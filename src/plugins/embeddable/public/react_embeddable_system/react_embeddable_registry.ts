@@ -7,7 +7,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AnyReactEmbeddableFactory, DefaultEmbeddableApi, ReactEmbeddableFactory } from './types';
+import { DefaultEmbeddableApi, ReactEmbeddableFactory } from './types';
+
+type AnyReactEmbeddableFactory = ReactEmbeddableFactory<any, any, any>;
 
 const registry: { [key: string]: () => Promise<AnyReactEmbeddableFactory> } = {};
 
@@ -41,7 +43,7 @@ export const getReactEmbeddableFactory = async <
   ExternalState extends object = object
 >(
   key: string
-): Promise<ReactEmbeddableFactory<SerializedState, Api, RuntimeState, ExternalState>> => {
+): Promise<ReactEmbeddableFactory<SerializedState, Api, RuntimeState>> => {
   if (registry[key] === undefined)
     throw new Error(
       i18n.translate('embeddableApi.reactEmbeddable.factoryNotFoundError', {
@@ -50,6 +52,6 @@ export const getReactEmbeddableFactory = async <
       })
     );
   return registry[key]() as unknown as Promise<
-    ReactEmbeddableFactory<SerializedState, Api, RuntimeState, ExternalState>
+    ReactEmbeddableFactory<SerializedState, Api, RuntimeState>
   >;
 };

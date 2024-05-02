@@ -8,7 +8,7 @@
 
 import deepEqual from 'fast-deep-equal';
 import { isEqual, xor } from 'lodash';
-import { BehaviorSubject, EMPTY, merge, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, EMPTY, merge, Subscription } from 'rxjs';
 import {
   catchError,
   combineLatestWith,
@@ -22,7 +22,7 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 
 import { PanelPackage } from '@kbn/presentation-containers';
-import { PresentationContainer, SerializedPanelState } from '@kbn/presentation-containers';
+import { PresentationContainer } from '@kbn/presentation-containers';
 
 import { isSavedObjectEmbeddableInput } from '../../../common/lib/saved_object_embeddable';
 import { EmbeddableStart } from '../../plugin';
@@ -63,10 +63,6 @@ export abstract class Container<
 
   private subscription: Subscription | undefined;
   private readonly anyChildOutputChange$;
-
-  public lastSavedState: Subject<void> = new Subject();
-  public getLastSavedStateForChild: (childId: string) => SerializedPanelState | undefined = () =>
-    undefined;
 
   constructor(
     input: TContainerInput,

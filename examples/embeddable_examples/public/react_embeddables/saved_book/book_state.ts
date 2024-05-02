@@ -13,7 +13,7 @@ export const defaultBookAttributes: BookAttributes = {
   bookTitle: 'Pillars of the earth',
   authorName: 'Ken follett',
   numberOfPages: 973,
-  bookDescription:
+  bookSynopsis:
     'A spellbinding epic set in 12th-century England, The Pillars of the Earth tells the story of the struggle to build the greatest Gothic cathedral the world has known.',
 };
 
@@ -21,25 +21,25 @@ export const stateManagerFromAttributes = (attributes: BookAttributes): BookAttr
   const bookTitle = new BehaviorSubject<string>(attributes.bookTitle);
   const authorName = new BehaviorSubject<string>(attributes.authorName);
   const numberOfPages = new BehaviorSubject<number>(attributes.numberOfPages);
-  const bookDescription = new BehaviorSubject<string | undefined>(attributes.bookDescription);
+  const bookSynopsis = new BehaviorSubject<string | undefined>(attributes.bookSynopsis);
 
   return {
     bookTitle,
     authorName,
     numberOfPages,
-    bookDescription,
+    bookSynopsis,
     comparators: {
       bookTitle: [bookTitle, (val) => bookTitle.next(val)],
       authorName: [authorName, (val) => authorName.next(val)],
       numberOfPages: [numberOfPages, (val) => numberOfPages.next(val)],
-      bookDescription: [bookDescription, (val) => bookDescription.next(val)],
+      bookSynopsis: [bookSynopsis, (val) => bookSynopsis.next(val)],
     },
   };
 };
 
-export const serializeBookAttributes = (stateManager: BookAttributesManager) => ({
+export const serializeBookAttributes = (stateManager: BookAttributesManager): BookAttributes => ({
   bookTitle: stateManager.bookTitle.value,
   authorName: stateManager.authorName.value,
   numberOfPages: stateManager.numberOfPages.value,
-  bookDescription: stateManager.bookDescription.value,
+  bookSynopsis: stateManager.bookSynopsis.value,
 });

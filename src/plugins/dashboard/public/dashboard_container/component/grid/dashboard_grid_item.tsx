@@ -56,7 +56,6 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
     const scrollToPanelId = container.select((state) => state.componentState.scrollToPanelId);
     const highlightPanelId = container.select((state) => state.componentState.highlightPanelId);
     const useMargins = container.select((state) => state.explicitInput.useMargins);
-    const panel = container.select((state) => state.explicitInput.panels[id]);
 
     const expandPanel = expandedPanelId !== undefined && expandedPanelId === id;
     const hidePanel = expandedPanelId !== undefined && expandedPanelId !== id;

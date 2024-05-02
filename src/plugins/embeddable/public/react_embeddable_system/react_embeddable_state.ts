@@ -7,9 +7,9 @@
  */
 
 import {
-  getLastSavedStateSubjectForChild,
-  HasChildState,
-  SerializedPanelState,
+  apiHasRuntimeChildState,
+  apiHasSaveNotification,
+  HasSerializedChildState,
 } from '@kbn/presentation-containers';
 import {
   getInitialValuesFromComparators,
@@ -17,50 +17,57 @@ import {
   runComparators,
   StateComparators,
 } from '@kbn/presentation-publishing';
-import { BehaviorSubject, combineLatest, combineLatestWith, debounceTime, map } from 'rxjs';
-import { AnyReactEmbeddableFactory } from './types';
-
-const getDefaultDiffingApi = () => {
-  return {
-    unsavedChanges: new BehaviorSubject<object | undefined>(undefined),
-    resetUnsavedChanges: () => {},
-    cleanup: () => {},
-  };
-};
+import {
+  BehaviorSubject,
+  combineLatest,
+  combineLatestWith,
+  debounceTime,
+  map,
+  Subscription,
+} from 'rxjs';
+import { DefaultEmbeddableApi, ReactEmbeddableFactory } from './types';
 
 export const initializeReactEmbeddableState = async <
-  SerializedState extends object,
-  RuntimeState extends object,
-  ExternalState extends object
+  SerializedState extends object = object,
+  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>,
+  RuntimeState extends object = SerializedState
 >(
   uuid: string,
-  factory: AnyReactEmbeddableFactory,
-  parentApi: HasChildState
+  factory: ReactEmbeddableFactory<SerializedState, Api, RuntimeState>,
+  parentApi: HasSerializedChildState<SerializedState>
 ) => {
-  const latestParentState = parentApi.getStateForChild(uuid);
-
-  const firstLoadedExternalState: SerializedPanelState<ExternalState> | undefined =
-    factory.loadExternalState ? await factory.loadExternalState(latestParentState) : undefined;
-
-  const initialRuntimeState: RuntimeState = factory.deserializeState(
-    latestParentState,
-    firstLoadedExternalState
+  const lastSavedRuntimeState = await factory.deserializeState(
+    parentApi.getSerializedStateForChild(uuid)
   );
 
-  const startStateDiffing = (comparators: StateComparators<RuntimeState>) => {
-    if (Object.keys(comparators).length === 0) return getDefaultDiffingApi();
+  // If the parent provides runtime state for the child (usually as a state backup or cache),
+  // we merge it with the last saved runtime state.
+  const partialRuntimeState = apiHasRuntimeChildState<RuntimeState>(parentApi)
+    ? parentApi.getRuntimeStateForChild(uuid) ?? ({} as Partial<RuntimeState>)
+    : ({} as Partial<RuntimeState>);
 
-    const lastSavedStateSubject = getLastSavedStateSubjectForChild<SerializedState, RuntimeState>(
-      parentApi,
-      uuid,
-      (state) => {
-        if (!state) return;
-        // when deserializing last saved state, we always use the external state that was loaded
-        // on initiailization to avoid loading it multiple times.
-        return factory.deserializeState(state, firstLoadedExternalState);
-      }
-    );
-    if (!lastSavedStateSubject) return getDefaultDiffingApi();
+  const initialRuntimeState = { ...lastSavedRuntimeState, ...partialRuntimeState };
+
+  const startStateDiffing = (comparators: StateComparators<RuntimeState>) => {
+    const subscription = new Subscription();
+    const snapshotRuntimeState = () => {
+      const comparatorKeys = Object.keys(comparators) as Array<keyof RuntimeState>;
+      return comparatorKeys.reduce((acc, key) => {
+        acc[key] = comparators[key][0].value as RuntimeState[typeof key];
+        return acc;
+      }, {} as RuntimeState);
+    };
+
+    // the last saved state subject is always initialized with the deserialized state from the parent.
+    const lastSavedState$ = new BehaviorSubject<RuntimeState | undefined>(lastSavedRuntimeState);
+    if (apiHasSaveNotification(parentApi)) {
+      subscription.add(
+        // any time the parent saves, the current state becomes the last saved state...
+        parentApi.saveNotification$.subscribe(() => {
+          lastSavedState$.next(snapshotRuntimeState());
+        })
+      );
+    }
 
     const comparatorSubjects: Array<PublishingSubject<unknown>> = [];
     const comparatorKeys: Array<keyof RuntimeState> = [];
@@ -74,36 +81,37 @@ export const initializeReactEmbeddableState = async <
       runComparators(
         comparators,
         comparatorKeys,
-        lastSavedStateSubject?.getValue() as RuntimeState,
+        lastSavedState$.getValue() as RuntimeState,
         getInitialValuesFromComparators(comparators, comparatorKeys)
       )
     );
 
-    const subscription = combineLatest(comparatorSubjects)
-      .pipe(
-        debounceTime(100),
-        map((latestStates) =>
-          comparatorKeys.reduce((acc, key, index) => {
-            acc[key] = latestStates[index] as RuntimeState[typeof key];
-            return acc;
-          }, {} as Partial<RuntimeState>)
-        ),
-        combineLatestWith(lastSavedStateSubject)
-      )
-      .subscribe(([latestStates, lastSavedState]) => {
-        unsavedChanges.next(
-          runComparators(comparators, comparatorKeys, lastSavedState, latestStates)
-        );
-      });
+    subscription.add(
+      combineLatest(comparatorSubjects)
+        .pipe(
+          debounceTime(100),
+          map((latestStates) =>
+            comparatorKeys.reduce((acc, key, index) => {
+              acc[key] = latestStates[index] as RuntimeState[typeof key];
+              return acc;
+            }, {} as Partial<RuntimeState>)
+          ),
+          combineLatestWith(lastSavedState$)
+        )
+        .subscribe(([latest, last]) => {
+          unsavedChanges.next(runComparators(comparators, comparatorKeys, last, latest));
+        })
+    );
     return {
       unsavedChanges,
       resetUnsavedChanges: () => {
-        const lastSaved = lastSavedStateSubject?.getValue();
+        const lastSaved = lastSavedState$.getValue();
         for (const key of comparatorKeys) {
           const setter = comparators[key][1]; // setter function is the 1st element of the tuple
           setter(lastSaved?.[key] as RuntimeState[typeof key]);
         }
       },
+      snapshotRuntimeState,
       cleanup: () => subscription.unsubscribe(),
     };
   };

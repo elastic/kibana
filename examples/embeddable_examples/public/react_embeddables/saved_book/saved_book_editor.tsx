@@ -18,6 +18,7 @@ import {
   EuiFlyoutHeader,
   EuiFormControlLayout,
   EuiFormRow,
+  EuiSwitch,
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
@@ -40,7 +41,7 @@ export const openSavedBookEditor = (
   isCreate: boolean,
   core: CoreStart,
   api: unknown
-): Promise<void> => {
+): Promise<{ addToLibrary: boolean }> => {
   return new Promise((resolve) => {
     const closeOverlay = (overlayRef: OverlayRef) => {
       if (apiHasParentApi(api) && tracksOverlays(api.parentApi)) {
@@ -58,14 +59,14 @@ export const openSavedBookEditor = (
           onCancel={() => {
             // set the state back to the initial state and reject
             attributesManager.authorName.next(initialState.authorName);
-            attributesManager.bookDescription.next(initialState.bookDescription);
+            attributesManager.bookSynopsis.next(initialState.bookSynopsis);
             attributesManager.bookTitle.next(initialState.bookTitle);
             attributesManager.numberOfPages.next(initialState.numberOfPages);
             closeOverlay(overlay);
           }}
-          onSubmit={() => {
+          onSubmit={(addToLibrary: boolean) => {
             closeOverlay(overlay);
-            resolve();
+            resolve({ addToLibrary });
           }}
         />,
         {
@@ -73,7 +74,11 @@ export const openSavedBookEditor = (
           i18n: core.i18n,
         }
       ),
-      { type: isCreate ? 'overlay' : 'push', size: 's', onClose: () => closeOverlay(overlay) }
+      {
+        type: isCreate ? 'overlay' : 'push',
+        size: isCreate ? 'm' : 's',
+        onClose: () => closeOverlay(overlay),
+      }
     );
 
     const overlayOptions = !isCreate && apiHasUniqueId(api) ? { focusedPanelId: api.uuid } : {};
@@ -91,16 +96,16 @@ export const SavedBookEditor = ({
 }: {
   attributesManager: BookAttributesManager;
   isCreate: boolean;
-  onSubmit: () => void;
+  onSubmit: (addToLibrary: boolean) => void;
   onCancel: () => void;
 }) => {
-  const [authorName, bookDescription, bookTitle, numberOfPages] =
-    useBatchedOptionalPublishingSubjects(
-      attributesManager.authorName,
-      attributesManager.bookDescription,
-      attributesManager.bookTitle,
-      attributesManager.numberOfPages
-    );
+  const [addToLibrary, setAddToLibrary] = React.useState(false);
+  const [authorName, synopsis, bookTitle, numberOfPages] = useBatchedOptionalPublishingSubjects(
+    attributesManager.authorName,
+    attributesManager.bookSynopsis,
+    attributesManager.bookTitle,
+    attributesManager.numberOfPages
+  );
 
   return (
     <>
@@ -150,13 +155,13 @@ export const SavedBookEditor = ({
             />
           </EuiFormRow>
           <EuiFormRow
-            label={i18n.translate('embeddableExamples.savedBook.editor.descriptionLabel', {
-              defaultMessage: 'Book description',
+            label={i18n.translate('embeddableExamples.savedBook.editor.synopsisLabel', {
+              defaultMessage: 'Synopsis',
             })}
           >
             <EuiTextArea
-              value={bookDescription}
-              onChange={(e) => attributesManager.bookDescription.next(e.target.value)}
+              value={synopsis}
+              onChange={(e) => attributesManager.bookSynopsis.next(e.target.value)}
             />
           </EuiFormRow>
         </EuiFormControlLayout>
@@ -171,11 +176,30 @@ export const SavedBookEditor = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={onSubmit} fill>
-              {i18n.translate('embeddableExamples.savedBook.editor.save', {
-                defaultMessage: 'Apply',
-              })}
-            </EuiButton>
+            <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+              {isCreate && (
+                <EuiFlexItem grow={false}>
+                  <EuiSwitch
+                    label={i18n.translate('embeddableExamples.savedBook.editor.addToLibrary', {
+                      defaultMessage: 'Save to library',
+                    })}
+                    checked={addToLibrary}
+                    onChange={() => setAddToLibrary(!addToLibrary)}
+                  />
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem grow={false}>
+                <EuiButton onClick={() => onSubmit(addToLibrary)} fill>
+                  {isCreate
+                    ? i18n.translate('embeddableExamples.savedBook.editor.create', {
+                        defaultMessage: 'Create book',
+                      })
+                    : i18n.translate('embeddableExamples.savedBook.editor.save', {
+                        defaultMessage: 'Apply changes',
+                      })}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>

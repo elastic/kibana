@@ -8,12 +8,22 @@
 
 import { SerializedPanelState } from './serialized_state';
 
-export interface HasChildState<SerializedState extends object = object> {
-  getStateForChild: (childId: string) => SerializedPanelState<SerializedState>;
+export interface HasSerializedChildState<SerializedState extends object = object> {
+  getSerializedStateForChild: (childId: string) => SerializedPanelState<SerializedState>;
 }
 
-export const apiHasChildState = <SerializedState extends object = object>(
+export interface HasRuntimeChildState<RuntimeState extends object = object> {
+  getRuntimeStateForChild: (childId: string) => Partial<RuntimeState> | undefined;
+}
+
+export const apiHasSerializedChildState = <SerializedState extends object = object>(
   api: unknown
-): api is HasChildState<SerializedState> => {
-  return Boolean(api && (api as HasChildState).getStateForChild);
+): api is HasSerializedChildState<SerializedState> => {
+  return Boolean(api && (api as HasSerializedChildState).getSerializedStateForChild);
+};
+
+export const apiHasRuntimeChildState = <RuntimeState extends object = object>(
+  api: unknown
+): api is HasRuntimeChildState<RuntimeState> => {
+  return Boolean(api && (api as HasRuntimeChildState).getRuntimeStateForChild);
 };

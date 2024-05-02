@@ -15,11 +15,7 @@ import {
   reactEmbeddableRegistryHasKey,
   ReactEmbeddableRenderer,
 } from '@kbn/embeddable-plugin/public';
-<<<<<<< HEAD
-=======
-import { PresentationContainer } from '@kbn/presentation-containers';
 import { EmbeddableAppContext } from '@kbn/presentation-publishing';
->>>>>>> upstream/main
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React, { FC } from 'react';
 import ReactDOM from 'react-dom';

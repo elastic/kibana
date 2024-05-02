@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { HasChildState, SerializedPanelState } from '@kbn/presentation-containers';
+import { HasSerializedChildState, SerializedPanelState } from '@kbn/presentation-containers';
 import { PresentationPanel, PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
 import { ComparatorDefinition, StateComparators } from '@kbn/presentation-publishing';
 import React, { useEffect, useImperativeHandle, useMemo, useRef } from 'react';
-import { combineLatest, debounceTime, skip } from 'rxjs';
+import { combineLatest, debounceTime, skip, switchMap } from 'rxjs';
 import { v4 as generateId } from 'uuid';
 import { getReactEmbeddableFactory } from './react_embeddable_registry';
 import { initializeReactEmbeddableState } from './react_embeddable_state';
@@ -26,9 +26,8 @@ const ON_STATE_CHANGE_DEBOUNCE = 100;
 export const ReactEmbeddableRenderer = <
   SerializedState extends object = object,
   Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>,
-  ParentApi extends HasChildState<SerializedState> = HasChildState<SerializedState>,
   RuntimeState extends object = SerializedState,
-  ExternalState extends object = object
+  ParentApi extends HasSerializedChildState<SerializedState> = HasSerializedChildState<SerializedState>
 >({
   type,
   maybeId,
@@ -65,20 +64,15 @@ export const ReactEmbeddableRenderer = <
       (async () => {
         const parentApi = getParentApi();
         const uuid = maybeId ?? generateId();
-        const factory = await getReactEmbeddableFactory<
-          SerializedState,
-          Api,
-          RuntimeState,
-          ExternalState
-        >(type);
+        const factory = await getReactEmbeddableFactory<SerializedState, Api, RuntimeState>(type);
 
         const { initialState, startStateDiffing } = await initializeReactEmbeddableState<
           SerializedState,
-          RuntimeState,
-          ExternalState
+          Api,
+          RuntimeState
         >(uuid, factory, parentApi);
 
-        const registerApi = (
+        const buildApi = (
           apiRegistration: ReactEmbeddableApiRegistration<SerializedState, Api>,
           comparators: StateComparators<RuntimeState>
         ) => {
@@ -91,20 +85,26 @@ export const ReactEmbeddableRenderer = <
               ComparatorDefinition<RuntimeState, keyof RuntimeState>
             > = Object.values(comparators);
             combineLatest(comparatorDefinitions.map((comparator) => comparator[0]))
-              .pipe(skip(1), debounceTime(ON_STATE_CHANGE_DEBOUNCE))
-              .subscribe(() => {
-                onAnyStateChange(apiRegistration.serializeState());
+              .pipe(
+                skip(1),
+                debounceTime(ON_STATE_CHANGE_DEBOUNCE),
+                switchMap(() => apiRegistration.serializeState())
+              )
+              .subscribe((serializedState) => {
+                onAnyStateChange(serializedState);
               });
           }
 
-          const { unsavedChanges, resetUnsavedChanges, cleanup } = startStateDiffing(comparators);
+          const { unsavedChanges, resetUnsavedChanges, cleanup, snapshotRuntimeState } =
+            startStateDiffing(comparators);
           const fullApi = {
             ...apiRegistration,
             uuid,
             parentApi,
             unsavedChanges,
-            resetUnsavedChanges,
             type: factory.type,
+            resetUnsavedChanges,
+            snapshotRuntimeState,
           } as unknown as Api;
           cleanupFunction.current = () => cleanup();
           onApiAvailable?.(fullApi);
@@ -113,7 +113,7 @@ export const ReactEmbeddableRenderer = <
 
         const { api, Component } = await factory.buildEmbeddable(
           initialState,
-          registerApi,
+          buildApi,
           uuid,
           parentApi
         );

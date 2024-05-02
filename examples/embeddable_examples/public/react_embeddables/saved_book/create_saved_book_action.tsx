@@ -8,27 +8,30 @@
 
 import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
-import { v4 } from 'uuid';
-import { defaultBookAttributes, stateManagerFromAttributes } from './book_state';
+import { embeddableExamplesGrouping } from '../embeddable_examples_grouping';
 import {
-  ADD_SAVED_BOOK_ACTION_ID,
-  ADD_SAVED_BOOK_BY_REFERENCE_ACTION_ID,
-  SAVED_BOOK_ID,
-} from './constants';
+  defaultBookAttributes,
+  serializeBookAttributes,
+  stateManagerFromAttributes,
+} from './book_state';
+import { ADD_SAVED_BOOK_ACTION_ID, SAVED_BOOK_ID } from './constants';
 import { openSavedBookEditor } from './saved_book_editor';
-import { BookSerializedState } from './types';
-
-const storage = new Storage(localStorage);
+import { saveBookAttributes } from './saved_book_library';
+import {
+  BookByReferenceSerializedState,
+  BookByValueSerializedState,
+  BookSerializedState,
+} from './types';
 
 export const registerCreateSavedBookAction = (uiActions: UiActionsPublicStart, core: CoreStart) => {
   uiActions.registerAction<EmbeddableApiContext>({
     id: ADD_SAVED_BOOK_ACTION_ID,
     getIconType: () => 'folderClosed',
+    grouping: [embeddableExamplesGrouping],
     isCompatible: async ({ embeddable }) => {
       return apiIsPresentationContainer(embeddable);
     },
@@ -36,16 +39,27 @@ export const registerCreateSavedBookAction = (uiActions: UiActionsPublicStart, c
       if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
       const newPanelStateManager = stateManagerFromAttributes(defaultBookAttributes);
 
-      await openSavedBookEditor(newPanelStateManager, true, core, { parentApi: embeddable });
+      const { addToLibrary } = await openSavedBookEditor(newPanelStateManager, true, core, {
+        parentApi: embeddable,
+      });
+
+      const initialState: BookSerializedState = await (async () => {
+        // if we're adding this to the library, we only need to return the by reference state.
+        if (addToLibrary) {
+          const savedBookId = await saveBookAttributes(
+            undefined,
+            serializeBookAttributes(newPanelStateManager)
+          );
+          return { savedBookId } as BookByReferenceSerializedState;
+        }
+        return {
+          attributes: serializeBookAttributes(newPanelStateManager),
+        } as BookByValueSerializedState;
+      })();
+
       embeddable.addNewPanel<BookSerializedState>({
         panelType: SAVED_BOOK_ID,
-        initialState: {
-          attributes: {
-            bookTitle: newPanelStateManager.bookTitle.value,
-            authorName: newPanelStateManager.authorName.value,
-            numberOfPages: newPanelStateManager.numberOfPages.value,
-          },
-        },
+        initialState,
       });
     },
     getDisplayName: () =>
@@ -54,33 +68,4 @@ export const registerCreateSavedBookAction = (uiActions: UiActionsPublicStart, c
       }),
   });
   uiActions.attachAction('ADD_PANEL_TRIGGER', ADD_SAVED_BOOK_ACTION_ID);
-
-  uiActions.registerAction<EmbeddableApiContext>({
-    id: ADD_SAVED_BOOK_BY_REFERENCE_ACTION_ID,
-    getIconType: () => 'folderCheck',
-    isCompatible: async ({ embeddable }) => {
-      return apiIsPresentationContainer(embeddable);
-    },
-    execute: async ({ embeddable }) => {
-      if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
-      const bookAttributes = {
-        bookTitle: 'The Dispossessed',
-        authorName: 'Ursula K. Le Guin',
-        numberOfPages: 387,
-      };
-      const savedBookId = v4();
-      storage.set(savedBookId, bookAttributes);
-      embeddable.addNewPanel<BookSerializedState>({
-        panelType: SAVED_BOOK_ID,
-        initialState: {
-          savedBookId,
-        },
-      });
-    },
-    getDisplayName: () =>
-      i18n.translate('embeddableExamples.savedbook.addBookByReferenceAction.displayName', {
-        defaultMessage: 'Book by reference',
-      }),
-  });
-  uiActions.attachAction('ADD_PANEL_TRIGGER', ADD_SAVED_BOOK_BY_REFERENCE_ACTION_ID);
 };

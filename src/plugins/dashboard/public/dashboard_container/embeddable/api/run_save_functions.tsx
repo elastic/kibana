@@ -14,8 +14,7 @@ import {
   isReferenceOrValueEmbeddable,
   reactEmbeddableRegistryHasKey,
 } from '@kbn/embeddable-plugin/public';
-import { apiHasSerializableState } from '@kbn/presentation-containers';
-import { apiPublishesUnsavedChanges, apiSavesExternalState } from '@kbn/presentation-publishing';
+import { apiHasSerializableState, SerializedPanelState } from '@kbn/presentation-containers';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { cloneDeep } from 'lodash';
 import React from 'react';
@@ -39,32 +38,27 @@ const serializeAllPanelState = async (
   const references: Reference[] = [];
   const panels = cloneDeep(dashboard.getInput().panels);
 
-  // serialize all panel state.
+  const serializePromises: Array<
+    Promise<{ uuid: string; serialized: SerializedPanelState<object> }>
+  > = [];
   for (const [uuid, panel] of Object.entries(panels)) {
     if (!reactEmbeddableRegistryHasKey(panel.type)) continue;
     const api = dashboard.children$.value[uuid];
+
     if (api && apiHasSerializableState(api)) {
-      const serializedState = api.serializeState();
-      panels[uuid].explicitInput = { ...serializedState.rawState, id: uuid };
-      references.push(...prefixReferencesFromPanel(uuid, serializedState.references ?? []));
+      serializePromises.push(
+        (async () => {
+          const serialized = await api.serializeState();
+          return { uuid, serialized };
+        })()
+      );
     }
   }
 
-  // save to external store for any panels that require it.
-  const savePromises: Array<Promise<void>> = [];
-  for (const [uuid, panel] of Object.entries(panels)) {
-    if (!reactEmbeddableRegistryHasKey(panel.type)) continue;
-    const api = dashboard.children$.value[uuid];
-    const apiHasUnsavedChanges = apiPublishesUnsavedChanges(api)
-      ? Object.keys(api.unsavedChanges.value ?? {}).length > 0
-      : true; // if the API doesn't publish unsaved changes, then we have no idea if it needs to be saved or not and must save it.
-
-    if (api && apiSavesExternalState(api) && apiHasUnsavedChanges) {
-      savePromises.push(api.saveExternalState());
-    }
-  }
-  if (savePromises.length > 0) {
-    await Promise.all(savePromises);
+  const serializeResults = await Promise.all(serializePromises);
+  for (const result of serializeResults) {
+    panels[result.uuid].explicitInput = { ...result.serialized.rawState, id: result.uuid };
+    references.push(...prefixReferencesFromPanel(result.uuid, result.serialized.references ?? []));
   }
 
   return { panels, references };
@@ -167,7 +161,7 @@ export function runSaveAs(this: DashboardContainer) {
         });
       }
       this.savedObjectReferences = saveResult.references ?? [];
-      this.lastSavedState.next();
+      this.saveNotification$.next();
       resolve(saveResult);
       return saveResult;
     };
@@ -221,7 +215,7 @@ export async function runQuickSave(this: DashboardContainer) {
 
   this.savedObjectReferences = saveResult.references ?? [];
   this.dispatch.setLastSavedInput(dashboardStateToSave);
-  this.lastSavedState.next();
+  this.saveNotification$.next();
   if (this.controlGroup && persistableControlGroupInput) {
     this.controlGroup.setSavedState(persistableControlGroupInput);
   }

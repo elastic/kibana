@@ -5,14 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { HasSerializableState, SerializedPanelState } from '@kbn/presentation-containers';
-import { DefaultPresentationPanelApi } from '@kbn/presentation-panel-plugin/public/panel_component/types';
 import {
-  HasType,
-  PublishesUnsavedChanges,
-  SavesExternalState,
-  StateComparators,
-} from '@kbn/presentation-publishing';
+  HasSerializableState,
+  HasSnapshottableState,
+  SerializedPanelState,
+} from '@kbn/presentation-containers';
+import { DefaultPresentationPanelApi } from '@kbn/presentation-panel-plugin/public/panel_component/types';
+import { HasType, PublishesUnsavedChanges, StateComparators } from '@kbn/presentation-publishing';
+import { MaybePromise } from '@kbn/utility-types';
 import React from 'react';
 
 /**
@@ -20,16 +20,14 @@ import React from 'react';
  *
  * Before adding anything to this interface, please be certain that it belongs in *every* embeddable.
  */
-export interface DefaultEmbeddableApi<SerializedState extends object = object>
-  extends DefaultPresentationPanelApi,
+export interface DefaultEmbeddableApi<
+  SerializedState extends object = object,
+  RuntimeState extends object = SerializedState
+> extends DefaultPresentationPanelApi,
     HasType,
     PublishesUnsavedChanges,
-<<<<<<< HEAD
     HasSerializableState<SerializedState>,
-    Partial<SavesExternalState> {}
-=======
-    HasSerializableState<SerializedState> {}
->>>>>>> upstream/main
+    HasSnapshottableState<RuntimeState> {}
 
 /**
  * A subset of the default embeddable API used in registration to allow implementors to omit aspects
@@ -38,7 +36,10 @@ export interface DefaultEmbeddableApi<SerializedState extends object = object>
 export type ReactEmbeddableApiRegistration<
   SerializedState extends object = object,
   Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
-> = Omit<Api, 'uuid' | 'parent' | 'type' | 'unsavedChanges' | 'resetUnsavedChanges'>;
+> = Omit<
+  Api,
+  'uuid' | 'parent' | 'type' | 'unsavedChanges' | 'resetUnsavedChanges' | 'snapshotRuntimeState'
+>;
 
 /**
  * The React Embeddable Factory interface is used to register a series of functions that
@@ -50,14 +51,8 @@ export type ReactEmbeddableApiRegistration<
  **/
 export interface ReactEmbeddableFactory<
   SerializedState extends object = object,
-<<<<<<< HEAD
   Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>,
-  RuntimeState extends object = SerializedState,
-  ExternalState extends object = {}
-=======
-  ApiType extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>,
   RuntimeState extends object = SerializedState
->>>>>>> upstream/main
 > {
   /**
    * A unique key for the type of this embeddable. The React Embeddable Renderer will use this type
@@ -66,42 +61,16 @@ export interface ReactEmbeddableFactory<
   type: string;
 
   /**
-<<<<<<< HEAD
-   * An optional async function that loads state from some external store. This function
-   * takes the most recent state from the parent and returns some loaded external state.
+   * A required asynchronous function that transforms serialized state into runtime state.
    *
-   * If this is provided, your API should also extend {@link SavesExternalState} to allow
-   * the embeddable to save back to the external state store.
-   */
-  loadExternalState?: (
-    panelState: SerializedPanelState<SerializedState> | undefined
-  ) => Promise<SerializedPanelState<ExternalState> | undefined>;
-
-  /**
-=======
->>>>>>> upstream/main
-   * A required synchronous function that transforms serialized state into runtime state.
-   * This will be used twice - once for the parent state, and once for the last saved state
-   * for comparison.
-   *
-<<<<<<< HEAD
-   * If `loadExternalState` is provided, this function will be called with the result of that.
-   *
-=======
->>>>>>> upstream/main
-   * This can also be used to:
-   *
+   * This could be used to:
+   * - Load state from some external store
    * - Inject references provided by the parent
    * - Migrate the state to a newer version (this must be undone when serializing)
    */
-<<<<<<< HEAD
   deserializeState: (
-    panelState: SerializedPanelState<SerializedState>,
-    externalState?: SerializedPanelState<ExternalState>
-  ) => RuntimeState;
-=======
-  deserializeState: (state: SerializedPanelState<SerializedState>) => RuntimeState;
->>>>>>> upstream/main
+    panelState: SerializedPanelState<SerializedState>
+  ) => MaybePromise<RuntimeState>;
 
   /**
    * A required async function that builds your embeddable component and a linked API instance. The API
@@ -114,18 +83,10 @@ export interface ReactEmbeddableFactory<
   buildEmbeddable: (
     initialState: RuntimeState,
     buildApi: (
-<<<<<<< HEAD
       apiRegistration: ReactEmbeddableApiRegistration<SerializedState, Api>,
       comparators: StateComparators<RuntimeState>
     ) => Api,
-=======
-      apiRegistration: ReactEmbeddableApiRegistration<SerializedState, ApiType>,
-      comparators: StateComparators<RuntimeState>
-    ) => ApiType,
->>>>>>> upstream/main
     uuid: string,
     parentApi?: unknown
   ) => Promise<{ Component: React.FC<{}>; api: Api }>;
 }
-
-export type AnyReactEmbeddableFactory = ReactEmbeddableFactory<any, any, any, any>;

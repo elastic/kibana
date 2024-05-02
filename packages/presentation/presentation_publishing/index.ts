@@ -106,7 +106,6 @@ export {
   type PublishesWritableViewMode,
   type ViewMode,
 } from './interfaces/publishes_view_mode';
-export { apiSavesExternalState, type SavesExternalState } from './interfaces/saves_external_state';
 export {
   apiPublishesPanelDescription,
   apiPublishesWritablePanelDescription,

@@ -27,6 +27,7 @@ export const registerAddSearchPanelAction = (uiActions: UiActionsStart) => {
       embeddable.addNewPanel<SearchSerializedState>(
         {
           panelType: SEARCH_EMBEDDABLE_ID,
+          initialState: {},
         },
         true
       );

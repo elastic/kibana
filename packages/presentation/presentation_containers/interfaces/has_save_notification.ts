@@ -6,16 +6,12 @@
  * Side Public License, v 1.
  */
 
-/**
- * An API that saves its state to some external store.
- */
-export interface SavesExternalState {
-  /**
-   * Save the state to some external store.
-   */
-  saveExternalState: () => Promise<void>;
+import { Subject } from 'rxjs';
+
+export interface HasSaveNotification {
+  saveNotification$: Subject<void>; // a notification that state has been saved
 }
 
-export const apiSavesExternalState = (api: unknown | null): api is SavesExternalState => {
-  return Boolean((api as SavesExternalState)?.saveExternalState);
+export const apiHasSaveNotification = (api: unknown): api is HasSaveNotification => {
+  return Boolean(api && (api as HasSaveNotification).saveNotification$);
 };
