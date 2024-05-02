@@ -255,7 +255,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    *  Enables Security AI Assistant's Flyout mode
    */
-  aiAssistantFlyoutMode: true,
+  aiAssistantFlyoutMode: false,
 
   /**
    * Enables the new modal for the value list items
