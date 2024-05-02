@@ -51,17 +51,14 @@ const paramDetailLabel = i18n.translate('console.autocompleteSuggestions.paramLa
 /*
  * This functions removes any trailing inline comments, for example
  * "_search // comment" -> "_search"
- * And any url params, for example "_search?flag" -> "_search"
  * Ideally the parser would do that, but currently they are included in url.
  */
-export const cleanUrl = (url: string): string => {
-  let cleanedUrl = url.trim().split(whitespacesRegex)[0];
-  cleanedUrl = cleanedUrl.split(questionMarkRegex)[0];
-  return cleanedUrl;
+export const removeTrailingWhitespaces = (url: string): string => {
+  return url.trim().split(whitespacesRegex)[0];
 };
 
 export const stringifyRequest = (parsedRequest: ParsedRequest): EditorRequest => {
-  const url = cleanUrl(parsedRequest.url);
+  const url = removeTrailingWhitespaces(parsedRequest.url);
   const method = parsedRequest.method.toUpperCase();
   const data = parsedRequest.data?.map((parsedData) => JSON.stringify(parsedData, null, 2));
   return { url, method, data: data ?? [] };
@@ -114,27 +111,20 @@ export const trackSentRequests = (
 };
 
 /*
- * This function takes a request url as a string and returns it parts,
- * for example '_search/test' => ['_search', 'test']
- * and also adds a marker for the url end.
- */
-export const tokenizeRequestUrl = (url: string): string[] => {
-  const parts = url.split(slashRegex);
-  // this special token is used to mark the end of the url
-  parts.push(endOfUrlToken);
-  return parts;
-};
-
-/*
  * This function initializes the autocomplete context for the request
  * and returns a documentation link from the endpoint object
  * with the branch in the url replaced by the current version "docLinkVersion"
  */
 export const getDocumentationLink = (request: EditorRequest, docLinkVersion: string) => {
   // get the url parts from the request url
-  const urlTokens = tokenizeRequestUrl(request.url);
-
-  const { endpoint } = populateContextForMethodAndUrl(request.method, urlTokens);
+  const { urlPathTokens } = parseUrlTokens(request.url);
+  // remove the last token, if it's empty
+  if (!urlPathTokens[urlPathTokens.length - 1]) {
+    urlPathTokens.pop();
+  }
+  // add the end of url token
+  urlPathTokens.push(endOfUrlToken);
+  const { endpoint } = populateContextForMethodAndUrl(request.method, urlPathTokens);
   if (endpoint && endpoint.documentation && endpoint.documentation.indexOf('http') !== -1) {
     return endpoint.documentation
       .replace('/master/', `/${docLinkVersion}/`)
@@ -267,7 +257,8 @@ export const getUrlPathCompletionItems = (
 
   // get the method and previous url parts for context
   const { method, urlPathTokens } = parseLineContent(lineContent);
-  // ignore the last url path token to find all possible autocomplete suggestions
+  // remove the last token that is either empty if the url has like "_search/" as the last char
+  // or it's a word that need to be replaced with autocomplete suggestions like "_search/s"
   urlPathTokens.pop();
   const { autoCompleteSet } = populateContextForMethodAndUrl(method, urlPathTokens);
 
@@ -366,32 +357,39 @@ export const getUrlParamsCompletionItems = (
 };
 
 const parseLineContent = (lineContent: string): ParsedLineTokens => {
-  const parsedTokens = {} as ParsedLineTokens;
   // try to parse into method and url (split on whitespace)
   const parts = lineContent.split(whitespacesRegex);
   // 1st part is the method
-  parsedTokens.method = parts[0];
+  const method = parts[0];
   // 2nd part is the url
   const url = parts[1];
   // try to parse into url path and url params (split on question mark)
-  if (url) {
-    const urlParts = url.split(questionMarkRegex);
-    // 1st part is the url path
-    const urlPath = urlParts[0];
-    // try to parse into url path tokens (split on slash)
-    if (urlPath) {
-      parsedTokens.urlPathTokens = urlPath.split(slashRegex);
-    }
-    // 2nd part is the url params
-    const urlParams = urlParts[1];
-    // try to parse into url param tokens
-    if (urlParams) {
-      parsedTokens.urlParamsTokens = urlParams.split(ampersandRegex).map((urlParamsPart) => {
-        return urlParamsPart.split(equalsSignRegex);
-      });
-    } else {
-      parsedTokens.urlParamsTokens = [];
-    }
+  const { urlPathTokens, urlParamsTokens } = parseUrlTokens(url);
+  return { method, urlPathTokens, urlParamsTokens };
+};
+
+const parseUrlTokens = (
+  url: string
+): {
+  urlPathTokens: ParsedLineTokens['urlPathTokens'];
+  urlParamsTokens: ParsedLineTokens['urlParamsTokens'];
+} => {
+  let urlPathTokens: ParsedLineTokens['urlPathTokens'] = [];
+  let urlParamsTokens: ParsedLineTokens['urlParamsTokens'] = [];
+  const urlParts = url.split(questionMarkRegex);
+  // 1st part is the url path
+  const urlPath = urlParts[0];
+  // try to parse into url path tokens (split on slash)
+  if (urlPath) {
+    urlPathTokens = urlPath.split(slashRegex);
   }
-  return parsedTokens;
+  // 2nd part is the url params
+  const urlParams = urlParts[1];
+  // try to parse into url param tokens
+  if (urlParams) {
+    urlParamsTokens = urlParams.split(ampersandRegex).map((urlParamsPart) => {
+      return urlParamsPart.split(equalsSignRegex);
+    });
+  }
+  return { urlPathTokens, urlParamsTokens };
 };

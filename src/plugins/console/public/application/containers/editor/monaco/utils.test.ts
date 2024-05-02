@@ -12,7 +12,6 @@ import {
   removeTrailingWhitespaces,
   replaceRequestVariables,
   stringifyRequest,
-  tokenizeRequestUrl,
   trackSentRequests,
 } from './utils';
 import { MetricsTracker } from '../../../../types';
@@ -193,20 +192,6 @@ describe('monaco editor utils', () => {
       expect(mockMetricsTracker.count).toHaveBeenCalledTimes(2);
       expect(mockMetricsTracker.count).toHaveBeenNthCalledWith(1, 'GET__search');
       expect(mockMetricsTracker.count).toHaveBeenNthCalledWith(2, 'POST__test');
-    });
-  });
-
-  describe('tokenizeRequestUrl', () => {
-    it('returns the url if it has only 1 part', () => {
-      const url = '_search';
-      const urlTokens = tokenizeRequestUrl(url);
-      expect(urlTokens).toEqual(['_search', '__url_path_end__']);
-    });
-
-    it('returns correct url tokens', () => {
-      const url = '_search/test';
-      const urlTokens = tokenizeRequestUrl(url);
-      expect(urlTokens).toEqual(['_search', 'test', '__url_path_end__']);
     });
   });
 
