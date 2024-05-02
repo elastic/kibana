@@ -70,7 +70,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('shows full data button, but not data tier control');
           await ml.jobWizardCommon.assertUseFullDataButtonVisible(true);
-          await ml.jobWizardCommon.assertDataTierOptionsVisible(false);
+          await ml.commonUI.assertDatePickerDataTierOptionsVisible(false);
         });
       });
     });

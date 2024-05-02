@@ -57,7 +57,7 @@ export function TransformDatePickerProvider({ getService, getPageObjects }: FtrP
         await testSubjects.missingOrFail(selector);
       }
     },
-    async assertDataTierOptionsVisible(shouldBeVisible: boolean) {
+    async assertDatePickerDataTierOptionsVisible(shouldBeVisible: boolean) {
       const selector = 'mlDatePickerButtonDataTierOptions';
       if (shouldBeVisible === true) {
         await testSubjects.existOrFail(selector);

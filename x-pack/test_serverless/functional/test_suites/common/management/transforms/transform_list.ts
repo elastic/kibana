@@ -62,7 +62,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await transform.management.startTransformCreation();
       await transform.sourceSelection.selectSource('logstash-2015.09.22');
       await transform.datePicker.assertUseFullDataButtonVisible(true);
-      await transform.datePicker.assertDataTierOptionsVisible(false);
+      await transform.datePicker.assertDatePickerDataTierOptionsVisible(false);
     });
   });
 };

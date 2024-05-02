@@ -439,7 +439,7 @@ export function MachineLearningCommonUIProvider({
       });
     },
 
-    async assertDataTierOptionsVisible(shouldBeVisible: boolean) {
+    async assertDatePickerDataTierOptionsVisible(shouldBeVisible: boolean) {
       const selector = 'mlDatePickerButtonDataTierOptions';
       if (shouldBeVisible === true) {
         await testSubjects.existOrFail(selector);
