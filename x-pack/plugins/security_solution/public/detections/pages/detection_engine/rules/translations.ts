@@ -453,7 +453,8 @@ export const BULK_EDIT_FLYOUT_FORM_ADD_INVESTIGATION_FIELDS_LABEL = i18n.transla
 export const BULK_EDIT_FLYOUT_FORM_ADD_INVESTIGATION_FIELDS_HELP_TEXT = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addInvestigationFieldsComboboxHelpText',
   {
-    defaultMessage: 'Enter fields that you would like to add.',
+    defaultMessage:
+      'Enter fields that you would like to add. By default, the dropdown includes fields of the index patterns defined in Security Solution advanced settings.',
   }
 );
 
@@ -474,7 +475,8 @@ export const BULK_EDIT_FLYOUT_FORM_DELETE_INVESTIGATION_FIELDS_LABEL = i18n.tran
 export const BULK_EDIT_FLYOUT_FORM_DELETE_INVESTIGATION_FIELDS_HELP_TEXT = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteInvestigationFieldsComboboxHelpText',
   {
-    defaultMessage: 'Enter fields that you would like to delete.',
+    defaultMessage:
+      'Enter fields that you would like to delete. By default, the dropdown includes fields of the index patterns defined in Security Solution advanced settings.',
   }
 );
 
