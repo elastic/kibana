@@ -394,7 +394,7 @@ export class SearchInterceptor {
           ).pipe(
             map(toPartialResponseAfterTimeout),
             tap(async () => {
-              // await sendCancelRequest();
+              await sendCancelRequest();
               this.handleSearchError(e, request?.params?.body ?? {}, options, true);
             })
           );
@@ -532,6 +532,9 @@ export class SearchInterceptor {
         );
 
         return response$.pipe(
+          tap((res) => {
+            void res;
+          }),
           takeUntil(aborted$),
           catchError((e) => {
             return throwError(
