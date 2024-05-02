@@ -130,7 +130,7 @@ export const SessionPreviewContainer: FC = () => {
               tooltip: (
                 <FormattedMessage
                   id="xpack.securitySolution.flyout.right.visualizations.sessionPreview.sessionPreviewTooltip"
-                  defaultMessage="Show session viewer in timeline"
+                  defaultMessage="Investigate in timeline"
                 />
               ),
             },
