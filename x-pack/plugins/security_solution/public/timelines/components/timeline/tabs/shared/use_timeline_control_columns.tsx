@@ -7,6 +7,8 @@
 
 import { isEmpty } from 'lodash/fp';
 import React, { useMemo } from 'react';
+import type { EuiDataGridControlColumn } from '@elastic/eui';
+import type { SortColumnTable } from '@kbn/securitysolution-data-table';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
@@ -20,7 +22,10 @@ import { ControlColumnCellRender } from '../../unified_components/data_table/con
 import { defaultUdtHeaders } from '../../unified_components/default_headers';
 import type { ColumnHeaderOptions } from '../../../../../../common/types';
 
-export const useTimelineControlColumn = (columns: ColumnHeaderOptions[], sort, refetch) => {
+export const useTimelineControlColumn = (
+  columns: ColumnHeaderOptions[],
+  sort: SortColumnTable[]
+) => {
   const { browserFields } = useSourcererDataView(SourcererScopeName.timeline);
 
   const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
@@ -60,24 +65,16 @@ export const useTimelineControlColumn = (columns: ColumnHeaderOptions[], sort, r
               fieldBrowserOptions={{}}
               {...props}
               timelineId={TimelineId.active}
-              refetch={refetch}
             />
           );
         },
         rowCellRender: ControlColumnCellRender,
-      }));
+      })) as unknown as EuiDataGridControlColumn[];
     } else {
       return getDefaultControlColumn(ACTION_BUTTON_COUNT).map((x) => ({
         ...x,
         headerCellRender: HeaderActions,
-      }));
+      })) as unknown as ColumnHeaderOptions[];
     }
-  }, [
-    ACTION_BUTTON_COUNT,
-    browserFields,
-    localColumns,
-    sort,
-    refetch,
-    unifiedComponentsInTimelineEnabled,
-  ]);
+  }, [ACTION_BUTTON_COUNT, browserFields, localColumns, sort, unifiedComponentsInTimelineEnabled]);
 };

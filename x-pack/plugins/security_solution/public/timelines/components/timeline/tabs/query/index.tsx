@@ -11,6 +11,7 @@ import type { Dispatch } from 'redux';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
+import type { EuiDataGridControlColumn } from '@elastic/eui';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
@@ -19,6 +20,7 @@ import { InputsModelId } from '../../../../../common/store/inputs/constants';
 import { useInvalidFilterQuery } from '../../../../../common/hooks/use_invalid_filter_query';
 import { timelineActions, timelineSelectors } from '../../../../store';
 import type { Direction } from '../../../../../../common/search_strategy';
+import type { ControlColumnProps } from '../../../../../../common/types';
 import { useTimelineEvents } from '../../../../containers';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { StatefulBody } from '../../body';
@@ -190,7 +192,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     timerangeKind,
   });
 
-  const leadingControlColumns = useTimelineControlColumn(columns, sort, refetch);
+  const leadingControlColumns = useTimelineControlColumn(columns, sort);
 
   useEffect(() => {
     dispatch(
@@ -252,7 +254,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         onEventClosed={onEventClosed}
         expandedDetail={expandedDetail}
         showExpandedDetails={showExpandedDetails}
-        leadingControlColumns={leadingControlColumns}
+        leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
         eventIdToNoteIds={eventIdToNoteIds}
         pinnedEventIds={pinnedEventIds}
         onChangePage={loadPage}
@@ -305,7 +307,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                   itemsCount: totalCount,
                   itemsPerPage,
                 })}
-                leadingControlColumns={leadingControlColumns}
+                leadingControlColumns={leadingControlColumns as ControlColumnProps[]}
                 trailingControlColumns={timelineEmptyTrailingControlColumns}
               />
             </StyledEuiFlyoutBody>
@@ -446,9 +448,9 @@ const QueryTabContent = connector(
       prevProps.showCallOutUnauthorizedMsg === nextProps.showCallOutUnauthorizedMsg &&
       prevProps.showExpandedDetails === nextProps.showExpandedDetails &&
       prevProps.status === nextProps.status &&
-      prevProps.eventIdToNoteIds === nextProps.eventIdToNoteIds &&
       prevProps.status === nextProps.status &&
       prevProps.timelineId === nextProps.timelineId &&
+      deepEqual(prevProps.eventIdToNoteIds, nextProps.eventIdToNoteIds) &&
       deepEqual(prevProps.columns, nextProps.columns) &&
       deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
       deepEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions) &&

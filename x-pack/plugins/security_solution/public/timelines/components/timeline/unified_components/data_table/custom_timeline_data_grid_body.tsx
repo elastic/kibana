@@ -28,7 +28,7 @@ export type CustomTimelineDataGridBodyProps = EuiDataGridCustomBodyProps & {
   rows: Array<DataTableRecord & TimelineItem> | undefined;
   enabledRowRenderers: RowRenderer[];
   events: TimelineItem[];
-  eventIdToNoteIds?: Record<string, string[]>;
+  eventIdToNoteIds?: Record<string, string[]> | null;
   eventIdsAddingNotes?: Set<string>;
   onToggleShowNotes: (eventId?: string) => void;
   refetch?: () => void;
@@ -75,7 +75,7 @@ export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = m
       <>
         {visibleRows.map((row, rowIndex) => {
           const eventId = eventIds[rowIndex];
-          const noteIds: string[] = eventIdToNoteIds[eventId] || emptyNotes;
+          const noteIds: string[] = (eventIdToNoteIds && eventIdToNoteIds[eventId]) || emptyNotes;
           const notes = noteIds
             .map((noteId) => {
               const note = notesById[noteId];

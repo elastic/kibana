@@ -7,14 +7,13 @@
 
 import { isEmpty } from 'lodash/fp';
 import React, { useMemo, useCallback, memo } from 'react';
-import type { EuiDataGridControlColumn } from '@elastic/eui';
 import styled from 'styled-components';
 import type { Dispatch } from 'redux';
 import type { ConnectedProps } from 'react-redux';
 import { connect } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
+import type { EuiDataGridControlColumn } from '@elastic/eui';
 import { DataLoadingState } from '@kbn/unified-data-table';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ControlColumnProps } from '../../../../../../common/types';
 import { timelineActions, timelineSelectors } from '../../../../store';
 import type { Direction } from '../../../../../../common/search_strategy';
@@ -28,7 +27,6 @@ import { SourcererScopeName } from '../../../../../common/store/sourcerer/model'
 import { timelineDefaults } from '../../../../store/defaults';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
-import { withDataView } from '../../../../../common/components/with_data_view';
 import { useTimelineFullScreen } from '../../../../../common/containers/use_full_screen';
 import type { TimelineModel } from '../../../../store/model';
 import type { State } from '../../../../../common/store';
@@ -61,7 +59,7 @@ interface PinnedFilter {
   };
 }
 
-export type Props = TimelineTabCommonProps & PropsFromRedux & { dataView: DataView };
+export type Props = TimelineTabCommonProps & PropsFromRedux;
 
 const trailingControlColumns: ControlColumnProps[] = []; // stable reference
 
@@ -88,7 +86,6 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   sort,
   expandedDetail,
   eventIdToNoteIds,
-  dataView,
 }) => {
   const {
     browserFields,
@@ -177,7 +174,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
       timerangeKind: undefined,
     });
 
-  const leadingControlColumns = useTimelineControlColumn(columns, sort, refetch);
+  const leadingControlColumns = useTimelineControlColumn(columns, sort);
 
   const isQueryLoading = useMemo(
     () => [DataLoadingState.loading, DataLoadingState.loadingMore].includes(queryLoadingState),
@@ -212,7 +209,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
         updatedAt={refreshedAt}
         isTextBasedQuery={false}
         pageInfo={pageInfo}
-        leadingControlColumns={leadingControlColumns}
+        leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
         trailingControlColumns={rowDetailColumn}
       />
     );
@@ -249,9 +246,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
                   itemsCount: totalCount,
                   itemsPerPage,
                 })}
-                leadingControlColumns={
-                  leadingControlColumns as unknown as EuiDataGridControlColumn[]
-                }
+                leadingControlColumns={leadingControlColumns as ControlColumnProps[]}
                 trailingControlColumns={trailingControlColumns}
               />
             </StyledEuiFlyoutBody>
@@ -335,19 +330,16 @@ const connector = connect(makeMapStateToProps, mapDispatchToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 
-const PinnedTabWithDataView = withDataView<Props>(PinnedTabContentComponent);
-
 const PinnedTabContent = connector(
   memo(
-    PinnedTabWithDataView,
+    PinnedTabContentComponent,
     (prevProps, nextProps) =>
       prevProps.itemsPerPage === nextProps.itemsPerPage &&
       prevProps.onEventClosed === nextProps.onEventClosed &&
       prevProps.showExpandedDetails === nextProps.showExpandedDetails &&
       prevProps.timelineId === nextProps.timelineId &&
       deepEqual(prevProps.columns, nextProps.columns) &&
-      prevProps.status === nextProps.status &&
-      prevProps.eventIdToNoteIds === nextProps.eventIdToNoteIds &&
+      deepEqual(prevProps.eventIdToNoteIds, nextProps.eventIdToNoteIds) &&
       deepEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions) &&
       deepEqual(prevProps.pinnedEventIds, nextProps.pinnedEventIds) &&
       deepEqual(prevProps.sort, nextProps.sort)
