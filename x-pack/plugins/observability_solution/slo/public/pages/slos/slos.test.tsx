@@ -15,7 +15,7 @@ import Router from 'react-router-dom';
 import { paths } from '../../../common/locators/paths';
 import { historicalSummaryData } from '../../data/slo/historical_summary_data';
 import { emptySloList, sloList } from '../../data/slo/slo';
-import { useCapabilities } from '../../hooks/use_capabilities';
+import { usePermissions } from '../../hooks/use_permissions';
 import { useCreateSlo } from '../../hooks/use_create_slo';
 import { useDeleteSlo } from '../../hooks/use_delete_slo';
 import { useFetchHistoricalSummary } from '../../hooks/use_fetch_historical_summary';
@@ -40,7 +40,7 @@ jest.mock('../../hooks/use_create_slo');
 jest.mock('../slo_settings/use_get_settings');
 jest.mock('../../hooks/use_delete_slo');
 jest.mock('../../hooks/use_fetch_historical_summary');
-jest.mock('../../hooks/use_capabilities');
+jest.mock('../../hooks/use_permissions');
 
 const useGetSettingsMock = useGetSettings as jest.Mock;
 const useKibanaMock = useKibana as jest.Mock;
@@ -49,7 +49,8 @@ const useFetchSloListMock = useFetchSloList as jest.Mock;
 const useCreateSloMock = useCreateSlo as jest.Mock;
 const useDeleteSloMock = useDeleteSlo as jest.Mock;
 const useFetchHistoricalSummaryMock = useFetchHistoricalSummary as jest.Mock;
-const useCapabilitiesMock = useCapabilities as jest.Mock;
+const usePermissionsMock = usePermissions as jest.Mock;
+
 const TagsListMock = TagsList as jest.Mock;
 TagsListMock.mockReturnValue(<div>Tags list</div>);
 
@@ -147,7 +148,10 @@ describe('SLOs Page', () => {
         selectedRemoteClusters: [],
       },
     });
-    useCapabilitiesMock.mockReturnValue({ hasWriteCapabilities: true, hasReadCapabilities: true });
+    usePermissionsMock.mockReturnValue({
+      isLoading: false,
+      data: { hasAllReadRequested: true, hasAllWriteRequested: true },
+    });
     jest
       .spyOn(Router, 'useLocation')
       .mockReturnValue({ pathname: '/slos', search: '', state: '', hash: '' });
@@ -165,6 +169,7 @@ describe('SLOs Page', () => {
         data: {},
       });
     });
+
     it('navigates to the SLOs Welcome Page', async () => {
       await act(async () => {
         render(<SlosPage />);
@@ -197,9 +202,28 @@ describe('SLOs Page', () => {
       });
     });
 
+    it('navigates to the SLOs Welcome Page when the user has not the request read permissions', async () => {
+      useFetchSloListMock.mockReturnValue({ isLoading: false, data: sloList });
+      useFetchHistoricalSummaryMock.mockReturnValue({
+        isLoading: false,
+        data: historicalSummaryData,
+      });
+      usePermissionsMock.mockReturnValue({
+        isLoading: false,
+        data: { hasAllReadRequested: false, hasAllWriteRequested: false },
+      });
+
+      await act(async () => {
+        render(<SlosPage />);
+      });
+
+      await waitFor(() => {
+        expect(mockNavigate).toBeCalledWith(paths.slosWelcome);
+      });
+    });
+
     it('should have a create new SLO button', async () => {
       useFetchSloListMock.mockReturnValue({ isLoading: false, data: sloList });
-
       useFetchHistoricalSummaryMock.mockReturnValue({
         isLoading: false,
         data: historicalSummaryData,

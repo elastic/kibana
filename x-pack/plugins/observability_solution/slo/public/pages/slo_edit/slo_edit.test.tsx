@@ -15,7 +15,7 @@ import Router from 'react-router-dom';
 import { BehaviorSubject } from 'rxjs';
 import { paths } from '../../../common/locators/paths';
 import { buildSlo } from '../../data/slo/slo';
-import { useCapabilities } from '../../hooks/use_capabilities';
+import { usePermissions } from '../../hooks/use_permissions';
 import { useCreateSlo } from '../../hooks/use_create_slo';
 import { useFetchApmSuggestions } from '../../hooks/use_fetch_apm_suggestions';
 import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
@@ -41,7 +41,7 @@ jest.mock('../../hooks/use_create_slo');
 jest.mock('../../hooks/use_update_slo');
 jest.mock('@kbn/observability-plugin/public');
 jest.mock('../../hooks/use_fetch_apm_suggestions');
-jest.mock('../../hooks/use_capabilities');
+jest.mock('../../hooks/use_permissions');
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 
@@ -57,7 +57,7 @@ const useCreateSloMock = useCreateSlo as jest.Mock;
 const useUpdateSloMock = useUpdateSlo as jest.Mock;
 const useCreateRuleMock = useCreateRule as jest.Mock;
 const useFetchApmSuggestionsMock = useFetchApmSuggestions as jest.Mock;
-const useCapabilitiesMock = useCapabilities as jest.Mock;
+const usePermissionsMock = usePermissions as jest.Mock;
 
 const HeaderMenuPortalMock = HeaderMenuPortal as jest.Mock;
 HeaderMenuPortalMock.mockReturnValue(<div>Portal node</div>);
@@ -189,9 +189,12 @@ describe('SLO Edit Page', () => {
 
   describe('when the incorrect license is found', () => {
     beforeEach(() => {
-      useCapabilitiesMock.mockReturnValue({
-        hasWriteCapabilities: true,
-        hasReadCapabilities: true,
+      usePermissionsMock.mockReturnValue({
+        isLoading: false,
+        data: {
+          hasAllWriteRequested: true,
+          hasAllReadRequested: true,
+        },
       });
       licenseMock.hasAtLeast.mockReturnValue(false);
     });
@@ -212,9 +215,12 @@ describe('SLO Edit Page', () => {
 
   describe('when the license is null', () => {
     beforeEach(() => {
-      useCapabilitiesMock.mockReturnValue({
-        hasWriteCapabilities: true,
-        hasReadCapabilities: true,
+      usePermissionsMock.mockReturnValue({
+        isLoading: false,
+        data: {
+          hasAllWriteRequested: true,
+          hasAllReadRequested: true,
+        },
       });
       mockKibana(null);
     });
@@ -235,18 +241,24 @@ describe('SLO Edit Page', () => {
 
   describe('when the correct license is found', () => {
     beforeEach(() => {
-      useCapabilitiesMock.mockReturnValue({
-        hasWriteCapabilities: true,
-        hasReadCapabilities: true,
+      usePermissionsMock.mockReturnValue({
+        isLoading: false,
+        data: {
+          hasAllWriteRequested: true,
+          hasAllReadRequested: true,
+        },
       });
       licenseMock.hasAtLeast.mockReturnValue(true);
     });
 
     describe('with no write permission', () => {
       beforeEach(() => {
-        useCapabilitiesMock.mockReturnValue({
-          hasWriteCapabilities: false,
-          hasReadCapabilities: true,
+        usePermissionsMock.mockReturnValue({
+          isLoading: false,
+          data: {
+            hasAllWriteRequested: false,
+            hasAllReadRequested: true,
+          },
         });
       });
 
@@ -261,6 +273,31 @@ describe('SLO Edit Page', () => {
         render(<SloEditPage />);
 
         expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slos));
+      });
+    });
+
+    describe('with no read permission', () => {
+      beforeEach(() => {
+        usePermissionsMock.mockReturnValue({
+          isLoading: false,
+          data: {
+            hasAllWriteRequested: false,
+            hasAllReadRequested: false,
+          },
+        });
+      });
+
+      it('redirects to the slo welcome page', async () => {
+        jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '1234' });
+        jest
+          .spyOn(Router, 'useLocation')
+          .mockReturnValue({ pathname: '/slos/1234/edit', search: '', state: '', hash: '' });
+
+        useFetchSloMock.mockReturnValue({ isLoading: false, data: undefined });
+
+        render(<SloEditPage />);
+
+        expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slosWelcome));
       });
     });
 
