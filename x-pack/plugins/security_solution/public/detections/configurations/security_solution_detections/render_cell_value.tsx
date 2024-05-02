@@ -17,13 +17,11 @@ import { useLicense } from '../../../common/hooks/use_license';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import type { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import {
-  GuidedOnboardingTourStep,
-  hiddenWhenCaseFlyoutExpanded,
-} from '../../../common/components/guided_onboarding_tour/tour_step';
+import { GuidedOnboardingTourStep } from '../../../common/components/guided_onboarding_tour/tour_step';
 import { isDetectionsAlertsTable } from '../../../common/components/top_n/helpers';
 import {
   AlertsCasesTourSteps,
+  hiddenWhenExpandableFlyoutExpanded,
   SecurityStepId,
 } from '../../../common/components/guided_onboarding_tour/tour_config';
 import { SIGNAL_RULE_NAME_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
@@ -126,7 +124,7 @@ export const RenderCellValue: React.FC<NonNullable<EuiDataGridCellProps['cellCon
     const hiddenWhenExpandableFlyoutOpened = useMemo(
       () =>
         isExpandableFlyoutExpanded &&
-        hiddenWhenCaseFlyoutExpanded[SecurityStepId.alertsCases]?.includes(
+        hiddenWhenExpandableFlyoutExpanded[SecurityStepId.alertsCases]?.includes(
           AlertsCasesTourSteps.pointToAlertName
         ),
       [isExpandableFlyoutExpanded]

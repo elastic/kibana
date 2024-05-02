@@ -17,7 +17,12 @@ import { TimelineId } from '../../../../common/types';
 import { timelineDefaults } from '../../../timelines/store/defaults';
 import { timelineSelectors } from '../../../timelines/store';
 import { useTourContext } from './tour';
-import { AlertsCasesTourSteps, SecurityStepId, securityTourConfig } from './tour_config';
+import {
+  AlertsCasesTourSteps,
+  hiddenWhenCaseFlyoutExpanded,
+  SecurityStepId,
+  securityTourConfig,
+} from './tour_config';
 import { useKibana } from '../../lib/kibana';
 
 interface SecurityTourStep {
@@ -145,23 +150,6 @@ interface GuidedOnboardingTourStep extends SecurityTourStep {
   hidden?: boolean;
 }
 
-export const hiddenWhenExpandableFlyoutExpanded: Record<string, AlertsCasesTourSteps[]> = {
-  [SecurityStepId.alertsCases]: [
-    AlertsCasesTourSteps.pointToAlertName,
-    AlertsCasesTourSteps.expandEvent,
-  ],
-};
-
-export const hiddenWhenCaseFlyoutExpanded: Record<string, AlertsCasesTourSteps[]> = {
-  [SecurityStepId.alertsCases]: [
-    AlertsCasesTourSteps.pointToAlertName,
-    AlertsCasesTourSteps.expandEvent,
-    AlertsCasesTourSteps.reviewAlertDetailsFlyout,
-    AlertsCasesTourSteps.addAlertToCase,
-    AlertsCasesTourSteps.viewCase,
-  ],
-};
-
 // wraps tour anchor component
 // and gives the tour step itself a place to mount once it is active
 // mounts the tour step with a delay to ensure the anchor will render first
@@ -174,17 +162,17 @@ export const GuidedOnboardingTourStep = ({
   ...props
 }: GuidedOnboardingTourStep) => {
   const { cases } = useKibana().services;
-  const isAddToNewCaseFlyoutOpen = cases.hooks.useIsAddToNewCaseFlyoutOpen();
-  const isAddToExistingCaseModalOpen = cases.hooks.useAddToExistingCaseModalOpen();
+  const { hidden: allStepsHidden } = useTourContext();
+  const isCasesFlyoutModalOpen =
+    cases.hooks.useIsAddToNewCaseFlyoutOpen() || cases.hooks.useAddToExistingCaseModalOpen();
 
   const hiddenWhenCasesModalFlyoutExpanded = useMemo(
     () =>
-      (isAddToNewCaseFlyoutOpen || isAddToExistingCaseModalOpen) &&
-      hiddenWhenCaseFlyoutExpanded[props.tourId]?.includes(props.step),
-    [isAddToNewCaseFlyoutOpen, isAddToExistingCaseModalOpen, props.tourId, props.step]
+      isCasesFlyoutModalOpen && hiddenWhenCaseFlyoutExpanded[props.tourId]?.includes(props.step),
+    [isCasesFlyoutModalOpen, props.tourId, props.step]
   );
 
-  return isTourAnchor && !hidden && !hiddenWhenCasesModalFlyoutExpanded ? (
+  return isTourAnchor && !hidden && !allStepsHidden && !hiddenWhenCasesModalFlyoutExpanded ? (
     <SecurityTourStep {...props}>{children}</SecurityTourStep>
   ) : (
     <>{children}</>

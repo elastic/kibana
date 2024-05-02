@@ -37,12 +37,13 @@ import { AlertContextMenu } from '../../../detections/components/alerts_table/ti
 import { InvestigateInTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
 import * as i18n from './translations';
 import { useTourContext } from '../guided_onboarding_tour';
-import { AlertsCasesTourSteps, SecurityStepId } from '../guided_onboarding_tour/tour_config';
-import { isDetectionsAlertsTable } from '../top_n/helpers';
 import {
-  GuidedOnboardingTourStep,
-  hiddenWhenCaseFlyoutExpanded,
-} from '../guided_onboarding_tour/tour_step';
+  AlertsCasesTourSteps,
+  SecurityStepId,
+  hiddenWhenExpandableFlyoutExpanded,
+} from '../guided_onboarding_tour/tour_config';
+import { isDetectionsAlertsTable } from '../top_n/helpers';
+import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
 import { DEFAULT_ACTION_BUTTON_WIDTH, isAlert } from './helpers';
 
 const ActionsContainer = styled.div`
@@ -88,7 +89,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
   const hiddenWhenExpandableFlyoutOpened = useMemo(
     () =>
       isExpandableFlyoutExpanded &&
-      hiddenWhenCaseFlyoutExpanded[SecurityStepId.alertsCases]?.includes(
+      hiddenWhenExpandableFlyoutExpanded[SecurityStepId.alertsCases]?.includes(
         AlertsCasesTourSteps.expandEvent
       ),
     [isExpandableFlyoutExpanded]
