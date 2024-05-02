@@ -23,6 +23,14 @@ jest.mock('../../hooks/use_indices_fields', () => ({
   }),
 }));
 
+jest.mock('../../hooks/use_usage_tracker', () => ({
+  useUsageTracker: () => ({
+    count: jest.fn(),
+    load: jest.fn(),
+    click: jest.fn(),
+  }),
+}));
+
 const MockFormProvider = ({ children }: { children: React.ReactElement }) => {
   const methods = useForm({
     values: {
