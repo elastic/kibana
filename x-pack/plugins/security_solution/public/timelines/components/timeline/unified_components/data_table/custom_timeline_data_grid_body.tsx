@@ -126,6 +126,17 @@ const CustomGridRow = styled.div.attrs<{
 }))`
   width: fit-content;
   border-bottom: 1px solid ${(props) => (props.theme as EuiTheme).eui.euiBorderThin};
+
+  .udt--customRow {
+    border-radius: 0;
+    padding: ${(props) => (props.theme as EuiTheme).eui.euiDataGridCellPaddingM};
+    max-width: ${(props) => (props.theme as EuiTheme).eui.euiPageDefaultMaxWidth};
+    width: 85vw;
+  }
+
+  .euiCommentEvent__body {
+    background-color: ${(props) => (props.theme as EuiTheme).eui.euiColorEmptyShade};
+  }
 `;
 
 /* below styles as per : https://eui.elastic.co/#/tabular-content/data-grid-advanced#custom-body-renderer */
@@ -234,6 +245,7 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
       <NoteCards
         ariaRowindex={rowIndex}
         associateNote={associateNote}
+        className="udt--customRow"
         data-test-subj="note-cards"
         notes={notes ?? []}
         showAddNote={eventIdsAddingNotes?.has(eventId) ?? false}
