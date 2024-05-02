@@ -35,7 +35,11 @@ import { SearchEmbeddablFieldStatsTableComponent } from './components/search_emb
 import { SearchEmbeddableGridComponent } from './components/search_embeddable_grid_component';
 import { initializeFetch } from './initialize_fetch';
 import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_api';
-import { SearchEmbeddableApi, SearchEmbeddableSerializedState } from './types';
+import {
+  SearchEmbeddableApi,
+  SearchEmbeddableRuntimeState,
+  SearchEmbeddableSerializedState,
+} from './types';
 import { getDiscoverLocatorParams } from './utils/get_discover_locator_params';
 
 export const getSearchEmbeddableFactory = ({
@@ -52,7 +56,8 @@ export const getSearchEmbeddableFactory = ({
 
   const savedSearchEmbeddableFactory: ReactEmbeddableFactory<
     SearchEmbeddableSerializedState,
-    SearchEmbeddableApi
+    SearchEmbeddableApi,
+    SearchEmbeddableRuntimeState
   > = {
     type: SEARCH_EMBEDDABLE_TYPE,
     deserializeState: (state) => {

@@ -46,6 +46,8 @@ export type SearchEmbeddableSerializedState = SerializedTitles & {
   savedObjectId?: string;
 };
 
+export type SearchEmbeddableRuntimeState = SavedSearchByValueAttributes;
+
 export interface PublishesRows {
   rows$: BehaviorSubject<DataTableRecord[]>;
 }
