@@ -711,8 +711,8 @@
                 "pluginId": "visualizations",
                 "scope": "common",
                 "docId": "kibVisualizationsPluginApi",
-                "section": "def-common.PartitionLegendValue",
-                "text": "PartitionLegendValue"
+                "section": "def-common.LegendStats",
+                "text": "LegendStats"
               },
               "[] | undefined"
             ],
@@ -1013,8 +1013,8 @@
                 "pluginId": "visualizations",
                 "scope": "common",
                 "docId": "kibVisualizationsPluginApi",
-                "section": "def-common.PartitionLegendValue",
-                "text": "PartitionLegendValue"
+                "section": "def-common.LegendStats",
+                "text": "LegendStats"
               },
               "[] | undefined"
             ],
