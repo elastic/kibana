@@ -12,6 +12,7 @@ import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plu
 import { KibanaRequest } from '@kbn/core/server';
 import { aiAssistantSimulatedFunctionCalling } from '../..';
 import { flushBuffer } from '../../service/util/flush_buffer';
+import { observableIntoOpenAIStream } from '../../service/util/observable_into_openai_stream';
 import { observableIntoStream } from '../../service/util/observable_into_stream';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import { screenContextRt, messageRt, functionRt } from '../runtime_types';
@@ -53,9 +54,12 @@ const chatCompleteInternalRt = t.intersection([
 
 const chatCompletePublicRt = t.intersection([
   chatCompleteBaseRt,
-  t.type({
+  t.partial({
     body: t.partial({
       actions: t.array(functionRt),
+    }),
+    query: t.partial({
+      format: t.union([t.literal('default'), t.literal('openai')]),
     }),
   }),
 ]);
@@ -230,24 +234,32 @@ const publicChatCompleteRoute = createObservabilityAIAssistantServerRoute({
   },
   params: chatCompletePublicRt,
   handler: async (resources): Promise<Readable> => {
+    const { params, logger } = resources;
+
     const {
       body: { actions, ...restOfBody },
-    } = resources.params;
-    return observableIntoStream(
-      await chatComplete({
-        ...resources,
-        params: {
-          body: {
-            ...restOfBody,
-            screenContexts: [
-              {
-                actions,
-              },
-            ],
-          },
+      query = {},
+    } = params;
+
+    const { format = 'default' } = query;
+
+    const response$ = await chatComplete({
+      ...resources,
+      params: {
+        body: {
+          ...restOfBody,
+          screenContexts: [
+            {
+              actions,
+            },
+          ],
         },
-      })
-    );
+      },
+    });
+
+    return format === 'openai'
+      ? observableIntoOpenAIStream(response$, logger)
+      : observableIntoStream(response$);
   },
 });
 
