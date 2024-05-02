@@ -149,9 +149,9 @@ const previouslyRegisteredTypes = [
 describe('SO type registrations', () => {
   let root: ReturnType<typeof createRoot>;
 
-  afterEach(() => {
+  afterEach(async () => {
     try {
-      root?.shutdown();
+      await root?.shutdown();
     } catch (e) {
       /* trap */
     }

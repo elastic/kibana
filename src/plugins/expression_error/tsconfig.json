@@ -14,9 +14,10 @@
     "@kbn/presentation-util-plugin",
     "@kbn/expressions-plugin",
     "@kbn/i18n",
-    "@kbn/kibana-react-plugin",
-    "@kbn/i18n-react",
     "@kbn/shared-ux-markdown",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/i18n-react",
+    "@kbn/shared-ux-error-boundary",
   ],
   "exclude": [
     "target/**/*",

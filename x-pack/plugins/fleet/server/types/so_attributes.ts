@@ -32,6 +32,7 @@ import type {
   KafkaPartitionType,
   KafkaSaslMechanism,
   KafkaTopicWhenType,
+  SimpleSOAssetType,
 } from '../../common/types';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
@@ -242,7 +243,4 @@ export interface DownloadSourceSOAttributes {
   source_id?: string;
   proxy_id?: string | null;
 }
-export interface SimpleSOAssetAttributes {
-  title?: string;
-  description?: string;
-}
+export type SimpleSOAssetAttributes = SimpleSOAssetType['attributes'];

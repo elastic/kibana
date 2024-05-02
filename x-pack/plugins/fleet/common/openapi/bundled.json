@@ -6295,33 +6295,33 @@
         "type": "object",
         "deprecated": true,
         "properties": {
-          "response": {
+          "items": {
             "type": "array",
             "items": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "type": "string"
-                  },
-                  "type": {
-                    "$ref": "#/components/schemas/saved_object_type"
-                  },
-                  "updatedAt": {
-                    "type": "string"
-                  },
-                  "attributes": {
-                    "type": "object",
-                    "properties": {
-                      "title": {
-                        "type": "string"
-                      },
-                      "description": {
-                        "type": "string"
-                      }
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "type": {
+                  "$ref": "#/components/schemas/saved_object_type"
+                },
+                "updatedAt": {
+                  "type": "string"
+                },
+                "attributes": {
+                  "type": "object",
+                  "properties": {
+                    "title": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
                     }
                   }
+                },
+                "appLink": {
+                  "type": "string"
                 }
               }
             }
