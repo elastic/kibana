@@ -7,7 +7,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { DeepPartial } from 'utility-types';
+import type { DeepPartial, Mutable } from 'utility-types';
 import { merge } from 'lodash';
 import type { SearchResponse, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type {
@@ -87,38 +87,39 @@ export class SentinelOneDataGenerator extends EndpointActionGenerator {
     return this.toEsSearchResponse<SentinelOneActivityEsDoc>(docs);
   }
 
-  generateSentinelOneApiActivityResponse(): SentinelOneGetActivitiesResponse {
+  generateSentinelOneApiActivityResponse(
+    activityRecordOverrides: DeepPartial<Mutable<SentinelOneActivityRecord>> = {}
+  ): SentinelOneGetActivitiesResponse {
     const today = new Date();
     today.setMinutes(today.getMinutes() - 5);
-    const activityType = this.randomActivityType();
+    const activityType = activityRecordOverrides.activityType ?? this.randomActivityType();
+    const activity: SentinelOneActivityRecord = {
+      accountId: this.randomString(10),
+      accountName: 'Elastic',
+      activityType,
+      activityUuid: this.seededUUIDv4(),
+      agentId: this.seededUUIDv4(),
+      agentUpdatedVersion: null,
+      comments: null,
+      createdAt: today.toISOString(),
+      data: this.generateActivityDataForType(activityType),
+      description: null,
+      groupId: '1392053568591146999',
+      groupName: 'Default Group',
+      hash: null,
+      id: this.seededUUIDv4(),
+      osFamily: null,
+      primaryDescription: sentinelOneActivityTypes[activityType.toString()],
+      secondaryDescription: 'IP address: 108.77.84.191',
+      siteId: '1392053568582758390',
+      siteName: 'Default site',
+      threatId: null,
+      updatedAt: today.toISOString(),
+      userId: this.randomUser(),
+    };
 
     return {
-      data: [
-        {
-          accountId: this.randomString(10),
-          accountName: 'Elastic',
-          activityType,
-          activityUuid: this.seededUUIDv4(),
-          agentId: this.seededUUIDv4(),
-          agentUpdatedVersion: null,
-          comments: null,
-          createdAt: today.toISOString(),
-          data: this.generateActivityDataForType(activityType),
-          description: null,
-          groupId: '1392053568591146999',
-          groupName: 'Default Group',
-          hash: null,
-          id: this.seededUUIDv4(),
-          osFamily: null,
-          primaryDescription: sentinelOneActivityTypes[activityType.toString()],
-          secondaryDescription: 'IP address: 108.77.84.191',
-          siteId: '1392053568582758390',
-          siteName: 'Default site',
-          threatId: null,
-          updatedAt: today.toISOString(),
-          userId: this.randomUser(),
-        },
-      ],
+      data: [merge(activity, activityRecordOverrides)],
       pagination: {
         nextCursor: 'eyJpZF9jb2x9',
         totalItems: 1,
