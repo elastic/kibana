@@ -188,23 +188,21 @@ export const getOverviewEmbeddableFactory = (deps: SloEmbeddableDeps) => {
             }
           };
           return (
-            <I18nContext>
-              <Router history={createBrowserHistory()}>
-                <EuiThemeProvider darkMode={true}>
-                  <KibanaContextProvider services={deps}>
-                    <PluginContext.Provider value={{ observabilityRuleTypeRegistry }}>
-                      <QueryClientProvider client={queryClient}>
-                        {showAllGroupByInstances ? (
-                          <SloCardChartList sloId={sloId!} />
-                        ) : (
-                          renderOverview()
-                        )}
-                      </QueryClientProvider>
-                    </PluginContext.Provider>
-                  </KibanaContextProvider>
-                </EuiThemeProvider>
-              </Router>
-            </I18nContext>
+            <Router history={createBrowserHistory()}>
+              <EuiThemeProvider darkMode={true}>
+                <KibanaContextProvider services={deps}>
+                  <PluginContext.Provider value={{ observabilityRuleTypeRegistry }}>
+                    <QueryClientProvider client={queryClient}>
+                      {showAllGroupByInstances ? (
+                        <SloCardChartList sloId={sloId!} />
+                      ) : (
+                        renderOverview()
+                      )}
+                    </QueryClientProvider>
+                  </PluginContext.Provider>
+                </KibanaContextProvider>
+              </EuiThemeProvider>
+            </Router>
           );
         },
       };
