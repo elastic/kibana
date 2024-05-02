@@ -93,7 +93,7 @@ import { RuleResultService } from '../monitoring/rule_result_service';
 import { ruleResultServiceMock } from '../monitoring/rule_result_service.mock';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
-import { getExecutorServices } from './get_executor_services';
+import * as getExecutorServicesModule from './get_executor_services';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -107,7 +107,7 @@ jest.mock('../lib/alerting_event_logger/alerting_event_logger');
 
 jest.mock('../monitoring/rule_result_service');
 
-jest.mock('./get_executor_services');
+jest.spyOn(getExecutorServicesModule, 'getExecutorServices');
 
 let fakeTimer: sinon.SinonFakeTimers;
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
@@ -1928,9 +1928,9 @@ describe('Task Runner', () => {
   });
 
   test('should set unexpected errors as framework-error', async () => {
-    const mocked = jest.mocked(getExecutorServices);
-
-    mocked.mockRejectedValue(new Error('test'));
+    (getExecutorServicesModule.getExecutorServices as jest.Mock).mockRejectedValue(
+      new Error('test')
+    );
 
     const taskRunner = new TaskRunner({
       ruleType,
