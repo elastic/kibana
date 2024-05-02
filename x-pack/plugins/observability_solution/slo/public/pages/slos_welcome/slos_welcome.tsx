@@ -33,11 +33,11 @@ export function SlosWelcomePage() {
     http: { basePath },
   } = useKibana().services;
 
-  const { data: permissions, isLoading: arePermissionsLoading } = usePermissions();
   const { ObservabilityPageTemplate } = usePluginContext();
+  const { data: permissions, isLoading: arePermissionsLoading } = usePermissions();
   const { hasAtLeast } = useLicense();
-
   const hasRightLicense = hasAtLeast('platinum');
+
   const { isLoading, data: sloList } = useFetchSloList();
   const { total } = sloList ?? { total: 0 };
 
