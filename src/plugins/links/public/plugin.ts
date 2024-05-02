@@ -11,12 +11,16 @@ import {
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { DashboardStart, DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/dashboard-plugin/public';
+import {
+  DashboardStart,
+  DASHBOARD_GRID_COLUMN_COUNT,
+  PanelPlacementStrategy,
+  registerDashboardPanelPlacementSetting,
+} from '@kbn/dashboard-plugin/public';
 import {
   EmbeddableSetup,
   EmbeddableStart,
   registerReactEmbeddableFactory,
-  registerEmbeddablePlacementStrategy,
   registerReactEmbeddableSavedObject,
 } from '@kbn/embeddable-plugin/public';
 import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
@@ -118,13 +122,18 @@ export class LinksPlugin
         getIconForSavedObject: () => APP_ICON,
       });
 
-      registerEmbeddablePlacementStrategy(CONTENT_ID, (serializedState: LinksSerializedState) => {
-        if (!serializedState) return {};
-        const isHorizontal = serializedState.attributes?.layout === 'horizontal';
-        const width = isHorizontal ? DASHBOARD_GRID_COLUMN_COUNT : 8;
-        const height = isHorizontal ? 4 : (serializedState.attributes?.links?.length ?? 1 * 3) + 4;
-        return { width, height, strategy: 'placeAtTop' };
-      });
+      registerDashboardPanelPlacementSetting(
+        CONTENT_ID,
+        (serializedState: LinksSerializedState | undefined) => {
+          if (!serializedState) return {};
+          const isHorizontal = serializedState.attributes?.layout === 'horizontal';
+          const width = isHorizontal ? DASHBOARD_GRID_COLUMN_COUNT : 8;
+          const height = isHorizontal
+            ? 4
+            : (serializedState.attributes?.links?.length ?? 1 * 3) + 4;
+          return { width, height, strategy: PanelPlacementStrategy.placeAtTop };
+        }
+      );
 
       registerReactEmbeddableFactory(CONTENT_ID, async () => {
         const { getLinksEmbeddableFactory } = await import('./embeddable/links_embeddable');
