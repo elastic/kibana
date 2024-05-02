@@ -349,14 +349,14 @@ const ExtraAlertsMessage: React.FC<ExtraAlertsMessageProps> = ({ riskScore, aler
 
 const formatContribution = (value: number): string => {
   const fixedValue = value.toFixed(2);
+  // very small negative decimal values like -0.0000001 were
+  // displayed as -0.00, same for positive values.
+  if (fixedValue === '-0.00' || fixedValue === '0.00') {
+    return '0.00';
+  }
 
   if (value > 0) {
     return `+${fixedValue}`;
-  }
-
-  // very small negative decimal values like -0.0000001 are displayed as -0.00
-  if (fixedValue === '-0.00') {
-    return '0.00';
   }
 
   return fixedValue;
