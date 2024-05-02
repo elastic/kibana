@@ -40,9 +40,9 @@ export const useTimelineControlColumn = (columns: ColumnHeaderOptions[], sort, r
     [columns, defaultColumns]
   );
 
-  return useMemo(
-    () =>
-      getDefaultControlColumn(ACTION_BUTTON_COUNT).map((x) => ({
+  return useMemo(() => {
+    if (unifiedComponentsInTimelineEnabled) {
+      return getDefaultControlColumn(ACTION_BUTTON_COUNT).map((x) => ({
         ...x,
         headerCellRender: function HeaderCellRender(props: UnifiedActionProps) {
           return (
@@ -60,13 +60,24 @@ export const useTimelineControlColumn = (columns: ColumnHeaderOptions[], sort, r
               fieldBrowserOptions={{}}
               {...props}
               timelineId={TimelineId.active}
-              showCheckboxes={false}
               refetch={refetch}
             />
           );
         },
         rowCellRender: ControlColumnCellRender,
-      })),
-    [ACTION_BUTTON_COUNT, browserFields, localColumns, sort, refetch]
-  );
+      }));
+    } else {
+      return getDefaultControlColumn(ACTION_BUTTON_COUNT).map((x) => ({
+        ...x,
+        headerCellRender: HeaderActions,
+      }));
+    }
+  }, [
+    ACTION_BUTTON_COUNT,
+    browserFields,
+    localColumns,
+    sort,
+    refetch,
+    unifiedComponentsInTimelineEnabled,
+  ]);
 };

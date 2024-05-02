@@ -221,6 +221,10 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
     [dispatch, eventId, refetch]
   );
 
+  const renderNotesContainer = useMemo(() => {
+    return ((notes && notes.length > 0) || eventIdsAddingNotes?.has(eventId)) ?? false;
+  }, [notes, eventIdsAddingNotes, eventId]);
+
   return (
     <CustomGridRow
       className={`${rowIndex % 2 === 0 ? 'euiDataGridRow--striped' : ''}`}
@@ -242,16 +246,19 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
           return null;
         })}
       </CustomGridRowCellWrapper>
-      <NoteCards
-        ariaRowindex={rowIndex}
-        associateNote={associateNote}
-        className="udt--customRow"
-        data-test-subj="note-cards"
-        notes={notes ?? []}
-        showAddNote={eventIdsAddingNotes?.has(eventId) ?? false}
-        toggleShowAddNote={onToggleShowNotes}
-        eventId={eventId}
-      />
+      {renderNotesContainer && (
+        <NoteCards
+          ariaRowindex={rowIndex}
+          associateNote={associateNote}
+          className="udt--customRow"
+          data-test-subj="note-cards"
+          notes={notes ?? []}
+          showAddNote={eventIdsAddingNotes?.has(eventId) ?? false}
+          toggleShowAddNote={onToggleShowNotes}
+          eventId={eventId}
+        />
+      )}
+
       {/* Timeline Expanded Row */}
       {canShowRowRenderer ? (
         <Cell

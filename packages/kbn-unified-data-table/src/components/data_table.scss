@@ -40,6 +40,10 @@
     background: transparent;
   }
 
+  .rowCellWrapper, .euiDataGridRowCell {
+    height: 100%;
+  }
+
   .euiDataGridHeaderCell {
     align-items: start;
 
@@ -58,6 +62,10 @@
   .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='select'] {
     padding-left: 0;
     padding-right: 0;
+  }
+
+  .euiDataGridRowCell--controlColumn .euiDataGridRowCell__content {
+    padding: 0;
   }
 
   .euiDataGrid--rowHoverHighlight .euiDataGridRow:hover {
