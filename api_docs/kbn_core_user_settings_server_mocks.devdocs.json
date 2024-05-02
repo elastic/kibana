@@ -44,15 +44,13 @@
             "signature": [
               "() => jest.Mocked<",
               {
-                "pluginId": "@kbn/utility-types",
+                "pluginId": "@kbn/core-user-settings-server-internal",
                 "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.PublicMethodsOf",
-                "text": "PublicMethodsOf"
+                "docId": "kibKbnCoreUserSettingsServerInternalPluginApi",
+                "section": "def-common.UserSettingsService",
+                "text": "UserSettingsService"
               },
-              "<",
-              "UserSettingsService",
-              ">>"
+              ">"
             ],
             "path": "packages/core/user-settings/core-user-settings-server-mocks/src/user_settings_service.mock.ts",
             "deprecated": false,
@@ -68,9 +66,7 @@
             "label": "createSetupContract",
             "description": [],
             "signature": [
-              "() => jest.Mocked<",
-              "InternalUserSettingsServiceSetup",
-              ">"
+              "() => { setUserProfileSettings: jest.Mock<any, any, any>; getUserSettingDarkMode: jest.Mock<any, any, any>; }"
             ],
             "path": "packages/core/user-settings/core-user-settings-server-mocks/src/user_settings_service.mock.ts",
             "deprecated": false,

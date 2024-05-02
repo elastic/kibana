@@ -827,10 +827,6 @@
                 "path": "x-pack/plugins/reporting/server/usage/event_tracker.ts"
               },
               {
-                "plugin": "searchPlayground",
-                "path": "x-pack/plugins/search_playground/server/routes.ts"
-              },
-              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
               },
@@ -1566,11 +1562,11 @@
               },
               {
                 "plugin": "telemetry",
-                "path": "src/plugins/telemetry/server/plugin.ts"
+                "path": "src/plugins/telemetry/public/plugin.ts"
               },
               {
                 "plugin": "telemetry",
-                "path": "src/plugins/telemetry/public/plugin.ts"
+                "path": "src/plugins/telemetry/server/plugin.ts"
               },
               {
                 "plugin": "securitySolution",
