@@ -5,51 +5,21 @@
  * 2.0.
  */
 
-import { ALL_VALUE } from '@kbn/slo-schema';
+import { IBasePath } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
+import { SLODefinition } from '../../domain/models';
+import {
+  createTempSummaryDocument,
+  EsSummaryDocument,
+} from '../summary_transform_generator/helpers/create_temp_summary';
 
-export const aSummaryDocument = ({
-  id = uuidv4(),
-  sliValue = 0.9,
-  consumed = 0.4,
-  isTempDoc = false,
-  status = 'HEALTHY',
-} = {}) => {
+export const aSummaryDocument = (
+  slo: SLODefinition,
+  params: Partial<EsSummaryDocument> = {}
+): EsSummaryDocument => {
   return {
-    goodEvents: 96,
-    totalEvents: 100,
-    errorBudgetEstimated: false,
-    errorBudgetRemaining: 1 - consumed,
-    errorBudgetConsumed: consumed,
-    isTempDoc,
-    service: {
-      environment: null,
-      name: null,
-    },
-    slo: {
-      indicator: {
-        type: 'sli.kql.custom',
-      },
-      timeWindow: {
-        duration: '30d',
-        type: 'rolling',
-      },
-      instanceId: ALL_VALUE,
-      name: 'irrelevant',
-      description: '',
-      id,
-      budgetingMethod: 'occurrences',
-      revision: 1,
-      tags: ['tag-one', 'tag-two', 'irrelevant'],
-    },
-    errorBudgetInitial: 0.02,
-    transaction: {
-      name: null,
-      type: null,
-    },
-    sliValue,
-    statusCode: 4,
-    status,
+    ...createTempSummaryDocument(slo, 'default', { publicBaseUrl: '' } as IBasePath),
+    ...params,
   };
 };
 

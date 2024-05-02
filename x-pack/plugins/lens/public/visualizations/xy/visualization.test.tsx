@@ -54,13 +54,13 @@ import {
 } from './visualization_helpers';
 import { cloneDeep } from 'lodash';
 import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
+import { XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import {
   XYPersistedByReferenceAnnotationLayerConfig,
   XYPersistedByValueAnnotationLayerConfig,
   XYPersistedLinkedByValueAnnotationLayerConfig,
   XYPersistedState,
 } from './persistence';
-import { XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
 
 const DATE_HISTORGRAM_COLUMN_ID = 'date_histogram_column';
 const exampleAnnotation: EventAnnotationConfig = {
@@ -612,13 +612,13 @@ describe('xy_visualization', () => {
           ...exampleState(),
           legend: {
             ...exampleState().legend,
-            legendStats: ['currentAndLastValue' as XYLegendValue.CurrentAndLastValue],
+            legendStats: [XYLegendValue.CurrentAndLastValue],
           },
         };
 
         const transformedState = xyVisualization.initialize(() => 'first', persistedState);
 
-        expect(transformedState.legend.legendStats).toEqual(['value']);
+        expect(transformedState.legend.legendStats).toEqual(['currentAndLastValue']);
         expect('valuesInLegend' in transformedState).toEqual(false);
       });
       it('loads a xy chart with `valuesInLegend` property equal to false and transforms to legendStats: []', () => {
@@ -641,7 +641,7 @@ describe('xy_visualization', () => {
 
         const transformedState = xyVisualization.initialize(() => 'first', persistedState);
 
-        expect(transformedState.legend.legendStats).toEqual(['value']);
+        expect(transformedState.legend.legendStats).toEqual(['currentAndLastValue']);
         expect('valuesInLegend' in transformedState).toEqual(false);
       });
 

@@ -169,7 +169,7 @@ describe('pie_visualization', () => {
     describe('converting to legendStats', () => {
       it('loads a chart with `legendStats` property', () => {
         const persistedState = getExampleState();
-        persistedState.layers[0].legendStats = ['value' as PartitionLegendValue.Value];
+        persistedState.layers[0].legendStats = [PartitionLegendValue.Value];
 
         const runtimeState = pieVisualization.initialize(() => 'first', persistedState);
 
