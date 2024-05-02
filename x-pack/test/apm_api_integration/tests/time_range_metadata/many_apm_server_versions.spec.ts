@@ -26,7 +26,7 @@ import { ApmApiClient } from '../../common/config';
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtrace = getService('synthtraceEsClient');
+  const synthtrace = getService('apmSynthtraceEsClient');
   const es = getService('es');
 
   const baseTime = new Date('2023-10-01T00:00:00.000Z').getTime();

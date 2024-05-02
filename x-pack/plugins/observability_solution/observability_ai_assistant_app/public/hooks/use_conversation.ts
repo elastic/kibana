@@ -121,6 +121,7 @@ export function useConversation({
     service,
     connectorId,
     onConversationUpdate: (event) => {
+      conversation.refresh();
       setDisplayedConversationId(event.conversation.id);
       onConversationUpdate?.({ conversation: event.conversation });
     },
