@@ -9,7 +9,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
-import { CoreThemeProvider } from '@kbn/core-theme-browser-internal';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import type { InternalHttpSetup } from '@kbn/core-http-browser-internal';
 import type { NotificationsSetup } from '@kbn/core-notifications-browser';
 import type { AppMountParameters } from '@kbn/core-application-browser';
@@ -26,9 +26,9 @@ export const renderApp = (
 ) => {
   ReactDOM.render(
     <I18nProvider>
-      <CoreThemeProvider theme$={theme$}>
+      <KibanaThemeProvider theme={{ theme$ }}>
         <StatusApp http={http} notifications={notifications} />
-      </CoreThemeProvider>
+      </KibanaThemeProvider>
     </I18nProvider>,
     element
   );

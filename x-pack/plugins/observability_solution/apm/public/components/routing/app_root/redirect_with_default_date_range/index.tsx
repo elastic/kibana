@@ -18,11 +18,7 @@ import { isRouteWithTimeRange } from '../../../shared/is_route_with_time_range';
 // This should be considered a temporary workaround until we have a
 // more comprehensive solution for redirects that require context.
 
-export function RedirectWithDefaultDateRange({
-  children,
-}: {
-  children: ReactElement;
-}) {
+export function RedirectWithDefaultDateRange({ children }: { children: ReactElement }) {
   const { isDateRangeSet, redirect } = useDateRangeRedirect();
 
   const apmRouter = useApmRouter();

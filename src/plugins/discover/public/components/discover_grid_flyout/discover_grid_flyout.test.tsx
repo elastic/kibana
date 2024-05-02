@@ -49,6 +49,7 @@ jest.mock('@elastic/eui', () => {
 
       return original.useIsWithinBreakpoints(breakpoints);
     }),
+    useResizeObserver: jest.fn(() => ({ width: 1000, height: 1000 })),
   };
 });
 
@@ -258,7 +259,7 @@ describe('Discover flyout', function () {
     const singleDocumentView = findTestSubject(component, 'docTableRowAction');
     expect(singleDocumentView.length).toBeFalsy();
     const flyoutTitle = findTestSubject(component, 'docTableRowDetailsTitle');
-    expect(flyoutTitle.text()).toBe('Row');
+    expect(flyoutTitle.text()).toBe('Result');
   });
 
   describe('with applied customizations', () => {

@@ -6,49 +6,109 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { OpenAILogo } from '@kbn/stack-connectors-plugin/public/common';
-import { ComponentType } from 'react';
+import { BedrockLogo, OpenAILogo } from '@kbn/stack-connectors-plugin/public/common';
+import { ComponentType, useMemo } from 'react';
 import { LLMs } from '../../common/types';
-import { LLMModel, SummarizationModelName } from '../types';
+import { LLMModel } from '../types';
 import { useLoadConnectors } from './use_load_connectors';
 
-const llmModels: Array<{
-  llm: LLMs;
-  icon: ComponentType;
-  models: Array<{ label: string; value?: string }>;
-}> = [
+const mapLlmToModels: Record<
+  LLMs,
   {
-    llm: LLMs.openai_azure,
+    icon: ComponentType;
+    getModels: (
+      connectorName: string,
+      includeName: boolean
+    ) => Array<{ label: string; value?: string; promptTokenLimit?: number }>;
+  }
+> = {
+  [LLMs.openai]: {
     icon: OpenAILogo,
-    models: [
+    getModels: (connectorName, includeName) =>
+      [
+        {
+          model: 'gpt-3.5-turbo',
+          limit: 16385,
+        },
+        { model: 'gpt-4-turbo', limit: 128000 },
+      ].map((model) => ({
+        label: `${model.model} ${includeName ? `(${connectorName})` : ''}`,
+        value: model.model,
+        promptTokenLimit: model.limit,
+      })),
+  },
+  [LLMs.openai_azure]: {
+    icon: OpenAILogo,
+    getModels: (connectorName, includeName) => [
       {
         label: i18n.translate('xpack.searchPlayground.openAIAzureModel', {
-          defaultMessage: 'Azure OpenAI',
+          defaultMessage: 'Azure OpenAI {name}',
+          values: { name: includeName ? `(${connectorName})` : '' },
         }),
       },
     ],
   },
-  {
-    llm: LLMs.openai,
-    icon: OpenAILogo,
-    models: Object.values(SummarizationModelName).map((model) => ({ label: model, value: model })),
+  [LLMs.bedrock]: {
+    icon: BedrockLogo,
+    getModels: () => [
+      {
+        label: 'Claude 3 Haiku',
+        value: 'anthropic.claude-3-haiku-20240307-v1:0',
+        promptTokenLimit: 200000,
+      },
+      {
+        label: 'Claude 3 Sonnet',
+        value: 'anthropic.claude-3-haiku-20240307-v1:0',
+        promptTokenLimit: 200000,
+      },
+    ],
   },
-];
+};
 
 export const useLLMsModels = (): LLMModel[] => {
   const { data: connectors } = useLoadConnectors();
 
-  return llmModels.reduce<LLMModel[]>(
-    (result, { llm, icon, models }) => [
-      ...result,
-      ...models.map(({ label, value }) => ({
-        name: label,
-        value,
-        icon,
-        disabled: !connectors?.[llm],
-        connectorId: connectors?.[llm]?.id,
-      })),
-    ],
-    []
+  const mapConnectorTypeToCount = useMemo(
+    () =>
+      connectors?.reduce<Partial<Record<LLMs, number>>>(
+        (result, connector) => ({
+          ...result,
+          [connector.type]: (result[connector.type] || 0) + 1,
+        }),
+        {}
+      ),
+    [connectors]
+  );
+
+  return useMemo(
+    () =>
+      connectors?.reduce<LLMModel[]>((result, connector) => {
+        const llmParams = mapLlmToModels[connector.type];
+
+        if (!llmParams) {
+          return result;
+        }
+
+        const showConnectorName = Number(mapConnectorTypeToCount?.[connector.type]) > 1;
+
+        return [
+          ...result,
+          ...llmParams
+            .getModels(connector.name, false)
+            .map(({ label, value, promptTokenLimit }) => ({
+              id: connector?.id + label,
+              name: label,
+              value,
+              connectorType: connector.type,
+              connectorName: connector.name,
+              showConnectorName,
+              icon: llmParams.icon,
+              disabled: !connector,
+              connectorId: connector.id,
+              promptTokenLimit,
+            })),
+        ];
+      }, []) || [],
+    [connectors, mapConnectorTypeToCount]
   );
 };

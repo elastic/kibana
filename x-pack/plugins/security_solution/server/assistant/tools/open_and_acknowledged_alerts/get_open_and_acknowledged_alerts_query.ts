@@ -5,21 +5,25 @@
  * 2.0.
  */
 
+import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+
 export const getOpenAndAcknowledgedAlertsQuery = ({
   alertsIndexPattern,
-  allow,
+  anonymizationFields,
   size,
 }: {
   alertsIndexPattern: string;
-  allow: string[];
+  anonymizationFields: AnonymizationFieldResponse[];
   size: number;
 }) => ({
   allow_no_indices: true,
   body: {
-    fields: allow.map((field) => ({
-      field,
-      include_unmapped: true,
-    })),
+    fields: anonymizationFields
+      .filter((fieldItem) => fieldItem.allowed)
+      .map((fieldItem) => ({
+        field: fieldItem.field,
+        include_unmapped: true,
+      })),
     query: {
       bool: {
         filter: [

@@ -778,10 +778,6 @@ const expectAssetsInstalled = ({
       install_started_at: res.attributes.install_started_at,
       install_source: 'registry',
       latest_install_failed_attempts: [],
-      latest_executed_state: {
-        name: 'update_so',
-        started_at: res.attributes.latest_executed_state.started_at,
-      },
       install_format_schema_version: FLEET_INSTALL_FORMAT_VERSION,
       verification_status: 'unknown',
       verification_key_id: null,

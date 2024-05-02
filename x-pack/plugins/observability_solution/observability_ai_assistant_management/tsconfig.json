@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["public/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/home-plugin",
@@ -17,11 +17,10 @@
     "@kbn/serverless",
     "@kbn/translations-plugin",
     "@kbn/enterprise-search-plugin",
-    "@kbn/management-settings-types",
-    "@kbn/core-ui-settings-browser",
-    "@kbn/shared-ux-utility",
     "@kbn/management-settings-components-field-row",
-    "@kbn/observability-shared-plugin"
+    "@kbn/observability-shared-plugin",
+    "@kbn/config-schema",
+    "@kbn/core-ui-settings-common"
   ],
   "exclude": ["target/**/*"]
 }

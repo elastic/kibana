@@ -72,7 +72,7 @@ export const createToggleColumnCellActionFactory = createCellActionFactory(
       if (alertTableConfigurationId) {
         services.triggersActionsUi.alertsTableConfigurationRegistry
           .getActions(alertTableConfigurationId)
-          .toggleColumn(field.name);
+          ?.toggleColumn(field.name);
         return;
       }
 

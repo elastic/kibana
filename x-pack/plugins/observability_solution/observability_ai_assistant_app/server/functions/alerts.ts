@@ -47,7 +47,6 @@ export function registerAlertsFunction({
   functions.registerFunction(
     {
       name: 'alerts',
-      contexts: ['core'],
       description:
         'Get alerts for Observability. Display the response in tabular format if appropriate.',
       descriptionForUser: 'Get alerts for Observability',
@@ -71,7 +70,7 @@ export function registerAlertsFunction({
             type: 'string',
             description: 'The end of the time range, in Elasticsearch date math, like `now-24h`.',
           },
-          filter: {
+          kqlFilter: {
             type: 'string',
             description:
               'a KQL query to filter the data by. If no filter should be applied, leave it empty.',

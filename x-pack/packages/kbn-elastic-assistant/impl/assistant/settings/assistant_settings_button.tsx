@@ -17,10 +17,11 @@ import { useAssistantContext } from '../../assistant_context';
 interface Props {
   defaultConnector?: AIConnector;
   isSettingsModalVisible: boolean;
-  selectedConversation: Conversation;
+  selectedConversationId?: string;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
   isDisabled?: boolean;
+  isFlyoutMode: boolean;
   conversations: Record<string, Conversation>;
   refetchConversationsState: () => Promise<void>;
 }
@@ -34,7 +35,8 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
     isDisabled = false,
     isSettingsModalVisible,
     setIsSettingsModalVisible,
-    selectedConversation,
+    selectedConversationId,
+    isFlyoutMode,
     onConversationSelected,
     conversations,
     refetchConversationsState,
@@ -79,16 +81,18 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
             isDisabled={isDisabled}
             iconType="gear"
             size="xs"
+            {...(isFlyoutMode ? { color: 'text' } : {})}
           />
         </EuiToolTip>
 
         {isSettingsModalVisible && (
           <AssistantSettings
             defaultConnector={defaultConnector}
-            selectedConversation={selectedConversation}
+            selectedConversationId={selectedConversationId}
             onConversationSelected={onConversationSelected}
             onClose={handleCloseModal}
             onSave={handleSave}
+            isFlyoutMode={isFlyoutMode}
             conversations={conversations}
           />
         )}

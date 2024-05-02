@@ -60,4 +60,7 @@ export const useDiscoverCustomization$ = <TCustomizationId extends DiscoverCusto
 
 export const useDiscoverCustomization = <TCustomizationId extends DiscoverCustomizationId>(
   id: TCustomizationId
-) => useObservable(useDiscoverCustomization$(id));
+) => {
+  const customizationService = useContext(customizationContext);
+  return useObservable(customizationService.get$(id), customizationService.get(id));
+};

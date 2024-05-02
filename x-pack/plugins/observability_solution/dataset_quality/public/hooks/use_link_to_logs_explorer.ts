@@ -14,24 +14,27 @@ import { getRouterLinkProps } from '@kbn/router-utils';
 import { useSelector } from '@xstate/react';
 import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
-import { FlyoutDataset } from '../state_machines/dataset_quality_controller';
+import { FlyoutDataset, TimeRangeConfig } from '../state_machines/dataset_quality_controller';
 import { useKibanaContextForPlugin } from '../utils';
 
 export const useLinkToLogsExplorer = ({
   dataStreamStat,
   query,
+  timeRangeConfig,
+  breakdownField,
 }: {
   dataStreamStat: DataStreamStat | FlyoutDataset;
   query?: Query | AggregateQuery;
+  timeRangeConfig?: TimeRangeConfig;
+  breakdownField?: string;
 }) => {
   const {
     services: { share },
   } = useKibanaContextForPlugin();
 
   const { service } = useDatasetQualityContext();
-  const {
-    timeRange: { from, to },
-  } = useSelector(service, (state) => state.context.filters);
+  const { timeRange } = useSelector(service, (state) => state.context.filters);
+  const { from, to } = timeRangeConfig || timeRange;
 
   const params: SingleDatasetLocatorParams = {
     dataset: dataStreamStat.name,
@@ -47,6 +50,7 @@ export const useLinkToLogsExplorer = ({
         values: [dataStreamStat.namespace],
       },
     },
+    breakdownField,
   };
 
   const singleDatasetLocator =
@@ -63,5 +67,5 @@ export const useLinkToLogsExplorer = ({
     onClick: navigateToLogsExplorer,
   });
 
-  return logsExplorerLinkProps;
+  return { ...logsExplorerLinkProps, navigate: navigateToLogsExplorer };
 };

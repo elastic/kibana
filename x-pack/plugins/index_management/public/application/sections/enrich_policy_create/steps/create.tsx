@@ -21,7 +21,7 @@ import {
   EuiCodeBlock,
 } from '@elastic/eui';
 
-import type { SerializedEnrichPolicy } from '../../../../../common';
+import type { SerializedEnrichPolicy } from '@kbn/index-management';
 import { useCreatePolicyContext } from '../create_policy_context';
 import { serializeAsESPolicy, getESPolicyCreationApiCall } from '../../../../../common/lib';
 

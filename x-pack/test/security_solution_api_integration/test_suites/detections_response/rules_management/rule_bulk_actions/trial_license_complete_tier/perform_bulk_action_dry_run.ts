@@ -24,7 +24,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');
   const es = getService('es');
 
-  describe('@ess @serverless @skipInQA perform_bulk_action dry_run', () => {
+  describe('@ess @serverless @skipInServerlessMKI perform_bulk_action dry_run', () => {
     beforeEach(async () => {
       await createAlertsIndex(supertest, log);
     });

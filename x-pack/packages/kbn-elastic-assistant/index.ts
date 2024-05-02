@@ -74,6 +74,17 @@ export { analyzeMarkdown } from './impl/assistant/use_conversation/helpers';
 /** Default Elastic AI Assistant logo, can be removed once included in EUI **/
 export { AssistantAvatar } from './impl/assistant/assistant_avatar/assistant_avatar';
 
+export { ConnectorSelectorInline } from './impl/connectorland/connector_selector_inline/connector_selector_inline';
+
+export {
+  ATTACK_DISCOVERY_STORAGE_KEY,
+  DEFAULT_ASSISTANT_NAMESPACE,
+  DEFAULT_LATEST_ALERTS,
+  KNOWLEDGE_BASE_LOCAL_STORAGE_KEY,
+} from './impl/assistant_context/constants';
+
+export { useLoadConnectors } from './impl/connectorland/use_load_connectors';
+
 export {
   ELASTIC_AI_ASSISTANT_TITLE,
   WELCOME_CONVERSATION_TITLE,
@@ -142,7 +153,10 @@ export type { GetKnowledgeBaseStatusResponse } from './impl/assistant/api';
 export type { PostKnowledgeBaseResponse } from './impl/assistant/api';
 
 export { useFetchCurrentUserConversations } from './impl/assistant/api/conversations/use_fetch_current_user_conversations';
-export * from './impl/assistant/api/conversations/use_bulk_actions_conversations';
+export * from './impl/assistant/api/conversations/bulk_update_actions_conversations';
 export { getConversationById } from './impl/assistant/api/conversations/conversations';
 
 export { mergeBaseWithPersistedConversations } from './impl/assistant/helpers';
+
+export { UpgradeButtons } from './impl/upgrade/upgrade_buttons';
+export { getUserConversations } from './impl/assistant/api';

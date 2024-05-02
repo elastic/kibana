@@ -15,7 +15,8 @@ export {
   getIndexForESQLQuery,
   getInitialESQLQuery,
   getESQLWithSafeLimit,
+  appendToESQLQuery,
   TextBasedLanguages,
 } from './src';
 
-export { ESQL_LATEST_VERSION } from './constants';
+export { ESQL_LATEST_VERSION, ENABLE_ESQL } from './constants';

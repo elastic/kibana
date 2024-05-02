@@ -15,7 +15,7 @@ import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { MAX_DESCRIPTION_LENGTH } from '../../../common/constants';
 import { FormTestComponent } from '../../common/test_utils';
-import type { FormSchema } from '@kbn/index-management-plugin/public/shared_imports';
+import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 describe('Description', () => {
   let appMockRender: AppMockRenderer;

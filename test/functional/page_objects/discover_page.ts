@@ -27,7 +27,6 @@ export class DiscoverPageObject extends FtrService {
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
   private readonly fieldEditor = this.ctx.getService('fieldEditor');
   private readonly queryBar = this.ctx.getService('queryBar');
-  private readonly comboBox = this.ctx.getService('comboBox');
   private readonly savedObjectsFinder = this.ctx.getService('savedObjectsFinder');
 
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
@@ -239,14 +238,33 @@ export class DiscoverPageObject extends FtrService {
     await this.chooseBreakdownField('No breakdown', '__EMPTY_SELECTOR_OPTION__');
   }
 
-  public async chooseLensChart(chart: string) {
-    await this.comboBox.set('unifiedHistogramSuggestionSelector', chart);
+  public async chooseLensSuggestion(suggestionType: string) {
+    await this.testSubjects.click('discoverQueryTotalHits'); // cancel any tooltips which might hide the edit button
+    await this.testSubjects.click('unifiedHistogramEditFlyoutVisualization');
+    await this.retry.waitFor('flyout', async () => {
+      return await this.testSubjects.exists('lensSuggestionsPanelToggleButton');
+    });
+    await this.testSubjects.click('lensSuggestionsPanelToggleButton');
+
+    const suggestionTestSubj = `lnsSuggestion-${suggestionType}`;
+    await this.retry.waitFor('suggestion option', async () => {
+      return await this.testSubjects.exists(suggestionTestSubj);
+    });
+    await this.testSubjects.click(suggestionTestSubj);
+    await this.retry.waitFor('suggestion option to get selected', async () => {
+      return (
+        (await (
+          await this.testSubjects.find(`${suggestionTestSubj} > lnsSuggestion`)
+        ).getAttribute('aria-current')) === 'true'
+      );
+    });
+
+    await this.testSubjects.scrollIntoView('applyFlyoutButton');
+    await this.testSubjects.click('applyFlyoutButton');
   }
 
-  public async getCurrentLensChart() {
-    return (
-      await this.comboBox.getComboBoxSelectedOptions('unifiedHistogramSuggestionSelector')
-    )?.[0];
+  public async getVisContextSuggestionType() {
+    return await this.testSubjects.getAttribute('unifiedHistogramChart', 'data-suggestion-type');
   }
 
   public async getHistogramLegendList() {
@@ -356,7 +374,7 @@ export class DiscoverPageObject extends FtrService {
           return await cell.getVisibleText();
         } else {
           const textContent = await cell.getAttribute('textContent');
-          return textContent.trim();
+          return textContent?.trim();
         }
       })
     );

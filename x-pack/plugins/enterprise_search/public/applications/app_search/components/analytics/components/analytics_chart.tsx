@@ -39,7 +39,7 @@ export const AnalyticsChart: React.FC<Props> = ({ height = 300, lines }) => {
   return (
     <Chart size={{ height }}>
       <Tooltip headerFormatter={(tooltip) => moment(tooltip.value).format(TOOLTIP_DATE_FORMAT)} />
-      <Settings baseTheme={charts.theme.useChartsBaseTheme()} locale={i18n.getLocale()} />
+      <Settings baseTheme={charts?.theme.useChartsBaseTheme()} locale={i18n.getLocale()} />
       {lines.map(({ id, data, isDashed }) => (
         <LineSeries
           key={id}

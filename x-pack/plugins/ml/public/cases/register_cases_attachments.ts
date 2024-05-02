@@ -16,6 +16,6 @@ export function registerCasesAttachments(
   coreStart: CoreStart,
   pluginStart: MlStartDependencies
 ) {
-  registerAnomalySwimLaneCasesAttachment(cases, coreStart, pluginStart);
+  registerAnomalySwimLaneCasesAttachment(cases, pluginStart);
   registerAnomalyChartsCasesAttachment(cases, coreStart, pluginStart);
 }

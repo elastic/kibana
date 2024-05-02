@@ -4,11 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  EndpointOf,
-  ReturnOf,
-  ServerRouteRepository,
-} from '@kbn/server-route-repository';
+import type { EndpointOf, ReturnOf, ServerRouteRepository } from '@kbn/server-route-repository';
 import { PickByValue } from 'utility-types';
 import { agentExplorerRouteRepository } from '../agent_explorer/route';
 import { agentKeysRouteRepository } from '../agent_keys/route';
@@ -98,9 +94,7 @@ const getGlobalApmServerRouteRepository = (): ServerRouteRepository => {
   return getTypedGlobalApmServerRouteRepository();
 };
 
-export type APMServerRouteRepository = ReturnType<
-  typeof getTypedGlobalApmServerRouteRepository
->;
+export type APMServerRouteRepository = ReturnType<typeof getTypedGlobalApmServerRouteRepository>;
 
 // Ensure no APIs return arrays (or, by proxy, the any type),
 // to guarantee compatibility with _inspect.

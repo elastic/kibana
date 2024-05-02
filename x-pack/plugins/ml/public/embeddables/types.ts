@@ -8,7 +8,12 @@
 import type { CoreStart } from '@kbn/core/public';
 import type { RefreshInterval } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { EmbeddableInput, EmbeddableOutput, IEmbeddable } from '@kbn/embeddable-plugin/public';
+import type {
+  DefaultEmbeddableApi,
+  EmbeddableInput,
+  EmbeddableOutput,
+  IEmbeddable,
+} from '@kbn/embeddable-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { MlEntityField } from '@kbn/ml-anomaly-utils';
 import type {
@@ -16,9 +21,10 @@ import type {
   HasParentApi,
   HasType,
   PublishesUnifiedSearch,
-  PublishesViewMode,
-  PublishesWritablePanelTitle,
   PublishingSubject,
+  PublishesTimeRange,
+  PublishesWritablePanelTitle,
+  SerializedTitles,
 } from '@kbn/presentation-publishing';
 import type { JobId } from '../../common/types/anomaly_detection_jobs';
 import type { MlDependencies } from '../application/app';
@@ -33,41 +39,47 @@ import type { MlJobService } from '../application/services/job_service';
 import type { MlApiServices } from '../application/services/ml_api_service';
 import type { MlResultsService } from '../application/services/results_service';
 import type { MlTimeSeriesSearchService } from '../application/timeseriesexplorer/timeseriesexplorer_utils/time_series_search_service';
+import type { TimeSeriesExplorerService } from '../application/util/time_series_explorer_service';
+import type { ToastNotificationService } from '../application/services/toast_notification_service';
 import type {
   AnomalyExplorerChartsEmbeddableType,
-  AnomalySingleMetricViewerEmbeddableType,
   AnomalySwimLaneEmbeddableType,
   MlEmbeddableTypes,
 } from './constants';
 
-export type MlEmbeddableBaseApi = Partial<
-  HasParentApi<PublishesUnifiedSearch> & PublishesViewMode & PublishesUnifiedSearch
->;
+export type {
+  AnomalySwimLaneEmbeddableState,
+  AnomalySwimLaneEmbeddableApi,
+} from './anomaly_swimlane/types';
+
+/**
+ * Common API for all ML embeddables
+ */
+export interface MlEmbeddableBaseApi<StateType extends object = object>
+  extends DefaultEmbeddableApi<StateType>,
+    PublishesTimeRange {}
 
 export type MlEntity = Record<string, MlEntityField['fieldValue']>;
 
 /** Manual input by the user */
 export interface AnomalySwimlaneEmbeddableUserInput {
   jobIds: JobId[];
-  panelTitle: string;
+  panelTitle?: string;
   swimlaneType: SwimlaneType;
   viewBy?: string;
 }
 
-export interface AnomalySwimlaneEmbeddableCustomInput {
-  jobIds: JobId[];
-  swimlaneType: SwimlaneType;
-  viewBy?: string;
+export interface AnomalySwimlaneEmbeddableCustomInput
+  extends Omit<AnomalySwimlaneEmbeddableUserInput, 'panelTitle'> {
+  id?: string;
   perPage?: number;
 
   // Embeddable inputs which are not included in the default interface
-  filters: Filter[];
-  query: Query;
-  refreshConfig: RefreshInterval;
-  timeRange: TimeRange;
+  filters?: Filter[];
+  query?: Query;
+  refreshConfig?: RefreshInterval;
+  timeRange: TimeRange | undefined;
 }
-
-export type AnomalySwimlaneEmbeddableInput = EmbeddableInput & AnomalySwimlaneEmbeddableCustomInput;
 
 export interface AnomalySwimlaneServices {
   anomalyDetectorService: AnomalyDetectorService;
@@ -79,16 +91,6 @@ export type AnomalySwimlaneEmbeddableServices = [
   MlDependencies,
   AnomalySwimlaneServices
 ];
-
-export interface AnomalySwimlaneEmbeddableCustomOutput {
-  perPage?: number;
-  fromPage?: number;
-  interval?: number;
-  indexPatterns: DataView[];
-}
-
-export type AnomalySwimlaneEmbeddableOutput = EmbeddableOutput &
-  AnomalySwimlaneEmbeddableCustomOutput;
 
 export type EditSwimLaneActionApi = HasType<AnomalySwimLaneEmbeddableType> &
   Partial<HasParentApi<PublishesUnifiedSearch>>;
@@ -121,37 +123,58 @@ export interface AnomalyChartsEmbeddableCustomInput {
 
 export type AnomalyChartsEmbeddableInput = EmbeddableInput & AnomalyChartsEmbeddableCustomInput;
 
-export interface SingleMetricViewerEmbeddableCustomInput {
+/** Manual input by the user */
+export interface SingleMetricViewerEmbeddableUserInput {
   jobIds: JobId[];
-  title: string;
   functionDescription?: string;
-  panelTitle: string;
   selectedDetectorIndex: number;
   selectedEntities?: MlEntity;
-  // Embeddable inputs which are not included in the default interface
-  filters: Filter[];
-  query: Query;
-  refreshConfig: RefreshInterval;
-  timeRange: TimeRange;
+  panelTitle?: string;
+}
+
+export interface SingleMetricViewerEmbeddableCustomInput
+  extends Omit<SingleMetricViewerEmbeddableUserInput, 'panelTitle'> {
+  id?: string;
+  filters?: Filter[];
+  query?: Query;
+  refreshConfig?: RefreshInterval;
+  timeRange: TimeRange | undefined;
 }
 
 export type SingleMetricViewerEmbeddableInput = EmbeddableInput &
   SingleMetricViewerEmbeddableCustomInput;
 
+/**
+ * Persisted state for the Single Metric Embeddable.
+ */
+export interface SingleMetricViewerEmbeddableState
+  extends SerializedTitles,
+    SingleMetricViewerEmbeddableCustomInput {}
+
+export type SingleMetricViewerEmbeddableApi =
+  MlEmbeddableBaseApi<SingleMetricViewerEmbeddableState> &
+    PublishesWritablePanelTitle &
+    SingleMetricViewerComponentApi;
+
+/**
+ * The subset of the single metric viewer Embeddable state that is actually used by the single metric viewer embeddable.
+ *
+ * TODO: Ideally this should be the same as the SingleMetricViewerEmbeddableState, but that type is used in many
+ * places, so we cannot change it at the moment.
+ */
+export type SingleMetricViewerRuntimeState = Omit<
+  SingleMetricViewerEmbeddableState,
+  'id' | 'filters' | 'query' | 'refreshConfig'
+>;
+
 export interface SingleMetricViewerComponentApi {
-  functionDescription?: PublishingSubject<string>;
+  functionDescription: PublishingSubject<string | undefined>;
   jobIds: PublishingSubject<JobId[]>;
   selectedDetectorIndex: PublishingSubject<number>;
-  selectedEntities?: PublishingSubject<MlEntity>;
+  selectedEntities: PublishingSubject<MlEntity | undefined>;
 
-  updateUserInput: (input: Partial<SingleMetricViewerEmbeddableInput>) => void;
+  updateUserInput: (input: SingleMetricViewerEmbeddableUserInput) => void;
 }
-
-export interface SingleMetricViewerEmbeddableApi
-  extends HasType<AnomalySingleMetricViewerEmbeddableType>,
-    PublishesWritablePanelTitle,
-    MlEmbeddableBaseApi,
-    SingleMetricViewerComponentApi {}
 
 export interface AnomalyChartsServices {
   anomalyDetectorService: AnomalyDetectorService;
@@ -170,6 +193,8 @@ export interface SingleMetricViewerServices {
   mlJobService: MlJobService;
   mlResultsService: MlResultsService;
   mlTimeSeriesSearchService?: MlTimeSeriesSearchService;
+  mlTimeSeriesExplorerService?: TimeSeriesExplorerService;
+  toastNotificationService?: ToastNotificationService;
 }
 
 export type AnomalyChartsEmbeddableServices = [CoreStart, MlDependencies, AnomalyChartsServices];
@@ -196,8 +221,6 @@ export interface AnomalyChartsFieldSelectionContext extends EditAnomalyChartsPan
 }
 
 export type MappedEmbeddableTypeOf<TEmbeddableType extends MlEmbeddableTypes> =
-  TEmbeddableType extends AnomalySwimLaneEmbeddableType
-    ? AnomalySwimlaneEmbeddableInput
-    : TEmbeddableType extends AnomalyExplorerChartsEmbeddableType
+  TEmbeddableType extends AnomalyExplorerChartsEmbeddableType
     ? AnomalyChartsEmbeddableInput
     : unknown;

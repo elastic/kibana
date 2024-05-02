@@ -29,6 +29,7 @@ export const AzureCredentialsFormAgentless = ({
   input,
   newPolicy,
   updatePolicy,
+  packageInfo,
 }: AzureCredentialsFormProps) => {
   const integrationLink = cspIntegrationDocsNavigation.cspm.getStartedPath;
   const options = getAzureCredentialsFormOptions();
@@ -40,6 +41,7 @@ export const AzureCredentialsFormAgentless = ({
       <AzureSetupInfoContent integrationLink={integrationLink} />
       <EuiSpacer size="l" />
       <AzureInputVarFields
+        packageInfo={packageInfo}
         fields={fields}
         onChange={(key, value) => {
           updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }));

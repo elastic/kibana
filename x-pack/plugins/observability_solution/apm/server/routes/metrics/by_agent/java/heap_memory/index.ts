@@ -32,12 +32,9 @@ const series = {
     color: theme.euiColorVis0,
   },
   heapMemoryCommitted: {
-    title: i18n.translate(
-      'xpack.apm.agentMetrics.java.heapMemorySeriesCommitted',
-      {
-        defaultMessage: 'Avg. committed',
-      }
-    ),
+    title: i18n.translate('xpack.apm.agentMetrics.java.heapMemorySeriesCommitted', {
+      defaultMessage: 'Avg. committed',
+    }),
     color: theme.euiColorVis1,
   },
   heapMemoryMax: {

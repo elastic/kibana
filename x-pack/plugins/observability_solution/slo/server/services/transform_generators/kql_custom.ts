@@ -7,19 +7,19 @@
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import { kqlCustomIndicatorSchema, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
-
-import { InvalidTransformError } from '../../errors';
-import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
 import { getElasticsearchQueryOrThrow, parseIndex, TransformGenerator } from '.';
 import {
+  getSLOTransformId,
   SLO_DESTINATION_INDEX_NAME,
   SLO_INGEST_PIPELINE_NAME,
-  getSLOTransformId,
 } from '../../../common/constants';
-import { KQLCustomIndicator, SLO } from '../../domain/models';
+import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
+import { KQLCustomIndicator, SLODefinition } from '../../domain/models';
+import { InvalidTransformError } from '../../errors';
+import { getTimesliceTargetComparator } from './common';
 
 export class KQLCustomTransformGenerator extends TransformGenerator {
-  public getTransformParams(slo: SLO): TransformPutTransformRequest {
+  public getTransformParams(slo: SLODefinition): TransformPutTransformRequest {
     if (!kqlCustomIndicatorSchema.is(slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
@@ -36,11 +36,11 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
     );
   }
 
-  private buildTransformId(slo: SLO): string {
+  private buildTransformId(slo: SLODefinition): string {
     return getSLOTransformId(slo.id, slo.revision);
   }
 
-  private buildSource(slo: SLO, indicator: KQLCustomIndicator) {
+  private buildSource(slo: SLODefinition, indicator: KQLCustomIndicator) {
     return {
       index: parseIndex(indicator.params.index),
       runtime_mappings: this.buildCommonRuntimeMappings(slo),
@@ -68,7 +68,7 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
     };
   }
 
-  private buildAggregations(slo: SLO, indicator: KQLCustomIndicator) {
+  private buildAggregations(slo: SLODefinition, indicator: KQLCustomIndicator) {
     const numerator = getElasticsearchQueryOrThrow(indicator.params.good);
     const denominator = getElasticsearchQueryOrThrow(indicator.params.total);
 
@@ -86,7 +86,9 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
               goodEvents: 'slo.numerator>_count',
               totalEvents: 'slo.denominator>_count',
             },
-            script: `params.goodEvents / params.totalEvents >= ${slo.objective.timesliceTarget} ? 1 : 0`,
+            script: `params.goodEvents / params.totalEvents ${getTimesliceTargetComparator(
+              slo.objective.timesliceTarget!
+            )} ${slo.objective.timesliceTarget} ? 1 : 0`,
           },
         },
       }),

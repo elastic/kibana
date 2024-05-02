@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
@@ -44,27 +45,18 @@ export const mountManagementSection = async ({ core, mountParams }: MountParams)
     wrapWithTheme(
       <RedirectToHomeIfUnauthorized coreStart={coreStart}>
         <I18nProvider>
-          <AppContextProvider
-            value={{
-              ...startDeps,
-              application: coreStart.application,
-              http: coreStart.http,
-              notifications: coreStart.notifications,
-              uiSettings: coreStart.uiSettings,
-              settings: coreStart.settings,
-              docLinks: coreStart.docLinks,
-              setBreadcrumbs,
-            }}
-          >
-            <QueryClientProvider client={queryClient}>
-              <RouterProvider
-                history={history}
-                router={aIAssistantManagementObservabilityRouter as any}
-              >
-                <RouteRenderer />
-              </RouterProvider>
-            </QueryClientProvider>
-          </AppContextProvider>
+          <KibanaContextProvider services={{ ...coreStart, ...startDeps }}>
+            <AppContextProvider value={{ ...startDeps, ...coreStart, setBreadcrumbs }}>
+              <QueryClientProvider client={queryClient}>
+                <RouterProvider
+                  history={history}
+                  router={aIAssistantManagementObservabilityRouter as any}
+                >
+                  <RouteRenderer />
+                </RouterProvider>
+              </QueryClientProvider>
+            </AppContextProvider>
+          </KibanaContextProvider>
         </I18nProvider>
       </RedirectToHomeIfUnauthorized>,
       theme$

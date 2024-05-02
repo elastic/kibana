@@ -15,9 +15,7 @@ type SourceProjection = DeepPartial<any>;
 type DeepMerge<T, U> = U extends PlainObject
   ? T extends PlainObject
     ? Omit<T, keyof U> & {
-        [key in keyof U]: T extends { [k in key]: any }
-          ? DeepMerge<T[key], U[key]>
-          : U[key];
+        [key in keyof U]: T extends { [k in key]: any } ? DeepMerge<T[key], U[key]> : U[key];
       }
     : U
   : U;

@@ -4,18 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import {
-  kqlQuery,
-  rangeQuery,
-  termQuery,
-} from '@kbn/observability-plugin/server';
+import { BoolQuery } from '@kbn/es-query';
+import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ApmServiceTransactionDocumentType } from '../../../common/document_type';
-import {
-  SERVICE_NAME,
-  TRANSACTION_NAME,
-  TRANSACTION_TYPE,
-} from '../../../common/es_fields/apm';
+import { SERVICE_NAME, TRANSACTION_NAME, TRANSACTION_TYPE } from '../../../common/es_fields/apm';
 import { RollupInterval } from '../../../common/rollup';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
@@ -30,6 +22,7 @@ import {
 export async function getFailedTransactionRate({
   environment,
   kuery,
+  filters,
   serviceName,
   transactionTypes,
   transactionName,
@@ -43,6 +36,7 @@ export async function getFailedTransactionRate({
 }: {
   environment: string;
   kuery: string;
+  filters?: BoolQuery;
   serviceName: string;
   transactionTypes: string[];
   transactionName?: string;
@@ -70,7 +64,9 @@ export async function getFailedTransactionRate({
     ...rangeQuery(startWithOffset, endWithOffset),
     ...environmentQuery(environment),
     ...kqlQuery(kuery),
+    ...(filters?.filter || []),
   ];
+  const mustNot = filters?.must_not || [];
 
   const outcomes = getOutcomeAggregation(documentType);
 
@@ -81,7 +77,7 @@ export async function getFailedTransactionRate({
     body: {
       track_total_hits: false,
       size: 0,
-      query: { bool: { filter } },
+      query: { bool: { filter, must_not: mustNot } },
       aggs: {
         ...outcomes,
         timeseries: {
@@ -99,17 +95,12 @@ export async function getFailedTransactionRate({
     },
   };
 
-  const resp = await apmEventClient.search(
-    'get_transaction_group_error_rate',
-    params
-  );
+  const resp = await apmEventClient.search('get_transaction_group_error_rate', params);
   if (!resp.aggregations) {
     return { timeseries: [], average: null };
   }
 
-  const timeseries = getFailedTransactionRateTimeSeries(
-    resp.aggregations.timeseries.buckets
-  );
+  const timeseries = getFailedTransactionRateTimeSeries(resp.aggregations.timeseries.buckets);
   const average = calculateFailedTransactionRate(resp.aggregations);
 
   return { timeseries, average };

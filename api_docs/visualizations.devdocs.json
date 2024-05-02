@@ -6872,7 +6872,15 @@
             "section": "def-common.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string | undefined>; disabledActionIds: ",
+          "<string | undefined>; defaultPanelDescription: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<string | undefined> | undefined; disabledActionIds: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -11527,6 +11535,27 @@
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.LegendConfig.legendStats",
+            "type": "Array",
+            "tags": [],
+            "label": "legendStats",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.LegendStats",
+                "text": "LegendStats"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -12167,13 +12196,20 @@
           },
           {
             "parentPluginId": "visualizations",
-            "id": "def-common.PartitionLayerState.showValuesInLegend",
-            "type": "CompoundType",
+            "id": "def-common.PartitionLayerState.legendStats",
+            "type": "Array",
             "tags": [],
-            "label": "showValuesInLegend",
+            "label": "legendStats",
             "description": [],
             "signature": [
-              "boolean | undefined"
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.LegendStats",
+                "text": "LegendStats"
+              },
+              "[] | undefined"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -13032,7 +13068,7 @@
             "label": "rowHeight",
             "description": [],
             "signature": [
-              "\"custom\" | \"auto\" | \"single\" | undefined"
+              "RowHeightMode | undefined"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -13046,7 +13082,7 @@
             "label": "headerRowHeight",
             "description": [],
             "signature": [
-              "\"custom\" | \"auto\" | \"single\" | undefined"
+              "RowHeightMode | undefined"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -14136,20 +14172,6 @@
             "type": "CompoundType",
             "tags": [],
             "label": "hideEndzones",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-common.XYConfiguration.valuesInLegend",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "valuesInLegend",
             "description": [],
             "signature": [
               "boolean | undefined"
@@ -15792,6 +15814,18 @@
           "\"default\" | \"hide\" | \"show\""
         ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.LegendStats",
+        "type": "string",
+        "tags": [],
+        "label": "LegendStats",
+        "description": [],
+        "path": "src/plugins/visualizations/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

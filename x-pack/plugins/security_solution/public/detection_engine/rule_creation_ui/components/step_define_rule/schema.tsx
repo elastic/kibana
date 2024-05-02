@@ -17,6 +17,8 @@ import {
   customValidators,
 } from '../../../../common/components/threat_match/helpers';
 import {
+  isEqlRule,
+  isEqlSequenceQuery,
   isEsqlRule,
   isNewTermsRule,
   isThreatMatchRule,
@@ -39,6 +41,7 @@ import {
   THREAT_MATCH_INDEX_HELPER_TEXT,
   THREAT_MATCH_REQUIRED,
   THREAT_MATCH_EMPTIES,
+  EQL_SEQUENCE_SUPPRESSION_GROUPBY_VALIDATION_TEXT,
 } from './translations';
 import { getQueryRequiredMessage } from './utils';
 
@@ -134,6 +137,7 @@ export const schema: FormSchema<DefineStepRule> = {
     fieldsToValidateOnChange: ['eqlOptions', 'queryBar'],
   },
   queryBar: {
+    fieldsToValidateOnChange: ['queryBar', 'groupByFields'],
     validations: [
       {
         validator: (
@@ -241,18 +245,7 @@ export const schema: FormSchema<DefineStepRule> = {
     ],
   },
   relatedIntegrations: {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldRelatedIntegrationsLabel',
-      {
-        defaultMessage: 'Related integrations',
-      }
-    ),
-    helpText: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldRelatedIntegrationsHelpText',
-      {
-        defaultMessage: 'Integration related to this Rule.',
-      }
-    ),
+    type: FIELD_TYPES.JSON,
   },
   requiredFields: {
     label: i18n.translate(
@@ -647,22 +640,6 @@ export const schema: FormSchema<DefineStepRule> = {
   },
   groupByFields: {
     type: FIELD_TYPES.COMBO_BOX,
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByFieldsLabel',
-      {
-        defaultMessage: 'Suppress alerts by',
-      }
-    ),
-    labelAppend: (
-      <EuiText color="subdued" size="xs">
-        {i18n.translate(
-          'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByFieldsLabelAppend',
-          {
-            defaultMessage: 'Optional (Technical Preview)',
-          }
-        )}
-      </EuiText>
-    ),
     helpText: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldGroupByFieldHelpText',
       {
@@ -689,6 +666,25 @@ export const schema: FormSchema<DefineStepRule> = {
               }
             ),
           })(...args);
+        },
+      },
+      {
+        validator: (
+          ...args: Parameters<ValidationFunc>
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+          const [{ formData, value }] = args;
+          const groupByLength = (value as string[]).length;
+          const needsValidation = isEqlRule(formData.ruleType) && groupByLength > 0;
+          if (!needsValidation) {
+            return;
+          }
+
+          const query: string = formData.queryBar?.query?.query ?? '';
+          if (isEqlSequenceQuery(query)) {
+            return {
+              message: EQL_SEQUENCE_SUPPRESSION_GROUPBY_VALIDATION_TEXT,
+            };
+          }
         },
       },
     ],
