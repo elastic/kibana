@@ -16,7 +16,7 @@ import {
   AttackDiscoveryPostResponse,
   ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
 } from '@kbn/elastic-assistant-common';
-import { isEmpty } from 'lodash/fp';
+import { isEmpty, uniq } from 'lodash/fp';
 import moment from 'moment';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useLocalStorage, useSessionStorage } from 'react-use';
@@ -41,6 +41,7 @@ import {
 } from '../pages/session_storage';
 import { ERROR_GENERATING_ATTACK_DISCOVERIES } from '../pages/translations';
 import type { AttackDiscovery, GenerationInterval } from '../types';
+import { getGenAiConfig } from './helpers';
 
 const MAX_GENERATION_INTERVALS = 5;
 
@@ -230,7 +231,17 @@ export const useAttackDiscovery = ({
       setAttackDiscoveries(newAttackDiscoveries);
       setLastUpdated(newLastUpdated);
       setConnectorId?.(connectorId);
-      reportAttackDiscoveriesGenerated({ actionTypeId });
+      const connectorConfig = getGenAiConfig(selectedConnector);
+      reportAttackDiscoveriesGenerated({
+        actionTypeId,
+        durationMs,
+        alertsCount: uniq(
+          newAttackDiscoveries.flatMap((attackDiscovery) => attackDiscovery.alertIds)
+        ).length,
+        configuredAlertsCount: knowledgeBase.latestAlerts,
+        provider: connectorConfig?.apiProvider,
+        model: connectorConfig?.defaultModel,
+      });
     } catch (error) {
       toasts?.addDanger(error, {
         title: ERROR_GENERATING_ATTACK_DISCOVERIES,

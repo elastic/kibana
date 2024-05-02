@@ -30,6 +30,7 @@ export interface MappingsConfiguration {
     enabled?: boolean;
     includes?: string[];
     excludes?: string[];
+    mode?: string;
   };
   _meta?: string;
   _size?: { enabled: boolean };
