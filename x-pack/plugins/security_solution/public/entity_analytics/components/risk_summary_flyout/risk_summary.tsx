@@ -186,15 +186,17 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
               defaultMessage="View risk contributions"
             />
           ),
-          link: {
-            callback: () => openDetailsPanel(EntityDetailsLeftPanelTab.RISK_INPUTS),
-            tooltip: (
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.entityDetails.showAllRiskInputs"
-                defaultMessage="Show all risk inputs"
-              />
-            ),
-          },
+          link: riskScoreData.loading
+            ? undefined
+            : {
+                callback: () => openDetailsPanel(EntityDetailsLeftPanelTab.RISK_INPUTS),
+                tooltip: (
+                  <FormattedMessage
+                    id="xpack.securitySolution.flyout.entityDetails.showAllRiskInputs"
+                    defaultMessage="Show all risk inputs"
+                  />
+                ),
+              },
           iconType: 'arrowStart',
         }}
         expand={{

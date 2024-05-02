@@ -80,7 +80,6 @@ export const riskScoreEntityCalculationRoute = (
             return siemResponse.error({
               statusCode: 400,
               body: 'No Risk engine configuration found',
-              // bypassErrorFormat: true,
             });
           }
 
@@ -97,7 +96,6 @@ export const riskScoreEntityCalculationRoute = (
             return siemResponse.error({
               statusCode: 400,
               body: 'Risk engine is disabled',
-              // bypassErrorFormat: true,
             });
           }
 

@@ -129,7 +129,7 @@ export const UserPanel = ({ contextID, scopeId, userName, isDraggable }: UserPan
     !!managedUser.data?.[ManagedUserDatasetKey.OKTA] ||
     !!managedUser.data?.[ManagedUserDatasetKey.ENTRA];
 
-  if (observedUser.isLoading || managedUser.isLoading || !riskScoreState.data) {
+  if (observedUser.isLoading || managedUser.isLoading) {
     return <FlyoutLoading />;
   }
 

@@ -119,7 +119,7 @@ export const HostPanel = ({ contextID, scopeId, hostName, isDraggable }: HostPan
   const openDefaultPanel = useCallback(() => openTabPanel(), [openTabPanel]);
   const observedHost = useObservedHost(hostName);
 
-  if (observedHost.isLoading || !riskScoreState.data) {
+  if (observedHost.isLoading) {
     return <FlyoutLoading />;
   }
 
