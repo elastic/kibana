@@ -6043,6 +6043,40 @@ Object {
         "ruleNameOverride": Object {
           "type": "string",
         },
+        "ruleSource": Object {
+          "anyOf": Array [
+            Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "is_customized": Object {
+                  "type": "boolean",
+                },
+                "type": Object {
+                  "const": "external",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+                "is_customized",
+              ],
+              "type": "object",
+            },
+            Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "type": Object {
+                  "const": "internal",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+              ],
+              "type": "object",
+            },
+          ],
+        },
         "setup": Object {
           "type": "string",
         },
@@ -6507,6 +6541,40 @@ Object {
         },
         "ruleNameOverride": Object {
           "type": "string",
+        },
+        "ruleSource": Object {
+          "anyOf": Array [
+            Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "is_customized": Object {
+                  "type": "boolean",
+                },
+                "type": Object {
+                  "const": "external",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+                "is_customized",
+              ],
+              "type": "object",
+            },
+            Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "type": Object {
+                  "const": "internal",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+              ],
+              "type": "object",
+            },
+          ],
         },
         "setup": Object {
           "type": "string",
@@ -7036,6 +7104,40 @@ Object {
         "ruleNameOverride": Object {
           "type": "string",
         },
+        "ruleSource": Object {
+          "anyOf": Array [
+            Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "is_customized": Object {
+                  "type": "boolean",
+                },
+                "type": Object {
+                  "const": "external",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+                "is_customized",
+              ],
+              "type": "object",
+            },
+            Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "type": Object {
+                  "const": "internal",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+              ],
+              "type": "object",
+            },
+          ],
+        },
         "setup": Object {
           "type": "string",
         },
@@ -7435,6 +7537,40 @@ Object {
         },
         "ruleNameOverride": Object {
           "type": "string",
+        },
+        "ruleSource": Object {
+          "anyOf": Array [
+            Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "is_customized": Object {
+                  "type": "boolean",
+                },
+                "type": Object {
+                  "const": "external",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+                "is_customized",
+              ],
+              "type": "object",
+            },
+            Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "type": Object {
+                  "const": "internal",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+              ],
+              "type": "object",
+            },
+          ],
         },
         "setup": Object {
           "type": "string",
@@ -7941,6 +8077,40 @@ Object {
         },
         "ruleNameOverride": Object {
           "type": "string",
+        },
+        "ruleSource": Object {
+          "anyOf": Array [
+            Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "is_customized": Object {
+                  "type": "boolean",
+                },
+                "type": Object {
+                  "const": "external",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+                "is_customized",
+              ],
+              "type": "object",
+            },
+            Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "type": Object {
+                  "const": "internal",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+              ],
+              "type": "object",
+            },
+          ],
         },
         "setup": Object {
           "type": "string",
@@ -8620,6 +8790,40 @@ Object {
         "ruleNameOverride": Object {
           "type": "string",
         },
+        "ruleSource": Object {
+          "anyOf": Array [
+            Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "is_customized": Object {
+                  "type": "boolean",
+                },
+                "type": Object {
+                  "const": "external",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+                "is_customized",
+              ],
+              "type": "object",
+            },
+            Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "type": Object {
+                  "const": "internal",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+              ],
+              "type": "object",
+            },
+          ],
+        },
         "setup": Object {
           "type": "string",
         },
@@ -9297,6 +9501,40 @@ Object {
         },
         "ruleNameOverride": Object {
           "type": "string",
+        },
+        "ruleSource": Object {
+          "anyOf": Array [
+            Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "is_customized": Object {
+                  "type": "boolean",
+                },
+                "type": Object {
+                  "const": "external",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+                "is_customized",
+              ],
+              "type": "object",
+            },
+            Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "type": Object {
+                  "const": "internal",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+              ],
+              "type": "object",
+            },
+          ],
         },
         "setup": Object {
           "type": "string",

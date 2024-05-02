@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/dashboard-plugin/public';
+import { DASHBOARD_GRID_COLUMN_COUNT, PanelPlacementStrategy } from '@kbn/dashboard-plugin/public';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 import { IProvidesPanelPlacementSettings } from '@kbn/dashboard-plugin/public/dashboard_container/component/panel_placement/types';
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
@@ -76,7 +76,7 @@ export class LinksFactoryDefinition
     const isHorizontal = attributes.layout === 'horizontal';
     const width = isHorizontal ? DASHBOARD_GRID_COLUMN_COUNT : 8;
     const height = isHorizontal ? 4 : (attributes.links?.length ?? 1 * 3) + 4;
-    return { width, height, strategy: 'placeAtTop' };
+    return { width, height, strategy: PanelPlacementStrategy.placeAtTop };
   };
 
   public async isEditable() {
