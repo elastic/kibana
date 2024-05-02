@@ -103,7 +103,7 @@ describe('getAnomalySwimLaneEmbeddableFactory', () => {
         type={ANOMALY_SWIMLANE_EMBEDDABLE_TYPE}
         onApiAvailable={onApiAvailable}
         getParentApi={() => ({
-          getStateForChild: () => ({ rawState }),
+          getSerializedStateForChild: () => ({ rawState }),
           executionContext: {
             type: 'dashboard',
             id: 'dashboard-id',

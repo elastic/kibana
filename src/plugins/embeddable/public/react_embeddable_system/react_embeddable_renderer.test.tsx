@@ -59,7 +59,7 @@ describe('react embeddable renderer', () => {
       <ReactEmbeddableRenderer
         type={'test'}
         getParentApi={() => ({
-          getStateForChild: () => ({
+          getSerializedStateForChild: () => ({
             rawState: {
               bork: 'blorp?',
             },
@@ -80,7 +80,7 @@ describe('react embeddable renderer', () => {
       <ReactEmbeddableRenderer
         type={'test'}
         getParentApi={() => ({
-          getStateForChild: () => ({
+          getSerializedStateForChild: () => ({
             rawState: {
               bork: 'blorp?',
             },
@@ -105,7 +105,7 @@ describe('react embeddable renderer', () => {
         type={'test'}
         maybeId={'12345'}
         getParentApi={() => ({
-          getStateForChild: () => ({
+          getSerializedStateForChild: () => ({
             rawState: {
               bork: 'blorp?',
             },
@@ -131,7 +131,7 @@ describe('react embeddable renderer', () => {
         type={'test'}
         getParentApi={() => ({
           ...parentApi,
-          getStateForChild: () => ({
+          getSerializedStateForChild: () => ({
             rawState: {
               bork: 'blorp?',
             },
@@ -154,7 +154,7 @@ describe('react embeddable renderer', () => {
       <ReactEmbeddableRenderer
         type={'test'}
         getParentApi={() => ({
-          getStateForChild: () => ({
+          getSerializedStateForChild: () => ({
             rawState: { name: 'Kuni Garu', bork: 'Dara' },
           }),
         })}
@@ -175,7 +175,7 @@ describe('react embeddable renderer', () => {
         maybeId={'12345'}
         onApiAvailable={onApiAvailable}
         getParentApi={() => ({
-          getStateForChild: () => ({
+          getSerializedStateForChild: () => ({
             rawState: { name: 'Kuni Garu' },
           }),
         })}
@@ -200,7 +200,7 @@ describe('react embeddable renderer', () => {
         type={'test'}
         onApiAvailable={onApiAvailable}
         getParentApi={() => ({
-          getStateForChild: () => ({
+          getSerializedStateForChild: () => ({
             rawState: { name: 'Kuni Garu' },
           }),
         })}

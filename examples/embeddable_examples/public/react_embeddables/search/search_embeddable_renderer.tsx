@@ -31,7 +31,7 @@ export function SearchEmbeddableRenderer(props: Props) {
   const parentApi = useMemo(() => {
     return {
       timeRange$: new BehaviorSubject(props.timeRange),
-      getStateForChild: () => initialState,
+      getSerializedStateForChild: () => initialState,
     };
     // only run onMount
     // eslint-disable-next-line react-hooks/exhaustive-deps

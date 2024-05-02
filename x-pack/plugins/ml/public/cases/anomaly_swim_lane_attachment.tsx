@@ -87,7 +87,7 @@ export const initComponent = memoize((fieldFormats: FieldFormatsStart) => {
             maybeId={inputProps.id}
             type={CASE_ATTACHMENT_TYPE_ID_ANOMALY_SWIMLANE}
             getParentApi={() => ({
-              getStateForChild: () => ({
+              getSerializedStateForChild: () => ({
                 rawState: inputProps,
               }),
               executionContext: {

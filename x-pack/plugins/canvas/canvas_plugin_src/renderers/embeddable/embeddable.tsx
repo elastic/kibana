@@ -58,7 +58,7 @@ const renderReactEmbeddable = ({
       maybeId={uuid}
       getParentApi={(): CanvasContainerApi => ({
         ...container,
-        getStateForChild: () => ({
+        getSerializedStateForChild: () => ({
           rawState: input,
         }),
       })}

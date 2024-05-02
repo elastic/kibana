@@ -30,7 +30,7 @@ export const RenderExamples = () => {
   const parentApi = useMemo(() => {
     return {
       reload$: new Subject<void>(),
-      getStateForChild: () => ({
+      getSerializedStateForChild: () => ({
         rawState: {
           timeRange: undefined,
         },
