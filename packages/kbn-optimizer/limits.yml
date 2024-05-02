@@ -31,7 +31,7 @@ pageLoadAssetSize:
   datasetQuality: 50624
   dataViewEditor: 28082
   dataViewFieldEditor: 27000
-  dataViewManagement: 5176
+  dataViewManagement: 5300
   dataViews: 65000
   dataVisualizer: 27530
   devTools: 38637
@@ -51,7 +51,7 @@ pageLoadAssetSize:
   expressionLegacyMetricVis: 23121
   expressionMetric: 22238
   expressionMetricVis: 23121
-  expressionPartitionVis: 29000
+  expressionPartitionVis: 29700
   expressionRepeatImage: 22341
   expressionRevealImage: 25675
   expressions: 140958

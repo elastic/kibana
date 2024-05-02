@@ -44,7 +44,7 @@ export function createTelemetryFilterListArtifactTaskConfig() {
         const manifest = await artifactService.getArtifact(artifactName);
         if (manifest.notModified) {
           log.l('No new filterlist artifact found, skipping...');
-          taskMetricsService.end(trace);
+          await taskMetricsService.end(trace);
           return 0;
         }
 
@@ -53,12 +53,12 @@ export function createTelemetryFilterListArtifactTaskConfig() {
         filterList.endpointAlerts = artifact.endpoint_alerts;
         filterList.exceptionLists = artifact.exception_lists;
         filterList.prebuiltRulesAlerts = artifact.prebuilt_rules_alerts;
-        taskMetricsService.end(trace);
+        await taskMetricsService.end(trace);
         return 0;
       } catch (err) {
         log.l(`Failed to set telemetry filterlist artifact due to ${err.message}`);
         filterList.resetAllToDefault();
-        taskMetricsService.end(trace, err);
+        await taskMetricsService.end(trace, err);
         return 0;
       }
     },

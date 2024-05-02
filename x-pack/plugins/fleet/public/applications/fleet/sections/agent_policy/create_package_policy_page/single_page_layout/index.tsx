@@ -403,6 +403,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       }),
       'data-test-subj': 'dataCollectionSetupStep',
       children: replaceStepConfigurePackagePolicy || stepConfigurePackagePolicy,
+      headingElement: 'h2',
     },
   ];
 
@@ -412,6 +413,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         defaultMessage: 'Where to add this integration?',
       }),
       children: stepSelectAgentPolicy,
+      headingElement: 'h2',
     });
   }
 
