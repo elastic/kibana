@@ -17,6 +17,7 @@ import {
   getCommonDefaultAsyncSubmitParams,
   getCommonDefaultAsyncGetParams,
 } from '../common/async_utils';
+import { pollSearch } from '../../../../common';
 import { getKbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type { IAsyncSearchOptions } from '../../../../common';
