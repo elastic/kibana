@@ -15,6 +15,7 @@ import type {
   ESQLFunction,
   ESQLSingleAstItem,
 } from '@kbn/esql-ast';
+import { partition } from 'lodash';
 import type { EditorContext, SuggestionRawDefinition } from './types';
 import {
   columnExists,
@@ -80,6 +81,7 @@ import {
 } from '../shared/resources_helpers';
 import { ESQLCallbacks } from '../shared/types';
 import { getFunctionsToIgnoreForStats, isAggFunctionUsedAlready } from './helper';
+import { FunctionArgSignature } from '../definitions/types';
 
 type GetSourceFn = () => Promise<SuggestionRawDefinition[]>;
 type GetFieldsByTypeFn = (
@@ -977,6 +979,9 @@ function pushItUpInTheList(suggestions: SuggestionRawDefinition[], shouldPromote
   }));
 }
 
+/**
+ * TODO — split this into distinct functions, one for fields, one for functions, one for literals
+ */
 async function getFieldsOrFunctionsSuggestions(
   types: string[],
   commandName: string,
@@ -1123,6 +1128,9 @@ async function getFunctionArgsSuggestions(
       variables: variablesExcludingCurrentCommandOnes,
     }).hit;
   if (noArgDefined || isUnknownColumn) {
+    // ... | EVAL fn( <suggest>)
+    // ... | EVAL fn( field, <suggest>)
+
     const commandArgIndex = command.args.findIndex(
       (cmdArg) => isSingleItem(cmdArg) && cmdArg.location.max >= node.location.max
     );
@@ -1164,36 +1172,53 @@ async function getFunctionArgsSuggestions(
         return true;
       });
 
-    const supportedFieldTypes = validSignatures
-      .flatMap((signature) => {
-        if (signature.params.length > argIndex) {
-          return signature.params[argIndex].type;
-        }
-        if (signature.minParams) {
-          return signature.params[signature.params.length - 1].type;
-        }
-        return [];
-      })
+    /**
+     * Get all parameter definitions across all function signatures
+     * for the current parameter position in the given function definition,
+     */
+    const allParamDefinitionsForThisPosition = validSignatures
+      .map((signature) =>
+        signature.params.length > argIndex
+          ? signature.params[argIndex]
+          : signature.minParams
+          ? signature.params[signature.params.length - 1]
+          : null
+      )
       .filter(nonNullable);
 
-    const shouldBeConstant = validSignatures.some(
-      ({ params }) => params[argIndex]?.constantOnly || /_literal$/.test(params[argIndex]?.type)
+    // Separate the param definitions into two groups:
+    // fields should only be suggested if the param isn't constant-only,
+    // and constant suggestions should only be given if it is.
+    //
+    // TODO - consider incorporating the literalOptions into this
+    //
+    // TODO — improve this to inherit the constant flag from the outer function
+    // (e.g. if func1's first parameter is constant-only, any nested functions should
+    // inherit that constraint: func1(func2(shouldBeConstantOnly)))
+    //
+    const [constantOnlyParamDefs, paramDefsWhichSupportFields] = partition(
+      allParamDefinitionsForThisPosition,
+      (paramDef) => paramDef.constantOnly || /_literal$/.test(paramDef.type)
     );
 
-    // ... | EVAL fn( <suggest>)
-    // ... | EVAL fn( field, <suggest>)
+    const getTypesFromParamDefs = (paramDefs: FunctionArgSignature[]) => {
+      return Array.from(new Set(paramDefs.map(({ type }) => type)));
+    };
+
+    suggestions.push(
+      ...getCompatibleLiterals(command.name, getTypesFromParamDefs(constantOnlyParamDefs))
+    );
+
     suggestions.push(
       ...(await getFieldsOrFunctionsSuggestions(
-        supportedFieldTypes,
+        getTypesFromParamDefs(paramDefsWhichSupportFields),
         command.name,
         option?.name,
         getFieldsByType,
         {
-          // @TODO: improve this to inherit the constant flag from the outer function
-          functions: !shouldBeConstant,
-          fields: !shouldBeConstant,
+          functions: true,
+          fields: true,
           variables: variablesExcludingCurrentCommandOnes,
-          literals: shouldBeConstant,
         },
         // do not repropose the same function as arg
         // i.e. avoid cases like abs(abs(abs(...))) with suggestions
