@@ -43,11 +43,13 @@ export default function ApiTest({ getService }: ObsFtrProviderContext) {
 
     describe('when traces and logs are ingested and logs are not annotated with service.name', async () => {
       before(async () => {
-        await ingestTraces({ 'service.name': 'Backend', 'container.id': 'my-container-a' });
-        await ingestLogs({
-          'container.id': 'my-container-a',
-          'kubernetes.pod.name': 'pod-a',
-        });
+        await Promise.all([
+          ingestTraces({ 'service.name': 'Backend', 'container.id': 'my-container-a' }),
+          ingestLogs({
+            'container.id': 'my-container-a',
+            'kubernetes.pod.name': 'pod-a',
+          }),
+        ]);
       });
 
       after(async () => {
@@ -415,7 +417,7 @@ export default function ApiTest({ getService }: ObsFtrProviderContext) {
       });
     });
 
-    async function ingestTraces(eventMetadata: {
+    function ingestTraces(eventMetadata: {
       'service.name': string;
       'container.id'?: string;
       'host.name'?: string;
