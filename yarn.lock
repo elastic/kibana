@@ -5590,6 +5590,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/react-hooks@link:packages/kbn-react-hooks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/react-kibana-context-common@link:packages/react/kibana_context/common":
   version "0.0.0"
   uid ""
