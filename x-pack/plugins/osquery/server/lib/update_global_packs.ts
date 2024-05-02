@@ -46,7 +46,7 @@ export const updateGlobalPacksCreateCallback = async (
 
   if (packsContainingShardForPolicy.length) {
     await Promise.all(
-      map(packsContainingShardForPolicy, (pack) => {
+      map(packsContainingShardForPolicy, (pack) =>
         packsClient.update(
           packSavedObjectType,
           pack.saved_object_id,
@@ -61,8 +61,8 @@ export const updateGlobalPacksCreateCallback = async (
               },
             ],
           }
-        );
-      })
+        )
+      )
     );
 
     return produce<NewPackagePolicy>(packagePolicy, (draft) => {

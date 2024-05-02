@@ -11,7 +11,7 @@ import { useSecurityContext } from '../hooks/use_security_context';
 /**
  * Security solution page wrapper, with some extra styling etc.
  */
-export const SecuritySolutionPageWrapper: FC<PropsWithChildren> = ({ children }) => {
+export const SecuritySolutionPageWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const contextValue = useSecurityContext();
 
   const Component = contextValue.getPageWrapper();

@@ -19,8 +19,8 @@ describe('legacy_create_rule_actions_saved_object', () => {
     savedObjectsClient = savedObjectsClientMock.create();
   });
 
-  test('it creates a rule actions saved object with empty actions array', () => {
-    legacyCreateRuleActionsSavedObject({
+  test('it creates a rule actions saved object with empty actions array', async () => {
+    await legacyCreateRuleActionsSavedObject({
       ruleAlertId: '123',
       savedObjectsClient,
       actions: [],
@@ -43,8 +43,8 @@ describe('legacy_create_rule_actions_saved_object', () => {
     });
   });
 
-  test('it creates a rule actions saved object with 1 single action', () => {
-    legacyCreateRuleActionsSavedObject({
+  test('it creates a rule actions saved object with 1 single action', async () => {
+    await legacyCreateRuleActionsSavedObject({
       ruleAlertId: '123',
       savedObjectsClient,
       actions: [
@@ -90,8 +90,8 @@ describe('legacy_create_rule_actions_saved_object', () => {
     });
   });
 
-  test('it creates a rule actions saved object with 2 actions', () => {
-    legacyCreateRuleActionsSavedObject({
+  test('it creates a rule actions saved object with 2 actions', async () => {
+    await legacyCreateRuleActionsSavedObject({
       ruleAlertId: '123',
       savedObjectsClient,
       actions: [

@@ -8,7 +8,6 @@
 import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
 
-import '../../common/mock/match_media';
 import type { ReturnUsePushToService, UsePushToService } from '.';
 import { usePushToService } from '.';
 import { noPushCasesPermissions, readCasesPermissions, TestProviders } from '../../common/mock';

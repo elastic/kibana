@@ -484,7 +484,7 @@ const OverviewFooter = () => {
   );
 };
 
-const FooterButtonContainer: FC<PropsWithChildren> = ({ children }) => (
+const FooterButtonContainer: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <EuiFlexItem>
     <EuiPanel hasShadow={false} paddingSize="none">
       <EuiFlexGroup>
