@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { differenceWith } from 'lodash';
 import type {
   CustomFieldsConfiguration,
   CustomFieldTypes,
@@ -48,6 +49,39 @@ export const validateCustomFieldTypesInRequest = ({
   }
 };
 
+/**
+ * Throws if the template key doesn't match the configuration
+ */
+export const validateTemplateKeysAgainstConfiguration = ({
+  requestTemplateFields,
+  templatesConfiguration,
+}: {
+  requestTemplateFields: TemplatesConfiguration | undefined;
+  templatesConfiguration: TemplatesConfiguration;
+}) => {
+  if (!Array.isArray(requestTemplateFields) || !requestTemplateFields.length) {
+    return;
+  }
+
+  if (templatesConfiguration === undefined) {
+    throw Boom.badRequest('No templates configured.');
+  }
+
+  if (!templatesConfiguration.length) {
+    return;
+  }
+
+  const invalidTemplateKeys = differenceWith(
+    requestTemplateFields,
+    templatesConfiguration,
+    (requestVal, configurationVal) => requestVal.key === configurationVal.key
+  ).map((e) => e.key);
+
+  if (invalidTemplateKeys.length) {
+    throw Boom.badRequest(`Invalid template keys: ${invalidTemplateKeys}`);
+  }
+};
+
 export const validateTemplatesCustomFieldsInRequest = ({
   templates,
   customFieldsConfiguration,
@@ -55,12 +89,8 @@ export const validateTemplatesCustomFieldsInRequest = ({
   templates?: TemplatesConfiguration;
   customFieldsConfiguration?: CustomFieldsConfiguration;
 }) => {
-  if (!Array.isArray(templates)) {
+  if (!Array.isArray(templates) || !templates.length) {
     return;
-  }
-
-  if (customFieldsConfiguration === undefined) {
-    throw Boom.badRequest('No custom fields configured.');
   }
 
   templates.forEach((template, index) => {
@@ -71,6 +101,11 @@ export const validateTemplatesCustomFieldsInRequest = ({
     ) {
       return;
     }
+
+    if (customFieldsConfiguration === undefined) {
+      throw Boom.badRequest('No custom fields configured.');
+    }
+
     const params = {
       requestCustomFields: template.caseFields.customFields,
       customFieldsConfiguration,
