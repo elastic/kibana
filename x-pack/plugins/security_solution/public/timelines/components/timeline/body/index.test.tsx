@@ -11,7 +11,6 @@ import { waitFor } from '@testing-library/react';
 
 import { useKibana, useCurrentUser } from '../../../../common/lib/kibana';
 import { DefaultCellRenderer } from '../cell_rendering/default_cell_renderer';
-import '../../../../common/mock/match_media';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { Direction } from '../../../../../common/search_strategy';
 import {

@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, Context, Dispatch, SetStateAction } from 'react';
+import React, {
+  createContext,
+  useContext,
+  Context,
+  Dispatch,
+  SetStateAction,
+  PropsWithChildren,
+} from 'react';
 import { JourneyStep } from '../../../../../../../../common/runtime_types';
 import {
   WaterfallData,
@@ -54,7 +61,7 @@ export interface IWaterfallContext {
 
 export const WaterfallContext = createContext<Partial<IWaterfallContext>>({});
 
-export const WaterfallProvider: React.FC<IWaterfallContext> = ({
+export const WaterfallProvider: React.FC<PropsWithChildren<IWaterfallContext>> = ({
   children,
   data,
   markerItems,

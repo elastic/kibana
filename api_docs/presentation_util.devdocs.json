@@ -354,7 +354,7 @@
               "\nReturns a React Context Provider for use in consuming applications."
             ],
             "signature": [
-              "() => React.FC<{}>"
+              "() => React.FC<{ children?: React.ReactNode; }>"
             ],
             "path": "src/plugins/presentation_util/public/services/create/registry.tsx",
             "deprecated": false,
@@ -521,7 +521,7 @@
               "\nReturn the React Context Provider that will supply services."
             ],
             "signature": [
-              "() => React.FC<{}>"
+              "() => React.FC<{ children?: React.ReactNode; }>"
             ],
             "path": "src/plugins/presentation_util/public/services/create/index.ts",
             "deprecated": false,
@@ -703,7 +703,7 @@
         "label": "getContextProvider",
         "description": [],
         "signature": [
-          "() => React.FC<{}>"
+          "() => React.FC<{ children?: React.ReactNode; }>"
         ],
         "path": "src/plugins/presentation_util/public/index.ts",
         "deprecated": false,
@@ -2864,7 +2864,7 @@
           "label": "ContextProvider",
           "description": [],
           "signature": [
-            "React.FunctionComponent<{}>"
+            "React.FunctionComponent<{ children?: React.ReactNode; }>"
           ],
           "path": "src/plugins/presentation_util/public/types.ts",
           "deprecated": false,
