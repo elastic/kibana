@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getAgentActionConnectRouteDefinition } from './agent_action_connect_route';
 import { getAgentActionDisconnectRouteDefinition } from './agent_action_disconnect_route';
 import { getActivitiesRouteDefinition } from './activities_route';
 import { getAgentsRouteDefinition } from './agents_route';
@@ -14,6 +15,7 @@ export const getSentinelOneRouteDefinitions = (): EmulatorServerRouteDefinition[
   return [
     getAgentsRouteDefinition(),
     getActivitiesRouteDefinition(),
+    getAgentActionConnectRouteDefinition(),
     getAgentActionDisconnectRouteDefinition(),
   ];
 };
