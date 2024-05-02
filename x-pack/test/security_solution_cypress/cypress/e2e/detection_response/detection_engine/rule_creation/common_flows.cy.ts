@@ -31,6 +31,7 @@ import {
   fillFrom,
   fillNote,
   fillReferenceUrls,
+  fillRelatedIntegrations,
   fillRiskScore,
   fillRuleName,
   fillRuleTags,
@@ -64,6 +65,7 @@ describe('Common rule creation flows', { tags: ['@ess', '@serverless'] }, () => 
   it('Creates and enables a rule', function () {
     cy.log('Filling define section');
     importSavedQuery(this.timelineId);
+    fillRelatedIntegrations();
     cy.get(DEFINE_CONTINUE_BUTTON).click();
 
     cy.log('Filling about section');

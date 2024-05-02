@@ -101,7 +101,9 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should export rules', async () => {
-      await createRule(supertest, log, getSimpleRule());
+      const mockRule = getCustomQueryRuleParams();
+
+      await securitySolutionApi.createRule({ body: mockRule });
 
       const { body } = await postBulkAction()
         .send({ query: '', action: BulkActionTypeEnum.export })
@@ -112,12 +114,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const [ruleJson, exportDetailsJson] = body.toString().split(/\n/);
 
-      const rule = removeServerGeneratedProperties(JSON.parse(ruleJson));
-      const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
-      expect(rule).toEqual(expectedRule);
-
-      const exportDetails = JSON.parse(exportDetailsJson);
-      expect(exportDetails).toEqual({
+      expect(JSON.parse(ruleJson)).toMatchObject(mockRule);
+      expect(JSON.parse(exportDetailsJson)).toEqual({
         exported_exception_list_count: 0,
         exported_exception_list_item_count: 0,
         exported_count: 1,
@@ -136,8 +134,12 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    it('should export rules with defaultable fields when values are set', async () => {
+    it('should export rules with defaultbale fields when values are set', async () => {
       const defaultableFields: BaseDefaultableFields = {
+        related_integrations: [
+          { package: 'package-a', version: '^1.2.3' },
+          { package: 'package-b', integration: 'integration-b', version: '~1.1.1' },
+        ],
         setup: '# some setup markdown',
       };
       const mockRule = getCustomQueryRuleParams(defaultableFields);
@@ -314,6 +316,10 @@ export default ({ getService }: FtrProviderContext): void => {
       const ruleToDuplicate = getCustomQueryRuleParams({
         rule_id: ruleId,
         setup: '# some setup markdown',
+        related_integrations: [
+          { package: 'package-a', version: '^1.2.3' },
+          { package: 'package-b', integration: 'integration-b', version: '~1.1.1' },
+        ],
       });
 
       await securitySolutionApi.createRule({ body: ruleToDuplicate });
@@ -334,13 +340,22 @@ export default ({ getService }: FtrProviderContext): void => {
       );
 
       // Check that the updates have been persisted
-      const { body: rulesResponse } = await supertest
-        .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
-        .set('kbn-xsrf', 'true')
-        .set('elastic-api-version', '2023-10-31')
-        .expect(200);
+      const { body: rulesResponse } = await securitySolutionApi.findRules({ query: {} });
 
       expect(rulesResponse.total).toEqual(2);
+
+      const duplicatedRuleId = body.attributes.results.created[0].id;
+      const { body: duplicatedRule } = await securitySolutionApi
+        .readRule({
+          query: { id: duplicatedRuleId },
+        })
+        .expect(200);
+
+      expect(duplicatedRule).toMatchObject({
+        ...ruleToDuplicate,
+        name: `${ruleToDuplicate.name} [Duplicate]`,
+        rule_id: expect.any(String),
+      });
     });
 
     it('should duplicate rules with exceptions - expired exceptions included', async () => {
