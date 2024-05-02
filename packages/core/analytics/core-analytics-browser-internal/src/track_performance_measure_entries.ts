@@ -19,8 +19,6 @@ export function trackPerformanceMeasureEntries(analytics: AnalyticsClient, isDev
         const target = entry?.name;
         const duration = entry.duration;
 
-        console.log(entry);
-
         if (isDevMode) {
           if (!target) {
             console.error(`Failed to report the performance entry. Measure name is undefined`);

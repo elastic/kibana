@@ -178,7 +178,6 @@ function useServicesDetailedStatisticsFetcher({
 
 export function ServiceInventory() {
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useStateDebounced('');
-  //
   const { onPageReady } = usePerformanceContext();
 
   const [renderedItems, setRenderedItems] = useState<ServiceListItem[]>([]);

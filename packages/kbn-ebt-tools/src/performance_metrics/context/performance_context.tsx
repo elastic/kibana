@@ -11,7 +11,7 @@ import afterFrame from '../after_frame';
 
 function measureInteraction() {
   performance.mark(ttfmpPerfomanceMarkers.startPageChange);
-
+  const trackedRoutes: string[] = [];
   return {
     /**
      * Marks the end of the page ready state and measures the performance between the start of the page change and the end of the page ready state.
@@ -21,12 +21,14 @@ function measureInteraction() {
       performance.mark(ttfmpPerfomanceMarkers.endPageReady);
 
       // Time To First Meaningful Paint (ttfmp)
-
-      performance.measure(pathname, {
-        detail: { eventName: 'TTFMP' },
-        start: ttfmpPerfomanceMarkers.startPageChange,
-        end: ttfmpPerfomanceMarkers.endPageReady,
-      });
+      if (!trackedRoutes.includes(pathname)) {
+        performance.measure(pathname, {
+          detail: { eventName: 'time_to_first_meaninful_paint' },
+          start: ttfmpPerfomanceMarkers.startPageChange,
+          end: ttfmpPerfomanceMarkers.endPageReady,
+        });
+        trackedRoutes.push(pathname);
+      }
     },
   };
 }
@@ -39,7 +41,7 @@ export const PerformanceContext = createContext<PerformanceApi | undefined>(unde
 
 export function PerformanceContextProvider({ children }: { children: React.ReactElement }) {
   const [isBrowserReady, setIsBrowserReady] = useState<Boolean>(false);
-  // const location = useLocation();
+  const location = useLocation();
   const interaction = measureInteraction();
 
   React.useEffect(() => {

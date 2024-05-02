@@ -103,64 +103,54 @@ const servicesRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   async handler(resources): Promise<ServicesItemsResponse> {
-    return new Promise((resolve, reject) => {
-      setTimeout(async () => {
-        try {
-          const {
-            context,
-            params,
-            logger,
-            request,
-            plugins: { security },
-          } = resources;
+    const {
+      context,
+      params,
+      logger,
+      request,
+      plugins: { security },
+    } = resources;
 
-          const {
-            searchQuery,
-            environment,
-            kuery,
-            start,
-            end,
-            serviceGroup: serviceGroupId,
-            probability,
-            documentType,
-            rollupInterval,
-            useDurationSummary,
-          } = params.query;
-          const savedObjectsClient = (await context.core).savedObjects.client;
+    const {
+      searchQuery,
+      environment,
+      kuery,
+      start,
+      end,
+      serviceGroup: serviceGroupId,
+      probability,
+      documentType,
+      rollupInterval,
+      useDurationSummary,
+    } = params.query;
+    const savedObjectsClient = (await context.core).savedObjects.client;
 
-          const [mlClient, apmEventClient, apmAlertsClient, serviceGroup, randomSampler] =
-            await Promise.all([
-              getMlClient(resources),
-              getApmEventClient(resources),
-              getApmAlertsClient(resources),
-              serviceGroupId
-                ? getServiceGroup({ savedObjectsClient, serviceGroupId })
-                : Promise.resolve(null),
-              getRandomSampler({ security, request, probability }),
-            ]);
+    const [mlClient, apmEventClient, apmAlertsClient, serviceGroup, randomSampler] =
+      await Promise.all([
+        getMlClient(resources),
+        getApmEventClient(resources),
+        getApmAlertsClient(resources),
+        serviceGroupId
+          ? getServiceGroup({ savedObjectsClient, serviceGroupId })
+          : Promise.resolve(null),
+        getRandomSampler({ security, request, probability }),
+      ]);
 
-          const servicesItems = await getServicesItems({
-            environment,
-            kuery,
-            mlClient,
-            apmEventClient,
-            apmAlertsClient,
-            logger,
-            start,
-            end,
-            serviceGroup,
-            randomSampler,
-            documentType,
-            rollupInterval,
-            useDurationSummary,
-            searchQuery,
-          });
-
-          resolve(servicesItems);
-        } catch (error) {
-          reject(error);
-        }
-      }, 5005); // Delay of 5 milliseconds
+    return getServicesItems({
+      environment,
+      kuery,
+      mlClient,
+      apmEventClient,
+      apmAlertsClient,
+      logger,
+      start,
+      end,
+      serviceGroup,
+      randomSampler,
+      documentType,
+      rollupInterval,
+      useDurationSummary,
+      searchQuery,
     });
   },
 });

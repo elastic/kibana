@@ -6,6 +6,7 @@
  */
 
 import { EuiErrorBoundary } from '@elastic/eui';
+import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import React from 'react';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
@@ -58,43 +59,45 @@ export const SnapshotPage = () => {
 
   return (
     <EuiErrorBoundary>
-      <WaffleOptionsProvider>
-        <WaffleTimeProvider>
-          <WaffleFiltersProvider>
-            <div className={APP_WRAPPER_CLASS}>
-              <MetricsPageTemplate
-                hasData={metricIndicesExist}
-                pageHeader={{
-                  pageTitle: inventoryTitle,
-                  rightSideItems: [<SavedViews />, <SurveySection />],
-                }}
-                pageSectionProps={{
-                  contentProps: {
-                    css: css`
-                      ${fullHeightContentStyles};
-                      padding-bottom: 0;
-                    `,
-                  },
-                }}
-              >
-                <SnapshotContainer
-                  render={({ loading, nodes, reload, interval }) => (
-                    <>
-                      <FilterBar interval={interval} />
-                      <LayoutView
-                        loading={loading}
-                        nodes={nodes}
-                        reload={reload}
-                        interval={interval}
-                      />
-                    </>
-                  )}
-                />
-              </MetricsPageTemplate>
-            </div>
-          </WaffleFiltersProvider>
-        </WaffleTimeProvider>
-      </WaffleOptionsProvider>
+      <PerformanceContextProvider>
+        <WaffleOptionsProvider>
+          <WaffleTimeProvider>
+            <WaffleFiltersProvider>
+              <div className={APP_WRAPPER_CLASS}>
+                <MetricsPageTemplate
+                  hasData={metricIndicesExist}
+                  pageHeader={{
+                    pageTitle: inventoryTitle,
+                    rightSideItems: [<SavedViews />, <SurveySection />],
+                  }}
+                  pageSectionProps={{
+                    contentProps: {
+                      css: css`
+                        ${fullHeightContentStyles};
+                        padding-bottom: 0;
+                      `,
+                    },
+                  }}
+                >
+                  <SnapshotContainer
+                    render={({ loading, nodes, reload, interval }) => (
+                      <>
+                        <FilterBar interval={interval} />
+                        <LayoutView
+                          loading={loading}
+                          nodes={nodes}
+                          reload={reload}
+                          interval={interval}
+                        />
+                      </>
+                    )}
+                  />
+                </MetricsPageTemplate>
+              </div>
+            </WaffleFiltersProvider>
+          </WaffleTimeProvider>
+        </WaffleOptionsProvider>
+      </PerformanceContextProvider>
     </EuiErrorBoundary>
   );
 };
