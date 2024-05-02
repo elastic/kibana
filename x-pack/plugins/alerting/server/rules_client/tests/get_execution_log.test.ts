@@ -553,7 +553,7 @@ describe('getExecutionLogForRule()', () => {
     eventLogClient.aggregateEventsBySavedObjectIds.mockResolvedValueOnce(aggregateResults);
 
     const dateStart = 'ain"t no way this will get parsed as a date';
-    expect(
+    await expect(
       rulesClient.getExecutionLogForRule(getExecutionLogByIdParams({ dateStart }))
     ).rejects.toMatchInlineSnapshot(
       `[Error: Invalid date for parameter dateStart: "ain"t no way this will get parsed as a date"]`
@@ -565,7 +565,7 @@ describe('getExecutionLogForRule()', () => {
     eventLogClient.aggregateEventsBySavedObjectIds.mockResolvedValueOnce(aggregateResults);
 
     const dateEnd = 'ain"t no way this will get parsed as a date';
-    expect(
+    await expect(
       rulesClient.getExecutionLogForRule(getExecutionLogByIdParams({ dateEnd }))
     ).rejects.toMatchInlineSnapshot(
       `[Error: Invalid date for parameter dateEnd: "ain"t no way this will get parsed as a date"]`
@@ -576,7 +576,7 @@ describe('getExecutionLogForRule()', () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getRuleSavedObject());
     eventLogClient.aggregateEventsBySavedObjectIds.mockResolvedValueOnce(aggregateResults);
 
-    expect(
+    await expect(
       rulesClient.getExecutionLogForRule(getExecutionLogByIdParams({ page: -3 }))
     ).rejects.toMatchInlineSnapshot(`[Error: Invalid page field "-3" - must be greater than 0]`);
   });
@@ -585,7 +585,7 @@ describe('getExecutionLogForRule()', () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getRuleSavedObject());
     eventLogClient.aggregateEventsBySavedObjectIds.mockResolvedValueOnce(aggregateResults);
 
-    expect(
+    await expect(
       rulesClient.getExecutionLogForRule(getExecutionLogByIdParams({ perPage: -3 }))
     ).rejects.toMatchInlineSnapshot(`[Error: Invalid perPage field "-3" - must be greater than 0]`);
   });
@@ -594,7 +594,7 @@ describe('getExecutionLogForRule()', () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getRuleSavedObject());
     eventLogClient.aggregateEventsBySavedObjectIds.mockResolvedValueOnce(aggregateResults);
 
-    expect(
+    await expect(
       rulesClient.getExecutionLogForRule(
         getExecutionLogByIdParams({ sort: [{ foo: { order: 'desc' } }] })
       )
@@ -607,7 +607,7 @@ describe('getExecutionLogForRule()', () => {
     unsecuredSavedObjectsClient.get.mockRejectedValueOnce(new Error('OMG!'));
     eventLogClient.aggregateEventsBySavedObjectIds.mockResolvedValueOnce(aggregateResults);
 
-    expect(
+    await expect(
       rulesClient.getExecutionLogForRule(getExecutionLogByIdParams())
     ).rejects.toMatchInlineSnapshot(`[Error: OMG!]`);
   });
@@ -616,7 +616,7 @@ describe('getExecutionLogForRule()', () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getRuleSavedObject());
     eventLogClient.aggregateEventsBySavedObjectIds.mockRejectedValueOnce(new Error('OMG 2!'));
 
-    expect(
+    await expect(
       rulesClient.getExecutionLogForRule(getExecutionLogByIdParams())
     ).rejects.toMatchInlineSnapshot(`[Error: OMG 2!]`);
   });

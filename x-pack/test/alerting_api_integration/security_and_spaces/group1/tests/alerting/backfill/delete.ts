@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { asyncForEach } from '@kbn/std';
 import { GetResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { UserAtSpaceScenarios } from '../../../../scenarios';
 import {
@@ -23,9 +24,18 @@ export default function deleteBackfillTests({ getService }: FtrProviderContext) 
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('delete backfill', () => {
+    let backfillIds: Array<{ id: string; spaceId: string }> = [];
     const objectRemover = new ObjectRemover(supertest);
 
-    after(() => objectRemover.removeAll());
+    afterEach(async () => {
+      asyncForEach(backfillIds, async ({ id, spaceId }: { id: string; spaceId: string }) => {
+        await supertest
+          .delete(`${getUrlPrefix(spaceId)}/internal/alerting/rules/backfill/${id}`)
+          .set('kbn-xsrf', 'foo');
+      });
+      backfillIds = [];
+      await objectRemover.removeAll();
+    });
 
     function getRule(overwrites = {}) {
       return getTestRuleData({
@@ -89,6 +99,8 @@ export default function deleteBackfillTests({ getService }: FtrProviderContext) 
           expect(scheduleResult.length).to.eql(2);
           const backfillId1 = scheduleResult[0].id;
           const backfillId2 = scheduleResult[1].id;
+          backfillIds.push({ id: backfillId1, spaceId: apiOptions.spaceId });
+          backfillIds.push({ id: backfillId2, spaceId: apiOptions.spaceId });
 
           // ensure backfills exist
           await supertest
@@ -271,6 +283,7 @@ export default function deleteBackfillTests({ getService }: FtrProviderContext) 
           const scheduleResult = scheduleResponse.body;
           expect(scheduleResult.length).to.eql(1);
           const backfillId = scheduleResult[0].id;
+          backfillIds.push({ id: backfillId, spaceId: apiOptions.spaceId });
 
           // delete backfill as current user
           const response = await supertestWithoutAuth
