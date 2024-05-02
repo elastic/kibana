@@ -370,8 +370,106 @@ describe('client', () => {
         );
       });
 
+      it('throws when there are duplicated template keys in the request', async () => {
+        await expect(
+          update(
+            'test-id',
+            {
+              version: 'test-version',
+              templates: [
+                {
+                  key: 'template_1',
+                  name: 'template 1',
+                  description: 'test',
+                  caseFields: null,
+                },
+                {
+                  key: 'template_1',
+                  name: 'template 2',
+                  description: 'test',
+                  caseFields: {
+                    title: 'Case title',
+                  },
+                },
+              ],
+            },
+            clientArgs,
+            casesClientInternal
+          )
+        ).rejects.toThrow(
+          'Failed to get patch configure in route: Error: Invalid duplicated templates keys in request: template_1'
+        );
+      });
+
+      it('throws when there are invalid template keys in the request', async () => {
+        clientArgs.services.caseConfigureService.get.mockResolvedValue({
+          // @ts-ignore: these are all the attributes needed for the test
+          attributes: {
+            templates: [
+              {
+                key: 'template_1',
+                name: 'template 1',
+                description: 'this is test description',
+                caseFields: null,
+              },
+            ],
+          },
+        });
+
+        await expect(
+          update(
+            'test-id',
+            {
+              version: 'test-version',
+              templates: [
+                {
+                  key: 'template_2',
+                  name: 'template 2',
+                  description: 'this is test description',
+                  caseFields: null,
+                },
+              ],
+            },
+            clientArgs,
+            casesClientInternal
+          )
+        ).rejects.toThrow(
+          'Failed to get patch configure in route: Error: Invalid template keys: template_2'
+        );
+      });
+
       describe('customFields', () => {
-        it('throws when there are duplicated template keys in the request', async () => {
+        it('throws when template has duplicated custom field keys in the request', async () => {
+          clientArgs.services.caseConfigureService.get.mockResolvedValue({
+            // @ts-ignore: these are all the attributes needed for the test
+            attributes: {
+              customFields: [
+                {
+                  key: 'custom_field_key_1',
+                  label: 'text label',
+                  type: CustomFieldTypes.TEXT,
+                  required: false,
+                },
+              ],
+              templates: [
+                {
+                  key: 'template_1',
+                  name: 'template 1',
+                  description: 'this is test description',
+                  caseFields: {
+                    customFields: [
+                      {
+                        key: 'custom_field_key_1',
+                        type: CustomFieldTypes.TEXT,
+                        value: 'custom field value 1',
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          });
+
           await expect(
             update(
               'test-id',
@@ -379,17 +477,22 @@ describe('client', () => {
                 version: 'test-version',
                 templates: [
                   {
-                    key: 'duplicated_key',
+                    key: 'template_1',
                     name: 'template 1',
                     description: 'test',
-                    caseFields: null,
-                  },
-                  {
-                    key: 'duplicated_key',
-                    name: 'template 2',
-                    description: 'test',
                     caseFields: {
-                      title: 'Case title',
+                      customFields: [
+                        {
+                          key: 'custom_field_key_1',
+                          type: CustomFieldTypes.TEXT,
+                          value: 'custom field value 1',
+                        },
+                        {
+                          key: 'custom_field_key_1',
+                          type: CustomFieldTypes.TEXT,
+                          value: 'custom field value 2',
+                        },
+                      ],
                     },
                   },
                 ],
@@ -398,11 +501,25 @@ describe('client', () => {
               casesClientInternal
             )
           ).rejects.toThrow(
-            'Failed to get patch configure in route: Error: Invalid duplicated templates keys in request: duplicated_key'
+            `Failed to get patch configure in route: Error: Invalid duplicated templates[0]'s customFields keys in request: custom_field_key_1`
           );
         });
 
-        it('throws when template has duplicated custom field keys in the request', async () => {
+        it('throws when there are no customFields in configure and template has customField in the request', async () => {
+          clientArgs.services.caseConfigureService.get.mockResolvedValue({
+            // @ts-ignore: these are all the attributes needed for the test
+            attributes: {
+              templates: [
+                {
+                  key: 'template_1',
+                  name: 'template 1',
+                  description: 'this is test description',
+                  caseFields: null,
+                },
+              ],
+            },
+          });
+
           await expect(
             update(
               'test-id',
@@ -412,15 +529,15 @@ describe('client', () => {
                   {
                     key: 'template_1',
                     name: 'template 1',
-                    description: 'test',
-                    caseFields: null,
-                  },
-                  {
-                    key: 'template_1',
-                    name: 'template 1',
-                    description: 'test',
+                    description: 'this is test description',
                     caseFields: {
-                      title: 'case title',
+                      customFields: [
+                        {
+                          key: 'custom_field_key_1',
+                          type: CustomFieldTypes.TEXT,
+                          value: 'custom field value 1',
+                        },
+                      ],
                     },
                   },
                 ],
@@ -429,7 +546,171 @@ describe('client', () => {
               casesClientInternal
             )
           ).rejects.toThrow(
-            'Failed to get patch configure in route: Error: Invalid duplicated templates keys in request: template_1'
+            'Failed to get patch configure in route: Error: No custom fields configured.'
+          );
+        });
+
+        it('throws when there are invalid customField keys in the request', async () => {
+          clientArgs.services.caseConfigureService.get.mockResolvedValue({
+            // @ts-ignore: these are all the attributes needed for the test
+            attributes: {
+              customFields: [
+                {
+                  key: 'custom_field_key_1',
+                  label: 'text label',
+                  type: CustomFieldTypes.TEXT,
+                  required: false,
+                },
+              ],
+              templates: [
+                {
+                  key: 'template_1',
+                  name: 'template 1',
+                  description: 'this is test description',
+                  caseFields: {
+                    customFields: [
+                      {
+                        key: 'custom_field_key_1',
+                        type: CustomFieldTypes.TEXT,
+                        value: 'custom field value 1',
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          });
+
+          await expect(
+            update(
+              'test-id',
+              {
+                version: 'test-version',
+                templates: [
+                  {
+                    key: 'template_1',
+                    name: 'template 1',
+                    description: 'this is test description',
+                    caseFields: {
+                      customFields: [
+                        {
+                          key: 'custom_field_key_2',
+                          type: CustomFieldTypes.TEXT,
+                          value: 'custom field value 1',
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+              clientArgs,
+              casesClientInternal
+            )
+          ).rejects.toThrow(
+            'Failed to get patch configure in route: Error: Invalid custom field keys: custom_field_key_2'
+          );
+        });
+
+        it('throws when template has customField with invalid type in the request', async () => {
+          clientArgs.services.caseConfigureService.get.mockResolvedValue({
+            // @ts-ignore: these are all the attributes needed for the test
+            attributes: {
+              customFields: [
+                {
+                  key: 'custom_field_key_1',
+                  label: 'text label',
+                  type: CustomFieldTypes.TEXT,
+                  required: false,
+                },
+              ],
+              templates: [
+                {
+                  key: 'template_1',
+                  name: 'template 1',
+                  description: 'this is test description',
+                  caseFields: {
+                    customFields: [
+                      {
+                        key: 'custom_field_key_1',
+                        type: CustomFieldTypes.TEXT,
+                        value: 'custom field value 1',
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          });
+
+          await expect(
+            update(
+              'test-id',
+              {
+                version: 'test-version',
+                templates: [
+                  {
+                    key: 'template_1',
+                    name: 'template 1',
+                    description: 'this is test description',
+                    caseFields: {
+                      customFields: [
+                        {
+                          key: 'custom_field_key_1',
+                          type: CustomFieldTypes.TOGGLE,
+                          value: true,
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+              clientArgs,
+              casesClientInternal
+            )
+          ).rejects.toThrow(
+            'Failed to get patch configure in route: Error: The following custom fields have the wrong type in the request: "text label"'
+          );
+        });
+      });
+
+      describe('assignees', () => {
+        it('should throw if the user does not have the correct license while adding assignees in template ', async () => {
+          clientArgs.services.licensingService.isAtLeastPlatinum.mockResolvedValue(false);
+          clientArgs.services.caseConfigureService.get.mockResolvedValue({
+            // @ts-ignore: these are all the attributes needed for the test
+            attributes: {
+              templates: [
+                {
+                  key: 'template_1',
+                  name: 'template 1',
+                  description: 'this is test description',
+                  caseFields: null,
+                },
+              ],
+            },
+          });
+
+          await expect(
+            update(
+              'test-id',
+              {
+                version: 'test-version',
+                templates: [
+                  {
+                    key: 'template_1',
+                    name: 'template 1',
+                    description: 'this is test description',
+                    caseFields: {
+                      assignees: [{ uid: '1' }],
+                    },
+                  },
+                ],
+              },
+              clientArgs,
+              casesClientInternal
+            )
+          ).rejects.toThrow(
+            'Failed to get patch configure in route: Error: In order to assign users to cases, you must be subscribed to an Elastic Platinum license'
           );
         });
       });
@@ -496,54 +777,121 @@ describe('client', () => {
       );
     });
 
-    it(`throws when trying to create more than ${MAX_TEMPLATES_LENGTH} custom fields`, async () => {
-      await expect(
-        create(
-          {
-            ...baseRequest,
-            templates: new Array(MAX_TEMPLATES_LENGTH + 1).fill({
-              key: 'template_1',
-              name: 'template 1',
-              description: 'test',
-              caseFields: null,
-            }),
-          },
-          clientArgs,
-          casesClientInternal
-        )
-      ).rejects.toThrow(
-        `Failed to create case configuration: Error: The length of the field templates is too long. Array must be of length <= ${MAX_TEMPLATES_LENGTH}.`
-      );
-    });
-
-    it('throws when there are duplicated template keys in the request', async () => {
-      await expect(
-        create(
-          {
-            ...baseRequest,
-            templates: [
-              {
-                key: 'duplicated_key',
+    describe('templates', () => {
+      it(`throws when trying to create more than ${MAX_TEMPLATES_LENGTH} templates`, async () => {
+        await expect(
+          create(
+            {
+              ...baseRequest,
+              templates: new Array(MAX_TEMPLATES_LENGTH + 1).fill({
+                key: 'template_1',
                 name: 'template 1',
                 description: 'test',
                 caseFields: null,
-              },
-              {
-                key: 'duplicated_key',
-                name: 'template 2',
-                description: 'test',
-                caseFields: {
-                  title: 'Case title',
+              }),
+            },
+            clientArgs,
+            casesClientInternal
+          )
+        ).rejects.toThrow(
+          `Failed to create case configuration: Error: The length of the field templates is too long. Array must be of length <= ${MAX_TEMPLATES_LENGTH}.`
+        );
+      });
+
+      it('throws when there are duplicated template keys in the request', async () => {
+        await expect(
+          create(
+            {
+              ...baseRequest,
+              templates: [
+                {
+                  key: 'duplicated_key',
+                  name: 'template 1',
+                  description: 'test',
+                  caseFields: null,
                 },
+                {
+                  key: 'duplicated_key',
+                  name: 'template 2',
+                  description: 'test',
+                  caseFields: {
+                    title: 'Case title',
+                  },
+                },
+              ],
+            },
+            clientArgs,
+            casesClientInternal
+          )
+        ).rejects.toThrow(
+          'Failed to create case configuration: Error: Invalid duplicated templates keys in request: duplicated_key'
+        );
+      });
+
+      describe('customFields', () => {
+        it('throws when template has duplicated custom field keys in the request', async () => {
+          await expect(
+            create(
+              {
+                ...baseRequest,
+                templates: [
+                  {
+                    key: 'template_1',
+                    name: 'template 1',
+                    description: 'test',
+                    caseFields: {
+                      customFields: [
+                        {
+                          key: 'custom_field_key_1',
+                          type: CustomFieldTypes.TEXT,
+                          value: 'custom field value 1',
+                        },
+                        {
+                          key: 'custom_field_key_1',
+                          type: CustomFieldTypes.TEXT,
+                          value: 'custom field value 2',
+                        },
+                      ],
+                    },
+                  },
+                ],
               },
-            ],
-          },
-          clientArgs,
-          casesClientInternal
-        )
-      ).rejects.toThrow(
-        'Failed to create case configuration: Error: Invalid duplicated templates keys in request: duplicated_key'
-      );
+              clientArgs,
+              casesClientInternal
+            )
+          ).rejects.toThrow(
+            `Failed to create case configuration: Error: Invalid duplicated templates[0]'s customFields keys in request: custom_field_key_1`
+          );
+        });
+      });
+
+      describe('assignees', () => {
+        it('should throw if the user does not have the correct license while adding assignees in template ', async () => {
+          clientArgs.services.licensingService.isAtLeastPlatinum.mockResolvedValue(false);
+
+          await expect(
+            create(
+              {
+                ...baseRequest,
+                templates: [
+                  {
+                    key: 'template_1',
+                    name: 'template 1',
+                    description: 'this is test description',
+                    caseFields: {
+                      assignees: [{ uid: '1' }],
+                    },
+                  },
+                ],
+              },
+              clientArgs,
+              casesClientInternal
+            )
+          ).rejects.toThrow(
+            'Failed to create case configuration: Error: In order to assign users to cases, you must be subscribed to an Elastic Platinum license'
+          );
+        });
+      });
     });
   });
 });

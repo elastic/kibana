@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CaseConnector, CaseSeverity, ConfigurationAttributes } from '../../../common/types/domain';
-import { CustomFieldTypes, ConnectorTypes } from '../../../common/types/domain';
+import type { CaseConnector, ConfigurationAttributes } from '../../../common/types/domain';
+import { CustomFieldTypes, ConnectorTypes, CaseSeverity } from '../../../common/types/domain';
 import { CASE_CONFIGURE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type {
@@ -22,12 +22,11 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { CaseConfigureService } from '.';
 import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
 import { getNoneCaseConnector } from '../../common/utils';
-import { basicCaseFields, ESCaseConnectorWithId } from '../test_utils';
+import type { ESCaseConnectorWithId } from '../test_utils';
 import { createESJiraConnector, createJiraConnector } from '../test_utils';
 import type { ConfigurationPersistedAttributes } from '../../common/types/configure';
 import { unset } from 'lodash';
 import type { ConfigurationPatchRequest } from '../../../common/types/api';
-import { templates } from 'handlebars';
 
 const basicConfigFields = {
   closure_type: 'close-by-pushing' as const,

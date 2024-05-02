@@ -8,13 +8,19 @@
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { v4 as uuidv4 } from 'uuid';
 import {
+  MAX_ASSIGNEES_PER_CASE,
+  MAX_CATEGORY_LENGTH,
   MAX_CUSTOM_FIELDS_PER_CASE,
   MAX_CUSTOM_FIELD_KEY_LENGTH,
   MAX_CUSTOM_FIELD_LABEL_LENGTH,
   MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
+  MAX_DESCRIPTION_LENGTH,
+  MAX_LENGTH_PER_TAG,
+  MAX_TAGS_PER_CASE,
   MAX_TEMPLATES_LENGTH,
   MAX_TEMPLATE_KEY_LENGTH,
   MAX_TEMPLATE_NAME_LENGTH,
+  MAX_TITLE_LENGTH,
 } from '../../../constants';
 import { CaseSeverity } from '../../domain';
 import { ConnectorTypes } from '../../domain/connector/v1';
@@ -573,73 +579,196 @@ describe('configure', () => {
       ).toContain('The length of the name is too long. The maximum length is 50.');
     });
 
-    it('removes foo:bar attributes from caseFields', () => {
-      const query = TemplateConfigurationRt.decode({
-        ...defaultRequest,
-        caseFields: { ...defaultRequest.caseFields, foo: 'bar' },
+    describe('caseFields', () => {
+      it('removes foo:bar attributes from caseFields', () => {
+        const query = TemplateConfigurationRt.decode({
+          ...defaultRequest,
+          caseFields: { ...defaultRequest.caseFields, foo: 'bar' },
+        });
+
+        expect(query).toStrictEqual({
+          _tag: 'Right',
+          right: { ...defaultRequest },
+        });
       });
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: { ...defaultRequest },
-      });
-    });
+      it('accepts caseFields as null', () => {
+        const query = TemplateConfigurationRt.decode({
+          ...defaultRequest,
+          caseFields: null,
+        });
 
-    it('accepts caseFields as null', () => {
-      const query = TemplateConfigurationRt.decode({
-        ...defaultRequest,
-        caseFields: null,
-      });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: { ...defaultRequest, caseFields: null },
-      });
-    });
-
-    it('accepts caseFields as {}', () => {
-      const query = TemplateConfigurationRt.decode({
-        ...defaultRequest,
-        caseFields: {},
+        expect(query).toStrictEqual({
+          _tag: 'Right',
+          right: { ...defaultRequest, caseFields: null },
+        });
       });
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: { ...defaultRequest, caseFields: {} },
-      });
-    });
+      it('accepts caseFields as {}', () => {
+        const query = TemplateConfigurationRt.decode({
+          ...defaultRequest,
+          caseFields: {},
+        });
 
-    it('accepts caseFields with all fields', () => {
-      const caseFieldsAll = {
-        title: 'Case with sample template 1',
-        description: 'case desc',
-        severity: CaseSeverity.LOW,
-        category: null,
-        tags: ['sample-1'],
-        assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
-        customFields: [
-          {
-            key: 'first_custom_field_key',
-            type: 'text',
-            value: 'this is a text field value',
+        expect(query).toStrictEqual({
+          _tag: 'Right',
+          right: { ...defaultRequest, caseFields: {} },
+        });
+      });
+
+      it('accepts caseFields with all fields', () => {
+        const caseFieldsAll = {
+          title: 'Case with sample template 1',
+          description: 'case desc',
+          severity: CaseSeverity.LOW,
+          category: null,
+          tags: ['sample-1'],
+          assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
+          customFields: [
+            {
+              key: 'first_custom_field_key',
+              type: 'text',
+              value: 'this is a text field value',
+            },
+          ],
+          connector: {
+            id: 'none',
+            name: 'My Connector',
+            type: ConnectorTypes.none,
+            fields: null,
           },
-        ],
-        connector: {
-          id: 'none',
-          name: 'My Connector',
-          type: ConnectorTypes.none,
-          fields: null,
-        },
-      };
+        };
 
-      const query = TemplateConfigurationRt.decode({
-        ...defaultRequest,
-        caseFields: caseFieldsAll,
+        const query = TemplateConfigurationRt.decode({
+          ...defaultRequest,
+          caseFields: caseFieldsAll,
+        });
+
+        expect(query).toStrictEqual({
+          _tag: 'Right',
+          right: { ...defaultRequest, caseFields: caseFieldsAll },
+        });
       });
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: { ...defaultRequest, caseFields: caseFieldsAll },
+      it(`throws an error when the assignees are more than ${MAX_ASSIGNEES_PER_CASE}`, async () => {
+        const assignees = Array(MAX_ASSIGNEES_PER_CASE + 1).fill({ uid: 'foobar' });
+
+        expect(
+          PathReporter.report(
+            TemplateConfigurationRt.decode({
+              ...defaultRequest,
+              caseFields: { ...defaultRequest.caseFields, assignees },
+            })
+          )
+        ).toContain(
+          'The length of the field assignees is too long. Array must be of length <= 10.'
+        );
+      });
+
+      it(`throws an error when the description contains more than ${MAX_DESCRIPTION_LENGTH} characters`, async () => {
+        const description = 'a'.repeat(MAX_DESCRIPTION_LENGTH + 1);
+
+        expect(
+          PathReporter.report(
+            TemplateConfigurationRt.decode({
+              ...defaultRequest,
+              caseFields: { ...defaultRequest.caseFields, description },
+            })
+          )
+        ).toContain('The length of the description is too long. The maximum length is 30000.');
+      });
+
+      it(`throws an error when there are more than ${MAX_TAGS_PER_CASE} tags`, async () => {
+        const tags = Array(MAX_TAGS_PER_CASE + 1).fill('foobar');
+
+        expect(
+          PathReporter.report(
+            TemplateConfigurationRt.decode({
+              ...defaultRequest,
+              caseFields: { ...defaultRequest.caseFields, tags },
+            })
+          )
+        ).toContain('The length of the field tags is too long. Array must be of length <= 200.');
+      });
+
+      it(`throws an error when the a tag is more than ${MAX_LENGTH_PER_TAG} characters`, async () => {
+        const tag = 'a'.repeat(MAX_LENGTH_PER_TAG + 1);
+
+        expect(
+          PathReporter.report(
+            TemplateConfigurationRt.decode({
+              ...defaultRequest,
+              caseFields: { ...defaultRequest.caseFields, tags: [tag] },
+            })
+          )
+        ).toContain('The length of the tag is too long. The maximum length is 256.');
+      });
+
+      it(`throws an error when the title contains more than ${MAX_TITLE_LENGTH} characters`, async () => {
+        const title = 'a'.repeat(MAX_TITLE_LENGTH + 1);
+
+        expect(
+          PathReporter.report(
+            TemplateConfigurationRt.decode({
+              ...defaultRequest,
+              caseFields: { ...defaultRequest.caseFields, title },
+            })
+          )
+        ).toContain('The length of the title is too long. The maximum length is 160.');
+      });
+
+      it(`throws an error when the category contains more than ${MAX_CATEGORY_LENGTH} characters`, async () => {
+        const category = 'a'.repeat(MAX_CATEGORY_LENGTH + 1);
+
+        expect(
+          PathReporter.report(
+            TemplateConfigurationRt.decode({
+              ...defaultRequest,
+              caseFields: { ...defaultRequest.caseFields, category },
+            })
+          )
+        ).toContain('The length of the category is too long. The maximum length is 50.');
+      });
+
+      it(`limits customFields to ${MAX_CUSTOM_FIELDS_PER_CASE}`, () => {
+        const customFields = Array(MAX_CUSTOM_FIELDS_PER_CASE + 1).fill({
+          key: 'first_custom_field_key',
+          type: CustomFieldTypes.TEXT,
+          value: 'this is a text field value',
+        });
+
+        expect(
+          PathReporter.report(
+            TemplateConfigurationRt.decode({
+              ...defaultRequest,
+              caseFields: { ...defaultRequest.caseFields, customFields },
+            })
+          )
+        ).toContain(
+          `The length of the field customFields is too long. Array must be of length <= ${MAX_CUSTOM_FIELDS_PER_CASE}.`
+        );
+      });
+
+      it(`throws an error when a text customFields is longer than ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH}`, () => {
+        expect(
+          PathReporter.report(
+            TemplateConfigurationRt.decode({
+              ...defaultRequest,
+              caseFields: {
+                ...defaultRequest.caseFields,
+                customFields: [
+                  {
+                    key: 'first_custom_field_key',
+                    type: CustomFieldTypes.TEXT,
+                    value: '#'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1),
+                  },
+                ],
+              },
+            })
+          )
+        ).toContain(
+          `The length of the value is too long. The maximum length is ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH}.`
+        );
       });
     });
   });

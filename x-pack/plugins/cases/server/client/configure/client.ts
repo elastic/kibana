@@ -51,6 +51,7 @@ import { validateDuplicatedKeysInRequest } from '../validators';
 import {
   validateCustomFieldTypesInRequest,
   validateTemplatesCustomFieldsInRequest,
+  validateTemplateKeysAgainstConfiguration,
 } from './validators';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 
@@ -139,7 +140,7 @@ export async function get(
 ): Promise<Configurations> {
   const {
     unsecuredSavedObjectsClient,
-    services: { caseConfigureService, licensingService },
+    services: { caseConfigureService },
     logger,
     authorization,
   } = clientArgs;
@@ -277,15 +278,19 @@ export async function update(
       originalCustomFields: configuration.attributes.customFields,
     });
 
+    validateTemplateKeysAgainstConfiguration({
+      requestTemplateFields: templates,
+      templatesConfiguration: configuration.attributes.templates,
+    });
+
     validateTemplatesCustomFieldsInRequest({
-      templates: templates,
+      templates,
       customFieldsConfiguration: configuration.attributes.customFields,
     });
 
     /**
      * Assign users to a template is only available to Platinum+
      */
-
     if (templates && templates.length) {
       const hasAssigneesInTemplate = templates.find(
         (template) => template.caseFields?.assignees && template.caseFields?.assignees.length > 0
@@ -357,6 +362,7 @@ export async function update(
       configurationId: configuration.id,
       updatedAttributes: {
         ...queryWithoutVersionAndConnector,
+        ...(templates && { templates }),
         ...(connector != null && { connector }),
         updated_at: updateDate,
         updated_by: user,
@@ -391,7 +397,7 @@ export async function create(
 ): Promise<Configuration> {
   const {
     unsecuredSavedObjectsClient,
-    services: { caseConfigureService },
+    services: { caseConfigureService, licensingService },
     logger,
     user,
     authorization,
@@ -410,6 +416,32 @@ export async function create(
       requestFields: validatedConfigurationRequest.templates,
       fieldName: 'templates',
     });
+
+    if (validatedConfigurationRequest.templates && validatedConfigurationRequest.templates.length) {
+      const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
+
+      validatedConfigurationRequest.templates.forEach((template, index) => {
+        validateDuplicatedKeysInRequest({
+          requestFields: template?.caseFields?.customFields,
+          fieldName: `templates[${index}]'s customFields`,
+        });
+
+        /**
+         * Assign users to a template is only available to Platinum+
+         */
+
+        const hasAssigneesInTemplate =
+          template.caseFields?.assignees && template.caseFields?.assignees.length > 0;
+
+        if (hasAssigneesInTemplate && !hasPlatinumLicenseOrGreater) {
+          throw Boom.forbidden(
+            'In order to assign users to cases, you must be subscribed to an Elastic Platinum license'
+          );
+        }
+
+        licensingService.notifyUsage(LICENSING_CASE_ASSIGNMENT_FEATURE);
+      });
+    }
 
     let error = null;
 

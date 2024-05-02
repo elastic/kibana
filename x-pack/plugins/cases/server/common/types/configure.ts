@@ -8,7 +8,7 @@
 import * as rt from 'io-ts';
 
 import type { SavedObject } from '@kbn/core/server';
-import type { CaseSeverity, ConfigurationAttributes } from '../../../common/types/domain';
+import type { ConfigurationAttributes } from '../../../common/types/domain';
 import {
   ConfigurationActivityFieldsRt,
   ConfigurationAttributesRt,
@@ -16,7 +16,7 @@ import {
 } from '../../../common/types/domain';
 import type { ConnectorPersisted } from './connectors';
 import type { User, UserProfile } from './user';
-import { CasePersistedCustomFields, CasePersistedSeverity } from './case';
+import type { CasePersistedCustomFields, CasePersistedSeverity } from './case';
 
 export interface ConfigurationPersistedAttributes {
   connector: ConnectorPersisted;
@@ -45,7 +45,7 @@ type PersistedTemplatesConfiguration = Array<{
   caseFields?: CaseFieldsAttributes;
 }>;
 
-export type CaseFieldsAttributes = {
+export interface CaseFieldsAttributes {
   title?: string;
   assignees?: UserProfile[];
   connector?: ConnectorPersisted;
@@ -54,7 +54,7 @@ export type CaseFieldsAttributes = {
   tags?: string[];
   category?: string | null;
   customFields?: CasePersistedCustomFields;
-};
+}
 
 export type ConfigurationTransformedAttributes = ConfigurationAttributes;
 export type ConfigurationSavedObjectTransformed = SavedObject<ConfigurationTransformedAttributes>;
