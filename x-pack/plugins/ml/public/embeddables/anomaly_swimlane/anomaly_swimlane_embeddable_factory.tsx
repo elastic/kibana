@@ -288,6 +288,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
                       padding: 8px;
                     `}
                     data-test-subj="mlAnomalySwimlaneEmbeddableWrapper"
+                    data-shared-item="" // TODO: Remove data-shared-item as part of https://github.com/elastic/kibana/issues/179376
                   >
                     <SwimlaneContainer
                       id={uuid}

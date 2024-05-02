@@ -78,7 +78,6 @@
     "@kbn/visualization-utils",
     "@kbn/ml-time-buckets",
     "@kbn/aiops-log-rate-analysis",
-    "@kbn/discover-utils"
   ],
   "exclude": [
     "target/**/*",

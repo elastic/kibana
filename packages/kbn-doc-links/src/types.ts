@@ -11,6 +11,7 @@
  */
 export interface DocLinksMeta {
   version: string;
+  ecs_version: string;
   elasticWebsiteUrl: string;
   elasticGithubUrl: string;
   docsWebsiteUrl: string;
@@ -646,6 +647,9 @@ export interface DocLinks {
   };
   readonly telemetry: {
     readonly settings: string;
+  };
+  readonly playground: {
+    readonly chatPlayground: string;
   };
 }
 

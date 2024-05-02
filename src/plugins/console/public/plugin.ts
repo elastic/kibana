@@ -18,18 +18,30 @@ import {
   ConsolePluginSetup,
   ConsolePluginStart,
   ConsoleUILocatorParams,
-  EmbeddableConsoleProps,
   EmbeddedConsoleView,
 } from './types';
-import { AutocompleteInfo, setAutocompleteInfo, EmbeddableConsoleInfo } from './services';
+import {
+  AutocompleteInfo,
+  setAutocompleteInfo,
+  EmbeddableConsoleInfo,
+  createStorage,
+  setStorage,
+} from './services';
 
 export class ConsoleUIPlugin
   implements Plugin<ConsolePluginSetup, ConsolePluginStart, AppSetupUIPluginDependencies>
 {
   private readonly autocompleteInfo = new AutocompleteInfo();
-  private _embeddableConsole: EmbeddableConsoleInfo = new EmbeddableConsoleInfo();
+  private _embeddableConsole: EmbeddableConsoleInfo;
 
-  constructor(private ctx: PluginInitializerContext) {}
+  constructor(private ctx: PluginInitializerContext) {
+    const storage = createStorage({
+      engine: window.localStorage,
+      prefix: 'sense:',
+    });
+    setStorage(storage);
+    this._embeddableConsole = new EmbeddableConsoleInfo(storage);
+  }
 
   public setup(
     { notifications, getStartServices, http }: CoreSetup,
@@ -125,15 +137,16 @@ export class ConsoleUIPlugin
       embeddedConsoleUiSetting;
 
     if (embeddedConsoleAvailable) {
-      consoleStart.EmbeddableConsole = (props: EmbeddableConsoleProps) => {
+      consoleStart.EmbeddableConsole = (_props: {}) => {
         return EmbeddableConsole({
-          ...props,
           core,
           usageCollection: deps.usageCollection,
           setDispatch: (d) => {
             this._embeddableConsole.setDispatch(d);
           },
           alternateView: this._embeddableConsole.alternateView,
+          getConsoleHeight: this._embeddableConsole.getConsoleHeight.bind(this._embeddableConsole),
+          setConsoleHeight: this._embeddableConsole.setConsoleHeight.bind(this._embeddableConsole),
         });
       };
       consoleStart.isEmbeddedConsoleAvailable = () =>
