@@ -15,12 +15,11 @@ import {
   DashboardLocatorParams,
   getDashboardLocatorParamsFromEmbeddable,
 } from '@kbn/dashboard-plugin/public';
-import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 import {
   DashboardDrilldownOptions,
   DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
 } from '@kbn/presentation-util-plugin/public';
-import type { HasParentApi, PublishesUnifiedSearch } from '@kbn/presentation-publishing';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import {
   DASHBOARD_LINK_TYPE,
@@ -40,8 +39,12 @@ export const DashboardLinkComponent = ({
   layout: LinksLayoutType;
   api: LinksApi;
 }) => {
-  const dashboardContainer = api.parentApi as DashboardContainer;
-  const parentDashboardId = dashboardContainer.getDashboardSavedObjectId();
+  const [parentDashboardId, parentDashboardTitle, parentDashboardDescription] =
+    useBatchedPublishingSubjects(
+      api.parentApi.savedObjectId,
+      api.parentApi.panelTitle,
+      api.parentApi.panelDescription
+    );
 
   /**
    * Returns the title and description of the dashboard that the link points to; note that, if the link points to
@@ -50,9 +53,9 @@ export const DashboardLinkComponent = ({
    */
   const [dashboardTitle, dashboardDescription] = useMemo(() => {
     return link.destination === parentDashboardId
-      ? [dashboardContainer.getTitle(), dashboardContainer.getDescription()]
+      ? [parentDashboardTitle, parentDashboardDescription]
       : [link.label ?? link.title, link.description];
-  }, [link, parentDashboardId, dashboardContainer]);
+  }, [link, parentDashboardId, parentDashboardTitle, parentDashboardDescription]);
 
   const { tooltipTitle, tooltipMessage } = useMemo(() => {
     if (link.error) {
@@ -81,13 +84,10 @@ export const DashboardLinkComponent = ({
 
     const params: DashboardLocatorParams = {
       dashboardId: link.destination,
-      ...getDashboardLocatorParamsFromEmbeddable(
-        api as Partial<PublishesUnifiedSearch & HasParentApi<Partial<PublishesUnifiedSearch>>>,
-        linkOptions
-      ),
+      ...getDashboardLocatorParamsFromEmbeddable(api, linkOptions),
     };
 
-    const locator = dashboardContainer.locator;
+    const locator = api.parentApi.locator;
     if (!locator) return;
 
     const href = locator.getRedirectUrl(params);
@@ -114,7 +114,7 @@ export const DashboardLinkComponent = ({
         }
       },
     };
-  }, [link, parentDashboardId, api, dashboardContainer.locator]);
+  }, [link, parentDashboardId, api]);
 
   const id = `dashboardLink--${link.id}`;
 
