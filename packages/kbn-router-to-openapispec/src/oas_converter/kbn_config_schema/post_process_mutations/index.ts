@@ -27,7 +27,8 @@ const walkSchema = (ctx: IContext, schema: OpenAPIV3.SchemaObject): void => {
   /* At runtime 'type' can be broader than 'NonArraySchemaObjectType', so we set it to 'string' */
   const type: undefined | string = schema.type;
   if (type === 'array') {
-    walkSchema(ctx, schema.items as OpenAPIV3.SchemaObject);
+    const items = (schema as OpenAPIV3.ArraySchemaObject).items;
+    walkSchema(ctx, items as OpenAPIV3.SchemaObject);
   } else if (type === 'object') {
     if (schema.properties) {
       Object.values(schema.properties).forEach((value) => {
