@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment-timezone';
+import moment, { type Duration } from 'moment-timezone';
 import { getFileInfo } from './fs';
 
 export const listFilesExceedingSize = async ({
@@ -34,13 +34,13 @@ export const listFilesExceedingSize = async ({
 
 export const listFilesOlderThan = async ({
   orderedFiles,
-  maxDays,
+  duration,
 }: {
   orderedFiles: string[];
-  maxDays: number;
+  duration: Duration;
 }): Promise<string[]> => {
   const filesOlderThanLimit = [];
-  const timeLimit = moment().add(-maxDays, 'day').toDate().getTime();
+  const timeLimit = moment().subtract(duration).toDate().getTime();
 
   for (let i = 0; i < orderedFiles.length; i++) {
     const filePath = orderedFiles[i];

@@ -17,7 +17,7 @@ export const retentionPolicyConfigSchema = schema.object(
   {
     maxFiles: schema.maybe(schema.number({ min: 1, max: 100 })),
     maxAccumulatedFileSize: schema.maybe(schema.byteSize()),
-    removeOlderThan: schema.maybe(schema.number({ min: 1, max: 365 })),
+    removeOlderThan: schema.maybe(schema.duration({ min: '1d', max: '365d' })),
   },
   {
     validate: (config) => {
@@ -71,7 +71,7 @@ export class GenericRetentionPolicy implements RetentionPolicy {
     if (removeOlderThan) {
       const toRemoveByAge = await listFilesOlderThan({
         orderedFiles: absOrderedFiles,
-        maxDays: removeOlderThan,
+        duration: removeOlderThan,
       });
       toRemoveByAge.forEach((file) => filesToDelete.add(file));
     }

@@ -14,7 +14,7 @@ import type { TriggeringPolicy } from './policies/policy';
 import type { RollingStrategy } from './strategies/strategy';
 import type { RetentionPolicy } from './retention/retention_policy';
 
-const createContextMock = (filePath: string) => {
+const createContextMock = (filePath: string = 'kibana.log') => {
   const mock: jest.Mocked<RollingFileContext> = {
     currentFileSize: 0,
     currentFileTime: 0,

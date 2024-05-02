@@ -119,5 +119,5 @@ export interface NumericRollingStrategyConfig {
 export interface RetentionPolicyConfig {
   maxFiles?: number;
   maxAccumulatedFileSize?: ByteSizeValue;
-  removeOlderThan?: number;
+  removeOlderThan?: Duration;
 }
