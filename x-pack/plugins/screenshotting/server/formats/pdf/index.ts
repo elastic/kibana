@@ -130,9 +130,9 @@ export async function toPdf(
     }
   } else {
     buffer = results[0].screenshots[0].data; // This buffer is already the PDF
-    pages = await PDFJS.getDocument({ data: buffer }).promise.then((doc) => {
+    pages = await PDFJS.getDocument({ data: buffer }).promise.then(async (doc) => {
       const numPages = doc.numPages;
-      doc.destroy();
+      await doc.destroy();
       return numPages;
     });
   }

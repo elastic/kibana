@@ -140,13 +140,13 @@ describe('CompleteExternalTaskRunner class', () => {
         return clientMock;
       }
     );
-    runnerInstance.run();
+    void runnerInstance.run();
 
     await waitFor(() => {
       expect(endpointContextServicesMock.getInternalResponseActionsClient).toHaveBeenCalled();
     });
 
-    runnerInstance.cancel();
+    await runnerInstance.cancel();
 
     expect(processPendingActionsAbortSignal!.aborted).toBe(true);
   });
