@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { mount } from 'enzyme';
 import { act, render, within, fireEvent, waitFor } from '@testing-library/react';
@@ -56,10 +57,11 @@ describe('CreateCaseForm', () => {
   let globalForm: FormHook;
   const draftStorageKey = `cases.caseView.createCase.description.markdownEditor`;
 
-  const MockHookWrapperComponent: React.FC<{ testProviderProps?: unknown }> = ({
-    children,
-    testProviderProps = {},
-  }) => {
+  const MockHookWrapperComponent: FC<
+    PropsWithChildren<{
+      testProviderProps?: unknown;
+    }>
+  > = ({ children, testProviderProps = {} }) => {
     const { form } = useForm<FormProps>({
       defaultValue: initialCaseValue,
       options: { stripEmptyFields: false },
