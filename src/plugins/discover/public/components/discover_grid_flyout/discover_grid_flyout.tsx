@@ -209,6 +209,7 @@ export function DiscoverGridFlyout({
   return (
     <EuiPortal>
       <EuiFlyout
+        className="DiscoverFlyout" // used to override the z-index of the flyout from SecuritySolution
         onClose={onClose}
         size={flyoutSize}
         data-test-subj="docTableDetailsFlyout"
