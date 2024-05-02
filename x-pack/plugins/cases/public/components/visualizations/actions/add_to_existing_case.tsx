@@ -26,6 +26,8 @@ export const createAddToExistingCaseLensAction = (
   return createAction<EmbeddableApiContext>({
     id: ACTION_ID,
     type: 'actionButton',
+    order: 10,
+    grouping: [{ id: 'case', order: 6 }],
     getIconType: () => 'casesApp',
     getDisplayName: () => ADD_TO_EXISTING_CASE_DISPLAYNAME,
     isCompatible: async ({ embeddable }) => {

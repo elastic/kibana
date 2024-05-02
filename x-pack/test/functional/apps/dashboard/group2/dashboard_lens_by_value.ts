@@ -42,7 +42,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('edits to a by value lens panel are properly applied', async () => {
       await PageObjects.dashboard.waitForRenderComplete();
-      await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickEdit();
       await PageObjects.lens.switchToVisualization('donut');
       await PageObjects.lens.saveAndReturn();
@@ -55,7 +54,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('editing and saving a lens by value panel retains number of panels', async () => {
       const originalPanelCount = await PageObjects.dashboard.getPanelCount();
       await PageObjects.dashboard.waitForRenderComplete();
-      await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickEdit();
       await PageObjects.lens.switchToVisualization('treemap');
       await PageObjects.lens.saveAndReturn();

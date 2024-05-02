@@ -19,7 +19,7 @@
 .dshLayout--editing {
   .react-resizable-handle {
     @include size($euiSizeL);
-    z-index: $euiZLevel1; /* 1 */
+    z-index: $euiZLevel2; /* 1 */
     right: 0;
     bottom: 0;
     padding-right: $euiSizeS;
@@ -40,8 +40,7 @@
  * Shifting the rendered panels offscreen prevents a quick flash when redrawing the panels on minimize
  */
 .dshDashboardGrid__item--hidden {
-  top: -9999px;
-  left: -9999px;
+  transform: translate(-9999px, -9999px);
 }
 
 /**
@@ -98,13 +97,25 @@
    */
   &.resizing,
   &.react-draggable-dragging {
-    z-index: $euiZLevel2 !important;
+    z-index: $euiZLevel3 !important;
   }
 
   &.react-draggable-dragging {
     transition: box-shadow $euiAnimSpeedFast $euiAnimSlightResistance;
     @include euiBottomShadowLarge;
     border-radius: $euiBorderRadius; // keeps shadow within bounds
+
+    .embPanel__hoverActionsWrapper {
+      top: -$euiSizeXL;
+    }
+
+    .embPanel__hoverActionsLeft {
+      opacity: 1 !important;
+    }
+
+    .embPanel__hoverActionsRight {
+      opacity: 0 !important;
+    }
   }
 
   /**

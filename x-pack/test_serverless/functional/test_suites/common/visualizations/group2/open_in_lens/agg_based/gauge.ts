@@ -43,12 +43,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should show the "Convert to Lens" menu item', async () => {
-      const visPanel = await panelActions.getPanelHeading('Gauge - Basic');
+      const visPanel = await panelActions.getPanelHoverActions('Gauge - Basic');
       expect(await panelActions.canConvertToLens(visPanel)).to.eql(true);
     });
 
     it('should convert aggregation with params', async () => {
-      const visPanel = await panelActions.getPanelHeading('Gauge - Agg with params');
+      const visPanel = await panelActions.getPanelHoverActions('Gauge - Agg with params');
       await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('gaugeChart');
 

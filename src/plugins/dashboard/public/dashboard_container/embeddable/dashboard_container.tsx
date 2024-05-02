@@ -60,6 +60,7 @@ import { DashboardContainerInput, DashboardPanelState } from '../../../common';
 import { getReferencesForPanelId } from '../../../common/dashboard_container/persistable_state/dashboard_container_references';
 import {
   DASHBOARD_APP_ID,
+  DASHBOARD_MARGIN_SIZE,
   DASHBOARD_UI_METRIC_ID,
   DEFAULT_PANEL_HEIGHT,
   DEFAULT_PANEL_WIDTH,
@@ -793,7 +794,8 @@ export class DashboardContainer
         return;
       }
 
-      panelRef.scrollIntoView({ block: 'center' });
+      if (panelRef.style.top)
+        window.scrollTo(0, parseInt(panelRef.style.top, 10) - DASHBOARD_MARGIN_SIZE);
     });
   };
 

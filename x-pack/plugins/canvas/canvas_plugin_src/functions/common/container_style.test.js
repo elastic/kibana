@@ -140,9 +140,9 @@ describe('containerStyle', () => {
         result = fn(null, { overflow: 'hidden' });
         expect(result).toHaveProperty('overflow', 'hidden');
       });
-      it(`defaults to 'hidden'`, () => {
+      it(`defaults to 'visible'`, () => {
         const result = fn(null);
-        expect(result).toHaveProperty('overflow', 'hidden');
+        expect(result).toHaveProperty('overflow', 'visible');
       });
     });
   });

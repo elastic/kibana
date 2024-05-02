@@ -14,9 +14,11 @@ export const PanelLoader = (props: {
   showShadow?: boolean;
   showBorder?: boolean;
   dataTestSubj?: string;
+  className?: string;
 }) => {
   return (
     <EuiPanel
+      className={props.className}
       css={css`
         z-index: auto;
         flex: 1;

@@ -42,13 +42,13 @@ export const getMockLensApi = (
   ({
     type: 'lens',
     getSavedVis: () => {},
-    canViewUnderlyingData: () => {},
+    canViewUnderlyingData$: new BehaviorSubject(true),
     getViewUnderlyingDataArgs: () => {},
     getFullAttributes: () => {
       return mockLensAttributes;
     },
     panelTitle: new BehaviorSubject('myPanel'),
-    hidePanelTitle: new BehaviorSubject('false'),
+    hidePanelTitle: new BehaviorSubject(false),
     timeslice$: new BehaviorSubject<[number, number] | undefined>(undefined),
     timeRange$: new BehaviorSubject<TimeRange | undefined>({
       from,

@@ -27,6 +27,8 @@ interface BuildAllDashboardActionsProps {
   plugins: DashboardStartDependencies;
 }
 
+export const dashboardActionGroup = { id: 'dashboard_actions', order: 10 };
+
 export const buildAllDashboardActions = async ({
   core,
   plugins,

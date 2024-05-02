@@ -22,7 +22,6 @@ export function DashboardDrilldownPanelActionsProvider({ getService }: FtrProvid
       log.debug('expectExistsCreateDrilldownAction');
       await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.expectContextMenuToBeOpen();
-      await dashboardPanelActions.clickContextMenuMoreItem();
       await await testSubjects.existOrFail(CREATE_DRILLDOWN_DATA_TEST_SUBJ);
     }
 
@@ -30,7 +29,6 @@ export function DashboardDrilldownPanelActionsProvider({ getService }: FtrProvid
       log.debug('expectMissingCreateDrilldownAction');
       await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.expectContextMenuToBeOpen();
-      await dashboardPanelActions.clickContextMenuMoreItem();
       await testSubjects.existOrFail(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ);
     }
 
@@ -44,7 +42,6 @@ export function DashboardDrilldownPanelActionsProvider({ getService }: FtrProvid
       log.debug('expectExistsCreateDrilldownAction');
       await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.expectContextMenuToBeOpen();
-      await dashboardPanelActions.clickContextMenuMoreItem();
       await testSubjects.existOrFail(CREATE_DRILLDOWN_DATA_TEST_SUBJ);
     }
 
@@ -52,7 +49,6 @@ export function DashboardDrilldownPanelActionsProvider({ getService }: FtrProvid
       log.debug('expectExistsRemovePanelAction');
       await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.expectContextMenuToBeOpen();
-      await dashboardPanelActions.clickContextMenuMoreItem();
       await testSubjects.existOrFail(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ);
     }
 

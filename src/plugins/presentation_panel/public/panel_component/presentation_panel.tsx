@@ -52,6 +52,7 @@ export const PresentationPanel = <
   if (loading)
     return props.hideLoader ? null : (
       <PanelLoader
+        className="embPanel embPanel--loading"
         showShadow={props.showShadow}
         showBorder={props.showBorder}
         dataTestSubj="embeddablePanelLoadingIndicator"

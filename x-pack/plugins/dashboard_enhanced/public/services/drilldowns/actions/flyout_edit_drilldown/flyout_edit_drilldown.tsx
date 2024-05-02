@@ -57,6 +57,7 @@ export class FlyoutEditDrilldownAction implements Action<EmbeddableApiContext> {
   public readonly type = OPEN_FLYOUT_EDIT_DRILLDOWN;
   public readonly id = OPEN_FLYOUT_EDIT_DRILLDOWN;
   public order = 10;
+  public grouping = [{ id: 'drilldown', order: 3 }];
 
   constructor(protected readonly params: FlyoutEditDrilldownParams) {}
 
