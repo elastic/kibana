@@ -8,22 +8,25 @@
 
 import { TimeRange, Filter, Query, AggregateQuery } from '@kbn/es-query';
 import { PublishingSubject } from '../../publishing_subject';
+import { PublishesFilters } from '../publishes_filters';
 
-export interface PublishesTimeRange {
+export interface PublishesTimeslice {
+  timeslice$?: PublishingSubject<[number, number] | undefined>;
+}
+export interface PublishesTimeRange extends PublishesTimeslice {
   timeRange$: PublishingSubject<TimeRange | undefined>;
   timeRestore$?: PublishingSubject<boolean | undefined>;
-  timeslice$?: PublishingSubject<[number, number] | undefined>;
 }
 
 export type PublishesWritableTimeRange = PublishesTimeRange & {
   setTimeRange: (timeRange: TimeRange | undefined) => void;
 };
 
-export type PublishesUnifiedSearch = PublishesTimeRange & {
-  isCompatibleWithUnifiedSearch?: () => boolean;
-  filters$: PublishingSubject<Filter[] | undefined>;
-  query$: PublishingSubject<Query | AggregateQuery | undefined>;
-};
+export type PublishesUnifiedSearch = PublishesTimeRange &
+  PublishesFilters & {
+    isCompatibleWithUnifiedSearch?: () => boolean;
+    query$: PublishingSubject<Query | AggregateQuery | undefined>;
+  };
 
 export type PublishesWritableUnifiedSearch = PublishesUnifiedSearch &
   PublishesWritableTimeRange & {

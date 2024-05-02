@@ -10,24 +10,24 @@ import React from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
 import { EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
-import { SearchExample } from './control_renderer_examples/search_example';
-import { EditExample } from './control_renderer_examples/edit_example';
-import { BasicReduxExample } from './control_renderer_examples/basic_redux_example';
-import { AddButtonExample } from './control_renderer_examples/add_button_example';
+import { SearchExample } from './control_group_renderer_examples/search_example';
+import { EditExample } from './control_group_renderer_examples/edit_example';
+import { BasicReduxExample } from './control_group_renderer_examples/basic_redux_example';
+import { AddButtonExample } from './control_group_renderer_examples/add_button_example';
 import { ControlsExampleStartDeps } from '../plugin';
 
-export const ControlRendererExamples = ({ data, navigation }: ControlsExampleStartDeps) => {
+export const ControlGroupRendererExamples = ({ data, navigation }: ControlsExampleStartDeps) => {
   const {
     loading,
     value: dataViews,
     error,
   } = useAsync(async () => {
-    return data.dataViews.find('kibana_sample_data_logs');
+    return await data.dataViews.find('kibana_sample_data_logs');
   }, []);
 
-  return loading ? (
-    <EuiLoadingSpinner />
-  ) : dataViews.length > 0 && !error ? (
+  if (loading) return <EuiLoadingSpinner />;
+
+  return dataViews && dataViews.length > 0 && !error ? (
     <>
       <SearchExample dataView={dataViews[0]} navigation={navigation} data={data} />
       <EuiSpacer size="xl" />

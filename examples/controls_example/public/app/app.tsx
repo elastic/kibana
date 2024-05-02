@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
-import ReactDOM from 'react-dom';
 import {
   EuiPage,
   EuiPageBody,
@@ -18,51 +16,19 @@ import {
   EuiTab,
   EuiTabs,
 } from '@elastic/eui';
+import React, { useState } from 'react';
+import ReactDOM from 'react-dom';
 
 import { AppMountParameters } from '@kbn/core/public';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { ControlsExampleStartDeps } from '../plugin';
-import { BasicReduxExample } from './control_renderer_examples/basic_redux_example';
-import { EditExample } from './control_renderer_examples/edit_example';
-import { SearchExample } from './control_renderer_examples/search_example';
-import { AddButtonExample } from './control_renderer_examples/add_button_example';
-import { ControlRendererExamples } from './control_renderer_examples';
-
-// export const renderApp = async (
-// { data, navigation }: ControlsExampleStartDeps,
-// { element }: AppMountParameters
-// ) => {
-// const dataViews = await data.dataViews.find('kibana_sample_data_logs');
-// const examples =
-//   dataViews.length > 0 ? (
-//     <>
-//       <SearchExample dataView={dataViews[0]} navigation={navigation} data={data} />
-//       <EuiSpacer size="xl" />
-//       <EditExample />
-//       <EuiSpacer size="xl" />
-//       <BasicReduxExample dataViewId={dataViews[0].id!} />
-//       <EuiSpacer size="xl" />
-//       <AddButtonExample dataViewId={dataViews[0].id!} />
-//     </>
-//   ) : (
-//     <div>{'Install web logs sample data to run controls examples.'}</div>
-//   );
-
-//   ReactDOM.render(
-//     <KibanaPageTemplate>
-//       <KibanaPageTemplate.Header pageTitle="Controls as a Building Block" />
-//       <KibanaPageTemplate.Section>{examples}</KibanaPageTemplate.Section>
-//     </KibanaPageTemplate>,
-//     element
-//   );
-//   return () => ReactDOM.unmountComponentAtNode(element);
-// };
+import { ControlGroupRendererExamples } from './control_group_renderer_examples';
+import { RegisterControlType } from './register_control_type';
 
 const CONTROLS_AS_A_BUILDING_BLOCK = 'controls_as_a_building_block';
 const CONTROLS_REFACTOR_TEST = 'controls_refactor_test';
 
 const App = ({ data, navigation }: ControlsExampleStartDeps) => {
-  const [selectedTabId, setSelectedTabId] = useState(CONTROLS_AS_A_BUILDING_BLOCK);
+  const [selectedTabId, setSelectedTabId] = useState(CONTROLS_REFACTOR_TEST); // TODO: Make this the first tab
 
   function onSelectedTabChanged(tabId: string) {
     setSelectedTabId(tabId);
@@ -70,10 +36,10 @@ const App = ({ data, navigation }: ControlsExampleStartDeps) => {
 
   function renderTabContent() {
     if (selectedTabId === CONTROLS_REFACTOR_TEST) {
-      return <>test</>;
+      return <RegisterControlType />;
     }
 
-    return <ControlRendererExamples data={data} navigation={navigation} />;
+    return <ControlGroupRendererExamples data={data} navigation={navigation} />;
   }
 
   return (
@@ -95,7 +61,7 @@ const App = ({ data, navigation }: ControlsExampleStartDeps) => {
                 onClick={() => onSelectedTabChanged(CONTROLS_REFACTOR_TEST)}
                 isSelected={CONTROLS_REFACTOR_TEST === selectedTabId}
               >
-                Register new embeddable type
+                Register new control type
               </EuiTab>
             </EuiTabs>
 

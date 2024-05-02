@@ -10,8 +10,10 @@ import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/publ
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import img from './control_group_image.png';
 import { PLUGIN_ID } from './constants';
+import { registerControlFactory } from './controls/control_factory_registry';
+import { SEARCH_CONTROL_TYPE } from './controls/search_control/types';
+import img from './control_group_image.png';
 
 interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
@@ -45,7 +47,21 @@ export class ControlsExamplePlugin
     });
   }
 
-  public start(core: CoreStart) {}
+  public start(core: CoreStart) {
+    registerControlFactory(SEARCH_CONTROL_TYPE, async () => {
+      const { getSearchEmbeddableFactory } = await import(
+        './controls/search_control/get_search_control_factory'
+      );
+      return getSearchEmbeddableFactory();
+    });
+
+    // registerReactEmbeddableFactory(EUI_MARKDOWN_ID, async () => {
+    //   const { markdownEmbeddableFactory } = await import(
+    //     './react_embeddables/eui_markdown/eui_markdown_react_embeddable'
+    //   );
+    //   return markdownEmbeddableFactory;
+    // });
+  }
 
   public stop() {}
 }

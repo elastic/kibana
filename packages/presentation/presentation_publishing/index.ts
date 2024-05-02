@@ -42,6 +42,7 @@ export {
   type PublishesTimeRange,
   type PublishesUnifiedSearch,
   type PublishesWritableUnifiedSearch,
+  type PublishesTimeslice,
 } from './interfaces/fetch/publishes_unified_search';
 export {
   apiHasAppContext,
@@ -85,6 +86,12 @@ export {
   apiPublishesDisabledActionIds,
   type PublishesDisabledActionIds,
 } from './interfaces/publishes_disabled_action_ids';
+export {
+  apiPublishesFilter,
+  apiPublishesFilters,
+  type PublishesFilter,
+  type PublishesFilters,
+} from './interfaces/publishes_filters';
 export {
   apiPublishesPhaseEvents,
   type PhaseEvent,
