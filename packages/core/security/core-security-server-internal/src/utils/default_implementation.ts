@@ -15,10 +15,10 @@ export const getDefaultSecurityImplementation = (): CoreSecurityDelegateContract
     },
     audit: {
       asScoped: () => {
-        return { log: () => null, enabled: false };
+        return { log: () => undefined, enabled: false };
       },
       withoutRequest: {
-        log: () => null,
+        log: () => undefined,
         enabled: false,
       },
     },

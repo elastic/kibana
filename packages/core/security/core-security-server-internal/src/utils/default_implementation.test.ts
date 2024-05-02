@@ -26,7 +26,7 @@ describe('getDefaultSecurityImplementation', () => {
   describe('audit.asScoped', () => {
     it('returns null', async () => {
       const logger = implementation.audit.asScoped({} as any);
-      expect(logger.log({ message: 'something' })).toBeNull();
+      expect(logger.log({ message: 'something' })).toBeUndefined();
     });
   });
 
@@ -34,7 +34,7 @@ describe('getDefaultSecurityImplementation', () => {
     it('does not log', async () => {
       const logger = implementation.audit.withoutRequest;
       expect(logger.enabled).toBe(false);
-      expect(logger.log({ message: 'no request' })).toBeNull();
+      expect(logger.log({ message: 'no request' })).toBeUndefined();
     });
   });
 });
