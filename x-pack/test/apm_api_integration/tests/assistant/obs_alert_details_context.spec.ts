@@ -8,6 +8,7 @@
 import moment from 'moment';
 import { log, apm, generateShortId, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
+import { LogCategories } from '@kbn/apm-plugin/server/routes/assistant_functions/get_log_categories';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { SupertestReturnType } from '../../common/apm_api_supertest';
 
@@ -26,10 +27,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const range = timerange(start, end);
 
       describe('when no traces or logs are available', async () => {
-        let response: SupertestReturnType<'GET /internal/apm/assistant/get_obs_alert_details_context'>;
+        let response: SupertestReturnType<'GET /internal/apm/assistant/alert_details_contextual_insights'>;
         before(async () => {
           response = await apmApiClient.writeUser({
-            endpoint: 'GET /internal/apm/assistant/get_obs_alert_details_context',
+            endpoint: 'GET /internal/apm/assistant/alert_details_contextual_insights',
             params: {
               query: {
                 alert_started_at: new Date(end).toISOString(),
@@ -39,11 +40,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('returns nothing', () => {
-          expect(response.body).to.eql({
-            serviceChangePoints: [],
-            exitSpanChangePoints: [],
-            anomalies: [],
-          });
+          expect(response.body.context).to.eql([]);
         });
       });
 
@@ -61,10 +58,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         describe('when no params are specified', async () => {
-          let response: SupertestReturnType<'GET /internal/apm/assistant/get_obs_alert_details_context'>;
+          let response: SupertestReturnType<'GET /internal/apm/assistant/alert_details_contextual_insights'>;
           before(async () => {
             response = await apmApiClient.writeUser({
-              endpoint: 'GET /internal/apm/assistant/get_obs_alert_details_context',
+              endpoint: 'GET /internal/apm/assistant/alert_details_contextual_insights',
               params: {
                 query: {
                   alert_started_at: new Date(end).toISOString(),
@@ -73,26 +70,21 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             });
           });
 
-          it('returns no service summary', async () => {
-            expect(response.body.serviceSummary).to.be(undefined);
-          });
-
-          it('returns no downstream dependencies', async () => {
-            expect(response.body.downstreamDependencies ?? []).to.eql([]);
-          });
-
-          it('returns 1 log category', async () => {
-            expect(response.body.logCategories?.map(({ errorCategory }) => errorCategory)).to.eql([
-              'Error message from container my-container-a',
-            ]);
+          it('returns only 1 log category', async () => {
+            expect(response.body.context).to.have.length(1);
+            expect(
+              (response.body.context[0]?.data as LogCategories)?.map(
+                ({ errorCategory }: { errorCategory: string }) => errorCategory
+              )
+            ).to.eql(['Error message from container my-container-a']);
           });
         });
 
         describe('when service name is specified', async () => {
-          let response: SupertestReturnType<'GET /internal/apm/assistant/get_obs_alert_details_context'>;
+          let response: SupertestReturnType<'GET /internal/apm/assistant/alert_details_contextual_insights'>;
           before(async () => {
             response = await apmApiClient.writeUser({
-              endpoint: 'GET /internal/apm/assistant/get_obs_alert_details_context',
+              endpoint: 'GET /internal/apm/assistant/alert_details_contextual_insights',
               params: {
                 query: {
                   alert_started_at: new Date(end).toISOString(),
@@ -103,7 +95,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           it('returns service summary', () => {
-            expect(response.body.serviceSummary).to.eql({
+            const serviceSummary = response.body.context.find(
+              ({ key }) => key === 'serviceSummary'
+            );
+            expect(serviceSummary?.data).to.eql({
               'service.name': 'Backend',
               'service.environment': ['production'],
               'agent.name': 'java',
@@ -117,7 +112,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           it('returns downstream dependencies', async () => {
-            expect(response.body.downstreamDependencies).to.eql([
+            const downstreamDependencies = response.body.context.find(
+              ({ key }) => key === 'downstreamDependencies'
+            );
+            expect(downstreamDependencies?.data).to.eql([
               {
                 'span.destination.service.resource': 'elasticsearch',
                 'span.type': 'db',
@@ -127,9 +125,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           it('returns log categories', () => {
-            expect(response.body.logCategories).to.have.length(1);
+            const logCategories = response.body.context.find(({ key }) => key === 'logCategories');
+            expect(logCategories?.data).to.have.length(1);
 
-            const logCategory = response.body.logCategories?.[0];
+            const logCategory = (logCategories?.data as LogCategories)?.[0];
             expect(logCategory?.sampleMessage).to.match(
               /Error message #\d{16} from container my-container-a/
             );
@@ -139,10 +138,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         describe('when container id is specified', async () => {
-          let response: SupertestReturnType<'GET /internal/apm/assistant/get_obs_alert_details_context'>;
+          let response: SupertestReturnType<'GET /internal/apm/assistant/alert_details_contextual_insights'>;
           before(async () => {
             response = await apmApiClient.writeUser({
-              endpoint: 'GET /internal/apm/assistant/get_obs_alert_details_context',
+              endpoint: 'GET /internal/apm/assistant/alert_details_contextual_insights',
               params: {
                 query: {
                   alert_started_at: new Date(end).toISOString(),
@@ -153,7 +152,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           it('returns service summary', () => {
-            expect(response.body.serviceSummary).to.eql({
+            const serviceSummary = response.body.context.find(
+              ({ key }) => key === 'serviceSummary'
+            );
+            expect(serviceSummary?.data).to.eql({
               'service.name': 'Backend',
               'service.environment': ['production'],
               'agent.name': 'java',
@@ -167,7 +169,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           it('returns downstream dependencies', async () => {
-            expect(response.body.downstreamDependencies).to.eql([
+            const downstreamDependencies = response.body.context.find(
+              ({ key }) => key === 'downstreamDependencies'
+            );
+            expect(downstreamDependencies?.data).to.eql([
               {
                 'span.destination.service.resource': 'elasticsearch',
                 'span.type': 'db',
@@ -177,9 +182,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           it('returns log categories', () => {
-            expect(response.body.logCategories).to.have.length(1);
+            const logCategories = response.body.context.find(({ key }) => key === 'logCategories');
+            expect(logCategories?.data).to.have.length(1);
 
-            const logCategory = response.body.logCategories?.[0];
+            const logCategory = (logCategories?.data as LogCategories)?.[0];
             expect(logCategory?.sampleMessage).to.match(
               /Error message #\d{16} from container my-container-a/
             );
@@ -189,10 +195,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         describe('when non-existing container id is specified', async () => {
-          let response: SupertestReturnType<'GET /internal/apm/assistant/get_obs_alert_details_context'>;
+          let response: SupertestReturnType<'GET /internal/apm/assistant/alert_details_contextual_insights'>;
           before(async () => {
             response = await apmApiClient.writeUser({
-              endpoint: 'GET /internal/apm/assistant/get_obs_alert_details_context',
+              endpoint: 'GET /internal/apm/assistant/alert_details_contextual_insights',
               params: {
                 query: {
                   alert_started_at: new Date(end).toISOString(),
@@ -203,20 +209,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           it('returns nothing', () => {
-            expect(response.body).to.eql({
-              logCategories: [],
-              serviceChangePoints: [],
-              exitSpanChangePoints: [],
-              anomalies: [],
-            });
+            expect(response.body.context).to.eql([]);
           });
         });
 
         describe('when non-existing service.name is specified', async () => {
-          let response: SupertestReturnType<'GET /internal/apm/assistant/get_obs_alert_details_context'>;
+          let response: SupertestReturnType<'GET /internal/apm/assistant/alert_details_contextual_insights'>;
           before(async () => {
             response = await apmApiClient.writeUser({
-              endpoint: 'GET /internal/apm/assistant/get_obs_alert_details_context',
+              endpoint: 'GET /internal/apm/assistant/alert_details_contextual_insights',
               params: {
                 query: {
                   alert_started_at: new Date(end).toISOString(),
@@ -227,7 +228,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           it('returns empty service summary', () => {
-            expect(response.body.serviceSummary).to.eql({
+            const serviceSummary = response.body.context.find(
+              ({ key }) => key === 'serviceSummary'
+            );
+            expect(serviceSummary?.data).to.eql({
               'service.name': 'non-existing-service',
               'service.environment': [],
               instances: 1,
@@ -238,11 +242,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           it('returns no downstream dependencies', async () => {
-            expect(response.body.downstreamDependencies).to.eql([]);
+            const downstreamDependencies = response.body.context.find(
+              ({ key }) => key === 'downstreamDependencies'
+            );
+            expect(downstreamDependencies).to.eql(undefined);
           });
 
           it('returns log categories', () => {
-            expect(response.body.logCategories).to.have.length(1);
+            const logCategories = response.body.context.find(({ key }) => key === 'logCategories');
+            expect(logCategories?.data).to.have.length(1);
           });
         });
       });
@@ -276,10 +284,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         describe('when no params are specified', async () => {
-          let response: SupertestReturnType<'GET /internal/apm/assistant/get_obs_alert_details_context'>;
+          let response: SupertestReturnType<'GET /internal/apm/assistant/alert_details_contextual_insights'>;
           before(async () => {
             response = await apmApiClient.writeUser({
-              endpoint: 'GET /internal/apm/assistant/get_obs_alert_details_context',
+              endpoint: 'GET /internal/apm/assistant/alert_details_contextual_insights',
               params: {
                 query: {
                   alert_started_at: new Date(end).toISOString(),
@@ -289,22 +297,27 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           it('returns no service summary', async () => {
-            expect(response.body.serviceSummary).to.be(undefined);
+            const serviceSummary = response.body.context.find(
+              ({ key }) => key === 'serviceSummary'
+            );
+            expect(serviceSummary).to.be(undefined);
           });
 
           it('returns 1 log category', async () => {
-            expect(response.body.logCategories?.map(({ errorCategory }) => errorCategory)).to.eql([
-              'Error message from service',
-              'Error message from container my-container-c',
-            ]);
+            const logCategories = response.body.context.find(({ key }) => key === 'logCategories');
+            expect(
+              (logCategories?.data as LogCategories)?.map(
+                ({ errorCategory }: { errorCategory: string }) => errorCategory
+              )
+            ).to.eql(['Error message from service', 'Error message from container my-container-c']);
           });
         });
 
         describe('when service name is specified', async () => {
-          let response: SupertestReturnType<'GET /internal/apm/assistant/get_obs_alert_details_context'>;
+          let response: SupertestReturnType<'GET /internal/apm/assistant/alert_details_contextual_insights'>;
           before(async () => {
             response = await apmApiClient.writeUser({
-              endpoint: 'GET /internal/apm/assistant/get_obs_alert_details_context',
+              endpoint: 'GET /internal/apm/assistant/alert_details_contextual_insights',
               params: {
                 query: {
                   alert_started_at: new Date(end).toISOString(),
@@ -315,9 +328,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           it('returns log categories', () => {
-            expect(response.body.logCategories).to.have.length(1);
+            const logCategories = response.body.context.find(({ key }) => key === 'logCategories');
+            expect(logCategories?.data).to.have.length(1);
 
-            const logCategory = response.body.logCategories?.[0];
+            const logCategory = (logCategories?.data as LogCategories)?.[0];
             expect(logCategory?.sampleMessage).to.match(
               /Error message #\d{16} from service Backend/
             );
@@ -327,10 +341,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         describe('when container id is specified', async () => {
-          let response: SupertestReturnType<'GET /internal/apm/assistant/get_obs_alert_details_context'>;
+          let response: SupertestReturnType<'GET /internal/apm/assistant/alert_details_contextual_insights'>;
           before(async () => {
             response = await apmApiClient.writeUser({
-              endpoint: 'GET /internal/apm/assistant/get_obs_alert_details_context',
+              endpoint: 'GET /internal/apm/assistant/alert_details_contextual_insights',
               params: {
                 query: {
                   alert_started_at: new Date(end).toISOString(),
@@ -341,9 +355,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           it('returns log categories', () => {
-            expect(response.body.logCategories).to.have.length(1);
+            const logCategories = response.body.context.find(({ key }) => key === 'logCategories');
+            expect(logCategories?.data).to.have.length(1);
 
-            const logCategory = response.body.logCategories?.[0];
+            const logCategory = (logCategories?.data as LogCategories)?.[0];
             expect(logCategory?.sampleMessage).to.match(
               /Error message #\d{16} from service Backend/
             );
@@ -353,10 +368,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         describe('when non-existing service.name is specified', async () => {
-          let response: SupertestReturnType<'GET /internal/apm/assistant/get_obs_alert_details_context'>;
+          let response: SupertestReturnType<'GET /internal/apm/assistant/alert_details_contextual_insights'>;
           before(async () => {
             response = await apmApiClient.writeUser({
-              endpoint: 'GET /internal/apm/assistant/get_obs_alert_details_context',
+              endpoint: 'GET /internal/apm/assistant/alert_details_contextual_insights',
               params: {
                 query: {
                   alert_started_at: new Date(end).toISOString(),
@@ -367,7 +382,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           it('returns empty service summary', () => {
-            expect(response.body.serviceSummary).to.eql({
+            const serviceSummary = response.body.context.find(
+              ({ key }) => key === 'serviceSummary'
+            );
+            expect(serviceSummary?.data).to.eql({
               'service.name': 'non-existing-service',
               'service.environment': [],
               instances: 1,
@@ -378,9 +396,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           it('does not return log categories', () => {
-            expect(response.body.logCategories?.map(({ errorCategory }) => errorCategory)).to.eql([
-              'Error message from container my-container-c',
-            ]);
+            const logCategories = response.body.context.find(({ key }) => key === 'logCategories');
+            expect(logCategories?.data).to.have.length(1);
+
+            expect(
+              (logCategories?.data as LogCategories)?.map(
+                ({ errorCategory }: { errorCategory: string }) => errorCategory
+              )
+            ).to.eql(['Error message from container my-container-c']);
           });
         });
       });

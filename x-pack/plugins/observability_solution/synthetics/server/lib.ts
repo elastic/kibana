@@ -65,7 +65,7 @@ export class UptimeEsClient {
     this.heartbeatIndices = heartbeatIndices;
     this.isDev = isDev;
     this.inspectableEsQueries = [];
-    this.getInspectEnabled();
+    this.getInspectEnabled().catch(() => {});
   }
 
   async initSettings() {
@@ -176,15 +176,14 @@ export class UptimeEsClient {
     return {};
   }
   async getInspectEnabled() {
-    if (this.isInspectorEnabled !== undefined) {
-      return this.isInspectorEnabled;
-    }
-
     if (!this.uiSettings) {
       return false;
     }
 
-    this.isInspectorEnabled = this.uiSettings.client.get<boolean>(enableInspectEsQueries);
+    if (this.isInspectorEnabled === undefined) {
+      this.isInspectorEnabled = this.uiSettings.client.get<boolean>(enableInspectEsQueries);
+    }
+    return this.isInspectorEnabled;
   }
 
   async getIndices() {
