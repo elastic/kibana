@@ -9,11 +9,9 @@
     "public/**/*.ts",
     "public/**/*.tsx",
     "server/**/*.ts",
-    "../../../typings/**/*",
+    "../../../typings/**/*"
   ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/config-schema",
@@ -42,12 +40,13 @@
     "@kbn/es-types",
     "@kbn/code-editor",
     "@kbn/console-plugin",
+    "@kbn/ingest-pipelines-plugin",
     "@kbn/core-chrome-browser",
     "@kbn/core-logging-server-mocks",
     "@kbn/discover-plugin",
     "@kbn/search-connectors-plugin",
     "@kbn/index-management",
     "@kbn/react-kibana-context-render",
-    "@kbn/search-playground",
+    "@kbn/search-playground"
   ]
 }

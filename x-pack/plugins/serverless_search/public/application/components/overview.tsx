@@ -37,6 +37,7 @@ import type {
 } from '@kbn/search-api-panels';
 import { useLocation } from 'react-router-dom';
 import { CloudDetailsPanel } from '@kbn/search-api-panels';
+import { apiService } from '@kbn/ingest-pipelines-plugin/public';
 import { docLinks } from '../../../common/doc_links';
 import { useKibanaServices } from '../hooks/use_kibana';
 import { useAssetBasePath } from '../hooks/use_asset_base_path';
@@ -82,12 +83,16 @@ export const ElasticsearchOverview = () => {
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
     [consolePlugin]
   );
+  const [selectedPipeline, setSelectedPipeline] = React.useState<string>('');
 
   const codeSnippetArguments: LanguageDefinitionSnippetArguments = {
     url: elasticsearchURL,
     apiKey: clientApiKey,
     cloudId,
+    ingestPipeline: selectedPipeline,
   };
+
+  const { data } = apiService.useLoadPipelines();
 
   return (
     <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchOverviewPage">
@@ -302,7 +307,8 @@ export const ElasticsearchOverview = () => {
             'ingestData',
             codeSnippetArguments
           )}
-          consoleRequest={getConsoleRequest('ingestData')}
+          ingestPipelineData={data}
+          consoleRequest={getConsoleRequest('ingestDataWithPipeline', codeSnippetArguments)}
           languages={languageDefinitions}
           selectedLanguage={selectedLanguage}
           setSelectedLanguage={setSelectedLanguage}
@@ -312,6 +318,7 @@ export const ElasticsearchOverview = () => {
           consolePlugin={consolePlugin}
           sharePlugin={share}
           additionalIngestionPanel={<ConnectorIngestionPanel assetBasePath={assetBasePath} />}
+          setSelectedPipeline={setSelectedPipeline}
         />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section

@@ -7,12 +7,13 @@
  */
 
 import React from 'react';
-
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { Pipeline } from '@kbn/ingest-pipelines-plugin/public';
+import { IngestPipelinePanel } from '..';
 import { CodeBox } from './code_box';
 import { LanguageDefinition } from '../types';
 import { OverviewPanel } from './overview_panel';
@@ -32,6 +33,8 @@ interface IngestDataProps {
   languages: LanguageDefinition[];
   consoleRequest?: string;
   additionalIngestionPanel?: React.ReactNode;
+  ingestPipelineData?: Pipeline[] | null;
+  setSelectedPipeline: (pipelineId: string) => void;
 }
 
 export const IngestData: React.FC<IngestDataProps> = ({
@@ -46,6 +49,8 @@ export const IngestData: React.FC<IngestDataProps> = ({
   languages,
   consoleRequest,
   additionalIngestionPanel,
+  ingestPipelineData,
+  setSelectedPipeline,
 }) => {
   return (
     <OverviewPanel
@@ -71,6 +76,10 @@ export const IngestData: React.FC<IngestDataProps> = ({
       })}
     >
       <EuiSpacer size="l" />
+      <IngestPipelinePanel
+        setSelectedPipeline={setSelectedPipeline}
+        ingestPipelineData={ingestPipelineData}
+      />
       <EuiTitle size="xs">
         <h4>
           {i18n.translate('searchApiPanels.welcomeBanner.ingestData.alternativeOptions', {

@@ -27,9 +27,11 @@ import {
   getConsoleRequest,
   getLanguageDefinitionCodeSnippet,
   LanguageDefinition,
+  IngestPipelinePanel,
   LanguageDefinitionSnippetArguments,
 } from '@kbn/search-api-panels';
 
+import { apiService } from '@kbn/ingest-pipelines-plugin/public';
 import { BACK_LABEL } from '../../../../common/i18n_string';
 
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
@@ -55,6 +57,8 @@ export const APIIndexEmptyPrompt = ({ indexName, onBackClick }: APIIndexEmptyPro
   const assetBasePath = useAssetBasePath();
   const [selectedLanguage, setSelectedLanguage] =
     React.useState<LanguageDefinition>(javaDefinition);
+
+  const [selectedPipeline, setSelectedPipeline] = React.useState<string>('');
   const [clientApiKey, setClientApiKey] = useState<string>(API_KEY_PLACEHOLDER);
   const { elasticsearchURL, cloudId } = useMemo(() => {
     return {
@@ -67,8 +71,10 @@ export const APIIndexEmptyPrompt = ({ indexName, onBackClick }: APIIndexEmptyPro
     apiKey: clientApiKey,
     cloudId,
     indexName,
+    ingestPipeline: selectedPipeline,
   };
 
+  const { data } = apiService.useLoadPipelines();
   const apiIngestSteps: EuiContainedStepProps[] = [
     {
       title: i18n.translate(
@@ -83,6 +89,12 @@ export const APIIndexEmptyPrompt = ({ indexName, onBackClick }: APIIndexEmptyPro
               setSelectedLanguage={setSelectedLanguage}
               languages={languageDefinitions}
               selectedLanguage={selectedLanguage.id}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <IngestPipelinePanel
+              setSelectedPipeline={setSelectedPipeline}
+              ingestPipelineData={data}
             />
           </EuiFlexItem>
           <EuiFlexItem>
