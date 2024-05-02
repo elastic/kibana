@@ -15,7 +15,12 @@ import {
   RULE_NAME_INPUT,
   SCHEDULE_CONTINUE_BUTTON,
 } from '../../../../screens/create_new_rule';
-import { MAX_SIGNALS_DETAILS, RULE_NAME_HEADER } from '../../../../screens/rule_details';
+import {
+  MAX_SIGNALS_DETAILS,
+  DESCRIPTION_SETUP_GUIDE_BUTTON,
+  DESCRIPTION_SETUP_GUIDE_CONTENT,
+  RULE_NAME_HEADER,
+} from '../../../../screens/rule_details';
 import { createTimeline } from '../../../../tasks/api_calls/timelines';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import {
@@ -32,6 +37,7 @@ import {
   fillRiskScore,
   fillRuleName,
   fillRuleTags,
+  fillSetup,
   fillSeverity,
   fillThreat,
   fillThreatSubtechnique,
@@ -79,6 +85,7 @@ describe('Common rule creation flows', { tags: ['@ess', '@serverless'] }, () => 
     fillCustomInvestigationFields();
     fillMaxSignals();
     fillNote();
+    fillSetup();
     cy.get(ABOUT_CONTINUE_BTN).click();
 
     cy.log('Filling schedule section');
@@ -100,5 +107,8 @@ describe('Common rule creation flows', { tags: ['@ess', '@serverless'] }, () => 
     // UI redirects to rule creation page of a created rule
     cy.get(RULE_NAME_HEADER).should('contain', ruleFields.ruleName);
     cy.get(MAX_SIGNALS_DETAILS).should('contain', ruleFields.maxSignals);
+
+    cy.get(DESCRIPTION_SETUP_GUIDE_BUTTON).click();
+    cy.get(DESCRIPTION_SETUP_GUIDE_CONTENT).should('contain', 'test setup markdown'); // Markdown formatting should be removed
   });
 });

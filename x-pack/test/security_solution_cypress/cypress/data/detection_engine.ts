@@ -26,6 +26,7 @@ import type {
   RuleReferenceArray,
   RuleTagArray,
   MaxSignals,
+  SetupGuide,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 interface RuleFields {
@@ -46,6 +47,7 @@ interface RuleFields {
   threatSubtechnique: ThreatSubtechnique;
   threatTechnique: ThreatTechnique;
   maxSignals: MaxSignals;
+  setup: SetupGuide;
 }
 
 export const ruleFields: RuleFields = {
@@ -62,6 +64,7 @@ export const ruleFields: RuleFields = {
   ],
   falsePositives: ['False1', 'False2'],
   investigationGuide: '# test markdown',
+  setup: '# test setup markdown',
   investigationFields: {
     field_names: ['agent.hostname'],
   },

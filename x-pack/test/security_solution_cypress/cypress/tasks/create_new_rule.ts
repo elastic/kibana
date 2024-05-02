@@ -126,6 +126,7 @@ import {
   INVESTIGATIONS_INPUT,
   QUERY_BAR_ADD_FILTER,
   MAX_SIGNALS_INPUT,
+  SETUP_GUIDE_TEXTAREA,
   RELATED_INTEGRATION_COMBO_BOX_INPUT,
 } from '../screens/create_new_rule';
 import {
@@ -210,6 +211,13 @@ export const fillNote = (note: string = ruleFields.investigationGuide) => {
   cy.get(INVESTIGATION_NOTES_TEXTAREA).type(note, { force: true });
 
   return note;
+};
+
+export const fillSetup = (setup: string = ruleFields.setup) => {
+  cy.get(SETUP_GUIDE_TEXTAREA).clear({ force: true });
+  cy.get(SETUP_GUIDE_TEXTAREA).type(setup);
+
+  return setup;
 };
 
 export const fillMitre = (mitreAttacks: Threat[]) => {
