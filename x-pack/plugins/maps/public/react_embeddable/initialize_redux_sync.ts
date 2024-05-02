@@ -220,7 +220,7 @@ export function initializeReduxSync({
         },
         fastIsEqual,
       ],
-    } as StateComparators<MapSerializedState>,
+    } as StateComparators<Pick<MapSerializedState, 'hiddenLayers' | 'isLayerTOCOpen' | 'mapCenter' | 'openTOCDetails'>>,
     serialize: () => {
       return {
         hiddenLayers: getHiddenLayerIds(store.getState()),

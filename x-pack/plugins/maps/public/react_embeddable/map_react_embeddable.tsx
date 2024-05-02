@@ -11,7 +11,7 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { ReactEmbeddableFactory, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
-import { initializeTimeRange, initializeTitles } from '@kbn/presentation-publishing';
+import { getUnchangingComparator, initializeTimeRange, initializeTitles } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { apiPublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
@@ -145,9 +145,18 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializedState, Ma
       {
         ...timeRange.comparators,
         ...title.titleComparators,
-        ...(dynamicActionsApi?.dynamicActionsComparator ?? {}),
+        ...(dynamicActionsApi?.dynamicActionsComparator ?? {
+          enhancements: getUnchangingComparator()
+        }),
         ...crossPanelActions.comparators,
         ...reduxSync.comparators,
+        // readonly state
+        attributes: getUnchangingComparator(),
+        isSharable: getUnchangingComparator(),
+        mapBuffer: getUnchangingComparator(),
+        savedObjectId: getUnchangingComparator(),
+        mapSettings: getUnchangingComparator(),
+        hideFilterActions: getUnchangingComparator(),
       }
     );
 
