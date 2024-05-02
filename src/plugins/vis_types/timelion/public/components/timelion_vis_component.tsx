@@ -18,6 +18,7 @@ import {
   LayoutDirection,
   Placement,
   Tooltip,
+  BrushEndListener,
 } from '@elastic/charts';
 import { EuiTitle } from '@elastic/eui';
 import { RangeFilterParams } from '@kbn/es-query';
@@ -119,8 +120,8 @@ export const TimelionVisComponent = ({
     isDateHistogram: true,
   });
 
-  const brushEndListener = useCallback(
-    ({ x }: any) => {
+  const brushEndListener = useCallback<BrushEndListener>(
+    ({ x }) => {
       if (!x) {
         return;
       }

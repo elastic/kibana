@@ -85,7 +85,7 @@ import { CompareDocuments } from './compare_documents';
 import { useFullScreenWatcher } from '../hooks/use_full_screen_watcher';
 import { UnifiedDataTableRenderCustomToolbar } from './custom_toolbar/render_custom_toolbar';
 
-export type SortOrder = [string, string];
+export type SortOrder = [id: string, direction: string];
 
 export enum DataLoadingState {
   loading = 'loading',
@@ -778,16 +778,16 @@ export const UnifiedDataTable = ({
   /**
    * Sorting
    */
-  const sortingColumns = useMemo(
+  const sortingColumns = useMemo<EuiDataGridSorting['columns']>(
     () =>
       sort
-        .map(([id, direction]) => ({ id, direction }))
+        .map(([id, direction]) => ({ id, direction: direction as 'asc' | 'desc' }))
         .filter(({ id }) => visibleColumns.includes(id)),
     [sort, visibleColumns]
   );
 
-  const onTableSort = useCallback(
-    (sortingColumnsData: any) => {
+  const onTableSort = useCallback<EuiDataGridSorting['onSort']>(
+    (sortingColumnsData) => {
       if (isSortEnabled) {
         if (onSort) {
           onSort(sortingColumnsData.map(({ id, direction }: SortObj) => [id, direction]));
@@ -797,7 +797,7 @@ export const UnifiedDataTable = ({
     [onSort, isSortEnabled]
   );
 
-  const sorting = useMemo(() => {
+  const sorting = useMemo<EuiDataGridSorting>(() => {
     if (isSortEnabled) {
       return {
         columns: sortingColumns,
@@ -1047,7 +1047,7 @@ export const UnifiedDataTable = ({
               ref={dataGridRef}
               rowCount={rowCount}
               schemaDetectors={schemaDetectors}
-              sorting={sorting as EuiDataGridSorting}
+              sorting={sorting}
               toolbarVisibility={toolbarVisibility}
               rowHeightsOptions={rowHeightsOptions}
               inMemory={inMemory}

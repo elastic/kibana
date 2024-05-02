@@ -70,8 +70,8 @@ export const CodeEditor = ({ onChange, type, isReadOnly, name, ...props }: CodeE
     editorModel.setValue(trimmedValue);
   }, []);
 
-  const editorDidMount = useCallback(
-    (editor: any) => {
+  const editorDidMount = useCallback<NonNullable<KibanaReactCodeEditorProps['editorDidMount']>>(
+    (editor) => {
       setEditorCalculatedHeight(editor);
 
       editor.onDidChangeModelContent(() => {

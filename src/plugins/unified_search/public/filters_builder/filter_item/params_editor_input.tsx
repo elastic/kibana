@@ -34,7 +34,7 @@ export const strings = {
     }),
 };
 
-interface ParamsEditorInputProps {
+export interface ParamsEditorInputProps {
   dataView: DataView;
   params: unknown;
   onParamsChange: (params: unknown) => void;

@@ -70,7 +70,7 @@ const HeatmapOptions = (props: HeatmapOptionsProps) => {
   }, [stateParams]);
 
   const handleLegendSizeChange = useCallback(
-    (size: any) => setValue('legendSize', size),
+    (size?: LegendSize) => setValue('legendSize', size),
     [setValue]
   );
 

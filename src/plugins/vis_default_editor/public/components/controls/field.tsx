@@ -120,7 +120,7 @@ function FieldParamEditor({
     }
   });
 
-  const onSearchChange = useCallback((searchValue: any) => setIsDirty(Boolean(searchValue)), []);
+  const onSearchChange = useCallback((searchValue: string) => setIsDirty(Boolean(searchValue)), []);
 
   return (
     <EuiFormRow

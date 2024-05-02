@@ -39,7 +39,7 @@ function RowsOrColumnsControl({ editorStateParams, setStateParamValue }: AggCont
     },
   ];
   const onChange = useCallback(
-    (optionId: any) => setStateParamValue(PARAMS.NAME, optionId === PARAMS.ROWS),
+    (optionId: string) => setStateParamValue(PARAMS.NAME, optionId === PARAMS.ROWS),
     [setStateParamValue]
   );
 

@@ -27,6 +27,7 @@ export {
   ColorRanges,
   BasicOptions,
   type SetColorRangeValue,
+  type NumberInputOptionProps,
   type SetColorSchemaOptionsValue,
 } from './components/options';
 export type { RangeValues } from './components/controls/ranges';

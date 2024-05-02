@@ -117,7 +117,7 @@ const PieOptions = (props: PieOptionsProps) => {
   }, [props.palettes]);
 
   const handleEmptySizeRatioChange = useCallback(
-    (sizeId: any) => {
+    (sizeId: string) => {
       const emptySizeRatio = emptySizeRatioOptions.find(({ id }) => id === sizeId)?.value;
       setValue('emptySizeRatio', emptySizeRatio);
     },
@@ -125,7 +125,7 @@ const PieOptions = (props: PieOptionsProps) => {
   );
 
   const handleLegendSizeChange = useCallback(
-    (size: any) => setValue('legendSize', size),
+    (size?: LegendSize) => setValue('legendSize', size),
     [setValue]
   );
 
