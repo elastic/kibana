@@ -224,8 +224,8 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
     [onClosePopover, onTimelineChange]
   );
 
-  const EuiSelectableContent = useCallback(
-    (list: any, search: any) => (
+  const EuiSelectableContent = useCallback<NonNullable<EuiSelectableProps['children']>>(
+    (list, search) => (
       <>
         {search}
         {list}

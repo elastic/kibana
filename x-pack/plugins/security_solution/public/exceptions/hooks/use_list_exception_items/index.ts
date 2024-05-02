@@ -142,7 +142,7 @@ export const useListExceptionItems = ({
     if (typeof onEditListExceptionItem === 'function') onEditListExceptionItem(exception);
   };
   const onPaginationChange = useCallback(
-    async (options: any) => {
+    async (options?: GetExceptionItemProps | null) => {
       fetchItems(options);
     },
     [fetchItems]
