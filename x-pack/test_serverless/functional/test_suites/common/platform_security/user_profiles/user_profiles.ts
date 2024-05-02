@@ -25,7 +25,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('User details', async () => {
-      it('should display correct user deatils', async () => {
+      it('should display correct user details', async () => {
         await pageObjects.common.navigateToApp('security_account');
 
         const userData = await svlUserManager.getUserData(VIEWER_ROLE);

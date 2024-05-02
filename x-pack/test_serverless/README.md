@@ -213,12 +213,12 @@ TEST_CLOUD=1 TEST_CLOUD_HOST_NAME="CLOUD_HOST_NAME" TEST_ES_URL="https://elastic
 ```
 
 Steps to follow to run on QA environment:
-- Go to [QA Cloud Console](https://console.qa.cld.elstc.co/) and create a project.
-- Go to https://console.qa.cld.elstc.co/account/keys and create Cloud specific API Key.
+- Go to `CLOUD_HOST_NAME`  and create a project.
+- Go to `CLOUD_HOST_NAME/account/keys` and create Cloud specific API Key.
 - We need the key from step 2 to obtain basic auth credentials for ES and Kibana.
   Make a post request to the following endpoint.
   ```
-  POST https://console.qa.cld.elstc.co/api/v1/serverless/projects/<project-type>/<project-id>/_reset-internal-credentials
+  POST CLOUD_HOST_NAME/api/v1/serverless/projects/<project-type>/<project-id>/_reset-internal-credentials
   Authorization: ApiKey <Cloud-API-key>
   Content-Type: application/json
   ```
@@ -231,20 +231,20 @@ Steps to follow to run on QA environment:
   }
   ```
   We would use these credentials for `TEST_ES_URL="https://USERNAME:PASSWORD@ES_HOSTNAME:443"` and `TEST_KIBANA_URL="https://USERNAME:PASSWORD@KIBANA_HOSTNAME"`
-- Now we need to create a user with the roles we want to test. Go to [members page](https://console.qa.cld.elstc.co/account/members) and click `[Invite member]`.
+- Now we need to create a user with the roles we want to test. Go to members page - `CLOUD_HOST_NAME/account/members` and click `[Invite member]`.
   - Select the access level you want to grant and your project type. For example, to create a user with viewer role, toggle `[Instanse access]`, select project (should correspond to your project type, i.e Security), select `Viewer` role.
   - Create `.ftr/role_users.json` in the root of Kibana repo. Add record for created user.
     ```
     {
       "viewer": {
         "password": "xxxx",
-        "email": "name.lastname@elasticsearch.com"
+        "email": "email_of_the_elastic_cloud_account"
       }
     }
     ```
 - Now run the tests from the `x-pack` directory
 ```
-TEST_CLOUD=1 TEST_CLOUD_HOST_NAME="console.qa.cld.elstc.co" TEST_ES_URL="https://testing-internal:testing-internal_pwd@ES_HOSTNAME:443" TEST_KIBANA_URL="https://testing-internal:testing-internal_pwd@KIBANA_HOSTNAME:443" node scripts/functional_test_runner.js --config test_serverless/functional/test_suites/security/common_configs/config.group1.ts --exclude-tag=skipMKI
+TEST_CLOUD=1 TEST_CLOUD_HOST_NAME="CLOUD_HOST_NAME" TEST_ES_URL="https://testing-internal:testing-internal_pwd@ES_HOSTNAME:443" TEST_KIBANA_URL="https://testing-internal:testing-internal_pwd@KIBANA_HOSTNAME:443" node scripts/functional_test_runner.js --config test_serverless/functional/test_suites/security/common_configs/config.group1.ts --exclude-tag=skipMKI
 ```
 
 
