@@ -23,7 +23,7 @@ type ErrorRate =
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   // url parameters
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
@@ -141,10 +141,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               .failure()
           ),
       ];
-      await synthtraceEsClient.index(documents);
+      await apmSynthtraceEsClient.index(documents);
     });
 
-    after(() => synthtraceEsClient.clean());
+    after(() => apmSynthtraceEsClient.clean());
 
     describe('returns the transaction error rate', () => {
       let errorRateResponse: ErrorRate;
