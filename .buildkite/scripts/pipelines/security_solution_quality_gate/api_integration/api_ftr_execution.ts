@@ -99,51 +99,56 @@ export const cli = () => {
 
         return process.exit(1);
       }
+      let statusCode: number = 0;
+      try {
+        // Reset credentials for elastic user
+        const credentials = await cloudHandler.resetCredentials(project.id, id);
 
-      // Reset credentials for elastic user
-      const credentials = await cloudHandler.resetCredentials(project.id, id);
+        if (!credentials) {
+          log.error('Credentials could not be reset.');
 
-      if (!credentials) {
-        log.error('Credentials could not be reset.');
+          return process.exit(1);
+        }
 
-        return process.exit(1);
+        // Wait for project to be initialized
+        await cloudHandler.waitForProjectInitialized(project.id);
+
+        // Base64 encode the credentials in order to invoke ES and KB APIs
+        const auth = btoa(`${credentials.username}:${credentials.password}`);
+
+        // Wait for elasticsearch status to go green.
+        await waitForEsStatusGreen(project.es_url, auth, id);
+
+        // Wait until Kibana is available
+        await waitForKibanaAvailable(project.kb_url, auth, id);
+
+        // Wait for Elasticsearch to be accessible
+        await waitForEsAccess(project.es_url, auth, id);
+
+        const FORMATTED_ES_URL = project.es_url.replace('https://', '');
+        const FORMATTED_KB_URL = project.kb_url.replace('https://', '');
+
+        const command = `yarn run ${process.env.TARGET_SCRIPT}`;
+        const testCloud = 1;
+        const testEsUrl = `https://${credentials.username}:${credentials.password}@${FORMATTED_ES_URL}`;
+        const testKibanaUrl = `https://${credentials.username}:${credentials.password}@${FORMATTED_KB_URL}`;
+        const workDir = 'x-pack/test/security_solution_api_integration';
+        const envVars = {
+          ...process.env,
+          TEST_CLOUD: testCloud.toString(),
+          TEST_ES_URL: testEsUrl,
+          TEST_KIBANA_URL: testKibanaUrl,
+        };
+
+        statusCode = await executeCommand(command, envVars, workDir);
+      } catch (err) {
+        log.error('An error occured when running the test script.');
+        log.error(err);
+      } finally {
+        // Delete serverless project
+        log.info(`${id} : Deleting project ${PROJECT_NAME}...`);
+        await cloudHandler.deleteSecurityProject(project.id, PROJECT_NAME);
       }
-
-      // Wait for project to be initialized
-      await cloudHandler.waitForProjectInitialized(project.id);
-
-      // Base64 encode the credentials in order to invoke ES and KB APIs
-      const auth = btoa(`${credentials.username}:${credentials.password}`);
-
-      // Wait for elasticsearch status to go green.
-      await waitForEsStatusGreen(project.es_url, auth, id);
-
-      // Wait until Kibana is available
-      await waitForKibanaAvailable(project.kb_url, auth, id);
-
-      // Wait for Elasticsearch to be accessible
-      await waitForEsAccess(project.es_url, auth, id);
-
-      const FORMATTED_ES_URL = project.es_url.replace('https://', '');
-      const FORMATTED_KB_URL = project.kb_url.replace('https://', '');
-
-      const command = `yarn run ${process.env.TARGET_SCRIPT}`;
-      const testCloud = 1;
-      const testEsUrl = `https://${credentials.username}:${credentials.password}@${FORMATTED_ES_URL}`;
-      const testKibanaUrl = `https://${credentials.username}:${credentials.password}@${FORMATTED_KB_URL}`;
-      const workDir = 'x-pack/test/security_solution_api_integration';
-      const envVars = {
-        ...process.env,
-        TEST_CLOUD: testCloud.toString(),
-        TEST_ES_URL: testEsUrl,
-        TEST_KIBANA_URL: testKibanaUrl,
-      };
-
-      const statusCode = await executeCommand(command, envVars, workDir);
-
-      // Delete serverless project
-      log.info(`${id} : Deleting project ${PROJECT_NAME}...`);
-      await cloudHandler.deleteSecurityProject(project.id, PROJECT_NAME);
       process.exit(statusCode);
     },
     {
