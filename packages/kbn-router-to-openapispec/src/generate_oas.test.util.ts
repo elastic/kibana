@@ -70,6 +70,7 @@ const getRouterDefaults = () => ({
       200: {
         body: () => schema.string({ maxLength: 10, minLength: 1 }),
       },
+      unsafe: { body: true },
     },
   },
   handler: jest.fn(),
@@ -114,7 +115,11 @@ const getVersionedRouterDefaults = () => ({
         validate: {
           request: { body: schema.object({ foo: schema.string() }) },
           response: {
-            [200]: { body: () => schema.object({ fooResponse: schema.string() }) },
+            [200]: {
+              body: () => schema.stream({ meta: { description: 'stream response' } }),
+              bodyContentType: 'application/octet-stream',
+            },
+            unsafe: { body: true },
           },
         },
         version: 'oas-test-version-2',
