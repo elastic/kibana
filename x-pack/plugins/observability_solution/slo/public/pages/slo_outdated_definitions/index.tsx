@@ -26,9 +26,15 @@ export function SlosOutdatedDefinitions() {
   const {
     http: { basePath },
   } = useKibana().services;
+
+  const { data: permissions, isLoading: arePermissionsLoading } = usePermissions();
+
   const { hasWriteCapabilities } = useCapabilities();
   const { data: globalDiagnosis } = useFetchSloGlobalDiagnosis();
   const { ObservabilityPageTemplate } = usePluginContext();
+
+  const { hasAtLeast } = useLicense();
+  const hasPlatinumLicense = hasAtLeast('platinum') === true;
 
   useBreadcrumbs([
     {
@@ -54,8 +60,6 @@ export function SlosOutdatedDefinitions() {
     setActivePage(0);
   };
 
-  const { hasAtLeast } = useLicense();
-
   const { isLoading, data, refetch } = useFetchSloDefinitions({
     name: search,
     includeOutdatedOnly: true,
@@ -66,8 +70,6 @@ export function SlosOutdatedDefinitions() {
 
   const hasRequiredWritePrivileges =
     !!globalDiagnosis?.userPrivileges.write.has_all_requested && hasWriteCapabilities;
-
-  const hasPlatinumLicense = hasAtLeast('platinum') === true;
 
   const hasSlosAndHasPermissions = hasPlatinumLicense && hasRequiredWritePrivileges;
 
