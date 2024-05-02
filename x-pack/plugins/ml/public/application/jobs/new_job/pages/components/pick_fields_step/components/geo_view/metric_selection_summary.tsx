@@ -57,7 +57,7 @@ export const GeoDetectorsSummary: FC = () => {
     async function getMapLayersForGeoJob() {
       if (geoField) {
         const { query } = jobCreator.savedSearchQuery ?? {};
-        
+
         const layers = await mapLoader.getMapLayersForGeoJob(
           geoField,
           splitField,

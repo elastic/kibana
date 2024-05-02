@@ -8,7 +8,8 @@
 import type { FC } from 'react';
 import React from 'react';
 import { EuiFlexGrid, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { INITIAL_LOCATION, LayerDescriptor } from '@kbn/maps-plugin/common';
+import type { LayerDescriptor } from '@kbn/maps-plugin/common';
+import { INITIAL_LOCATION } from '@kbn/maps-plugin/common';
 import type { Aggregation, Field, SplitField } from '@kbn/ml-anomaly-utils';
 import { SplitCards, useAnimateSplit } from '../split_cards';
 import { useMlKibana } from '../../../../../../../contexts/kibana';
@@ -50,16 +51,18 @@ export const GeoMapExamples: FC<Props> = ({
           <>
             {geoAgg && geoField ? <DetectorTitle index={0} agg={geoAgg} field={geoField} /> : null}
             <EuiSpacer size="s" />
-            {mapsPlugin && <span data-test-subj="mlGeoJobWizardMap" style={{ width: '100%', height: 400 }}>
-              <mapsPlugin.Map
-                layerList={layerList} 
-                hideFilterActions={true}
-                mapSettings={{
-                  initialLocation: INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS,
-                  autoFitToDataBounds: true,
-                }}
-              />
-            </span>}
+            {mapsPlugin && (
+              <span data-test-subj="mlGeoJobWizardMap" style={{ width: '100%', height: 400 }}>
+                <mapsPlugin.Map
+                  layerList={layerList}
+                  hideFilterActions={true}
+                  mapSettings={{
+                    initialLocation: INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS,
+                    autoFitToDataBounds: true,
+                  }}
+                />
+              </span>
+            )}
           </>
         </EuiFlexItem>
       </EuiFlexGrid>
