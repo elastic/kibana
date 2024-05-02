@@ -1,0 +1,60 @@
+---
+##
+## This the automation will undeploy an existing automated deployment
+## caused by a merged/closed event and if the GitHub label matches
+## the automated one.
+##
+## Owner: @elastic/observablt-robots
+## Further details: https://ela.st/oblt-deploy-my-kibana
+##
+name: undeploy-my-kibana
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-my-kibana:
+    if: contains(github.event.pull_request.labels.*.name, 'ci:project-deploy-observability')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: elastic/apm-pipeline-library/.github/actions/github-token@current
+        with:
+          url: ${{ secrets.OBLT_VAULT_ADDR }}
+          roleId: ${{ secrets.OBLT_VAULT_ROLE_ID }}
+          secretId: ${{ secrets.OBLT_VAULT_SECRET_ID }}
+
+      - name: Is an Elastician's PR?
+        id: is_elastic_member
+        uses: elastic/apm-pipeline-library/.github/actions/is-member-elastic-org@current
+        with:
+          username: ${{ github.event.pull_request.head.repo.owner.login }}
+          token: ${{ env.GITHUB_TOKEN }}
+
+      - name: Create undeploy GitHub issue
+        if: contains(steps.is_elastic_member.outputs.result, 'true')
+        run: |-
+          GITHUB_ISSUE=$(mktemp --suffix ".md") 
+          cat <<EOF > "$GITHUB_ISSUE"
+          ### Kibana pull request
+
+          ${{ env.PR }}
+
+          ### Further details
+
+          Caused by @${{ env.PR_OWNER}} using the github label in https://github.com/elastic/kibana/pull/${{ env.PR }}
+          EOF
+
+          GH_TOKEN="$GITHUB_TOKEN" \
+          gh issue create \
+            --title "[Undeploy Serverless Kibana] for user ${{ env.PR_OWNER}} with PR kibana@pr-${{ env.PR }}" \
+            --body-file "${GITHUB_ISSUE}" \
+            --label 'destroy-custom-kibana-serverless' \
+            --repo 'elastic/observability-test-environments'
+        env:
+          GH_TOKEN: ${{ env.GITHUB_TOKEN }}
+          PR: ${{ github.event.pull_request.number }} 
+          PR_OWNER: ${{ github.event.pull_request.head.repo.owner.login }}
