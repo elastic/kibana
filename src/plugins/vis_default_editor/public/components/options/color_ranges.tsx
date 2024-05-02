@@ -39,7 +39,7 @@ function ColorRanges({
   }, [colorsRange]);
 
   const validateRange = useCallback(
-    ({ from, to }: any, index: any) => {
+    ({ from, to }: { from: number; to: number }, index: number) => {
       if (!colorsRange[index]) {
         return [false, false];
       }

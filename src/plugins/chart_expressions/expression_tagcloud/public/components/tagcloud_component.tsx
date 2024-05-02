@@ -18,6 +18,8 @@ import {
   Wordcloud,
   RenderChangeListener,
   LEGACY_LIGHT_THEME,
+  WordCloudElementEvent,
+  ElementClickListener,
 } from '@elastic/charts';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import {
@@ -190,8 +192,8 @@ export const TagCloudChart = ({
     []
   );
 
-  const handleWordClick = useCallback(
-    (elements: any) => {
+  const handleWordClick: ElementClickListener = useCallback(
+    (elements: WordCloudElementEvent[]) => {
       if (!bucket) {
         return;
       }
@@ -228,7 +230,7 @@ export const TagCloudChart = ({
       });
     },
     [bucket, bucketFormatter, fireEvent, visData]
-  );
+  ) as ElementClickListener;
 
   if (visData.rows.length === 0) {
     return <EmptyPlaceholder icon={IconChartTagcloud} renderComplete={renderComplete} />;

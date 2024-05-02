@@ -19,7 +19,7 @@ interface ParamsEditorProps {
   dataView: DataView;
   params: unknown;
   onHandleParamsChange: (params: Filter['meta']['params']) => void;
-  onHandleParamsUpdate: (value: string) => void;
+  onHandleParamsUpdate: (value: Filter | boolean | string | number) => void;
   timeRangeForSuggestionsOverride?: boolean;
   filtersForSuggestions?: Filter[];
   field?: DataViewField;

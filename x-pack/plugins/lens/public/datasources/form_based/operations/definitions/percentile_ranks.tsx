@@ -34,12 +34,7 @@ export interface PercentileRanksIndexPatternColumn extends FieldBasedIndexPatter
   };
 }
 
-function ofName(
-  name: string,
-  value: number,
-  timeShift: string | undefined,
-  reducedTimeRange: string | undefined
-) {
+function ofName(name: string, value: number, timeShift?: string, reducedTimeRange?: string) {
   return adjustTimeScaleLabelSuffix(
     i18n.translate('xpack.lens.indexPattern.percentileRanksOf', {
       defaultMessage: 'Percentile rank ({value}) of {name}',
@@ -187,7 +182,7 @@ export const percentileRanksOperation: OperationDefinition<
         defaultMessage: 'Percentile ranks value',
       });
     const onChange = useCallback(
-      (value: string | undefined) => {
+      (value?: string) => {
         if (!isValidNumber(value, isInline) || Number(value) === currentColumn.params.value) {
           return;
         }

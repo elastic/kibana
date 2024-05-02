@@ -24,11 +24,11 @@ const defaultLabel = i18n.translate('xpack.lens.indexPattern.staticValueLabelDef
 
 const defaultValue = 100;
 
-function isEmptyValue(value: number | string | undefined) {
+function isEmptyValue(value?: number | string) {
   return value == null || value === '';
 }
 
-function ofName(value: number | string | undefined) {
+function ofName(value?: number | string) {
   if (isEmptyValue(value)) {
     return defaultLabel;
   }
@@ -163,7 +163,7 @@ export const staticValueOperation: OperationDefinition<
     paramEditorCustomProps,
   }) {
     const onChange = useCallback(
-      (newValue: string | undefined) => {
+      (newValue?: string) => {
         // even if debounced it's triggering for empty string with the previous valid value
         if (
           currentColumn.params.value === newValue ||

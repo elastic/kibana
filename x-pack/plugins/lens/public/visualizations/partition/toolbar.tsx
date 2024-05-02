@@ -20,9 +20,10 @@ import type { Position } from '@elastic/charts';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-ui-components';
 import { PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
+import { CategoryDisplayType, NumberDisplayType } from '@kbn/visualizations-plugin/common';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PartitionChartsMeta } from './partition_charts_meta';
-import { PieVisualizationState, SharedPieLayerState } from '../../../common/types';
+import { PieLayerState, PieVisualizationState, SharedPieLayerState } from '../../../common/types';
 import { LegendDisplay } from '../../../common/constants';
 import { VisualizationToolbarProps } from '../../types';
 import { ToolbarPopover, LegendSettingsPopover } from '../../shared_components';
@@ -76,7 +77,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
   const [hadAutoLegendSize] = useState(() => legendSize === LegendSize.AUTO);
 
   const onStateChange = useCallback(
-    (part: Record<string, unknown>) => {
+    (part: Partial<PieLayerState>) => {
       setState({
         ...state,
         layers: [{ ...layer, ...part }],
@@ -86,31 +87,31 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
   );
 
   const onCategoryDisplayChange = useCallback(
-    (option: unknown) => onStateChange({ categoryDisplay: option }),
+    (option?: CategoryDisplayType) => onStateChange({ categoryDisplay: option }),
     [onStateChange]
   );
 
   const onNumberDisplayChange = useCallback(
-    (option: unknown) => onStateChange({ numberDisplay: option }),
+    (option?: NumberDisplayType) => onStateChange({ numberDisplay: option }),
     [onStateChange]
   );
 
   const onPercentDecimalsChange = useCallback(
-    (option: unknown) => {
+    (option?: number) => {
       onStateChange({ percentDecimals: option });
     },
     [onStateChange]
   );
 
   const onLegendDisplayChange = useCallback(
-    (optionId: unknown) => {
+    (optionId?: string) => {
       onStateChange({ legendDisplay: legendOptions.find(({ id }) => id === optionId)!.value });
     },
     [onStateChange]
   );
 
   const onLegendPositionChange = useCallback(
-    (id: unknown) => onStateChange({ legendPosition: id as Position }),
+    (id: string) => onStateChange({ legendPosition: id as Position }),
     [onStateChange]
   );
 
@@ -125,12 +126,12 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
   }, [layer, onStateChange]);
 
   const onLegendMaxLinesChange = useCallback(
-    (val: unknown) => onStateChange({ legendMaxLines: val }),
+    (val?: number) => onStateChange({ legendMaxLines: val }),
     [onStateChange]
   );
 
   const onLegendSizeChange = useCallback(
-    (val: unknown) => onStateChange({ legendSize: val }),
+    (val?: LegendSize) => onStateChange({ legendSize: val }),
     [onStateChange]
   );
 

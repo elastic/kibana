@@ -11,8 +11,8 @@ import type { IAggType, IAggConfig, AggGroupName } from '@kbn/data-plugin/public
 
 import type { EditorVisState } from './sidebar/state/reducers';
 
-type AggId = IAggConfig['id'];
-type AggParams = IAggConfig['params'];
+export type AggId = IAggConfig['id'];
+export type AggParams = IAggConfig['params'];
 
 export type AddSchema = (schemas: Schema) => void;
 export type ReorderAggs = (sourceAgg: IAggConfig, destinationAgg: IAggConfig) => void;

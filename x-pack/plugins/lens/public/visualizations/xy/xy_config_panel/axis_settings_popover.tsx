@@ -44,7 +44,7 @@ export interface AxisSettingsPopoverProps {
   /**
    * Determines the axis title
    */
-  axisTitle: string | undefined;
+  axisTitle?: string;
   /**
    * Callback to axis title change
    */
@@ -115,7 +115,7 @@ export interface AxisSettingsPopoverProps {
   /**
    * set axis extent
    */
-  setExtent?: (extent: AxisExtentConfig | undefined) => void;
+  setExtent?: (extent?: AxisExtentConfig) => void;
   hasBarOrAreaOnAxis: boolean;
   hasPercentageAxis: boolean;
   dataBounds?: { min: number; max: number };
@@ -237,7 +237,7 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
   const config = popoverConfig(axis, isHorizontal);
 
   const onExtentChange = useCallback(
-    (newExtent: AxisExtentConfig | undefined) => {
+    (newExtent?: AxisExtentConfig) => {
       if (setExtent && newExtent && !isEqual(newExtent, extent)) {
         const { inclusiveZeroError, boundaryError } = validateExtent(hasBarOrAreaOnAxis, newExtent);
         if (

@@ -127,8 +127,8 @@ export function ColorRangeItem({
   );
 
   const onValueChange = useCallback(
-    ({ target: { value: targetValue } }: any) => {
-      setLocalValue(targetValue);
+    ({ target: { value: targetValue } }: React.ChangeEvent<HTMLInputElement>) => {
+      setLocalValue(Number(targetValue));
       dispatch({
         type: 'updateValue',
         payload: { index, value: targetValue, accessor, dataBounds, palettes },
@@ -138,7 +138,7 @@ export function ColorRangeItem({
   );
 
   const onUpdateColor = useCallback(
-    (color: any) => {
+    (color: string) => {
       dispatch({ type: 'updateColor', payload: { index, color, dataBounds, palettes } });
     },
     [dispatch, index, dataBounds, palettes]

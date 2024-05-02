@@ -71,7 +71,8 @@ export const LegendSizeSettings = ({
   }, [isVerticalLegend, legendSize, onLegendSizeChange]);
 
   const onLegendSizeOptionChange = useCallback(
-    (option: any) => onLegendSizeChange(option === DEFAULT_LEGEND_SIZE ? undefined : option),
+    (option?: LegendSize) =>
+      onLegendSizeChange(option === DEFAULT_LEGEND_SIZE ? undefined : option),
     [onLegendSizeChange]
   );
 

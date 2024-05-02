@@ -48,7 +48,7 @@ function LabelsPanel({ valueAxis, setValue, isNewLibrary }: LabelsPanelProps) {
   );
 
   const setColor = useCallback(
-    (value: any) => setValueAxisLabels('color', value),
+    (value: string) => setValueAxisLabels('color', value),
     [setValueAxisLabels]
   );
 

@@ -74,7 +74,7 @@ export const AnnotationsEditor = (props: AnnotationsEditorProps) => {
   );
 
   const handleDelete = useCallback(
-    (annotation: any) => () =>
+    (annotation: Annotation) => () =>
       collectionActions.handleDelete(getCollectionActionsProps(props), annotation),
     [props]
   );

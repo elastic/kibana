@@ -18,6 +18,7 @@ import {
   LayoutDirection,
   Placement,
   Tooltip,
+  BrushEvent,
 } from '@elastic/charts';
 import { EuiTitle } from '@elastic/eui';
 import { RangeFilterParams } from '@kbn/es-query';
@@ -120,7 +121,7 @@ export const TimelionVisComponent = ({
   });
 
   const brushEndListener = useCallback(
-    ({ x }: any) => {
+    ({ x }: BrushEvent) => {
       if (!x) {
         return;
       }

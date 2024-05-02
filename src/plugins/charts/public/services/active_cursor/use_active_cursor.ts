@@ -11,7 +11,7 @@ import { animationFrameScheduler } from 'rxjs';
 import { useCallback, useEffect, RefObject } from 'react';
 import { filter, debounceTime } from 'rxjs';
 
-import type { Chart } from '@elastic/charts';
+import type { Chart, PointerOverEvent, PointerUpdateListener } from '@elastic/charts';
 
 import { parseSyncOptions } from './active_cursor_utils';
 
@@ -27,7 +27,7 @@ export const useActiveCursor = (
 ) => {
   const { accessors, isDateHistogram } = parseSyncOptions(syncOptions);
   const handleCursorUpdate = useCallback(
-    (cursor: any) => {
+    (cursor: PointerOverEvent) => {
       activeCursor.activeCursor$?.next({
         cursor,
         isDateHistogram,
@@ -35,7 +35,7 @@ export const useActiveCursor = (
       });
     },
     [activeCursor.activeCursor$, accessors, isDateHistogram]
-  );
+  ) as PointerUpdateListener;
 
   useEffect(() => {
     const cursorSubscription = activeCursor.activeCursor$

@@ -46,12 +46,7 @@ export interface PercentileIndexPatternColumn extends FieldBasedIndexPatternColu
   };
 }
 
-function ofName(
-  name: string,
-  percentile: number,
-  timeShift: string | undefined,
-  reducedTimeRange: string | undefined
-) {
+function ofName(name: string, percentile: number, timeShift?: string, reducedTimeRange?: string) {
   return adjustTimeScaleLabelSuffix(
     i18n.translate('xpack.lens.indexPattern.percentileOf', {
       defaultMessage:
@@ -346,7 +341,7 @@ export const percentileOperation: OperationDefinition<
     const step = isInline ? 1 : 0.0001;
     const upperBound = isInline ? 99 : 99.9999;
     const onChange = useCallback(
-      (value: string | undefined) => {
+      (value?: string) => {
         if (
           !isValidNumber(value, isInline, upperBound, step, ALLOWED_DECIMAL_DIGITS) ||
           Number(value) === currentColumn.params.percentile
