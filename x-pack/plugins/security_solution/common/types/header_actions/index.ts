@@ -9,7 +9,6 @@ import type {
   EuiDataGridCellValueElementProps,
   EuiDataGridColumn,
   EuiDataGridControlColumn,
-  EuiDataGridProps,
 } from '@elastic/eui';
 import type { IFieldSubType } from '@kbn/es-query';
 import type { FieldBrowserOptions } from '@kbn/triggers-actions-ui-plugin/public';
@@ -69,16 +68,9 @@ export type HeaderCellRender = ComponentType | ComponentType<HeaderActionProps>;
 
 type GenericActionRowCellRenderProps = Pick<
   EuiDataGridCellValueElementProps,
-  | 'rowIndex'
-  | 'columnId'
-  | 'setCellProps'
-  | 'isExpandable'
-  | 'isDetails'
-  | 'isExpanded'
-  | 'colIndex'
-> & {
-  rowCellRender?: EuiDataGridProps['renderCellValue'];
-} & Partial<EuiDataGridCellValueElementProps>;
+  'rowIndex' | 'columnId'
+> &
+  Partial<EuiDataGridCellValueElementProps>;
 
 export type RowCellRender =
   | JSXElementConstructor<GenericActionRowCellRenderProps>

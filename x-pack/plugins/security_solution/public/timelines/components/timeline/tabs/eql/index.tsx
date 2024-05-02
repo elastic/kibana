@@ -13,9 +13,11 @@ import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
+import type { EuiDataGridControlColumn } from '@elastic/eui';
 
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
+import type { ControlColumnProps } from '../../../../../../common/types';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { timelineActions, timelineSelectors } from '../../../../store';
@@ -54,6 +56,7 @@ import type { TimelineTabCommonProps } from '../shared/types';
 import { UnifiedTimelineBody } from '../../body/unified_timeline_body';
 import { EqlTabHeader } from './header';
 import { useTimelineColumns } from '../shared/use_timeline_columns';
+import { useTimelineControlColumn } from '../shared/use_timeline_control_columns';
 
 export type Props = TimelineTabCommonProps & PropsFromRedux;
 
@@ -85,8 +88,9 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     runtimeMappings,
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
-  const { augmentedColumnHeaders, timelineQueryFieldsFromColumns, leadingControlColumns } =
-    useTimelineColumns(columns);
+  const { augmentedColumnHeaders, timelineQueryFieldsFromColumns } = useTimelineColumns(columns);
+
+  const leadingControlColumns = useTimelineControlColumn(columns, TIMELINE_NO_SORTING);
 
   const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
     'unifiedComponentsInTimelineEnabled'
@@ -195,6 +199,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
                 updatedAt={refreshedAt}
                 isTextBasedQuery={false}
                 pageInfo={pageInfo}
+                leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
               />
             </ScrollableFlexItem>
           </FullWidthFlexGroup>
@@ -238,7 +243,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
                       itemsCount: totalCount,
                       itemsPerPage,
                     })}
-                    leadingControlColumns={leadingControlColumns}
+                    leadingControlColumns={leadingControlColumns as ControlColumnProps[]}
                     trailingControlColumns={timelineEmptyTrailingControlColumns}
                   />
                 </StyledEuiFlyoutBody>

@@ -35,7 +35,6 @@ import type { ToggleDetailPanel } from '../../../../../../common/types/timeline'
 import { TimelineTabs } from '../../../../../../common/types/timeline';
 import { DetailsPanel } from '../../../side_panel';
 import { ExitFullScreen } from '../../../../../common/components/exit_full_screen';
-import { useLicense } from '../../../../../common/hooks/use_license';
 import { UnifiedTimelineBody } from '../../body/unified_timeline_body';
 import {
   FullWidthFlexGroup,
@@ -95,8 +94,6 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
   const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
-  const isEnterprisePlus = useLicense().isEnterprise();
-  const ACTION_BUTTON_COUNT = isEnterprisePlus ? 6 : 5;
   const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
     'unifiedComponentsInTimelineEnabled'
   );

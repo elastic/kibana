@@ -452,6 +452,7 @@ const QueryTabContent = connector(
       prevProps.timelineId === nextProps.timelineId &&
       deepEqual(prevProps.eventIdToNoteIds, nextProps.eventIdToNoteIds) &&
       deepEqual(prevProps.columns, nextProps.columns) &&
+      deepEqual(prevProps.pinnedEventIds, nextProps.pinnedEventIds) &&
       deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
       deepEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions) &&
       deepEqual(prevProps.sort, nextProps.sort)
