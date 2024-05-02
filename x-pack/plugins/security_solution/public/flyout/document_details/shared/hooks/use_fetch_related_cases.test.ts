@@ -6,26 +6,27 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-
+import { createReactQueryWrapper } from '../../../../common/mock';
 import { useFetchRelatedCases } from './use_fetch_related_cases';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import type { ReactNode } from 'react';
-import React from 'react';
+
+jest.mock('../../../../common/lib/kibana', () => ({
+  useKibana: jest.fn().mockReturnValue({
+    services: {
+      cases: {
+        api: {
+          getRelatedCases: jest.fn().mockResolvedValue([]),
+        },
+      },
+    },
+  }),
+}));
 
 const eventId = 'eventId';
-
-const createWrapper = () => {
-  const queryClient = new QueryClient();
-  // eslint-disable-next-line react/display-name
-  return ({ children }: { children: ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
-};
 
 describe('useFetchRelatedCases', () => {
   it(`should return loading true while data is loading`, () => {
     const hookResult = renderHook(() => useFetchRelatedCases({ eventId }), {
-      wrapper: createWrapper(),
+      wrapper: createReactQueryWrapper(),
     });
 
     expect(hookResult.result.current.loading).toEqual(true);

@@ -403,6 +403,7 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
 
   const baseFields = {
     type: ruleType,
+    related_integrations: defineStepData.relatedIntegrations?.filter((ri) => !isEmpty(ri.package)),
     ...(timeline.id != null &&
       timeline.title != null && {
         timeline_id: timeline.id,
