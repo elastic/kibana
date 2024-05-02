@@ -421,6 +421,21 @@
     "misc": [
       {
         "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.ENABLE_ESQL",
+        "type": "string",
+        "tags": [],
+        "label": "ENABLE_ESQL",
+        "description": [],
+        "signature": [
+          "\"enableESQL\""
+        ],
+        "path": "packages/kbn-esql-utils/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
         "id": "def-common.ESQL_LATEST_VERSION",
         "type": "string",
         "tags": [],

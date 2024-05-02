@@ -251,7 +251,7 @@ describe('#create', () => {
 
     const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository, []);
 
-    expect(client.create(spaceToCreate)).rejects.toThrowErrorMatchingInlineSnapshot(
+    await expect(client.create(spaceToCreate)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Unable to create Space, this exceeds the maximum number of spaces set by the xpack.spaces.maxSpaces setting"`
     );
 
@@ -321,7 +321,7 @@ describe('#create', () => {
         []
       );
 
-      expect(
+      await expect(
         client.create({ ...spaceToCreate, disabledFeatures: ['some-feature'] })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Unable to create Space, the disabledFeatures array must be empty when xpack.spaces.allowFeatureVisibility setting is disabled"`
@@ -429,7 +429,7 @@ describe('#update', () => {
       );
       const id = savedObject.id;
 
-      expect(
+      await expect(
         client.update(id, { ...spaceToUpdate, disabledFeatures: ['some-feature'] })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Unable to update Space, the disabledFeatures array must be empty when xpack.spaces.allowFeatureVisibility setting is disabled"`
@@ -475,7 +475,7 @@ describe('#delete', () => {
 
     const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository, []);
 
-    expect(client.delete(id)).rejects.toThrowErrorMatchingInlineSnapshot(
+    await expect(client.delete(id)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"The foo space cannot be deleted because it is reserved."`
     );
 

@@ -16,7 +16,7 @@ import { SLOS_BASE_PATH, SLO_SETTINGS_PATH } from '../../../common/locators/path
 export function HeaderMenu(): React.ReactElement | null {
   const { http, theme } = useKibana().services;
 
-  const { appMountParameters } = usePluginContext();
+  const { appMountParameters, isServerless } = usePluginContext();
   return (
     <HeaderMenuPortal
       setHeaderActionMenu={appMountParameters?.setHeaderActionMenu!}
@@ -34,15 +34,17 @@ export function HeaderMenu(): React.ReactElement | null {
                 defaultMessage: 'Add integrations',
               })}
             </EuiHeaderLink>
-            <EuiHeaderLink
-              color="primary"
-              href={http.basePath.prepend(`${SLOS_BASE_PATH}${SLO_SETTINGS_PATH}`)}
-              iconType="gear"
-            >
-              {i18n.translate('xpack.slo.headerMenu.settings', {
-                defaultMessage: 'Settings',
-              })}
-            </EuiHeaderLink>
+            {!isServerless && (
+              <EuiHeaderLink
+                color="primary"
+                href={http.basePath.prepend(`${SLOS_BASE_PATH}${SLO_SETTINGS_PATH}`)}
+                iconType="gear"
+              >
+                {i18n.translate('xpack.slo.headerMenu.settings', {
+                  defaultMessage: 'Settings',
+                })}
+              </EuiHeaderLink>
+            )}
           </EuiHeaderLinks>
         </EuiFlexItem>
       </EuiFlexGroup>
