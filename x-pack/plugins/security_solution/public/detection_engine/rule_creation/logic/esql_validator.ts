@@ -48,8 +48,6 @@ export const esqlValidator = async (
   ...args: Parameters<ValidationFunc>
 ): Promise<ValidationError<ERROR_CODES> | void | undefined> => {
   const [{ value, formData, customData }] = args;
-  const queryClient = (customData.value as { queryClient: QueryClient | undefined }).queryClient;
-
   const { query: queryValue } = value as FieldValueQueryBar;
   const query = queryValue.query as string;
   const { ruleType } = formData as DefineStepRule;
@@ -60,6 +58,8 @@ export const esqlValidator = async (
   }
 
   try {
+    const queryClient = (customData.value as { queryClient: QueryClient | undefined })?.queryClient;
+
     const services = KibanaServices.get();
     const { isEsqlQueryAggregating, isMissingMetadataOperator } = parseEsqlQuery(query);
 
