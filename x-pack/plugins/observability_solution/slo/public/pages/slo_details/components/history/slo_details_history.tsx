@@ -51,7 +51,10 @@ export function SLODetailsHistory({ slo, isAutoRefreshing, selectedTabId }: Prop
     };
   }, [start, end]);
 
-  const onBrushed = useCallback(({ fromUtc, toUtc }) => {
+  const onBrushed = useCallback(({
+    fromUtc,
+    toUtc
+  }: any) => {
     setStart(fromUtc);
     setEnd(toUtc);
   }, []);

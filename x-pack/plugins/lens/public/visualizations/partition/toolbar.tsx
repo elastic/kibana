@@ -135,7 +135,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
   );
 
   const onLegendStatsChange = useCallback(
-    (checked) => {
+    (checked?: boolean) => {
       onStateChange({
         legendStats: checked ? [PartitionLegendValue.Value] : [],
       });

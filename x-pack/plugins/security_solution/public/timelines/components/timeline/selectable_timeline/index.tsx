@@ -225,7 +225,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
   );
 
   const EuiSelectableContent = useCallback(
-    (list, search) => (
+    (list: any, search: any) => (
       <>
         {search}
         {list}

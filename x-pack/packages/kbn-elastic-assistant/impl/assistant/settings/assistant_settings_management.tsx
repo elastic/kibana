@@ -220,7 +220,8 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
     }, [setSelectedSettingsTab, selectedSettingsTab, tabsConfig]);
 
     const handleChange = useCallback(
-      (callback) => (value: unknown) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (callback: (payload: any) => void) => (value: unknown) => {
         setHasPendingChanges(true);
         callback(value);
       },
