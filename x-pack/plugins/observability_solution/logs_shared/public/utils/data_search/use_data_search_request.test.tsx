@@ -8,10 +8,10 @@
 import { act, renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 import { firstValueFrom, Observable, of, Subject } from 'rxjs';
+import type { ISearchGeneric } from '@kbn/search-types';
 import {
   DataPublicPluginStart,
   IKibanaSearchResponse,
-  ISearchGeneric,
   ISearchStart,
 } from '@kbn/data-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';

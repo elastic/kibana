@@ -9,6 +9,7 @@
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { catchError, tap } from 'rxjs';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
+import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
 import { SqlQueryRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SqlGetAsyncResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ESQLSearchParams } from '@kbn/es-types';
@@ -19,7 +20,6 @@ import {
 import { getKbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type { IAsyncSearchOptions } from '../../../../common';
-import { IKibanaSearchRequest, IKibanaSearchResponse, pollSearch } from '../../../../common';
 import { toAsyncKibanaSearchResponse } from './response_utils';
 import { SearchConfigSchema } from '../../../../config';
 

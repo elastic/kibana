@@ -20,5 +20,6 @@
     "@kbn/crypto-browser",
     "@kbn/data-view-utils",
     "@kbn/esql-ast",
+    "@kbn/search-types"
   ]
 }

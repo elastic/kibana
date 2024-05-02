@@ -711,6 +711,7 @@
     "@kbn/search-notebooks": "link:x-pack/plugins/search_notebooks",
     "@kbn/search-playground": "link:x-pack/plugins/search_playground",
     "@kbn/search-response-warnings": "link:packages/kbn-search-response-warnings",
+    "@kbn/search-types": "link:packages/kbn-search-types",
     "@kbn/searchprofiler-plugin": "link:x-pack/plugins/searchprofiler",
     "@kbn/security-hardening": "link:packages/kbn-security-hardening",
     "@kbn/security-plugin": "link:x-pack/plugins/security",
