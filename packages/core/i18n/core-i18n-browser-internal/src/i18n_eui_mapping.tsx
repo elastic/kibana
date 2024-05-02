@@ -1377,9 +1377,13 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       'core.euiDatePopoverContent.nowTabButtonEnd',
       { defaultMessage: 'Set end date and time to now' }
     ),
-    'euiAbsoluteTab.dateFormatError': i18n.translate('core.euiAbsoluteTab.dateFormatError', {
-      defaultMessage: 'Allowed formats: \\{dateFormat\\}, ISO 8601, RFC 2822, or Unix timestamp.',
-    }),
+    'euiAbsoluteTab.dateFormatError': ({ dateFormat }: EuiValues) => (
+      <FormattedMessage
+        id="euiAbsoluteTab.dateFormatError"
+        defaultMessage="Allowed formats: {dateFormat}, ISO 8601, RFC 2822, or Unix timestamp."
+        values={{ dateFormat }}
+      />
+    ),
     'euiRelativeTab.fullDescription': ({ unit }: EuiValues) =>
       i18n.translate('core.euiRelativeTab.fullDescription', {
         defaultMessage: 'The unit is changeable. Currently set to {unit}.',
