@@ -22,7 +22,6 @@ export const useCloneAction = (forceDisable: boolean, transformNodes: number) =>
   const toastNotifications = useToastNotifications();
 
   const { data: dataViewListItems } = useGetDataViewIdsWithTitle();
-
   const { canCreateTransform } = useTransformCapabilities();
 
   const clickHandler = useCallback(
