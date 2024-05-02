@@ -15,6 +15,7 @@ import {
   apiHasExecutionContext,
   fetch$,
   initializeTimeRange,
+  initializeTitles,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import React, { useMemo } from 'react';
@@ -89,6 +90,8 @@ export const getChangePointChartEmbeddableFactory = (
         serialize: serializeTimeRange,
       } = initializeTimeRange(state);
 
+      const { titleComparators, serializeTitles } = initializeTitles(state);
+
       const {
         changePointControlsApi,
         changePointControlsComparators,
@@ -135,6 +138,7 @@ export const getChangePointChartEmbeddableFactory = (
             return {
               rawState: {
                 timeRange: undefined,
+                ...serializeTitles(),
                 ...serializeTimeRange(),
                 ...serializeChangePointChartState(),
               },
@@ -144,6 +148,7 @@ export const getChangePointChartEmbeddableFactory = (
         },
         {
           ...timeRangeComparators,
+          ...titleComparators,
           ...changePointControlsComparators,
         }
       );

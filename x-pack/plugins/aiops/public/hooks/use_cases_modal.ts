@@ -8,7 +8,7 @@
 import { useCallback } from 'react';
 import { stringHash } from '@kbn/ml-string-hash';
 import { AttachmentType } from '@kbn/cases-plugin/common';
-import type { EmbeddableChangePointChartInput } from '../embeddable/change_point_chart/embeddable_change_point_chart';
+import type { ChangePointEmbeddableRuntimeState } from '../embeddable/change_point_chart/types';
 import type { EmbeddableChangePointChartType } from '../embeddable/change_point_chart/embeddable_change_point_chart_factory';
 import { useAiopsAppContext } from './use_aiops_app_context';
 
@@ -23,7 +23,7 @@ export const useCasesModal = <EmbeddableType extends EmbeddableChangePointChartT
   const selectCaseModal = cases?.hooks.useCasesAddToExistingCaseModal();
 
   return useCallback(
-    (persistableState: Partial<Omit<EmbeddableChangePointChartInput, 'id'>>) => {
+    (persistableState: Partial<Omit<ChangePointEmbeddableRuntimeState, 'id'>>) => {
       const persistableStateAttachmentState = {
         ...persistableState,
         // Creates unique id based on the input

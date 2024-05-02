@@ -13,8 +13,10 @@ import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescriptionList } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
-import type { ChangePointDetectionSharedComponent } from '../shared_components/change_point_detection';
-import type { EmbeddableChangePointChartProps } from '../embeddable';
+import type {
+  ChangePointDetectionProps,
+  ChangePointDetectionSharedComponent,
+} from '../shared_components/change_point_detection';
 
 export const initComponent = memoize(
   (
@@ -29,8 +31,7 @@ export const initComponent = memoize(
           id: FIELD_FORMAT_IDS.DATE,
         });
 
-        const inputProps =
-          persistableStateAttachmentState as unknown as EmbeddableChangePointChartProps;
+        const inputProps = persistableStateAttachmentState as unknown as ChangePointDetectionProps;
 
         const listItems = [
           {

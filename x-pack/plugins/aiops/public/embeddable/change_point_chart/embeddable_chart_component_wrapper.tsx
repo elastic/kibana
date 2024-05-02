@@ -9,12 +9,12 @@ import type { FC } from 'react';
 import React, { useEffect, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { CHANGE_POINT_DETECTION_VIEW_TYPE } from '@kbn/aiops-change-point-detection/constants';
+import type { ChangePointDetectionProps } from '../../shared_components/change_point_detection';
 import { ChangePointsTable } from '../../components/change_point_detection/change_points_table';
 import {
   type ChangePointAnnotation,
   type ChangePointDetectionRequestParams,
 } from '../../components/change_point_detection/change_point_detection_context';
-import type { EmbeddableChangePointChartProps } from './embeddable_change_point_chart_component';
 import { useFilterQueryUpdates } from '../../hooks/use_filters_query';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
@@ -39,13 +39,7 @@ const defaultSort = {
  * @param partitions
  * @constructor
  */
-export const ChartGridEmbeddableWrapper: FC<
-  EmbeddableChangePointChartProps & {
-    onRenderComplete: () => void;
-    onLoading: (isLoading: boolean) => void;
-    onError: (error: Error) => void;
-  }
-> = ({
+export const ChartGridEmbeddableWrapper: FC<ChangePointDetectionProps> = ({
   viewType = CHANGE_POINT_DETECTION_VIEW_TYPE.CHARTS,
   fn,
   metricField,

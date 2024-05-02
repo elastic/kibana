@@ -13,6 +13,7 @@ import type {
   PublishesTimeRange,
   PublishingSubject,
   SerializedTimeRange,
+  SerializedTitles,
 } from '@kbn/presentation-publishing';
 import type { ChangePointDetectionViewType } from '@kbn/aiops-change-point-detection/constants';
 import type { SelectedChangePoint } from '../../components/change_point_detection/change_point_detection_context';
@@ -50,4 +51,6 @@ export interface ChangePointEmbeddableState {
   maxSeriesToPlot?: number;
 }
 
-export type ChangePointEmbeddableRuntimeState = ChangePointEmbeddableState & SerializedTimeRange;
+export type ChangePointEmbeddableRuntimeState = ChangePointEmbeddableState &
+  SerializedTimeRange &
+  SerializedTitles;

@@ -39,7 +39,6 @@ import { ViewTypeSelector } from '../../components/change_point_detection/view_t
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { DataSourceContextProvider } from '../../hooks/use_data_source';
 import { DEFAULT_SERIES } from './const';
-import type { EmbeddableChangePointChartProps } from './embeddable_change_point_chart_component';
 import type { ChangePointEmbeddableRuntimeState } from './types';
 
 export interface AnomalyChartsInitializerProps {
@@ -174,7 +173,7 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
 };
 
 export type FormControlsProps = Pick<
-  EmbeddableChangePointChartProps,
+  ChangePointEmbeddableRuntimeState,
   'metricField' | 'splitField' | 'fn' | 'maxSeriesToPlot' | 'partitions'
 >;
 
