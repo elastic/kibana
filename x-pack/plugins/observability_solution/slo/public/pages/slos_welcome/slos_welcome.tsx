@@ -5,62 +5,64 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
 import {
-  EuiPageTemplate,
   EuiButton,
-  EuiTitle,
-  EuiLink,
-  EuiImage,
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiImage,
+  EuiLink,
+  EuiPageTemplate,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-import { useKibana } from '../../utils/kibana_react';
-import { useLicense } from '../../hooks/use_license';
-import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useCapabilities } from '../../hooks/use_capabilities';
-import { useFetchSloList } from '../../hooks/use_fetch_slo_list';
+import React, { useEffect } from 'react';
 import { paths } from '../../../common/locators/paths';
-import illustration from './assets/illustration.svg';
-import { useFetchSloGlobalDiagnosis } from '../../hooks/use_fetch_global_diagnosis';
-import { SloOutdatedCallout } from '../../components/slo/slo_outdated_callout';
 import { HeaderMenu } from '../../components/header_menu/header_menu';
+import { SloOutdatedCallout } from '../../components/slo/slo_outdated_callout';
+import { useFetchSloList } from '../../hooks/use_fetch_slo_list';
+import { useLicense } from '../../hooks/use_license';
+import { usePermissions } from '../../hooks/use_permissions';
+import { usePluginContext } from '../../hooks/use_plugin_context';
+import { useKibana } from '../../utils/kibana_react';
+import illustration from './assets/illustration.svg';
 
 export function SlosWelcomePage() {
   const {
     application: { navigateToUrl },
     http: { basePath },
   } = useKibana().services;
-  const { hasWriteCapabilities } = useCapabilities();
-  const { data: globalDiagnosis } = useFetchSloGlobalDiagnosis();
+
+  const { data: permissions, isLoading: arePermissionsLoading } = usePermissions();
   const { ObservabilityPageTemplate } = usePluginContext();
-
   const { hasAtLeast } = useLicense();
-  const hasRightLicense = hasAtLeast('platinum');
 
+  const hasRightLicense = hasAtLeast('platinum');
   const { isLoading, data: sloList } = useFetchSloList();
   const { total } = sloList ?? { total: 0 };
 
-  const hasRequiredWritePrivileges = !!globalDiagnosis?.userPrivileges.write.has_all_requested;
-  const hasRequiredReadPrivileges = !!globalDiagnosis?.userPrivileges.read.has_all_requested;
+  const hasSlosAndPermissions =
+    total > 0 && hasRightLicense && permissions?.hasAllReadRequested === true;
 
   const handleClickCreateSlo = () => {
     navigateToUrl(basePath.prepend(paths.sloCreate));
   };
 
-  const hasSlosAndHasPermissions =
-    total > 0 && hasAtLeast('platinum') === true && hasRequiredReadPrivileges;
-
   useEffect(() => {
-    if (hasSlosAndHasPermissions) {
+    if (hasSlosAndPermissions) {
       navigateToUrl(basePath.prepend(paths.slos));
     }
-  }, [basePath, hasSlosAndHasPermissions, navigateToUrl]);
+  }, [basePath, navigateToUrl, hasSlosAndPermissions]);
 
-  return hasSlosAndHasPermissions || isLoading ? null : (
+  if (isLoading || arePermissionsLoading) {
+    return null;
+  }
+
+  if (hasSlosAndPermissions) {
+    return null;
+  }
+
+  return (
     <ObservabilityPageTemplate data-test-subj="slosPageWelcomePrompt">
       <HeaderMenu />
       <SloOutdatedCallout />
@@ -117,7 +119,7 @@ export function SlosWelcomePage() {
                       fill
                       color="primary"
                       onClick={handleClickCreateSlo}
-                      disabled={!hasWriteCapabilities || !hasRequiredWritePrivileges}
+                      disabled={!permissions?.hasAllWriteRequested}
                     >
                       {i18n.translate('xpack.slo.sloList.welcomePrompt.buttonLabel', {
                         defaultMessage: 'Create SLO',
