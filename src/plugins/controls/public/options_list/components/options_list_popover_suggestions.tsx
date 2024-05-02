@@ -150,7 +150,7 @@ export const OptionsListPopoverSuggestions = ({
   }, [loadMoreSuggestions, totalCardinality]);
 
   const renderOption = useCallback(
-    (option: any, searchStringValue: any) => {
+    (option: EuiSelectableOption, searchStringValue: string) => {
       if (!allowExpensiveQueries || searchTechnique === 'exact') return option.label;
 
       return (
