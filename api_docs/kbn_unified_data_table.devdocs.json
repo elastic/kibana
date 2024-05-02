@@ -1060,13 +1060,7 @@
               "\nIf set, the given document is displayed in a flyout"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/discover-utils",
-                "scope": "common",
-                "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.DataTableRecord",
-                "text": "DataTableRecord"
-              },
+              "DataTableRecord",
               " | undefined"
             ],
             "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
@@ -1329,13 +1323,7 @@
               "\nArray of documents provided by Elasticsearch"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/discover-utils",
-                "scope": "common",
-                "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.DataTableRecord",
-                "text": "DataTableRecord"
-              },
+              "DataTableRecord",
               "[] | undefined"
             ],
             "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
@@ -1353,13 +1341,7 @@
             ],
             "signature": [
               "((doc?: ",
-              {
-                "pluginId": "@kbn/discover-utils",
-                "scope": "common",
-                "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.DataTableRecord",
-                "text": "DataTableRecord"
-              },
+              "DataTableRecord",
               " | undefined) => void) | undefined"
             ],
             "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
@@ -1374,13 +1356,7 @@
                 "label": "doc",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/discover-utils",
-                    "scope": "common",
-                    "docId": "kibKbnDiscoverUtilsPluginApi",
-                    "section": "def-common.DataTableRecord",
-                    "text": "DataTableRecord"
-                  },
+                  "DataTableRecord",
                   " | undefined"
                 ],
                 "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
@@ -1865,21 +1841,9 @@
             ],
             "signature": [
               "((hit: ",
-              {
-                "pluginId": "@kbn/discover-utils",
-                "scope": "common",
-                "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.DataTableRecord",
-                "text": "DataTableRecord"
-              },
+              "DataTableRecord",
               ", displayedRows: ",
-              {
-                "pluginId": "@kbn/discover-utils",
-                "scope": "common",
-                "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.DataTableRecord",
-                "text": "DataTableRecord"
-              },
+              "DataTableRecord",
               "[], displayedColumns: string[], columnsMeta?: ",
               {
                 "pluginId": "@kbn/unified-data-table",
@@ -1902,13 +1866,7 @@
                 "label": "hit",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/discover-utils",
-                    "scope": "common",
-                    "docId": "kibKbnDiscoverUtilsPluginApi",
-                    "section": "def-common.DataTableRecord",
-                    "text": "DataTableRecord"
-                  }
+                  "DataTableRecord"
                 ],
                 "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
                 "deprecated": false,
@@ -1923,13 +1881,7 @@
                 "label": "displayedRows",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/discover-utils",
-                    "scope": "common",
-                    "docId": "kibKbnDiscoverUtilsPluginApi",
-                    "section": "def-common.DataTableRecord",
-                    "text": "DataTableRecord"
-                  },
+                  "DataTableRecord",
                   "[]"
                 ],
                 "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
@@ -2587,13 +2539,7 @@
         "signature": [
           "EuiDataGridCellValueElementProps",
           " & { row: ",
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.DataTableRecord",
-            "text": "DataTableRecord"
-          },
+          "DataTableRecord",
           "; dataView: ",
           {
             "pluginId": "dataViews",

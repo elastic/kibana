@@ -12,7 +12,7 @@ import { rangeQuery, termQuery, typedSearch } from '@kbn/observability-plugin/se
 import * as t from 'io-ts';
 import moment from 'moment';
 import { ESSearchRequest } from '@kbn/es-types';
-import { observabilityAlertDetailsContextRt } from '@kbn/observability-plugin/server/services';
+import { alertDetailsContextRt } from '@kbn/observability-plugin/server/services';
 import { ApmDocumentType } from '../../../../common/document_type';
 import {
   APMEventClient,
@@ -26,7 +26,7 @@ export async function getServiceNameFromSignals({
   coreContext,
   apmEventClient,
 }: {
-  query: t.TypeOf<typeof observabilityAlertDetailsContextRt>;
+  query: t.TypeOf<typeof alertDetailsContextRt>;
   esClient: ElasticsearchClient;
   coreContext: Pick<CoreRequestHandlerContext, 'uiSettings'>;
   apmEventClient: APMEventClient;
