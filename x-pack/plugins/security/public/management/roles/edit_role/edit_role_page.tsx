@@ -529,6 +529,9 @@ export const EditRolePage: FunctionComponent<Props> = ({
           canUseRemoteIndices={
             buildFlavor === 'traditional' && featureCheckState.value?.canUseRemoteIndices
           }
+          canUseRemoteClusters={
+            buildFlavor === 'traditional' && featureCheckState.value?.canUseRemoteClusters
+          }
           isDarkMode={isDarkMode}
           buildFlavor={buildFlavor}
         />

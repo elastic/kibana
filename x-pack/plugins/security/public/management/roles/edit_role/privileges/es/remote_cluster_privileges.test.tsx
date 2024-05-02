@@ -9,6 +9,7 @@ import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { SecurityLicenseFeatures } from '@kbn/security-plugin-types-common';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import '@kbn/code-editor-mock/jest_helper';
 
@@ -88,6 +89,52 @@ test('it renders an RemoteClusterPrivilegesForm for each remote cluster privileg
 });
 
 test('it renders fields as disabled when not editable', async () => {
+  const props = {
+    role: {
+      name: '',
+      kibana: [],
+      elasticsearch: {
+        cluster: [],
+        remote_cluster: [
+          {
+            clusters: ['cluster1', 'cluster2'],
+            privileges: ['monitor_enrich'],
+          },
+          {
+            clusters: ['cluster3', 'cluster4'],
+            privileges: ['monitor_enrich'],
+          },
+        ],
+        indices: [],
+        run_as: [],
+      },
+    },
+    onChange: jest.fn(),
+    editable: false,
+    validator: new RoleValidator(),
+    availableRemoteClusterPrivileges: ['monitor_enrich'],
+    license: licenseMock.create(),
+  };
+  const wrapper = mountWithIntl(
+    <KibanaContextProvider services={coreMock.createStart()}>
+      <RemoteClusterPrivileges {...props} />
+    </KibanaContextProvider>
+  );
+
+  expect(
+    wrapper
+      .find('RemoteClusterPrivilegesForm')
+      .everyWhere((component) => component.prop('isRoleReadOnly'))
+  ).toBe(true);
+});
+
+test('it renders fields as disabled when `allowRemoteClusterPrivileges` is set to false', async () => {
+  const lisence = licenseMock.create();
+
+  lisence.getFeatures.mockReturnValue({
+    allowRemoteClusterPrivileges: false,
+  } as SecurityLicenseFeatures);
+
   const props = {
     role: {
       name: '',

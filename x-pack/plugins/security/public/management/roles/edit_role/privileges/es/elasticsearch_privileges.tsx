@@ -44,6 +44,7 @@ interface Props {
   indexPatterns: string[];
   remoteClusters?: Cluster[];
   canUseRemoteIndices?: boolean;
+  canUseRemoteClusters?: boolean;
   isDarkMode?: boolean;
   buildFlavor: BuildFlavor;
 }
@@ -70,6 +71,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
       license,
       builtinESPrivileges,
       canUseRemoteIndices,
+      canUseRemoteClusters,
       buildFlavor,
     } = this.props;
 
@@ -220,7 +222,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
             />
           </>
         )}
-        {buildFlavor === 'traditional' && canUseRemoteIndices && (
+        {buildFlavor === 'traditional' && canUseRemoteClusters && (
           <>
             <EuiSpacer />
             <EuiSpacer />

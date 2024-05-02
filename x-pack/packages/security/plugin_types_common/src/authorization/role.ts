@@ -38,7 +38,7 @@ export interface Role {
   description?: string;
   elasticsearch: {
     cluster: string[];
-    remote_cluster: RoleRemoteClusterPrivilege[];
+    remote_cluster?: RoleRemoteClusterPrivilege[];
     indices: RoleIndexPrivilege[];
     remote_indices?: RoleRemoteIndexPrivilege[];
     run_as: string[];

@@ -31,7 +31,7 @@ export const RemoteClusterPrivileges: React.FunctionComponent<Props> = ({
   license,
   availableRemoteClusterPrivileges,
   role,
-  editable = true,
+  editable,
   onChange,
   validator,
 }) => {
