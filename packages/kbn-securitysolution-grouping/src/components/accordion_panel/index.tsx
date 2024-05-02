@@ -102,7 +102,7 @@ const GroupPanelComponent = <T,>({
   );
 
   const onToggle = useCallback(
-    (isOpen: any) => {
+    (isOpen: boolean) => {
       if (onToggleGroup) {
         onToggleGroup(isOpen, groupBucket);
       }
