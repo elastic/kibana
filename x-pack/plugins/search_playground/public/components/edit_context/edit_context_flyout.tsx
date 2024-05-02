@@ -74,6 +74,7 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
     onChangeSize(docSize);
     onClose();
   };
+
   const handleDocSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     usageTracker.click(AnalyticsEvents.editContextDocSizeChanged);
     setDocSize(Number(e.target.value));
@@ -126,33 +127,28 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
                       defaultMessage: 'Number of documents to retrieve',
                     }
                   )}
-                  options={[
-                    {
-                      value: 1,
-                      text: '1',
-                    },
-                    {
-                      value: 3,
-                      text: '3',
-                    },
-                    {
-                      value: 5,
-                      text: '5',
-                    },
-                    {
-                      value: 10,
-                      text: '10',
-                    },
-                  ]}
-                  value={docSize}
-                  onChange={handleDocSizeChange}
-                />
-              </EuiFlexItem>
-              <EuiText>
-                <h5>
-                  <FormattedMessage
-                    id="xpack.searchPlayground.editContext.flyout.table.title"
-                    defaultMessage="Selected fields"
+                >
+                  <EuiSelect
+                    options={[
+                      {
+                        value: 1,
+                        text: '1',
+                      },
+                      {
+                        value: 3,
+                        text: '3',
+                      },
+                      {
+                        value: 5,
+                        text: '5',
+                      },
+                      {
+                        value: 10,
+                        text: '10',
+                      },
+                    ]}
+                    value={docSize}
+                    onChange={handleDocSizeChange}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
