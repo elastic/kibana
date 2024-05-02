@@ -16,11 +16,7 @@ import type { CoreIncrementUsageCounter } from '@kbn/core-usage-data-server';
 import { type ServiceStatus, type CoreStatus, ServiceStatusLevels } from '@kbn/core-status-common';
 import { StatusResponse } from '@kbn/core-status-common-internal';
 import { calculateLegacyStatus, type LegacyStatusInfo } from '../legacy_status';
-import {
-  statusResponse,
-  redactedStatusResponse,
-  type RedactedStatusHttpBody,
-} from './status_response_schemas';
+import { statusResponse, type RedactedStatusHttpBody } from './status_response_schemas';
 
 const SNAPSHOT_POSTFIX = /-SNAPSHOT$/;
 
@@ -57,12 +53,6 @@ const SERVICE_UNAVAILABLE_NOT_REPORTED: ServiceStatus = {
   level: ServiceStatusLevels.unavailable,
   summary: 'Status not yet reported',
 };
-
-const responseSchema = schema.oneOf([redactedStatusResponse, statusResponse], {
-  meta: {
-    description: `Kibana's operational status. A minimal response is sent for unauthorized users.`,
-  },
-});
 
 export const registerStatusRoute = ({
   router,
@@ -118,10 +108,10 @@ export const registerStatusRoute = ({
         },
         response: {
           200: {
-            body: responseSchema,
+            body: statusResponse,
           },
           503: {
-            body: responseSchema,
+            body: statusResponse,
           },
         },
       },

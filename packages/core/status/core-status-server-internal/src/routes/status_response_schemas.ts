@@ -18,88 +18,103 @@ import type {
   ServerVersion,
 } from '@kbn/core-status-common-internal';
 
-export const serviceStatusLevelId: Type<ServiceStatusLevelId> = schema.oneOf([
-  schema.literal('available'),
-  schema.literal('degraded'),
-  schema.literal('unavailable'),
-  schema.literal('critical'),
-]);
+const serviceStatusLevelId: () => Type<ServiceStatusLevelId> = () =>
+  schema.oneOf([
+    schema.literal('available'),
+    schema.literal('degraded'),
+    schema.literal('unavailable'),
+    schema.literal('critical'),
+  ]);
 
-export const statusInfoServiceStatus: Type<
+const statusInfoServiceStatus: () => Type<
   Omit<ServiceStatus, 'level'> & { level: ServiceStatusLevelId }
-> = schema.object({
-  level: serviceStatusLevelId,
-  summary: schema.string(),
-  detail: schema.maybe(schema.string()),
-  documentationUrl: schema.maybe(schema.string()),
-  meta: schema.recordOf(schema.string(), schema.any()),
-});
+> = () =>
+  schema.object({
+    level: serviceStatusLevelId(),
+    summary: schema.string(),
+    detail: schema.maybe(schema.string()),
+    documentationUrl: schema.maybe(schema.string()),
+    meta: schema.recordOf(schema.string(), schema.any()),
+  });
 
-export const statusInfoCoreStatus: Type<StatusInfoCoreStatus> = schema.object({
-  elasticsearch: statusInfoServiceStatus,
-  savedObjects: statusInfoServiceStatus,
-});
+const statusInfoCoreStatus: () => Type<StatusInfoCoreStatus> = () =>
+  schema.object({
+    elasticsearch: statusInfoServiceStatus(),
+    savedObjects: statusInfoServiceStatus(),
+  });
 
 /** Only include a subset of fields for OAS documentation, for now */
-export const serverMetrics: Type<Partial<ServerMetrics>> = schema.object({
-  elasticsearch_client: schema.object({
-    totalActiveSockets: schema.number(),
-    totalIdleSockets: schema.number(),
-    totalQueuedRequests: schema.number(),
-  }),
-  last_updated: schema.string(),
-  collection_interval_in_millis: schema.number(),
-});
+const serverMetrics: () => Type<Partial<ServerMetrics>> = () =>
+  schema.object({
+    elasticsearch_client: schema.object({
+      totalActiveSockets: schema.number(),
+      totalIdleSockets: schema.number(),
+      totalQueuedRequests: schema.number(),
+    }),
+    last_updated: schema.string(),
+    collection_interval_in_millis: schema.number(),
+  });
 
-export const buildFlavour: Type<BuildFlavor> = schema.oneOf([
-  schema.literal('serverless'),
-  schema.literal('traditional'),
-]);
-export const serverVersion: Type<ServerVersion> = schema.object({
-  number: schema.string(),
-  build_hash: schema.string(),
-  build_number: schema.number(),
-  build_snapshot: schema.boolean(),
-  build_flavor: buildFlavour,
-  build_date: schema.string(),
-});
+const buildFlavour: () => Type<BuildFlavor> = () =>
+  schema.oneOf([schema.literal('serverless'), schema.literal('traditional')]);
 
-export const statusInfo: Type<StatusInfo> = schema.object({
-  overall: statusInfoServiceStatus,
-  core: statusInfoCoreStatus,
-  plugins: schema.recordOf(schema.string(), statusInfoServiceStatus),
-});
+const serverVersion: () => Type<ServerVersion> = () =>
+  schema.object({
+    number: schema.string(),
+    build_hash: schema.string(),
+    build_number: schema.number(),
+    build_snapshot: schema.boolean(),
+    build_flavor: buildFlavour(),
+    build_date: schema.string(),
+  });
+
+const statusInfo: () => Type<StatusInfo> = () =>
+  schema.object({
+    overall: statusInfoServiceStatus(),
+    core: statusInfoCoreStatus(),
+    plugins: schema.recordOf(schema.string(), statusInfoServiceStatus()),
+  });
 
 /** Excluding metrics for brevity, for now */
-export const statusResponse: Type<Omit<StatusResponse, 'metrics'>> = schema.object(
-  {
-    name: schema.string(),
-    uuid: schema.string(),
-    version: serverVersion,
-    status: statusInfo,
-    metrics: serverMetrics,
-  },
-  {
-    meta: {
-      id: 'core.status.response',
-      description: `Kibana's operational status as well as a detailed breakdown of plugin statuses indication of various loads (like event loop utilization and network traffic) at time of request.`,
+const fullStatusResponse: () => Type<Omit<StatusResponse, 'metrics'>> = () =>
+  schema.object(
+    {
+      name: schema.string(),
+      uuid: schema.string(),
+      version: serverVersion(),
+      status: statusInfo(),
+      metrics: serverMetrics(),
     },
-  }
-);
+    {
+      meta: {
+        id: 'core.status.response',
+        description: `Kibana's operational status as well as a detailed breakdown of plugin statuses indication of various loads (like event loop utilization and network traffic) at time of request.`,
+      },
+    }
+  );
 
-export const redactedStatusResponse = schema.object(
-  {
-    status: schema.object({
-      overall: schema.object({
-        level: serviceStatusLevelId,
+const redactedStatusResponse = () =>
+  schema.object(
+    {
+      status: schema.object({
+        overall: schema.object({
+          level: serviceStatusLevelId(),
+        }),
       }),
-    }),
-  },
-  {
-    meta: {
-      id: 'core.status.redactedResponse',
     },
-  }
-);
+    {
+      meta: {
+        id: 'core.status.redactedResponse',
+      },
+    }
+  );
+
+/** Lazily load this schema */
+export const statusResponse = () =>
+  schema.oneOf([redactedStatusResponse(), fullStatusResponse()], {
+    meta: {
+      description: `Kibana's operational status. A minimal response is sent for unauthorized users.`,
+    },
+  });
 
 export type RedactedStatusHttpBody = TypeOf<typeof redactedStatusResponse>;
