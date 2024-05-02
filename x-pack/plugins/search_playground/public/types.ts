@@ -20,6 +20,7 @@ import { SharePluginStart } from '@kbn/share-plugin/public';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { AppMountParameters } from '@kbn/core/public';
+import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { ChatRequestData } from '../common/types';
 import type { App } from './components/app';
 import type { PlaygroundProvider as PlaygroundProviderComponent } from './providers/playground_provider';
@@ -39,6 +40,7 @@ export interface SearchPlaygroundPluginStart {
 
 export interface AppPluginStartDependencies {
   history: AppMountParameters['history'];
+  usageCollection: UsageCollectionStart;
   navigation: NavigationPublicPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   share: SharePluginStart;
@@ -50,6 +52,7 @@ export interface AppServicesContext {
   share: SharePluginStart;
   cloud?: CloudSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  usageCollection: UsageCollectionStart;
 }
 
 export enum ChatFormFields {
@@ -210,6 +213,7 @@ export interface LLMModel {
   showConnectorName?: boolean;
   connectorId: string;
   connectorName: string;
+  connectorType: string;
   icon: ComponentType;
   disabled: boolean;
   promptTokenLimit?: number;

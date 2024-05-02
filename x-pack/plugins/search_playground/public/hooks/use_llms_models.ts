@@ -99,6 +99,7 @@ export const useLLMsModels = (): LLMModel[] => {
               id: connector?.id + label,
               name: label,
               value,
+              connectorType: connector.type,
               connectorName: connector.name,
               showConnectorName,
               icon: llmParams.icon,
