@@ -19,12 +19,10 @@ import { ReportingPanelContent } from './reporting_panel_content_lazy';
 
 export const reportingCsvShareProvider = ({
   apiClient,
-  toasts,
-  uiSettings,
   application,
   license,
   usesUiCapabilities,
-  theme,
+  startServices$,
 }: ExportPanelShareOpts): ShareMenuProvider => {
   const getShareMenuItems = ({ objectType, objectId, sharingData, onClose }: ShareContext) => {
     if ('search' !== objectType) {
@@ -104,14 +102,12 @@ export const reportingCsvShareProvider = ({
             <ReportingPanelContent
               requiresSavedState={false}
               apiClient={apiClient}
-              toasts={toasts}
-              uiSettings={uiSettings}
               reportType={reportType}
               layoutId={undefined}
               objectId={objectId}
               getJobParams={getJobParams}
               onClose={onClose}
-              theme={theme}
+              startServices$={startServices$}
             />
           ),
         },

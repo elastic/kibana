@@ -68,7 +68,7 @@ const getRouterDefaults = () => ({
     },
     response: {
       200: {
-        body: schema.string({ maxLength: 10, minLength: 1 }),
+        body: () => schema.string({ maxLength: 10, minLength: 1 }),
       },
     },
   },
@@ -97,10 +97,11 @@ const getVersionedRouterDefaults = () => ({
           },
           response: {
             [200]: {
-              body: schema.object(
-                { fooResponse: schema.string() },
-                { meta: { description: 'fooResponse' } }
-              ),
+              body: () =>
+                schema.object(
+                  { fooResponse: schema.string() },
+                  { meta: { description: 'fooResponse' } }
+                ),
             },
           },
         },
@@ -113,7 +114,7 @@ const getVersionedRouterDefaults = () => ({
         validate: {
           request: { body: schema.object({ foo: schema.string() }) },
           response: {
-            [200]: { body: schema.object({ fooResponse: schema.string() }) },
+            [200]: { body: () => schema.object({ fooResponse: schema.string() }) },
           },
         },
         version: 'oas-test-version-2',

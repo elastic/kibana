@@ -133,6 +133,10 @@ export class MlServerPlugin
       category: DEFAULT_APP_CATEGORIES.kibana,
       app: [PLUGIN_ID, 'kibana'],
       catalogue: [PLUGIN_ID, `${PLUGIN_ID}_file_data_visualizer`],
+      privilegesTooltip: i18n.translate('xpack.ml.featureRegistry.privilegesTooltip', {
+        defaultMessage:
+          'Granting All or Read feature privilege for Machine Learning will also grant the equivalent feature privileges to certain types of Kibana saved objects, namely index patterns, dashboards, saved searches and visualizations as well as machine learning job, trained model and module saved objects.',
+      }),
       management: {
         insightsAndAlerting: ['jobsListLink', 'triggersActions'],
       },
@@ -338,10 +342,16 @@ export class MlServerPlugin
         this.security,
         this.spacesPlugin !== undefined
       );
-      initializeJobs().finally(() => {
-        this.setMlReady();
+      initializeJobs()
+        .catch((err) => {
+          this.log.debug(`Error initializing jobs`, err);
+        })
+        .finally(() => {
+          this.setMlReady();
+        });
+      this.savedObjectsSyncService.scheduleSyncTask(plugins.taskManager, coreStart).catch((err) => {
+        this.log.debug(`Error scheduling saved objects sync task`, err);
       });
-      this.savedObjectsSyncService.scheduleSyncTask(plugins.taskManager, coreStart);
     });
   }
 
