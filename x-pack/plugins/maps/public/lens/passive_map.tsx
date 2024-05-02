@@ -14,9 +14,9 @@ import { INITIAL_LOCATION, MAP_SAVED_OBJECT_TYPE } from '../../common';
 import { createBasemapLayerDescriptor } from '../classes/layers/create_basemap_layer_descriptor';
 import { MapApi, MapSerializedState } from '../react_embeddable/types';
 
-interface Props {
+export interface Props {
   passiveLayer: LayerDescriptor;
-  onRenderComplete: () => void;
+  onRenderComplete?: () => void;
 }
 
 /*
@@ -81,15 +81,15 @@ export function PassiveMap(props: Props) {
         state={initialState}
         onApiAvailable={(api) => {
           mapApiRef.current = api;
-          onRenderCompleteSubscriptionRef.current = api.onRenderComplete$.subscribe(() => {
-            if (isMounted()) {
-              props.onRenderComplete();
-            }
-          });
+          if (props.onRenderComplete) {
+            onRenderCompleteSubscriptionRef.current = api.onRenderComplete$.subscribe(() => {
+              if (isMounted() && props.onRenderComplete) {
+                props.onRenderComplete();
+              }
+            });
+          }
         }}
-        panelProps={{
-          hideHeader: true,
-        }}
+        hidePanelChrome={true}
       />
     </div>
   );

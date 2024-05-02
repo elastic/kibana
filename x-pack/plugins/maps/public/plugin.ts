@@ -89,9 +89,10 @@ import {
 import { MapInspectorView } from './inspector/map_adapter/map_inspector_view';
 import { VectorTileInspectorView } from './inspector/vector_tile_adapter/vector_tile_inspector_view';
 
-import { setupLensChoroplethChart } from './lens';
+import { PassiveMapLazy, setupLensChoroplethChart } from './lens';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { setupMapEmbeddable } from './react_embeddable/setup_map_embeddable';
+import { MapRendererLazy } from './react_embeddable/map_renderer_lazy';
 
 export interface MapsPluginSetupDependencies {
   cloud?: CloudSetup;
@@ -265,6 +266,8 @@ export class MapsPlugin
     return {
       createLayerDescriptors,
       suggestEMSTermJoinConfig,
+      Map: MapRendererLazy,
+      PassiveMap: PassiveMapLazy,
     };
   }
 }

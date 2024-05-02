@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
 import type { Query, TimeRange } from '@kbn/es-query';
 import type { TileMapVisConfig } from './types';
-import { MapComponent } from '../../react_embeddable/map_component';
+import { MapComponent } from '../../react_embeddable/map_renderer';
 import { createTileMapLayerDescriptor } from '../../classes/layers/create_tile_map_layer_descriptor';
 
 interface Props {
@@ -20,30 +20,33 @@ interface Props {
   onInitialRenderComplete: () => void;
 }
 
-function TileMapVisualization(props: Props) {
-  const mapCenter = {
-    lat: props.visConfig.mapCenter[0],
-    lon: props.visConfig.mapCenter[1],
-    zoom: props.visConfig.mapZoom,
-  };
-  function getLayerDescriptors() {
+export function TileMapVisualization(props: Props) {
+  const initialMapCenter = useMemo(() => {
+    return {
+      lat: props.visConfig.mapCenter[0],
+      lon: props.visConfig.mapCenter[1],
+      zoom: props.visConfig.mapZoom,
+    };
+    // props.visConfig reference changes each render but values are the same
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const initialLayerList = useMemo(() => {
     const layerDescriptor = createTileMapLayerDescriptor(props.visConfig.layerDescriptorParams);
     return layerDescriptor ? [layerDescriptor] : [];
-  }
+    // props.visConfig reference changes each render but values are the same
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   return (
     <MapComponent
       title={props.visConfig.layerDescriptorParams.label}
       filters={props.filters}
       query={props.query}
       timeRange={props.timeRange}
-      mapCenter={mapCenter}
-      getLayerDescriptors={getLayerDescriptors}
+      mapCenter={initialMapCenter}
+      isLayerTOCOpen={true}
+      layerList={initialLayerList}
       onInitialRenderComplete={props.onInitialRenderComplete}
       isSharable={false}
     />
   );
 }
-
-// default export required for React.Lazy
-// eslint-disable-next-line import/no-default-export
-export default TileMapVisualization;

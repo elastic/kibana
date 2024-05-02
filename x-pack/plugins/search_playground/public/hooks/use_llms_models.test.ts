@@ -37,6 +37,7 @@ describe('useLLMsModels Hook', () => {
       {
         connectorId: 'connectorId1',
         connectorName: undefined,
+        connectorType: LLMs.openai,
         disabled: false,
         icon: expect.any(Function),
         id: 'connectorId1gpt-3.5-turbo ',
@@ -47,6 +48,7 @@ describe('useLLMsModels Hook', () => {
       {
         connectorId: 'connectorId1',
         connectorName: undefined,
+        connectorType: LLMs.openai,
         disabled: false,
         icon: expect.any(Function),
         id: 'connectorId1gpt-4 ',
@@ -57,6 +59,7 @@ describe('useLLMsModels Hook', () => {
       {
         connectorId: 'connectorId2',
         connectorName: undefined,
+        connectorType: LLMs.openai_azure,
         disabled: false,
         icon: expect.any(Function),
         id: 'connectorId2Azure OpenAI ',
@@ -67,6 +70,7 @@ describe('useLLMsModels Hook', () => {
       {
         connectorId: 'connectorId2',
         connectorName: undefined,
+        connectorType: LLMs.bedrock,
         disabled: false,
         icon: expect.any(Function),
         id: 'connectorId2Claude 3 Haiku',
@@ -77,6 +81,7 @@ describe('useLLMsModels Hook', () => {
       {
         connectorId: 'connectorId2',
         connectorName: undefined,
+        connectorType: LLMs.bedrock,
         disabled: false,
         icon: expect.any(Function),
         id: 'connectorId2Claude 3 Sonnet',

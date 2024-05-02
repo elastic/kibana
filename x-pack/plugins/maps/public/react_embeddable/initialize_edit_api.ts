@@ -16,7 +16,7 @@ export function initializeEditApi(
   parentApi?: unknown, 
   savedObjectId?: string
 ) {
-  if (!apiHasAppContext(parentApi)) {
+  if (!parentApi || !apiHasAppContext(parentApi)) {
     return {};
   }
 
