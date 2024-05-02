@@ -143,6 +143,10 @@ const KEYCODE_ARROW_DOWN = 40;
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
 
+function isMouseEvent(e: React.TouchEvent | React.MouseEvent): e is React.MouseEvent {
+  return e && 'pageY' in e;
+}
+
 const languageId = (language: string) => {
   switch (language) {
     case 'esql': {
@@ -298,9 +302,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
   // When the editor is on full size mode, the user can resize the height of the editor.
   const onMouseDownResizeHandler = useCallback(
-    (mouseDownEvent: any) => {
+    (mouseDownEvent: React.MouseEvent<HTMLButtonElement, MouseEvent> | React.TouchEvent) => {
       const startSize = editorHeight;
-      const startPosition = mouseDownEvent.pageY;
+      const startPosition = isMouseEvent(mouseDownEvent)
+        ? mouseDownEvent?.pageY
+        : mouseDownEvent?.touches[0].pageY;
 
       function onMouseMove(mouseMoveEvent: MouseEvent) {
         const height = startSize - startPosition + mouseMoveEvent.pageY;
@@ -318,7 +324,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   );
 
   const onKeyDownResizeHandler = useCallback(
-    (keyDownEvent: any) => {
+    (keyDownEvent: React.KeyboardEvent) => {
       let height = editorHeight;
       if (
         keyDownEvent.keyCode === KEYCODE_ARROW_UP ||
