@@ -39,21 +39,28 @@ export const useDatasetQualityTable = () => {
     fullNames: showFullDatasetNames,
     timeRange,
     integrations,
+    namespaces,
+    qualities,
     query,
   } = useSelector(service, (state) => state.context.filters);
 
   const flyout = useSelector(service, (state) => state.context.flyout);
 
-  const loading = useSelector(service, (state) => state.matches('datasets.fetching'));
+  const loading = useSelector(
+    service,
+    (state) =>
+      state.matches('datasets.fetching') ||
+      state.matches('integrations.fetching') ||
+      state.matches('degradedDocs.fetching')
+  );
+  const loadingDataStreamStats = useSelector(service, (state) =>
+    state.matches('datasets.fetching')
+  );
   const loadingDegradedStats = useSelector(service, (state) =>
     state.matches('degradedDocs.fetching')
   );
 
   const datasets = useSelector(service, (state) => state.context.datasets);
-
-  const isDatasetQualityPageIdle = useSelector(service, (state) =>
-    state.matches('datasets.loaded.idle')
-  );
 
   const toggleInactiveDatasets = useCallback(
     () => service.send({ type: 'TOGGLE_INACTIVE_DATASETS' }),
@@ -76,7 +83,7 @@ export const useDatasetQualityTable = () => {
         return;
       }
 
-      if (isDatasetQualityPageIdle) {
+      if (!flyout?.insightsTimeRange) {
         service.send({
           type: 'OPEN_FLYOUT',
           dataset: selectedDataset,
@@ -89,7 +96,7 @@ export const useDatasetQualityTable = () => {
         dataset: selectedDataset,
       });
     },
-    [flyout?.dataset?.rawName, isDatasetQualityPageIdle, service]
+    [flyout?.dataset?.rawName, flyout?.insightsTimeRange, service]
   );
 
   const isActive = useCallback(
@@ -103,6 +110,7 @@ export const useDatasetQualityTable = () => {
         fieldFormats,
         selectedDataset: flyout?.dataset,
         openFlyout,
+        loadingDataStreamStats,
         loadingDegradedStats,
         showFullDatasetNames,
         isActiveDataset: isActive,
@@ -111,6 +119,7 @@ export const useDatasetQualityTable = () => {
       fieldFormats,
       flyout?.dataset,
       openFlyout,
+      loadingDataStreamStats,
       loadingDegradedStats,
       showFullDatasetNames,
       isActive,
@@ -122,21 +131,25 @@ export const useDatasetQualityTable = () => {
       ? datasets
       : filterInactiveDatasets({ datasets, timeRange });
 
-    const filteredByIntegrations =
-      integrations.length > 0
-        ? visibleDatasets.filter((dataset) => {
-            if (!dataset.integration && integrations.includes(NONE)) {
-              return true;
-            }
+    return visibleDatasets.filter((dataset) => {
+      const passesIntegrationFilter =
+        integrations.length === 0 ||
+        (!dataset.integration && integrations.includes(NONE)) ||
+        (dataset.integration && integrations.includes(dataset.integration.name));
 
-            return dataset.integration && integrations.includes(dataset.integration.name);
-          })
-        : visibleDatasets;
+      const passesNamespaceFilter =
+        namespaces.length === 0 || namespaces.includes(dataset.namespace);
 
-    return query
-      ? filteredByIntegrations.filter((dataset) => dataset.rawName.includes(query))
-      : filteredByIntegrations;
-  }, [showInactiveDatasets, datasets, timeRange, integrations, query]);
+      const passesQualityFilter =
+        qualities.length === 0 || qualities.includes(dataset.degradedDocs.quality);
+
+      const passesQueryFilter = !query || dataset.rawName.includes(query);
+
+      return (
+        passesIntegrationFilter && passesNamespaceFilter && passesQualityFilter && passesQueryFilter
+      );
+    });
+  }, [showInactiveDatasets, datasets, timeRange, integrations, namespaces, qualities, query]);
 
   const pagination = {
     pageIndex: page,

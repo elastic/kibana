@@ -71,7 +71,7 @@ export function fetchAll(
     const query = getAppState().query;
     const prevQuery = dataSubjects.documents$.getValue().query;
     const recordRawType = getRawRecordType(query);
-    const useTextbased = recordRawType === RecordRawType.PLAIN;
+    const useTextBased = recordRawType === RecordRawType.PLAIN;
     if (reset) {
       sendResetMsg(dataSubjects, initialFetchStatus, recordRawType);
     }
@@ -86,24 +86,32 @@ export function fetchAll(
       });
     }
 
+    const shouldFetchTextBased = useTextBased && !!query;
+
     // Mark all subjects as loading
     sendLoadingMsg(dataSubjects.main$, { recordRawType });
     sendLoadingMsg(dataSubjects.documents$, { recordRawType, query });
-    // histogram will send `loading` for totalHits$
+
+    // histogram for data view mode will send `loading` for totalHits$
+    if (shouldFetchTextBased) {
+      sendLoadingMsg(dataSubjects.totalHits$, {
+        recordRawType,
+        result: dataSubjects.totalHits$.getValue().result,
+      });
+    }
 
     // Start fetching all required requests
-    const response =
-      useTextbased && query
-        ? fetchTextBased(
-            query,
-            dataView,
-            data,
-            services.expressions,
-            inspectorAdapters,
-            abortController.signal
-          )
-        : fetchDocuments(searchSource, fetchDeps);
-    const fetchType = useTextbased && query ? 'fetchTextBased' : 'fetchDocuments';
+    const response = shouldFetchTextBased
+      ? fetchTextBased(
+          query,
+          dataView,
+          data,
+          services.expressions,
+          inspectorAdapters,
+          abortController.signal
+        )
+      : fetchDocuments(searchSource, fetchDeps);
+    const fetchType = shouldFetchTextBased ? 'fetchTextBased' : 'fetchDocuments';
     const startTime = window.performance.now();
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response
@@ -117,16 +125,24 @@ export function fetchAll(
           });
         }
 
-        const currentTotalHits = dataSubjects.totalHits$.getValue();
-        // If the total hits (or chart) query is still loading, emit a partial
-        // hit count that's at least our retrieved document count
-        if (currentTotalHits.fetchStatus === FetchStatus.LOADING && !currentTotalHits.result) {
-          // trigger `partial` only for the first request (if no total hits value yet)
+        if (shouldFetchTextBased) {
           dataSubjects.totalHits$.next({
-            fetchStatus: FetchStatus.PARTIAL,
+            fetchStatus: FetchStatus.COMPLETE,
             result: records.length,
             recordRawType,
           });
+        } else {
+          const currentTotalHits = dataSubjects.totalHits$.getValue();
+          // If the total hits (or chart) query is still loading, emit a partial
+          // hit count that's at least our retrieved document count
+          if (currentTotalHits.fetchStatus === FetchStatus.LOADING && !currentTotalHits.result) {
+            // trigger `partial` only for the first request (if no total hits value yet)
+            dataSubjects.totalHits$.next({
+              fetchStatus: FetchStatus.PARTIAL,
+              result: records.length,
+              recordRawType,
+            });
+          }
         }
         /**
          * The partial state for text based query languages is necessary in case the query has changed
@@ -136,7 +152,7 @@ export function fetchAll(
          * So it takes too long, a bad user experience, also a potential flakniess in tests
          */
         const fetchStatus =
-          useTextbased && (!prevQuery || !isEqual(query, prevQuery))
+          useTextBased && (!prevQuery || !isEqual(query, prevQuery))
             ? FetchStatus.PARTIAL
             : FetchStatus.COMPLETE;
 

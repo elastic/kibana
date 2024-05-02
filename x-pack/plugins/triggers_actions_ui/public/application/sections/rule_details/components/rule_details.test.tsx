@@ -17,7 +17,7 @@ import {
   ActionGroup,
   RuleExecutionStatusErrorReasons,
   RuleExecutionStatusWarningReasons,
-  ALERTS_FEATURE_ID,
+  ALERTING_FEATURE_ID,
 } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
@@ -70,7 +70,7 @@ const mockRuleApis = {
 };
 
 const authorizedConsumers = {
-  [ALERTS_FEATURE_ID]: { read: true, all: true },
+  [ALERTING_FEATURE_ID]: { read: true, all: true },
 };
 const recoveryActionGroup: ActionGroup<'recovered'> = { id: 'recovered', name: 'Recovered' };
 
@@ -82,7 +82,7 @@ const ruleType: RuleType = {
   actionVariables: { context: [], state: [], params: [] },
   defaultActionGroupId: 'default',
   minimumLicenseRequired: 'basic',
-  producer: ALERTS_FEATURE_ID,
+  producer: ALERTING_FEATURE_ID,
   authorizedConsumers,
   enabledInLicense: true,
 };
@@ -821,7 +821,7 @@ describe('rule_details', () => {
       name: `rule-${uuidv4()}`,
       tags: [],
       ruleTypeId: '.noop',
-      consumer: ALERTS_FEATURE_ID,
+      consumer: ALERTING_FEATURE_ID,
       schedule: { interval: '1m' },
       actions: [],
       params: {},

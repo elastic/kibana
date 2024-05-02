@@ -49,13 +49,13 @@ interface DiscoverLandingParams {
 }
 
 export interface MainRouteProps {
-  customizationCallbacks: CustomizationCallback[];
+  customizationCallbacks?: CustomizationCallback[];
   stateStorageContainer?: IKbnUrlStateStorage;
   customizationContext: DiscoverCustomizationContext;
 }
 
 export function DiscoverMainRoute({
-  customizationCallbacks,
+  customizationCallbacks = [],
   customizationContext,
   stateStorageContainer,
 }: MainRouteProps) {

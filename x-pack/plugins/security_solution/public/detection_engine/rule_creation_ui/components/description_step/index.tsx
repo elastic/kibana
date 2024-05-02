@@ -47,6 +47,8 @@ import {
   buildAlertSuppressionWindowDescription,
   buildAlertSuppressionMissingFieldsDescription,
   buildHighlightedFieldsOverrideDescription,
+  buildSetupDescription,
+  getQueryLabel,
 } from './helpers';
 import * as i18n from './translations';
 import { buildMlJobsDescription } from './build_ml_jobs_description';
@@ -200,11 +202,14 @@ export const getDescriptionItem = (
     const query = get('queryBar.query.query', data);
     const savedId = get('queryBar.saved_id', data);
     const savedQueryName = get('queryBar.title', data);
+    const ruleType: Type = get('ruleType', data);
+    const queryLabel = getQueryLabel(ruleType);
     return buildQueryBarDescription({
       field,
       filters,
       filterManager,
       query,
+      queryLabel,
       savedId,
       savedQueryName,
       indexPatterns,
@@ -219,7 +224,7 @@ export const getDescriptionItem = (
       return [];
     }
     const values: string[] = get(field, data);
-    return buildAlertSuppressionDescription(label, values);
+    return buildAlertSuppressionDescription(label, values, ruleType);
   } else if (field === 'groupByRadioSelection') {
     return [];
   } else if (field === 'groupByDuration') {
@@ -241,7 +246,8 @@ export const getDescriptionItem = (
       return buildAlertSuppressionWindowDescription(
         label,
         value,
-        get('groupByRadioSelection', data)
+        get('groupByRadioSelection', data),
+        ruleType
       );
     } else {
       return [];
@@ -256,7 +262,7 @@ export const getDescriptionItem = (
     }
     if (get('groupByFields', data).length > 0) {
       const value = get(field, data);
-      return buildAlertSuppressionMissingFieldsDescription(label, value);
+      return buildAlertSuppressionMissingFieldsDescription(label, value, ruleType);
     } else {
       return [];
     }
@@ -301,6 +307,9 @@ export const getDescriptionItem = (
   } else if (field === 'note') {
     const val: string = get(field, data);
     return buildNoteDescription(label, val);
+  } else if (field === 'setup') {
+    const val: string = get(field, data);
+    return buildSetupDescription(label, val);
   } else if (field === 'ruleType') {
     const ruleType: Type = get(field, data);
     return buildRuleTypeDescription(label, ruleType);

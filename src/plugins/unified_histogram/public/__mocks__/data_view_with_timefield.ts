@@ -64,3 +64,9 @@ export const dataViewWithTimefieldMock = buildDataViewMock({
   fields,
   timeFieldName: 'timestamp',
 });
+
+export const dataViewWithAtTimefieldMock = buildDataViewMock({
+  name: 'index-pattern-with-@timefield',
+  fields,
+  timeFieldName: '@timestamp',
+});

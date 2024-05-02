@@ -104,7 +104,6 @@ export const StatusTable: FunctionComponent<StatusTableProps> = ({ statuses }) =
       columns={tableColumns}
       itemId={(item) => item.id}
       items={statuses}
-      isExpandable={true}
       itemIdToExpandedRowMap={itemIdToExpandedRowMap}
       rowProps={({ state }) => ({
         className: `status-table-row-${state.uiColor}`,

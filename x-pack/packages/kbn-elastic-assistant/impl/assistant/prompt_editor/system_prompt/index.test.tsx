@@ -22,6 +22,8 @@ import { WELCOME_CONVERSATION } from '../../use_conversation/sample_conversation
 const BASE_CONVERSATION: Conversation = {
   ...WELCOME_CONVERSATION,
   apiConfig: {
+    connectorId: '123',
+    actionTypeId: '.gen-ai',
     defaultSystemPromptId: mockSystemPrompt.id,
   },
 };
@@ -88,6 +90,7 @@ describe('SystemPrompt', () => {
           isSettingsModalVisible={isSettingsModalVisible}
           onSystemPromptSelectionChange={onSystemPromptSelectionChange}
           setIsSettingsModalVisible={setIsSettingsModalVisible}
+          isFlyoutMode={false}
         />
       );
     });
@@ -118,6 +121,7 @@ describe('SystemPrompt', () => {
           isSettingsModalVisible={isSettingsModalVisible}
           onSystemPromptSelectionChange={onSystemPromptSelectionChange}
           setIsSettingsModalVisible={setIsSettingsModalVisible}
+          isFlyoutMode={false}
         />
       );
     });
@@ -152,6 +156,7 @@ describe('SystemPrompt', () => {
             isSettingsModalVisible={isSettingsModalVisible}
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
+            isFlyoutMode={false}
           />
         </TestProviders>
       );
@@ -198,6 +203,7 @@ describe('SystemPrompt', () => {
             isSettingsModalVisible={isSettingsModalVisible}
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
+            isFlyoutMode={false}
           />
         </TestProviders>
       );
@@ -258,6 +264,7 @@ describe('SystemPrompt', () => {
             isSettingsModalVisible={isSettingsModalVisible}
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
+            isFlyoutMode={false}
           />
         </TestProviders>
       );
@@ -325,6 +332,7 @@ describe('SystemPrompt', () => {
             isSettingsModalVisible={isSettingsModalVisible}
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
+            isFlyoutMode={false}
           />
         </TestProviders>
       );
@@ -372,14 +380,19 @@ describe('SystemPrompt', () => {
     it('should save new prompt correctly when prompt is removed from a conversation and linked to another conversation in a single transaction', async () => {
       const secondMockConversation: Conversation = {
         id: 'second',
+        category: 'assistant',
         apiConfig: {
+          actionTypeId: '.gen-ai',
+          connectorId: '123',
           defaultSystemPromptId: undefined,
         },
+        title: 'second',
         messages: [],
+        replacements: {},
       };
       const localMockConversations: Record<string, Conversation> = {
         [DEFAULT_CONVERSATION_TITLE]: BASE_CONVERSATION,
-        [secondMockConversation.id]: secondMockConversation,
+        [secondMockConversation.title]: secondMockConversation,
       };
 
       const localMockUseAssistantContext = {
@@ -402,6 +415,7 @@ describe('SystemPrompt', () => {
             isSettingsModalVisible={isSettingsModalVisible}
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
+            isFlyoutMode={false}
           />
         </TestProviders>
       );
@@ -451,9 +465,10 @@ describe('SystemPrompt', () => {
             defaultSystemPromptId: undefined,
           }),
         }),
-        [secondMockConversation.id]: {
+        [secondMockConversation.title]: {
           ...secondMockConversation,
           apiConfig: {
+            connectorId: '123',
             defaultSystemPromptId: mockSystemPrompt.id,
           },
         },
@@ -470,6 +485,7 @@ describe('SystemPrompt', () => {
           isSettingsModalVisible={isSettingsModalVisible}
           onSystemPromptSelectionChange={onSystemPromptSelectionChange}
           setIsSettingsModalVisible={setIsSettingsModalVisible}
+          isFlyoutMode={false}
         />
       </TestProviders>
     );
@@ -488,6 +504,7 @@ describe('SystemPrompt', () => {
           isSettingsModalVisible={isSettingsModalVisible}
           onSystemPromptSelectionChange={onSystemPromptSelectionChange}
           setIsSettingsModalVisible={setIsSettingsModalVisible}
+          isFlyoutMode={false}
         />
       </TestProviders>
     );

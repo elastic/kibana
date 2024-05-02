@@ -50,6 +50,43 @@ export function MachineLearningJobTableProvider(
   const retry = getService('retry');
 
   return new (class MlJobTable {
+    public async clickJobRowCalendarWithAssertion(
+      jobId: string,
+      calendarId: string
+    ): Promise<void> {
+      await this.ensureDetailsOpen(jobId);
+      const calendarSelector = `mlJobDetailsCalendar-${calendarId}`;
+      await testSubjects.existOrFail(calendarSelector, {
+        timeout: 3_000,
+      });
+      await testSubjects.click(calendarSelector, 3_000);
+      await testSubjects.existOrFail('mlPageCalendarEdit > mlCalendarFormEdit', {
+        timeout: 3_000,
+      });
+      const calendarTitleVisibleText = await testSubjects.getVisibleText('mlCalendarTitle');
+      expect(calendarTitleVisibleText).to.contain(
+        calendarId,
+        `Calendar page title should contain [${calendarId}], got [${calendarTitleVisibleText}]`
+      );
+    }
+
+    public async assertJobRowCalendars(
+      jobId: string,
+      expectedCalendars: string[],
+      checkForExists: boolean = true
+    ): Promise<void> {
+      await this.withDetailsOpen(jobId, async function verifyJobRowCalendars(): Promise<void> {
+        for await (const expectedCalendar of expectedCalendars) {
+          const calendarSelector = `mlJobDetailsCalendar-${expectedCalendar}`;
+          await testSubjects[checkForExists ? 'existOrFail' : 'missingOrFail'](calendarSelector, {
+            timeout: 3_000,
+          });
+          if (checkForExists)
+            expect(await testSubjects.getVisibleText(calendarSelector)).to.be(expectedCalendar);
+        }
+      });
+    }
+
     public async parseJobTable(
       tableEnvironment: 'mlAnomalyDetection' | 'stackMgmtJobList' = 'mlAnomalyDetection'
     ) {

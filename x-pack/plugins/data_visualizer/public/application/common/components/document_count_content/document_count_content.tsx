@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { LogRateHistogramItem } from '@kbn/aiops-utils';
+import type { LogRateHistogramItem } from '@kbn/aiops-log-rate-analysis';
 import type { RandomSamplerOption } from '../../../index_data_visualizer/constants/random_sampler';
 import {
   RANDOM_SAMPLER_SELECT_OPTIONS,

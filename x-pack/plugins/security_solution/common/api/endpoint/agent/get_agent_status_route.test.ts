@@ -22,7 +22,7 @@ describe('Agent status api route schema', () => {
         agentIds: '1',
         agentType: 'foo',
       })
-    ).toThrow(/\[agentType\]: types that failed validation/);
+    ).toThrow(/\[agentType]: types that failed validation/);
   });
 
   it.each([
@@ -37,7 +37,7 @@ describe('Agent status api route schema', () => {
     ],
   ])('should error if %s are used for `agentIds`', (_, validateOptions) => {
     expect(() => EndpointAgentStatusRequestSchema.query.validate(validateOptions)).toThrow(
-      /\[agentIds\]:/
+      /\[agentIds]:/
     );
   });
 

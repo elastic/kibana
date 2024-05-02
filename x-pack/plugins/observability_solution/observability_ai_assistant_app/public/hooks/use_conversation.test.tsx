@@ -12,8 +12,8 @@ import {
   type WrapperComponent,
 } from '@testing-library/react-hooks';
 import { merge } from 'lodash';
-import React from 'react';
-import { Observable, Subject } from 'rxjs';
+import React, { PropsWithChildren } from 'react';
+import { Observable, of, Subject } from 'rxjs';
 import {
   MessageRole,
   StreamingChatResponseEventType,
@@ -27,11 +27,11 @@ import {
   type UseConversationProps,
   type UseConversationResult,
 } from './use_conversation';
-import * as useKibanaModule from './use_kibana';
 import { ChatState } from '@kbn/observability-ai-assistant-plugin/public';
 import { createMockChatService } from '../utils/create_mock_chat_service';
 import { createUseChat } from '@kbn/observability-ai-assistant-plugin/public/hooks/use_chat';
 import type { NotificationsStart } from '@kbn/core/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 let hookResult: RenderHookResult<UseConversationProps, UseConversationResult>;
 
@@ -54,39 +54,43 @@ const mockService: MockedService = {
     openNewConversation: jest.fn(),
     predefinedConversation$: new Observable(),
   },
+  navigate: jest.fn().mockReturnValue(of()),
 };
 
 const mockChatService = createMockChatService();
 
 const addErrorMock = jest.fn();
 
-jest.spyOn(useKibanaModule, 'useKibana').mockReturnValue({
-  services: {
-    plugins: {
-      start: {
-        observabilityAIAssistant: {
-          useChat: createUseChat({
-            notifications: {
-              toasts: {
-                addError: addErrorMock,
-              },
-            } as unknown as NotificationsStart,
-          }),
-        },
+const useKibanaMockServices = {
+  uiSettings: {
+    get: jest.fn(),
+  },
+  plugins: {
+    start: {
+      observabilityAIAssistant: {
+        useChat: createUseChat({
+          notifications: {
+            toasts: {
+              addError: addErrorMock,
+            },
+          } as unknown as NotificationsStart,
+        }),
       },
     },
   },
-} as any);
+};
 
 describe('useConversation', () => {
   let wrapper: WrapperComponent<UseConversationProps>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    wrapper = ({ children }) => (
-      <ObservabilityAIAssistantAppServiceProvider value={mockService}>
-        {children}
-      </ObservabilityAIAssistantAppServiceProvider>
+    wrapper = ({ children }: PropsWithChildren<unknown>) => (
+      <KibanaContextProvider services={useKibanaMockServices}>
+        <ObservabilityAIAssistantAppServiceProvider value={mockService}>
+          {children}
+        </ObservabilityAIAssistantAppServiceProvider>
+      </KibanaContextProvider>
     );
   });
 

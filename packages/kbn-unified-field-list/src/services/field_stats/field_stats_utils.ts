@@ -12,11 +12,18 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { ESSearchResponse } from '@kbn/es-types';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { FieldStatsResponse } from '../../types';
+import { getFieldExampleBuckets, getFieldValues } from '../field_examples_calculator';
 import {
-  getFieldExampleBuckets,
   canProvideExamplesForField,
-  showExamplesForField,
-} from './field_examples_calculator';
+  canProvideNumberSummaryForField,
+  canProvideAggregatedStatsForField,
+} from '../../utils/can_provide_stats';
+import {
+  SHARD_SIZE,
+  DEFAULT_TOP_VALUES_SIZE,
+  SIMPLE_EXAMPLES_FETCH_SIZE,
+  DEFAULT_SIMPLE_EXAMPLES_SIZE,
+} from '../../constants';
 
 export type SearchHandler = ({
   aggs,
@@ -27,10 +34,6 @@ export type SearchHandler = ({
   fields?: object[];
   size?: number;
 }) => Promise<estypes.SearchResponse<unknown>>;
-
-const SHARD_SIZE = 5000;
-const DEFAULT_TOP_VALUES_SIZE = 10;
-const SIMPLE_EXAMPLES_SIZE = 100;
 
 export function buildSearchParams({
   dataViewPattern,
@@ -110,7 +113,7 @@ export async function fetchAndCalculateFieldStats({
   size?: number;
 }) {
   if (!field.aggregatable) {
-    return canProvideExamplesForField(field)
+    return canProvideExamplesForField(field, false)
       ? await getSimpleExamples(searchHandler, field, dataView)
       : {};
   }
@@ -119,7 +122,7 @@ export async function fetchAndCalculateFieldStats({
     return await getGeoExamples(searchHandler, field, dataView);
   }
 
-  if (!canProvideAggregatedStatsForField(field)) {
+  if (!canProvideAggregatedStatsForField(field, false)) {
     return {};
   }
 
@@ -127,7 +130,7 @@ export async function fetchAndCalculateFieldStats({
     return await getNumberHistogram(searchHandler, field, false);
   }
 
-  if (canProvideNumberSummaryForField(field)) {
+  if (canProvideNumberSummaryForField(field, false)) {
     return await getNumberSummary(searchHandler, field);
   }
 
@@ -140,27 +143,6 @@ export async function fetchAndCalculateFieldStats({
   }
 
   return await getStringSamples(searchHandler, field, size);
-}
-
-function canProvideAggregatedStatsForField(field: DataViewField): boolean {
-  return !(
-    field.type === 'document' ||
-    field.type.includes('range') ||
-    field.type === 'geo_point' ||
-    field.type === 'geo_shape' ||
-    field.type === 'murmur3' ||
-    field.type === 'attachment'
-  );
-}
-
-export function canProvideStatsForField(field: DataViewField): boolean {
-  return (
-    (field.aggregatable && canProvideAggregatedStatsForField(field)) || showExamplesForField(field)
-  );
-}
-
-export function canProvideNumberSummaryForField(field: DataViewField): boolean {
-  return field.timeSeriesMetric === 'counter';
 }
 
 export async function getNumberSummary(
@@ -423,17 +405,17 @@ export async function getSimpleExamples(
     const fieldRef = getFieldRef(field);
 
     const simpleExamplesBody = {
-      size: SIMPLE_EXAMPLES_SIZE,
+      size: SIMPLE_EXAMPLES_FETCH_SIZE,
       fields: [fieldRef],
     };
 
     const simpleExamplesResult = await search(simpleExamplesBody);
     const fieldExampleBuckets = getFieldExampleBuckets(
       {
-        hits: simpleExamplesResult.hits.hits,
+        values: getFieldValues(simpleExamplesResult.hits.hits, field, dataView),
         field,
-        dataView,
-        count: DEFAULT_TOP_VALUES_SIZE,
+        count: DEFAULT_SIMPLE_EXAMPLES_SIZE,
+        isTextBased: false,
       },
       formatter
     );
@@ -444,6 +426,7 @@ export async function getSimpleExamples(
       sampledValues: fieldExampleBuckets.sampledValues,
       topValues: {
         buckets: fieldExampleBuckets.buckets,
+        areExamples: true,
       },
     };
   } catch (error) {

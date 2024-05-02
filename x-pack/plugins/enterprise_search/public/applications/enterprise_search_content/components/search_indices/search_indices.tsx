@@ -211,8 +211,8 @@ export const SearchIndices: React.FC = () => {
                       <EuiToolTip
                         content={
                           <FormattedMessage
-                            id="xpack.enterpriseSearch.content.searchIndices.searchIndices.onlySearchOptimized.tooltipContent"
-                            defaultMessage="Search-optimized indices are prefixed with {code}. They are managed by ingestion mechanisms such as crawlers, connectors or ingestion APIs."
+                            id="xpack.enterpriseSearch.content.searchIndices.searchIndices.onlyCrawlerIndices.tooltipContent"
+                            defaultMessage="Crawler indices are prefixed with {code}. Connector and ingestion API indices created prior to 8.13.0 may also have this prefix, but it is not longer required."
                             values={{ code: <EuiCode>search-</EuiCode> }}
                           />
                         }
@@ -220,9 +220,9 @@ export const SearchIndices: React.FC = () => {
                         <EuiSwitch
                           checked={onlyShowSearchOptimizedIndices}
                           label={i18n.translate(
-                            'xpack.enterpriseSearch.content.searchIndices.searchIndices.onlySearchOptimized.label',
+                            'xpack.enterpriseSearch.content.searchIndices.searchIndices.onlyCrawlerIndices.label',
                             {
-                              defaultMessage: 'Only show search-optimized indices',
+                              defaultMessage: 'Only show crawler indices',
                             }
                           )}
                           onChange={(event) =>

@@ -1075,19 +1075,7 @@
                 "section": "def-common.SearchSource",
                 "text": "SearchSource"
               },
-              "; fetch: (options?: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSourceSearchOptions",
-                "text": "SearchSourceSearchOptions"
-              },
-              ") => Promise<",
-              "SearchResponse",
-              "<unknown, Record<string, ",
-              "AggregationsAggregate",
-              ">>>; history: ",
+              "; history: ",
               "SearchRequest",
               "[]; setField: <K extends keyof ",
               {
@@ -1255,7 +1243,19 @@
               "SearchResponse",
               "<T, Record<string, ",
               "AggregationsAggregate",
-              ">>>>; onRequestStart: (handler: (searchSource: ",
+              ">>>>; fetch: (options?: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSourceSearchOptions",
+                "text": "SearchSourceSearchOptions"
+              },
+              ") => Promise<",
+              "SearchResponse",
+              "<unknown, Record<string, ",
+              "AggregationsAggregate",
+              ">>>; onRequestStart: (handler: (searchSource: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -1605,6 +1605,21 @@
             "description": [],
             "signature": [
               "string | undefined"
+            ],
+            "path": "src/plugins/saved_search/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedSearch",
+            "id": "def-common.SavedSearch.visContext",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "visContext",
+            "description": [],
+            "signature": [
+              "VisContextUnmapped",
+              " | undefined"
             ],
             "path": "src/plugins/saved_search/common/types.ts",
             "deprecated": false,

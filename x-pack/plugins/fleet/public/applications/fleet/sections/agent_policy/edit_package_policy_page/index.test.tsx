@@ -233,7 +233,7 @@ describe('edit package policy page', () => {
     });
 
     await act(async () => {
-      fireEvent.click(renderResult.getByLabelText('Show logfile inputs'));
+      fireEvent.click(renderResult.getByText('Change defaults'));
     });
 
     await act(async () => {

@@ -15,7 +15,9 @@ import {
 } from '../../common/endpoint/service/authz';
 import {
   BLOCKLIST_PATH,
+  ENABLE_ASSET_CRITICALITY_SETTING,
   ENDPOINTS_PATH,
+  ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH,
   ENTITY_ANALYTICS_MANAGEMENT_PATH,
   EVENT_FILTERS_PATH,
   HOST_ISOLATION_EXCEPTIONS_PATH,
@@ -36,6 +38,7 @@ import {
   RESPONSE_ACTIONS_HISTORY,
   TRUSTED_APPLICATIONS,
   ENTITY_ANALYTICS_RISK_SCORE,
+  ASSET_CRITICALITY,
 } from '../app/translations';
 import { licenseService } from '../common/hooks/use_license';
 import type { LinkItem } from '../common/links/types';
@@ -50,13 +53,17 @@ import { IconSavedObject } from '../common/icons/saved_object';
 import { IconDashboards } from '../common/icons/dashboards';
 import { IconEntityAnalytics } from '../common/icons/entity_analytics';
 import { HostIsolationExceptionsApiClient } from './pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
+import { IconAssetCriticality } from '../common/icons/asset_criticality';
 
 const categories = [
   {
     label: i18n.translate('xpack.securitySolution.appLinks.category.entityAnalytics', {
       defaultMessage: 'Entity Analytics',
     }),
-    linkIds: [SecurityPageName.entityAnalyticsManagement],
+    linkIds: [
+      SecurityPageName.entityAnalyticsManagement,
+      SecurityPageName.entityAnalyticsAssetClassification,
+    ],
   },
   {
     label: i18n.translate('xpack.securitySolution.appLinks.category.endpoints', {
@@ -86,7 +93,7 @@ export const links: LinkItem = {
   path: MANAGE_PATH,
   skipUrlState: true,
   hideTimeline: true,
-  globalNavPosition: 9,
+  globalNavPosition: 10,
   capabilities: [`${SERVER_APP_ID}.show`],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.manage', {
@@ -179,6 +186,22 @@ export const links: LinkItem = {
       capabilities: [`${SERVER_APP_ID}.entity-analytics`],
       experimentalKey: 'riskScoringRoutesEnabled',
       licenseType: 'platinum',
+    },
+    {
+      id: SecurityPageName.entityAnalyticsAssetClassification,
+      title: ASSET_CRITICALITY,
+      description: i18n.translate(
+        'xpack.securitySolution.appLinks.assetClassificationDescription',
+        {
+          defaultMessage: 'Represents the criticality of an asset to your business infrastructure.',
+        }
+      ),
+      landingIcon: IconAssetCriticality,
+      path: ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH,
+      skipUrlState: true,
+      hideTimeline: true,
+      capabilities: [`${SERVER_APP_ID}.entity-analytics`],
+      uiSettingRequired: ENABLE_ASSET_CRITICALITY_SETTING,
     },
     {
       id: SecurityPageName.responseActionsHistory,

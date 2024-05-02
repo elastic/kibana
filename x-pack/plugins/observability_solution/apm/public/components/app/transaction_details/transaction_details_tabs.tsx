@@ -28,6 +28,8 @@ import { latencyCorrelationsTab } from './latency_correlations_tab';
 import { profilingTab } from './profiling_tab';
 import { traceSamplesTab } from './trace_samples_tab';
 import { useTransactionProfilingSetting } from '../../../hooks/use_profiling_integration_setting';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { isJavaAgentName } from '../../../../common/agent_name';
 
 export interface TabContentProps {
   clearChartSelection: () => void;
@@ -43,26 +45,23 @@ export function TransactionDetailsTabs() {
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view'
   );
+  const { agentName } = useApmServiceContext();
 
   const isCriticalPathFeatureEnabled = useCriticalPathFeatureEnabledSetting();
   const isTransactionProfilingEnabled = useTransactionProfilingSetting();
 
   const availableTabs = useMemo(() => {
-    const tabs = [
-      traceSamplesTab,
-      latencyCorrelationsTab,
-      failedTransactionsCorrelationsTab,
-    ];
+    const tabs = [traceSamplesTab, latencyCorrelationsTab, failedTransactionsCorrelationsTab];
     if (isCriticalPathFeatureEnabled) {
       tabs.push(aggregatedCriticalPathTab);
     }
 
-    if (isTransactionProfilingEnabled) {
+    if (isTransactionProfilingEnabled && isJavaAgentName(agentName)) {
       tabs.push(profilingTab);
     }
 
     return tabs;
-  }, [isCriticalPathFeatureEnabled, isTransactionProfilingEnabled]);
+  }, [agentName, isCriticalPathFeatureEnabled, isTransactionProfilingEnabled]);
 
   const { urlParams } = useLegacyUrlParams();
   const history = useHistory();
@@ -81,8 +80,7 @@ export function TransactionDetailsTabs() {
 
   const { sampleRangeFrom, sampleRangeTo, transactionId, traceId } = urlParams;
 
-  const { clearChartSelection, selectSampleFromChartSelection } =
-    useSampleChartSelection();
+  const { clearChartSelection, selectSampleFromChartSelection } = useSampleChartSelection();
 
   // When filtering in either the latency correlations or failed transactions correlations tab,
   // scroll to the top of the page and switch to the 'Trace samples' tab to trigger a refresh.
@@ -96,26 +94,17 @@ export function TransactionDetailsTabs() {
 
   useEffect(() => {
     const selectedSample = traceSamplesFetchResult.data?.traceSamples.find(
-      (sample) =>
-        sample.transactionId === transactionId && sample.traceId === traceId
+      (sample) => sample.transactionId === transactionId && sample.traceId === traceId
     );
 
-    if (
-      traceSamplesFetchResult.status === FETCH_STATUS.SUCCESS &&
-      !selectedSample
-    ) {
+    if (traceSamplesFetchResult.status === FETCH_STATUS.SUCCESS && !selectedSample) {
       // selected sample was not found. select a new one:
-      const preferredSample = maybe(
-        traceSamplesFetchResult.data?.traceSamples[0]
-      );
+      const preferredSample = maybe(traceSamplesFetchResult.data?.traceSamples[0]);
 
       history.replace({
         ...history.location,
         search: fromQuery({
-          ...omit(toQuery(history.location.search), [
-            'traceId',
-            'transactionId',
-          ]),
+          ...omit(toQuery(history.location.search), ['traceId', 'transactionId']),
           ...preferredSample,
         }),
       });

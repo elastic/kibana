@@ -22,7 +22,10 @@ export interface TransformAlertsUsageData {
   };
 }
 
-export function registerCollector(usageCollection: UsageCollectionSetup, alertIndex: string) {
+export function registerCollector(
+  usageCollection: UsageCollectionSetup,
+  getAlertIndex: () => Promise<string>
+) {
   const collector = usageCollection.makeUsageCollector<TransformAlertsUsageData>({
     type: 'transform',
     schema: {
@@ -62,7 +65,7 @@ export function registerCollector(usageCollection: UsageCollectionSetup, alertIn
         };
       }>(
         {
-          index: alertIndex,
+          index: await getAlertIndex(),
           size: 10000,
           query: {
             bool: {

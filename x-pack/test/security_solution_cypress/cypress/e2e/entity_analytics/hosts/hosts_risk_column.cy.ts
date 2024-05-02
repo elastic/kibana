@@ -24,7 +24,7 @@ describe('All hosts table', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     after(() => {
-      cy.task('esArchiverUnload', 'risk_hosts');
+      cy.task('esArchiverUnload', { archiveName: 'risk_hosts' });
     });
 
     it('it renders risk column', () => {
@@ -47,7 +47,7 @@ describe('All hosts table', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     after(() => {
-      cy.task('esArchiverUnload', 'risk_scores_new');
+      cy.task('esArchiverUnload', { archiveName: 'risk_scores_new' });
     });
 
     it('it renders risk column', () => {

@@ -120,6 +120,24 @@ describe('global query string', () => {
         })
       );
     });
+
+    it('should use newUrlParamKey if provided', () => {
+      const urlParamKey = 'testKey';
+      const newUrlParamKey = 'newTestKey';
+      const initialValue = 123;
+      window.location.search = `?testKey=${initialValue}`;
+
+      renderHook(() => useInitializeUrlParam(urlParamKey, () => {}, newUrlParamKey), {
+        wrapper: makeWrapper(),
+      });
+
+      expect(mockDispatch).toBeCalledWith(
+        globalUrlParamActions.registerUrlParam({
+          key: newUrlParamKey,
+          initialValue,
+        })
+      );
+    });
   });
 
   describe('updateUrlParam', () => {

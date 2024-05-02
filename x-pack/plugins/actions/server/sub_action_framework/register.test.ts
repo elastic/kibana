@@ -105,4 +105,33 @@ describe('Registration', () => {
       isSystemActionType: true,
     });
   });
+
+  it('add support for setting the kibana privileges for system connectors', async () => {
+    const getKibanaPrivileges = () => ['my-privilege'];
+
+    register<TestConfig, TestSecrets>({
+      actionTypeRegistry,
+      connector: {
+        ...connector,
+        isSystemActionType: true,
+        getKibanaPrivileges,
+      },
+      configurationUtilities: mockedActionsConfig,
+      logger,
+    });
+
+    expect(actionTypeRegistry.register).toHaveBeenCalledTimes(1);
+    expect(actionTypeRegistry.register).toHaveBeenCalledWith({
+      id: connector.id,
+      name: connector.name,
+      minimumLicenseRequired: connector.minimumLicenseRequired,
+      supportedFeatureIds: connector.supportedFeatureIds,
+      validate: expect.anything(),
+      executor: expect.any(Function),
+      getService: expect.any(Function),
+      renderParameterTemplates: expect.any(Function),
+      isSystemActionType: true,
+      getKibanaPrivileges,
+    });
+  });
 });

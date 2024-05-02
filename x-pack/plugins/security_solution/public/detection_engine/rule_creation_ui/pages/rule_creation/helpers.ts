@@ -481,6 +481,7 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         timestamp_field: ruleFields.eqlOptions?.timestampField,
         event_category_override: ruleFields.eqlOptions?.eventCategoryField,
         tiebreaker_field: ruleFields.eqlOptions?.tiebreakerField,
+        ...alertSuppressionFields,
       }
     : isNewTermsFields(ruleFields)
     ? {
@@ -490,6 +491,7 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         query: ruleFields.queryBar?.query?.query as string,
         new_terms_fields: ruleFields.newTermsFields,
         history_window_start: `now-${ruleFields.historyWindowSize}`,
+        ...alertSuppressionFields,
       }
     : isEsqlFields(ruleFields) && !('index' in ruleFields)
     ? {

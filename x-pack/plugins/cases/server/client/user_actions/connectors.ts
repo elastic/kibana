@@ -15,7 +15,7 @@ import type {
   GetCaseConnectorsResponse,
 } from '../../../common/types/api';
 import { GetCaseConnectorsResponseRt } from '../../../common/types/api';
-import { decodeOrThrow } from '../../../common/api';
+import { decodeOrThrow } from '../../common/runtime_types';
 import {
   isConnectorUserAction,
   isCreateCaseUserAction,

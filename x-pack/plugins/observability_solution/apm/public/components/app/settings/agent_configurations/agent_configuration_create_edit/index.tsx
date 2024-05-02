@@ -22,9 +22,7 @@ import { SettingsPage } from './settings_page/settings_page';
 
 type PageStep = 'choose-service-step' | 'choose-settings-step' | 'review-step';
 
-function getInitialNewConfig(
-  existingConfig: AgentConfigurationIntake | undefined
-) {
+function getInitialNewConfig(existingConfig: AgentConfigurationIntake | undefined) {
   return {
     agent_name: existingConfig?.agent_name,
     service: existingConfig?.service || {},
@@ -96,11 +94,7 @@ export function AgentConfigurationCreateEdit({
     }
 
     // the user skipped the first step (select service)
-    if (
-      pageStep === 'choose-settings-step' &&
-      !isEditMode &&
-      isEmpty(newConfig.service)
-    ) {
+    if (pageStep === 'choose-settings-step' && !isEditMode && isEmpty(newConfig.service)) {
       setPage('choose-service-step', history);
     }
   }, [history, isEditMode, newConfig, pageStep]);

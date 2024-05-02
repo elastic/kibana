@@ -11,10 +11,7 @@ import { apmSchema } from '../../server/lib/apm_telemetry/schema';
 const markdownFilePath =
   'x-pack/plugins/observability_solution/apm/dev_docs/apm_telemetry_fields.md';
 
-function extractFieldDescriptions(
-  schema: any,
-  parentKeys: string[] = []
-): string[] {
+function extractFieldDescriptions(schema: any, parentKeys: string[] = []): string[] {
   const fieldDescriptions = [];
   let currentKey: string;
 
@@ -28,10 +25,7 @@ function extractFieldDescriptions(
       }
 
       fieldDescriptions.push(
-        ...extractFieldDescriptions(schema[currentKey], [
-          ...parentKeys,
-          currentKey,
-        ])
+        ...extractFieldDescriptions(schema[currentKey], [...parentKeys, currentKey])
       );
     }
   }

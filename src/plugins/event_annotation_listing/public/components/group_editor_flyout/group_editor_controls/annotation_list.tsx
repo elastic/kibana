@@ -8,7 +8,8 @@
 
 import { css } from '@emotion/react';
 import {
-  DragDrop,
+  Droppable,
+  Draggable,
   DropTargetSwapDuplicateCombine,
   ReorderProvider,
   useDragDropContext,
@@ -93,10 +94,10 @@ export const AnnotationList = ({
         background-color: ${euiThemeVars.euiColorLightestShade};
         padding: ${euiThemeVars.euiSizeS};
         border-radius: ${euiThemeVars.euiBorderRadius};
-        overflow: hidden;
+        overflow: visible;
 
-        .domDragDrop-isActiveGroup {
-          padding: ${euiThemeVars.euiSizeS};
+        .domDragDrop-group {
+          padding: ${euiThemeVars.euiSizeXS} ${euiThemeVars.euiSizeS};
           margin: -${euiThemeVars.euiSizeS} -${euiThemeVars.euiSizeS} 0 -${euiThemeVars.euiSizeS};
         }
       `}
@@ -106,11 +107,14 @@ export const AnnotationList = ({
           <div
             key={index}
             css={css`
-              position: relative; // this is to properly contain the absolutely-positioned drop target in DragDrop
-              margin-bottom: ${euiThemeVars.euiSizeS};
+              position: relative; // this is to properly contain the absolutely-positioned drop target in Droppable
+              & + div {
+                margin-top: ${euiThemeVars.euiSizeS};
+              }
             `}
           >
-            <DragDrop
+            <Draggable
+              dragType="move"
               order={[index]}
               key={annotation.id}
               value={{
@@ -119,57 +123,72 @@ export const AnnotationList = ({
                   label: annotation.label,
                 },
               }}
-              dragType="move"
-              dropTypes={dragging && dragging.id !== annotation.id ? ['reorder'] : []}
-              draggable
               reorderableGroup={annotations}
-              onDrop={(source) => {
-                const sourceAnnotation = source
-                  ? annotations.find(({ id }) => id === source.id)
-                  : undefined;
-                reorderAnnotations(sourceAnnotation, annotation);
-              }}
             >
-              <DimensionButton
-                groupLabel={i18n.translate('eventAnnotationListing.groupEditor.addAnnotation', {
-                  defaultMessage: 'Annotations',
-                })}
-                onClick={() => selectAnnotation(annotation)}
-                onRemoveClick={() =>
-                  updateAnnotations(annotations.filter(({ id }) => id !== annotation.id))
-                }
-                accessorConfig={getAnnotationAccessor(annotation)}
-                label={annotation.label}
+              <Droppable
+                order={[index]}
+                key={annotation.id}
+                value={{
+                  id: annotation.id,
+                  humanData: {
+                    label: annotation.label,
+                  },
+                }}
+                dropTypes={dragging && dragging.id !== annotation.id ? ['reorder'] : []}
+                reorderableGroup={annotations}
+                onDrop={(source) => {
+                  const sourceAnnotation = source
+                    ? annotations.find(({ id }) => id === source.id)
+                    : undefined;
+                  reorderAnnotations(sourceAnnotation, annotation);
+                }}
               >
-                <DimensionTrigger label={annotation.label} />
-              </DimensionButton>
-            </DragDrop>
+                <DimensionButton
+                  groupLabel={i18n.translate('eventAnnotationListing.groupEditor.addAnnotation', {
+                    defaultMessage: 'Annotations',
+                  })}
+                  onClick={() => selectAnnotation(annotation)}
+                  onRemoveClick={() =>
+                    updateAnnotations(annotations.filter(({ id }) => id !== annotation.id))
+                  }
+                  accessorConfig={getAnnotationAccessor(annotation)}
+                  label={annotation.label}
+                >
+                  <DimensionTrigger label={annotation.label} />
+                </DimensionButton>
+              </Droppable>
+            </Draggable>
           </div>
         ))}
       </ReorderProvider>
-
-      <DragDrop
-        order={[annotations.length]}
-        getCustomDropTarget={DropTargetSwapDuplicateCombine.getCustomDropTarget}
-        getAdditionalClassesOnDroppable={
-          DropTargetSwapDuplicateCombine.getAdditionalClassesOnDroppable
-        }
-        dropTypes={dragging ? ['duplicate_compatible'] : []}
-        value={{
-          id: 'addAnnotation',
-          humanData: {
-            label: addAnnotationText,
-          },
-        }}
-        onDrop={({ id: sourceId }) => addNewAnnotation(sourceId)}
+      <div
+        css={css`
+          margin-top: ${euiThemeVars.euiSizeXS};
+        `}
       >
-        <EmptyDimensionButton
-          dataTestSubj="addAnnotation"
-          label={addAnnotationText}
-          ariaLabel={addAnnotationText}
-          onClick={() => addNewAnnotation()}
-        />
-      </DragDrop>
+        <Droppable
+          order={[annotations.length]}
+          getCustomDropTarget={DropTargetSwapDuplicateCombine.getCustomDropTarget}
+          getAdditionalClassesOnDroppable={
+            DropTargetSwapDuplicateCombine.getAdditionalClassesOnDroppable
+          }
+          dropTypes={dragging ? ['duplicate_compatible'] : []}
+          value={{
+            id: 'addAnnotation',
+            humanData: {
+              label: addAnnotationText,
+            },
+          }}
+          onDrop={({ id: sourceId }) => addNewAnnotation(sourceId)}
+        >
+          <EmptyDimensionButton
+            dataTestSubj="addAnnotation"
+            label={addAnnotationText}
+            ariaLabel={addAnnotationText}
+            onClick={() => addNewAnnotation()}
+          />
+        </Droppable>
+      </div>
     </div>
   );
 };

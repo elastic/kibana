@@ -6,12 +6,18 @@
  */
 
 import type { FromSchema } from 'json-schema-to-ts';
+import { Observable } from 'rxjs';
+import { ChatCompletionChunkEvent, ChatEvent } from '../../common/conversation_complete';
 import type {
   CompatibleJSONSchema,
   FunctionDefinition,
   FunctionResponse,
 } from '../../common/functions/types';
-import type { Message, ObservabilityAIAssistantScreenContext } from '../../common/types';
+import type {
+  Message,
+  ObservabilityAIAssistantScreenContextRequest,
+  UserInstructionOrPlainText,
+} from '../../common/types';
 import type { ObservabilityAIAssistantRouteHandlerResources } from '../routes/types';
 import { ChatFunctionClient } from './chat_function_client';
 import type { ObservabilityAIAssistantClient } from './client';
@@ -21,12 +27,33 @@ export type RespondFunctionResources = Pick<
   'context' | 'logger' | 'plugins' | 'request'
 >;
 
+export type ChatFunction = (
+  name: string,
+  params: Parameters<ObservabilityAIAssistantClient['chat']>[1]
+) => Observable<ChatEvent>;
+
+export type ChatFunctionWithoutConnector = (
+  name: string,
+  params: Omit<
+    Parameters<ObservabilityAIAssistantClient['chat']>[1],
+    'connectorId' | 'simulateFunctionCalling' | 'signal'
+  >
+) => Observable<ChatEvent>;
+
+export type FunctionCallChatFunction = (
+  name: string,
+  params: Omit<
+    Parameters<ObservabilityAIAssistantClient['chat']>[1],
+    'connectorId' | 'simulateFunctionCalling'
+  >
+) => Observable<ChatCompletionChunkEvent>;
+
 type RespondFunction<TArguments, TResponse extends FunctionResponse> = (
   options: {
     arguments: TArguments;
     messages: Message[];
-    connectorId: string;
-    screenContexts: ObservabilityAIAssistantScreenContext[];
+    screenContexts: ObservabilityAIAssistantScreenContextRequest[];
+    chat: FunctionCallChatFunction;
   },
   signal: AbortSignal
 ) => Promise<TResponse>;
@@ -35,6 +62,18 @@ export interface FunctionHandler {
   definition: FunctionDefinition;
   respond: RespondFunction<any, FunctionResponse>;
 }
+
+export type RegisteredInstruction = UserInstructionOrPlainText | RegisterInstructionCallback;
+
+type RegisterInstructionCallback = ({
+  availableFunctionNames,
+}: {
+  availableFunctionNames: string[];
+}) => UserInstructionOrPlainText | UserInstructionOrPlainText[] | undefined;
+
+export type RegisterInstruction = (
+  ...instructions: Array<UserInstructionOrPlainText | RegisterInstructionCallback>
+) => void;
 
 export type RegisterFunction = <
   TParameters extends CompatibleJSONSchema = any,

@@ -59,6 +59,7 @@ export interface SyntheticsServerSetup {
   isDev?: boolean;
   coreStart: CoreStart;
   pluginsStart: SyntheticsPluginsStartDependencies;
+  isElasticsearchServerless: boolean;
 }
 
 export interface SyntheticsPluginsSetupDependencies {

@@ -9,13 +9,7 @@ import * as React from 'react';
 import numeral from '@elastic/numeral';
 import styled from 'styled-components';
 import { useContext, useEffect } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiStat,
-  EuiToolTip,
-  EuiIconTip,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiToolTip, EuiIconTip } from '@elastic/eui';
 import { useClientMetricsQuery } from '../../../../hooks/use_client_metrics_query';
 import { I18LABELS } from '../translations';
 import { formatToSec } from '../ux_metrics/key_ux_metrics';
@@ -68,10 +62,7 @@ export function Metrics() {
           description={
             <>
               {I18LABELS.totalPageLoad}
-              <EuiIconTip
-                content={I18LABELS.totalPageLoadTooltip}
-                type="questionInCircle"
-              />
+              <EuiIconTip content={I18LABELS.totalPageLoadTooltip} type="questionInCircle" />
             </>
           }
           isLoading={!!loading}
@@ -85,10 +76,7 @@ export function Metrics() {
           description={
             <>
               {I18LABELS.backEnd}
-              <EuiIconTip
-                content={I18LABELS.backEndTooltip}
-                type="questionInCircle"
-              />
+              <EuiIconTip content={I18LABELS.backEndTooltip} type="questionInCircle" />
             </>
           }
           isLoading={!!loading}
@@ -102,10 +90,7 @@ export function Metrics() {
           description={
             <>
               {I18LABELS.frontEnd}
-              <EuiIconTip
-                content={I18LABELS.frontEndTooltip}
-                type="questionInCircle"
-              />
+              <EuiIconTip content={I18LABELS.frontEndTooltip} type="questionInCircle" />
             </>
           }
           isLoading={!!loading}

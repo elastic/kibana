@@ -9,7 +9,7 @@
 import { inspect } from 'util';
 
 import * as Rx from 'rxjs';
-import { take, mergeMap } from 'rxjs/operators';
+import { take, mergeMap } from 'rxjs';
 
 import {
   parseBundles,

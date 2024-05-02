@@ -7,8 +7,13 @@
 
 import type { Logger } from '@kbn/core/server';
 
+export interface BatchHandlerCallbackOptions<T = unknown> {
+  batch: number;
+  data: T[];
+}
+
 export interface QueueProcessorOptions<T = unknown> {
-  batchHandler: (batch: { batch: number; data: T[] }) => Promise<void>;
+  batchHandler: (batch: BatchHandlerCallbackOptions<T>) => Promise<void>;
   batchSize?: number;
   logger?: Logger;
   /**
@@ -128,8 +133,10 @@ export class QueueProcessor<T = unknown> {
    * Adds an update to the queue
    */
   public addToQueue(...data: T[]) {
-    this.queue.push(...data);
-    this.processQueue();
+    if (data.length > 0) {
+      this.queue.push(...data);
+      this.processQueue().catch(() => {});
+    }
   }
 
   /**

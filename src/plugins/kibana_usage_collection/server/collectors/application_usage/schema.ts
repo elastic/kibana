@@ -162,6 +162,7 @@ export const applicationUsageSchema = {
   'exploratory-view': commonSchema,
   osquery: commonSchema,
   profiling: commonSchema,
+  slo: commonSchema,
   security_account: commonSchema,
   reportingRedirect: commonSchema,
   security_access_agreement: commonSchema,

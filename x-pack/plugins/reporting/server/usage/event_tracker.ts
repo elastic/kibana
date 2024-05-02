@@ -6,7 +6,7 @@
  */
 
 import { AnalyticsServiceStart } from '@kbn/core/server';
-import { EventType, FieldType } from './types';
+import { EventType, FieldType } from '@kbn/reporting-server';
 
 interface CompletionOpts {
   byteSize: number;

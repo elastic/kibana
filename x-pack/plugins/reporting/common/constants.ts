@@ -52,7 +52,3 @@ export const USES_HEADLESS_JOB_TYPES = [
 ];
 
 export const DEPRECATED_JOB_TYPES = [CSV_JOB_TYPE_DEPRECATED];
-
-// Test Subjects
-export const REPORT_TABLE_ID = 'reportJobListing';
-export const REPORT_TABLE_ROW_ID = 'reportJobRow';

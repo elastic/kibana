@@ -18,10 +18,11 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { exhaustMap, Subject, takeUntil, timer } from 'rxjs';
 import type { ITelemetryReceiver } from './receiver';
 import { copyAllowlistedFields, filterList } from './filterlists';
 import { createTelemetryTaskConfigs } from './tasks';
-import { createUsageCounterLabel, tlog } from './helpers';
+import { copyLicenseFields, createUsageCounterLabel, tlog } from './helpers';
 import type { TelemetryChannel, TelemetryEvent } from './types';
 import type { SecurityTelemetryTaskConfig } from './task';
 import { SecurityTelemetryTask } from './task';
@@ -92,10 +93,10 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
   private readonly initialCheckDelayMs = 10 * 1000;
   private readonly checkIntervalMs = 60 * 1000;
   private readonly logger: Logger;
+  private readonly stop$ = new Subject<void>();
   private maxQueueSize = telemetryConfiguration.telemetry_max_buffer_size;
   private telemetryStart?: TelemetryPluginStart;
   private telemetrySetup?: TelemetryPluginSetup;
-  private intervalId?: NodeJS.Timeout;
   private isSending = false;
   private receiver: ITelemetryReceiver | undefined;
   private queue: TelemetryEvent[] = [];
@@ -162,16 +163,16 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
     }
 
     tlog(this.logger, `Starting local task`);
-    setTimeout(() => {
-      this.sendIfDue();
-      this.intervalId = setInterval(() => this.sendIfDue(), this.checkIntervalMs);
-    }, this.initialCheckDelayMs);
+    timer(this.initialCheckDelayMs, this.checkIntervalMs)
+      .pipe(
+        takeUntil(this.stop$),
+        exhaustMap(() => this.sendIfDue())
+      )
+      .subscribe();
   }
 
   public stop() {
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
-    }
+    this.stop$.next();
   }
 
   public queueTelemetryEvents(events: TelemetryEvent[]) {
@@ -317,7 +318,7 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
 
       const toSend: TelemetryEvent[] = cloneDeep(this.queue).map((event) => ({
         ...event,
-        ...(licenseInfo ? { license: this.receiver?.copyLicenseFields(licenseInfo) } : {}),
+        ...(licenseInfo ? { license: copyLicenseFields(licenseInfo) } : {}),
         cluster_uuid: clusterInfo?.cluster_uuid,
         cluster_name: clusterInfo?.cluster_name,
       }));

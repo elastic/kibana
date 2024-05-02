@@ -218,7 +218,7 @@ export interface HttpServiceSetup<
    * Creates cookie based session storage factory {@link SessionStorageFactory}
    * @param cookieOptions {@link SessionStorageCookieOptions} - options to configure created cookie session storage.
    */
-  createCookieSessionStorageFactory: <T>(
+  createCookieSessionStorageFactory: <T extends object>(
     cookieOptions: SessionStorageCookieOptions<T>
   ) => Promise<SessionStorageFactory<T>>;
 

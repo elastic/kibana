@@ -9,7 +9,7 @@ import moment from 'moment';
 import userEvent from '@testing-library/user-event';
 import { screen, within, fireEvent } from '@testing-library/react';
 
-export const getButtonGroupInputValue = (testId: string) => () => {
+export const getSelectedButtonInGroup = (testId: string) => () => {
   const buttonGroup = screen.getByTestId(testId);
   return within(buttonGroup).getByRole('button', { pressed: true });
 };

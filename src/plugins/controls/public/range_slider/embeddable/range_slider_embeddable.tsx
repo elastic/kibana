@@ -12,7 +12,7 @@ import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { batch } from 'react-redux';
 import { lastValueFrom, Subscription, switchMap } from 'rxjs';
-import { distinctUntilChanged, map } from 'rxjs/operators';
+import { distinctUntilChanged, map } from 'rxjs';
 
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
@@ -25,7 +25,7 @@ import {
 } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 import {
   ControlGroupContainer,
@@ -34,6 +34,7 @@ import {
   RangeSliderEmbeddableInput,
   RANGE_SLIDER_CONTROL,
 } from '../..';
+import { ControlFilterOutput } from '../../control_group/types';
 import { pluginServices } from '../../services';
 import { ControlsDataService } from '../../services/data/types';
 import { ControlsDataViewsService } from '../../services/data_views/types';
@@ -135,8 +136,8 @@ export class RangeSliderEmbeddable
   private initialize = async () => {
     const [initialMin, initialMax] = this.getInput().value ?? [];
     if (!isEmpty(initialMin) || !isEmpty(initialMax)) {
-      const filter = await this.buildFilter();
-      this.dispatch.publishFilters(filter);
+      const { filters: rangeFilter } = await this.buildFilter();
+      this.dispatch.publishFilters(rangeFilter);
     }
     this.setInitializationFinished();
 
@@ -190,7 +191,7 @@ export class RangeSliderEmbeddable
           switchMap(async () => {
             try {
               this.dispatch.setLoading(true);
-              const rangeFilter = await this.buildFilter();
+              const { filters: rangeFilter } = await this.buildFilter();
               this.dispatch.publishFilters(rangeFilter);
               await this.runValidations();
               this.dispatch.setLoading(false);
@@ -300,25 +301,22 @@ export class RangeSliderEmbeddable
     return { min, max };
   };
 
-  private buildFilter = async () => {
-    const {
-      explicitInput: { value },
-    } = this.getState();
-
+  public selectionsToFilters = async (
+    input: Partial<RangeSliderEmbeddableInput>
+  ): Promise<ControlFilterOutput> => {
+    const { value } = input;
     const [selectedMin, selectedMax] = value ?? ['', ''];
     const [min, max] = [selectedMin, selectedMax].map(parseFloat);
 
     const { dataView, field } = await this.getCurrentDataViewAndField();
-    if (!dataView || !field) return [];
-
-    if (isEmpty(selectedMin) && isEmpty(selectedMax)) return [];
+    if (!dataView || !field || (isEmpty(selectedMin) && isEmpty(selectedMax))) {
+      return { filters: [] };
+    }
 
     const params = {} as RangeFilterParams;
-
     if (selectedMin) {
       params.gte = min;
     }
-
     if (selectedMax) {
       params.lte = max;
     }
@@ -328,7 +326,14 @@ export class RangeSliderEmbeddable
     rangeFilter.meta.type = 'range';
     rangeFilter.meta.params = params;
 
-    return [rangeFilter];
+    return { filters: [rangeFilter] };
+  };
+
+  private buildFilter = async () => {
+    const {
+      explicitInput: { value },
+    } = this.getState();
+    return await this.selectionsToFilters({ value });
   };
 
   private onLoadingError(errorMessage: string) {
@@ -439,13 +444,13 @@ export class RangeSliderEmbeddable
     this.node = node;
     const ControlsServicesProvider = pluginServices.getContextProvider();
     ReactDOM.render(
-      <KibanaThemeProvider theme={pluginServices.getServices().core.theme}>
+      <KibanaRenderContextProvider {...pluginServices.getServices().core}>
         <ControlsServicesProvider>
           <RangeSliderControlContext.Provider value={this}>
             <RangeSliderControl />
           </RangeSliderControlContext.Provider>
         </ControlsServicesProvider>
-      </KibanaThemeProvider>,
+      </KibanaRenderContextProvider>,
       node
     );
   };

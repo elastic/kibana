@@ -52,7 +52,7 @@ export const status: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown \n  "# Cover Title Goes Here\n\nShort description or intro text about document/report for the cover. \nEdit the Markdown content in the side panel.\n\n##### Firstname Lastname" \n  font={font family="\'Gill Sans\', \'Lucida Grande\', \'Lucida Sans Unicode\', Verdana, Helvetica, Arial, sans-serif" size=24 align="left" color="#FFFFFF" weight="normal" underline=false italic=false}\n| render \n  css=".canvasMarkdown h1, .canvasMarkdown p {\ncolor: #EFEFEF;\n}\n\n.canvasMarkdown h5 {\ncolor: #FFFFFF;\nfont-weight: 300;\nfont-size: .75em;\nmargin-top: 2em;\nfont-style: italic;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown \n  "# Cover Title Goes Here\n\nShort description or intro text about document/report for the cover. \nEdit the Markdown content in the side panel.\n\n##### Firstname Lastname" \n  font={font family="\'Gill Sans\', \'Lucida Grande\', \'Lucida Sans Unicode\', Verdana, Helvetica, Arial, sans-serif" size=24 align="left" color="#FFFFFF" weight="normal" underline=false italic=false}\n| render \n  css=".canvasMarkdown h1, .canvasMarkdown p {\ncolor: #EFEFEF;\n}\n\n.canvasMarkdown h5 {\ncolor: #FFFFFF;\nfont-weight: 300;\nfont-size: .75em;\nmargin-top: 2em;\nfont-style: italic;\n}"',
           },
           {
             id: 'element-1c8088da-e23b-4195-9315-7cb84b152592',
@@ -152,7 +152,7 @@ export const status: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "## Table of contents" \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="left" color="#1785b0" weight="normal" underline=false italic=false}\n| render',
+              'kibana\n| selectFilter\n| demodata\n| markdown "## Table of contents" \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="left" color="#1785b0" weight="normal" underline=false italic=false}\n| render',
           },
           {
             id: 'element-41019499-8469-4432-aa0a-00975d592781',
@@ -165,7 +165,7 @@ export const status: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown \n  "- Section with Markdown Text Formatting\n- Section with Live Charts\n- Section with Tabular Data" \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=18 align="left" color="#000000" weight="normal" underline=false italic=false}\n| render \n  css=".canvasRenderEl ul {\npadding-left: 0;\n}\n.canvasRenderEl li {\nlist-style: none;\nline-height: 2em;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown \n  "- Section with Markdown Text Formatting\n- Section with Live Charts\n- Section with Tabular Data" \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=18 align="left" color="#000000" weight="normal" underline=false italic=false}\n| render \n  css=".canvasRenderEl ul {\npadding-left: 0;\n}\n.canvasRenderEl li {\nlist-style: none;\nline-height: 2em;\n}"',
           },
           {
             id: 'element-6418df11-35dc-4402-8153-4d15097b256a',
@@ -178,7 +178,7 @@ export const status: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "- 3\n- 5\n- 8" \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=18 align="left" color="#000000" weight="normal" underline=false italic=false}\n| render \n  css=".canvasRenderEl ul {\npadding-left: 0;\n}\n.canvasRenderEl li {\nlist-style: none;\nline-height: 2em;\ntext-align: right;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "- 3\n- 5\n- 8" \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=18 align="left" color="#000000" weight="normal" underline=false italic=false}\n| render \n  css=".canvasRenderEl ul {\npadding-left: 0;\n}\n.canvasRenderEl li {\nlist-style: none;\nline-height: 2em;\ntext-align: right;\n}"',
           },
           {
             id: 'element-06f152f7-e9b2-4535-8d3f-9b5c170a5bbc',
@@ -191,7 +191,7 @@ export const status: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "- 2\n- yoursite.com\n- © 2019 Company Name Here. All Rights Reserved.     "\n| render \n  css=".canvasMarkdown ul {\npadding-left: 0;\n}\n\n.canvasMarkdown li {\nfont-size: 12px;\ncolor: #A4A4A4;\nlist-style: none;\ndisplay: inline-block;\nmargin-right: 1em;\npadding-right: 1em;\nborder-right: 1px solid #A4A4A4;\n}\n\n.canvasMarkdown li:last-child {\nborder-right: none;\npadding-right: 0;\nmargin-right: 0;"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "- 2\n- yoursite.com\n- © 2019 Company Name Here. All Rights Reserved.     "\n| render \n  css=".canvasMarkdown ul {\npadding-left: 0;\n}\n\n.canvasMarkdown li {\nfont-size: 12px;\ncolor: #A4A4A4;\nlist-style: none;\ndisplay: inline-block;\nmargin-right: 1em;\npadding-right: 1em;\nborder-right: 1px solid #A4A4A4;\n}\n\n.canvasMarkdown li:last-child {\nborder-right: none;\npadding-right: 0;\nmargin-right: 0;"',
           },
           {
             id: 'element-5d7fa9a0-8d5e-43aa-943f-b369b711e0d9',
@@ -227,7 +227,7 @@ export const status: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "## Section 1" \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="left" color="#1785b0" weight="normal" underline=false italic=false}\n| render',
+              'kibana\n| selectFilter\n| demodata\n| markdown "## Section 1" \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="left" color="#1785b0" weight="normal" underline=false italic=false}\n| render',
           },
           {
             id: 'element-b85c5632-e18d-49eb-9f63-85344630f3cc',
@@ -240,7 +240,7 @@ export const status: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "# Section with Markdown Text Formatting" \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=18 align="left" color="#000000" weight="normal" underline=false italic=false}\n| render \n  css=".canvasRenderEl ul {\npadding-left: 0;\n}\n.canvasRenderEl li {\nlist-style: none;\nline-height: 2em;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "# Section with Markdown Text Formatting" \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=18 align="left" color="#000000" weight="normal" underline=false italic=false}\n| render \n  css=".canvasRenderEl ul {\npadding-left: 0;\n}\n.canvasRenderEl li {\nlist-style: none;\nline-height: 2em;\n}"',
           },
           {
             id: 'element-e29deafe-f72a-4b23-ae62-5e78688f2f82',
@@ -253,7 +253,7 @@ export const status: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "- 3\n- yoursite.com\n- © 2019 Company Name Here. All Rights Reserved.     "\n| render \n  css=".canvasMarkdown ul {\npadding-left: 0;\n}\n\n.canvasMarkdown li {\nfont-size: 12px;\ncolor: #A4A4A4;\nlist-style: none;\ndisplay: inline-block;\nmargin-right: 1em;\npadding-right: 1em;\nborder-right: 1px solid #A4A4A4;\n}\n\n.canvasMarkdown li:last-child {\nborder-right: none;\npadding-right: 0;\nmargin-right: 0;"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "- 3\n- yoursite.com\n- © 2019 Company Name Here. All Rights Reserved.     "\n| render \n  css=".canvasMarkdown ul {\npadding-left: 0;\n}\n\n.canvasMarkdown li {\nfont-size: 12px;\ncolor: #A4A4A4;\nlist-style: none;\ndisplay: inline-block;\nmargin-right: 1em;\npadding-right: 1em;\nborder-right: 1px solid #A4A4A4;\n}\n\n.canvasMarkdown li:last-child {\nborder-right: none;\npadding-right: 0;\nmargin-right: 0;"',
           },
           {
             id: 'element-e35f61a8-fd83-4dd9-b7fd-64cd81139eb8',
@@ -289,7 +289,7 @@ export const status: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown \n  "### Subsection heading 3 on one line\n\nLorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. \n\n1. Duis autem vel eum iriure dolor in\n2. Hendrerit in vulputate velit esse\n3. Consequat, vel illum dolore\n\n### Subsection heading 3 wraps to a second line when it is long\n\nOlypian quarrels et gorilla congolium sic ad nauseum. Souvlaki ignitus carborundum e pluribus unum. Defacto lingo est igpay atinlay. Marquee selectus non provisio incongruous feline nolo contendre. Gratuitous octopus niacin.\n\nParagraph with a link to [elastic.co](https://www.elastic.co)."\n| render',
+              'kibana\n| selectFilter\n| demodata\n| markdown \n  "### Subsection heading 3 on one line\n\nLorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. \n\n1. Duis autem vel eum iriure dolor in\n2. Hendrerit in vulputate velit esse\n3. Consequat, vel illum dolore\n\n### Subsection heading 3 wraps to a second line when it is long\n\nOlypian quarrels et gorilla congolium sic ad nauseum. Souvlaki ignitus carborundum e pluribus unum. Defacto lingo est igpay atinlay. Marquee selectus non provisio incongruous feline nolo contendre. Gratuitous octopus niacin.\n\nParagraph with a link to [elastic.co](https://www.elastic.co)."\n| render',
           },
           {
             id: 'element-86ae0363-0a32-4403-8ddb-5bb26762ef0c',
@@ -302,7 +302,7 @@ export const status: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "- 4\n- yoursite.com\n- © 2019 Company Name Here. All Rights Reserved.     "\n| render \n  css=".canvasMarkdown ul {\npadding-left: 0;\n}\n\n.canvasMarkdown li {\nfont-size: 12px;\ncolor: #A4A4A4;\nlist-style: none;\ndisplay: inline-block;\nmargin-right: 1em;\npadding-right: 1em;\nborder-right: 1px solid #A4A4A4;\n}\n\n.canvasMarkdown li:last-child {\nborder-right: none;\npadding-right: 0;\nmargin-right: 0;"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "- 4\n- yoursite.com\n- © 2019 Company Name Here. All Rights Reserved.     "\n| render \n  css=".canvasMarkdown ul {\npadding-left: 0;\n}\n\n.canvasMarkdown li {\nfont-size: 12px;\ncolor: #A4A4A4;\nlist-style: none;\ndisplay: inline-block;\nmargin-right: 1em;\npadding-right: 1em;\nborder-right: 1px solid #A4A4A4;\n}\n\n.canvasMarkdown li:last-child {\nborder-right: none;\npadding-right: 0;\nmargin-right: 0;"',
           },
           {
             id: 'element-a491ba09-5186-4153-a23d-882085a852cf',
@@ -338,7 +338,7 @@ export const status: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "## Section II" \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="left" color="#1785b0" weight="normal" underline=false italic=false}\n| render',
+              'kibana\n| selectFilter\n| demodata\n| markdown "## Section II" \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="left" color="#1785b0" weight="normal" underline=false italic=false}\n| render',
           },
           {
             id: 'element-01195269-250f-468d-82bf-958187aed0d9',
@@ -351,7 +351,7 @@ export const status: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "# Section with Live Data Elements" \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=18 align="left" color="#000000" weight="normal" underline=false italic=false}\n| render \n  css=".canvasRenderEl ul {\npadding-left: 0;\n}\n.canvasRenderEl li {\nlist-style: none;\nline-height: 2em;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "# Section with Live Data Elements" \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=18 align="left" color="#000000" weight="normal" underline=false italic=false}\n| render \n  css=".canvasRenderEl ul {\npadding-left: 0;\n}\n.canvasRenderEl li {\nlist-style: none;\nline-height: 2em;\n}"',
           },
           {
             id: 'element-03b1e0ca-2359-412b-9ae8-2ae809f812a9',
@@ -364,7 +364,7 @@ export const status: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "- 5\n- yoursite.com\n- © 2019 Company Name Here. All Rights Reserved.     "\n| render \n  css=".canvasMarkdown ul {\npadding-left: 0;\n}\n\n.canvasMarkdown li {\nfont-size: 12px;\ncolor: #A4A4A4;\nlist-style: none;\ndisplay: inline-block;\nmargin-right: 1em;\npadding-right: 1em;\nborder-right: 1px solid #A4A4A4;\n}\n\n.canvasMarkdown li:last-child {\nborder-right: none;\npadding-right: 0;\nmargin-right: 0;"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "- 5\n- yoursite.com\n- © 2019 Company Name Here. All Rights Reserved.     "\n| render \n  css=".canvasMarkdown ul {\npadding-left: 0;\n}\n\n.canvasMarkdown li {\nfont-size: 12px;\ncolor: #A4A4A4;\nlist-style: none;\ndisplay: inline-block;\nmargin-right: 1em;\npadding-right: 1em;\nborder-right: 1px solid #A4A4A4;\n}\n\n.canvasMarkdown li:last-child {\nborder-right: none;\npadding-right: 0;\nmargin-right: 0;"',
           },
           {
             id: 'element-4b0ea1dc-bf1a-4903-97f2-33e59dbf8c31',
@@ -400,7 +400,7 @@ export const status: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown \n  "### Subsection with live data elements\n\nLorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat." \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="left" color="#1785b0" weight="normal" underline=false italic=false}\n| render',
+              'kibana\n| selectFilter\n| demodata\n| markdown \n  "### Subsection with live data elements\n\nLorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat." \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="left" color="#1785b0" weight="normal" underline=false italic=false}\n| render',
           },
           {
             id: 'element-827e63a5-2f89-4eb1-95e1-9ac492bce7d9',
@@ -413,7 +413,7 @@ export const status: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "- 6\n- yoursite.com\n- © 2019 Company Name Here. All Rights Reserved.     "\n| render \n  css=".canvasMarkdown ul {\npadding-left: 0;\n}\n\n.canvasMarkdown li {\nfont-size: 12px;\ncolor: #A4A4A4;\nlist-style: none;\ndisplay: inline-block;\nmargin-right: 1em;\npadding-right: 1em;\nborder-right: 1px solid #A4A4A4;\n}\n\n.canvasMarkdown li:last-child {\nborder-right: none;\npadding-right: 0;\nmargin-right: 0;"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "- 6\n- yoursite.com\n- © 2019 Company Name Here. All Rights Reserved.     "\n| render \n  css=".canvasMarkdown ul {\npadding-left: 0;\n}\n\n.canvasMarkdown li {\nfont-size: 12px;\ncolor: #A4A4A4;\nlist-style: none;\ndisplay: inline-block;\nmargin-right: 1em;\npadding-right: 1em;\nborder-right: 1px solid #A4A4A4;\n}\n\n.canvasMarkdown li:last-child {\nborder-right: none;\npadding-right: 0;\nmargin-right: 0;"',
           },
           {
             id: 'element-9dfc7bd4-10fb-4d64-ab77-174786d39654',
@@ -439,7 +439,7 @@ export const status: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| pointseries x="size(cost)" y="project" color="project"\n| plot defaultStyle={seriesStyle bars=0.75 horizontalBars=true} legend=false palette={palette "#7ECAE3" "#003A4D" gradient=true} \n  font={font family="\'Gill Sans\', \'Lucida Grande\', \'Lucida Sans Unicode\', Verdana, Helvetica, Arial, sans-serif" size=16 align="left" color="#444444" weight="normal" underline=false italic=false}\n| render',
+              'kibana\n| selectFilter\n| demodata\n| pointseries x="size(cost)" y="project" color="project"\n| plot defaultStyle={seriesStyle bars=0.75 horizontalBars=true} legend=false palette={palette "#7ECAE3" "#003A4D" gradient=true} \n  font={font family="\'Gill Sans\', \'Lucida Grande\', \'Lucida Sans Unicode\', Verdana, Helvetica, Arial, sans-serif" size=16 align="left" color="#444444" weight="normal" underline=false italic=false}\n| render',
           },
           {
             id: 'element-5e2cde8c-a8c5-40bb-b894-2f006add7b87',
@@ -452,7 +452,7 @@ export const status: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "#### Chart title goes here"\n| render css=".canvasMarkdown h4 {\ntext-align: center;\ncolor: #1785b0;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "#### Chart title goes here"\n| render css=".canvasMarkdown h4 {\ntext-align: center;\ncolor: #1785b0;\n}"',
           },
         ],
         groups: [],
@@ -475,7 +475,7 @@ export const status: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown \n  "### Subsection with live data elements\n\nLorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat." \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="left" color="#1785b0" weight="normal" underline=false italic=false}\n| render',
+              'kibana\n| selectFilter\n| demodata\n| markdown \n  "### Subsection with live data elements\n\nLorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat." \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="left" color="#1785b0" weight="normal" underline=false italic=false}\n| render',
           },
           {
             id: 'element-34f5d4a0-d94d-4fe7-a0a3-586e3db8fbba',
@@ -488,7 +488,7 @@ export const status: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "- 7\n- yoursite.com\n- © 2019 Company Name Here. All Rights Reserved.     "\n| render \n  css=".canvasMarkdown ul {\npadding-left: 0;\n}\n\n.canvasMarkdown li {\nfont-size: 12px;\ncolor: #A4A4A4;\nlist-style: none;\ndisplay: inline-block;\nmargin-right: 1em;\npadding-right: 1em;\nborder-right: 1px solid #A4A4A4;\n}\n\n.canvasMarkdown li:last-child {\nborder-right: none;\npadding-right: 0;\nmargin-right: 0;"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "- 7\n- yoursite.com\n- © 2019 Company Name Here. All Rights Reserved.     "\n| render \n  css=".canvasMarkdown ul {\npadding-left: 0;\n}\n\n.canvasMarkdown li {\nfont-size: 12px;\ncolor: #A4A4A4;\nlist-style: none;\ndisplay: inline-block;\nmargin-right: 1em;\npadding-right: 1em;\nborder-right: 1px solid #A4A4A4;\n}\n\n.canvasMarkdown li:last-child {\nborder-right: none;\npadding-right: 0;\nmargin-right: 0;"',
           },
           {
             id: 'element-55b532a1-a639-427a-beeb-586b98166969',
@@ -514,7 +514,7 @@ export const status: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "#### Chart title goes here"\n| render css=".canvasMarkdown h4 {\ntext-align: center;\ncolor: #1785b0;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "#### Chart title goes here"\n| render css=".canvasMarkdown h4 {\ntext-align: center;\ncolor: #1785b0;\n}"',
           },
           {
             id: 'element-19220eff-ba36-4d45-948f-70fd8fbd9334',
@@ -527,7 +527,7 @@ export const status: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| pointseries color="project" size="price"\n| pie hole=60 labels=true legend=false palette={palette "#7ECAE3" "#003A4D" gradient=true} \n  font={font family="\'Gill Sans\', \'Lucida Grande\', \'Lucida Sans Unicode\', Verdana, Helvetica, Arial, sans-serif" size=16 align="center" color="#444444" weight="normal" underline=false italic=false}\n| render',
+              'kibana\n| selectFilter\n| demodata\n| pointseries color="project" size="price"\n| pie hole=60 labels=true legend=false palette={palette "#7ECAE3" "#003A4D" gradient=true} \n  font={font family="\'Gill Sans\', \'Lucida Grande\', \'Lucida Sans Unicode\', Verdana, Helvetica, Arial, sans-serif" size=16 align="center" color="#444444" weight="normal" underline=false italic=false}\n| render',
           },
         ],
         groups: [],
@@ -550,7 +550,7 @@ export const status: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "## Section III" \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="left" color="#1785b0" weight="normal" underline=false italic=false}\n| render',
+              'kibana\n| selectFilter\n| demodata\n| markdown "## Section III" \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="left" color="#1785b0" weight="normal" underline=false italic=false}\n| render',
           },
           {
             id: 'element-08fd0534-acbb-4727-9e35-f9ac85cc0092',
@@ -563,7 +563,7 @@ export const status: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "# Section with Tabular Data" \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=18 align="left" color="#000000" weight="normal" underline=false italic=false}\n| render \n  css=".canvasRenderEl ul {\npadding-left: 0;\n}\n.canvasRenderEl li {\nlist-style: none;\nline-height: 2em;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "# Section with Tabular Data" \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=18 align="left" color="#000000" weight="normal" underline=false italic=false}\n| render \n  css=".canvasRenderEl ul {\npadding-left: 0;\n}\n.canvasRenderEl li {\nlist-style: none;\nline-height: 2em;\n}"',
           },
           {
             id: 'element-4d285ac4-9c49-4fdf-adae-e7953ac1c804',
@@ -576,7 +576,7 @@ export const status: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "- 8\n- yoursite.com\n- © 2019 Company Name Here. All Rights Reserved.     "\n| render \n  css=".canvasMarkdown ul {\npadding-left: 0;\n}\n\n.canvasMarkdown li {\nfont-size: 12px;\ncolor: #A4A4A4;\nlist-style: none;\ndisplay: inline-block;\nmargin-right: 1em;\npadding-right: 1em;\nborder-right: 1px solid #A4A4A4;\n}\n\n.canvasMarkdown li:last-child {\nborder-right: none;\npadding-right: 0;\nmargin-right: 0;"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "- 8\n- yoursite.com\n- © 2019 Company Name Here. All Rights Reserved.     "\n| render \n  css=".canvasMarkdown ul {\npadding-left: 0;\n}\n\n.canvasMarkdown li {\nfont-size: 12px;\ncolor: #A4A4A4;\nlist-style: none;\ndisplay: inline-block;\nmargin-right: 1em;\npadding-right: 1em;\nborder-right: 1px solid #A4A4A4;\n}\n\n.canvasMarkdown li:last-child {\nborder-right: none;\npadding-right: 0;\nmargin-right: 0;"',
           },
           {
             id: 'element-581e9d1e-c5a9-46a6-aa25-f257a8eed207',
@@ -612,7 +612,7 @@ export const status: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| tail 1\n| markdown \n  "### Table with live data\n\nSelect a project above to change the scope of this data.\n\n| User        | Created           | Age  |\n| ------------- |:-------------| -------------:|\n| " {getCell "username"} "      | " {getCell "time" | formatDate "MMMM DD YYYY"}\n  " | " {getCell "age"}\n  "|\n\n\n### Table with static data\n\nLorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.\n\n| Heading 1        | Heading 2           |\n| ------------- |:-------------| -------------:|\n| First item name      | Cell with text |\n| Second item name      | Another cell with text      "\n| render css=".canvasMarkdown table {\ndisplay: table;\nwidth: 100%;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| tail 1\n| markdown \n  "### Table with live data\n\nSelect a project above to change the scope of this data.\n\n| User        | Created           | Age  |\n| ------------- |:-------------| -------------:|\n| " {getCell "username"} "      | " {getCell "time" | formatDate "MMMM DD YYYY"}\n  " | " {getCell "age"}\n  "|\n\n\n### Table with static data\n\nLorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.\n\n| Heading 1        | Heading 2           |\n| ------------- |:-------------| -------------:|\n| First item name      | Cell with text |\n| Second item name      | Another cell with text      "\n| render css=".canvasMarkdown table {\ndisplay: table;\nwidth: 100%;\n}"',
           },
           {
             id: 'element-66599442-7b94-4573-b196-367896a0c551',
@@ -625,7 +625,7 @@ export const status: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "- 9\n- yoursite.com\n- © 2019 Company Name Here. All Rights Reserved.     "\n| render \n  css=".canvasMarkdown ul {\npadding-left: 0;\n}\n\n.canvasMarkdown li {\nfont-size: 12px;\ncolor: #A4A4A4;\nlist-style: none;\ndisplay: inline-block;\nmargin-right: 1em;\npadding-right: 1em;\nborder-right: 1px solid #A4A4A4;\n}\n\n.canvasMarkdown li:last-child {\nborder-right: none;\npadding-right: 0;\nmargin-right: 0;"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "- 9\n- yoursite.com\n- © 2019 Company Name Here. All Rights Reserved.     "\n| render \n  css=".canvasMarkdown ul {\npadding-left: 0;\n}\n\n.canvasMarkdown li {\nfont-size: 12px;\ncolor: #A4A4A4;\nlist-style: none;\ndisplay: inline-block;\nmargin-right: 1em;\npadding-right: 1em;\nborder-right: 1px solid #A4A4A4;\n}\n\n.canvasMarkdown li:last-child {\nborder-right: none;\npadding-right: 0;\nmargin-right: 0;"',
           },
           {
             id: 'element-5bf0c7e6-c520-4cc2-8ec5-6f253c5a8b89',
@@ -689,7 +689,7 @@ export const status: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown \n  "### Conclusion\n\nLorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. \n\n- Duis autem vel eum iriure dolor in\n- Hendrerit in vulputate velit esse\n- Consequat, vel illum dolore"\n| render',
+              'kibana\n| selectFilter\n| demodata\n| markdown \n  "### Conclusion\n\nLorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. \n\n- Duis autem vel eum iriure dolor in\n- Hendrerit in vulputate velit esse\n- Consequat, vel illum dolore"\n| render',
           },
           {
             id: 'element-1a1ee637-5d44-48bd-aba7-741c3e2d358e',
@@ -702,7 +702,7 @@ export const status: CanvasTemplate = {
               parent: null,
             },
             expression:
-              'filters\n| demodata\n| markdown "- 10\n- yoursite.com\n- © 2019 Company Name Here. All Rights Reserved.     "\n| render \n  css=".canvasMarkdown ul {\npadding-left: 0;\n}\n\n.canvasMarkdown li {\nfont-size: 12px;\ncolor: #EFEFEF;\nlist-style: none;\ndisplay: inline-block;\nmargin-right: 1em;\npadding-right: 1em;\nborder-right: 1px solid #EFEFEF;\n}\n\n.canvasMarkdown li:last-child {\nborder-right: none;\npadding-right: 0;\nmargin-right: 0;"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "- 10\n- yoursite.com\n- © 2019 Company Name Here. All Rights Reserved.     "\n| render \n  css=".canvasMarkdown ul {\npadding-left: 0;\n}\n\n.canvasMarkdown li {\nfont-size: 12px;\ncolor: #EFEFEF;\nlist-style: none;\ndisplay: inline-block;\nmargin-right: 1em;\npadding-right: 1em;\nborder-right: 1px solid #EFEFEF;\n}\n\n.canvasMarkdown li:last-child {\nborder-right: none;\npadding-right: 0;\nmargin-right: 0;"',
           },
           {
             id: 'element-5ed4e36b-571b-4f10-9381-c6e7bf65cd4c',

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
+import React, { useCallback } from 'react';
 import { EuiSwitch } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
@@ -51,16 +50,6 @@ export const ProtectionSettingCardSwitch = React.memo(
     const getTestId = useTestIdGenerator(dataTestSubj);
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const isEditMode = mode === 'edit';
-
-    const switchLabel = useMemo(() => {
-      return i18n.translate('xpack.securitySolution.endpoint.policy.details.protectionsEnabled', {
-        defaultMessage: '{protectionLabel} {mode, select, true {enabled} false {disabled}}',
-        values: {
-          protectionLabel,
-          mode: selected,
-        },
-      });
-    }, [protectionLabel, selected]);
 
     const handleSwitchChange = useCallback(
       (event) => {
@@ -134,15 +123,12 @@ export const ProtectionSettingCardSwitch = React.memo(
       [policy, onChange, additionalOnSwitchChange, osList, isPlatinumPlus, protection]
     );
 
-    if (!isEditMode) {
-      return <span data-test-subj={getTestId()}>{switchLabel}</span>;
-    }
-
     return (
       <EuiSwitch
-        label={switchLabel}
+        label={protectionLabel}
         labelProps={{ 'data-test-subj': getTestId('label') }}
         checked={selected}
+        disabled={!isEditMode}
         onChange={handleSwitchChange}
         data-test-subj={getTestId()}
       />

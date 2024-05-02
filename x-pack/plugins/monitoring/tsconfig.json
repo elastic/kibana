@@ -44,6 +44,9 @@
     "@kbn/logs-shared-plugin",
     "@kbn/alerts-as-data-utils",
     "@kbn/rule-data-utils",
+    "@kbn/react-kibana-mount",
+    "@kbn/react-kibana-context-render",
+    "@kbn/flot-charts",
   ],
   "exclude": [
     "target/**/*",

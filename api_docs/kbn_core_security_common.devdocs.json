@@ -1,0 +1,347 @@
+{
+  "id": "@kbn/core-security-common",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-security-common",
+        "id": "def-common.AuthenticatedUser",
+        "type": "Interface",
+        "tags": [],
+        "label": "AuthenticatedUser",
+        "description": [
+          "\nRepresents the currently authenticated user."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-security-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSecurityCommonPluginApi",
+            "section": "def-common.AuthenticatedUser",
+            "text": "AuthenticatedUser"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/core-security-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSecurityCommonPluginApi",
+            "section": "def-common.User",
+            "text": "User"
+          }
+        ],
+        "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-common",
+            "id": "def-common.AuthenticatedUser.authentication_realm",
+            "type": "Object",
+            "tags": [],
+            "label": "authentication_realm",
+            "description": [
+              "\nThe name and type of the Realm that has authenticated the user."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-security-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityCommonPluginApi",
+                "section": "def-common.UserRealm",
+                "text": "UserRealm"
+              }
+            ],
+            "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-common",
+            "id": "def-common.AuthenticatedUser.lookup_realm",
+            "type": "Object",
+            "tags": [],
+            "label": "lookup_realm",
+            "description": [
+              "\nThe name and type of the Realm where the user information were retrieved from."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-security-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityCommonPluginApi",
+                "section": "def-common.UserRealm",
+                "text": "UserRealm"
+              }
+            ],
+            "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-common",
+            "id": "def-common.AuthenticatedUser.authentication_provider",
+            "type": "Object",
+            "tags": [],
+            "label": "authentication_provider",
+            "description": [
+              "\nThe authentication provider that used to authenticate user."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-security-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityCommonPluginApi",
+                "section": "def-common.AuthenticationProvider",
+                "text": "AuthenticationProvider"
+              }
+            ],
+            "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-common",
+            "id": "def-common.AuthenticatedUser.authentication_type",
+            "type": "string",
+            "tags": [],
+            "label": "authentication_type",
+            "description": [
+              "\nThe AuthenticationType used by ES to authenticate the user.\n"
+            ],
+            "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-common",
+            "id": "def-common.AuthenticatedUser.elastic_cloud_user",
+            "type": "boolean",
+            "tags": [],
+            "label": "elastic_cloud_user",
+            "description": [
+              "\nIndicates whether user is authenticated via Elastic Cloud built-in SAML realm."
+            ],
+            "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-common",
+            "id": "def-common.AuthenticatedUser.profile_uid",
+            "type": "string",
+            "tags": [],
+            "label": "profile_uid",
+            "description": [
+              "\nUser profile ID of this user."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-common",
+        "id": "def-common.AuthenticationProvider",
+        "type": "Interface",
+        "tags": [],
+        "label": "AuthenticationProvider",
+        "description": [
+          "\nType and name tuple to identify provider used to authenticate user."
+        ],
+        "path": "packages/core/security/core-security-common/src/authentication/authentication_provider.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-common",
+            "id": "def-common.AuthenticationProvider.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "\nType of the Kibana authentication provider."
+            ],
+            "path": "packages/core/security/core-security-common/src/authentication/authentication_provider.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-common",
+            "id": "def-common.AuthenticationProvider.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nName of the Kibana authentication provider (arbitrary string)."
+            ],
+            "path": "packages/core/security/core-security-common/src/authentication/authentication_provider.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-common",
+        "id": "def-common.User",
+        "type": "Interface",
+        "tags": [],
+        "label": "User",
+        "description": [
+          "\nA set of fields describing Kibana user."
+        ],
+        "path": "packages/core/security/core-security-common/src/authentication/user.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-common",
+            "id": "def-common.User.username",
+            "type": "string",
+            "tags": [],
+            "label": "username",
+            "description": [],
+            "path": "packages/core/security/core-security-common/src/authentication/user.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-common",
+            "id": "def-common.User.email",
+            "type": "string",
+            "tags": [],
+            "label": "email",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/security/core-security-common/src/authentication/user.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-common",
+            "id": "def-common.User.full_name",
+            "type": "string",
+            "tags": [],
+            "label": "full_name",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/security/core-security-common/src/authentication/user.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-common",
+            "id": "def-common.User.roles",
+            "type": "Object",
+            "tags": [],
+            "label": "roles",
+            "description": [],
+            "signature": [
+              "readonly string[]"
+            ],
+            "path": "packages/core/security/core-security-common/src/authentication/user.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-common",
+            "id": "def-common.User.enabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "enabled",
+            "description": [],
+            "path": "packages/core/security/core-security-common/src/authentication/user.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-common",
+            "id": "def-common.User.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [],
+            "signature": [
+              "{ _reserved: boolean; _deprecated?: boolean | undefined; _deprecated_reason?: string | undefined; } | undefined"
+            ],
+            "path": "packages/core/security/core-security-common/src/authentication/user.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-common",
+        "id": "def-common.UserRealm",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserRealm",
+        "description": [
+          "\nAn Elasticsearch realm that was used to resolve and authenticate the user."
+        ],
+        "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-common",
+            "id": "def-common.UserRealm.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nArbitrary name of the security realm."
+            ],
+            "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-common",
+            "id": "def-common.UserRealm.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "\nType of the security realm (file, native, saml etc.)."
+            ],
+            "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

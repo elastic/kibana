@@ -85,7 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardPanelActions.customizePanel();
         await dashboardCustomizePanel.setCustomPanelTitle(CUSTOM_TITLE);
         await dashboardCustomizePanel.clickSaveButton();
-        await dashboardPanelActions.saveToLibrary(LIBRARY_TITLE_FOR_CUSTOM_TESTS);
+        await dashboardPanelActions.legacySaveToLibrary(LIBRARY_TITLE_FOR_CUSTOM_TESTS);
         await retry.try(async () => {
           // need to surround in 'retry' due to delays in HTML updates causing the title read to be behind
           const newPanelTitle = (await PageObjects.dashboard.getPanelTitles())[0];
@@ -109,7 +109,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardPanelActions.customizePanel();
         await dashboardCustomizePanel.setCustomPanelTitle(CUSTOM_TITLE);
         await dashboardCustomizePanel.clickSaveButton();
-        await dashboardPanelActions.unlinkFromLibary();
+        await dashboardPanelActions.legacyUnlinkFromLibary();
         const newPanelTitle = (await PageObjects.dashboard.getPanelTitles())[0];
         expect(newPanelTitle).to.equal(CUSTOM_TITLE);
       });
@@ -118,7 +118,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardPanelActions.customizePanel();
         await dashboardCustomizePanel.setCustomPanelTitle('');
         await dashboardCustomizePanel.clickSaveButton();
-        await dashboardPanelActions.saveToLibrary(LIBRARY_TITLE_FOR_EMPTY_TESTS);
+        await dashboardPanelActions.legacySaveToLibrary(LIBRARY_TITLE_FOR_EMPTY_TESTS);
         await retry.try(async () => {
           // need to surround in 'retry' due to delays in HTML updates causing the title read to be behind
           const newPanelTitle = (await PageObjects.dashboard.getPanelTitles())[0];
@@ -127,7 +127,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('unlinking a by reference panel without a custom title will keep the library title', async () => {
-        await dashboardPanelActions.unlinkFromLibary();
+        await dashboardPanelActions.legacyUnlinkFromLibary();
         const newPanelTitle = (await PageObjects.dashboard.getPanelTitles())[0];
         expect(newPanelTitle).to.equal(LIBRARY_TITLE_FOR_EMPTY_TESTS);
       });

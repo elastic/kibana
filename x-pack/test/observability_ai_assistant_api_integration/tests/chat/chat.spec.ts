@@ -13,6 +13,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const log = getService('log');
 
   const CHAT_API_URL = `/internal/observability_ai_assistant/chat`;
 
@@ -33,13 +34,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     },
   ];
 
-  describe('Chat', () => {
+  describe('/internal/observability_ai_assistant/chat', () => {
     let proxy: LlmProxy;
 
     let connectorId: string;
 
     before(async () => {
-      proxy = await createLlmProxy();
+      proxy = await createLlmProxy(log);
 
       const response = await supertest
         .post('/api/actions/connector')
@@ -89,7 +90,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         new Promise<void>((resolve, reject) => {
           async function runTest() {
             const interceptor = proxy.intercept('conversation', () => true);
-            const receivedChunks: any[] = [];
+            const receivedChunks: Array<Record<string, any>> = [];
 
             const passThrough = new PassThrough();
             supertest
@@ -107,7 +108,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             const simulator = await interceptor.waitForIntercept();
 
             passThrough.on('data', (chunk) => {
-              receivedChunks.push(chunk.toString());
+              receivedChunks.push(JSON.parse(chunk.toString()));
             });
 
             for (let i = 0; i < NUM_RESPONSES; i++) {
@@ -118,9 +119,25 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
             await new Promise<void>((innerResolve) => passThrough.on('end', () => innerResolve()));
 
-            expect(receivedChunks.length).to.eql(
+            const chatCompletionChunks = receivedChunks.filter(
+              (chunk) => chunk.type === 'chatCompletionChunk'
+            );
+            expect(chatCompletionChunks).to.have.length(
               NUM_RESPONSES,
-              'received no of chunks did not match expected. This might be because of a 4xx or 5xx'
+              `received number of chat completion chunks did not match expected. This might be because of a 4xx or 5xx: ${JSON.stringify(
+                chatCompletionChunks,
+                null,
+                2
+              )}`
+            );
+
+            const tokenCountChunk = receivedChunks.find((chunk) => chunk.type === 'tokenCount');
+            expect(tokenCountChunk).to.eql(
+              {
+                type: 'tokenCount',
+                tokens: { completion: 20, prompt: 33, total: 53 },
+              },
+              `received token count chunk did not match expected`
             );
           }
 
@@ -143,6 +160,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           connectorId,
           functions: [],
         })
+        .expect(200)
         .pipe(passThrough);
 
       let data: string = '';
@@ -171,9 +189,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       await new Promise<void>((resolve) => passThrough.on('end', () => resolve()));
 
-      const response = JSON.parse(data);
+      const response = JSON.parse(data.trim());
 
-      expect(response.message).to.be(
+      expect(response.error.message).to.be(
         `Token limit reached. Token limit is 8192, but the current conversation has 11036 tokens.`
       );
     });

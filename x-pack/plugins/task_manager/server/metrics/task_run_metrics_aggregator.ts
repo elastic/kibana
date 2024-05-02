@@ -57,6 +57,7 @@ export interface TaskRunMetrics extends JsonObject {
 export interface TaskRunMetric extends JsonObject {
   overall: TaskRunMetrics['overall'] & {
     delay: SerializedHistogram;
+    delay_values: number[];
   };
   by_type: TaskRunMetrics['by_type'];
 }
@@ -71,12 +72,20 @@ export class TaskRunMetricsAggregator implements ITaskMetricsAggregator<TaskRunM
   public initialMetric(): TaskRunMetric {
     return merge(this.counter.initialMetrics(), {
       by_type: {},
-      overall: { delay: { counts: [], values: [] } },
+      overall: {
+        delay: { counts: [], values: [] },
+        delay_values: [],
+      },
     });
   }
 
   public collect(): TaskRunMetric {
-    return merge(this.counter.collect(), { overall: { delay: this.delayHistogram.serialize() } });
+    return merge(this.counter.collect(), {
+      overall: {
+        delay: this.delayHistogram.serialize(),
+        delay_values: this.delayHistogram.getAllValues(),
+      },
+    });
   }
 
   public reset() {

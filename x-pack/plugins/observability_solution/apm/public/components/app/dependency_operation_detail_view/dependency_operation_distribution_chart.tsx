@@ -17,8 +17,7 @@ import { DurationDistributionChartData } from '../../shared/charts/duration_dist
 import { DurationDistributionChartWithScrubber } from '../../shared/charts/duration_distribution_chart_with_scrubber';
 
 export function DependencyOperationDistributionChart() {
-  const { clearChartSelection, selectSampleFromChartSelection } =
-    useSampleChartSelection();
+  const { clearChartSelection, selectSampleFromChartSelection } = useSampleChartSelection();
 
   // there is no "current" event in the dependency operation detail view
   const markerCurrentEvent = undefined;
@@ -39,9 +38,7 @@ export function DependencyOperationDistributionChart() {
   } = useApmParams('/dependencies/operation');
 
   const selection: [number, number] | undefined =
-    sampleRangeFrom >= 0 && sampleRangeTo > 0
-      ? [sampleRangeFrom, sampleRangeTo]
-      : undefined;
+    sampleRangeFrom >= 0 && sampleRangeTo > 0 ? [sampleRangeFrom, sampleRangeTo] : undefined;
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -72,23 +69,20 @@ export function DependencyOperationDistributionChart() {
     {
       areaSeriesColor: euiTheme.eui.euiColorVis1,
       histogram: data?.allSpansDistribution.overallHistogram ?? [],
-      id: i18n.translate(
-        'xpack.apm.dependencyOperationDistributionChart.allSpansLegendLabel',
-        { defaultMessage: 'All spans' }
-      ),
+      id: i18n.translate('xpack.apm.dependencyOperationDistributionChart.allSpansLegendLabel', {
+        defaultMessage: 'All spans',
+      }),
     },
     {
       areaSeriesColor: euiTheme.eui.euiColorVis7,
       histogram: data?.failedSpansDistribution?.overallHistogram ?? [],
-      id: i18n.translate(
-        'xpack.apm.dependencyOperationDistributionChart.failedSpansLegendLabel',
-        { defaultMessage: 'Failed spans' }
-      ),
+      id: i18n.translate('xpack.apm.dependencyOperationDistributionChart.failedSpansLegendLabel', {
+        defaultMessage: 'Failed spans',
+      }),
     },
   ];
 
-  const percentileThresholdValue =
-    data?.allSpansDistribution.percentileThresholdValue;
+  const percentileThresholdValue = data?.allSpansDistribution.percentileThresholdValue;
 
   return (
     <DurationDistributionChartWithScrubber

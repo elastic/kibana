@@ -16,7 +16,7 @@ import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
-import { TriggersAndActionsUiServices } from '../../../application/app';
+import { TriggersAndActionsUiServices } from '../../../application/rules_app';
 import {
   RuleTypeRegistryContract,
   ActionTypeRegistryContract,

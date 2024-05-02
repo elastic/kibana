@@ -17,6 +17,7 @@ const ROOT_FIELDS = [
   'managed',
   'updated_at',
   'created_at',
+  'created_by',
   'originId',
 ];
 

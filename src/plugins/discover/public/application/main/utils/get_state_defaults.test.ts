@@ -108,6 +108,7 @@ describe('getStateDefaults', () => {
       },
     });
     expect(actualForTextBasedWithValidViewMode.viewMode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
+    expect(actualForTextBasedWithValidViewMode.index).toBe(undefined);
 
     const actualForWithValidViewMode = getStateDefaults({
       services: discoverServiceMock,
@@ -117,5 +118,8 @@ describe('getStateDefaults', () => {
       },
     });
     expect(actualForWithValidViewMode.viewMode).toBe(VIEW_MODE.AGGREGATED_LEVEL);
+    expect(actualForWithValidViewMode.index).toBe(
+      savedSearchMock.searchSource.getField('index')?.id
+    );
   });
 });

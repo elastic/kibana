@@ -14,12 +14,7 @@ import {
 } from '@kbn/rule-data-utils';
 import { INFRA_ALERT_FEATURE_ID } from '../../../../../common/constants';
 import { BUCKET_KEY, MAX_SIZE } from '../constants';
-import { InfraAlertsClient } from '../helpers/get_infra_alerts_client';
-
-export type HostAlertsResponse = Array<{
-  name: string;
-  alertsCount: number;
-}>;
+import { InfraAlertsClient } from '../../../../lib/helpers/get_infra_alerts_client';
 
 export async function getHostsAlertsCount({
   alertsClient,
@@ -35,7 +30,7 @@ export async function getHostsAlertsCount({
   from: string;
   to: string;
   maxNumHosts?: number;
-}): Promise<HostAlertsResponse> {
+}) {
   const rangeQuery = [
     {
       range: {
@@ -66,6 +61,9 @@ export async function getHostsAlertsCount({
         terms: {
           field: BUCKET_KEY,
           size: maxNumHosts,
+          order: {
+            _key: 'asc',
+          },
         },
         aggs: {
           alerts_count: {

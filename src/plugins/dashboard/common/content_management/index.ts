@@ -17,8 +17,3 @@ export type {
   DashboardAttributes,
   SavedDashboardPanel,
 } from './latest';
-
-// Today "v1" === "latest" so the export under DashboardV1 namespace is not really useful
-// We leave it as a reference for future version when it will be needed to export/support older types
-// in the UIs.
-export * as DashboardV1 from './v1';

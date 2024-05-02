@@ -72,6 +72,7 @@ export const performBulkCreate = async <T>(
     preflight: preflightHelper,
     serializer: serializerHelper,
     migration: migrationHelper,
+    user: userHelper,
   } = helpers;
   const { securityExtension } = extensions;
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
@@ -83,6 +84,7 @@ export const performBulkCreate = async <T>(
     managed: optionsManaged,
   } = options;
   const time = getCurrentTime();
+  const createdBy = userHelper.getCurrentUserProfileUid();
 
   let preflightCheckIndexCounter = 0;
   const expectedResults = objects.map<ExpectedResult>((object) => {
@@ -231,6 +233,7 @@ export const performBulkCreate = async <T>(
         managed: setManaged({ optionsManaged, objectManaged: object.managed }),
         updated_at: time,
         created_at: time,
+        ...(createdBy && { created_by: createdBy }),
         references: object.references || [],
         originId,
       }) as SavedObjectSanitizedDoc<T>;

@@ -7,7 +7,7 @@
  */
 
 import { Observable, Subscription } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { map, tap } from 'rxjs';
 import { COMPARE_ALL_OPTIONS, compareFilters, isFilterPinned } from '@kbn/es-query';
 import { createStateContainer } from '@kbn/kibana-utils-plugin/public';
 import type { TimefilterSetup } from '../timefilter';

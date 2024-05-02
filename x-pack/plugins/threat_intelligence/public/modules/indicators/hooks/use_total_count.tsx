@@ -24,9 +24,7 @@ export const useIndicatorsTotalCount = () => {
   const [count, setCount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const {
-    sourcererDataView: { selectedPatterns, loading: loadingDataView },
-  } = useSourcererDataView();
+  const { selectedPatterns, loading: loadingDataView } = useSourcererDataView();
 
   useEffect(() => {
     const query = {

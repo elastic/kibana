@@ -9,14 +9,14 @@
 import { CommonTokenStream, CharStreams } from 'antlr4';
 import { default as PainlessParser, SourceContext } from '../../antlr/painless_parser';
 import { PainlessLexerEnhanced } from './lexer';
-import { EditorError } from '../../../types';
+import { MonacoEditorError } from '../../../types';
 import { ANTLRErrorListener } from '../../../common/error_listener';
 
 const parse = (
   code: string
 ): {
   source: SourceContext;
-  errors: EditorError[];
+  errors: MonacoEditorError[];
 } => {
   const inputStream = CharStreams.fromString(code);
   const lexer = new PainlessLexerEnhanced(inputStream);
@@ -30,7 +30,7 @@ const parse = (
   lexer.addErrorListener(painlessLangErrorListener);
   parser.addErrorListener(painlessLangErrorListener);
 
-  const errors: EditorError[] = painlessLangErrorListener.getErrors();
+  const errors: MonacoEditorError[] = painlessLangErrorListener.getErrors();
 
   return {
     source: parser.source(),
@@ -38,7 +38,7 @@ const parse = (
   };
 };
 
-export const parseAndGetSyntaxErrors = (code: string): EditorError[] => {
+export const parseAndGetSyntaxErrors = (code: string): MonacoEditorError[] => {
   const { errors } = parse(code);
   return errors;
 };

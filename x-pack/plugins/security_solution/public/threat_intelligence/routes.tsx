@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import type { SecuritySolutionPluginContext } from '@kbn/threat-intelligence-plugin/public';
 import { THREAT_INTELLIGENCE_BASE_PATH } from '@kbn/threat-intelligence-plugin/public';
-import type { SourcererDataView } from '@kbn/threat-intelligence-plugin/public/types';
 import type { Store } from 'redux';
 import { useSelector } from 'react-redux';
+import type { SelectedDataView } from '@kbn/threat-intelligence-plugin/public/types';
 import { useUserPrivileges } from '../common/components/user_privileges';
 import { useSetUrlParams } from '../management/components/artifact_list_page/hooks/use_set_url_params';
 import { BlockListForm } from '../management/pages/blocklist/view/components/blocklist_form';
@@ -40,49 +40,53 @@ const ThreatIntelligence = memo(() => {
 
   const securitySolutionStore = getStore() as Store;
 
-  const securitySolutionContext: SecuritySolutionPluginContext = {
-    securitySolutionStore,
+  const canWriteBlocklist = useUserPrivileges().endpointPrivileges.canWriteBlocklist;
 
-    getFiltersGlobalComponent: () => FiltersGlobal,
-    getPageWrapper: () => SecuritySolutionPageWrapper,
-    licenseService,
-    sourcererDataView: sourcererDataView as unknown as SourcererDataView,
-    getUseInvestigateInTimeline: useInvestigateInTimeline,
+  const securitySolutionContext: SecuritySolutionPluginContext = useMemo(
+    () => ({
+      securitySolutionStore,
+      getFiltersGlobalComponent: () => FiltersGlobal,
+      getPageWrapper: () => SecuritySolutionPageWrapper,
+      licenseService,
+      sourcererDataView: sourcererDataView as unknown as SelectedDataView,
+      getUseInvestigateInTimeline: useInvestigateInTimeline,
 
-    blockList: {
-      canWriteBlocklist: useUserPrivileges().endpointPrivileges.canWriteBlocklist,
-      exceptionListApiClient: BlocklistsApiClient.getInstance(http),
-      useSetUrlParams,
-      // @ts-ignore
-      getFlyoutComponent: () => ArtifactFlyout,
-      // @ts-ignore
-      getFormComponent: () => BlockListForm,
-    },
+      blockList: {
+        canWriteBlocklist,
+        exceptionListApiClient: BlocklistsApiClient.getInstance(http),
+        useSetUrlParams,
+        // @ts-ignore
+        getFlyoutComponent: () => ArtifactFlyout,
+        // @ts-ignore
+        getFormComponent: () => BlockListForm,
+      } as unknown as SecuritySolutionPluginContext['blockList'],
 
-    useQuery: () => useSelector(inputsSelectors.globalQuerySelector()),
-    useFilters: () => useSelector(inputsSelectors.globalFiltersQuerySelector()),
-    useGlobalTime,
+      useQuery: () => useSelector(inputsSelectors.globalQuerySelector()),
+      useFilters: () => useSelector(inputsSelectors.globalFiltersQuerySelector()),
+      useGlobalTime,
 
-    registerQuery: (query) =>
-      securitySolutionStore.dispatch(
-        setQuery({
-          inputId: InputsModelId.global,
-          id: query.id,
-          refetch: query.refetch,
-          inspect: null,
-          loading: query.loading,
-        })
-      ),
-    deregisterQuery: (query) =>
-      securitySolutionStore.dispatch(
-        deleteOneQuery({
-          inputId: InputsModelId.global,
-          id: query.id,
-        })
-      ),
+      registerQuery: (query) =>
+        securitySolutionStore.dispatch(
+          setQuery({
+            inputId: InputsModelId.global,
+            id: query.id,
+            refetch: query.refetch,
+            inspect: null,
+            loading: query.loading,
+          })
+        ),
+      deregisterQuery: (query) =>
+        securitySolutionStore.dispatch(
+          deleteOneQuery({
+            inputId: InputsModelId.global,
+            id: query.id,
+          })
+        ),
 
-    SiemSearchBar,
-  };
+      SiemSearchBar,
+    }),
+    [canWriteBlocklist, http, securitySolutionStore, sourcererDataView]
+  );
 
   return (
     <SecurityRoutePageWrapper pageName={SecurityPageName.threatIntelligence}>

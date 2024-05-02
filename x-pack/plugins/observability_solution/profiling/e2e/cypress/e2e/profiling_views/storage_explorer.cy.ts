@@ -89,8 +89,8 @@ describe('Storage explorer page', () => {
       cy.wait('@indicesDetails');
       cy.get('table > tbody tr.euiTableRow').should('have.length', 10);
     });
-
-    it('displays a chart with percentage of each index', () => {
+    // Skipping it we should not rely on dom elements from third-level libraries to write our tests
+    it.skip('displays a chart with percentage of each index', () => {
       cy.intercept('GET', '/internal/profiling/storage_explorer/indices_storage_details?*').as(
         'indicesDetails'
       );
@@ -108,6 +108,7 @@ describe('Storage explorer page', () => {
       ];
 
       cy.get('.echChartPointerContainer table tbody tr').each(($row, idx) => {
+        // These are no longer valid elements on charts
         cy.wrap($row).find('th').contains(indices[idx].index);
         cy.wrap($row).find('td').contains(indices[idx].perc);
       });

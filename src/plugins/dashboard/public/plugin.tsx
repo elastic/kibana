@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { filter, map } from 'rxjs';
 
 import {
   App,
@@ -165,6 +165,11 @@ export class DashboardPlugin
     // adding items to the add panel menu
     uiActions.registerTrigger(addPanelMenuTrigger);
 
+    core.analytics.registerEventType({
+      eventType: 'dashboard_loaded_with_data',
+      schema: {},
+    });
+
     if (share) {
       this.locator = share.url.locators.create(
         new DashboardAppLocatorDefinition({
@@ -216,7 +221,7 @@ export class DashboardPlugin
 
         // We also don't want to store the table list view state.
         // The question is: what _do_ we want to save here? :)
-        const tableListUrlState = ['s', 'title', 'sort', 'sortdir'];
+        const tableListUrlState = ['s', 'title', 'sort', 'sortdir', 'created_by'];
         return replaceUrlHashQuery(newNavLink, (query) => {
           [SEARCH_SESSION_ID, ...tableListUrlState].forEach((param) => {
             delete query[param];
@@ -252,6 +257,8 @@ export class DashboardPlugin
         const { mountApp } = await import('./dashboard_app/dashboard_router');
         appMounted();
 
+        const [coreStart] = await core.getStartServices();
+
         const mountContext: DashboardMountContextProps = {
           restorePreviousUrl,
           scopedHistory: () => this.currentHistory!,
@@ -260,7 +267,7 @@ export class DashboardPlugin
         };
 
         return mountApp({
-          core,
+          coreStart,
           appUnMounted,
           element: params.element,
           mountContext,

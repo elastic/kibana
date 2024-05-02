@@ -28,9 +28,8 @@ import { usePageUrlState, useUrlState } from '@kbn/ml-url-state';
 import type { FieldValidationResults } from '@kbn/ml-category-validator';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { stringHash } from '@kbn/ml-string-hash';
-import { AIOPS_TELEMETRY_ID } from '../../../common/constants';
-
-import type { Category } from '../../../common/api/log_categorization/types';
+import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
+import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 
 import { useDataSource } from '../../hooks/use_data_source';
 import { useData } from '../../hooks/use_data';
@@ -312,7 +311,6 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem>
           <SearchPanel
-            dataView={dataView}
             searchString={searchString ?? ''}
             searchQuery={searchQuery}
             searchQueryLanguage={searchQueryLanguage}

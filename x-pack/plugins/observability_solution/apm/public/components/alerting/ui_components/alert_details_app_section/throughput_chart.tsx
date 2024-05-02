@@ -17,10 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import {
-  ChartType,
-  getTimeSeriesColor,
-} from '../../../shared/charts/helper/get_timeseries_color';
+import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
@@ -33,6 +30,7 @@ const INITIAL_STATE = {
 };
 function ThroughputChart({
   transactionType,
+  transactionName,
   serviceName,
   environment,
   start,
@@ -43,6 +41,7 @@ function ThroughputChart({
   timeZone,
 }: {
   transactionType: string;
+  transactionName?: string;
   serviceName: string;
   environment: string;
   start: string;
@@ -59,41 +58,37 @@ function ThroughputChart({
     end,
     numBuckets: 100,
     kuery: '',
-    type: ApmDocumentType.ServiceTransactionMetric,
+    type: transactionName
+      ? ApmDocumentType.TransactionMetric
+      : ApmDocumentType.ServiceTransactionMetric,
   });
 
-  const { data: dataThroughput = INITIAL_STATE, status: statusThroughput } =
-    useFetcher(
-      (callApmApi) => {
-        if (serviceName && transactionType && start && end && preferred) {
-          return callApmApi(
-            'GET /internal/apm/services/{serviceName}/throughput',
-            {
-              params: {
-                path: {
-                  serviceName,
-                },
-                query: {
-                  environment,
-                  kuery: '',
-                  start,
-                  end,
-                  transactionType,
-                  transactionName: undefined,
-                  documentType: preferred.source.documentType,
-                  rollupInterval: preferred.source.rollupInterval,
-                  bucketSizeInSeconds: preferred.bucketSizeInSeconds,
-                },
-              },
-            }
-          );
-        }
-      },
-      [environment, serviceName, start, end, transactionType, preferred]
-    );
-  const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-    ChartType.THROUGHPUT
+  const { data: dataThroughput = INITIAL_STATE, status: statusThroughput } = useFetcher(
+    (callApmApi) => {
+      if (serviceName && transactionType && start && end && preferred) {
+        return callApmApi('GET /internal/apm/services/{serviceName}/throughput', {
+          params: {
+            path: {
+              serviceName,
+            },
+            query: {
+              environment,
+              kuery: '',
+              start,
+              end,
+              transactionType,
+              transactionName,
+              documentType: preferred.source.documentType,
+              rollupInterval: preferred.source.rollupInterval,
+              bucketSizeInSeconds: preferred.bucketSizeInSeconds,
+            },
+          },
+        });
+      }
+    },
+    [environment, serviceName, start, end, transactionType, transactionName, preferred]
   );
+  const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(ChartType.THROUGHPUT);
   const timeseriesThroughput = [
     {
       data: dataThroughput.currentPeriod,
@@ -122,10 +117,9 @@ function ThroughputChart({
           <EuiFlexItem grow={false}>
             <EuiTitle size="xs">
               <h2>
-                {i18n.translate(
-                  'xpack.apm.serviceOverview.throughtputChartTitle',
-                  { defaultMessage: 'Throughput' }
-                )}
+                {i18n.translate('xpack.apm.serviceOverview.throughtputChartTitle', {
+                  defaultMessage: 'Throughput',
+                })}
               </h2>
             </EuiTitle>
           </EuiFlexItem>
@@ -133,8 +127,7 @@ function ThroughputChart({
           <EuiFlexItem grow={false}>
             <EuiIconTip
               content={i18n.translate('xpack.apm.serviceOverview.tpmHelp', {
-                defaultMessage:
-                  'Throughput is measured in transactions per minute (tpm).',
+                defaultMessage: 'Throughput is measured in transactions per minute (tpm).',
               })}
               position="right"
             />

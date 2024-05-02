@@ -8,13 +8,16 @@
 import { cloneDeep } from 'lodash/fp';
 import moment from 'moment';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { fireEvent, screen, render, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import '../../../../common/mock/formatted_relative';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { mockTimelineResults } from '../../../../common/mock/timeline_results';
+import { TestProviders } from '../../../../common/mock';
 import type { OpenTimelineResult, TimelineResultNote } from '../types';
 import { NotePreviews } from '.';
+import { useDeleteNote } from './hooks/use_delete_note';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/hooks/use_selector');
@@ -26,6 +29,10 @@ jest.mock('react-redux', () => {
     useDispatch: () => jest.fn(),
   };
 });
+
+jest.mock('./hooks/use_delete_note');
+
+const deleteMutateMock = jest.fn();
 
 describe('NotePreviews', () => {
   let mockResults: OpenTimelineResult[];
@@ -46,6 +53,13 @@ describe('NotePreviews', () => {
           retry: false,
         },
       },
+    });
+
+    (useDeleteNote as jest.Mock).mockReturnValue({
+      mutate: deleteMutateMock,
+      onSuccess: jest.fn(),
+      onError: jest.fn(),
+      isLoading: false,
     });
   });
 
@@ -242,5 +256,50 @@ describe('NotePreviews', () => {
     );
 
     expect(wrapper.find('[data-test-subj="delete-note"] button').prop('disabled')).toBeFalsy();
+  });
+
+  describe('Delete Notes', () => {
+    it('should delete note correctly', async () => {
+      const timeline = {
+        ...mockTimelineResults[0],
+        confirmingNoteId: 'noteId1',
+      };
+      (useDeepEqualSelector as jest.Mock).mockReturnValue(timeline);
+
+      render(
+        <TestProviders>
+          <QueryClientProvider client={queryClient}>
+            <NotePreviews
+              notes={[
+                {
+                  note: 'first note',
+                  noteId: 'noteId1',
+                  savedObjectId: 'test-id-1',
+                  updated: note2updated,
+                  updatedBy: 'alice',
+                },
+
+                {
+                  note: 'second note',
+                  noteId: 'noteId2',
+                  savedObjectId: 'test-id-2',
+                  updated: note2updated,
+                  updatedBy: 'alice',
+                },
+              ]}
+              showTimelineDescription
+              timelineId="test-timeline-id"
+            />
+          </QueryClientProvider>
+        </TestProviders>
+      );
+
+      fireEvent.click(screen.queryAllByTestId('delete-note')[0]);
+      await waitFor(() => {
+        fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+      });
+      expect(deleteMutateMock.mock.calls).toHaveLength(1);
+      expect(deleteMutateMock.mock.calls[0][0]).toBe('test-id-1');
+    });
   });
 });

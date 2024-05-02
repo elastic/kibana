@@ -9,7 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import { AlertsTableFlyoutBaseProps } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { useRouteMatch } from 'react-router-dom';
-import { SLO_ALERTS_TABLE_ID } from '../../pages/slo_details/components/slo_detail_alerts';
+import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { SLO_DETAIL_PATH } from '../../../common/locators/paths';
 import type { ObservabilityRuleTypeRegistry } from '../../rules/create_observability_rule_type_registry';
 import { AlertsFlyoutHeader } from './alerts_flyout_header';

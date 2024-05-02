@@ -13,13 +13,12 @@ import type { ESTermQuery } from '../../../../../common/typed_json';
 import type { inputsModel } from '../../../../common/store';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { createFilter } from '../../../../common/containers/helpers';
-import { generateTablePaginationOptions } from '../../../components/paginated_table/helpers';
+import { getLimitedPaginationOptions } from '../../../components/paginated_table/helpers';
 import type { networkModel } from '../../store';
 import { networkSelectors } from '../../store';
 import type {
   FlowTargetSourceDest,
   NetworkTopNFlowEdges,
-  PageInfoPaginated,
 } from '../../../../../common/search_strategy';
 import { NetworkQueries } from '../../../../../common/search_strategy';
 import type { InspectResponse } from '../../../../types';
@@ -33,13 +32,12 @@ export interface NetworkTopNFlowArgs {
   inspect: InspectResponse;
   isInspected: boolean;
   loadPage: (newActivePage: number) => void;
-  pageInfo: PageInfoPaginated;
   refetch: inputsModel.Refetch;
   networkTopNFlow: NetworkTopNFlowEdges[];
   totalCount: number;
 }
 
-interface UseNetworkTopNFlow {
+interface UseNetworkTopNFlowProps {
   flowTarget: FlowTargetSourceDest;
   id: string;
   ip?: string;
@@ -61,7 +59,7 @@ export const useNetworkTopNFlow = ({
   skip,
   startDate,
   type,
-}: UseNetworkTopNFlow): [boolean, NetworkTopNFlowArgs] => {
+}: UseNetworkTopNFlowProps): [boolean, NetworkTopNFlowArgs] => {
   const getTopNFlowSelector = useMemo(() => networkSelectors.topNFlowSelector(), []);
   const { activePage, limit, sort } = useDeepEqualSelector((state) =>
     getTopNFlowSelector(state, type, flowTarget)
@@ -70,16 +68,15 @@ export const useNetworkTopNFlow = ({
   const [networkTopNFlowRequest, setTopNFlowRequest] =
     useState<NetworkTopNFlowRequestOptionsInput | null>(null);
 
-  const wrappedLoadMore = useCallback(
+  const loadPage = useCallback(
     (newActivePage: number) => {
       setTopNFlowRequest((prevRequest) => {
         if (!prevRequest) {
           return prevRequest;
         }
-
         return {
           ...prevRequest,
-          pagination: generateTablePaginationOptions(newActivePage, limit),
+          pagination: getLimitedPaginationOptions(newActivePage, limit),
         };
       });
     },
@@ -87,49 +84,61 @@ export const useNetworkTopNFlow = ({
   );
 
   const {
-    loading,
+    loading: isLoadingData,
     result: response,
     search,
-    refetch,
+    refetch: refetchData,
     inspect,
   } = useSearchStrategy<NetworkQueries.topNFlow>({
     factoryQueryType: NetworkQueries.topNFlow,
-    initialResult: {
-      edges: [],
-      totalCount: -1,
-      pageInfo: {
-        activePage: 0,
-        fakeTotalCount: 0,
-        showMorePagesIndicator: false,
-      },
-    },
+    initialResult: { edges: [] },
     errorMessage: i18n.FAIL_NETWORK_TOP_N_FLOW,
     abort: skip,
   });
 
+  const {
+    loading: isLoadingTotalCount,
+    result: responseTotalCount,
+    search: searchTotalCount,
+    refetch: refetchTotalCount,
+    inspect: inspectTotalCount,
+  } = useSearchStrategy<NetworkQueries.topNFlowCount>({
+    factoryQueryType: NetworkQueries.topNFlowCount,
+    initialResult: { totalCount: -1 },
+    errorMessage: i18n.FAIL_NETWORK_TOP_N_FLOW,
+    abort: skip,
+  });
+
+  const isLoading = isLoadingData || isLoadingTotalCount;
+
+  const refetch = useCallback(() => {
+    refetchData();
+    refetchTotalCount();
+  }, [refetchData, refetchTotalCount]);
+
   const networkTopNFlowResponse = useMemo(
     () => ({
-      endDate,
       networkTopNFlow: response.edges,
       id,
-      inspect,
+      inspect: {
+        dsl: [...inspect.dsl, ...inspectTotalCount.dsl],
+        response: [...inspect.response, ...inspectTotalCount.response],
+      },
       isInspected: false,
-      loadPage: wrappedLoadMore,
-      pageInfo: response.pageInfo,
+      loadPage,
       refetch,
       startDate,
-      totalCount: response.totalCount,
+      totalCount: responseTotalCount.totalCount,
     }),
     [
-      endDate,
       id,
       inspect,
+      inspectTotalCount,
       refetch,
       response.edges,
-      response.pageInfo,
-      response.totalCount,
+      responseTotalCount.totalCount,
       startDate,
-      wrappedLoadMore,
+      loadPage,
     ]
   );
 
@@ -142,7 +151,7 @@ export const useNetworkTopNFlow = ({
         filterQuery: createFilter(filterQuery),
         flowTarget,
         ip,
-        pagination: generateTablePaginationOptions(activePage, limit),
+        pagination: getLimitedPaginationOptions(activePage, limit),
         timerange: {
           interval: '12h',
           from: startDate,
@@ -160,8 +169,9 @@ export const useNetworkTopNFlow = ({
   useEffect(() => {
     if (!skip && networkTopNFlowRequest) {
       search(networkTopNFlowRequest);
+      searchTotalCount(networkTopNFlowRequest);
     }
-  }, [networkTopNFlowRequest, search, skip]);
+  }, [networkTopNFlowRequest, search, searchTotalCount, skip]);
 
-  return [loading, networkTopNFlowResponse];
+  return [isLoading, networkTopNFlowResponse];
 };

@@ -1,0 +1,90 @@
+{
+  "index_patterns": [
+    "kbn-data-forge-fake_stack.heartbeat-*"
+  ],
+  "mappings": {
+    "_meta": {
+      "version": "1.6.0"
+    },
+    "date_detection": false,
+    "dynamic_templates": [
+      {
+        "strings_as_keyword": {
+          "mapping": {
+            "fields": {
+              "text": {
+                "norms": false,
+                "type": "text"
+              }
+            },
+            "ignore_above": 1024,
+            "type": "keyword"
+          },
+          "match_mapping_type": "string"
+        }
+      }
+    ],
+    "properties": {
+      "@timestamp": {
+        "type": "date"
+      },
+      "event": {
+        "properties": {
+          "action": {
+            "ignore_above": 1024,
+            "type": "keyword"
+          },
+          "duration": {
+            "type": "long"
+          },
+          "outcome": {
+            "ignore_above": 1024,
+            "type": "keyword"
+          },
+          "type": {
+            "ignore_above": 1024,
+            "type": "keyword"
+          },
+          "url": {
+            "ignore_above": 1024,
+            "type": "keyword"
+          }
+        }
+      },
+      "labels": {
+        "type": "object"
+      },
+      "log": {
+        "properties": {
+          "level": {
+            "ignore_above": 1024,
+            "type": "keyword"
+          },
+          "logger": {
+            "ignore_above": 1024,
+            "type": "keyword"
+          }
+        }
+      },
+      "message": {
+        "type": "match_only_text"
+      },
+      "tags": {
+        "ignore_above": 1024,
+        "type": "keyword"
+      }
+    }
+  },
+  "order": 1,
+  "settings": {
+    "index": {
+      "codec": "best_compression",
+      "mapping": {
+        "total_fields": {
+          "limit": 2000
+        }
+      },
+      "refresh_interval": "2s"
+    }
+  }
+}

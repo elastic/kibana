@@ -6,7 +6,10 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { DEPRECATION_LOGS_INDEX } from '../../../../common/constants';
+import {
+  DEPRECATION_LOGS_INDEX,
+  APP_LOGS_COUNT_CLUSTER_PRIVILEGES,
+} from '../../../../common/constants';
 import { setupEnvironment } from '../../helpers';
 import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
 
@@ -134,27 +137,44 @@ describe('Overview - Logs Step', () => {
         isDeprecationLogIndexingEnabled: true,
         isDeprecationLoggingEnabled: true,
       });
+    });
 
+    test('warns the user of missing index privileges', async () => {
       await act(async () => {
         testBed = await setupOverviewPage(httpSetup, {
           privileges: {
             hasAllPrivileges: true,
             missingPrivileges: {
+              cluster: [],
               index: [DEPRECATION_LOGS_INDEX],
             },
           },
         });
       });
 
-      const { component } = testBed;
-
+      const { component, exists } = testBed;
       component.update();
+
+      expect(exists('missingIndexPrivilegesCallout')).toBe(true);
     });
 
-    test('warns the user of missing index privileges', () => {
-      const { exists } = testBed;
+    test('warns the user of missing cluster privileges', async () => {
+      await act(async () => {
+        testBed = await setupOverviewPage(httpSetup, {
+          privileges: {
+            hasAllPrivileges: true,
+            missingPrivileges: {
+              cluster: [...APP_LOGS_COUNT_CLUSTER_PRIVILEGES],
+              index: [],
+            },
+          },
+        });
+      });
 
-      expect(exists('missingPrivilegesCallout')).toBe(true);
+      const { component, exists } = testBed;
+      component.update();
+
+      expect(exists('missingClusterPrivilegesCallout')).toBe(true);
     });
   });
 });

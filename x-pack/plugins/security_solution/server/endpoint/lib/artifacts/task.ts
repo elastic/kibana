@@ -65,13 +65,13 @@ export class ManifestTask {
               const taskInterval = packagerTaskInterval;
               const startTime = new Date();
 
-              this.logger.info(`Started. Checking for changes to endpoint artifacts`);
+              this.logger.debug(`Started. Checking for changes to endpoint artifacts`);
 
               await this.runTask(taskInstance.id);
 
               const endTime = new Date().getTime();
 
-              this.logger.info(
+              this.logger.debug(
                 `Complete. Task run took ${
                   endTime - startTime.getTime()
                 }ms [ stated: ${startTime.toISOString()} ]`
@@ -176,7 +176,7 @@ export class ManifestTask {
       }
 
       if (!oldManifest) {
-        this.logger.info('Last computed manifest not available yet');
+        this.logger.debug('Last computed manifest not available yet');
         return;
       }
 

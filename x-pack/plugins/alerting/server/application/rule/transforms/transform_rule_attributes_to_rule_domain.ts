@@ -4,20 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { omit, isEmpty } from 'lodash';
+import { isEmpty } from 'lodash';
 import { Logger } from '@kbn/core/server';
 import { SavedObjectReference } from '@kbn/core/server';
 import { ruleExecutionStatusValues } from '../constants';
 import { getRuleSnoozeEndTime } from '../../../lib';
 import { RuleDomain, Monitoring, RuleParams } from '../types';
-import { RuleAttributes } from '../../../data/rule/types';
-import { RawRule, PartialRule } from '../../../types';
+import { PartialRule, SanitizedRule } from '../../../types';
+import { RuleAttributes, RuleExecutionStatusAttributes } from '../../../data/rule/types';
 import { UntypedNormalizedRuleType } from '../../../rule_type_registry';
-import {
-  injectReferencesIntoActions,
-  injectReferencesIntoParams,
-} from '../../../rules_client/common';
+import { injectReferencesIntoParams } from '../../../rules_client/common';
 import { getActiveScheduledSnoozes } from '../../../lib/is_rule_snoozed';
+import {
+  transformRawActionsToDomainActions,
+  transformRawActionsToDomainSystemActions,
+} from './transform_raw_actions_to_domain_actions';
 
 const INITIAL_LAST_RUN_METRICS = {
   duration: 0,
@@ -31,7 +32,7 @@ const INITIAL_LAST_RUN_METRICS = {
 const transformEsExecutionStatus = (
   logger: Logger,
   ruleId: string,
-  esRuleExecutionStatus: RuleAttributes['executionStatus']
+  esRuleExecutionStatus: RuleExecutionStatusAttributes
 ): RuleDomain['executionStatus'] => {
   const {
     lastExecutionDate,
@@ -120,7 +121,8 @@ interface TransformEsToRuleParams {
 
 export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = never>(
   esRule: RuleAttributes,
-  transformParams: TransformEsToRuleParams
+  transformParams: TransformEsToRuleParams,
+  isSystemAction: (connectorId: string) => boolean
 ): RuleDomain<Params> => {
   const { scheduledTaskId, executionStatus, monitoring, snoozeSchedule, lastRun } = esRule;
 
@@ -141,21 +143,30 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
       ...(s.rRule.until ? { until: new Date(s.rRule.until).toISOString() } : {}),
     },
   }));
+
   const includeSnoozeSchedule = snoozeSchedule !== undefined && !isEmpty(snoozeSchedule);
   const isSnoozedUntil = includeSnoozeSchedule
     ? getRuleSnoozeEndTime({
         muteAll: esRule.muteAll ?? false,
-        snoozeSchedule,
+        snoozeSchedule: snoozeSchedule as SanitizedRule<Params>['snoozeSchedule'],
       })?.toISOString()
     : null;
 
-  let actions = esRule.actions
-    ? injectReferencesIntoActions(id, esRule.actions as RawRule['actions'], references || [])
-    : [];
-
-  if (omitGeneratedValues) {
-    actions = actions.map((ruleAction) => omit(ruleAction, 'alertsFilter.query.dsl'));
-  }
+  const ruleDomainActions: RuleDomain['actions'] = transformRawActionsToDomainActions({
+    ruleId: id,
+    actions: esRule.actions,
+    references,
+    isSystemAction,
+    omitGeneratedValues,
+  });
+  const ruleDomainSystemActions: RuleDomain['systemActions'] =
+    transformRawActionsToDomainSystemActions({
+      ruleId: id,
+      actions: esRule.actions,
+      references,
+      isSystemAction,
+      omitGeneratedValues,
+    });
 
   const params = injectReferencesIntoParams<Params, RuleParams>(
     id,
@@ -165,7 +176,7 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
   );
 
   const activeSnoozes = getActiveScheduledSnoozes({
-    snoozeSchedule,
+    snoozeSchedule: snoozeSchedule as SanitizedRule<Params>['snoozeSchedule'],
     muteAll: esRule.muteAll ?? false,
   })?.map((s) => s.id);
 
@@ -177,7 +188,8 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
     alertTypeId: esRule.alertTypeId,
     consumer: esRule.consumer,
     schedule: esRule.schedule,
-    actions: actions as RuleDomain['actions'],
+    actions: ruleDomainActions,
+    systemActions: ruleDomainSystemActions,
     params,
     mapped_params: esRule.mapped_params,
     ...(scheduledTaskId ? { scheduledTaskId } : {}),
@@ -192,7 +204,9 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
     muteAll: esRule.muteAll,
     notifyWhen: esRule.notifyWhen,
     mutedInstanceIds: esRule.mutedInstanceIds,
-    executionStatus: transformEsExecutionStatus(logger, id, executionStatus),
+    ...(executionStatus
+      ? { executionStatus: transformEsExecutionStatus(logger, id, executionStatus) }
+      : {}),
     ...(monitoring ? { monitoring: transformEsMonitoring(logger, id, monitoring) } : {}),
     snoozeSchedule: snoozeScheduleDates ?? [],
     ...(includeSnoozeData
@@ -217,6 +231,7 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
     revision: esRule.revision,
     running: esRule.running,
     ...(esRule.alertDelay ? { alertDelay: esRule.alertDelay } : {}),
+    ...(esRule.legacyId !== undefined ? { legacyId: esRule.legacyId } : {}),
   };
 
   // Bad casts, but will fix once we fix all rule types

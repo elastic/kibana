@@ -82,12 +82,11 @@ export class DefaultAlertService {
       },
     });
 
-    const alert = data?.[0];
-    if (!alert) {
+    if (data.length === 0) {
       return;
     }
-
-    return { ...alert, ruleTypeId: alert.alertTypeId };
+    const { actions = [], systemActions = [], ...alert } = data[0];
+    return { ...alert, actions: [...actions, ...systemActions], ruleTypeId: alert.alertTypeId };
   }
   async createDefaultAlertIfNotExist(ruleType: DefaultRuleType, name: string, interval: string) {
     const alert = await this.getExistingAlert(ruleType);
@@ -96,9 +95,12 @@ export class DefaultAlertService {
     }
 
     const actions = await this.getAlertActions(ruleType);
-
     const rulesClient = (await this.context.alerting)?.getRulesClient();
-    const newAlert = await rulesClient.create<{}>({
+    const {
+      actions: actionsFromRules = [],
+      systemActions = [],
+      ...newAlert
+    } = await rulesClient.create<{}>({
       data: {
         actions,
         params: {},
@@ -111,7 +113,12 @@ export class DefaultAlertService {
         throttle: null,
       },
     });
-    return { ...newAlert, ruleTypeId: newAlert.alertTypeId };
+
+    return {
+      ...newAlert,
+      actions: [...actionsFromRules, ...systemActions],
+      ruleTypeId: newAlert.alertTypeId,
+    };
   }
 
   updateStatusRule() {
@@ -127,7 +134,11 @@ export class DefaultAlertService {
     const alert = await this.getExistingAlert(ruleType);
     if (alert) {
       const actions = await this.getAlertActions(ruleType);
-      const updatedAlert = await rulesClient.update({
+      const {
+        actions: actionsFromRules = [],
+        systemActions = [],
+        ...updatedAlert
+      } = await rulesClient.update({
         id: alert.id,
         data: {
           actions,
@@ -137,7 +148,11 @@ export class DefaultAlertService {
           params: alert.params,
         },
       });
-      return { ...updatedAlert, ruleTypeId: updatedAlert.alertTypeId };
+      return {
+        ...updatedAlert,
+        actions: [...actionsFromRules, ...systemActions],
+        ruleTypeId: updatedAlert.alertTypeId,
+      };
     }
 
     return await this.createDefaultAlertIfNotExist(ruleType, name, interval);

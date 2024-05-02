@@ -20,11 +20,23 @@ import type {
   AppId as ManagementApp,
   DeepLinkId as ManagementLink,
 } from '@kbn/deeplinks-management';
-import type { AppId as SearchApp, DeepLinkId as SearchLink } from '@kbn/deeplinks-search';
+import type {
+  EnterpriseSearchApp,
+  EnterpriseSearchContentApp,
+  EnterpriseSearchApplicationsApp,
+  EnterpriseSearchAnalyticsApp,
+  EnterpriseSearchAppsearchApp,
+  EnterpriseSearchWorkplaceSearchApp,
+  ServerlessSearchApp,
+  DeepLinkId as SearchLink,
+} from '@kbn/deeplinks-search';
 import type {
   AppId as ObservabilityApp,
   DeepLinkId as ObservabilityLink,
 } from '@kbn/deeplinks-observability';
+import type { AppId as SecurityApp, DeepLinkId as SecurityLink } from '@kbn/deeplinks-security';
+import type { AppId as FleetApp, DeepLinkId as FleetLink } from '@kbn/deeplinks-fleet';
+import type { AppId as SharedApp, DeepLinkId as SharedLink } from '@kbn/deeplinks-shared';
 
 import type { ChromeBreadcrumb } from './breadcrumb';
 import type { ChromeNavLink } from './nav_links';
@@ -36,8 +48,17 @@ export type AppId =
   | AnalyticsApp
   | MlApp
   | ManagementApp
-  | SearchApp
-  | ObservabilityApp;
+  | EnterpriseSearchApp
+  | EnterpriseSearchContentApp
+  | EnterpriseSearchApplicationsApp
+  | EnterpriseSearchAnalyticsApp
+  | EnterpriseSearchAppsearchApp
+  | EnterpriseSearchWorkplaceSearchApp
+  | ServerlessSearchApp
+  | ObservabilityApp
+  | SecurityApp
+  | FleetApp
+  | SharedApp;
 
 /** @public */
 export type AppDeepLinkId =
@@ -46,14 +67,26 @@ export type AppDeepLinkId =
   | MlLink
   | ManagementLink
   | SearchLink
-  | ObservabilityLink;
+  | ObservabilityLink
+  | SecurityLink
+  | FleetLink
+  | SharedLink;
 
 /** @public */
-export type CloudLinkId = 'userAndRoles' | 'performance' | 'billingAndSub' | 'deployment';
+export type CloudLinkId =
+  | 'userAndRoles'
+  | 'performance'
+  | 'billingAndSub'
+  | 'deployment'
+  | 'deployments'
+  | 'projects';
 
 export interface CloudURLs {
+  baseUrl?: string;
   billingUrl?: string;
+  deploymentsUrl?: string;
   deploymentUrl?: string;
+  projectsUrl?: string;
   performanceUrl?: string;
   usersAndRolesUrl?: string;
 }
@@ -383,16 +416,19 @@ export interface NavigationTreeDefinitionUI {
  * for the side navigation evolution to align with the Serverless UX.
  */
 
-export interface SolutionNavigationDefinition {
+export interface SolutionNavigationDefinition<LinkId extends AppDeepLinkId = AppDeepLinkId> {
   /** Unique id for the solution navigation. */
   id: string;
   /** Title for the solution navigation. */
   title: string;
-  /** Optional icon for the solution navigation. */
+  /** The navigation tree definition */
+  navigationTree$: Observable<NavigationTreeDefinition<LinkId>>;
+  /** Optional icon for the solution navigation to render in the select dropdown. */
   icon?: IconType;
-  sideNavComponentGetter?: () => SideNavComponent;
+  /** React component to render in the side nav for the navigation */
+  sideNavComponent?: SideNavComponent;
   /** The page to navigate to when switching to this solution navigation. */
-  homePage?: AppDeepLinkId;
+  homePage?: LinkId;
 }
 
 export interface SolutionNavigationDefinitions {

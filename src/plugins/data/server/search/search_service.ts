@@ -19,7 +19,7 @@ import {
   SharedGlobalConfig,
   StartServicesAccessor,
 } from '@kbn/core/server';
-import { catchError, map, switchMap, tap } from 'rxjs/operators';
+import { catchError, map, switchMap, tap } from 'rxjs';
 import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
 import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
@@ -256,7 +256,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       registerFunction: expressions.registerFunction,
     });
 
-    firstValueFrom(this.initializerContext.config.create<ConfigSchema>()).then((value) => {
+    void firstValueFrom(this.initializerContext.config.create<ConfigSchema>()).then((value) => {
       if (value.search.aggs.shardDelay.enabled) {
         aggs.types.registerBucket(SHARD_DELAY_AGG_NAME, getShardDelayBucketAgg);
         expressions.registerFunction(aggShardDelay);

@@ -33,7 +33,7 @@ export interface ApmPluginContextValue {
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   uiActions: UiActionsStart;
-  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   share: SharePluginSetup;
   kibanaEnvironment: KibanaEnvContext;
 }

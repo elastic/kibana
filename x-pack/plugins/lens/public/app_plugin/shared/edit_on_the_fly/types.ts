@@ -102,5 +102,5 @@ export interface LayerConfigurationProps {
   hasPadding?: boolean;
   setIsInlineFlyoutVisible: (flag: boolean) => void;
   getUserMessages: UserMessagesGetter;
-  shouldDisplayChartSwitch?: boolean;
+  onlyAllowSwitchToSubtypes?: boolean;
 }

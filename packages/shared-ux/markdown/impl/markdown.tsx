@@ -87,11 +87,14 @@ export const Markdown = ({
     }
     return (
       <EuiMarkdownFormat
+        textSize={'relative'}
         className={className}
         aria-label={ariaLabelContent ?? 'markdown component'}
         parsingPluginList={_parsingPlugins}
         processingPluginList={openLinksInNewTab ? processingPlugins : undefined}
         data-test-subj={restProps['data-test-subj']}
+        // There was a trick to pass style as a part of props in the legacy React <Markdown> component
+        style={restProps.style}
       >
         {children ?? markdownContent!}
       </EuiMarkdownFormat>

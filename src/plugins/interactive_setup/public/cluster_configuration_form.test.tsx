@@ -9,7 +9,7 @@
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 
-import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 
 import { ClusterConfigurationForm } from './cluster_configuration_form';
 import { Providers } from './plugin';
@@ -21,8 +21,6 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
 describe('ClusterConfigurationForm', () => {
   jest.setTimeout(20_000);
 
-  const theme$ = themeServiceMock.createTheme$();
-
   it('calls enrollment API for https addresses when submitting form', async () => {
     const coreStart = coreMock.createStart();
     coreStart.http.post.mockResolvedValue({});
@@ -30,7 +28,7 @@ describe('ClusterConfigurationForm', () => {
     const onSuccess = jest.fn();
 
     const { findByRole, findByLabelText } = render(
-      <Providers services={coreStart} theme$={theme$}>
+      <Providers services={coreStart}>
         <ClusterConfigurationForm
           host="https://localhost:9200"
           authRequired
@@ -80,7 +78,7 @@ describe('ClusterConfigurationForm', () => {
     const onSuccess = jest.fn();
 
     const { findByRole } = render(
-      <Providers services={coreStart} theme$={theme$}>
+      <Providers services={coreStart}>
         <ClusterConfigurationForm
           host="http://localhost:9200"
           authRequired={false}
@@ -109,7 +107,7 @@ describe('ClusterConfigurationForm', () => {
     const onSuccess = jest.fn();
 
     const { findAllByText, findByRole, findByLabelText } = render(
-      <Providers services={coreStart} theme$={theme$}>
+      <Providers services={coreStart}>
         <ClusterConfigurationForm
           host="https://localhost:9200"
           authRequired

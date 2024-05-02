@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { LogRateAnalysisType } from '@kbn/aiops-utils';
+import type { LogRateAnalysisType } from '@kbn/aiops-log-rate-analysis';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import type { LogRateAnalysisDataGenerator } from '../../services/aiops/log_rate_analysis_data_generator';
@@ -25,6 +25,7 @@ interface TestDataExpectedWithSampleProbability {
   appState: object;
   sampleProbabilityFormatted: string;
   fieldSelectorPopover: string[];
+  prompt: 'empty' | 'change-point';
 }
 
 export function isTestDataExpectedWithSampleProbability(
@@ -47,11 +48,13 @@ interface TestDataExpectedWithoutSampleProbability {
     impact: string;
   }>;
   fieldSelectorPopover: string[];
+  prompt: 'empty' | 'change-point';
 }
 
 export interface TestData {
   suiteTitle: string;
   analysisType: LogRateAnalysisType;
+  autoRun: boolean;
   dataGenerator: LogRateAnalysisDataGenerator;
   isSavedSearch?: boolean;
   sourceIndexOrSavedSearch: string;

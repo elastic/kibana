@@ -9,13 +9,13 @@ import { BehaviorSubject, lastValueFrom } from 'rxjs';
 
 import type { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils';
 import { getSeverityType, ES_AGGREGATION } from '@kbn/ml-anomaly-utils';
+import type { TimeBuckets } from '@kbn/ml-time-buckets';
 
 import { parseInterval } from '../../../../../../common/util/parse_interval';
 import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 
 import type { ModelPlotOutputResults } from '../../../../services/results_service';
 import { mlResultsService } from '../../../../services/results_service';
-import type { TimeBuckets } from '../../../../util/time_buckets';
 
 import type { JobCreatorType } from '../job_creator';
 import { isMultiMetricJobCreator } from '../job_creator';

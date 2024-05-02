@@ -118,11 +118,11 @@ describe('.execute() & getHref', () => {
       filters: filtersFromEvent,
       embeddable: {
         parentApi: {
-          localFilters: new BehaviorSubject(embeddableInput.filters ? embeddableInput.filters : []),
-          localQuery: new BehaviorSubject(
+          filters$: new BehaviorSubject(embeddableInput.filters ? embeddableInput.filters : []),
+          query$: new BehaviorSubject(
             embeddableInput.query ? embeddableInput.query : { query: 'test', language: 'kuery' }
           ),
-          localTimeRange: new BehaviorSubject(
+          timeRange$: new BehaviorSubject(
             embeddableInput.timeRange ? embeddableInput.timeRange : { from: 'now-15m', to: 'now' }
           ),
         },

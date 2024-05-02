@@ -39,7 +39,8 @@ export const timelineEventsDetails: TimelineFactory<TimelineEventsQueries.detail
     response: IEsSearchResponse<EventHit>
   ): Promise<TimelineEventsDetailsStrategyResponse> => {
     const { indexName, eventId, runtimeMappings = {} } = options;
-    const { fields, ...hitsData } = response.rawResponse.hits.hits[0] ?? {};
+    // _source is removed here as it's only needed in the rawEventData below
+    const { fields, _source, ...hitsData } = response.rawResponse.hits.hits[0] ?? {};
 
     const inspect = {
       dsl: [

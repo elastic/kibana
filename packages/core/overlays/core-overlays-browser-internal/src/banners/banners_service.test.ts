@@ -7,15 +7,19 @@
  */
 
 import { InternalOverlayBannersStart, OverlayBannersService } from './banners_service';
-import { take } from 'rxjs/operators';
+import { take } from 'rxjs';
+import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
+import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
 describe('OverlayBannersService', () => {
   let service: InternalOverlayBannersStart;
   beforeEach(() => {
     service = new OverlayBannersService().start({
+      analytics: analyticsServiceMock.createAnalyticsServiceStart(),
       i18n: i18nServiceMock.createStartContract(),
+      theme: themeServiceMock.createStartContract(),
       uiSettings: uiSettingsServiceMock.createStartContract(),
     });
   });

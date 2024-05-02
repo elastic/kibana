@@ -7,7 +7,8 @@
 import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
 import React from 'react';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { MessageRole } from '.';
 import type { StreamingChatResponseEventWithoutError } from '../common/conversation_complete';
 import type { ObservabilityAIAssistantAPIClient } from './api';
 import type { ObservabilityAIAssistantChatService, ObservabilityAIAssistantService } from './types';
@@ -17,7 +18,6 @@ export const createStorybookChatService = (): ObservabilityAIAssistantChatServic
   sendAnalyticsEvent: () => {},
   chat: (options) => new Observable<StreamingChatResponseEventWithoutError>(),
   complete: (options) => new Observable<StreamingChatResponseEventWithoutError>(),
-  getContexts: () => [],
   getFunctions: () => [buildFunctionElasticsearch(), buildFunctionServiceSummary()],
   renderFunction: (name) => (
     <div>
@@ -29,6 +29,13 @@ export const createStorybookChatService = (): ObservabilityAIAssistantChatServic
   ),
   hasFunction: () => true,
   hasRenderFunction: () => true,
+  getSystemMessage: () => ({
+    '@timestamp': new Date().toISOString(),
+    message: {
+      role: MessageRole.System,
+      content: 'System',
+    },
+  }),
 });
 
 export const createStorybookService = (): ObservabilityAIAssistantService => ({
@@ -44,4 +51,5 @@ export const createStorybookService = (): ObservabilityAIAssistantService => ({
     openNewConversation: noop,
     predefinedConversation$: new Observable(),
   },
+  navigate: async () => of(),
 });

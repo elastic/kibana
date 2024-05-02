@@ -6,7 +6,7 @@
  */
 
 import { BehaviorSubject, combineLatest, EMPTY, type Observable, Subscription } from 'rxjs';
-import { catchError, debounceTime, map, startWith, switchMap, tap } from 'rxjs/operators';
+import { catchError, debounceTime, map, startWith, switchMap, tap } from 'rxjs';
 import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
 import { isRunningResponse } from '@kbn/data-plugin/public';
 import type {
