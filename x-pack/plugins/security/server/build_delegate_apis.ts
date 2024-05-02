@@ -7,19 +7,31 @@
 
 import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
 import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-server';
+import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 
 import type { InternalAuthenticationServiceStart } from './authentication';
 import type { UserProfileServiceStartInternal } from './user_profile';
 
 export const buildSecurityApi = ({
   getAuthc,
+  audit,
 }: {
   getAuthc: () => InternalAuthenticationServiceStart;
+  audit: AuditServiceSetup;
 }): CoreSecurityDelegateContract => {
   return {
     authc: {
       getCurrentUser: (request) => {
         return getAuthc().getCurrentUser(request);
+      },
+    },
+    audit: {
+      asScoped(request) {
+        return audit.asScoped(request);
+      },
+      withoutRequest: {
+        log: audit.withoutRequest.log,
+        enabled: audit.withoutRequest.enabled,
       },
     },
   };

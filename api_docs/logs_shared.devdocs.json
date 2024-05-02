@@ -6002,7 +6002,7 @@
         "label": "LogEntryAfterCursor",
         "description": [],
         "signature": [
-          "{ after: { time: string; tiebreaker: number; } | \"first\"; }"
+          "{ after: \"first\" | { time: string; tiebreaker: number; }; }"
         ],
         "path": "x-pack/plugins/observability_solution/logs_shared/common/log_entry/log_entry_cursor.ts",
         "deprecated": false,
