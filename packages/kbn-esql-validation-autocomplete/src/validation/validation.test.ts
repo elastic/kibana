@@ -2839,6 +2839,11 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings(
+          `from a_index | eval date_diff(stringField, "2023-12-02T11:00:00.000Z", "2023-12-02T11:00:00.000Z")`,
+          []
+        );
+
+        testErrorsAndWarnings(
           `from a_index | eval date_diff("month", dateField, "2023-12-02T11:00:00.000Z")`,
           []
         );
