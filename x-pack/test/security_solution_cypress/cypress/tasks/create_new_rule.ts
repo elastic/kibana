@@ -125,6 +125,8 @@ import {
   ALERTS_INDEX_BUTTON,
   INVESTIGATIONS_INPUT,
   QUERY_BAR_ADD_FILTER,
+  SETUP_GUIDE_TEXTAREA,
+  RELATED_INTEGRATION_COMBO_BOX_INPUT,
 } from '../screens/create_new_rule';
 import {
   INDEX_SELECTOR,
@@ -147,7 +149,7 @@ import { ruleFields } from '../data/detection_engine';
 import { waitForAlerts } from './alerts';
 import { refreshPage } from './security_header';
 import { EMPTY_ALERT_TABLE } from '../screens/alerts';
-import { TOOLTIP } from '../screens/common';
+import { COMBO_BOX_OPTION, TOOLTIP } from '../screens/common';
 
 export const createAndEnableRule = () => {
   cy.get(CREATE_AND_ENABLE_BTN).click();
@@ -201,6 +203,13 @@ export const fillNote = (note: string = ruleFields.investigationGuide) => {
   cy.get(INVESTIGATION_NOTES_TEXTAREA).type(note, { force: true });
 
   return note;
+};
+
+export const fillSetup = (setup: string = ruleFields.setup) => {
+  cy.get(SETUP_GUIDE_TEXTAREA).clear({ force: true });
+  cy.get(SETUP_GUIDE_TEXTAREA).type(setup);
+
+  return setup;
 };
 
 export const fillMitre = (mitreAttacks: Threat[]) => {
@@ -270,6 +279,17 @@ export const importSavedQuery = (timelineId: string) => {
   cy.get(TIMELINE(timelineId)).click();
   cy.get(CUSTOM_QUERY_INPUT).should('not.be.empty');
   removeAlertsIndex();
+};
+
+export const fillRelatedIntegrations = (): void => {
+  addFirstIntegration();
+  addFirstIntegration();
+};
+
+const addFirstIntegration = (): void => {
+  cy.get('button').contains('Add integration').click();
+  cy.get(RELATED_INTEGRATION_COMBO_BOX_INPUT).last().should('be.enabled').click();
+  cy.get(COMBO_BOX_OPTION).first().click();
 };
 
 export const fillRuleName = (ruleName: string = ruleFields.ruleName) => {
