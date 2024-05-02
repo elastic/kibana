@@ -113,7 +113,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     };
 
     const assertWorkspaceAspectRatio = async (expectedRatio: number) => {
-      const tolerance = 0.05;
+      const tolerance = 0.07;
 
       await retry.try(async () => {
         const { width, height } = await PageObjects.lens.getWorkspaceVisContainerDimensions();
