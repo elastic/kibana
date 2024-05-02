@@ -56,6 +56,7 @@ export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
   } = params;
 
   const excludedTiers = await uiSettingsClient?.get<string>(DATA_VIEWS_FIELDS_EXCLUDED_TIERS);
+  console.log('calling field caps');
   const esFieldCaps = await callFieldCapsApi({
     callCluster,
     indices,

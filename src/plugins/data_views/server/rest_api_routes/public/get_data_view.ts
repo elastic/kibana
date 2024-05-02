@@ -39,7 +39,14 @@ export const getDataView = async ({
   id,
 }: GetDataViewArgs) => {
   usageCollection?.incrementCounter({ counterName });
-  return dataViewsService.getDataViewLazy(id);
+  console.log('get data view');
+  const dataView = await dataViewsService.get(id);
+  console.log('get data view lazy');
+  const dataViewLazy = await dataViewsService.toDataViewLazy(dataView);
+  // this shouldn't trigger a field caps call
+  console.log('get data view again');
+  await dataViewsService.toDataView(dataViewLazy);
+  return dataViewLazy;
 };
 
 const getDataViewRouteFactory =
@@ -97,6 +104,7 @@ const getDataViewRouteFactory =
             id,
           });
 
+          console.log('data view lazy will get fields here');
           const responseBody: Record<string, DataViewSpecRestResponse> = {
             [serviceKey]: {
               ...(await dataView.toSpec({ fieldParams: { fieldName: ['*'] } })),
