@@ -88,7 +88,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const createWebHookConnector = () => createConnector(getWebHookAction());
   const createSlackConnector = () => createConnector(getSlackAction());
 
-  describe('@ess @serverless @skipInServerless perform_bulk_action', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/182431
+  describe.skip('@ess @serverless @skipInServerless perform_bulk_action', () => {
     beforeEach(async () => {
       await createAlertsIndex(supertest, log);
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
@@ -140,6 +141,7 @@ export default ({ getService }: FtrProviderContext): void => {
           { package: 'package-a', version: '^1.2.3' },
           { package: 'package-b', integration: 'integration-b', version: '~1.1.1' },
         ],
+        setup: '# some setup markdown',
       };
       const mockRule = getCustomQueryRuleParams(defaultableFields);
 
@@ -314,6 +316,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const ruleId = 'ruleId';
       const ruleToDuplicate = getCustomQueryRuleParams({
         rule_id: ruleId,
+        setup: '# some setup markdown',
         related_integrations: [
           { package: 'package-a', version: '^1.2.3' },
           { package: 'package-b', integration: 'integration-b', version: '~1.1.1' },
@@ -1172,7 +1175,7 @@ export default ({ getService }: FtrProviderContext): void => {
             })
             .expect(200);
 
-          expect(bulkEditResponse.attributes.summary).to.eql({
+          expect(bulkEditResponse.attributes.summary).toEqual({
             failed: 0,
             skipped: 0,
             succeeded: 1,
@@ -1180,14 +1183,14 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           // Check that the updated rule is returned with the response
-          expect(bulkEditResponse.attributes.results.updated[0].investigation_fields).to.eql({
+          expect(bulkEditResponse.attributes.results.updated[0].investigation_fields).toEqual({
             field_names: ['field-1'],
           });
 
           // Check that the updates have been persisted
           const { body: updatedRule } = await fetchRule(ruleId).expect(200);
 
-          expect(updatedRule.investigation_fields).to.eql({ field_names: ['field-1'] });
+          expect(updatedRule.investigation_fields).toEqual({ field_names: ['field-1'] });
         });
 
         it('should add investigation fields to rules', async () => {
@@ -1215,7 +1218,7 @@ export default ({ getService }: FtrProviderContext): void => {
             })
             .expect(200);
 
-          expect(bulkEditResponse.attributes.summary).to.eql({
+          expect(bulkEditResponse.attributes.summary).toEqual({
             failed: 0,
             skipped: 0,
             succeeded: 1,
@@ -1223,14 +1226,14 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           // Check that the updated rule is returned with the response
-          expect(bulkEditResponse.attributes.results.updated[0].investigation_fields).to.eql(
+          expect(bulkEditResponse.attributes.results.updated[0].investigation_fields).toEqual(
             resultingFields
           );
 
           // Check that the updates have been persisted
           const { body: updatedRule } = await fetchRule(ruleId).expect(200);
 
-          expect(updatedRule.investigation_fields).to.eql(resultingFields);
+          expect(updatedRule.investigation_fields).toEqual(resultingFields);
         });
 
         it('should delete investigation fields from rules', async () => {
@@ -1258,7 +1261,7 @@ export default ({ getService }: FtrProviderContext): void => {
             })
             .expect(200);
 
-          expect(bulkEditResponse.attributes.summary).to.eql({
+          expect(bulkEditResponse.attributes.summary).toEqual({
             failed: 0,
             skipped: 0,
             succeeded: 1,
@@ -1266,14 +1269,14 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           // Check that the updated rule is returned with the response
-          expect(bulkEditResponse.attributes.results.updated[0].investigation_fields).to.eql(
+          expect(bulkEditResponse.attributes.results.updated[0].investigation_fields).toEqual(
             resultingFields
           );
 
           // Check that the updates have been persisted
           const { body: updatedRule } = await fetchRule(ruleId).expect(200);
 
-          expect(updatedRule.investigation_fields).to.eql(resultingFields);
+          expect(updatedRule.investigation_fields).toEqual(resultingFields);
         });
 
         const skipIndexPatternsUpdateCases = [
@@ -1334,7 +1337,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 })
                 .expect(200);
 
-              expect(bulkEditResponse.attributes.summary).to.eql({
+              expect(bulkEditResponse.attributes.summary).toEqual({
                 failed: 0,
                 skipped: 1,
                 succeeded: 0,
@@ -1342,14 +1345,14 @@ export default ({ getService }: FtrProviderContext): void => {
               });
 
               // Check that the rules is returned as skipped with expected skip reason
-              expect(bulkEditResponse.attributes.results.skipped[0].skip_reason).to.eql(
+              expect(bulkEditResponse.attributes.results.skipped[0].skip_reason).toEqual(
                 'RULE_NOT_MODIFIED'
               );
 
               // Check that the no changes have been persisted
               const { body: updatedRule } = await fetchRule(ruleId).expect(200);
 
-              expect(updatedRule.investigation_fields).to.eql(resultingInvestigationFields);
+              expect(updatedRule.investigation_fields).toEqual(resultingInvestigationFields);
             });
           }
         );
