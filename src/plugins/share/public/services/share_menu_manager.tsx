@@ -72,7 +72,6 @@ export class ShareMenuManager {
     sharingData,
     menuItems,
     shareableUrl,
-    shareableUrlForSavedObject,
     shareableUrlLocatorParams,
     embedUrlParamExtensions,
     theme,
@@ -86,6 +85,7 @@ export class ShareMenuManager {
     i18n,
     isDirty,
     toasts,
+    delegatedShareUrlHandler,
   }: ShowShareMenuOptions & {
     anchorElement: HTMLElement;
     menuItems: ShareMenuItem[];
@@ -117,8 +117,8 @@ export class ShareMenuManager {
               objectTypeMeta,
               sharingData,
               shareableUrl,
-              shareableUrlForSavedObject,
               shareableUrlLocatorParams,
+              delegatedShareUrlHandler,
               embedUrlParamExtensions,
               anonymousAccess,
               showPublicUrlSwitch,
