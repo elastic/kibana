@@ -12,6 +12,7 @@ import axios, { AxiosResponse } from 'axios';
 import * as cheerio from 'cheerio';
 import { Cookie, parse as parseCookie } from 'tough-cookie';
 import Url from 'url';
+import { isValidHostname, isValidUrl } from './helper';
 import {
   CloudSamlSessionParams,
   CreateSamlSessionParams,
@@ -56,7 +57,7 @@ const getSessionCookie = (cookieString: string) => {
 
 const getCloudHostName = () => {
   const hostname = process.env.TEST_CLOUD_HOST_NAME;
-  if (!hostname) {
+  if (!hostname || !isValidHostname(hostname)) {
     throw new Error('SAML Authentication requires TEST_CLOUD_HOST_NAME env variable to be set');
   }
 
@@ -149,20 +150,46 @@ const createSAMLRequest = async (kbnUrl: string, kbnVersion: string, log: Toolin
       `Failed to get location from SAML response data: ${JSON.stringify(samlResponse.data)}`
     );
   }
+  if (!isValidUrl(location)) {
+    throw new Error(`Location from Kibana SAML request is not a valid url: ${location}`);
+  }
   return { location, sid: cookie.value };
 };
 
-const createSAMLResponse = async (url: string, ecSession: string) => {
-  const samlResponse = await axios.get(url, {
-    headers: {
-      Cookie: `ec_session=${ecSession}`,
-    },
-  });
-  const $ = cheerio.load(samlResponse.data);
-  const value = $('input').attr('value') ?? '';
-  if (value.length === 0) {
-    throw new Error('Failed to parse SAML response value');
+const createSAMLResponse = async (
+  url: string,
+  ecSession: string,
+  email: string,
+  kbnHost: string,
+  log: ToolingLog
+) => {
+  let samlResponse: AxiosResponse;
+  let value: string | undefined;
+  try {
+    samlResponse = await axios.get(url, {
+      headers: {
+        Cookie: `ec_session=${ecSession}`,
+      },
+      maxRedirects: 0,
+    });
+    const $ = cheerio.load(samlResponse.data);
+    value = $('input').attr('value');
+  } catch (err) {
+    if (err.isAxiosError) {
+      log.error(
+        `Create SAML Response failed with status code ${err?.response?.status}: ${err?.response?.data}`
+      );
+    }
   }
+
+  if (!value) {
+    throw new Error(
+      `Failed to parse SAML response value.\nMost likely the '${email}' user has no access to the cloud deployment.
+Login to ${new URL(url).hostname} with the user from '.ftr/role_users.json' file and try to load
+${kbnHost} in the same window.`
+    );
+  }
+
   return value;
 };
 
@@ -240,7 +267,7 @@ export const createCloudSAMLSession = async (params: CloudSamlSessionParams) => 
   const hostname = getCloudHostName();
   const token = await createCloudSession({ hostname, email, password, log });
   const { location, sid } = await createSAMLRequest(kbnHost, kbnVersion, log);
-  const samlResponse = await createSAMLResponse(location, token);
+  const samlResponse = await createSAMLResponse(location, token, email, kbnHost, log);
   const cookie = await finishSAMLHandshake({ kbnHost, samlResponse, sid, log });
   const userProfile = await getSecurityProfile({ kbnHost, cookie, log });
   return new Session(cookie, email, userProfile.full_name);
