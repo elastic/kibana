@@ -19,6 +19,11 @@ export const useGetDataViewIdsWithTitle = () => {
 
   return useQuery<DataViewListItem[], IHttpFetchError>(
     [TRANSFORM_REACT_QUERY_KEYS.GET_DATA_VIEW_IDS_WITH_TITLE],
-    async () => await data.dataViews.getIdsWithTitle()
+    async () => {
+      // Since we let useQuery take care of caching,
+      // clear the cache to ensure we get the latest data view list.
+      await data.dataViews.clearCache();
+      return await data.dataViews.getIdsWithTitle();
+    }
   );
 };
