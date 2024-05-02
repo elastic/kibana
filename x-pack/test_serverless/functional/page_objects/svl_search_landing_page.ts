@@ -91,9 +91,7 @@ export function SvlSearchLandingPageProvider({ getService }: FtrProviderContext)
         await testSubjects.click('manage-pipeline-button');
       },
       async expectNavigateToManagePipelinePage() {
-        expect(await browser.getCurrentUrl()).contain(
-          '/app/management/ingest/ingest_pipelines'
-        );
+        expect(await browser.getCurrentUrl()).contain('/app/management/ingest/ingest_pipelines');
       },
     },
   };
