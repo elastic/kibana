@@ -17,4 +17,7 @@ export enum COMPARATORS {
   LESS_THAN = '<',
   LESS_THAN_OR_EQUALS = '<=',
   NOT_BETWEEN = 'notBetween',
+  // BC_OUTSIDE_RANGE is added only for Backward Compatibility purposes
+  // For the old rules are active and using "outside"
+  BC_OUTSIDE_RANGE = 'outside',
 }
