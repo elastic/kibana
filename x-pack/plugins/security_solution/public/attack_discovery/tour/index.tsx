@@ -10,7 +10,7 @@
  *
  * */
 
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiTourStep } from '@elastic/eui';
 import { useIsElementMounted } from '../../detection_engine/rule_management_ui/components/rules_table/rules_table/guided_onboarding/use_is_element_mounted';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS, SecurityPageName } from '../../../common/constants';
@@ -36,12 +36,16 @@ const AttackDiscoveryTourComp = () => {
 
   const finishTour = useCallback(() => {
     setTourState((prev) => {
+      storage.set(NEW_FEATURES_TOUR_STORAGE_KEYS.ATTACK_DISCOVERY, {
+        ...prev,
+        isTourActive: false,
+      });
       return {
         ...prev,
         isTourActive: false,
       };
     });
-  }, []);
+  }, [storage]);
 
   const navigateToAttackDiscovery = useCallback(() => {
     navigateTo({
@@ -50,10 +54,10 @@ const AttackDiscoveryTourComp = () => {
   }, [navigateTo]);
 
   const nextStep = useCallback(() => {
-    if (tourState.currentTourStep === 1) {
-      navigateToAttackDiscovery();
-    }
     setTourState((prev) => {
+      if (prev.currentTourStep === 1) {
+        navigateToAttackDiscovery();
+      }
       storage.set(NEW_FEATURES_TOUR_STORAGE_KEYS.ATTACK_DISCOVERY, {
         ...prev,
         currentTourStep: prev.currentTourStep + 1,
@@ -64,12 +68,7 @@ const AttackDiscoveryTourComp = () => {
         currentTourStep: prev.currentTourStep + 1,
       };
     });
-  }, [navigateToAttackDiscovery, storage, tourState.currentTourStep]);
-
-  useEffect(() => {
-    storage.set(NEW_FEATURES_TOUR_STORAGE_KEYS.ATTACK_DISCOVERY, tourState);
-    console.log('tourState', tourState);
-  }, [tourState, storage]);
+  }, [navigateToAttackDiscovery, storage]);
 
   const getFooterAction = useCallback(() => {
     // if it's the last step, we don't want to show the next button
@@ -100,17 +99,23 @@ const AttackDiscoveryTourComp = () => {
         };
         return (
           <EuiTourStep
-            panelProps={panelProps}
-            key={idx}
-            step={stepCount}
-            isStepOpen={tourState.isTourActive && tourState.currentTourStep === idx + 1}
-            maxWidth={tourState.tourPopoverWidth}
-            stepsTotal={2}
-            onFinish={finishTour}
-            title={steps.title}
-            content={steps.content}
             anchor={`#${steps.anchor}`}
+            content={steps.content}
+            decoration="none"
             footerAction={getFooterAction()}
+            isStepOpen={tourState.isTourActive && tourState.currentTourStep === idx + 1}
+            key={idx}
+            maxWidth={tourState.tourPopoverWidth}
+            onFinish={finishTour}
+            panelProps={panelProps}
+            repositionOnScroll
+            step={stepCount}
+            stepsTotal={2}
+            title={steps.title}
+            hasArrow={tourState.currentTourStep === 1}
+            attachToAnchor={tourState.currentTourStep === 1}
+            display={'block'}
+            offset={100}
           />
         );
       })}

@@ -9,7 +9,7 @@ import * as i18n from './translations';
 
 export const ATTACK_DISCOVERY_TOUR_CONFIG_ANCHORS = {
   NAV_LINK: 'solutionSideNavItemLink-attack_discovery',
-  TOAST: 'toast',
+  TIMELINE: 'timeline-bottom-bar-container',
 };
 
 export const attackDiscoveryTourSteps = [
@@ -21,7 +21,7 @@ export const attackDiscoveryTourSteps = [
   {
     title: i18n.ATTACK_DISCOVERY_TOUR_VIDEO_STEP_TITLE,
     content: i18n.ATTACK_DISCOVERY_TOUR_VIDEO_STEP_DESC,
-    anchor: ATTACK_DISCOVERY_TOUR_CONFIG_ANCHORS.TOAST,
+    anchor: ATTACK_DISCOVERY_TOUR_CONFIG_ANCHORS.TIMELINE,
   },
 ];
 

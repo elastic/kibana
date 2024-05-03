@@ -111,7 +111,10 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateW
               {didMount && <AttackDiscoveryTour />}
             </KibanaPageTemplate.Section>
             {isTimelineBottomBarVisible && (
-              <KibanaPageTemplate.BottomBar data-test-subj="timeline-bottom-bar-container">
+              <KibanaPageTemplate.BottomBar
+                data-test-subj="timeline-bottom-bar-container"
+                id={'timeline-bottom-bar-container'}
+              >
                 <EuiThemeProvider colorMode={globalColorMode}>
                   <ExpandableFlyoutProvider urlKey={URL_PARAM_KEY.timelineFlyout}>
                     <Timeline />
