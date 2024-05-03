@@ -165,7 +165,7 @@ describe('SearchSourceAlertTypeExpression', () => {
       fetch$: jest.fn(() => {
         return mockSearchResult;
       }),
-      getSearchRequestBody: jest.fn(() => ({
+      getSearchRequestBody: jest.fn().mockResolvedValue(() => ({
         fields: [
           {
             field: '@timestamp',

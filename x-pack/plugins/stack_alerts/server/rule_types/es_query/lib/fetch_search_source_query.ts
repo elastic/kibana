@@ -59,7 +59,7 @@ export async function fetchSearchSourceQuery({
 
   const initialSearchSource = await searchSourceClient.create(params.searchConfiguration);
 
-  const index = initialSearchSource.getField('index') as DataView;
+  const index = (await initialSearchSource.getDataView())!;
   const { searchSource, filterToExcludeHitsFromPreviousRun } = updateSearchSource(
     initialSearchSource,
     index,
@@ -72,7 +72,7 @@ export async function fetchSearchSourceQuery({
 
   logger.debug(
     `search source query rule (${ruleId}) query: ${JSON.stringify(
-      searchSource.getSearchRequestBody()
+      await searchSource.getSearchRequestBody()
     )}`
   );
 

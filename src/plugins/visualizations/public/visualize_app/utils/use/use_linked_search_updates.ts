@@ -29,14 +29,14 @@ export const useLinkedSearchUpdates = (
       // SearchSource is a promise-based stream of search results that can inherit from other search sources.
       const { searchSource } = visInstance.vis.data;
 
-      const unlinkFromSavedSearch = (showToast: boolean = true) => {
+      const unlinkFromSavedSearch = async (showToast: boolean = true) => {
         const searchSourceParent = savedSearch.searchSource;
         const searchSourceGrandparent = searchSourceParent?.getParent();
-        const currentIndex = searchSourceParent?.getField('index');
+        const currentIndex = await searchSourceParent?.getDataView();
         visInstance.savedSearch = undefined;
         visInstance.vis.data.savedSearchId = undefined;
 
-        searchSource.setField('index', currentIndex);
+        searchSource.setDataView(currentIndex);
         searchSource.setParent(searchSourceGrandparent);
 
         appState.transitions.unlinkSavedSearch({

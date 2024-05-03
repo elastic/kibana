@@ -466,7 +466,6 @@ export class DataViewLazy extends AbstractDataView {
 
   async getComputedFields({ fieldName = ['*'] }: { fieldName: string[] }) {
     const scriptFields: Record<string, estypes.ScriptField> = {};
-
     const fieldMap = (
       await this.getFields({
         fieldName,

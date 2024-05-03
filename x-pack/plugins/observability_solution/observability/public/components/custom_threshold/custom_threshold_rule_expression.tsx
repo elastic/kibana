@@ -111,7 +111,7 @@ export default function Expressions(props: Props) {
           newSearchSource.setField('query', data.query.queryString.getDefaultQuery());
           const defaultDataView = await data.dataViews.getDefaultDataView();
           if (defaultDataView) {
-            newSearchSource.setField('index', defaultDataView);
+            await newSearchSource.setDataView(defaultDataView);
             setDataView(defaultDataView);
           }
           initialSearchConfiguration = getSearchConfiguration(
@@ -132,10 +132,10 @@ export default function Expressions(props: Props) {
           }),
         });
         setSearchSource(createdSearchSource);
-        setDataView(createdSearchSource.getField('index'));
+        setDataView(await createdSearchSource.getDataView());
 
-        if (createdSearchSource.getField('index')) {
-          const timeFieldName = createdSearchSource.getField('index')?.timeFieldName;
+        if (createdSearchSource.getDataViewLazy()) {
+          const timeFieldName = createdSearchSource.getDataViewLazy()?.timeFieldName;
           if (!timeFieldName) {
             setDataViewTimeFieldError(
               i18n.translate(
@@ -192,11 +192,9 @@ export default function Expressions(props: Props) {
         }
       );
       setRuleParams('criteria', ruleCriteria);
-      searchSource?.setParent(undefined).setField('index', newDataView);
-      setRuleParams(
-        'searchConfiguration',
-        searchSource && getSearchConfiguration(searchSource.getSerializedFields(), setParamsWarning)
-      );
+      searchSource?.setParent(undefined).setDataView(newDataView);
+      setRuleParams('searchConfiguration', searchSource?.getSerializedFields());
+
       setDataView(newDataView);
     },
     [ruleParams.criteria, searchSource, setRuleParams]

@@ -271,8 +271,8 @@ export const SearchExamplesApp = ({
     try {
       const searchSource = await data.search.searchSource.create();
 
+      searchSource.setDataView(dataView);
       searchSource
-        .setField('index', dataView)
         .setField('filter', filters)
         .setField('query', query)
         .setField('fields', selectedFields.length ? selectedFields.map((f) => f.name) : [''])
@@ -294,7 +294,7 @@ export const SearchExamplesApp = ({
         const ac = data.search.aggs.createAggConfigs(dataView, aggDef);
         searchSource.setField('aggs', ac);
       }
-      setRequest(searchSource.getSearchRequestBody());
+      setRequest(await searchSource.getSearchRequestBody());
       setRawResponse({});
       setWarningContents([]);
       const abortController = new AbortController();

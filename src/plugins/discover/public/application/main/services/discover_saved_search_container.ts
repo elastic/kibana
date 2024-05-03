@@ -114,7 +114,7 @@ export interface DiscoverSavedSearchContainer {
    * Updates the current state of the saved search
    * @param params
    */
-  update: (params: UpdateParams) => SavedSearch;
+  update: (params: UpdateParams) => Promise<SavedSearch>;
   /**
    * Updates the current state of the saved search with new time range and refresh interval
    */
@@ -158,10 +158,10 @@ export function getSavedSearchContainer({
 
   const newSavedSearch = async (nextDataView: DataView | undefined) => {
     addLog('[savedSearch] new', { nextDataView });
-    const dataView = nextDataView ?? getState().searchSource.getField('index');
+    const dataView = nextDataView ?? (await getState().searchSource.getDataView());
     const nextSavedSearch = services.savedSearch.getNew();
-    nextSavedSearch.searchSource.setField('index', dataView);
-    const newAppState = getDefaultAppState(nextSavedSearch, services);
+    await nextSavedSearch.searchSource.setDataView(dataView);
+    const newAppState = await getDefaultAppState(nextSavedSearch, services);
     const nextSavedSearchToSet = updateSavedSearch({
       savedSearch: { ...nextSavedSearch },
       dataView,
@@ -208,13 +208,13 @@ export function getSavedSearchContainer({
     return nextSavedSearch;
   };
 
-  const update = ({ nextDataView, nextState, useFilterAndQueryServices }: UpdateParams) => {
+  const update = async ({ nextDataView, nextState, useFilterAndQueryServices }: UpdateParams) => {
     addLog('[savedSearch] update', { nextDataView, nextState });
 
     const previousSavedSearch = getState();
     const dataView = nextDataView
       ? nextDataView
-      : previousSavedSearch.searchSource.getField('index')!;
+      : await previousSavedSearch.searchSource.getDataView()!;
 
     const nextSavedSearch = updateSavedSearch({
       savedSearch: { ...previousSavedSearch },
@@ -269,10 +269,10 @@ export function getSavedSearchContainer({
 
     const loadedSavedSearch = await services.savedSearch.get(id);
 
-    if (!loadedSavedSearch.searchSource.getField('index') && dataView) {
-      loadedSavedSearch.searchSource.setField('index', dataView);
+    if (!loadedSavedSearch.searchSource.getDataViewLazy() && dataView) {
+      await loadedSavedSearch.searchSource.setDataView(dataView);
     }
-    restoreStateFromSavedSearch({
+    await restoreStateFromSavedSearch({
       savedSearch: loadedSavedSearch,
       timefilter: services.timefilter,
     });
@@ -308,9 +308,9 @@ export function copySavedSearch(savedSearch: SavedSearch): SavedSearch {
   };
 }
 
-export function getDefaultAppState(savedSearch: SavedSearch, services: DiscoverServices) {
+export async function getDefaultAppState(savedSearch: SavedSearch, services: DiscoverServices) {
   return handleSourceColumnState(
-    getStateDefaults({
+    await getStateDefaults({
       savedSearch,
       services,
     }),
@@ -412,7 +412,7 @@ function getSearchSourceFieldValueForComparison(
   if (searchSourceFieldName === 'index') {
     const query = searchSource.getField('query');
     // ad-hoc data view id can change, so we rather compare the ES|QL query itself here
-    return query && 'esql' in query ? query.esql : searchSource.getField('index')?.id;
+    return query && 'esql' in query ? query.esql : searchSource.getDataViewLazy()?.id;
   }
 
   if (searchSourceFieldName === 'filter') {

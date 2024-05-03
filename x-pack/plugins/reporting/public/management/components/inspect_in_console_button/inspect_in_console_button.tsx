@@ -34,7 +34,7 @@ const InspectInConsoleButtonUi: React.FC<PropsUI> = (props) => {
 
   const handleDevToolsLinkClick = useCallback(async () => {
     const searchSource = await searchSourceStart.create(serializedSearchSource);
-    const index = searchSource.getField('index');
+    const index = searchSource.getDataViewLazy();
     if (!index) {
       throw new Error(`The search must have a reference to an index pattern!`);
     }

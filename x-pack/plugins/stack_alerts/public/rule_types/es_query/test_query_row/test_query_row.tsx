@@ -27,7 +27,7 @@ export interface TestQueryRowProps {
     isGrouped: boolean;
     timeWindow: string;
   }>;
-  copyQuery?: () => string;
+  copyQuery?: () => Promise<string>;
   hasValidationErrors: boolean;
   showTable?: boolean;
 }
@@ -85,8 +85,8 @@ export const TestQueryRow: React.FC<TestQueryRowProps> = ({
                   color="primary"
                   iconSide="left"
                   iconType="copyClipboard"
-                  onClick={() => {
-                    const copied = copyToClipboard(copyQuery());
+                  onClick={async () => {
+                    const copied = copyToClipboard(await copyQuery());
                     if (copied) {
                       setCopiedMessage(
                         <FormattedMessage

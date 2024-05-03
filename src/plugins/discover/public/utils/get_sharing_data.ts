@@ -38,7 +38,7 @@ export async function getSharingData(
 ) {
   const { uiSettings, data } = services;
   const searchSource = currentSearchSource.createCopy();
-  const index = searchSource.getField('index')!;
+  const index = (await searchSource.getDataView())!;
 
   searchSource.setField(
     'sort',

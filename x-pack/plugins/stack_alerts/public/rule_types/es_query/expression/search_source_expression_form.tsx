@@ -95,7 +95,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         setParam('searchConfiguration', searchSource.getSerializedFields());
 
         if (action.type === 'index') {
-          setParam('timeField', searchSource.getField('index')?.timeFieldName);
+          setParam('timeField', searchSource.getDataViewLazy()?.timeFieldName);
         }
       } else {
         setParam(action.type, action.payload);
@@ -103,7 +103,8 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
       return { ...currentState, [action.type]: action.payload };
     },
     {
-      index: searchSource.getField('index'),
+      // todo this is definitely broken
+      index: await searchSource.getDataView(),
       query: searchSource.getField('query')! as Query,
       filter: mapAndFlattenFilters(searchSource.getField('filter') as Filter[]),
       threshold: ruleParams.threshold ?? DEFAULT_VALUES.THRESHOLD,
@@ -246,9 +247,9 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
 
   const timeWindow = `${ruleConfiguration.timeWindowSize}${ruleConfiguration.timeWindowUnit}`;
 
-  const createTestSearchSource = useCallback(() => {
+  const createTestSearchSource = useCallback(async () => {
     const testSearchSource = searchSource.createCopy();
-    const timeFilter = getTime(searchSource.getField('index')!, {
+    const timeFilter = getTime((await searchSource.getDataView())!, {
       from: `now-${timeWindow}`,
       to: 'now',
     });
@@ -285,15 +286,15 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
     ruleParams.thresholdComparator,
   ]);
 
-  const onCopyQuery = useCallback(() => {
-    const testSearchSource = createTestSearchSource();
-    return JSON.stringify(testSearchSource.getSearchRequestBody(), null, 2);
+  const onCopyQuery = useCallback(async () => {
+    const testSearchSource = await createTestSearchSource();
+    return JSON.stringify(await testSearchSource.getSearchRequestBody(), null, 2);
   }, [createTestSearchSource]);
 
   const onTestFetch = useCallback(async () => {
     const isGroupAgg = isGroupAggregation(ruleParams.termField);
     const isCountAgg = isCountAggregation(ruleParams.aggType);
-    const testSearchSource = createTestSearchSource();
+    const testSearchSource = await createTestSearchSource();
     const { rawResponse } = await lastValueFrom(testSearchSource.fetch$());
     return {
       testResults: parseAggregationResults({ isCountAgg, isGroupAgg, esResult: rawResponse }),
