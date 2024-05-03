@@ -93,7 +93,7 @@ Object {
       "legendPosition": "right",
       "legendSize": "medium",
       "legendStats": Array [
-        "values",
+        "value",
       ],
       "maxLegendLines": 2,
       "metrics": Array [
