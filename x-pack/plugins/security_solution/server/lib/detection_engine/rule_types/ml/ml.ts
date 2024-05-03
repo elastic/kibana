@@ -8,6 +8,7 @@
 /* eslint require-atomic-updates: ["error", { "allowProperties": true }] */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import type { SuppressedAlertService } from '@kbn/rule-registry-plugin/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type {
   AlertInstanceContext,
@@ -17,11 +18,12 @@ import type {
 import type { ListClient } from '@kbn/lists-plugin/server';
 import type { Filter } from '@kbn/es-query';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
+import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import type { CompleteRule, MachineLearningRuleParams } from '../../rule_schema';
 import { bulkCreateMlSignals } from './bulk_create_ml_signals';
 import { filterEventsAgainstList } from '../utils/large_list_filters/filter_events_against_list';
 import { findMlSignals } from './find_ml_signals';
-import type { BulkCreate, RuleRangeTuple, WrapHits } from '../types';
+import type { BulkCreate, RuleRangeTuple, WrapHits, WrapSuppressedHits } from '../types';
 import {
   addToSearchAfterReturn,
   createErrorsFromShard,
@@ -45,6 +47,11 @@ interface MachineLearningRuleExecutorParams {
   wrapHits: WrapHits;
   exceptionFilter: Filter | undefined;
   unprocessedExceptions: ExceptionListItemSchema[];
+  wrapSuppressedHits: WrapSuppressedHits;
+  alertTimestampOverride: Date | undefined;
+  alertWithSuppression: SuppressedAlertService;
+  isAlertSuppressionActive: boolean;
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 export const mlExecutor = async ({
