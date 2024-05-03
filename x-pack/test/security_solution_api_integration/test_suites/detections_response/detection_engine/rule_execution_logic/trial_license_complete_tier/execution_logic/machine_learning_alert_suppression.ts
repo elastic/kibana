@@ -44,7 +44,7 @@ export default ({ getService }: FtrProviderContext) => {
   };
   let ruleProps: MachineLearningRuleCreateProps;
 
-  // TODO: feature flag
+  // The tests described in this file rely on the 'alertSuppressionForMachineLearningRuleEnabled' feature flag
   describe('@ess @serverless @serverlessQA Machine Learning Detection Rule - Alert Suppression', () => {
     describe('with anomalies available to be alerted upon', () => {
       before(async () => {
