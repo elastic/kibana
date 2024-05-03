@@ -476,6 +476,7 @@ enabled:
   - x-pack/performance/journeys_e2e/infra_hosts_view.ts
   - x-pack/test/custom_branding/config.ts
   - x-pack/test/profiling_api_integration/cloud/config.ts
+  - x-pack/test/api_integration/apis/all_deployments/config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/actions/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/actions/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/alerts/basic_license_essentials_tier/configs/ess.config.ts

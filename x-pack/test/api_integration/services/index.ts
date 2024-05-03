@@ -24,6 +24,7 @@ import { IngestPipelinesProvider } from './ingest_pipelines';
 import { IndexManagementProvider } from './index_management';
 import { DataViewApiProvider } from './data_view_api';
 import { SloApiProvider } from './slo';
+import { AlertingApiProvider } from './alerting_api';
 import { SecuritySolutionApiProvider } from './security_solution_api.gen';
 
 export const services = {
@@ -44,5 +45,6 @@ export const services = {
   ingestPipelines: IngestPipelinesProvider,
   indexManagement: IndexManagementProvider,
   slo: SloApiProvider,
+  alertingApi: AlertingApiProvider,
   securitySolutionApi: SecuritySolutionApiProvider,
 };
