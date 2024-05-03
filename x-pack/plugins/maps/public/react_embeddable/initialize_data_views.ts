@@ -7,6 +7,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { DataView } from '@kbn/data-plugin/common';
+import { isEqual } from 'lodash';
 import { LayerDescriptor } from '../../common';
 import { replaceLayerList, updateLayerDescriptor } from '../actions';
 import { MapStore } from '../reducers/store';
@@ -20,6 +21,12 @@ export function initializeDataViews(store: MapStore) {
 
   async function updateDataViews() {
     const queryableDataViewIds = getQueryableUniqueIndexPatternIds(store.getState());
+    const prevDataViewIds = dataViews$.getValue()?.map((dataView) => {
+      return dataView.id;
+    });
+    if (isEqual(queryableDataViewIds.sort(), prevDataViewIds?.sort())) {
+      return;
+    }
     const currentDataViewsFetchToken = Symbol();
     dataViewsFetchToken = currentDataViewsFetchToken;
     const dataViews = await getIndexPatternsFromIds(queryableDataViewIds);
