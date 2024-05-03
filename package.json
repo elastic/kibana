@@ -1323,6 +1323,7 @@
     "@kbn/jest-serializers": "link:packages/kbn-jest-serializers",
     "@kbn/journeys": "link:packages/kbn-journeys",
     "@kbn/json-ast": "link:packages/kbn-json-ast",
+    "@kbn/json-view": "link:packages/kbn-json-view",
     "@kbn/kibana-manifest-schema": "link:packages/kbn-kibana-manifest-schema",
     "@kbn/lint-packages-cli": "link:packages/kbn-lint-packages-cli",
     "@kbn/lint-ts-projects-cli": "link:packages/kbn-lint-ts-projects-cli",

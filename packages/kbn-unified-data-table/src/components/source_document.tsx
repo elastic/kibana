@@ -55,6 +55,8 @@ export function SourceDocument({
         maxEntries
       )
     : formatHit(row, dataView, shouldShowFieldHandler, maxEntries, fieldFormats);
+  
+  console.dir(pairs);
 
   return (
     <EuiDescriptionList
