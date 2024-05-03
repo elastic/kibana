@@ -90,7 +90,7 @@ export const getChangePointChartEmbeddableFactory = (
         serialize: serializeTimeRange,
       } = initializeTimeRange(state);
 
-      const { titleComparators, serializeTitles } = initializeTitles(state);
+      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
 
       const {
         changePointControlsApi,
@@ -108,6 +108,7 @@ export const getChangePointChartEmbeddableFactory = (
       const api = buildApi(
         {
           ...timeRangeApi,
+          ...titlesApi,
           ...changePointControlsApi,
           getTypeDisplayName: () =>
             i18n.translate('xpack.aiops.changePointDetection.typeDisplayName', {
