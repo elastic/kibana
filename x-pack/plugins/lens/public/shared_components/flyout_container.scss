@@ -5,7 +5,6 @@
   @include euiFlyout;
   // But with custom positioning to keep it within the sidebar contents
   animation: euiFlyoutAnimation $euiAnimSpeedNormal $euiAnimSlightResistance;
-  left: 0;
   max-width: none !important;
   z-index: $euiZContentMenu;
 
