@@ -124,7 +124,7 @@ function getSavedSearchSource(savedSearch: SavedSearch) {
  * Extract query data from the saved search object
  * with overrides from the provided query data and/or filters
  */
-export function getEsQueryFromSavedSearch({
+export async function getEsQueryFromSavedSearch({
   dataView,
   uiSettings,
   savedSearch,
@@ -154,7 +154,8 @@ export function getEsQueryFromSavedSearch({
     // Flattened query from search source may contain a clause that narrows the time range
     // which might interfere with global time pickers so we need to remove
     const savedQuery =
-      cloneDeep(savedSearch.searchSource.getSearchRequestBody()?.query) ?? getDefaultDSLQuery();
+      cloneDeep((await savedSearch.searchSource.getSearchRequestBody())?.query) ??
+      getDefaultDSLQuery();
     const timeField = savedSearch.searchSource.getField('index')?.timeFieldName;
 
     if (Array.isArray(savedQuery.bool.filter) && timeField !== undefined) {

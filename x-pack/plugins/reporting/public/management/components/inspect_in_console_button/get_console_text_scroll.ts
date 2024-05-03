@@ -10,13 +10,13 @@ import { i18n } from '@kbn/i18n';
 import { getQueryFromCsvJob } from '@kbn/reporting-export-types-csv-common';
 import type { ClientConfigType } from '@kbn/reporting-public';
 
-export const getScrollApiTextForConsole = (
+export const getScrollApiTextForConsole = async (
   jobTitle: string,
   indexPattern: string,
   searchSource: ISearchSource,
   csvConfig: ClientConfigType['csv']
 ) => {
-  const queryInfo = getQueryFromCsvJob(searchSource, csvConfig);
+  const queryInfo = await getQueryFromCsvJob(searchSource, csvConfig);
 
   // Part 1
   const scanRequest =

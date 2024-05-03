@@ -214,18 +214,18 @@ describe('getQueryFromSavedSearchObject()', () => {
 });
 
 describe('getEsQueryFromSavedSearch()', () => {
-  it('return undefined if saved search is not provided', () => {
+  it('return undefined if saved search is not provided', async () => {
     expect(
-      getEsQueryFromSavedSearch({
+      await getEsQueryFromSavedSearch({
         dataView: mockDataView,
         savedSearch: undefined,
         uiSettings: mockUiSettings,
       })
     ).toEqual(undefined);
   });
-  it('return search data from saved search if neither query nor filter is provided ', () => {
+  it('return search data from saved search if neither query nor filter is provided ', async () => {
     expect(
-      getEsQueryFromSavedSearch({
+      await getEsQueryFromSavedSearch({
         dataView: mockDataView,
         savedSearch: luceneSavedSearch,
         uiSettings: mockUiSettings,
@@ -271,9 +271,9 @@ describe('getEsQueryFromSavedSearch()', () => {
       searchString: 'responsetime > 49',
     });
   });
-  it('should override original saved search with the provided query ', () => {
+  it('should override original saved search with the provided query ', async () => {
     expect(
-      getEsQueryFromSavedSearch({
+      await getEsQueryFromSavedSearch({
         dataView: mockDataView,
         savedSearch: luceneSavedSearch,
         uiSettings: mockUiSettings,
@@ -321,9 +321,9 @@ describe('getEsQueryFromSavedSearch()', () => {
     });
   });
 
-  it('should override original saved search with the provided filters ', () => {
+  it('should override original saved search with the provided filters ', async () => {
     expect(
-      getEsQueryFromSavedSearch({
+      await getEsQueryFromSavedSearch({
         dataView: mockDataView,
         savedSearch: luceneSavedSearch,
         uiSettings: mockUiSettings,

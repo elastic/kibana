@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { getQueryFromCsvJob } from '@kbn/reporting-export-types-csv-common';
 import type { ClientConfigType } from '@kbn/reporting-public';
 
-export const getPitApiTextForConsole = (
+export const getPitApiTextForConsole = async (
   jobTitle: string,
   indexPattern: string,
   searchSource: ISearchSource,
@@ -23,7 +23,7 @@ export const getPitApiTextForConsole = (
       description: `This gets used in place of an ID string that is sent in a request body.`,
     }
   );
-  const queryInfo = getQueryFromCsvJob(searchSource, csvConfig, examplePitId);
+  const queryInfo = await getQueryFromCsvJob(searchSource, csvConfig, examplePitId);
 
   // Part 1
   const pitRequest =

@@ -67,7 +67,7 @@ describe('getQueryFromCsvJob', () => {
     };
 
     const searchSource = await searchSourceStart.create(serializedSearchSource);
-    const query = getQueryFromCsvJob(searchSource, config);
+    const query = await getQueryFromCsvJob(searchSource, config);
 
     // NOTE the mocked search source service is not returning assertable info
     expect(query).toMatchInlineSnapshot(`

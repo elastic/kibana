@@ -91,7 +91,7 @@ describe('fetchSearchSourceQuery', () => {
         dateStart,
         dateEnd
       );
-      const searchRequest = searchSource.getSearchRequestBody();
+      const searchRequest = await searchSource.getSearchRequestBody();
       expect(filterToExcludeHitsFromPreviousRun).toBe(null);
       expect(searchRequest.size).toMatchInlineSnapshot(`100`);
       expect(searchRequest.query).toMatchInlineSnapshot(`
@@ -131,7 +131,7 @@ describe('fetchSearchSourceQuery', () => {
         dateStart,
         dateEnd
       );
-      const searchRequest = searchSource.getSearchRequestBody();
+      const searchRequest = await searchSource.getSearchRequestBody();
       expect(searchRequest.track_total_hits).toBe(true);
       expect(filterToExcludeHitsFromPreviousRun).toMatchInlineSnapshot(`
         Object {
@@ -196,7 +196,7 @@ describe('fetchSearchSourceQuery', () => {
         dateStart,
         dateEnd
       );
-      const searchRequest = searchSource.getSearchRequestBody();
+      const searchRequest = await searchSource.getSearchRequestBody();
       expect(filterToExcludeHitsFromPreviousRun).toBe(null);
       expect(searchRequest.size).toMatchInlineSnapshot(`100`);
       expect(searchRequest.query).toMatchInlineSnapshot(`
@@ -236,7 +236,7 @@ describe('fetchSearchSourceQuery', () => {
         dateStart,
         dateEnd
       );
-      const searchRequest = searchSource.getSearchRequestBody();
+      const searchRequest = await searchSource.getSearchRequestBody();
       expect(filterToExcludeHitsFromPreviousRun).toBe(null);
       expect(searchRequest.size).toMatchInlineSnapshot(`100`);
       expect(searchRequest.query).toMatchInlineSnapshot(`
@@ -282,7 +282,7 @@ describe('fetchSearchSourceQuery', () => {
         dateStart,
         dateEnd
       );
-      const searchRequest = searchSource.getSearchRequestBody();
+      const searchRequest = await searchSource.getSearchRequestBody();
       expect(searchRequest.track_total_hits).toBeUndefined();
       expect(searchRequest.size).toMatchInlineSnapshot(`0`);
       expect(searchRequest.query).toMatchInlineSnapshot(`
