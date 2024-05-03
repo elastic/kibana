@@ -8,7 +8,6 @@
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { jobsApiProvider } from '../../application/services/ml_api_service/jobs';
 import { AnomalySwimlaneInitializer } from './anomaly_swimlane_initializer';
@@ -17,7 +16,6 @@ import type { AnomalySwimLaneEmbeddableState, AnomalySwimlaneEmbeddableUserInput
 
 export async function resolveAnomalySwimlaneUserInput(
   coreStart: CoreStart,
-  dataViews: DataViewsContract,
   input?: Partial<AnomalySwimLaneEmbeddableState>
 ): Promise<AnomalySwimlaneEmbeddableUserInput> {
   const { http, overlays, ...startServices } = coreStart;
