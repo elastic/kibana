@@ -439,6 +439,51 @@ describe('client', () => {
       });
 
       describe('customFields', () => {
+        it('throws when there are no customFields in configure and template has customField in the request', async () => {
+          clientArgs.services.caseConfigureService.get.mockResolvedValue({
+            // @ts-ignore: these are all the attributes needed for the test
+            attributes: {
+              templates: [
+                {
+                  key: 'template_1',
+                  name: 'template 1',
+                  description: 'this is test description',
+                  caseFields: null,
+                },
+              ],
+            },
+          });
+
+          await expect(
+            update(
+              'test-id',
+              {
+                version: 'test-version',
+                templates: [
+                  {
+                    key: 'template_1',
+                    name: 'template 1',
+                    description: 'this is test description',
+                    caseFields: {
+                      customFields: [
+                        {
+                          key: 'custom_field_key_1',
+                          type: CustomFieldTypes.TEXT,
+                          value: 'custom field value 1',
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+              clientArgs,
+              casesClientInternal
+            )
+          ).rejects.toThrow(
+            'Failed to get patch configure in route: Error: No custom fields configured.'
+          );
+        });
+
         it('throws when template has duplicated custom field keys in the request', async () => {
           clientArgs.services.caseConfigureService.get.mockResolvedValue({
             // @ts-ignore: these are all the attributes needed for the test
@@ -502,51 +547,6 @@ describe('client', () => {
             )
           ).rejects.toThrow(
             `Failed to get patch configure in route: Error: Invalid duplicated templates[0]'s customFields keys in request: custom_field_key_1`
-          );
-        });
-
-        it('throws when there are no customFields in configure and template has customField in the request', async () => {
-          clientArgs.services.caseConfigureService.get.mockResolvedValue({
-            // @ts-ignore: these are all the attributes needed for the test
-            attributes: {
-              templates: [
-                {
-                  key: 'template_1',
-                  name: 'template 1',
-                  description: 'this is test description',
-                  caseFields: null,
-                },
-              ],
-            },
-          });
-
-          await expect(
-            update(
-              'test-id',
-              {
-                version: 'test-version',
-                templates: [
-                  {
-                    key: 'template_1',
-                    name: 'template 1',
-                    description: 'this is test description',
-                    caseFields: {
-                      customFields: [
-                        {
-                          key: 'custom_field_key_1',
-                          type: CustomFieldTypes.TEXT,
-                          value: 'custom field value 1',
-                        },
-                      ],
-                    },
-                  },
-                ],
-              },
-              clientArgs,
-              casesClientInternal
-            )
-          ).rejects.toThrow(
-            'Failed to get patch configure in route: Error: No custom fields configured.'
           );
         });
 
@@ -674,7 +674,7 @@ describe('client', () => {
       });
 
       describe('assignees', () => {
-        it('should throw if the user does not have the correct license while adding assignees in template ', async () => {
+        it('throws if the user does not have the correct license while adding assignees in template ', async () => {
           clientArgs.services.licensingService.isAtLeastPlatinum.mockResolvedValue(false);
           clientArgs.services.caseConfigureService.get.mockResolvedValue({
             // @ts-ignore: these are all the attributes needed for the test
@@ -829,6 +829,36 @@ describe('client', () => {
       });
 
       describe('customFields', () => {
+        it('throws when there are no customFields in configure and template has customField in the request', async () => {
+          await expect(
+            create(
+              {
+                ...baseRequest,
+                templates: [
+                  {
+                    key: 'template_1',
+                    name: 'template 1',
+                    description: 'this is test description',
+                    caseFields: {
+                      customFields: [
+                        {
+                          key: 'custom_field_key_1',
+                          type: CustomFieldTypes.TEXT,
+                          value: 'custom field value 1',
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+              clientArgs,
+              casesClientInternal
+            )
+          ).rejects.toThrow(
+            'Failed to create case configuration: Error: Cannot create template with custom fields as there are no custom fields in configuration'
+          );
+        });
+
         it('throws when template has duplicated custom field keys in the request', async () => {
           await expect(
             create(
@@ -869,36 +899,6 @@ describe('client', () => {
             )
           ).rejects.toThrow(
             `Failed to create case configuration: Error: Invalid duplicated templates[0]'s customFields keys in request: custom_field_key_1`
-          );
-        });
-
-        it('throws when there are no customFields in configure and template has customField in the request', async () => {
-          await expect(
-            create(
-              {
-                ...baseRequest,
-                templates: [
-                  {
-                    key: 'template_1',
-                    name: 'template 1',
-                    description: 'this is test description',
-                    caseFields: {
-                      customFields: [
-                        {
-                          key: 'custom_field_key_1',
-                          type: CustomFieldTypes.TEXT,
-                          value: 'custom field value 1',
-                        },
-                      ],
-                    },
-                  },
-                ],
-              },
-              clientArgs,
-              casesClientInternal
-            )
-          ).rejects.toThrow(
-            'Failed to create case configuration: Error: Cannot create template with custom fields as there are no custom fields in configuration'
           );
         });
 
@@ -980,7 +980,7 @@ describe('client', () => {
       });
 
       describe('assignees', () => {
-        it('should throw if the user does not have the correct license while adding assignees in template ', async () => {
+        it('throws if the user does not have the correct license while adding assignees in template ', async () => {
           clientArgs.services.licensingService.isAtLeastPlatinum.mockResolvedValue(false);
 
           await expect(

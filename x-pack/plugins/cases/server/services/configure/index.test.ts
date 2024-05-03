@@ -104,7 +104,7 @@ const createConfigUpdateParams = (connector?: CaseConnector): Partial<Configurat
 });
 
 const createConfigPostParams = (connector: CaseConnector): ConfigurationAttributes => ({
-  ...(basicConfigFields as ConfigurationAttributes),
+  ...basicConfigFields,
   connector,
 });
 
