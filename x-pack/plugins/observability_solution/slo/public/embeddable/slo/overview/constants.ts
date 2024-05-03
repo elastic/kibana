@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { useIsEsqlRuleTypeEnabled } from './use_is_esql_rule_type_enabled';
+export const SLO_OVERVIEW_EMBEDDABLE_ID = 'SLO_EMBEDDABLE';
+export const ADD_SLO_OVERVIEW_ACTION_ID = 'CREATE_SLO_OVERVIEW_EMBEDDABLE';
