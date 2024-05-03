@@ -479,6 +479,11 @@ export class ControlGroupContainer extends Container<
     };
   }
 
+  public removePanel(id: string): void {
+    /** TODO: This is a temporary wrapper until the control group refactor is complete */
+    super.removeEmbeddable(id);
+  }
+
   protected onRemoveEmbeddable(idToRemove: string) {
     const newPanels = super.onRemoveEmbeddable(idToRemove) as ControlsPanels;
     const childOrderCache = cachedChildEmbeddableOrder(this.getInput().panels);

@@ -6,15 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { EuiFormControlLayout, EuiFormRow, htmlIdGenerator } from '@elastic/eui';
+import { EuiFormControlLayout, EuiFormLabel, htmlIdGenerator } from '@elastic/eui';
 // import { ControlError } from '@kbn/controls-plugin/public/control_group/component/control_error_component';
-import { i18n } from '@kbn/i18n';
 import { isPromise } from '@kbn/std';
 
-import {
-  PresentationPanelInternalProps,
-  PresentationPanelProps,
-} from '@kbn/presentation-panel-plugin/public/panel_component/types';
+import { PresentationPanelProps } from '@kbn/presentation-panel-plugin/public/panel_component/types';
 import {
   apiHasParentApi,
   apiPublishesViewMode,
@@ -81,21 +77,7 @@ export const ControlPanel = <State extends object>({
 
   const ControlComponent = value?.component;
 
-  return blockingError || loading || !ControlComponent ? (
-    <EuiFormControlLayout>
-      <>{error}</>
-      {/* <ControlError
-        error={
-          blockingError ??
-          new Error(
-            i18n.translate('controlPanel.error.errorWhenLoadingControl', {
-              defaultMessage: 'An error occurred while loading this control.',
-            })
-          )
-        }
-      /> */}
-    </EuiFormControlLayout>
-  ) : (
+  return (
     <FloatingActions
       // className={classNames({
       //   'controlFrameFloatingActions--twoLine': usingTwoLineLayout,
@@ -106,20 +88,33 @@ export const ControlPanel = <State extends object>({
       disabledActions={[]}
       isEnabled={true}
     >
-      <EuiFormRow data-test-subj="control-frame-title" fullWidth label={'here'}>
+      {blockingError || !ControlComponent ? (
+        <EuiFormControlLayout>
+          <>{error}</>
+          {/* <ControlError
+        error={
+          blockingError ??
+          new Error(
+            i18n.translate('controlPanel.error.errorWhenLoadingControl', {
+              defaultMessage: 'An error occurred while loading this control.',
+            })
+          )
+        }
+      /> */}
+        </EuiFormControlLayout>
+      ) : (
         <EuiFormControlLayout
           fullWidth
-          prepend={
-            <>
-              {/* {(embeddable && customPrepend) ?? null}
-              {renderEmbeddablePrepend()} */}
-              prepend
-            </>
-          }
+          isLoading={loading || dataLoading}
+          prepend={<EuiFormLabel>{panelTitle || defaultPanelTitle}</EuiFormLabel>}
         >
-          <ControlComponent />
+          <ControlComponent
+            ref={(newApi) => {
+              if (newApi && !api) setApi(newApi);
+            }}
+          />
         </EuiFormControlLayout>
-      </EuiFormRow>
+      )}
     </FloatingActions>
   );
 };

@@ -15,7 +15,7 @@ import React, { useEffect, useImperativeHandle, useMemo, useRef } from 'react';
 import { ControlApiRegistration, ControlGroupApi, DefaultControlApi } from './types';
 import { getControlFactory } from './control_factory_registry';
 import { startTrackingEmbeddableUnsavedChanges } from '@kbn/embeddable-plugin/public';
-import { combineLatest, debounceTime, skip } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, skip } from 'rxjs';
 import { ComparatorDefinition, StateComparators } from '@kbn/presentation-publishing';
 import { ControlPanel } from './control_panel';
 
@@ -56,6 +56,8 @@ export const ControlRenderer = <StateType extends object = object>({
           const { unsavedChanges, resetUnsavedChanges, cleanup } =
             startTrackingEmbeddableUnsavedChanges(uuid, parentApi, comparators, state);
 
+          const defaultPanelTitle = new BehaviorSubject<string | undefined>('TEST');
+
           if (onAnyStateChange) {
             /**
              * To avoid unnecessary re-renders, only subscribe to the comparator publishing subjects if
@@ -77,6 +79,7 @@ export const ControlRenderer = <StateType extends object = object>({
             unsavedChanges,
             resetUnsavedChanges,
             type: factory.type,
+            defaultPanelTitle,
           };
           cleanupFunction.current = () => cleanup();
           return fullApi;

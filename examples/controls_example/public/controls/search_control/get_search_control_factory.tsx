@@ -10,6 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { ControlFactory } from '../types';
 import { SearchControlState, SEARCH_CONTROL_TYPE } from './types';
+import { EuiFieldText } from '@elastic/eui';
 
 export const getSearchEmbeddableFactory = (): ControlFactory<SearchControlState> => {
   return {
@@ -20,7 +21,19 @@ export const getSearchEmbeddableFactory = (): ControlFactory<SearchControlState>
     getSupportedFieldTypes: () => ['string'],
     buildControl: (initialState, buildApi, uuid, parentApi) => {
       const api = buildApi({}, []);
-      return { api, Component: () => <>TEST</> };
+      console.log('api', api);
+      return {
+        api,
+        Component: () => (
+          <EuiFieldText
+            type="text"
+            controlOnly
+            className="euiFieldText--inGroup"
+            id={uuid}
+            fullWidth
+          />
+        ),
+      };
     },
   };
 };

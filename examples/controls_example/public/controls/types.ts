@@ -55,7 +55,6 @@ export type ControlApiRegistration<State extends object = object> = Omit<
   DefaultControlApi<State>,
   'uuid' | 'parent' | 'type' | 'unsavedChanges' | 'resetUnsavedChanges'
 >;
-
 export interface ControlFactory<State extends object = object> {
   type: string;
   getIconType: () => string;

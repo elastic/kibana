@@ -58,6 +58,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
         })
         .sort((a, b) => (a.order || 0) - (b.order || 0));
 
+      console.log('actions', actions);
       if (!mounted) return;
       if (actions.length > 0) {
         setFloatingActions(
