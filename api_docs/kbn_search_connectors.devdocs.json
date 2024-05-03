@@ -214,7 +214,7 @@
         "label": "ConnectorConfigurationComponent",
         "description": [],
         "signature": [
-          "({ children, connector, hasPlatinumLicense, isLoading, saveConfig, subscriptionLink, stackManagementLink, }: React.PropsWithChildren<ConnectorConfigurationProps>) => JSX.Element"
+          "({ children, connector, hasPlatinumLicense, isLoading, saveConfig, subscriptionLink, stackManagementLink, }: React.PropsWithChildren<React.PropsWithChildren<ConnectorConfigurationProps>>) => JSX.Element"
         ],
         "path": "packages/kbn-search-connectors/components/configuration/connector_configuration.tsx",
         "deprecated": false,
@@ -228,7 +228,7 @@
             "label": "{\n  children,\n  connector,\n  hasPlatinumLicense,\n  isLoading,\n  saveConfig,\n  subscriptionLink,\n  stackManagementLink,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<ConnectorConfigurationProps>"
+              "React.PropsWithChildren<React.PropsWithChildren<ConnectorConfigurationProps>>"
             ],
             "path": "packages/kbn-search-connectors/components/configuration/connector_configuration.tsx",
             "deprecated": false,
@@ -5303,7 +5303,7 @@
             "label": "rule",
             "description": [],
             "signature": [
-              "\"contains\" | \"<\" | \">\" | \"equals\" | \"regex\" | \"ends_with\" | \"starts_with\""
+              "\"<\" | \">\" | \"contains\" | \"equals\" | \"regex\" | \"ends_with\" | \"starts_with\""
             ],
             "path": "packages/kbn-search-connectors/types/connectors.ts",
             "deprecated": false,
@@ -6903,7 +6903,7 @@
         "label": "FilteringRuleRule",
         "description": [],
         "signature": [
-          "\"contains\" | \"<\" | \">\" | \"equals\" | \"regex\" | \"ends_with\" | \"starts_with\""
+          "\"<\" | \">\" | \"contains\" | \"equals\" | \"regex\" | \"ends_with\" | \"starts_with\""
         ],
         "path": "packages/kbn-search-connectors/types/connectors.ts",
         "deprecated": false,

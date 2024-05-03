@@ -10,8 +10,10 @@ import {
   DENSE_PASSAGE_FIRST_SINGLE_INDEX_FIELD_CAPS,
   DENSE_VECTOR_DOCUMENT_FIRST,
   DENSE_VECTOR_DOCUMENT_FIRST_FIELD_CAPS,
+  ELSER_PASSAGE_CHUNKED,
   ELSER_PASSAGE_CHUNKED_TWO_INDICES,
   ELSER_PASSAGE_CHUNKED_TWO_INDICES_DOCS,
+  SPARSE_DOC_SINGLE_INDEX,
 } from '../../__mocks__/fetch_query_source_fields.mock';
 import { parseFieldsCapabilities } from './fetch_query_source_fields';
 
@@ -46,6 +48,7 @@ describe('fetch_query_source_fields', () => {
               indices: ['workplace_index'],
             },
           ],
+          skipped_fields: 8,
           source_fields: ['metadata.summary', 'metadata.rolePermissions', 'text', 'metadata.name'],
         },
         workplace_index2: {
@@ -56,6 +59,7 @@ describe('fetch_query_source_fields', () => {
             'metadata.name',
           ],
           dense_vector_query_fields: [],
+          skipped_fields: 8,
           elser_query_fields: [
             {
               field: 'content_vector.tokens',
@@ -108,6 +112,7 @@ describe('fetch_query_source_fields', () => {
             },
           ],
           elser_query_fields: [],
+          skipped_fields: 30,
           source_fields: [
             'page_content_key',
             'title',
@@ -127,7 +132,34 @@ describe('fetch_query_source_fields', () => {
       });
     });
 
+    it('sparse vector passage first - should handle sparse_vector type fields', () => {
+      expect(
+        parseFieldsCapabilities(ELSER_PASSAGE_CHUNKED, [
+          {
+            index: 'search-nethys',
+            doc: SPARSE_DOC_SINGLE_INDEX,
+          },
+        ])
+      ).toEqual({
+        'search-nethys': {
+          bm25_query_fields: ['body_content', 'headings', 'title'],
+          dense_vector_query_fields: [],
+          elser_query_fields: [
+            {
+              field: 'ml.inference.body_content_expanded.predicted_value',
+              indices: ['search-nethys'],
+              model_id: '.elser_model_2_linux-x86_64',
+              nested: false,
+            },
+          ],
+          source_fields: ['body_content', 'headings', 'title'],
+          skipped_fields: 4,
+        },
+      });
+    });
+
     it('should return the correct fields for a document first index', () => {
+      // Skips the nested dense vector field.
       expect(
         parseFieldsCapabilities(DENSE_VECTOR_DOCUMENT_FIRST_FIELD_CAPS, [
           {
@@ -147,14 +179,7 @@ describe('fetch_query_source_fields', () => {
             'metadata.summary',
             'metadata.content',
           ],
-          dense_vector_query_fields: [
-            {
-              field: 'passages.vector.predicted_value',
-              model_id: '.multilingual-e5-small',
-              nested: true,
-              indices: ['workplace_index_nested'],
-            },
-          ],
+          dense_vector_query_fields: [],
           elser_query_fields: [],
           source_fields: [
             'metadata.category',
@@ -166,6 +191,7 @@ describe('fetch_query_source_fields', () => {
             'metadata.summary',
             'metadata.content',
           ],
+          skipped_fields: 18,
         },
       });
     });

@@ -126,6 +126,7 @@ const findTestUtils = (
               monitoring: match.monitoring,
               snooze_schedule: match.snooze_schedule,
               ...(hasActiveSnoozes && { active_snoozes: activeSnoozes }),
+              is_snoozed_until: null,
             }
           : {}),
       });

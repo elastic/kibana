@@ -593,6 +593,7 @@
     "is_managed",
     "name",
     "namespace",
+    "overrides",
     "package",
     "package.name",
     "package.title",
