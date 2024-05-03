@@ -85,11 +85,12 @@
     "@kbn/code-editor",
     "@kbn/managed-content-badge",
     "@kbn/presentation-publishing",
-    "@kbn/saved-objects-finder-plugin",
     "@kbn/esql-utils",
     "@kbn/apm-data-view",
     "@kbn/shared-ux-utility",
-    "@kbn/react-kibana-context-render"
+    "@kbn/react-kibana-context-render",
+    "@kbn/embeddable-enhanced-plugin",
+    "@kbn/presentation-containers"
   ],
   "exclude": [
     "target/**/*",
