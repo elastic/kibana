@@ -18,6 +18,6 @@
   "kbn_references": [
     "@kbn/observability-plugin",
     "@kbn/rule-data-utils",
-    "@kbn/alerting-comparators",
+    "@kbn/alerting-shared-types",
   ]
 }

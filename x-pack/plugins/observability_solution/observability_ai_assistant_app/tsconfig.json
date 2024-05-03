@@ -69,7 +69,7 @@
     "@kbn/task-manager-plugin",
     "@kbn/cloud-plugin",
     "@kbn/observability-plugin",
-    "@kbn/alerting-comparators"
+    "@kbn/alerting-shared-types"
   ],
   "exclude": ["target/**/*"]
 }
