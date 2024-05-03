@@ -133,8 +133,3 @@
     owner: vagrant
     group: vagrant
     recurse: yes
-
-# - name: link OpenSSL package
-#   become: yes
-#   shell:
-#     cmd: ldconfig /usr/local/lib64/
