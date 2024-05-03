@@ -90,7 +90,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
     setHasPackageListLoaded(true);
   }, []);
   const packageListRef = useRef<HTMLDivElement | null>(null);
-  const customCardsRef = useRef<HTMLDivElement | null>(null);
+  const formRef = useRef<HTMLDivElement | null>(null);
   const [integrationSearch, setIntegrationSearch] = useState(searchParams.get('search') ?? '');
   const selectedCategory: Category | null = searchParams.get('category') as Category | null;
 
@@ -100,7 +100,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
     }
 
     const timeout = setTimeout(() => {
-      customCardsRef.current?.scrollIntoView({
+      formRef.current?.scrollIntoView({
         behavior: 'smooth',
         block: 'end',
       });
@@ -144,7 +144,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
   const virtualSearchResults = useVirtualSearchResults();
 
   return (
-    <EuiPanel hasBorder paddingSize="xl">
+    <EuiPanel hasBorder paddingSize="xl" panelRef={formRef}>
       <TitleWithIcon
         iconType="indexRollupApp"
         title={i18n.translate(
@@ -158,10 +158,12 @@ export const OnboardingFlowForm: FunctionComponent = () => {
       <EuiSpacer size="m" />
       <EuiFlexGroup css={{ ...customMargin, maxWidth: '560px' }} gutterSize="l" direction="column">
         {options.map((option) => (
-          <EuiFlexItem key={option.id}>
+          <EuiFlexItem
+            key={option.id}
+            data-test-subj={`observabilityOnboardingUseCaseCard-${option.id}`}
+          >
             <EuiCheckableCard
               id={`${radioGroupId}_${option.id}`}
-              data-test-subj={`observabilityOnboardingUseCaseCard-${option.id}`}
               name={radioGroupId}
               label={
                 <>
@@ -197,7 +199,6 @@ export const OnboardingFlowForm: FunctionComponent = () => {
 
           {Array.isArray(customCards) && (
             <OnboardingFlowPackageList
-              ref={customCardsRef}
               customCards={customCards}
               flowSearch={integrationSearch}
               flowCategory={searchParams.get('category')}
