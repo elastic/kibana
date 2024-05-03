@@ -154,4 +154,6 @@ describe('ml_executor', () => {
     expect(result.success).toEqual(false);
     expect(result.errors).toEqual(['my_test_job_name missing']);
   });
+
+  it.todo('returns timing information as part of the result');
 });
