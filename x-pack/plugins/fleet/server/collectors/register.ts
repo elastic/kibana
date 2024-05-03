@@ -62,6 +62,7 @@ export const fetchFleetUsage = async (
     ...(await getAgentLogsTopErrors(esClient)),
     agents_per_output_type: await getAgentsPerOutput(soClient, esClient),
     license_info: await esClient.license.get(),
+    cluster_info: await esClient.info(),
   };
   return usage;
 };
@@ -85,6 +86,7 @@ export const fetchAgentsUsage = async (core: CoreSetup, config: FleetConfigType)
     agents: await getAgentUsage(soClient, esClient),
     fleet_server: await getFleetServerUsage(soClient, esClient),
     license_info: await esClient.license.get(),
+    cluster_info: await esClient.info(),
   };
   return usage;
 };
