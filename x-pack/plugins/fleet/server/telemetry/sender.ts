@@ -14,6 +14,8 @@ import axios from 'axios';
 
 import type { InfoResponse, LicenseGetResponse } from '@elastic/elasticsearch/lib/api/types';
 
+import { appContextService } from '../services';
+
 import { TelemetryQueue } from './queue';
 
 import type { FleetTelemetryChannel, FleetTelemetryChannelEvents } from './types';
@@ -144,15 +146,16 @@ export class TelemetryEventsSender {
 
       queue.clearEvents();
 
-      const eventsWithLicenseInfo = events.map((event) => ({
+      const toSend = events.map((event) => ({
         ...event,
-        license: this.licenseInfo?.license,
+        license_issued_to: this.licenseInfo?.license.issued_to,
+        deployment_id: appContextService.getCloud()?.deploymentId,
       }));
 
-      this.logger.debug(JSON.stringify(eventsWithLicenseInfo));
+      this.logger.debug(JSON.stringify(toSend));
 
       await this.send(
-        eventsWithLicenseInfo,
+        toSend,
         telemetryUrl,
         clusterInfo?.cluster_uuid,
         clusterInfo?.version?.number

@@ -393,4 +393,12 @@ export const fleetUsagesSchema: RootSchema<any> = {
       },
     },
   },
+  license_issued_to: {
+    type: 'text',
+    _meta: { description: 'The name of the user the license is issued to' },
+  },
+  deployment_id: {
+    type: 'keyword',
+    _meta: { description: 'id of the deployment', optional: true },
+  },
 };
