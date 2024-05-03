@@ -37,5 +37,5 @@ export const pageObjects = {
   svlTriggersActionsUI: SvlTriggersActionsPageProvider,
   svlRuleDetailsUI: SvlRuleDetailsPageProvider,
   svlManagementPage: SvlManagementPageProvider,
-  svlIngestPipelines: SvlIngestPipelines
+  svlIngestPipelines: SvlIngestPipelines,
 };
