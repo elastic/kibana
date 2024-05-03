@@ -139,6 +139,16 @@ const CustomGridRow = styled.div.attrs<{
   .euiCommentEvent__body {
     background-color: ${(props) => (props.theme as EuiTheme).eui.euiColorEmptyShade};
   }
+
+   &:has(.unifiedDataTable__cell--expanded) {
+      .euiDataGridRowCell--firstColumn,
+      .euiDataGridRowCell--lastColumn,
+      .euiDataGridRowCell--controlColumn,
+      .udt--customRow {
+        ${({ theme }) => `background-color: ${theme.eui.euiColorHighlight};`}
+      }
+    }
+  }
 `;
 
 /* below styles as per : https://eui.elastic.co/#/tabular-content/data-grid-advanced#custom-body-renderer */

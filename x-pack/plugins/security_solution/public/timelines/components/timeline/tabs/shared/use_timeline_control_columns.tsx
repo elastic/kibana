@@ -32,12 +32,15 @@ export const useTimelineControlColumn = (
   );
 
   const isEnterprisePlus = useLicense().isEnterprise();
-  const ACTION_BUTTON_COUNT = isEnterprisePlus ? 5 : 4;
+  const ACTION_BUTTON_COUNT = isEnterprisePlus ? 6 : 5;
   const { localColumns } = useTimelineColumns(columns);
+
+  // We need one less when the unified components are enabled because the document expand is provided by the unified data table
+  const UNIFIED_COMPONENTS_ACTION_BUTTON_COUNT = ACTION_BUTTON_COUNT - 1;
 
   return useMemo(() => {
     if (unifiedComponentsInTimelineEnabled) {
-      return getDefaultControlColumn(ACTION_BUTTON_COUNT).map((x) => ({
+      return getDefaultControlColumn(UNIFIED_COMPONENTS_ACTION_BUTTON_COUNT).map((x) => ({
         ...x,
         headerCellRender: function HeaderCellRender(props: UnifiedActionProps) {
           return (
@@ -66,5 +69,12 @@ export const useTimelineControlColumn = (
         headerCellRender: HeaderActions,
       })) as unknown as ColumnHeaderOptions[];
     }
-  }, [ACTION_BUTTON_COUNT, browserFields, localColumns, sort, unifiedComponentsInTimelineEnabled]);
+  }, [
+    ACTION_BUTTON_COUNT,
+    UNIFIED_COMPONENTS_ACTION_BUTTON_COUNT,
+    browserFields,
+    localColumns,
+    sort,
+    unifiedComponentsInTimelineEnabled,
+  ]);
 };
