@@ -242,7 +242,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
                   id="xpack.security.management.editRole.elasticSearchPrivileges.controlAccessToRemoteClusterDataDescription"
                   defaultMessage="Control access to the data in remote clusters. "
                 />
-                {this.learnMore(docLinks.links.security.indicesPrivileges)}
+                {this.learnMore(docLinks.links.security.clusterPrivileges)}
               </p>
             </EuiText>
             <RemoteClusterPrivileges
