@@ -15,9 +15,9 @@ import { listFilesExceedingSize, listFilesOlderThan } from './utils';
 
 export const retentionPolicyConfigSchema = schema.object(
   {
-    maxFiles: schema.maybe(schema.number({ min: 1, max: 100 })),
+    maxFiles: schema.maybe(schema.number({ min: 1, max: 365 })),
     maxAccumulatedFileSize: schema.maybe(schema.byteSize()),
-    removeOlderThan: schema.maybe(schema.duration({ min: '1d', max: '365d' })),
+    removeOlderThan: schema.maybe(schema.duration({ max: '365d' })),
   },
   {
     validate: (config) => {
