@@ -10,7 +10,7 @@ import Joi from 'joi';
 import { metaFields } from '@kbn/config-schema';
 import type { OpenAPIV3 } from 'openapi-types';
 import { parse } from '../../parse';
-import { deleteField, stripBadDefault } from './utils';
+import { deleteField, stripBadDefault, processDeprecated } from './utils';
 import { IContext } from '../context';
 
 const {
@@ -28,6 +28,10 @@ export const processString = (schema: OpenAPIV3.SchemaObject): void => {
     schema.maxLength = schema[META_FIELD_X_OAS_MAX_LENGTH] as number;
     deleteField(schema, META_FIELD_X_OAS_MAX_LENGTH);
   }
+};
+
+export const processStream = (schema: OpenAPIV3.SchemaObject): void => {
+  schema.type = 'object';
 };
 
 const processAdditionalProperties = (ctx: IContext, schema: OpenAPIV3.SchemaObject) => {
@@ -62,6 +66,7 @@ export const processMap = (ctx: IContext, schema: OpenAPIV3.SchemaObject): void 
 };
 
 export const processAny = (schema: OpenAPIV3.SchemaObject): void => {
+  processDeprecated(schema);
   stripBadDefault(schema);
 };
 

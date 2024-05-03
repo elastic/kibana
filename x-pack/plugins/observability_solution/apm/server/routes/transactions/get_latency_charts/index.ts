@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { BoolQuery } from '@kbn/es-query';
 import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ApmServiceTransactionDocumentType } from '../../../../common/document_type';
 import {
@@ -29,6 +29,7 @@ import { getDurationFieldForTransactions } from '../../../lib/helpers/transactio
 function searchLatency({
   environment,
   kuery,
+  filters,
   serviceName,
   transactionType,
   transactionName,
@@ -45,6 +46,7 @@ function searchLatency({
 }: {
   environment: string;
   kuery: string;
+  filters?: BoolQuery;
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;
@@ -87,7 +89,9 @@ function searchLatency({
             ...termQuery(TRANSACTION_NAME, transactionName),
             ...termQuery(TRANSACTION_TYPE, transactionType),
             ...termQuery(FAAS_ID, serverlessId),
+            ...(filters?.filter || []),
           ],
+          must_not: filters?.must_not || [],
         },
       },
       aggs: {
@@ -111,6 +115,7 @@ function searchLatency({
 export async function getLatencyTimeseries({
   environment,
   kuery,
+  filters,
   serviceName,
   transactionType,
   transactionName,
@@ -127,6 +132,7 @@ export async function getLatencyTimeseries({
 }: {
   environment: string;
   kuery: string;
+  filters?: BoolQuery;
   serviceName: string;
   transactionType?: string;
   transactionName?: string;
@@ -144,6 +150,7 @@ export async function getLatencyTimeseries({
   const response = await searchLatency({
     environment,
     kuery,
+    filters,
     serviceName,
     transactionType,
     transactionName,
@@ -195,6 +202,7 @@ export async function getLatencyPeriods({
   apmEventClient,
   latencyAggregationType,
   kuery,
+  filters,
   environment,
   start,
   end,
@@ -210,6 +218,7 @@ export async function getLatencyPeriods({
   apmEventClient: APMEventClient;
   latencyAggregationType: LatencyAggregationType;
   kuery: string;
+  filters?: BoolQuery;
   environment: string;
   start: number;
   end: number;
@@ -225,6 +234,7 @@ export async function getLatencyPeriods({
     transactionName,
     apmEventClient,
     kuery,
+    filters,
     environment,
     documentType,
     rollupInterval,

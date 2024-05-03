@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import React, { FC, useEffect } from 'react';
+import React, { FC, PropsWithChildren, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { getBaseBreadcrumb, getWorkpadBreadcrumb } from '../../lib/breadcrumbs';
@@ -21,7 +21,7 @@ const getWorkpadLabel = () =>
     defaultMessage: 'Workpad',
   });
 
-export const WorkpadPresentationHelper: FC = ({ children }) => {
+export const WorkpadPresentationHelper: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const platformService = usePlatformService();
   const workpad = useSelector(getWorkpad);
   useFullscreenPresentationHelper();

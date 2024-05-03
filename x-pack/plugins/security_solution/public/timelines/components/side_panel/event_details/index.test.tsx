@@ -7,7 +7,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { EventDetailsPanel } from '.';
-import '../../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';

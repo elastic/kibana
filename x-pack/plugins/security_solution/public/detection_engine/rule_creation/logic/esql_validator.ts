@@ -36,10 +36,10 @@ const constructValidationError = (error: Error) => {
 };
 
 /**
- * checks whether query has [metadata _id] operator
+ * checks whether query has metadata _id operator
  */
 export const computeHasMetadataOperator = (esqlQuery: string) => {
-  return /(?<!\|[\s\S.]*)\[\s*metadata[\s\S.]*_id[\s\S.]*\]/i.test(esqlQuery);
+  return /(?<!\|[\s\S.]*)\s*metadata[\s\S.]*_id[\s\S.]*/i.test(esqlQuery?.split('|')?.[0]);
 };
 
 /**
@@ -63,7 +63,7 @@ export const esqlValidator = async (
 
     const isEsqlQueryAggregating = computeIsESQLQueryAggregating(query);
 
-    // non-aggregating query which does not have [metadata], is not a valid one
+    // non-aggregating query which does not have metadata, is not a valid one
     if (!isEsqlQueryAggregating && !computeHasMetadataOperator(query)) {
       return {
         code: ERROR_CODES.ERR_MISSING_ID_FIELD_FROM_RESULT,

@@ -32,7 +32,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
 
-  describe('@serverless @ess Rule exception operators for data type float', () => {
+  describe('@serverless @serverlessQA @ess Rule exception operators for data type float', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/rule_exceptions/float');
       await esArchiver.load('x-pack/test/functional/es_archives/rule_exceptions/float_as_string');

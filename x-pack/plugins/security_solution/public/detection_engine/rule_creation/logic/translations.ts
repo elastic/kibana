@@ -30,6 +30,6 @@ export const ESQL_VALIDATION_MISSING_METADATA_OPERATOR_IN_QUERY_ERROR = i18n.tra
 export const ESQL_VALIDATION_MISSING_ID_FIELD_IN_QUERY_ERROR = i18n.translate(
   'xpack.securitySolution.detectionEngine.esqlValidation.missingIdFieldInQueryError',
   {
-    defaultMessage: `Queries that don’t use the STATS...BY function (non-aggregating queries) must include the [metadata _id, _version, _index] operator after the source command. For example: FROM logs* [metadata _id, _version, _index].  In addition, the metadata properties (_id, _version, and _index)  must be returned in the query response.`,
+    defaultMessage: `Queries that don’t use the STATS...BY function (non-aggregating queries) must include the "metadata _id, _version, _index" operator after the source command. For example: FROM logs* metadata _id, _version, _index.  In addition, the metadata properties (_id, _version, and _index)  must be returned in the query response.`,
   }
 );

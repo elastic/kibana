@@ -19,7 +19,7 @@ import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { withSuspense } from '@kbn/shared-ux-utility';
-import { isOfEsqlQueryType } from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { useUrl } from './hooks/use_url';
@@ -49,13 +49,13 @@ interface DiscoverLandingParams {
 }
 
 export interface MainRouteProps {
-  customizationCallbacks: CustomizationCallback[];
+  customizationCallbacks?: CustomizationCallback[];
   stateStorageContainer?: IKbnUrlStateStorage;
   customizationContext: DiscoverCustomizationContext;
 }
 
 export function DiscoverMainRoute({
-  customizationCallbacks,
+  customizationCallbacks = [],
   customizationContext,
   stateStorageContainer,
 }: MainRouteProps) {
@@ -116,7 +116,7 @@ export function DiscoverMainRoute({
         return true; // bypass NoData screen
       }
 
-      if (isOfEsqlQueryType(stateContainer.appState.getState().query)) {
+      if (isOfAggregateQueryType(stateContainer.appState.getState().query)) {
         return true;
       }
 

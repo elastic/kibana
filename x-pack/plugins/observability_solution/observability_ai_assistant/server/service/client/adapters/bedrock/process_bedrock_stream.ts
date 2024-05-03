@@ -74,7 +74,7 @@ export function processBedrockStream() {
           subscriber.error(err);
         },
         complete: () => {
-          nextPromise.then(() => subscriber.complete());
+          nextPromise.then(() => subscriber.complete()).catch(() => {});
         },
       });
     });

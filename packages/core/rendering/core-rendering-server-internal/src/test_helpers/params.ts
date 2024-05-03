@@ -12,6 +12,7 @@ import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { statusServiceMock } from '@kbn/core-status-server-mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mocks';
 import { userSettingsServiceMock } from '@kbn/core-user-settings-server-mocks';
+import { i18nServiceMock } from '@kbn/core-i18n-server-mocks';
 
 const context = mockCoreContext.create();
 const httpPreboot = httpServiceMock.createInternalPrebootContract();
@@ -33,6 +34,7 @@ export const mockRenderingServiceParams = context;
 export const mockRenderingPrebootDeps = {
   http: httpPreboot,
   uiPlugins: createUiPlugins(),
+  i18n: i18nServiceMock.createInternalPrebootContract(),
 };
 export const mockRenderingSetupDeps = {
   elasticsearch,
@@ -41,4 +43,5 @@ export const mockRenderingSetupDeps = {
   customBranding,
   status,
   userSettings,
+  i18n: i18nServiceMock.createSetupContract(),
 };
