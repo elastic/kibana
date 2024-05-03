@@ -40,10 +40,10 @@
   args:
     executable: /bin/bash
 
-- name: "ensure {{ kibana_dist_path }} dir exists"
+- name: "ensure {{ openssl_path }} dir exists"
   become: yes
   file:
-    path: "{{ kibana_dist_path }}"
+    path: "{{ openssl_path }}"
     state: directory
 
 - name: find kibana distribution
@@ -92,6 +92,40 @@
     src: templates/fips/nodejs.cnf
     dest: "{{ kibana_dist_path }}/config/nodejs.cnf"
 
+- name: download FIPS certified OpenSSL
+  become: yes
+  retries: 5
+  delay: 10
+  get_url:
+    url: "https://www.openssl.org/source/openssl-{{ openssl_ver }}.tar.gz"
+    dest: "{{ openssl_src_path }}.tar.gz"
+    checksum: "{{ openssl_sha }}"
+
+- name: extract OpenSSL
+  become: yes
+  unarchive:
+    src: "{{ openssl_src_path }}.tar.gz"
+    dest: "{{ kibana_dist_path }}"
+    remote_src: yes
+
+- name: configure OpenSSL for FIPS
+  become: yes
+  shell:
+    chdir: "{{ openssl_src_path }}"
+    cmd: "./Configure --prefix={{ openssl_path }} --openssldir={{ openssl_path }}/ssl --libdir={{ openssl_path }}/lib enable-fips"
+
+- name: compile OpenSSL with FIPS
+  become: yes
+  make:
+    chdir: "{{ openssl_src_path }}"
+    jobs: "{{ ansible_facts['processor_vcpus'] }}"
+
+- name: install OpenSSL with FIPS
+  become: yes
+  make:
+    chdir: "{{ openssl_src_path }}"
+    target: install
+
 - name: "change owner of {{ kibana_dist_path }} to vagrant"
   become: yes
   file:
@@ -100,41 +134,7 @@
     group: vagrant
     recurse: yes
 
-- name: download FIPS certified OpenSSL
-  become: yes
-  retries: 5
-  delay: 10
-  get_url:
-    url: "https://www.openssl.org/source/openssl-{{ openssl_ver }}.tar.gz"
-    dest: "{{ openssl_path }}.tar.gz"
-    checksum: "{{ openssl_sha }}"
-
-- name: extract OpenSSL
-  become: yes
-  unarchive:
-    src: "{{ openssl_path }}.tar.gz"
-    dest: "{{ kibana_dist_path }}"
-    remote_src: yes
-
-- name: configure OpenSSL for FIPS
-  become: yes
-  shell:
-    chdir: "{{ openssl_path }}"
-    cmd: ./Configure enable-fips
-
-- name: compile OpenSSL with FIPS
-  become: yes
-  make:
-    chdir: "{{ openssl_path }}"
-    jobs: "{{ ansible_facts['processor_vcpus'] }}"
-
-- name: install OpenSSL with FIPS
-  become: yes
-  make:
-    chdir: "{{ openssl_path }}"
-    target: install
-
-- name: link OpenSSL package
-  become: yes
-  shell:
-    cmd: ldconfig /usr/local/lib64/
+# - name: link OpenSSL package
+#   become: yes
+#   shell:
+#     cmd: ldconfig /usr/local/lib64/
