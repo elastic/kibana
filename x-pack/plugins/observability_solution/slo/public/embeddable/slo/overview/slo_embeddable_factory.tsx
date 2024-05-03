@@ -124,7 +124,6 @@ export const getOverviewEmbeddableFactory = (deps: SloEmbeddableDeps) => {
             remoteName$
           );
           const { observabilityRuleTypeRegistry } = deps.observability;
-          const I18nContext = deps.i18n.Context;
 
           useEffect(() => {
             return () => {
