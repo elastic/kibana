@@ -78,5 +78,5 @@ export function initializeFetch({
   });
   return () => {
     fetchSubscription.unsubscribe();
-  }
+  };
 }
