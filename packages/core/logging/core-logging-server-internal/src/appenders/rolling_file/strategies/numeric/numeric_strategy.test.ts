@@ -10,7 +10,6 @@ import { join } from 'path';
 import {
   resetAllMock,
   shouldSkipRolloutMock,
-  deleteFilesMock,
   getOrderedRolledFilesMock,
   rollCurrentFileMock,
   rollPreviousFilesInOrderMock,
@@ -53,23 +52,6 @@ describe('NumericRollingStrategy', () => {
     });
   });
 
-  it('calls `deleteFiles` with the correct files', async () => {
-    getOrderedRolledFilesMock.mockResolvedValue([
-      'kibana.1.log',
-      'kibana.2.log',
-      'kibana.3.log',
-      'kibana.4.log',
-    ]);
-
-    await strategy.rollout();
-
-    expect(deleteFilesMock).toHaveBeenCalledTimes(1);
-    expect(deleteFilesMock).toHaveBeenCalledWith({
-      filesToDelete: ['kibana.3.log', 'kibana.4.log'],
-      logFileFolder,
-    });
-  });
-
   it('calls `rollPreviousFilesInOrder` with the correct files', async () => {
     getOrderedRolledFilesMock.mockResolvedValue([
       'kibana.1.log',
@@ -82,7 +64,7 @@ describe('NumericRollingStrategy', () => {
 
     expect(rollPreviousFilesInOrderMock).toHaveBeenCalledTimes(1);
     expect(rollPreviousFilesInOrderMock).toHaveBeenCalledWith({
-      filesToRoll: ['kibana.1.log', 'kibana.2.log'],
+      filesToRoll: ['kibana.1.log', 'kibana.2.log', 'kibana.3.log', 'kibana.4.log'],
       logFileFolder,
       logFileBaseName,
       pattern,
@@ -116,22 +98,12 @@ describe('NumericRollingStrategy', () => {
 
     await strategy.rollout();
 
-    const deleteFilesCall = deleteFilesMock.mock.invocationCallOrder[0];
     const rollPreviousFilesInOrderCall = rollPreviousFilesInOrderMock.mock.invocationCallOrder[0];
     const rollCurrentFileCall = rollCurrentFileMock.mock.invocationCallOrder[0];
     const refreshFileInfoCall = context.refreshFileInfo.mock.invocationCallOrder[0];
 
-    expect(deleteFilesCall).toBeLessThan(rollPreviousFilesInOrderCall);
     expect(rollPreviousFilesInOrderCall).toBeLessThan(rollCurrentFileCall);
     expect(rollCurrentFileCall).toBeLessThan(refreshFileInfoCall);
-  });
-
-  it('do not calls `deleteFiles` if no file should be deleted', async () => {
-    getOrderedRolledFilesMock.mockResolvedValue(['kibana.1.log', 'kibana.2.log']);
-
-    await strategy.rollout();
-
-    expect(deleteFilesMock).not.toHaveBeenCalled();
   });
 
   it('do not calls `rollPreviousFilesInOrder` if no file should be rolled', async () => {
@@ -154,7 +126,6 @@ describe('NumericRollingStrategy', () => {
     await strategy.rollout();
 
     expect(getOrderedRolledFilesMock).not.toHaveBeenCalled();
-    expect(deleteFilesMock).not.toHaveBeenCalled();
     expect(rollPreviousFilesInOrderMock).not.toHaveBeenCalled();
     expect(rollCurrentFileMock).not.toHaveBeenCalled();
     expect(context.refreshFileInfo).not.toHaveBeenCalled();

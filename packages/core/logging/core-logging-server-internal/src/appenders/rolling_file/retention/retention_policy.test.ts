@@ -92,4 +92,17 @@ describe('GenericRetentionPolicy', () => {
       filesToDelete: ['file-2', 'file-3', 'file-4'],
     });
   });
+
+  it('do not call deleteFiles if no file should be deleted', async () => {
+    config = retentionPolicyConfigSchema.validate({
+      maxFiles: 5,
+    });
+    context.getOrderedRolledFiles.mockResolvedValue(['file-1', 'file-2', 'file-3', 'file-4']);
+
+    const policy = new GenericRetentionPolicy(config, context);
+
+    await policy.apply();
+
+    expect(deleteFilesMock).not.toHaveBeenCalled();
+  });
 });
