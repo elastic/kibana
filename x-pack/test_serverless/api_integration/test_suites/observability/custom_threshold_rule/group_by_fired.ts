@@ -17,7 +17,7 @@ import { Aggregators } from '@kbn/observability-plugin/common/custom_threshold_r
 import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/constants';
 import expect from '@kbn/expect';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import { COMPARATORS } from '@kbn/alerting-comparators';
+import { COMPARATORS } from '@kbn/alerting-shared-types';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { ActionDocument } from './typings';
 

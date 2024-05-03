@@ -11,7 +11,7 @@ import { buildEsQuery, fromKueryExpression } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import { isEmpty } from 'lodash';
-import { COMPARATORS } from '@kbn/alerting-comparators';
+import { COMPARATORS } from '@kbn/alerting-shared-types';
 import {
   CustomMetricExpressionParams,
   CustomThresholdSearchSourceFields,

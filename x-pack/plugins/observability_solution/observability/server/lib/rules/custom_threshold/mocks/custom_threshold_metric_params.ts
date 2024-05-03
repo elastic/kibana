@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { COMPARATORS } from '@kbn/alerting-comparators';
+import { COMPARATORS } from '@kbn/alerting-shared-types';
 import {
   Aggregators,
   CustomMetricExpressionParams,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { COMPARATORS } from '@kbn/alerting-comparators';
+import { COMPARATORS } from '@kbn/alerting-shared-types';
 
 export const createConditionScript = (threshold: number[], comparator: COMPARATORS) => {
   if (comparator === COMPARATORS.BETWEEN && threshold.length === 2) {

@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { COMPARATORS } from '@kbn/alerting-comparators';
+import { COMPARATORS } from '@kbn/alerting-shared-types';
 import { Aggregators } from '../../../../common/alerting/metrics';
 import { MetricThresholdAlert, MetricThresholdRule } from '../components/alert_details_app_section';
 

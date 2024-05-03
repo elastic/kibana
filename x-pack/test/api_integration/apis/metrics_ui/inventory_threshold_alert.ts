@@ -10,7 +10,7 @@ import { InventoryMetricConditions } from '@kbn/infra-plugin/common/alerting/met
 import { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { evaluateCondition } from '@kbn/infra-plugin/server/lib/alerting/inventory_metric_threshold/evaluate_condition';
 import { InfraSource } from '@kbn/infra-plugin/server/lib/sources';
-import { COMPARATORS } from '@kbn/alerting-comparators';
+import { COMPARATORS } from '@kbn/alerting-shared-types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES } from './constants';
 import { createFakeLogger } from './create_fake_logger';

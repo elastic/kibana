@@ -10,7 +10,7 @@ import {
   formatDurationFromTimeUnitChar,
   TimeUnitChar,
 } from '@kbn/observability-plugin/common/utils/formatters/duration';
-import { COMPARATORS } from '@kbn/alerting-comparators';
+import { COMPARATORS } from '@kbn/alerting-shared-types';
 import { AlertStates } from '../../../../common/alerting/metrics';
 import { UNGROUPED_FACTORY_KEY } from './utils';
 

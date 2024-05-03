@@ -12,7 +12,7 @@ import expect from '@kbn/expect';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { parseSearchParams } from '@kbn/share-plugin/common/url_service';
 import { omit } from 'lodash';
-import { COMPARATORS } from '@kbn/alerting-comparators';
+import { COMPARATORS } from '@kbn/alerting-shared-types';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { ISO_DATE_REGEX } from './constants';
 import { ActionDocument, LogsExplorerLocatorParsedParams } from './typings';

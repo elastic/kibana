@@ -25,7 +25,7 @@ import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
 import { EventAnnotationConfig } from '@kbn/event-annotation-common';
-import { COMPARATORS } from '@kbn/alerting-comparators';
+import { COMPARATORS } from '@kbn/alerting-shared-types';
 import { EventsAsUnit } from '../../../../../common/constants';
 import { CustomThresholdSearchSourceFields } from '../../../../../common/custom_threshold_rule/types';
 import { useKibana } from '../../../../utils/kibana_react';

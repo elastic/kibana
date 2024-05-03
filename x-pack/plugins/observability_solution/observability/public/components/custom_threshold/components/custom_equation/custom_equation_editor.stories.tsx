@@ -9,7 +9,7 @@ import { Meta, Story } from '@storybook/react/types-6-0';
 import React, { useCallback, useEffect, useState } from 'react';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { COMPARATORS } from '@kbn/alerting-comparators';
+import { COMPARATORS } from '@kbn/alerting-shared-types';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../../test_utils/use_global_storybook_theme';
 import {
   Aggregators,

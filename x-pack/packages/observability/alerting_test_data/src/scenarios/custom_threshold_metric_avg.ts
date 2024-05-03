@@ -6,7 +6,7 @@
  */
 
 import { Aggregators } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
-import { COMPARATORS } from '@kbn/alerting-comparators';
+import { COMPARATORS } from '@kbn/alerting-shared-types';
 
 export const scenario4 = {
   dataView: {

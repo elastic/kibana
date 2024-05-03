@@ -22,7 +22,7 @@ import { AlertsClientError, RuleExecutorOptions, RuleTypeState } from '@kbn/aler
 import type { TimeUnitChar } from '@kbn/observability-plugin/common';
 import { getAlertUrl } from '@kbn/observability-plugin/common';
 import { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
-import { COMPARATORS } from '@kbn/alerting-comparators';
+import { COMPARATORS } from '@kbn/alerting-shared-types';
 import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
 import { AlertStates } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';

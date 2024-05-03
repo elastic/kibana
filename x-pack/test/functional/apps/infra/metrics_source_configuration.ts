@@ -13,7 +13,7 @@ import {
   MetricThresholdParams,
 } from '@kbn/infra-plugin/common/alerting/metrics';
 
-import { COMPARATORS } from '@kbn/alerting-comparators';
+import { COMPARATORS } from '@kbn/alerting-shared-types';
 import { createRule } from '../../../alerting_api_integration/observability/helpers/alerting_api_helper';
 import {
   waitForDocumentInIndex,

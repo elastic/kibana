@@ -6,7 +6,7 @@
  */
 
 import { Aggregators } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
-import { COMPARATORS } from '@kbn/alerting-comparators';
+import { COMPARATORS } from '@kbn/alerting-shared-types';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { FIRED_ACTIONS_ID } from './constants';
 import { createRule } from './create_rule';

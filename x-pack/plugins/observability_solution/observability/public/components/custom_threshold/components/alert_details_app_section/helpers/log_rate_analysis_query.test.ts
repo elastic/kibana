@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { COMPARATORS } from '@kbn/alerting-comparators';
+import { COMPARATORS } from '@kbn/alerting-shared-types';
 import { Aggregators } from '../../../../../../common/custom_threshold_rule/types';
 import { CustomThresholdRuleTypeParams } from '../../../types';
 import { getLogRateAnalysisEQQuery } from './log_rate_analysis_query';

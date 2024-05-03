@@ -12,7 +12,7 @@ import {
   SearchConfigurationType,
 } from '../../../../../common/custom_threshold_rule/types';
 import { getElasticsearchMetricQuery } from './metric_query';
-import { COMPARATORS } from '@kbn/alerting-comparators';
+import { COMPARATORS } from '@kbn/alerting-shared-types';
 
 describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
   const expressionParams: CustomMetricExpressionParams = {

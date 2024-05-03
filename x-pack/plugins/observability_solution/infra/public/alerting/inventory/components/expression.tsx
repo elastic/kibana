@@ -52,7 +52,7 @@ import {
   SnapshotMetricType,
   SnapshotMetricTypeRT,
 } from '@kbn/metrics-data-access-plugin/common';
-import { COMPARATORS } from '@kbn/alerting-comparators';
+import { COMPARATORS } from '@kbn/alerting-shared-types';
 import {
   SnapshotCustomMetricInput,
   SnapshotCustomMetricInputRT,

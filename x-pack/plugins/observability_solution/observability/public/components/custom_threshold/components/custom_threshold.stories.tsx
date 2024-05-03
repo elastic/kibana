@@ -8,7 +8,7 @@
 import React from 'react';
 import { ComponentMeta } from '@storybook/react';
 import { LIGHT_THEME } from '@elastic/charts';
-import { COMPARATORS } from '@kbn/alerting-comparators';
+import { COMPARATORS } from '@kbn/alerting-shared-types';
 import { Props, Threshold as Component } from './custom_threshold';
 
 export default {

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { COMPARATORS } from '@kbn/alerting-comparators';
+import { COMPARATORS } from '@kbn/alerting-shared-types';
 import { formatDurationFromTimeUnitChar } from '../../../../common';
 import { Evaluation } from './lib/evaluate_rule';
 import { formatAlertResult, FormattedEvaluation } from './lib/format_alert_result';

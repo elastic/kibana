@@ -18,7 +18,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { isNil } from 'lodash';
-import { Comparator, COMPARATORS } from '@kbn/alerting-comparators';
+import { Comparator, COMPARATORS } from '@kbn/alerting-shared-types';
 import { BC_OUTSIDE_RANG } from '../constants';
 import { builtInComparators } from '../..';
 import { IErrorObject } from '../../types';

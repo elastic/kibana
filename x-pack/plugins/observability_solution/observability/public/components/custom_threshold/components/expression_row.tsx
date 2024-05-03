@@ -24,7 +24,7 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import { debounce } from 'lodash';
-import { COMPARATORS } from '@kbn/alerting-comparators';
+import { COMPARATORS } from '@kbn/alerting-shared-types';
 import { Aggregators } from '../../../../common/custom_threshold_rule/types';
 import { MetricExpression } from '../types';
 import { CustomEquationEditor } from './custom_equation';
