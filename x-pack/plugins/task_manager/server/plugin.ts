@@ -277,7 +277,8 @@ export class TaskManagerPlugin
         this.podName!,
         'serverless',
         'kibana.k8s.elastic.co/name=kb',
-        savedObjects.createInternalRepository(['all_pods'])
+        savedObjects.createInternalRepository(['all_pods']),
+        this.config.manually_provide_pod_names
       );
       this.taskPollingLifecycle = new TaskPollingLifecycle({
         config: this.config!,
