@@ -14,81 +14,165 @@ import { SettingsMenu } from './settings_menu';
 import { EuiFlyoutProps } from '@elastic/eui';
 import {
   SETTINGS_MENU_BUTTON_TEST_ID,
+  SETTINGS_MENU_FLYOUT_RESIZE_BUTTON_TEST_ID,
+  SETTINGS_MENU_FLYOUT_RESIZE_INFORMATION_ICON_TEST_ID,
+  SETTINGS_MENU_FLYOUT_RESIZE_TITLE_TEST_ID,
   SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_PUSH_TEST_ID,
   SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_TEST_ID,
   SETTINGS_MENU_FLYOUT_TYPE_INFORMATION_ICON_TEST_ID,
   SETTINGS_MENU_FLYOUT_TYPE_TITLE_TEST_ID,
 } from './test_ids';
 
+const flyoutTypePropsMock = {
+  type: 'overlay' as EuiFlyoutProps['type'],
+  onChange: jest.fn(),
+  disabled: false,
+  tooltip: '',
+};
+const flyoutResizePropsMock = {
+  onReset: jest.fn(),
+  disabled: false,
+  tooltip: '',
+};
+
 describe('SettingsMenu', () => {
-  it('should render the flyout type button group', () => {
-    const flyoutTypeProps = {
-      type: 'overlay' as EuiFlyoutProps['type'],
-      onChange: jest.fn(),
-      disabled: false,
-      tooltip: '',
-    };
+  describe('flyout type', () => {
+    it('should render the flyout type button group', () => {
+      const { getByTestId, queryByTestId } = render(
+        <SettingsMenu
+          flyoutTypeProps={flyoutTypePropsMock}
+          flyoutResizeProps={flyoutResizePropsMock}
+        />
+      );
 
-    const { getByTestId, queryByTestId } = render(
-      <SettingsMenu flyoutTypeProps={flyoutTypeProps} />
-    );
+      getByTestId(SETTINGS_MENU_BUTTON_TEST_ID).click();
 
-    getByTestId(SETTINGS_MENU_BUTTON_TEST_ID).click();
+      expect(getByTestId(SETTINGS_MENU_FLYOUT_TYPE_TITLE_TEST_ID)).toBeInTheDocument();
+      expect(
+        queryByTestId(SETTINGS_MENU_FLYOUT_TYPE_INFORMATION_ICON_TEST_ID)
+      ).not.toBeInTheDocument();
+      expect(getByTestId(SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_TEST_ID)).toBeInTheDocument();
+    });
 
-    expect(getByTestId(SETTINGS_MENU_FLYOUT_TYPE_TITLE_TEST_ID)).toBeInTheDocument();
-    expect(
-      queryByTestId(SETTINGS_MENU_FLYOUT_TYPE_INFORMATION_ICON_TEST_ID)
-    ).not.toBeInTheDocument();
-    expect(getByTestId(SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_TEST_ID)).toBeInTheDocument();
+    it('should select correct the flyout type', () => {
+      const onChange = jest.fn();
+      const flyoutTypeProps = {
+        ...flyoutTypePropsMock,
+        onChange,
+      };
+
+      const { getByTestId } = render(
+        <SettingsMenu flyoutTypeProps={flyoutTypeProps} flyoutResizeProps={flyoutResizePropsMock} />
+      );
+
+      getByTestId(SETTINGS_MENU_BUTTON_TEST_ID).click();
+      getByTestId(SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_PUSH_TEST_ID).click();
+
+      expect(onChange).toHaveBeenCalledWith('push');
+    });
+
+    it('should render the the flyout type button group disabled', () => {
+      const flyoutTypeProps = {
+        ...flyoutTypePropsMock,
+        disabled: true,
+        tooltip: 'This option is disabled',
+      };
+
+      const { getByTestId } = render(
+        <SettingsMenu flyoutTypeProps={flyoutTypeProps} flyoutResizeProps={flyoutResizePropsMock} />
+      );
+
+      getByTestId(SETTINGS_MENU_BUTTON_TEST_ID).click();
+      expect(getByTestId(SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_TEST_ID)).toHaveAttribute(
+        'disabled'
+      );
+      expect(getByTestId(SETTINGS_MENU_FLYOUT_TYPE_INFORMATION_ICON_TEST_ID)).toBeInTheDocument();
+    });
+
+    it('should not render the information icon if the tooltip is empty', () => {
+      const flyoutTypeProps = {
+        ...flyoutTypePropsMock,
+        disabled: true,
+        tooltip: '',
+      };
+
+      const { getByTestId, queryByTestId } = render(
+        <SettingsMenu flyoutTypeProps={flyoutTypeProps} flyoutResizeProps={flyoutResizePropsMock} />
+      );
+
+      getByTestId(SETTINGS_MENU_BUTTON_TEST_ID).click();
+      expect(
+        queryByTestId(SETTINGS_MENU_FLYOUT_TYPE_INFORMATION_ICON_TEST_ID)
+      ).not.toBeInTheDocument();
+    });
   });
 
-  it('should select correct the flyout type', () => {
-    const onChange = jest.fn();
-    const flyoutTypeProps = {
-      type: 'overlay' as EuiFlyoutProps['type'],
-      onChange,
-      disabled: false,
-      tooltip: '',
-    };
+  describe('flyout resize', () => {
+    it('should render the flyout resize button', () => {
+      const { getByTestId, queryByTestId } = render(
+        <SettingsMenu
+          flyoutTypeProps={flyoutTypePropsMock}
+          flyoutResizeProps={flyoutResizePropsMock}
+        />
+      );
 
-    const { getByTestId } = render(<SettingsMenu flyoutTypeProps={flyoutTypeProps} />);
+      getByTestId(SETTINGS_MENU_BUTTON_TEST_ID).click();
 
-    getByTestId(SETTINGS_MENU_BUTTON_TEST_ID).click();
-    getByTestId(SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_PUSH_TEST_ID).click();
+      expect(getByTestId(SETTINGS_MENU_FLYOUT_RESIZE_TITLE_TEST_ID)).toBeInTheDocument();
+      expect(
+        queryByTestId(SETTINGS_MENU_FLYOUT_RESIZE_INFORMATION_ICON_TEST_ID)
+      ).not.toBeInTheDocument();
+      expect(getByTestId(SETTINGS_MENU_FLYOUT_RESIZE_BUTTON_TEST_ID)).toBeInTheDocument();
+    });
 
-    expect(onChange).toHaveBeenCalledWith('push');
-  });
+    it('should reset correctly when clicked', () => {
+      const onReset = jest.fn();
+      const flyoutResizeProps = {
+        ...flyoutResizePropsMock,
+        onReset,
+      };
 
-  it('should render the the flyout type button group disabled', () => {
-    const flyoutTypeProps = {
-      type: 'overlay' as EuiFlyoutProps['type'],
-      onChange: jest.fn(),
-      disabled: true,
-      tooltip: 'This option is disabled',
-    };
+      const { getByTestId } = render(
+        <SettingsMenu flyoutTypeProps={flyoutTypePropsMock} flyoutResizeProps={flyoutResizeProps} />
+      );
 
-    const { getByTestId } = render(<SettingsMenu flyoutTypeProps={flyoutTypeProps} />);
+      getByTestId(SETTINGS_MENU_BUTTON_TEST_ID).click();
+      getByTestId(SETTINGS_MENU_FLYOUT_RESIZE_BUTTON_TEST_ID).click();
 
-    getByTestId(SETTINGS_MENU_BUTTON_TEST_ID).click();
-    expect(getByTestId(SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_TEST_ID)).toHaveAttribute('disabled');
-    expect(getByTestId(SETTINGS_MENU_FLYOUT_TYPE_INFORMATION_ICON_TEST_ID)).toBeInTheDocument();
-  });
+      expect(onReset).toHaveBeenCalled();
+    });
 
-  it('should not render the information icon if the tooltip is empty', () => {
-    const flyoutTypeProps = {
-      type: 'overlay' as EuiFlyoutProps['type'],
-      onChange: jest.fn(),
-      disabled: true,
-      tooltip: '',
-    };
+    it('should render the the flyout resize button disabled', () => {
+      const flyoutResizeProps = {
+        ...flyoutResizePropsMock,
+        disabled: true,
+        tooltip: 'This option is disabled',
+      };
 
-    const { getByTestId, queryByTestId } = render(
-      <SettingsMenu flyoutTypeProps={flyoutTypeProps} />
-    );
+      const { getByTestId } = render(
+        <SettingsMenu flyoutTypeProps={flyoutTypePropsMock} flyoutResizeProps={flyoutResizeProps} />
+      );
 
-    getByTestId(SETTINGS_MENU_BUTTON_TEST_ID).click();
-    expect(
-      queryByTestId(SETTINGS_MENU_FLYOUT_TYPE_INFORMATION_ICON_TEST_ID)
-    ).not.toBeInTheDocument();
+      getByTestId(SETTINGS_MENU_BUTTON_TEST_ID).click();
+      expect(getByTestId(SETTINGS_MENU_FLYOUT_RESIZE_BUTTON_TEST_ID)).toHaveAttribute('disabled');
+      expect(getByTestId(SETTINGS_MENU_FLYOUT_RESIZE_INFORMATION_ICON_TEST_ID)).toBeInTheDocument();
+    });
+
+    it('should not render the information icon if the tooltip is empty', () => {
+      const flyoutResizeProps = {
+        ...flyoutResizePropsMock,
+        disabled: true,
+        tooltip: '',
+      };
+
+      const { getByTestId, queryByTestId } = render(
+        <SettingsMenu flyoutTypeProps={flyoutTypePropsMock} flyoutResizeProps={flyoutResizeProps} />
+      );
+
+      getByTestId(SETTINGS_MENU_BUTTON_TEST_ID).click();
+      expect(
+        queryByTestId(SETTINGS_MENU_FLYOUT_RESIZE_INFORMATION_ICON_TEST_ID)
+      ).not.toBeInTheDocument();
+    });
   });
 });

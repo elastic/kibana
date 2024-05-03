@@ -8,11 +8,11 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { useWindowSize } from './use_window_size';
+import { useWindowWidth } from './use_window_width';
 
-describe('useWindowSize', () => {
+describe('useWindowWidth', () => {
   it('should return the window size', () => {
-    const hookResult = renderHook(() => useWindowSize());
+    const hookResult = renderHook(() => useWindowWidth());
     expect(hookResult.result.current).toEqual(1024);
   });
 });
