@@ -111,6 +111,7 @@ export const RemoteClusterPrivileges: React.FunctionComponent<Props> = ({
                 iconType="plusInCircle"
                 onClick={addRemoteClusterPrivilege}
                 disabled={remoteClusterPrivilegesDisabled}
+                data-test-subj="addRemoteClusterPrivilegesButton"
               >
                 <FormattedMessage
                   id="xpack.security.management.editRole.elasticSearchPrivileges.addRemoteClusterPrivilegesButtonLabel"

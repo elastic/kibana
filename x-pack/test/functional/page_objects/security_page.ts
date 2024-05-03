@@ -6,7 +6,7 @@
  */
 
 import { adminTestUser } from '@kbn/test';
-import { AuthenticatedUser, Role } from '@kbn/security-plugin/common';
+import { AuthenticatedUser, Role, RoleRemoteClusterPrivilege } from '@kbn/security-plugin/common';
 import type { UserFormValues } from '@kbn/security-plugin/public/management/users/edit_user/user_form';
 import { Key } from 'selenium-webdriver';
 import { FtrService } from '../ftr_provider_context';
@@ -600,9 +600,39 @@ export class SecurityPageObject extends FtrService {
     return confirmText;
   }
 
+  async addRemoteClusterPrivilege(privilege: RoleRemoteClusterPrivilege, index = 0) {
+    this.log.debug('addRemoteClusterPrivilege, index = ', index);
+
+    await this.testSubjects.click('addRemoteClusterPrivilegesButton');
+
+    for (const cluster of privilege.clusters) {
+      await this.comboBox.setCustom(`remoteClusterClustersInput${index}`, cluster);
+    }
+
+    for (const clusterPrivilege of privilege.privileges) {
+      await this.comboBox.setCustom(`remoteClusterPrivilegesInput${index}`, clusterPrivilege);
+    }
+  }
+
+  async getRemoteClusterPrivilege(index = 0) {
+    this.log.debug('getRemoteClusterPrivilege, index = ', index);
+    const clusterOptions = await this.comboBox.getComboBoxSelectedOptions(
+      `remoteClusterClustersInput${index}`
+    );
+
+    const privilegeOptions = await this.comboBox.getComboBoxSelectedOptions(
+      `remoteClusterPrivilegesInput${index}`
+    );
+
+    return {
+      clusters: clusterOptions,
+      privileges: privilegeOptions,
+    };
+  }
+
   async addRole(
     roleName: string,
-    roleObj: { elasticsearch: Pick<Role['elasticsearch'], 'indices'> }
+    roleObj: { elasticsearch: Pick<Role['elasticsearch'], 'indices' | 'remote_cluster'> }
   ) {
     const self = this;
 
@@ -665,6 +695,17 @@ export class SecurityPageObject extends FtrService {
       );
 
       await addGrantedField(roleObj.elasticsearch.indices[0].field_security!.grant!);
+    }
+
+    if (roleObj.elasticsearch.remote_cluster) {
+      this.log.debug('adding remote_cluster privileges');
+
+      for (const [
+        index,
+        remoteClusterPrivilege,
+      ] of roleObj.elasticsearch.remote_cluster.entries()) {
+        await this.addRemoteClusterPrivilege(remoteClusterPrivilege, index);
+      }
     }
 
     this.log.debug('click save button');

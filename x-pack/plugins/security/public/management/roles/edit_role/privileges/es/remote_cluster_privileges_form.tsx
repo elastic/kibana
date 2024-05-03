@@ -171,7 +171,6 @@ export const RemoteClusterPrivilegesForm: React.FunctionComponent<Props> = ({
               color="danger"
               onClick={onDelete}
               iconType="trash"
-              data-test-subj="addRemoteClusterPrivilegesButtonAdd"
             />
           </EuiFlexItem>
         )}
