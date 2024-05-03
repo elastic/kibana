@@ -13,18 +13,19 @@ import {
 } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import {
-  ADD_SLO_ERROR_BUDGET_ACTION_ID,
-  SLO_ERROR_BUDGET_ID,
-} from '../embeddable/slo/error_budget/constants';
+  ADD_SLO_OVERVIEW_ACTION_ID,
+  SLO_OVERVIEW_EMBEDDABLE_ID,
+} from '../embeddable/slo/overview/constants';
 import { SloPublicPluginsStart, SloPublicStart } from '..';
 import { COMMON_SLO_GROUPING } from '../embeddable/slo/common/constants';
-export function createAddErrorBudgetPanelAction(
+
+export function createOverviewPanelAction(
   getStartServices: CoreSetup<SloPublicPluginsStart, SloPublicStart>['getStartServices']
 ): UiActionsActionDefinition<EmbeddableApiContext> {
   return {
-    id: ADD_SLO_ERROR_BUDGET_ACTION_ID,
+    id: ADD_SLO_OVERVIEW_ACTION_ID,
     grouping: COMMON_SLO_GROUPING,
-    getIconType: () => 'visLine',
+    getIconType: () => 'visGauge',
     isCompatible: async ({ embeddable }) => {
       return apiIsPresentationContainer(embeddable);
     },
@@ -33,12 +34,12 @@ export function createAddErrorBudgetPanelAction(
       const [coreStart, deps] = await getStartServices();
       try {
         const { openSloConfiguration } = await import(
-          '../embeddable/slo/error_budget/error_budget_open_configuration'
+          '../embeddable/slo/overview/slo_overview_open_configuration'
         );
         const initialState = await openSloConfiguration(coreStart, deps);
         embeddable.addNewPanel(
           {
-            panelType: SLO_ERROR_BUDGET_ID,
+            panelType: SLO_OVERVIEW_EMBEDDABLE_ID,
             initialState,
           },
           true
@@ -48,8 +49,8 @@ export function createAddErrorBudgetPanelAction(
       }
     },
     getDisplayName: () =>
-      i18n.translate('xpack.slo.errorBudgetEmbeddable.ariaLabel', {
-        defaultMessage: 'SLO Error Budget',
+      i18n.translate('xpack.slo.sloEmbeddable.ariaLabel', {
+        defaultMessage: 'SLO Overview',
       }),
   };
 }
