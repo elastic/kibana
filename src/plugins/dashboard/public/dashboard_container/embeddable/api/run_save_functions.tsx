@@ -15,6 +15,7 @@ import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { cloneDeep } from 'lodash';
 import React from 'react';
 import { batch } from 'react-redux';
+import { i18n } from '@kbn/i18n';
 import { DashboardContainerInput, DashboardPanelMap } from '../../../../common';
 import { prefixReferencesFromPanel } from '../../../../common/dashboard_container/persistable_state/dashboard_container_references';
 import { DASHBOARD_CONTENT_ID, SAVED_OBJECT_POST_TIME } from '../../../dashboard_constants';
@@ -94,7 +95,7 @@ export function runSaveAs(this: DashboardContainer) {
         confirmOverwrite: false,
         isTitleDuplicateConfirmed,
         onTitleDuplicate,
-        saveAsCopy: newCopyOnSave,
+        saveAsCopy: lastSavedId ? true : newCopyOnSave,
       };
       const stateFromSaveModal: DashboardStateFromSaveModal = {
         title: newTitle,
@@ -165,15 +166,27 @@ export function runSaveAs(this: DashboardContainer) {
       return saveResult;
     };
 
+    let customModalTitle;
+    let newTitle = currentState.title;
+
+    if (lastSavedId) {
+      const [baseTitle, baseCount] = extractTitleAndCount(currentState.title);
+      newTitle = `${baseTitle} (${baseCount + 1})`;
+      customModalTitle = i18n.translate('dashboard.topNav.saveModal.modalTitle', {
+        defaultMessage: 'Save as new dashboard',
+      });
+    }
+
     const dashboardSaveModal = (
       <DashboardSaveModal
         tags={currentState.tags}
-        title={currentState.title}
+        title={newTitle}
         onClose={() => resolve(undefined)}
         timeRestore={currentState.timeRestore}
         description={currentState.description ?? ''}
-        showCopyOnSave={lastSavedId ? true : false}
+        showCopyOnSave={false}
         onSave={onSave}
+        customModalTitle={customModalTitle}
       />
     );
     this.clearOverlays();

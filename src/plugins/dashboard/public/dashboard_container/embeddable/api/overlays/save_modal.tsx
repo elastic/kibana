@@ -36,6 +36,7 @@ interface Props {
   tags?: string[];
   timeRestore: boolean;
   showCopyOnSave: boolean;
+  customModalTitle?: string;
 }
 
 interface State {
@@ -104,26 +105,29 @@ export class DashboardSaveModal extends React.Component<Props, State> {
       <Fragment>
         {tagSelector}
 
-        <EuiFormRow
-          helpText={
-            <FormattedMessage
-              id="dashboard.topNav.saveModal.storeTimeWithDashboardFormRowHelpText"
-              defaultMessage="This changes the time filter to the currently selected time each time this dashboard is loaded."
-            />
-          }
-        >
-          <EuiSwitch
-            data-test-subj="storeTimeWithDashboard"
-            checked={this.state.timeRestore}
-            onChange={this.onTimeRestoreChange}
-            label={
+        {/* we are guaranteed that we'd only ever not have a title when it's a newly created dashboard */}
+        {!Boolean(this.props.title) ? (
+          <EuiFormRow
+            helpText={
               <FormattedMessage
-                id="dashboard.topNav.saveModal.storeTimeWithDashboardFormRowLabel"
-                defaultMessage="Store time with dashboard"
+                id="dashboard.topNav.saveModal.storeTimeWithDashboardFormRowHelpText"
+                defaultMessage="This changes the time filter to the currently selected time each time this dashboard is loaded."
               />
             }
-          />
-        </EuiFormRow>
+          >
+            <EuiSwitch
+              data-test-subj="storeTimeWithDashboard"
+              checked={this.state.timeRestore}
+              onChange={this.onTimeRestoreChange}
+              label={
+                <FormattedMessage
+                  id="dashboard.topNav.saveModal.storeTimeWithDashboardFormRowLabel"
+                  defaultMessage="Store time with dashboard"
+                />
+              }
+            />
+          </EuiFormRow>
+        ) : null}
       </Fragment>
     );
   }
@@ -141,6 +145,7 @@ export class DashboardSaveModal extends React.Component<Props, State> {
         objectType={i18n.translate('dashboard.topNav.saveModal.objectType', {
           defaultMessage: 'dashboard',
         })}
+        customModalTitle={this.props.customModalTitle}
         options={this.renderDashboardSaveOptions()}
       />
     );

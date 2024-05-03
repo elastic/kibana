@@ -304,7 +304,7 @@ export const useDashboardMenuItems = ({
     const editModeItems: TopNavMenuData[] = [];
 
     if (lastSavedId) {
-      editModeItems.push(menuItems.duplicate, menuItems.switchToViewMode);
+      editModeItems.push(menuItems.saveAs, menuItems.switchToViewMode);
 
       if (showResetChange) {
         editModeItems.push(resetChangesMenuItem);
@@ -320,7 +320,6 @@ export const useDashboardMenuItems = ({
     menuItems.labs,
     menuItems.share,
     menuItems.settings,
-    menuItems.duplicate,
     menuItems.switchToViewMode,
     menuItems.quickSave,
     menuItems.saveAs,
