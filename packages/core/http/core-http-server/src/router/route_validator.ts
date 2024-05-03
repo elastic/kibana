@@ -154,10 +154,26 @@ export type RouteValidatorFullConfigRequest<P, Q, B> = RouteValidatorConfig<P, Q
  * )
  * ...
  * ```
+ *
+ *  * @example
+ * ```ts
+ * {
+ *    200: {
+ *       body: schema.stream()
+ *       bodyContentType: 'application/octet-stream'
+ *    }
+ * }
+ *
  * @public
  */
 export interface RouteValidatorFullConfigResponse {
-  [statusCode: number]: { body: LazyValidator };
+  [statusCode: number]: {
+    /**
+     * A string representing the mime type of the response body.
+     */
+    bodyContentType?: string;
+    body: LazyValidator;
+  };
   unsafe?: {
     body?: boolean;
   };
