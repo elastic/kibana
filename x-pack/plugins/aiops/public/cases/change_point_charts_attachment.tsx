@@ -14,7 +14,7 @@ import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescriptionList } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
-import type { EmbeddableChangePointChartProps } from '../embeddables/change_point_chart';
+import type { EmbeddableChangePointChartProps } from '../embeddable';
 
 export const initComponent = memoize(
   (fieldFormats: FieldFormatsStart, EmbeddableComponent: FC<EmbeddableChangePointChartProps>) => {

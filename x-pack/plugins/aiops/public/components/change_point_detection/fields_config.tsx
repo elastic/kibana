@@ -39,7 +39,7 @@ import {
 } from '@kbn/aiops-change-point-detection/constants';
 import { MaxSeriesControl } from './max_series_control';
 import { useCasesModal } from '../../hooks/use_cases_modal';
-import type { EmbeddableChangePointChartInput } from '../../embeddables/change_point_chart/embeddable_change_point_chart';
+import { type EmbeddableChangePointChartInput } from '../../embeddable/embeddable_change_point_chart';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { ChangePointsTable } from './change_points_table';

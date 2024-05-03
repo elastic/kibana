@@ -64,8 +64,6 @@ export const DiscoverMainContent = ({
   isChartAvailable,
 }: DiscoverMainContentProps) => {
   const { trackUiMetric } = useDiscoverServices();
-  // const [patternCount, setPatternCount] = React.useState<number | undefined>(undefined);
-
   const setDiscoverViewMode = useCallback(
     (mode: VIEW_MODE) => {
       stateContainer.appState.update({ viewMode: mode });

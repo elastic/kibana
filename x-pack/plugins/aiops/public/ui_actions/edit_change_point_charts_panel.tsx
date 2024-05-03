@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { ViewMode } from '@kbn/embeddable-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
 import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '@kbn/aiops-change-point-detection/constants';
-import type { EditChangePointChartsPanelContext } from '../embeddables/change_point_chart/types';
+import type { EditChangePointChartsPanelContext } from '../embeddable/types';
 import type { AiopsPluginStartDeps } from '../types';
 
 export const EDIT_CHANGE_POINT_CHARTS_ACTION = 'editChangePointChartsPanelAction';
@@ -36,7 +36,7 @@ export function createEditChangePointChartsPanelAction(
 
       try {
         const { resolveEmbeddableChangePointUserInput } = await import(
-          '../embeddables/change_point_chart/handle_explicit_input'
+          '../embeddable/handle_explicit_input'
         );
 
         const result = await resolveEmbeddableChangePointUserInput(

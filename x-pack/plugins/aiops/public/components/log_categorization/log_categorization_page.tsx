@@ -191,8 +191,6 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
   );
 
   const loadCategories = useCallback(async () => {
-    // eslint-disable-next-line no-console
-    console.log('loadCategories');
     setLoading(true);
     setData(null);
     setFieldValidationResult(null);
