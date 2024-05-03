@@ -82,8 +82,10 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables use of SentinelOne response actions that complete asynchronously as well as support
    * for more response actions.
+   *
+   * Release: v8.14.0
    */
-  responseActionsSentinelOneV2Enabled: false,
+  responseActionsSentinelOneV2Enabled: true,
 
   /**
    * Enables top charts on Alerts Page
@@ -108,7 +110,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables expandable flyout in timeline
    */
-  expandableTimelineFlyoutEnabled: false,
+  expandableTimelineFlyoutEnabled: true,
   /*
 
   /**
@@ -241,7 +243,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the new modal for the value list items
    */
-  valueListItemsModalEnabled: false,
+  valueListItemsModalEnabled: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

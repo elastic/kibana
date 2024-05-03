@@ -130,6 +130,7 @@ export default function ({ getService }: FtrProviderContext) {
         'cases-telemetry-task',
         'cloud_security_posture-stats_task',
         'dashboard_telemetry',
+        'endpoint:complete-external-response-actions',
         'endpoint:metadata-check-transforms-task',
         'endpoint:user-artifact-packager',
         'fleet:check-deleted-files-task',

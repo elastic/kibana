@@ -101,6 +101,9 @@ describe('SentinelOneActionsClient class', () => {
     });
 
     it('should write action request and response to endpoint indexes when `responseActionsSentinelOneV2Enabled` FF is Disabled', async () => {
+      // @ts-expect-error updating readonly attribute
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneV2Enabled =
+        false;
       await s1ActionsClient.isolate(createS1IsolationOptions());
 
       expect(classConstructorOptions.esClient.index).toHaveBeenCalledTimes(2);
@@ -232,6 +235,9 @@ describe('SentinelOneActionsClient class', () => {
     });
 
     it('should write action request and response to endpoint indexes when `responseActionsSentinelOneV2Enabled` is Disabled', async () => {
+      // @ts-expect-error updating readonly attribute
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneV2Enabled =
+        false;
       await s1ActionsClient.release(createS1IsolationOptions());
 
       expect(classConstructorOptions.esClient.index).toHaveBeenCalledTimes(2);

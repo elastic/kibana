@@ -20,6 +20,8 @@ import {
   getSLOInstancesParamsSchema,
   getSLOParamsSchema,
   manageSLOParamsSchema,
+  putSLOServerlessSettingsParamsSchema,
+  PutSLOSettingsParams,
   putSLOSettingsParamsSchema,
   resetSLOParamsSchema,
   updateSLOParamsSchema,
@@ -558,7 +560,8 @@ const getSloBurnRates = createSloServerRoute({
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const soClient = (await context.core).savedObjects.client;
     const { instanceId, windows, remoteName } = params.body;
-    const burnRates = await getBurnRates({
+
+    return await getBurnRates({
       instanceId,
       spaceId,
       windows,
@@ -570,7 +573,6 @@ const getSloBurnRates = createSloServerRoute({
         logger,
       },
     });
-    return { burnRates };
   },
 });
 
@@ -607,39 +609,42 @@ const getSloSettingsRoute = createSloServerRoute({
   },
 });
 
-const putSloSettings = createSloServerRoute({
-  endpoint: 'PUT /internal/slo/settings',
-  options: {
-    tags: ['access:slo_write'],
-    access: 'internal',
-  },
-  params: putSLOSettingsParamsSchema,
-  handler: async ({ context, params }) => {
-    await assertPlatinumLicense(context);
+const putSloSettings = (isServerless?: boolean) =>
+  createSloServerRoute({
+    endpoint: 'PUT /internal/slo/settings',
+    options: {
+      tags: ['access:slo_write'],
+      access: 'internal',
+    },
+    params: isServerless ? putSLOServerlessSettingsParamsSchema : putSLOSettingsParamsSchema,
+    handler: async ({ context, params }) => {
+      await assertPlatinumLicense(context);
 
-    const soClient = (await context.core).savedObjects.client;
-    return await storeSloSettings(soClient, params.body);
-  },
-});
+      const soClient = (await context.core).savedObjects.client;
+      return await storeSloSettings(soClient, params.body as PutSLOSettingsParams);
+    },
+  });
 
-export const sloRouteRepository = {
-  ...getSloSettingsRoute,
-  ...putSloSettings,
-  ...createSLORoute,
-  ...inspectSLORoute,
-  ...deleteSLORoute,
-  ...deleteSloInstancesRoute,
-  ...disableSLORoute,
-  ...enableSLORoute,
-  ...fetchHistoricalSummary,
-  ...findSloDefinitionsRoute,
-  ...findSLORoute,
-  ...getSLORoute,
-  ...updateSLORoute,
-  ...getDiagnosisRoute,
-  ...getSloBurnRates,
-  ...getPreviewData,
-  ...getSLOInstancesRoute,
-  ...resetSLORoute,
-  ...findSLOGroupsRoute,
+export const getSloRouteRepository = (isServerless?: boolean) => {
+  return {
+    ...getSloSettingsRoute,
+    ...putSloSettings(isServerless),
+    ...createSLORoute,
+    ...inspectSLORoute,
+    ...deleteSLORoute,
+    ...deleteSloInstancesRoute,
+    ...disableSLORoute,
+    ...enableSLORoute,
+    ...fetchHistoricalSummary,
+    ...findSloDefinitionsRoute,
+    ...findSLORoute,
+    ...getSLORoute,
+    ...updateSLORoute,
+    ...getDiagnosisRoute,
+    ...getSloBurnRates,
+    ...getPreviewData,
+    ...getSLOInstancesRoute,
+    ...resetSLORoute,
+    ...findSLOGroupsRoute,
+  };
 };
