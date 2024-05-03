@@ -7,10 +7,10 @@
  */
 
 import {
-  cleanUrl,
   getBodyTokenPath,
   getCurlRequest,
   getDocumentationLink,
+  removeTrailingWhitespaces,
   replaceRequestVariables,
   stringifyRequest,
   trackSentRequests,
@@ -42,23 +42,24 @@ describe('monaco editor utils', () => {
       test: 'test',
     },
   ];
-  describe('cleanUrl', () => {
+  describe('removeTrailingWhitespaces', () => {
     it(`works with an empty string`, () => {
       const url = '';
-      const result = cleanUrl(url);
+      const result = removeTrailingWhitespaces(url);
       expect(result).toBe(url);
     });
     it(`doesn't change the string if no trailing whitespaces`, () => {
       const url = '_search';
-      const result = cleanUrl(url);
+      const result = removeTrailingWhitespaces(url);
       expect(result).toBe(url);
     });
     it(`removes any text after the first whitespace`, () => {
       const url = '_search some_text';
-      const result = cleanUrl(url);
+      const result = removeTrailingWhitespaces(url);
       expect(result).toBe('_search');
     });
   });
+
 
   describe('stringifyRequest', () => {
     const request = {
