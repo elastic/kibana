@@ -994,7 +994,6 @@ export const getXyVisualization = ({
                         defaultMessage="right"
                       />
                     ),
-                  n: axisGroup.mixedDomainSeries.length,
                 }}
               />
             ),
