@@ -24,7 +24,7 @@ import type { DataProvider } from '../../../timelines/components/timeline/data_p
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../../../timelines/components/row_renderers_browser/constants';
 
 import { TruncatableText } from '../truncatable_text';
-import { WithCellActions } from '../with_hover_actions';
+import { DraggableCellActions } from './draggable_cell_actions';
 
 import { getDraggableId, getDroppableId } from './helpers';
 import { ProviderContainer } from './provider_container';
@@ -97,14 +97,10 @@ type RenderFunctionProp = (
 
 interface Props {
   dataProvider: DataProvider;
-  hideTopN?: boolean;
   isDraggable?: boolean;
   render: RenderFunctionProp;
-  isAggregatable?: boolean;
-  fieldType?: string;
   scopeId?: string;
   truncate?: boolean;
-  onFilterAdded?: () => void;
 }
 
 export const disableHoverActions = (timelineId: string | undefined): boolean =>
@@ -131,38 +127,13 @@ export const getStyle = (
 
 const DraggableOnWrapperComponent: React.FC<Props> = ({
   dataProvider,
-  // hideTopN = false,
-  // onFilterAdded,
   render,
-  // fieldType = '',
-  // isAggregatable = false,
   scopeId,
   truncate,
 }) => {
   const [providerRegistered, setProviderRegistered] = useState(false);
   const isDisabled = dataProvider.id.includes(`-${ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID}-`);
   const dispatch = useDispatch();
-  // const {
-  //   closePopOverTrigger,
-  //   handleClosePopOverTrigger,
-  //   hoverActionsOwnFocus,
-  //   hoverContent,
-  //   keyboardHandlerRef,
-  //   onCloseRequested,
-  //   openPopover,
-  //   onFocus,
-  //   setContainerRef,
-  //   isShowingTopN,
-  // } = useHoverActions({
-  //   dataProvider,
-  //   hideTopN,
-  //   onFilterAdded,
-  //   render,
-  //   fieldType,
-  //   isAggregatable,
-  //   scopeId,
-  //   truncate,
-  // });
 
   const data = useMemo(() => {
     const { value, field } = dataProvider.queryMatch;
@@ -219,7 +190,6 @@ const DraggableOnWrapperComponent: React.FC<Props> = ({
         {...provided.dragHandleProps}
         ref={(e: HTMLDivElement) => {
           provided.innerRef(e);
-          // setContainerRef(e);
         }}
         data-test-subj="providerContainer"
         isDragging={snapshot.isDragging}
@@ -247,17 +217,8 @@ const DraggableOnWrapperComponent: React.FC<Props> = ({
         )}
       </ProviderContainer>
     ),
-    // [dataProvider, registerProvider, render, setContainerRef, truncate]
     [dataProvider, registerProvider, render, truncate]
   );
-
-  // const { onBlur, onKeyDown } = useDraggableKeyboardWrapper({
-  //   closePopover: handleClosePopOverTrigger,
-  //   draggableId: getDraggableId(dataProvider.id),
-  //   fieldName: dataProvider.queryMatch.field,
-  //   keyboardHandlerRef,
-  //   openPopover,
-  // });
 
   const DroppableContent = useCallback(
     (droppableProvided) => (
@@ -265,10 +226,6 @@ const DraggableOnWrapperComponent: React.FC<Props> = ({
         <div
           className={DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME}
           data-test-subj="draggableWrapperKeyboardHandler"
-          // onClick={onFocus}
-          // onBlur={onBlur}
-          // onKeyDown={onKeyDown}
-          // ref={keyboardHandlerRef}
           role="button"
           tabIndex={0}
         >
@@ -284,7 +241,6 @@ const DraggableOnWrapperComponent: React.FC<Props> = ({
         {droppableProvided.placeholder}
       </div>
     ),
-    // [DraggableContent, dataProvider.id, isDisabled, keyboardHandlerRef, onBlur, onFocus, onKeyDown]
     [DraggableContent, dataProvider.id, isDisabled]
   );
 
@@ -305,135 +261,66 @@ const DraggableOnWrapperComponent: React.FC<Props> = ({
     [DroppableContent, RenderClone, dataProvider.id, isDisabled]
   );
 
-  const renderContent = useCallback(() => content, [content]);
-
   if (isDisabled) return <>{content}</>;
-
   return (
-    <WithCellActions
-      // alwaysShow={isShowingTopN || hoverActionsOwnFocus}
-      data={data}
-      scopeId={scopeId}
-      // hoverContent={disableHoverActions(scopeId) ? undefined : hoverContent}
-      // onCloseRequested={onCloseRequested}
-      render={renderContent}
-    />
-    // <WithHoverActions
-    //   alwaysShow={isShowingTopN || hoverActionsOwnFocus}
-    //   closePopOverTrigger={closePopOverTrigger}
-    //   hoverContent={hoverContent}
-    //   onCloseRequested={onCloseRequested}
-    //   render={renderContent}
-    // />
+    <DraggableCellActions data={data} scopeId={scopeId}>
+      {content}
+    </DraggableCellActions>
   );
 };
 
 const DraggableWrapperComponent: React.FC<Props> = ({
   dataProvider,
-  hideTopN = false,
   isDraggable = false,
-  onFilterAdded,
   render,
-  isAggregatable = false,
-  fieldType = '',
   scopeId,
   truncate,
 }) => {
-  // const {
-  //   closePopOverTrigger,
-  //   hoverActionsOwnFocus,
-  //   hoverContent,
-  //   onCloseRequested,
-  //   setContainerRef,
-  //   isShowingTopN,
-  // } = useHoverActions({
-  //   dataProvider,
-  //   hideTopN,
-  //   isDraggable,
-  //   isAggregatable,
-  //   fieldType,
-  //   onFilterAdded,
-  //   render,
-  //   scopeId,
-  //   truncate,
-  // });
-
   const data = useMemo(() => {
     const { value, field } = dataProvider.queryMatch;
     return { value, field };
   }, [dataProvider.queryMatch]);
 
-  const renderContent = useCallback(
-    () => (
-      <div
-        // ref={(e: HTMLDivElement) => {
-        //   setContainerRef(e);
-        // }}
-        tabIndex={-1}
-        data-provider-id={getDraggableId(dataProvider.id)}
-      >
-        {truncate ? (
-          <TruncatableText data-test-subj="render-truncatable-content">
-            {render(dataProvider, null, {
-              isDragging: false,
-              isDropAnimating: false,
-              isClone: false,
-              dropAnimation: null,
-              draggingOver: null,
-              combineWith: null,
-              combineTargetFor: null,
-              mode: null,
-            })}
-          </TruncatableText>
-        ) : (
-          <ProviderContentWrapper
-            data-test-subj={`render-content-${dataProvider.queryMatch.field}`}
-          >
-            {render(dataProvider, null, {
-              isDragging: false,
-              isDropAnimating: false,
-              isClone: false,
-              dropAnimation: null,
-              draggingOver: null,
-              combineWith: null,
-              combineTargetFor: null,
-              mode: null,
-            })}
-          </ProviderContentWrapper>
-        )}
-      </div>
-    ),
-    [dataProvider, render, truncate]
-    // [dataProvider, render, setContainerRef, truncate]
-  );
   if (!isDraggable) {
-    // return (
-    //   <WithHoverActions
-    //     alwaysShow={isShowingTopN || hoverActionsOwnFocus}
-    //     closePopOverTrigger={closePopOverTrigger}
-    //     hoverContent={disableHoverActions(scopeId) ? undefined : hoverContent}
-    //     onCloseRequested={onCloseRequested}
-    //     render={renderContent}
-    //   />
-    // );
     return (
-      <WithCellActions
-        // alwaysShow={isShowingTopN || hoverActionsOwnFocus}
-        data={data}
-        scopeId={scopeId}
-        // hoverContent={disableHoverActions(scopeId) ? undefined : hoverContent}
-        // onCloseRequested={onCloseRequested}
-        render={renderContent}
-      />
+      <DraggableCellActions data={data} scopeId={scopeId}>
+        <div tabIndex={-1} data-provider-id={getDraggableId(dataProvider.id)}>
+          {truncate ? (
+            <TruncatableText data-test-subj="render-truncatable-content">
+              {render(dataProvider, null, {
+                isDragging: false,
+                isDropAnimating: false,
+                isClone: false,
+                dropAnimation: null,
+                draggingOver: null,
+                combineWith: null,
+                combineTargetFor: null,
+                mode: null,
+              })}
+            </TruncatableText>
+          ) : (
+            <ProviderContentWrapper
+              data-test-subj={`render-content-${dataProvider.queryMatch.field}`}
+            >
+              {render(dataProvider, null, {
+                isDragging: false,
+                isDropAnimating: false,
+                isClone: false,
+                dropAnimation: null,
+                draggingOver: null,
+                combineWith: null,
+                combineTargetFor: null,
+                mode: null,
+              })}
+            </ProviderContentWrapper>
+          )}
+        </div>
+      </DraggableCellActions>
     );
   }
   return (
     <DraggableOnWrapperComponent
       dataProvider={dataProvider}
-      // hideTopN={hideTopN}
-      // onFilterAdded={onFilterAdded}
-      // fieldType={fieldType}
-      // isAggregatable={isAggregatable}
       render={render}
       scopeId={scopeId}
       truncate={truncate}
