@@ -135,7 +135,9 @@ describe(
         assertDetailsNotExist(SUPPRESS_FOR_DETAILS);
       });
       cy.get(SCHEDULE_DETAILS).within(() => {
-        getDetails(RUNS_EVERY_DETAILS).should('have.text', `${rule.interval}`);
+        getDetails(RUNS_EVERY_DETAILS)
+          .find(INTERVAL_ABBR_VALUE)
+          .should('have.text', `${rule.interval}`);
         const humanizedDuration = getHumanizedDuration(
           rule.from ?? 'now-6m',
           rule.interval ?? '5m'
