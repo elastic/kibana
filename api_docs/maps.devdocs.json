@@ -1386,7 +1386,7 @@
                 "section": "def-common.Query",
                 "text": "Query"
               },
-              " | undefined; version?: string | undefined; filters?: ",
+              " | undefined; filters?: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -1394,7 +1394,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[] | undefined; description?: string | undefined; executionContext?: ",
+              "[] | undefined; description?: string | undefined; version?: string | undefined; executionContext?: ",
               {
                 "pluginId": "@kbn/core-execution-context-common",
                 "scope": "common",
@@ -1474,7 +1474,7 @@
                 "section": "def-common.Query",
                 "text": "Query"
               },
-              " | undefined; version?: string | undefined; filters?: ",
+              " | undefined; filters?: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -1482,7 +1482,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[] | undefined; description?: string | undefined; executionContext?: ",
+              "[] | undefined; description?: string | undefined; version?: string | undefined; executionContext?: ",
               {
                 "pluginId": "@kbn/core-execution-context-common",
                 "scope": "common",
@@ -4597,6 +4597,100 @@
           "path": "x-pack/plugins/maps/public/api/start_api.ts",
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "maps",
+          "id": "def-public.MapsStartApi.Map",
+          "type": "Function",
+          "tags": [],
+          "label": "Map",
+          "description": [],
+          "signature": [
+            "React.FunctionComponent<",
+            "Props",
+            ">"
+          ],
+          "path": "x-pack/plugins/maps/public/api/start_api.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "maps",
+              "id": "def-public.MapsStartApi.Map.$1",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "P & { children?: React.ReactNode; }"
+              ],
+              "path": "node_modules/@types/react/index.d.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            },
+            {
+              "parentPluginId": "maps",
+              "id": "def-public.MapsStartApi.Map.$2",
+              "type": "Any",
+              "tags": [],
+              "label": "context",
+              "description": [],
+              "signature": [
+                "any"
+              ],
+              "path": "node_modules/@types/react/index.d.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            }
+          ]
+        },
+        {
+          "parentPluginId": "maps",
+          "id": "def-public.MapsStartApi.PassiveMap",
+          "type": "Function",
+          "tags": [],
+          "label": "PassiveMap",
+          "description": [],
+          "signature": [
+            "React.FunctionComponent<",
+            "Props",
+            ">"
+          ],
+          "path": "x-pack/plugins/maps/public/api/start_api.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "maps",
+              "id": "def-public.MapsStartApi.PassiveMap.$1",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "P & { children?: React.ReactNode; }"
+              ],
+              "path": "node_modules/@types/react/index.d.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            },
+            {
+              "parentPluginId": "maps",
+              "id": "def-public.MapsStartApi.PassiveMap.$2",
+              "type": "Any",
+              "tags": [],
+              "label": "context",
+              "description": [],
+              "signature": [
+                "any"
+              ],
+              "path": "node_modules/@types/react/index.d.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            }
+          ]
         },
         {
           "parentPluginId": "maps",

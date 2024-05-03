@@ -46,7 +46,7 @@ export enum FEATURE_FLAG_NAMES {
   /**
    * Used to enable the new stack navigation around solutions during the rollout period.
    */
-  'navigation.solutionNavEnabled' = 'navigation.solutionNavEnabled',
+  'solutionNavEnabled' = 'solutionNavEnabled',
 }
 
 /**
