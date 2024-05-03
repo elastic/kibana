@@ -371,6 +371,9 @@ export interface UnifiedDataTableProps {
    * This data is sent directly to actions.
    */
   cellActionsMetadata?: Record<string, unknown>;
+  /**
+   * Optional extra props passed to the renderCellValue function/component.
+   */
   cellContext?: EuiDataGridProps['cellContext'];
 }
 
