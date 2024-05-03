@@ -694,7 +694,7 @@ export class SearchSource {
         const sort = normalizeSortRequest(
           val,
           // todo - need all fields in the sort request
-          await this.getDataView(),
+          this.getDataView(),
           getConfig(UI_SETTINGS.SORT_OPTIONS)
         );
         return addToBody(key, sort);
