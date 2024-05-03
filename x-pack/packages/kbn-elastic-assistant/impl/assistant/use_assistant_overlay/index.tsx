@@ -12,9 +12,11 @@ import { useAssistantContext } from '../../assistant_context';
 import { getUniquePromptContextId } from '../../assistant_context/helpers';
 import type { PromptContext } from '../prompt_context/types';
 import { useConversation } from '../use_conversation';
-import { getDefaultConnector } from '../helpers';
+import { getDefaultConnector, mergeBaseWithPersistedConversations } from '../helpers';
 import { getGenAiConfig } from '../../connectorland/helpers';
 import { useLoadConnectors } from '../../connectorland/use_load_connectors';
+import { FetchConversationsResponse, useFetchCurrentUserConversations } from '../api';
+import { Conversation } from '../../assistant_context/types';
 
 interface UseAssistantOverlay {
   showAssistantOverlay: (show: boolean, silent?: boolean) => void;
@@ -86,6 +88,17 @@ export const useAssistantOverlay = (
 
   const { getConversation, createConversation } = useConversation();
 
+  const onFetchedConversations = useCallback(
+    (conversationsData: FetchConversationsResponse): Record<string, Conversation> =>
+      mergeBaseWithPersistedConversations({}, conversationsData),
+    []
+  );
+  const { data: conversations, isLoading } = useFetchCurrentUserConversations({
+    http,
+    onFetch: onFetchedConversations,
+    isAssistantEnabled: true,
+  });
+
   // memoize the props so that we can use them in the effect below:
   const _category: PromptContext['category'] = useMemo(() => category, [category]);
   const _description: PromptContext['description'] = useMemo(() => description, [description]);
@@ -116,13 +129,11 @@ export const useAssistantOverlay = (
   const showAssistantOverlay = useCallback(
     async (showOverlay: boolean, silent?: boolean) => {
       let conversation;
-      try {
-        conversation = await getConversation(promptContextId, silent);
-      } catch (e) {
-        /* empty */
+      if (!isLoading) {
+        conversation = conversationTitle ? conversations[conversationTitle] : undefined;
       }
 
-      if (!conversation && defaultConnector) {
+      if (!conversation && defaultConnector && !isLoading) {
         try {
           conversation = await createConversation({
             apiConfig: {
@@ -132,7 +143,6 @@ export const useAssistantOverlay = (
             },
             category: 'assistant',
             title: conversationTitle ?? '',
-            id: promptContextId,
           });
         } catch (e) {
           /* empty */
@@ -151,9 +161,10 @@ export const useAssistantOverlay = (
       apiConfig,
       assistantContextShowOverlay,
       conversationTitle,
+      conversations,
       createConversation,
       defaultConnector,
-      getConversation,
+      isLoading,
       promptContextId,
     ]
   );
