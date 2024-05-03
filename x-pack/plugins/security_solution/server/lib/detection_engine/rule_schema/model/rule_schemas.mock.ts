@@ -109,7 +109,7 @@ export const getEsqlRuleParams = (rewrites?: Partial<EsqlRuleParams>): EsqlRuleP
     ...getBaseRuleParams(),
     type: 'esql',
     language: 'esql',
-    query: 'from auditbeat* [metadata _id]',
+    query: 'from auditbeat* metadata _id',
     ...rewrites,
   };
 };

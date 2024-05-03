@@ -406,7 +406,7 @@ export const getEsqlRule = (
 ): EsqlRuleCreateProps => ({
   type: 'esql',
   language: 'esql',
-  query: 'from auditbeat-* [metadata _id, _version, _index] | keep agent.*,_id | eval test_id=_id',
+  query: 'from auditbeat-* metadata _id, _version, _index | keep agent.*,_id | eval test_id=_id',
   name: 'ES|QL Rule',
   description: 'The new rule description.',
   severity: 'high',

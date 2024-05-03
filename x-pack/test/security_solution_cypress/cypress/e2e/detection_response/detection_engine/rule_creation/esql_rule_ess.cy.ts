@@ -239,7 +239,7 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
       const SUPPRESS_BY_FIELDS = [CUSTOM_ESQL_FIELD, 'agent.type'];
 
       const queryWithCustomFields = [
-        `from auditbeat* [metadata _id, _version, _index]`,
+        `from auditbeat* metadata _id, _version, _index`,
         `eval ${CUSTOM_ESQL_FIELD} = agent.name`,
         `drop agent.*`,
       ].join(' | ');

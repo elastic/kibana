@@ -62,7 +62,7 @@ export default ({ getService }: FtrProviderContext) => {
   const internalIdPipe = (id: string) => `| where id=="${id}"`;
 
   const getNonAggRuleQueryWithMetadata = (id: string) =>
-    `from ecs_compliant [metadata _id, _index, _version] ${internalIdPipe(id)}`;
+    `from ecs_compliant metadata _id, _index, _version ${internalIdPipe(id)}`;
 
   describe('@ess ES|QL rule type, alert suppression', () => {
     before(async () => {
@@ -457,7 +457,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       const rule: EsqlRuleCreateProps = {
         ...getCreateEsqlRulesSchemaMock('rule-1', true),
-        query: `from ecs_compliant [metadata _id, _index, _version] ${internalIdPipe(
+        query: `from ecs_compliant metadata _id, _index, _version ${internalIdPipe(
           id
         )} | where host.name=="host-a"`,
         from: 'now-35m',
@@ -987,7 +987,7 @@ export default ({ getService }: FtrProviderContext) => {
       const rule: EsqlRuleCreateProps = {
         ...getCreateEsqlRulesSchemaMock('rule-1', true),
         // ES|QL query creates new field custom_field - prefix_host, prefix_test
-        query: `from ecs_compliant [metadata _id] ${internalIdPipe(
+        query: `from ecs_compliant metadata _id ${internalIdPipe(
           id
         )} | eval custom_field=concat("prefix_", left(host.name, 4))`,
         from: 'now-35m',
@@ -1085,7 +1085,7 @@ export default ({ getService }: FtrProviderContext) => {
       const rule: EsqlRuleCreateProps = {
         ...getCreateEsqlRulesSchemaMock('rule-1', true),
         // ES|QL query creates new field custom_field - prefix_host, prefix_test
-        query: `from ecs_compliant [metadata _id] ${internalIdPipe(
+        query: `from ecs_compliant metadata _id ${internalIdPipe(
           id
         )} | eval custom_field=concat("prefix_", left(host.name, 4))`,
         from: 'now-35m',
@@ -1167,7 +1167,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       const rule: EsqlRuleCreateProps = {
         ...getCreateEsqlRulesSchemaMock('rule-1', true),
-        query: `from ecs_compliant [metadata _id] ${internalIdPipe(id)} | drop host.name`,
+        query: `from ecs_compliant metadata _id ${internalIdPipe(id)} | drop host.name`,
         from: 'now-35m',
         interval: '30m',
         alert_suppression: {
@@ -1241,7 +1241,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       const rule: EsqlRuleCreateProps = {
         ...getCreateEsqlRulesSchemaMock('rule-1', true),
-        query: `from ecs_compliant [metadata _id] ${internalIdPipe(id)} | drop host.name`,
+        query: `from ecs_compliant metadata _id ${internalIdPipe(id)} | drop host.name`,
         from: 'now-35m',
         interval: '30m',
         alert_suppression: {
@@ -1326,7 +1326,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const rule: EsqlRuleCreateProps = {
           ...getCreateEsqlRulesSchemaMock('rule-1', true),
-          query: `from ecs_compliant [metadata _id, _index, _version] ${internalIdPipe(
+          query: `from ecs_compliant metadata _id, _index, _version ${internalIdPipe(
             id
           )} | where host.name=="host-a"`,
           alert_suppression: {
