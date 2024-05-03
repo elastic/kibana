@@ -44,7 +44,7 @@ describe('useTimelineColumns', () => {
       });
       expect(result.current).toMatchSnapshot();
     });
-    it('should have a width of 152 for 5 actions', () => {
+    it('should have a width of 124 for 5 actions', () => {
       useLicenseMock.mockReturnValue({
         isEnterprise: () => false,
       });
@@ -52,9 +52,9 @@ describe('useTimelineColumns', () => {
         wrapper: TestProviders,
       });
       const controlColumn = result.current[0] as EuiDataGridControlColumn;
-      expect(controlColumn.width).toBe(152);
+      expect(controlColumn.width).toBe(124);
     });
-    it('should have a width of 180 for 6 actions', () => {
+    it('should have a width of 152 for 6 actions', () => {
       useLicenseMock.mockReturnValue({
         isEnterprise: () => true,
       });
@@ -62,7 +62,7 @@ describe('useTimelineColumns', () => {
         wrapper: TestProviders,
       });
       const controlColumn = result.current[0] as EuiDataGridControlColumn;
-      expect(controlColumn.width).toBe(180);
+      expect(controlColumn.width).toBe(152);
     });
   });
 });

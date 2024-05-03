@@ -41,6 +41,13 @@ exports[`CustomTimelineDataGridBody should render exactly as snapshots 1`] = `
   background-color: #1d1e24;
 }
 
+.c0:has(.unifiedDataTable__cell--expanded) .euiDataGridRowCell--firstColumn,
+.c0:has(.unifiedDataTable__cell--expanded) .euiDataGridRowCell--lastColumn,
+.c0:has(.unifiedDataTable__cell--expanded) .euiDataGridRowCell--controlColumn,
+.c0:has(.unifiedDataTable__cell--expanded) .udt--customRow {
+  background-color: #2e2d25;
+}
+
 .c1 {
   display: -webkit-box;
   display: -webkit-flex;
