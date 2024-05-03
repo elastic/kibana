@@ -8,11 +8,21 @@
 
 export type { SecurityServiceSetup, SecurityServiceStart } from './src/contracts';
 export type { CoreAuthenticationService } from './src/authc';
+export type { CoreAuditService } from './src/audit';
 export type {
   CoreSecurityDelegateContract,
   AuthenticationServiceContract,
+  AuditServiceContract,
 } from './src/api_provider';
 export type {
   SecurityRequestHandlerContext,
   AuthcRequestHandlerContext,
+  AuditRequestHandlerContext,
 } from './src/request_handler_context';
+export type {
+  AuditEvent,
+  AuditHttp,
+  AuditKibana,
+  AuditRequest,
+} from './src/audit_logging/audit_events';
+export type { AuditLogger } from './src/audit_logging/audit_logger';

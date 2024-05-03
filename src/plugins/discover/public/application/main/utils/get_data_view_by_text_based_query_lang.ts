@@ -6,11 +6,7 @@
  * Side Public License, v 1.
  */
 import type { AggregateQuery } from '@kbn/es-query';
-import {
-  getESQLAdHocDataview,
-  getIndexPatternFromSQLQuery,
-  getIndexPatternFromESQLQuery,
-} from '@kbn/esql-utils';
+import { getESQLAdHocDataview, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { DiscoverServices } from '../../../build_services';
 
@@ -19,13 +15,7 @@ export async function getDataViewByTextBasedQueryLang(
   currentDataView: DataView | undefined,
   services: DiscoverServices
 ) {
-  let indexPatternFromQuery = '';
-  if ('sql' in query) {
-    indexPatternFromQuery = getIndexPatternFromSQLQuery(query.sql);
-  }
-  if ('esql' in query) {
-    indexPatternFromQuery = getIndexPatternFromESQLQuery(query.esql);
-  }
+  const indexPatternFromQuery = getIndexPatternFromESQLQuery(query.esql);
 
   if (
     currentDataView?.isPersisted() ||
