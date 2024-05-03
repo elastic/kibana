@@ -39,11 +39,16 @@ export const DATA_DATASETS_INDEX_PATTERNS = [
 
   // Observability - Elastic
   { pattern: 'filebeat-*', patternName: 'filebeat', shipper: 'filebeat' },
+  { pattern: '*filebeat*', patternName: 'generic-filebeat' },
   { pattern: 'metricbeat-*', patternName: 'metricbeat', shipper: 'metricbeat' },
+  { pattern: '*metricbeat*', patternName: 'generic-metricbeat' },
   { pattern: 'apm-*', patternName: 'apm', shipper: 'apm' },
   { pattern: 'functionbeat-*', patternName: 'functionbeat', shipper: 'functionbeat' },
+  { pattern: '*functionbeat*', patternName: 'generic-functionbeat' },
   { pattern: 'heartbeat-*', patternName: 'heartbeat', shipper: 'heartbeat' },
+  { pattern: '*heartbeat*', patternName: 'generic-heartbeat' },
   { pattern: 'logstash-*', patternName: 'logstash', shipper: 'logstash' },
+  { pattern: '*logstash*', patternName: 'generic-logstash' },
   // Observability - 3rd party
   { pattern: 'fluentd*', patternName: 'fluentd' },
   { pattern: 'telegraf*', patternName: 'telegraf' },
@@ -54,15 +59,15 @@ export const DATA_DATASETS_INDEX_PATTERNS = [
   { pattern: '*logs*', patternName: 'third-party-logs' },
 
   // Security - Elastic
-  { pattern: '*logstash*', patternName: 'logstash', shipper: 'logstash' },
+  { pattern: 'logstash-*', patternName: 'logstash', shipper: 'logstash' },
   { pattern: 'endgame-*', patternName: 'endgame', shipper: 'endgame' },
   { pattern: 'logs-endpoint.*', patternName: 'logs-endpoint', shipper: 'endpoint' }, // It should be caught by the `mappings` logic, but just in case
   { pattern: 'metrics-endpoint.*', patternName: 'metrics-endpoint', shipper: 'endpoint' }, // It should be caught by the `mappings` logic, but just in case
   { pattern: '.siem-signals-*', patternName: 'siem-signals' },
-  { pattern: '*auditbeat*', patternName: 'auditbeat', shipper: 'auditbeat' },
-  { pattern: '*winlogbeat*', patternName: 'winlogbeat', shipper: 'winlogbeat' },
-  { pattern: '*packetbeat*', patternName: 'packetbeat', shipper: 'packetbeat' },
-  { pattern: '*filebeat*', patternName: 'filebeat', shipper: 'filebeat' },
+  { pattern: 'auditbeat-*', patternName: 'auditbeat', shipper: 'auditbeat' },
+  { pattern: 'winlogbeat-*', patternName: 'winlogbeat', shipper: 'winlogbeat' },
+  { pattern: 'packetbeat-*', patternName: 'packetbeat', shipper: 'packetbeat' },
+  { pattern: 'filebeat-*', patternName: 'filebeat', shipper: 'filebeat' },
   { pattern: '.internal.alerts-*', patternName: 'alerts' },
   // Security - 3rd party
   { pattern: '*apache*', patternName: 'apache' }, // Already in Observability (keeping it in here for documentation)
