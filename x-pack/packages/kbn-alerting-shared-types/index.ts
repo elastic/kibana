@@ -24,4 +24,5 @@ export type {
   LatestLastScheduledActionsSchema as LastScheduledActions,
 } from './src/task_state';
 export { stateSchemaByVersion, emptyState as emptyTaskState } from './src/task_state';
-export * from './src/comparators';
+export { COMPARATORS } from './src/comparators';
+export type { Comparator } from './src/comparators';
