@@ -37,7 +37,7 @@ export class SearchCursorPit extends SearchCursor {
     this.cursorId = await this.openPointInTime();
   }
 
-  private async openPointInTime() {
+  protected async openPointInTime() {
     const { includeFrozen, maxConcurrentShardRequests, scroll, taskInstanceFields } = this.settings;
 
     let pitId: string | undefined;
@@ -74,13 +74,17 @@ export class SearchCursorPit extends SearchCursor {
     return pitId;
   }
 
-  private async searchWithPit(searchBody: SearchRequest) {
+  protected async searchWithPit(searchBody: SearchRequest) {
     const { maxConcurrentShardRequests, scroll, taskInstanceFields } = this.settings;
+
+    // maxConcurrentShardRequests=0 is not supported
+    const effectiveMaxConcurrentShardRequests =
+      maxConcurrentShardRequests > 0 ? maxConcurrentShardRequests : undefined;
 
     const searchParamsPit = {
       params: {
         body: searchBody,
-        max_concurrent_shard_requests: maxConcurrentShardRequests,
+        max_concurrent_shard_requests: effectiveMaxConcurrentShardRequests,
       },
     };
 
@@ -146,14 +150,14 @@ export class SearchCursorPit extends SearchCursor {
     this.setSearchAfter(hits); // for pit only
   }
 
-  private getSearchAfter() {
+  protected getSearchAfter() {
     return this.searchAfter;
   }
 
   /**
    * For managing the search_after parameter, needed for paging using point-in-time
    */
-  private setSearchAfter(hits: Array<estypes.SearchHit<unknown>>) {
+  protected setSearchAfter(hits: Array<estypes.SearchHit<unknown>>) {
     // Update last sort results for next query. PIT is used, so the sort results
     // automatically include _shard_doc as a tiebreaker
     this.searchAfter = hits[hits.length - 1]?.sort as estypes.SortResults | undefined;
