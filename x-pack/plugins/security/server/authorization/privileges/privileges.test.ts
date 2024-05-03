@@ -790,6 +790,7 @@ describe('features', () => {
           ...(expectDecryptedTelemetry ? [actions.api.get('decryptedTelemetry')] : []),
           ...(expectGetFeatures ? [actions.api.get('features')] : []),
           ...(expectGetFeatures ? [actions.api.get('taskManager')] : []),
+          ...(expectGetFeatures ? [actions.api.get('manageSpaces')] : []),
           ...(expectManageSpaces
             ? [
                 actions.space.manage,
@@ -1332,6 +1333,7 @@ describe('features', () => {
           ...(expectDecryptedTelemetry ? [actions.api.get('decryptedTelemetry')] : []),
           ...(expectGetFeatures ? [actions.api.get('features')] : []),
           ...(expectGetFeatures ? [actions.api.get('taskManager')] : []),
+          ...(expectGetFeatures ? [actions.api.get('manageSpaces')] : []),
           ...(expectManageSpaces
             ? [
                 actions.space.manage,
@@ -1500,6 +1502,7 @@ describe('features', () => {
           ...(expectDecryptedTelemetry ? [actions.api.get('decryptedTelemetry')] : []),
           ...(expectGetFeatures ? [actions.api.get('features')] : []),
           ...(expectGetFeatures ? [actions.api.get('taskManager')] : []),
+          ...(expectGetFeatures ? [actions.api.get('manageSpaces')] : []),
           ...(expectManageSpaces
             ? [
                 actions.space.manage,
