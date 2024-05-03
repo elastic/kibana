@@ -53,11 +53,11 @@ import {
   MaxSignals,
   ThreatArray,
   SetupGuide,
+  RelatedIntegrationArray,
   RuleObjectId,
   RuleSignatureId,
   IsRuleImmutable,
   RuleSource,
-  RelatedIntegrationArray,
   RequiredFieldArray,
   RuleQuery,
   IndexPatternArray,
@@ -136,6 +136,7 @@ export const BaseDefaultableFields = z.object({
   max_signals: MaxSignals.optional(),
   threat: ThreatArray.optional(),
   setup: SetupGuide.optional(),
+  related_integrations: RelatedIntegrationArray.optional(),
 });
 
 export type BaseCreateProps = z.infer<typeof BaseCreateProps>;
@@ -163,7 +164,6 @@ export const ResponseFields = z.object({
   created_at: z.string().datetime(),
   created_by: z.string(),
   revision: z.number().int().min(0),
-  related_integrations: RelatedIntegrationArray,
   required_fields: RequiredFieldArray,
   execution_summary: RuleExecutionSummary.optional(),
 });

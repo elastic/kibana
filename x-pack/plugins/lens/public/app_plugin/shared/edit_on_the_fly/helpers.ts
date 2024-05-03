@@ -5,7 +5,6 @@
  * 2.0.
  */
 import {
-  getIndexPatternFromSQLQuery,
   getIndexPatternFromESQLQuery,
   getESQLAdHocDataview,
   getESQLQueryColumns,
@@ -28,13 +27,7 @@ export const getSuggestions = async (
   abortController?: AbortController
 ) => {
   try {
-    let indexPattern = '';
-    if ('sql' in query) {
-      indexPattern = getIndexPatternFromSQLQuery(query.sql);
-    }
-    if ('esql' in query) {
-      indexPattern = getIndexPatternFromESQLQuery(query.esql);
-    }
+    const indexPattern = getIndexPatternFromESQLQuery(query.esql);
     const dataViewSpec = adHocDataViews.find((adHoc) => {
       return adHoc.name === indexPattern;
     });
