@@ -48,6 +48,7 @@ import { useTags } from './use_tags';
 import { useInRouterContext, useUrlState } from './use_url_state';
 import { RowActions, TableItemsRowActions } from './types';
 import { UserAvatarTip } from './components/user_avatar_tip';
+import { NoUsersTip } from './components/user_missing_tip';
 
 interface ContentEditorConfig
   extends Pick<OpenContentEditorParams, 'isReadonly' | 'onSave' | 'customValidators'> {
@@ -569,9 +570,14 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     if (hasCreatedByMetadata && createdByEnabled) {
       columns.push({
         field: tableColumnMetadata.createdBy.field,
-        name: i18n.translate('contentManagement.tableList.createdByColumnTitle', {
-          defaultMessage: 'Creator',
-        }),
+        name: (
+          <>
+            {i18n.translate('contentManagement.tableList.createdByColumnTitle', {
+              defaultMessage: 'Creator',
+            })}
+            <NoUsersTip />
+          </>
+        ),
         render: (field: string, record: { createdBy?: string }) =>
           record.createdBy ? <UserAvatarTip uid={record.createdBy} /> : null,
         sortable:
