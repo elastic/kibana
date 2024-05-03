@@ -172,7 +172,7 @@ export function runSaveAs(this: DashboardContainer) {
     if (lastSavedId) {
       const [baseTitle, baseCount] = extractTitleAndCount(currentState.title);
       newTitle = `${baseTitle} (${baseCount + 1})`;
-      customModalTitle = i18n.translate('dashboard.topNav.saveModal.modalTitle', {
+      customModalTitle = i18n.translate('dashboard.topNav.saveAs.modalTitle', {
         defaultMessage: 'Save as new dashboard',
       });
     }
@@ -238,83 +238,128 @@ export async function runQuickSave(this: DashboardContainer) {
 export async function runClone(this: DashboardContainer) {
   const {
     dashboardContentManagement: { saveDashboardState, checkForDuplicateDashboardTitle },
+    savedObjectsTagging: { hasApi: hasSavedObjectsTagging },
   } = pluginServices.getServices();
 
   const { explicitInput: currentState } = this.getState();
 
-  return new Promise<SaveDashboardReturn | undefined>(async (resolve, reject) => {
-    try {
-      const [baseTitle, baseCount] = extractTitleAndCount(currentState.title);
-      let copyCount = baseCount;
-      let newTitle = `${baseTitle} (${copyCount})`;
-      while (
-        !(await checkForDuplicateDashboardTitle({
-          title: newTitle,
-          lastSavedTitle: currentState.title,
-          copyOnSave: true,
-          isTitleDuplicateConfirmed: false,
-        }))
-      ) {
-        copyCount++;
-        newTitle = `${baseTitle} (${copyCount})`;
-      }
-
-      let stateToSave: DashboardContainerInput & {
-        controlGroupInput?: PersistableControlGroupInput;
-      } = currentState;
-      if (this.controlGroup) {
-        stateToSave = {
-          ...stateToSave,
-          controlGroupInput: this.controlGroup.getPersistableInput(),
-        };
-      }
-
-      const isManaged = this.getState().componentState.managed;
-      const newPanels = await (async () => {
-        if (!isManaged) return currentState.panels;
-
-        // this is a managed dashboard - unlink all by reference embeddables on clone
-        const unlinkedPanels: DashboardPanelMap = {};
-        for (const [panelId, panel] of Object.entries(currentState.panels)) {
-          const child = this.getChild(panelId);
-          if (
-            child &&
-            isReferenceOrValueEmbeddable(child) &&
-            child.inputIsRefType(child.getInput() as EmbeddableInput)
-          ) {
-            const valueTypeInput = await child.getInputAsValueType();
-            unlinkedPanels[panelId] = {
-              ...panel,
-              explicitInput: valueTypeInput,
-            };
-            continue;
-          }
-          unlinkedPanels[panelId] = panel;
+  return new Promise<SaveDashboardReturn | undefined>((resolve, reject) => {
+    const onDuplicateAttempt = async ({
+      newTags,
+      newTitle,
+      newDescription,
+      onTitleDuplicate,
+    }: DashboardSaveOptions): Promise<Pick<SaveDashboardReturn, 'id' | 'error'>> => {
+      try {
+        while (
+          !(await checkForDuplicateDashboardTitle({
+            title: newTitle,
+            onTitleDuplicate,
+            lastSavedTitle: currentState.title,
+            copyOnSave: true,
+            isTitleDuplicateConfirmed: false,
+          }))
+        ) {
+          return {};
         }
-        return unlinkedPanels;
-      })();
 
-      const saveResult = await saveDashboardState({
-        saveOptions: {
-          saveAsCopy: true,
-        },
-        currentState: {
-          ...stateToSave,
-          panels: newPanels,
+        const stateFromSaveModal: Pick<
+          DashboardStateFromSaveModal,
+          'title' | 'tags' | 'description'
+        > = {
           title: newTitle,
-        },
-      });
-      this.savedObjectReferences = saveResult.references ?? [];
-      resolve(saveResult);
-      return saveResult.id
-        ? {
-            id: saveResult.id,
-          }
-        : {
-            error: saveResult.error,
+          tags: [] as string[],
+          description: newDescription,
+        };
+
+        if (hasSavedObjectsTagging && newTags) {
+          // remove `hasSavedObjectsTagging` once the savedObjectsTagging service is optional
+          stateFromSaveModal.tags = newTags;
+        }
+
+        let stateToSave: DashboardContainerInput & {
+          controlGroupInput?: PersistableControlGroupInput;
+        } = {
+          ...currentState,
+          ...stateFromSaveModal,
+        };
+
+        if (this.controlGroup) {
+          stateToSave = {
+            ...stateToSave,
+            controlGroupInput: this.controlGroup.getPersistableInput(),
           };
-    } catch (error) {
-      reject(error);
-    }
+        }
+
+        const isManaged = this.getState().componentState.managed;
+        const newPanels = await (async () => {
+          if (!isManaged) return currentState.panels;
+
+          // this is a managed dashboard - unlink all by reference embeddables on clone
+          const unlinkedPanels: DashboardPanelMap = {};
+          for (const [panelId, panel] of Object.entries(currentState.panels)) {
+            const child = this.getChild(panelId);
+            if (
+              child &&
+              isReferenceOrValueEmbeddable(child) &&
+              child.inputIsRefType(child.getInput() as EmbeddableInput)
+            ) {
+              const valueTypeInput = await child.getInputAsValueType();
+              unlinkedPanels[panelId] = {
+                ...panel,
+                explicitInput: valueTypeInput,
+              };
+              continue;
+            }
+            unlinkedPanels[panelId] = panel;
+          }
+          return unlinkedPanels;
+        })();
+
+        const saveResult = await saveDashboardState({
+          saveOptions: {
+            saveAsCopy: true,
+          },
+          currentState: {
+            ...stateToSave,
+            panels: newPanels,
+            title: newTitle,
+          },
+        });
+        this.savedObjectReferences = saveResult.references ?? [];
+        resolve(saveResult);
+        return saveResult.id
+          ? {
+              id: saveResult.id,
+            }
+          : {
+              error: saveResult.error,
+            };
+      } catch (error) {
+        reject(error);
+        return error;
+      }
+    };
+
+    const [baseTitle, baseCount] = extractTitleAndCount(currentState.title);
+    const newTitle = `${baseTitle} (${baseCount + 1})`;
+
+    const dashboardDuplicateModal = (
+      <DashboardSaveModal
+        tags={currentState.tags}
+        title={newTitle}
+        onClose={() => resolve(undefined)}
+        timeRestore={currentState.timeRestore}
+        description={currentState.description ?? ''}
+        showCopyOnSave={false}
+        onSave={onDuplicateAttempt}
+        customModalTitle={i18n.translate('dashboard.topNav.duplicate.modalTitle', {
+          defaultMessage: 'Duplicate dashboard',
+        })}
+      />
+    );
+
+    this.clearOverlays();
+    showSaveModal(dashboardDuplicateModal);
   });
 }
