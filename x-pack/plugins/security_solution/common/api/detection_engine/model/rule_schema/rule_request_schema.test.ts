@@ -483,6 +483,19 @@ describe('rules schema', () => {
     );
   });
 
+  test('max_signals cannot be greater than 1000', () => {
+    const payload: RuleCreateProps = {
+      ...getCreateRulesSchemaMock(),
+      max_signals: 1001,
+    };
+
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual(
+      'max_signals: Number must be less than or equal to 1000'
+    );
+  });
+
   test('max_signals can be 1', () => {
     const payload: RuleCreateProps = {
       ...getCreateRulesSchemaMock(),
