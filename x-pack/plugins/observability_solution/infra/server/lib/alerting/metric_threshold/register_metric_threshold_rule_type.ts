@@ -55,7 +55,7 @@ export type MetricThresholdAlertType = Omit<RuleType, 'ActionGroupIdsOf'> & {
   ActionGroupIdsOf: MetricThresholdAllowedActionGroups;
 };
 
-export async function registerMetricThresholdRuleType(
+export function registerMetricThresholdRuleType(
   alertingPlugin: PluginSetupContract,
   libs: InfraBackendLibs,
   { featureFlags }: InfraConfig
