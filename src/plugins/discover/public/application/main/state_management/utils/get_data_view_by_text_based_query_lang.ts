@@ -8,7 +8,7 @@
 import type { AggregateQuery } from '@kbn/es-query';
 import { getESQLAdHocDataview, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { DiscoverServices } from '../../../build_services';
+import { DiscoverServices } from '../../../../build_services';
 
 export async function getDataViewByTextBasedQueryLang(
   query: AggregateQuery,

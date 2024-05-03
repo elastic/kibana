@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ToastsStart } from '@kbn/core/public';
-import { isTimeRangeValid } from '../../../utils/validate_time';
+import { isTimeRangeValid } from '../../../../utils/validate_time';
 
 /**
  * Validates a given time filter range, provided by URL or UI
