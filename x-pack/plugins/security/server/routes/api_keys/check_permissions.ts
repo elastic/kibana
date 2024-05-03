@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ValidKeysCache } from './check_permissions_cache';
 import type { RouteDefinitionParams } from '..';
 import type { ApiKey } from '../../../common/model';
 import { wrapIntoCustomErrorResponse } from '../../errors';
@@ -32,6 +33,7 @@ export function defineValidPermissionRoutes({
     // @ts-ignore undefined would return but is caught by the cache function
     createLicensedRouteHandler(async (context, request, response) => {
       try {
+        const apiKeysCache = new ValidKeysCache();
         const esClient = (await context.core).elasticsearch.client;
         const authenticationService = getAuthenticationService();
 
