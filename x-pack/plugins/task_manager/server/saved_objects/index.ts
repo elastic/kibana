@@ -13,6 +13,7 @@ import { getMigrations } from './migrations';
 import { TaskManagerConfig } from '../config';
 import { getOldestIdleActionTask } from '../queries/oldest_idle_action_task';
 import { TASK_MANAGER_INDEX } from '../constants';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
@@ -74,5 +75,19 @@ export function setupSavedObjects(
       } as estypes.QueryDslQueryContainer;
     },
     modelVersions: taskModelVersions,
+  });
+
+  savedObjects.registerType({
+    name: 'all_pods',
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    hidden: true,
+    namespaceType: 'agnostic',
+    mappings: {
+      properties: {
+        podNames: {
+          type: 'keyword',
+        },
+      },
+    },
   });
 }

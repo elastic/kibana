@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import * as k8s from '@kubernetes/client-node';
 import { rendezvousHash } from './rendezvous_hash';
 
@@ -23,16 +24,25 @@ const SHARD_3 = 'f';
 
 export class TaskPartitioner {
   private readonly enabled: boolean;
-  private readonly podName: string = process.env.HOSTNAME!;
+  private readonly podName: string;
   private readonly allPartitions: number[];
   private readonly k8sNamespace: string;
   private readonly k8sServiceLabelSelector: string;
+  private readonly savedObjectsRepository: ISavedObjectsRepository;
 
-  constructor(enabled: boolean, k8sNamespace: string, k8sServiceLabelSelector: string) {
+  constructor(
+    enabled: boolean,
+    podName: string,
+    k8sNamespace: string,
+    k8sServiceLabelSelector: string,
+    savedObjectsRepository: ISavedObjectsRepository
+  ) {
     this.enabled = enabled;
+    this.podName = podName;
     this.allPartitions = range(0, 360);
     this.k8sNamespace = k8sNamespace;
     this.k8sServiceLabelSelector = k8sServiceLabelSelector;
+    this.savedObjectsRepository = savedObjectsRepository;
   }
 
   // TODO: Implement some form of caching
@@ -78,6 +88,20 @@ export class TaskPartitioner {
   }
 
   private async getAllPodNames(): Promise<string[]> {
+    const result = await this.savedObjectsRepository.find<{ podNames: string[] }>({
+      type: 'all_pods',
+      perPage: 1,
+      sortField: 'created_at',
+      sortOrder: 'desc',
+    });
+    if (result.saved_objects.length === 0) {
+      throw new Error('No pods found');
+    } else {
+      const { podNames } = result.saved_objects[0].attributes;
+      console.log('Pods found:', JSON.stringify(podNames));
+      return podNames;
+    }
+
     const kc = new k8s.KubeConfig();
 
     kc.loadFromCluster();

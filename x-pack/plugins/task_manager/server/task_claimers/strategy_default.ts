@@ -171,6 +171,7 @@ async function markAvailableTasksAsClaimed({
   taskPartitioner,
 }: OwnershipClaimingOpts): Promise<UpdateByQueryResult> {
   const partitions = await taskPartitioner.getPartitions();
+  console.log('Running claiming on partitions:', JSON.stringify(partitions));
 
   const { taskTypesToSkip = [], taskTypesToClaim = [] } = groupBy(
     definitions.getAllTypes(),

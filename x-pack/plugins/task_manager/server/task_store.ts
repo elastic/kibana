@@ -513,6 +513,10 @@ export class TaskStore {
   ): Promise<UpdateByQueryResult> {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
     try {
+      if (opts.routing) {
+        console.log('Running Update By Query on', opts.routing);
+      }
+
       const // eslint-disable-next-line @typescript-eslint/naming-convention
         { total, updated, version_conflicts } = await this.esClientWithoutRetries.updateByQuery(
           {

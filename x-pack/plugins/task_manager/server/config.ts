@@ -157,7 +157,7 @@ export const configSchema = schema.object(
     }),
     claim_strategy: schema.string({ defaultValue: CLAIM_STRATEGY_DEFAULT }),
     request_timeouts: requestTimeoutsConfig,
-    k8s_task_partitioning_enabled: schema.boolean({ defaultValue: false }),
+    k8s_task_partitioning_enabled: schema.boolean({ defaultValue: true }),
   },
   {
     validate: (config) => {

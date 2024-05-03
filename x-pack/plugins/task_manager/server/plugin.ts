@@ -27,7 +27,7 @@ import { TaskDefinitionRegistry, TaskTypeDictionary, REMOVED_TYPES } from './tas
 import { AggregationOpts, FetchResult, SearchOpts, TaskStore } from './task_store';
 import { createManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskScheduling } from './task_scheduling';
-import { backgroundTaskUtilizationRoute, healthRoute, metricsRoute } from './routes';
+import { backgroundTaskUtilizationRoute, healthRoute, metricsRoute, podNamesRoute } from './routes';
 import { createMonitoringStats, MonitoringStats } from './monitoring';
 import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
 import { EphemeralTask, ConcreteTaskInstance } from './task';
@@ -93,6 +93,7 @@ export class TaskManagerPlugin
   private adHocTaskCounter: AdHocTaskCounter;
   private taskManagerMetricsCollector?: TaskManagerMetricsCollector;
   private nodeRoles: PluginInitializerContext['node']['roles'];
+  private podName?: string;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -115,6 +116,9 @@ export class TaskManagerPlugin
     plugins: { usageCollection?: UsageCollectionSetup }
   ): TaskManagerSetupContract {
     this.elasticsearchAndSOAvailability$ = getElasticsearchAndSOAvailability(core.status.core$);
+
+    const serverInfo = core.http.getServerInfo();
+    this.podName = serverInfo.name;
 
     setupSavedObjects(core.savedObjects, this.config);
     this.taskManagerId = this.initContext.env.instanceUuid;
@@ -167,6 +171,15 @@ export class TaskManagerPlugin
       metrics$: this.metrics$,
       resetMetrics$: this.resetMetrics$,
       taskManagerId: this.taskManagerId,
+    });
+    podNamesRoute({
+      router,
+      savedObjectsRepository: () =>
+        core
+          .getStartServices()
+          .then(([coreServices]) =>
+            coreServices.savedObjects.createInternalRepository(['all_pods'])
+          ),
     });
 
     core.status.derivedStatus$.subscribe((status) =>
@@ -261,8 +274,10 @@ export class TaskManagerPlugin
       // TODO: Pass the namespace and selectors in the config
       const taskPartitioner = new TaskPartitioner(
         this.config.k8s_task_partitioning_enabled,
+        this.podName!,
         'serverless',
-        'kibana.k8s.elastic.co/name=kb'
+        'kibana.k8s.elastic.co/name=kb',
+        savedObjects.createInternalRepository(['all_pods'])
       );
       this.taskPollingLifecycle = new TaskPollingLifecycle({
         config: this.config!,
