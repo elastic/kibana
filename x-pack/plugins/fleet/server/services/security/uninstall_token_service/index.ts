@@ -365,7 +365,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
       tokenObjects = result.saved_objects;
       break;
     }
-    tokensFinder.close();
+    await tokensFinder.close();
 
     return tokenObjects;
   }
@@ -510,7 +510,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     if (force) {
       const config = appContextService.getConfig();
       const batchSize = config?.setup?.agentPolicySchemaUpgradeBatchSize ?? 100;
-      asyncForEach(
+      await asyncForEach(
         chunk(policyIds, batchSize),
         async (policyIdsBatch) =>
           await agentPolicyService.deployPolicies(this.soClient, policyIdsBatch)

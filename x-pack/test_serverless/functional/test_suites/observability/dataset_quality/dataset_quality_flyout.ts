@@ -402,13 +402,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
       await PageObjects.datasetQuality.openIntegrationActionsMenu();
 
-      const action = await PageObjects.datasetQuality.getIntegrationActionButtonByAction(
-        integrationActions.template
-      );
-
-      await action.click();
-
       await retry.tryForTime(5000, async () => {
+        const action = await PageObjects.datasetQuality.getIntegrationActionButtonByAction(
+          integrationActions.template
+        );
+
+        await action.click();
+
         const currentUrl = await browser.getCurrentUrl();
         const parsedUrl = new URL(currentUrl);
         expect(parsedUrl.pathname).to.contain(
