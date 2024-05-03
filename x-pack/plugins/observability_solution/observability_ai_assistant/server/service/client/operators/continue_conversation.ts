@@ -114,26 +114,30 @@ function executeFunctionAndCatchError({
 function getFunctionDefinitions({
   functionClient,
   functionLimitExceeded,
+  disableFunctions,
 }: {
   functionClient: ChatFunctionClient;
   functionLimitExceeded: boolean;
+  disableFunctions: boolean;
 }) {
-  const systemFunctions = functionLimitExceeded
-    ? []
-    : functionClient
-        .getFunctions()
-        .map((fn) => fn.definition)
-        .filter(
-          (def) =>
-            !def.visibility ||
-            [FunctionVisibility.AssistantOnly, FunctionVisibility.All].includes(def.visibility)
-        );
+  const systemFunctions = functionClient
+    .getFunctions()
+    .map((fn) => fn.definition)
+    .filter(
+      (def) =>
+        !def.visibility ||
+        [FunctionVisibility.AssistantOnly, FunctionVisibility.All].includes(def.visibility)
+    );
 
   const actions = functionLimitExceeded ? [] : functionClient.getActions();
 
   const allDefinitions = systemFunctions
     .concat(actions)
     .map((definition) => pick(definition, 'name', 'description', 'parameters'));
+
+  if (disableFunctions || functionLimitExceeded) {
+    return allDefinitions.filter((def) => def.name === 'context');
+  }
 
   return allDefinitions;
 }
@@ -146,6 +150,7 @@ export function continueConversation({
   functionCallsLeft,
   requestInstructions,
   knowledgeBaseInstructions,
+  disableFunctions,
 }: {
   messages: Message[];
   functionClient: ChatFunctionClient;
@@ -154,13 +159,17 @@ export function continueConversation({
   functionCallsLeft: number;
   requestInstructions: Array<string | UserInstruction>;
   knowledgeBaseInstructions: UserInstruction[];
+  disableFunctions: boolean;
 }): Observable<MessageOrChatEvent> {
   let nextFunctionCallsLeft = functionCallsLeft;
 
   const definitions = getFunctionDefinitions({
     functionLimitExceeded: functionCallsLeft <= 0,
     functionClient,
+    disableFunctions,
   });
+
+  console.log('definitions', definitions);
 
   const messagesWithUpdatedSystemMessage = replaceSystemMessage(
     getSystemMessageFromInstructions({
@@ -285,6 +294,7 @@ export function continueConversation({
               signal,
               knowledgeBaseInstructions,
               requestInstructions,
+              disableFunctions,
             });
           })
         )

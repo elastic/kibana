@@ -43,6 +43,7 @@ export function complete(
     conversationId,
     messages: initialMessages,
     persist,
+    disableFunctions,
     signal,
     responseLanguage,
   }: {
@@ -52,6 +53,7 @@ export function complete(
     conversationId?: string;
     messages: Message[];
     persist: boolean;
+    disableFunctions: boolean;
     signal: AbortSignal;
     responseLanguage: string;
   },
@@ -69,6 +71,7 @@ export function complete(
           connectorId,
           messages: initialMessages,
           persist,
+          disableFunctions,
           screenContexts,
           conversationId,
           responseLanguage,
