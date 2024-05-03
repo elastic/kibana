@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { TransformListAction, TransformListRow } from '../../../../common';
 import { SECTION_SLUG } from '../../../../common/constants';
-import { useGetDataViewIdsWithTitle, useTransformCapabilities } from '../../../../hooks';
+import { useGetDataViewsTitleIdMap, useTransformCapabilities } from '../../../../hooks';
 import { useToastNotifications } from '../../../../app_dependencies';
 
 import { cloneActionNameText, CloneActionName } from './clone_action_name';
@@ -21,22 +21,22 @@ export const useCloneAction = (forceDisable: boolean, transformNodes: number) =>
   const history = useHistory();
   const toastNotifications = useToastNotifications();
 
-  const { data: dataViewListItems } = useGetDataViewIdsWithTitle();
+  const { data: dataViewsTitleIdMap } = useGetDataViewsTitleIdMap();
   const { canCreateTransform } = useTransformCapabilities();
 
   const clickHandler = useCallback(
     async (item: TransformListRow) => {
       try {
-        if (!dataViewListItems) {
+        if (!dataViewsTitleIdMap) {
           return;
         }
 
         const dataViewTitle = Array.isArray(item.config.source.index)
           ? item.config.source.index.join(',')
           : item.config.source.index;
-        const dataViewListItem = dataViewListItems.find((d) => d.title === dataViewTitle);
+        const dataViewId = dataViewsTitleIdMap[dataViewTitle];
 
-        if (dataViewListItem === undefined) {
+        if (dataViewId === undefined) {
           toastNotifications.addDanger(
             i18n.translate('xpack.transform.clone.noDataViewErrorPromptText', {
               defaultMessage:
@@ -45,9 +45,7 @@ export const useCloneAction = (forceDisable: boolean, transformNodes: number) =>
             })
           );
         } else {
-          history.push(
-            `/${SECTION_SLUG.CLONE_TRANSFORM}/${item.id}?dataViewId=${dataViewListItem.id}`
-          );
+          history.push(`/${SECTION_SLUG.CLONE_TRANSFORM}/${item.id}?dataViewId=${dataViewId}`);
         }
       } catch (e) {
         toastNotifications.addError(e, {
@@ -57,14 +55,14 @@ export const useCloneAction = (forceDisable: boolean, transformNodes: number) =>
         });
       }
     },
-    [dataViewListItems, history, toastNotifications]
+    [dataViewsTitleIdMap, history, toastNotifications]
   );
 
   const action: TransformListAction = useMemo(
     () => ({
       name: (item: TransformListRow) => <CloneActionName disabled={!canCreateTransform} />,
       enabled: () =>
-        dataViewListItems !== undefined &&
+        dataViewsTitleIdMap !== undefined &&
         canCreateTransform &&
         !forceDisable &&
         transformNodes > 0,
@@ -74,7 +72,7 @@ export const useCloneAction = (forceDisable: boolean, transformNodes: number) =>
       onClick: clickHandler,
       'data-test-subj': 'transformActionClone',
     }),
-    [canCreateTransform, dataViewListItems, forceDisable, clickHandler, transformNodes]
+    [canCreateTransform, dataViewsTitleIdMap, forceDisable, clickHandler, transformNodes]
   );
 
   return { action };

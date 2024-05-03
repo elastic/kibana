@@ -8,22 +8,30 @@
 import { useQuery } from '@tanstack/react-query';
 
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 
 import { TRANSFORM_REACT_QUERY_KEYS } from '../../../common/constants';
 
 import { useAppDependencies } from '../app_dependencies';
 
-export const useGetDataViewIdsWithTitle = () => {
+type DataViewListTitleIdMap = Record<string, string>;
+
+export const useGetDataViewsTitleIdMap = () => {
   const { data } = useAppDependencies();
 
-  return useQuery<DataViewListItem[], IHttpFetchError>(
+  return useQuery<DataViewListTitleIdMap, IHttpFetchError>(
     [TRANSFORM_REACT_QUERY_KEYS.GET_DATA_VIEW_IDS_WITH_TITLE],
     async () => {
       // Since we let useQuery take care of caching,
       // clear the cache to ensure we get the latest data view list.
-      await data.dataViews.clearCache();
-      return await data.dataViews.getIdsWithTitle();
+      data.dataViews.clearCache();
+
+      return (await data.dataViews.getIdsWithTitle()).reduce<Record<string, string>>(
+        (acc, { id, title }) => {
+          acc[title] = id;
+          return acc;
+        },
+        {}
+      );
     }
   );
 };

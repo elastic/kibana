@@ -10,7 +10,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import type { TransformListAction, TransformListRow } from '../../../../common';
-import { useGetDataViewIdsWithTitle, useTransformCapabilities } from '../../../../hooks';
+import { useGetDataViewsTitleIdMap, useTransformCapabilities } from '../../../../hooks';
 
 import { editActionNameText, EditActionName } from './edit_action_name';
 import { useToastNotifications } from '../../../../app_dependencies';
@@ -18,7 +18,7 @@ import type { TransformConfigUnion } from '../../../../../../common/types/transf
 
 export type EditAction = ReturnType<typeof useEditAction>;
 export const useEditAction = (forceDisable: boolean, transformNodes: number) => {
-  const { data: dataViewListItems } = useGetDataViewIdsWithTitle();
+  const { data: dataViewsTitleIdMap } = useGetDataViewsTitleIdMap();
   const { canCreateTransform } = useTransformCapabilities();
 
   const [config, setConfig] = useState<TransformConfigUnion>();
@@ -32,16 +32,16 @@ export const useEditAction = (forceDisable: boolean, transformNodes: number) => 
   const clickHandler = useCallback(
     async (item: TransformListRow) => {
       try {
-        if (!dataViewListItems) {
+        if (!dataViewsTitleIdMap) {
           return;
         }
 
         const dataViewTitle = Array.isArray(item.config.source.index)
           ? item.config.source.index.join(',')
           : item.config.source.index;
-        const dataViewListItem = dataViewListItems.find((d) => d.title === dataViewTitle);
+        const newDataViewId = dataViewsTitleIdMap[dataViewTitle];
 
-        if (dataViewListItem === undefined) {
+        if (newDataViewId === undefined) {
           toastNotifications.addWarning(
             i18n.translate('xpack.transform.edit.noDataViewErrorPromptText', {
               defaultMessage:
@@ -50,7 +50,7 @@ export const useEditAction = (forceDisable: boolean, transformNodes: number) => 
             })
           );
         } else {
-          setDataViewId(dataViewListItem.id);
+          setDataViewId(newDataViewId);
         }
         setConfig(item.config);
         setIsFlyoutVisible(true);
@@ -62,7 +62,7 @@ export const useEditAction = (forceDisable: boolean, transformNodes: number) => 
         });
       }
     },
-    [dataViewListItems, toastNotifications]
+    [dataViewsTitleIdMap, toastNotifications]
   );
 
   const action: TransformListAction = useMemo(

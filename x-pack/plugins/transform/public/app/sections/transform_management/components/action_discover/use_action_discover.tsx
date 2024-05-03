@@ -11,7 +11,7 @@ import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import type { TransformListAction, TransformListRow } from '../../../../common';
 
 import { useAppDependencies } from '../../../../app_dependencies';
-import { useGetDataViewIdsWithTitle } from '../../../../hooks';
+import { useGetDataViewsTitleIdMap } from '../../../../hooks';
 
 import {
   isDiscoverActionDisabled,
@@ -27,32 +27,32 @@ export const useDiscoverAction = (forceDisable: boolean) => {
   } = useAppDependencies();
   const isDiscoverAvailable = !!capabilities.discover?.show;
 
-  const { data: dataViewListItems } = useGetDataViewIdsWithTitle();
+  const { data: dataViewsTitleIdMap } = useGetDataViewsTitleIdMap();
 
   const clickHandler = useCallback(
     (item: TransformListRow) => {
       const locator = share.url.locators.get(DISCOVER_APP_LOCATOR);
-      if (!locator || !dataViewListItems) return;
-      const dataView = dataViewListItems.find((d) => d.title === item.config.dest.index);
-      if (dataView) {
+      if (!locator || !dataViewsTitleIdMap) return;
+      const dataViewId = dataViewsTitleIdMap[item.config.dest.index];
+      if (dataViewId) {
         locator.navigateSync({
-          indexPatternId: dataView.id,
+          indexPatternId: dataViewId,
         });
       }
     },
-    [dataViewListItems, share]
+    [dataViewsTitleIdMap, share]
   );
 
   const dataViewExists = useCallback(
     (item: TransformListRow): boolean => {
-      if (!dataViewListItems) {
+      if (!dataViewsTitleIdMap) {
         return false;
       }
 
-      const dataViewId = dataViewListItems.find((d) => d.title === item.config.dest.index);
+      const dataViewId = dataViewsTitleIdMap[item.config.dest.index];
       return dataViewId !== undefined;
     },
-    [dataViewListItems]
+    [dataViewsTitleIdMap]
   );
 
   const action: TransformListAction = useMemo(
