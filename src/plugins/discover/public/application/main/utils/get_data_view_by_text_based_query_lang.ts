@@ -21,6 +21,7 @@ export async function getDataViewByTextBasedQueryLang(
     currentDataView?.isPersisted() ||
     indexPatternFromQuery !== currentDataView?.getIndexPattern()
   ) {
+    // I could use DataViewLazy here BUT this function returns a DataView - where is that DataView being used?
     const dataViewObj = await getESQLAdHocDataview(indexPatternFromQuery, services.dataViews);
 
     // If the indexPatternFromQuery is empty string means that the user used either the ROW or SHOW META / SHOW INFO commands
