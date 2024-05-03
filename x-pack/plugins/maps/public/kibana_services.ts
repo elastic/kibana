@@ -66,6 +66,7 @@ export const getUiActions = () => pluginsStart.uiActions;
 export const getCore = () => coreStart;
 export const getNavigation = () => pluginsStart.navigation;
 export const getCoreI18n = () => coreStart.i18n;
+export const getAnalytics = () => coreStart.analytics;
 export const getSearchService = () => pluginsStart.data.search;
 export const getEmbeddableService = () => pluginsStart.embeddable;
 export const getNavigateToApp = () => coreStart.application.navigateToApp;
