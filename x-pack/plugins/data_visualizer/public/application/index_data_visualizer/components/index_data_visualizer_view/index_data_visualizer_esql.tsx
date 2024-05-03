@@ -199,6 +199,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
       setLocalQuery(q);
     }
   }, []);
+
   return (
     <EuiPageTemplate
       offset={0}

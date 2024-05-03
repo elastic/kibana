@@ -47,7 +47,7 @@ const hits: UserContentCommonSchema[] = [
   },
 ];
 
-describe('created_by', () => {
+describe('created_by filter', () => {
   const requiredProps: TableListViewTableProps = {
     entityName: 'test',
     entityNamePlural: 'tests',
