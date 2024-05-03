@@ -6,25 +6,23 @@
  */
 
 import React from 'react';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-
 import type { CoreStart } from '@kbn/core/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import type { SloEmbeddableInput, EmbeddableSloProps } from './types';
-
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { GroupSloCustomInput, SingleSloCustomInput } from './types';
 import { SloPublicPluginsStart } from '../../..';
 import { SloConfiguration } from './slo_configuration';
-export async function resolveEmbeddableSloUserInput(
+export async function openSloConfiguration(
   coreStart: CoreStart,
   pluginStart: SloPublicPluginsStart,
-  input?: SloEmbeddableInput
-): Promise<EmbeddableSloProps> {
+  initialState?: GroupSloCustomInput
+): Promise<GroupSloCustomInput | SingleSloCustomInput> {
   const { overlays } = coreStart;
   const queryClient = new QueryClient();
   return new Promise(async (resolve, reject) => {
     try {
-      const flyoutSession = overlays.openFlyout(
+      const modalSession = overlays.openFlyout(
         toMountPoint(
           <KibanaContextProvider
             services={{
@@ -34,13 +32,13 @@ export async function resolveEmbeddableSloUserInput(
           >
             <QueryClientProvider client={queryClient}>
               <SloConfiguration
-                initialInput={input}
-                onCreate={(update: EmbeddableSloProps) => {
-                  flyoutSession.close();
+                initialInput={initialState}
+                onCreate={(update: GroupSloCustomInput | SingleSloCustomInput) => {
+                  modalSession.close();
                   resolve(update);
                 }}
                 onCancel={() => {
-                  flyoutSession.close();
+                  modalSession.close();
                   reject();
                 }}
               />

@@ -5,4 +5,12 @@
  * 2.0.
  */
 
-export { SloOverviewEmbeddableFactoryDefinition } from './slo_embeddable_factory';
+export const COMMON_SLO_GROUPING = [
+  {
+    id: 'slos',
+    getDisplayName: () => 'SLOs',
+    getIconType: () => {
+      return 'visGauge';
+    },
+  },
+];
