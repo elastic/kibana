@@ -78,6 +78,7 @@
     "yarn": "^1.22.19"
   },
   "resolutions": {
+    "**/@bazel/typescript/protobufjs": "6.11.4",
     "**/@hello-pangea/dnd": "16.2.0",
     "**/@langchain/core": "0.1.53",
     "**/@types/node": "20.10.5",
