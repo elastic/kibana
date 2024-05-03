@@ -39,6 +39,7 @@
     "@kbn/features-plugin",
     "@kbn/cloud-plugin",
     "@kbn/serverless",
+    "@kbn/ml-plugin",
   ],
   "exclude": ["target/**/*"]
 }
