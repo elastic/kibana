@@ -13,7 +13,7 @@ import { BehaviorSubject } from 'rxjs';
 import { getPanelTitle, StateComparators } from '@kbn/presentation-publishing';
 import { createExtentFilter } from '../../common/elasticsearch_util';
 import { SavedMap } from '../routes/map_page';
-import { mapEmbeddablesSingleton } from '../embeddable/map_embeddables_singleton';
+import { mapEmbeddablesSingleton } from './map_embeddables_singleton';
 import {
   getGeoFieldNames,
   getGoto,
@@ -26,7 +26,7 @@ import {
 import { setGotoWithCenter, setMapSettings } from '../actions';
 import { MapExtent } from '../../common/descriptor_types';
 import { getUiActions } from '../kibana_services';
-import { getGeoFieldsLabel } from '../embeddable/get_geo_fields_label';
+import { getGeoFieldsLabel } from './get_geo_fields_label';
 import { MapApi, MapSerializedState } from './types';
 import { setOnMapMove } from '../reducers/non_serializable_instances';
 

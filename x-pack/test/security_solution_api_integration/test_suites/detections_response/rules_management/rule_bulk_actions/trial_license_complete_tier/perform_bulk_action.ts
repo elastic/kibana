@@ -88,8 +88,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const createWebHookConnector = () => createConnector(getWebHookAction());
   const createSlackConnector = () => createConnector(getSlackAction());
 
-  // Failing: See https://github.com/elastic/kibana/issues/182431
-  describe.skip('@ess @serverless @skipInServerless perform_bulk_action', () => {
+  describe('@ess @serverless @skipInServerless perform_bulk_action', () => {
     beforeEach(async () => {
       await createAlertsIndex(supertest, log);
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
