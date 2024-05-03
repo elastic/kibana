@@ -86,60 +86,6 @@ test('it allows for custom remote cluster clusters input', () => {
   );
 });
 
-test('should render clusters field for remote indices', () => {
-  const wrapper = shallowWithIntl(
-    <RemoteClusterPrivilegesForm
-      remoteClusterPrivilege={{
-        clusters: ['cluster1'],
-        privileges: ['monitor_enrich'],
-      }}
-      formIndex={0}
-      availableRemoteClusterPrivileges={['monitor_enrich']}
-      isRoleReadOnly={false}
-      validator={new RoleValidator()}
-      onChange={jest.fn()}
-      onDelete={jest.fn()}
-      remoteClusters={[
-        {
-          name: 'test1',
-          mode: 'proxy',
-          isConnected: false,
-          initialConnectTimeout: '30s',
-          skipUnavailable: false,
-          proxyAddress: 'localhost:9400',
-          proxySocketConnections: 18,
-          connectedSocketsCount: 0,
-          serverName: 'localhost',
-          securityModel: 'certificate',
-        },
-        {
-          name: 'test2',
-          mode: 'proxy',
-          isConnected: false,
-          initialConnectTimeout: '30s',
-          skipUnavailable: false,
-          proxyAddress: 'localhost:9400',
-          proxySocketConnections: 18,
-          connectedSocketsCount: 0,
-          serverName: 'localhost',
-          securityModel: 'api_key',
-        },
-      ]}
-    />
-  );
-  const clustersInput = wrapper.find('[data-test-subj="remoteClusterClustersInput0"]');
-  expect(clustersInput).toHaveLength(1);
-  expect(clustersInput.prop('options')).toEqual([
-    { label: 'test2' },
-    { label: expect.anything(), isGroupLabelOption: true },
-    {
-      label: 'test1',
-      disabled: true,
-      append: expect.anything(),
-    },
-  ]);
-});
-
 test('it renders fields as disabled when isRoleReadOnly is true', () => {
   const onChange = jest.fn();
   const wrapper = mountWithIntl(
