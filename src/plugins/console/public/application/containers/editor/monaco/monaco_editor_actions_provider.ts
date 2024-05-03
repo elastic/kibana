@@ -24,20 +24,18 @@ import { MetricsTracker } from '../../../../types';
 import { Actions } from '../../../stores/request';
 import {
   containsUrlParams,
-  getBodyCompletionItems,
   getCurlRequest,
   getDocumentationLink,
   getLineTokens,
   getMethodCompletionItems,
   getRequestEndLineNumber,
   getRequestStartLineNumber,
-  getMethodAndUrlTokenPath,
+  getUrlParamsCompletionItems,
   getUrlPathCompletionItems,
-  populateContextForMethodAndUrl,
   replaceRequestVariables,
   stringifyRequest,
   trackSentRequests,
-  getUrlPathCompletionItemsFromContext,
+  getBodyCompletionItems,
 } from './utils';
 
 const selectedRequestsClass = 'console__monaco_editor__selectedRequests';

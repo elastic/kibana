@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { CSSProperties, useCallback, useMemo, useRef, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { CodeEditor } from '@kbn/code-editor';
