@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { CoreAuditService } from './audit';
 import type { CoreAuthenticationService } from './authc';
 
 /**
@@ -14,11 +15,14 @@ import type { CoreAuthenticationService } from './authc';
  *
  * @public
  */
-export interface CoreSecurityContract {
+export interface CoreSecurityDelegateContract {
   authc: AuthenticationServiceContract;
+  audit: AuditServiceContract;
 }
 
 /**
  * @public
  */
 export type AuthenticationServiceContract = CoreAuthenticationService;
+
+export type AuditServiceContract = CoreAuditService;
