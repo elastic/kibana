@@ -58,7 +58,6 @@ import type { SourceIndicesWithGeoFields } from '../../explorer/explorer_utils';
 import { escapeDoubleQuotes, getDateFormatTz } from '../../explorer/explorer_utils';
 import { usePermissionCheck } from '../../capabilities/check_capabilities';
 import { useMlKibana } from '../../contexts/kibana';
-import { getFieldTypeFromMapping } from '../../services/mapping_service';
 import { useMlIndexUtils } from '../../util/index_service';
 
 import { getQueryStringForInfluencers } from './get_query_string_for_influencers';
@@ -598,7 +597,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     window.open(singleMetricViewerLink, '_blank');
   };
 
-  const viewExamples = () => {
+  const viewExamples = async () => {
     const categoryId = props.anomaly.entityValue;
     const record = props.anomaly.source;
 
@@ -616,35 +615,13 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       );
       return;
     }
+
     const categorizationFieldName = job.analysis_config.categorization_field_name;
     const datafeedIndices = job.datafeed_config.indices;
 
-    // Find the type of the categorization field i.e. text (preferred) or keyword.
-    // Uses the first matching field found in the list of indices in the datafeed_config.
-    // attempt to load the field type using each index. we have to do it this way as _field_caps
-    // doesn't specify which index a field came from unless there is a clash.
-    let i = 0;
-    findFieldType(datafeedIndices[i]);
-
-    const error = () => {
-      // eslint-disable-next-line no-console
-      console.log(
-        `viewExamples(): error finding type of field ${categorizationFieldName} in indices:`,
-        datafeedIndices
-      );
-      const { toasts } = kibana.services.notifications;
-      toasts.addDanger(
-        i18n.translate('xpack.ml.anomaliesTable.linksMenu.noMappingCouldBeFoundErrorMessage', {
-          defaultMessage:
-            'Unable to view examples of documents with mlcategory {categoryId} ' +
-            'as no mapping could be found for the categorization field {categorizationFieldName}',
-          values: {
-            categoryId,
-            categorizationFieldName,
-          },
-        })
-      );
-    };
+    if (!categorizationFieldName) {
+      return;
+    }
 
     const createAndOpenUrl = (index: string, categorizationFieldType: string) => {
       // Get the definition of the category and use the terms or regex to view the
@@ -736,23 +713,46 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         });
     };
 
-    function findFieldType(index: string) {
-      getFieldTypeFromMapping(index, categorizationFieldName)
-        .then((resp: string) => {
-          if (resp !== '') {
-            createAndOpenUrl(datafeedIndices.join(), resp);
-          } else {
-            i++;
-            if (i < datafeedIndices.length) {
-              findFieldType(datafeedIndices[i]);
-            } else {
-              error();
-            }
-          }
+    // Find the type of the categorization field i.e. text (preferred) or keyword.
+    // Uses the first matching field found in the list of indices in the datafeed_config.
+    let fieldType;
+
+    for (const index of datafeedIndices) {
+      const dataView = (await data.dataViews.find(index)).find(
+        (dv) => dv.getIndexPattern() === index
+      );
+
+      if (!dataView) {
+        continue;
+      }
+
+      const field = dataView?.getFieldByName(categorizationFieldName);
+      if (field && Array.isArray(field.esTypes) && field.esTypes.length > 0) {
+        fieldType = field.esTypes[0];
+        break;
+      }
+    }
+
+    if (fieldType) {
+      createAndOpenUrl(datafeedIndices.join(), fieldType);
+    } else {
+      // eslint-disable-next-line no-console
+      console.log(
+        `viewExamples(): error finding type of field ${categorizationFieldName} in indices:`,
+        datafeedIndices
+      );
+      const { toasts } = kibana.services.notifications;
+      toasts.addDanger(
+        i18n.translate('xpack.ml.anomaliesTable.linksMenu.noMappingCouldBeFoundErrorMessage', {
+          defaultMessage:
+            'Unable to view examples of documents with mlcategory {categoryId} ' +
+            'as no mapping could be found for the categorization field {categorizationFieldName}',
+          values: {
+            categoryId,
+            categorizationFieldName,
+          },
         })
-        .catch(() => {
-          error();
-        });
+      );
     }
   };
 
