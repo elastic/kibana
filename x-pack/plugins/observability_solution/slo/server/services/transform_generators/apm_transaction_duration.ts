@@ -23,6 +23,7 @@ import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_tr
 import { APMTransactionDurationIndicator, SLODefinition } from '../../domain/models';
 import { InvalidTransformError } from '../../errors';
 import { parseIndex } from './common';
+import { getTimesliceTargetComparator } from './common';
 
 export class ApmTransactionDurationTransformGenerator extends TransformGenerator {
   public getTransformParams(slo: SLODefinition): TransformPutTransformRequest {
@@ -179,7 +180,9 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
               goodEvents: 'slo.numerator.value',
               totalEvents: 'slo.denominator.value',
             },
-            script: `params.goodEvents / params.totalEvents >= ${slo.objective.timesliceTarget} ? 1 : 0`,
+            script: `params.goodEvents / params.totalEvents ${getTimesliceTargetComparator(
+              slo.objective.timesliceTarget!
+            )} ${slo.objective.timesliceTarget} ? 1 : 0`,
           },
         },
       }),
