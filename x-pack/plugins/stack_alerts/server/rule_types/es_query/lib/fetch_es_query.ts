@@ -105,22 +105,31 @@ export async function fetchEsQuery({
     fields,
     runtime_mappings,
     _source,
-    aggs: buildAggregation({
-      aggType: params.aggType,
-      aggField: params.aggField,
-      termField: params.termField,
-      termSize: params.termSize,
-      sourceFieldsParams: params.sourceFields,
-      condition: {
-        resultLimit: alertLimit,
-        conditionScript: getComparatorScript(
-          params.thresholdComparator,
-          params.threshold,
-          BUCKET_SELECTOR_FIELD
-        ),
-      },
-      ...(isGroupAgg ? { topHitsSize: params.size } : {}),
-    }),
+    aggs: {
+      ...buildAggregation({
+        aggType: params.aggType,
+        aggField: params.aggField,
+        termField: params.termField,
+        termSize: params.termSize,
+        sourceFieldsParams: params.sourceFields,
+        condition: {
+          resultLimit: alertLimit,
+          conditionScript: getComparatorScript(
+            params.thresholdComparator,
+            params.threshold,
+            BUCKET_SELECTOR_FIELD
+          ),
+        },
+        ...(isGroupAgg ? { topHitsSize: params.size } : {}),
+      }),
+      // For testing purposes
+      delay: {
+        shard_delay: {
+          value: '1s',
+        },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any,
+    },
   });
 
   logger.debug(
