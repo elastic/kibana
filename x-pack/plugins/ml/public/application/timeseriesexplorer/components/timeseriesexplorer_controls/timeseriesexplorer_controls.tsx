@@ -104,7 +104,6 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
               defaultMessage="Add to dashboard"
             />
           ),
-          icon: 'search',
           onClick: closePopoverOnAction(() => {
             setCreateInDashboard(true);
           }),
