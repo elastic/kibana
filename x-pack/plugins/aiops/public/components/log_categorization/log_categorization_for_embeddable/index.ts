@@ -6,3 +6,4 @@
  */
 
 export { LogCategorizationEmbeddable } from './log_categorization_for_embeddable';
+export { LogCategorizationWrapper } from './log_categorization_wrapper';

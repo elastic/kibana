@@ -18,7 +18,8 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { CasesPublicSetup } from '@kbn/cases-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import type { EmbeddableChangePointChartInput } from './embeddables/change_point_chart/embeddable_change_point_chart';
+import type { EmbeddableChangePointChartInput } from './embeddable/embeddable_change_point_chart';
+import type { LogCategorizationEmbeddableProps } from './components/log_categorization/log_categorization_for_embeddable/log_categorization_wrapper';
 
 export interface AiopsPluginSetupDeps {
   embeddable: EmbeddableSetup;
@@ -46,4 +47,5 @@ export interface AiopsPluginStartDeps {
 export type AiopsPluginSetup = void;
 export interface AiopsPluginStart {
   EmbeddableChangePointChart: React.ComponentType<EmbeddableChangePointChartInput>;
+  LogCategorizationWrapper: React.ComponentType<LogCategorizationEmbeddableProps>;
 }

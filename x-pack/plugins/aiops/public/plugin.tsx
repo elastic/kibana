@@ -9,13 +9,14 @@ import type { CoreStart, Plugin } from '@kbn/core/public';
 import { type CoreSetup } from '@kbn/core/public';
 import { firstValueFrom } from 'rxjs';
 import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '@kbn/aiops-change-point-detection/constants';
+import { dynamic } from '@kbn/shared-ux-utility';
 import type {
   AiopsPluginSetup,
   AiopsPluginSetupDeps,
   AiopsPluginStart,
   AiopsPluginStartDeps,
 } from './types';
-import { getEmbeddableChangePointChart } from './embeddables/change_point_chart/embeddable_change_point_chart_component';
+import { getEmbeddableChangePointChart } from './embeddable/embeddable_change_point_chart_component';
 
 export type AiopsCoreSetup = CoreSetup<AiopsPluginStartDeps, AiopsPluginStart>;
 
@@ -28,22 +29,21 @@ export class AiopsPlugin
   ) {
     Promise.all([
       firstValueFrom(licensing.license$),
-      import('./embeddables/register_embeddables'),
+      import('./embeddable/register_embeddable'),
       import('./ui_actions'),
       import('./cases/register_change_point_charts_attachment'),
       core.getStartServices(),
     ]).then(
       ([
         license,
-        { registerChangePointChartEmbeddable, registerLogCategorizationEmbeddable },
+        { registerEmbeddable },
         { registerAiopsUiActions },
         { registerChangePointChartsAttachment },
         [coreStart, pluginStart],
       ]) => {
         if (license.hasAtLeast('platinum')) {
           if (embeddable) {
-            registerChangePointChartEmbeddable(core, embeddable);
-            registerLogCategorizationEmbeddable(core, embeddable);
+            registerEmbeddable(core, embeddable);
           }
 
           if (uiActions) {
@@ -64,6 +64,12 @@ export class AiopsPlugin
         EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
         core,
         plugins
+      ),
+      LogCategorizationWrapper: dynamic(
+        async () =>
+          import(
+            './components/log_categorization/log_categorization_for_embeddable/log_categorization_wrapper'
+          )
       ),
     };
   }

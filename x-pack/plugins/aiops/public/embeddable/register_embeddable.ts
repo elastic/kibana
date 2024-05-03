@@ -10,10 +10,9 @@ import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '@kbn/aiops-change-point-detection/constants';
 import type { AiopsPluginStart, AiopsPluginStartDeps } from '../types';
-import { EmbeddableChangePointChartFactory } from './change_point_chart/embeddable_change_point_chart_factory';
-import { EmbeddableLogCategorizationFactory } from './log_categorization/log_categorization_embeddable_factory';
+import { EmbeddableChangePointChartFactory } from './embeddable_change_point_chart_factory';
 
-export const registerChangePointChartEmbeddable = (
+export const registerEmbeddable = (
   core: CoreSetup<AiopsPluginStartDeps, AiopsPluginStart>,
   embeddable: EmbeddableSetup
 ) => {
@@ -25,20 +24,4 @@ export const registerChangePointChartEmbeddable = (
     core.getStartServices
   );
   embeddable.registerEmbeddableFactory(changePointChartFactory.type, changePointChartFactory);
-};
-
-export const registerLogCategorizationEmbeddable = (
-  core: CoreSetup<AiopsPluginStartDeps, AiopsPluginStart>,
-  embeddable: EmbeddableSetup
-) => {
-  const embeddableLogCategorizationFactory = new EmbeddableLogCategorizationFactory(
-    i18n.translate('xpack.aiops.embeddableLogCategorizationDisplayName', {
-      defaultMessage: 'Pattern analysis',
-    }),
-    core.getStartServices
-  );
-  embeddable.registerEmbeddableFactory(
-    embeddableLogCategorizationFactory.type,
-    embeddableLogCategorizationFactory
-  );
 };

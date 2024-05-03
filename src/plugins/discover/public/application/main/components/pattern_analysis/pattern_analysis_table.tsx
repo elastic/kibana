@@ -6,26 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
-import {
-  ErrorEmbeddable,
-  type IEmbeddable,
-  isErrorEmbeddable,
-} from '@kbn/embeddable-plugin/public';
-import {
-  type EmbeddablePatternAnalysisInput,
-  type EmbeddablePatternAnalysisOutput,
-  type EmbeddablePatternAnalysisProps,
-  EMBEDDABLE_PATTERN_ANALYSIS_TYPE,
-} from '@kbn/aiops-log-pattern-analysis/embeddable';
-import { EuiFlexItem } from '@elastic/eui';
-import { css } from '@emotion/react';
-import useObservable from 'react-use/lib/useObservable';
-import { of } from 'rxjs';
+import { type EmbeddablePatternAnalysisProps } from '@kbn/aiops-log-pattern-analysis/embeddable';
+import { pick } from 'lodash';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { PATTERN_ANALYSIS_LOADED } from './constants';
 import type { DiscoverStateContainer } from '../../services/discover_state';
+import { PATTERN_ANALYSIS_LOADED } from './constants';
 
 export type PatternAnalysisTableProps = EmbeddablePatternAnalysisProps & {
   searchDescription?: string;
@@ -35,128 +22,62 @@ export type PatternAnalysisTableProps = EmbeddablePatternAnalysisProps & {
    */
   stateContainer?: DiscoverStateContainer;
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
-  searchSessionId?: string;
-  viewModeToggle: React.ReactElement;
-  setOptionsMenu: (optionsMenu: React.ReactElement | undefined) => void;
+  viewModeToggle: (patternCount?: number) => React.ReactElement;
 };
 
 export const PatternAnalysisTable = (props: PatternAnalysisTableProps) => {
-  const {
-    dataView,
-    savedSearch,
-    query,
-    filters,
-    stateContainer,
-    onAddFilter,
-    trackUiMetric,
-    searchSessionId,
-  } = props;
-
-  const totalHits = useObservable(stateContainer?.dataState.data$.totalHits$ ?? of(undefined));
-  const totalDocuments = useMemo(() => totalHits?.result, [totalHits]);
+  const [lastReloadRequestTime, setLastReloadRequestTime] = useState<number | undefined>(undefined);
 
   const services = useDiscoverServices();
-  const [embeddable, setEmbeddable] = useState<
-    | ErrorEmbeddable
-    | IEmbeddable<EmbeddablePatternAnalysisInput, EmbeddablePatternAnalysisOutput>
-    | undefined
-  >();
-  const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
+  const aiopsService = services.aiops;
+  const { trackUiMetric, stateContainer } = props;
 
   useEffect(() => {
     const refetch = stateContainer?.dataState.refetch$.subscribe(() => {
-      if (embeddable && !isErrorEmbeddable(embeddable)) {
-        embeddable.updateInput({ lastReloadRequestTime: Date.now() });
-      }
+      setLastReloadRequestTime(Date.now());
     });
 
     return () => {
       refetch?.unsubscribe();
     };
-  }, [embeddable, stateContainer]);
+  }, [stateContainer]);
 
   useEffect(() => {
-    if (embeddable && !isErrorEmbeddable(embeddable)) {
-      embeddable.updateInput({
-        dataView,
-        savedSearch,
-        query,
-        filters,
-      });
-      embeddable.reload();
-    }
-  }, [
-    embeddable,
-    dataView,
-    savedSearch,
-    query,
-    filters,
-    searchSessionId,
-    totalDocuments,
-    stateContainer,
+    // Track should only be called once when component is loaded
+    trackUiMetric?.(METRIC_TYPE.LOADED, PATTERN_ANALYSIS_LOADED);
+  }, [trackUiMetric]);
+
+  if (aiopsService === undefined) {
+    return null;
+  }
+
+  const deps = pick(services, [
+    'i18n',
+    'theme',
+    'data',
+    'uiSettings',
+    'http',
+    'notifications',
+    'lens',
+    'fieldFormats',
+    'application',
+    'charts',
   ]);
 
-  useEffect(() => {
-    let unmounted = false;
-    const loadEmbeddable = async () => {
-      if (services.embeddable) {
-        const factory = services.embeddable.getEmbeddableFactory<
-          EmbeddablePatternAnalysisInput,
-          EmbeddablePatternAnalysisOutput
-        >(EMBEDDABLE_PATTERN_ANALYSIS_TYPE);
-        if (factory) {
-          const initializedEmbeddable = await factory.create({
-            id: EMBEDDABLE_PATTERN_ANALYSIS_TYPE,
-            dataView,
-            savedSearch,
-            query,
-            onAddFilter,
-            setPatternCount: props.setPatternCount,
-            setOptionsMenu: props.setOptionsMenu,
-          });
-          if (!unmounted) {
-            setEmbeddable(initializedEmbeddable);
-          }
-        }
-      }
-    };
-    loadEmbeddable();
-    return () => {
-      unmounted = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [services.embeddable]);
-
-  // We can only render after embeddable has already initialized
-  useEffect(() => {
-    if (embeddableRoot.current && embeddable) {
-      embeddable.render(embeddableRoot.current);
-
-      trackUiMetric?.(METRIC_TYPE.LOADED, PATTERN_ANALYSIS_LOADED);
-    }
-
-    return () => {
-      // Clean up embeddable upon unmounting
-      embeddable?.destroy();
-    };
-  }, [embeddable, embeddableRoot, trackUiMetric]);
-
-  const style = css`
-    overflow-y: auto;
-
-    .kbnDocTableWrapper {
-      overflow-x: hidden;
-    }
-  `;
+  const input = pick(props, ['dataView', 'savedSearch', 'query', 'filters', 'onAddFilter']);
 
   return (
-    <EuiFlexItem css={style}>
-      <div
-        data-test-subj="dscFieldStatsEmbeddedContent"
-        ref={embeddableRoot}
-        // Match the scroll bar of the Discover doc table
-        className="kbnDocTableWrapper"
-      />
-    </EuiFlexItem>
+    <aiopsService.LogCategorizationWrapper
+      props={{
+        input: {
+          ...input,
+          lastReloadRequestTime,
+        },
+        viewModeToggle: props.viewModeToggle,
+        onClose: () => {},
+        embeddingOrigin: 'discover-embedded',
+      }}
+      deps={deps}
+    />
   );
 };

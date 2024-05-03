@@ -14,9 +14,9 @@ import type {
   EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
   EmbeddableChangePointType,
 } from '@kbn/aiops-change-point-detection/constants';
+import type { AiopsPluginStart, AiopsPluginStartDeps } from '../types';
 import type { EmbeddableChangePointChartInput } from './embeddable_change_point_chart';
 import { EmbeddableChangePointChart } from './embeddable_change_point_chart';
-import type { AiopsPluginStart, AiopsPluginStartDeps } from '../../types';
 
 export interface EmbeddableChangePointChartStartServices {
   data: DataPublicPluginStart;

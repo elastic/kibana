@@ -6,39 +6,34 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, memo, type ReactElement, type FC } from 'react';
+import React, { memo, type FC } from 'react';
 import { useQuerySubscriber } from '@kbn/unified-field-list/src/hooks/use_query_subscriber';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+// import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useSavedSearch } from '../../services/discover_state_provider';
 import { PatternAnalysisTable, type PatternAnalysisTableProps } from './pattern_analysis_table';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 
-export const PatternAnalysisTab: FC<
-  Omit<PatternAnalysisTableProps, 'query' | 'filters' | 'setOptionsMenu'>
-> = memo((props) => {
-  const services = useDiscoverServices();
-  const querySubscriberResult = useQuerySubscriber({
-    data: services.data,
-  });
-  const savedSearch = useSavedSearch();
-  const [optionsMenu, setOptionsMenu] = useState<ReactElement | undefined>(undefined);
+export const PatternAnalysisTab: FC<Omit<PatternAnalysisTableProps, 'query' | 'filters'>> = memo(
+  (props) => {
+    const services = useDiscoverServices();
+    const querySubscriberResult = useQuerySubscriber({
+      data: services.data,
+    });
+    const savedSearch = useSavedSearch();
 
-  return (
-    <>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="none">
-          <EuiFlexItem grow={false}>{props.viewModeToggle}</EuiFlexItem>
-          <EuiFlexItem />
-          <EuiFlexItem grow={false}>{optionsMenu}</EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <PatternAnalysisTable
-        {...props}
-        savedSearch={savedSearch}
-        query={querySubscriberResult.query}
-        filters={querySubscriberResult.filters}
-        setOptionsMenu={setOptionsMenu}
-      />
-    </>
-  );
-});
+    return (
+      <>
+        <PatternAnalysisTable
+          dataView={props.dataView}
+          filters={querySubscriberResult.filters}
+          query={querySubscriberResult.query}
+          onAddFilter={props.onAddFilter}
+          savedSearch={savedSearch}
+          stateContainer={props.stateContainer}
+          trackUiMetric={props.trackUiMetric}
+          viewModeToggle={props.viewModeToggle}
+        />
+      </>
+    );
+  }
+);

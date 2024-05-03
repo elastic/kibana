@@ -15,14 +15,12 @@ export interface EmbeddablePatternAnalysisProps<T = Query | AggregateQuery> {
   savedSearch?: SavedSearch | null;
   query?: T;
   filters?: Filter[];
-  id?: string;
   embeddingOrigin?: string;
   /**
    * Callback to add a filter to filter bar
    */
   onAddFilter?: () => void;
-  setPatternCount: (patternCount: number | undefined) => void;
-  setOptionsMenu: (optionsMenu: React.ReactElement | undefined) => void;
+  lastReloadRequestTime?: number;
 }
 
 export type EmbeddablePatternAnalysisInput = EmbeddableInput & EmbeddablePatternAnalysisProps;

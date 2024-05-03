@@ -8,7 +8,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { type DropType, DropOverlayWrapper, Droppable } from '@kbn/dom-drag-drop';
-import React, { ReactElement, useCallback, useMemo } from 'react';
+import React, { ReactElement, useCallback } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
@@ -64,7 +64,7 @@ export const DiscoverMainContent = ({
   isChartAvailable,
 }: DiscoverMainContentProps) => {
   const { trackUiMetric } = useDiscoverServices();
-  const [patternCount, setPatternCount] = React.useState<number | undefined>(undefined);
+  // const [patternCount, setPatternCount] = React.useState<number | undefined>(undefined);
 
   const setDiscoverViewMode = useCallback(
     (mode: VIEW_MODE) => {
@@ -85,32 +85,34 @@ export const DiscoverMainContent = ({
 
   const isDropAllowed = Boolean(onDropFieldToTable);
 
-  const viewModeToggle = useMemo(() => {
-    return (
-      <DocumentViewModeToggle
-        viewMode={viewMode}
-        isTextBasedQuery={isPlainRecord}
-        stateContainer={stateContainer}
-        setDiscoverViewMode={setDiscoverViewMode}
-        patternCount={patternCount}
-        dataView={dataView}
-        prepend={
-          React.isValidElement(panelsToggle)
-            ? React.cloneElement(panelsToggle, { renderedFor: 'tabs', isChartAvailable })
-            : undefined
-        }
-      />
-    );
-  }, [
-    viewMode,
-    setDiscoverViewMode,
-    isPlainRecord,
-    stateContainer,
-    panelsToggle,
-    isChartAvailable,
-    patternCount,
-    dataView,
-  ]);
+  const viewModeToggle = useCallback(
+    (patternCount?: number) => {
+      return (
+        <DocumentViewModeToggle
+          viewMode={viewMode}
+          isTextBasedQuery={isPlainRecord}
+          stateContainer={stateContainer}
+          setDiscoverViewMode={setDiscoverViewMode}
+          patternCount={patternCount}
+          dataView={dataView}
+          prepend={
+            React.isValidElement(panelsToggle)
+              ? React.cloneElement(panelsToggle, { renderedFor: 'tabs', isChartAvailable })
+              : undefined
+          }
+        />
+      );
+    },
+    [
+      viewMode,
+      setDiscoverViewMode,
+      isPlainRecord,
+      stateContainer,
+      panelsToggle,
+      isChartAvailable,
+      dataView,
+    ]
+  );
 
   const showChart = useAppStateSelector((state) => !state.hideChart);
 
@@ -132,7 +134,7 @@ export const DiscoverMainContent = ({
           {showChart && isChartAvailable && <EuiHorizontalRule margin="none" />}
           {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
             <DiscoverDocuments
-              viewModeToggle={viewModeToggle}
+              viewModeToggle={viewModeToggle()}
               dataView={dataView}
               onAddFilter={!isPlainRecord ? onAddFilter : undefined}
               stateContainer={stateContainer}
@@ -141,7 +143,7 @@ export const DiscoverMainContent = ({
           ) : null}
           {viewMode === VIEW_MODE.AGGREGATED_LEVEL ? (
             <>
-              <EuiFlexItem grow={false}>{viewModeToggle}</EuiFlexItem>
+              <EuiFlexItem grow={false}>{viewModeToggle()}</EuiFlexItem>
               <FieldStatisticsTab
                 dataView={dataView}
                 columns={columns}
@@ -158,7 +160,6 @@ export const DiscoverMainContent = ({
                 stateContainer={stateContainer}
                 onAddFilter={() => setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL)}
                 trackUiMetric={trackUiMetric}
-                setPatternCount={setPatternCount}
                 viewModeToggle={viewModeToggle}
               />
             </>

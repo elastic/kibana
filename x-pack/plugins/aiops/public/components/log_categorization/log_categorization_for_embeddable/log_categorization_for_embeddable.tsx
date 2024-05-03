@@ -20,7 +20,8 @@ import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 
 import type { CategorizationAdditionalFilter } from '@kbn/aiops-log-pattern-analysis/create_category_request';
 import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
-import type { EmbeddablePatternAnalysisInput } from '@kbn/aiops-log-pattern-analysis/embeddable';
+import type { EmbeddablePatternAnalysisProps } from '@kbn/aiops-log-pattern-analysis/embeddable';
+import { css } from '@emotion/react';
 import {
   type LogCategorizationPageUrlState,
   getDefaultLogCategorizationAppState,
@@ -37,17 +38,18 @@ import { InformationText } from '../information_text';
 import { LoadingCategorization } from '../loading_categorization';
 import { useValidateFieldRequest } from '../use_validate_category_field';
 import { FieldValidationCallout } from '../category_validation_callout';
-import { EmbeddableMenu } from './embeddable_menu';
 import { useMinimumTimeRange } from './use_minimum_time_range';
 
 import { createAdditionalConfigHash, createDocumentStatsHash, getMessageField } from '../utils';
 import { useOpenInDiscover } from '../category_table/use_open_in_discover';
 import { OpenInDiscoverButtons } from '../category_table/table_header';
+import { EmbeddableMenu } from './embeddable_menu';
 
 export interface LogCategorizationPageProps {
   onClose: () => void;
   embeddingOrigin: string;
-  input: Readonly<EmbeddablePatternAnalysisInput>;
+  input: Readonly<EmbeddablePatternAnalysisProps>;
+  viewModeToggle: (patternCount?: number) => React.ReactElement;
 }
 
 const BAR_TARGET = 20;
@@ -56,6 +58,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
   onClose,
   embeddingOrigin,
   input,
+  viewModeToggle,
 }) => {
   const {
     notifications: { toasts },
@@ -64,7 +67,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
     },
     uiSettings,
   } = useAiopsAppContext();
-  const { dataView, savedSearch, setPatternCount, setOptionsMenu } = input;
+  const { dataView, savedSearch } = input;
 
   const { runValidateFieldRequest, cancelRequest: cancelValidationRequest } =
     useValidateFieldRequest();
@@ -136,10 +139,9 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
       return () => {
         mounted.current = false;
         cancelRequest();
-        setPatternCount(undefined);
       };
     },
-    [cancelRequest, mounted, setPatternCount]
+    [cancelRequest, mounted]
   );
 
   const { searchQuery } = useSearch(
@@ -336,56 +338,56 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
     toasts,
   ]);
 
-  useEffect(
-    function initOptionsMenu() {
-      setPatternCount(data?.categories.length);
-      setOptionsMenu(
-        <>
-          {randomSampler !== undefined ? (
-            <>
-              <EuiSpacer size="s" />
-              <EuiFlexGroup gutterSize="none">
-                {selectedCategories.length > 0 ? (
-                  <EuiFlexItem>
-                    <OpenInDiscoverButtons openInDiscover={openInDiscover} showText={false} />
-                  </EuiFlexItem>
-                ) : null}
-                <EuiFlexItem>
-                  <EmbeddableMenu
-                    randomSampler={randomSampler}
-                    reload={() => loadCategories()}
-                    fields={fields}
-                    setSelectedField={setSelectedField}
-                    selectedField={selectedField}
-                    minimumTimeRangeOption={minimumTimeRangeOption}
-                    setMinimumTimeRangeOption={setMinimumTimeRangeOption}
-                    categoryCount={data?.totalCategories}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </>
-          ) : null}
-        </>
-      );
-      return () => {
-        setPatternCount(undefined);
-        setOptionsMenu(undefined);
-      };
-    },
-    [
-      data,
-      fields,
-      loadCategories,
-      randomSampler,
-      selectedField,
-      setOptionsMenu,
-      setPatternCount,
-      setMinimumTimeRangeOption,
-      minimumTimeRangeOption,
-      selectedCategories.length,
-      openInDiscover,
-    ]
-  );
+  // useEffect(
+  //   function initOptionsMenu() {
+  //     setPatternCount(data?.categories.length);
+  //     setOptionsMenu(
+  //       <>
+  //         {randomSampler !== undefined ? (
+  //           <>
+  //             <EuiSpacer size="s" />
+  //             <EuiFlexGroup gutterSize="none">
+  //               {selectedCategories.length > 0 ? (
+  //                 <EuiFlexItem>
+  //                   <OpenInDiscoverButtons openInDiscover={openInDiscover} showText={false} />
+  //                 </EuiFlexItem>
+  //               ) : null}
+  //               <EuiFlexItem>
+  //                 <EmbeddableMenu
+  //                   randomSampler={randomSampler}
+  //                   reload={() => loadCategories()}
+  //                   fields={fields}
+  //                   setSelectedField={setSelectedField}
+  //                   selectedField={selectedField}
+  //                   minimumTimeRangeOption={minimumTimeRangeOption}
+  //                   setMinimumTimeRangeOption={setMinimumTimeRangeOption}
+  //                   categoryCount={data?.totalCategories}
+  //                 />
+  //               </EuiFlexItem>
+  //             </EuiFlexGroup>
+  //           </>
+  //         ) : null}
+  //       </>
+  //     );
+  //     return () => {
+  //       setPatternCount(undefined);
+  //       setOptionsMenu(undefined);
+  //     };
+  //   },
+  //   [
+  //     data,
+  //     fields,
+  //     loadCategories,
+  //     randomSampler,
+  //     selectedField,
+  //     setOptionsMenu,
+  //     setPatternCount,
+  //     setMinimumTimeRangeOption,
+  //     minimumTimeRangeOption,
+  //     selectedCategories.length,
+  //     openInDiscover,
+  //   ]
+  // );
 
   useEffect(
     function triggerAnalysis() {
@@ -431,54 +433,102 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
 
   useEffect(
     function refreshTriggeredFromButton() {
-      if (input?.lastReloadRequestTime !== undefined) {
+      if (input.lastReloadRequestTime !== undefined) {
         setPreviousDocumentStatsHash(0);
         setPreviousAdditionalConfigsHash(null);
         forceRefresh();
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [input?.lastReloadRequestTime]
+    [input.lastReloadRequestTime]
   );
+  const style = css({
+    overflowY: 'auto',
+    '.kbnDocTableWrapper': {
+      overflowX: 'hidden',
+    },
+  });
 
   return (
     <>
-      <EuiFlexGroup
-        className="eui-fullHeight"
-        direction="column"
-        gutterSize="none"
-        responsive={false}
-      >
-        <EuiFlexItem css={{ position: 'relative', overflowY: 'auto' }}>
-          <>
-            <FieldValidationCallout validationResults={fieldValidationResult} />
-            {(loading ?? true) === true ? <LoadingCategorization onCancel={cancelRequest} /> : null}
-            <InformationText
-              loading={loading ?? true}
-              categoriesLength={data?.categories?.length ?? null}
-              eventRateLength={eventRate.length}
-              fields={fields}
-            />
-            {loading === false &&
-            data !== null &&
-            data.categories.length > 0 &&
-            selectedField !== null ? (
-              <CategoryTable
-                categories={data.categories}
-                eventRate={eventRate}
-                pinnedCategory={pinnedCategory}
-                setPinnedCategory={setPinnedCategory}
-                highlightedCategory={highlightedCategory}
-                setHighlightedCategory={setHighlightedCategory}
-                enableRowActions={false}
-                displayExamples={data.displayExamples}
-                setSelectedCategories={setSelectedCategories}
-                openInDiscover={openInDiscover}
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="none">
+          <EuiFlexItem grow={false}>{viewModeToggle(data?.categories.length)}</EuiFlexItem>
+          <EuiFlexItem />
+          <EuiFlexItem grow={false}>
+            <>
+              {randomSampler !== undefined ? (
+                <>
+                  <EuiSpacer size="s" />
+                  <EuiFlexGroup gutterSize="none">
+                    {selectedCategories.length > 0 ? (
+                      <EuiFlexItem>
+                        <OpenInDiscoverButtons openInDiscover={openInDiscover} showText={false} />
+                      </EuiFlexItem>
+                    ) : null}
+                    <EuiFlexItem>
+                      <EmbeddableMenu
+                        randomSampler={randomSampler}
+                        reload={() => loadCategories()}
+                        fields={fields}
+                        setSelectedField={setSelectedField}
+                        selectedField={selectedField}
+                        minimumTimeRangeOption={minimumTimeRangeOption}
+                        setMinimumTimeRangeOption={setMinimumTimeRangeOption}
+                        categoryCount={data?.totalCategories}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </>
+              ) : null}
+            </>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+
+      <EuiFlexItem css={style}>
+        <EuiFlexGroup
+          className="eui-fullHeight"
+          direction="column"
+          gutterSize="none"
+          responsive={false}
+        >
+          <EuiFlexItem css={{ position: 'relative', overflowY: 'auto' }}>
+            <>
+              <FieldValidationCallout validationResults={fieldValidationResult} />
+              {(loading ?? true) === true ? (
+                <LoadingCategorization onCancel={cancelRequest} />
+              ) : null}
+              <InformationText
+                loading={loading ?? true}
+                categoriesLength={data?.categories?.length ?? null}
+                eventRateLength={eventRate.length}
+                fields={fields}
               />
-            ) : null}
-          </>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+              {loading === false &&
+              data !== null &&
+              data.categories.length > 0 &&
+              selectedField !== null ? (
+                <CategoryTable
+                  categories={data.categories}
+                  eventRate={eventRate}
+                  pinnedCategory={pinnedCategory}
+                  setPinnedCategory={setPinnedCategory}
+                  highlightedCategory={highlightedCategory}
+                  setHighlightedCategory={setHighlightedCategory}
+                  enableRowActions={false}
+                  displayExamples={data.displayExamples}
+                  setSelectedCategories={setSelectedCategories}
+                  openInDiscover={openInDiscover}
+                />
+              ) : null}
+            </>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
     </>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export default LogCategorizationEmbeddable;

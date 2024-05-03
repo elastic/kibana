@@ -6,7 +6,4 @@
  */
 
 export { EmbeddableChangePointChartFactory } from './embeddable_change_point_chart_factory';
-export {
-  type EmbeddableChangePointChartProps,
-  getEmbeddableChangePointChart,
-} from './embeddable_change_point_chart_component';
+export { type EmbeddableChangePointChartProps } from './embeddable_change_point_chart_component';
