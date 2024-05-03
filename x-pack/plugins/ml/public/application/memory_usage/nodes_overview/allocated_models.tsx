@@ -256,7 +256,6 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
 
   return (
     <EuiInMemoryTable<AllocatedModel>
-      responsiveBreakpoint={'xl'}
       allowNeutralSort={false}
       columns={columns}
       hasActions={false}
