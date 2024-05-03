@@ -8,6 +8,7 @@
  */
 
 import {
+  EuiButtonEmpty,
   EuiButtonGroup,
   EuiButtonIcon,
   EuiContextMenu,
@@ -24,6 +25,9 @@ import React, { memo, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   SETTINGS_MENU_BUTTON_TEST_ID,
+  SETTINGS_MENU_FLYOUT_RESIZE_BUTTON_TEST_ID,
+  SETTINGS_MENU_FLYOUT_RESIZE_INFORMATION_ICON_TEST_ID,
+  SETTINGS_MENU_FLYOUT_RESIZE_TITLE_TEST_ID,
   SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_OVERLAY_TEST_ID,
   SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_PUSH_TEST_ID,
   SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_TEST_ID,
@@ -58,6 +62,12 @@ const FLYOUT_TYPE_OVERLAY_TOOLTIP = i18n.translate('expandableFlyout.settingsMen
 const FLYOUT_TYPE_PUSH_TOOLTIP = i18n.translate('expandableFlyout.settingsMenu.pushTooltip', {
   defaultMessage: 'Displays the flyout next to the page',
 });
+const FLYOUT_RESIZE_TITLE = i18n.translate('expandableFlyout.renderMenu.flyoutResizeTitle', {
+  defaultMessage: 'Flyout size',
+});
+const FLYOUT_RESIZE_BUTTON = i18n.translate('expandableFlyout.renderMenu.flyoutResizeButton', {
+  defaultMessage: 'Reset size',
+});
 
 interface SettingsMenuProps {
   /**
@@ -81,6 +91,20 @@ interface SettingsMenuProps {
      */
     tooltip: string;
   };
+  flyoutResizeProps: {
+    /**
+     *
+     */
+    onReset: () => void;
+    /**
+     * Disables the button group for flyout where the option shouldn't be available
+     */
+    disabled: boolean;
+    /**
+     * Allows to show a tooltip to explain why the option is disabled
+     */
+    tooltip: string;
+  };
 }
 
 /**
@@ -89,7 +113,7 @@ interface SettingsMenuProps {
  * - Flyout type: overlay or push
  */
 export const SettingsMenu: React.FC<SettingsMenuProps> = memo(
-  ({ flyoutTypeProps }: SettingsMenuProps) => {
+  ({ flyoutTypeProps, flyoutResizeProps }: SettingsMenuProps) => {
     const [isPopoverOpen, setPopover] = useState(false);
     const togglePopover = () => {
       setPopover(!isPopoverOpen);
@@ -102,6 +126,11 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = memo(
       },
       [flyoutTypeProps]
     );
+
+    const resetSizeOnClick = useCallback(() => {
+      flyoutResizeProps.onReset();
+      setPopover(false);
+    }, [flyoutResizeProps]);
 
     const panels = [
       {
@@ -147,6 +176,31 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = memo(
               isDisabled={flyoutTypeProps.disabled}
               data-test-subj={SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_TEST_ID}
             />
+            <EuiSpacer size="m" />
+            <EuiTitle size="xxs" data-test-subj={SETTINGS_MENU_FLYOUT_RESIZE_TITLE_TEST_ID}>
+              <h3>
+                {FLYOUT_RESIZE_TITLE}{' '}
+                {flyoutResizeProps.tooltip && (
+                  <EuiToolTip position="top" content={flyoutResizeProps.tooltip}>
+                    <EuiIcon
+                      data-test-subj={SETTINGS_MENU_FLYOUT_RESIZE_INFORMATION_ICON_TEST_ID}
+                      type="iInCircle"
+                      css={css`
+                        margin-left: 4px;
+                      `}
+                    />
+                  </EuiToolTip>
+                )}
+              </h3>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiButtonEmpty
+              onClick={resetSizeOnClick}
+              disabled={flyoutResizeProps.disabled}
+              data-test-subj={SETTINGS_MENU_FLYOUT_RESIZE_BUTTON_TEST_ID}
+            >
+              {FLYOUT_RESIZE_BUTTON}
+            </EuiButtonEmpty>
           </EuiPanel>
         ),
       },

@@ -21,6 +21,9 @@ import {
 import { type State } from './state';
 import { TestProvider } from './test/provider';
 import { REDUX_ID_FOR_MEMORY_STORAGE } from './constants';
+import { useWindowWidth } from './hooks/use_window_width';
+
+jest.mock('./hooks/use_window_width');
 
 const id = REDUX_ID_FOR_MEMORY_STORAGE;
 const registeredPanels: Panel[] = [
@@ -31,6 +34,10 @@ const registeredPanels: Panel[] = [
 ];
 
 describe('ExpandableFlyout', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
   it(`shouldn't render flyout if no panels`, () => {
     const state: State = {
       byId: {},
@@ -71,7 +78,9 @@ describe('ExpandableFlyout', () => {
     const state = {
       byId: {
         [id]: {
-          right: undefined,
+          right: {
+            id: 'key',
+          },
           left: {
             id: 'key',
           },
@@ -87,6 +96,28 @@ describe('ExpandableFlyout', () => {
     );
 
     expect(getByTestId(LEFT_SECTION_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('should not render left section if right section is not provided', () => {
+    const state = {
+      byId: {
+        [id]: {
+          right: undefined,
+          left: {
+            id: 'key',
+          },
+          preview: undefined,
+        },
+      },
+    };
+
+    const { queryByTestId } = render(
+      <TestProvider state={state}>
+        <ExpandableFlyout registeredPanels={registeredPanels} />
+      </TestProvider>
+    );
+
+    expect(queryByTestId(LEFT_SECTION_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('should render preview section', () => {
@@ -113,6 +144,56 @@ describe('ExpandableFlyout', () => {
     expect(getByTestId(PREVIEW_SECTION_TEST_ID)).toBeInTheDocument();
   });
 
+  it('should not render flyout if windowWidth is 0', () => {
+    (useWindowWidth as jest.Mock).mockReturnValue(0);
+
+    const state = {
+      byId: {
+        [id]: {
+          right: {
+            id: 'key',
+          },
+          left: {
+            id: 'key',
+          },
+          preview: [
+            {
+              id: 'key',
+            },
+          ],
+        },
+      },
+    };
+
+    const { container } = render(
+      <TestProvider state={state}>
+        <ExpandableFlyout registeredPanels={registeredPanels} />
+      </TestProvider>
+    );
+
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it('should not render flyout if no panels are to be rendered', () => {
+    const state = {
+      byId: {
+        [id]: {
+          right: undefined,
+          left: undefined,
+          preview: [],
+        },
+      },
+    };
+
+    const { container } = render(
+      <TestProvider state={state}>
+        <ExpandableFlyout registeredPanels={registeredPanels} />
+      </TestProvider>
+    );
+
+    expect(container).toBeEmptyDOMElement();
+  });
+
   it('should not render flyout when right has value but does not matches registered panels', () => {
     const state = {
       byId: {
@@ -120,23 +201,28 @@ describe('ExpandableFlyout', () => {
           right: {
             id: 'key1',
           },
-          left: undefined,
-          preview: undefined,
+          left: {
+            id: 'key2',
+          },
+          preview: [
+            {
+              id: 'key3',
+            },
+          ],
         },
       },
     };
 
-    const { queryByTestId } = render(
+    const { container } = render(
       <TestProvider state={state}>
         <ExpandableFlyout data-test-subj="my-test-flyout" registeredPanels={registeredPanels} />
       </TestProvider>
     );
 
-    expect(queryByTestId('my-test-flyout')).toBeNull();
-    expect(queryByTestId(RIGHT_SECTION_TEST_ID)).toBeNull();
+    expect(container).toBeEmptyDOMElement();
   });
 
-  it('should render the menu to change display options', () => {
+  it('should render the settings icon', () => {
     const state = {
       byId: {
         [id]: {
@@ -156,5 +242,30 @@ describe('ExpandableFlyout', () => {
     );
 
     expect(getByTestId(SETTINGS_MENU_BUTTON_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('should hide the settings icon', () => {
+    const state = {
+      byId: {
+        [id]: {
+          right: {
+            id: 'key',
+          },
+          left: undefined,
+          preview: undefined,
+        },
+      },
+    };
+
+    const { queryByTestId } = render(
+      <TestProvider state={state}>
+        <ExpandableFlyout
+          registeredPanels={registeredPanels}
+          flyoutCustomProps={{ hideSettings: true }}
+        />
+      </TestProvider>
+    );
+
+    expect(queryByTestId(SETTINGS_MENU_BUTTON_TEST_ID)).not.toBeInTheDocument();
   });
 });

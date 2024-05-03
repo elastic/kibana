@@ -14,7 +14,7 @@ import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-templat
 import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
 import { AttackDiscoveryTour } from '../../../attack_discovery/tour';
 import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
-import { SecuritySolutionFlyout, TimelineFlyout } from '../../../flyout';
+import { SecuritySolutionFlyout } from '../../../flyout';
 import { useSecuritySolutionNavigation } from '../../../common/components/navigation/use_security_solution_navigation';
 import { TimelineId } from '../../../../common/types/timeline';
 import { getTimelineShowStatusByIdSelector } from '../../../timelines/store/selectors';
@@ -115,7 +115,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateW
                 <EuiThemeProvider colorMode={globalColorMode}>
                   <ExpandableFlyoutProvider urlKey={URL_PARAM_KEY.timelineFlyout}>
                     <Timeline />
-                    <TimelineFlyout />
+                    {/* <TimelineFlyout />*/}
                   </ExpandableFlyoutProvider>
                 </EuiThemeProvider>
               </KibanaPageTemplate.BottomBar>

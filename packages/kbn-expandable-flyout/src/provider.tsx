@@ -12,7 +12,7 @@ import React, { FC, PropsWithChildren, useEffect, useMemo } from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { ExpandableFlyoutContextProvider, useExpandableFlyoutContext } from './context';
-import { FlyoutState } from './state';
+import { FlyoutPanelsState } from './state';
 import { useExpandableFlyoutState } from './hooks/use_expandable_flyout_state';
 import { Context, selectNeedsSync, store, useDispatch, useSelector } from './redux';
 import { urlChangedAction } from './actions';
@@ -43,7 +43,7 @@ export const UrlSynchronizer = () => {
       return;
     }
 
-    const currentValue = urlStorage.get<FlyoutState>(urlKey);
+    const currentValue = urlStorage.get<FlyoutPanelsState>(urlKey);
 
     // Dispatch current value to redux store as it does not happen automatically
     if (currentValue) {
@@ -56,7 +56,7 @@ export const UrlSynchronizer = () => {
       );
     }
 
-    const subscription = urlStorage.change$<FlyoutState>(urlKey).subscribe((value) => {
+    const subscription = urlStorage.change$<FlyoutPanelsState>(urlKey).subscribe((value) => {
       dispatch(urlChangedAction({ ...value, preview: value?.preview?.at(-1), id: urlKey }));
     });
 

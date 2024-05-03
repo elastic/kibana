@@ -7,25 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
-import type { Interpolation, Theme } from '@emotion/react';
-import { EuiFlyoutProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlyout } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
+import { Interpolation, Theme } from '@emotion/react';
+import { EuiFlyoutProps, EuiFlyoutResizable } from '@elastic/eui';
+import { EuiFlyoutResizableProps } from '@elastic/eui/src/components/flyout/flyout_resizable';
+import { useExpandableFlyoutContext } from './context';
+import {
+  changeCollapsedWidthAction,
+  changeExpandedWidthAction,
+  resetCollapsedWidthAction,
+  resetExpandedWidthAction,
+  resetInternalPercentagesAction,
+} from './actions';
+import { useDispatch } from './redux';
+import { RightSection } from './components/right_section';
+import { useSections } from './hooks/use_sections';
+import { useFlyoutWidth } from './hooks/use_flyout_width';
 import { useFlyoutType } from './hooks/use_flyout_type';
 import { SettingsMenu } from './components/settings_menu';
-import { useSectionSizes } from './hooks/use_sections_sizes';
-import { useWindowSize } from './hooks/use_window_size';
+import { useWindowWidth } from './hooks/use_window_width';
 import { useExpandableFlyoutState } from './hooks/use_expandable_flyout_state';
 import { useExpandableFlyoutApi } from './hooks/use_expandable_flyout_api';
-import { PreviewSection } from './components/preview_section';
-import { RightSection } from './components/right_section';
 import type { FlyoutPanelProps, Panel } from './types';
-import { LeftSection } from './components/left_section';
-import { isPreviewBanner } from './components/preview_section';
+import { PreviewSection } from './components/preview_section';
+import { ResizableContainer } from './components/resizable_container';
 
-const flyoutInnerStyles = { height: '100%' };
+const COLLAPSED_FLYOUT_MIN_WIDTH = 380;
+const EXPANDED_FLYOUT_MIN_WIDTH = 740;
 
-export interface ExpandableFlyoutProps extends Omit<EuiFlyoutProps, 'onClose'> {
+export interface ExpandableFlyoutProps extends Omit<EuiFlyoutResizableProps, 'onClose'> {
   /**
    * List of all registered panels available for render
    */
@@ -50,7 +60,26 @@ export interface ExpandableFlyoutProps extends Omit<EuiFlyoutProps, 'onClose'> {
      * Control if the option to render in overlay or push mode is enabled or not
      */
     pushVsOverlay?: {
+      /**
+       * Disables the option
+       */
       disabled: boolean;
+      /**
+       * Tooltip to display
+       */
+      tooltip: string;
+    };
+    /**
+     * Control if the option to resize the flyout is enabled or not
+     */
+    resize?: {
+      /**
+       * Disables the option
+       */
+      disabled: boolean;
+      /**
+       * Tooltip to display
+       */
       tooltip: string;
     };
   };
@@ -69,51 +98,63 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
   flyoutCustomProps,
   ...flyoutProps
 }) => {
-  const windowWidth = useWindowSize();
+  const dispatch = useDispatch();
+
+  // retrieves the window width
+  const windowWidth = useWindowWidth();
+
+  // push vs overlay mode
   const { flyoutType, flyoutTypeChange } = useFlyoutType();
+
   const { left, right, preview } = useExpandableFlyoutState();
+  const { urlKey } = useExpandableFlyoutContext();
   const { closeFlyout } = useExpandableFlyoutApi();
 
-  const leftSection = useMemo(
-    () => registeredPanels.find((panel) => panel.key === left?.id),
-    [left, registeredPanels]
-  );
+  // retrieves the sections to be displayed
+  const { leftSection, rightSection, previewSection, mostRecentPreview, previewBanner } =
+    useSections({
+      registeredPanels,
+    });
 
-  const rightSection = useMemo(
-    () => registeredPanels.find((panel) => panel.key === right?.id),
-    [right, registeredPanels]
-  );
-
-  // retrieve the last preview panel (most recent)
-  const mostRecentPreview = preview ? preview[preview.length - 1] : undefined;
-  const previewBanner = isPreviewBanner(mostRecentPreview?.params?.banner)
-    ? mostRecentPreview?.params?.banner
-    : undefined;
-
-  const previewSection = useMemo(
-    () => registeredPanels.find((panel) => panel.key === mostRecentPreview?.id),
-    [mostRecentPreview, registeredPanels]
-  );
-
-  const showRight = rightSection != null && right != null;
+  // calculates what needs to be rendered
   const showLeft = leftSection != null && left != null;
+  const showRight = rightSection != null && right != null;
   const showPreview = previewSection != null && preview != null;
 
-  const { rightSectionWidth, leftSectionWidth, flyoutWidth, previewSectionLeft } = useSectionSizes({
+  // calculates the flyout width
+  const flyoutWidth = useFlyoutWidth({
+    urlKey: urlKey as string, // TODO: fix this typing
     windowWidth,
     showRight,
     showLeft,
-    showPreview,
   });
 
-  const hideFlyout = !(left && leftSection) && !(right && rightSection) && !preview?.length;
+  // we want to set a minimum flyout width different when in collapsed and expanded mode
+  const minFlyoutWidth = useMemo(
+    () => (showLeft ? EXPANDED_FLYOUT_MIN_WIDTH : COLLAPSED_FLYOUT_MIN_WIDTH),
+    [showLeft]
+  );
 
-  if (hideFlyout) {
+  // callback function called when user changes the flyout's width
+  const onResize = useCallback(
+    (width: number) => {
+      if (showLeft && urlKey) {
+        dispatch(changeExpandedWidthAction({ width, id: urlKey }));
+      } else if (showRight && urlKey) {
+        dispatch(changeCollapsedWidthAction({ width, id: urlKey }));
+      }
+    },
+    [dispatch, showLeft, showRight, urlKey]
+  );
+
+  // don't need to render if the windowWidth is 0 or if nothing needs to be rendered
+  if (windowWidth === 0 || (!showLeft && !showRight && !showPreview)) {
     return null;
   }
 
   return (
-    <EuiFlyout
+    // @ts-ignore // TODO figure out why it's throwing an ref error
+    <EuiFlyoutResizable
       {...flyoutProps}
       data-panel-id={right?.id ?? ''}
       type={flyoutType}
@@ -126,35 +167,24 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
         }
       }}
       css={customStyles}
+      onResize={onResize}
+      minWidth={minFlyoutWidth}
     >
-      <EuiFlexGroup
-        direction={leftSection ? 'row' : 'column'}
-        wrap={false}
-        gutterSize="none"
-        style={flyoutInnerStyles}
-        responsive={false}
-      >
-        {showLeft ? (
-          <LeftSection
-            component={leftSection.component({ ...(left as FlyoutPanelProps) })}
-            width={leftSectionWidth}
-          />
-        ) : null}
-        {showRight ? (
-          <RightSection
-            component={rightSection.component({ ...(right as FlyoutPanelProps) })}
-            width={rightSectionWidth}
-          />
-        ) : null}
-      </EuiFlexGroup>
+      {showRight && !showLeft && (
+        <RightSection component={rightSection.component({ ...(right as FlyoutPanelProps) })} />
+      )}
 
-      {showPreview ? (
+      {showRight && showLeft && (
+        <ResizableContainer registeredPanels={registeredPanels} showPreview={showPreview} />
+      )}
+
+      {showPreview && (
         <PreviewSection
           component={previewSection.component({ ...(mostRecentPreview as FlyoutPanelProps) })}
-          leftPosition={previewSectionLeft}
           banner={previewBanner}
+          showLeft={showLeft}
         />
-      ) : null}
+      )}
 
       {!flyoutCustomProps?.hideSettings && (
         <SettingsMenu
@@ -164,9 +194,20 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
             disabled: flyoutCustomProps?.pushVsOverlay?.disabled || false,
             tooltip: flyoutCustomProps?.pushVsOverlay?.tooltip || '',
           }}
+          flyoutResizeProps={{
+            onReset: () => {
+              if (urlKey) {
+                dispatch(resetCollapsedWidthAction({ id: urlKey }));
+                dispatch(resetExpandedWidthAction({ id: urlKey }));
+                dispatch(resetInternalPercentagesAction({ id: urlKey }));
+              }
+            },
+            disabled: flyoutCustomProps?.resize?.disabled || false,
+            tooltip: flyoutCustomProps?.resize?.tooltip || '',
+          }}
         />
       )}
-    </EuiFlyout>
+    </EuiFlyoutResizable>
   );
 };
 

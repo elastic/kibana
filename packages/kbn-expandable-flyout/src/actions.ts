@@ -21,6 +21,13 @@ export enum ActionType {
   previousPreviewPanel = 'previous_preview_panel',
   closeFlyout = 'close_flyout',
   urlChanged = 'urlChanged',
+  changeCollapsedWidth = 'changeCollapsedWidth',
+  resetCollapsedWidth = 'resetCollapsedWidth',
+  changeExpandedWidth = 'changeExpandedWidth',
+  resetExpandedWidth = 'resetExpandedWidth',
+  setDefaultWidths = 'setDefaultWidths',
+  changeInternalPercentagesWidth = 'changeInternalPercentagesWidth',
+  resetInternalPercentagesWidth = 'resetInternalPercentagesWidth',
 }
 
 export const openPanelsAction = createAction<{
@@ -120,3 +127,76 @@ export const urlChangedAction = createAction<{
    */
   id: string;
 }>(ActionType.urlChanged);
+
+export const changeCollapsedWidthAction = createAction<{
+  /**
+   *
+   */
+  width: number;
+  /**
+   * Unique identifier for the flyout (either the urlKey or 'memory')
+   */
+  id: string;
+}>(ActionType.changeCollapsedWidth);
+
+export const resetCollapsedWidthAction = createAction<{
+  /**
+   * Unique identifier for the flyout (either the urlKey or 'memory')
+   */
+  id: string;
+}>(ActionType.resetCollapsedWidth);
+
+export const changeExpandedWidthAction = createAction<{
+  /**
+   *
+   */
+  width: number;
+  /**
+   * Unique identifier for the flyout (either the urlKey or 'memory')
+   */
+  id: string;
+}>(ActionType.changeExpandedWidth);
+
+export const resetExpandedWidthAction = createAction<{
+  /**
+   * Unique identifier for the flyout (either the urlKey or 'memory')
+   */
+  id: string;
+}>(ActionType.resetExpandedWidth);
+
+export const setDefaultWidthsAction = createAction<{
+  /**
+   *
+   */
+  right: number;
+  /**
+   *
+   */
+  left: number;
+  /**
+   *
+   */
+  preview: number;
+}>(ActionType.setDefaultWidths);
+
+export const changeInternalPercentagesAction = createAction<{
+  /**
+   *
+   */
+  left: number;
+  /**
+   *
+   */
+  right: number;
+  /**
+   * Unique identifier for the flyout (either the urlKey or 'memory')
+   */
+  id: string;
+}>(ActionType.changeInternalPercentagesWidth);
+
+export const resetInternalPercentagesAction = createAction<{
+  /**
+   * Unique identifier for the flyout (either the urlKey or 'memory')
+   */
+  id: string;
+}>(ActionType.resetInternalPercentagesWidth);
