@@ -514,6 +514,7 @@ export class TaskStore {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
     try {
       if (opts.routing) {
+        // eslint-disable-next-line no-console
         console.log('Running Update By Query on', opts.routing);
       }
 

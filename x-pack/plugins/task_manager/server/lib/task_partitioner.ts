@@ -98,6 +98,7 @@ export class TaskPartitioner {
       throw new Error('No pods found');
     } else {
       const { podNames } = result.saved_objects[0].attributes;
+      // eslint-disable-next-line no-console
       console.log('Pods found:', JSON.stringify(podNames));
       return podNames;
     }

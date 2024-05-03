@@ -40,6 +40,7 @@ export function podNamesRoute({ router, savedObjectsRepository }: PodNamesRouteP
       try {
         await (await savedObjectsRepository()).create('all_pods', req.body);
       } catch (e) {
+        // eslint-disable-next-line no-console
         console.log('Failed to create SO', e.message);
         throw e;
       }
