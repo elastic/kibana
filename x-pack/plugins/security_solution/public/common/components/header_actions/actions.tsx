@@ -228,7 +228,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
     onEventDetailsPanelOpened();
   }, [activeStep, incrementStep, isTourAnchor, isTourShown, onEventDetailsPanelOpened]);
   const showExpandEvent = useMemo(
-    () => !isEventViewer && timelineId !== TimelineId.active && unifiedComponentsInTimelineEnabled,
+    () => !isEventViewer && timelineId !== TimelineId.active && !unifiedComponentsInTimelineEnabled,
     [isEventViewer, timelineId, unifiedComponentsInTimelineEnabled]
   );
 
