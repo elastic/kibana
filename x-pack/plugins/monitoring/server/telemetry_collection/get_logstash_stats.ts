@@ -171,7 +171,7 @@ export interface LogstashProcessOptions {
 export function processStatsResults(
   results: estypes.SearchResponse<LogstashStats>,
   { clusters, allEphemeralIds, versions, plugins }: LogstashProcessOptions,
-  isSelfMonitoring: boolean = false
+  isSelfMonitoring: boolean
 ) {
   const currHits = results?.hits?.hits || [];
   currHits.forEach((hit) => {
@@ -238,7 +238,7 @@ export function processLogstashStateResults(
   results: estypes.SearchResponse<LogstashState>,
   clusterUuid: string,
   { clusters, plugins }: LogstashProcessOptions,
-  isSelfMonitoring: boolean = false
+  isSelfMonitoring: boolean
 ) {
   const currHits = results?.hits?.hits || [];
   const clusterStats = clusters[clusterUuid].cluster_stats;
@@ -329,7 +329,7 @@ export async function fetchLogstashStats(
   start: string,
   end: string,
   { page = 0, ...options }: { page?: number } & LogstashProcessOptions,
-  isSelfMonitoring: boolean = false
+  isSelfMonitoring: boolean
 ): Promise<void> {
   const statsField = isSelfMonitoring ? 'logstash_stats' : 'logstash.node.stats';
   const filterPath: string[] = [
@@ -395,7 +395,7 @@ export async function fetchLogstashState(
   start: string,
   end: string,
   { page = 0, ...options }: { page?: number } & LogstashProcessOptions,
-  isSelfMonitoring: boolean = false
+  isSelfMonitoring: boolean
 ): Promise<void> {
   const stateField = isSelfMonitoring ? 'logstash_state' : 'logstash.node.state';
   const filterPath: string[] = [
@@ -442,7 +442,7 @@ export async function fetchLogstashState(
   const hitsLength = results?.hits?.hits.length || 0;
   if (hitsLength > 0) {
     // further augment the clusters object with more stats
-    processLogstashStateResults(results, clusterUuid, options);
+    processLogstashStateResults(results, clusterUuid, options, isSelfMonitoring);
   }
   return Promise.resolve();
 }

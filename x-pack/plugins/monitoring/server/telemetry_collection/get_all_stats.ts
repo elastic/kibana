@@ -69,14 +69,22 @@ export function handleAllStats(
   }
 ) {
   return clusters.map((cluster) => {
+    const clusterUuid: string =
+      cluster.cluster_uuid !== undefined ? cluster.cluster_uuid : cluster.elasticsearch?.cluster.id;
+
+    const clusterStats =
+      cluster.cluster_stats !== undefined
+        ? cluster.cluster_stats
+        : cluster.elasticsearch?.cluster.stats.stack;
+
     const stats = {
       ...cluster,
       stack_stats: {
-        ...cluster.stack_stats,
+        ...clusterStats,
         // if they are using Kibana or Logstash, then add it to the cluster details under cluster.stack_stats
-        ...getStackStats(cluster.cluster_uuid, kibana, KIBANA_SYSTEM_ID),
-        ...getStackStats(cluster.cluster_uuid, logstash, LOGSTASH_SYSTEM_ID),
-        ...getStackStats(cluster.cluster_uuid, beats, BEATS_SYSTEM_ID),
+        ...getStackStats(clusterUuid, kibana, KIBANA_SYSTEM_ID),
+        ...getStackStats(clusterUuid, logstash, LOGSTASH_SYSTEM_ID),
+        ...getStackStats(clusterUuid, beats, BEATS_SYSTEM_ID),
       },
     };
 
