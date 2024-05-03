@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 const VIEWER_ROLE = 'viewer';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const pageObjects = getPageObjects(['svlCommonPage', 'common', 'svlUserProfile']);
+  const pageObjects = getPageObjects(['svlCommonPage', 'common', 'userProfiles']);
   const svlUserManager = getService('svlUserManager');
   const find = getService('find');
 
@@ -30,8 +30,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         const userData = await svlUserManager.getUserData(VIEWER_ROLE);
 
-        const actualFullname = await pageObjects.svlUserProfile.getProfileFullname();
-        const actualEmail = await pageObjects.svlUserProfile.getProfileEmail();
+        const actualFullname = await pageObjects.userProfiles.getProfileFullname();
+        const actualEmail = await pageObjects.userProfiles.getProfileEmail();
 
         expect(actualFullname).to.be(userData.fullname);
         expect(actualEmail).to.be(userData.email);
