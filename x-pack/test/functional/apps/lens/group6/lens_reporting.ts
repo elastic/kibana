@@ -114,14 +114,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await PageObjects.lens.openReportingShare(type);
           await PageObjects.reporting.clickGenerateReportButton();
-          await PageObjects.lens.closeShareModal();
+          if (await testSubjects.exists('shareContextModal')) {
+            await PageObjects.lens.closeShareModal();
+          }
           const url = await PageObjects.reporting.getReportURL(60000);
-          await PageObjects.lens.closeShareModal();
+          if (await testSubjects.exists('shareContextModal')) {
+            await PageObjects.lens.closeShareModal();
+          }
           expect(url).to.be.ok();
           if (await testSubjects.exists('toastCloseButton')) {
             await testSubjects.click('toastCloseButton');
           }
-          await PageObjects.lens.closeShareModal();
+          if (await testSubjects.exists('shareContextModal')) {
+            await PageObjects.lens.closeShareModal();
+          }
         });
 
         it(`should enable curl reporting if the visualization is saved`, async () => {
