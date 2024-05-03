@@ -101,7 +101,7 @@ export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
     name: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
     indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: false,
-    namespaceType: USE_SPACE_AWARENESS ? 'multiple-isolated' : 'agnostic',
+    namespaceType: 'agnostic',
     management: {
       importableAndExportable: false,
     },
@@ -127,7 +127,7 @@ export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
     name: AGENT_POLICY_SAVED_OBJECT_TYPE,
     indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: false,
-    namespaceType: USE_SPACE_AWARENESS ? 'multiple-isolated' : 'agnostic',
+    namespaceType: USE_SPACE_AWARENESS ? 'single' : 'agnostic',
     management: {
       importableAndExportable: false,
     },
@@ -188,7 +188,7 @@ export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
     name: OUTPUT_SAVED_OBJECT_TYPE,
     indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: false,
-    namespaceType: USE_SPACE_AWARENESS ? 'multiple-isolated' : 'agnostic',
+    namespaceType: 'agnostic',
     management: {
       importableAndExportable: false,
     },
@@ -402,7 +402,7 @@ export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
     name: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
     indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: false,
-    namespaceType: USE_SPACE_AWARENESS ? 'multiple-isolated' : 'agnostic',
+    namespaceType: USE_SPACE_AWARENESS ? 'single' : 'agnostic',
     management: {
       importableAndExportable: false,
     },
@@ -538,7 +538,7 @@ export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
     name: PACKAGES_SAVED_OBJECT_TYPE,
     indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: false,
-    namespaceType: USE_SPACE_AWARENESS ? 'multiple-isolated' : 'agnostic',
+    namespaceType: USE_SPACE_AWARENESS ? 'single' : 'agnostic',
     management: {
       importableAndExportable: false,
     },
@@ -631,7 +631,7 @@ export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
     name: ASSETS_SAVED_OBJECT_TYPE,
     indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: false,
-    namespaceType: USE_SPACE_AWARENESS ? 'multiple-isolated' : 'agnostic',
+    namespaceType: USE_SPACE_AWARENESS ? 'single' : 'agnostic',
     management: {
       importableAndExportable: false,
     },
@@ -651,7 +651,7 @@ export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
     name: PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
     indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: false,
-    namespaceType: USE_SPACE_AWARENESS ? 'multiple-isolated' : 'agnostic',
+    namespaceType: USE_SPACE_AWARENESS ? 'single' : 'agnostic',
     management: {
       importableAndExportable: false,
     },
@@ -665,7 +665,7 @@ export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
     name: DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
     indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: false,
-    namespaceType: USE_SPACE_AWARENESS ? 'multiple-isolated' : 'agnostic',
+    namespaceType: USE_SPACE_AWARENESS ? 'single' : 'agnostic',
     management: {
       importableAndExportable: false,
     },
@@ -683,7 +683,7 @@ export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
     name: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
     indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: false,
-    namespaceType: USE_SPACE_AWARENESS ? 'multiple-isolated' : 'agnostic',
+    namespaceType: 'agnostic',
     management: {
       importableAndExportable: false,
     },
@@ -714,7 +714,7 @@ export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
     name: FLEET_PROXY_SAVED_OBJECT_TYPE,
     indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: false,
-    namespaceType: USE_SPACE_AWARENESS ? 'multiple-isolated' : 'agnostic',
+    namespaceType: 'agnostic',
     management: {
       importableAndExportable: false,
     },
@@ -734,7 +734,7 @@ export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
     name: MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
     indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: true,
-    namespaceType: USE_SPACE_AWARENESS ? 'multiple-isolated' : 'agnostic',
+    namespaceType: USE_SPACE_AWARENESS ? 'single' : 'agnostic',
     management: {
       importableAndExportable: false,
     },
@@ -747,7 +747,7 @@ export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
     name: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
     indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: true,
-    namespaceType: USE_SPACE_AWARENESS ? 'multiple-isolated' : 'agnostic',
+    namespaceType: USE_SPACE_AWARENESS ? 'single' : 'agnostic',
     management: {
       importableAndExportable: false,
     },
