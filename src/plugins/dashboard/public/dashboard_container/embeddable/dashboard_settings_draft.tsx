@@ -17,7 +17,10 @@ const createDashboardDraftSettings = once(function createDashboardDraftSettingsO
   return new BehaviorSubject<DashboardSettings | null>(null);
 });
 
-export const dashboardDraftSettings$ = createDashboardDraftSettings();
+const dashboardDraftSettings = createDashboardDraftSettings();
+
+// expose as readonly observable
+export const dashboardDraftSettings$ = dashboardDraftSettings.asObservable();
 
 export function useDashboardSettingsDraft<T extends DashboardSettings = DashboardSettings>(
   initialValue: T
@@ -26,17 +29,17 @@ export function useDashboardSettingsDraft<T extends DashboardSettings = Dashboar
 
   useEffect(() => {
     if (initialValue) {
-      dashboardDraftSettings$.next(initialValue);
+      dashboardDraftSettings.next(initialValue);
 
       return () => {
         // reset on unmount
-        dashboardDraftSettings$.next(null);
+        dashboardDraftSettings.next(null);
       };
     }
   }, [initialValue]);
 
   useEffect(() => {
-    const subscription = dashboardDraftSettings$.subscribe((value) => {
+    const subscription = dashboardDraftSettings.subscribe((value) => {
       if (value) {
         setSettingsDraftValue(value as T);
       }
@@ -49,7 +52,7 @@ export function useDashboardSettingsDraft<T extends DashboardSettings = Dashboar
 
   const draftSettingsValueSetter = useCallback(
     (val: (prev: T) => T) => {
-      dashboardDraftSettings$.next(val(draftSettingsValue));
+      dashboardDraftSettings.next(val(draftSettingsValue));
     },
     [draftSettingsValue]
   );
