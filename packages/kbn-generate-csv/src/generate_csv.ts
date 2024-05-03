@@ -252,8 +252,9 @@ export class CsvGenerator {
       );
     }
 
+    // todo we want to move to dataViewLazy
     const index = await searchSource.getDataView();
-    const indexLazy = searchSource.getDataViewLazy();
+    // const indexLazy = searchSource.getDataViewLazy();
 
     if (!index) {
       throw new Error(`The search must have a reference to an index pattern!`);
@@ -360,7 +361,7 @@ export class CsvGenerator {
 
         let table: Datatable | undefined;
         try {
-          table = tabifyDocs(results, indexLazy, { shallow: true, includeIgnoredValues: true });
+          table = tabifyDocs(results, index, { shallow: true, includeIgnoredValues: true });
         } catch (err) {
           logger.error(err);
           warnings.push(i18nTexts.unknownError(err?.message ?? err));

@@ -649,8 +649,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     const searchService = getSearchService();
     const searchSource = await searchService.searchSource.create();
     searchSource.setField('trackTotalHits', false);
-
-    searchSource.setField('index', indexPattern);
+    searchSource.setDataView(indexPattern);
     searchSource.setField('size', 1);
     const query = {
       language: 'kuery',
@@ -940,7 +939,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       index: dataView.getIndexPattern(),
       hasLabels,
       buffer,
-      requestBody: _.pick(searchSource.getSearchRequestBody(), [
+      requestBody: _.pick(await searchSource.getSearchRequestBody(), [
         'fields',
         'query',
         'runtime_mappings',

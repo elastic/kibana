@@ -381,8 +381,9 @@ export class SearchSource {
     options: SearchSourceSearchOptions = {}
   ): Observable<IKibanaSearchResponse<estypes.SearchResponse<T>>> {
     const s$ = defer(() => this.requestIsStarting(options)).pipe(
-      // todo todo todo
       switchMap(() => {
+        // todo need to await on flatten but then this fn needs to be async and then everything breaks
+        // mostly because this rxjs code needs to be rewritten for the additional async
         const searchRequest = this.flatten();
         this.history = [searchRequest];
         if (searchRequest.index) {
@@ -429,8 +430,8 @@ export class SearchSource {
   /**
    * Returns body contents of the search request, often referred as query DSL.
    */
-  getSearchRequestBody() {
-    return this.flatten().body;
+  async getSearchRequestBody() {
+    return (await this.flatten()).body;
   }
 
   /**
@@ -456,9 +457,10 @@ export class SearchSource {
       searchSessionId: options.sessionId,
     });
 
-    const trackRequestBody = () => {
+    const trackRequestBody = async () => {
       try {
-        requestResponder?.json(this.getSearchRequestBody());
+        // todo just appended await, this might not work
+        requestResponder?.json(await this.getSearchRequestBody());
       } catch (e) {} // eslint-disable-line no-empty
     };
 
@@ -694,7 +696,7 @@ export class SearchSource {
         const sort = normalizeSortRequest(
           val,
           // todo - need all fields in the sort request
-          this.getDataView(),
+          await this.getDataView(),
           getConfig(UI_SETTINGS.SORT_OPTIONS)
         );
         return addToBody(key, sort);
@@ -733,8 +735,8 @@ export class SearchSource {
   private readonly getFieldName = (fld: SearchFieldValue): string =>
     typeof fld === 'string' ? fld : (fld.field as string);
 
-  private getFieldsWithoutSourceFilters(
-    index: DataViewLazy | undefined,
+  private async getFieldsWithoutSourceFilters(
+    index: DataView | undefined,
     bodyFields: SearchFieldValue[]
   ) {
     if (!index) {
@@ -800,7 +802,7 @@ export class SearchSource {
   }
 
   // this may need to become async
-  private flatten() {
+  private async flatten() {
     const { getConfig } = this.dependencies;
     // todo I wonder whats in searchRequest
     const searchRequest = this.mergeProps();
@@ -914,7 +916,7 @@ export class SearchSource {
         const docvaluesIndex = keyBy(filteredDocvalueFields, 'field');
         // todo this returns all fields minus sourceFiltered fields
         // TODO
-        const bodyFields = this.getFieldsWithoutSourceFilters(index, body.fields);
+        const bodyFields = await this.getFieldsWithoutSourceFilters(index, body.fields);
 
         const uniqueFieldNames = new Set();
         const uniqueFields = [];

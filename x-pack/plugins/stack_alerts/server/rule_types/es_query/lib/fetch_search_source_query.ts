@@ -72,7 +72,7 @@ export async function fetchSearchSourceQuery({
 
   logger.debug(
     `search source query rule (${ruleId}) query: ${JSON.stringify(
-      searchSource.getSearchRequestBody()
+      await searchSource.getSearchRequestBody()
     )}`
   );
 

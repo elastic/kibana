@@ -8,8 +8,13 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isPlainObject } from 'lodash';
-import { Datatable, DatatableColumn, DatatableColumnType } from '@kbn/expressions-plugin/common';
-import type { DataViewLazy } from '@kbn/data-views-plugin/common';
+import {
+  Datatable,
+  DatatableColumn,
+  DatatableRow,
+  DatatableColumnType,
+} from '@kbn/expressions-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
 // meta fields we won't merge with our result hit
 const EXCLUDED_META_FIELDS: string[] = ['_type', '_source'];
@@ -90,47 +95,11 @@ function flattenAccum(
  * @param indexPattern The index pattern for the requested index if available.
  * @param params Parameters how to flatten the hit
  */
-export function flattenHit(hit: Hit, indexPattern?: DataViewLazy, params?: TabifyDocsOptions) {
+export function flattenHit(hit: Hit, indexPattern?: DataView, params?: TabifyDocsOptions) {
   const flat = {} as Record<string, any>;
 
-  async function flatten(obj: Record<string, any>, keyPrefix: string = '') {
-    const fieldName = Object.keys(obj).map((k) => keyPrefix + k);
-    const fields = (await indexPattern?.getFields({ fieldName }))?.getFieldMap();
-    for (const [k, val] of Object.entries(obj)) {
-      const key = keyPrefix + k;
+  flattenAccum(flat, hit.fields || {}, '', indexPattern, params);
 
-      // todo
-      const field = fields[key];
-
-      if (params?.shallow === false) {
-        const isNestedField = field?.type === 'nested';
-        if (Array.isArray(val) && !isNestedField) {
-          val.forEach((v) => isPlainObject(v) && flatten(v, key + '.'));
-          continue;
-        }
-      } else if (flat[key] !== undefined) {
-        continue;
-      }
-
-      const hasValidMapping = field && field.type !== 'conflict';
-      const isValue = !isPlainObject(val);
-
-      if (hasValidMapping || isValue) {
-        if (!flat[key]) {
-          flat[key] = val;
-        } else if (Array.isArray(flat[key])) {
-          flat[key].push(val);
-        } else {
-          flat[key] = [flat[key], val];
-        }
-        continue;
-      }
-
-      flatten(val, key + '.');
-    }
-  }
-
-  flatten(hit.fields || {});
   if (params?.source !== false && hit._source) {
     flattenAccum(flat, hit._source as Record<string, any>, '', indexPattern, params);
   } else if (params?.includeIgnoredValues && hit.ignored_field_values) {
@@ -203,7 +172,7 @@ function makeProxy(flat: Record<string, any>, indexPattern?: DataView) {
 
 export const tabifyDocs = (
   esResponse: estypes.SearchResponse<unknown>,
-  index?: DataViewLazy,
+  index?: DataView,
   params: TabifyDocsOptions = {}
 ): Datatable => {
   const columns: DatatableColumn[] = [];
@@ -215,7 +184,6 @@ export const tabifyDocs = (
         return;
       }
       for (const [key, value] of Object.entries(flat)) {
-        // todo
         const field = index?.fields.getByName(key);
         const fieldName = field?.name || key;
         if (!columns.find((c) => c.id === fieldName)) {

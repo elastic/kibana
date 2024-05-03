@@ -288,7 +288,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
 
   const onCopyQuery = useCallback(async () => {
     const testSearchSource = await createTestSearchSource();
-    return JSON.stringify(testSearchSource.getSearchRequestBody(), null, 2);
+    return JSON.stringify(await testSearchSource.getSearchRequestBody(), null, 2);
   }, [createTestSearchSource]);
 
   const onTestFetch = useCallback(async () => {
