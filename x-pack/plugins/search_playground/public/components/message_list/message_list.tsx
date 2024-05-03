@@ -25,12 +25,7 @@ const mapRoleToMessageComponent = {
     <UserMessage content={message.content} createdAt={message.createdAt} />
   ),
   [MessageRole.assistant]: (message: Message) => (
-    <AssistantMessage
-      content={message.content}
-      createdAt={message.createdAt}
-      citations={(message as AIMessage).citations}
-      retrievalDocs={(message as AIMessage).retrievalDocs}
-    />
+    <AssistantMessage message={message as AIMessage} />
   ),
 };
 
