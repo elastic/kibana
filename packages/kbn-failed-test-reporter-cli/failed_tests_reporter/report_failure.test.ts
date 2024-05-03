@@ -27,7 +27,8 @@ describe('createFailureIssue()', () => {
         likelyIrrelevant: false,
       },
       api,
-      'main'
+      'main',
+      'kibana-on-merge'
     );
 
     expect(api.createIssue).toMatchInlineSnapshot(`
@@ -81,7 +82,8 @@ describe('updateFailureIssue()', () => {
         },
       },
       api,
-      'main'
+      'main',
+      'kibana-on-merge'
     );
 
     expect(api.editIssueBodyAndEnsureOpen).toMatchInlineSnapshot(`
