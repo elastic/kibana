@@ -41,14 +41,12 @@ describe(
     });
 
     it('should render the add note button and display the markdown editor', () => {
-      cy.get(ROW_ADD_NOTES_BUTTON).should('be.visible');
-      cy.get(ROW_ADD_NOTES_BUTTON).click();
+      cy.get(ROW_ADD_NOTES_BUTTON).should('be.visible').click();
       cy.get(ADD_NOTE_CONTAINER).should('be.visible');
     });
 
     it('should render the analyze event button and display the process analyzer visualization', () => {
-      cy.get(OPEN_ANALYZER_BTN).should('be.visible');
-      cy.get(OPEN_ANALYZER_BTN).click();
+      cy.get(OPEN_ANALYZER_BTN).should('be.visible').click();
       cy.get(RESOLVER_GRAPH_CONTAINER).should('be.visible');
     });
   }
