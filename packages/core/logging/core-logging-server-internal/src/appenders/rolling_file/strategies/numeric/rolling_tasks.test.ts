@@ -7,12 +7,7 @@
  */
 
 import { join } from 'path';
-import {
-  accessMock,
-  readdirMock,
-  renameMock,
-  clearAllMocks,
-} from './rolling_tasks.test.mocks';
+import { accessMock, readdirMock, renameMock, clearAllMocks } from './rolling_tasks.test.mocks';
 import {
   shouldSkipRollout,
   rollCurrentFile,
