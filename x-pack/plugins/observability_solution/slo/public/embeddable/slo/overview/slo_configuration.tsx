@@ -73,7 +73,7 @@ function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConf
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFlexGroup>
-              <EuiFlexItem grow>
+              <EuiFlexItem data-test-subj="singleSloSelector" grow>
                 <SloSelector
                   singleSelection={true}
                   hasError={hasError}
@@ -200,7 +200,7 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
   );
 
   return (
-    <EuiFlyout onClose={onCancel}>
+    <EuiFlyout data-test-subj="sloOverviewConfiguration" onClose={onCancel}>
       <EuiFlyoutHeader>
         <EuiFlexGroup direction="column">
           <EuiFlexItem>

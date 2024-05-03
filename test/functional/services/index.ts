@@ -55,6 +55,7 @@ import { SavedObjectsFinderService } from './saved_objects_finder';
 import { DashboardSettingsProvider } from './dashboard/dashboard_settings';
 import { ESQLService } from './esql';
 import { DataViewsService } from './data_views';
+import { SloApiProvider } from '../../../x-pack/test/api_integration/services/slo';
 
 export const services = {
   ...commonServiceProviders,
@@ -99,4 +100,5 @@ export const services = {
   usageCollection: UsageCollectionService,
   savedObjectsFinder: SavedObjectsFinderService,
   esql: ESQLService,
+  slo: SloApiProvider,
 };

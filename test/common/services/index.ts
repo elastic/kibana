@@ -15,6 +15,7 @@ import { SavedObjectInfoService } from './saved_object_info';
 import { IndexPatternsService } from './index_patterns';
 import { BsearchService } from './bsearch';
 import { ConsoleProvider } from './console';
+import { DataViewApiProvider } from './data_view_api';
 
 export const services = {
   ...commonFunctionalServices,
@@ -26,4 +27,5 @@ export const services = {
   indexPatterns: IndexPatternsService,
   bsearch: BsearchService,
   console: ConsoleProvider,
+  dataViewApi: DataViewApiProvider,
 };
