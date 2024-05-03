@@ -594,7 +594,11 @@ async function getExpressionSuggestionsByType(
             option?.name,
             getFieldsByType,
             {
-              functions: canHaveAssignments,
+              // TODO instead of relying on canHaveAssignments and other command name checks
+              // we should have a more generic way to determine if a command can have functions.
+              // I think it comes down to the definition of 'column' since 'any' should always
+              // include functions.
+              functions: canHaveAssignments || command.name === 'sort',
               fields: !argDef.constantOnly,
               variables: anyVariables,
               literals: argDef.constantOnly,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
@@ -27,7 +27,7 @@ jest.mock('@kbn/text-based-editor', () => ({
 const { fetchFieldsFromESQL } = jest.requireMock('@kbn/text-based-editor');
 const { getFields } = jest.requireMock('@kbn/triggers-actions-ui-plugin/public');
 
-const AppWrapper: React.FC<{ children: React.ReactElement }> = React.memo(({ children }) => (
+const AppWrapper = React.memo<PropsWithChildren<unknown>>(({ children }) => (
   <I18nProvider>{children}</I18nProvider>
 ));
 

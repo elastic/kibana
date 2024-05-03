@@ -256,7 +256,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       registerFunction: expressions.registerFunction,
     });
 
-    firstValueFrom(this.initializerContext.config.create<ConfigSchema>()).then((value) => {
+    void firstValueFrom(this.initializerContext.config.create<ConfigSchema>()).then((value) => {
       if (value.search.aggs.shardDelay.enabled) {
         aggs.types.registerBucket(SHARD_DELAY_AGG_NAME, getShardDelayBucketAgg);
         expressions.registerFunction(aggShardDelay);

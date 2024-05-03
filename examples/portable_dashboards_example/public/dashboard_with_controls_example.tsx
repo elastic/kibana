@@ -13,12 +13,13 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { controlGroupInputBuilder } from '@kbn/controls-plugin/public';
 import { getDefaultControlGroupInput } from '@kbn/controls-plugin/common';
-import { FILTER_DEBUGGER_EMBEDDABLE } from '@kbn/embeddable-examples-plugin/public';
 import {
   AwaitingDashboardAPI,
   DashboardRenderer,
   DashboardCreationOptions,
 } from '@kbn/dashboard-plugin/public';
+import { apiHasUniqueId } from '@kbn/presentation-publishing';
+import { FILTER_DEBUGGER_EMBEDDABLE_ID } from './constants';
 
 export const DashboardWithControlsExample = ({ dataView }: { dataView: DataView }) => {
   const [dashboard, setDashboard] = useState<AwaitingDashboardAPI>();
@@ -27,14 +28,23 @@ export const DashboardWithControlsExample = ({ dataView }: { dataView: DataView 
   useEffect(() => {
     if (!dashboard) return;
     (async () => {
-      const embeddable = await dashboard.addNewEmbeddable(FILTER_DEBUGGER_EMBEDDABLE, {});
-      const prevPanelState = dashboard.getExplicitInput().panels[embeddable.id];
+      const api = await dashboard.addNewPanel(
+        {
+          panelType: FILTER_DEBUGGER_EMBEDDABLE_ID,
+          initialState: {},
+        },
+        true
+      );
+      if (!apiHasUniqueId(api)) {
+        return;
+      }
+      const prevPanelState = dashboard.getExplicitInput().panels[api.uuid];
       // resize the new panel so that it fills up the entire width of the dashboard
       dashboard.updateInput({
         panels: {
-          [embeddable.id]: {
+          [api.uuid]: {
             ...prevPanelState,
-            gridData: { i: embeddable.id, x: 0, y: 0, w: 48, h: 12 },
+            gridData: { i: api.uuid, x: 0, y: 0, w: 48, h: 12 },
           },
         },
       });

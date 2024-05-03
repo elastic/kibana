@@ -618,6 +618,7 @@ describe('features', () => {
           ...(expectDecryptedTelemetry ? [actions.api.get('decryptedTelemetry')] : []),
           ...(expectGetFeatures ? [actions.api.get('features')] : []),
           ...(expectGetFeatures ? [actions.api.get('taskManager')] : []),
+          ...(expectGetFeatures ? [actions.api.get('manageSpaces')] : []),
           ...(expectManageSpaces
             ? [
                 actions.space.manage,
@@ -1164,6 +1165,7 @@ describe('features', () => {
           ...(expectDecryptedTelemetry ? [actions.api.get('decryptedTelemetry')] : []),
           ...(expectGetFeatures ? [actions.api.get('features')] : []),
           ...(expectGetFeatures ? [actions.api.get('taskManager')] : []),
+          ...(expectGetFeatures ? [actions.api.get('manageSpaces')] : []),
           ...(expectManageSpaces
             ? [
                 actions.space.manage,
@@ -1232,6 +1234,7 @@ describe('features', () => {
           ...(expectDecryptedTelemetry ? [actions.api.get('decryptedTelemetry')] : []),
           ...(expectGetFeatures ? [actions.api.get('features')] : []),
           ...(expectGetFeatures ? [actions.api.get('taskManager')] : []),
+          ...(expectGetFeatures ? [actions.api.get('manageSpaces')] : []),
           ...(expectManageSpaces
             ? [
                 actions.space.manage,
@@ -1398,6 +1401,7 @@ describe('features', () => {
           ...(expectDecryptedTelemetry ? [actions.api.get('decryptedTelemetry')] : []),
           ...(expectGetFeatures ? [actions.api.get('features')] : []),
           ...(expectGetFeatures ? [actions.api.get('taskManager')] : []),
+          ...(expectGetFeatures ? [actions.api.get('manageSpaces')] : []),
           ...(expectManageSpaces
             ? [
                 actions.space.manage,
@@ -1763,6 +1767,7 @@ describe('subFeatures', () => {
         actions.api.get('decryptedTelemetry'),
         actions.api.get('features'),
         actions.api.get('taskManager'),
+        actions.api.get('manageSpaces'),
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
@@ -1921,6 +1926,7 @@ describe('subFeatures', () => {
         actions.api.get('decryptedTelemetry'),
         actions.api.get('features'),
         actions.api.get('taskManager'),
+        actions.api.get('manageSpaces'),
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
@@ -2156,6 +2162,7 @@ describe('subFeatures', () => {
         actions.api.get('decryptedTelemetry'),
         actions.api.get('features'),
         actions.api.get('taskManager'),
+        actions.api.get('manageSpaces'),
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
@@ -2294,6 +2301,7 @@ describe('subFeatures', () => {
         actions.api.get('decryptedTelemetry'),
         actions.api.get('features'),
         actions.api.get('taskManager'),
+        actions.api.get('manageSpaces'),
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
@@ -2472,6 +2480,7 @@ describe('subFeatures', () => {
         actions.api.get('decryptedTelemetry'),
         actions.api.get('features'),
         actions.api.get('taskManager'),
+        actions.api.get('manageSpaces'),
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
@@ -2608,6 +2617,7 @@ describe('subFeatures', () => {
         actions.api.get('decryptedTelemetry'),
         actions.api.get('features'),
         actions.api.get('taskManager'),
+        actions.api.get('manageSpaces'),
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
@@ -2822,6 +2832,7 @@ describe('subFeatures', () => {
         actions.api.get('decryptedTelemetry'),
         actions.api.get('features'),
         actions.api.get('taskManager'),
+        actions.api.get('manageSpaces'),
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
@@ -3055,6 +3066,7 @@ describe('subFeatures', () => {
         actions.api.get('decryptedTelemetry'),
         actions.api.get('features'),
         actions.api.get('taskManager'),
+        actions.api.get('manageSpaces'),
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
@@ -3324,6 +3336,7 @@ describe('subFeatures', () => {
         actions.api.get('decryptedTelemetry'),
         actions.api.get('features'),
         actions.api.get('taskManager'),
+        actions.api.get('manageSpaces'),
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
