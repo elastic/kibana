@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Cluster } from '@kbn/remote-clusters-plugin/public';
 
+import { RemoteClusterComboBox } from './remote_clusters_combo_box';
 import type { RoleRemoteClusterPrivilege } from '../../../../../../common';
 import type { RoleValidator } from '../../validate_role';
 
@@ -168,9 +169,8 @@ export const RemoteClusterPrivilegesForm: React.FunctionComponent<Props> = ({
                   fullWidth
                   {...validator.validateRemoteClusterPrivilegeClusterField(remoteClusterPrivilege)}
                 >
-                  <EuiComboBox
+                  <RemoteClusterComboBox
                     data-test-subj={`remoteClusterClustersInput${formIndex}`}
-                    options={remoteClusterOptions}
                     selectedOptions={(remoteClusterPrivilege.clusters ?? []).map(toOption)}
                     onCreateOption={onCreateClusterOption}
                     onChange={onClustersChange}
@@ -179,6 +179,8 @@ export const RemoteClusterPrivilegesForm: React.FunctionComponent<Props> = ({
                       'xpack.security.management.editRole.remoteClusterPrivilegeForm.clustersPlaceholder',
                       { defaultMessage: 'Add a remote cluster…' }
                     )}
+                    remoteClusters={remoteClusters}
+                    type="remote_cluster"
                     fullWidth
                   />
                 </EuiFormRow>
