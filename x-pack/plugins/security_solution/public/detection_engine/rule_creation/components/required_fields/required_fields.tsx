@@ -7,14 +7,12 @@
 
 import React from 'react';
 import { EuiButtonEmpty, EuiCallOut, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { DataViewFieldBase } from '@kbn/es-query';
+import type { RequiredFieldInput } from '../../../../../common/api/detection_engine';
 import { UseArray, useFormData } from '../../../../shared_imports';
 import { RequiredFieldRow } from './required_fields_row';
 import * as ruleDetailsI18n from '../../../rule_management/components/rule_details/translations';
 import * as i18n from './translations';
-
-import type { RequiredFieldWithOptionalEcs } from './types';
 
 interface RequiredFieldsProps {
   path: string;
@@ -31,9 +29,9 @@ export const RequiredFields = ({
 
   return (
     <UseArray path={path} initialNumberOfItems={0}>
-      {({ items, addItem, removeItem }) => {
+      {({ items, addItem, removeItem, form, error }) => {
         const [formData] = useFormDataResult;
-        const fieldValue: RequiredFieldWithOptionalEcs[] = formData[path] ?? [];
+        const fieldValue: RequiredFieldInput[] = formData[path] ?? [];
 
         const selectedFieldNames = fieldValue.map(({ name }) => name);
 
@@ -45,11 +43,6 @@ export const RequiredFields = ({
         const availableFieldNames = allFieldNames.filter(
           (name) => !selectedFieldNames.includes(name)
         );
-
-        const availableNameOptions: Array<EuiComboBoxOptionOption<undefined>> =
-          availableFieldNames.map((availableFieldName) => ({
-            label: availableFieldName,
-          }));
 
         const typesByFieldName: Record<string, string[]> = fieldsWithTypes.reduce(
           (accumulator, browserField) => {
@@ -63,8 +56,7 @@ export const RequiredFields = ({
 
         const isEmptyRowDisplayed = !!fieldValue.find(({ name }) => name === '');
 
-        const isAddNewFieldButtonDisabled =
-          isIndexPatternLoading || isEmptyRowDisplayed || availableNameOptions.length === 0;
+        const isAddNewFieldButtonDisabled = isIndexPatternLoading || isEmptyRowDisplayed;
 
         const nameWarnings = fieldValue
           .filter(({ name }) => name !== '')
@@ -78,15 +70,19 @@ export const RequiredFields = ({
         const typeWarnings = fieldValue
           .filter(({ name }) => name !== '')
           .reduce<Record<string, string>>((warnings, { name, type }) => {
-            if (!isIndexPatternLoading && !typesByFieldName[name]?.includes(type)) {
-              warnings[name] = i18n.FIELD_TYPE_NOT_FOUND_WARNING(name, type);
+            if (
+              !isIndexPatternLoading &&
+              typesByFieldName[name] &&
+              !typesByFieldName[name].includes(type)
+            ) {
+              warnings[`${name}-${type}`] = i18n.FIELD_TYPE_NOT_FOUND_WARNING(name, type);
             }
             return warnings;
           }, {});
 
-        const getWarnings = (name: string) => ({
+        const getWarnings = ({ name, type }: { name: string; type: string }) => ({
           nameWarning: nameWarnings[name] || '',
-          typeWarning: typeWarnings[name] || '',
+          typeWarning: typeWarnings[`${name}-${type}`] || '',
         });
 
         const hasWarnings =
@@ -125,6 +121,7 @@ export const RequiredFields = ({
                     getWarnings={getWarnings}
                     typesByFieldName={typesByFieldName}
                     availableFieldNames={availableFieldNames}
+                    parentFieldPath={path}
                   />
                 ))}
 

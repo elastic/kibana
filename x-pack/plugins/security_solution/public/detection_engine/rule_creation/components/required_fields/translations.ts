@@ -7,6 +7,20 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const FIELD_NAME = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.requiredFields.fieldNameLabel',
+  {
+    defaultMessage: 'Field name',
+  }
+);
+
+export const FIELD_TYPE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.requiredFields.fieldTypeLabel',
+  {
+    defaultMessage: 'Field type',
+  }
+);
+
 export const REQUIRED_FIELDS_HELP_TEXT = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.requiredFields.fieldRequiredFieldsHelpText',
   {
@@ -64,5 +78,28 @@ export const FIELD_TYPE_NOT_FOUND_WARNING = (name: string, type: string) =>
     {
       values: { name, type },
       defaultMessage: `Field "{name}" with type "{type}" is not found within specified index patterns`,
+    }
+  );
+
+export const FIELD_NAME_REQUIRED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.requiredFields.validation.fieldNameRequired',
+  {
+    defaultMessage: 'Field name is required',
+  }
+);
+
+export const FIELD_TYPE_REQUIRED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.requiredFields.validation.fieldTypeRequired',
+  {
+    defaultMessage: 'Field type is required',
+  }
+);
+
+export const FIELD_NAME_USED_MORE_THAN_ONCE = (name: string) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.ruleDescription.requiredFields.validation.fieldNameUsedMoreThanOnce',
+    {
+      values: { name },
+      defaultMessage: 'Field name "{name}" is already used',
     }
   );

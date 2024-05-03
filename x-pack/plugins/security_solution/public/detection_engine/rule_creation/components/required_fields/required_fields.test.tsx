@@ -7,11 +7,12 @@
 
 import React from 'react';
 import { screen, render, act, fireEvent, waitFor } from '@testing-library/react';
-import { FIELD_TYPES, Form, useForm } from '../../../../shared_imports';
+import { Form, useForm } from '../../../../shared_imports';
 
 import type { DataViewFieldBase } from '@kbn/es-query';
 import { RequiredFields } from './required_fields';
 import type { RequiredFieldWithOptionalEcs } from './types';
+import type { RequiredFieldInput } from '../../../../../common/api/detection_engine';
 
 describe('RequiredFields form part', () => {
   it('displays the required fields label', () => {
@@ -99,6 +100,26 @@ describe('RequiredFields form part', () => {
     expect(screen.getByDisplayValue('keyword')).toBeVisible();
   });
 
+  it('user can add his own custom field name and type', async () => {
+    render(<TestForm initialState={[]} indexPatternFields={[]} />);
+
+    await addRequiredFieldRow();
+
+    await typeInCustomComboBoxOption({
+      comboBoxToggleButton: getSelectToggleButtonForName('empty'),
+      optionText: 'customField',
+    });
+
+    expect(screen.getByDisplayValue('customField')).toBeVisible();
+
+    await typeInCustomComboBoxOption({
+      comboBoxToggleButton: getSelectToggleButtonForType('empty'),
+      optionText: 'customType',
+    });
+
+    expect(screen.getByDisplayValue('customType')).toBeVisible();
+  });
+
   it('field type dropdown allows to choose from options if multiple types are available', async () => {
     const initialState: RequiredFieldWithOptionalEcs[] = [{ name: 'field1', type: 'string' }];
 
@@ -114,19 +135,6 @@ describe('RequiredFields form part', () => {
     });
 
     expect(screen.getByDisplayValue('keyword')).toBeVisible();
-  });
-
-  it('field type dropdown is disabled if only a single type option is available', async () => {
-    const initialState: RequiredFieldWithOptionalEcs[] = [{ name: 'field1', type: 'string' }];
-
-    const indexPatternFields: DataViewFieldBase[] = [
-      createIndexPatternField({ name: 'field1', esTypes: ['string'] }),
-    ];
-
-    render(<TestForm initialState={initialState} indexPatternFields={indexPatternFields} />);
-
-    expect(screen.getByDisplayValue('string')).toBeVisible();
-    expect(screen.getByDisplayValue('string')).toBeDisabled();
   });
 
   it('user can remove a required field', async () => {
@@ -192,29 +200,6 @@ describe('RequiredFields form part', () => {
     expect(screen.getByTestId('addRequiredFieldButton')).toBeDisabled();
   });
 
-  it('adding a new required field is disabled when there are no available field names left', async () => {
-    const indexPatternFields: DataViewFieldBase[] = [
-      createIndexPatternField({ name: 'field1', esTypes: ['string'] }),
-      createIndexPatternField({ name: 'field2', esTypes: ['keyword'] }),
-    ];
-
-    render(<TestForm initialState={[]} indexPatternFields={indexPatternFields} />);
-
-    await addRequiredFieldRow();
-    await selectFirstEuiComboBoxOption({
-      comboBoxToggleButton: getSelectToggleButtonForName('empty'),
-    });
-
-    expect(screen.getByTestId('addRequiredFieldButton')).toBeEnabled();
-
-    await addRequiredFieldRow();
-    await selectFirstEuiComboBoxOption({
-      comboBoxToggleButton: getSelectToggleButtonForName('empty'),
-    });
-
-    expect(screen.getByTestId('addRequiredFieldButton')).toBeDisabled();
-  });
-
   describe('warnings', () => {
     it('displays a warning when a selected field name is not found within index patterns', async () => {
       const initialState: RequiredFieldWithOptionalEcs[] = [
@@ -236,6 +221,15 @@ describe('RequiredFields form part', () => {
           'Field "field-that-does-not-exist" is not found within specified index patterns'
         )
       ).toBeVisible();
+
+      const nameWarningIcon = screen
+        .getByTestId(`requiredFieldNameSelect-field-that-does-not-exist`)
+        .querySelector('[data-euiicon-type="warning"]');
+
+      expect(nameWarningIcon).toBeVisible();
+
+      /* Make sure only one warning icon is displayed - the one for name */
+      expect(document.querySelectorAll('[data-euiicon-type="warning"]')).toHaveLength(1);
     });
 
     it('displays a warning when a selected field type is not found within index patterns', async () => {
@@ -258,20 +252,46 @@ describe('RequiredFields form part', () => {
           'Field "field1" with type "type-that-does-not-exist" is not found within specified index patterns'
         )
       ).toBeVisible();
+
+      const typeWarningIcon = screen
+        .getByTestId(`requiredFieldTypeSelect-type-that-does-not-exist`)
+        .querySelector('[data-euiicon-type="warning"]');
+
+      expect(typeWarningIcon).toBeVisible();
+
+      /* Make sure only one warning icon is displayed - the one for type */
+      expect(document.querySelectorAll('[data-euiicon-type="warning"]')).toHaveLength(1);
     });
 
-    it(`doesn't display a warning for a an empty row`, async () => {
+    it('displays a warning only for field name when both field name and type are not found within index patterns', async () => {
+      const initialState: RequiredFieldWithOptionalEcs[] = [
+        { name: 'field-that-does-not-exist', type: 'type-that-does-not-exist' },
+      ];
+
       const indexPatternFields: DataViewFieldBase[] = [
         createIndexPatternField({ name: 'field1', esTypes: ['string'] }),
       ];
 
-      render(<TestForm initialState={[]} indexPatternFields={indexPatternFields} />);
-
-      await addRequiredFieldRow();
+      render(<TestForm initialState={initialState} indexPatternFields={indexPatternFields} />);
 
       expect(
-        screen.queryByText('Some fields are not found within specified index patterns.')
-      ).toBeNull();
+        screen.getByText('Some fields are not found within specified index patterns.')
+      ).toBeVisible();
+
+      expect(
+        screen.getByText(
+          'Field "field-that-does-not-exist" is not found within specified index patterns'
+        )
+      ).toBeVisible();
+
+      const nameWarningIcon = screen
+        .getByTestId(`requiredFieldNameSelect-field-that-does-not-exist`)
+        .querySelector('[data-euiicon-type="warning"]');
+
+      expect(nameWarningIcon).toBeVisible();
+
+      /* Make sure only one warning icon is displayed - the one for name */
+      expect(document.querySelectorAll('[data-euiicon-type="warning"]')).toHaveLength(1);
     });
 
     it(`doesn't display a warning when all selected fields are found within index patterns`, async () => {
@@ -286,6 +306,119 @@ describe('RequiredFields form part', () => {
       expect(
         screen.queryByText('Some fields are not found within specified index patterns.')
       ).toBeNull();
+    });
+
+    it(`doesn't display a warning for an empty row`, async () => {
+      const indexPatternFields: DataViewFieldBase[] = [
+        createIndexPatternField({ name: 'field1', esTypes: ['string'] }),
+      ];
+
+      render(<TestForm initialState={[]} indexPatternFields={indexPatternFields} />);
+
+      await addRequiredFieldRow();
+
+      expect(
+        screen.queryByText('Some fields are not found within specified index patterns.')
+      ).toBeNull();
+    });
+
+    it(`doesn't display a warning when field is invalid`, async () => {
+      render(<TestForm initialState={[]} />);
+
+      await addRequiredFieldRow();
+
+      await typeInCustomComboBoxOption({
+        comboBoxToggleButton: getSelectToggleButtonForName('empty'),
+        optionText: 'customField',
+      });
+
+      expect(screen.getByText('Field type is required')).toBeVisible();
+
+      expect(screen.queryByTestId(`customField-warningText`)).toBeNull();
+    });
+  });
+
+  describe('validation', () => {
+    it('form is invalid when only field name is empty', async () => {
+      render(<TestForm initialState={[]} />);
+
+      await addRequiredFieldRow();
+
+      await typeInCustomComboBoxOption({
+        comboBoxToggleButton: getSelectToggleButtonForType('empty'),
+        optionText: 'customType',
+      });
+
+      expect(screen.getByText('Field name is required')).toBeVisible();
+
+      await typeInCustomComboBoxOption({
+        comboBoxToggleButton: getSelectToggleButtonForName('empty'),
+        optionText: 'customField',
+      });
+
+      expect(screen.queryByText('Field name is required')).toBeNull();
+    });
+
+    it('form is invalid when only field type is empty', async () => {
+      render(<TestForm initialState={[]} />);
+
+      await addRequiredFieldRow();
+
+      await typeInCustomComboBoxOption({
+        comboBoxToggleButton: getSelectToggleButtonForName('empty'),
+        optionText: 'customField',
+      });
+
+      expect(screen.getByText('Field type is required')).toBeVisible();
+
+      await typeInCustomComboBoxOption({
+        comboBoxToggleButton: getSelectToggleButtonForType('empty'),
+        optionText: 'customType',
+      });
+
+      expect(screen.queryByText('Field type is required')).toBeNull();
+    });
+
+    it('form is invalid when same field name is selected more than once', async () => {
+      const initialState: RequiredFieldWithOptionalEcs[] = [{ name: 'field1', type: 'string' }];
+
+      const indexPatternFields: DataViewFieldBase[] = [
+        createIndexPatternField({ name: 'field1', esTypes: ['string'] }),
+        createIndexPatternField({ name: 'field2', esTypes: ['string'] }),
+      ];
+
+      render(<TestForm initialState={initialState} indexPatternFields={indexPatternFields} />);
+
+      await addRequiredFieldRow();
+
+      await typeInCustomComboBoxOption({
+        comboBoxToggleButton: getSelectToggleButtonForName('empty'),
+        optionText: 'field1',
+      });
+
+      expect(screen.getByText('Field name "field1" is already used')).toBeVisible();
+
+      await typeInCustomComboBoxOption({
+        comboBoxToggleButton: getLastSelectToggleButtonForName(),
+        optionText: 'field2',
+      });
+
+      expect(screen.queryByText('Field name "field1" is already used')).toBeNull();
+    });
+
+    it('form is valid when both field name and type are empty', async () => {
+      const handleSubmit = jest.fn();
+
+      render(<TestForm initialState={[]} onSubmit={handleSubmit} />);
+
+      await addRequiredFieldRow();
+
+      await submitForm();
+
+      expect(handleSubmit).toHaveBeenCalledWith({
+        data: [{ name: '', type: '' }],
+        isValid: true,
+      });
     });
   });
 
@@ -338,22 +471,6 @@ describe('RequiredFields form part', () => {
 
       expect(handleSubmit).toHaveBeenCalledWith({
         data: undefined,
-        isValid: true,
-      });
-    });
-
-    it('submits without empty rows', async () => {
-      const initialState: RequiredFieldWithOptionalEcs[] = [{ name: 'field1', type: 'string' }];
-
-      const handleSubmit = jest.fn();
-
-      render(<TestForm initialState={initialState} onSubmit={handleSubmit} />);
-
-      await addRequiredFieldRow();
-      await submitForm();
-
-      expect(handleSubmit).toHaveBeenCalledWith({
-        data: [{ name: 'field1', type: 'string' }],
         isValid: true,
       });
     });
@@ -481,7 +598,7 @@ describe('RequiredFields form part', () => {
   });
 });
 
-function createIndexPatternField(overrides: Partial<DataViewFieldBase>): DataViewFieldBase {
+export function createIndexPatternField(overrides: Partial<DataViewFieldBase>): DataViewFieldBase {
   return {
     name: 'one',
     type: 'string',
@@ -500,7 +617,7 @@ async function getDropdownOptions(dropdownToggleButton: HTMLElement): Promise<st
   return options;
 }
 
-function addRequiredFieldRow(): Promise<void> {
+export function addRequiredFieldRow(): Promise<void> {
   return act(async () => {
     fireEvent.click(screen.getByText('Add required field'));
   });
@@ -510,7 +627,10 @@ function showEuiComboBoxOptions(comboBoxToggleButton: HTMLElement): Promise<void
   fireEvent.click(comboBoxToggleButton);
 
   return waitFor(() => {
-    expect(screen.getByRole('listbox')).toBeInTheDocument();
+    const listWithOptionsElement = document.querySelector('[role="listbox"]');
+    const emptyListElement = document.querySelector('.euiComboBoxOptionsList__empty');
+
+    expect(listWithOptionsElement || emptyListElement).toBeInTheDocument();
   });
 }
 
@@ -534,7 +654,9 @@ function selectEuiComboBoxOption({
   return act(async () => {
     await showEuiComboBoxOptions(comboBoxToggleButton);
 
-    const options = screen.getAllByRole('option');
+    const options = Array.from(
+      document.querySelectorAll('[data-test-subj*="comboBoxOptionsList"] [role="option"]')
+    );
 
     if (typeof optionText === 'string') {
       const optionToSelect = options.find((option) => option.textContent === optionText);
@@ -562,7 +684,29 @@ function selectFirstEuiComboBoxOption({
   return selectEuiComboBoxOption({ comboBoxToggleButton, optionIndex: 0 });
 }
 
-function getSelectToggleButtonForName(value: string): HTMLElement {
+function typeInCustomComboBoxOption({
+  comboBoxToggleButton,
+  optionText,
+}: {
+  comboBoxToggleButton: HTMLElement;
+  optionText: string;
+}) {
+  return act(async () => {
+    await showEuiComboBoxOptions(comboBoxToggleButton);
+
+    fireEvent.change(document.activeElement as HTMLInputElement, { target: { value: optionText } });
+    fireEvent.keyDown(document.activeElement as HTMLInputElement, { key: 'Enter' });
+  });
+}
+
+function getLastSelectToggleButtonForName(): HTMLElement {
+  const allNameSelects = screen.getAllByTestId(/requiredFieldNameSelect-.*/);
+  const lastNameSelect = allNameSelects[allNameSelects.length - 1];
+
+  return lastNameSelect.querySelector('[data-test-subj="comboBoxToggleListButton"]') as HTMLElement;
+}
+
+export function getSelectToggleButtonForName(value: string): HTMLElement {
   return screen
     .getByTestId(`requiredFieldNameSelect-${value}`)
     .querySelector('[data-test-subj="comboBoxToggleListButton"]') as HTMLElement;
@@ -582,7 +726,7 @@ function submitForm(): Promise<void> {
 
 interface TestFormProps {
   initialState?: RequiredFieldWithOptionalEcs[];
-  onSubmit?: (args: { data: RequiredFieldWithOptionalEcs[]; isValid: boolean }) => void;
+  onSubmit?: (args: { data: RequiredFieldInput[]; isValid: boolean }) => void;
   indexPatternFields?: DataViewFieldBase[];
   isIndexPatternLoading?: boolean;
 }
@@ -594,12 +738,6 @@ function TestForm({
   onSubmit,
 }: TestFormProps): JSX.Element {
   const { form } = useForm({
-    options: { stripEmptyFields: true },
-    schema: {
-      requiredFieldsField: {
-        type: FIELD_TYPES.JSON,
-      },
-    },
     defaultValue: {
       requiredFieldsField: initialState,
     },
