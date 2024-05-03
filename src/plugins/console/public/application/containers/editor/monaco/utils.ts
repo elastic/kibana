@@ -25,6 +25,7 @@ import { populateContext } from '../../../../lib/autocomplete/engine';
  * Helper constants
  */
 const whitespacesRegex = /\s+/;
+const newLineRegex = /\n/;
 const slashRegex = /\//;
 const ampersandRegex = /&/;
 const equalsSignRegex = /=/;
@@ -51,6 +52,9 @@ const endpointDetailLabel = i18n.translate('console.autocompleteSuggestions.endp
 });
 const paramDetailLabel = i18n.translate('console.autocompleteSuggestions.paramLabel', {
   defaultMessage: 'param',
+});
+const apiDetailLabel = i18n.translate('console.autocompleteSuggestions.apiLabel', {
+  defaultMessage: 'API',
 });
 
 /*
@@ -439,12 +443,23 @@ export const getBodyCompletionItems = (
 
   if (context.autoCompleteSet && context.autoCompleteSet.length > 0) {
     const wordUntilPosition = model.getWordUntilPosition(position);
+    // if there is " after the cursor, replace it
+    let endColumn = position.column;
+    const charAfterPosition = model.getValueInRange({
+      startLineNumber: position.lineNumber,
+      startColumn: position.column,
+      endLineNumber: position.lineNumber,
+      endColumn: position.column + 1,
+    });
+    if (charAfterPosition === '"') {
+      endColumn = endColumn + 1;
+    }
     const range = {
       startLineNumber: position.lineNumber,
       // replace the whole word with the suggestion
       startColumn: wordUntilPosition.startColumn,
       endLineNumber: position.lineNumber,
-      endColumn: position.column,
+      endColumn,
     };
     return (
       context.autoCompleteSet
@@ -452,26 +467,53 @@ export const getBodyCompletionItems = (
         .filter(({ name }) => Boolean(name))
         // map autocomplete items to completion items
         .map((item) => {
-          return {
+          const suggestion = {
             label: item.name!,
-            insertText: getInsertText(item),
-            detail: item.meta ?? paramDetailLabel,
+            insertText: getInsertText(item, bodyContent),
+            detail: apiDetailLabel,
             // the kind is only used to configure the icon
             kind: monaco.languages.CompletionItemKind.Constant,
             range,
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
           };
+          return suggestion;
         })
     );
   }
   return [];
 };
 
-const getInsertText = (item: ResultTerm): string => {
-  return `${item.name}`;
+const getInsertText = (
+  { name, insertValue, template, value }: ResultTerm,
+  bodyContent: string
+): string => {
+  let insertText = bodyContent.endsWith('"') ? '' : '"';
+  if (insertValue && insertValue !== '{' && insertValue !== '[') {
+    insertText = `${insertValue}"`;
+  } else {
+    insertText = `${name}"`;
+  }
+  // check if there is template to add
+  if (template) {
+    let templateLines;
+    const { __raw, value } = template;
+    if (__raw && value) {
+      templateLines = value.split(newLineRegex);
+    } else {
+      templateLines = JSON.stringify(template, null, 2).split(newLineRegex);
+    }
+    // TODO add correct indentation
+    insertText += ': ' + templateLines.join('\n');
+  } else if (value === '{') {
+    insertText += '{}';
+  } else if (value === '[') {
+    insertText += '[]';
+  }
+  return insertText;
 };
 
 const isNewLine = (char: string): boolean => {
-  return char === '\n';
+  return newLineRegex.test(char);
 };
 const isDoubleQuote = (char: string): boolean => {
   return char === '"';
