@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { ServerRoute } from '@hapi/hapi';
 import Hapi from '@hapi/hapi';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -84,12 +86,12 @@ export class EmulatorServer<TServices extends {} = {}> {
   ): ServerRoute[] {
     const routes = Array.isArray(routesToRegister) ? routesToRegister : [routesToRegister];
 
-    // Inject `services` to every request under `request.pre.services`
     for (const routeDefinition of routes) {
       if (typeof routeDefinition.options === 'function') {
         throw new Error(`a callback function for 'route.options' is not currently supported!`);
       }
 
+      // Inject `services` to every request under `request.pre.services`
       routeDefinition.options = routeDefinition.options ?? {};
       routeDefinition.options.pre = routeDefinition.options.pre ?? [];
       routeDefinition.options.pre.unshift({
@@ -130,6 +132,7 @@ export class EmulatorServer<TServices extends {} = {}> {
    */
   public async register({ register, prefix, ...options }: EmulatorServerPlugin) {
     const createHapiRouteDefinition = this.createHapiRouteDefinition.bind(this);
+    const services = this.server.app.services;
 
     await this.server.register(
       {
@@ -141,6 +144,12 @@ export class EmulatorServer<TServices extends {} = {}> {
                 return pluginScopedServer.route(createHapiRouteDefinition(routesToRegister));
               },
             },
+
+            expose: (key: string, value: any): void => {
+              pluginScopedServer.expose(key, value);
+            },
+
+            services,
           };
 
           return register(scopedServer);
@@ -186,5 +195,20 @@ export class EmulatorServer<TServices extends {} = {}> {
   public async stop() {
     this.log.debug(`Stopping Hapi server: ${this.server.info.uri}`);
     await this.server.stop();
+  }
+
+  /**
+   * Returns a plugin client that enables interactions with the given plugin emulator.
+   * Plugins can expose interfaces via the `expose()` method that is available to the plugin's
+   * `register()` method.
+   */
+  public getClient<TClient extends {} = {}>(pluginName: string): TClient {
+    const pluginExposedInterface = this.server.plugins[pluginName as keyof Hapi.PluginProperties];
+
+    if (!pluginExposedInterface) {
+      throw new Error(`No plugin named ${pluginName} registered!`);
+    }
+
+    return pluginExposedInterface as TClient;
   }
 }

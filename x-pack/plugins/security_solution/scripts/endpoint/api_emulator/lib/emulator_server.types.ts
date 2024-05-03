@@ -9,14 +9,30 @@
 
 import type HapiTypes from '@hapi/hapi';
 
-export interface EmulatorServerPluginRegisterOptions {
+export interface EmulatorServerPluginRegisterOptions<TServices extends Record<string, any> = {}> {
   router: {
     route(route: EmulatorServerRouteDefinition | EmulatorServerRouteDefinition[]): void;
   };
+
+  /**
+   * Expose content on the server related to the plugin
+   *
+   * @param key
+   * @param value
+   *
+   * @see https://hapi.dev/api/?v=21.3.3#-serverexposekey-value-options
+   */
+  expose: (key: string, value: any) => void;
+
+  /**
+   * Core services defined at the server level
+   */
+  services: TServices;
 }
 
-export interface EmulatorServerPlugin extends Omit<HapiTypes.PluginBase<unknown>, 'register'> {
-  register: (options: EmulatorServerPluginRegisterOptions) => void | Promise<void>;
+export interface EmulatorServerPlugin<TServices extends Record<string, any> = any>
+  extends Omit<HapiTypes.PluginBase<unknown>, 'register'> {
+  register: (options: EmulatorServerPluginRegisterOptions<TServices>) => void | Promise<void>;
   name: string;
   /**
    * A prefix for the routes that will be registered via this plugin. Default is the plugin's `name`
