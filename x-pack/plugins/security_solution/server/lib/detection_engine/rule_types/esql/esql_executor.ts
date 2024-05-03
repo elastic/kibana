@@ -36,6 +36,7 @@ import {
   makeFloatString,
   getUnprocessedExceptionsWarnings,
   getMaxSignalsWarning,
+  getSuppressionMaxSignalsWarning,
 } from '../utils/utils';
 import type { EsqlRuleParams } from '../../rule_schema';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
@@ -47,7 +48,7 @@ import type { ExperimentalFeatures } from '../../../../../common';
  * while we try increase size of the request to catch all events
  * we don't want to overload ES/Kibana with large responses
  */
-const ESQL_PAGE_SIZE_CIRCUIT_BREAKER = 1000;
+const ESQL_PAGE_SIZE_CIRCUIT_BREAKER = 500;
 
 export const esqlExecutor = async ({
   runOpts: {
@@ -193,13 +194,17 @@ export const esqlExecutor = async ({
           experimentalFeatures,
           buildReasonMessage: buildReasonMessageForEsqlAlert,
           mergeSourceAndFields: true,
+          // passing 1 here since ES|QL does not support pagination
+          maxNumberOfAlertsMultiplier: 1,
         });
 
         addToSearchAfterReturn({ current: result, next: bulkCreateResult });
-        ruleExecutionLogger.debug(`Created ${bulkCreateResult.createdItemsCount} alerts.`);
+        ruleExecutionLogger.debug(
+          `Created ${bulkCreateResult.createdItemsCount} alerts. Suppressed ${bulkCreateResult.suppressedItemsCount} alerts`
+        );
 
         if (bulkCreateResult.alertsWereTruncated) {
-          result.warningMessages.push(getMaxSignalsWarning());
+          result.warningMessages.push(getSuppressionMaxSignalsWarning());
           break;
         }
       } else {
