@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSwitch } from '@elastic/eui';
+import React, { memo, useCallback, useEffect, useRef } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { ConsoleFooter } from './components/console_footer';
 import { ConsoleHeader } from './components/console_header';
 import type { CommandInputProps } from './components/command_input';
@@ -55,10 +54,6 @@ const ConsoleWindow = styled.div`
         ${({ theme: { eui } }) => eui.euiSize} ${({ theme: { eui } }) => eui.euiSize};
     }
 
-    &-commandInputHeader {
-      padding-bottom: ${({ theme: { eui } }) => eui.euiSizeXS};
-    }
-
     &-commandInput {
       padding-top: ${({ theme: { eui } }) => eui.euiSizeXS};
       padding-bottom: ${({ theme: { eui } }) => eui.euiSizeXS};
@@ -91,7 +86,6 @@ const ConsoleWindow = styled.div`
     // To prevent this from being applied to an individual flex item, use the classname of
     // 'noMinWidth'. For areas of the Console that render components external to the Console,
     // use className 'noThemeOverrides' to prevent this from impacting those components/
-
     .euiFlexItem:not(.noMinWidth):not(.noThemeOverrides .euiFlexItem) {
       min-width: 0;
     }
@@ -123,16 +117,7 @@ export const Console = memo<ConsoleProps>(
     const scrollingViewport = useRef<HTMLDivElement | null>(null);
     const inputFocusRef: CommandInputProps['focusRef'] = useRef(null);
     const getTestId = useTestIdGenerator(commonProps['data-test-subj']);
-    const isResponseConsoleExecuteEnabled = useIsExperimentalFeatureEnabled(
-      'responseConsoleExecuteEnabled'
-    );
-
     const managedConsole = useWithManagedConsole(managedKey);
-    const [isExecuteAsCliEnabled, setIsExecuteAsCliEnabled] = useState(false);
-
-    const onChangeSwitch = useCallback(() => {
-      setIsExecuteAsCliEnabled((prev) => !prev);
-    }, []);
 
     const scrollToBottom = useCallback(() => {
       // We need the `setTimeout` here because in some cases, the command output
@@ -205,33 +190,13 @@ export const Console = memo<ConsoleProps>(
                             <HistoryOutput />
                           </div>
                         </EuiFlexItem>
-                        {isResponseConsoleExecuteEnabled && (
-                          <EuiFlexItem
-                            grow={false}
-                            className="layout-container layout-commandInputHeader"
-                          >
-                            <EuiSwitch
-                              aria-label="switch-to-execute-as-cli"
-                              compressed
-                              checked={isExecuteAsCliEnabled}
-                              data-test-subj={getTestId('switchToExecuteAsCli')}
-                              label="Execute as CLI"
-                              onChange={onChangeSwitch}
-                            />
-                          </EuiFlexItem>
-                        )}
-
                         <EuiFlexItem
                           onClick={setFocusOnInput}
                           grow={false}
                           className="layout-container layout-commandInput"
                           data-test-subj={getTestId('mainPanel-inputArea')}
                         >
-                          <CommandInput
-                            prompt={prompt}
-                            focusRef={inputFocusRef}
-                            isExecuteAsCliEnabled={isExecuteAsCliEnabled}
-                          />
+                          <CommandInput prompt={prompt} focusRef={inputFocusRef} />
                         </EuiFlexItem>
                         <EuiFlexItem grow={false} className="layout-container layout-footer">
                           <ConsoleFooter />

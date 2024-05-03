@@ -15,6 +15,12 @@ import { useWithInputShowPopover } from '../../../hooks/state_selectors/use_with
 import { useWithInputCommandEntered } from '../../../hooks/state_selectors/use_with_input_command_entered';
 import { useWithCommandList } from '../../../hooks/state_selectors/use_with_command_list';
 
+const EXECUTE_AS_CLI_HINT = (commandParam: string) =>
+  i18n.translate('xpack.securitySolution.useInputHints.executeAsCli', {
+    defaultMessage: 'Hit enter or submit, to send `execute --command "{commandParam}"`',
+    values: { commandParam },
+  });
+
 const UNKNOWN_COMMAND_HINT = (commandName: string) =>
   i18n.translate('xpack.securitySolution.useInputHints.unknownCommand', {
     defaultMessage: 'Unknown command {commandName}',
@@ -33,7 +39,7 @@ export const UP_ARROW_ACCESS_HISTORY_HINT = i18n.translate(
 /**
  * Auto-generates console footer "hints" while user is interacting with the input area
  */
-export const useInputHints = () => {
+export const useInputHints = (isExecuteAsCliEnabled: boolean = false) => {
   const dispatch = useConsoleStateDispatch();
   const isInputPopoverOpen = Boolean(useWithInputShowPopover());
   const commandEntered = useWithInputCommandEntered();
@@ -92,14 +98,23 @@ export const useInputHints = () => {
 
         dispatch({ type: 'setInputState', payload: { value: undefined } });
       } else {
-        dispatch({
-          type: 'updateFooterContent',
-          payload: {
-            value: UNKNOWN_COMMAND_HINT(commandEntered),
-          },
-        });
-
-        dispatch({ type: 'setInputState', payload: { value: 'error' } });
+        // if execute with a shortcut is enabled, then show the parsed execute command hint
+        if (isExecuteAsCliEnabled) {
+          dispatch({
+            type: 'updateFooterContent',
+            payload: {
+              value: EXECUTE_AS_CLI_HINT(commandEntered),
+            },
+          });
+        } else {
+          dispatch({
+            type: 'updateFooterContent',
+            payload: {
+              value: UNKNOWN_COMMAND_HINT(commandEntered),
+            },
+          });
+          dispatch({ type: 'setInputState', payload: { value: 'error' } });
+        }
       }
     } else {
       dispatch({
