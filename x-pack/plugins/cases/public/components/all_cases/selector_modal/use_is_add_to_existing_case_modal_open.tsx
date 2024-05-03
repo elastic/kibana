@@ -7,9 +7,9 @@
 
 import { useCasesContext } from '../../cases_context/use_cases_context';
 
-export const useAddToExistingCaseModalOpen = () => {
+export const useIsAddToExistingCaseModalOpen = () => {
   const { isSelectCaseModalOpen } = useCasesContext();
   return isSelectCaseModalOpen;
 };
 
-export type UseAddToExistingCaseModalOpen = typeof useAddToExistingCaseModalOpen;
+export type UseIsAddToExistingCaseModalOpen = typeof useIsAddToExistingCaseModalOpen;

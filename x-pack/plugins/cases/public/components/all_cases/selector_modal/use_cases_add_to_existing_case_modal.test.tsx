@@ -77,6 +77,8 @@ describe('use cases add to existing case modal hook', () => {
           dispatch,
           features: { alerts: { sync: true, enabled: true, isExperimental: false }, metrics: [] },
           releasePhase: 'ga',
+          isCreateCaseFlyoutOpen: false,
+          isSelectCaseModalOpen: false,
         }}
       >
         {children}

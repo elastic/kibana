@@ -61,7 +61,7 @@ import type {
   ExternalReferenceSOAttachmentPayload,
 } from '../common/types/domain';
 import type { UseIsAddToNewCaseFlyoutOpen } from './components/create/flyout/use_is_add_to_new_case_flyout_open';
-import type { UseAddToExistingCaseModalOpen } from './components/all_cases/selector_modal/use_add_to_existing_case_modal_open';
+import type { UseIsAddToExistingCaseModalOpen } from './components/all_cases/selector_modal/use_is_add_to_existing_case_modal_open';
 
 export interface CasesPublicSetupDependencies {
   files: FilesSetup;
@@ -157,7 +157,7 @@ export interface CasesPublicStart {
     useCasesAddToNewCaseFlyout: UseCasesAddToNewCaseFlyout;
     useCasesAddToExistingCaseModal: UseCasesAddToExistingCaseModal;
     useIsAddToNewCaseFlyoutOpen: UseIsAddToNewCaseFlyoutOpen;
-    useAddToExistingCaseModalOpen: UseAddToExistingCaseModalOpen;
+    useIsAddToExistingCaseModalOpen: UseIsAddToExistingCaseModalOpen;
   };
   helpers: {
     /**

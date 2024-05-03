@@ -5,108 +5,70 @@
  * 2.0.
  */
 
-import { alertComment } from '../../../containers/mock';
 import { renderHook } from '@testing-library/react-hooks';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import { CasesContext } from '../../cases_context';
-import { CasesContextStoreActionsList } from '../../cases_context/cases_context_reducer';
+import CasesProvider from '../../cases_context';
 import { useCasesAddToNewCaseFlyout } from './use_cases_add_to_new_case_flyout';
 import { allCasesPermissions } from '../../../common/mock';
 import { ExternalReferenceAttachmentTypeRegistry } from '../../../client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from '../../../client/attachment_framework/persistable_state_registry';
+import { useIsAddToNewCaseFlyoutOpen } from './use_is_add_to_new_case_flyout_open';
+import { act } from 'react-dom/test-utils';
 
 jest.mock('../../../common/use_cases_toast');
 
 const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
 const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
 
-describe('use cases add to new case flyout hook', () => {
+describe('use is add to new case flyout open hook', () => {
   const dispatch = jest.fn();
   let wrapper: FC<PropsWithChildren<unknown>>;
   beforeEach(() => {
     dispatch.mockReset();
     wrapper = ({ children }) => {
       return (
-        <CasesContext.Provider
+        <CasesProvider
           value={{
             externalReferenceAttachmentTypeRegistry,
             persistableStateAttachmentTypeRegistry,
-            owner: ['test'],
+            owner: ['cases'],
             permissions: allCasesPermissions(),
             basePath: '/jest',
-            dispatch,
             features: { alerts: { sync: true, enabled: true, isExperimental: false }, metrics: [] },
             releasePhase: 'ga',
-            isCreateCaseFlyoutOpen: false,
-            isSelectCaseModalOpen: false,
+            getFilesClient: jest.fn(),
           }}
         >
           {children}
-        </CasesContext.Provider>
+        </CasesProvider>
       );
     };
   });
 
   it('should throw if called outside of a cases context', () => {
     const { result } = renderHook(() => {
-      useCasesAddToNewCaseFlyout();
+      useIsAddToNewCaseFlyoutOpen();
     });
     expect(result.error?.message).toContain(
       'useCasesContext must be used within a CasesProvider and have a defined value'
     );
   });
 
-  it('should dispatch the open action when invoked without attachments', () => {
+  it('should return open flyout status', () => {
     const { result } = renderHook(
       () => {
-        return useCasesAddToNewCaseFlyout();
-      },
-      { wrapper }
-    );
-    result.current.open();
-    expect(dispatch).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: CasesContextStoreActionsList.OPEN_CREATE_CASE_FLYOUT,
-        payload: expect.objectContaining({
-          attachments: undefined,
-        }),
-      })
-    );
-  });
-
-  it('should dispatch the open action when invoked with attachments', () => {
-    const { result } = renderHook(
-      () => {
-        return useCasesAddToNewCaseFlyout();
+        return { flyout: useCasesAddToNewCaseFlyout(), isOpen: useIsAddToNewCaseFlyoutOpen() };
       },
       { wrapper }
     );
 
-    result.current.open({ attachments: [alertComment] });
+    expect(result.current.isOpen).toEqual(false);
 
-    expect(dispatch).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: CasesContextStoreActionsList.OPEN_CREATE_CASE_FLYOUT,
-        payload: expect.objectContaining({
-          attachments: [alertComment],
-        }),
-      })
-    );
-  });
+    act(() => {
+      result.current.flyout.open();
+    });
 
-  it('should dispatch the close action when invoked', () => {
-    const { result } = renderHook(
-      () => {
-        return useCasesAddToNewCaseFlyout();
-      },
-      { wrapper }
-    );
-    result.current.close();
-    expect(dispatch).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: CasesContextStoreActionsList.CLOSE_CREATE_CASE_FLYOUT,
-      })
-    );
+    expect(result.current.isOpen).toEqual(true);
   });
 });

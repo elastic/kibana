@@ -164,7 +164,7 @@ export const GuidedOnboardingTourStep = ({
   const { cases } = useKibana().services;
   const { hidden: allStepsHidden } = useTourContext();
   const isCasesFlyoutModalOpen =
-    cases.hooks.useIsAddToNewCaseFlyoutOpen() || cases.hooks.useAddToExistingCaseModalOpen();
+    cases.hooks.useIsAddToNewCaseFlyoutOpen() || cases.hooks.useIsAddToExistingCaseModalOpen();
 
   const hiddenWhenCasesModalFlyoutExpanded = useMemo(
     () =>

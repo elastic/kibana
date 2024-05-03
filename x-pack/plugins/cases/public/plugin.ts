@@ -38,7 +38,7 @@ import type {
 } from './types';
 import { registerSystemActions } from './components/system_actions';
 import { useIsAddToNewCaseFlyoutOpen } from './components/create/flyout/use_is_add_to_new_case_flyout_open';
-import { useAddToExistingCaseModalOpen } from './components/all_cases/selector_modal/use_add_to_existing_case_modal_open';
+import { useIsAddToExistingCaseModalOpen } from './components/all_cases/selector_modal/use_is_add_to_existing_case_modal_open';
 
 /**
  * @public
@@ -193,7 +193,7 @@ export class CasesUiPlugin
         useCasesAddToNewCaseFlyout,
         useCasesAddToExistingCaseModal,
         useIsAddToNewCaseFlyoutOpen,
-        useAddToExistingCaseModalOpen,
+        useIsAddToExistingCaseModalOpen,
       },
       helpers: {
         canUseCases: canUseCases(core.application.capabilities),

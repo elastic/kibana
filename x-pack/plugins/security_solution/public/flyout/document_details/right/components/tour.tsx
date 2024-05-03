@@ -30,7 +30,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 export const RightPanelTour = memo(() => {
   const { cases } = useKibana().services;
   const isAddToNewCaseFlyoutOpen = cases.hooks.useIsAddToNewCaseFlyoutOpen();
-  const isAddToExistingCaseModalOpen = cases.hooks.useAddToExistingCaseModalOpen();
+  const isAddToExistingCaseModalOpen = cases.hooks.useIsAddToExistingCaseModalOpen();
 
   const casesFlyoutExpanded = isAddToNewCaseFlyoutOpen || isAddToExistingCaseModalOpen;
 
