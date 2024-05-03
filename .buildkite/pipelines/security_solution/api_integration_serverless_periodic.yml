@@ -1,10 +1,10 @@
 steps:
-  - group: "API Integration Serverless Release Tests"
+  - group: "API Integration Serverless Periodic Tests"
     key: test_execution
     steps:
-      - label: Running exception_workflows:essentials:qa:serverless:release
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_workflows:essentials:qa:serverless:release
-        key: exception_workflows:essentials:qa:serverless:release
+      - label: Running exception_workflows:essentials:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_workflows:essentials:qa:serverless
+        key: exception_workflows:essentials:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
@@ -17,9 +17,9 @@ steps:
             - exit_status: "*"
               limit: 2
 
-      - label: Running exception_operators_date_numeric_types:essentials:qa:serverless:release
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_date_numeric_types:essentials:qa:serverless:release
-        key: exception_operators_date_numeric_types:essentials:qa:serverless:release
+      - label: Running exception_operators_date_numeric_types:essentials:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_date_numeric_types:essentials:qa:serverless
+        key: exception_operators_date_numeric_types:essentials:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
@@ -32,9 +32,9 @@ steps:
             - exit_status: "*"
               limit: 2
 
-      - label: Running exception_operators_keyword:essentials:qa:serverless:release
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_keyword:essentials:qa:serverless:release
-        key: exception_operators_keyword:essentials:qa:serverless:release
+      - label: Running exception_operators_keyword:essentials:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_keyword:essentials:qa:serverless
+        key: exception_operators_keyword:essentials:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
@@ -47,9 +47,9 @@ steps:
             - exit_status: "*"
               limit: 2
 
-      - label: Running exception_operators_ips:essentials:qa:serverless:release
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_ips:essentials:qa:serverless:release
-        key: exception_operators_ips:essentials:qa:serverless:release
+      - label: Running exception_operators_ips:essentials:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_ips:essentials:qa:serverless
+        key: exception_operators_ips:essentials:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
@@ -62,9 +62,9 @@ steps:
             - exit_status: "*"
               limit: 2
 
-      - label: Running exception_operators_long:essentials:qa:serverless:release
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_long:qa:serverless:release
-        key: exception_operators_long:essentials:qa:serverless:release
+      - label: Running exception_operators_long:essentials:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_long:essentials:qa:serverless
+        key: exception_operators_long:essentials:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
@@ -77,9 +77,9 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running exception_operators_text:essentials:qa:serverless:release
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_text:essentials:qa:serverless:release
-        key: exception_operators_text:essentials:qa:serverless:release
+      - label: Running exception_operators_text:essentials:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_text:essentials:qa:serverless
+        key: exception_operators_text:essentials:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
@@ -92,9 +92,9 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running alerts:qa:serverless:release
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh alerts:qa:serverless:release
-        key: alerts:qa:serverless:release
+      - label: Running alerts:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh alerts:qa:serverless
+        key: alerts:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
@@ -107,9 +107,9 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running alerts:essentials:qa:serverless:release
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh alerts:essentials:qa:serverless:release
-        key: alerts:essentials:qa:serverless:release
+      - label: Running alerts:essentials:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh alerts:essentials:qa:serverless
+        key: alerts:essentials:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
@@ -122,9 +122,9 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running actions:qa:serverless:release
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh actions:qa:serverless:release
-        key: actions:qa:serverless:release
+      - label: Running actions:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh actions:qa:serverless
+        key: actions:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
@@ -137,9 +137,9 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running genai:qa:serverless:release
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh genai:qa:serverless:release
-        key: genai:qa:serverless:release
+      - label: Running genai:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh genai:qa:serverless
+        key: genai:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
@@ -152,9 +152,9 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running rule_execution_logic:qa:serverless:release
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:qa:serverless:release
-        key: rule_execution_logic:qa:serverless:release
+      - label: Running rule_execution_logic:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:qa:serverless
+        key: rule_execution_logic:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
@@ -167,9 +167,9 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running rule_patch:qa:serverless:release
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_patch:qa:serverless:release
-        key: rule_patch:qa:serverless:release
+      - label: Running rule_patch:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_patch:qa:serverless
+        key: rule_patch:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
@@ -182,9 +182,9 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running rule_patch:essentials:qa:serverless:release
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_patch:essentials:qa:serverless:release
-        key: rule_patch:essentials:qa:serverless:release
+      - label: Running rule_patch:essentials:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_patch:essentials:qa:serverless
+        key: rule_patch:essentials:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
@@ -197,9 +197,9 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running rule_update:qa:serverless:release
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_update:qa:serverless:release
-        key: rule_update:qa:serverless:release
+      - label: Running rule_update:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_update:qa:serverless
+        key: rule_update:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
@@ -212,9 +212,9 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running rule_update:essentials:qa:serverless:release
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_update:essentials:qa:serverless:release
-        key: rule_update:essentials:qa:serverless:release
+      - label: Running rule_update:essentials:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_update:essentials:qa:serverless
+        key: rule_update:essentials:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
@@ -227,9 +227,9 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running rules_management:essentials:qa:serverless:release
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rules_management:essentials:qa:serverless:release
-        key: rules_management:essentials:qa:serverless:release
+      - label: Running rules_management:essentials:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rules_management:essentials:qa:serverless
+        key: rules_management:essentials:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
@@ -242,9 +242,9 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running prebuilt_rules_management:qa:serverless:release
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh prebuilt_rules_management:qa:serverless:release
-        key: prebuilt_rules_management:qa:serverless:release
+      - label: Running prebuilt_rules_management:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh prebuilt_rules_management:qa:serverless
+        key: prebuilt_rules_management:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
@@ -257,9 +257,9 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running prebuilt_rules_bundled_prebuilt_rules_package:qa:serverless:release
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh prebuilt_rules_bundled_prebuilt_rules_package:qa:serverless:release
-        key: prebuilt_rules_bundled_prebuilt_rules_package:qa:serverless:release
+      - label: Running prebuilt_rules_bundled_prebuilt_rules_package:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh prebuilt_rules_bundled_prebuilt_rules_package:qa:serverless
+        key: prebuilt_rules_bundled_prebuilt_rules_package:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
@@ -272,9 +272,9 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running prebuilt_rules_large_prebuilt_rules_package:qa:serverless:release
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh prebuilt_rules_large_prebuilt_rules_package:qa:serverless:release
-        key: prebuilt_rules_large_prebuilt_rules_package:qa:serverless:release
+      - label: Running prebuilt_rules_large_prebuilt_rules_package:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh prebuilt_rules_large_prebuilt_rules_package:qa:serverless
+        key: prebuilt_rules_large_prebuilt_rules_package:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
@@ -287,9 +287,9 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running prebuilt_rules_update_prebuilt_rules_package:qa:serverless:release
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh prebuilt_rules_update_prebuilt_rules_package:qa:serverless:release
-        key: prebuilt_rules_update_prebuilt_rules_package:qa:serverless:release
+      - label: Running prebuilt_rules_update_prebuilt_rules_package:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh prebuilt_rules_update_prebuilt_rules_package:qa:serverless
+        key: prebuilt_rules_update_prebuilt_rules_package:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
@@ -302,9 +302,9 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running rule_bulk_actions:qa:serverless:release
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_bulk_actions:qa:serverless:release
-        key: rule_bulk_actions:qa:serverless:release
+      - label: Running rule_bulk_actions:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_bulk_actions:qa:serverless
+        key: rule_bulk_actions:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
@@ -317,9 +317,9 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running rule_read:qa:serverless:release
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_read:qa:serverless:release
-        key: rule_read:qa:serverless:release
+      - label: Running rule_read:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_read:qa:serverless
+        key: rule_read:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
@@ -332,9 +332,9 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running rule_import_export:essentials:qa:serverless:release
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_import_export:essentials:qa:serverless:release
-        key: rule_import_export:essentials:qa:serverless:release
+      - label: Running rule_import_export:essentials:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_import_export:essentials:qa:serverless
+        key: rule_import_export:essentials:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
@@ -347,9 +347,9 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running rule_import_export:qa:serverless:release
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_import_export:qa:serverless:release
-        key: rule_import_export:qa:serverless:release
+      - label: Running rule_import_export:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_import_export:qa:serverless
+        key: rule_import_export:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
@@ -362,9 +362,9 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running rule_management:qa:serverless:release
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_management:qa:serverless:release
-        key: rule_management:qa:serverless:release
+      - label: Running rule_management:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_management:qa:serverless
+        key: rule_management:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
@@ -377,9 +377,9 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running rule_read:essentials:qa:serverless:release
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_read:essentials:qa:serverless:release
-        key: rule_read:essentials:qa:serverless:release
+      - label: Running rule_read:essentials:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_read:essentials:qa:serverless
+        key: rule_read:essentials:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
@@ -392,9 +392,9 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running rule_creation:qa:serverless:release
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_creation:qa:serverless:release
-        key: rule_creation:qa:serverless:release
+      - label: Running rule_creation:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_creation:qa:serverless
+        key: rule_creation:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
@@ -407,9 +407,9 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running rule_creation:essentials:qa:serverless:release
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_creation:essentials:qa:serverless:release
-        key: rule_creation:essentials:qa:serverless:release
+      - label: Running rule_creation:essentials:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_creation:essentials:qa:serverless
+        key: rule_creation:essentials:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
@@ -422,9 +422,9 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running rule_delete:qa:serverless:release
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_delete:qa:serverless:release
-        key: rule_delete:qa:serverless:release
+      - label: Running rule_delete:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_delete:qa:serverless
+        key: rule_delete:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
@@ -437,9 +437,9 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running rule_delete:essentials:qa:serverless:release
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_delete:essentials:qa:serverless:release
-        key: rule_delete:essentials:qa:serverless:release
+      - label: Running rule_delete:essentials:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_delete:essentials:qa:serverless
+        key: rule_delete:essentials:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
@@ -452,9 +452,9 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running exception_lists_items:qa:serverless:release
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_lists_items:qa:serverless:release
-        key: exception_lists_items:qa:serverless:release
+      - label: Running exception_lists_items:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_lists_items:qa:serverless
+        key: exception_lists_items:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
@@ -467,9 +467,9 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running lists_items:qa:serverless:release
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh lists_items:qa:serverless:release
-        key: lists_items:qa:serverless:release
+      - label: Running lists_items:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh lists_items:qa:serverless
+        key: lists_items:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
@@ -482,9 +482,9 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running user_roles:qa:serverless:release
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh user_roles:qa:serverless:release
-        key: user_roles:qa:serverless:release
+      - label: Running user_roles:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh user_roles:qa:serverless
+        key: user_roles:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
@@ -497,9 +497,9 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running telemetry:qa:serverless:release
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh telemetry:qa:serverless:release
-        key: telemetry:qa:serverless:release
+      - label: Running telemetry:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh telemetry:qa:serverless
+        key: telemetry:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
@@ -512,9 +512,9 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running entity_analytics:qa:serverless:release
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh entity_analytics:qa:serverless:release
-        key: entity_analytics:qa:serverless:release
+      - label: Running entity_analytics:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh entity_analytics:qa:serverless
+        key: entity_analytics:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
