@@ -128,16 +128,26 @@ export const RiskScore = z.object({
   inputs: z.array(RiskScoreInput),
 });
 
-/**
- * Configuration used to tune risk scoring. Weights can be used to change the score contribution of risk inputs for hosts and users at both a global level and also for Risk Input categories (e.g. 'category_1').
- */
-export type RiskScoreWeight = z.infer<typeof RiskScoreWeight>;
-export const RiskScoreWeight = z.object({
-  type: z.string(),
+export type RiskScoreWeightGlobal = z.infer<typeof RiskScoreWeightGlobal>;
+export const RiskScoreWeightGlobal = z.object({
+  type: z.literal('global_identifier'),
+  host: z.number().min(0).max(1).optional(),
+  user: z.number().min(0).max(1).optional(),
+});
+
+export type RiskScoreWeightCategory = z.infer<typeof RiskScoreWeightCategory>;
+export const RiskScoreWeightCategory = z.object({
+  type: z.literal('risk_category'),
   value: z.string().optional(),
   host: z.number().min(0).max(1).optional(),
   user: z.number().min(0).max(1).optional(),
 });
+
+/**
+ * Configuration used to tune risk scoring. Weights can be used to change the score contribution of risk inputs for hosts and users at both a global level and also for Risk Input categories (e.g. 'category_1').
+ */
+export type RiskScoreWeight = z.infer<typeof RiskScoreWeight>;
+export const RiskScoreWeight = z.union([RiskScoreWeightGlobal, RiskScoreWeightCategory]);
 
 /**
  * A list of weights to be applied to the scoring calculation.

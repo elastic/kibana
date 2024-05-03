@@ -6,6 +6,7 @@
  */
 
 import { useMemo } from 'react';
+import type { RiskScoresPreviewRequest } from '../../../common/api/entity_analytics/risk_engine/preview_route.gen';
 import type { AssetCriticalityCsvUploadResponse } from '../../../common/entity_analytics/asset_criticality/types';
 import type { AssetCriticalityRecord } from '../../../common/api/entity_analytics/asset_criticality';
 import type { RiskScoreEntity } from '../../../common/search_strategy';
@@ -30,8 +31,6 @@ import type {
   InitRiskEngineResponse,
   DisableRiskEngineResponse,
 } from '../../../server/lib/entity_analytics/types';
-import type { RiskScorePreviewRequestSchema } from '../../../common/entity_analytics/risk_engine/risk_score_preview/request_schema';
-import type { EntityAnalyticsPrivileges } from '../../../common/api/entity_analytics/common';
 import type { RiskEngineSettingsResponse } from '../../../common/api/entity_analytics/risk_engine';
 import type { SnakeToCamelCase } from '../common/utils';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
@@ -51,7 +50,7 @@ export const useEntityAnalyticsRoutes = () => {
       params,
     }: {
       signal?: AbortSignal;
-      params: RiskScorePreviewRequestSchema;
+      params: RiskScoresPreviewRequest;
     }) =>
       http.fetch<CalculateScoresResponse>(RISK_SCORE_PREVIEW_URL, {
         version: '1',
