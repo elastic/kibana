@@ -62,7 +62,7 @@ export interface Services {
   /** Handler to retrieve the list of available tags */
   getTagList: () => Tag[];
   TagList: FC<TagListProps>;
-  /** Flag to indicate if taggins features are enabled */
+  /** Predicate to indicate if tagging features is enabled */
   isTaggingEnabled: () => boolean;
   /** Predicate function to indicate if some of the saved object references are tags */
   itemHasTags: (references: SavedObjectsReference[]) => boolean;
