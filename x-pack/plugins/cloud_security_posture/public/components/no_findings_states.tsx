@@ -245,16 +245,24 @@ const EmptySecurityFindingsPrompt = ({
 const NoFindingsStatesNotification = ({
   postureType,
   status,
-  unprivilegedIndices,
+  indicesStatus,
   isNotInstalled,
 }: {
   postureType: PostureTypes;
-  status: CspStatusCode | undefined;
-  unprivilegedIndices: string[] | undefined;
+  status?: CspStatusCode;
+  indicesStatus?: IndexDetails[];
   isNotInstalled: boolean;
 }) => {
   const kspmIntegrationLink = useCspIntegrationLink(KSPM_POLICY_TEMPLATE);
   const cspmIntegrationLink = useCspIntegrationLink(CSPM_POLICY_TEMPLATE);
+
+  const unprivilegedIndices =
+    indicesStatus &&
+    indicesStatus
+      .filter((idxDetails) => idxDetails.status === 'unprivileged')
+      .map((idxDetails: IndexDetails) => idxDetails.index)
+      .sort((a, b) => a.localeCompare(b));
+
   if (status === 'unprivileged')
     return <Unprivileged unprivilegedIndices={unprivilegedIndices || []} />;
   if (status === 'indexing' || status === 'waiting_for_results') return <Indexing />;
@@ -285,20 +293,13 @@ export const NoFindingsStates = ({ postureType }: { postureType: PostureTypes })
   const status = postureType === 'cspm' ? statusCspm : statusKspm;
   const isNotInstalled = statusKspm === 'not-installed' && statusCspm === 'not-installed';
 
-  const unprivilegedIndices =
-    indicesStatus &&
-    indicesStatus
-      .filter((idxDetails) => idxDetails.status === 'unprivileged')
-      .map((idxDetails: IndexDetails) => idxDetails.index)
-      .sort((a, b) => a.localeCompare(b));
-
   return (
     <CloudPosturePage query={getSetupStatus}>
       <FullSizeCenteredPage>
         <NoFindingsStatesNotification
           postureType={postureType}
           status={status}
-          unprivilegedIndices={unprivilegedIndices}
+          indicesStatus={indicesStatus}
           isNotInstalled={isNotInstalled}
         />
       </FullSizeCenteredPage>
