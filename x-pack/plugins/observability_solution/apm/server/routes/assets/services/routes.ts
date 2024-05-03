@@ -10,25 +10,7 @@ import * as t from 'io-ts';
 import { createAssetsESClient } from '../../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
 import { getServicesFromAssets } from './get_services_from_assets';
 import { kueryRt, rangeRt } from '../../default_api_types';
-
-type SignalTypes = {
-  'asset.trace'?: boolean;
-  'asset.logs'?: boolean;
-};
-
-type ServiceItem = {
-  environment: string;
-  name: string;
-};
-
-type AssetItem = {
-  signalTypes: SignalTypes;
-  identifyingMetadata: string[];
-};
-
-export interface ServicesItemsResponse {
-  services: Array<{ asset: AssetItem; service: ServiceItem }>;
-}
+import { AssetServicesResponse } from './types';
 
 const servicesAssetsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/assets/services',
@@ -36,7 +18,7 @@ const servicesAssetsRoute = createApmServerRoute({
     query: t.intersection([kueryRt, rangeRt]),
   }),
   options: { tags: ['access:apm'] },
-  async handler(resources): Promise<ServicesItemsResponse> {
+  async handler(resources): Promise<AssetServicesResponse> {
     const { context, params, request } = resources;
     const coreContext = await context.core;
 
@@ -47,7 +29,14 @@ const servicesAssetsRoute = createApmServerRoute({
 
     const { start, end, kuery } = params.query;
 
-    const services = await getServicesFromAssets({ assetsESClient, start, end, kuery });
+    const services = await getServicesFromAssets({
+      assetsESClient,
+      start,
+      end,
+      kuery,
+      assetType: 'service',
+      logger: resources.logger,
+    });
     return { services };
   },
 });
