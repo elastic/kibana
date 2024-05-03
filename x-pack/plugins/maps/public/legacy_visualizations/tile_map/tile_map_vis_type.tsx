@@ -9,9 +9,9 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { toExpressionAst } from './to_ast';
 import { MapTypes, TileMapVisParams, TILE_MAP_VIS_TYPE } from './types';
-import { dynamic } from '@kbn/shared-ux-utility';
 
 export const title = i18n.translate('xpack.maps.tileMap.vis.title', {
   defaultMessage: 'Coordinate Map',
