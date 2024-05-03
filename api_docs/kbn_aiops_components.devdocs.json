@@ -217,7 +217,7 @@
           "\nContext provider component that manages and provides global state for Log Rate Analysis.\nThis provider handles several pieces of state important for controlling and displaying\nlog rate analysis data, such as the control of automatic analysis runs, and the management\nof both pinned and selected significant items and groups.\n\nThe state includes mechanisms for setting initial analysis parameters, toggling analysis,\nand managing the current selection and pinned state of significant items and groups.\n"
         ],
         "signature": [
-          "(props: React.PropsWithChildren<LogRateAnalysisStateProviderProps>) => JSX.Element"
+          "(props: React.PropsWithChildren<React.PropsWithChildren<LogRateAnalysisStateProviderProps>>) => JSX.Element"
         ],
         "path": "x-pack/packages/ml/aiops_components/src/log_rate_analysis_state_provider/log_rate_analysis_state_provider.tsx",
         "deprecated": false,
@@ -233,7 +233,7 @@
               "- Props object containing initial settings for the analysis,\nincluding children components to be wrapped by the Provider."
             ],
             "signature": [
-              "React.PropsWithChildren<LogRateAnalysisStateProviderProps>"
+              "React.PropsWithChildren<React.PropsWithChildren<LogRateAnalysisStateProviderProps>>"
             ],
             "path": "x-pack/packages/ml/aiops_components/src/log_rate_analysis_state_provider/log_rate_analysis_state_provider.tsx",
             "deprecated": false,
@@ -256,7 +256,7 @@
           "\nProgressControls React Component\nComponent with ability to Run & cancel analysis\nby default uses `Baseline` and `Deviation` for the badge name\n"
         ],
         "signature": [
-          "(props: React.PropsWithChildren<ProgressControlProps>) => JSX.Element"
+          "(props: React.PropsWithChildren<React.PropsWithChildren<ProgressControlProps>>) => JSX.Element"
         ],
         "path": "x-pack/packages/ml/aiops_components/src/progress_controls/progress_controls.tsx",
         "deprecated": false,
@@ -272,7 +272,7 @@
               "ProgressControls component props"
             ],
             "signature": [
-              "React.PropsWithChildren<ProgressControlProps>"
+              "React.PropsWithChildren<React.PropsWithChildren<ProgressControlProps>>"
             ],
             "path": "x-pack/packages/ml/aiops_components/src/progress_controls/progress_controls.tsx",
             "deprecated": false,
@@ -998,7 +998,7 @@
           "\nType for defining attributes picked from\nSignificantItemGroupItem used in the grouped table."
         ],
         "signature": [
-          "{ type: ",
+          "{ key: string; type: ",
           {
             "pluginId": "@kbn/ml-agg-utils",
             "scope": "common",
@@ -1006,7 +1006,7 @@
             "section": "def-common.SignificantItemType",
             "text": "SignificantItemType"
           },
-          "; key: string; fieldName: string; fieldValue: string | number; docCount: number; pValue: number | null; duplicate?: number | undefined; }"
+          "; fieldName: string; fieldValue: string | number; docCount: number; pValue: number | null; duplicate?: number | undefined; }"
         ],
         "path": "x-pack/packages/ml/aiops_components/src/log_rate_analysis_state_provider/types.ts",
         "deprecated": false,

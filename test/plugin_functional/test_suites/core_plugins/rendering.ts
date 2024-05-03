@@ -271,11 +271,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.graph.savePolicy (alternatives)',
         'xpack.ilm.ui.enabled (boolean)',
         'xpack.index_management.ui.enabled (boolean)',
-        'xpack.index_management.enableIndexActions (any)',
-        'xpack.index_management.enableLegacyTemplates (any)',
-        'xpack.index_management.enableIndexStats (any)',
-        'xpack.index_management.editableIndexSettings (any)',
-        'xpack.index_management.enableDataStreamsStorageColumn (any)',
         'xpack.infra.sources.default.fields.message (array)',
         'xpack.index_management.enableTogglingDataRetention (any)', // It's a boolean (any because schema.conditional)
         /**
@@ -292,6 +287,12 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.infra.featureFlags.alertsAndRulesDropdownEnabled (any)',
         'xpack.infra.featureFlags.profilingEnabled (boolean)',
 
+        'xpack.index_management.enableIndexActions (any)',
+        'xpack.index_management.enableLegacyTemplates (any)',
+        'xpack.index_management.enableIndexStats (any)',
+        'xpack.index_management.editableIndexSettings (any)',
+        'xpack.index_management.enableDataStreamsStorageColumn (any)',
+        'xpack.index_management.enableMappingsSourceFieldSection (any)',
         'xpack.license_management.ui.enabled (boolean)',
         'xpack.maps.preserveDrawingBuffer (boolean)',
         'xpack.maps.showMapsInspectorAdapter (boolean)',

@@ -30,6 +30,10 @@ export const processString = (schema: OpenAPIV3.SchemaObject): void => {
   }
 };
 
+export const processStream = (schema: OpenAPIV3.SchemaObject): void => {
+  schema.type = 'object';
+};
+
 const processAdditionalProperties = (ctx: IContext, schema: OpenAPIV3.SchemaObject) => {
   if (META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES in schema) {
     const fn = schema[META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES] as () => Joi.Schema<unknown>;

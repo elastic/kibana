@@ -397,6 +397,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     const aboutStepFormValid = await aboutStepForm.validate();
     const scheduleStepFormValid = await scheduleStepForm.validate();
     const actionsStepFormValid = await actionsStepForm.validate();
+
     if (
       defineStepFormValid &&
       aboutStepFormValid &&

@@ -13,6 +13,7 @@ import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { EuiDataGridCustomBodyProps, EuiDataGridProps } from '@elastic/eui';
+import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import { selectTimelineById } from '../../../../store/selectors';
 import { RowRendererCount } from '../../../../../../common/api/timeline';
 import { EmptyComponent } from '../../../../../common/lib/cell_actions/helpers';
@@ -43,6 +44,7 @@ import { transformTimelineItemToUnifiedRows } from '../utils';
 import { TimelineEventDetailRow } from './timeline_event_detail_row';
 import { CustomTimelineDataGridBody } from './custom_timeline_data_grid_body';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
+import { useUnifiedTableExpandableFlyout } from '../hooks/use_unified_timeline_expandable_flyout';
 
 export const SAMPLE_SIZE_SETTING = 500;
 const DataGridMemoized = React.memo(UnifiedDataTable);
@@ -124,6 +126,15 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     const [expandedDoc, setExpandedDoc] = useState<DataTableRecord & TimelineItem>();
     const [fetchedPage, setFechedPage] = useState<number>(0);
 
+    const onCloseExpandableFlyout = useCallback(() => {
+      setExpandedDoc((prev) => (!prev ? prev : undefined));
+    }, []);
+
+    const { openFlyout, closeFlyout, isTimelineExpandableFlyoutEnabled } =
+      useUnifiedTableExpandableFlyout({
+        onClose: onCloseExpandableFlyout,
+      });
+
     const { browserFields, runtimeMappings } = useSourcererDataView(SourcererScopeName.timeline);
 
     const showTimeCol = useMemo(() => !!dataView && !!dataView.timeFieldName, [dataView]);
@@ -142,26 +153,39 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
         const updatedExpandedDetail: ExpandedDetailType = {
           panelView: 'eventDetail',
           params: {
-            eventId: eventData.id,
-            indexName: eventData._index ?? '', // TODO: fix type error
+            eventId: eventData._id,
+            indexName: eventData.ecs._index ?? '', // TODO: fix type error
             refetch,
           },
         };
 
-        dispatch(
-          timelineActions.toggleDetailPanel({
-            ...updatedExpandedDetail,
-            tabType: activeTab,
-            id: timelineId,
-          })
-        );
+        if (isTimelineExpandableFlyoutEnabled) {
+          openFlyout({
+            right: {
+              id: DocumentDetailsRightPanelKey,
+              params: {
+                id: eventData._id,
+                indexName: eventData.ecs._index ?? '',
+                scopeId: timelineId,
+              },
+            },
+          });
+        } else {
+          dispatch(
+            timelineActions.toggleDetailPanel({
+              ...updatedExpandedDetail,
+              tabType: activeTab,
+              id: timelineId,
+            })
+          );
+        }
 
         activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });
       },
-      [activeTab, dispatch, refetch, timelineId]
+      [activeTab, dispatch, refetch, timelineId, isTimelineExpandableFlyoutEnabled, openFlyout]
     );
 
-    const handleOnPanelClosed = useCallback(() => {
+    const onTimelineLegacyFlyoutClose = useCallback(() => {
       if (
         expandedDetail[activeTab]?.panelView &&
         timelineId === TimelineId.active &&
@@ -182,10 +206,20 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             handleOnEventDetailPanelOpened(timelineDoc);
           }
         } else {
-          handleOnPanelClosed();
+          if (isTimelineExpandableFlyoutEnabled) {
+            closeFlyout();
+            return;
+          }
+          onTimelineLegacyFlyoutClose();
         }
       },
-      [tableRows, handleOnEventDetailPanelOpened, handleOnPanelClosed]
+      [
+        tableRows,
+        handleOnEventDetailPanelOpened,
+        onTimelineLegacyFlyoutClose,
+        closeFlyout,
+        isTimelineExpandableFlyoutEnabled,
+      ]
     );
 
     const onColumnResize = useCallback(
@@ -393,10 +427,10 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             trailingControlColumns={trailingControlColumns}
             renderCustomGridBody={renderCustomBodyCallback}
           />
-          {showExpandedDetails && (
+          {showExpandedDetails && !isTimelineExpandableFlyoutEnabled && (
             <DetailsPanel
               browserFields={browserFields}
-              handleOnPanelClosed={handleOnPanelClosed}
+              handleOnPanelClosed={onTimelineLegacyFlyoutClose}
               runtimeMappings={runtimeMappings}
               tabType={activeTab}
               scopeId={timelineId}

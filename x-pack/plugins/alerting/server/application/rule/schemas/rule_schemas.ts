@@ -174,6 +174,7 @@ export const ruleDomainSchema = schema.object({
   running: schema.maybe(schema.nullable(schema.boolean())),
   viewInAppRelativeUrl: schema.maybe(schema.nullable(schema.string())),
   alertDelay: schema.maybe(alertDelaySchema),
+  legacyId: schema.maybe(schema.nullable(schema.string())),
 });
 
 /**
@@ -213,4 +214,5 @@ export const ruleSchema = schema.object({
   running: schema.maybe(schema.nullable(schema.boolean())),
   viewInAppRelativeUrl: schema.maybe(schema.nullable(schema.string())),
   alertDelay: schema.maybe(alertDelaySchema),
+  legacyId: schema.maybe(schema.nullable(schema.string())),
 });
