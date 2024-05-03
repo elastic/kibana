@@ -86,7 +86,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(alerts.hits.hits).toHaveLength(1);
           expect(alerts.hits.hits[0]._source).toEqual(
             expect.objectContaining({
-              [ALERT_SUPPRESSION_TERMS]: { field: 'user.name', value: ['root'] },
+              [ALERT_SUPPRESSION_TERMS]: [{ field: 'user.name', value: ['root'] }],
               [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
             })
           );
