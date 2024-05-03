@@ -740,7 +740,6 @@ export const getBodyTokenPath = (value: string): string[] => {
         if (isDoubleQuote(char)) {
           // property name: parse the string and add to tokens
           const propertyName = parsePropertyName();
-          console.log(`token: ${currentToken} char: ${char} name: ${propertyName}`);
           // allow whitespace
           skipWhitespace();
           // expecting a colon, otherwise the parser fails
