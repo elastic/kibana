@@ -130,3 +130,26 @@ test('supports unsplittable key syntax on nested list', () => {
     }
   `);
 });
+
+test('supports var:default syntax', () => {
+  process.env.KBN_ENV_VAR1 = 'val1';
+
+  const config = getConfigFromFiles([fixtureFile('/en_var_with_defaults.yml')]);
+
+  delete process.env.KBN_ENV_VAR1;
+
+  expect(config).toMatchInlineSnapshot(`
+    Object {
+      "foo": "pre-val1-mid-default2-post",
+      "nested_list": Array [
+        Object {
+          "id": "a",
+          "values": Array [
+            "val1",
+            "default2",
+          ],
+        },
+      ],
+    }
+  `);
+});

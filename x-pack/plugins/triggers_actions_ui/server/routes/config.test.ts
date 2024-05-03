@@ -55,7 +55,7 @@ describe('createConfigRoute', () => {
         maxScheduledPerMinute: 10000,
         minimumScheduleInterval: { value: '1m', enforce: false },
       }),
-      getRulesClientWithRequest: () => mockRulesClient,
+      getRulesClientWithRequest: async () => mockRulesClient,
     });
 
     const [config, handler] = router.get.mock.calls[0];
@@ -89,7 +89,7 @@ describe('createConfigRoute', () => {
         maxScheduledPerMinute: 10000,
         minimumScheduleInterval: { value: '1m', enforce: false },
       }),
-      getRulesClientWithRequest: () => mockRulesClient,
+      getRulesClientWithRequest: async () => mockRulesClient,
     });
 
     const [config, handler] = router.get.mock.calls[0];
