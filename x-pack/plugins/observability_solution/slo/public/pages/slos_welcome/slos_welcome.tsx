@@ -34,11 +34,11 @@ export function SlosWelcomePage() {
   } = useKibana().services;
 
   const { ObservabilityPageTemplate } = usePluginContext();
-  const { data: permissions, isLoading: arePermissionsLoading } = usePermissions();
+  const { data: permissions } = usePermissions();
   const { hasAtLeast } = useLicense();
   const hasRightLicense = hasAtLeast('platinum');
 
-  const { isLoading, data: sloList } = useFetchSloList();
+  const { data: sloList } = useFetchSloList();
   const { total } = sloList ?? { total: 0 };
 
   const hasSlosAndPermissions =
@@ -53,14 +53,6 @@ export function SlosWelcomePage() {
       navigateToUrl(basePath.prepend(paths.slos));
     }
   }, [basePath, navigateToUrl, hasSlosAndPermissions]);
-
-  if (isLoading || arePermissionsLoading) {
-    return null;
-  }
-
-  if (hasSlosAndPermissions) {
-    return null;
-  }
 
   return (
     <ObservabilityPageTemplate data-test-subj="slosPageWelcomePrompt">

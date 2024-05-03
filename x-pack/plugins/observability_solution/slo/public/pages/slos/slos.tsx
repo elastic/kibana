@@ -32,13 +32,7 @@ export function SlosPage() {
   const { hasAtLeast } = useLicense();
   const { data: permissions } = usePermissions();
 
-  const {
-    isLoading,
-    isError,
-    data: sloList,
-  } = useFetchSloList({
-    perPage: 0,
-  });
+  const { isLoading, isError, data: sloList } = useFetchSloList({ perPage: 0 });
   const { total } = sloList ?? { total: 0 };
 
   useBreadcrumbs([
