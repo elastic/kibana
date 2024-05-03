@@ -17,6 +17,8 @@ export const ABOUT_DETAILS =
 
 export const ADDITIONAL_LOOK_BACK_DETAILS = 'Additional look-back time';
 
+export const INTERVAL_ABBR_VALUE = '[data-test-subj="interval-abbr-value"]';
+
 export const ALERTS_TAB = '[data-test-subj="navigation-alerts"]';
 
 export const ANOMALY_SCORE_DETAILS = 'Anomaly score';

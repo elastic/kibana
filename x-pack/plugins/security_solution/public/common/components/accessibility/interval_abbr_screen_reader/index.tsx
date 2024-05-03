@@ -39,7 +39,9 @@ export const IntervalAbbrScreenReader = ({ interval }: IntervalAbbrScreenReaderP
 
   return (
     <>
-      <span aria-hidden={Boolean(screenReaderInterval)}>{interval}</span>
+      <span data-test-subj="interval-abbr-value" aria-hidden={Boolean(screenReaderInterval)}>
+        {interval}
+      </span>
       {screenReaderInterval && (
         <EuiScreenReaderOnly>
           <p>{screenReaderInterval}</p>
