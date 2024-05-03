@@ -58,9 +58,11 @@ export const ToolbarSelector: React.FC<ToolbarSelectorProps> = ({
     []
   );
 
-  const onSelectionChange = useCallback(
-    (newOptions: any) => {
-      const chosenOption = newOptions.find(({ checked }: SelectableEntry) => checked === 'on');
+  const onSelectionChange = useCallback<
+    NonNullable<EuiSelectableProps<SelectableEntry>['onChange']>
+  >(
+    (newOptions) => {
+      const chosenOption = newOptions.find(({ checked }) => checked === 'on');
 
       onChange?.(
         chosenOption?.value && chosenOption?.value !== EMPTY_OPTION ? chosenOption : undefined
@@ -137,7 +139,7 @@ export const ToolbarSelector: React.FC<ToolbarSelectorProps> = ({
       anchorPosition="downLeft"
     >
       <EuiPopoverTitle paddingSize="s">{popoverTitle}</EuiPopoverTitle>
-      <EuiSelectable
+      <EuiSelectable<SelectableEntry>
         id={`${dataTestSubj}Selectable`}
         singleSelection
         aria-label={popoverTitle}
