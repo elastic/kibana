@@ -29,6 +29,7 @@ export interface Props {
 export function PassiveMap(props: Props) {
   const isMounted = useMountedState();
   const mapApiRef = useRef<MapApi | undefined>(undefined);
+  const beforeApiReadyPassiveLayerRef = useRef<LayerDescriptor | undefined>(undefined);
   const onRenderCompleteSubscriptionRef = useRef<Subscription | undefined>(undefined);
   const initialState = useMemo(() => {
     const basemapLayerDescriptor = createBasemapLayerDescriptor();
@@ -63,6 +64,8 @@ export function PassiveMap(props: Props) {
   useEffect(() => {
     if (mapApiRef.current) {
       mapApiRef.current.updateLayerById(props.passiveLayer);
+    } else {
+      beforeApiReadyPassiveLayerRef.current = props.passiveLayer;
     }
   }, [props.passiveLayer]);
 
@@ -81,6 +84,9 @@ export function PassiveMap(props: Props) {
         state={initialState}
         onApiAvailable={(api) => {
           mapApiRef.current = api;
+          if (beforeApiReadyPassiveLayerRef.current) {
+            api.updateLayerById(beforeApiReadyPassiveLayerRef.current);
+          }
           if (props.onRenderComplete) {
             onRenderCompleteSubscriptionRef.current = api.onRenderComplete$.subscribe(() => {
               if (isMounted() && props.onRenderComplete) {
