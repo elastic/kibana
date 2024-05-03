@@ -23,7 +23,7 @@ import {
   EuiFlexItem,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { HttpSetup } from '@kbn/core-http-browser';
+import type { HttpSetup, IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import type { ErrorToastOptions, Toast, ToastInput } from '@kbn/core-notifications-browser';
 import { i18n as translate } from '@kbn/i18n';
 import type { ListDetails } from '@kbn/securitysolution-exception-list-components';
@@ -120,10 +120,11 @@ export const CreateSharedListFlyout = memo(
     }, [addSuccess, handleCloseFlyout, handleRefresh, newListDetails]);
 
     const handleCreateError = useCallback(
-      // error: unknown
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (error: any) => {
-        if (!error.message.includes('AbortError') && !error?.body?.message.includes('AbortError')) {
+      (error: IHttpFetchError<ResponseErrorBody> | undefined) => {
+        if (
+          !error?.message?.includes('AbortError') &&
+          !error?.body?.message.includes('AbortError')
+        ) {
           addError(error, {
             title: translate.translate(
               'xpack.securitySolution.exceptions.createSharedExceptionListErrorTitle',
@@ -142,7 +143,9 @@ export const CreateSharedListFlyout = memo(
         if (createSharedExceptionListState?.result) {
           handleCreateSuccess();
         } else if (createSharedExceptionListState?.error) {
-          handleCreateError(createSharedExceptionListState?.error);
+          handleCreateError(
+            createSharedExceptionListState?.error as IHttpFetchError<ResponseErrorBody>
+          );
         }
       }
     }, [
