@@ -80,8 +80,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     `.internal.alerts-transform.health.alerts-default-000001`
   );
 
-  // Failing: See https://github.com/elastic/kibana/issues/177215
-  describe.skip('rule', async () => {
+  describe('rule', async () => {
     const objectRemover = new ObjectRemover(supertest);
     let connectorId: string;
     const transformId = 'test_transform_01';
