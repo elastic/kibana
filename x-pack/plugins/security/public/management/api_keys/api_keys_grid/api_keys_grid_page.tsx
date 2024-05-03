@@ -74,9 +74,9 @@ const parseSearchBarQuery = (query: Query): QueryContainer => {
 const DEFAULT_TABLE_STATE = {
   query: EuiSearchBar.Query.parse(''),
   sort: {
-    field: 'creation',
-    direction: 'desc',
-  } as QueryApiKeySortOptions,
+    field: 'creation' as const,
+    direction: 'desc' as const,
+  },
   from: 0,
   size: 25,
 };
@@ -107,17 +107,8 @@ export const APIKeysGridPage: FunctionComponent = () => {
   }, []);
 
   const resetQueryOnError = () => {
-    const newState = {
-      query: EuiSearchBar.Query.parse(''),
-      sort: {
-        field: 'creation',
-        direction: 'desc',
-      } as QueryApiKeySortOptions,
-      from: 0,
-      size: 25,
-    };
-    setTableState(newState);
-    queryApiKeysAndAggregations(newState);
+    setTableState(DEFAULT_TABLE_STATE);
+    queryApiKeysAndAggregations(DEFAULT_TABLE_STATE);
   };
 
   const onTableChange = ({ page, sort }: Criteria<CategorizedApiKey>) => {
