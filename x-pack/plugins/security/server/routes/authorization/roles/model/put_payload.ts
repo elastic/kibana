@@ -35,7 +35,7 @@ export const transformPutPayloadToElasticsearchRole = (
     ...(rolePayload.description && { description: rolePayload.description }),
     metadata: rolePayload.metadata,
     cluster: elasticsearch.cluster || [],
-    remote_cluster: elasticsearch.remote_cluster || [],
+    remote_cluster: elasticsearch.remote_cluster,
     indices: elasticsearch.indices || [],
     remote_indices: elasticsearch.remote_indices,
     run_as: elasticsearch.run_as || [],

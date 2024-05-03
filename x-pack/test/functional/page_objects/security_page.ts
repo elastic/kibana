@@ -614,7 +614,22 @@ export class SecurityPageObject extends FtrService {
     }
   }
 
-  async getRemoteClusterPrivilege(index = 0) {
+  async saveRole() {
+    this.log.debug('click save button');
+    await this.testSubjects.click('roleFormSaveButton');
+
+    // Signifies that the role management page redirected back to the role grid page,
+    // and successfully refreshed the grid
+    await this.testSubjects.existOrFail('roleRow');
+  }
+
+  async deleteRemoteClusterPrivilege(index: number) {
+    this.log.debug('deleteRemoteClusterPrivilege, index = ', index);
+
+    await this.testSubjects.click(`deleteRemoteClusterPrivilegesButton${index}`);
+  }
+
+  async getRemoteClusterPrivilege(index: number) {
     this.log.debug('getRemoteClusterPrivilege, index = ', index);
     const clusterOptions = await this.comboBox.getComboBoxSelectedOptions(
       `remoteClusterClustersInput${index}`
@@ -708,12 +723,7 @@ export class SecurityPageObject extends FtrService {
       }
     }
 
-    this.log.debug('click save button');
-    await this.testSubjects.click('roleFormSaveButton');
-
-    // Signifies that the role management page redirected back to the role grid page,
-    // and successfully refreshed the grid
-    await this.testSubjects.existOrFail('roleRow');
+    await this.saveRole();
   }
 
   async selectRole(role: string) {

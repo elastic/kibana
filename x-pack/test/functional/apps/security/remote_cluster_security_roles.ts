@@ -9,6 +9,8 @@ import expect from '@kbn/expect';
 import { keyBy } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+const EDIT_ROLES_PATH = 'security/roles/edit';
+
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
@@ -18,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   describe('Remote Cluster Privileges', function () {
-    const customRole = 'customRoleRC';
+    const customRole = 'rc-custom-role';
 
     before('initialize tests', async () => {
       await kibanaServer.savedObjects.cleanStandardList();
@@ -56,15 +58,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(roles[customRole].reserved).to.be(false);
     });
 
-    it(`should display role ${customRole} with remote cluster privileges`, async function () {
-      const url = await browser.getCurrentUrl();
+    it(`should update role ${customRole} with remote cluster privileges`, async function () {
+      await PageObjects.settings.clickLinkText(customRole);
+      const currentUrl = await browser.getCurrentUrl();
 
-      await browser.navigateTo(`${url}edit/${customRole}`);
+      expect(currentUrl).to.contain(EDIT_ROLES_PATH);
 
-      const { clusters, privileges } = await PageObjects.security.getRemoteClusterPrivilege(0);
+      const { clusters: currentClusters, privileges: currentPrivileges } =
+        await PageObjects.security.getRemoteClusterPrivilege(0);
 
-      expect(clusters).to.eql(['cluster1', 'cluster2']);
-      expect(privileges).to.eql(['monitor_enrich']);
+      expect(currentClusters).to.eql(['cluster1', 'cluster2']);
+      expect(currentPrivileges).to.eql(['monitor_enrich']);
+
+      await PageObjects.security.deleteRemoteClusterPrivilege(0);
+
+      await PageObjects.security.addRemoteClusterPrivilege({
+        clusters: ['cluster3', 'cluster4'],
+        privileges: ['monitor_enrich'],
+      });
+
+      await PageObjects.security.saveRole();
     });
 
     after('logout', async () => {

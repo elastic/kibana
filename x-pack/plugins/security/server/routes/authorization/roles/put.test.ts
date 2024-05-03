@@ -325,6 +325,7 @@ describe('PUT role', () => {
               body: {
                 cluster: [],
                 indices: [],
+                remote_cluster: undefined,
                 remote_indices: undefined,
                 run_as: [],
                 applications: [],
