@@ -12993,10 +12993,10 @@
             "id": "def-common.RouteValidatorFullConfigResponse.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[statusCode: number]: { body: LazyValidator; }",
+            "label": "[statusCode: number]: { bodyContentType?: string | undefined; body: LazyValidator; }",
             "description": [],
             "signature": [
-              "[statusCode: number]:  { body: ",
+              "[statusCode: number]:  { bodyContentType?: string | undefined; body: ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
@@ -14417,6 +14417,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/agent/agent_status_handler.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/fleet_integrations/api/get_all_integrations/route.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -16485,10 +16489,10 @@
             "id": "def-common.VersionedRouteResponseValidation.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[statusCode: number]: { body: VersionedResponseBodyValidation; }",
+            "label": "[statusCode: number]: { bodyContentType?: string | undefined; body: VersionedResponseBodyValidation; }",
             "description": [],
             "signature": [
-              "[statusCode: number]:  { body: ",
+              "[statusCode: number]:  { bodyContentType?: string | undefined; body: ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
