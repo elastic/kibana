@@ -40,7 +40,7 @@ import { useTourContext } from '../guided_onboarding_tour';
 import {
   AlertsCasesTourSteps,
   SecurityStepId,
-  hiddenWhenExpandableFlyoutExpanded,
+  hiddenWhenLeftExpandableFlyoutExpanded,
 } from '../guided_onboarding_tour/tour_config';
 import { isDetectionsAlertsTable } from '../top_n/helpers';
 import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
@@ -84,12 +84,12 @@ const ActionsComponent: React.FC<ActionProps> = ({
   const isEnterprisePlus = useLicense().isEnterprise();
 
   const panels = useExpandableFlyoutState();
-  const isExpandableFlyoutExpanded: boolean = !!panels.right;
+  const isExpandableFlyoutExpanded: boolean = !!panels.left;
 
   const hiddenWhenExpandableFlyoutOpened = useMemo(
     () =>
       isExpandableFlyoutExpanded &&
-      hiddenWhenExpandableFlyoutExpanded[SecurityStepId.alertsCases]?.includes(
+      hiddenWhenLeftExpandableFlyoutExpanded[SecurityStepId.alertsCases]?.includes(
         AlertsCasesTourSteps.expandEvent
       ),
     [isExpandableFlyoutExpanded]

@@ -21,7 +21,7 @@ import { GuidedOnboardingTourStep } from '../../../common/components/guided_onbo
 import { isDetectionsAlertsTable } from '../../../common/components/top_n/helpers';
 import {
   AlertsCasesTourSteps,
-  hiddenWhenExpandableFlyoutExpanded,
+  hiddenWhenLeftExpandableFlyoutExpanded,
   SecurityStepId,
 } from '../../../common/components/guided_onboarding_tour/tour_config';
 import { SIGNAL_RULE_NAME_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
@@ -119,12 +119,12 @@ export const RenderCellValue: React.FC<NonNullable<EuiDataGridCellProps['cellCon
       return ecsSuppressionCount ? parseInt(ecsSuppressionCount, 10) : dataSuppressionCount;
     }, [ecsData, data]);
     const panels = useExpandableFlyoutState();
-    const isExpandableFlyoutExpanded: boolean = !!panels.right;
+    const isExpandableFlyoutExpanded: boolean = !!panels.left;
 
-    const hiddenWhenExpandableFlyoutOpened = useMemo(
+    const hiddenWhenLeftExpandableFlyoutOpened = useMemo(
       () =>
         isExpandableFlyoutExpanded &&
-        hiddenWhenExpandableFlyoutExpanded[SecurityStepId.alertsCases]?.includes(
+        hiddenWhenLeftExpandableFlyoutExpanded[SecurityStepId.alertsCases]?.includes(
           AlertsCasesTourSteps.pointToAlertName
         ),
       [isExpandableFlyoutExpanded]
@@ -139,7 +139,7 @@ export const RenderCellValue: React.FC<NonNullable<EuiDataGridCellProps['cellCon
           isTourAnchor={isTourAnchor}
           step={AlertsCasesTourSteps.pointToAlertName}
           tourId={SecurityStepId.alertsCases}
-          hidden={hiddenWhenExpandableFlyoutOpened}
+          hidden={hiddenWhenLeftExpandableFlyoutOpened}
         >
           <DefaultCellRenderer
             browserFields={browserFields}
@@ -171,7 +171,7 @@ export const RenderCellValue: React.FC<NonNullable<EuiDataGridCellProps['cellCon
       columnHeaders,
       ecsData,
       isTourAnchor,
-      hiddenWhenExpandableFlyoutOpened,
+      hiddenWhenLeftExpandableFlyoutOpened,
       browserFields,
       finalData,
       eventId,
