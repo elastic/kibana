@@ -218,7 +218,7 @@ describe('CasePostRequestRt', () => {
     );
   });
 
-  it(`throws an error when a tag is more than ${MAX_LENGTH_PER_TAG} characters`, async () => {
+  it(`throws an error when the a tag is more than ${MAX_LENGTH_PER_TAG} characters`, async () => {
     const tag = 'a'.repeat(MAX_LENGTH_PER_TAG + 1);
 
     expect(
