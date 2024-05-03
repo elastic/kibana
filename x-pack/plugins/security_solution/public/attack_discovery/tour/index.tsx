@@ -13,8 +13,8 @@
 import React, { useEffect, useCallback, useState } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiTourStep } from '@elastic/eui';
 import { useIsElementMounted } from '../../detection_engine/rule_management_ui/components/rules_table/rules_table/guided_onboarding/use_is_element_mounted';
-import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../../common/constants';
-import { useKibana } from '../../common/lib/kibana';
+import { NEW_FEATURES_TOUR_STORAGE_KEYS, SecurityPageName } from '../../../common/constants';
+import { useKibana, useNavigation } from '../../common/lib/kibana';
 import { attackDiscoveryTourSteps, tourConfig } from './step_config';
 import * as i18n from './translations';
 
@@ -22,7 +22,6 @@ interface TourState {
   currentTourStep: number;
   isTourActive: boolean;
   tourPopoverWidth: number;
-  tourSubtitle: string;
 }
 
 const AttackDiscoveryTourComp = () => {
@@ -30,13 +29,10 @@ const AttackDiscoveryTourComp = () => {
     services: { storage },
   } = useKibana();
 
-  const [tourState, setTourState] = useState<TourState>(() => {
-    const restoredTourState = storage.get(NEW_FEATURES_TOUR_STORAGE_KEYS.ATTACK_DISCOVERY);
-    if (restoredTourState != null) {
-      return restoredTourState;
-    }
-    return tourConfig;
-  });
+  const { navigateTo } = useNavigation();
+  const [tourState, setTourState] = useState<TourState>(
+    storage.get(NEW_FEATURES_TOUR_STORAGE_KEYS.ATTACK_DISCOVERY) ?? tourConfig
+  );
 
   const finishTour = useCallback(() => {
     setTourState((prev) => {
@@ -47,17 +43,32 @@ const AttackDiscoveryTourComp = () => {
     });
   }, []);
 
+  const navigateToAttackDiscovery = useCallback(() => {
+    navigateTo({
+      deepLinkId: SecurityPageName.attackDiscovery,
+    });
+  }, [navigateTo]);
+
   const nextStep = useCallback(() => {
+    if (tourState.currentTourStep === 1) {
+      navigateToAttackDiscovery();
+    }
     setTourState((prev) => {
+      storage.set(NEW_FEATURES_TOUR_STORAGE_KEYS.ATTACK_DISCOVERY, {
+        ...prev,
+        currentTourStep: prev.currentTourStep + 1,
+      });
+      console.log('setCurrentTourStep to: ', prev.currentTourStep + 1);
       return {
         ...prev,
         currentTourStep: prev.currentTourStep + 1,
       };
     });
-  }, []);
+  }, [navigateToAttackDiscovery, storage, tourState.currentTourStep]);
 
   useEffect(() => {
     storage.set(NEW_FEATURES_TOUR_STORAGE_KEYS.ATTACK_DISCOVERY, tourState);
+    console.log('tourState', tourState);
   }, [tourState, storage]);
 
   const getFooterAction = useCallback(() => {
@@ -72,6 +83,7 @@ const AttackDiscoveryTourComp = () => {
     ];
   }, [finishTour, nextStep]);
 
+  const nextEl = attackDiscoveryTourSteps[tourState.currentTourStep - 1]?.anchor;
   const isElementAtCurrentStepMounted = useIsElementMounted(nextEl);
 
   if (!tourState.isTourActive || !isElementAtCurrentStepMounted) {
@@ -84,7 +96,7 @@ const AttackDiscoveryTourComp = () => {
         const stepCount = idx + 1;
         if (tourState.currentTourStep !== stepCount) return null;
         const panelProps = {
-          'data-test-subj': `timeline-tour-step-${idx + 1}`,
+          'data-test-subj': `attackDiscovery-tour-step-${idx + 1}`,
         };
         return (
           <EuiTourStep
@@ -92,13 +104,12 @@ const AttackDiscoveryTourComp = () => {
             key={idx}
             step={stepCount}
             isStepOpen={tourState.isTourActive && tourState.currentTourStep === idx + 1}
-            minWidth={tourState.tourPopoverWidth}
+            maxWidth={tourState.tourPopoverWidth}
             stepsTotal={2}
             onFinish={finishTour}
             title={steps.title}
             content={steps.content}
             anchor={`#${steps.anchor}`}
-            subtitle={tourConfig.tourSubtitle}
             footerAction={getFooterAction()}
           />
         );

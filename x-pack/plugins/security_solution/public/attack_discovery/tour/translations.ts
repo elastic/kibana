@@ -25,7 +25,7 @@ export const ATTACK_DISCOVERY_TOUR_ATTACK_DISCOVERY_DESC = i18n.translate(
   'xpack.securitySolution.attackDiscovery.tour.navStep.desc',
   {
     defaultMessage:
-      'Tour step content. Change the contents by swapping this Paragraph component with your own component.',
+      'Leverage Generative AI to find relationships among your alerts and describe attack chains.',
   }
 );
 
@@ -61,7 +61,7 @@ export const ATTACK_DISCOVERY_TOUR_FINISH = i18n.translate(
 export const ATTACK_DISCOVERY_TOUR_EXIT = i18n.translate(
   'xpack.securitySolution.attackDiscovery.tour.exit',
   {
-    defaultMessage: 'Closer',
+    defaultMessage: 'Close',
   }
 );
 
