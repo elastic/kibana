@@ -15,6 +15,10 @@ export interface FeatureTypeUsage {
   notifications_enabled: number;
   notifications_disabled: number;
   legacy_investigation_fields: number;
+  suppression_enabled?: number;
+  suppression_enabled_per_rule_execution?: number;
+  suppression_enabled_per_timeperiod?: number;
+  suppression_enabled_missing_fields_suppress?: number;
 }
 
 export interface RulesTypeUsage {
@@ -49,6 +53,9 @@ export interface RuleMetric {
   has_legacy_notification: boolean;
   has_notification: boolean;
   has_legacy_investigation_field: boolean;
+  has_alert_suppression_per_execution: boolean;
+  has_alert_suppression_per_period: boolean;
+  has_alert_suppression_missing_fields_strategy_suppress: boolean;
 }
 
 /**
