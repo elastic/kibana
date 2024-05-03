@@ -439,13 +439,13 @@ describe('Put payload schema', () => {
     ).toMatchInlineSnapshot(`
       Object {
         "elasticsearch": Object {
-          "remote_cluster": [
-            {
-              "privileges": [
-                "monitor_enrich"
+          "remote_cluster": Array [
+            Object {
+              "clusters": Array [
+                "my_remote*",
               ],
-              "clusters": [
-                "my_remote*"
+              "privileges": Array [
+                "monitor_enrich",
               ],
             },
           ],
