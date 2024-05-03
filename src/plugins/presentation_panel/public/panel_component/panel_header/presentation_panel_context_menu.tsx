@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import React, { ReactElement, useEffect, useMemo, useState } from 'react';
+import React, { MouseEventHandler, ReactElement, useEffect, useMemo, useState } from 'react';
 
 import {
   EuiButtonIcon,
@@ -20,6 +20,7 @@ import {
   EuiPopover,
   EuiSkeletonText,
   EuiToolTip,
+  IconType,
 } from '@elastic/eui';
 import { Action, buildContextMenuForActions } from '@kbn/ui-actions-plugin/public';
 
@@ -44,7 +45,7 @@ export const PresentationPanelContextMenu = ({
   viewMode,
 }: {
   index?: number;
-  api?: DefaultPresentationPanelApi;
+  api: DefaultPresentationPanelApi | null;
   getActions: PresentationPanelInternalProps['getActions'];
   actionPredicate?: (actionId: string) => boolean;
   children: ReactElement;
@@ -65,7 +66,7 @@ export const PresentationPanelContextMenu = ({
      * actions should eventually all be Frequent Compatibility Change Actions which can track their
      * own dependencies.
      */
-    getViewModeSubject(api)
+    getViewModeSubject(api ?? undefined)
   );
 
   useEffect(() => {
@@ -151,77 +152,84 @@ export const PresentationPanelContextMenu = ({
 
   const [mainMenu, moreMenuPanels] = contextMenuPanels;
 
-  console.log({ mainMenu });
-
-  if (!api) {
-    return <>{children}</>;
-  }
-
   return (
     <div className="embPanel__floatingActionsWrapper">
       {children}
-      <div
-        data-test-subj={`embPanel__floatingActions__${api?.uuid}__left`}
-        className={classNames('embPanel__floatingActions embPanel__floatingActionsLeft', className)}
-      >
-        <EuiIcon
-          // type={moveSVG}
-          type="grabOmnidirectional"
-          className={`${viewMode === 'edit' ? 'embPanel--dragHandle' : ''}`}
-        />
-      </div>
-      <div
-        data-test-subj={`embPanel__floatingActions__${api?.uuid}__right`}
-        className={classNames(
-          'embPanel__floatingActions embPanel__floatingActionsRight',
-          className
-        )}
-      >
-        {mainMenu?.items &&
-          mainMenu?.items?.map(({ icon, 'data-test-subj': dataTestSubj, onClick, name }) => (
-            <EuiToolTip content={name}>
-              <EuiButtonIcon
-                iconType={icon}
-                color="text"
-                onClick={onClick}
-                data-test-subj={dataTestSubj}
-              />
-            </EuiToolTip>
-          ))}
-        <EuiPopover
-          repositionOnScroll
-          panelPaddingSize="none"
-          anchorPosition="downRight"
-          button={ContextMenuButton}
-          isOpen={isContextMenuOpen}
-          className={contextMenuClasses}
-          closePopover={() => setIsContextMenuOpen(false)}
-          data-test-subj={
-            isContextMenuOpen
-              ? 'embeddablePanelContextMenuOpen'
-              : 'embeddablePanelContextMenuClosed'
-          }
-        >
-          {menuPanelsLoading ? (
-            <EuiContextMenuPanel
-              className="embPanel__optionsMenuPopover-loading"
-              title={i18n.translate('presentationPanel.contextMenu.loadingTitle', {
-                defaultMessage: 'Options',
-              })}
+      {api && (
+        <>
+          {viewMode === 'edit' && (
+            <div
+              data-test-subj={`embPanel__floatingActions__${api?.uuid}__left`}
+              className={classNames(
+                'embPanel__floatingActions embPanel__floatingActionsLeft',
+                className
+              )}
             >
-              <EuiContextMenuItem>
-                <EuiSkeletonText />
-              </EuiContextMenuItem>
-            </EuiContextMenuPanel>
-          ) : (
-            <EuiContextMenu
-              data-test-subj="presentationPanelContextMenuItems"
-              initialPanelId="mainMenu"
-              panels={[moreMenuPanels]}
-            />
+              <EuiIcon
+                // type={moveSVG}
+                type="grabOmnidirectional"
+                className={`${viewMode === 'edit' ? 'embPanel--dragHandle' : ''}`}
+                aria-label={i18n.translate('presentationPanel.dragHandle', {
+                  defaultMessage: 'Move panel',
+                })}
+              />
+            </div>
           )}
-        </EuiPopover>
-      </div>
+          <div
+            data-test-subj={`embPanel__floatingActions__${api?.uuid}__right`}
+            className={classNames(
+              'embPanel__floatingActions embPanel__floatingActionsRight',
+              className
+            )}
+          >
+            {mainMenu?.items &&
+              mainMenu?.items?.map(({ icon, 'data-test-subj': dataTestSubj, onClick, name }) => (
+                <EuiToolTip key={`hoveraction_${dataTestSubj}_${api?.uuid}`} content={name}>
+                  <EuiButtonIcon
+                    iconType={icon as IconType}
+                    color="text"
+                    onClick={onClick as MouseEventHandler}
+                    data-test-subj={dataTestSubj}
+                    aria-label={name}
+                  />
+                </EuiToolTip>
+              ))}
+            <EuiPopover
+              repositionOnScroll
+              panelPaddingSize="none"
+              anchorPosition="downRight"
+              button={ContextMenuButton}
+              isOpen={isContextMenuOpen}
+              className={contextMenuClasses}
+              closePopover={() => setIsContextMenuOpen(false)}
+              data-test-subj={
+                isContextMenuOpen
+                  ? 'embeddablePanelContextMenuOpen'
+                  : 'embeddablePanelContextMenuClosed'
+              }
+            >
+              {menuPanelsLoading ? (
+                <EuiContextMenuPanel
+                  className="embPanel__optionsMenuPopover-loading"
+                  title={i18n.translate('presentationPanel.contextMenu.loadingTitle', {
+                    defaultMessage: 'Options',
+                  })}
+                >
+                  <EuiContextMenuItem>
+                    <EuiSkeletonText />
+                  </EuiContextMenuItem>
+                </EuiContextMenuPanel>
+              ) : (
+                <EuiContextMenu
+                  data-test-subj="presentationPanelContextMenuItems"
+                  initialPanelId="mainMenu"
+                  panels={[moreMenuPanels]}
+                />
+              )}
+            </EuiPopover>
+          </div>
+        </>
+      )}
     </div>
   );
 };

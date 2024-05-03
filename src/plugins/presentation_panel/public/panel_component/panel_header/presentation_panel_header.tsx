@@ -50,8 +50,8 @@ export const PresentationPanelHeader = <
   //   getActions
   // );
 
-  console.log({ panelTitle });
-  const showPanelBar = !hideTitle || !panelTitle || panelDescription || viewMode !== 'view';
+  // console.log({ panelTitle });
+  const showPanelBar = !hideTitle && (panelTitle || panelDescription);
   // ||
   // badgeElements.length > 0 ||
   // notificationElements.length > 0;

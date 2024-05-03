@@ -76,7 +76,7 @@ export const PresentationPanelInternal = <
   const hideTitle =
     Boolean(hidePanelTitle) ||
     Boolean(parentHidePanelTitle) ||
-    (viewMode === 'view' && !Boolean(panelTitle ?? defaultPanelTitle));
+    !Boolean(panelTitle ?? defaultPanelTitle);
 
   const contentAttrs = useMemo(() => {
     const attrs: { [key: string]: boolean } = {};
