@@ -26,6 +26,10 @@ exports[`CustomTimelineDataGridBody should render exactly as snapshots 1`] = `
   border-bottom: 1px solid 1px solid #343741;
 }
 
+.c0 . euiDataGridRowCell--controlColumn {
+  height: 40px;
+}
+
 .c0 .udt--customRow {
   border-radius: 0;
   padding: 6px;
@@ -47,6 +51,20 @@ exports[`CustomTimelineDataGridBody should render exactly as snapshots 1`] = `
   -ms-flex-align: center;
   align-items: center;
   height: 36px;
+}
+
+.c1 .euiDataGridRowCell,
+.c1 .euiDataGridRowCell__content {
+  height: 100%;
+}
+
+.c1 .euiDataGridRowCell .unifiedDataTable__rowControl,
+.c1 .euiDataGridRowCell__content .unifiedDataTable__rowControl {
+  margin-top: 0;
+}
+
+.c1 .euiDataGridRowCell--controlColumn .euiDataGridRowCell__content {
+  padding: 0;
 }
 
 <div>
