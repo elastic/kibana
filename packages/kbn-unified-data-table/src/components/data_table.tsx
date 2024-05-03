@@ -31,6 +31,7 @@ import {
   EuiDataGridProps,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiDataGridColumnSortingConfig,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
@@ -781,7 +782,10 @@ export const UnifiedDataTable = ({
   const sortingColumns = useMemo<EuiDataGridSorting['columns']>(
     () =>
       sort
-        .map(([id, direction]) => ({ id, direction: direction as 'asc' | 'desc' }))
+        .map(([id, direction]) => ({
+          id,
+          direction: direction as EuiDataGridColumnSortingConfig['direction'],
+        }))
         .filter(({ id }) => visibleColumns.includes(id)),
     [sort, visibleColumns]
   );

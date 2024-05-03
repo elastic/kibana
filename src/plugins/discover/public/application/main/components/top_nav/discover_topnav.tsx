@@ -158,19 +158,20 @@ export const DiscoverTopNav = ({
     }
   };
 
-  const onTextBasedSavedAndExit: TopNavMenuProps<AggregateQuery>['onTextBasedSavedAndExit'] =
-    useCallback(
-      ({ onSave, onCancel }) => {
-        onSaveSearch({
-          savedSearch: stateContainer.savedSearchState.getState(),
-          services,
-          state: stateContainer,
-          onClose: onCancel,
-          onSaveCb: onSave,
-        });
-      },
-      [services, stateContainer]
-    );
+  const onTextBasedSavedAndExit = useCallback<
+    NonNullable<TopNavMenuProps<AggregateQuery>['onTextBasedSavedAndExit']>
+  >(
+    ({ onSave, onCancel }) => {
+      onSaveSearch({
+        savedSearch: stateContainer.savedSearchState.getState(),
+        services,
+        state: stateContainer,
+        onClose: onCancel,
+        onSaveCb: onSave,
+      });
+    },
+    [services, stateContainer]
+  );
 
   const { topNavBadges, topNavMenu } = useDiscoverTopNav({ stateContainer });
   const topNavProps = useMemo(() => {

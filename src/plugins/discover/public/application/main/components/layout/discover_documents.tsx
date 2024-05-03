@@ -190,7 +190,7 @@ function DiscoverDocumentsComponent({
     sort,
   });
 
-  const onResizeDataGrid: NonNullable<UnifiedDataTableProps['onResize']> = useCallback(
+  const onResizeDataGrid = useCallback<NonNullable<UnifiedDataTableProps['onResize']>>(
     (colSettings) => onResize(colSettings, stateContainer),
     [stateContainer]
   );

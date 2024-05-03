@@ -151,7 +151,7 @@ export function ContextAppContent({
     [addFilter, dataView, onAddColumn, onRemoveColumn]
   );
 
-  const onResize: NonNullable<UnifiedDataTableProps['onResize']> = useCallback(
+  const onResize = useCallback<NonNullable<UnifiedDataTableProps['onResize']>>(
     (colSettings) => {
       setGridSettings((currentGridSettings) =>
         onResizeGridColumn(colSettings, currentGridSettings)
