@@ -834,6 +834,14 @@ describe('client', () => {
             create(
               {
                 ...baseRequest,
+                customFields: [
+                  {
+                    key: 'custom_field_key_1',
+                    type: CustomFieldTypes.TEXT,
+                    label: 'custom field 1',
+                    required: true,
+                  },
+                ],
                 templates: [
                   {
                     key: 'template_1',
@@ -861,6 +869,112 @@ describe('client', () => {
             )
           ).rejects.toThrow(
             `Failed to create case configuration: Error: Invalid duplicated templates[0]'s customFields keys in request: custom_field_key_1`
+          );
+        });
+
+        it('throws when there are no customFields in configure and template has customField in the request', async () => {
+          await expect(
+            create(
+              {
+                ...baseRequest,
+                templates: [
+                  {
+                    key: 'template_1',
+                    name: 'template 1',
+                    description: 'this is test description',
+                    caseFields: {
+                      customFields: [
+                        {
+                          key: 'custom_field_key_1',
+                          type: CustomFieldTypes.TEXT,
+                          value: 'custom field value 1',
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+              clientArgs,
+              casesClientInternal
+            )
+          ).rejects.toThrow(
+            'Failed to create case configuration: Error: Cannot create template with custom fields as there are no custom fields in configuration'
+          );
+        });
+
+        it('throws when there are invalid customField keys in the request', async () => {
+          await expect(
+            create(
+              {
+                ...baseRequest,
+                customFields: [
+                  {
+                    key: 'custom_field_key_1',
+                    type: CustomFieldTypes.TEXT,
+                    label: 'custom field 1',
+                    required: true,
+                  },
+                ],
+                templates: [
+                  {
+                    key: 'template_1',
+                    name: 'template 1',
+                    description: 'this is test description',
+                    caseFields: {
+                      customFields: [
+                        {
+                          key: 'custom_field_key_2',
+                          type: CustomFieldTypes.TEXT,
+                          value: 'custom field value 1',
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+              clientArgs,
+              casesClientInternal
+            )
+          ).rejects.toThrow(
+            'Failed to create case configuration: Error: Invalid custom field keys: custom_field_key_2'
+          );
+        });
+
+        it('throws when template has customField with invalid type in the request', async () => {
+          await expect(
+            create(
+              {
+                ...baseRequest,
+                customFields: [
+                  {
+                    key: 'custom_field_key_1',
+                    type: CustomFieldTypes.TEXT,
+                    label: 'custom field 1',
+                    required: true,
+                  },
+                ],
+                templates: [
+                  {
+                    key: 'template_1',
+                    name: 'template 1',
+                    description: 'this is test description',
+                    caseFields: {
+                      customFields: [
+                        {
+                          key: 'custom_field_key_1',
+                          type: CustomFieldTypes.TOGGLE,
+                          value: true,
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+              clientArgs,
+              casesClientInternal
+            )
+          ).rejects.toThrow(
+            'Failed to create case configuration: Error: The following custom fields have the wrong type in the request: "custom field 1"'
           );
         });
       });

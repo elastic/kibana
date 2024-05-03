@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { CaseConnector, ConfigurationAttributes } from '../../../common/types/domain';
+import type {
+  CaseConnector,
+  CaseCustomFields,
+  ConfigurationAttributes,
+} from '../../../common/types/domain';
 import { CustomFieldTypes, ConnectorTypes, CaseSeverity } from '../../../common/types/domain';
 import { CASE_CONFIGURE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
@@ -83,7 +87,7 @@ const basicConfigFields = {
             type: CustomFieldTypes.TEXT,
             value: 'this is a text field value',
           },
-        ],
+        ] as CaseCustomFields,
         connector: {
           id: 'none',
           name: 'My Connector',
