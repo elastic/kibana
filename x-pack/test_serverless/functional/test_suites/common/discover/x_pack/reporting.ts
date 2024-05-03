@@ -62,6 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   // Failing: See https://github.com/elastic/kibana/issues/182599
+  // Failing: See https://github.com/elastic/kibana/issues/182603
   describe.skip('Discover CSV Export', () => {
     describe('Check Available', () => {
       before(async () => {
