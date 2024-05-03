@@ -8,6 +8,7 @@
 
 import React from 'react';
 
+import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
 import { getDashboardLocatorParamsFromEmbeddable } from '@kbn/dashboard-plugin/public';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 import { buildMockDashboard } from '@kbn/dashboard-plugin/public/mocks';
@@ -20,6 +21,8 @@ import { DashboardLinkComponent } from './dashboard_link_component';
 import { DashboardLinkStrings } from './dashboard_link_strings';
 import { getMockLinksApi } from '../../mocks';
 import { ResolvedLink } from '../../embeddable/types';
+import { BehaviorSubject } from 'rxjs';
+import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 
 jest.mock('@kbn/dashboard-plugin/public', () => {
   const originalModule = jest.requireActual('@kbn/dashboard-plugin/public');
@@ -221,6 +224,44 @@ describe('Dashboard link component', () => {
     const tooltip = await screen.findByTestId('dashboardLink--foo--tooltip');
     expect(tooltip).toHaveTextContent('another dashboard'); // title
     expect(tooltip).toHaveTextContent('something awesome'); // description
+  });
+
+  test('current dashboard title updates when parent changes', async () => {
+    const parentApi = {
+      ...getMockPresentationContainer(),
+      filters$: new BehaviorSubject<Filter[] | undefined>(undefined),
+      query$: new BehaviorSubject<Query | AggregateQuery | undefined>(undefined),
+      timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
+      timeslice$: new BehaviorSubject<[number, number] | undefined>(undefined),
+      panelTitle: new BehaviorSubject<string | undefined>('old title'),
+      panelDescription: new BehaviorSubject<string | undefined>('old description'),
+      hidePanelTitle: new BehaviorSubject<boolean | undefined>(false),
+      savedObjectId: new BehaviorSubject<string | undefined>('123'),
+    };
+
+    const linksApi = getMockLinksApi({
+      attributes: { links: [{ ...defaultLinkInfo, destination: '123', id: 'bar' }] },
+      parentApi,
+    });
+
+    const { rerender } = render(
+      <DashboardLinkComponent
+        link={linksApi.resolvedLinks$.value[0]}
+        layout={LINKS_VERTICAL_LAYOUT}
+        api={linksApi}
+      />
+    );
+    expect(await screen.findByTestId('dashboardLink--bar')).toHaveTextContent('old title');
+
+    parentApi.panelTitle.next('new title');
+    rerender(
+      <DashboardLinkComponent
+        link={linksApi.resolvedLinks$.value[0]}
+        layout={LINKS_VERTICAL_LAYOUT}
+        api={linksApi}
+      />
+    );
+    expect(await screen.findByTestId('dashboardLink--bar')).toHaveTextContent('new title');
   });
 
   test('can override link label', async () => {
