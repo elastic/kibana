@@ -10,7 +10,7 @@ import { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
 import { useCallback } from 'react';
 import { useKibana } from '../../../utils/kibana_react';
 import { useDeleteSlo } from '../../../hooks/use_delete_slo';
-import { SLO_EMBEDDABLE } from '../../../embeddable/slo/overview/slo_embeddable';
+import { SLO_OVERVIEW_EMBEDDABLE_ID } from '../../../embeddable/slo/overview/constants';
 
 export function useSloListActions({
   slo,
@@ -52,7 +52,7 @@ export function useSloListActions({
 
       const state = {
         input: embeddableInput,
-        type: SLO_EMBEDDABLE,
+        type: SLO_OVERVIEW_EMBEDDABLE_ID,
       };
 
       const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
