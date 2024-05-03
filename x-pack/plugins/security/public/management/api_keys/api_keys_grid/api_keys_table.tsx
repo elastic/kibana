@@ -35,7 +35,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { UserAvatar, UserProfilesPopover } from '@kbn/user-profile-components';
 
-import { ApiKeysEmptyPrompt } from './api_keys_empty_prompt';
+import { ApiKeysEmptyPrompt, doesErrorIndicateBadQuery } from './api_keys_empty_prompt';
 import type { AuthenticatedUser } from '../../../../common';
 import type { ApiKey, ApiKeyAggregations, BaseApiKey } from '../../../../common/model';
 import type { CreateAPIKeyResult, QueryApiKeySortOptions } from '../api_keys_api_client';
@@ -66,10 +66,7 @@ export interface ApiKeysTableProps {
   onSearchChange: (args: EuiSearchBarOnChangeArgs) => boolean | void;
   aggregations?: ApiKeyAggregations;
   sortingOptions: QueryApiKeySortOptions;
-  queryErrors?: {
-    isBadRequest?: boolean;
-    queryError?: Error;
-  };
+  queryErrors?: Error;
   resetQuery: () => void;
 }
 
@@ -104,7 +101,8 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
   const deletable = (item: CategorizedApiKey) =>
     canManageApiKeys || (canManageOwnApiKeys && item.username === currentUser.username);
 
-  const itemsToDisplay = queryErrors?.isBadRequest ? [] : apiKeys;
+  const isBadRequest = queryErrors && doesErrorIndicateBadQuery(queryErrors);
+  const itemsToDisplay = isBadRequest ? [] : apiKeys;
 
   columns.push(
     {
@@ -314,12 +312,11 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
         />
       </FiltersContext.Provider>
       <EuiSpacer size="s" />
-      {queryErrors?.isBadRequest ? (
-        <ApiKeysEmptyPrompt error={queryErrors.queryError}>
+      {isBadRequest ? (
+        <ApiKeysEmptyPrompt error={queryErrors}>
           <EuiButton
             iconType="refresh"
             onClick={() => {
-              // onSearchChange({ query: initialQuery, queryText: '', error: null });
               resetQuery();
             }}
           >

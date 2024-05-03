@@ -23,7 +23,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { Route } from '@kbn/shared-ux-router';
 
 import { ApiKeyFlyout } from './api_key_flyout';
-import { ApiKeysEmptyPrompt, doesErrorIndicateBadQuery } from './api_keys_empty_prompt';
+import { ApiKeysEmptyPrompt } from './api_keys_empty_prompt';
 import { ApiKeysTable, MAX_PAGINATED_ITEMS } from './api_keys_table';
 import type { CategorizedApiKey } from './api_keys_table';
 import { InvalidateProvider } from './invalidate_provider';
@@ -188,8 +188,6 @@ export const APIKeysGridPage: FunctionComponent = () => {
     ? apiKeys.map((apiKey) => apiKey as CategorizedApiKey)
     : [];
 
-  const isBadRequest = queryError && doesErrorIndicateBadQuery(queryError);
-
   const displayedPageCount =
     totalKeys > MAX_PAGINATED_ITEMS && queryTotal > MAX_PAGINATED_ITEMS
       ? MAX_PAGINATED_ITEMS
@@ -345,7 +343,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
                   onSearchChange={onSearchChange}
                   aggregations={aggregations}
                   sortingOptions={tableState.sort}
-                  queryErrors={{ isBadRequest, queryError }}
+                  queryErrors={queryError}
                   resetQuery={resetQueryOnError}
                 />
               )}
