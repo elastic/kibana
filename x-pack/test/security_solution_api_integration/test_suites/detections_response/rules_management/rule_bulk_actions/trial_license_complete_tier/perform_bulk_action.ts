@@ -88,8 +88,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const createWebHookConnector = () => createConnector(getWebHookAction());
   const createSlackConnector = () => createConnector(getSlackAction());
 
-  // Failing: See https://github.com/elastic/kibana/issues/182431
-  describe.skip('@ess @serverless @skipInServerless perform_bulk_action', () => {
+  describe('@ess @serverless @skipInServerless perform_bulk_action', () => {
     beforeEach(async () => {
       await createAlertsIndex(supertest, log);
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
@@ -135,12 +134,13 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    it('should export rules with defaultbale fields when values are set', async () => {
+    it('should export rules with defaultable fields when values are set', async () => {
       const defaultableFields: BaseDefaultableFields = {
         related_integrations: [
           { package: 'package-a', version: '^1.2.3' },
           { package: 'package-b', integration: 'integration-b', version: '~1.1.1' },
         ],
+        max_signals: 100,
         setup: '# some setup markdown',
       };
       const mockRule = getCustomQueryRuleParams(defaultableFields);
@@ -316,6 +316,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const ruleId = 'ruleId';
       const ruleToDuplicate = getCustomQueryRuleParams({
         rule_id: ruleId,
+        max_signals: 100,
         setup: '# some setup markdown',
         related_integrations: [
           { package: 'package-a', version: '^1.2.3' },

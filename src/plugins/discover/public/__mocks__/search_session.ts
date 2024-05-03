@@ -8,7 +8,7 @@
 import { createMemoryHistory } from 'history';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DiscoverSearchSessionManager } from '../application/main/services/discover_search_session';
+import { DiscoverSearchSessionManager } from '../application/main/state_management/discover_search_session';
 
 export function createSearchSessionMock(
   session = dataPluginMock.createStartContract().search.session as jest.Mocked<
