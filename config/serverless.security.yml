@@ -9,7 +9,7 @@ xpack.observability.enabled: false
 xpack.observabilityAIAssistant.enabled: false
 xpack.search.notebooks.enabled: false
 
-## Fine-tune the security solution feature privileges.
+## Fine-tune the security solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
 xpack.features.overrides:
   ### Dashboard feature is disabled since it's automatically granted by SIEM feature.
   dashboard.disabled: true

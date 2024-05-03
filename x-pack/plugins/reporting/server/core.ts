@@ -244,7 +244,7 @@ export class ReportingCore {
    * that is controlled by user role names. Also, for Serverless register a
    * 'shell' Reporting Kibana feature.
    */
-  public registerFeatures(isServerless: boolean) {
+  public registerFeatures({ isServerless }: { isServerless: boolean }) {
     const { features } = this.getPluginSetupDeps();
     const deprecatedRoles = this.getDeprecatedAllowedRoles();
 

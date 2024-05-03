@@ -8,7 +8,7 @@ xpack.uptime.enabled: true
 xpack.securitySolution.enabled: false
 xpack.search.notebooks.enabled: false
 
-## Fine-tune the observability solution feature privileges.
+## Fine-tune the observability solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
 xpack.features.overrides:
   ### Dashboards feature should be moved from Analytics category to the Observability one.
   dashboard.category: "observability"

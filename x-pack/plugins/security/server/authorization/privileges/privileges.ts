@@ -139,7 +139,11 @@ export function privilegesFactory(
       }
 
       // Update composable feature privileges to include and deduplicate actions from the referenced privileges.
-      // Note that we should do it _before_ removing disabled features.
+      // Note that we should do it _before_ removing disabled features. Also, currently, feature privilege composition
+      // doesn't respect the minimum license level required by the feature whose privileges are being included in
+      // another feature. This could potentially enable functionality in a license lower than originally intended. It
+      // might or might not be desired, but we're accepting this for now, as every attempt to compose a feature
+      // undergoes a stringent review process.
       for (const composableFeature of composableFeaturePrivileges) {
         const composedActions = composableFeature.composedOf.flatMap((privilegeReference) =>
           privilegeReference.privileges.flatMap(

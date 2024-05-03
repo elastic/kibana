@@ -13,7 +13,7 @@ enterpriseSearch.enabled: false
 xpack.fleet.enabled: false
 xpack.observabilityAIAssistant.enabled: false
 
-## Fine-tune the search solution feature privileges.
+## Fine-tune the search solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
 xpack.features.overrides:
   ### Dashboards feature is moved from Analytics category to the Search one.
   dashboard.category: "enterpriseSearch"

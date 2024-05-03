@@ -80,6 +80,8 @@ export class FeatureRegistry {
         feature.disabled = featureOverride.disabled;
       }
 
+      // Note that the name doesn't currently support localizable strings. We'll revisit this approach when i18n support
+      // becomes necessary.
       if (featureOverride.name) {
         feature.name = featureOverride.name;
       }
