@@ -189,6 +189,7 @@ export const typeSpecificSnakeToCamel = (
         type: params.type,
         anomalyThreshold: params.anomaly_threshold,
         machineLearningJobId: normalizeMachineLearningJobIds(params.machine_learning_job_id),
+        alertSuppression: convertAlertSuppressionToCamel(params.alert_suppression),
       };
     }
     case 'new_terms': {
@@ -334,6 +335,8 @@ const patchMachineLearningParams = (
     machineLearningJobId: params.machine_learning_job_id
       ? normalizeMachineLearningJobIds(params.machine_learning_job_id)
       : existingRule.machineLearningJobId,
+    alertSuppression:
+      convertAlertSuppressionToCamel(params.alert_suppression) ?? existingRule.alertSuppression,
   };
 };
 
@@ -639,6 +642,7 @@ export const typeSpecificCamelToSnake = (
         type: params.type,
         anomaly_threshold: params.anomalyThreshold,
         machine_learning_job_id: params.machineLearningJobId,
+        alert_suppression: convertAlertSuppressionToSnake(params.alertSuppression),
       };
     }
     case 'new_terms': {
