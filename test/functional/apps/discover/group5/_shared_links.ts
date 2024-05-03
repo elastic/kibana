@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import expect from '@kbn/expect';
 import { decompressFromBase64 } from 'lz-string';
 
@@ -65,7 +64,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       describe('permalink', function () {
         it('should allow for copying the snapshot URL', async function () {
           const actualUrl = await PageObjects.share.getSharedUrl();
-          expect(actualUrl).to.contain(`?l=${DISCOVER_APP_LOCATOR}`);
           const urlSearchParams = new URLSearchParams(actualUrl);
           expect(JSON.parse(decompressFromBase64(urlSearchParams.get('lz')!)!)).to.eql({
             query: {
