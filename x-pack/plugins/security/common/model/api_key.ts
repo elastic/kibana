@@ -89,3 +89,26 @@ export interface ApiKeyAggregations {
     };
   };
 }
+
+/**
+ * Response of Kibana Query API keys endpoint.
+ */
+export type QueryApiKeyResult = SuccessQueryApiKeyResult | ErrorQueryApiKeyResult;
+
+interface SuccessQueryApiKeyResult extends BaseQueryApiKeyResult {
+  apiKeys: ApiKey[];
+  count: number;
+  total: number;
+}
+
+interface ErrorQueryApiKeyResult extends BaseQueryApiKeyResult {
+  queryError: { name: string; message: string };
+}
+
+interface BaseQueryApiKeyResult {
+  canManageCrossClusterApiKeys: boolean;
+  canManageApiKeys: boolean;
+  canManageOwnApiKeys: boolean;
+  aggregationTotal: number;
+  aggregations: Record<string, estypes.SecurityQueryApiKeysAPIKeyAggregate> | undefined;
+}
