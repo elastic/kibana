@@ -1739,7 +1739,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.event_on_access.file_paths',
       {
         defaultMessage:
-          'Comma-separated list of additional wildcard patterns that will be monitored for read access. TODO FILL IN THE REST OF DESCRIPTION.',
+          'Comma-separated list of additional wildcard patterns that will be monitored for read access.  Put only commas (no spaces) between entries. Wildcard matching is case-insensitive.',
       }
     ),
   },
