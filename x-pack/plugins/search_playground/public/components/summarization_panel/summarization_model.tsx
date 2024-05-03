@@ -119,7 +119,7 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
           content={i18n.translate(
             'xpack.searchPlayground.sidebar.summarizationModel.manageConnectorTooltip',
             {
-              defaultMessage: 'Manage connector',
+              defaultMessage: 'Manage',
             }
           )}
         >
