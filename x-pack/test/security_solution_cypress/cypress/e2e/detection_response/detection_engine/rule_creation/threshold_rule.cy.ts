@@ -42,6 +42,7 @@ import {
   THRESHOLD_DETAILS,
   TIMELINE_TEMPLATE_DETAILS,
   SUPPRESS_FOR_DETAILS,
+  INTERVAL_ABBR_VALUE,
 } from '../../../../screens/rule_details';
 import { expectNumberOfRules, goToRuleDetailsOf } from '../../../../tasks/alerts_detection_rules';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
@@ -139,7 +140,9 @@ describe(
           rule.from ?? 'now-6m',
           rule.interval ?? '5m'
         );
-        getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should('have.text', `${humanizedDuration}`);
+        getDetails(ADDITIONAL_LOOK_BACK_DETAILS)
+          .find(INTERVAL_ABBR_VALUE)
+          .should('have.text', `${humanizedDuration}`);
       });
 
       waitForTheRuleToBeExecuted();
