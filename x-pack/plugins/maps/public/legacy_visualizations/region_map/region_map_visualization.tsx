@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
 import type { Query, TimeRange } from '@kbn/es-query';
 import { RegionMapVisConfig } from './types';
-import { MapComponent } from '../../react_embeddable/map_renderer';
+import { MapRenderer } from '../../react_embeddable/map_renderer';
 import { createRegionMapLayerDescriptor } from '../../classes/layers/create_region_map_layer_descriptor';
 
 interface Props {
@@ -37,7 +37,7 @@ export function RegionMapVisualization(props: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
-    <MapComponent
+    <MapRenderer
       title={props.visConfig.layerDescriptorParams.label}
       filters={props.filters}
       query={props.query}
