@@ -7,7 +7,13 @@
 
 import { ApmUsername } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
 import { createApmUsers } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/create_apm_users';
-import { ApmSynthtraceEsClient, ApmSynthtraceKibanaClient } from '@kbn/apm-synthtrace';
+import {
+  ApmSynthtraceEsClient,
+  ApmSynthtraceKibanaClient,
+  LogsSynthtraceEsClient,
+  createLogger,
+  LogLevel,
+} from '@kbn/apm-synthtrace';
 import { FtrConfigProviderContext, kbnTestConfig } from '@kbn/test';
 import supertest from 'supertest';
 import { format, UrlObject } from 'url';
@@ -66,7 +72,10 @@ export interface CreateTest {
   services: InheritedServices & {
     apmFtrConfig: () => ApmFtrConfig;
     registry: ({ getService }: FtrProviderContext) => ReturnType<typeof RegistryProvider>;
-    synthtraceEsClient: (context: InheritedFtrProviderContext) => Promise<ApmSynthtraceEsClient>;
+    logSynthtraceEsClient: (
+      context: InheritedFtrProviderContext
+    ) => Promise<LogsSynthtraceEsClient>;
+    apmSynthtraceEsClient: (context: InheritedFtrProviderContext) => Promise<ApmSynthtraceEsClient>;
     synthtraceKibanaClient: (
       context: InheritedFtrProviderContext
     ) => Promise<ApmSynthtraceKibanaClient>;
@@ -103,9 +112,15 @@ export function createTestConfig(
         ...services,
         apmFtrConfig: () => config,
         registry: RegistryProvider,
-        synthtraceEsClient: (context: InheritedFtrProviderContext) => {
+        apmSynthtraceEsClient: (context: InheritedFtrProviderContext) => {
           return bootstrapApmSynthtrace(context, synthtraceKibanaClient);
         },
+        logSynthtraceEsClient: (context: InheritedFtrProviderContext) =>
+          new LogsSynthtraceEsClient({
+            client: context.getService('es'),
+            logger: createLogger(LogLevel.info),
+            refreshAfterIndex: true,
+          }),
         synthtraceKibanaClient: () => synthtraceKibanaClient,
         apmApiClient: async (context: InheritedFtrProviderContext) => {
           const { username, password } = servers.kibana;

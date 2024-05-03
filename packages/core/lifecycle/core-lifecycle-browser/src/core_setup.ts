@@ -17,6 +17,7 @@ import type { ApplicationSetup } from '@kbn/core-application-browser';
 import type { CustomBrandingSetup } from '@kbn/core-custom-branding-browser';
 import type { PluginsServiceSetup } from '@kbn/core-plugins-contracts-browser';
 import type { SecurityServiceSetup } from '@kbn/core-security-browser';
+import type { UserProfileServiceSetup } from '@kbn/core-user-profile-browser';
 import type { CoreStart } from './core_start';
 
 /**
@@ -59,6 +60,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   plugins: PluginsServiceSetup;
   /** {@link SecurityServiceSetup} */
   security: SecurityServiceSetup;
+  /** {@link UserProfileServiceSetup} */
+  userProfile: UserProfileServiceSetup;
   /** {@link StartServicesAccessor} */
   getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
 }

@@ -12,7 +12,11 @@ import { ToolInterface } from '@langchain/core/tools';
 import { streamFactory } from '@kbn/ml-response-stream/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { RetrievalQAChain } from 'langchain/chains';
-import { ActionsClientChatOpenAI, ActionsClientLlm } from '@kbn/elastic-assistant-common/impl/llm';
+import {
+  ActionsClientChatOpenAI,
+  ActionsClientLlm,
+} from '@kbn/elastic-assistant-common/impl/language_models';
+import { getDefaultArguments } from '@kbn/elastic-assistant-common/impl/language_models/constants';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
 import { AgentExecutor } from '../executors/types';
@@ -59,7 +63,12 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     request,
     llmType,
     logger,
+    // possible client model override,
+    // let this be undefined otherwise so the connector handles the model
     model: request.body.model,
+    // ensure this is defined because we default to it in the language_models
+    // This is where the LangSmith logs (Metadata > Invocation Params) are set
+    temperature: getDefaultArguments(llmType).temperature,
     signal: abortSignal,
     streaming: isStream,
     // prevents the agent from retrying on failure
@@ -107,23 +116,31 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     request,
     size,
   };
-  const tools: ToolInterface[] = assistantTools.flatMap(
-    (tool) => tool.getTool(assistantToolParams) ?? []
-  );
+
+  const tools: ToolInterface[] = assistantTools
+    .filter((tool) =>
+      isStream
+        ? tool.id !== 'esql-knowledge-base-tool'
+        : tool.id !== 'esql-knowledge-base-structured-tool'
+    )
+    .flatMap((tool) => tool.getTool(assistantToolParams) ?? []);
 
   logger.debug(`applicable tools: ${JSON.stringify(tools.map((t) => t.name).join(', '), null, 2)}`);
 
+  const executorArgs = {
+    memory,
+    verbose: false,
+    handleParsingErrors: 'Try again, paying close attention to the allowed tool input',
+  };
   // isStream check is not on agentType alone because typescript doesn't like
   const executor = isStream
     ? await initializeAgentExecutorWithOptions(tools, llm, {
         agentType: 'openai-functions',
-        memory,
-        verbose: false,
+        ...executorArgs,
       })
     : await initializeAgentExecutorWithOptions(tools, llm, {
         agentType: 'chat-conversational-react-description',
-        memory,
-        verbose: false,
+        ...executorArgs,
       });
 
   // Sets up tracer for tracing executions to APM. See x-pack/plugins/elastic_assistant/server/lib/langchain/tracers/README.mdx
@@ -153,7 +170,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
             traceId: streamingSpan?.ids?.['trace.id'],
           },
           isError
-        );
+        ).catch(() => {});
       }
       streamEnd();
       didEnd = true;

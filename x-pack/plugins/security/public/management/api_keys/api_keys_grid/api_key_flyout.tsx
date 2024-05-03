@@ -137,6 +137,29 @@ const defaultInitialValues: ApiKeyFormValues = {
   role_descriptors: '{}',
 };
 
+const READ_ONLY_BOILERPLATE = `{
+  "read-only-role": {
+    "cluster": [],
+    "indices": [
+      {
+        "names": ["*"],
+        "privileges": ["read"]
+      }
+    ]
+  }
+}`;
+const WRITE_ONLY_BOILERPLATE = `{
+  "write-only-role": {
+    "cluster": [],
+    "indices": [
+      {
+        "names": ["*"],
+        "privileges": ["write"]
+      }
+    ]
+  }
+}`;
+
 export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
   onSuccess,
   onCancel,
@@ -704,6 +727,57 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                   {formik.values.customPrivileges && (
                     <>
                       <EuiSpacer />
+                      <EuiPanel hasShadow={false} color="subdued">
+                        <EuiFlexGroup
+                          gutterSize="none"
+                          justifyContent="flexEnd"
+                          alignItems="baseline"
+                        >
+                          <EuiFlexItem grow={false}>
+                            <EuiText size="xs">
+                              <h4>
+                                {i18n.translate(
+                                  'xpack.security.apiKey.privileges.boilerplate.label',
+                                  {
+                                    defaultMessage: 'Replace with boilerplate:',
+                                  }
+                                )}
+                              </h4>
+                            </EuiText>
+                          </EuiFlexItem>
+
+                          <EuiFlexItem grow={false}>
+                            <EuiButtonEmpty
+                              data-test-subj="apiKeysReadOnlyDescriptors"
+                              onClick={() =>
+                                formik.setFieldValue('role_descriptors', READ_ONLY_BOILERPLATE)
+                              }
+                            >
+                              {i18n.translate(
+                                'xpack.security.apiKeys.apiKeyFlyout.roleDescriptors.readOnlyLabel',
+                                {
+                                  defaultMessage: 'Read-only',
+                                }
+                              )}
+                            </EuiButtonEmpty>
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiButtonEmpty
+                              data-test-subj="apiKeysWriteOnlyDescriptors"
+                              onClick={() =>
+                                formik.setFieldValue('role_descriptors', WRITE_ONLY_BOILERPLATE)
+                              }
+                            >
+                              {i18n.translate(
+                                'xpack.security.management.apiKeys.apiKeyFlyout.roleDescriptors.writeOnlyLabel',
+                                {
+                                  defaultMessage: 'Write-only',
+                                }
+                              )}
+                            </EuiButtonEmpty>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiPanel>
                       <FormRow
                         helpText={
                           <DocLink

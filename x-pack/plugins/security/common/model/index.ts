@@ -42,6 +42,7 @@ export {
   isRoleEnabled,
   prepareRoleClone,
   getExtendedRoleDeprecationNotice,
+  isRoleWithWildcardBasePrivilege,
 } from './role';
 export type {
   InlineRoleTemplate,
