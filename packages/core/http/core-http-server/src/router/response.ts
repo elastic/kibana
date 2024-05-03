@@ -56,7 +56,19 @@ export interface IKibanaResponse<T extends HttpResponsePayload | ResponseError =
 }
 
 export function isKibanaResponse(response: Record<string, any>): response is IKibanaResponse {
-  return typeof response.status === 'number' && typeof response.options === 'object';
+  const { status, options, payload, ...rest } = response;
+
+  if (Object.keys(rest).length !== 0) {
+    return false;
+  }
+
+  return (
+    typeof status === 'number' &&
+    typeof options === 'object' &&
+    !Array.isArray(options) &&
+    options !== null &&
+    !(options instanceof Set)
+  );
 }
 
 /**
