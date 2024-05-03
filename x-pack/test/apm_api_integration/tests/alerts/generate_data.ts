@@ -21,12 +21,12 @@ export const config = {
 };
 
 export async function generateLatencyData({
-  synthtraceEsClient,
+  apmSynthtraceEsClient,
   serviceName,
   start,
   end,
 }: {
-  synthtraceEsClient: ApmSynthtraceEsClient;
+  apmSynthtraceEsClient: ApmSynthtraceEsClient;
   serviceName: string;
   start: number;
   end: number;
@@ -58,16 +58,16 @@ export async function generateLatencyData({
       ),
   ];
 
-  await synthtraceEsClient.index(documents);
+  await apmSynthtraceEsClient.index(documents);
 }
 
 export async function generateErrorData({
-  synthtraceEsClient,
+  apmSynthtraceEsClient,
   serviceName,
   start,
   end,
 }: {
-  synthtraceEsClient: ApmSynthtraceEsClient;
+  apmSynthtraceEsClient: ApmSynthtraceEsClient;
   serviceName: string;
   start: number;
   end: number;
@@ -110,5 +110,5 @@ export async function generateErrorData({
     ];
   });
 
-  await synthtraceEsClient.index(documents);
+  await apmSynthtraceEsClient.index(documents);
 }
