@@ -394,7 +394,7 @@ export class SearchSource {
   /**
    * Returns body contents of the search request, often referred as query DSL.
    */
-  getSearchRequestBody() {
+  async getSearchRequestBody() {
     return this.flatten().body;
   }
 
@@ -421,9 +421,9 @@ export class SearchSource {
       searchSessionId: options.sessionId,
     });
 
-    const trackRequestBody = () => {
+    const trackRequestBody = async () => {
       try {
-        requestResponder?.json(this.getSearchRequestBody());
+        requestResponder?.json(await this.getSearchRequestBody());
       } catch (e) {} // eslint-disable-line no-empty
     };
 
