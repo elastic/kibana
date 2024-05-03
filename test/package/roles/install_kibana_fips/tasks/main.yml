@@ -106,32 +106,32 @@
   delay: 10
   get_url:
     url: "https://www.openssl.org/source/openssl-{{ openssl_ver }}.tar.gz"
-    dest: "{{ kibana_dist_path }}/openssl-{{ openssl_ver }}.tar.gz"
+    dest: "{{ openssl_path }}.tar.gz"
     checksum: "{{ openssl_sha }}"
 
 - name: extract OpenSSL
   become: yes
   unarchive:
-    src: "{{ kibana_dist_path }}/openssl-{{ openssl_ver }}.tar.gz"
+    src: "{{ openssl_path }}.tar.gz"
     dest: "{{ kibana_dist_path }}"
     remote_src: yes
 
 - name: configure OpenSSL for FIPS
   become: yes
   shell:
-    chdir: "{{ kibana_dist_path }}/openssl-{{ openssl_ver }}"
+    chdir: "{{ openssl_path }}"
     cmd: ./Configure enable-fips
 
 - name: compile OpenSSL with FIPS
   become: yes
   make:
-    chdir: "{{ kibana_dist_path }}/openssl-{{ openssl_ver }}"
+    chdir: "{{ openssl_path }}"
     jobs: "{{ ansible_facts['processor_vcpus'] }}"
 
 - name: install OpenSSL with FIPS
   become: yes
   make:
-    chdir: "{{ kibana_dist_path }}/openssl-{{ openssl_ver }}"
+    chdir: "{{ openssl_path }}"
     target: install
 
 - name: link OpenSSL package
