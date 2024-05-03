@@ -9,7 +9,6 @@ import React, { useCallback, useContext, useMemo } from 'react';
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { isString } from 'lodash/fp';
-import { TableId } from '@kbn/securitysolution-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { HostPanelKey } from '../../../../../flyout/entity_details/host_right';
@@ -81,7 +80,7 @@ const HostNameComponent: React.FC<Props> = ({
           params: {
             hostName,
             contextID: contextId,
-            scopeId: TableId.alertsOnAlertsPage,
+            scopeId: timelineID,
             isDraggable,
           },
         });

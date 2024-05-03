@@ -23,6 +23,8 @@ import { transformCSVToUpsertRecords } from '../transform_csv_to_upsert_records'
 import { createAssetCriticalityProcessedFileEvent } from '../../../telemetry/event_based/events';
 import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { AssetCriticalityAuditActions } from '../audit';
+import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 
 export const assetCriticalityCSVUploadRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -57,6 +59,17 @@ export const assetCriticalityCSVUploadRoute = (
         },
       },
       async (context, request, response) => {
+        const securitySolution = await context.securitySolution;
+        securitySolution.getAuditLogger()?.log({
+          message: 'User attempted to assign many asset criticalities via file upload',
+          event: {
+            action: AssetCriticalityAuditActions.ASSET_CRITICALITY_BULK_UPDATE,
+            category: AUDIT_CATEGORY.DATABASE,
+            type: AUDIT_TYPE.CREATION,
+            outcome: AUDIT_OUTCOME.UNKNOWN,
+          },
+        });
+
         const start = new Date();
         const siemResponse = buildSiemResponse(response);
         const [coreStart] = await getStartServices();
@@ -65,7 +78,6 @@ export const assetCriticalityCSVUploadRoute = (
         try {
           await assertAdvancedSettingsEnabled(await context.core, ENABLE_ASSET_CRITICALITY_SETTING);
           await checkAndInitAssetCriticalityResources(context, logger);
-          const securitySolution = await context.securitySolution;
           const assetCriticalityClient = securitySolution.getAssetCriticalityDataClient();
           const fileStream = request.body.file as HapiReadableStream;
 

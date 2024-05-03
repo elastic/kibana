@@ -6,7 +6,7 @@
  */
 
 import type { DecoratorFn } from '@storybook/react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, FC, PropsWithChildren } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import type { CoreTheme } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
@@ -28,10 +28,11 @@ export const useGlobalStorybookTheme = ({ globals: { euiTheme } }: StoryContext)
   };
 };
 
-export const GlobalStorybookThemeProviders: React.FC<{ storyContext: StoryContext }> = ({
-  children,
-  storyContext,
-}) => {
+export const GlobalStorybookThemeProviders: FC<
+  PropsWithChildren<{
+    storyContext: StoryContext;
+  }>
+> = ({ children, storyContext }) => {
   const { theme, theme$ } = useGlobalStorybookTheme(storyContext);
   return (
     <KibanaThemeProvider theme$={theme$}>

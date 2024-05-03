@@ -81,6 +81,7 @@ import {
   isQueryRule,
   isEsqlRule,
   isEqlSequenceQuery,
+  isSuppressionRuleInGA,
 } from '../../../../../common/detection_engine/utils';
 import { EqlQueryBar } from '../eql_query_bar';
 import { DataViewSelector } from '../data_view_selector';
@@ -98,6 +99,7 @@ import { DurationInput } from '../duration_input';
 import { MINIMUM_LICENSE_FOR_SUPPRESSION } from '../../../../../common/detection_engine/constants';
 import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
 import { useAlertSuppression } from '../../../rule_management/logic/use_alert_suppression';
+import { RelatedIntegrations } from '../../../rule_creation/components/related_integrations';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -1047,6 +1049,14 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             <RuleTypeEuiFormRow
               $isVisible={isAlertSuppressionEnabled && !isThresholdRule}
               data-test-subj="alertSuppressionInput"
+              label={i18n.GROUP_BY_LABEL}
+              labelAppend={
+                <EuiText color="subdued" size="xs">
+                  {isSuppressionRuleInGA(ruleType)
+                    ? i18n.GROUP_BY_GA_LABEL_APPEND
+                    : i18n.GROUP_BY_TECH_PREVIEW_LABEL_APPEND}
+                </EuiText>
+              }
             >
               <UseField
                 path="groupByFields"
@@ -1105,6 +1115,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               </UseMultiFields>
             </IntendedRuleTypeEuiFormRow>
           </>
+
+          <RelatedIntegrations path="relatedIntegrations" dataTestSubj="relatedIntegrations" />
+
           <UseField
             path="timeline"
             component={PickTimeline}

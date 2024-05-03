@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiLinkButtonProps, EuiPopoverProps } from '@elastic/eui';
@@ -31,7 +31,11 @@ interface HelpPopoverProps {
   title?: string;
 }
 
-export const HelpPopover: FC<HelpPopoverProps> = ({ anchorPosition, children, title }) => {
+export const HelpPopover: FC<PropsWithChildren<HelpPopoverProps>> = ({
+  anchorPosition,
+  children,
+  title,
+}) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   return (
