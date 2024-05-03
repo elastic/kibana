@@ -244,27 +244,15 @@ const EmptySecurityFindingsPrompt = ({
 
 const NoFindingsStatesNotification = ({
   postureType,
+  status,
+  unprivilegedIndices,
+  isNotInstalled,
 }: {
   postureType: PostureTypes;
   status: CspStatusCode | undefined;
   unprivilegedIndices: string[] | undefined;
   isNotInstalled: boolean;
 }) => {
-  const getSetupStatus = useCspSetupStatusApi({
-    refetchInterval: NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS,
-  });
-  const statusKspm = getSetupStatus.data?.kspm?.status;
-  const statusCspm = getSetupStatus.data?.cspm?.status;
-  const indicesStatus = getSetupStatus.data?.indicesDetails;
-  const status = postureType === 'cspm' ? statusCspm : statusKspm;
-  const isNotInstalled = statusKspm === 'not-installed' && statusCspm === 'not-installed';
-
-  const unprivilegedIndices =
-    indicesStatus &&
-    indicesStatus
-      .filter((idxDetails) => idxDetails.status === 'unprivileged')
-      .map((idxDetails: IndexDetails) => idxDetails.index)
-      .sort((a, b) => a.localeCompare(b));
   const kspmIntegrationLink = useCspIntegrationLink(KSPM_POLICY_TEMPLATE);
   const cspmIntegrationLink = useCspIntegrationLink(CSPM_POLICY_TEMPLATE);
   if (status === 'unprivileged')
@@ -287,15 +275,33 @@ const NoFindingsStatesNotification = ({
  * This component will return the render states based on cloud posture setup status API
  * since 'not-installed' is being checked globally by CloudPosturePage and 'indexed' is the pass condition, those states won't be handled here
  * */
-export const NoFindingsStates = ({ postureType }: { postureType: PostureTypes }) => (
-  <CloudPosturePage query={getSetupStatus}>
-    <FullSizeCenteredPage>
-      <NoFindingsStatesNotification
-        postureType={postureType}
-        status={status}
-        unprivilegedIndices={unprivilegedIndices}
-        isNotInstalled={isNotInstalled}
-      />
-    </FullSizeCenteredPage>
-  </CloudPosturePage>
-);
+export const NoFindingsStates = ({ postureType }: { postureType: PostureTypes }) => {
+  const getSetupStatus = useCspSetupStatusApi({
+    refetchInterval: NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS,
+  });
+  const statusKspm = getSetupStatus.data?.kspm?.status;
+  const statusCspm = getSetupStatus.data?.cspm?.status;
+  const indicesStatus = getSetupStatus.data?.indicesDetails;
+  const status = postureType === 'cspm' ? statusCspm : statusKspm;
+  const isNotInstalled = statusKspm === 'not-installed' && statusCspm === 'not-installed';
+
+  const unprivilegedIndices =
+    indicesStatus &&
+    indicesStatus
+      .filter((idxDetails) => idxDetails.status === 'unprivileged')
+      .map((idxDetails: IndexDetails) => idxDetails.index)
+      .sort((a, b) => a.localeCompare(b));
+
+  return (
+    <CloudPosturePage query={getSetupStatus}>
+      <FullSizeCenteredPage>
+        <NoFindingsStatesNotification
+          postureType={postureType}
+          status={status}
+          unprivilegedIndices={unprivilegedIndices}
+          isNotInstalled={isNotInstalled}
+        />
+      </FullSizeCenteredPage>
+    </CloudPosturePage>
+  );
+};
