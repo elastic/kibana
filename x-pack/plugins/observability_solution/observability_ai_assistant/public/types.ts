@@ -110,7 +110,6 @@ export interface ObservabilityAIAssistantPluginStartDependencies {
   licensing: LicensingPluginStart;
   security: SecurityPluginStart;
   ml: MlPluginStart;
-  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 
 export interface ObservabilityAIAssistantPublicSetup {}
