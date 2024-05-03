@@ -400,6 +400,7 @@ describe('scheduleBackfill()', () => {
       rules: [
         {
           id: existingDecryptedRule1.id,
+          legacyId: null,
           actions: existingDecryptedRule1.attributes.actions,
           alertTypeId: existingDecryptedRule1.attributes.alertTypeId,
           apiKey: existingDecryptedRule1.attributes.apiKey,
@@ -430,6 +431,7 @@ describe('scheduleBackfill()', () => {
         },
         {
           id: existingDecryptedRule2.id,
+          legacyId: null,
           actions: existingDecryptedRule2.attributes.actions,
           alertTypeId: existingDecryptedRule2.attributes.alertTypeId,
           apiKey: existingDecryptedRule2.attributes.apiKey,

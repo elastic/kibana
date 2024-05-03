@@ -355,7 +355,7 @@ describe('When using the artifacts services', () => {
 
   describe('and calling `deleteArtifact()`', () => {
     it('should delete the artifact', async () => {
-      deleteArtifact(esClientMock, '123');
+      await deleteArtifact(esClientMock, '123');
 
       expect(esClientMock.delete).toHaveBeenCalledWith({
         index: FLEET_SERVER_ARTIFACTS_INDEX,
@@ -375,7 +375,7 @@ describe('When using the artifacts services', () => {
 
   describe('and calling `bulkDeleteArtifacts()`', () => {
     it('should delete single artifact', async () => {
-      bulkDeleteArtifacts(esClientMock, ['123']);
+      await bulkDeleteArtifacts(esClientMock, ['123']);
 
       expect(esClientMock.bulk).toHaveBeenCalledWith({
         refresh: 'wait_for',
@@ -391,7 +391,7 @@ describe('When using the artifacts services', () => {
     });
 
     it('should delete all the artifacts', async () => {
-      bulkDeleteArtifacts(esClientMock, ['123', '231']);
+      await bulkDeleteArtifacts(esClientMock, ['123', '231']);
 
       expect(esClientMock.bulk).toHaveBeenCalledWith({
         refresh: 'wait_for',

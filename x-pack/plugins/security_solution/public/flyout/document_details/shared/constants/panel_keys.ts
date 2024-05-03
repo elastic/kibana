@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import type { IsolateHostPanelProps } from '../../isolate_host';
-import type { LeftPanelProps } from '../../left';
-import type { PreviewPanelProps } from '../../preview';
-import type { RightPanelProps } from '../../right';
-
-export const DocumentDetailsRightPanelKey: RightPanelProps['key'] = 'document-details-right';
-export const DocumentDetailsLeftPanelKey: LeftPanelProps['key'] = 'document-details-left';
-export const DocumentDetailsPreviewPanelKey: PreviewPanelProps['key'] = 'document-details-preview';
-export const DocumentDetailsIsolateHostPanelKey: IsolateHostPanelProps['key'] =
-  'document-details-isolate-host';
+export const DocumentDetailsRightPanelKey = 'document-details-right' as const;
+export const DocumentDetailsLeftPanelKey = 'document-details-left' as const;
+export const DocumentDetailsPreviewPanelKey = 'document-details-preview' as const;
+export const DocumentDetailsIsolateHostPanelKey = 'document-details-isolate-host' as const;
