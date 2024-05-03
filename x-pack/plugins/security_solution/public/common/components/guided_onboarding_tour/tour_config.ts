@@ -12,7 +12,6 @@ import type { ElementTarget } from '@elastic/eui/src/services/findElement';
 export enum SecurityStepId {
   rules = 'rules',
   alertsCases = 'alertsCases',
-  attackDiscovery = 'attackDiscovery',
 }
 
 export enum AlertsCasesTourSteps {
@@ -24,12 +23,6 @@ export enum AlertsCasesTourSteps {
   createCase = 5,
   submitCase = 6,
   viewCase = 7,
-}
-
-export enum AttackDiscoveryTourSteps {
-  none = 0,
-  pointToAttackDiscovery = 1,
-  watchVideo = 2,
 }
 
 export type StepConfig = Pick<
@@ -204,55 +197,9 @@ export const sampleCase = {
   ),
 };
 
-const attackDiscoveryConfig: StepConfig[] = [
-  {
-    ...defaultConfig,
-    step: AttackDiscoveryTourSteps.pointToAttackDiscovery,
-    title: i18n.translate(
-      'xpack.securitySolution.guided_onboarding.tour.attackDiscovery.tourTitle',
-      {
-        defaultMessage: 'Introducing attack discovery',
-      }
-    ),
-    content: i18n.translate(
-      'xpack.securitySolution.guided_onboarding.tour.attackDiscovery.tourContent',
-      {
-        defaultMessage:
-          'Tour step content. Change the contents by swapping this Paragraph component with your own component.',
-      }
-    ),
-    anchorPosition: 'leftCenter',
-    dataTestSubj: getTourAnchor(
-      AttackDiscoveryTourSteps.pointToAttackDiscovery,
-      SecurityStepId.attackDiscovery
-    ),
-    initialFocus: `button[tour-step="nextButton"]`,
-  },
-  {
-    ...defaultConfig,
-    step: AttackDiscoveryTourSteps.watchVideo,
-    title: i18n.translate('xpack.securitySolution.guided_onboarding.tour.watchVideo.tourTitle', {
-      defaultMessage: 'Start discovering attacks',
-    }),
-    content: i18n.translate(
-      'xpack.securitySolution.guided_onboarding.tour.watchVideo.tourContent',
-      {
-        defaultMessage:
-          'Dive into data-driven attack discoveries and streamline your workflow with our intuitive AI technology, designed to elevate your productivity instantly.',
-      }
-    ),
-    anchorPosition: 'rightUp',
-    dataTestSubj: getTourAnchor(
-      AttackDiscoveryTourSteps.watchVideo,
-      SecurityStepId.attackDiscovery
-    ),
-  },
-];
-
 interface SecurityTourConfig {
   [SecurityStepId.rules]: StepConfig[];
   [SecurityStepId.alertsCases]: StepConfig[];
-  [SecurityStepId.attackDiscovery]: StepConfig[];
 }
 
 export const securityTourConfig: SecurityTourConfig = {
