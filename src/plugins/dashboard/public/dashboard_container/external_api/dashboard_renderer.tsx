@@ -30,10 +30,7 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 import { DASHBOARD_CONTAINER_TYPE } from '..';
 import { DashboardContainerInput } from '../../../common';
 import type { DashboardContainer } from '../embeddable/dashboard_container';
-import {
-  dashboardDraftSettings$,
-  type DashboardSettings,
-} from '../embeddable/dashboard_settings_draft';
+import { useDashboardSettingsDraftValue } from '../embeddable/dashboard_settings_draft';
 import {
   DashboardContainerFactory,
   DashboardContainerFactoryDefinition,
@@ -65,15 +62,7 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
     const [dashboardContainer, setDashboardContainer] = useState<DashboardContainer>();
     const [fatalError, setFatalError] = useState<ErrorEmbeddable | undefined>();
     const [dashboardMissing, setDashboardMissing] = useState(false);
-    const [dashboardSettingsDraft, setDashboardDraftSettings] = useState<DashboardSettings | null>(
-      null
-    );
-
-    useEffect(() => {
-      const s = dashboardDraftSettings$.subscribe(setDashboardDraftSettings);
-
-      return () => s.unsubscribe();
-    }, []);
+    const dashboardSettingsDraft = useDashboardSettingsDraftValue();
 
     useImperativeHandle(
       ref,

@@ -43,23 +43,24 @@ describe('useDashboardSettingsDraft', () => {
 
     dashboardDraftSettings$.subscribe(mockSubscriber);
 
+    const differentiatingDashboardSettings = {
+      query: {
+        query: '',
+        language: 'kuery',
+      },
+    };
+
     act(() => {
       result.current[1]((prev) => ({
         ...prev,
-        query: {
-          query: '',
-          language: 'kql',
-        },
+        ...differentiatingDashboardSettings,
       }));
     });
 
     expect(result.current[0]).not.toBe(mockDashboardSettings);
 
     const differentiatedSettings = expect.objectContaining({
-      query: {
-        query: '',
-        language: 'kql',
-      },
+      ...differentiatingDashboardSettings,
     });
 
     expect(result.current[0]).toEqual(differentiatedSettings);

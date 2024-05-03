@@ -22,6 +22,21 @@ const dashboardDraftSettings = createDashboardDraftSettings();
 // expose as readonly observable
 export const dashboardDraftSettings$ = dashboardDraftSettings.asObservable();
 
+export function useDashboardSettingsDraftValue() {
+  const [dashboardSettingsDraft, setDashboardDraftSettings] = useState<DashboardSettings | null>(
+    null
+  );
+
+  useEffect(() => {
+    // consume readonly observable
+    const s = dashboardDraftSettings$.subscribe(setDashboardDraftSettings);
+
+    return () => s.unsubscribe();
+  }, []);
+
+  return dashboardSettingsDraft;
+}
+
 export function useDashboardSettingsDraft<T extends DashboardSettings = DashboardSettings>(
   initialValue: T
 ): [T, (args: (prev: T) => T) => void] {
