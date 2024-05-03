@@ -11,13 +11,14 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
 import { MachineLearningRuleParams } from '../../rule_schema';
+import { getIsAlertSuppressionActive } from '../utils/get_is_alert_suppression_active';
 import { mlExecutor } from './ml';
 import type { CreateRuleOptions, SecurityAlertType } from '../types';
 
 export const createMlAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<MachineLearningRuleParams, {}, {}, 'default'> => {
-  const { ml } = createOptions;
+  const { experimentalFeatures, ml, logger, licensing } = createOptions;
   return {
     id: ML_RULE_TYPE_ID,
     name: 'Machine Learning Rule',
@@ -60,6 +61,12 @@ export const createMlAlertType = (
         services,
         state,
       } = execOptions;
+
+      const isMachineLearningAlertSuppressionActive = await getIsAlertSuppressionActive({
+        alertSuppression: completeRule.ruleParams.alertSuppression,
+        isFeatureDisabled: !experimentalFeatures.alertSuppressionForMachineLearningRuleEnabled,
+        licensing,
+      });
 
       const result = await mlExecutor({
         completeRule,
