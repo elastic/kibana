@@ -22,6 +22,7 @@ import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_tr
 import { APMTransactionErrorRateIndicator, SLODefinition } from '../../domain/models';
 import { InvalidTransformError } from '../../errors';
 import { parseIndex } from './common';
+import { getTimesliceTargetComparator } from './common';
 
 export class ApmTransactionErrorRateTransformGenerator extends TransformGenerator {
   public getTransformParams(slo: SLODefinition): TransformPutTransformRequest {
@@ -162,7 +163,9 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
               goodEvents: 'slo.numerator>_count',
               totalEvents: 'slo.denominator>_count',
             },
-            script: `params.goodEvents / params.totalEvents >= ${slo.objective.timesliceTarget} ? 1 : 0`,
+            script: `params.goodEvents / params.totalEvents ${getTimesliceTargetComparator(
+              slo.objective.timesliceTarget!
+            )} ${slo.objective.timesliceTarget} ? 1 : 0`,
           },
         },
       }),
