@@ -61,6 +61,7 @@ export const fetchFleetUsage = async (
     ...(await getPanicLogsLastHour(esClient)),
     ...(await getAgentLogsTopErrors(esClient)),
     agents_per_output_type: await getAgentsPerOutput(soClient, esClient),
+    license_info: await esClient.license.get(),
   };
   return usage;
 };
@@ -83,6 +84,7 @@ export const fetchAgentsUsage = async (core: CoreSetup, config: FleetConfigType)
     agents_enabled: getIsAgentsEnabled(config),
     agents: await getAgentUsage(soClient, esClient),
     fleet_server: await getFleetServerUsage(soClient, esClient),
+    license_info: await esClient.license.get(),
   };
   return usage;
 };

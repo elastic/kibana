@@ -136,7 +136,9 @@ export class FleetUsageSender {
     this.wasStarted = true;
 
     try {
-      appContextService.getLogger().info(`Task ${this.taskId} scheduled with interval 1h`);
+      appContextService
+        .getLogger()
+        .info(`Task ${this.taskId} scheduled with interval ${this.interval}`);
 
       await this.taskManager.ensureScheduled({
         id: this.taskId,
