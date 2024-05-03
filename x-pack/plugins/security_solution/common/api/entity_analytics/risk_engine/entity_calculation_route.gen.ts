@@ -16,7 +16,7 @@ import { z } from 'zod';
  *   version: 1.0.0
  */
 
-import { IdentifierType, RiskScore } from './common.gen';
+import { IdentifierType, RiskScore } from '../common/common.gen';
 
 export type RiskScoresEntityCalculationRequest = z.infer<typeof RiskScoresEntityCalculationRequest>;
 export const RiskScoresEntityCalculationRequest = z.object({

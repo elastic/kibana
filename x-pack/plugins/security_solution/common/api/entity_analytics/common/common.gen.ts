@@ -16,32 +16,6 @@ import { z } from 'zod';
  *   version: 1.0.0
  */
 
-export type EntityAnalyticsPrivileges = z.infer<typeof EntityAnalyticsPrivileges>;
-export const EntityAnalyticsPrivileges = z.object({
-  has_all_required: z.boolean(),
-  has_read_permissions: z.boolean().optional(),
-  has_write_permissions: z.boolean().optional(),
-  privileges: z.object({
-    elasticsearch: z.object({
-      cluster: z
-        .object({
-          manage_index_templates: z.boolean().optional(),
-          manage_transform: z.boolean().optional(),
-        })
-        .optional(),
-      index: z
-        .object({})
-        .catchall(
-          z.object({
-            read: z.boolean().optional(),
-            write: z.boolean().optional(),
-          })
-        )
-        .optional(),
-    }),
-  }),
-});
-
 export type AfterKeys = z.infer<typeof AfterKeys>;
 export const AfterKeys = z.object({
   host: z.object({}).catchall(z.string()).optional(),
@@ -170,10 +144,3 @@ export const RiskScoreWeight = z.object({
  */
 export type RiskScoreWeights = z.infer<typeof RiskScoreWeights>;
 export const RiskScoreWeights = z.array(RiskScoreWeight);
-
-export type RiskEngineInitStep = z.infer<typeof RiskEngineInitStep>;
-export const RiskEngineInitStep = z.object({
-  type: z.string(),
-  success: z.boolean(),
-  error: z.string().optional(),
-});
