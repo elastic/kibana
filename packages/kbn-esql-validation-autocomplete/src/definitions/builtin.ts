@@ -19,7 +19,7 @@ function createMathDefinition(
     type: 'builtin',
     name,
     description,
-    supportedCommands: ['eval', 'where', 'row', 'stats'],
+    supportedCommands: ['eval', 'where', 'row', 'stats', 'sort'],
     supportedOptions: ['by'],
     signatures: types.map((type) => {
       if (Array.isArray(type)) {
@@ -59,7 +59,7 @@ function createComparisonDefinition(
     type: 'builtin' as const,
     name,
     description,
-    supportedCommands: ['eval', 'where', 'row'],
+    supportedCommands: ['eval', 'where', 'row', 'sort'],
     supportedOptions: ['by'],
     validate,
     signatures: [
@@ -296,7 +296,7 @@ export const builtinFunctions: FunctionDefinition[] = [
     ignoreAsSuggestion: /not/.test(name),
     name,
     description,
-    supportedCommands: ['eval', 'where', 'row'],
+    supportedCommands: ['eval', 'where', 'row', 'sort'],
     supportedOptions: ['by'],
     signatures: [
       {
@@ -322,7 +322,7 @@ export const builtinFunctions: FunctionDefinition[] = [
     ignoreAsSuggestion: /not/.test(name),
     name,
     description,
-    supportedCommands: ['eval', 'where', 'row'],
+    supportedCommands: ['eval', 'where', 'row', 'sort'],
     signatures: [
       {
         params: [
@@ -371,7 +371,7 @@ export const builtinFunctions: FunctionDefinition[] = [
     type: 'builtin' as const,
     name,
     description,
-    supportedCommands: ['eval', 'where', 'row'],
+    supportedCommands: ['eval', 'where', 'row', 'sort'],
     supportedOptions: ['by'],
     signatures: [
       {
@@ -410,7 +410,7 @@ export const builtinFunctions: FunctionDefinition[] = [
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.notDoc', {
       defaultMessage: 'Not',
     }),
-    supportedCommands: ['eval', 'where', 'row'],
+    supportedCommands: ['eval', 'where', 'row', 'sort'],
     supportedOptions: ['by'],
     signatures: [
       {
@@ -436,7 +436,7 @@ export const builtinFunctions: FunctionDefinition[] = [
     type: 'builtin',
     name,
     description,
-    supportedCommands: ['eval', 'where', 'row'],
+    supportedCommands: ['eval', 'where', 'row', 'sort'],
     signatures: [
       {
         params: [{ name: 'left', type: 'any' }],
