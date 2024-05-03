@@ -15,10 +15,10 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { numberValidator } from '@kbn/ml-agg-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
+import { validateTopNBucket } from '../validators';
 import { TOP_N_BUCKETS_COUNT } from '../../../common/constants/alerts';
 import { type MlAnomalyDetectionAlertAdvancedSettings } from '../../../common/types/alerts';
 import { TimeIntervalControl } from '../time_interval_control';
@@ -29,14 +29,12 @@ interface AdvancedSettingsProps {
 }
 
 export const AdvancedSettings: FC<AdvancedSettingsProps> = React.memo(({ value, onChange }) => {
-  const topNBucketsValidator = useMemo(() => numberValidator({ min: 1, integerOnly: true }), []);
-
   const topNBucketsValidationErrors = useMemo(() => {
     if (!isDefined(value.topNBuckets)) {
       return null;
     }
-    return topNBucketsValidator(value.topNBuckets);
-  }, [value.topNBuckets, topNBucketsValidator]);
+    return validateTopNBucket(value.topNBuckets);
+  }, [value.topNBuckets]);
 
   return (
     <EuiAccordion
