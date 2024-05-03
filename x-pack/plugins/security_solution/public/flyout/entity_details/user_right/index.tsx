@@ -88,7 +88,7 @@ export const UserPanel = ({ contextID, scopeId, userName, isDraggable }: UserPan
   const { isLoading: recalculatingScore, calculateEntityRiskScore } = useCalculateEntityRiskScore(
     RiskScoreEntity.user,
     userName,
-    refetchRiskScore
+    { onSuccess: refetchRiskScore }
   );
 
   useQueryInspector({

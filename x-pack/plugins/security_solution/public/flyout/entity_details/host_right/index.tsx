@@ -86,7 +86,7 @@ export const HostPanel = ({ contextID, scopeId, hostName, isDraggable }: HostPan
   const { isLoading: recalculatingScore, calculateEntityRiskScore } = useCalculateEntityRiskScore(
     RiskScoreEntity.host,
     hostName,
-    refetchRiskScore
+    { onSuccess: refetchRiskScore }
   );
 
   useQueryInspector({

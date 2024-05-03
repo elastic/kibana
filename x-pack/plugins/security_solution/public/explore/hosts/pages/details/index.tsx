@@ -195,7 +195,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
   const { calculateEntityRiskScore } = useCalculateEntityRiskScore(
     RiskScoreEntity.host,
     detailName,
-    refetchRiskScore
+    { onSuccess: refetchRiskScore }
   );
 
   const canReadAssetCriticality = !!privileges.data?.has_read_permissions;

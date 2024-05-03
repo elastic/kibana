@@ -58,16 +58,6 @@ export interface OptionsParam<Parameters> {
    * Set `initialParameters` to start fetching immediately when the hook is called, without having to call the `fetch` function.
    */
   initialParameters?: Parameters;
-
-  /**
-   * Called when the request is successful.
-   */
-  onSuccess?: () => void;
-
-  /**
-   * Called when the request fails.
-   */
-  onFailure?: (error: unknown) => void;
 }
 
 interface State<Parameters, Response, Error> extends ResultState<Response, Error> {
@@ -124,7 +114,7 @@ const requestReducer = <Parameters, Response, Error>(
 export const useFetch = <Parameters, Response, Error extends unknown>(
   requestName: RequestName,
   fetchFn: RequestFnParam<Parameters, Response>,
-  { disabled = false, initialParameters, onSuccess, onFailure }: OptionsParam<Parameters> = {}
+  { disabled = false, initialParameters }: OptionsParam<Parameters> = {}
 ): Result<Parameters, Response, Error> => {
   const { startTracking } = useTrackHttpRequest();
 
@@ -158,13 +148,11 @@ export const useFetch = <Parameters, Response, Error extends unknown>(
         endTracking('success');
         if (!ignore) {
           dispatch({ type: 'FETCH_SUCCESS', payload: response });
-          onSuccess?.();
         }
       } catch (err) {
         endTracking(abortController.signal.aborted ? 'aborted' : 'error');
         if (!ignore) {
           dispatch({ type: 'FETCH_FAILURE', payload: err });
-          onFailure?.(err);
         }
       }
     };
@@ -175,7 +163,7 @@ export const useFetch = <Parameters, Response, Error extends unknown>(
       ignore = true;
       abortController.abort();
     };
-  }, [isLoading, parameters, disabled, fetchFn, startTracking, requestName, onSuccess, onFailure]);
+  }, [isLoading, parameters, disabled, fetchFn, startTracking, requestName]);
 
   return { fetch, refetch, data, isLoading, error };
 };

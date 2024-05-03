@@ -198,7 +198,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   const { calculateEntityRiskScore } = useCalculateEntityRiskScore(
     RiskScoreEntity.user,
     detailName,
-    refetchRiskScore
+    { onSuccess: refetchRiskScore }
   );
 
   const canReadAssetCriticality = !!privileges.data?.has_read_permissions;

@@ -17,7 +17,7 @@ import { RiskScoreEntity, RiskEngineStatus } from '../../../../common/entity_ana
 export const useCalculateEntityRiskScore = (
   identifierType: RiskScoreEntity,
   identifier: string,
-  onSuccess: () => void
+  { onSuccess }: { onSuccess: () => void }
 ) => {
   const { addError } = useAppToasts();
   const { data: riskEngineStatus } = useRiskEngineStatus();
