@@ -7,9 +7,7 @@
 
 import * as z from 'zod';
 import {
-  RelatedIntegrationArray,
   RequiredFieldArray,
-  SetupGuide,
   RuleSignatureId,
   RuleVersion,
   BaseCreateProps,
@@ -35,8 +33,6 @@ export const PrebuiltRuleAsset = BaseCreateProps.and(TypeSpecificCreateProps).an
   z.object({
     rule_id: RuleSignatureId,
     version: RuleVersion,
-    related_integrations: RelatedIntegrationArray.optional(),
     required_fields: RequiredFieldArray.optional(),
-    setup: SetupGuide.optional(),
   })
 );
