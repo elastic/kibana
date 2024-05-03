@@ -182,7 +182,7 @@ export function Table<T extends UserContentCommonSchema>({
   }, [hasUpdatedAtMetadata, onSortChange, tableSort]);
 
   const tagFilterPanel = useMemo<SearchFilterConfig | null>(() => {
-    if (!isTaggingEnabled) return null;
+    if (!isTaggingEnabled()) return null;
 
     return {
       type: 'custom_component',
