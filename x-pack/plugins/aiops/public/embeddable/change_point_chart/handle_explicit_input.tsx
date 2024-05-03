@@ -23,7 +23,7 @@ export async function resolveEmbeddableChangePointUserInput(
 
   return new Promise(async (resolve, reject) => {
     try {
-      const modalSession = overlays.openModal(
+      const flyoutSession = overlays.openFlyout(
         toMountPoint(
           <AiopsAppContext.Provider
             value={
@@ -36,17 +36,28 @@ export async function resolveEmbeddableChangePointUserInput(
             <ChangePointChartInitializer
               initialInput={input}
               onCreate={(update) => {
-                modalSession.close();
+                flyoutSession.close();
                 resolve(update);
               }}
               onCancel={() => {
-                modalSession.close();
+                flyoutSession.close();
                 reject();
               }}
             />
           </AiopsAppContext.Provider>,
           coreStart
-        )
+        ),
+        {
+          ownFocus: true,
+          size: 's',
+          type: 'push',
+          'data-test-subj': 'aiopsChangePointChartEmbeddableInitializer',
+          'aria-labelledby': 'changePointConfig',
+          onClose: () => {
+            flyoutSession.close();
+            reject();
+          },
+        }
       );
     } catch (error) {
       reject(error);

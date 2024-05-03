@@ -8,14 +8,15 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
   EuiHorizontalRule,
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
+  EuiTitle,
 } from '@elastic/eui';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
@@ -97,17 +98,19 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
   }, [formInput, dataViewId, viewType]);
 
   return (
-    <EuiModal onClose={onCancel} data-test-subj={'aiopsChangePointChartEmbeddableInitializer'}>
-      <EuiModalHeader>
-        <EuiModalHeaderTitle>
-          <FormattedMessage
-            id="xpack.aiops.embeddableChangePointChart.modalTitle"
-            defaultMessage="Change point detection configuration"
-          />
-        </EuiModalHeaderTitle>
-      </EuiModalHeader>
+    <>
+      <EuiFlyoutHeader>
+        <EuiTitle>
+          <h2 id={'changePointConfig'}>
+            <FormattedMessage
+              id="xpack.aiops.embeddableChangePointChart.modalTitle"
+              defaultMessage="Change point detection configuration"
+            />
+          </h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
 
-      <EuiModalBody>
+      <EuiFlyoutBody>
         <EuiForm>
           <ViewTypeSelector value={viewType} onChange={setViewType} />
           <EuiFormRow
@@ -143,32 +146,37 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
             </ChangePointDetectionControlsContextProvider>
           </DataSourceContextProvider>
         </EuiForm>
-      </EuiModalBody>
+      </EuiFlyoutBody>
 
-      <EuiModalFooter>
-        <EuiButtonEmpty
-          onClick={onCancel}
-          data-test-subj="aiopsChangePointChartsInitializerCancelButton"
-        >
-          <FormattedMessage
-            id="xpack.aiops.embeddableChangePointChart.setupModal.cancelButtonLabel"
-            defaultMessage="Cancel"
-          />
-        </EuiButtonEmpty>
-
-        <EuiButton
-          data-test-subj="aiopsChangePointChartsInitializerConfirmButton"
-          isDisabled={!isFormValid || !dataViewId}
-          onClick={onCreate.bind(null, updatedProps)}
-          fill
-        >
-          <FormattedMessage
-            id="xpack.aiops.embeddableChangePointChart.setupModal.confirmButtonLabel"
-            defaultMessage="Confirm configurations"
-          />
-        </EuiButton>
-      </EuiModalFooter>
-    </EuiModal>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              onClick={onCancel}
+              data-test-subj="aiopsChangePointChartsInitializerCancelButton"
+            >
+              <FormattedMessage
+                id="xpack.aiops.embeddableChangePointChart.setupModal.cancelButtonLabel"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              data-test-subj="aiopsChangePointChartsInitializerConfirmButton"
+              isDisabled={!isFormValid || !dataViewId}
+              onClick={onCreate.bind(null, updatedProps)}
+              fill
+            >
+              <FormattedMessage
+                id="xpack.aiops.embeddableChangePointChart.setupModal.confirmButtonLabel"
+                defaultMessage="Confirm configurations"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+    </>
   );
 };
 
