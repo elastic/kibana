@@ -8,8 +8,8 @@
 
 import React, { useMemo } from 'react';
 import type { Interpolation, Theme } from '@emotion/react';
-import { EuiFlyoutProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlyout } from '@elastic/eui';
+import { EuiFlyoutProps, EuiFlyoutResizable } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import { useSectionSizes } from './hooks/use_sections_sizes';
 import { useWindowSize } from './hooks/use_window_size';
 import { useExpandableFlyoutState } from './hooks/use_expandable_flyout_state';
@@ -76,7 +76,7 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
   const showLeft = leftSection != null && left != null;
   const showPreview = previewSection != null && preview != null;
 
-  const { rightSectionWidth, leftSectionWidth, flyoutWidth, previewSectionLeft } = useSectionSizes({
+  const { rightSectionWidth, leftSectionWidth, previewSectionLeft } = useSectionSizes({
     windowWidth,
     showRight,
     showLeft,
@@ -89,13 +89,7 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
   }
 
   return (
-    <EuiFlyout
-      {...flyoutProps}
-      size={flyoutWidth}
-      ownFocus={false}
-      onClose={closeFlyout}
-      css={customStyles}
-    >
+    <EuiFlyoutResizable {...flyoutProps} ownFocus={false} onClose={closeFlyout} css={customStyles}>
       <EuiFlexGroup
         direction={leftSection ? 'row' : 'column'}
         wrap={false}
@@ -125,7 +119,7 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
           banner={previewBanner}
         />
       ) : null}
-    </EuiFlyout>
+    </EuiFlyoutResizable>
   );
 };
 
