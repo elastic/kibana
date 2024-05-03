@@ -147,6 +147,7 @@ export function complete(
               signal,
               persist,
               responseLanguage,
+              disableFunctions,
             },
             requestCallback
           ).subscribe(subscriber);

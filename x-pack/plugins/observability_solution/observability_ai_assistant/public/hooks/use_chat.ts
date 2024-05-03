@@ -77,8 +77,6 @@ function useChatWithoutContext({
     return chatService.getSystemMessage();
   }, [chatService]);
 
-  console.log('disableFunctions 1', disableFunctions);
-
   useOnce(initialMessages);
   useOnce(initialConversationId);
 
@@ -157,8 +155,6 @@ function useChatWithoutContext({
       }
 
       setChatState(ChatState.Loading);
-
-      console.log('disableFunctions 2', disableFunctions);
 
       const next$ = chatService.complete({
         getScreenContexts: () => service.getScreenContexts(),

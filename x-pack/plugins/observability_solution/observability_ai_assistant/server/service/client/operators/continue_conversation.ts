@@ -169,8 +169,6 @@ export function continueConversation({
     disableFunctions,
   });
 
-  console.log('definitions', definitions);
-
   const messagesWithUpdatedSystemMessage = replaceSystemMessage(
     getSystemMessageFromInstructions({
       registeredInstructions: functionClient.getInstructions(),
