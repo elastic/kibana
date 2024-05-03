@@ -24,7 +24,7 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { useDiscoverState } from './use_discover_state';
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
 import { useSetDiscoverCustomizationCallbacks } from './customizations/use_set_discover_customizations';
-import { EmbeddedDiscoverContainer } from './styles';
+import { EmbeddedDiscoverContainer, TimelineESQLGlobalStyles } from './styles';
 import { timelineSelectors } from '../../../../store';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 import { timelineDefaults } from '../../../../store/defaults';
@@ -258,6 +258,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
   return (
     <EmbeddedDiscoverContainer data-test-subj="timeline-embedded-discover">
       <HideSearchSessionIndicatorBreadcrumbIcon />
+      <TimelineESQLGlobalStyles />
       <DiscoverContainer
         overrideServices={services}
         scopedHistory={history as ScopedHistory}
