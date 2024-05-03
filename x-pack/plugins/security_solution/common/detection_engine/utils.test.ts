@@ -235,9 +235,9 @@ describe('Alert Suppression Rules', () => {
       expect(isSuppressibleAlertRule('threat_match')).toBe(true);
       expect(isSuppressibleAlertRule('new_terms')).toBe(true);
       expect(isSuppressibleAlertRule('eql')).toBe(true);
+      expect(isSuppressibleAlertRule('machine_learning')).toBe(true);
 
       // Rule types that don't support alert suppression:
-      expect(isSuppressibleAlertRule('machine_learning')).toBe(false);
       expect(isSuppressibleAlertRule('esql')).toBe(false);
     });
 
@@ -272,9 +272,9 @@ describe('Alert Suppression Rules', () => {
       expect(isSuppressionRuleConfiguredWithDuration('threat_match')).toBe(true);
       expect(isSuppressionRuleConfiguredWithDuration('new_terms')).toBe(true);
       expect(isSuppressionRuleConfiguredWithDuration('eql')).toBe(true);
+      expect(isSuppressionRuleConfiguredWithDuration('machine_learning')).toBe(true);
 
       // Rule types that don't support alert suppression:
-      expect(isSuppressionRuleConfiguredWithDuration('machine_learning')).toBe(false);
       expect(isSuppressionRuleConfiguredWithDuration('esql')).toBe(false);
     });
 
@@ -293,9 +293,9 @@ describe('Alert Suppression Rules', () => {
       expect(isSuppressionRuleConfiguredWithGroupBy('threat_match')).toBe(true);
       expect(isSuppressionRuleConfiguredWithGroupBy('new_terms')).toBe(true);
       expect(isSuppressionRuleConfiguredWithGroupBy('eql')).toBe(true);
+      expect(isSuppressionRuleConfiguredWithGroupBy('machine_learning')).toBe(true);
 
       // Rule types that don't support alert suppression:
-      expect(isSuppressionRuleConfiguredWithGroupBy('machine_learning')).toBe(false);
       expect(isSuppressionRuleConfiguredWithGroupBy('esql')).toBe(false);
     });
 
@@ -319,9 +319,9 @@ describe('Alert Suppression Rules', () => {
       expect(isSuppressionRuleConfiguredWithMissingFields('threat_match')).toBe(true);
       expect(isSuppressionRuleConfiguredWithMissingFields('new_terms')).toBe(true);
       expect(isSuppressionRuleConfiguredWithMissingFields('eql')).toBe(true);
+      expect(isSuppressionRuleConfiguredWithMissingFields('machine_learning')).toBe(true);
 
       // Rule types that don't support alert suppression:
-      expect(isSuppressionRuleConfiguredWithMissingFields('machine_learning')).toBe(false);
       expect(isSuppressionRuleConfiguredWithMissingFields('esql')).toBe(false);
     });
 
