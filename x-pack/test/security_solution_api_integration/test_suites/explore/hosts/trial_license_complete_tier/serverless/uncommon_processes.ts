@@ -11,8 +11,8 @@ import {
   HostsQueries,
   HostsUncommonProcessesStrategyResponse,
 } from '@kbn/security-solution-plugin/common/search_strategy';
-import { FtrProviderContext } from '../../../../../../api_integration/ftr_provider_context';
-import { rootUserServerless } from '../../../../../common/lib/authentication/users';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { RoleCredentials } from '../../../../../../../test_serverless/shared/services';
 
 const FROM = '2019-01-01T00:00:00.000Z';
 const TO = '3000-01-01T00:00:00.000Z';
@@ -24,22 +24,22 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const secureBsearch = getService('secureBsearch');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-
+  const svlUserManager = getService('svlUserManager');
+  let roleAuthc: RoleCredentials;
   describe('hosts', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/uncommon_processes');
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
     });
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/uncommon_processes');
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
     it('should return an edge of length 1 when given a pagination of length 1', async () => {
       const response = await secureBsearch.send<HostsUncommonProcessesStrategyResponse>({
         supertestWithoutAuth,
-        auth: {
-          username: rootUserServerless.username,
-          password: rootUserServerless.password,
-        },
+        apiKeyHeader: roleAuthc.apiKeyHeader,
         internalOrigin: 'Kibana',
         options: {
           factoryQueryType: HostsQueries.uncommonProcesses,
@@ -68,10 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return an edge of length 2 ', async () => {
         const response = await secureBsearch.send<HostsUncommonProcessesStrategyResponse>({
           supertestWithoutAuth,
-          auth: {
-            username: rootUserServerless.username,
-            password: rootUserServerless.password,
-          },
+          apiKeyHeader: roleAuthc.apiKeyHeader,
           internalOrigin: 'Kibana',
           options: {
             factoryQueryType: HostsQueries.uncommonProcesses,
@@ -101,10 +98,7 @@ export default function ({ getService }: FtrProviderContext) {
       before(async () => {
         response = await secureBsearch.send<HostsUncommonProcessesStrategyResponse>({
           supertestWithoutAuth,
-          auth: {
-            username: rootUserServerless.username,
-            password: rootUserServerless.password,
-          },
+          apiKeyHeader: roleAuthc.apiKeyHeader,
           internalOrigin: 'Kibana',
           options: {
             factoryQueryType: HostsQueries.uncommonProcesses,

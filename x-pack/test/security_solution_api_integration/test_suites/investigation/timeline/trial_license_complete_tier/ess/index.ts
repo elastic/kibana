@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context';
 
-export default function ({ loadTestFile, getService }: FtrProviderContext) {
+export default function ({ loadTestFile, getService }: FtrProviderContextWithSpaces) {
   describe('@ess SecuritySolution Timeline', () => {
     loadTestFile(require.resolve('./events'));
     loadTestFile(require.resolve('./timeline_details'));

@@ -14,7 +14,7 @@ import {
 } from '@kbn/security-solution-plugin/common/search_strategy';
 import type { UserAuthenticationsRequestOptions } from '@kbn/security-solution-plugin/common/api/search_strategy';
 
-import { FtrProviderContext } from '../../../../../../api_integration/ftr_provider_context';
+import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 
 const FROM = '2000-01-01T00:00:00.000Z';
 const TO = '3000-01-01T00:00:00.000Z';
@@ -25,7 +25,7 @@ const LAST_SUCCESS_SOURCE_IP = '8.42.77.171';
 const TOTAL_COUNT = 3;
 const EDGE_LENGTH = 1;
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContextWithSpaces) {
   const esArchiver = getService('esArchiver');
   const bsearch = getService('bsearch');
   const supertest = getService('supertest');

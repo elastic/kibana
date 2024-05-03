@@ -10,30 +10,30 @@ import {
   NetworkDetailsStrategyResponse,
   NetworkQueries,
 } from '@kbn/security-solution-plugin/common/search_strategy';
-import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
-import { rootUserServerless } from '../../../../../common/lib/authentication/users';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { RoleCredentials } from '../../../../../../../test_serverless/shared/services';
 
-export default function ({ getService }: FtrProviderContextWithSpaces) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const secureBsearch = getService('secureBsearch');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-
+  const svlUserManager = getService('svlUserManager');
+  let roleAuthc: RoleCredentials;
   describe('Network details', () => {
     describe('With filebeat', () => {
-      before(
-        async () => await esArchiver.load('x-pack/test/functional/es_archives/filebeat/default')
-      );
-      after(
-        async () => await esArchiver.unload('x-pack/test/functional/es_archives/filebeat/default')
-      );
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/filebeat/default');
+        roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      });
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/filebeat/default');
+        await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      });
 
       it('Make sure that we get Network details data', async () => {
         const body = await secureBsearch.send<NetworkDetailsStrategyResponse>({
           supertestWithoutAuth,
-          auth: {
-            username: rootUserServerless.username,
-            password: rootUserServerless.password,
-          },
+          apiKeyHeader: roleAuthc.apiKeyHeader,
           internalOrigin: 'Kibana',
           options: {
             ip: '151.205.0.17',
@@ -51,20 +51,19 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     });
 
     describe('With packetbeat', () => {
-      before(
-        async () => await esArchiver.load('x-pack/test/functional/es_archives/packetbeat/default')
-      );
-      after(
-        async () => await esArchiver.unload('x-pack/test/functional/es_archives/packetbeat/default')
-      );
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/packetbeat/default');
+        roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      });
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/packetbeat/default');
+        await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      });
 
       it('Make sure that we get Network details data', async () => {
         const body = await secureBsearch.send<NetworkDetailsStrategyResponse>({
           supertestWithoutAuth,
-          auth: {
-            username: rootUserServerless.username,
-            password: rootUserServerless.password,
-          },
+          apiKeyHeader: roleAuthc.apiKeyHeader,
           internalOrigin: 'Kibana',
           options: {
             ip: '185.53.91.88',

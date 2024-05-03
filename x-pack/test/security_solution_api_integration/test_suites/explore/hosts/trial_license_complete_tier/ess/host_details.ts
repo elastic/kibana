@@ -10,10 +10,10 @@ import {
   HostDetailsStrategyResponse,
   HostsQueries,
 } from '@kbn/security-solution-plugin/common/search_strategy';
-import { FtrProviderContext } from '../../../../../../api_integration/ftr_provider_context';
+import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 import { hostDetailsFilebeatExpectedResult } from '../mocks/host_details';
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContextWithSpaces) {
   const esArchiver = getService('esArchiver');
   const bsearch = getService('bsearch');
   const supertest = getService('supertest');

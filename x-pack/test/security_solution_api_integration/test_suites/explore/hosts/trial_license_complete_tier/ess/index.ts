@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 
-export default function ({ loadTestFile, getService }: FtrProviderContext) {
+export default function ({ loadTestFile }: FtrProviderContextWithSpaces) {
   describe('@ess SecuritySolution Explore Hosts', () => {
     loadTestFile(require.resolve('./hosts'));
     loadTestFile(require.resolve('./host_details'));

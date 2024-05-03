@@ -13,8 +13,8 @@ import {
   TimelineKpiStrategyResponse,
 } from '@kbn/security-solution-plugin/common/search_strategy';
 
-import { FtrProviderContext } from '../../../../../../api_integration/ftr_provider_context';
-import { rootUserServerless } from '../../../../../common/lib/authentication/users';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { RoleCredentials } from '../../../../../../../test_serverless/shared/services';
 import { timelineDetailsFilebeatExpectedResults as EXPECTED_DATA } from '../mocks/timeline_details';
 
 // typical values that have to change after an update from "scripts/es_archiver"
@@ -33,23 +33,24 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const secureBsearch = getService('secureBsearch');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const svlUserManager = getService('svlUserManager');
+  let roleAuthc: RoleCredentials;
 
   describe('Timeline Details', () => {
-    before(
-      async () => await esArchiver.load('x-pack/test/functional/es_archives/filebeat/default')
-    );
-    after(
-      async () => await esArchiver.unload('x-pack/test/functional/es_archives/filebeat/default')
-    );
+    before(async () => {
+      await esArchiver.load('x-pack/test/functional/es_archives/filebeat/default');
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+    });
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/filebeat/default');
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+    });
 
     it('Make sure that we get Event Details data', async () => {
       const { data: detailsData } = await secureBsearch.send<TimelineEventsDetailsStrategyResponse>(
         {
           supertestWithoutAuth,
-          auth: {
-            username: rootUserServerless.username,
-            password: rootUserServerless.password,
-          },
+          apiKeyHeader: roleAuthc.apiKeyHeader,
           internalOrigin: 'Kibana',
           options: {
             factoryQueryType: TimelineEventsQueries.details,
@@ -67,10 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
       const { destinationIpCount, hostCount, processCount, sourceIpCount, userCount } =
         await secureBsearch.send<TimelineKpiStrategyResponse>({
           supertestWithoutAuth,
-          auth: {
-            username: rootUserServerless.username,
-            password: rootUserServerless.password,
-          },
+          apiKeyHeader: roleAuthc.apiKeyHeader,
           internalOrigin: 'Kibana',
           options: {
             factoryQueryType: TimelineEventsQueries.kpi,

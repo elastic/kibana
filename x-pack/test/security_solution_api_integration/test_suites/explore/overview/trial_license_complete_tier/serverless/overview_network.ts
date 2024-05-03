@@ -10,22 +10,26 @@ import {
   NetworkOverviewStrategyResponse,
   NetworkQueries,
 } from '@kbn/security-solution-plugin/common/search_strategy';
-import { FtrProviderContext } from '../../../../../../api_integration/ftr_provider_context';
-import { rootUserServerless } from '../../../../../common/lib/authentication/users';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { RoleCredentials } from '../../../../../../../test_serverless/shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const secureBsearch = getService('secureBsearch');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const svlUserManager = getService('svlUserManager');
+  let roleAuthc: RoleCredentials;
 
   describe('Overview Network', () => {
     describe('With filebeat', () => {
-      before(
-        async () => await esArchiver.load('x-pack/test/functional/es_archives/filebeat/default')
-      );
-      after(
-        async () => await esArchiver.unload('x-pack/test/functional/es_archives/filebeat/default')
-      );
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/filebeat/default');
+        roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      });
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/filebeat/default');
+        await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      });
 
       const FROM = '2000-01-01T00:00:00.000Z';
       const TO = '3000-01-01T00:00:00.000Z';
@@ -45,10 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('Make sure that we get OverviewNetwork data', async () => {
         const { overviewNetwork } = await secureBsearch.send<NetworkOverviewStrategyResponse>({
           supertestWithoutAuth,
-          auth: {
-            username: rootUserServerless.username,
-            password: rootUserServerless.password,
-          },
+          apiKeyHeader: roleAuthc.apiKeyHeader,
           internalOrigin: 'Kibana',
           options: {
             defaultIndex: ['filebeat-*'],
@@ -67,13 +68,14 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('With packetbeat', () => {
-      before(
-        async () => await esArchiver.load('x-pack/test/functional/es_archives/packetbeat/overview')
-      );
-      after(
-        async () =>
-          await esArchiver.unload('x-pack/test/functional/es_archives/packetbeat/overview')
-      );
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/packetbeat/overview');
+        roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      });
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/packetbeat/overview');
+        await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      });
 
       const FROM = '2000-01-01T00:00:00.000Z';
       const TO = '3000-01-01T00:00:00.000Z';
@@ -92,10 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('Make sure that we get OverviewNetwork data', async () => {
         const { overviewNetwork } = await secureBsearch.send<NetworkOverviewStrategyResponse>({
           supertestWithoutAuth,
-          auth: {
-            username: rootUserServerless.username,
-            password: rootUserServerless.password,
-          },
+          apiKeyHeader: roleAuthc.apiKeyHeader,
           internalOrigin: 'Kibana',
           options: {
             defaultIndex: ['packetbeat-*'],
@@ -114,12 +113,14 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('With auditbeat', () => {
-      before(
-        async () => await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/overview')
-      );
-      after(
-        async () => await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/overview')
-      );
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/overview');
+        roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      });
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/overview');
+        await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      });
 
       const FROM = '2000-01-01T00:00:00.000Z';
       const TO = '3000-01-01T00:00:00.000Z';
@@ -138,10 +139,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('Make sure that we get OverviewNetwork data', async () => {
         const { overviewNetwork } = await secureBsearch.send<NetworkOverviewStrategyResponse>({
           supertestWithoutAuth,
-          auth: {
-            username: rootUserServerless.username,
-            password: rootUserServerless.password,
-          },
+          apiKeyHeader: roleAuthc.apiKeyHeader,
           internalOrigin: 'Kibana',
           options: {
             defaultIndex: ['auditbeat-*'],

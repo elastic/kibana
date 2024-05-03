@@ -13,7 +13,7 @@ import {
   TimelineKpiStrategyResponse,
 } from '@kbn/security-solution-plugin/common/search_strategy';
 
-import { FtrProviderContext } from '../../../../../../api_integration/ftr_provider_context';
+import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 import { timelineDetailsFilebeatExpectedResults as EXPECTED_DATA } from '../mocks/timeline_details';
 
 // typical values that have to change after an update from "scripts/es_archiver"
@@ -28,7 +28,7 @@ const EXPECTED_KPI_COUNTS = {
   userCount: 0,
 };
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContextWithSpaces) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const bsearch = getService('bsearch');

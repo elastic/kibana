@@ -16,8 +16,8 @@ import {
   FirstLastSeenStrategyResponse,
 } from '@kbn/security-solution-plugin/common/search_strategy';
 
-import { FtrProviderContext } from '../../../../../../api_integration/ftr_provider_context';
-import { rootUserServerless } from '../../../../../common/lib/authentication/users';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { RoleCredentials } from '../../../../../../../test_serverless/shared/services';
 
 const FROM = '2000-01-01T00:00:00.000Z';
 const TO = '3000-01-01T00:00:00.000Z';
@@ -32,23 +32,23 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const secureBsearch = getService('secureBsearch');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-
+  const svlUserManager = getService('svlUserManager');
+  let roleAuthc: RoleCredentials;
   describe('hosts', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
     });
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
     it('Make sure that we get Hosts Table data', async () => {
       const hosts = await secureBsearch.send<HostsStrategyResponse>({
         supertestWithoutAuth,
-        auth: {
-          username: rootUserServerless.username,
-          password: rootUserServerless.password,
-        },
+        apiKeyHeader: roleAuthc.apiKeyHeader,
         internalOrigin: 'Kibana',
         options: {
           factoryQueryType: HostsQueries.hosts,
@@ -72,6 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
         strategy: 'securitySolutionSearchStrategy',
       });
+
       expect(hosts.edges.length).to.be(EDGE_LENGTH);
       expect(hosts.totalCount).to.be(TOTAL_COUNT);
       expect(hosts.pageInfo.fakeTotalCount).to.equal(3);
@@ -80,10 +81,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('Make sure that pagination is working in Hosts Table query', async () => {
       const hosts = await secureBsearch.send<HostsStrategyResponse>({
         supertestWithoutAuth,
-        auth: {
-          username: rootUserServerless.username,
-          password: rootUserServerless.password,
-        },
+        apiKeyHeader: roleAuthc.apiKeyHeader,
         internalOrigin: 'Kibana',
         options: {
           factoryQueryType: HostsQueries.hosts,
@@ -115,10 +113,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('Make sure that we get Host details data', async () => {
       const { hostDetails } = await secureBsearch.send<HostDetailsStrategyResponse>({
         supertestWithoutAuth,
-        auth: {
-          username: rootUserServerless.username,
-          password: rootUserServerless.password,
-        },
+        apiKeyHeader: roleAuthc.apiKeyHeader,
         internalOrigin: 'Kibana',
         options: {
           factoryQueryType: HostsQueries.details,
@@ -159,10 +154,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('Make sure that we get First Seen for a Host', async () => {
       const firstLastSeenHost = await secureBsearch.send<FirstLastSeenStrategyResponse>({
         supertestWithoutAuth,
-        auth: {
-          username: rootUserServerless.username,
-          password: rootUserServerless.password,
-        },
+        apiKeyHeader: roleAuthc.apiKeyHeader,
         internalOrigin: 'Kibana',
         options: {
           factoryQueryType: FirstLastSeenQuery,
@@ -179,10 +171,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('Make sure that we get Last Seen for a Host', async () => {
       const firstLastSeenHost = await secureBsearch.send<FirstLastSeenStrategyResponse>({
         supertestWithoutAuth,
-        auth: {
-          username: rootUserServerless.username,
-          password: rootUserServerless.password,
-        },
+        apiKeyHeader: roleAuthc.apiKeyHeader,
         internalOrigin: 'Kibana',
         options: {
           factoryQueryType: FirstLastSeenQuery,

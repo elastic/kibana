@@ -8,13 +8,13 @@
 import expect from '@kbn/expect';
 import { SavedTimeline, TimelineType } from '@kbn/security-solution-plugin/common/api/timeline';
 
-import { FtrProviderContext } from '../../../../../../api_integration/ftr_provider_context';
+import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 import {
   createBasicTimeline,
   createBasicTimelineTemplate,
 } from '../../../saved_objects/trial_license_complete_tier/helpers';
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContextWithSpaces) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 

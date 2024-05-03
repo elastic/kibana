@@ -11,7 +11,7 @@ import {
   HostsQueries,
   HostsUncommonProcessesStrategyResponse,
 } from '@kbn/security-solution-plugin/common/search_strategy';
-import { FtrProviderContext } from '../../../../../../api_integration/ftr_provider_context';
+import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 
 const FROM = '2000-01-01T00:00:00.000Z';
 const TO = '3000-01-01T00:00:00.000Z';
@@ -19,7 +19,7 @@ const TO = '3000-01-01T00:00:00.000Z';
 // typical values that have to change after an update from "scripts/es_archiver"
 const TOTAL_COUNT = 3;
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContextWithSpaces) {
   const esArchiver = getService('esArchiver');
   const bsearch = getService('bsearch');
   const supertest = getService('supertest');

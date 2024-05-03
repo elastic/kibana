@@ -14,8 +14,8 @@ import {
 } from '@kbn/security-solution-plugin/common/search_strategy';
 import type { UserAuthenticationsRequestOptions } from '@kbn/security-solution-plugin/common/api/search_strategy';
 
-import { FtrProviderContext } from '../../../../../../api_integration/ftr_provider_context';
-import { rootUserServerless } from '../../../../../common/lib/authentication/users';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { RoleCredentials } from '../../../../../../../test_serverless/shared/services';
 
 const FROM = '2000-01-01T00:00:00.000Z';
 const TO = '3000-01-01T00:00:00.000Z';
@@ -30,13 +30,18 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const secureBsearch = getService('secureBsearch');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-
+  const svlUserManager = getService('svlUserManager');
+  let roleAuthc: RoleCredentials;
   describe('authentications', () => {
-    before(async () => await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts'));
+    before(async () => {
+      await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+    });
 
-    after(
-      async () => await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts')
-    );
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+    });
 
     it('Make sure that we get Authentication data', async () => {
       const requestOptions: UserAuthenticationsRequestOptions = {
@@ -60,10 +65,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const authentications = await secureBsearch.send<UserAuthenticationsStrategyResponse>({
         supertestWithoutAuth,
-        auth: {
-          username: rootUserServerless.username,
-          password: rootUserServerless.password,
-        },
+        apiKeyHeader: roleAuthc.apiKeyHeader,
         internalOrigin: 'Kibana',
         options: requestOptions,
         strategy: 'securitySolutionSearchStrategy',
@@ -96,10 +98,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const authentications = await secureBsearch.send<UserAuthenticationsStrategyResponse>({
         supertestWithoutAuth,
-        auth: {
-          username: rootUserServerless.username,
-          password: rootUserServerless.password,
-        },
+        apiKeyHeader: roleAuthc.apiKeyHeader,
         internalOrigin: 'Kibana',
         options: requestOptions,
         strategy: 'securitySolutionSearchStrategy',

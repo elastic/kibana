@@ -5,6 +5,6 @@
  * 2.0.
  */
 import { GenericFtrProviderContext } from '@kbn/test';
-import { services } from './config/serverless/services';
+import { services } from './config/ess/services';
 
 export type FtrProviderContextWithSpaces = GenericFtrProviderContext<typeof services, {}>;

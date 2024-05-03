@@ -14,22 +14,26 @@ import {
   NetworkDnsStrategyResponse,
 } from '@kbn/security-solution-plugin/common/search_strategy';
 
-import { FtrProviderContext } from '../../../../../../api_integration/ftr_provider_context';
-import { rootUserServerless } from '../../../../../common/lib/authentication/users';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { RoleCredentials } from '../../../../../../../test_serverless/shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const secureBsearch = getService('secureBsearch');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const svlUserManager = getService('svlUserManager');
+  let roleAuthc: RoleCredentials;
 
   describe('Network DNS', () => {
     describe('With packetbeat', () => {
-      before(
-        async () => await esArchiver.load('x-pack/test/functional/es_archives/packetbeat/dns')
-      );
-      after(
-        async () => await esArchiver.unload('x-pack/test/functional/es_archives/packetbeat/dns')
-      );
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/packetbeat/dns');
+        roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      });
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/packetbeat/dns');
+        await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      });
 
       const FROM = '2000-01-01T00:00:00.000Z';
       const TO = '3000-01-01T00:00:00.000Z';
@@ -37,10 +41,8 @@ export default function ({ getService }: FtrProviderContext) {
       it('Make sure that we get Dns data and sorting by uniqueDomains ascending', async () => {
         const networkDns = await secureBsearch.send<NetworkDnsStrategyResponse>({
           supertestWithoutAuth,
-          auth: {
-            username: rootUserServerless.username,
-            password: rootUserServerless.password,
-          },
+          apiKeyHeader: roleAuthc.apiKeyHeader,
+
           internalOrigin: 'Kibana',
           options: {
             defaultIndex: ['packetbeat-*'],
@@ -70,10 +72,8 @@ export default function ({ getService }: FtrProviderContext) {
       it('Make sure that we get Dns data and sorting by uniqueDomains descending', async () => {
         const networkDns = await secureBsearch.send<NetworkDnsStrategyResponse>({
           supertestWithoutAuth,
-          auth: {
-            username: rootUserServerless.username,
-            password: rootUserServerless.password,
-          },
+          apiKeyHeader: roleAuthc.apiKeyHeader,
+
           internalOrigin: 'Kibana',
           options: {
             ip: '151.205.0.17',
