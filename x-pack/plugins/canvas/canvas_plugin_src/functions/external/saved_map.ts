@@ -6,7 +6,7 @@
  */
 
 import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import type { MapEmbeddableInput } from '@kbn/maps-plugin/public';
+import type { MapSerializedState } from '@kbn/maps-plugin/public';
 import { SavedObjectReference } from '@kbn/core/types';
 import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
 import { ExpressionValueFilter, MapCenter, TimeRange as TimeRangeArg } from '../../../types';
@@ -30,7 +30,7 @@ const defaultTimeRange = {
   to: 'now',
 };
 
-type Output = EmbeddableExpression<MapEmbeddableInput & { savedObjectId: string }>;
+type Output = EmbeddableExpression<MapSerializedState & { id: string }>;
 
 export function savedMap(): ExpressionFunctionDefinition<
   'savedMap',

@@ -27,7 +27,7 @@ export type {
 
 export type { MapsSetupApi, MapsStartApi } from './api';
 
-export { type MapApi, isMapApi } from './react_embeddable/types';
+export { type MapApi, type MapSerializedState, isMapApi } from './react_embeddable/types';
 
 export type { EMSTermJoinConfig, SampleValuesConfig } from './ems_autosuggest';
 
