@@ -698,7 +698,6 @@ describe('helpers', () => {
       expect(result).toEqual(expected);
     });
 
-
     // Users are allowed to input 0 in the form, but value is validated in the API layer
     test('returns formatted object with max_signals set to 0', () => {
       const mockDataWithZeroMaxSignals: AboutStepRule = {
