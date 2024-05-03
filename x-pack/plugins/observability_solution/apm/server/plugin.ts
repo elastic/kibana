@@ -40,7 +40,7 @@ import { createApmSourceMapIndexTemplate } from './routes/source_maps/create_apm
 import { addApiKeysToEveryPackagePolicyIfMissing } from './routes/fleet/api_keys/add_api_keys_to_policies_if_missing';
 import { apmTutorialCustomIntegration } from '../common/tutorial/tutorials';
 import { registerAssistantFunctions } from './assistant_functions';
-import { getAlertDetailsContextHandler } from './routes/assistant_functions/get_observability_alert_details_context/get_alert_details_context_handler';
+import { getAlertDetailsContextHandler } from './routes/assistant_functions/get_observability_alert_details_context';
 
 export class APMPlugin
   implements Plugin<APMPluginSetup, void, APMPluginSetupDependencies, APMPluginStartDependencies>
