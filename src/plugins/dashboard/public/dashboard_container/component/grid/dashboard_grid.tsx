@@ -20,6 +20,7 @@ import { DashboardPanelState } from '../../../../common';
 import { DashboardGridItem } from './dashboard_grid_item';
 import { useDashboardGridSettings } from './use_dashboard_grid_settings';
 import { useDashboardContainer } from '../../embeddable/dashboard_container';
+import { useDashboardSettingsDraftValue } from '../../embeddable/dashboard_settings_draft';
 import { useDashboardPerformanceTracker } from './use_dashboard_performance_tracker';
 import { getPanelLayoutsAreEqual } from '../../state/diffing/dashboard_diffing_utils';
 import { DASHBOARD_GRID_HEIGHT, DASHBOARD_MARGIN_SIZE } from '../../../dashboard_constants';
@@ -34,6 +35,7 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
   const animatePanelTransforms = dashboard.select(
     (state) => state.componentState.animatePanelTransforms
   );
+  const dashboardSettingsDraft = useDashboardSettingsDraftValue();
 
   /**
    *  Track panel maximized state delayed by one tick and use it to prevent
@@ -108,7 +110,9 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
   );
 
   const classes = classNames({
-    'dshLayout-withoutMargins': !useMargins,
+    'dshLayout-withoutMargins': dashboardSettingsDraft
+      ? !dashboardSettingsDraft?.useMargins
+      : !useMargins,
     'dshLayout--viewing': viewMode === ViewMode.VIEW,
     'dshLayout--editing': viewMode !== ViewMode.VIEW,
     'dshLayout--noAnimation': !animatePanelTransforms || delayedIsPanelExpanded,
@@ -133,7 +137,11 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
       isResizable={!expandedPanelId && !focusedPanelId}
       isDraggable={!expandedPanelId && !focusedPanelId}
       rowHeight={DASHBOARD_GRID_HEIGHT}
-      margin={useMargins ? [DASHBOARD_MARGIN_SIZE, DASHBOARD_MARGIN_SIZE] : [0, 0]}
+      margin={
+        dashboardSettingsDraft?.useMargins || useMargins
+          ? [DASHBOARD_MARGIN_SIZE, DASHBOARD_MARGIN_SIZE]
+          : [0, 0]
+      }
       draggableHandle={'.embPanel--dragHandle'}
     >
       {panelComponents}
