@@ -78,6 +78,7 @@
     "yarn": "^1.22.19"
   },
   "resolutions": {
+    "**/@bazel/typescript/protobufjs": "6.11.4",
     "**/@hello-pangea/dnd": "16.2.0",
     "**/@langchain/core": "0.1.53",
     "**/@types/node": "20.10.5",
@@ -420,6 +421,7 @@
     "@kbn/discover-customization-examples-plugin": "link:examples/discover_customization_examples",
     "@kbn/discover-enhanced-plugin": "link:x-pack/plugins/discover_enhanced",
     "@kbn/discover-plugin": "link:src/plugins/discover",
+    "@kbn/discover-shared-plugin": "link:src/plugins/discover_shared",
     "@kbn/discover-utils": "link:packages/kbn-discover-utils",
     "@kbn/doc-links": "link:packages/kbn-doc-links",
     "@kbn/dom-drag-drop": "link:packages/kbn-dom-drag-drop",
@@ -1717,7 +1719,7 @@
     "webpack-merge": "^4.2.2",
     "webpack-sources": "^1.4.1",
     "webpack-visualizer-plugin2": "^1.1.0",
-    "xml-crypto": "^5.0.0",
+    "xml-crypto": "^6.0.0",
     "xmlbuilder": "13.0.2",
     "yargs": "^15.4.1",
     "yarn-deduplicate": "^6.0.2",
