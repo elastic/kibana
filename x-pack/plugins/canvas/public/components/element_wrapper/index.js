@@ -6,7 +6,7 @@
  */
 
 import PropTypes from 'prop-types';
-import { connectAdvanced } from 'react-redux';
+import { connect } from 'react-redux';
 import { compose, withPropsOnChange, mapProps } from 'react-recompose';
 import isEqual from 'react-fast-compare';
 import { getResolvedArgs, getSelectedPage } from '../../state/selectors/workpad';
@@ -57,7 +57,7 @@ function selectorFactory(dispatch) {
 }
 
 export const ElementWrapper = compose(
-  connectAdvanced(selectorFactory),
+  connect(selectorFactory),
   withPropsOnChange(
     (props, nextProps) => !isEqual(props.element, nextProps.element),
     (props) => {

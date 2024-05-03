@@ -40,7 +40,7 @@ function createReducer<S extends State>(
   reducer?: CreateStoreOptions<S>['reducer']
 ): Reducer<S> | ReducersMapObject<S> {
   if (reducer instanceof Function) {
-    const generic = combineReducers<Pick<S, keyof State>>({
+    const generic = combineReducers({
       input: input.reducer,
       output: output.reducer,
     }) as Reducer<S>;
