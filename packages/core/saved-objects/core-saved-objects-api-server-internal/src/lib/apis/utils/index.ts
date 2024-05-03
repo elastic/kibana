@@ -12,7 +12,6 @@ export {
   rawDocExistsInNamespace,
   errorContent,
   rawDocExistsInNamespaces,
-  getRawDocNamespacesFromSource,
   isMgetDoc,
   getCurrentTime,
   getBulkOperationError,
