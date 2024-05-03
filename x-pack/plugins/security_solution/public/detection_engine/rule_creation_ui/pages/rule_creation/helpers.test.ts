@@ -698,6 +698,32 @@ describe('helpers', () => {
       expect(result).toEqual(expected);
     });
 
+
+    // Users are allowed to input 0 in the form, but value is validated in the API layer
+    test('returns formatted object with max_signals set to 0', () => {
+      const mockDataWithZeroMaxSignals: AboutStepRule = {
+        ...mockData,
+        maxSignals: 0,
+      };
+
+      const result = formatAboutStepData(mockDataWithZeroMaxSignals);
+
+      expect(result.max_signals).toEqual(0);
+    });
+
+    // Strings or empty values are replaced with undefined and overriden with the default value of 1000
+    test('returns formatted object with undefined max_signals for non-integer values inputs', () => {
+      const mockDataWithNonIntegerMaxSignals: AboutStepRule = {
+        ...mockData,
+        // @ts-expect-error
+        maxSignals: '',
+      };
+
+      const result = formatAboutStepData(mockDataWithNonIntegerMaxSignals);
+
+      expect(result.max_signals).toEqual(undefined);
+    });
+
     test('returns formatted object with endpoint exceptions_list', () => {
       const result = formatAboutStepData(
         {
