@@ -50,22 +50,6 @@ describe('<TemplateClone />', () => {
     httpRequestsMockHelpers.setLoadTelemetryResponse({});
     httpRequestsMockHelpers.setLoadComponentTemplatesResponse([]);
     httpRequestsMockHelpers.setLoadTemplateResponse(templateToClone.name, templateToClone);
-
-    // Mocking matchMedia to resolve TypeError: window.matchMedia is not a function
-    // For more info, see https://jestjs.io/docs/manual-mocks#mocking-methods-which-are-not-implemented-in-jsdom
-    Object.defineProperty(window, 'matchMedia', {
-      writable: true,
-      value: jest.fn().mockImplementation((query) => ({
-        matches: false,
-        media: query,
-        onchange: null,
-        addListener: jest.fn(), // deprecated
-        removeListener: jest.fn(), // deprecated
-        addEventListener: jest.fn(),
-        removeEventListener: jest.fn(),
-        dispatchEvent: jest.fn(),
-      })),
-    });
   });
 
   afterAll(() => {
