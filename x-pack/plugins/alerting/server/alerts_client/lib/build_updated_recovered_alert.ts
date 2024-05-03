@@ -14,7 +14,7 @@ import {
   ALERT_RULE_EXECUTION_UUID,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
-import { RawAlertInstance } from '@kbn/alerting-state-types';
+import { RawAlertInstance } from '@kbn/alerting-shared-types';
 import { get } from 'lodash';
 import { RuleAlertData } from '../../types';
 import { AlertRule } from '../types';

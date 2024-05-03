@@ -9,7 +9,7 @@ import { processRunResults } from './process_run_result';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ruleResultServiceMock } from '../../monitoring/rule_result_service.mock';
 import { asErr, asOk } from '../../lib/result_type';
-import { ActionsCompletion } from '@kbn/alerting-state-types';
+import { ActionsCompletion } from '@kbn/alerting-shared-types';
 
 const logger = loggingSystemMock.create().get();
 const ruleResultService = ruleResultServiceMock.create();

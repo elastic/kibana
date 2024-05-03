@@ -19,7 +19,7 @@ import {
   ExecutionResponseItem,
   ExecutionResponseType,
 } from '@kbn/actions-plugin/server/create_execute_function';
-import { ActionsCompletion } from '@kbn/alerting-state-types';
+import { ActionsCompletion } from '@kbn/alerting-shared-types';
 import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
 import { chunk } from 'lodash';
 import { GetSummarizedAlertsParams, IAlertsClient } from '../alerts_client/types';

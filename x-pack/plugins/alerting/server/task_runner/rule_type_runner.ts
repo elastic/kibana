@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { AlertInstanceContext, AlertInstanceState, RuleTaskState } from '@kbn/alerting-state-types';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  RuleTaskState,
+} from '@kbn/alerting-shared-types';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { Logger } from '@kbn/core/server';
 import {

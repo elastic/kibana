@@ -14,7 +14,7 @@ import type {
   MutableRuleTaskState,
   WrappedLifecycleRuleState,
   RawAlertInstance,
-} from '@kbn/alerting-state-types';
+} from '@kbn/alerting-shared-types';
 
 import { getMigrations } from './migrations';
 import { SerializedConcreteTaskInstance, TaskStatus } from '../task';

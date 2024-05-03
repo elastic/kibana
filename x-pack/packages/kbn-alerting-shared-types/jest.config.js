@@ -4,4 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export * from '../kbn-alerting-shared-types/src/comparators';
+
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../..',
+  roots: ['<rootDir>/x-pack/packages/kbn-alerting-shared-types'],
+};

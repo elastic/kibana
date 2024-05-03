@@ -1,4 +1,4 @@
-# @kbn/alerting-state-types
+# @kbn/alerting-shared-types
 
 Contains type information for the alerting data persisted in task
 manager documents as state.  
