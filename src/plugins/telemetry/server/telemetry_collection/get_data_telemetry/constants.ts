@@ -51,18 +51,18 @@ export const DATA_DATASETS_INDEX_PATTERNS = [
   { pattern: 'fluentbit*', patternName: 'fluentbit' },
   { pattern: '*nginx*', patternName: 'nginx' },
   { pattern: '*apache*', patternName: 'apache' }, // Already in Security (keeping it in here for documentation)
-  // { pattern: '*logs*', patternName: 'third-party-logs' }, Disabled for now
+  { pattern: '*logs*', patternName: 'third-party-logs' },
 
   // Security - Elastic
-  { pattern: 'logstash-*', patternName: 'logstash', shipper: 'logstash' },
+  { pattern: '*logstash*', patternName: 'logstash', shipper: 'logstash' },
   { pattern: 'endgame-*', patternName: 'endgame', shipper: 'endgame' },
   { pattern: 'logs-endpoint.*', patternName: 'logs-endpoint', shipper: 'endpoint' }, // It should be caught by the `mappings` logic, but just in case
   { pattern: 'metrics-endpoint.*', patternName: 'metrics-endpoint', shipper: 'endpoint' }, // It should be caught by the `mappings` logic, but just in case
   { pattern: '.siem-signals-*', patternName: 'siem-signals' },
-  { pattern: 'auditbeat-*', patternName: 'auditbeat', shipper: 'auditbeat' },
-  { pattern: 'winlogbeat-*', patternName: 'winlogbeat', shipper: 'winlogbeat' },
-  { pattern: 'packetbeat-*', patternName: 'packetbeat', shipper: 'packetbeat' },
-  { pattern: 'filebeat-*', patternName: 'filebeat', shipper: 'filebeat' },
+  { pattern: '*auditbeat*', patternName: 'auditbeat', shipper: 'auditbeat' },
+  { pattern: '*winlogbeat*', patternName: 'winlogbeat', shipper: 'winlogbeat' },
+  { pattern: '*packetbeat*', patternName: 'packetbeat', shipper: 'packetbeat' },
+  { pattern: '*filebeat*', patternName: 'filebeat', shipper: 'filebeat' },
   { pattern: '.internal.alerts-*', patternName: 'alerts' },
   // Security - 3rd party
   { pattern: '*apache*', patternName: 'apache' }, // Already in Observability (keeping it in here for documentation)
