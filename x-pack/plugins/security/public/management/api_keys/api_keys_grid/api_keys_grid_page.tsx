@@ -173,7 +173,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
       queryError,
     },
     currentUser,
-  ] = state.value && state.value;
+  ] = state.value;
 
   const categorizedApiKeys = !queryError
     ? apiKeys.map((apiKey) => apiKey as CategorizedApiKey)
