@@ -206,7 +206,7 @@ const getColumns = ({
       <EuiCheckbox
         id={RULES_ROW_SELECT_ALL_CURRENT_PAGE}
         checked={isCurrentPageRulesASubset(items, selectedRules) && isAllRulesSelectedThisPage}
-        onChange={(_e) => {
+        onChange={() => {
           const uniqueSelectedRules = uniqBy([...selectedRules, ...items], 'metadata.id');
           const onChangeSelectAllThisPageFn = () => {
             setSelectedRules(uniqueSelectedRules);
