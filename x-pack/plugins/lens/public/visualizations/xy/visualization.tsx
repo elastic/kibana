@@ -980,7 +980,7 @@ export const getXyVisualization = ({
             longMessage: (
               <FormattedMessage
                 id="xpack.lens.xyVisualization.mixedLogScaleWarning"
-                defaultMessage="The {axisName} axis is set to a logarithmic scale but {n} of the datasets contains positive and negative data."
+                defaultMessage="When the {axisName} axis is set to logarithmic scale, the dataset should not contain positive and negative data."
                 values={{
                   axisName:
                     groupId === 'left' ? (
@@ -1010,7 +1010,7 @@ export const getXyVisualization = ({
               longMessage: (
                 <FormattedMessage
                   id="xpack.lens.xyVisualization.mixedLogScaleDimensionWarning"
-                  defaultMessage="This metric is used on logarithmic scale and contains positive and negative data."
+                  defaultMessage="This metric is using logarithmic scale and should not contain positive and negative data."
                 />
               ),
               displayLocations: [{ id: 'dimensionButton', dimensionId: accessor }],

@@ -114,7 +114,7 @@ export function validateExtent(
   if (!validateAxisDomain(extent)) {
     return {
       errorMsg: i18n.translate('xpack.lens.axisExtent.boundaryError', {
-        defaultMessage: 'Lower bound has to be less than upper bound',
+        defaultMessage: 'Lower bound should be less than upper bound',
       }),
     };
   }
@@ -123,7 +123,7 @@ export function validateExtent(
     const key = validateLogarithmicExtent(extent) ? 'helpMsg' : 'errorMsg';
     return {
       [key]: i18n.translate('xpack.lens.axisExtent.logExcludeZero', {
-        defaultMessage: 'Logarithmic bounds must exclude zero',
+        defaultMessage: 'Logarithmic bounds must not contain zero',
       }),
     };
   }
@@ -132,7 +132,7 @@ export function validateExtent(
     const key = validateZeroInclusivityExtent(extent) ? 'helpMsg' : 'errorMsg';
     return {
       [key]: i18n.translate('xpack.lens.axisExtent.inclusiveZero', {
-        defaultMessage: 'Bounds must include zero',
+        defaultMessage: 'Bounds must contain zero',
       }),
     };
   }
