@@ -80,7 +80,6 @@ export const fleetSetupHandler: FleetRequestHandler = async (context, request, r
     };
     return response.ok({ body });
   } catch (error) {
-    console.log(JSON.stringify(error, null, 2));
     return defaultFleetErrorHandler({ error, response });
   }
 };
