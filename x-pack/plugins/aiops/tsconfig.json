@@ -71,6 +71,7 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/react-kibana-context-render",
     "@kbn/core-theme-browser",
+    "@kbn/shared-ux-utility",
   ],
   "exclude": [
     "target/**/*",
