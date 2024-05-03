@@ -15,12 +15,12 @@ import type { Cluster } from '@kbn/remote-clusters-plugin/public';
 const API_KEY_SECURITY_MODEL = 'api_key';
 
 interface Props extends Omit<EuiComboBoxProps<string | number | string[] | undefined>, 'options'> {
-  remoteClusters?: Cluster[];
+  remoteClusters: Cluster[];
   type: 'remote_cluster' | 'remote_indexes';
 }
 
 export const RemoteClusterComboBox: React.FunctionComponent<Props> = ({
-  remoteClusters = [],
+  remoteClusters,
   type,
   ...restProps
 }) => {

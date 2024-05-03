@@ -32,17 +32,14 @@ exports[`it renders without crashing 1`] = `
               }
               labelType="label"
             >
-              <EuiComboBox
-                async={false}
-                compressed={false}
+              <RemoteClusterComboBox
                 data-test-subj="remoteClusterClustersInput0"
                 fullWidth={true}
-                isClearable={true}
                 isDisabled={false}
                 onChange={[Function]}
                 onCreateOption={[Function]}
-                options={Array []}
                 placeholder="Add a remote cluster…"
+                remoteClusters={Array []}
                 selectedOptions={
                   Array [
                     Object {
@@ -50,8 +47,7 @@ exports[`it renders without crashing 1`] = `
                     },
                   ]
                 }
-                singleSelection={false}
-                sortMatchesBy="none"
+                type="remote_cluster"
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -110,6 +106,7 @@ exports[`it renders without crashing 1`] = `
       <EuiButtonIcon
         aria-label="Delete remote cluster privilege"
         color="danger"
+        data-test-subj="addRemoteClusterPrivilegesButtonAdd"
         iconType="trash"
         onClick={[MockFunction]}
       />

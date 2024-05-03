@@ -91,7 +91,7 @@ export class RoleValidator {
       return valid();
     }
 
-    const areRemoteClustersInvalid = role.elasticsearch.remote_cluster.some(
+    const areRemoteClustersInvalid = role.elasticsearch.remote_cluster?.some(
       (remoteClusterPrivilege) => {
         return (
           this.validateRemoteClusterPrivilegeClusterField(remoteClusterPrivilege).isInvalid ||

@@ -12,11 +12,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiIconTip,
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { Fragment, useCallback, useMemo } from 'react';
+import React, { Fragment, useCallback } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -25,8 +24,6 @@ import type { Cluster } from '@kbn/remote-clusters-plugin/public';
 import { RemoteClusterComboBox } from './remote_clusters_combo_box';
 import type { RoleRemoteClusterPrivilege } from '../../../../../../common';
 import type { RoleValidator } from '../../validate_role';
-
-const API_KEY_SECURITY_MODEL = 'api_key';
 
 const fromOption = (option: EuiComboBoxOptionOption) => option.label;
 const toOption = (value: string): EuiComboBoxOptionOption => ({ label: value });
@@ -52,58 +49,6 @@ export const RemoteClusterPrivilegesForm: React.FunctionComponent<Props> = ({
   onChange,
   onDelete,
 }) => {
-  const remoteClusterOptions = useMemo<EuiComboBoxOptionOption[]>(() => {
-    const { incompatible, remote } = remoteClusters.reduce<{
-      remote: EuiComboBoxOptionOption[];
-      incompatible: EuiComboBoxOptionOption[];
-    }>(
-      (data, item) => {
-        const disabled = item.securityModel !== API_KEY_SECURITY_MODEL;
-
-        if (!disabled) {
-          data.remote.push({ label: item.name });
-
-          return data;
-        }
-
-        data.incompatible.push({
-          label: item.name,
-          disabled,
-          append: disabled ? (
-            <EuiIconTip
-              type="warning"
-              color="inherit"
-              content={
-                <FormattedMessage
-                  id="xpack.security.management.editRole.remoteClusterPrivilegeForm.remoteClusterSecurityModelWarning"
-                  defaultMessage="This cluster is configured with the certificate based security model and does not support remote cluster privileges. Connect this cluster with the API key based security model instead to use remote cluster privileges."
-                />
-              }
-            />
-          ) : undefined,
-        });
-
-        return data;
-      },
-      {
-        incompatible: [],
-        remote: [],
-      }
-    );
-
-    if (incompatible.length) {
-      remote.push(
-        {
-          label: 'Incompatible clusters',
-          isGroupLabelOption: true,
-        },
-        ...incompatible
-      );
-    }
-
-    return remote;
-  }, [remoteClusters]);
-
   const onCreateClusterOption = useCallback(
     (option: string) => {
       const nextClusters = (remoteClusterPrivilege.clusters ?? []).concat([option]);
@@ -226,6 +171,7 @@ export const RemoteClusterPrivilegesForm: React.FunctionComponent<Props> = ({
               color="danger"
               onClick={onDelete}
               iconType="trash"
+              data-test-subj="addRemoteClusterPrivilegesButtonAdd"
             />
           </EuiFlexItem>
         )}
