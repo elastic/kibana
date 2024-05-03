@@ -59,6 +59,7 @@ export interface HeaderActionProps {
   onSelectAll: ({ isSelected }: { isSelected: boolean }) => void;
   showEventsSelect: boolean;
   showSelectAllCheckbox: boolean;
+  showFullScreenToggle?: boolean;
   sort: SortColumnTable[];
   tabType: string;
   timelineId: string;

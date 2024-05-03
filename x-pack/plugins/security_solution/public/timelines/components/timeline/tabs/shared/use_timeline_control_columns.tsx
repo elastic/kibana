@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
 import React, { useMemo } from 'react';
 import type { EuiDataGridControlColumn } from '@elastic/eui';
 import type { SortColumnTable } from '@kbn/securitysolution-data-table';
@@ -13,15 +12,15 @@ import { useLicense } from '../../../../../common/hooks/use_license';
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { defaultHeaders } from '../../body/column_headers/default_headers';
 import { getDefaultControlColumn } from '../../body/control_columns';
 import type { UnifiedActionProps } from '../../unified_components/data_table/control_column_cell_render';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { HeaderActions } from '../../../../../common/components/header_actions/header_actions';
 import { ControlColumnCellRender } from '../../unified_components/data_table/control_column_cell_render';
-import { defaultUdtHeaders } from '../../unified_components/default_headers';
 import type { ColumnHeaderOptions } from '../../../../../../common/types';
+import { useTimelineColumns } from './use_timeline_columns';
 
+const noSelectAll = ({ isSelected }: { isSelected: boolean }) => {};
 export const useTimelineControlColumn = (
   columns: ColumnHeaderOptions[],
   sort: SortColumnTable[]
@@ -33,17 +32,8 @@ export const useTimelineControlColumn = (
   );
 
   const isEnterprisePlus = useLicense().isEnterprise();
-  const ACTION_BUTTON_COUNT = isEnterprisePlus ? 6 : 5;
-
-  const defaultColumns = useMemo(
-    () => (unifiedComponentsInTimelineEnabled ? defaultUdtHeaders : defaultHeaders),
-    [unifiedComponentsInTimelineEnabled]
-  );
-
-  const localColumns = useMemo(
-    () => (isEmpty(columns) ? defaultColumns : columns),
-    [columns, defaultColumns]
-  );
+  const ACTION_BUTTON_COUNT = isEnterprisePlus ? 5 : 4;
+  const { localColumns } = useTimelineColumns(columns);
 
   return useMemo(() => {
     if (unifiedComponentsInTimelineEnabled) {
@@ -57,12 +47,12 @@ export const useTimelineControlColumn = (
               columnHeaders={localColumns}
               isEventViewer={false}
               isSelectAllChecked={false}
-              onSelectAll={() => {}}
+              onSelectAll={noSelectAll}
               showEventsSelect={false}
               showSelectAllCheckbox={false}
+              showFullScreenToggle={false}
               sort={sort}
               tabType={TimelineTabs.pinned}
-              fieldBrowserOptions={{}}
               {...props}
               timelineId={TimelineId.active}
             />

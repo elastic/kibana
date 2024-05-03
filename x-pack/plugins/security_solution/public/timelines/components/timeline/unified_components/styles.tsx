@@ -68,8 +68,8 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
   }
 
   .udtTimeline .euiDataGridHeaderCell.euiDataGridHeaderCell--controlColumn {
+    padding: 0;
     position: relative;
-    left: -60px;
   }
 
   .udtTimeline .euiDataGridRowCell--controlColumn {
