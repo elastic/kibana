@@ -400,4 +400,7 @@ export interface OverrideBodyQuery {
   fields?: estypes.Fields;
 }
 
-export type RuleWithInMemorySuppression = ThreatRuleParams | EqlRuleParams;
+export type RuleWithInMemorySuppression =
+  | ThreatRuleParams
+  | EqlRuleParams
+  | MachineLearningRuleParams;

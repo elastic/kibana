@@ -15,6 +15,7 @@ export interface BuildReasonMessageArgs {
   mergedDoc?: SignalSourceHit;
 }
 
+// TODO these aren't the standard rule_type values
 export interface BuildReasonMessageUtilArgs extends BuildReasonMessageArgs {
   type?: 'eql' | 'ml' | 'query' | 'threatMatch' | 'threshold' | 'new_terms' | 'esql';
 }

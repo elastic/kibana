@@ -35,6 +35,8 @@ import type { SetupPlugins } from '../../../../plugin';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import type { AnomalyResults } from '../../../machine_learning';
+import { bulkCreateSuppressedAlertsInMemory } from '../utils/bulk_create_suppressed_alerts_in_memory';
+import { buildReasonMessageForMlAlert } from '../utils/reason_formatters';
 
 interface MachineLearningRuleExecutorParams {
   completeRule: CompleteRule<MachineLearningRuleParams>;
@@ -65,6 +67,11 @@ export const mlExecutor = async ({
   wrapHits,
   exceptionFilter,
   unprocessedExceptions,
+  isAlertSuppressionActive,
+  wrapSuppressedHits,
+  alertTimestampOverride,
+  alertWithSuppression,
+  experimentalFeatures,
 }: MachineLearningRuleExecutorParams) => {
   const result = createSearchAfterReturnType();
   const ruleParams = completeRule.ruleParams;
@@ -129,6 +136,7 @@ export const mlExecutor = async ({
       return result;
     }
 
+    // TODO we add the max_signals warning _before_ filtering the anomalies against the exceptions list. Is that correct?
     if (
       anomalyResults.hits.total &&
       typeof anomalyResults.hits.total !== 'number' &&
@@ -149,17 +157,36 @@ export const mlExecutor = async ({
       ruleExecutionLogger.debug(`Found ${anomalyCount} signals from ML anomalies`);
     }
 
-    const createResult = await bulkCreateMlSignals({
-      anomalyHits: filteredAnomalyHits,
-      completeRule,
-      services,
-      ruleExecutionLogger,
-      id: completeRule.alertId,
-      signalsIndex: ruleParams.outputIndex,
-      bulkCreate,
-      wrapHits,
-    });
-    addToSearchAfterReturn({ current: result, next: createResult });
+    if (anomalyCount && isAlertSuppressionActive) {
+      await bulkCreateSuppressedAlertsInMemory({
+        enrichedEvents: filteredAnomalyHits,
+        toReturn: result,
+        wrapHits,
+        bulkCreate,
+        services,
+        buildReasonMessage: buildReasonMessageForMlAlert,
+        ruleExecutionLogger,
+        tuple,
+        alertSuppression: completeRule.ruleParams.alertSuppression,
+        wrapSuppressedHits,
+        alertTimestampOverride,
+        alertWithSuppression,
+        experimentalFeatures,
+      });
+    } else {
+      const createResult = await bulkCreateMlSignals({
+        anomalyHits: filteredAnomalyHits,
+        completeRule,
+        services,
+        ruleExecutionLogger,
+        id: completeRule.alertId,
+        signalsIndex: ruleParams.outputIndex,
+        bulkCreate,
+        wrapHits,
+      });
+      addToSearchAfterReturn({ current: result, next: createResult });
+    }
+
     const shardFailures = anomalyResults._shards.failures ?? [];
     const searchErrors = createErrorsFromShard({
       errors: shardFailures,

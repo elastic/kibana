@@ -13,12 +13,13 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 import { MachineLearningRuleParams } from '../../rule_schema';
 import { getIsAlertSuppressionActive } from '../utils/get_is_alert_suppression_active';
 import { mlExecutor } from './ml';
-import type { CreateRuleOptions, SecurityAlertType } from '../types';
+import type { CreateRuleOptions, SecurityAlertType, WrapSuppressedHits } from '../types';
+import { wrapSuppressedAlerts } from '../utils/wrap_suppressed_alerts';
 
 export const createMlAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<MachineLearningRuleParams, {}, {}, 'default'> => {
-  const { experimentalFeatures, ml, logger, licensing } = createOptions;
+  const { experimentalFeatures, ml, licensing } = createOptions;
   return {
     id: ML_RULE_TYPE_ID,
     name: 'Machine Learning Rule',
@@ -57,16 +58,40 @@ export const createMlAlertType = (
           wrapHits,
           exceptionFilter,
           unprocessedExceptions,
+          inputIndex,
+          mergeStrategy,
+          alertTimestampOverride,
+          publicBaseUrl,
+          alertWithSuppression,
+          primaryTimestamp,
+          secondaryTimestamp,
         },
         services,
+        spaceId,
         state,
       } = execOptions;
 
-      const isMachineLearningAlertSuppressionActive = await getIsAlertSuppressionActive({
+      const isAlertSuppressionActive = await getIsAlertSuppressionActive({
         alertSuppression: completeRule.ruleParams.alertSuppression,
         isFeatureDisabled: !experimentalFeatures.alertSuppressionForMachineLearningRuleEnabled,
         licensing,
       });
+
+      const wrapSuppressedHits: WrapSuppressedHits = (events, buildReasonMessage) =>
+        wrapSuppressedAlerts({
+          events,
+          spaceId,
+          completeRule,
+          mergeStrategy,
+          // TODO is this correct?
+          indicesToQuery: inputIndex,
+          buildReasonMessage,
+          alertTimestampOverride,
+          ruleExecutionLogger,
+          publicBaseUrl,
+          primaryTimestamp,
+          secondaryTimestamp,
+        });
 
       const result = await mlExecutor({
         completeRule,
@@ -79,6 +104,11 @@ export const createMlAlertType = (
         wrapHits,
         exceptionFilter,
         unprocessedExceptions,
+        wrapSuppressedHits,
+        alertTimestampOverride,
+        alertWithSuppression,
+        isAlertSuppressionActive,
+        experimentalFeatures,
       });
       return { ...result, state };
     },
