@@ -24,10 +24,6 @@ const parseBfetchResponse = (resp: request.Response): Array<Record<string, any>>
     .map((item) => JSON.parse(item));
 };
 
-const getSpaceUrlPrefix = (spaceId?: string): string => {
-  return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;
-};
-
 interface SendOptions {
   supertestWithoutAuth: SuperTest.SuperTest<SuperTest.Test>;
   apiKeyHeader: { Authorization: string };
@@ -52,11 +48,9 @@ export class BsearchSecureService extends GenericFtrService<FtrProviderContext> 
     strategy,
     space,
   }: SendOptions) {
-    const spaceUrl = getSpaceUrlPrefix(space);
-
     const { body } = await this.retry.try(async () => {
       let result;
-      const url = `${spaceUrl}/internal/search/${strategy}`;
+      const url = `/internal/search/${strategy}`;
       if (referer && kibanaVersion) {
         result = await supertestWithoutAuth
           .post(url)
@@ -110,7 +104,7 @@ export class BsearchSecureService extends GenericFtrService<FtrProviderContext> 
 
     const result = await this.retry.try(async () => {
       const resp = await supertestWithoutAuth
-        .post(`${spaceUrl}/internal/bsearch`)
+        .post(`/internal/bsearch`)
         .set(apiKeyHeader)
         .set('kbn-xsrf', 'true')
         .set('x-elastic-internal-origin', 'Kibana')
