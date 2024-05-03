@@ -7,20 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useLayoutEffect, useState } from 'react';
+import { renderHook } from '@testing-library/react-hooks';
+import { useWindowWidth } from './use_window_width';
 
-/**
- * Hook that returns the browser window width
- */
-export const useWindowSize = (): number => {
-  const [width, setWidth] = useState(0);
-  useLayoutEffect(() => {
-    function updateSize() {
-      setWidth(window.innerWidth);
-    }
-    window.addEventListener('resize', updateSize);
-    updateSize();
-    return () => window.removeEventListener('resize', updateSize);
-  }, []);
-  return width;
-};
+describe('useWindowWidth', () => {
+  it('should return the window size', () => {
+    const hookResult = renderHook(() => useWindowWidth());
+    expect(hookResult.result.current).toEqual(1024);
+  });
+});

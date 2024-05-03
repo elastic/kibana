@@ -8,7 +8,7 @@
  */
 
 import { EuiFlexItem } from '@elastic/eui';
-import React, { memo, useMemo } from 'react';
+import React, { memo } from 'react';
 import { RIGHT_SECTION_TEST_ID } from './test_ids';
 
 interface RightSectionProps {
@@ -16,24 +16,16 @@ interface RightSectionProps {
    * Component to be rendered
    */
   component: React.ReactElement;
-  /**
-   * Width used when rendering the panel
-   */
-  width: number;
 }
 
 /**
  * Right section of the expanded flyout rendering a panel
  */
 export const RightSection: React.FC<RightSectionProps> = memo(
-  ({ component, width }: RightSectionProps) => {
-    const style = useMemo<React.CSSProperties>(
-      () => ({ height: '100%', width: `${width}px` }),
-      [width]
-    );
-
+  ({ component }: RightSectionProps) => {
+    console.log('render - RightSection');
     return (
-      <EuiFlexItem grow={false} style={style} data-test-subj={RIGHT_SECTION_TEST_ID}>
+      <EuiFlexItem grow={false} style={{ height: '100%' }} data-test-subj={RIGHT_SECTION_TEST_ID}>
         {component}
       </EuiFlexItem>
     );

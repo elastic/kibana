@@ -30,12 +30,18 @@ describe('PreviewSection', () => {
   } as unknown as State;
 
   const component = <div>{'component'}</div>;
-  const left = 500;
+  const defaultLeftSectionWidth = 500;
+  const defaultRightSectionWidth = 300;
 
   it('should render back button and close button in header', () => {
     const { getByTestId } = render(
       <TestProvider state={context}>
-        <PreviewSection component={component} leftPosition={left} />
+        <PreviewSection
+          component={component}
+          defaultLeftSectionWidth={defaultLeftSectionWidth}
+          defaultRightSectionWidth={defaultRightSectionWidth}
+          showLeft={true}
+        />
       </TestProvider>
     );
 
@@ -53,7 +59,13 @@ describe('PreviewSection', () => {
 
     const { getByTestId, getByText } = render(
       <TestProvider state={context}>
-        <PreviewSection component={component} leftPosition={left} banner={banner} />
+        <PreviewSection
+          component={component}
+          defaultLeftSectionWidth={defaultLeftSectionWidth}
+          defaultRightSectionWidth={defaultRightSectionWidth}
+          showLeft={true}
+          banner={banner}
+        />
       </TestProvider>
     );
 

@@ -8,7 +8,7 @@
  */
 
 import { createAction } from '@reduxjs/toolkit';
-import { FlyoutPanelProps } from './types';
+import { FlyoutPanelProps } from '../..';
 
 export enum ActionType {
   openFlyout = 'open_flyout',
@@ -21,6 +21,18 @@ export enum ActionType {
   previousPreviewPanel = 'previous_preview_panel',
   closeFlyout = 'close_flyout',
   urlChanged = 'urlChanged',
+
+  changePushVsOverlay = 'change_push_overlay',
+
+  setDefaultWidths = 'set_default_widths',
+
+  changeCollapsedWidth = 'change_collapsed_width',
+  resetCollapsedWidth = 'reset_collapsed_width',
+  changeExpandedWidth = 'change_expanded_width',
+  resetExpandedWidth = 'reset_expanded_width',
+
+  changeInternalPercentagesWidth = 'change_internal_percentages_width',
+  resetInternalPercentagesWidth = 'reset_internal_percentages_width',
 }
 
 export const openPanelsAction = createAction<{
@@ -120,3 +132,103 @@ export const urlChangedAction = createAction<{
    */
   id: string;
 }>(ActionType.urlChanged);
+
+export const changePushVsOverlayAction = createAction<{
+  /**
+   *
+   */
+  type: 'push' | 'overlay';
+  /**
+   * Unique identifier for the flyout (either the urlKey or 'memory')
+   */
+  id: string;
+  /**
+   *
+   */
+  savedToLocalStorage: boolean;
+}>(ActionType.changePushVsOverlay);
+
+export const setDefaultWidthsAction = createAction<{
+  /**
+   *
+   */
+  right: number;
+  /**
+   *
+   */
+  left: number;
+  /**
+   *
+   */
+  preview: number;
+}>(ActionType.setDefaultWidths);
+
+export const changeCollapsedWidthAction = createAction<{
+  /**
+   *
+   */
+  width: number;
+  /**
+   * Unique identifier for the flyout (either the urlKey or 'memory')
+   */
+  id: string;
+  /**
+   *
+   */
+  savedToLocalStorage: boolean;
+}>(ActionType.changeCollapsedWidth);
+
+export const resetCollapsedWidthAction = createAction<{
+  /**
+   * Unique identifier for the flyout (either the urlKey or 'memory')
+   */
+  id: string;
+}>(ActionType.resetCollapsedWidth);
+
+export const changeExpandedWidthAction = createAction<{
+  /**
+   *
+   */
+  width: number;
+  /**
+   * Unique identifier for the flyout (either the urlKey or 'memory')
+   */
+  id: string;
+  /**
+   *
+   */
+  savedToLocalStorage: boolean;
+}>(ActionType.changeExpandedWidth);
+
+export const resetExpandedWidthAction = createAction<{
+  /**
+   * Unique identifier for the flyout (either the urlKey or 'memory')
+   */
+  id: string;
+}>(ActionType.resetExpandedWidth);
+
+export const changeInternalPercentagesAction = createAction<{
+  /**
+   *
+   */
+  left: number;
+  /**
+   *
+   */
+  right: number;
+  /**
+   * Unique identifier for the flyout (either the urlKey or 'memory')
+   */
+  id: string;
+  /**
+   *
+   */
+  savedToLocalStorage: boolean;
+}>(ActionType.changeInternalPercentagesWidth);
+
+export const resetInternalPercentagesAction = createAction<{
+  /**
+   * Unique identifier for the flyout (either the urlKey or 'memory')
+   */
+  id: string;
+}>(ActionType.resetInternalPercentagesWidth);
