@@ -67,6 +67,11 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
     margin-top: 3px;
   }
 
+  .udtTimeline .euiDataGridHeaderCell.euiDataGridHeaderCell--controlColumn {
+    position: relative;
+    left: -60px;
+  }
+
   .udtTimeline .euiDataGridRowCell--controlColumn {
     overflow: visible;
   }
