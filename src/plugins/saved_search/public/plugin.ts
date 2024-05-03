@@ -17,7 +17,7 @@ import type {
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import type { SOWithMetadata } from '@kbn/content-management-utils';
-import { EmbeddableStart, registerSavedObjectToPanelMethod } from '@kbn/embeddable-plugin/public';
+import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import {
   getSavedSearch,
   saveSavedSearch,
@@ -68,6 +68,7 @@ export interface SavedSearchPublicPluginStart {
  * Saved search plugin public Setup contract
  */
 export interface SavedSearchPublicSetupDependencies {
+  embeddable: EmbeddableSetup;
   contentManagement: ContentManagementPublicSetup;
   expressions: ExpressionsSetup;
 }
@@ -94,7 +95,7 @@ export class SavedSearchPublicPlugin
 {
   public setup(
     { getStartServices }: CoreSetup,
-    { contentManagement, expressions }: SavedSearchPublicSetupDependencies
+    { contentManagement, expressions, embeddable }: SavedSearchPublicSetupDependencies
   ) {
     contentManagement.registry.register({
       id: SavedSearchType,
@@ -117,7 +118,7 @@ export class SavedSearchPublicPlugin
 
     expressions.registerType(kibanaContext);
 
-    registerSavedObjectToPanelMethod<SavedSearchAttributes, SearchByValueInput>(
+    embeddable.registerSavedObjectToPanelMethod<SavedSearchAttributes, SearchByValueInput>(
       SavedSearchType,
       (savedObject) => {
         if (!savedObject.managed) {

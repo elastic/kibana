@@ -34,6 +34,10 @@ import {
 import { setKibanaServices } from './kibana_services';
 import { SelfStyledOptions } from './lib/self_styled_embeddable/types';
 import { EmbeddablePublicPlugin } from './plugin';
+import {
+  reactEmbeddableRegistryHasKey,
+  registerReactEmbeddableFactory,
+} from './react_embeddable_system';
 
 export { mockAttributeService } from './lib/attribute_service/attribute_service.mock';
 export type Setup = jest.Mocked<EmbeddableSetup>;
@@ -93,6 +97,8 @@ export function mockFilterableEmbeddable<OriginalEmbeddableType>(
 
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
+    registerReactEmbeddableFactory: jest.fn().mockImplementation(registerReactEmbeddableFactory),
+    reactEmbeddableRegistryHasKey: jest.fn().mockImplementation(reactEmbeddableRegistryHasKey),
     registerEmbeddableFactory: jest.fn(),
     registerEnhancement: jest.fn(),
     setCustomEmbeddableFactoryProvider: jest.fn(),
@@ -102,6 +108,8 @@ const createSetupContract = (): Setup => {
 
 const createStartContract = (): Start => {
   const startContract: Start = {
+    registerReactEmbeddableFactory: jest.fn().mockImplementation(registerReactEmbeddableFactory),
+    reactEmbeddableRegistryHasKey: jest.fn().mockImplementation(reactEmbeddableRegistryHasKey),
     getEmbeddableFactories: jest.fn(),
     getEmbeddableFactory: jest.fn(),
     telemetry: jest.fn(),

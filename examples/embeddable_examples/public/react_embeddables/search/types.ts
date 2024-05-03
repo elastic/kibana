@@ -8,7 +8,7 @@
 
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type { DefaultEmbeddableApi, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import {
   HasParentApi,
   PublishesDataLoading,
@@ -27,6 +27,7 @@ export type SearchApi = DefaultEmbeddableApi<SearchSerializedState> &
   Partial<HasParentApi<PublishesUnifiedSearch>>;
 
 export interface Services {
+  embeddable: EmbeddableStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
 }

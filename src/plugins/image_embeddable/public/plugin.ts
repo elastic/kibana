@@ -7,7 +7,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { EmbeddableSetup, registerReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { FilesSetup, FilesStart } from '@kbn/files-plugin/public';
 import {
   ScreenshotModePluginSetup,
@@ -33,6 +33,7 @@ export interface ImageEmbeddableStartDependencies {
   files: FilesStart;
   security?: SecurityPluginStart;
   uiActions: UiActionsStart;
+  embeddable: EmbeddableStart;
   screenshotMode?: ScreenshotModePluginStart;
   embeddableEnhanced?: EmbeddableEnhancedPluginStart;
 }
@@ -68,7 +69,7 @@ export class ImageEmbeddablePlugin
     untilPluginStartServicesReady().then(() => {
       registerCreateImageAction();
     });
-    registerReactEmbeddableFactory(IMAGE_EMBEDDABLE_TYPE, async () => {
+    plugins.embeddable.registerReactEmbeddableFactory(IMAGE_EMBEDDABLE_TYPE, async () => {
       const [_, { getImageEmbeddableFactory }] = await Promise.all([
         untilPluginStartServicesReady(),
         import('./image_embeddable/get_image_embeddable_factory'),

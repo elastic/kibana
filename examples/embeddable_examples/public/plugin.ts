@@ -12,11 +12,7 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import {
-  EmbeddableSetup,
-  EmbeddableStart,
-  registerReactEmbeddableFactory,
-} from '@kbn/embeddable-plugin/public';
+import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { setupApp } from './app/setup_app';
@@ -53,7 +49,7 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
 
   public start(core: CoreStart, deps: StartDeps) {
     registerCreateFieldListAction(deps.uiActions);
-    registerReactEmbeddableFactory(FIELD_LIST_ID, async () => {
+    deps.embeddable.registerReactEmbeddableFactory(FIELD_LIST_ID, async () => {
       const { getFieldListFactory } = await import(
         './react_embeddables/field_list/field_list_react_embeddable'
       );
@@ -62,7 +58,7 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
     registerFieldListPanelPlacementSetting();
 
     registerCreateEuiMarkdownAction(deps.uiActions);
-    registerReactEmbeddableFactory(EUI_MARKDOWN_ID, async () => {
+    deps.embeddable.registerReactEmbeddableFactory(EUI_MARKDOWN_ID, async () => {
       const { markdownEmbeddableFactory } = await import(
         './react_embeddables/eui_markdown/eui_markdown_react_embeddable'
       );
@@ -73,7 +69,7 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
     registerSearchEmbeddable(deps);
 
     registerCreateDataTableAction(deps.uiActions);
-    registerReactEmbeddableFactory(DATA_TABLE_ID, async () => {
+    deps.embeddable.registerReactEmbeddableFactory(DATA_TABLE_ID, async () => {
       const { getDataTableFactory } = await import(
         './react_embeddables/data_table/data_table_react_embeddable'
       );
