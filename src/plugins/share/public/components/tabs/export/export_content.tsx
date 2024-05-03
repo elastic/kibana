@@ -34,13 +34,7 @@ type ExportProps = Pick<IShareContext, 'isDirty' | 'objectId' | 'objectType' | '
   intl: InjectedIntl;
 };
 
-const ExportContentUi = ({
-  isDirty,
-  objectType,
-  aggregateReportTypes,
-  intl,
-  onClose,
-}: ExportProps) => {
+const ExportContentUi = ({ isDirty, aggregateReportTypes, intl, onClose }: ExportProps) => {
   const [isCreatingExport, setIsCreatingExport] = useState<boolean>(false);
   const [usePrintLayout, setPrintLayout] = useState(false);
 
@@ -87,7 +81,7 @@ const ExportContentUi = ({
   const renderLayoutOptionsSwitch = useCallback(() => {
     if (renderLayoutOptionSwitch) {
       return (
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiSwitch
               label={
@@ -123,7 +117,7 @@ const ExportContentUi = ({
   const showCopyURLButton = useCallback(() => {
     if (renderCopyURLButton)
       return (
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} css={{ flexGrow: 0 }}>
+        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} css={{ flexGrow: 0 }}>
           <EuiFlexItem grow={false}>
             <EuiCopy textToCopy={absoluteUrl ?? ''}>
               {(copy) => (
@@ -131,7 +125,6 @@ const ExportContentUi = ({
                   iconType="copyClipboard"
                   onClick={copy}
                   data-test-subj="shareReportingCopyURL"
-                  flush="both"
                 >
                   <FormattedMessage
                     id="share.modalContent.copyUrlButtonLabel"

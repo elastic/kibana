@@ -48,11 +48,20 @@ export interface ShareContext {
    * If not set it will default to `window.location.href`
    */
   shareableUrl?: string;
+  /**
+   * @deprecated prefer {@link delegatedShareUrlHandler}
+   */
   shareableUrlForSavedObject?: string;
   shareableUrlLocatorParams?: {
     locator: LocatorPublic<any>;
     params: any;
   };
+  /**
+   *
+   * @description allows a consumer to provide a custom method which when invoked
+   * handles providing a share url in the context of said consumer
+   */
+  delegatedShareUrlHandler?: () => string;
   sharingData: { [key: string]: unknown };
   isDirty: boolean;
   onClose: () => void;
@@ -146,7 +155,6 @@ export interface ShowShareMenuOptions extends Omit<ShareContext, 'onClose'> {
   embedUrlParamExtensions?: UrlParamExtension[];
   snapshotShareWarning?: string;
   onClose?: () => void;
-  objectTypeTitle?: string;
 }
 
 export interface ClientConfigType {
