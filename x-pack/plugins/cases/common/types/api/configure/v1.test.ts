@@ -691,7 +691,7 @@ describe('configure', () => {
         ).toContain('The length of the field tags is too long. Array must be of length <= 200.');
       });
 
-      it(`throws an error when the a tag is more than ${MAX_LENGTH_PER_TAG} characters`, async () => {
+      it(`throws an error when the tag is more than ${MAX_LENGTH_PER_TAG} characters`, async () => {
         const tag = 'a'.repeat(MAX_LENGTH_PER_TAG + 1);
 
         expect(
