@@ -195,6 +195,18 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       'core.euiCollapsibleNavButton.ariaLabelOpen',
       { defaultMessage: 'Open navigation' }
     ),
+    'euiCollapsibleNavKibanaSolution.switcherTitle': i18n.translate(
+      'core.euiCollapsibleNavKibanaSolution.switcherTitle',
+      { defaultMessage: 'Solution view' }
+    ),
+    'euiCollapsibleNavKibanaSolution.switcherAriaLabel': i18n.translate(
+      'core.euiCollapsibleNavKibanaSolution.switcherAriaLabel',
+      { defaultMessage: '- click to switch to another solution' }
+    ),
+    'euiCollapsibleNavKibanaSolution.groupLabel': i18n.translate(
+      'core.euiCollapsibleNavKibanaSolution.groupLabel',
+      { defaultMessage: 'Navigate to solution' }
+    ),
     'euiColorPicker.alphaLabel': i18n.translate('core.euiColorPicker.alphaLabel', {
       defaultMessage: 'Alpha channel (opacity) value',
       description: 'Label describing color alpha channel',

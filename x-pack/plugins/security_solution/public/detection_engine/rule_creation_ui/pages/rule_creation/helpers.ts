@@ -559,6 +559,7 @@ export const formatAboutStepData = (
     threat,
     isAssociatedToEndpointList,
     isBuildingBlock,
+    maxSignals,
     note,
     ruleNameOverride,
     threatIndicatorPath,
@@ -613,6 +614,7 @@ export const formatAboutStepData = (
     timestamp_override: timestampOverride !== '' ? timestampOverride : undefined,
     timestamp_override_fallback_disabled: timestampOverrideFallbackDisabled,
     ...(!isEmpty(note) ? { note } : {}),
+    max_signals: Number.isSafeInteger(maxSignals) ? maxSignals : undefined,
     ...rest,
   };
   return resp;
