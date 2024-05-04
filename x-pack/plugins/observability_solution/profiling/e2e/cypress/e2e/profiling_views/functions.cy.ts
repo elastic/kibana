@@ -38,8 +38,8 @@ describe('Functions page', () => {
     cy.get(firstRowSelector).eq(2).contains('vmlinux');
     cy.get(firstRowSelector).eq(3).contains('0.16%');
     cy.get(firstRowSelector).eq(4).contains('0.16%');
-    cy.get(firstRowSelector).eq(5).contains('4.41 lbs / 2 kg');
-    cy.get(firstRowSelector).eq(6).contains('$18.61');
+    cy.get(firstRowSelector).eq(5).contains('3.97 lbs / 1.8 kg');
+    cy.get(firstRowSelector).eq(6).contains('$17.37');
     cy.get(firstRowSelector).eq(7).contains('28');
   });
 
@@ -66,16 +66,16 @@ describe('Functions page', () => {
       { parentKey: 'impactEstimates', key: 'annualizedSelfCoreSeconds', value: '17.03 days' },
       { parentKey: 'impactEstimates', key: 'co2Emission', value: '~0.00 lbs / ~0.00 kg' },
       { parentKey: 'impactEstimates', key: 'selfCo2Emission', value: '~0.00 lbs / ~0.00 kg' },
-      { parentKey: 'impactEstimates', key: 'annualizedCo2Emission', value: '4.41 lbs / 2 kg' },
+      { parentKey: 'impactEstimates', key: 'annualizedCo2Emission', value: '3.97 lbs / 1.8 kg' },
       {
         parentKey: 'impactEstimates',
         key: 'annualizedSelfCo2Emission',
-        value: '4.41 lbs / 2 kg',
+        value: '3.97 lbs / 1.8 kg',
       },
       { parentKey: 'impactEstimates', key: 'dollarCost', value: '$~0.00' },
       { parentKey: 'impactEstimates', key: 'selfDollarCost', value: '$~0.00' },
-      { parentKey: 'impactEstimates', key: 'annualizedDollarCost', value: '$18.61' },
-      { parentKey: 'impactEstimates', key: 'annualizedSelfDollarCost', value: '$18.61' },
+      { parentKey: 'impactEstimates', key: 'annualizedDollarCost', value: '$17.37' },
+      { parentKey: 'impactEstimates', key: 'annualizedSelfDollarCost', value: '$17.37' },
     ].forEach(({ parentKey, key, value }) => {
       cy.get(`[data-test-subj="${parentKey}_${key}"]`).contains(value);
     });
@@ -134,7 +134,7 @@ describe('Functions page', () => {
         columnIndex: 5,
         highRank: 693,
         lowRank: 44,
-        highValue: '48.28 lbs / 21.9 kg',
+        highValue: '44.97 lbs / 20.4 kg',
         lowValue: '0 lbs / 0 kg',
       },
       {
@@ -142,8 +142,8 @@ describe('Functions page', () => {
         columnIndex: 6,
         highRank: 693,
         lowRank: 44,
-        highValue: '$206.09',
-        lowValue: '$0.66',
+        highValue: '$192.36',
+        lowValue: '$0.62',
       },
     ].forEach(({ columnKey, columnIndex, highRank, highValue, lowRank, lowValue }) => {
       cy.get(`[data-test-subj="dataGridHeaderCell-${columnKey}"]`).click();
@@ -189,7 +189,7 @@ describe('Functions page', () => {
       const firstRowSelector = '[data-grid-row-index="0"] [data-test-subj="dataGridRowCell"]';
       cy.get(firstRowSelector).eq(1).contains('1');
       cy.get(firstRowSelector).eq(2).contains('vmlinux');
-      cy.get(firstRowSelector).eq(5).contains('4.41 lbs / 2 kg');
+      cy.get(firstRowSelector).eq(5).contains('3.97 lbs / 1.8 kg');
       cy.contains('Settings').click();
       cy.contains('Advanced Settings');
       cy.get(`[data-test-subj="management-settings-editField-${profilingCo2PerKWH}"]`)
@@ -208,7 +208,7 @@ describe('Functions page', () => {
       });
       cy.go('back');
       cy.wait('@getTopNFunctions');
-      cy.get(firstRowSelector).eq(5).contains('2k lbs / 908.4 kg');
+      cy.get(firstRowSelector).eq(5).contains('1.87k lbs / 847.8 kg');
       const firstRowSelectorActionButton =
         '[data-grid-row-index="0"] [data-test-subj="dataGridRowCell"] .euiButtonIcon';
       cy.get(firstRowSelectorActionButton).click();
@@ -218,12 +218,12 @@ describe('Functions page', () => {
         {
           parentKey: 'impactEstimates',
           key: 'annualizedCo2Emission',
-          value: '2k lbs / 908.4 kg',
+          value: '1.87k lbs / 847.8 kg',
         },
         {
           parentKey: 'impactEstimates',
           key: 'annualizedSelfCo2Emission',
-          value: '2k lbs / 908.4 kg',
+          value: '1.87k lbs / 847.8 kg',
         },
       ].forEach(({ parentKey, key, value }) => {
         cy.get(`[data-test-subj="${parentKey}_${key}"]`).contains(value);

@@ -75,6 +75,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
     version,
     isPreview,
     experimentalFeatures,
+    alerting,
   }) =>
   (type) => {
     const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
@@ -306,7 +307,12 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             wroteWarningStatus = true;
           }
 
-          const { tuples, remainingGap } = getRuleRangeTuples({
+          const {
+            tuples,
+            remainingGap,
+            wroteWarningStatus: rangeTuplesWarningStatus,
+            warningStatusMessage: rangeTuplesWarningMessage,
+          } = await getRuleRangeTuples({
             startedAt,
             previousStartedAt,
             from,
@@ -314,7 +320,12 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             interval,
             maxSignals: maxSignals ?? DEFAULT_MAX_SIGNALS,
             ruleExecutionLogger,
+            alerting,
           });
+          if (rangeTuplesWarningStatus) {
+            wroteWarningStatus = rangeTuplesWarningStatus;
+            warningMessage = rangeTuplesWarningMessage;
+          }
 
           if (remainingGap.asMilliseconds() > 0) {
             hasError = true;
@@ -464,7 +475,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             if (result.warningMessages.length) {
               await ruleExecutionLogger.logStatusChange({
                 newStatus: RuleExecutionStatusEnum['partial failure'],
-                message: truncateList(result.warningMessages).join(),
+                message: truncateList(result.warningMessages).join(', '),
                 metrics: {
                   searchDurations: result.searchAfterTimes,
                   indexingDurations: result.bulkCreateTimes,
