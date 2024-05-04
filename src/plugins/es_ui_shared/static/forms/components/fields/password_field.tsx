@@ -24,7 +24,7 @@ export const PasswordField = ({ field, euiFieldProps, idAria, ...rest }: Props) 
   return (
     <EuiFormRow
       label={field.label}
-            helpText={field.helpText}
+      helpText={field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}
       fullWidth

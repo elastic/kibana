@@ -8,7 +8,8 @@
 import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
 import { useVisualizationResponse } from './use_visualization_response';
 import { renderHook } from '@testing-library/react-hooks';
-import React, { PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
+import React from 'react';
 import { parseVisualizationData } from './utils';
 
 describe('useVisualizationResponse', () => {
