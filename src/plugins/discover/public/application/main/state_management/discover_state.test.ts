@@ -113,18 +113,21 @@ describe('Test discover state', () => {
   });
 
   test('changing URL to be propagated to appState', async () => {
-    history.push('/#?_a=(index:modified)');
+    history.push('/#?_a=(dataSource:(dataViewId:modified,type:dataView))');
     expect(state.appState.getState()).toMatchInlineSnapshot(`
       Object {
-        "index": "modified",
+        "dataSource": Object {
+          "dataViewId": "modified",
+          "type": "dataView",
+        },
       }
     `);
   });
   test('URL navigation to url without _a, state should not change', async () => {
-    history.push('/#?_a=(index:modified)');
+    history.push('/#?_a=(dataSource:(dataViewId:modified,type:dataView))');
     history.push('/');
     expect(state.appState.getState()).toEqual({
-      index: 'modified',
+      dataSource: createDataViewDataSource({ dataViewId: 'modified' }),
     });
   });
 
@@ -210,13 +213,16 @@ describe('Test discover state with overridden state storage', () => {
   });
 
   test('changing URL to be propagated to appState', async () => {
-    history.push('/#?_a=(index:modified)');
+    history.push('/#?_a=(dataSource:(dataViewId:modified,type:dataView))');
 
     await jest.runAllTimersAsync();
 
     expect(state.appState.getState()).toMatchInlineSnapshot(`
       Object {
-        "index": "modified",
+        "dataSource": Object {
+          "dataViewId": "modified",
+          "type": "dataView",
+        },
       }
     `);
   });
@@ -613,7 +619,7 @@ describe('Test discover state actions', () => {
   });
 
   test('loadSavedSearch without id ignoring invalid index in URL, adding a warning toast', async () => {
-    const url = '/#?_a=(index:abc)&_g=()';
+    const url = '/#?_a=(dataSource:(dataViewId:abc,type:dataView))&_g=()';
     const { state } = await getState(url, { savedSearch: savedSearchMock, isEmptyUrl: false });
     await state.actions.loadSavedSearch();
     expect(state.savedSearchState.getState().searchSource.getField('index')?.id).toBe(
@@ -627,14 +633,15 @@ describe('Test discover state actions', () => {
   });
 
   test('loadSavedSearch without id containing ES|QL, adding no warning toast with an invalid index', async () => {
-    const url = "/#?_a=(index:abcde,query:(esql:'FROM test'))&_g=()";
+    const url =
+      "/#?_a=(dataSource:(dataViewId:abcde,type:dataView),query:(esql:'FROM test'))&_g=()";
     const { state } = await getState(url, { savedSearch: savedSearchMock, isEmptyUrl: false });
     await state.actions.loadSavedSearch();
     expect(discoverServiceMock.toastNotifications.addWarning).not.toHaveBeenCalled();
   });
 
   test('loadSavedSearch with id ignoring invalid index in URL, adding a warning toast', async () => {
-    const url = '/#?_a=(index:abc)&_g=()';
+    const url = '/#?_a=(dataSource:(dataViewId:abc,type:dataView))&_g=()';
     const { state } = await getState(url, { savedSearch: savedSearchMock, isEmptyUrl: false });
     await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });
     expect(state.savedSearchState.getState().searchSource.getField('index')?.id).toBe(
@@ -735,7 +742,7 @@ describe('Test discover state actions', () => {
   test('loadSavedSearch with ES|QL, data view index is not overwritten by URL ', async () => {
     const savedSearchMockWithESQLCopy = copySavedSearch(savedSearchMockWithESQL);
     const persistedDataViewId = savedSearchMockWithESQLCopy?.searchSource.getField('index')!.id;
-    const url = "/#?_a=(index:'the-data-view-id')&_g=()";
+    const url = "/#?_a=(dataSource:(dataViewId:'the-data-view-id',type:dataView))&_g=()";
     const { state } = await getState(url, {
       savedSearch: savedSearchMockWithESQLCopy,
       isEmptyUrl: false,
@@ -874,7 +881,7 @@ describe('Test discover state actions', () => {
     const unsubscribe = state.actions.initializeAndSync();
     await new Promise(process.nextTick);
     const initialUrlState =
-      '/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),index:the-data-view-id,interval:auto,sort:!())';
+      '/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),dataSource:(dataViewId:the-data-view-id,type:dataView),interval:auto,sort:!())';
     expect(getCurrentUrl()).toBe(initialUrlState);
     expect(state.internalState.getState().dataView?.id).toBe(dataViewMock.id!);
 
@@ -882,7 +889,7 @@ describe('Test discover state actions', () => {
     await state.actions.onChangeDataView(dataViewComplexMock.id!);
     await new Promise(process.nextTick);
     expect(getCurrentUrl()).toMatchInlineSnapshot(
-      `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(),index:data-view-with-various-field-types-id,interval:auto,sort:!(!(data,desc)))"`
+      `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(),dataSource:(dataViewId:data-view-with-various-field-types-id,type:dataView),interval:auto,sort:!(!(data,desc)))"`
     );
     await waitFor(() => {
       expect(state.dataState.fetch).toHaveBeenCalledTimes(1);
@@ -960,10 +967,10 @@ describe('Test discover state with embedded mode', () => {
   });
 
   test('changing URL to be propagated to appState', async () => {
-    history.push('/?_a=(index:modified)');
+    history.push('/?_a=(dataSource:(dataViewId:modified,type:dataView))');
     expect(state.appState.getState()).toMatchObject(
       expect.objectContaining({
-        index: 'modified',
+        dataSource: createDataViewDataSource({ dataViewId: 'modified' }),
       })
     );
   });
