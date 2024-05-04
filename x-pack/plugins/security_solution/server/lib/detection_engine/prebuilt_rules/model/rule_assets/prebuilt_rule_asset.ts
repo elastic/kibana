@@ -7,9 +7,6 @@
 
 import * as z from 'zod';
 import {
-  RequiredFieldArray,
-  RelatedIntegrationArray,
-  SetupGuide,
   RuleSignatureId,
   RuleVersion,
   BaseCreateProps,

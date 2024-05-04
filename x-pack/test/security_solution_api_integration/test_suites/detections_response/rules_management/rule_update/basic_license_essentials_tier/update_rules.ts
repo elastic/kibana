@@ -66,7 +66,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should update a rule with defaultable fields', async () => {
-        const expectedRule = getCustomQueryRuleParams({
+        const ruleUpdateProperties = getCustomQueryRuleParams({
           rule_id: 'rule-1',
           max_signals: 200,
           setup: '# some setup markdown',
@@ -74,7 +74,13 @@ export default ({ getService }: FtrProviderContext) => {
             { package: 'package-a', version: '^1.2.3' },
             { package: 'package-b', integration: 'integration-b', version: '~1.1.1' },
           ],
+          required_fields: [{ name: '@timestamp', type: 'date' }],
         });
+
+        const expectedRule = {
+          ...ruleUpdateProperties,
+          required_fields: [{ name: '@timestamp', type: 'date', ecs: true }],
+        };
 
         await securitySolutionApi.createRule({
           body: getCustomQueryRuleParams({ rule_id: 'rule-1' }),
@@ -82,7 +88,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const { body: updatedRuleResponse } = await securitySolutionApi
           .updateRule({
-            body: expectedRule,
+            body: ruleUpdateProperties,
           })
           .expect(200);
 
@@ -95,35 +101,6 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         expect(updatedRule).toMatchObject(expectedRule);
-      });
-
-      it('should update a rule with defaultable fields', async () => {
-        const expectedRule = {
-          ...getCustomQueryRuleParams({
-            rule_id: 'rule-1',
-          }),
-          required_fields: [{ name: '@timestamp', type: 'date', ecs: true }],
-        };
-
-        await securitySolutionApi.createRule({
-          body: getCustomQueryRuleParams({ rule_id: 'rule-1' }),
-        });
-
-        const { body: updatedRuleResponse } = await securitySolutionApi
-          .updateRule({
-            body: expectedRule,
-          })
-          .expect(200);
-
-        expect(updatedRuleResponse.required_fields).to.eql(expectedRule.required_fields);
-
-        const { body: updatedRule } = await securitySolutionApi
-          .readRule({
-            query: { rule_id: 'rule-1' },
-          })
-          .expect(200);
-
-        expect(updatedRule.required_fields).to.eql(expectedRule.required_fields);
       });
 
       it('@skipInServerless should return a 403 forbidden if it is a machine learning job', async () => {
