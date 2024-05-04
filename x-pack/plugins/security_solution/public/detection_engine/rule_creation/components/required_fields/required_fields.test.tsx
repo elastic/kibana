@@ -21,7 +21,7 @@ describe('RequiredFields form part', () => {
     expect(screen.getByText('Required fields'));
   });
 
-  it('displays previosuly saved required fields', () => {
+  it('displays previously saved required fields', () => {
     const initialState: RequiredFieldWithOptionalEcs[] = [
       { name: 'field1', type: 'string' },
       { name: 'field2', type: 'number' },
@@ -52,7 +52,7 @@ describe('RequiredFields form part', () => {
     expect(screen.getByDisplayValue('string')).toBeVisible();
   });
 
-  it('user can add a new required field to a previosly saved form', async () => {
+  it('user can add a new required field to a previously saved form', async () => {
     const initialState: RequiredFieldWithOptionalEcs[] = [{ name: 'field1', type: 'string' }];
 
     const indexPatternFields: DataViewFieldBase[] = [
