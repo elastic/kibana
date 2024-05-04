@@ -145,7 +145,6 @@ export const useAssistantOverlay = (
             },
             category: 'assistant',
             title: conversationTitle ?? '',
-            replacements: _replacements ?? {},
           });
         } catch (e) {
           /* empty */
@@ -161,7 +160,6 @@ export const useAssistantOverlay = (
       }
     },
     [
-      _replacements,
       apiConfig,
       assistantContextShowOverlay,
       conversationTitle,
