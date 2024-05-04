@@ -437,8 +437,6 @@ export const convertPatchAPIToInternalSchema = (
   const typeSpecificParams = patchTypeSpecificSnakeToCamel(nextParams, existingRule.params);
   const existingParams = existingRule.params;
 
-  const requiredFieldsWithEcs = addEcsToRequiredFields(nextParams.required_fields);
-
   const alertActions =
     nextParams.actions?.map((action) => transformRuleToAlertAction(action)) ?? existingRule.actions;
   const throttle = nextParams.throttle ?? transformFromAlertThrottle(existingRule);
@@ -463,7 +461,7 @@ export const convertPatchAPIToInternalSchema = (
       meta: nextParams.meta ?? existingParams.meta,
       maxSignals: nextParams.max_signals ?? existingParams.maxSignals,
       relatedIntegrations: nextParams.related_integrations ?? existingParams.relatedIntegrations,
-      requiredFields: requiredFieldsWithEcs,
+      requiredFields: addEcsToRequiredFields(nextParams.required_fields),
       riskScore: nextParams.risk_score ?? existingParams.riskScore,
       riskScoreMapping: nextParams.risk_score_mapping ?? existingParams.riskScoreMapping,
       ruleNameOverride: nextParams.rule_name_override ?? existingParams.ruleNameOverride,
