@@ -130,7 +130,9 @@ export const useAssistantOverlay = (
     async (showOverlay: boolean, silent?: boolean) => {
       let conversation;
       if (!isLoading) {
-        conversation = conversationTitle ? conversations[conversationTitle] : undefined;
+        conversation = conversationTitle
+          ? Object.values(conversations).find((conv) => conv.title === conversationTitle)
+          : undefined;
       }
 
       if (!conversation && defaultConnector && !isLoading) {
