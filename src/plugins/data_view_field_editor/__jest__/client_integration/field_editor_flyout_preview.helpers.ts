@@ -27,7 +27,6 @@ import {
 const defaultProps: Props = {
   onSave: () => {},
   onCancel: () => {},
-  isSavingField: false,
 };
 
 /**
