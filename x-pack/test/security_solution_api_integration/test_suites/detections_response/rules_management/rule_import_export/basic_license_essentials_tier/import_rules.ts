@@ -126,8 +126,8 @@ export default ({ getService }: FtrProviderContext): void => {
             { package: 'package-b', integration: 'integration-b', version: '~1.1.1' },
           ],
           required_fields: [
-            { name: '@timestamp', type: 'date', ecs: true },
-            { name: 'my-non-ecs-field', type: 'keyword', ecs: false },
+            { name: '@timestamp', type: 'date' },
+            { name: 'my-non-ecs-field', type: 'keyword' },
           ],
         };
 
@@ -135,6 +135,15 @@ export default ({ getService }: FtrProviderContext): void => {
           ...defaultableFields,
           rule_id: 'rule-1',
         });
+
+        const expectedRule = {
+          ...ruleToImport,
+          required_fields: [
+            { name: '@timestamp', type: 'date', ecs: true },
+            { name: 'my-non-ecs-field', type: 'keyword', ecs: false },
+          ],
+        };
+
         const ndjson = combineToNdJson(ruleToImport);
 
         await securitySolutionApi
@@ -148,7 +157,7 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(200);
 
-        expect(importedRule).toMatchObject(ruleToImport);
+        expect(importedRule).toMatchObject(expectedRule);
       });
 
       it('should be able to import two rules', async () => {

@@ -60,7 +60,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should patch defaultable fields', async () => {
-        const expectedRule = getCustomQueryRuleParams({
+        const rulePatchProperties = getCustomQueryRuleParams({
           rule_id: 'rule-1',
           max_signals: 200,
           setup: '# some setup markdown',
@@ -68,7 +68,13 @@ export default ({ getService }: FtrProviderContext) => {
             { package: 'package-a', version: '^1.2.3' },
             { package: 'package-b', integration: 'integration-b', version: '~1.1.1' },
           ],
+          required_fields: [{ name: '@timestamp', type: 'date' }],
         });
+
+        const expectedRule = {
+          ...rulePatchProperties,
+          required_fields: [{ name: '@timestamp', type: 'date', ecs: true }],
+        };
 
         await securitySolutionApi.createRule({
           body: getCustomQueryRuleParams({ rule_id: 'rule-1' }),
@@ -78,10 +84,7 @@ export default ({ getService }: FtrProviderContext) => {
           .bulkPatchRules({
             body: [
               {
-                rule_id: 'rule-1',
-                max_signals: expectedRule.max_signals,
-                setup: expectedRule.setup,
-                related_integrations: expectedRule.related_integrations,
+                ...rulePatchProperties,
               },
             ],
           })
@@ -96,37 +99,6 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         expect(patchedRule).toMatchObject(expectedRule);
-      });
-
-      it('should patch defaultable fields', async () => {
-        const expectedRule = {
-          required_fields: [{ name: '@timestamp', type: 'date', ecs: true }],
-        };
-
-        await securitySolutionApi.createRule({
-          body: getCustomQueryRuleParams({ rule_id: 'rule-1' }),
-        });
-
-        const { body: patchedRulesBulkResponse } = await securitySolutionApi
-          .bulkPatchRules({
-            body: [
-              {
-                rule_id: 'rule-1',
-                required_fields: [{ name: '@timestamp', type: 'date' }],
-              },
-            ],
-          })
-          .expect(200);
-
-        expect(patchedRulesBulkResponse[0].required_fields).to.eql(expectedRule.required_fields);
-
-        const { body: patchedRule } = await securitySolutionApi
-          .readRule({
-            query: { rule_id: 'rule-1' },
-          })
-          .expect(200);
-
-        expect(patchedRule.required_fields).to.eql(expectedRule.required_fields);
       });
 
       it('should patch two rule properties of name using the two rules rule_id', async () => {

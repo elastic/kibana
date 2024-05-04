@@ -6,7 +6,6 @@
  */
 
 import expect from 'expect';
-import { BaseDefaultableFields } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 import { EsArchivePathBuilder } from '../../../../../es_archive_path_builder';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
@@ -14,7 +13,6 @@ import {
   getCustomQueryRuleParams,
   getSimpleRule,
   getSimpleRuleOutput,
-  getCustomQueryRuleParams,
   getSimpleRuleOutputWithoutRuleId,
   getSimpleRuleWithoutRuleId,
   removeServerGeneratedProperties,
@@ -71,7 +69,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should create a rule with defaultable fields', async () => {
-        const expectedRule = getCustomQueryRuleParams({
+        const ruleCreateProperties = getCustomQueryRuleParams({
           rule_id: 'rule-1',
           max_signals: 200,
           setup: '# some setup markdown',
@@ -79,10 +77,22 @@ export default ({ getService }: FtrProviderContext): void => {
             { package: 'package-a', version: '^1.2.3' },
             { package: 'package-b', integration: 'integration-b', version: '~1.1.1' },
           ],
+          required_fields: [
+            { name: '@timestamp', type: 'date' },
+            { name: 'my-non-ecs-field', type: 'keyword' },
+          ],
         });
 
+        const expectedRule = {
+          ...ruleCreateProperties,
+          required_fields: [
+            { name: '@timestamp', type: 'date', ecs: true },
+            { name: 'my-non-ecs-field', type: 'keyword', ecs: false },
+          ],
+        };
+
         const { body: createdRulesBulkResponse } = await securitySolutionApi
-          .bulkCreateRules({ body: [expectedRule] })
+          .bulkCreateRules({ body: [ruleCreateProperties] })
           .expect(200);
 
         expect(createdRulesBulkResponse[0]).toMatchObject(expectedRule);
@@ -94,36 +104,6 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         expect(createdRule).toMatchObject(expectedRule);
-      });
-
-      it('should create a rule with defaultable fields', async () => {
-        const defaultableFields: BaseDefaultableFields = {
-          required_fields: [
-            { name: '@timestamp', type: 'date' },
-            { name: 'my-non-ecs-field', type: 'keyword' },
-          ],
-        };
-        const mockRule = getCustomQueryRuleParams({ rule_id: 'rule-1', ...defaultableFields });
-
-        const { body: createdRulesBulkResponse } = await securitySolutionApi
-          .bulkCreateRules({ body: [mockRule] })
-          .expect(200);
-
-        expect(createdRulesBulkResponse[0].required_fields).to.eql([
-          { name: '@timestamp', type: 'date', ecs: true },
-          { name: 'my-non-ecs-field', type: 'keyword', ecs: false },
-        ]);
-
-        const { body: createdRule } = await securitySolutionApi
-          .readRule({
-            query: { rule_id: 'rule-1' },
-          })
-          .expect(200);
-
-        expect(createdRule.required_fields).to.eql([
-          { name: '@timestamp', type: 'date', ecs: true },
-          { name: 'my-non-ecs-field', type: 'keyword', ecs: false },
-        ]);
       });
 
       it('should create a single rule without a rule_id', async () => {
