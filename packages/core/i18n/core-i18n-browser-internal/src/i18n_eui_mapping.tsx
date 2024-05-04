@@ -1379,7 +1379,7 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     ),
     'euiAbsoluteTab.dateFormatError': ({ dateFormat }: EuiValues) => (
       <FormattedMessage
-        id="euiAbsoluteTab.dateFormatError"
+        id="core.euiAbsoluteTab.dateFormatError"
         defaultMessage="Allowed formats: {dateFormat}, ISO 8601, RFC 2822, or Unix timestamp."
         values={{ dateFormat }}
       />
