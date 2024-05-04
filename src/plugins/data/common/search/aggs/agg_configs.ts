@@ -11,7 +11,7 @@ import _, { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { Assign } from '@kbn/utility-types';
 import { isRangeFilter, TimeRange, RangeFilter } from '@kbn/es-query';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { AbstractDataView } from '@kbn/data-views-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IndexPatternLoadExpressionFunctionDefinition } from '@kbn/data-views-plugin/common';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
@@ -88,7 +88,7 @@ export class AggConfigs {
   public readonly timeZone: string;
 
   constructor(
-    public indexPattern: DataView,
+    public indexPattern: AbstractDataView,
     configStates: CreateAggConfigParams[] = [],
     private opts: AggConfigsOptions,
     private getConfig: GetConfigFn
