@@ -20,6 +20,11 @@ import { addLog } from '../../../../utils/add_log';
 import { isTextBasedQuery } from '../../utils/is_text_based_query';
 import { FetchStatus } from '../../../types';
 import { loadAndResolveDataView } from './resolve_data_view';
+import {
+  createDataViewDataSource,
+  DataSourceType,
+  isDataSourceType,
+} from '../../../../../common/data_sources';
 
 /**
  * Builds a subscribe function for the AppStateContainer, that is executed when the AppState changes in URL
@@ -90,8 +95,9 @@ export const buildStateSubscribe =
 
     // NOTE: this is also called when navigating from discover app to context app
     if (nextState.dataSource && dataSourceChanged) {
-      const dataViewId =
-        nextState.dataSource.type === 'dataView' ? nextState.dataSource.dataViewId : undefined;
+      const dataViewId = isDataSourceType(nextState.dataSource, DataSourceType.DataView)
+        ? nextState.dataSource.dataViewId
+        : undefined;
 
       const { dataView: nextDataView, fallback } = await loadAndResolveDataView(
         { id: dataViewId, savedSearch, isTextBasedQuery: isTextBasedQueryLang },
@@ -104,7 +110,7 @@ export const buildStateSubscribe =
         appState.update(
           {
             dataSource: nextDataView.id
-              ? { type: 'dataView', dataViewId: nextDataView.id }
+              ? createDataViewDataSource({ dataViewId: nextDataView.id })
               : undefined,
           },
           true

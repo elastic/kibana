@@ -35,6 +35,7 @@ import { DiscoverMainProvider } from '../../state_management/discover_state_prov
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { PanelsToggle } from '../../../../components/panels_toggle';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import { createDataViewDataSource } from '../../../../../common/data_sources';
 
 const mountComponent = async ({
   hideChart = false,
@@ -97,7 +98,7 @@ const mountComponent = async ({
     .getState()
     .searchSource.getField('index') as DataView;
   stateContainer.appState.update({
-    dataSource: { type: 'dataView', dataViewId: dataView.id! },
+    dataSource: createDataViewDataSource({ dataViewId: dataView.id! }),
     interval: 'auto',
     hideChart,
     columns: [],

@@ -39,6 +39,7 @@ import { DiscoverMainProvider } from '../../state_management/discover_state_prov
 import { act } from 'react-dom/test-utils';
 import { ErrorCallout } from '../../../../components/common/error_callout';
 import { PanelsToggle } from '../../../../components/panels_toggle';
+import { createDataViewDataSource } from '../../../../../common/data_sources';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -107,7 +108,7 @@ async function mountComponent(
   session.getSession$.mockReturnValue(new BehaviorSubject('123'));
 
   stateContainer.appState.update({
-    dataSource: { type: 'dataView', dataViewId: dataView.id! },
+    dataSource: createDataViewDataSource({ dataViewId: dataView.id! }),
     interval: 'auto',
     query,
   });

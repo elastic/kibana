@@ -10,6 +10,7 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { DiscoverAppState, AppStateUrl } from '../discover_app_state_container';
 import { migrateLegacyQuery } from '../../../../utils/migrate_legacy_query';
 import { getMaxAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
+import { createDataViewDataSource } from '../../../../../common/data_sources';
 
 /**
  * Takes care of the given url state, migrates legacy props and cleans up empty props
@@ -65,7 +66,7 @@ export function cleanupUrlState(
 
   if (appStateFromUrl.index && !appStateFromUrl.dataSource) {
     // Convert the provided index to a dataView data source
-    appStateFromUrl.dataSource = { type: 'dataView', dataViewId: appStateFromUrl.index };
+    appStateFromUrl.dataSource = createDataViewDataSource({ dataViewId: appStateFromUrl.index });
     delete appStateFromUrl.index;
   }
 

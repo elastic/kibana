@@ -24,6 +24,7 @@ import {
 } from '../discover_app_state_container';
 import { DiscoverGlobalStateContainer } from '../discover_global_state_container';
 import { DiscoverServices } from '../../../../build_services';
+import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
 
 interface LoadSavedSearchDeps {
   appStateContainer: DiscoverAppStateContainer;
@@ -63,8 +64,9 @@ export const loadSavedSearch = async (
   if (savedSearchId) {
     nextSavedSearch = await savedSearchContainer.load(savedSearchId);
   } else {
-    const dataViewId =
-      appState?.dataSource?.type === 'dataView' ? appState.dataSource.dataViewId : undefined;
+    const dataViewId = isDataSourceType(appState?.dataSource, DataSourceType.DataView)
+      ? appState?.dataSource.dataViewId
+      : undefined;
 
     nextSavedSearch = await savedSearchContainer.new(
       await getStateDataView(params, {
@@ -98,7 +100,7 @@ export const loadSavedSearch = async (
 
   // Update saved search by a given app state (in URL)
   if (appState) {
-    if (savedSearchId && appState.dataSource?.type === 'dataView') {
+    if (savedSearchId && isDataSourceType(appState.dataSource, DataSourceType.DataView)) {
       // This is for the case appState is overwriting the loaded saved search data view
       const savedSearchDataViewId = nextSavedSearch.searchSource.getField('index')?.id;
       const stateDataView = await getStateDataView(params, {

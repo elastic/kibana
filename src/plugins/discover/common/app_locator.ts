@@ -15,6 +15,7 @@ import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
 import { VIEW_MODE } from './constants';
 import type { DiscoverAppState } from '../public';
+import { createDataViewDataSource } from './data_sources';
 
 export const DISCOVER_APP_LOCATOR = 'DISCOVER_APP_LOCATOR';
 
@@ -157,8 +158,9 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
 
     if (query) appState.query = query;
     if (filters && filters.length) appState.filters = filters?.filter((f) => !isFilterPinned(f));
-    if (indexPatternId) appState.dataSource = { type: 'dataView', dataViewId: indexPatternId };
-    if (dataViewId) appState.dataSource = { type: 'dataView', dataViewId };
+    if (indexPatternId)
+      appState.dataSource = createDataViewDataSource({ dataViewId: indexPatternId });
+    if (dataViewId) appState.dataSource = createDataViewDataSource({ dataViewId });
     if (columns) appState.columns = columns;
     if (grid) appState.grid = grid;
     if (savedQuery) appState.savedQuery = savedQuery;

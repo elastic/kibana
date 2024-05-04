@@ -11,6 +11,7 @@ import { FetchStatus } from '../../../types';
 import { dataViewComplexMock } from '../../../../__mocks__/data_view_complex';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { discoverServiceMock } from '../../../../__mocks__/services';
+import { createDataViewDataSource } from '../../../../../common/data_sources';
 
 describe('buildStateSubscribe', () => {
   const savedSearch = savedSearchMock;
@@ -36,7 +37,7 @@ describe('buildStateSubscribe', () => {
 
   it('should set the data view if the index has changed, and refetch should be triggered', async () => {
     await getSubscribeFn()({
-      dataSource: { type: 'dataView', dataViewId: dataViewComplexMock.id! },
+      dataSource: createDataViewDataSource({ dataViewId: dataViewComplexMock.id! }),
     });
 
     expect(stateContainer.actions.setDataView).toHaveBeenCalledWith(dataViewComplexMock);
@@ -78,24 +79,24 @@ describe('buildStateSubscribe', () => {
     const stateSubscribeFn = getSubscribeFn();
     stateContainer.dataState.getInitialFetchStatus = jest.fn(() => FetchStatus.UNINITIALIZED);
     await stateSubscribeFn({
-      dataSource: { type: 'dataView', dataViewId: dataViewComplexMock.id! },
+      dataSource: createDataViewDataSource({ dataViewId: dataViewComplexMock.id! }),
     });
 
     expect(stateContainer.dataState.reset).toHaveBeenCalled();
   });
   it('should not execute setState twice if the identical data view change is propagated twice', async () => {
     await getSubscribeFn()({
-      dataSource: { type: 'dataView', dataViewId: dataViewComplexMock.id! },
+      dataSource: createDataViewDataSource({ dataViewId: dataViewComplexMock.id! }),
     });
 
     expect(stateContainer.dataState.reset).toBeCalledTimes(1);
 
     stateContainer.appState.getPrevious = jest.fn(() => ({
-      dataSource: { type: 'dataView', dataViewId: dataViewComplexMock.id! },
+      dataSource: createDataViewDataSource({ dataViewId: dataViewComplexMock.id! }),
     }));
 
     await getSubscribeFn()({
-      dataSource: { type: 'dataView', dataViewId: dataViewComplexMock.id! },
+      dataSource: createDataViewDataSource({ dataViewId: dataViewComplexMock.id! }),
     });
     expect(stateContainer.dataState.reset).toBeCalledTimes(1);
   });

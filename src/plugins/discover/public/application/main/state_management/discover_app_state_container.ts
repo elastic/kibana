@@ -30,6 +30,12 @@ import { addLog } from '../../../utils/add_log';
 import { cleanupUrlState } from './utils/cleanup_url_state';
 import { getStateDefaults } from './utils/get_state_defaults';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
+import {
+  createDataViewDataSource,
+  DataSourceType,
+  DiscoverDataSource,
+  isDataSourceType,
+} from '../../../../common/data_sources';
 
 export const APP_STATE_URL_KEY = '_a';
 export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<DiscoverAppState> {
@@ -81,11 +87,6 @@ export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<Disco
    * */
   getAppStateFromSavedSearch: (newSavedSearch: SavedSearch) => DiscoverAppState;
 }
-
-export type DiscoverDataSource =
-  | { type: 'esql' }
-  | { type: 'dataView'; dataViewId: string }
-  | { type: 'savedSearch'; savedSearchId: string };
 
 export interface DiscoverAppState {
   /**
@@ -228,12 +229,14 @@ export const getDiscoverAppStateContainer = ({
     const appState = appStateContainer.getState();
 
     if (
-      appState.dataSource?.type !== 'dataView' ||
+      !isDataSourceType(appState.dataSource, DataSourceType.DataView) ||
       appState.dataSource.dataViewId !== dataView?.id
     ) {
       // used data view is different from the given by url/state which is invalid
       setState(appStateContainer, {
-        dataSource: dataView?.id ? { type: 'dataView', dataViewId: dataView.id } : undefined,
+        dataSource: dataView?.id
+          ? createDataViewDataSource({ dataViewId: dataView.id })
+          : undefined,
       });
     }
 

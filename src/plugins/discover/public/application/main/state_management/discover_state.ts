@@ -54,6 +54,7 @@ import {
   DiscoverGlobalStateContainer,
 } from './discover_global_state_container';
 import type { DiscoverCustomizationContext } from '../../../customizations';
+import { createDataViewDataSource } from '../../../../common/data_sources';
 
 export interface DiscoverStateContainerParams {
   /**
@@ -314,7 +315,9 @@ export function getDiscoverStateContainer({
 
     internalStateContainer.transitions.replaceAdHocDataViewWithId(prevDataView.id!, newDataView);
     await appStateContainer.replaceUrlState({
-      dataSource: newDataView.id ? { type: 'dataView', dataViewId: newDataView.id } : undefined,
+      dataSource: newDataView.id
+        ? createDataViewDataSource({ dataViewId: newDataView.id })
+        : undefined,
     });
     const trackingEnabled = Boolean(newDataView.isPersisted() || savedSearchContainer.getId());
     services.urlTracker.setTrackingEnabled(trackingEnabled);

@@ -19,6 +19,7 @@ import {
   isEqualState,
 } from './discover_app_state_container';
 import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/common';
+import { createDataViewDataSource } from '../../../../common/data_sources';
 
 let history: History;
 let state: DiscoverAppStateContainer;
@@ -41,7 +42,7 @@ describe('Test discover app state container', () => {
 
   test('hasChanged returns whether the current state has changed', async () => {
     state.set({
-      dataSource: { type: 'dataView', dataViewId: 'modified' },
+      dataSource: createDataViewDataSource({ dataViewId: 'modified' }),
     });
     expect(state.hasChanged()).toBeTruthy();
     state.resetInitialState();
@@ -50,11 +51,11 @@ describe('Test discover app state container', () => {
 
   test('getPrevious returns the state before the current', async () => {
     state.set({
-      dataSource: { type: 'dataView', dataViewId: 'first' },
+      dataSource: createDataViewDataSource({ dataViewId: 'first' }),
     });
     const stateA = state.getState();
     state.set({
-      dataSource: { type: 'dataView', dataViewId: 'second' },
+      dataSource: createDataViewDataSource({ dataViewId: 'second' }),
     });
     expect(state.getPrevious()).toEqual(stateA);
   });
