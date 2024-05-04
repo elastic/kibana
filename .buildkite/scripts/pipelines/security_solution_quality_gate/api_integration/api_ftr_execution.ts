@@ -144,6 +144,7 @@ export const cli = () => {
       } catch (err) {
         log.error('An error occured when running the test script.');
         log.error(err);
+        statusCode = 1;
       } finally {
         // Delete serverless project
         log.info(`${id} : Deleting project ${PROJECT_NAME}...`);
