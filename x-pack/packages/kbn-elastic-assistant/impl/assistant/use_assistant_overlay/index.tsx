@@ -86,7 +86,7 @@ export const useAssistantOverlay = (
   const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
   const apiConfig = useMemo(() => getGenAiConfig(defaultConnector), [defaultConnector]);
 
-  const { getConversation, createConversation } = useConversation();
+  const { createConversation } = useConversation();
 
   const onFetchedConversations = useCallback(
     (conversationsData: FetchConversationsResponse): Record<string, Conversation> =>
