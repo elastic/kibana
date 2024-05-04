@@ -41,7 +41,8 @@ export const InlineEditListItemValue = ({ listItem }: { listItem: ListItemSchema
     setValue(listItem.value);
   }, [listItem]);
 
-  const onSave = useCallback<NonNullable<EuiInlineEditTextProps['onSave']>>(
+  const onSave = useCallback(
+    async (newValue: string) => {
     async (newValue) => {
       track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.EDIT_VALUE_LIST_ITEM);
       await patchListItemMutation.mutateAsync({

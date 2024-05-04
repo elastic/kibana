@@ -50,7 +50,8 @@ const RuleActivityFilterComponent = ({
 
   const options = populateSelected(ruleActivityFilterDefaultOptions, selected);
 
-  const handleSelectableOnChange = useCallback<
+    const handleSelectableOnChange = useCallback(
+      (newOptions: Array<EuiSelectableOption<{ label: CoverageOverviewRuleActivity }>>) => {
     NonNullable<EuiSelectableProps<{ label: CoverageOverviewRuleActivity }>['onChange']>
   >(
     (newOptions) => {

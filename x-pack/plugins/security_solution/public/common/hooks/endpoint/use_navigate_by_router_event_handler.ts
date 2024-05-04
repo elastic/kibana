@@ -26,8 +26,8 @@ export const useNavigateByRouterEventHandler = (
   onClick?: EventHandlerCallback
 ): EventHandlerCallback => {
   const history = useHistory();
-  return useCallback<EventHandlerCallback>(
-    (ev) => {
+  return useCallback(
+    (ev: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
       try {
         if (onClick) {
           onClick(ev);

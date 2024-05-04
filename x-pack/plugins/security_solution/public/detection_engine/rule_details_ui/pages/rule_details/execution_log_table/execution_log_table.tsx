@@ -218,9 +218,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
   }, [indexPattern]);
 
   // Callbacks
-  const onTableChangeCallback = useCallback<
-    NonNullable<EuiBasicTableProps<RuleExecutionResult>['onChange']>
-  >(
+    const onTableChangeCallback = useCallback(
     (criteria?: Criteria<RuleExecutionResult> | CriteriaWithPagination<RuleExecutionResult>) => {
       if (criteria?.page && criteria?.sort) {
         const { index, size } = criteria.page;
