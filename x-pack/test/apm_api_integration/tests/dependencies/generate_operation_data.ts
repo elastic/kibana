@@ -21,11 +21,11 @@ export const generateOperationDataConfig = {
 export async function generateOperationData({
   start,
   end,
-  synthtraceEsClient,
+  apmSynthtraceEsClient,
 }: {
   start: number;
   end: number;
-  synthtraceEsClient: ApmSynthtraceEsClient;
+  apmSynthtraceEsClient: ApmSynthtraceEsClient;
 }) {
   const synthGoInstance = apm
     .service({ name: 'synth-go', environment: 'production', agentName: 'go' })
@@ -36,7 +36,7 @@ export async function generateOperationData({
 
   const interval = timerange(start, end).interval('1m');
 
-  return await synthtraceEsClient.index([
+  return await apmSynthtraceEsClient.index([
     interval
       .rate(generateOperationDataConfig.ES_SEARCH_UNKNOWN_RATE)
       .generator((timestamp) =>

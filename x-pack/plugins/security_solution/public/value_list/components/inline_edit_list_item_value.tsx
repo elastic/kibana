@@ -43,7 +43,6 @@ export const InlineEditListItemValue = ({ listItem }: { listItem: ListItemSchema
 
   const onSave = useCallback(
     async (newValue: string) => {
-    async (newValue) => {
       track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.EDIT_VALUE_LIST_ITEM);
       await patchListItemMutation.mutateAsync({
         id: listItem.id,

@@ -1681,10 +1681,10 @@
           },
           ") => ",
           {
-            "pluginId": "@kbn/security-plugin-types-server",
-            "scope": "server",
-            "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-            "section": "def-server.AuditEvent",
+            "pluginId": "@kbn/core-security-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSecurityServerPluginApi",
+            "section": "def-common.AuditEvent",
             "text": "AuditEvent"
           }
         ],
