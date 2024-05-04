@@ -6,51 +6,64 @@
  */
 
 import type { FC } from 'react';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiTitle,
   EuiFieldText,
-  EuiModal,
   EuiSpacer,
 } from '@elastic/eui';
+import type { ToastsStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import useMountedState from 'react-use/lib/useMountedState';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
 import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
+import type { MlApiServices } from '../../application/services/ml_api_service';
 import type { SingleMetricViewerEmbeddableInput } from '..';
 import { SeriesControls } from '../../application/timeseriesexplorer/components/series_controls';
 import {
   APP_STATE_ACTION,
   type TimeseriesexplorerActionType,
 } from '../../application/timeseriesexplorer/timeseriesexplorer_constants';
+import { JobSelectorControl } from '../../alerting/job_selector';
 import type { SingleMetricViewerEmbeddableUserInput, MlEntity } from '..';
+import { getDefaultSingleMetricViewerPanelTitle } from './get_default_panel_title';
 
 export interface SingleMetricViewerInitializerProps {
   bounds: TimeRangeBounds;
-  defaultTitle: string;
   initialInput?: Partial<SingleMetricViewerEmbeddableInput>;
-  job: MlJob;
-  onCreate: (props: Partial<SingleMetricViewerEmbeddableUserInput>) => void;
+  mlApiServices: MlApiServices;
+  onCreate: (props: SingleMetricViewerEmbeddableUserInput) => void;
   onCancel: () => void;
+  toasts: ToastsStart;
 }
 
 export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProps> = ({
-  defaultTitle,
   bounds,
   initialInput,
-  job,
   onCreate,
   onCancel,
+  mlApiServices,
+  toasts,
 }) => {
-  const isNewJob = initialInput?.jobIds !== undefined && initialInput?.jobIds[0] !== job.job_id;
+  const isMounted = useMountedState();
+  const titleManuallyChanged = useRef(false);
 
-  const [panelTitle, setPanelTitle] = useState<string>(defaultTitle);
+  const [jobIds, setJobIds] = useState(initialInput?.jobIds ?? []);
+  const [job, setJob] = useState<MlJob | undefined>();
+  const isNewJob =
+    initialInput?.jobIds !== undefined && jobIds.length && initialInput?.jobIds[0] !== jobIds[0];
+  const [panelTitle, setPanelTitle] = useState<string>(initialInput?.title ?? '');
   const [functionDescription, setFunctionDescription] = useState<string | undefined>(
     initialInput?.functionDescription
   );
@@ -61,8 +74,41 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
   const [selectedEntities, setSelectedEntities] = useState<MlEntity | undefined>(
     !isNewJob && initialInput?.selectedEntities ? initialInput.selectedEntities : undefined
   );
-
   const isPanelTitleValid = panelTitle.length > 0;
+
+  useEffect(
+    function setUpPanel() {
+      if (isMounted()) {
+        async function fetchJob() {
+          const { jobs } = await mlApiServices.getJobs({ jobId: jobIds.join(',') });
+          if (jobs.length > 0) {
+            setJob(jobs[0]);
+          }
+        }
+
+        if (jobIds.length === 1) {
+          if (!titleManuallyChanged.current) {
+            setPanelTitle(getDefaultSingleMetricViewerPanelTitle(jobIds));
+          }
+          if (mlApiServices) {
+            fetchJob().catch((error) => {
+              toasts.addDanger(
+                i18n.translate(
+                  'xpack.ml.SingleMetricViewerEmbeddable.setupModal.fetchJobErrorNotificationMessage',
+                  {
+                    defaultMessage:
+                      'The following error occurred loading the selected job. {error}',
+                    values: { error: extractErrorMessage(error) },
+                  }
+                )
+              );
+            });
+          }
+        }
+      }
+    },
+    [isMounted, jobIds, mlApiServices, toasts]
+  );
 
   const handleStateUpdate = (
     action: TimeseriesexplorerActionType,
@@ -84,23 +130,28 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
   };
 
   return (
-    <EuiModal
-      maxWidth={false}
-      initialFocus="[name=panelTitle]"
-      onClose={onCancel}
-      data-test-subj={'mlSingleMetricViewerEmbeddableInitializer'}
-    >
-      <EuiModalHeader>
-        <EuiModalHeaderTitle>
-          <FormattedMessage
-            id="xpack.ml.SingleMetricViewerEmbeddable.setupModal.title"
-            defaultMessage="Single metric viewer configuration"
-          />
-        </EuiModalHeaderTitle>
-      </EuiModalHeader>
+    <>
+      <EuiFlyoutHeader>
+        <EuiTitle>
+          <h2>
+            <FormattedMessage
+              id="xpack.ml.SingleMetricViewerEmbeddable.setupModal.title"
+              defaultMessage="Single metric viewer configuration"
+            />
+          </h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
 
-      <EuiModalBody>
+      <EuiFlyoutBody>
         <EuiForm>
+          <JobSelectorControl
+            errors={[]}
+            jobsAndGroupIds={jobIds}
+            adJobsApiService={mlApiServices.jobs}
+            onChange={(update) => {
+              setJobIds([...(update?.jobIds ?? []), ...(update?.groupIds ?? [])]);
+            }}
+          />
           <EuiFormRow
             label={
               <FormattedMessage
@@ -109,58 +160,70 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
               />
             }
             isInvalid={!isPanelTitleValid}
+            fullWidth
           >
             <EuiFieldText
               data-test-subj="panelTitleInput"
               id="panelTitle"
               name="panelTitle"
               value={panelTitle}
-              onChange={(e) => setPanelTitle(e.target.value)}
+              onChange={(e) => {
+                titleManuallyChanged.current = true;
+                setPanelTitle(e.target.value);
+              }}
               isInvalid={!isPanelTitleValid}
+              fullWidth
             />
           </EuiFormRow>
           <EuiSpacer />
-          <SeriesControls
-            selectedJobId={job.job_id}
-            job={job}
-            appStateHandler={handleStateUpdate}
-            selectedDetectorIndex={selectedDetectorIndex}
-            selectedEntities={selectedEntities}
-            bounds={bounds}
-            functionDescription={functionDescription}
-            setFunctionDescription={setFunctionDescription}
-          />
+          {job && jobIds.length ? (
+            <SeriesControls
+              selectedJobId={jobIds[0]}
+              job={job}
+              direction="column"
+              appStateHandler={handleStateUpdate}
+              selectedDetectorIndex={selectedDetectorIndex}
+              selectedEntities={selectedEntities}
+              bounds={bounds}
+              functionDescription={functionDescription}
+              setFunctionDescription={setFunctionDescription}
+            />
+          ) : null}
         </EuiForm>
-      </EuiModalBody>
-
-      <EuiModalFooter>
-        <EuiButtonEmpty
-          onClick={onCancel}
-          data-test-subj="mlsingleMetricViewerInitializerCancelButton"
-        >
-          <FormattedMessage
-            id="xpack.ml.singleMetricViewerEmbeddable.setupModal.cancelButtonLabel"
-            defaultMessage="Cancel"
-          />
-        </EuiButtonEmpty>
-
-        <EuiButton
-          data-test-subj="mlSingleMetricViewerInitializerConfirmButton"
-          isDisabled={!isPanelTitleValid}
-          onClick={onCreate.bind(null, {
-            functionDescription,
-            panelTitle,
-            selectedDetectorIndex,
-            selectedEntities,
-          })}
-          fill
-        >
-          <FormattedMessage
-            id="xpack.ml.singleMetricViewerEmbeddable.setupModal.confirmButtonLabel"
-            defaultMessage="Confirm configurations"
-          />
-        </EuiButton>
-      </EuiModalFooter>
-    </EuiModal>
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent={'spaceBetween'}>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              onClick={onCancel}
+              data-test-subj="mlsingleMetricViewerInitializerCancelButton"
+            >
+              <FormattedMessage
+                id="mlsingleMetricViewerInitializerCancelButtonLabel"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              isDisabled={!isPanelTitleValid}
+              onClick={onCreate.bind(null, {
+                jobIds,
+                functionDescription,
+                panelTitle,
+                selectedDetectorIndex,
+                selectedEntities,
+              })}
+              fill
+            >
+              <FormattedMessage
+                id="xpack.ml.singleMetricViewerEmbeddable.setupModal.confirmButtonLabel"
+                defaultMessage="Confirm"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+    </>
   );
 };
