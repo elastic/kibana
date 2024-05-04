@@ -66,7 +66,7 @@ export const ExecutionDurationChart: React.FunctionComponent<ComponentOpts> = ({
   );
 
   const onChange = useCallback(
-    ({ target }: ChangeEvent<HTMLSelectElement>) => onChangeDuration(Number(target.value)),
+    ({ target }: any) => onChangeDuration(Number(target.value)),
     [onChangeDuration]
   );
 

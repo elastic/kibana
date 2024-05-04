@@ -7,7 +7,7 @@
  */
 
 import React, { FC, PropsWithChildren, useContext } from 'react';
-import { createRoot } from 'react-dom/client';
+import ReactDOM from 'react-dom';
 import { Loader } from './loader';
 
 import type { Services, KibanaDependencies } from './types';

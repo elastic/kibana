@@ -9,6 +9,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 
 import { getOr } from 'lodash/fp';
 import { useDispatch } from 'react-redux';
+import type { SiemTables } from '../paginated_table';
 import { PaginatedTable } from '../paginated_table';
 
 import * as i18n from './translations';
@@ -70,8 +71,8 @@ const AuthenticationsHostTableComponent: React.FC<HostsComponentsQueryProps> = (
       ? getHostDetailsAuthenticationColumns()
       : getHostsPageAuthenticationColumns();
 
-  const updateLimitPagination = useCallback(
-    (newLimit: any) =>
+  const updateLimitPagination = useCallback<SiemTables['updateLimitPagination']>(
+    (newLimit) =>
       dispatch(
         hostsActions.updateTableLimit({
           hostsType: type,
@@ -82,8 +83,8 @@ const AuthenticationsHostTableComponent: React.FC<HostsComponentsQueryProps> = (
     [type, dispatch]
   );
 
-  const updateActivePage = useCallback(
-    (newPage: any) =>
+  const updateActivePage = useCallback<SiemTables['updateActivePage']>(
+    (newPage) =>
       dispatch(
         hostsActions.updateTableActivePage({
           activePage: newPage,

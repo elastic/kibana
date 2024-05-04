@@ -85,8 +85,8 @@ export const AddComment = React.memo(
       const { setFieldValue, reset, submit } = form;
       const [{ comment }] = useFormData<{ comment: string }>({ form, watch: [fieldName] });
 
-      const addQuote = useCallback(
-        (quote: string) => {
+      const addQuote = useCallback<AddCommentRefObject['addQuote']>(
+        (quote) => {
           const addCarrots = quote.replace(new RegExp('\r?\n', 'g'), '\n> ');
           const val = `> ${addCarrots} \n\n`;
           setFieldValue(fieldName, `${comment}${comment.length > 0 ? '\n\n' : ''}${val}`);
@@ -95,8 +95,8 @@ export const AddComment = React.memo(
         [comment, setFieldValue]
       );
 
-      const setComment = useCallback(
-        (newComment: string) => {
+      const setComment = useCallback<AddCommentRefObject['setComment']>(
+        (newComment) => {
           setFieldValue(fieldName, newComment);
         },
         [setFieldValue]

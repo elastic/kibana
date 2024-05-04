@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { renderHook } from '@testing-library/react';
-import React from 'react';
+import { renderHook } from '@testing-library/react-hooks';
+import React, { FC, PropsWithChildren } from 'react';
 import { makeAction, makeActionContext } from '../mocks/helpers';
 import { CellActionsProvider, useCellActionsContext } from './cell_actions_context';
 
 const action = makeAction('action-1', 'icon', 1);
 const mockGetTriggerCompatibleActions = jest.fn(async () => [action]);
-const ContextWrapper: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
+const ContextWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <CellActionsProvider getTriggerCompatibleActions={mockGetTriggerCompatibleActions}>
     {children}
   </CellActionsProvider>

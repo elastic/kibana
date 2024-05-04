@@ -36,7 +36,7 @@ export const useAddIntegrationsUrl = () => {
   const href = useMemo(() => prepend(addIntegrationsUrl), [prepend, addIntegrationsUrl]);
 
   const onClick = useCallback(
-    (e: React.MouseEvent<HTMLAnchorElement>) => {
+    (e: React.SyntheticEvent) => {
       e.preventDefault();
       navigateTo({ url: href });
     },

@@ -7,15 +7,34 @@
 
 import { schema } from '@kbn/config-schema';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { estypes } from '@elastic/elasticsearch';
+import { KueryNode } from '@kbn/es-query';
 import type { AlertingRouter } from '../../types';
 
 import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { LEGACY_BASE_ALERT_API_PATH } from '../../../common';
 import { renameKeys } from '../lib/rename_keys';
-import { FindOptions } from '../../rules_client';
+import { IndexType } from '../../rules_client';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 import { trackLegacyTerminology } from '../lib/track_legacy_terminology';
+
+export interface FindOptions extends IndexType {
+  perPage?: number;
+  page?: number;
+  search?: string;
+  defaultSearchOperator?: 'AND' | 'OR';
+  searchFields?: string[];
+  sortField?: string;
+  sortOrder?: estypes.SortOrder;
+  hasReference?: {
+    type: string;
+    id: string;
+  };
+  fields?: string[];
+  filter?: string | KueryNode;
+  filterConsumers?: string[];
+}
 
 // config definition
 const querySchema = schema.object({

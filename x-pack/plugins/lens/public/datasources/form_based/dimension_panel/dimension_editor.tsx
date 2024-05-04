@@ -48,9 +48,9 @@ import { getReferencedField, hasField } from '../pure_utils';
 import { fieldIsInvalid, getSamplingValue, isSamplingValueEnabled } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
 import type { FormBasedLayer } from '../types';
-import { FormatSelector } from './format_selector';
+import { FormatSelector, FormatSelectorProps } from './format_selector';
 import { ReferenceEditor } from './reference_editor';
-import { TimeScaling } from './time_scaling';
+import { TimeScaling, TimeScalingProps } from './time_scaling';
 import { Filtering } from './filtering';
 import { ReducedTimeRange } from './reduced_time_range';
 import { AdvancedOptions } from './advanced_options';
@@ -560,7 +560,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                           helpPopoverContainer.current = null;
                         }
                       }}
-                      theme={props.core.theme}
+                      startServices={props.core}
                     >
                       <HelpComponent />
                     </WrappingHelpPopover>
@@ -844,7 +844,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   updateLayer({
                     ...layer,
                     // clean up the incomplete column data for the referenced id
-                    incompleteColumns: { ...layer.incompleteColumns, [referenceId]: null },
+                    incompleteColumns: { ...layer.incompleteColumns, [referenceId]: undefined },
                   });
                 }}
                 onDeleteColumn={() => {
@@ -994,8 +994,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const ButtonGroupContent = showQuickFunctions ? quickFunctions : customParamEditor;
 
-  const onFormatChange = useCallback(
-    (newFormat: unknown) => {
+  const onFormatChange = useCallback<FormatSelectorProps['onChange']>(
+    (newFormat) => {
       updateLayer(
         updateColumnParam({
           layer: state.layers[layerId],
@@ -1099,8 +1099,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
    * Advanced options can cause side effects on other columns (i.e. formulas)
    * so before updating the layer the full insertOrReplaceColumn needs to be performed
    */
-  const updateAdvancedOption = useCallback(
-    (newLayer: FormBasedLayer) => {
+  const updateAdvancedOption = useCallback<TimeScalingProps['updateLayer']>(
+    (newLayer) => {
       if (selectedColumn) {
         setStateWrapper(
           // formula need to regenerate from scratch

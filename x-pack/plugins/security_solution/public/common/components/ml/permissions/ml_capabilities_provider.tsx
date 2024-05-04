@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React, { useState, useEffect } from 'react';
 
 import type { MlCapabilitiesResponse } from '@kbn/ml-plugin/public';
@@ -29,13 +30,13 @@ export const MlCapabilitiesContext = React.createContext<MlCapabilitiesProvider>
 
 MlCapabilitiesContext.displayName = 'MlCapabilitiesContext';
 
-export const MlCapabilitiesProvider = React.memo<{ children: React.ReactNode }>(({ children }) => {
-    const [capabilities, setCapabilities] = useState<MlCapabilitiesProvider>(
-      emptyMlCapabilitiesProvider
-    );
-    const http = useHttp();
-    const { addError } = useAppToasts();
-    const { start, result, error } = useGetMlCapabilities();
+export const MlCapabilitiesProvider = React.memo<PropsWithChildren<unknown>>(({ children }) => {
+  const [capabilities, setCapabilities] = useState<MlCapabilitiesProvider>(
+    emptyMlCapabilitiesProvider
+  );
+  const http = useHttp();
+  const { addError } = useAppToasts();
+  const { start, result, error } = useGetMlCapabilities();
 
     useEffect(() => {
       start({ http });

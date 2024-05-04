@@ -30,9 +30,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { stringHash } from '@kbn/ml-string-hash';
 import { useLogRateAnalysisStateContext, type GroupTableItem } from '@kbn/aiops-components';
+
+import { useDataSource } from '../../hooks/use_data_source';
 
 import { MiniHistogram } from '../mini_histogram';
 
@@ -60,7 +61,6 @@ interface LogRateAnalysisResultsTableProps {
   loading: boolean;
   searchQuery: estypes.QueryDslQueryContainer;
   timeRangeMs: TimeRangeMs;
-  dataView: DataView;
   /** Optional color override for the default bar color for charts */
   barColorOverride?: string;
   /** Optional color override for the highlighted bar color for charts */
@@ -72,13 +72,14 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
   significantItems,
   groupTableItems,
   loading,
-  dataView,
   timeRangeMs,
   searchQuery,
   barColorOverride,
   barHighlightColorOverride,
   zeroDocsFallback = false,
 }) => {
+  const { dataView } = useDataSource();
+
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [sortField, setSortField] = useState<'docCount' | 'pValue'>(
@@ -125,7 +126,6 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
           )}
           loading={loading}
           isExpandedRow
-          dataView={dataView}
           timeRangeMs={timeRangeMs}
           searchQuery={searchQuery}
           barColorOverride={barColorOverride}
@@ -254,7 +254,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
         return valuesBadges;
       },
       sortable: false,
-      textOnly: true,
+      truncateText: true,
       valign: 'top',
     },
     {

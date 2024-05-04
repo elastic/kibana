@@ -13,10 +13,12 @@ import {
   LogEntryFlyout,
   LogEntryStreamItem,
   ScrollableLogTextStreamView,
+  UpdatedDateRange,
   useLogHighlightsStateContext,
   useLogPositionStateContext,
   useLogStreamContext,
   useLogViewContext,
+  VisibleInterval,
   WithSummary,
   WithSummaryProps,
 } from '@kbn/logs-shared-plugin/public';
@@ -172,11 +174,11 @@ export const StreamPageLogsContent = React.memo<{
   const [, { setContextEntry }] = useViewLogInProviderContext();
 
   const handleDateRangeExtension = useCallback(
-    (newDateRange: any) => {
+    (newDateRange: UpdatedDateRange) => {
       updateDateRange(newDateRange);
 
       if (
-        'startDateExpression' in newDateRange &&
+        newDateRange.startDateExpression != null &&
         isValidDatemath(newDateRange.startDateExpression)
       ) {
         fetchPreviousEntries({
@@ -184,7 +186,10 @@ export const StreamPageLogsContent = React.memo<{
           extendTo: datemathToEpochMillis(newDateRange.startDateExpression)!,
         });
       }
-      if ('endDateExpression' in newDateRange && isValidDatemath(newDateRange.endDateExpression)) {
+      if (
+        newDateRange.endDateExpression != null &&
+        isValidDatemath(newDateRange.endDateExpression)
+      ) {
         fetchNextEntries({
           force: true,
           extendTo: datemathToEpochMillis(newDateRange.endDateExpression)!,
@@ -195,7 +200,7 @@ export const StreamPageLogsContent = React.memo<{
   );
 
   const handlePagination = useCallback(
-    (params: any) => {
+    (params: VisibleInterval) => {
       reportVisiblePositions(params);
       if (!params.fromScroll) {
         return;

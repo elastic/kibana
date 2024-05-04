@@ -6,7 +6,13 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker, EuiButton } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSuperDatePicker,
+  EuiButton,
+  OnTimeChangeProps,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 interface LogDatepickerProps {
@@ -27,11 +33,7 @@ export const LogDatepicker: React.FC<LogDatepickerProps> = ({
   onStopStreaming,
 }) => {
   const handleTimeChange = useCallback(
-    ({
-      start,
-      end,
-      isInvalid
-    }: any) => {
+    ({ start, end, isInvalid }: OnTimeChangeProps) => {
       if (onUpdateDateRange && !isInvalid) {
         onUpdateDateRange({ startDateExpression: start, endDateExpression: end });
       }

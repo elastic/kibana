@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { createContext, useEffect, useRef, useState } from 'react';
+import React, { createContext, useEffect, useRef, useState, FC, PropsWithChildren } from 'react';
 
 import {
   EuiButton,
@@ -81,7 +81,9 @@ export const LicenseContext = createContext<{
   stackManagementLink: undefined,
 });
 
-export const ConnectorConfigurationComponent: React.FC<ConnectorConfigurationProps> = ({
+export const ConnectorConfigurationComponent: FC<
+  PropsWithChildren<ConnectorConfigurationProps>
+> = ({
   children,
   connector,
   hasPlatinumLicense,

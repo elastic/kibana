@@ -7,7 +7,7 @@
 
 import type { ChangeEventHandler } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import type { EuiSuperSelectOption } from '@elastic/eui';
+import type { EuiFieldTextProps, EuiSuperSelectOption } from '@elastic/eui';
 import {
   EuiFieldText,
   EuiForm,
@@ -19,6 +19,7 @@ import {
   EuiTitle,
   EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { AllConditionEntryFields, EntryTypes } from '@kbn/securitysolution-utils';
 import {
   hasSimpleExecutableName,
@@ -295,7 +296,11 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           item: updatedFormValues,
           isValid: updatedValidationResult.isValid,
           confirmModalLabels: updatedValidationResult.extraWarning
-            ? CONFIRM_WARNING_MODAL_LABELS
+            ? CONFIRM_WARNING_MODAL_LABELS(
+                i18n.translate('xpack.securitySolution.trustedApps.flyoutForm.confirmModal.name', {
+                  defaultMessage: 'trusted application',
+                })
+              )
             : undefined,
         });
       },
@@ -334,10 +339,8 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
       [item, processChanged]
     );
 
-    const handleOnNameBlur = useCallback(
-      ({
-        target: { name }
-      }: any) => {
+    const handleOnNameBlur = useCallback<NonNullable<EuiFieldTextProps['onBlur']>>(
+      ({ target: { name } }) => {
         processChanged(item);
         setVisited((prevVisited) => ({ ...prevVisited, [name]: true }));
       },

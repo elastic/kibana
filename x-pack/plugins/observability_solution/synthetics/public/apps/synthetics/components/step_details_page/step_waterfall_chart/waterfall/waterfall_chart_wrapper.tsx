@@ -134,9 +134,7 @@ export const WaterfallChartWrapper: React.FC<Props> = ({
       <WaterfallChart
         tickFormat={useCallback((d: number) => `${Number(d).toFixed(0)} ms`, [])}
         domain={domain}
-        barStyleAccessor={useCallback(({
-          datum
-        }: any) => {
+        barStyleAccessor={useCallback(({ datum }: any) => {
           if (!datum.config?.isHighlighted) {
             return {
               rect: {

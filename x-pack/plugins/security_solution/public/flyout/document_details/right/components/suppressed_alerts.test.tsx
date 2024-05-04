@@ -15,6 +15,7 @@ import {
   CORRELATIONS_SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID,
 } from './test_ids';
 import { SuppressedAlerts } from './suppressed_alerts';
+import { isSuppressionRuleInGA } from '../../../../../common/detection_engine/utils';
 
 const ICON_TEST_ID = SUMMARY_ROW_ICON_TEST_ID(CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID);
 const VALUE_TEST_ID = SUMMARY_ROW_VALUE_TEST_ID(CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID);
@@ -24,9 +25,15 @@ const renderSuppressedAlerts = (alertSuppressionCount: number) =>
     // @ts-expect-error
 
     <IntlProvider locale="en">
-      <SuppressedAlerts alertSuppressionCount={alertSuppressionCount} />
+      <SuppressedAlerts alertSuppressionCount={alertSuppressionCount} ruleType="query" />
     </IntlProvider>
   );
+
+jest.mock('../../../../../common/detection_engine/utils', () => ({
+  isSuppressionRuleInGA: jest.fn().mockReturnValue(false),
+}));
+
+const isSuppressionRuleInGAMock = isSuppressionRuleInGA as jest.Mock;
 
 describe('<SuppressedAlerts />', () => {
   it('should render zero suppressed alert correctly', () => {
@@ -66,5 +73,14 @@ describe('<SuppressedAlerts />', () => {
     expect(
       getByTestId(CORRELATIONS_SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID)
     ).toBeInTheDocument();
+  });
+
+  it('should not render Technical Preview badge if rule type is in GA', () => {
+    isSuppressionRuleInGAMock.mockReturnValueOnce(true);
+    const { queryByTestId } = renderSuppressedAlerts(2);
+
+    expect(
+      queryByTestId(CORRELATIONS_SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID)
+    ).not.toBeInTheDocument();
   });
 });

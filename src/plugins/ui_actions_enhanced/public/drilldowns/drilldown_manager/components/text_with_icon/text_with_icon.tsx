@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import {
   EuiTextColor,
   EuiTextColorProps,
@@ -25,7 +25,7 @@ export interface TextWithIconProps {
   children: React.ReactNode;
 }
 
-export const TextWithIcon: React.FC<TextWithIconProps> = ({
+export const TextWithIcon: FC<PropsWithChildren<TextWithIconProps>> = ({
   color,
   tooltip,
   icon,

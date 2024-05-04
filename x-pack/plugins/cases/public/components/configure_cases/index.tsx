@@ -111,21 +111,23 @@ export const ConfigureCases: React.FC = React.memo(() => {
     refetch: refetchActionTypes,
   } = useGetActionTypes();
 
-  const onConnectorUpdated: NonNullable<EditConnectorFlyoutProps['onConnectorUpdated']> =
-    useCallback(
-      async (updatedConnector) => {
-        setEditedConnectorItem(updatedConnector as ActionConnectorTableItem);
-        refetchConnectors();
-        refetchActionTypes();
-        refetchCaseConfigure();
-      },
-      [refetchActionTypes, refetchCaseConfigure, refetchConnectors, setEditedConnectorItem]
-    );
+  const onConnectorUpdated = useCallback<
+    NonNullable<EditConnectorFlyoutProps['onConnectorUpdated']>
+  >(
+    async (updatedConnector) => {
+      setEditedConnectorItem(updatedConnector as ActionConnectorTableItem);
+      refetchConnectors();
+      refetchActionTypes();
+      refetchCaseConfigure();
+    },
+    [refetchActionTypes, refetchCaseConfigure, refetchConnectors, setEditedConnectorItem]
+  );
 
-  const onConnectorCreated: NonNullable<CreateConnectorFlyoutProps['onConnectorCreated']> =
-    useCallback(
-      async (createdConnector) => {
-        const caseConnector = normalizeActionConnector(createdConnector);
+  const onConnectorCreated = useCallback<
+    NonNullable<CreateConnectorFlyoutProps['onConnectorCreated']>
+  >(
+    async (createdConnector) => {
+      const caseConnector = normalizeActionConnector(createdConnector);
 
         await persistCaseConfigureAsync({
           connector: caseConnector,

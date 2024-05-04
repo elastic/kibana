@@ -117,10 +117,6 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
     [options, searchValue, state.items]
   );
 
-  const onSearchChange = useCallback((value: string) => {
-    setSearchValue(value);
-  }, []);
-
   return (
     <EuiSelectable
       options={optionsWithAddNewTagOption}
@@ -129,7 +125,7 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
         placeholder: i18n.SEARCH_PLACEHOLDER,
         isLoading,
         isClearable: !isLoading,
-        onChange: onSearchChange,
+        onChange: setSearchValue,
         value: searchValue,
         'data-test-subj': 'cases-actions-tags-edit-selectable-search-input',
       }}

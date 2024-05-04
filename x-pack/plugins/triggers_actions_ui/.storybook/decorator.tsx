@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { action } from '@storybook/addon-actions';
 import { DecoratorFn } from '@storybook/react';
@@ -51,7 +51,9 @@ const notifications: NotificationsStart = {
   showErrorDialog: () => {},
 };
 
-export const StorybookContextDecorator: React.FC<StorybookContextDecoratorProps> = (props) => {
+export const StorybookContextDecorator: FC<PropsWithChildren<StorybookContextDecoratorProps>> = (
+  props
+) => {
   const { children, context, servicesApplicationOverride, servicesOverride } = props;
   const { globals } = context;
   const { euiTheme } = globals;

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiTextArea } from '@elastic/eui';
-import React, { useCallback, useEffect, forwardRef } from 'react';
+import { EuiTextArea, EuiTextAreaProps } from '@elastic/eui';
+import React, { useCallback, forwardRef } from 'react';
 import { css } from '@emotion/react';
 
 import * as i18n from './translations';
@@ -28,10 +28,12 @@ export const PromptTextArea = forwardRef<HTMLTextAreaElement, Props>(
       [handlePromptChange]
     );
 
-    const onKeyDown = useCallback(
-      (event: any) => {
+    const onKeyDown = useCallback<NonNullable<EuiTextAreaProps['onKeyDown']>>(
+      (event) => {
         if (event.key === 'Enter' && !event.shiftKey && value.trim().length > 0) {
           event.preventDefault();
+          // Property 'value' does not exist on type 'EventTarget'
+          // @ts-expect-error
           onPromptSubmit(event.target.value?.trim());
           handlePromptChange('');
         } else if (event.key === 'Enter' && !event.shiftKey && value.trim().length === 0) {
@@ -41,10 +43,6 @@ export const PromptTextArea = forwardRef<HTMLTextAreaElement, Props>(
       },
       [value, onPromptSubmit, handlePromptChange]
     );
-
-    useEffect(() => {
-      handlePromptChange(value);
-    }, [handlePromptChange, value]);
 
     return (
       <EuiTextArea

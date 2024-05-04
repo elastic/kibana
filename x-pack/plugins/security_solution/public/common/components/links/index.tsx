@@ -31,7 +31,7 @@ import { isUrlInvalid } from '../../utils/validators';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../app/types';
 import { getTabsOnUsersDetailsUrl, getUsersDetailsUrl } from '../link_to/redirect_to_users';
-import type { ReputationLinkSetting } from './helpers';
+import type { ReputationLinkSetting, ReputationLinkOverflowProps } from './helpers';
 import {
   LinkAnchor,
   GenericLinkButton,
@@ -122,7 +122,7 @@ const UserDetailsLinkComponent: React.FC<{
 
 export const UserDetailsLink = React.memo(UserDetailsLinkComponent);
 
-const HostDetailsLinkComponent: React.FC<{
+export interface HostDetailsLinkProps {
   children?: React.ReactNode;
   /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
@@ -131,7 +131,16 @@ const HostDetailsLinkComponent: React.FC<{
   onClick?: (e: SyntheticEvent) => void;
   hostTab?: HostsTableType;
   title?: string;
-}> = ({ children, Component, hostName, isButton, onClick: onClickParam, title, hostTab }) => {
+}
+const HostDetailsLinkComponent: React.FC<HostDetailsLinkProps> = ({
+  children,
+  Component,
+  hostName,
+  isButton,
+  onClick: onClickParam,
+  title,
+  hostTab,
+}) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.hosts);
   const {
     application: { navigateToApp },
@@ -226,7 +235,7 @@ export const ExternalLink = React.memo<{
 
 ExternalLink.displayName = 'ExternalLink';
 
-const NetworkDetailsLinkComponent: React.FC<{
+export interface NetworkDetailsLinkProps {
   children?: React.ReactNode;
   /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
@@ -235,7 +244,17 @@ const NetworkDetailsLinkComponent: React.FC<{
   isButton?: boolean;
   onClick?: (e: SyntheticEvent) => void | undefined;
   title?: string;
-}> = ({ Component, children, ip, flowTarget = FlowTarget.source, isButton, onClick, title }) => {
+}
+
+const NetworkDetailsLinkComponent: React.FC<NetworkDetailsLinkProps> = ({
+  Component,
+  children,
+  ip,
+  flowTarget = FlowTarget.source,
+  isButton,
+  onClick,
+  title,
+}) => {
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
 
   const getLink = useCallback(
@@ -508,8 +527,8 @@ const ReputationLinkComponent: React.FC<{
     [ipReputationLinksSetting, domain, defaultNameMapping, allItemsLimit]
   );
 
-  const renderCallback = useCallback(
-    (rowItem: ReputationLinkSetting) =>
+  const renderCallback: NonNullable<ReputationLinkOverflowProps['render']> = useCallback(
+    (rowItem) =>
       isReputationLink(rowItem) && (
         <ExternalLink
           url={rowItem.url_template}

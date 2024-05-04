@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React, { memo, useCallback, useMemo } from 'react';
+import type { EuiSwitchProps } from '@elastic/eui';
 import { EuiFlexItem, EuiSwitch } from '@elastic/eui';
 import type { ExceptionListRuleReferencesSchema } from '../../../../../../../common/api/detection_engine/rule_exceptions';
 
@@ -26,10 +27,8 @@ export const LinkListSwitch = memo(
       () => Boolean(linkedList.find((l) => l.id === list.id)),
       [linkedList, list.id]
     );
-    const onLinkOrUnlinkList = useCallback(
-      ({
-        target: { checked }
-      }: any) => {
+    const onLinkOrUnlinkList = useCallback<EuiSwitchProps['onChange']>(
+      ({ target: { checked } }) => {
         const newLinkedLists = !checked
           ? linkedList?.filter((item) => item.id !== list.id)
           : [...linkedList, list];

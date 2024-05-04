@@ -37,10 +37,7 @@ export function Profiling() {
   });
 
   const onSearchSubmit = useCallback(
-    ({
-      dateRange: range,
-      query
-    }: any) => {
+    ({ dateRange: range, query }: any) => {
       setDateRange(range);
       setCustomKuery(query);
     },

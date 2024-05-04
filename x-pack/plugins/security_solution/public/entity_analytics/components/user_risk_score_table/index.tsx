@@ -9,7 +9,12 @@ import React, { useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { Columns, Criteria, ItemsPerRow } from '../../../explore/components/paginated_table';
+import type {
+  Columns,
+  Criteria,
+  ItemsPerRow,
+  SiemTables,
+} from '../../../explore/components/paginated_table';
 import { PaginatedTable } from '../../../explore/components/paginated_table';
 
 import { getUserRiskScoreColumns } from './columns';
@@ -82,8 +87,8 @@ const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({
   const { activePage, limit, sort } = useDeepEqualSelector((state: State) =>
     getUserRiskScoreSelector(state)
   );
-  const updateLimitPagination = useCallback(
-    (newLimit: any) => {
+  const updateLimitPagination = useCallback<SiemTables['updateLimitPagination']>(
+    (newLimit) => {
       dispatch(
         usersActions.updateTableLimit({
           usersType: type,
@@ -95,8 +100,8 @@ const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({
     [type, dispatch]
   );
 
-  const updateActivePage = useCallback(
-    (newPage: any) => {
+  const updateActivePage = useCallback<SiemTables['updateActivePage']>(
+    (newPage) => {
       dispatch(
         usersActions.updateTableActivePage({
           activePage: newPage,

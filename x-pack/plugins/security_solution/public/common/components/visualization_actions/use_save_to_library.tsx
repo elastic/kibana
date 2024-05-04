@@ -21,7 +21,7 @@ export const useSaveToLibrary = ({
 }: {
   attributes: LensAttributes | undefined | null;
 }) => {
-  const { lens, theme, i18n } = useKibana().services;
+  const { lens, ...startServices } = useKibana().services;
   const { SaveModalComponent, canUseEditor } = lens;
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
   const { redirectTo, getEditOrCreateDashboardPath } = useRedirectToDashboardFromLens({
@@ -43,13 +43,15 @@ export const useSaveToLibrary = ({
         getOriginatingPath={(dashboardId) =>
           `${SecurityPageName.dashboards}/${getEditOrCreateDashboardPath(dashboardId)}`
         }
+        // Type 'string' is not assignable to type 'RedirectToProps | undefined'.
+        // @ts-expect-error
         redirectTo={redirectTo}
       />,
-      { theme, i18n }
+      startServices
     );
 
     mount(targetDomElement);
-  }, [SaveModalComponent, attributes, getEditOrCreateDashboardPath, i18n, redirectTo, theme]);
+  }, [SaveModalComponent, attributes, getEditOrCreateDashboardPath, redirectTo, startServices]);
 
   const disableVisualizations = useMemo(
     () => !canUseEditor() || attributes == null,

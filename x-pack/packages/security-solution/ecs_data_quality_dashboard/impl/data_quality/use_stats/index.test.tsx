@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react';
-import React from 'react';
+import { renderHook } from '@testing-library/react-hooks';
+import React, { FC, PropsWithChildren } from 'react';
 
 import { DataQualityProvider } from '../data_quality_panel/data_quality_context';
 import { mockStatsAuditbeatIndex } from '../mock/stats/mock_stats_packetbeat_index';
@@ -23,7 +23,7 @@ const mockTelemetryEvents = {
 };
 const { toasts } = notificationServiceMock.createSetupContract();
 
-const ContextWrapper: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
+const ContextWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <DataQualityProvider
     httpFetch={mockHttpFetch}
     telemetryEvents={mockTelemetryEvents}
@@ -34,7 +34,7 @@ const ContextWrapper: React.FC<{ children?: React.ReactNode }> = ({ children }) 
   </DataQualityProvider>
 );
 
-const ContextWrapperILMNotAvailable: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
+const ContextWrapperILMNotAvailable: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <DataQualityProvider
     httpFetch={mockHttpFetch}
     telemetryEvents={mockTelemetryEvents}

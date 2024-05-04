@@ -80,9 +80,7 @@ export const renderWithReduxStore = (
 
   const CustomWrapper = wrapper as React.ComponentType<PropsWithChildren>;
 
-  const Wrapper: React.FC<{
-    children: React.ReactNode;
-  }> = ({ children }) => {
+  const Wrapper: React.FC<PropsWithChildren<{}>> = ({ children }) => {
     return (
       <Provider store={store}>
         <I18nProvider>
@@ -135,9 +133,7 @@ export const mountWithProvider = async (
   component: React.ReactElement,
   store?: MountStoreProps,
   options?: {
-    wrappingComponent?: React.FC<{
-      children: React.ReactNode;
-    }>;
+    wrappingComponent?: React.FC<PropsWithChildren<{}>>;
     wrappingComponentProps?: Record<string, unknown>;
     attachTo?: HTMLElement;
   }
@@ -156,18 +152,16 @@ const getMountWithProviderParams = (
   component: React.ReactElement,
   store?: MountStoreProps,
   options?: {
-    wrappingComponent?: React.FC<{
-      children: React.ReactNode;
-    }>;
+    wrappingComponent?: React.FC<PropsWithChildren<{}>>;
     wrappingComponentProps?: Record<string, unknown>;
     attachTo?: HTMLElement;
   }
 ) => {
   const { store: lensStore, deps } = makeLensStore(store || {});
 
-  let wrappingComponent: React.FC<{
-    children: React.ReactNode;
-  }> = ({ children }) => <Provider store={lensStore}>{children}</Provider>;
+  let wrappingComponent: React.FC<PropsWithChildren<{}>> = ({ children }) => (
+    <Provider store={lensStore}>{children}</Provider>
+  );
 
   let restOptions: {
     attachTo?: HTMLElement | undefined;

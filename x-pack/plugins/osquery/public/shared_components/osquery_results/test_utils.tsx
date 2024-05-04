@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import type { useKibana } from '../../common/lib/kibana';
 
@@ -77,6 +78,6 @@ export const getMockedKibanaConfig = (permissionType: unknown) =>
     },
   } as unknown as ReturnType<typeof useKibana>);
 
-export const mockCasesContext: React.FC<{ children?: React.ReactNode }> = (props) => (
+export const mockCasesContext: FC<PropsWithChildren<unknown>> = (props) => (
   <>{props?.children ?? null}</>
 );

@@ -124,7 +124,7 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
     ]
   );
 
-  const handleGetSelectableOptions: SelectableTimelineProps['getSelectableOptions'] = useCallback(
+  const handleGetSelectableOptions = useCallback<SelectableTimelineProps['getSelectableOptions']>(
     ({ timelines, onlyFavorites, searchTimelineValue }) => [
       ...(!onlyFavorites && searchTimelineValue === ''
         ? getBasicSelectableOptions(timelineId == null ? '-1' : timelineId)

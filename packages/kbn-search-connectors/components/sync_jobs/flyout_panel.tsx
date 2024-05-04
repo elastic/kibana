@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-
+import React, { FC, PropsWithChildren } from 'react';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 interface FlyoutPanelProps {
@@ -15,7 +14,7 @@ interface FlyoutPanelProps {
   children?: React.ReactNode;
 }
 
-export const FlyoutPanel: React.FC<FlyoutPanelProps> = ({ children, title }) => {
+export const FlyoutPanel: FC<PropsWithChildren<FlyoutPanelProps>> = ({ children, title }) => {
   return (
     <EuiPanel paddingSize="l" color="subdued" hasShadow={false}>
       <EuiTitle size="xs">

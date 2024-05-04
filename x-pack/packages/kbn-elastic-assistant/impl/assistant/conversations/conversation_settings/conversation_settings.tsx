@@ -25,7 +25,11 @@ import { Conversation, Prompt } from '../../../..';
 import * as i18n from './translations';
 import * as i18nModel from '../../../connectorland/models/model_selector/translations';
 
-import { AIConnector, ConnectorSelector } from '../../../connectorland/connector_selector';
+import {
+  AIConnector,
+  ConnectorSelector,
+  ConnectorSelectorProps,
+} from '../../../connectorland/connector_selector';
 import { SelectSystemPrompt } from '../../prompt_editor/system_prompt/select_system_prompt';
 import { ModelSelector } from '../../../connectorland/models/model_selector/model_selector';
 import { ConversationSelectorSettings } from '../conversation_selector_settings';
@@ -243,8 +247,10 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
       [selectedConversation?.apiConfig?.provider]
     );
 
-    const handleOnConnectorSelectionChange = useCallback(
-      (connector: any) => {
+    const handleOnConnectorSelectionChange = useCallback<
+      ConnectorSelectorProps['onConnectorSelectionChange']
+    >(
+      (connector) => {
         if (selectedConversation != null) {
           const config = getGenAiConfig(connector);
           const updatedConversation = {
@@ -425,6 +431,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
             isDisabled={isDisabled}
             onConnectorSelectionChange={handleOnConnectorSelectionChange}
             selectedConnectorId={selectedConnector?.id}
+            isFlyoutMode={isFlyoutMode}
           />
         </EuiFormRow>
 

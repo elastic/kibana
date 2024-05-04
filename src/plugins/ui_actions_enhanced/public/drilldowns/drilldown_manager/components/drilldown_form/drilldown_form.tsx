@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer, EuiCallOut, EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TriggerPicker, TriggerPickerProps } from '../trigger_picker';
@@ -45,7 +45,7 @@ export interface FormDrilldownWizardProps {
   children: React.ReactNode;
 }
 
-export const DrilldownForm: React.FC<FormDrilldownWizardProps> = ({
+export const DrilldownForm: FC<PropsWithChildren<FormDrilldownWizardProps>> = ({
   name = '',
   onNameChange,
   triggers,

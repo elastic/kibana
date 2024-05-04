@@ -9,7 +9,7 @@
 import { useCallback } from 'react';
 import type { SerializableRecord } from '@kbn/utility-types';
 
-import { IAggConfig, AggParamType, IAggType } from '@kbn/data-plugin/public';
+import { IAggConfig, AggParamType, AggConfigSerialized } from '@kbn/data-plugin/public';
 import { DefaultEditorCommonProps } from '../../agg_common_props';
 
 type SetValue = (value?: IAggConfig) => void;
@@ -19,9 +19,9 @@ function useSubAggParamsHandlers(
   aggParam: AggParamType,
   subAgg: IAggConfig,
   setValue: SetValue
-) {
-  const setAggParamValue: DefaultEditorCommonProps['setAggParamValue'] = useCallback(
-    (aggId, paramName, val) => {
+): Pick<DefaultEditorCommonProps, 'onAggTypeChange' | 'setAggParamValue'> {
+  const setAggParamValue = useCallback<DefaultEditorCommonProps['setAggParamValue']>(
+    (_, paramName, val) => {
       const parsedParams = subAgg.serialize();
       const params = {
         ...parsedParams,
@@ -36,13 +36,13 @@ function useSubAggParamsHandlers(
     [agg, aggParam, setValue, subAgg]
   );
 
-  const onAggTypeChange = useCallback(
-    (aggId: string, aggType: IAggType) => {
+  const onAggTypeChange = useCallback<DefaultEditorCommonProps['onAggTypeChange']>(
+    (_, aggType) => {
       const parsedAgg = subAgg.serialize();
       const parsedAggParams = parsedAgg.params as SerializableRecord;
 
       // we should share between aggs only field and base params: json, label, time shift.
-      const params = {
+      const params: AggConfigSerialized = {
         ...parsedAgg,
         params: {
           field: parsedAggParams.field,
@@ -50,7 +50,8 @@ function useSubAggParamsHandlers(
           customLabel: parsedAggParams.customLabel,
           timeShift: parsedAggParams.timeShift,
         },
-        type: aggType as unknown as string,
+        // @ts-ignore - Need to verify type
+        type: aggType,
       };
 
       setValue(aggParam.makeAgg(agg, params));

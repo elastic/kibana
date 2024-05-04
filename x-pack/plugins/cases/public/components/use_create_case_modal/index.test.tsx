@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, act, renderHook } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react-hooks';
 
 import { useKibana } from '../../common/lib/kibana';
 import type { UseCreateCaseModalReturnedValues, UseCreateCaseModalProps } from '.';
@@ -18,8 +18,7 @@ jest.mock('../../common/lib/kibana');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const onCaseCreated = jest.fn();
 
-// FLAKY: https://github.com/elastic/kibana/issues/174205
-describe.skip('useCreateCaseModal', () => {
+describe('useCreateCaseModal', () => {
   let navigateToApp: jest.Mock;
 
   beforeEach(() => {
@@ -94,14 +93,6 @@ describe.skip('useCreateCaseModal', () => {
 
     act(() => {
       result.current.openModal();
-    });
-
-    await act(async () => {
-      const modal = result.current.modal;
-      render(<TestProviders>{modal}</TestProviders>);
-    });
-
-    act(() => {
       result.current.modal.props.onSuccess({ id: 'case-id' });
     });
 

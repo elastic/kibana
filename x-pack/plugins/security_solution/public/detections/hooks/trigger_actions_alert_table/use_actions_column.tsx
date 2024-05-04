@@ -8,7 +8,10 @@
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import type { AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type {
+  AlertsTableConfigurationRegistry,
+  RenderCustomActionsRowArgs,
+} from '@kbn/triggers-actions-ui-plugin/public/types';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
 import { eventsViewerSelector } from '../../../common/components/events_viewer/selectors';
@@ -50,8 +53,8 @@ export const getUseActionColumnHook =
         refresh: alertsTableRefresh,
         clearSelection,
         ecsAlert: alert,
-        nonEcsData
-      }: any) => {
+        nonEcsData,
+      }: RenderCustomActionsRowArgs) => {
         const timelineItem: TimelineItem = {
           _id: (alert as Ecs)._id,
           _index: (alert as Ecs)._index,

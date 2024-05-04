@@ -10,6 +10,7 @@ import {
   EuiFormRow,
   EuiTextArea,
   EuiCheckbox,
+  EuiCheckboxProps,
   EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -225,8 +226,8 @@ export const SystemPromptSettings: React.FC<Props> = React.memo(
       [selectedSystemPrompt?.isNewConversationDefault]
     );
 
-    const handleNewConversationDefaultChange = useCallback(
-      (e: any) => {
+    const handleNewConversationDefaultChange = useCallback<EuiCheckboxProps['onChange']>(
+      (e) => {
         const isChecked = e.target.checked;
 
         if (selectedSystemPrompt != null) {

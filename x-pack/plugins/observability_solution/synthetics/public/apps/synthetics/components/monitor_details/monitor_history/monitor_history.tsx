@@ -35,10 +35,7 @@ export const MonitorHistory = () => {
   const statsColumns = statsWidth && statsWidth < STATS_WIDTH_SINGLE_COLUMN_THRESHOLD ? 1 : 2;
 
   const handleStatusChartBrushed = useCallback(
-    ({
-      fromUtc,
-      toUtc
-    }: any) => {
+    ({ fromUtc, toUtc }: any) => {
       updateUrlParams({ dateRangeStart: fromUtc, dateRangeEnd: toUtc });
     },
     [updateUrlParams]

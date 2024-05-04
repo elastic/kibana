@@ -13,6 +13,7 @@ import {
   EuiToolTip,
   EuiHighlight,
   EuiComboBox,
+  EuiComboBoxProps,
   EuiComboBoxOptionOption,
   EuiIcon,
 } from '@elastic/eui';
@@ -33,10 +34,10 @@ interface Props {
   selectedSystemPrompt?: Prompt;
 }
 
-export type SystemPromptSelectorOption = EuiComboBoxOptionOption<{
+export interface SystemPromptSelectorOption {
   isDefault: boolean;
   isNewConversationDefault: boolean;
-}>;
+}
 
 /**
  * Selector for choosing and deleting System Prompts
@@ -50,7 +51,9 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
     selectedSystemPrompt,
   }) => {
     // Form options
-    const [options, setOptions] = useState<SystemPromptSelectorOption[]>(
+    const [options, setOptions] = useState<
+      NonNullable<EuiComboBoxProps<SystemPromptSelectorOption>['options']>
+    >(
       systemPrompts.map((sp) => ({
         value: {
           isDefault: sp.isDefault ?? false,
@@ -60,7 +63,9 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
         'data-test-subj': `${TEST_IDS.SYSTEM_PROMPT_SELECTOR}-${sp.id}`,
       }))
     );
-    const selectedOptions = useMemo<SystemPromptSelectorOption[]>(() => {
+    const selectedOptions = useMemo<
+      NonNullable<EuiComboBoxProps<SystemPromptSelectorOption>['selectedOptions']>
+    >(() => {
       return selectedSystemPrompt
         ? [
             {
@@ -74,8 +79,10 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
         : [];
     }, [selectedSystemPrompt]);
 
-    const handleSelectionChange = useCallback(
-      (systemPromptSelectorOption: SystemPromptSelectorOption[]) => {
+    const handleSelectionChange = useCallback<
+      NonNullable<EuiComboBoxProps<SystemPromptSelectorOption>['onChange']>
+    >(
+      (systemPromptSelectorOption) => {
         const newSystemPrompt =
           systemPromptSelectorOption.length === 0
             ? undefined
@@ -87,8 +94,10 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
     );
 
     // Callback for when user types to create a new system prompt
-    const onCreateOption = useCallback(
-      (searchValue: string, flattenedOptions: SystemPromptSelectorOption[] = []) => {
+    const onCreateOption = useCallback<
+      NonNullable<EuiComboBoxProps<SystemPromptSelectorOption>['onCreateOption']>
+    >(
+      (searchValue, flattenedOptions = []) => {
         if (!searchValue || !searchValue.trim().toLowerCase()) {
           return;
         }
@@ -102,7 +111,7 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
         const newOption: SystemPromptSelectorOption = {
           value: searchValue as unknown as SystemPromptSelectorOption['value'],
           label: searchValue,
-        };
+        } as unknown as EuiComboBoxOptionOption<SystemPromptSelectorOption>;
 
         if (!optionExists) {
           setOptions([...options, newOption]);
@@ -113,8 +122,10 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
     );
 
     // Callback for when user selects a quick prompt
-    const onChange = useCallback(
-      (newOptions: SystemPromptSelectorOption[]) => {
+    const onChange = useCallback<
+      NonNullable<EuiComboBoxProps<SystemPromptSelectorOption>['onChange']>
+    >(
+      (newOptions) => {
         if (newOptions.length === 0) {
           handleSelectionChange([]);
         } else if (options.findIndex((o) => o.label === newOptions?.[0].label) !== -1) {
@@ -136,80 +147,81 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
       [handleSelectionChange, onSystemPromptDeleted, options, selectedOptions]
     );
 
-    const renderOption: (
-      option: SystemPromptSelectorOption,
-      searchValue: string,
-      OPTION_CONTENT_CLASSNAME: string
-    ) => React.ReactNode = (option, searchValue, contentClassName) => {
-      const { label, value } = option;
-      return (
-        <EuiFlexGroup
-          alignItems="center"
-          className={'parentFlexGroup'}
-          component={'span'}
-          justifyContent="spaceBetween"
-          data-test-subj="systemPromptOptionSelector"
-        >
-          <EuiFlexItem
-            grow={false}
+    const renderOption = useCallback<
+      NonNullable<EuiComboBoxProps<SystemPromptSelectorOption>['renderOption']>
+    >(
+      (option, searchValue, contentClassName) => {
+        const { label, value } = option;
+        return (
+          <EuiFlexGroup
+            alignItems="center"
+            className={'parentFlexGroup'}
             component={'span'}
-            css={css`
-              width: calc(100% - 60px);
-            `}
+            justifyContent="spaceBetween"
+            data-test-subj="systemPromptOptionSelector"
           >
-            <EuiFlexGroup alignItems="center" component={'span'} gutterSize={'s'}>
-              <EuiFlexItem
-                component={'span'}
-                grow={false}
-                css={css`
-                  max-width: 100%;
-                `}
-              >
-                <EuiHighlight
-                  search={searchValue}
+            <EuiFlexItem
+              grow={false}
+              component={'span'}
+              css={css`
+                width: calc(100% - 60px);
+              `}
+            >
+              <EuiFlexGroup alignItems="center" component={'span'} gutterSize={'s'}>
+                <EuiFlexItem
+                  component={'span'}
+                  grow={false}
                   css={css`
-                    overflow: hidden;
-                    text-overflow: ellipsis;
+                    max-width: 100%;
                   `}
                 >
-                  {label}
-                </EuiHighlight>
-              </EuiFlexItem>
-              {value?.isNewConversationDefault && (
-                <EuiFlexItem grow={false} component={'span'}>
-                  <EuiToolTip position="right" content={SYSTEM_PROMPT_DEFAULT_NEW_CONVERSATION}>
-                    <EuiIcon type={'starFilled'} />
-                  </EuiToolTip>
+                  <EuiHighlight
+                    search={searchValue}
+                    css={css`
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                    `}
+                  >
+                    {label}
+                  </EuiHighlight>
                 </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-
-          {!value?.isDefault && (
-            <EuiFlexItem grow={false} component={'span'}>
-              <EuiToolTip position="right" content={i18n.DELETE_SYSTEM_PROMPT}>
-                <EuiButtonIcon
-                  iconType="cross"
-                  aria-label={i18n.DELETE_SYSTEM_PROMPT}
-                  color="danger"
-                  data-test-subj="delete-prompt"
-                  onClick={(e: React.MouseEvent) => {
-                    e.stopPropagation();
-                    onDelete(label);
-                  }}
-                  css={css`
-                    visibility: hidden;
-                    .parentFlexGroup:hover & {
-                      visibility: visible;
-                    }
-                  `}
-                />
-              </EuiToolTip>
+                {value?.isNewConversationDefault && (
+                  <EuiFlexItem grow={false} component={'span'}>
+                    <EuiToolTip position="right" content={SYSTEM_PROMPT_DEFAULT_NEW_CONVERSATION}>
+                      <EuiIcon type={'starFilled'} />
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
             </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      );
-    };
+
+            {!value?.isDefault && (
+              <EuiFlexItem grow={false} component={'span'}>
+                <EuiToolTip position="right" content={i18n.DELETE_SYSTEM_PROMPT}>
+                  <EuiButtonIcon
+                    iconType="cross"
+                    aria-label={i18n.DELETE_SYSTEM_PROMPT}
+                    color="danger"
+                    data-test-subj="delete-prompt"
+                    onClick={(e: React.MouseEvent) => {
+                      e.stopPropagation();
+                      onDelete(label);
+                    }}
+                    css={css`
+                      visibility: hidden;
+                      .parentFlexGroup:hover & {
+                        visibility: visible;
+                      }
+                    `}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        );
+      },
+      [onDelete]
+    );
 
     return (
       <EuiComboBox

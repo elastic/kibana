@@ -12,6 +12,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import type { MarkdownEditorRef } from '../../editor';
 import { DRAFT_COMMENT_STORAGE_ID } from './constants';
 import { VISUALIZATION } from './translations';
+import type { MarkdownEditorRef } from '../../editor';
 
 interface DraftComment {
   commentId: string;
@@ -54,7 +55,7 @@ export const useLensDraftComment = () => {
 
   const openLensModal = useCallback(({ editorRef }: { editorRef: MarkdownEditorRef }) => {
     if (editorRef && editorRef.textarea && editorRef.toolbar) {
-      const lensPluginButton = editorRef.toolbar?.querySelector<HTMLElement>(
+      const lensPluginButton = editorRef.toolbar?.querySelector<HTMLButtonElement>(
         `[aria-label="${VISUALIZATION}"]`
       );
       if (lensPluginButton) {

@@ -131,7 +131,7 @@ export const ActionAlertsFilterTimeframe: React.FC<ActionAlertsFilterTimeframePr
   );
 
   const onChangeTimezone = useCallback(
-    (value: EuiComboBoxOptionOption[]) => {
+    (value: any) => {
       setSelectedTimezone(value);
       if (value[0].label) updateTimeframe({ timezone: value[0].label });
     },

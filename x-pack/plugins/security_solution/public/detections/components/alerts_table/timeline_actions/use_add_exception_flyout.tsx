@@ -48,7 +48,7 @@ export const useExceptionFlyout = ({
   }, []);
 
   const onAddExceptionConfirm = useCallback(
-    (didRuleChange: boolean, didCloseAlert: boolean, didBulkCloseAlert: any) => {
+    (didRuleChange: boolean, didCloseAlert: boolean, didBulkCloseAlert: boolean) => {
       if (refetch && (isActiveTimelines === false || didBulkCloseAlert)) {
         refetch();
       }

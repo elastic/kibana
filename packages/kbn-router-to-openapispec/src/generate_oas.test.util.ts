@@ -60,8 +60,9 @@ const getRouterDefaults = () => ({
     },
     response: {
       200: {
-        body: schema.string({ maxLength: 10, minLength: 1 }),
+        body: () => schema.string({ maxLength: 10, minLength: 1 }),
       },
+      unsafe: { body: true },
     },
   },
   options: { tags: ['foo'] },
@@ -79,9 +80,14 @@ const getVersionedRouterDefaults = () => ({
       fn: jest.fn(),
       options: {
         validate: {
-          request: { body: schema.object({ foo: schema.string() }) },
+          request: {
+            body: schema.object({
+              foo: schema.string(),
+              deprecatedFoo: schema.maybe(schema.string({ meta: { deprecated: true } })),
+            }),
+          },
           response: {
-            [200]: { body: schema.object({ fooResponse: schema.string() }) },
+            [200]: { body: () => schema.object({ fooResponse: schema.string() }) },
           },
         },
         version: 'oas-test-version-1',
@@ -93,7 +99,11 @@ const getVersionedRouterDefaults = () => ({
         validate: {
           request: { body: schema.object({ foo: schema.string() }) },
           response: {
-            [200]: { body: schema.object({ fooResponse: schema.string() }) },
+            [200]: {
+              body: () => schema.stream({ meta: { description: 'stream response' } }),
+              bodyContentType: 'application/octet-stream',
+            },
+            unsafe: { body: true },
           },
         },
         version: 'oas-test-version-2',

@@ -20,6 +20,7 @@ import {
   EuiCheckbox,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiCheckboxProps,
 } from '@elastic/eui';
 
 export interface TextBasedLanguagesTransitionModalProps {
@@ -35,7 +36,7 @@ export default function TextBasedLanguagesTransitionModal({
   textBasedLanguage,
 }: TextBasedLanguagesTransitionModalProps) {
   const [dismissModalChecked, setDismissModalChecked] = useState(false);
-  const onTransitionModalDismiss: React.ChangeEventHandler<HTMLInputElement> = useCallback((e) => {
+  const onTransitionModalDismiss = useCallback<EuiCheckboxProps['onChange']>((e) => {
     setDismissModalChecked(e.target.checked);
   }, []);
 

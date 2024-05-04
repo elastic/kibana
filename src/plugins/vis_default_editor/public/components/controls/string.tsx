@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, ChangeEventHandler } from 'react';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 
 import { AggParamEditorProps } from '../agg_param_props';
@@ -26,8 +26,8 @@ function StringParamEditor({
     setValidity(isValid);
   }, [isValid, setValidity]);
 
-  const onChange: React.ChangeEventHandler<HTMLInputElement> = useCallback(
-    (ev) => setValue(ev.target.value),
+  const onChange = useCallback<ChangeEventHandler<HTMLInputElement>>(
+    (e) => setValue(e.target.value),
     [setValue]
   );
 

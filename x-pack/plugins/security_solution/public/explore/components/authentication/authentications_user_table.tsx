@@ -10,6 +10,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { getOr } from 'lodash/fp';
 import { useDispatch } from 'react-redux';
 import { AuthStackByField } from '../../../../common/search_strategy/security_solution/users/authentications';
+import type { SiemTables } from '../paginated_table';
 import { PaginatedTable } from '../paginated_table';
 
 import * as i18n from './translations';
@@ -67,8 +68,8 @@ const AuthenticationsUserTableComponent: React.FC<AuthenticationsUserTableProps>
     [userName]
   );
 
-  const updateLimitPagination = useCallback(
-    (newLimit: any) =>
+  const updateLimitPagination = useCallback<SiemTables['updateLimitPagination']>(
+    (newLimit) =>
       dispatch(
         usersActions.updateTableLimit({
           usersType: type,
@@ -79,8 +80,8 @@ const AuthenticationsUserTableComponent: React.FC<AuthenticationsUserTableProps>
     [type, dispatch]
   );
 
-  const updateActivePage = useCallback(
-    (newPage: any) =>
+  const updateActivePage = useCallback<SiemTables['updateActivePage']>(
+    (newPage) =>
       dispatch(
         usersActions.updateTableActivePage({
           activePage: newPage,

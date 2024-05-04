@@ -52,8 +52,8 @@ export const ActionAlertsFilterQuery: React.FC<ActionAlertsFilterQueryProps> = (
     [query, setQuery]
   );
 
-  const onQueryChange: NonNullable<AlertsSearchBarProps['onQueryChange']> = useCallback(
-    ({ query: newQuery }) => updateQuery({ kql: newQuery }),
+  const onQueryChange = useCallback(
+    ({ query: newQuery }: any) => updateQuery({ kql: newQuery }),
     [updateQuery]
   );
 

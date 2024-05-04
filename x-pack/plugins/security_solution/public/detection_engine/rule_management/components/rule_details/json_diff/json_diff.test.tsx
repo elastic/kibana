@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
@@ -63,7 +64,7 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
       delete oldRule.license;
       newRule.license = 'GPLv3';
 
-      const ThemeWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+      const ThemeWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
         <EuiThemeProvider colorMode={colorMode}>{children}</EuiThemeProvider>
       );
 

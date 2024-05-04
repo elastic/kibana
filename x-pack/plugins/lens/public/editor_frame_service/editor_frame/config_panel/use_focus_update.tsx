@@ -35,7 +35,7 @@ export function useFocusUpdate(ids: string[]) {
     }
   }, [ids, refsById, nextFocusedId]);
 
-  const registerNewRef = useCallback((id: string, el: HTMLDivElement | null) => {
+  const registerNewRef = useCallback((id: string, el: HTMLElement | null) => {
     if (el) {
       setRefsById((refs) => {
         return new Map(refs.set(id, el));

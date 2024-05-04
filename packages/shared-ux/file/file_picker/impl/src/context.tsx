@@ -7,7 +7,7 @@
  */
 
 import React, { createContext, useContext, useMemo, useEffect } from 'react';
-import type { FunctionComponent } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { useFilesContext, FilesContextValue } from '@kbn/shared-ux-file-context';
 import { FileJSON } from '@kbn/shared-ux-file-types';
 import { FilePickerState, createFilePickerState } from './file_picker_state';
@@ -31,7 +31,7 @@ interface FilePickerContextProps
   children: React.ReactNode;
 }
 
-export const FilePickerContext: FunctionComponent<FilePickerContextProps> = ({
+export const FilePickerContext: FC<PropsWithChildren<FilePickerContextProps>> = ({
   kind,
   shouldAllowDelete,
   pageSize,

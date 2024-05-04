@@ -99,10 +99,7 @@ export const useCloudPostureDataTable = ({
   );
 
   const setTableOptions = useCallback(
-    ({
-      page,
-      sort
-    }: any) => {
+    ({ page, sort }: any) => {
       setPageSize(page.size);
       setUrlQuery({
         sort,

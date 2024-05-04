@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export const EmptySearchApplicationsPrompt: React.FC<{ children?: React.ReactNode }> = ({
-  children,
-}) => {
+export const EmptySearchApplicationsPrompt: FC<PropsWithChildren<unknown>> = ({ children }) => {
   return (
     <EuiEmptyPrompt
       iconType="aggregate"

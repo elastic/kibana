@@ -7,10 +7,8 @@
 
 import { createRoot } from 'react-dom/client';
 import React from 'react';
-import { CoreTheme } from '@kbn/core/public';
-import { Observable } from 'rxjs';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import { defaultTheme$ } from '@kbn/presentation-util-plugin/common';
+import { CoreStart } from '@kbn/core/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { StartInitializer } from '../plugin';
 import { Datatable as DatatableComponent } from '../../public/components/datatable';
 import { RendererStrings } from '../../i18n';
@@ -26,7 +24,7 @@ export interface TableArguments {
 }
 
 export const getTableRenderer =
-  (theme$: Observable<CoreTheme> = defaultTheme$): RendererFactory<TableArguments> =>
+  (core: CoreStart): RendererFactory<TableArguments> =>
   () => ({
     name: 'table',
     displayName: strings.getDisplayName(),
@@ -34,9 +32,8 @@ export const getTableRenderer =
     reuseDomNode: true,
     render(domNode, config, handlers) {
       const { datatable, paginate, perPage, font = { spec: {} }, showHeader } = config;
-      const root = createRoot(domNode);
-      root.render(
-        <KibanaThemeProvider theme={{ theme$ }}>
+      ReactDOM.render(
+        <KibanaRenderContextProvider {...core}>
           <div style={{ ...(font.spec as React.CSSProperties), height: '100%' }}>
             <DatatableComponent
               datatable={datatable}
@@ -45,12 +42,13 @@ export const getTableRenderer =
               showHeader={showHeader}
             />
           </div>
-        </KibanaThemeProvider>
-        // () => handlers.done()
+        </KibanaRenderContextProvider>,
+        domNode,
+        () => handlers.done()
       );
       handlers.onDestroy(() => root.unmount());
     },
   });
 
-export const tableFactory: StartInitializer<RendererFactory<TableArguments>> = (core, plugins) =>
-  getTableRenderer(core.theme.theme$);
+export const tableFactory: StartInitializer<RendererFactory<TableArguments>> = (core, _plugins) =>
+  getTableRenderer(core);

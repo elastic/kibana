@@ -27,8 +27,8 @@ export const NavButtons: FunctionComponent<Props> = ({ actionsErrors }) => {
   const { getCreateCaseUrl, navigateToCreateCase } = useCreateCaseNavigation();
   const { euiTheme } = useEuiTheme();
   const navigateToCreateCaseClick = useCallback(
-    (ev: React.MouseEvent<HTMLAnchorElement>) => {
-      ev.preventDefault();
+    (e: React.SyntheticEvent) => {
+      e.preventDefault();
       navigateToCreateCase();
     },
     [navigateToCreateCase]

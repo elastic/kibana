@@ -103,7 +103,7 @@ const CasesByStatusComponent: React.FC = () => {
   const caseUrl = getAppUrl({ deepLinkId: SecurityPageName.case, path: appendSearch(search) });
 
   const goToCases = useCallback(
-    (ev: React.MouseEvent<HTMLAnchorElement>) => {
+    (ev: React.SyntheticEvent) => {
       ev.preventDefault();
       navigateTo({ url: caseUrl });
     },

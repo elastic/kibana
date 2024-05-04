@@ -9,14 +9,14 @@
 import _ from 'lodash';
 import moment from 'moment-timezone';
 import React, { createContext, useContext } from 'react';
-import { createRoot } from 'react-dom/client';
-import { Subscription } from 'rxjs';
-import { debounceTime, first, map } from 'rxjs';
+import ReactDOM from 'react-dom';
+import { debounceTime, first, map, Subscription } from 'rxjs';
 
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 import { TIME_SLIDER_CONTROL } from '../..';
 import { TimeSliderControlEmbeddableInput } from '../../../common/time_slider/types';
@@ -374,6 +374,7 @@ export class TimeSliderControlEmbeddable
   private formatDate = (epoch: number) => {
     return moment
       .tz(epoch, getMomentTimezone(this.getTimezone()))
+      .locale(i18n.getLocale())
       .format(this.getState().componentState.format);
   };
 
@@ -385,9 +386,9 @@ export class TimeSliderControlEmbeddable
     if (this.root) {
       this.root.unmount();
     }
-    this.root = createRoot(node);
-    this.root.render(
-      <KibanaThemeProvider theme={pluginServices.getServices().core.theme}>
+    this.node = node;
+    ReactDOM.render(
+      <KibanaRenderContextProvider {...pluginServices.getServices().core}>
         <TimeSliderControlContext.Provider value={this}>
           <TimeSlider
             formatDate={this.formatDate}
@@ -398,7 +399,8 @@ export class TimeSliderControlEmbeddable
             }}
           />
         </TimeSliderControlContext.Provider>
-      </KibanaThemeProvider>
+      </KibanaRenderContextProvider>,
+      node
     );
   };
 

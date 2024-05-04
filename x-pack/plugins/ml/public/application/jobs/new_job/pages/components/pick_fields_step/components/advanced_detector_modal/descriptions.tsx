@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FC, PropsWithChildren } from 'react';
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -12,7 +13,7 @@ import { EuiDescribedFormGroup, EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@e
 
 import { FunctionHelpPopover } from './function_help';
 
-export const AggDescription = memo(({ children }: { children?: React.ReactNode }) => {
+export const AggDescription: FC<PropsWithChildren<unknown>> = memo(({ children }) => {
   const title = i18n.translate(
     'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.aggSelect.title',
     {
@@ -45,7 +46,7 @@ export const AggDescription = memo(({ children }: { children?: React.ReactNode }
   );
 });
 
-export const FieldDescription = memo(({ children }: { children?: React.ReactNode }) => {
+export const FieldDescription: FC<PropsWithChildren<unknown>> = memo(({ children }) => {
   const title = i18n.translate(
     'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.fieldSelect.title',
     {
@@ -69,7 +70,7 @@ export const FieldDescription = memo(({ children }: { children?: React.ReactNode
   );
 });
 
-export const ByFieldDescription = memo(({ children }: { children?: React.ReactNode }) => {
+export const ByFieldDescription: FC<PropsWithChildren<unknown>> = memo(({ children }) => {
   const title = i18n.translate(
     'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.byFieldSelect.title',
     {
@@ -93,7 +94,7 @@ export const ByFieldDescription = memo(({ children }: { children?: React.ReactNo
   );
 });
 
-export const OverFieldDescription = memo(({ children }: { children?: React.ReactNode }) => {
+export const OverFieldDescription: FC<PropsWithChildren<unknown>> = memo(({ children }) => {
   const title = i18n.translate(
     'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.overFieldSelect.title',
     {
@@ -117,7 +118,7 @@ export const OverFieldDescription = memo(({ children }: { children?: React.React
   );
 });
 
-export const PartitionFieldDescription = memo(({ children }: { children?: React.ReactNode }) => {
+export const PartitionFieldDescription: FC<PropsWithChildren<unknown>> = memo(({ children }) => {
   const title = i18n.translate(
     'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.partitionFieldSelect.title',
     {
@@ -141,7 +142,7 @@ export const PartitionFieldDescription = memo(({ children }: { children?: React.
   );
 });
 
-export const ExcludeFrequentDescription = memo(({ children }: { children?: React.ReactNode }) => {
+export const ExcludeFrequentDescription: FC<PropsWithChildren<unknown>> = memo(({ children }) => {
   const title = i18n.translate(
     'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.excludeFrequent.title',
     {
@@ -165,7 +166,7 @@ export const ExcludeFrequentDescription = memo(({ children }: { children?: React
   );
 });
 
-export const DescriptionDescription = memo(({ children }: { children?: React.ReactNode }) => {
+export const DescriptionDescription: FC<PropsWithChildren<unknown>> = memo(({ children }) => {
   const title = i18n.translate(
     'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.description.title',
     {

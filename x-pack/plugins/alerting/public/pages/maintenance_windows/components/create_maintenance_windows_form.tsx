@@ -137,7 +137,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     };
   }, [isScopedQueryEnabled, scopedQueryFeatureFlag, query, filters]);
 
-  const submitMaintenanceWindow: FormSubmitHandler<FormProps> = useCallback(
+  const submitMaintenanceWindow = useCallback<FormSubmitHandler<FormProps>>(
     async (formData, isValid) => {
       if (!isValid || scopedQueryErrors.length !== 0) {
         return;

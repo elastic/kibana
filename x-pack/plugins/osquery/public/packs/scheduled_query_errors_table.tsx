@@ -90,7 +90,10 @@ const ScheduledQueryErrorsTableComponent: React.FC<ScheduledQueryErrorsTableProp
     interval,
   });
 
-  const renderAgentIdColumn = useCallback((agentId: any) => <AgentIdToName agentId={agentId} />, []);
+  const renderAgentIdColumn = useCallback(
+    (agentId: any) => <AgentIdToName agentId={agentId} />,
+    []
+  );
 
   const renderLogsErrorsAction = useCallback(
     (item: any) => (

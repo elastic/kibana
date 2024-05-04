@@ -67,9 +67,7 @@ export function App({
   contextOriginatingApp,
   topNavMenuEntryGenerators,
   initialContext,
-  theme$,
   coreStart,
-  savedObjectStore,
 }: LensAppProps) {
   const lensAppServices = useKibana<LensAppServices>().services;
 
@@ -473,7 +471,7 @@ export function App({
     [dataViews, uiActions, http, notifications, uiSettings, initialContext, dispatch]
   );
 
-  const onTextBasedSavedAndExit: LensTopNavMenuProps['onTextBasedSavedAndExit'] = useCallback(
+  const onTextBasedSavedAndExit = useCallback<LensTopNavMenuProps['onTextBasedSavedAndExit']>(
     async ({ onSave }) => {
       setIsSaveModalVisible(true);
       setShouldCloseAndSaveTextBasedQuery(true);
@@ -575,11 +573,11 @@ export function App({
           initialContextIsEmbedded={initialContextIsEmbedded}
           topNavMenuEntryGenerators={topNavMenuEntryGenerators}
           initialContext={initialContext}
-          theme$={theme$}
           indexPatternService={indexPatternService}
           onTextBasedSavedAndExit={onTextBasedSavedAndExit}
           getUserMessages={getUserMessages}
           shortUrlService={shortUrlService}
+          startServices={coreStart}
         />
         {getLegacyUrlConflictCallout()}
         {(!isLoading || persistedDoc) && (

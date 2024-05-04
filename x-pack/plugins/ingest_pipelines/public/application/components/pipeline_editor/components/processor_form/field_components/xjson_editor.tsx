@@ -28,7 +28,7 @@ export const XJsonEditor: FunctionComponent<Props> = ({ field, editorProps }) =>
   const { xJson, setXJson, convertToJson } = useXJsonMode(value);
 
   const onChange = useCallback(
-    (s: string) => {
+    (s: any) => {
       setXJson(s);
       setValue(convertToJson(s));
     },

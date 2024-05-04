@@ -142,7 +142,7 @@ export const useAddBulkToTimelineAction = ({
   });
 
   const updateTimelineIsLoading = useCallback(
-    (payload: { id: string; isLoading: boolean }) =>
+    (payload: Parameters<typeof timelineActions.updateIsLoading>[0]) =>
       dispatch(timelineActions.updateIsLoading(payload)),
     [dispatch]
   );

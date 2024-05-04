@@ -21,7 +21,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { isEmpty } from 'lodash';
 import { Conversation } from '../../..';
-import { AssistantTitle } from '../assistant_title';
+import { AssistantTitle, AssistantTitleProps } from '../assistant_title';
 import { ConnectorSelectorInline } from '../../connectorland/connector_selector_inline/connector_selector_inline';
 import { FlyoutNavigation } from '../assistant_overlay/flyout_navigation';
 import { AssistantSettingsButton } from '../settings/assistant_settings_button';
@@ -99,8 +99,8 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
   const closeDestroyModal = useCallback(() => setIsResetConversationModalVisible(false), []);
   const showDestroyModal = useCallback(() => setIsResetConversationModalVisible(true), []);
 
-  const onConversationChange = useCallback(
-    (updatedConversation: any) => {
+  const onConversationChange: AssistantTitleProps['onChange'] = useCallback(
+    (updatedConversation) => {
       onConversationSelected({
         cId: updatedConversation.id,
         cTitle: updatedConversation.title,

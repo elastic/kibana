@@ -125,7 +125,7 @@ const PieOptions = (props: PieOptionsProps) => {
   );
 
   const handleLegendSizeChange = useCallback(
-    (size: LegendSize | undefined) => setValue('legendSize', size),
+    (size?: LegendSize) => setValue('legendSize', size),
     [setValue]
   );
 

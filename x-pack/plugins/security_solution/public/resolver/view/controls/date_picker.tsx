@@ -8,7 +8,7 @@ import React, { useCallback, memo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { EuiPopover, EuiPopoverTitle, EuiSuperDatePicker } from '@elastic/eui';
-import type { ShortDate } from '@elastic/eui';
+import type { ShortDate, EuiSuperDatePickerProps } from '@elastic/eui';
 import { formatDate } from '../../../common/components/super_date_picker';
 import { StyledEuiButtonIcon } from './styles';
 import { useColors } from '../use_colors';
@@ -61,12 +61,8 @@ export const DateSelectionButton = memo(
       return selectors.currentAppliedTimeRange(state.analyzer[id]);
     });
 
-    const onTimeChange = useCallback(
-      ({
-        start,
-        end,
-        isInvalid
-      }: any) => {
+    const onTimeChange = useCallback<EuiSuperDatePickerProps['onTimeChange']>(
+      ({ start, end, isInvalid }) => {
         if (!isInvalid) {
           const isQuickSelection = start.includes('now') || end.includes('now');
           const fromDate = formatDate(start);

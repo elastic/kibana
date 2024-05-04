@@ -47,7 +47,7 @@ export const App = () => {
   );
 
   const onHighlight = useCallback(
-    (value: OnHighlightChangeArgs) => dispatch({ type: 'setHighlightDetails', value }),
+    (value: any) => dispatch({ type: 'setHighlightDetails', value }),
     [dispatch]
   );
 

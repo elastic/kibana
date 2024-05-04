@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { createRoot } from 'react-dom/client';
+import React, { FC, PropsWithChildren } from 'react';
+import ReactDOM from 'react-dom';
 
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { getAnalytics, getI18n, getTheme } from '../kibana_services';
@@ -32,7 +32,7 @@ interface MinimalSaveModalProps {
 
 export function showSaveModal(
   saveModal: React.ReactElement<MinimalSaveModalProps>,
-  Wrapper?: React.FC<{ children: React.ReactNode }>
+  Wrapper?: FC<PropsWithChildren<unknown>>
 ) {
   const container = document.createElement('div');
   const root = createRoot(container);

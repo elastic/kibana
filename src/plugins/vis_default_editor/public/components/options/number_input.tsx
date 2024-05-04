@@ -62,4 +62,4 @@ function NumberInputOption<ParamName extends string>({
   );
 }
 
-export { NumberInputOption };
+export { NumberInputOption, type NumberInputOptionProps };

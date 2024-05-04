@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { EuiButton } from '@elastic/eui';
 
 export interface ButtonSubmitProps {
@@ -15,7 +15,11 @@ export interface ButtonSubmitProps {
   children: React.ReactNode;
 }
 
-export const ButtonSubmit: React.FC<ButtonSubmitProps> = ({ disabled, onClick, children }) => {
+export const ButtonSubmit: FC<PropsWithChildren<ButtonSubmitProps>> = ({
+  disabled,
+  onClick,
+  children,
+}) => {
   return (
     <EuiButton
       fill

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, createContext } from 'react';
+import React, { FC, PropsWithChildren, createContext } from 'react';
 import { useRoutingContext } from './hooks/use_routing_context';
 
 export interface WorkpadRoutingContextType {
@@ -46,9 +46,7 @@ export const WorkpadRoutingContext = createContext<WorkpadRoutingContextType>(
   basicWorkpadRoutingContext
 );
 
-export const WorkpadRoutingContextComponent: FC<{ children?: React.ReactNode }> = ({
-  children,
-}) => {
+export const WorkpadRoutingContextComponent: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const routingContext = useRoutingContext();
 
   return (

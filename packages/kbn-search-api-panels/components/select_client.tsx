@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 
 import {
   EuiCallOut,
@@ -37,7 +37,7 @@ export interface SelectClientPanelProps {
   children: React.ReactNode;
 }
 
-export const SelectClientPanel: React.FC<SelectClientPanelProps> = ({
+export const SelectClientPanel: FC<PropsWithChildren<SelectClientPanelProps>> = ({
   docLinks,
   children,
   isPanelLeft = true,

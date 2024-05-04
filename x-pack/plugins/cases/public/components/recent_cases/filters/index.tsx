@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiSelectOption } from '@elastic/eui';
+import type { EuiSelectOption, EuiSelectProps } from '@elastic/eui';
 import { EuiSelect } from '@elastic/eui';
 import React, { useCallback } from 'react';
 
@@ -50,8 +50,8 @@ export const RecentCasesFilters = React.memo<{
     };
   });
 
-  const onChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const onChange = useCallback<NonNullable<EuiSelectProps['onChange']>>(
+    (e) => {
       setFilterBy(e.target.value as FilterMode);
     },
     [setFilterBy]

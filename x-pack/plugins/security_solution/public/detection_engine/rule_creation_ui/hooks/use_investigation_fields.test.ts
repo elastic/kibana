@@ -28,7 +28,7 @@ const fetchFieldsFromESQLMock = fetchFieldsFromESQL as jest.Mock;
 
 const { wrapper } = createQueryWrapperMock();
 
-const mockEsqlQuery = 'from auditbeat* [metadata _id]';
+const mockEsqlQuery = 'from auditbeat* metadata _id';
 const mockIndexPatternFields: DataViewFieldBase[] = [
   {
     name: 'agent.name',

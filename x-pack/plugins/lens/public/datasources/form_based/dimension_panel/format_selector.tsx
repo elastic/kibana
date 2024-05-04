@@ -126,7 +126,7 @@ const compactLabel = i18n.translate('xpack.lens.indexPattern.compactLabel', {
 type FormatParams = NonNullable<ValueFormatConfig['params']>;
 type FormatParamsKeys = keyof FormatParams;
 
-interface FormatSelectorProps {
+export interface FormatSelectorProps {
   selectedColumn: GenericIndexPatternColumn;
   onChange: (newFormat?: { id: string; params?: FormatParams }) => void;
   docLinks: DocLinksStart;

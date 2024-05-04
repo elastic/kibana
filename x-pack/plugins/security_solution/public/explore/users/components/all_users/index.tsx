@@ -16,7 +16,12 @@ import {
   getOrEmptyTagFromValue,
 } from '../../../../common/components/empty_value';
 
-import type { Columns, Criteria, ItemsPerRow } from '../../../components/paginated_table';
+import type {
+  Columns,
+  Criteria,
+  ItemsPerRow,
+  SiemTables,
+} from '../../../components/paginated_table';
 import { PaginatedTable } from '../../../components/paginated_table';
 
 import { getRowItemsWithActions } from '../../../../common/components/tables/helpers';
@@ -159,8 +164,8 @@ const UsersTableComponent: React.FC<UsersTableProps> = ({
   const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
   const { navigateTo } = useNavigateTo();
 
-  const updateLimitPagination = useCallback(
-    (newLimit: any) => {
+  const updateLimitPagination = useCallback<SiemTables['updateLimitPagination']>(
+    (newLimit) => {
       dispatch(
         usersActions.updateTableLimit({
           usersType: type,
@@ -172,8 +177,8 @@ const UsersTableComponent: React.FC<UsersTableProps> = ({
     [type, dispatch]
   );
 
-  const updateActivePage = useCallback(
-    (newPage: any) => {
+  const updateActivePage = useCallback<SiemTables['updateActivePage']>(
+    (newPage) => {
       dispatch(
         usersActions.updateTableActivePage({
           activePage: newPage,

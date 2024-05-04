@@ -17,7 +17,7 @@ import {
   NetworkTopTablesFields,
 } from '../../../../../common/search_strategy';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import type { Criteria, ItemsPerRow } from '../../../components/paginated_table';
+import type { Criteria, ItemsPerRow, SiemTables } from '../../../components/paginated_table';
 import { PaginatedTable } from '../../../components/paginated_table';
 import { networkActions, networkModel, networkSelectors } from '../../store';
 import { getNFlowColumnsCurated } from './columns';
@@ -125,8 +125,8 @@ const NetworkTopNFlowTableComponent: React.FC<NetworkTopNFlowTableProps> = ({
     [flowTargeted, sort]
   );
 
-  const updateActivePage = useCallback(
-    (newPage: any) =>
+  const updateActivePage = useCallback<SiemTables['updateActivePage']>(
+    (newPage) =>
       dispatch(
         networkActions.updateNetworkTable({
           networkType: type,
@@ -137,8 +137,8 @@ const NetworkTopNFlowTableComponent: React.FC<NetworkTopNFlowTableProps> = ({
     [dispatch, type, tableType]
   );
 
-  const updateLimitPagination = useCallback(
-    (newLimit: any) =>
+  const updateLimitPagination = useCallback<SiemTables['updateLimitPagination']>(
+    (newLimit) =>
       dispatch(
         networkActions.updateNetworkTable({
           networkType: type,

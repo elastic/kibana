@@ -16,7 +16,7 @@ import {
   useShallowEqualSelector,
 } from '../../../../../../common/hooks/use_selector';
 import { timelineActions, timelineSelectors } from '../../../../../store';
-import type { OnFilterChange } from '../../../events';
+import type { OnColumnRemoved, OnFilterChange } from '../../../events';
 import type { Sort } from '../../sort';
 import { Actions } from '../actions';
 import { Filter } from '../filter';
@@ -81,8 +81,8 @@ export const HeaderComponent: React.FC<Props> = ({
     );
   }, [dispatch, header, sort, timelineId]);
 
-  const onColumnRemoved = useCallback(
-    (columnId: string) => dispatch(timelineActions.removeColumn({ id: timelineId, columnId })),
+  const onColumnRemoved = useCallback<OnColumnRemoved>(
+    (columnId) => dispatch(timelineActions.removeColumn({ id: timelineId, columnId })),
     [dispatch, timelineId]
   );
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, FC, PropsWithChildren } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { useValues, useActions } from 'kea';
@@ -29,7 +29,7 @@ interface Props {
   isAnalyticsView?: boolean;
   children?: React.ReactNode;
 }
-export const AnalyticsLayout: React.FC<Props> = ({
+export const AnalyticsLayout: FC<PropsWithChildren<Props>> = ({
   title,
   breadcrumbs = [],
   isQueryView,

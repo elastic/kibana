@@ -131,7 +131,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     const savedQueryServices = useSavedQueryServices();
 
     const applyKqlFilterQuery = useCallback(
-      (expression: string, kind: any) =>
+      (expression: string, kind: KueryFilterQueryKind) =>
         dispatch(
           timelineActions.applyKqlFilterQuery({
             id: timelineId,

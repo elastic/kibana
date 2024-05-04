@@ -29,7 +29,7 @@ import {
   MaintenanceWindow,
 } from '../../../../common';
 import { StatusFilter } from './status_filter';
-import { TableActionsPopover } from './table_actions_popover';
+import { TableActionsPopover, TableActionsPopoverProps } from './table_actions_popover';
 import { useFinishMaintenanceWindow } from '../../../hooks/use_finish_maintenance_window';
 import { useArchiveMaintenanceWindow } from '../../../hooks/use_archive_maintenance_window';
 import { useFinishAndArchiveMaintenanceWindow } from '../../../hooks/use_finish_and_archive_maintenance_window';
@@ -115,14 +115,14 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
     };
     const { euiTheme } = useEuiTheme();
     const { navigateToEditMaintenanceWindows } = useEditMaintenanceWindowsNavigation();
-    const onEdit = useCallback(
-      (id: string ) => navigateToEditMaintenanceWindows(id),
+    const onEdit = useCallback<TableActionsPopoverProps['onEdit']>(
+      (id) => navigateToEditMaintenanceWindows(id),
       [navigateToEditMaintenanceWindows]
     );
     const { mutate: finishMaintenanceWindow, isLoading: isLoadingFinish } =
       useFinishMaintenanceWindow();
-    const onCancel = useCallback(
-      (id: string) => finishMaintenanceWindow(id, { onSuccess: () => refreshData() }),
+    const onCancel = useCallback<TableActionsPopoverProps['onCancel']>(
+      (id) => finishMaintenanceWindow(id, { onSuccess: () => refreshData() }),
       [finishMaintenanceWindow, refreshData]
     );
     const { mutate: archiveMaintenanceWindow, isLoading: isLoadingArchive } =

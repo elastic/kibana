@@ -40,7 +40,7 @@ function ColorRanges({
 
   const validateRange = useCallback(
     ({ from, to }: RangeValues, index: number) => {
-      if (!colorsRange[index] || !to || !from) {
+      if (from === undefined || to === undefined || !colorsRange[index]) {
         return [false, false];
       }
 

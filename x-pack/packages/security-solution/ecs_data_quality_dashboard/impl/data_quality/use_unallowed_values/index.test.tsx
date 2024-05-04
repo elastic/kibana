@@ -6,8 +6,8 @@
  */
 
 import { EcsFlat } from '@elastic/ecs';
-import { renderHook } from '@testing-library/react';
-import React from 'react';
+import { renderHook } from '@testing-library/react-hooks';
+import React, { FC, PropsWithChildren } from 'react';
 
 import { getUnallowedValueRequestItems } from '../data_quality_panel/allowed_values/helpers';
 import { DataQualityProvider } from '../data_quality_panel/data_quality_context';
@@ -26,7 +26,7 @@ const mockTelemetryEvents = {
 };
 const { toasts } = notificationServiceMock.createSetupContract();
 
-const ContextWrapper: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
+const ContextWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <DataQualityProvider
     httpFetch={mockHttpFetch}
     telemetryEvents={mockTelemetryEvents}

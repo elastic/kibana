@@ -8,10 +8,10 @@
 import { cloneDeep, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { isOfAggregateQueryType } from '@kbn/es-query';
+import { AggregateQuery, isOfAggregateQueryType, Query } from '@kbn/es-query';
 import { useStore } from 'react-redux';
-import { TopNavMenuData } from '@kbn/navigation-plugin/public';
-import { getEsQueryConfig, SavedQuery } from '@kbn/data-plugin/public';
+import { TopNavMenuData, TopNavMenuProps } from '@kbn/navigation-plugin/public';
+import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
@@ -279,13 +279,13 @@ export const LensTopNavMenu = ({
   initialContextIsEmbedded,
   topNavMenuEntryGenerators,
   initialContext,
-  theme$,
   indexPatternService,
   currentDoc,
   onTextBasedSavedAndExit,
   getUserMessages,
   shortUrlService,
   isCurrentStateDirty,
+  startServices,
 }: LensTopNavMenuProps) => {
   const {
     data,
@@ -746,7 +746,7 @@ export const LensTopNavMenu = ({
             toggleSettingsMenuOpen({
               lensStore,
               anchorElement,
-              theme$,
+              startServices,
             }),
         },
       },
@@ -794,13 +794,14 @@ export const LensTopNavMenu = ({
     uiSettings,
     isOnTextBasedMode,
     lensStore,
-    theme$,
     notifications.toasts,
+    startServices,
   ]);
 
-  const onQuerySubmitWrapped = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (payload: any) => {
+  const onQuerySubmitWrapped = useCallback<
+    Required<TopNavMenuProps<AggregateQuery>>['onQuerySubmit']
+  >(
+    (payload) => {
       const { dateRange, query: newQuery } = payload;
       const currentRange = data.query.timefilter.timefilter.getTime();
       if (dateRange.from !== currentRange.from || dateRange.to !== currentRange.to) {
@@ -815,8 +816,8 @@ export const LensTopNavMenu = ({
       }
       if (newQuery) {
         if (!isEqual(newQuery, query)) {
-          dispatchSetState({ query: newQuery });
-          // check if query is text-based (sql, essql etc) and switchAndCleanDatasource
+          dispatchSetState({ query: newQuery as Query });
+          // check if query is text-based (esql etc) and switchAndCleanDatasource
           if (isOfAggregateQueryType(newQuery) && !isOnTextBasedMode) {
             setIsOnTextBasedMode(true);
             dispatch(
@@ -842,15 +843,17 @@ export const LensTopNavMenu = ({
     ]
   );
 
-  const onSavedWrapped = useCallback(
-    (newSavedQuery: SavedQuery) => {
+  const onSavedWrapped = useCallback<Required<TopNavMenuProps<AggregateQuery>>['onSaved']>(
+    (newSavedQuery) => {
       dispatchSetState({ savedQuery: newSavedQuery });
     },
     [dispatchSetState]
   );
 
-  const onSavedQueryUpdatedWrapped = useCallback(
-    (newSavedQuery: SavedQuery) => {
+  const onSavedQueryUpdatedWrapped = useCallback<
+    Required<TopNavMenuProps<AggregateQuery>>['onSavedQueryUpdated']
+  >(
+    (newSavedQuery) => {
       // If the user tries to load the same saved query that is already loaded,
       // we will receive the same object reference which was previously frozen
       // by Redux Toolkit. `filterManager.setFilters` will then try to modify
@@ -905,7 +908,7 @@ export const LensTopNavMenu = ({
   const editField = useMemo(
     () =>
       canEditDataView
-        ? async (fieldName?: string, uiAction: 'edit' | 'add' = 'edit') => {
+        ? async (fieldName?: string, _uiAction: 'edit' | 'add' = 'edit') => {
             if (currentIndexPattern?.id) {
               const indexPatternInstance = await data.dataViews.get(currentIndexPattern?.id);
               closeFieldEditor.current = dataViewFieldEditor.openEditor({

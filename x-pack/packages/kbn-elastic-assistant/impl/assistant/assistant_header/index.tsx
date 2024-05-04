@@ -19,7 +19,7 @@ import { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { isEmpty } from 'lodash';
 import { AIConnector } from '../../connectorland/connector_selector';
 import { Conversation } from '../../..';
-import { AssistantTitle } from '../assistant_title';
+import { AssistantTitle, AssistantTitleProps } from '../assistant_title';
 import { ConversationSelector } from '../conversations/conversation_selector';
 import { AssistantSettingsButton } from '../settings/assistant_settings_button';
 import * as i18n from './translations';
@@ -70,8 +70,8 @@ export const AssistantHeader: React.FC<Props> = ({
       showAnonymizedValues,
     [currentConversation?.replacements, showAnonymizedValues]
   );
-  const onConversationChange = useCallback(
-    (updatedConversation: any) => {
+  const onConversationChange: AssistantTitleProps['onChange'] = useCallback(
+    (updatedConversation) => {
       onConversationSelected({
         cId: updatedConversation.id,
         cTitle: updatedConversation.title,

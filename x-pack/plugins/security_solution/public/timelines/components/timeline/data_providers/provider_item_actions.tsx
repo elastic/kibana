@@ -7,7 +7,7 @@
 
 import type { EuiContextMenuPanelDescriptor, EuiPopoverProps } from '@elastic/eui';
 import { EuiContextMenu, EuiPopover } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -53,11 +53,11 @@ interface OwnProps {
   type: DataProviderType;
 }
 
-const MyEuiPopover = styled(EuiPopover as unknown as FunctionComponent)<
-  EuiPopoverProps & {
-    id?: string;
-    children: React.ReactNode;
-  }
+const MyEuiPopover = styled(EuiPopover as unknown as FC)<
+  EuiPopoverProps &
+    PropsWithChildren<{
+      id?: string;
+    }>
 >`
   height: 100%;
   user-select: none;

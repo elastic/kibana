@@ -61,11 +61,11 @@ export const RuleStatusPanel: React.FC<RuleStatusPanelWithApiProps> = ({
   const isInitialized = useRef(false);
 
   const onSnoozeRule = useCallback(
-    (snoozeSchedule: SnoozeSchedule) => snoozeRule(rule, snoozeSchedule),
+    (snoozeSchedule: any) => snoozeRule(rule, snoozeSchedule),
     [rule, snoozeRule]
   );
   const onUnsnoozeRule = useCallback(
-    (scheduleIds?: string[]) => unsnoozeRule(rule, scheduleIds),
+    (scheduleIds: any) => unsnoozeRule(rule, scheduleIds),
     [rule, unsnoozeRule]
   );
 

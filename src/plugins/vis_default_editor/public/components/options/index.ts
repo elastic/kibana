@@ -9,11 +9,9 @@
 export { BasicOptions } from './basic_options';
 export { SwitchOption } from './switch';
 export { SelectOption } from './select';
-export type { SetColorRangeValue } from './color_ranges';
-export { ColorRanges } from './color_ranges';
-export type { SetColorSchemaOptionsValue } from './color_schema';
-export { ColorSchemaOptions } from './color_schema';
-export { NumberInputOption } from './number_input';
+export { ColorRanges, type SetColorRangeValue } from './color_ranges';
+export { ColorSchemaOptions, type SetColorSchemaOptionsValue } from './color_schema';
+export { NumberInputOption, type NumberInputOptionProps } from './number_input';
 export { RangeOption } from './range';
 export { RequiredNumberInputOption } from './required_number_input';
 export { TextInputOption } from './text_input';

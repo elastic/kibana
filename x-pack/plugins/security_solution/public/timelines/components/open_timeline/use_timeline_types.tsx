@@ -47,7 +47,7 @@ export const useTimelineTypes = ({
   const templateUrl = formatUrl(getTimelineTabsUrl(TimelineType.template, urlSearch));
 
   const goToTimeline = useCallback(
-    (ev: SyntheticEvent) => {
+    (ev: React.SyntheticEvent) => {
       ev.preventDefault();
       navigateToUrl(timelineUrl);
     },
@@ -55,13 +55,13 @@ export const useTimelineTypes = ({
   );
 
   const goToTemplateTimeline = useCallback(
-    (ev: SyntheticEvent) => {
+    (ev: React.SyntheticEvent) => {
       ev.preventDefault();
       navigateToUrl(templateUrl);
     },
     [navigateToUrl, templateUrl]
   );
-  const getFilterOrTabs: (timelineTabsStyle: TimelineTabsStyle) => TimelineTab[] = useCallback(
+  const getFilterOrTabs = useCallback<(timelineTabsStyle: TimelineTabsStyle) => TimelineTab[]>(
     (timelineTabsStyle: TimelineTabsStyle) => [
       {
         id: TimelineType.default,
@@ -129,7 +129,7 @@ export const useTimelineTypes = ({
             data-test-subj={`open-timeline-modal-body-${TimelineTabsStyle.filter}-${tab.id}`}
             isSelected={tab.id === timelineType}
             key={`timeline-${TimelineTabsStyle.filter}-${tab.id}`}
-            onClick={(ev: SyntheticEvent) => {
+            onClick={(ev: React.SyntheticEvent) => {
               tab.onClick(ev);
               onFilterClicked(tab.id, TimelineTabsStyle.filter);
             }}

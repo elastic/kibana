@@ -179,14 +179,12 @@ export const usePickIndexPatterns = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOnlyDetectionAlerts, selectedDataViewId, missingPatterns, scopeId, selectedPatterns]);
 
-  const onChangeCombo = useCallback((newSelectedOptions: any) => {
+  const onChangeCombo = useCallback<UsePickIndexPatterns['onChangeCombo']>((newSelectedOptions) => {
     setSelectedOptions(newSelectedOptions);
   }, []);
 
-  const renderOption = useCallback(
-    ({
-      value
-    }: any) => <span data-test-subj="sourcerer-combo-option">{value}</span>,
+  const renderOption = useCallback<UsePickIndexPatterns['renderOption']>(
+    ({ value }) => <span data-test-subj="sourcerer-combo-option">{value}</span>,
     []
   );
 

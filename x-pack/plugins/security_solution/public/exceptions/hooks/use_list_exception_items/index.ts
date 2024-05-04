@@ -7,7 +7,10 @@
 import { useCallback, useState } from 'react';
 import type { Pagination } from '@elastic/eui';
 import { ViewerStatus } from '@kbn/securitysolution-exception-list-components';
-import type { RuleReferences } from '@kbn/securitysolution-exception-list-components';
+import type {
+  RuleReferences,
+  GetExceptionItemProps,
+} from '@kbn/securitysolution-exception-list-components';
 import type {
   ExceptionListItemSchema,
   ExceptionListSchema,
@@ -19,6 +22,7 @@ import {
   getExceptionItemsReferences,
   prepareFetchExceptionItemsParams,
 } from '../../api';
+import type { DeleteExceptionItem } from '../../api/types';
 
 export interface UseListExceptionItemsProps {
   list: ExceptionListSchema;
@@ -73,19 +77,26 @@ export const useListExceptionItems = ({
     }
   }, [handleErrorStatus, list, setExceptionListReferences]);
 
-  const updateViewer = useCallback((paginationResult: any, dataLength: any, viewStatus: any) => {
-    setPagination(paginationResult);
-    setLastUpdated(Date.now());
-    setTimeout(() => {
-      if (viewStatus === ViewerStatus.EMPTY_SEARCH)
-        return setViewerStatus(!dataLength ? viewStatus : '');
+  const updateViewer = useCallback(
+    (
+      paginationResult: Awaited<ReturnType<typeof fetchListExceptionItems>>['pagination'],
+      dataLength: number,
+      viewStatus?: ViewerStatus
+    ) => {
+      setPagination(paginationResult);
+      setLastUpdated(Date.now());
+      setTimeout(() => {
+        if (viewStatus === ViewerStatus.EMPTY_SEARCH)
+          return setViewerStatus(!dataLength ? viewStatus : '');
 
-      setViewerStatus(!dataLength ? ViewerStatus.EMPTY : '');
-    }, 200);
-  }, []);
+        setViewerStatus(!dataLength ? ViewerStatus.EMPTY : '');
+      }, 200);
+    },
+    []
+  );
 
   const fetchItems = useCallback(
-    async (options?: any, viewStatus?: any) => {
+    async (options?: GetExceptionItemProps | null, viewStatus?: ViewerStatus) => {
       try {
         setViewerStatus(ViewerStatus.LOADING);
         const { data, pagination: paginationResult } = await fetchListExceptionItems({
@@ -107,8 +118,12 @@ export const useListExceptionItems = ({
     async ({
       id,
       name,
-      namespaceType
-    }: any) => {
+      namespaceType,
+    }: {
+      id: DeleteExceptionItem['id'];
+      name: string;
+      namespaceType: DeleteExceptionItem['namespaceType'];
+    }) => {
       try {
         setViewerStatus(ViewerStatus.LOADING);
         await deleteException({ id, http, namespaceType });
@@ -127,7 +142,7 @@ export const useListExceptionItems = ({
     if (typeof onEditListExceptionItem === 'function') onEditListExceptionItem(exception);
   };
   const onPaginationChange = useCallback(
-    async (options: any) => {
+    async (options?: GetExceptionItemProps | null) => {
       fetchItems(options);
     },
     [fetchItems]

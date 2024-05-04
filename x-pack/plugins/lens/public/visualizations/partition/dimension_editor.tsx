@@ -17,7 +17,7 @@ import {
   AVAILABLE_PALETTES,
   getColorsFromMapping,
 } from '@kbn/coloring';
-import { ColorPicker, useDebouncedValue } from '@kbn/visualization-ui-components';
+import { ColorPicker, ColorPickerProps, useDebouncedValue } from '@kbn/visualization-ui-components';
 import { EuiFormRow, EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiText, EuiBadge } from '@elastic/eui';
 import { useState, useCallback } from 'react';
 import { getColorCategories } from '@kbn/chart-expressions-common';
@@ -49,8 +49,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const canUseColorMapping = currentLayer && currentLayer.colorMapping ? true : false;
   const [useNewColorMapping, setUseNewColorMapping] = useState(canUseColorMapping);
 
-  const setConfig = useCallback(
-    ({ color }: any) => {
+  const setConfig = useCallback<ColorPickerProps['setConfig']>(
+    ({ color }) => {
       if (!currentLayer) {
         return;
       }

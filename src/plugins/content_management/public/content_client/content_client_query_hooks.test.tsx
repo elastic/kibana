@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { renderHook, waitFor } from '@testing-library/react';
+import React, { FC, PropsWithChildren } from 'react';
+import { renderHook } from '@testing-library/react-hooks';
 import { ContentClientProvider } from './content_client_context';
 import { ContentClient } from './content_client';
 import { createCrudClientMock } from '../crud_client/crud_client.mock';
@@ -24,7 +24,7 @@ const setup = () => {
   });
   const contentClient = new ContentClient(() => crudClient, contentTypeRegistry);
 
-  const Wrapper: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
+  const Wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
     <ContentClientProvider contentClient={contentClient}>{children}</ContentClientProvider>
   );
 

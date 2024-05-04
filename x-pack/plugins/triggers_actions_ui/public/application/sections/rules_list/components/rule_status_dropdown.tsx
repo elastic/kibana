@@ -158,7 +158,7 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
   );
 
   const onSnoozeRule = useCallback(
-    async (snoozeSchedule: SnoozeSchedule) => {
+    async (snoozeSchedule: any) => {
       try {
         await snoozeRule(snoozeSchedule);
         onRuleChanged();
@@ -170,7 +170,7 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
   );
 
   const onUnsnoozeRule = useCallback(
-    async (scheduleIds?: string[]) => {
+    async (scheduleIds: any) => {
       try {
         await unsnoozeRule(scheduleIds);
         onRuleChanged();

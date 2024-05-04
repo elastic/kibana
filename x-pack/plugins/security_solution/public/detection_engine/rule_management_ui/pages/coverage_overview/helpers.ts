@@ -28,10 +28,12 @@ export const extractSelected = <
   return options.filter((option) => option.checked === 'on').map((option) => option.label);
 };
 
-export const populateSelected = (
-  allOptions: EuiSelectableOption[],
+export const populateSelected = <
+  T extends CoverageOverviewRuleSource | CoverageOverviewRuleActivity
+>(
+  allOptions: Array<EuiSelectableOption<{ label: T }>>,
   selected: string[]
-): EuiSelectableOption[] =>
+): Array<EuiSelectableOption<{ label: T }>> =>
   allOptions.map((option) =>
     selected.includes(option.label) ? { ...option, checked: 'on' } : option
   );

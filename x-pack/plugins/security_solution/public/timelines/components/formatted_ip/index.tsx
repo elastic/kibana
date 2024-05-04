@@ -15,7 +15,7 @@ import type { ExpandedDetailType } from '../../../../common/types';
 import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
 import { getScopedActions } from '../../../helpers';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
-import type { Props as DraggableWrapperProps } from '../../../common/components/drag_and_drop/draggable_wrapper';
+import type { DraggableWrapperProps } from '../../../common/components/drag_and_drop/draggable_wrapper';
 import {
   DragEffects,
   DraggableWrapper,
@@ -28,6 +28,7 @@ import type { DataProvider } from '../timeline/data_providers/data_provider';
 import { IS_OPERATOR } from '../timeline/data_providers/data_provider';
 import { Provider } from '../timeline/data_providers/provider';
 import type { TimelineTabs } from '../../../../common/types/timeline';
+import type { NetworkDetailsLinkProps } from '../../../common/components/links';
 import { NetworkDetailsLink } from '../../../common/components/links';
 
 const getUniqueId = ({
@@ -183,8 +184,8 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
   const isInTimelineContext =
     address && eventContext?.enableIpDetailsFlyout && eventContext?.timelineID;
 
-  const openNetworkDetailsSidePanel = useCallback(
-    (e: React.SyntheticEvent) => {
+  const openNetworkDetailsSidePanel: NetworkDetailsLinkProps['onClick'] = useCallback(
+    (e) => {
       e.preventDefault();
       if (onClick) {
         onClick();

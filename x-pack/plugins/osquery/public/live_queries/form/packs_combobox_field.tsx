@@ -86,9 +86,7 @@ export const PacksComboBoxField = ({
   );
 
   const renderOption = useCallback(
-    ({
-      value: option
-    }: any) => (
+    ({ value: option }: any) => (
       <EuiFlexGroup
         gutterSize="none"
         direction="column"

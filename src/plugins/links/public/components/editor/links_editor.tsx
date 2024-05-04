@@ -10,6 +10,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import useMountedState from 'react-use/lib/useMountedState';
 
 import {
+  DropResult,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
@@ -102,7 +103,7 @@ const LinksEditor = ({
   }, [initialLinks]);
 
   const onDragEnd = useCallback(
-    ({ source, destination }: any) => {
+    ({ source, destination }: DropResult) => {
       if (source && destination) {
         const newList = euiDragDropReorder(orderedLinks, source.index, destination.index).map(
           (link, i) => {

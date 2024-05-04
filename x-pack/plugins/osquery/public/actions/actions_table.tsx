@@ -66,9 +66,7 @@ const ActionsTableComponent = () => {
     kuery: 'user_id: *',
   });
 
-  const onTableChange = useCallback(({
-    page = {}
-  }: any) => {
+  const onTableChange = useCallback(({ page = {} }: any) => {
     const { index, size } = page;
 
     setPageIndex(index);
@@ -98,9 +96,15 @@ const ActionsTableComponent = () => {
     );
   }, []);
 
-  const renderAgentsColumn = useCallback((_: any, item: any) => <>{item.fields.agents?.length ?? 0}</>, []);
+  const renderAgentsColumn = useCallback(
+    (_: any, item: any) => <>{item.fields.agents?.length ?? 0}</>,
+    []
+  );
 
-  const renderCreatedByColumn = useCallback((userId: any) => (isArray(userId) ? userId[0] : '-'), []);
+  const renderCreatedByColumn = useCallback(
+    (userId: any) => (isArray(userId) ? userId[0] : '-'),
+    []
+  );
 
   const renderTimestampColumn = useCallback(
     (_: any, item: any) => <>{formatDate(item.fields['@timestamp'][0])}</>,

@@ -25,6 +25,7 @@ import { useGetSupportedActionConnectors } from '../../../containers/configure/u
 import type { CaseConnector, CaseSeverity, CaseStatuses } from '../../../../common/types/domain';
 import type { CaseUICustomField, UseFetchAlertData } from '../../../../common/ui/types';
 import type { CaseUI } from '../../../../common';
+import type { EditConnectorProps } from '../../edit_connector';
 import { EditConnector } from '../../edit_connector';
 import type { CasesNavigation } from '../../links';
 import { StatusActionButton } from '../../status/button';
@@ -120,8 +121,7 @@ export const CaseViewActivity = ({
   );
 
   const onSubmitCategory = useCallback(
-    (newCategory?: string | null) =>
-      newCategory && onUpdateField({ key: 'category', value: newCategory }),
+    (newCategory: string | null) => onUpdateField({ key: 'category', value: newCategory }),
     [onUpdateField]
   );
 
@@ -143,8 +143,8 @@ export const CaseViewActivity = ({
   const { isLoading: isLoadingAllAvailableConnectors, data: supportedActionConnectors } =
     useGetSupportedActionConnectors();
 
-  const onSubmitConnector = useCallback(
-    (connector: CaseConnector) => {
+  const onSubmitConnector = useCallback<EditConnectorProps['onSubmit']>(
+    (connector) => {
       onUpdateField({
         key: 'connector',
         value: connector,

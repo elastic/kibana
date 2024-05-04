@@ -223,10 +223,7 @@ const SavedQueriesPageComponent = () => {
     [renderDescriptionColumn, renderEditAction, renderPlayAction, renderUpdatedAt]
   );
 
-  const onTableChange = useCallback(({
-    page = {},
-    sort = {}
-  }: any) => {
+  const onTableChange = useCallback(({ page = {}, sort = {} }: any) => {
     setPageIndex(page.index);
     setPageSize(page.size);
     setSortField(sort.field);

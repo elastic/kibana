@@ -337,9 +337,7 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
     useState<keyof FailedTransactionsCorrelation>('normalizedScore');
   const [sortDirection, setSortDirection] = useState<Direction>('desc');
 
-  const onTableChange = useCallback(({
-    sort
-  }: any) => {
+  const onTableChange = useCallback(({ sort }: any) => {
     const { field: currentSortField, direction: currentSortDirection } = sort;
 
     setSortField(currentSortField);

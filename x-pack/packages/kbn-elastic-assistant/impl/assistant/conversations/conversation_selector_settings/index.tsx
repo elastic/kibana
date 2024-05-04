@@ -20,7 +20,6 @@ import { css } from '@emotion/react';
 
 import { Conversation } from '../../../..';
 import * as i18n from '../conversation_selector/translations';
-import { SystemPromptSelectorOption } from '../../prompt_editor/system_prompt/system_prompt_modal/system_prompt_selector/system_prompt_selector';
 
 interface Props {
   conversations: Record<string, Conversation>;
@@ -107,10 +106,7 @@ export const ConversationSelectorSettings: React.FC<Props> = React.memo(
 
     // Callback for when user types to create a new conversation
     const onCreateOption = useCallback(
-      (
-        searchValue: string,
-        flattenedOptions: Array<EuiComboBoxOptionOption<{ isDefault: boolean }>> = []
-      ) => {
+      (searchValue: string, flattenedOptions: ConversationSelectorSettingsOption[] = []) => {
         if (!searchValue || !searchValue.trim().toLowerCase()) {
           return;
         }
@@ -125,7 +121,7 @@ export const ConversationSelectorSettings: React.FC<Props> = React.memo(
           value: searchValue as unknown as SystemPromptSelectorOption['value'],
           label: searchValue,
           id: '',
-        };
+        } as unknown as ConversationSelectorSettingsOption;
 
         if (!optionExists) {
           setConversationOptions([...conversationOptions, newOption]);

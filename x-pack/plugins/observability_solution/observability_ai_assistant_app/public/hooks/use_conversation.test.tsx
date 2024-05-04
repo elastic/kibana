@@ -7,7 +7,7 @@
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import { act, renderHook, type RenderHookResult } from '@testing-library/react';
 import { merge } from 'lodash';
-import React, { FC, PropsWithChildren } from 'react';
+import React, { PropsWithChildren } from 'react';
 import { Observable, of, Subject } from 'rxjs';
 import {
   MessageRole,
@@ -80,7 +80,7 @@ describe('useConversation', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    wrapper = ({ children }) => (
+    wrapper = ({ children }: PropsWithChildren<unknown>) => (
       <KibanaContextProvider services={useKibanaMockServices}>
         <ObservabilityAIAssistantAppServiceProvider value={mockService}>
           {children}

@@ -16,7 +16,7 @@ import type {
   NetworkDnsEdges,
   NetworkDnsFields,
 } from '../../../../../common/search_strategy';
-import type { Criteria, ItemsPerRow } from '../../../components/paginated_table';
+import type { Criteria, ItemsPerRow, SiemTables } from '../../../components/paginated_table';
 import { PaginatedTable } from '../../../components/paginated_table';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 
@@ -66,8 +66,8 @@ const NetworkDnsTableComponent: React.FC<NetworkDnsTableProps> = ({
   const getNetworkDnsSelector = useMemo(() => networkSelectors.dnsSelector(), []);
   const { activePage, isPtrIncluded, limit, sort } = useDeepEqualSelector(getNetworkDnsSelector);
 
-  const updateLimitPagination = useCallback(
-    (newLimit: any) =>
+  const updateLimitPagination = useCallback<SiemTables['updateLimitPagination']>(
+    (newLimit) =>
       dispatch(
         networkActions.updateNetworkTable({
           networkType: type,
@@ -78,8 +78,8 @@ const NetworkDnsTableComponent: React.FC<NetworkDnsTableProps> = ({
     [type, dispatch]
   );
 
-  const updateActivePage = useCallback(
-    (newPage: any) =>
+  const updateActivePage = useCallback<SiemTables['updateActivePage']>(
+    (newPage) =>
       dispatch(
         networkActions.updateNetworkTable({
           networkType: type,

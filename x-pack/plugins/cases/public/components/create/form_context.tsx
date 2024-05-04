@@ -78,8 +78,7 @@ export const FormContext: React.FC<Props> = ({
   const availableOwners = useAvailableCasesOwners();
 
   const trimUserFormData = (
-    userFormData: Pick<CaseUI, 'description' | 'tags' | 'title'> &
-      Partial<Pick<CaseUI, 'tags' | 'severity' | 'category' | 'assignees'>>
+    userFormData: Omit<FormProps, 'connectorId' | 'fields' | 'syncAlerts' | 'customFields'>
   ) => {
     let formData = {
       ...userFormData,
@@ -127,7 +126,7 @@ export const FormContext: React.FC<Props> = ({
     []
   );
 
-  const submitCase: FormSubmitHandler<FormProps> = useCallback(
+  const submitCase = useCallback<FormSubmitHandler<FormProps>>(
     async (
       {
         connectorId: dataConnectorId,

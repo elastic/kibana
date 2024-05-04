@@ -6,7 +6,7 @@
  */
 
 import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
-import React, { createContext, useContext, useMemo } from 'react';
+import React, { createContext, useContext, useMemo, FC, PropsWithChildren } from 'react';
 import { DARK_THEME, LIGHT_THEME, PartialTheme, Theme } from '@elastic/charts';
 
 export interface SyntheticsAppColors {
@@ -55,7 +55,7 @@ interface ThemeContextProps {
   children: React.ReactNode;
 }
 
-export const SyntheticsThemeContextProvider: React.FC<ThemeContextProps> = ({
+export const SyntheticsThemeContextProvider: FC<PropsWithChildren<ThemeContextProps>> = ({
   darkMode,
   children,
 }) => {

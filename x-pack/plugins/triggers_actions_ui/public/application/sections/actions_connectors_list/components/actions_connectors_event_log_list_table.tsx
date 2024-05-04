@@ -272,7 +272,7 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
   );
 
   const onKeyUp = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
+    (e: React.KeyboardEvent) => {
       if (e.key === 'Enter') {
         setSearchText(search);
       }

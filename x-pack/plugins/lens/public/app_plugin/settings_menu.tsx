@@ -6,16 +6,14 @@
  */
 
 import React, { useCallback } from 'react';
-import { createRoot } from 'react-dom/client';
-import type { CoreTheme } from '@kbn/core/public';
+import ReactDOM from 'react-dom';
 import { EuiPopoverTitle, EuiSwitch, EuiWrappingPopover } from '@elastic/eui';
-import { Observable } from 'rxjs';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { Store } from 'redux';
 import { Provider } from 'react-redux';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import {
   disableAutoApply,
   enableAutoApply,
@@ -26,6 +24,7 @@ import {
 } from '../state_management';
 import { writeToStorage } from '../settings_storage';
 import { AUTO_APPLY_DISABLED_STORAGE_KEY } from '../editor_frame_service/editor_frame/workspace_panel/workspace_panel_wrapper';
+import { StartServices } from '../types';
 
 const container = document.createElement('div');
 let isMenuOpen = false;
@@ -85,7 +84,7 @@ export function SettingsMenu({
 export function toggleSettingsMenuOpen(props: {
   lensStore: Store<LensAppState>;
   anchorElement: HTMLElement;
-  theme$: Observable<CoreTheme>;
+  startServices: StartServices;
 }) {
   const root = createRoot(container);
 
@@ -104,13 +103,11 @@ export function toggleSettingsMenuOpen(props: {
   document.body.appendChild(container);
 
   const element = (
-    <Provider store={props.lensStore}>
-      <KibanaThemeProvider theme$={props.theme$}>
-        <I18nProvider>
-          <SettingsMenu {...props} isOpen={isMenuOpen} onClose={closeSettingsMenu} />
-        </I18nProvider>
-      </KibanaThemeProvider>
-    </Provider>
+    <KibanaRenderContextProvider {...props.startServices}>
+      <Provider store={props.lensStore}>
+        <SettingsMenu {...props} isOpen={isMenuOpen} onClose={closeSettingsMenu} />
+      </Provider>
+    </KibanaRenderContextProvider>
   );
   root.render(element);
 }

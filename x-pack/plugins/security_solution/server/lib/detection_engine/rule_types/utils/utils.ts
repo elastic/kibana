@@ -26,6 +26,7 @@ import type {
 import type {
   AlertInstanceContext,
   AlertInstanceState,
+  PluginSetupContract,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
@@ -410,7 +411,7 @@ export const errorAggregator = (
   }, Object.create(null));
 };
 
-export const getRuleRangeTuples = ({
+export const getRuleRangeTuples = async ({
   startedAt,
   previousStartedAt,
   from,
@@ -418,6 +419,7 @@ export const getRuleRangeTuples = ({
   interval,
   maxSignals,
   ruleExecutionLogger,
+  alerting,
 }: {
   startedAt: Date;
   previousStartedAt: Date | null | undefined;
@@ -426,18 +428,33 @@ export const getRuleRangeTuples = ({
   interval: string;
   maxSignals: number;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  alerting: PluginSetupContract;
 }) => {
   const originalFrom = dateMath.parse(from, { forceNow: startedAt });
   const originalTo = dateMath.parse(to, { forceNow: startedAt });
+  let wroteWarningStatus = false;
+  let warningStatusMessage;
   if (originalFrom == null || originalTo == null) {
     throw new Error('Failed to parse date math of rule.from or rule.to');
+  }
+
+  const maxAlertsAllowed = alerting.getConfig().run.alerts.max;
+  let maxSignalsToUse = maxSignals;
+  if (maxSignals > maxAlertsAllowed) {
+    maxSignalsToUse = maxAlertsAllowed;
+    warningStatusMessage = `The rule's max alerts per run setting (${maxSignals}) is greater than the Kibana alerting limit (${maxAlertsAllowed}). The rule will only write a maximum of ${maxAlertsAllowed} alerts per rule run.`;
+    await ruleExecutionLogger.logStatusChange({
+      newStatus: RuleExecutionStatusEnum['partial failure'],
+      message: warningStatusMessage,
+    });
+    wroteWarningStatus = true;
   }
 
   const tuples = [
     {
       to: originalTo,
       from: originalFrom,
-      maxSignals,
+      maxSignals: maxSignalsToUse,
     },
   ];
 
@@ -448,7 +465,7 @@ export const getRuleRangeTuples = ({
         interval
       )}"`
     );
-    return { tuples, remainingGap: moment.duration(0) };
+    return { tuples, remainingGap: moment.duration(0), wroteWarningStatus, warningStatusMessage };
   }
 
   const gap = getGapBetweenRuns({
@@ -464,7 +481,7 @@ export const getRuleRangeTuples = ({
   const catchupTuples = getCatchupTuples({
     originalTo,
     originalFrom,
-    ruleParamsMaxSignals: maxSignals,
+    ruleParamsMaxSignals: maxSignalsToUse,
     catchup,
     intervalDuration,
   });
@@ -480,6 +497,8 @@ export const getRuleRangeTuples = ({
   return {
     tuples: tuples.reverse(),
     remainingGap: moment.duration(remainingGapMilliseconds),
+    wroteWarningStatus,
+    warningStatusMessage,
   };
 };
 

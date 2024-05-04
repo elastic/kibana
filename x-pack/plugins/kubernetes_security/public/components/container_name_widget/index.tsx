@@ -86,9 +86,7 @@ export const ContainerNameWidget = ({
     sortDirection
   );
 
-  const onTableChange = useCallback(({
-    sort = {}
-  }: any) => {
+  const onTableChange = useCallback(({ sort = {} }: any) => {
     // @ts-ignore
     const { field: sortingField, direction: sortingDirection } = sort;
 

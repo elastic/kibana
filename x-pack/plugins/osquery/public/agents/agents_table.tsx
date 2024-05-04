@@ -96,7 +96,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
         (selectedAgents.filter(checkAgent).length +
         // add the number of agents added via policy and platform groups
         getNumAgentsInGrouping(selectedGroups) - // subtract the number of agents double counted by policy/platform selections
-        getNumOverlapped(selectedGroups, agentList?.groups?.overlap ?? {}))
+        getNumOverlapped(selectedGroups, agentList?.groups?.overlap ?? {})
       );
     }
   }, [agentList?.groups?.overlap, agentList?.total, selectedOptions]);

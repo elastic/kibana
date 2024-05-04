@@ -218,7 +218,10 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     []
   );
 
-  const renderLensResultsAction = useCallback((item: any) => <PackViewInLensAction item={item} />, []);
+  const renderLensResultsAction = useCallback(
+    (item: any) => <PackViewInLensAction item={item} />,
+    []
+  );
 
   const getHandleErrorsToggle = useCallback(
     (item: any) => () => {

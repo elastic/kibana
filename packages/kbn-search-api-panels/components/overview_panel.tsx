@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, FC, PropsWithChildren } from 'react';
 
 import {
   EuiFlexGroup,
@@ -30,7 +30,7 @@ interface OverviewPanelProps {
   children?: React.ReactNode;
 }
 
-export const OverviewPanel: React.FC<OverviewPanelProps> = ({
+export const OverviewPanel: FC<PropsWithChildren<OverviewPanelProps>> = ({
   children,
   description,
   leftPanelContent,

@@ -8,7 +8,15 @@
 
 import { i18n } from '@kbn/i18n';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
-import React, { useState, useCallback, Dispatch, FocusEvent, useContext, useMemo } from 'react';
+import React, {
+  useState,
+  useCallback,
+  Dispatch,
+  FocusEvent,
+  useContext,
+  useMemo,
+  ChangeEventHandler,
+} from 'react';
 import { css } from '@emotion/react';
 
 import {
@@ -126,9 +134,9 @@ export function ColorRangeItem({
     [colorRange.start, colorRanges, dispatch, index, popoverInFocus, dataBounds, palettes, isLast]
   );
 
-  const onValueChange = useCallback(
-    ({ target: { value: targetValue } }: any) => {
-      setLocalValue(targetValue);
+  const onValueChange = useCallback<ChangeEventHandler<HTMLInputElement>>(
+    ({ target: { value: targetValue } }) => {
+      setLocalValue(+targetValue);
       dispatch({
         type: 'updateValue',
         payload: { index, value: targetValue, accessor, dataBounds, palettes },

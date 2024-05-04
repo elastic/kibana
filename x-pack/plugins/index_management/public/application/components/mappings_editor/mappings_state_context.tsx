@@ -54,6 +54,12 @@ export const StateProvider: React.FC<{ children?: React.ReactNode }> = ({ childr
       term: '',
       result: [],
     },
+    filter: {
+      filteredFields: [],
+      selectedOptions: [],
+      selectedDataTypes: [],
+    },
+    inferenceToModelIdMap: {},
   };
 
   const [state, dispatch] = useReducer(reducer, initialState);

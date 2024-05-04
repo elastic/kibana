@@ -9,6 +9,7 @@ import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
+import type { DraggableWrapperProps } from '../../../../../../common/components/drag_and_drop/draggable_wrapper';
 import {
   DragEffects,
   DraggableWrapper,
@@ -80,8 +81,8 @@ export const DraggableSignatureId = React.memo<{
     [id, signatureId]
   );
 
-  const render = useCallback(
-    (dataProvider: any, _: any, snapshot: any) =>
+  const render: DraggableWrapperProps['render'] = useCallback(
+    (dataProvider, _, snapshot) =>
       snapshot.isDragging ? (
         <DragEffects>
           <Provider dataProvider={dataProvider} />

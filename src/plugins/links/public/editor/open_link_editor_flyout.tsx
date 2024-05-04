@@ -9,7 +9,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import { coreServices } from '../services/kibana_services';
@@ -65,16 +65,16 @@ export async function openLinkEditorFlyout({
       await unmountFlyout();
     };
 
-
-    root.render(
-      <KibanaThemeProvider theme={coreServices.theme}>
+    ReactDOM.render(
+      <KibanaRenderContextProvider {...coreServices}>
         <LinkEditor
           link={link}
           onSave={onSave}
           onClose={onCancel}
           parentDashboard={parentDashboard}
         />
-      </KibanaThemeProvider>
+      </KibanaRenderContextProvider>,
+      ref.current
     );
   }).catch(() => {
     // on reject (i.e. on cancel), just return the original list of links

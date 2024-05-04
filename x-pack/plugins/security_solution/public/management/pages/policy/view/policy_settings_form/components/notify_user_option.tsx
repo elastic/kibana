@@ -9,6 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { cloneDeep } from 'lodash';
+import type { EuiTextAreaProps, EuiCheckboxProps } from '@elastic/eui';
 import {
   EuiSpacer,
   EuiFlexItem,
@@ -76,8 +77,8 @@ export const NotifyUserOption = React.memo(
     const userNotificationSelected = policy.windows.popup[protection].enabled;
     const userNotificationMessage = policy.windows.popup[protection].message;
 
-    const handleUserNotificationCheckbox = useCallback(
-      (event: any) => {
+    const handleUserNotificationCheckbox = useCallback<EuiCheckboxProps['onChange']>(
+      (event) => {
         const newPayload = cloneDeep(policy);
 
         for (const os of osList) {
@@ -96,8 +97,8 @@ export const NotifyUserOption = React.memo(
       [policy, onChange, osList, protection]
     );
 
-    const handleCustomUserNotification = useCallback(
-      (event: any) => {
+    const handleCustomUserNotification = useCallback<NonNullable<EuiTextAreaProps['onChange']>>(
+      (event) => {
         const newPayload = cloneDeep(policy);
         for (const os of osList) {
           if (os === 'windows') {

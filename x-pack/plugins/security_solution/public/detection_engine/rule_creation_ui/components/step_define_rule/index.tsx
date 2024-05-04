@@ -33,6 +33,7 @@ import type { SavedQuery } from '@kbn/data-plugin/public';
 import type { DataViewBase } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useSetFieldValueWithCallback } from '../../../../common/utils/use_set_field_value_cb';
+import type { SetRuleQuery } from '../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
 import { useRuleFromTimeline } from '../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
@@ -68,7 +69,7 @@ import {
   useFormData,
   UseMultiFields,
 } from '../../../../shared_imports';
-import type { FormHook } from '../../../../shared_imports';
+import type { FormHook, FieldHook } from '../../../../shared_imports';
 import { schema } from './schema';
 import { getTermsAggregationFields } from './utils';
 import { useExperimentalFeatureFieldsTransform } from './use_experimental_feature_fields_transform';
@@ -81,6 +82,7 @@ import {
   isQueryRule,
   isEsqlRule,
   isEqlSequenceQuery,
+  isSuppressionRuleInGA,
 } from '../../../../../common/detection_engine/utils';
 import { EqlQueryBar } from '../eql_query_bar';
 import { DataViewSelector } from '../data_view_selector';
@@ -98,6 +100,7 @@ import { DurationInput } from '../duration_input';
 import { MINIMUM_LICENSE_FOR_SUPPRESSION } from '../../../../../common/detection_engine/constants';
 import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
 import { useAlertSuppression } from '../../../rule_management/logic/use_alert_suppression';
+import { RelatedIntegrations } from '../../../rule_creation/components/related_integrations';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -160,6 +163,14 @@ const IntendedRuleTypeEuiFormRow = styled(RuleTypeEuiFormRow)`
   ${({ theme }) => `padding-left: ${theme.eui.euiSizeXL};`}
 `;
 
+/* eslint-disable react/no-unused-prop-types */
+interface GroupByChildrenProps {
+  groupByRadioSelection: FieldHook<string>;
+  groupByDurationUnit: FieldHook<string>;
+  groupByDurationValue: FieldHook<number | undefined>;
+}
+/* eslint-enable react/no-unused-prop-types */
+
 // eslint-disable-next-line complexity
 const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   isLoading,
@@ -210,12 +221,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     setFieldValue,
   });
 
-  const handleSetRuleFromTimeline = useCallback(
-    ({
-      index: timelineIndex,
-      queryBar: timelineQueryBar,
-      eqlOptions
-    }: any) => {
+  const handleSetRuleFromTimeline = useCallback<SetRuleQuery>(
+    ({ index: timelineIndex, queryBar: timelineQueryBar, eqlOptions }) => {
       const setQuery = () => {
         setFieldValue('index', timelineIndex);
         setFieldValue('queryBar', timelineQueryBar);
@@ -421,8 +428,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       thresholdField,
       thresholdValue,
       thresholdCardinalityField,
-      thresholdCardinalityValue
-    }: any) => (
+      thresholdCardinalityValue,
+    }: Record<string, FieldHook>) => (
       <ThresholdInput
         browserFields={aggFields}
         thresholdField={thresholdField}
@@ -435,9 +442,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   );
 
   const ThreatMatchInputChildren = useCallback(
-    ({
-      threatMapping
-    }: any) => (
+    ({ threatMapping }: Record<string, FieldHook>) => (
       <ThreatMatchInput
         handleResetThreatIndices={handleResetThreatIndices}
         indexPatterns={indexPattern}
@@ -524,8 +529,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     ({
       groupByRadioSelection,
       groupByDurationUnit,
-      groupByDurationValue
-    }: any) => (
+      groupByDurationValue,
+    }: GroupByChildrenProps) => (
       <EuiRadioGroup
         disabled={isGroupByChildrenDisabled}
         idSelected={groupByRadioSelection.value}
@@ -580,9 +585,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   );
 
   const AlertSuppressionMissingFields = useCallback(
-    ({
-      suppressionMissingFields
-    }: any) => (
+    ({ suppressionMissingFields }: Record<string, FieldHook<string | undefined>>) => (
       <EuiRadioGroup
         disabled={isMissingFieldsDisabled}
         idSelected={suppressionMissingFields.value}
@@ -1064,6 +1067,14 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             <RuleTypeEuiFormRow
               $isVisible={isAlertSuppressionEnabled && !isThresholdRule}
               data-test-subj="alertSuppressionInput"
+              label={i18n.GROUP_BY_LABEL}
+              labelAppend={
+                <EuiText color="subdued" size="xs">
+                  {isSuppressionRuleInGA(ruleType)
+                    ? i18n.GROUP_BY_GA_LABEL_APPEND
+                    : i18n.GROUP_BY_TECH_PREVIEW_LABEL_APPEND}
+                </EuiText>
+              }
             >
               <UseField
                 path="groupByFields"
@@ -1122,6 +1133,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               </UseMultiFields>
             </IntendedRuleTypeEuiFormRow>
           </>
+
+          <RelatedIntegrations path="relatedIntegrations" dataTestSubj="relatedIntegrations" />
+
           <UseField
             path="timeline"
             component={PickTimeline}

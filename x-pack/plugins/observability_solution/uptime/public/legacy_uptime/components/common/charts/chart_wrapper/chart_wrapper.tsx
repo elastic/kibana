@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, HTMLAttributes } from 'react';
+import React, { FC, PropsWithChildren, HTMLAttributes } from 'react';
 import { EuiErrorBoundary, EuiFlexGroup, EuiFlexItem, EuiLoadingChart } from '@elastic/eui';
 
 interface Props {
@@ -24,7 +24,7 @@ interface Props {
   children: React.ReactNode;
 }
 
-export const ChartWrapper: FC<Props> = ({
+export const ChartWrapper: FC<PropsWithChildren<Props>> = ({
   loading = false,
   height = '100%',
   children,

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { DraggableProps, DroppableProps } from '@elastic/eui';
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import type { PropsWithChildren } from 'react';
@@ -98,7 +99,7 @@ type RenderFunctionProp = (
   state: DraggableStateSnapshot
 ) => React.ReactNode;
 
-export interface Props {
+export interface DraggableWrapperProps {
   dataProvider: DataProvider;
   hideTopN?: boolean;
   isDraggable?: boolean;
@@ -132,7 +133,7 @@ export const getStyle = (
   };
 };
 
-const DraggableOnWrapperComponent: React.FC<Props> = ({
+const DraggableOnWrapperComponent: React.FC<DraggableWrapperProps> = ({
   dataProvider,
   hideTopN = false,
   onFilterAdded,
@@ -188,8 +189,8 @@ const DraggableOnWrapperComponent: React.FC<Props> = ({
     [unRegisterProvider]
   );
 
-  const RenderClone = useCallback(
-    (provided: any, snapshot: any) => (
+  const RenderClone: DroppableProps['renderClone'] = useCallback(
+    (provided, snapshot) => (
       <ConditionalPortal registerProvider={registerProvider}>
         <div
           {...provided.draggableProps}
@@ -210,8 +211,8 @@ const DraggableOnWrapperComponent: React.FC<Props> = ({
     [dataProvider, registerProvider, render]
   );
 
-  const DraggableContent = useCallback(
-    (provided: any, snapshot: any) => (
+  const DraggableContent: DraggableProps['children'] = useCallback(
+    (provided, snapshot) => (
       <ProviderContainer
         {...provided.draggableProps}
         {...provided.dragHandleProps}
@@ -256,8 +257,8 @@ const DraggableOnWrapperComponent: React.FC<Props> = ({
     openPopover,
   });
 
-  const DroppableContent = useCallback(
-    (droppableProvided: any) => (
+  const DroppableContent: DroppableProps['children'] = useCallback(
+    (droppableProvided) => (
       <div ref={droppableProvided.innerRef} {...droppableProvided.droppableProps}>
         <div
           className={DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME}
@@ -316,7 +317,7 @@ const DraggableOnWrapperComponent: React.FC<Props> = ({
   );
 };
 
-const DraggableWrapperComponent: React.FC<Props> = ({
+const DraggableWrapperComponent: React.FC<DraggableWrapperProps> = ({
   dataProvider,
   hideTopN = false,
   isDraggable = false,

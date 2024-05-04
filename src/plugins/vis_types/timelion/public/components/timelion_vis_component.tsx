@@ -120,7 +120,7 @@ export const TimelionVisComponent = ({
     isDateHistogram: true,
   });
 
-  const brushEndListener: BrushEndListener = useCallback(
+  const brushEndListener = useCallback<BrushEndListener>(
     ({ x }) => {
       if (!x) {
         return;

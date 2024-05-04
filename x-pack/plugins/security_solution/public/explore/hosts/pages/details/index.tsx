@@ -20,6 +20,7 @@ import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { tableDefaults, dataTableSelectors, TableId } from '@kbn/securitysolution-data-table';
+import type { NarrowDateRange } from '../../../../common/components/ml/types';
 import {
   useAssetCriticalityData,
   useAssetCriticalityPrivileges,
@@ -109,8 +110,8 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
 
   const isEnterprisePlus = useLicense().isEnterprise();
 
-  const narrowDateRange = useCallback(
-    (score: any, interval: any) => {
+  const narrowDateRange = useCallback<NarrowDateRange>(
+    (score, interval) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
       dispatch(
         setAbsoluteRangeDatePicker({

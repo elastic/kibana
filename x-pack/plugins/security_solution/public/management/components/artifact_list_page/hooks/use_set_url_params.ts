@@ -10,18 +10,20 @@ import { useCallback } from 'react';
 import { pickBy } from 'lodash';
 import { useUrlParams } from '../../../hooks/use_url_params';
 
-// FIXME:PT Refactor into a more generic hooks for managing url params
-export const useSetUrlParams = (): ((
+type UseSetUrlParams = (
   /** Any param whose value is `undefined` will be removed from the URl when in append mode */
   params: Record<string, string | number | null | undefined>,
   replace?: boolean
-) => void) => {
+) => void;
+
+// FIXME:PT Refactor into a more generic hooks for managing url params
+export const useSetUrlParams = (): UseSetUrlParams => {
   const location = useLocation();
   const history = useHistory();
   const { toUrlParams, urlParams: currentUrlParams } = useUrlParams();
 
-  return useCallback(
-    (params: any, replace = false) => {
+  return useCallback<UseSetUrlParams>(
+    (params, replace = false) => {
       history.push({
         ...location,
         search: toUrlParams(

@@ -6,12 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { EuiLoadingSpinner, EuiText, EuiPageTemplate } from '@elastic/eui';
 
-export const PageLoading: React.FunctionComponent<{ children?: React.ReactNode }> = ({
-  children,
-}) => {
+export const PageLoading: FC<PropsWithChildren<unknown>> = ({ children }) => {
   return (
     <EuiPageTemplate.EmptyPrompt
       title={<EuiLoadingSpinner size="xl" />}

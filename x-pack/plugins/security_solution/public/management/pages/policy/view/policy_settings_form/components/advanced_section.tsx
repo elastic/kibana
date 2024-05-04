@@ -7,6 +7,7 @@
 
 import React, { memo, useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EuiFieldTextProps } from '@elastic/eui';
 import {
   EuiCallOut,
   EuiFieldText,
@@ -120,8 +121,8 @@ export const AdvancedSection = memo<AdvancedSectionProps>(
       setShowAdvancedPolicy((prevState) => !prevState);
     }, []);
 
-    const handleAdvancedSettingUpdate = useCallback(
-      (event: any) => {
+    const handleAdvancedSettingUpdate = useCallback<NonNullable<EuiFieldTextProps['onChange']>>(
+      (event) => {
         const updatedPolicy = cloneDeep(policy);
 
         setValue(

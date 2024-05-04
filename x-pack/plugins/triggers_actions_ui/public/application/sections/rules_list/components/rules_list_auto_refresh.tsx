@@ -95,8 +95,8 @@ export const RulesListAutoRefresh = (props: RulesListAutoRefreshProps) => {
     };
   }, [isPaused, refreshInterval]);
 
-  const onRefreshChange: ApplyRefreshInterval = useCallback(
-    ({ isPaused: newIsPaused, refreshInterval: newRefreshInterval }) => {
+  const onRefreshChange = useCallback(
+    ({ isPaused: newIsPaused, refreshInterval: newRefreshInterval }: any) => {
       setIsPaused(newIsPaused);
       setRefreshInterval(newRefreshInterval);
     },

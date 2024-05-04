@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 
 import { EuiAccordion, EuiIcon } from '@elastic/eui';
 
@@ -23,7 +23,7 @@ interface SummarySectionAccordionProps {
   title: string;
   children?: React.ReactNode;
 }
-export const SummarySectionAccordion: React.FC<SummarySectionAccordionProps> = ({
+export const SummarySectionAccordion: FC<PropsWithChildren<SummarySectionAccordionProps>> = ({
   id,
   status,
   title,

@@ -29,7 +29,7 @@ import { Comparator } from '../../../../common/comparator_types';
 import { getComparatorScript } from '../../../../common';
 import { hasExpressionValidationErrors } from '../validation';
 import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_query';
-import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType } from '../types';
+import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType, SourceField } from '../types';
 import { IndexSelectPopover } from '../../components/index_select_popover';
 import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
 import { RuleCommonExpressions } from '../rule_common_expressions';
@@ -244,7 +244,7 @@ export const EsQueryExpression: React.FC<
         id="queryEditor"
         data-test-subj="queryJsonEditor"
         fullWidth
-        isInvalid={errors.esQuery.length > 0}
+        isInvalid={(errors.esQuery.length as number) > 0}
         error={errors.esQuery}
         helpText={
           <EuiLink href={docLinks.links.query.queryDsl} target="_blank">
@@ -307,11 +307,11 @@ export const EsQueryExpression: React.FC<
           [setParam]
         )}
         onChangeSelectedGroupBy={useCallback(
-          (selectedGroupBy: any) => setParam('groupBy', selectedGroupBy),
+          (selectedGroupBy?: string) => setParam('groupBy', selectedGroupBy),
           [setParam]
         )}
         onChangeSelectedTermField={useCallback(
-          (selectedTermField: any) => setParam('termField', selectedTermField),
+          (selectedTermField?: string | string[]) => setParam('termField', selectedTermField),
           [setParam]
         )}
         onChangeSelectedTermSize={useCallback(
@@ -319,11 +319,11 @@ export const EsQueryExpression: React.FC<
           [setParam]
         )}
         onChangeThreshold={useCallback(
-          (selectedThresholds: any) => setParam('threshold', selectedThresholds),
+          (selectedThresholds?: number[]) => setParam('threshold', selectedThresholds),
           [setParam]
         )}
         onChangeThresholdComparator={useCallback(
-          (selectedThresholdComparator: any) =>
+          (selectedThresholdComparator?: string) =>
             setParam('thresholdComparator', selectedThresholdComparator),
           [setParam]
         )}
@@ -337,7 +337,7 @@ export const EsQueryExpression: React.FC<
           [setParam]
         )}
         onChangeSizeValue={useCallback(
-          (updatedValue: any) => setParam('size', updatedValue),
+          (updatedValue: number) => setParam('size', updatedValue),
           [setParam]
         )}
         errors={errors}
@@ -345,12 +345,12 @@ export const EsQueryExpression: React.FC<
         onTestFetch={onTestQuery}
         excludeHitsFromPreviousRun={excludeHitsFromPreviousRun}
         onChangeExcludeHitsFromPreviousRun={useCallback(
-          (exclude: any) => setParam('excludeHitsFromPreviousRun', exclude),
+          (exclude: boolean) => setParam('excludeHitsFromPreviousRun', exclude),
           [setParam]
         )}
         canSelectMultiTerms={DEFAULT_VALUES.CAN_SELECT_MULTI_TERMS}
         onChangeSourceFields={useCallback(
-          (selectedSourceFields: any) => setParam('sourceFields', selectedSourceFields),
+          (selectedSourceFields: SourceField[]) => setParam('sourceFields', selectedSourceFields),
           [setParam]
         )}
         sourceFields={sourceFields}

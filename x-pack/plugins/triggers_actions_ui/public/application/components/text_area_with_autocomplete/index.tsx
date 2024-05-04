@@ -172,7 +172,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
   ]);
 
   const textareaOnKeyPress = useCallback(
-    (event: { code: string; preventDefault: () => void; stopPropagation: () => void }) => {
+    (event: any) => {
       if (selectableRef.current && isListOpen) {
         if (!selectableHasFocus && (event.code === 'ArrowUp' || event.code === 'ArrowDown')) {
           event.preventDefault();

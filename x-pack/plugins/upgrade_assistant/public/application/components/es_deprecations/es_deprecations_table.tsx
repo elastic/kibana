@@ -205,10 +205,7 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
     [sortConfig]
   );
 
-  const handleSearch = useCallback(({
-    query,
-    error
-  }: any) => {
+  const handleSearch = useCallback(({ query, error }: any) => {
     if (error) {
       setSearchError(error);
     } else {

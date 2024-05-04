@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment, useCallback, useMemo, useState } from 'react';
+import React, { Fragment, useCallback, useMemo, useState, FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiText, useEuiPaddingSize } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -27,7 +27,7 @@ import {
   ROW_HEIGHT_OPTION,
   SHOW_MULTIFIELDS,
 } from '@kbn/discover-utils';
-import { DataLoadingState } from '@kbn/unified-data-table';
+import { DataLoadingState, UnifiedDataTableProps } from '@kbn/unified-data-table';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { DiscoverGrid } from '../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../common/constants';
@@ -151,8 +151,8 @@ export function ContextAppContent({
     [addFilter, dataView, onAddColumn, onRemoveColumn]
   );
 
-  const onResize = useCallback(
-    (colSettings: any) => {
+  const onResize = useCallback<NonNullable<UnifiedDataTableProps['onResize']>>(
+    (colSettings) => {
       setGridSettings((currentGridSettings) =>
         onResizeGridColumn(colSettings, currentGridSettings)
       );
@@ -242,7 +242,7 @@ export function ContextAppContent({
   );
 }
 
-const WrapperWithPadding: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
+const WrapperWithPadding: FC = ({ children }) => {
   const padding = useEuiPaddingSize('s');
 
   return (

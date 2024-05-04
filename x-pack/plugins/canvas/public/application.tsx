@@ -7,17 +7,17 @@
 
 import React from 'react';
 import { Store } from 'redux';
-import { createRoot } from 'react-dom/client';
-import { I18nProvider } from '@kbn/i18n-react';
+import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
 import { BehaviorSubject } from 'rxjs';
 
+import '@kbn/flot-charts';
 import { includes, remove } from 'lodash';
 
 import { AppMountParameters, CoreStart, CoreSetup, AppUpdater } from '@kbn/core/public';
 
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { PluginServices } from '@kbn/presentation-util-plugin/public';
 
@@ -69,23 +69,22 @@ export const renderApp = ({
   element.classList.add('canvas');
   element.classList.add('canvasContainerWrapper');
   const ServicesContextProvider = pluginServices.getContextProvider();
-  const root = createRoot(element);
-  root.render(
-    <KibanaContextProvider services={{ ...startPlugins, ...coreStart }}>
-      <ServicesContextProvider>
-        <LegacyServicesProvider providers={services}>
-          <presentationUtil.ContextProvider>
-            <I18nProvider>
-              <KibanaThemeProvider theme={{ theme$: coreStart.theme.theme$ }}>
-                <Provider store={canvasStore}>
-                  <App history={params.history} />
-                </Provider>
-              </KibanaThemeProvider>
-            </I18nProvider>
-          </presentationUtil.ContextProvider>
-        </LegacyServicesProvider>
-      </ServicesContextProvider>
-    </KibanaContextProvider>
+
+  ReactDOM.render(
+    <KibanaRenderContextProvider {...coreStart}>
+      <KibanaContextProvider services={{ ...startPlugins, ...coreStart }}>
+        <ServicesContextProvider>
+          <LegacyServicesProvider providers={services}>
+            <presentationUtil.ContextProvider>
+              <Provider store={canvasStore}>
+                <App history={params.history} />
+              </Provider>
+            </presentationUtil.ContextProvider>
+          </LegacyServicesProvider>
+        </ServicesContextProvider>
+      </KibanaContextProvider>
+    </KibanaRenderContextProvider>,
+    element
   );
   return () => {
     root.unmount();
@@ -150,13 +149,13 @@ export const initializeCanvas = async (
       },
     ],
     content: (domNode, { hideHelpMenu }) => {
-      const root = createRoot(domNode);
-      root.render(
-        <KibanaThemeProvider theme={{ theme$: coreStart.theme.theme$ }}>
+      ReactDOM.render(
+        <KibanaRenderContextProvider {...coreStart}>
           <Provider store={canvasStore}>
             <HelpMenu hideHelpMenu={hideHelpMenu} />
           </Provider>
-        </KibanaThemeProvider>
+        </KibanaRenderContextProvider>,
+        domNode
       );
       return () => root.unmount();
     },

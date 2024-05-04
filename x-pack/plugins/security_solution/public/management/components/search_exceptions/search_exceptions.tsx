@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useCallback, useState } from 'react';
+import type { EuiFieldSearchProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { PolicySelectionItem } from '../policies_selector';
@@ -67,8 +68,8 @@ export const SearchExceptions = memo<SearchExceptionsProps>(
       [onSearch, query, includedPolicies]
     );
 
-    const handleOnSearchQuery = useCallback(
-      (value: any) => {
+    const handleOnSearchQuery = useCallback<NonNullable<EuiFieldSearchProps['onSearch']>>(
+      (value) => {
         onSearch(value, includedPolicies, false);
       },
       [onSearch, includedPolicies]

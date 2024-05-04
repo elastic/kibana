@@ -17,7 +17,7 @@ import { debounceTime, distinctUntilChanged, skip } from 'rxjs';
 import { OverlayRef } from '@kbn/core/public';
 import { Container, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 import {
   PersistableControlGroupInput,
@@ -561,15 +561,16 @@ export class ControlGroupContainer extends Container<
     if (this.root) {
       this.root.unmount();
     }
-    this.root = createRoot(dom);
-    this.root.render(
-      <KibanaThemeProvider theme={pluginServices.getServices().core.theme}>
+    this.domNode = dom;
+    ReactDOM.render(
+      <KibanaRenderContextProvider {...pluginServices.getServices().core}>
         <Provider store={this.store}>
           <ControlGroupContainerContext.Provider value={this}>
             <ControlGroup />
           </ControlGroupContainerContext.Provider>
         </Provider>
-      </KibanaThemeProvider>
+      </KibanaRenderContextProvider>,
+      dom
     );
   }
 

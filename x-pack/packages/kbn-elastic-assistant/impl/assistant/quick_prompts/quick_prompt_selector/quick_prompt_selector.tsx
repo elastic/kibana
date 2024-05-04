@@ -15,6 +15,7 @@ import {
   EuiHighlight,
   EuiComboBox,
   EuiComboBoxOptionOption,
+  EuiComboBoxProps,
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
@@ -80,11 +81,10 @@ export const QuickPromptSelector: React.FC<Props> = React.memo(
     );
 
     // Callback for when user types to create a new quick prompt
-    const onCreateOption = useCallback(
-      (
-        searchValue: string,
-        flattenedOptions: Array<EuiComboBoxOptionOption<{ isDefault: boolean }>> = []
-      ) => {
+    const onCreateOption = useCallback<
+      NonNullable<EuiComboBoxProps<{ isDefault: boolean }>['onCreateOption']>
+    >(
+      (searchValue, flattenedOptions = []) => {
         if (!searchValue || !searchValue.trim().toLowerCase()) {
           return;
         }
@@ -95,10 +95,11 @@ export const QuickPromptSelector: React.FC<Props> = React.memo(
             (option) => option.label.trim().toLowerCase() === normalizedSearchValue
           ) !== -1;
 
-        const newOption: QuickPromptSelectorOption = {
-          value: searchValue as unknown as QuickPromptSelectorOption['value'],
+        //  Type 'string' is not assignable to type '{ isDefault: boolean; }'
+        const newOption = {
+          value: searchValue,
           label: searchValue,
-        };
+        } as unknown as EuiComboBoxOptionOption<{ isDefault: boolean }>;
 
         if (!optionExists) {
           setOptions([...options, newOption]);

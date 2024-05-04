@@ -6,7 +6,7 @@
  */
 
 import { EuiPageHeader, EuiPageHeaderSection, EuiSpacer, EuiText } from '@elastic/eui';
-import React, { FC, ReactNode } from 'react';
+import React, { FC, PropsWithChildren, ReactNode } from 'react';
 import { SecuritySolutionPageWrapper } from '../containers/security_solution_page_wrapper';
 import { TITLE_TEST_ID } from './test_ids';
 
@@ -17,7 +17,7 @@ export interface LayoutProps {
   children?: ReactNode;
 }
 
-export const DefaultPageLayout: FC<LayoutProps> = ({
+export const DefaultPageLayout: FC<PropsWithChildren<LayoutProps>> = ({
   children,
   pageTitle,
   border = true,

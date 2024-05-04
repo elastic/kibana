@@ -93,7 +93,7 @@ const RowRenderersBrowserComponent = ({
   );
 
   const nameColumnRenderCallback = useCallback(
-    (value: any, item: any) => (
+    (value: string, item: RowRendererOption) => (
       <StyledNameButton className="kbn-resetFocusState" onClick={handleNameClick(item)}>
         {value}
       </StyledNameButton>
@@ -102,7 +102,7 @@ const RowRenderersBrowserComponent = ({
   );
 
   const idColumnRenderCallback = useCallback(
-    (_: any, item: any) => (
+    (_: unknown, item: RowRendererOption) => (
       <EuiCheckbox
         id={item.id}
         onChange={handleNameClick(item)}

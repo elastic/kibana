@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 
 // eslint-disable-next-line @kbn/eslint/module_migration
 import { IntlProvider } from 'react-intl';
@@ -20,8 +20,7 @@ import { PseudoLocaleWrapper } from './pseudo_locale_wrapper';
  * IntlProvider should wrap react app's root component (inside each react render method).
  */
 
-export const I18nProvider: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
-  // @ts-expect-error
+export const I18nProvider: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <IntlProvider
     locale={i18n.getLocale()}
     messages={i18n.getTranslation().messages}

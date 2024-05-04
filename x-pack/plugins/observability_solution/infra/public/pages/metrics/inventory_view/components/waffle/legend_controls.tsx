@@ -27,6 +27,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import React, { SyntheticEvent, useState, useCallback, useEffect } from 'react';
 import { first, last } from 'lodash';
+import { EuiRangeProps, EuiSelectProps } from '@elastic/eui';
 import type { WaffleLegendOptions } from '../../hooks/use_waffle_options';
 import {
   type InfraWaffleMapBounds,
@@ -148,17 +149,17 @@ export const LegendControls = ({
     setPopoverState(false);
   }, [autoBounds, boundsOverride, options]);
 
-  const handleStepsChange = useCallback(
-    (e: any) => {
-      const steps = parseInt(e.target.value, 10);
+  const handleStepsChange = useCallback<NonNullable<EuiRangeProps['onChange']>>(
+    (e) => {
+      const steps = parseInt((e.target as HTMLInputElement).value, 10);
       setLegendOptions((previous) => ({ ...previous, steps }));
     },
     [setLegendOptions]
   );
 
-  const handlePaletteChange = useCallback(
-    (e: any) => {
-      const palette = e.target.value;
+  const handlePaletteChange = useCallback<NonNullable<EuiSelectProps['onChange']>>(
+    (e) => {
+      const palette = e.target.value as WaffleLegendOptions['palette'];
       setLegendOptions((previous) => ({ ...previous, palette }));
     },
     [setLegendOptions]
@@ -196,7 +197,11 @@ export const LegendControls = ({
       data-test-subj="legendControls"
       // panelStyle={{ width: '100%', maxWidth: 375 }}
     >
-      <EuiPopoverTitle>Legend Options</EuiPopoverTitle>
+      <EuiPopoverTitle>
+        {i18n.translate('xpack.infra.legendControls.legendOptionsPopoverTitleLabel', {
+          defaultMessage: 'Legend Options',
+        })}
+      </EuiPopoverTitle>
       <StyledEuiForm>
         <EuiFormRow
           display="columnCompressed"
@@ -248,7 +253,9 @@ export const LegendControls = ({
           <EuiSwitch
             showLabel={false}
             name="reverseColors"
-            label="reverseColors"
+            label={i18n.translate('xpack.infra.legendControls.euiSwitch.reversecolorsLabel', {
+              defaultMessage: 'reverseColors',
+            })}
             checked={draftLegend.reverseColors}
             onChange={handleReverseColors}
             compressed
@@ -268,7 +275,9 @@ export const LegendControls = ({
           <EuiSwitch
             showLabel={false}
             name="bounds"
-            label="bounds"
+            label={i18n.translate('xpack.infra.legendControls.euiSwitch.boundsLabel', {
+              defaultMessage: 'bounds',
+            })}
             checked={draftAuto}
             onChange={handleAutoChange}
             compressed

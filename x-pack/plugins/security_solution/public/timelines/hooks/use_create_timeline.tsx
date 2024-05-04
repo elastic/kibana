@@ -65,8 +65,12 @@ export const useCreateTimeline = ({
     ({
       id,
       show,
-      timeRange: timeRangeParam
-    }: any) => {
+      timeRange: timeRangeParam,
+    }: {
+      id: string;
+      show: boolean;
+      timeRange?: TimeRange;
+    }) => {
       const timerange = timeRangeParam ?? globalTimeRange;
 
       if (id === TimelineId.active && timelineFullScreen) {
@@ -129,11 +133,11 @@ export const useCreateTimeline = ({
   return useCallback(
     async (options?: { timeRange?: TimeRange }) => {
       await resetDiscoverAppState();
-      createTimeline({ id: timelineId, show: true, timelineType, timeRange: options?.timeRange });
+      createTimeline({ id: timelineId, show: true, timeRange: options?.timeRange });
       if (typeof onClick === 'function') {
         onClick();
       }
     },
-    [createTimeline, timelineId, timelineType, onClick, resetDiscoverAppState]
+    [createTimeline, timelineId, onClick, resetDiscoverAppState]
   );
 };

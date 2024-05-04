@@ -63,8 +63,8 @@ const defaultConfig = {
 };
 
 function MaskList({ showValidation, onBlur, ...rest }: MaskListProps) {
-  const renderInputRow: InputListConfig['renderInputRow'] = useCallback(
-    ({ mask }, index, onChangeValue) => (
+  const renderInputRow = useCallback<InputListConfig['renderInputRow']>(
+    ({ mask }: MaskModel, index, onChangeValue) => (
       <EuiFlexItem>
         <EuiFieldText
           aria-label={i18n.translate('visDefaultEditor.controls.ipRanges.cidrMaskAriaLabel', {

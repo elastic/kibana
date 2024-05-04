@@ -78,7 +78,10 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     }
   }, [edges, error, expired]);
 
-  const renderAgentIdColumn = useCallback((agentId: any) => <AgentIdToName agentId={agentId} />, []);
+  const renderAgentIdColumn = useCallback(
+    (agentId: any) => <AgentIdToName agentId={agentId} />,
+    []
+  );
   const renderRowsColumn = useCallback((rowsCount: any) => rowsCount ?? '-', []);
   const renderStatusColumn = useCallback(
     (_: any, item: any) => {

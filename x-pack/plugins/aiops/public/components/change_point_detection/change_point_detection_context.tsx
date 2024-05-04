@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { type DataViewField } from '@kbn/data-views-plugin/public';
 import { startWith } from 'rxjs';
@@ -99,7 +99,7 @@ export const useChangePointDetectionControlsContext = () => {
   return useContext(ChangePointDetectionControlsContext);
 };
 
-export const ChangePointDetectionControlsContextProvider: FC<{ children?: React.ReactNode }> = ({
+export const ChangePointDetectionControlsContextProvider: FC<PropsWithChildren<unknown>> = ({
   children,
 }) => {
   const { dataView } = useDataSource();
@@ -129,14 +129,14 @@ export const ChangePointDetectionControlsContextProvider: FC<{ children?: React.
   );
 };
 
-export const ChangePointDetectionContextProvider: FC<{ children?: React.ReactNode }> = ({
+export const ChangePointDetectionContextProvider: FC<PropsWithChildren<unknown>> = ({
   children,
 }) => {
   const { dataView, savedSearch } = useDataSource();
   const {
     uiSettings,
     data: {
-      query: { filterManager },
+      query: { filterManager, queryString },
     },
   } = useAiopsAppContext();
 
@@ -245,11 +245,18 @@ export const ChangePointDetectionContextProvider: FC<{ children?: React.ReactNod
       if (requestParamsFromUrl.filters) {
         filterManager.setFilters(requestParamsFromUrl.filters);
       }
+      if (requestParamsFromUrl.query) {
+        queryString.setQuery(requestParamsFromUrl.query);
+      }
       if (globalFilters) {
         filterManager?.addFilters(globalFilters);
       }
+      return () => {
+        filterManager?.removeAll();
+        queryString.clearQuery();
+      };
     },
-    [requestParamsFromUrl.filters, filterManager]
+    [requestParamsFromUrl.filters, requestParamsFromUrl.query, filterManager, queryString]
   );
 
   const combinedQuery = useMemo(() => {

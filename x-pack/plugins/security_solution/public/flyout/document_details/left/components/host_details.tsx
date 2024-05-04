@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { NarrowDateRange } from '../../../../common/components/ml/types';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import type { RelatedUser } from '../../../../../common/search_strategy/security_solution/related_entities/related_users';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
@@ -82,8 +83,8 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
   const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
   const isEntityAnalyticsAuthorized = isPlatinumOrTrialLicense && hasEntityAnalyticsCapability;
 
-  const narrowDateRange = useCallback(
-    (score: any, interval: any) => {
+  const narrowDateRange = useCallback<NarrowDateRange>(
+    (score, interval) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
       dispatch(
         setAbsoluteRangeDatePicker({
@@ -278,7 +279,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
                 content={
                   <FormattedMessage
                     id="xpack.securitySolution.flyout.left.insights.entities.relatedUsersTooltip"
-                    defaultMessage="After this alert was generated, these users logged into {hostName}. Check if this activity is normal."
+                    defaultMessage="After this event, these users logged into {hostName}. Check if this activity is normal."
                     values={{ hostName }}
                   />
                 }

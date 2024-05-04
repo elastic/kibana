@@ -24,6 +24,7 @@ import {
   EuiFlexItem,
   EuiText,
   EuiCheckbox,
+  EuiCheckboxProps,
 } from '@elastic/eui';
 import { useStyles } from './styles';
 import {
@@ -69,8 +70,8 @@ const BooleanCondition = ({
   onRemoveCondition,
 }: BooleanConditionProps) => {
   const value = selector[prop as keyof Selector] as boolean;
-  const onChange = useCallback(
-    (e: any) => {
+  const onChange = useCallback<EuiCheckboxProps['onChange']>(
+    (e) => {
       onChangeBooleanCondition(prop, e.target.checked);
     },
     [onChangeBooleanCondition, prop]

@@ -53,8 +53,7 @@ export async function mountManagementSection(
       overlays,
       http,
       docLinks,
-      theme,
-      i18n: coreI18n,
+      ...startServices
     },
     {
       data,
@@ -93,18 +92,17 @@ export async function mountManagementSection(
     IndexPatternEditor: dataViewEditor.IndexPatternEditorComponent,
     fieldFormats,
     spaces: spaces?.hasOnlyDefaultSpace ? undefined : spaces,
-    theme,
     savedObjectsManagement,
     noDataPage,
+    ...startServices,
   };
 
   const editPath = '/dataView/:id/field/:fieldName';
   const createPath = '/dataView/:id/create-field/';
   const createEditPath = dataViews.scriptedFieldsEnabled ? [editPath, createPath] : [editPath];
 
-  const root = createRoot(params.element);
-  root.render(
-    <KibanaRenderContextProvider theme={theme} i18n={coreI18n}>
+  ReactDOM.render(
+    <KibanaRenderContextProvider {...startServices}>
       <KibanaContextProvider services={deps}>
         <Router history={params.history}>
           <Routes>
