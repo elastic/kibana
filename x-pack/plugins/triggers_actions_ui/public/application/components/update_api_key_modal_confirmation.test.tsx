@@ -13,6 +13,7 @@ import { UpdateApiKeyModalConfirmation } from './update_api_key_modal_confirmati
 import { useKibana } from '../../common/lib/kibana';
 
 const Providers = ({ children }: { children: any }) => (
+  // @ts-expect-error
   <IntlProvider locale="en">{children}</IntlProvider>
 );
 

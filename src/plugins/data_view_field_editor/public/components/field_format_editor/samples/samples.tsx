@@ -35,7 +35,7 @@ export class FormatEditorSamples extends PureComponent<FormatEditorSamplesProps>
         name: i18n.translate('indexPatternFieldEditor.samples.inputHeader', {
           defaultMessage: 'Input',
         }),
-        render: (input: {} | string) => {
+        render: (input: React.ReactNode | string) => {
           return typeof input === 'object' ? JSON.stringify(input) : input;
         },
       },

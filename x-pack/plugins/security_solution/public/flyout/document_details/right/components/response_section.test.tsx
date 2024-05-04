@@ -25,6 +25,7 @@ const PREVIEW_MESSAGE = 'Response is not available in alert preview.';
 
 const renderResponseSection = () =>
   render(
+    // @ts-expect-error
     <IntlProvider locale="en">
       <TestProvider>
         <RightPanelContext.Provider value={mockContextValue}>
@@ -68,6 +69,7 @@ describe('<ResponseSection />', () => {
     };
 
     const { getByTestId } = render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <TestProvider>
           <RightPanelContext.Provider
@@ -88,6 +90,7 @@ describe('<ResponseSection />', () => {
     (useExpandSection as jest.Mock).mockReturnValue(true);
 
     const { getByTestId } = render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <TestProvider>
           <RightPanelContext.Provider value={{ ...mockContextValue, isPreview: true }}>
@@ -109,6 +112,7 @@ describe('<ResponseSection />', () => {
       }
     };
     const { container } = render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <TestProvider>
           <RightPanelContext.Provider

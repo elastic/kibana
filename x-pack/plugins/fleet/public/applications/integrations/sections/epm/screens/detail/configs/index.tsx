@@ -113,7 +113,7 @@ export const Configs: React.FC<ConfigsProps> = ({ packageInfo }) => {
             )}
             <EuiSpacer size="s" />
             <EuiCodeBlock language="yaml" isCopyable={true} paddingSize="s" overflowHeight={1000}>
-              {configs}
+              <>{configs}</>
             </EuiCodeBlock>
           </>
         )}

@@ -34,6 +34,7 @@ describe('AgentActivityFlyout', () => {
   const mockSetSelectedStatus = jest.fn();
 
   const component = (refreshAgentActivity: boolean = false) => (
+    // @ts-expect-error
     <IntlProvider timeZone="UTC" locale="en">
       <AgentActivityFlyout
         onClose={mockOnClose}

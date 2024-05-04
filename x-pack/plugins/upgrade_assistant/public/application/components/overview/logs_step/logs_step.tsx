@@ -194,7 +194,9 @@ const LogsStep = ({
         data-test-subj="deprecationLogsErrorCallout"
       >
         <p>
-          {error.statusCode} - {error.message}
+          <>
+            {error.statusCode} - {error.message}
+          </>
         </p>
 
         <EuiButton

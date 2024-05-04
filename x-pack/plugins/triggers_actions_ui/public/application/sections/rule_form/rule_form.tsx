@@ -794,8 +794,8 @@ export const RuleForm = ({
               data-test-subj="intervalFormRow"
               display="rowCompressed"
               helpText={getHelpTextForInterval()}
-              isInvalid={errors['schedule.interval'].length > 0}
-              error={errors['schedule.interval']}
+              isInvalid={!!errors['schedule.interval'].length}
+              error={errors['schedule.interval'] as string}
             >
               <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem grow={2}>
@@ -803,7 +803,7 @@ export const RuleForm = ({
                     prepend={labelForRuleChecked}
                     fullWidth
                     min={1}
-                    isInvalid={errors['schedule.interval'].length > 0}
+                    isInvalid={!!errors['schedule.interval'].length}
                     value={ruleInterval || ''}
                     name="interval"
                     data-test-subj="intervalInput"
@@ -914,7 +914,7 @@ export const RuleForm = ({
           {!!errors.actionConnectors.length ? (
             <>
               <EuiSpacer />
-              <EuiCallOut color="danger" size="s" title={errors.actionConnectors} />
+              <EuiCallOut color="danger" size="s" title={errors.actionConnectors as string} />
               <EuiSpacer />
             </>
           ) : null}
@@ -984,7 +984,7 @@ export const RuleForm = ({
               />
             }
             isInvalid={!!errors.name.length && rule.name !== undefined}
-            error={errors.name}
+            error={errors.name as string}
           >
             <EuiFieldText
               fullWidth
@@ -1122,7 +1122,7 @@ export const RuleForm = ({
             {!!errors.ruleTypeId.length && rule.ruleTypeId !== undefined ? (
               <>
                 <EuiSpacer />
-                <EuiCallOut color="danger" size="s" title={errors.ruleTypeId} />
+                <EuiCallOut color="danger" size="s" title={errors.ruleTypeId as string} />
                 <EuiSpacer />
               </>
             ) : null}

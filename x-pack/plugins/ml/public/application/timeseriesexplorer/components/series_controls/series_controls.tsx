@@ -238,7 +238,7 @@ export const SeriesControls: FC<PropsWithChildren<SeriesControlsProps>> = ({
     appStateHandler(APP_STATE_ACTION.SET_ENTITIES, resultEntities);
   };
 
-  const detectorIndexChangeHandler: EuiSelectProps['onChange'] = useCallback(
+  const detectorIndexChangeHandler: NonNullable<EuiSelectProps['onChange']> = useCallback(
     (e) => {
       const id = e.target.value;
       if (id !== undefined) {

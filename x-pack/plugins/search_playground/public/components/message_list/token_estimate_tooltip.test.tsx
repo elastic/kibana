@@ -26,6 +26,7 @@ const MockFormProvider = ({ children }: { children: React.ReactElement }) => {
 describe('TokenEstimateTooltip component tests', () => {
   beforeEach(() => {
     render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <MockFormProvider>
           <TokenEstimateTooltip context={50} total={150} />

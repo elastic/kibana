@@ -26,6 +26,7 @@ import {
   EuiButtonEmpty,
   useEuiTheme,
   useIsWithinMinBreakpoint,
+  EuiFlyoutResizableProps,
 } from '@elastic/eui';
 import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
@@ -232,7 +233,7 @@ export function DiscoverGridFlyout({
         ownFocus={true}
         minWidth={minWidth}
         maxWidth={maxWidth}
-        onResize={setFlyoutWidth}
+        onResize={setFlyoutWidth as EuiFlyoutResizableProps['onResize']}
         css={{
           maxWidth: `${isXlScreen ? `calc(100vw - ${DEFAULT_WIDTH}px)` : '90vw'} !important`,
         }}

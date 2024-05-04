@@ -53,6 +53,7 @@ const CasesFixtureAppWithContext: React.FC<CasesFixtureAppDeps> = (props) => {
   const selectCaseModal = cases.hooks.useCasesAddToExistingCaseModal();
 
   return (
+    // @ts-expect-error
     <EuiPageTemplate template="empty">
       <EuiFlexGrid columns={1}>
         <EuiFlexItem>

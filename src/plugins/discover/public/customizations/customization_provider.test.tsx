@@ -65,6 +65,7 @@ describe('useDiscoverCustomization', () => {
   it('should provide customization', () => {
     const customization: DiscoverCustomization = { id: 'top_nav' };
     const wrapper = renderHook(() => useDiscoverCustomization('top_nav'), {
+      // @ts-expect-error
       wrapper: ({ children }) => {
         const service = createCustomizationService();
         service.set(customization);
@@ -81,6 +82,7 @@ describe('useDiscoverCustomization', () => {
     const service = createCustomizationService();
     const wrapper = renderHook((id) => useDiscoverCustomization(id), {
       initialProps: customization.id as DiscoverCustomizationId,
+      // @ts-expect-error
       wrapper: ({ children }) => {
         service.set(customization);
         return (
@@ -97,6 +99,7 @@ describe('useDiscoverCustomization', () => {
 
   it('should provide undefined if customization is not found', () => {
     const wrapper = renderHook(() => useDiscoverCustomization('top_nav'), {
+      // @ts-expect-error
       wrapper: ({ children }) => {
         const service = createCustomizationService();
         return (
@@ -112,6 +115,7 @@ describe('useDiscoverCustomization$', () => {
   it('should provide customization$', () => {
     const customization: DiscoverCustomization = { id: 'top_nav' };
     const wrapper = renderHook(() => useDiscoverCustomization$('top_nav'), {
+      // @ts-expect-error
       wrapper: ({ children }) => {
         const service = createCustomizationService();
         service.set(customization);
@@ -132,6 +136,7 @@ describe('useDiscoverCustomization$', () => {
     const service = createCustomizationService();
     const wrapper = renderHook((id) => useDiscoverCustomization$(id), {
       initialProps: customization.id as DiscoverCustomizationId,
+      // @ts-expect-error
       wrapper: ({ children }) => {
         service.set(customization);
         return (
@@ -155,6 +160,7 @@ describe('useDiscoverCustomization$', () => {
 
   it('should provide undefined if customization is not found', () => {
     const wrapper = renderHook(() => useDiscoverCustomization$('top_nav'), {
+      // @ts-expect-error
       wrapper: ({ children }) => {
         const service = createCustomizationService();
         return (

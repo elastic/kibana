@@ -31,24 +31,27 @@ const renderComparisonControls = ({
     return (
       <>
         {isCompareActive && <span>Comparison active</span>}
-        <IntlProvider locale="en">
-          <ComparisonControls
-            isPlainRecord={isPlainRecord}
-            selectedDocs={selectedDocs}
-            showDiff={showDiff}
-            diffMode={diffMode}
-            showDiffDecorations={showDiffDecorations}
-            showMatchingValues={showMatchingValues}
-            showAllFields={showAllFields}
-            forceShowAllFields={forceShowAllFields}
-            setIsCompareActive={setIsCompareActive}
-            setShowDiff={setShowDiff}
-            setDiffMode={setDiffMode}
-            setShowDiffDecorations={setShowDiffDecorations}
-            setShowMatchingValues={setShowMatchingValues}
-            setShowAllFields={setShowAllFields}
-          />
-        </IntlProvider>
+        {
+          // @ts-expect-error
+          <IntlProvider locale="en">
+            <ComparisonControls
+              isPlainRecord={isPlainRecord}
+              selectedDocs={selectedDocs}
+              showDiff={showDiff}
+              diffMode={diffMode}
+              showDiffDecorations={showDiffDecorations}
+              showMatchingValues={showMatchingValues}
+              showAllFields={showAllFields}
+              forceShowAllFields={forceShowAllFields}
+              setIsCompareActive={setIsCompareActive}
+              setShowDiff={setShowDiff}
+              setDiffMode={setDiffMode}
+              setShowDiffDecorations={setShowDiffDecorations}
+              setShowMatchingValues={setShowMatchingValues}
+              setShowAllFields={setShowAllFields}
+            />
+          </IntlProvider>
+        }
       </>
     );
   };

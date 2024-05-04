@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 
@@ -28,7 +29,7 @@ describe('hooks', () => {
 
     it('returns true if it is the main application', () => {
       const { result } = renderHook(() => useIsMainApplication(), {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        wrapper: ({ children }: PropsWithChildren) => <TestProviders>{children}</TestProviders>,
       });
 
       expect(result.current).toBe(true);
@@ -38,7 +39,7 @@ describe('hooks', () => {
       useApplicationMock.mockReturnValue({ appId: 'testAppId', appTitle: 'Test app' });
 
       const { result } = renderHook(() => useIsMainApplication(), {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        wrapper: ({ children }: PropsWithChildren) => <TestProviders>{children}</TestProviders>,
       });
 
       expect(result.current).toBe(false);

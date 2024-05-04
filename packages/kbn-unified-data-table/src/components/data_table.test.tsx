@@ -761,6 +761,7 @@ describe('UnifiedDataTable', () => {
   describe('document comparison', () => {
     const renderDataTable = (props: Partial<UnifiedDataTableProps>) => {
       render(
+        // @ts-expect-error
         <IntlProvider locale="en">
           <DataTable {...props} />
         </IntlProvider>

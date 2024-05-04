@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { mount } from 'enzyme';
@@ -165,12 +166,12 @@ describe('StatefulOpenTimeline', () => {
 
   describe("Template timelines' tab", () => {
     test("should land on correct timelines' tab with url timelines/default", () => {
-      const { result } = renderHook<UseTimelineTypesArgs, UseTimelineTypesResult>(
-        () => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 0 }),
-        {
-          wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
-        }
-      );
+      const { result } = renderHook<
+        PropsWithChildren<UseTimelineTypesArgs>,
+        UseTimelineTypesResult
+      >(() => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 0 }), {
+        wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+      });
 
       expect(result.current.timelineType).toBe(TimelineType.default);
     });
@@ -181,12 +182,12 @@ describe('StatefulOpenTimeline', () => {
         pageName: SecurityPageName.timelines,
       });
 
-      const { result } = renderHook<UseTimelineTypesArgs, UseTimelineTypesResult>(
-        () => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 0 }),
-        {
-          wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
-        }
-      );
+      const { result } = renderHook<
+        PropsWithChildren<UseTimelineTypesArgs>,
+        UseTimelineTypesResult
+      >(() => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 0 }), {
+        wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+      });
 
       expect(result.current.timelineType).toBe(TimelineType.template);
     });
@@ -223,12 +224,12 @@ describe('StatefulOpenTimeline', () => {
         pageName: SecurityPageName.case,
       });
 
-      const { result } = renderHook<UseTimelineTypesArgs, UseTimelineTypesResult>(
-        () => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 0 }),
-        {
-          wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
-        }
-      );
+      const { result } = renderHook<
+        PropsWithChildren<UseTimelineTypesArgs>,
+        UseTimelineTypesResult
+      >(() => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 0 }), {
+        wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+      });
 
       expect(result.current.timelineType).toBe(TimelineType.default);
     });

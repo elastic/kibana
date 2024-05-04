@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
 
@@ -27,23 +28,23 @@ describe('useCreateCaseModal', () => {
   });
 
   it('init', async () => {
-    const { result } = renderHook<UseCreateCaseModalProps, UseCreateCaseModalReturnedValues>(
-      () => useCreateCaseModal({ onCaseCreated }),
-      {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-      }
-    );
+    const { result } = renderHook<
+      PropsWithChildren<UseCreateCaseModalProps>,
+      UseCreateCaseModalReturnedValues
+    >(() => useCreateCaseModal({ onCaseCreated }), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
 
     expect(result.current.isModalOpen).toBe(false);
   });
 
   it('opens the modal', async () => {
-    const { result } = renderHook<UseCreateCaseModalProps, UseCreateCaseModalReturnedValues>(
-      () => useCreateCaseModal({ onCaseCreated }),
-      {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-      }
-    );
+    const { result } = renderHook<
+      PropsWithChildren<UseCreateCaseModalProps>,
+      UseCreateCaseModalReturnedValues
+    >(() => useCreateCaseModal({ onCaseCreated }), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
 
     act(() => {
       result.current.openModal();
@@ -53,12 +54,12 @@ describe('useCreateCaseModal', () => {
   });
 
   it('closes the modal', async () => {
-    const { result } = renderHook<UseCreateCaseModalProps, UseCreateCaseModalReturnedValues>(
-      () => useCreateCaseModal({ onCaseCreated }),
-      {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-      }
-    );
+    const { result } = renderHook<
+      PropsWithChildren<UseCreateCaseModalProps>,
+      UseCreateCaseModalReturnedValues
+    >(() => useCreateCaseModal({ onCaseCreated }), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
 
     act(() => {
       result.current.openModal();
@@ -70,7 +71,7 @@ describe('useCreateCaseModal', () => {
 
   it('returns a memoized value', async () => {
     const { result, rerender } = renderHook<
-      UseCreateCaseModalProps,
+      PropsWithChildren<UseCreateCaseModalProps>,
       UseCreateCaseModalReturnedValues
     >(() => useCreateCaseModal({ onCaseCreated }), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
@@ -84,12 +85,12 @@ describe('useCreateCaseModal', () => {
   });
 
   it('closes the modal when creating a case', async () => {
-    const { result } = renderHook<UseCreateCaseModalProps, UseCreateCaseModalReturnedValues>(
-      () => useCreateCaseModal({ onCaseCreated }),
-      {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-      }
-    );
+    const { result } = renderHook<
+      PropsWithChildren<UseCreateCaseModalProps>,
+      UseCreateCaseModalReturnedValues
+    >(() => useCreateCaseModal({ onCaseCreated }), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
 
     act(() => {
       result.current.openModal();

@@ -244,11 +244,14 @@ export const GroupsExamples = (args: NavigationServices) => {
 
   return (
     <NavigationWrapper>
-      {({ isCollapsed }) => (
-        <NavigationProvider {...services} isSideNavCollapsed={isCollapsed}>
-          <Navigation navigationTree$={of(groupExamplesNavigationTree)} />
-        </NavigationProvider>
-      )}
+      {
+        // @ts-expect-error
+        ({ isCollapsed }) => (
+          <NavigationProvider {...services} isSideNavCollapsed={isCollapsed}>
+            <Navigation navigationTree$={of(groupExamplesNavigationTree)} />
+          </NavigationProvider>
+        )
+      }
     </NavigationWrapper>
   );
 };
@@ -529,11 +532,14 @@ export const ComplexObjectDefinition = (args: NavigationServices) => {
 
   return (
     <NavigationWrapper>
-      {({ isCollapsed }) => (
-        <NavigationProvider {...services} isSideNavCollapsed={isCollapsed}>
-          <Navigation navigationTree$={of(navigationTree)} />
-        </NavigationProvider>
-      )}
+      {
+        // @ts-expect-error
+        ({ isCollapsed }) => (
+          <NavigationProvider {...services} isSideNavCollapsed={isCollapsed}>
+            <Navigation navigationTree$={of(navigationTree)} />
+          </NavigationProvider>
+        )
+      }
     </NavigationWrapper>
   );
 };
@@ -1140,14 +1146,17 @@ export const ObjectDefinitionWithPanel = (args: NavigationServices) => {
 
   return (
     <NavigationWrapper>
-      {({ isCollapsed }) => (
-        <NavigationProvider {...services} isSideNavCollapsed={isCollapsed}>
-          <Navigation
-            navigationTree$={of(navigationTreeWithPanels)}
-            panelContentProvider={panelContentProvider}
-          />
-        </NavigationProvider>
-      )}
+      {
+        // @ts-expect-error
+        ({ isCollapsed }) => (
+          <NavigationProvider {...services} isSideNavCollapsed={isCollapsed}>
+            <Navigation
+              navigationTree$={of(navigationTreeWithPanels)}
+              panelContentProvider={panelContentProvider}
+            />
+          </NavigationProvider>
+        )
+      }
     </NavigationWrapper>
   );
 };

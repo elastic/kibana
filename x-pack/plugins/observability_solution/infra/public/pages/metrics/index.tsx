@@ -139,7 +139,7 @@ export const InfrastructurePage = () => {
               )}
 
               <Route path="/detail/:type/:node" component={NodeDetail} />
-              {isHostsViewEnabled && <Route path="/hosts" component={HostsPage} />}
+              {isHostsViewEnabled ? <Route path="/hosts" component={HostsPage} /> : <></>}
               <Route path="/settings" component={MetricsSettingsPage} />
 
               <RedirectWithQueryParams from="/snapshot" exact to="/inventory" />

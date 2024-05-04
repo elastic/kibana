@@ -50,9 +50,12 @@ describe('Transform: useIndexData()', () => {
     const mlShared = await getMlSharedImports();
     const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
       <QueryClientProvider client={queryClient}>
-        <IntlProvider locale="en">
-          <MlSharedContext.Provider value={mlShared}>{children}</MlSharedContext.Provider>
-        </IntlProvider>
+        {
+          // @ts-expect-error
+          <IntlProvider locale="en">
+            <MlSharedContext.Provider value={mlShared}>{children}</MlSharedContext.Provider>
+          </IntlProvider>
+        }
       </QueryClientProvider>
     );
 
@@ -105,11 +108,14 @@ describe('Transform: <DataGrid /> with useIndexData()', () => {
 
     render(
       <QueryClientProvider client={queryClient}>
-        <IntlProvider locale="en">
-          <MlSharedContext.Provider value={mlSharedImports}>
-            <Wrapper />
-          </MlSharedContext.Provider>
-        </IntlProvider>
+        {
+          // @ts-expect-error
+          <IntlProvider locale="en">
+            <MlSharedContext.Provider value={mlSharedImports}>
+              <Wrapper />
+            </MlSharedContext.Provider>
+          </IntlProvider>
+        }
       </QueryClientProvider>
     );
 
@@ -147,11 +153,14 @@ describe('Transform: <DataGrid /> with useIndexData()', () => {
 
     render(
       <QueryClientProvider client={queryClient}>
-        <IntlProvider locale="en">
-          <MlSharedContext.Provider value={mlSharedImports}>
-            <Wrapper />
-          </MlSharedContext.Provider>
-        </IntlProvider>
+        {
+          // @ts-expect-error
+          <IntlProvider locale="en">
+            <MlSharedContext.Provider value={mlSharedImports}>
+              <Wrapper />
+            </MlSharedContext.Provider>
+          </IntlProvider>
+        }
       </QueryClientProvider>
     );
 

@@ -15,6 +15,7 @@ import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 
 const renderRiskScore = (contextValue: RightPanelContext) =>
   render(
+    // @ts-expect-error
     <IntlProvider locale="en">
       <RightPanelContext.Provider value={contextValue}>
         <RiskScore />

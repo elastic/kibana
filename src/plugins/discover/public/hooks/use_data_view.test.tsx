@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { renderHook } from '@testing-library/react-hooks';
 import { useDataView } from './use_data_view';
@@ -37,7 +37,7 @@ const mockServices = {
 
 const render = async ({ dataViewId }: { dataViewId: string }) => {
   const hookResult = renderHook(() => useDataView({ index: dataViewId }), {
-    wrapper: ({ children }) => (
+    wrapper: ({ children }: PropsWithChildren) => (
       <KibanaContextProvider services={mockServices}>{children}</KibanaContextProvider>
     ),
   });

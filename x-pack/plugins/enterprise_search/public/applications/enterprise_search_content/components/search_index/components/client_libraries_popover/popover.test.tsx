@@ -85,6 +85,7 @@ describe('ClientLibrariesPopover', () => {
       wrapper
         .find(EuiContextMenuPanel)
         .prop('items')
+        // @ts-expect-error
         ?.map((item: HTMLElement) => shallow(<div>{item}</div>)) || [];
 
     expect(contextMenuItems.length > 0).toBeTruthy();

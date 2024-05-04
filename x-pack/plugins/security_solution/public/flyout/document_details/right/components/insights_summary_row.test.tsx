@@ -19,6 +19,7 @@ const loadingTestId = `${testId}Loading`;
 describe('<InsightsSummaryRow />', () => {
   it('should render by default', () => {
     const { getByTestId } = render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <InsightsSummaryRow
           icon={'image'}
@@ -51,6 +52,7 @@ describe('<InsightsSummaryRow />', () => {
 
   it('should handle big number in a compact notation', () => {
     const { getByTestId } = render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <InsightsSummaryRow
           icon={'image'}
@@ -67,6 +69,7 @@ describe('<InsightsSummaryRow />', () => {
 
   it(`should not show the colored dot if color isn't provided`, () => {
     const { queryByTestId } = render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <InsightsSummaryRow
           icon={'image'}

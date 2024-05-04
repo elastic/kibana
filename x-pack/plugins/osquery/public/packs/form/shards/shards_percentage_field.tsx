@@ -33,7 +33,7 @@ const ShardsPercentageFieldComponent = ({
     defaultValue: 100,
   });
 
-  const handleChange: EuiRangeProps['onChange'] = useCallback(
+  const handleChange: NonNullable<EuiRangeProps['onChange']> = useCallback(
     (e) => {
       const numberValue = (e.target as { valueAsNumber: number }).valueAsNumber
         ? (e.target as { valueAsNumber: number }).valueAsNumber

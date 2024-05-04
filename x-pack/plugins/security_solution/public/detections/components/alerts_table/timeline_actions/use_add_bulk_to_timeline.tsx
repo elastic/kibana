@@ -191,50 +191,58 @@ export const useAddBulkToTimelineAction = ({
     [dispatch, createTimeline, selectedEventIds, tableId]
   );
 
-  const onActionClick: BulkActionsConfig['onClick'] | CustomBulkAction['onClick'] = useCallback(
-    (items: TimelineItem[] | undefined, isAllSelected: boolean, setLoading, clearSelection) => {
-      if (!items) return;
-      /*
-       * Trigger actions table passed isAllSelected param
-       *
-       * and selectAll is used when using DataTable
-       * */
-      const onResponseHandler = (localResponse: TimelineArgs) => {
-        sendBulkEventsToTimelineHandler(localResponse.events);
-        if (tableId === TableId.alertsOnAlertsPage) {
-          setLoading(false);
-          clearSelection();
-        } else {
-          dispatch(
-            setEventsLoading({
-              id: tableId,
-              isLoading: false,
-              eventIds: Object.keys(selectedEventIds),
-            })
-          );
-        }
-      };
+  const onActionClick: NonNullable<BulkActionsConfig['onClick']> | CustomBulkAction['onClick'] =
+    useCallback(
+      (items: TimelineItem[] | undefined, isAllSelected: boolean, setLoading, clearSelection) => {
+        if (!items) return;
+        /*
+         * Trigger actions table passed isAllSelected param
+         *
+         * and selectAll is used when using DataTable
+         * */
+        const onResponseHandler = (localResponse: TimelineArgs) => {
+          sendBulkEventsToTimelineHandler(localResponse.events);
+          if (tableId === TableId.alertsOnAlertsPage) {
+            setLoading(false);
+            clearSelection();
+          } else {
+            dispatch(
+              setEventsLoading({
+                id: tableId,
+                isLoading: false,
+                eventIds: Object.keys(selectedEventIds),
+              })
+            );
+          }
+        };
 
-      if (isAllSelected || selectAll) {
-        if (tableId === TableId.alertsOnAlertsPage) {
-          setLoading(true);
-        } else {
-          dispatch(
-            setEventsLoading({
-              id: tableId,
-              isLoading: true,
-              eventIds: Object.keys(selectedEventIds),
-            })
-          );
+        if (isAllSelected || selectAll) {
+          if (tableId === TableId.alertsOnAlertsPage) {
+            setLoading(true);
+          } else {
+            dispatch(
+              setEventsLoading({
+                id: tableId,
+                isLoading: true,
+                eventIds: Object.keys(selectedEventIds),
+              })
+            );
+          }
+          searchhandler(onResponseHandler);
+          return;
         }
-        searchhandler(onResponseHandler);
-        return;
-      }
-      sendBulkEventsToTimelineHandler(items);
-      clearSelection();
-    },
-    [dispatch, selectedEventIds, tableId, searchhandler, selectAll, sendBulkEventsToTimelineHandler]
-  );
+        sendBulkEventsToTimelineHandler(items);
+        clearSelection();
+      },
+      [
+        dispatch,
+        selectedEventIds,
+        tableId,
+        searchhandler,
+        selectAll,
+        sendBulkEventsToTimelineHandler,
+      ]
+    );
 
   const investigateInTimelineTitle = useMemo(() => {
     return disableActionOnSelectAll

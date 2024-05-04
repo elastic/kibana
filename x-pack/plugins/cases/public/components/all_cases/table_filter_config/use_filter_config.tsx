@@ -100,6 +100,15 @@ const deactivateNonExistingFilters = ({
   }
 };
 
+export interface UseFilterConfig {
+  isSelectorView: boolean;
+  isLoading: boolean;
+  onFilterOptionsChange: (params: Partial<FilterOptions>) => void;
+  systemFilterConfig: FilterConfig[];
+  filterOptions: FilterOptions;
+  customFields: CasesConfigurationUI['customFields'];
+}
+
 export const useFilterConfig = ({
   isSelectorView,
   onFilterOptionsChange,
@@ -107,14 +116,7 @@ export const useFilterConfig = ({
   filterOptions,
   customFields,
   isLoading,
-}: {
-  isSelectorView: boolean;
-  isLoading: boolean;
-  onFilterOptionsChange: (params: Partial<FilterOptions>) => void;
-  systemFilterConfig: FilterConfig[];
-  filterOptions: FilterOptions;
-  customFields: CasesConfigurationUI['customFields'];
-}) => {
+}: UseFilterConfig) => {
   /**
    * Initially we won't save any order, it will use the default config as it is defined in the system.
    * Once the user adds/removes a filter, we start saving the order and the visible state.

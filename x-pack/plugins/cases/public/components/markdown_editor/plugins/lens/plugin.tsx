@@ -34,6 +34,7 @@ import type {
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import type { SavedObjectFinderProps } from '@kbn/saved-objects-finder-plugin/public';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DRAFT_COMMENT_STORAGE_ID, ID } from './constants';
 import { CommentEditorContext } from '../../context';
@@ -41,7 +42,7 @@ import { useLensDraftComment } from './use_lens_draft_comment';
 import { VISUALIZATION } from './translations';
 import { useIsMainApplication } from '../../../../common/hooks';
 
-const DEFAULT_TIMERANGE = {
+const DEFAULT_TIMERANGE: TimeRange = {
   from: 'now-7d',
   to: 'now',
   mode: 'relative',
@@ -163,7 +164,10 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   ]);
 
   const handleEditInLensClick = useCallback(
-    (lensAttributes?: Partial<LensSavedObjectAttributes>, timeRange = DEFAULT_TIMERANGE) => {
+    (
+      lensAttributes?: Partial<LensSavedObjectAttributes>,
+      timeRange: TimeRange = DEFAULT_TIMERANGE
+    ) => {
       storage.set(DRAFT_COMMENT_STORAGE_ID, {
         commentId: commentEditorContext?.editorId,
         comment: commentEditorContext?.value,
@@ -230,7 +234,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
 
   useEffect(() => {
     if (node?.attributes && currentAppId) {
-      handleEditInLensClick(node.attributes, node.timeRange);
+      handleEditInLensClick(node.attributes, node.timeRange as TimeRange);
     }
   }, [handleEditInLensClick, node, currentAppId]);
 

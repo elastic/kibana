@@ -52,6 +52,7 @@ describe('ViewQueryFlyout component tests', () => {
 
   beforeEach(() => {
     render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <MockFormProvider>
           <ViewQueryFlyout onClose={onCloseMock} />

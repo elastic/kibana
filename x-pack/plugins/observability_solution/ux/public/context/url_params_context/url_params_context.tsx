@@ -41,6 +41,7 @@ const UrlParamsContext = createContext({
   urlParams: {} as UrlParams,
 });
 
+// @ts-expect-error
 const UrlParamsProvider: React.ComponentClass<{}> = withRouter(({ location, children }) => {
   const refUrlParams = useRef(resolveUrlParams(location, {}));
 

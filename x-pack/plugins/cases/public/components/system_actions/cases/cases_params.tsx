@@ -150,12 +150,8 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
       <EuiFormRow
         fullWidth
         id="timeWindow"
-        error={errors.timeWindow}
-        isInvalid={
-          errors.timeWindow !== undefined &&
-          errors.timeWindow.length > 0 &&
-          timeWindow !== undefined
-        }
+        error={errors.timeWindow as string}
+        isInvalid={!!errors.timeWindow?.length && timeWindow !== undefined}
       >
         <EuiFlexGroup alignItems="flexEnd" gutterSize="s">
           <EuiFlexItem grow={4}>

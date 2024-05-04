@@ -197,13 +197,13 @@ export const GroupByExpression = ({
           {groupByTypes[groupBy].sizeRequired ? (
             <>
               <EuiFlexItem grow={1}>
-                <EuiFormRow isInvalid={errors.termSize.length > 0} error={errors.termSize}>
+                <EuiFormRow isInvalid={!!errors.termSize.length} error={errors.termSize as string}>
                   <EuiFieldNumber
                     data-test-subj="fieldsNumberSelect"
                     css={css`
                       min-width: 50px;
                     `}
-                    isInvalid={errors.termSize.length > 0}
+                    isInvalid={!!errors.termSize.length}
                     value={termSize || ''}
                     onChange={(e) => {
                       const { value } = e.target;
@@ -216,7 +216,10 @@ export const GroupByExpression = ({
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={2}>
-                <EuiFormRow isInvalid={errors.termField.length > 0} error={errors.termField}>
+                <EuiFormRow
+                  isInvalid={!!errors.termField.length}
+                  error={errors.termField as string}
+                >
                   <EuiComboBox
                     singleSelection={canSelectMultiTerms ? false : { asPlainText: true }}
                     placeholder={i18n.translate(
@@ -226,7 +229,7 @@ export const GroupByExpression = ({
                       }
                     )}
                     data-test-subj="fieldsExpressionSelect"
-                    isInvalid={errors.termField.length > 0}
+                    isInvalid={!!errors.termField.length}
                     selectedOptions={selectedTermsFieldsOptions}
                     onChange={(
                       selectedOptions: Array<EuiComboBoxOptionOption<GroupByOverFieldOption>>

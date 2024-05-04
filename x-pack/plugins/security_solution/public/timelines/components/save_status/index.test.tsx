@@ -17,6 +17,7 @@ jest.mock('../../../common/hooks/use_selector');
 
 const renderTimelineSaveStatus = () => {
   return render(
+    // @ts-expect-error
     <IntlProvider locale="en">
       <TimelineSaveStatus timelineId={TimelineId.test} />
     </IntlProvider>

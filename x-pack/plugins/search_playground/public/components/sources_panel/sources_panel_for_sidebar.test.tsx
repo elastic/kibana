@@ -22,7 +22,10 @@ jest.mock('../../hooks/use_query_indices', () => ({
 const Wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
   return (
     <>
-      <IntlProvider locale="en">{children}</IntlProvider>
+      {
+        // @ts-expect-error
+        <IntlProvider locale="en">{children}</IntlProvider>
+      }
     </>
   );
 };

@@ -58,7 +58,7 @@ export function useTableSettings<TypeOfItem extends object>(
     sortDirection: 'asc',
   });
 
-  const onTableChange: EuiBasicTableProps<TypeOfItem>['onChange'] = ({
+  const onTableChange: NonNullable<EuiBasicTableProps<TypeOfItem>['onChange']> = ({
     page = { index: 0, size: PAGE_SIZE },
     sort = { field: sortByField, direction: 'asc' },
   }: CriteriaWithPagination<TypeOfItem>) => {

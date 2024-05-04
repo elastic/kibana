@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
@@ -19,7 +20,7 @@ export function createReactQueryWrapper(): React.FC {
   });
 
   // eslint-disable-next-line react/display-name
-  return ({ children }) => (
+  return ({ children }: PropsWithChildren) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
 }

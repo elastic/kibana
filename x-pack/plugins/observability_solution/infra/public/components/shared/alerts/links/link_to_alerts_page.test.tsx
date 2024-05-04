@@ -36,6 +36,7 @@ describe('LinkToAlertsPage component', () => {
       ['data-test-subj']: 'test-link',
     };
     const { container } = render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <LinkToAlertsPage {...props} />
       </IntlProvider>
@@ -50,6 +51,7 @@ describe('LinkToAlertsPage component', () => {
       ['data-test-subj']: 'test-link',
     };
     const { container } = render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <LinkToAlertsPage {...props} />
       </IntlProvider>
@@ -66,6 +68,7 @@ describe('LinkToAlertsPage component', () => {
       ['data-test-subj']: 'test-link',
     };
     render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <LinkToAlertsPage {...props} />
       </IntlProvider>

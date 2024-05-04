@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { waitFor } from '@testing-library/react';
@@ -156,9 +157,12 @@ describe('Sourcerer Hooks', () => {
   });
   it('initializes loading default and timeline index patterns', async () => {
     await act(async () => {
-      const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
-        wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-      });
+      const { rerender, waitForNextUpdate } = renderHook<PropsWithChildren, void>(
+        () => useInitSourcerer(),
+        {
+          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+        }
+      );
       await waitForNextUpdate();
       rerender();
       expect(mockDispatch).toBeCalledTimes(3);
@@ -201,9 +205,12 @@ describe('Sourcerer Hooks', () => {
         loading: false,
         signalIndexName: mockSourcererState.signalIndexName,
       }));
-      const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
-        wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-      });
+      const { rerender, waitForNextUpdate } = renderHook<PropsWithChildren, void>(
+        () => useInitSourcerer(),
+        {
+          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+        }
+      );
       await waitForNextUpdate();
       rerender();
       await waitFor(() => {
@@ -248,7 +255,7 @@ describe('Sourcerer Hooks', () => {
       })
     );
 
-    renderHook<string, void>(() => useInitSourcerer(), {
+    renderHook<PropsWithChildren, void>(() => useInitSourcerer(), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
@@ -268,7 +275,7 @@ describe('Sourcerer Hooks', () => {
       onInitialize(null)
     );
 
-    renderHook<string, void>(() => useInitSourcerer(), {
+    renderHook<PropsWithChildren, void>(() => useInitSourcerer(), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
@@ -293,7 +300,7 @@ describe('Sourcerer Hooks', () => {
       },
     });
     await act(async () => {
-      renderHook<string, void>(() => useInitSourcerer(), {
+      renderHook<PropsWithChildren, void>(() => useInitSourcerer(), {
         wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
       });
 
@@ -329,9 +336,12 @@ describe('Sourcerer Hooks', () => {
         loading: false,
         signalIndexName: mockSourcererState.signalIndexName,
       }));
-      const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
-        wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-      });
+      const { rerender, waitForNextUpdate } = renderHook<PropsWithChildren, void>(
+        () => useInitSourcerer(),
+        {
+          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+        }
+      );
 
       await waitForNextUpdate();
       rerender();
@@ -368,9 +378,12 @@ describe('Sourcerer Hooks', () => {
         loading: false,
         signalIndexName: mockSourcererState.signalIndexName,
       }));
-      const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
-        wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-      });
+      const { rerender, waitForNextUpdate } = renderHook<PropsWithChildren, void>(
+        () => useInitSourcerer(),
+        {
+          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+        }
+      );
 
       await waitForNextUpdate();
       rerender();
@@ -388,7 +401,7 @@ describe('Sourcerer Hooks', () => {
         signalIndexName: mockSourcererState.signalIndexName,
         isSignalIndexExists: true,
       }));
-      const { rerender, waitForNextUpdate } = renderHook<string, void>(
+      const { rerender, waitForNextUpdate } = renderHook<PropsWithChildren, void>(
         () => useInitSourcerer(SourcererScopeName.detections),
         {
           wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
@@ -408,9 +421,12 @@ describe('Sourcerer Hooks', () => {
   });
   it('index field search is not repeated when default and timeline have same dataViewId', async () => {
     await act(async () => {
-      const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
-        wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-      });
+      const { rerender, waitForNextUpdate } = renderHook<PropsWithChildren, void>(
+        () => useInitSourcerer(),
+        {
+          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+        }
+      );
       await waitForNextUpdate();
       rerender();
       await waitFor(() => {
@@ -433,9 +449,12 @@ describe('Sourcerer Hooks', () => {
       },
     });
     await act(async () => {
-      const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
-        wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-      });
+      const { rerender, waitForNextUpdate } = renderHook<PropsWithChildren, void>(
+        () => useInitSourcerer(),
+        {
+          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+        }
+      );
       await waitForNextUpdate();
       rerender();
       await waitFor(() => {
@@ -455,9 +474,12 @@ describe('Sourcerer Hooks', () => {
     });
     it('does not needToBeInit if scope is default and selectedPatterns/missingPatterns have values', async () => {
       await act(async () => {
-        const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
-          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-        });
+        const { rerender, waitForNextUpdate } = renderHook<PropsWithChildren, void>(
+          () => useInitSourcerer(),
+          {
+            wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+          }
+        );
         await waitForNextUpdate();
         rerender();
         await waitFor(() => {
@@ -486,9 +508,12 @@ describe('Sourcerer Hooks', () => {
         },
       });
       await act(async () => {
-        const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
-          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-        });
+        const { rerender, waitForNextUpdate } = renderHook<PropsWithChildren, void>(
+          () => useInitSourcerer(),
+          {
+            wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+          }
+        );
         await waitForNextUpdate();
         rerender();
         await waitFor(() => {
@@ -522,9 +547,12 @@ describe('Sourcerer Hooks', () => {
         },
       });
       await act(async () => {
-        const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
-          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-        });
+        const { rerender, waitForNextUpdate } = renderHook<PropsWithChildren, void>(
+          () => useInitSourcerer(),
+          {
+            wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+          }
+        );
         await waitForNextUpdate();
         rerender();
         await waitFor(() => {
@@ -559,9 +587,12 @@ describe('Sourcerer Hooks', () => {
         },
       });
       await act(async () => {
-        const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
-          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-        });
+        const { rerender, waitForNextUpdate } = renderHook<PropsWithChildren, void>(
+          () => useInitSourcerer(),
+          {
+            wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+          }
+        );
         await waitForNextUpdate();
         rerender();
         await waitFor(() => {
@@ -600,9 +631,12 @@ describe('Sourcerer Hooks', () => {
         },
       });
       await act(async () => {
-        const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
-          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-        });
+        const { rerender, waitForNextUpdate } = renderHook<PropsWithChildren, void>(
+          () => useInitSourcerer(),
+          {
+            wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+          }
+        );
         await waitForNextUpdate();
         rerender();
         await waitFor(() => {
@@ -643,7 +677,7 @@ describe('Sourcerer Hooks', () => {
           },
         });
         const { result, rerender, waitForNextUpdate } = renderHook<
-          SourcererScopeName,
+          PropsWithChildren<SourcererScopeName>,
           SelectedDataView
         >(() => useSourcererDataView(), {
           wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,

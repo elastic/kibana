@@ -53,6 +53,7 @@ function toChangeListItem(
   item: LogChangeWithTimeseries | MetricChangeWithTimeseries
 ): ChangeListItem {
   return {
+    // @ts-expect-error
     label: 'regex' in item ? item.regex : item.key,
     timeseries: item.over_time,
     change:

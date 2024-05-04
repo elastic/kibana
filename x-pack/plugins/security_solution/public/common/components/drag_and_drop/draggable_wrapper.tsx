@@ -8,6 +8,7 @@
 import type { DraggableProps, DroppableProps } from '@elastic/eui';
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '@kbn/securitysolution-t-grid';
+import type { PropsWithChildren } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type {
   DraggableProvided,
@@ -47,7 +48,7 @@ DragEffects.displayName = 'DragEffects';
  * writing, there's no hook equivalent for `componentDidCatch`, per
  * https://reactjs.org/docs/hooks-faq.html#do-hooks-cover-all-use-cases-for-classes
  */
-class DragDropErrorBoundary extends React.PureComponent {
+class DragDropErrorBoundary extends React.PureComponent<PropsWithChildren> {
   componentDidCatch() {
     this.forceUpdate(); // required for recovery
   }
@@ -188,7 +189,7 @@ const DraggableOnWrapperComponent: React.FC<DraggableWrapperProps> = ({
     [unRegisterProvider]
   );
 
-  const RenderClone: DroppableProps['renderClone'] = useCallback(
+  const RenderClone: NonNullable<DroppableProps['renderClone']> = useCallback(
     (provided, snapshot) => (
       <ConditionalPortal registerProvider={registerProvider}>
         <div

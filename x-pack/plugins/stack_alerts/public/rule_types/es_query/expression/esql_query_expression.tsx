@@ -244,8 +244,8 @@ export const EsqlQueryExpression: React.FC<
       <EuiFormRow
         id="timeField"
         fullWidth
-        isInvalid={errors.timeField.length > 0 && timeField !== undefined}
-        error={errors.timeField}
+        isInvalid={!!errors.timeField.length && timeField !== undefined}
+        error={errors.timeField as string}
         label={
           <FormattedMessage
             id="xpack.stackAlerts.esQuery.ui.selectEsqlQueryTimeFieldPrompt"
@@ -255,7 +255,7 @@ export const EsqlQueryExpression: React.FC<
       >
         <EuiSelect
           options={timeFieldOptions}
-          isInvalid={errors.timeField.length > 0 && timeField !== undefined}
+          isInvalid={!!errors.timeField.length && timeField !== undefined}
           fullWidth
           name="timeField"
           data-test-subj="timeFieldSelect"
@@ -270,8 +270,8 @@ export const EsqlQueryExpression: React.FC<
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id="timeWindowSize"
-            isInvalid={errors.timeWindowSize.length > 0}
-            error={errors.timeWindowSize}
+            isInvalid={!!errors.timeWindowSize.length}
+            error={errors.timeWindowSize as string}
             label={
               <FormattedMessage
                 id="xpack.stackAlerts.esQuery.ui.setEsqlQueryTimeWindowPrompt"
@@ -282,7 +282,7 @@ export const EsqlQueryExpression: React.FC<
             <EuiFieldNumber
               name="timeWindowSize"
               data-test-subj="timeWindowSizeNumber"
-              isInvalid={errors.timeWindowSize.length > 0}
+              isInvalid={!!errors.timeWindowSize.length}
               min={0}
               value={timeWindowSize || ''}
               onChange={(e) => {

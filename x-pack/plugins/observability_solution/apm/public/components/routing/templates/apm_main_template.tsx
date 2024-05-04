@@ -45,6 +45,7 @@ export function ApmMainTemplate({
   environmentFilter = true,
   showServiceGroupSaveButton = false,
   showServiceGroupsNav = false,
+  // @ts-expect-error
   environmentFilterInTemplate = true,
   selectedNavButton,
   ...pageTemplateProps

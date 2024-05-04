@@ -127,7 +127,10 @@ describe('Header', () => {
       const headerWithLabel = { ...columnHeader, display };
       const wrapper = mount(
         <TestProviders>
-          <HeaderComponent header={headerWithLabel} sort={sort} timelineId={timelineId} />
+          {
+            // @ts-expect-error
+            <HeaderComponent header={headerWithLabel} sort={sort} timelineId={timelineId} />
+          }
         </TestProviders>
       );
 

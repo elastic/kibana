@@ -78,6 +78,7 @@ export const MetricsExplorerAggregationPicker = ({ options, onChange }: Props) =
     <EuiSelect
       data-test-subj="infraMetricsExplorerAggregationPickerSelect"
       aria-label={placeholder}
+      // @ts-expect-error
       placeholder={placeholder}
       fullWidth
       value={options.aggregation}

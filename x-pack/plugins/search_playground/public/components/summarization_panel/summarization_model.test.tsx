@@ -13,6 +13,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { LLMs } from '../../types';
 
 const render = (children: React.ReactNode) =>
+  // @ts-expect-error
   testingLibraryRender(<IntlProvider locale="en">{children}</IntlProvider>);
 const MockIcon = () => <span />;
 

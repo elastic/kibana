@@ -53,6 +53,7 @@ const queryClient = new QueryClient({
 
 export const render = (component: React.ReactNode, config: Subset<ConfigSchema> = {}) => {
   return testLibRender(
+    // @ts-expect-error
     <IntlProvider locale="en-US" messages={translations.messages}>
       <KibanaContextProvider
         services={{

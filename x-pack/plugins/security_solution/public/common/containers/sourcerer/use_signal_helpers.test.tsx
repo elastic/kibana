@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
 import { act, renderHook } from '@testing-library/react-hooks';
@@ -36,9 +37,9 @@ jest.mock('../../lib/kibana', () => {
 });
 
 describe('useSignalHelpers', () => {
-  const wrapperContainer: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
-    <TestProviders>{children}</TestProviders>
-  );
+  const wrapperContainer: React.FC<{ children?: React.ReactNode }> = ({
+    children,
+  }: PropsWithChildren) => <TestProviders>{children}</TestProviders>;
 
   test('Default state, does not need init and does not need poll', async () => {
     await act(async () => {
@@ -72,7 +73,9 @@ describe('useSignalHelpers', () => {
     const store = createMockStore(state);
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useSignalHelpers(), {
-        wrapper: ({ children }) => <TestProviders store={store}>{children}</TestProviders>,
+        wrapper: ({ children }: PropsWithChildren) => (
+          <TestProviders store={store}>{children}</TestProviders>
+        ),
       });
       await waitForNextUpdate();
       expect(result.current.signalIndexNeedsInit).toEqual(true);
@@ -101,7 +104,9 @@ describe('useSignalHelpers', () => {
     const store = createMockStore(state);
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useSignalHelpers(), {
-        wrapper: ({ children }) => <TestProviders store={store}>{children}</TestProviders>,
+        wrapper: ({ children }: PropsWithChildren) => (
+          <TestProviders store={store}>{children}</TestProviders>
+        ),
       });
       await waitForNextUpdate();
       expect(result.current.signalIndexNeedsInit).toEqual(false);
@@ -132,7 +137,9 @@ describe('useSignalHelpers', () => {
     const store = createMockStore(state);
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useSignalHelpers(), {
-        wrapper: ({ children }) => <TestProviders store={store}>{children}</TestProviders>,
+        wrapper: ({ children }: PropsWithChildren) => (
+          <TestProviders store={store}>{children}</TestProviders>
+        ),
       });
       await waitForNextUpdate();
       expect(result.current.signalIndexNeedsInit).toEqual(false);
@@ -166,7 +173,9 @@ describe('useSignalHelpers', () => {
     const store = createMockStore(state);
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useSignalHelpers(), {
-        wrapper: ({ children }) => <TestProviders store={store}>{children}</TestProviders>,
+        wrapper: ({ children }: PropsWithChildren) => (
+          <TestProviders store={store}>{children}</TestProviders>
+        ),
       });
       await waitForNextUpdate();
       expect(result.current.signalIndexNeedsInit).toEqual(false);

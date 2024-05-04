@@ -13,7 +13,7 @@ import type { DataVisualizerTableState } from '../../../../../common/types';
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
 
 interface UseTableSettingsReturnValue<T extends object> {
-  onTableChange: EuiBasicTableProps<T>['onChange'];
+  onTableChange: NonNullable<EuiBasicTableProps<T>['onChange']>;
   pagination: Pagination;
   sorting: { sort: PropertySort };
 }
@@ -25,8 +25,14 @@ export function useTableSettings<TypeOfItem extends object>(
 ): UseTableSettingsReturnValue<TypeOfItem> {
   const { pageIndex, pageSize, sortField, sortDirection } = pageState;
 
-  const onTableChange: EuiBasicTableProps<TypeOfItem>['onChange'] = useCallback(
-    ({ page, sort }) => {
+  const onTableChange = useCallback(
+    ({
+      page,
+      sort,
+    }: {
+      page?: { index?: number; size?: number };
+      sort?: { field: keyof TypeOfItem; direction: Direction };
+    }) => {
       const result = {
         ...pageState,
         pageIndex: page?.index ?? pageState.pageIndex,

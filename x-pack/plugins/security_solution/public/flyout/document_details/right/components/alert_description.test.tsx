@@ -77,11 +77,14 @@ const panelContextValue = (dataFormattedForFieldBrowser: TimelineEventsDetailsIt
 const renderDescription = (panelContext: RightPanelContext) =>
   render(
     <TestProviders>
-      <IntlProvider locale="en">
-        <RightPanelContext.Provider value={panelContext}>
-          <AlertDescription />
-        </RightPanelContext.Provider>
-      </IntlProvider>
+      {
+        // @ts-expect-error
+        <IntlProvider locale="en">
+          <RightPanelContext.Provider value={panelContext}>
+            <AlertDescription />
+          </RightPanelContext.Provider>
+        </IntlProvider>
+      }
     </TestProviders>
   );
 

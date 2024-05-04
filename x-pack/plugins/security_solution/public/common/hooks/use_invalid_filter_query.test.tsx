@@ -9,12 +9,14 @@
 // to indicate that the particular test is not working as expected
 // but is simply documenting the current behavior.
 
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { render } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import type { Store } from 'redux';
 
 import { createMockStore, kibanaMock, mockGlobalState, TestProviders } from '../mock';
+import type { UseInvalidFilterQueryProps } from './use_invalid_filter_query';
 import { genHash, useInvalidFilterQuery } from './use_invalid_filter_query';
 
 const getStore = () =>
@@ -38,7 +40,7 @@ const getProps = () => ({
   endDate: '2018-01-02T00:00:00.000Z',
 });
 
-const getWrapper = (store: Store): React.FC => {
+const getWrapper = (store: Store): React.FC<PropsWithChildren> => {
   // eslint-disable-next-line react/display-name
   return ({ children }) => (
     <TestProviders store={store} startServices={kibanaMock}>
@@ -56,7 +58,10 @@ describe('useInvalidFilterQuery', () => {
     const store = getStore();
     const props = getProps();
 
-    renderHook(useInvalidFilterQuery, { initialProps: props, wrapper: getWrapper(store) });
+    renderHook<PropsWithChildren<UseInvalidFilterQueryProps>, void>(useInvalidFilterQuery, {
+      initialProps: props,
+      wrapper: getWrapper(store),
+    });
 
     expect(store.getState().app.errors).toEqual([
       {
@@ -79,7 +84,7 @@ describe('useInvalidFilterQuery', () => {
     const store = getStore();
     const props = getProps();
 
-    renderHook(useInvalidFilterQuery, {
+    renderHook<PropsWithChildren<UseInvalidFilterQueryProps>, void>(useInvalidFilterQuery, {
       initialProps: {
         id: props.id,
         query: props.query,
@@ -98,7 +103,10 @@ describe('useInvalidFilterQuery', () => {
 
     // @ts-expect-error
     props.kqlError.name = null;
-    renderHook(useInvalidFilterQuery, { initialProps: props, wrapper: getWrapper(store) });
+    renderHook<PropsWithChildren<UseInvalidFilterQueryProps>, void>(useInvalidFilterQuery, {
+      initialProps: props,
+      wrapper: getWrapper(store),
+    });
 
     expect(kibanaMock.notifications.toasts.addError).not.toHaveBeenCalled();
   });
@@ -109,7 +117,10 @@ describe('useInvalidFilterQuery', () => {
 
     // @ts-expect-error
     props.kqlError.message = null;
-    renderHook(useInvalidFilterQuery, { initialProps: props, wrapper: getWrapper(store) });
+    renderHook<PropsWithChildren<UseInvalidFilterQueryProps>, void>(useInvalidFilterQuery, {
+      initialProps: props,
+      wrapper: getWrapper(store),
+    });
 
     expect(kibanaMock.notifications.toasts.addError).not.toHaveBeenCalled();
   });
@@ -118,7 +129,7 @@ describe('useInvalidFilterQuery', () => {
     const store = getStore();
     const props = getProps();
 
-    renderHook(useInvalidFilterQuery, {
+    renderHook<PropsWithChildren<UseInvalidFilterQueryProps>, void>(useInvalidFilterQuery, {
       initialProps: { ...props, filterQuery: 'filterQuery' },
       wrapper: getWrapper(store),
     });
@@ -169,10 +180,13 @@ describe('useInvalidFilterQuery', () => {
     const props = getProps();
 
     const kqlError2 = new Error('boom2');
-    const { rerender } = renderHook(useInvalidFilterQuery, {
-      initialProps: props,
-      wrapper: getWrapper(store),
-    });
+    const { rerender } = renderHook<PropsWithChildren<UseInvalidFilterQueryProps>, void>(
+      useInvalidFilterQuery,
+      {
+        initialProps: props,
+        wrapper: getWrapper(store),
+      }
+    );
     rerender({ ...props, kqlError: kqlError2 });
 
     expect(kibanaMock.notifications.toasts.addError).toHaveBeenCalledTimes(3);
@@ -207,10 +221,13 @@ describe('useInvalidFilterQuery', () => {
     const store = getStore();
     const props = getProps();
 
-    const { rerender } = renderHook(useInvalidFilterQuery, {
-      initialProps: props,
-      wrapper: getWrapper(store),
-    });
+    const { rerender } = renderHook<PropsWithChildren<UseInvalidFilterQueryProps>, void>(
+      useInvalidFilterQuery,
+      {
+        initialProps: props,
+        wrapper: getWrapper(store),
+      }
+    );
     rerender();
     rerender();
 
@@ -221,10 +238,13 @@ describe('useInvalidFilterQuery', () => {
     const store = getStore();
     const props = getProps();
 
-    const { rerender } = renderHook(useInvalidFilterQuery, {
-      initialProps: props,
-      wrapper: getWrapper(store),
-    });
+    const { rerender } = renderHook<PropsWithChildren<UseInvalidFilterQueryProps>, void>(
+      useInvalidFilterQuery,
+      {
+        initialProps: props,
+        wrapper: getWrapper(store),
+      }
+    );
     rerender({
       ...props,
       id: 'test-id2',
@@ -240,10 +260,13 @@ describe('useInvalidFilterQuery', () => {
     const store = getStore();
     const props = getProps();
 
-    const { rerender } = renderHook(useInvalidFilterQuery, {
-      initialProps: props,
-      wrapper: getWrapper(store),
-    });
+    const { rerender } = renderHook<PropsWithChildren<UseInvalidFilterQueryProps>, void>(
+      useInvalidFilterQuery,
+      {
+        initialProps: props,
+        wrapper: getWrapper(store),
+      }
+    );
     rerender({
       ...props,
       query: { query: ': :::', language: 'kuery' },
@@ -256,10 +279,13 @@ describe('useInvalidFilterQuery', () => {
     const store = getStore();
     const props = getProps();
 
-    const { rerender } = renderHook(useInvalidFilterQuery, {
-      initialProps: props,
-      wrapper: getWrapper(store),
-    });
+    const { rerender } = renderHook<PropsWithChildren<UseInvalidFilterQueryProps>, void>(
+      useInvalidFilterQuery,
+      {
+        initialProps: props,
+        wrapper: getWrapper(store),
+      }
+    );
     rerender({
       ...props,
       startDate: '2015-01-01T00:00:00.000Z',
@@ -272,10 +298,13 @@ describe('useInvalidFilterQuery', () => {
     const store = getStore();
     const props = getProps();
 
-    const { rerender } = renderHook(useInvalidFilterQuery, {
-      initialProps: props,
-      wrapper: getWrapper(store),
-    });
+    const { rerender } = renderHook<PropsWithChildren<UseInvalidFilterQueryProps>, void>(
+      useInvalidFilterQuery,
+      {
+        initialProps: props,
+        wrapper: getWrapper(store),
+      }
+    );
     rerender({
       ...props,
       endDate: '2019-01-02T00:00:00.000Z',

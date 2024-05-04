@@ -10,6 +10,7 @@ import React from 'react';
 import { createMockStore, mockGlobalState } from '../../../../common/mock';
 import { TestProviders } from '../../../../common/mock/test_providers';
 
+import type { BasicTimelineTab } from '.';
 import { TabsContent } from '.';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { TimelineType } from '../../../../../common/api/timeline';
@@ -28,7 +29,7 @@ describe('Timeline', () => {
   describe('esql tab', () => {
     const esqlTabSubj = `timelineTabs-${TimelineTabs.esql}`;
     const defaultProps = {
-      renderCellValue: () => {},
+      renderCellValue: (() => {}) as BasicTimelineTab['renderCellValue'],
       rowRenderers: [],
       timelineId: TimelineId.test,
       timelineType: TimelineType.default,

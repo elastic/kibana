@@ -10,12 +10,16 @@ import { SourcererScopeName } from '../store/sourcerer/model';
 import { DEFAULT_DATA_VIEW_ID } from '../../../common/constants';
 import { useDataViewId } from './use_data_view_id';
 import * as sourcererSelectors from '../store/sourcerer/selectors';
+import type { PropsWithChildren } from 'react';
 
 describe('useDataViewId', () => {
   it.each(Object.values(SourcererScopeName))(
     'should return the data view id for %s scope',
     (scope) => {
-      const { result } = renderHook(useDataViewId, { initialProps: scope, wrapper: TestProviders });
+      const { result } = renderHook<PropsWithChildren<SourcererScopeName>, void>(useDataViewId, {
+        initialProps: scope,
+        wrapper: TestProviders,
+      });
       expect(result.current).toEqual(DEFAULT_DATA_VIEW_ID); // mocked value
     }
   );
@@ -25,7 +29,7 @@ describe('useDataViewId', () => {
       .spyOn(sourcererSelectors, 'sourcererScopeSelectedDataViewId')
       .mockImplementationOnce(() => null);
 
-    const { result } = renderHook(useDataViewId, {
+    const { result } = renderHook<PropsWithChildren<SourcererScopeName>, void>(useDataViewId, {
       initialProps: SourcererScopeName.default,
       wrapper: TestProviders,
     });

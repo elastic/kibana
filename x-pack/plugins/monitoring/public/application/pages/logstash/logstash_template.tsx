@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import { i18n } from '@kbn/i18n';
 import { PageTemplate } from '../page_template';
 import { TabMenuItem, PageTemplateProps } from '../page_template';
@@ -17,7 +17,7 @@ interface LogstashTemplateProps extends PageTemplateProps {
   tabsDisabled?: boolean;
 }
 
-export const LogstashTemplate: React.FC<LogstashTemplateProps> = ({
+export const LogstashTemplate: React.FC<PropsWithChildren<LogstashTemplateProps>> = ({
   cluster,
   instance,
   pipelineId,

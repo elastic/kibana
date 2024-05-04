@@ -81,7 +81,7 @@ const useKibanaMockServices = {
 };
 
 describe('useConversation', () => {
-  let wrapper: WrapperComponent<UseConversationProps>;
+  let wrapper: WrapperComponent<PropsWithChildren<UseConversationProps>>;
 
   beforeEach(() => {
     jest.clearAllMocks();

@@ -57,12 +57,9 @@ const CorrelationIdField: React.FunctionComponent<
     <EuiFormRow
       fullWidth
       label={i18n.CORRELATION_ID}
-      error={errors['subActionParams.incident.correlation_id']}
+      error={errors['subActionParams.incident.correlation_id'] as string}
       isInvalid={
-        errors['subActionParams.incident.correlation_id'] !== undefined &&
-        errors['subActionParams.incident.correlation_id'].length > 0 &&
-        !correlationId &&
-        isRequired
+        !!errors['subActionParams.incident.correlation_id'].length && !correlationId && isRequired
       }
       helpText={
         <EuiLink href={docLinks.links.alerting.serviceNowAction} target="_blank">
@@ -410,10 +407,9 @@ const ServiceNowParamsFields: React.FunctionComponent<
             <EuiFlexItem>
               <EuiFormRow
                 fullWidth
-                error={errors['subActionParams.incident.short_description']}
+                error={errors['subActionParams.incident.short_description'] as string}
                 isInvalid={
-                  errors['subActionParams.incident.short_description'] !== undefined &&
-                  errors['subActionParams.incident.short_description'].length > 0 &&
+                  !!errors['subActionParams.incident.short_description'].length &&
                   incident.short_description !== undefined
                 }
                 label={i18n.SHORT_DESCRIPTION_LABEL}

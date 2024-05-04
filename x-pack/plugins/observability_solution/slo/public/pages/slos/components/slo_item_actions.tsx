@@ -168,6 +168,7 @@ export function SloItemActions({
     >
       <EuiContextMenuPanel
         size="m"
+        // @ts-expect-error
         items={[
           <EuiContextMenuItem
             key="view"

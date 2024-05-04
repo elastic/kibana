@@ -7,7 +7,7 @@
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { mount, ReactWrapper } from 'enzyme';
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import { act as reactAct } from 'react-dom/test-utils';
 /**
  * A wrapper object to provide access to the state of a hook under test and to
@@ -40,7 +40,7 @@ interface ReactHookWrapper<Args, HookValue> {
  */
 export const mountHook = <Args extends {}, HookValue extends any>(
   body: (args: Args) => HookValue,
-  WrapperComponent?: React.ComponentType,
+  WrapperComponent?: React.ComponentType<PropsWithChildren>,
   initialArgs: Args = {} as Args
 ): ReactHookWrapper<Args, HookValue> => {
   const hookValueCallback = jest.fn();

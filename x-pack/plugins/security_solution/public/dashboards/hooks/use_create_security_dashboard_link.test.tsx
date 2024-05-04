@@ -10,6 +10,7 @@ import { useKibana } from '../../common/lib/kibana';
 import { useCreateSecurityDashboardLink } from './use_create_security_dashboard_link';
 import { DashboardContextProvider } from '../context/dashboard_context';
 import { getTagsByName } from '../../common/containers/tags/api';
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { TestProviders } from '../../common/mock';
 
@@ -27,7 +28,7 @@ jest.mock('../../common/components/link_to', () => ({
 
 const renderUseCreateSecurityDashboardLink = () =>
   renderHook(() => useCreateSecurityDashboardLink(), {
-    wrapper: ({ children }) => (
+    wrapper: ({ children }: PropsWithChildren) => (
       <TestProviders>
         <DashboardContextProvider>{children}</DashboardContextProvider>
       </TestProviders>

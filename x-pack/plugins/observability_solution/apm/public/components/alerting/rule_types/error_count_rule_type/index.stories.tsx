@@ -42,6 +42,7 @@ const stories: Meta<{}> = {
       createCallApmApi(coreMock);
 
       return (
+        // @ts-expect-error
         <IntlProvider locale="en">
           <KibanaReactContext.Provider>
             <div style={{ width: 400 }}>

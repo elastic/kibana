@@ -19,6 +19,7 @@ import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
 const mockTheme = getMockTheme({ eui: { euiFontSizeXS: '' } });
 const renderEventRenderer = (contextValue: RightPanelContext) =>
   render(
+    // @ts-expect-error
     <IntlProvider locale="en">
       <ThemeProvider theme={mockTheme}>
         <RightPanelContext.Provider value={contextValue}>

@@ -136,7 +136,7 @@ const ServiceNowITOMParamsFields: React.FunctionComponent<
             {i18n.REQUIRED_LABEL}
           </EuiText>
         }
-        error={errors.severity}
+        error={errors.severity as string}
         isInvalid={isFieldInvalid(severity, errors.severity)}
       >
         <EuiSelect

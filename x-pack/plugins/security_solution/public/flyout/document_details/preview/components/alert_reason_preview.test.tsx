@@ -26,6 +26,7 @@ const NO_DATA_MESSAGE = 'There was an error displaying data.';
 describe('<AlertReasonPreview />', () => {
   it('should render alert reason preview', () => {
     const { getByTestId } = render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <PreviewPanelContext.Provider value={panelContextValue}>
           <ThemeProvider theme={mockTheme}>
@@ -40,6 +41,7 @@ describe('<AlertReasonPreview />', () => {
 
   it('should render no data message if alert reason is not available', () => {
     const { getByText } = render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <PreviewPanelContext.Provider value={{} as unknown as PreviewPanelContext}>
           <ThemeProvider theme={mockTheme}>

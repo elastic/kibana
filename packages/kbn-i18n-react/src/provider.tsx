@@ -21,6 +21,7 @@ import { PseudoLocaleWrapper } from './pseudo_locale_wrapper';
  */
 
 export const I18nProvider: FC<PropsWithChildren<unknown>> = ({ children }) => (
+  // @ts-expect-error
   <IntlProvider
     locale={i18n.getLocale()}
     messages={i18n.getTranslation().messages}

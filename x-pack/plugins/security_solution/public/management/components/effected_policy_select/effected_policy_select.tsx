@@ -199,14 +199,17 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
       [onChange, selected]
     );
 
-    const listBuilderCallback: EuiSelectableProps['children'] = useCallback((list, search) => {
-      return (
-        <>
-          {search}
-          {list}
-        </>
-      );
-    }, []);
+    const listBuilderCallback: NonNullable<EuiSelectableProps['children']> = useCallback(
+      (list, search) => {
+        return (
+          <>
+            {search}
+            {list}
+          </>
+        );
+      },
+      []
+    );
 
     return (
       <EffectivePolicyFormContainer>

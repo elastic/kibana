@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
@@ -37,7 +38,7 @@ describe('useCasesFeatures', () => {
   it.each(tests)(
     'returns isAlertsEnabled=%s and isSyncAlertsEnabled=%s if feature.alerts=%s',
     async (isAlertsEnabled, isSyncAlertsEnabled, alerts) => {
-      const { result } = renderHook<{}, UseCasesFeatures>(() => useCasesFeatures(), {
+      const { result } = renderHook<PropsWithChildren, UseCasesFeatures>(() => useCasesFeatures(), {
         wrapper: ({ children }) => <TestProviders features={{ alerts }}>{children}</TestProviders>,
       });
 
@@ -52,7 +53,7 @@ describe('useCasesFeatures', () => {
   );
 
   it('returns the metrics correctly', async () => {
-    const { result } = renderHook<{}, UseCasesFeatures>(() => useCasesFeatures(), {
+    const { result } = renderHook<PropsWithChildren, UseCasesFeatures>(() => useCasesFeatures(), {
       wrapper: ({ children }) => (
         <TestProviders features={{ metrics: [CaseMetricsFeature.CONNECTORS] }}>
           {children}
@@ -83,7 +84,7 @@ describe('useCasesFeatures', () => {
         license: { type },
       });
 
-      const { result } = renderHook<{}, UseCasesFeatures>(() => useCasesFeatures(), {
+      const { result } = renderHook<PropsWithChildren, UseCasesFeatures>(() => useCasesFeatures(), {
         wrapper: ({ children }) => <TestProviders license={license}>{children}</TestProviders>,
       });
 

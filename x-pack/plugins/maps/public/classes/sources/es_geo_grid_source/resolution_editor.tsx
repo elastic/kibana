@@ -94,7 +94,7 @@ export class ResolutionEditor extends Component<Props, State> {
     return resolution ? (resolution as GRID_RESOLUTION) : GRID_RESOLUTION.COARSE;
   }
 
-  _onResolutionChange: EuiRangeProps['onChange'] = (event) => {
+  _onResolutionChange: NonNullable<EuiRangeProps['onChange']> = (event) => {
     const resolution = this._sliderValueToResolution(parseInt(event.currentTarget.value, 10));
     if (isMvt(this.props.renderAs, resolution)) {
       const hasUnsupportedMetrics = this.props.metrics.find(isUnsupportedVectorTileMetric);

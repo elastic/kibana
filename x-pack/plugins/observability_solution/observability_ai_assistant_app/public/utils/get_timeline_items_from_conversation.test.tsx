@@ -19,6 +19,7 @@ let items: ReturnType<typeof getTimelineItemsfromConversation>;
 
 function Providers({ children }: { children: React.ReactElement }) {
   return (
+    // @ts-expect-error
     <IntlProvider locale="en" messages={{}}>
       <KibanaContextProvider
         services={{
@@ -330,6 +331,7 @@ describe('getTimelineItemsFromConversation', () => {
     it('returns a title that reflects a failure to execute the function', () => {
       const { container } = render(items[3].title as React.ReactElement, {
         wrapper: ({ children }) => (
+          // @ts-expect-error
           <IntlProvider locale="en" messages={{}}>
             {children}
           </IntlProvider>

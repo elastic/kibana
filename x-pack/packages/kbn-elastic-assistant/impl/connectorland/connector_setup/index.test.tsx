@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import { useConnectorSetup } from '.';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { fireEvent, render } from '@testing-library/react';
@@ -57,7 +57,7 @@ describe('useConnectorSetup', () => {
   it('should render comments and prompts', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useConnectorSetup(defaultProps), {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        wrapper: ({ children }: PropsWithChildren) => <TestProviders>{children}</TestProviders>,
       });
       await waitForNextUpdate();
       expect(
@@ -79,7 +79,7 @@ describe('useConnectorSetup', () => {
   it('should set api config for each conversation when new connector is saved', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useConnectorSetup(defaultProps), {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        wrapper: ({ children }: PropsWithChildren) => <TestProviders>{children}</TestProviders>,
       });
       await waitForNextUpdate();
       const { getByTestId, queryByTestId, rerender } = render(result.current.prompt, {
@@ -115,7 +115,7 @@ describe('useConnectorSetup', () => {
             },
           }),
         {
-          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+          wrapper: ({ children }: PropsWithChildren) => <TestProviders>{children}</TestProviders>,
         }
       );
       await waitForNextUpdate();
@@ -129,7 +129,7 @@ describe('useConnectorSetup', () => {
   it('should call onSetupComplete and setConversations when onHandleMessageStreamingComplete', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useConnectorSetup(defaultProps), {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        wrapper: ({ children }: PropsWithChildren) => <TestProviders>{children}</TestProviders>,
       });
       await waitForNextUpdate();
       render(<EuiCommentList comments={result.current.comments} />, {

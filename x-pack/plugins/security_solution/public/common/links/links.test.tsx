@@ -23,6 +23,7 @@ import {
 import { createCapabilities } from './test_utils';
 import { hasCapabilities } from '../lib/capabilities';
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
@@ -86,7 +87,7 @@ const mockUiSettingsClient = uiSettingsServiceMock.createStartContract();
 const renderUseAppLinks = () =>
   renderHook<{}, AppLinkItems>(() => useAppLinks(), { wrapper: TestProviders });
 const renderUseLinkExists = (id: SecurityPageName) =>
-  renderHook<SecurityPageName, boolean>(() => useLinkExists(id), {
+  renderHook<PropsWithChildren<SecurityPageName>, boolean>(() => useLinkExists(id), {
     wrapper: TestProviders,
   });
 

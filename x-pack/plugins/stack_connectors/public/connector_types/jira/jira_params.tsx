@@ -193,10 +193,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
   }, [actionParams]);
 
   const areLabelsInvalid =
-    errors['subActionParams.incident.labels'] != null &&
-    errors['subActionParams.incident.labels'] !== undefined &&
-    errors['subActionParams.incident.labels'].length > 0 &&
-    incident.labels !== undefined;
+    !!errors['subActionParams.incident.labels']?.length && incident.labels !== undefined;
 
   return (
     <>
@@ -279,11 +276,9 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
         <EuiFormRow
           data-test-subj="summary-row"
           fullWidth
-          error={errors['subActionParams.incident.summary']}
+          error={errors['subActionParams.incident.summary'] as string}
           isInvalid={
-            errors['subActionParams.incident.summary'] !== undefined &&
-            errors['subActionParams.incident.summary'].length > 0 &&
-            incident.summary !== undefined
+            !!errors['subActionParams.incident.summary']?.length && incident.summary !== undefined
           }
           label={i18n.translate('xpack.stackConnectors.components.jira.summaryFieldLabel', {
             defaultMessage: 'Summary',
@@ -385,11 +380,8 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
         />
         <EuiFormRow
           fullWidth
-          error={errors['subActionParams.incident.otherFields']}
-          isInvalid={
-            errors['subActionParams.incident.otherFields'] !== undefined &&
-            errors['subActionParams.incident.otherFields'].length > 0
-          }
+          error={errors['subActionParams.incident.otherFields'] as string}
+          isInvalid={!!errors['subActionParams.incident.otherFields']?.length}
         >
           <JsonEditorWithMessageVariables
             messageVariables={messageVariables}

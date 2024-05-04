@@ -35,7 +35,7 @@ function usePrevious(alert: Alert) {
   return ref.current;
 }
 
-interface AlertsFlyoutProps {
+export interface AlertsFlyoutProps {
   alert: Alert;
   alertsTableConfiguration: AlertsTableConfigurationRegistry;
   flyoutIndex: number;

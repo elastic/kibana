@@ -32,7 +32,7 @@ export const DefaultToDataNodesNotice: FunctionComponent<{ phase: PhaseWithAlloc
         )}
       </p>
 
-      {nodeAllocationMigrationGuidance}
+      <>{nodeAllocationMigrationGuidance}</>
     </EuiCallOut>
   );
 };

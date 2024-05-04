@@ -92,7 +92,7 @@ export const Threshold: React.FC<Props> = ({ comparator, value, updateThreshold,
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFormRow isInvalid={errors.value.length > 0} error={errors.value}>
+                <EuiFormRow isInvalid={errors.value.length > 0} error={errors.value as string}>
                   <EuiFieldNumber
                     data-test-subj="infraThresholdFieldNumber"
                     compressed

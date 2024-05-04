@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 
 import { DataQualityProvider } from '../data_quality_panel/data_quality_context';
 import { mockIlmExplain } from '../mock/ilm_explain/mock_ilm_explain';
@@ -74,7 +74,7 @@ describe('useIlmExplain', () => {
 
     beforeEach(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useIlmExplain(pattern), {
-        wrapper: ({ children }) => (
+        wrapper: ({ children }: PropsWithChildren) => (
           <DataQualityProvider
             httpFetch={mockHttpFetch}
             telemetryEvents={mockTelemetryEvents}

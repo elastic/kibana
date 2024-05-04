@@ -173,7 +173,7 @@ describe('application-level user messages', () => {
                   management: { kibana: { indexPatterns: false } },
                 }),
                 ...irrelevantProps,
-              })[0].longMessage
+              })[0].longMessage as React.ReactNode
             }
           </div>
         ).exists(RedirectAppLinks)
@@ -195,7 +195,7 @@ describe('application-level user messages', () => {
                   management: { kibana: { indexPatterns: true } },
                 }),
                 ...irrelevantProps,
-              })[0].longMessage
+              })[0].longMessage as React.ReactNode
             }
           </div>
         ).exists(RedirectAppLinks)

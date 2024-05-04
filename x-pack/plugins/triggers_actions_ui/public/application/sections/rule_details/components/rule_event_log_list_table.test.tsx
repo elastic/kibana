@@ -41,6 +41,7 @@ const { useLoadRuleEventLogs } = jest.requireMock('../../../hooks/use_load_rule_
 
 const RuleEventLogListWithProvider = (props: RuleEventLogListTableProps<'stackManagement'>) => {
   return (
+    // @ts-expect-error
     <IntlProvider locale="en">
       <RuleEventLogListTable {...props} />
     </IntlProvider>

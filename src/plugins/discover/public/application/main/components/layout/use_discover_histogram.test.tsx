@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { ReactElement } from 'react';
+import React, { ReactElement, PropsWithChildren } from 'react';
 import { AggregateQuery, Query } from '@kbn/es-query';
 import { act, renderHook, WrapperComponent } from '@testing-library/react-hooks';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -105,17 +105,24 @@ describe('useDiscoverHistogram', () => {
     return stateContainer;
   };
 
-  const renderUseDiscoverHistogram = async ({
-    stateContainer = getStateContainer(),
-    inspectorAdapters = { requests: new RequestAdapter() },
-    hideChart = false,
-    isPlainRecord = false,
-  }: {
-    stateContainer?: DiscoverStateContainer;
-    inspectorAdapters?: InspectorAdapters;
-    hideChart?: boolean;
-    isPlainRecord?: boolean;
-  } = {}) => {
+  const renderUseDiscoverHistogram = async (
+    {
+      stateContainer = getStateContainer(),
+      inspectorAdapters = { requests: new RequestAdapter() },
+      hideChart = false,
+      isPlainRecord = false,
+    }: {
+      stateContainer?: DiscoverStateContainer;
+      inspectorAdapters?: InspectorAdapters;
+      hideChart?: boolean;
+      isPlainRecord?: boolean;
+    } = {
+      stateContainer: getStateContainer(),
+      inspectorAdapters: { requests: new RequestAdapter() },
+      hideChart: false,
+      isPlainRecord: false,
+    }
+  ) => {
     const initialProps = {
       stateContainer,
       inspectorAdapters,
@@ -123,12 +130,14 @@ describe('useDiscoverHistogram', () => {
       isPlainRecord,
     };
 
-    const Wrapper: WrapperComponent<UseDiscoverHistogramProps> = ({ children }) => (
+    const Wrapper: WrapperComponent<PropsWithChildren<UseDiscoverHistogramProps>> = ({
+      children,
+    }) => (
       <DiscoverMainProvider value={stateContainer}>{children as ReactElement}</DiscoverMainProvider>
     );
 
     const hook = renderHook(
-      (props: UseDiscoverHistogramProps) => {
+      (props: PropsWithChildren<UseDiscoverHistogramProps>) => {
         return useDiscoverHistogram(props);
       },
       {

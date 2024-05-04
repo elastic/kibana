@@ -7,7 +7,11 @@
 
 import type { ElementRef } from 'react';
 import React, { memo, forwardRef, useCallback, useRef, useState, useImperativeHandle } from 'react';
-import type { EuiMarkdownEditorProps, EuiMarkdownAstNode } from '@elastic/eui';
+import type {
+  EuiMarkdownEditorProps,
+  EuiMarkdownAstNode,
+  EuiMarkdownParseError,
+} from '@elastic/eui';
 import { EuiMarkdownEditor } from '@elastic/eui';
 import type { ContextShape } from '@elastic/eui/src/components/markdown_editor/markdown_context';
 import { usePlugins } from './use_plugins';
@@ -34,11 +38,14 @@ export interface MarkdownEditorRef {
 const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProps>(
   ({ ariaLabel, dataTestSubj, editorId, height, onChange, value, disabledUiPlugins }, ref) => {
     const astRef = useRef<EuiMarkdownAstNode | undefined>(undefined);
-    const [markdownErrorMessages, setMarkdownErrorMessages] = useState([]);
-    const onParse: EuiMarkdownEditorProps['onParse'] = useCallback((err, { messages, ast }) => {
-      setMarkdownErrorMessages(err ? [err] : messages);
-      astRef.current = ast;
-    }, []);
+    const [markdownErrorMessages, setMarkdownErrorMessages] = useState<EuiMarkdownParseError[]>([]);
+    const onParse: NonNullable<EuiMarkdownEditorProps['onParse']> = useCallback(
+      (err, { messages, ast }) => {
+        setMarkdownErrorMessages(err ? [err] : messages);
+        astRef.current = ast;
+      },
+      []
+    );
 
     const { parsingPlugins, processingPlugins, uiPlugins } = usePlugins(disabledUiPlugins);
     const editorRef = useRef<EuiMarkdownEditorRef>(null);

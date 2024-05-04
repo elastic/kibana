@@ -33,7 +33,9 @@ export const WorkpadRoute = () => {
     <Route
       path={['/workpad/:id/page/:pageNumber', '/workpad/:id']}
       exact={false}
-      children={(route: WorkpadRouteProps) => {
+      // @ts-expect-error
+      children={(route: WorkpadRouteProps | null) => {
+        // @ts-expect-error
         return <WorkpadRouteComponent route={route} />;
       }}
     />
@@ -82,7 +84,8 @@ export const ExportWorkpadRoute = () => {
   return (
     <Route
       path={'/export/workpad/pdf/:id/page/:pageNumber'}
-      children={(route: WorkpadRouteProps) => {
+      children={(route) => {
+        // @ts-expect-error
         return <ExportWorkpadRouteComponent route={route} />;
       }}
     />

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { render, act } from '@testing-library/react';
 import type { Store } from 'redux';
@@ -45,7 +46,10 @@ const runAllPromises = () => new Promise(setImmediate);
 const renderUseFieldBrowserOptions = (
   props: Partial<UseFieldBrowserOptionsProps & { store?: Store }> = {}
 ) =>
-  renderHook<UseFieldBrowserOptionsProps & { store?: Store }, ReturnType<UseFieldBrowserOptions>>(
+  renderHook<
+    UseFieldBrowserOptionsProps & PropsWithChildren<{ store?: Store }>,
+    ReturnType<UseFieldBrowserOptions>
+  >(
     () =>
       useFieldBrowserOptions({
         sourcererScope: SourcererScopeName.default,

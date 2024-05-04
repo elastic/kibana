@@ -27,7 +27,9 @@ export const useAssistantTelemetry = (): AssistantTelemetry => {
 
   const reportTelemetry = useCallback(
     async ({
+      // @ts-expect-error
       fn,
+      // @ts-expect-error
       params: { conversationId, ...rest },
     }): Promise<{
       fn: keyof AssistantTelemetry;

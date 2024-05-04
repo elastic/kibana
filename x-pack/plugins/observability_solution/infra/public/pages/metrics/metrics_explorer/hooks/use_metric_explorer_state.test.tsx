@@ -32,6 +32,7 @@ jest.mock('../../../../alerting/use_alert_prefill', () => ({
 const renderUseMetricsExplorerStateHook = () =>
   renderHook((props) => useMetricsExplorerState(props.source, props.derivedIndexPattern), {
     initialProps: { source, derivedIndexPattern },
+    // @ts-expect-error
     wrapper: ({ children }) => (
       <MetricsExplorerOptionsContainer>{children}</MetricsExplorerOptionsContainer>
     ),

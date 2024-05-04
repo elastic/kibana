@@ -23,6 +23,7 @@ import { isFinite, isNumber } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import type { ResolvedLogViewField } from '@kbn/logs-shared-plugin/common';
+import { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   Comparator,
   ComparatorToi18nMap,
@@ -132,7 +133,7 @@ export const Criterion: React.FC<Props> = ({
   }, [fieldInfo]);
 
   const handleFieldChange = useCallback(
-    ([selectedOption]) => {
+    ([selectedOption]: EuiComboBoxOptionOption[]) => {
       if (!selectedOption) {
         updateCriterion(idx, { field: '' });
         return;
@@ -196,8 +197,8 @@ export const Criterion: React.FC<Props> = ({
                 <EuiPopoverTitle>{criterionFieldTitle}</EuiPopoverTitle>
                 <EuiFormRow
                   style={{ minWidth: '300px' }}
-                  isInvalid={errors.field.length > 0}
-                  error={errors.field}
+                  isInvalid={!!errors.field.length}
+                  error={errors.field as string}
                 >
                   <EuiComboBox
                     compressed
@@ -249,7 +250,10 @@ export const Criterion: React.FC<Props> = ({
                 <EuiPopoverTitle>{criterionComparatorValueTitle}</EuiPopoverTitle>
                 <EuiFlexGroup gutterSize="l">
                   <EuiFlexItem grow={false}>
-                    <EuiFormRow isInvalid={errors.comparator.length > 0} error={errors.comparator}>
+                    <EuiFormRow
+                      isInvalid={errors.comparator.length > 0}
+                      error={errors.comparator as string}
+                    >
                       <EuiSelect
                         data-test-subj="infraCriterionSelect"
                         compressed
@@ -263,7 +267,7 @@ export const Criterion: React.FC<Props> = ({
                     </EuiFormRow>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiFormRow isInvalid={errors.value.length > 0} error={errors.value}>
+                    <EuiFormRow isInvalid={errors.value.length > 0} error={errors.value as string}>
                       {fieldInfo?.type === 'number' ? (
                         <EuiFieldNumber
                           data-test-subj="infraCriterionFieldNumber"

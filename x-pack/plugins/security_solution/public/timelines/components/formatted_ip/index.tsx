@@ -184,7 +184,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
   const isInTimelineContext =
     address && eventContext?.enableIpDetailsFlyout && eventContext?.timelineID;
 
-  const openNetworkDetailsSidePanel: NetworkDetailsLinkProps['onClick'] = useCallback(
+  const openNetworkDetailsSidePanel: NonNullable<NetworkDetailsLinkProps['onClick']> = useCallback(
     (e) => {
       e.preventDefault();
       if (onClick) {

@@ -31,7 +31,10 @@ jest.mock('../../hooks/use_kibana', () => ({
 const Wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
   return (
     <>
-      <IntlProvider locale="en">{children}</IntlProvider>
+      {
+        // @ts-expect-error
+        <IntlProvider locale="en">{children}</IntlProvider>
+      }
     </>
   );
 };

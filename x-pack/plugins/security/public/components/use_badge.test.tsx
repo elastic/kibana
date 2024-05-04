@@ -6,6 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
@@ -21,7 +22,7 @@ describe('useBadge', () => {
       text: 'text',
       tooltip: 'text',
     };
-    renderHook(useBadge, {
+    renderHook<PropsWithChildren<ChromeBadge>, void>(useBadge, {
       initialProps: badge,
       wrapper: ({ children }) => (
         <KibanaContextProvider services={coreStart}>{children}</KibanaContextProvider>
@@ -37,7 +38,7 @@ describe('useBadge', () => {
       text: 'text',
       tooltip: 'text',
     };
-    const { unmount } = renderHook(useBadge, {
+    const { unmount } = renderHook<PropsWithChildren<ChromeBadge>, void>(useBadge, {
       initialProps: badge,
       wrapper: ({ children }) => (
         <KibanaContextProvider services={coreStart}>{children}</KibanaContextProvider>
@@ -57,7 +58,7 @@ describe('useBadge', () => {
       text: 'text',
       tooltip: 'text',
     };
-    const { rerender } = renderHook(useBadge, {
+    const { rerender } = renderHook<PropsWithChildren<ChromeBadge>, void>(useBadge, {
       initialProps: badge1,
       wrapper: ({ children }) => (
         <KibanaContextProvider services={coreStart}>{children}</KibanaContextProvider>

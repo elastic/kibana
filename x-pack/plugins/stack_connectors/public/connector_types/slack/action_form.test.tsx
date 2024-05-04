@@ -179,6 +179,7 @@ describe('ActionForm - Slack API Connector', () => {
     };
 
     render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <QueryClientProvider client={queryClient}>
           <ActionForm {...testProps} />

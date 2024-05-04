@@ -49,6 +49,7 @@ describe('useGrouping', () => {
       await waitForNextUpdate();
       await waitForNextUpdate();
       const { getByTestId, queryByTestId } = render(
+        // @ts-expect-error
         <IntlProvider locale="en">
           {result.current.getGrouping({
             ...groupingArgs,
@@ -100,6 +101,7 @@ describe('useGrouping', () => {
       await waitForNextUpdate();
       await waitForNextUpdate();
       const { getByTestId } = render(
+        // @ts-expect-error
         <IntlProvider locale="en">
           {result.current.getGrouping({
             ...groupingArgs,

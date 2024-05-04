@@ -73,6 +73,7 @@ describe('Connector rules list', () => {
 
   it('renders correctly', async () => {
     render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <QueryClientProvider client={queryClient}>
           <ConnectorRulesList
@@ -96,6 +97,7 @@ describe('Connector rules list', () => {
 
   it('should allow for sorting by name', async () => {
     render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <QueryClientProvider client={queryClient}>
           <ConnectorRulesList
@@ -132,6 +134,7 @@ describe('Connector rules list', () => {
 
   it('should allow for searching by text', async () => {
     render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <QueryClientProvider client={queryClient}>
           <ConnectorRulesList
@@ -162,6 +165,7 @@ describe('Connector rules list', () => {
 
   it('should find preconfigured rules correctly', async () => {
     render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <QueryClientProvider client={queryClient}>
           <ConnectorRulesList
@@ -193,6 +197,7 @@ describe('Connector rules list', () => {
 
   it('should find system actions rules correctly', async () => {
     render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <QueryClientProvider client={queryClient}>
           <ConnectorRulesList

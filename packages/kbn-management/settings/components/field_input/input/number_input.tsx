@@ -58,7 +58,7 @@ export const NumberInput = ({
     return debounce(updateValue, 500);
   }, [updateValue]);
 
-  const onChange: EuiFieldNumberProps['onChange'] = async (event) => {
+  const onChange: NonNullable<EuiFieldNumberProps['onChange']> = async (event) => {
     const newValue = Number(event.target.value);
     setValue(newValue);
     await debouncedUpdateValue(newValue, onUpdate);

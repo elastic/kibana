@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../../common/mock';
 import { ALERTS_QUERY_NAMES } from '../../../containers/detection_engine/alerts/constants';
@@ -97,7 +98,7 @@ describe('getAlertsQuery', () => {
 
 // helper function to render the hook
 const renderUseSummaryChartData = (props: Partial<UseAlertsQueryProps> = {}) =>
-  renderHook<UseAlertsQueryProps, ReturnType<UseAlerts>>(
+  renderHook<PropsWithChildren<UseAlertsQueryProps>, ReturnType<UseAlerts>>(
     () =>
       useSummaryChartData({
         aggregations: aggregations.severityAggregations,

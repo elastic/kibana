@@ -11,6 +11,7 @@ import { useInsightQuery } from './use_insight_query';
 import { TestProviders } from '../../../../mock';
 import type { UseInsightQuery, UseInsightQueryResult } from './use_insight_query';
 import { IS_OPERATOR } from '../../../../../timelines/components/timeline/data_providers/data_provider';
+import type { PropsWithChildren } from 'react';
 
 const mockProvider = {
   and: [],
@@ -29,7 +30,7 @@ const mockProvider = {
 
 describe('useInsightQuery', () => {
   it('should return renderable defaults', () => {
-    const { result } = renderHook<UseInsightQuery, UseInsightQueryResult>(
+    const { result } = renderHook<PropsWithChildren<UseInsightQuery>, UseInsightQueryResult>(
       () =>
         useInsightQuery({
           dataProviders: [mockProvider],

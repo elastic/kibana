@@ -17,6 +17,7 @@ describe('group by expression', () => {
     const onChangeSelectedGroupBy = jest.fn();
     const onChangeSelectedTermSize = jest.fn();
     render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <GroupByExpression
           errors={{ termSize: [], termField: [] }}
@@ -39,6 +40,7 @@ describe('group by expression', () => {
   it('clears selected agg field if fields does not contain current selection', async () => {
     const onChangeSelectedTermField = jest.fn();
     render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <GroupByExpression
           errors={{ termSize: [], termField: [] }}
@@ -66,6 +68,7 @@ describe('group by expression', () => {
   it('clears selected agg field if there is unknown field', async () => {
     const onChangeSelectedTermField = jest.fn();
     render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <GroupByExpression
           errors={{ termSize: [], termField: [] }}
@@ -93,6 +96,7 @@ describe('group by expression', () => {
   it('clears selected agg field if groupBy field is all', async () => {
     const onChangeSelectedTermField = jest.fn();
     render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <GroupByExpression
           errors={{ termSize: [], termField: [] }}
@@ -121,6 +125,7 @@ describe('group by expression', () => {
   it('calls onChangeSelectedTermField when a termField is selected', async () => {
     const onChangeSelectedTermField = jest.fn();
     render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <GroupByExpression
           errors={{ termSize: [], termField: [] }}
@@ -171,6 +176,7 @@ describe('group by expression', () => {
   it('calls onChangeSelectedTermField when multiple termFields are selected', async () => {
     const onChangeSelectedTermField = jest.fn();
     render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <GroupByExpression
           errors={{ termSize: [], termField: [] }}
@@ -222,6 +228,7 @@ describe('group by expression', () => {
   it('do NOT clears selected agg field if fields is undefined', async () => {
     const onChangeSelectedTermField = jest.fn();
     render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <GroupByExpression
           errors={{ termSize: [], termField: [] }}

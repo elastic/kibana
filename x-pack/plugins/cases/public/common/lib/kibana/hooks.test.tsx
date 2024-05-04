@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 
@@ -14,12 +15,12 @@ import { allCasesPermissions, TestProviders } from '../../mock';
 describe('hooks', () => {
   describe('useApplicationCapabilities', () => {
     it('should return the correct capabilities', async () => {
-      const { result } = renderHook<{}, ReturnType<typeof useApplicationCapabilities>>(
-        () => useApplicationCapabilities(),
-        {
-          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-        }
-      );
+      const { result } = renderHook<
+        PropsWithChildren,
+        ReturnType<typeof useApplicationCapabilities>
+      >(() => useApplicationCapabilities(), {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      });
 
       expect(result.current).toEqual({
         actions: { crud: true, read: true },

@@ -6,6 +6,7 @@
  */
 
 import { render } from '@testing-library/react';
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 import type { UseCreateFieldButton, UseCreateFieldButtonProps } from '.';
 import { useCreateFieldButton } from '.';
@@ -17,7 +18,7 @@ const mockOpenFieldEditor = jest.fn();
 const mockOnHide = jest.fn();
 
 const renderUseCreateFieldButton = (props: Partial<UseCreateFieldButtonProps> = {}) =>
-  renderHook<UseCreateFieldButtonProps, ReturnType<UseCreateFieldButton>>(
+  renderHook<PropsWithChildren<UseCreateFieldButtonProps>, ReturnType<UseCreateFieldButton>>(
     () =>
       useCreateFieldButton({
         isAllowed: true,

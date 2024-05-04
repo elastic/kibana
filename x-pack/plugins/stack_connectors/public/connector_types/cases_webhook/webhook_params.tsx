@@ -107,11 +107,9 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<CasesWebhoo
       <EuiFormRow
         data-test-subj="title-row"
         fullWidth
-        error={errors['subActionParams.incident.title']}
+        error={errors['subActionParams.incident.title'] as string}
         isInvalid={
-          errors['subActionParams.incident.title'] !== undefined &&
-          errors['subActionParams.incident.title'].length > 0 &&
-          incident.title !== undefined
+          !!errors['subActionParams.incident.title']?.length && incident.title !== undefined
         }
         label={i18n.translate('xpack.stackConnectors.components.casesWebhook.titleFieldLabel', {
           defaultMessage: 'Summary',
@@ -204,12 +202,8 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<CasesWebhoo
       <EuiFormRow
         data-test-subj="id-row"
         fullWidth
-        error={errors['subActionParams.incident.id']}
-        isInvalid={
-          errors['subActionParams.incident.id'] !== undefined &&
-          errors['subActionParams.incident.id'].length > 0 &&
-          incident.id !== undefined
-        }
+        error={errors['subActionParams.incident.id'] as string}
+        isInvalid={!!errors['subActionParams.incident.id']?.length && incident.id !== undefined}
         label={i18n.translate('xpack.stackConnectors.components.casesWebhook.idFieldLabel', {
           defaultMessage: 'Case ID',
         })}

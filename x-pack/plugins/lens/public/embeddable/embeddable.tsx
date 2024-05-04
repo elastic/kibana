@@ -260,7 +260,7 @@ function VisualizationErrorPanel({ errors, canEdit }: { errors: UserMessage[]; c
           <>
             {errors.length ? (
               <>
-                <p>{errors[0].longMessage}</p>
+                <p>{errors[0].longMessage as React.ReactNode}</p>
                 {showMore && !canFixInLens ? (
                   <p>
                     <FormattedMessage

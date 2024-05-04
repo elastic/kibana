@@ -32,7 +32,7 @@ export const MultiButtonGroupField = ({ field, euiFieldProps, idAria, ...rest }:
   return (
     <EuiFormRow
       label={field.label}
-      helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
+      helpText={field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}
       fullWidth

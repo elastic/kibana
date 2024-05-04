@@ -82,7 +82,7 @@ const NotesTab = tabWithSuspense(lazy(() => import('./notes')));
 const PinnedTab = tabWithSuspense(lazy(() => import('./pinned')));
 const SessionTab = tabWithSuspense(lazy(() => import('./session')));
 const EsqlTab = tabWithSuspense(lazy(() => import('./esql')));
-interface BasicTimelineTab {
+export interface BasicTimelineTab {
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
   timelineFullScreen?: boolean;

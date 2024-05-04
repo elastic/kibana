@@ -28,7 +28,7 @@ export const TextInput = ({
   isSavingEnabled,
   onInputChange,
 }: TextInputProps) => {
-  const onChange: EuiFieldTextProps['onChange'] = (event) => {
+  const onChange: NonNullable<EuiFieldTextProps['onChange']> = (event) => {
     const inputValue = event.target.value;
     onUpdate({ type: field.type, unsavedValue: inputValue });
   };

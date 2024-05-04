@@ -107,7 +107,9 @@ export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
         data-test-subj="errorCallout"
       >
         <p>
-          {error.statusCode} - {error.message}
+          <>
+            {error.statusCode} - {error.message}
+          </>
         </p>
         <EuiButton color="danger" onClick={resendRequest} data-test-subj="retryButton">
           {i18nTexts.retryButton}

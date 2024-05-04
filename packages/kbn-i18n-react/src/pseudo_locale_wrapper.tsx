@@ -40,14 +40,14 @@ function translateFormattedMessageUsingPseudoLocale(message: string) {
  * be inefficient in some cases, and can cause React hooks to lose
  * their state.
  */
-export class PseudoLocaleWrapper extends React.PureComponent {
+export class PseudoLocaleWrapper extends React.PureComponent<React.PropsWithChildren> {
   public static propTypes = { children: PropTypes.element.isRequired };
 
   public static contextTypes = {
     intl: PropTypes.object.isRequired,
   };
 
-  constructor(props: { children: React.ReactNode }, context: any) {
+  constructor(props: { children: React.PropsWithChildren<React.ReactNode> }, context: any) {
     super(props, context);
 
     if (i18n.isPseudoLocale(i18n.getLocale())) {

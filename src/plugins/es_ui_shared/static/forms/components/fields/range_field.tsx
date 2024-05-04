@@ -22,9 +22,10 @@ export const RangeField = ({ field, euiFieldProps = {}, idAria, ...rest }: Props
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const { onChange: onFieldChange } = field;
 
-  const onChange: EuiRangeProps['onChange'] = useCallback(
+  const onChange: NonNullable<EuiRangeProps['onChange']> = useCallback(
     (e) => {
       const event = { ...e, value: `${e.currentTarget.value}` };
+      // @ts-expect-error
       onFieldChange(event);
     },
     [onFieldChange]
@@ -33,7 +34,7 @@ export const RangeField = ({ field, euiFieldProps = {}, idAria, ...rest }: Props
   return (
     <EuiFormRow
       label={field.label}
-      helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
+      helpText={field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}
       fullWidth

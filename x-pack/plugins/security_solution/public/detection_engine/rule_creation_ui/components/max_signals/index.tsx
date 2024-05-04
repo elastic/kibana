@@ -47,7 +47,7 @@ export const MaxSignals: React.FC<MaxSignalsFieldProps> = ({
     [maxAlertsPerRun, value]
   );
 
-  const handleMaxSignalsChange: EuiFieldNumberProps['onChange'] = useCallback(
+  const handleMaxSignalsChange: NonNullable<EuiFieldNumberProps['onChange']> = useCallback(
     (e) => {
       const maxSignalsValue = (e.target as HTMLInputElement).value;
       // Has to handle an empty string as the field is optional

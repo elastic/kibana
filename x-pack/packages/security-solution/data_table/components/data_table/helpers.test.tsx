@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { ColumnHeaderOptions } from '../../common/types';
 import {
   hasCellActions,
@@ -64,21 +65,7 @@ describe('helpers', () => {
           },
         },
         defaultSortDirection: 'desc',
-        display: {
-          key: null,
-          ref: null,
-          props: {
-            children: {
-              key: null,
-              ref: null,
-              props: {
-                children: 'Status',
-              },
-              _owner: null,
-            },
-          },
-          _owner: null,
-        },
+        display: <>{'Status'}</>,
         isSortable: true,
       },
       {
@@ -99,21 +86,7 @@ describe('helpers', () => {
           },
         },
         defaultSortDirection: 'desc',
-        display: {
-          key: null,
-          ref: null,
-          props: {
-            children: {
-              key: null,
-              ref: null,
-              props: {
-                children: 'Triggered',
-              },
-              _owner: null,
-            },
-          },
-          _owner: null,
-        },
+        display: <>{'Triggered'}</>,
         isSortable: true,
       },
     ];

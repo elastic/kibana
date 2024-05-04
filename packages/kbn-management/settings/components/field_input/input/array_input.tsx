@@ -65,7 +65,7 @@ export const ArrayInput = ({
     return debounce(updateValue, 1000);
   }, [updateValue]);
 
-  const onChange: EuiFieldTextProps['onChange'] = async (event) => {
+  const onChange: NonNullable<EuiFieldTextProps['onChange']> = async (event) => {
     const newValue = event.target.value;
     setValue(newValue);
     await debouncedUpdateValue(newValue, onUpdate);

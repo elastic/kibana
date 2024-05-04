@@ -158,8 +158,8 @@ export const IndexSelectPopover: React.FunctionComponent<Props> = ({
               defaultMessage="Indices to query"
             />
           }
-          isInvalid={errors.index.length > 0 && index != null && index.length > 0}
-          error={errors.index}
+          isInvalid={!!errors.index.length && index != null && !!index.length}
+          error={errors.index as string}
           helpText={
             <FormattedMessage
               id="xpack.stackAlerts.components.ui.alertParams.howToBroadenSearchQueryDescription"
@@ -171,7 +171,7 @@ export const IndexSelectPopover: React.FunctionComponent<Props> = ({
             fullWidth
             async
             isLoading={areIndicesLoading}
-            isInvalid={errors.index.length > 0 && index != null && index.length > 0}
+            isInvalid={!!errors.index.length && index != null && !!index.length}
             noSuggestions={!indexOptions.length}
             options={indexOptions}
             data-test-subj="thresholdIndexesComboBox"
@@ -213,12 +213,12 @@ export const IndexSelectPopover: React.FunctionComponent<Props> = ({
               defaultMessage="Time field"
             />
           }
-          isInvalid={errors.timeField.length > 0 && timeField !== undefined}
-          error={errors.timeField}
+          isInvalid={!!errors.timeField.length && timeField !== undefined}
+          error={errors.timeField as string}
         >
           <EuiSelect
             options={timeFieldOptions}
-            isInvalid={errors.timeField.length > 0 && timeField !== undefined}
+            isInvalid={!!errors.timeField.length && timeField !== undefined}
             fullWidth
             name="thresholdTimeField"
             data-test-subj="thresholdAlertTimeFieldSelect"

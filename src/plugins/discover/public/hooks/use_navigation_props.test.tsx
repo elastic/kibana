@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { MouseEvent } from 'react';
+import React, { MouseEvent, PropsWithChildren } from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { useNavigationProps } from './use_navigation_props';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -57,7 +57,7 @@ const render = async () => {
         columns: ['mock-column'],
       }),
     {
-      wrapper: ({ children }) => (
+      wrapper: ({ children }: PropsWithChildren) => (
         <MemoryRouter initialEntries={['/']}>
           <KibanaContextProvider services={mockServices}>{children}</KibanaContextProvider>
         </MemoryRouter>

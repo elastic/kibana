@@ -116,7 +116,7 @@ function verifyTextAndTitle(
   expectedTitle?: string,
   expectedText?: string
 ) {
-  expect(getNodeText(title)).toEqual(expectedTitle);
+  expect(getNodeText(<>{title}</>)).toEqual(expectedTitle);
   expect(text).toEqual(expectedText);
 }
 

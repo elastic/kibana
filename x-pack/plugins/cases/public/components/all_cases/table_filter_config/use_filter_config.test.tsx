@@ -4,11 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
 import type { FilterConfig, FilterConfigRenderParams } from './types';
+import type { UseFilterConfig } from './use_filter_config';
 import { useFilterConfig } from './use_filter_config';
 import type { FilterOptions } from '../../../../common/ui';
 import { CUSTOM_FIELD_KEY_PREFIX } from '../constants';
@@ -63,7 +65,7 @@ describe('useFilterConfig', () => {
   });
 
   it('should remove a selected option if the filter is deleted', async () => {
-    const { rerender } = renderHook(useFilterConfig, {
+    const { rerender } = renderHook<PropsWithChildren<UseFilterConfig>, {}>(useFilterConfig, {
       wrapper: ({ children }) => <appMockRender.AppWrapper>{children}</appMockRender.AppWrapper>,
       initialProps: {
         systemFilterConfig: filters,
@@ -103,7 +105,10 @@ describe('useFilterConfig', () => {
       JSON.stringify([{ key: uiCustomFieldKey, isActive: false }])
     );
 
-    const { result } = renderHook(useFilterConfig, {
+    const { result } = renderHook<
+      PropsWithChildren<UseFilterConfig>,
+      ReturnType<typeof useFilterConfig>
+    >(useFilterConfig, {
       wrapper: ({ children }) => <appMockRender.AppWrapper>{children}</appMockRender.AppWrapper>,
       initialProps: {
         systemFilterConfig: filters,

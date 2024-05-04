@@ -14,11 +14,11 @@ import { ToolbarButtonProps, ToolbarButton } from '../buttons';
 
 type AllowedButtonProps = Omit<
   ToolbarButtonProps<'standard'>,
-  'iconSide' | 'onClick' | 'fill' | 'label'
+  'iconSide' | 'onClick' | 'fill' | 'label' | 'children'
 >;
 type AllowedPopoverProps = Omit<
   EuiPopoverProps,
-  'button' | 'isOpen' | 'closePopover' | 'anchorPosition'
+  'button' | 'isOpen' | 'closePopover' | 'anchorPosition' | 'children'
 >;
 
 /**

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import { act, renderHook, type WrapperComponent } from '@testing-library/react-hooks';
 import { BehaviorSubject, first, lastValueFrom, of } from 'rxjs';
 
@@ -34,7 +34,7 @@ const security = {
 
 const { http, notifications } = core;
 
-const wrapper: WrapperComponent<void> = ({ children }) => (
+const wrapper: WrapperComponent<PropsWithChildren> = ({ children }) => (
   <UserProfilesKibanaProvider
     core={core}
     security={security}

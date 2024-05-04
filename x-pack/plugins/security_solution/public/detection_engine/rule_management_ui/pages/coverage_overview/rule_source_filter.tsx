@@ -54,6 +54,7 @@ const RuleSourceFilterComponent = ({
   ) as EuiSelectableOption[];
 
   const handleSelectableOnChange = useCallback(
+    // @ts-expect-error
     (newOptions) => {
       const formattedOptions = extractSelected<CoverageOverviewRuleSource>(newOptions);
       onChange(formattedOptions);

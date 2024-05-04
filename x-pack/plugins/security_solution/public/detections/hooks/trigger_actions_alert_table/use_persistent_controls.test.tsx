@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { getPersistentControlsHook } from './use_persistent_controls';
 import { TableId } from '@kbn/securitysolution-data-table';
@@ -88,7 +89,9 @@ describe('usePersistentControls', () => {
     });
     const usePersistentControls = getPersistentControlsHook(tableId);
     const { result } = renderHook(() => usePersistentControls(), {
-      wrapper: ({ children }) => <TestProviders store={store}>{children}</TestProviders>,
+      wrapper: ({ children }: PropsWithChildren) => (
+        <TestProviders store={store}>{children}</TestProviders>
+      ),
     });
 
     const groupSelector = result.current.right.props.additionalMenuOptions[0];

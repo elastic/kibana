@@ -152,6 +152,7 @@ export function MockApmPluginStorybook({
   });
 
   return (
+    // @ts-expect-error
     <IntlProvider locale="en">
       <EuiThemeProvider darkMode={false}>
         <KibanaReactContext.Provider>

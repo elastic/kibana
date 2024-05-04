@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { useCreateTimeline } from './use_create_timeline';
@@ -43,7 +44,7 @@ describe('useCreateTimeline', () => {
     const hookResult = renderHook(
       () => useCreateTimeline({ timelineId: TimelineId.test, timelineType: TimelineType.default }),
       {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        wrapper: ({ children }: PropsWithChildren) => <TestProviders>{children}</TestProviders>,
       }
     );
 
@@ -59,7 +60,7 @@ describe('useCreateTimeline', () => {
     const hookResult = renderHook(
       () => useCreateTimeline({ timelineId: TimelineId.test, timelineType: TimelineType.default }),
       {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        wrapper: ({ children }: PropsWithChildren) => <TestProviders>{children}</TestProviders>,
       }
     );
 
@@ -102,7 +103,7 @@ describe('useCreateTimeline', () => {
           onClick,
         }),
       {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        wrapper: ({ children }: PropsWithChildren) => <TestProviders>{children}</TestProviders>,
       }
     );
 
@@ -119,7 +120,7 @@ describe('useCreateTimeline', () => {
     const hookResult = renderHook(
       () => useCreateTimeline({ timelineId: TimelineId.test, timelineType: TimelineType.default }),
       {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        wrapper: ({ children }: PropsWithChildren) => <TestProviders>{children}</TestProviders>,
       }
     );
 
@@ -139,7 +140,7 @@ describe('useCreateTimeline', () => {
     const hookResult = renderHook(
       () => useCreateTimeline({ timelineId: TimelineId.test, timelineType: TimelineType.default }),
       {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        wrapper: ({ children }: PropsWithChildren) => <TestProviders>{children}</TestProviders>,
       }
     );
 

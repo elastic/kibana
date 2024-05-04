@@ -31,6 +31,7 @@ jest.mock('../../../../app_dependencies');
 describe('Transform: Transform List <TransformList />', () => {
   test('Minimal initialization', async () => {
     const { container } = render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <QueryClientProvider client={queryClient}>
           <TransformList

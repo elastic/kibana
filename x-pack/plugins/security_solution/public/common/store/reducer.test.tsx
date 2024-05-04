@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { parseExperimentalConfigValue } from '../../../common/experimental_features';
 import type { SecuritySubPlugins } from '../../app/types';
@@ -74,7 +75,7 @@ describe('createInitialState', () => {
 
     test('indicesExist should be TRUE if patternList is NOT empty', async () => {
       const { result } = renderHook(() => useSourcererDataView(), {
-        wrapper: ({ children }) => (
+        wrapper: ({ children }: PropsWithChildren) => (
           <TestProviders store={createMockStore(initState)}>{children}</TestProviders>
         ),
       });
@@ -110,7 +111,7 @@ describe('createInitialState', () => {
         }
       );
       const { result } = renderHook(() => useSourcererDataView(), {
-        wrapper: ({ children }) => (
+        wrapper: ({ children }: PropsWithChildren) => (
           <TestProviders store={createMockStore(state)}>{children}</TestProviders>
         ),
       });

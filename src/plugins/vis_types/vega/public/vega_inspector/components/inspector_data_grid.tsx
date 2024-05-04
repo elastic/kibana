@@ -91,7 +91,7 @@ export const InspectorDataGrid = ({ columns, data, dataGridAriaLabel }: Inspecto
   // Resize
   const [columnsWidth, setColumnsWidth] = useState<Record<string, number>>({});
 
-  const onColumnResize: EuiDataGridProps['onColumnResize'] = useCallback(
+  const onColumnResize: NonNullable<EuiDataGridProps['onColumnResize']> = useCallback(
     ({ columnId, width }) => {
       setColumnsWidth({
         ...columnsWidth,

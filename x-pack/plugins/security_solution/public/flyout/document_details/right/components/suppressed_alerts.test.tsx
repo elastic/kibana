@@ -22,6 +22,7 @@ const VALUE_TEST_ID = SUMMARY_ROW_VALUE_TEST_ID(CORRELATIONS_SUPPRESSED_ALERTS_T
 
 const renderSuppressedAlerts = (alertSuppressionCount: number) =>
   render(
+    // @ts-expect-error
     <IntlProvider locale="en">
       <SuppressedAlerts alertSuppressionCount={alertSuppressionCount} ruleType="query" />
     </IntlProvider>
