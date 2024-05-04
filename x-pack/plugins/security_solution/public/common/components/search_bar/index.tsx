@@ -20,7 +20,6 @@ import { DataView } from '@kbn/data-views-plugin/public';
 
 import type { OnTimeChangeProps } from '@elastic/eui';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
-import type { StatefulSearchBarProps } from '@kbn/unified-search-plugin/public';
 import { inputsActions } from '../../store/inputs';
 import type { InputsRange } from '../../store/inputs/model';
 import type { InputsModelId } from '../../store/inputs/constants';

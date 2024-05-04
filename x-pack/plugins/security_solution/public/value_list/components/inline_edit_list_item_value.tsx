@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import type { EuiInlineEditTextProps } from '@elastic/eui';
 import { EuiInlineEditText } from '@elastic/eui';
 import type { ListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { usePatchListItemMutation } from '@kbn/securitysolution-list-hooks';

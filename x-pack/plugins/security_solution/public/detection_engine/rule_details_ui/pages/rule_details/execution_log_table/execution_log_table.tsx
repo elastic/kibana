@@ -13,7 +13,6 @@ import type {
   OnTimeChangeProps,
   OnRefreshProps,
   OnRefreshChangeProps,
-  EuiBasicTableProps,
   CriteriaWithPagination,
   Criteria,
 } from '@elastic/eui';
