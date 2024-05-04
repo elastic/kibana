@@ -279,6 +279,37 @@ export default ({ getService }: FtrProviderContext) => {
           );
         });
       });
+
+      describe('required_fields', () => {
+        afterEach(async () => {
+          await deleteAllRules(supertest, log);
+        });
+
+        it('should reset required fields field to default value on update when not present', async () => {
+          const expectedRule = getCustomQueryRuleParams({
+            rule_id: 'rule-1',
+            required_fields: [],
+          });
+
+          await securitySolutionApi.createRule({
+            body: getCustomQueryRuleParams({
+              rule_id: 'rule-1',
+              required_fields: [{ name: 'host.name', type: 'keyword' }],
+            }),
+          });
+
+          const { body: updatedRuleResponse } = await securitySolutionApi
+            .updateRule({
+              body: getCustomQueryRuleParams({
+                rule_id: 'rule-1',
+                max_signals: undefined,
+              }),
+            })
+            .expect(200);
+
+          expect(updatedRuleResponse).toMatchObject(expectedRule);
+        });
+      });
     });
   });
 };

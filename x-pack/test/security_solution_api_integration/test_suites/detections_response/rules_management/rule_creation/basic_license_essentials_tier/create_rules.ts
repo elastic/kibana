@@ -219,6 +219,26 @@ export default ({ getService }: FtrProviderContext) => {
           );
         });
       });
+
+      describe('required_fields', () => {
+        afterEach(async () => {
+          await deleteAllRules(supertest, log);
+        });
+
+        it('creates a rule with required_fields defaulted to an empty array when not present', async () => {
+          const customQueryRuleParams = getCustomQueryRuleParams();
+
+          expect(customQueryRuleParams.required_fields).toBeUndefined();
+
+          const { body } = await securitySolutionApi
+            .createRule({
+              body: customQueryRuleParams,
+            })
+            .expect(200);
+
+          expect(body.required_fields).toEqual([]);
+        });
+      });
     });
   });
 };
