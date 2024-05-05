@@ -71,15 +71,7 @@ describe('Get Logstash Stats', () => {
         },
       };
 
-      await fetchLogstashState(
-        callCluster,
-        clusterUuid,
-        ephemeralIds,
-        start,
-        end,
-        {} as any,
-        true
-      );
+      await fetchLogstashState(callCluster, clusterUuid, ephemeralIds, start, end, {} as any, true);
       const { args } = searchMock.firstCall;
       const [{ body }] = args;
       expect(body.query).toEqual(expected);
