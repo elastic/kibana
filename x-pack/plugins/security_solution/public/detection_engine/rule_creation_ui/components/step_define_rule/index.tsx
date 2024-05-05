@@ -99,6 +99,7 @@ import { DurationInput } from '../duration_input';
 import { MINIMUM_LICENSE_FOR_SUPPRESSION } from '../../../../../common/detection_engine/constants';
 import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
 import { useAlertSuppression } from '../../../rule_management/logic/use_alert_suppression';
+import { RelatedIntegrations } from '../../../rule_creation/components/related_integrations';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -1114,6 +1115,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               </UseMultiFields>
             </IntendedRuleTypeEuiFormRow>
           </>
+
+          <RelatedIntegrations path="relatedIntegrations" dataTestSubj="relatedIntegrations" />
+
           <UseField
             path="timeline"
             component={PickTimeline}

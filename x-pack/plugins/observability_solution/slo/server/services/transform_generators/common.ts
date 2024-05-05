@@ -35,3 +35,7 @@ export function parseIndex(index: string): string | string[] {
 
   return index.split(',');
 }
+
+export function getTimesliceTargetComparator(timesliceTarget: number) {
+  return timesliceTarget === 0 ? '>' : '>=';
+}

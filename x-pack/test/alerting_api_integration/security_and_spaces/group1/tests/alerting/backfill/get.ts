@@ -86,10 +86,7 @@ export default function getBackfillTests({ getService }: FtrProviderContext) {
 
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
-      // FLAKY: https://github.com/elastic/kibana/issues/181840
-      // FLAKY: https://github.com/elastic/kibana/issues/181861
-      // FLAKY: https://github.com/elastic/kibana/issues/181875
-      describe.skip(scenario.id, () => {
+      describe(scenario.id, () => {
         const apiOptions = {
           spaceId: space.id,
           username: user.username,
@@ -123,7 +120,11 @@ export default function getBackfillTests({ getService }: FtrProviderContext) {
                 start: '2023-10-19T12:00:00.000Z',
                 end: '2023-10-25T12:00:00.000Z',
               },
-              { rule_id: ruleId2, start: '2023-10-19T12:00:00.000Z' },
+              {
+                rule_id: ruleId2,
+                start: '2023-10-19T12:00:00.000Z',
+                end: '2023-10-23T12:00:00.000Z',
+              },
             ]);
 
           const scheduleResult = scheduleResponse.body;
@@ -188,85 +189,46 @@ export default function getBackfillTests({ getService }: FtrProviderContext) {
               expect(getResponse1.body.space_id).to.eql(space.id);
               expect(typeof getResponse1.body.created_at).to.be('string');
               testExpectedRule(getResponse1.body, ruleId1, false);
-              expect(getResponse1.body.schedule).to.eql([
-                {
-                  run_at: '2023-10-20T00:00:00.000Z',
-                  status: 'pending',
-                  interval: '12h',
-                },
-                {
-                  run_at: '2023-10-20T12:00:00.000Z',
-                  status: 'pending',
-                  interval: '12h',
-                },
-                {
-                  run_at: '2023-10-21T00:00:00.000Z',
-                  status: 'pending',
-                  interval: '12h',
-                },
-                {
-                  run_at: '2023-10-21T12:00:00.000Z',
-                  status: 'pending',
-                  interval: '12h',
-                },
-                {
-                  run_at: '2023-10-22T00:00:00.000Z',
-                  status: 'pending',
-                  interval: '12h',
-                },
-                {
-                  run_at: '2023-10-22T12:00:00.000Z',
-                  status: 'pending',
-                  interval: '12h',
-                },
-                {
-                  run_at: '2023-10-23T00:00:00.000Z',
-                  status: 'pending',
-                  interval: '12h',
-                },
-                {
-                  run_at: '2023-10-23T12:00:00.000Z',
-                  status: 'pending',
-                  interval: '12h',
-                },
-                {
-                  run_at: '2023-10-24T00:00:00.000Z',
-                  status: 'pending',
-                  interval: '12h',
-                },
-                {
-                  run_at: '2023-10-24T12:00:00.000Z',
-                  status: 'pending',
-                  interval: '12h',
-                },
-                {
-                  run_at: '2023-10-25T00:00:00.000Z',
-                  status: 'pending',
-                  interval: '12h',
-                },
-                {
-                  run_at: '2023-10-25T12:00:00.000Z',
-                  status: 'pending',
-                  interval: '12h',
-                },
-              ]);
+              expect(getResponse1.body.schedule.length).to.eql(12);
+              getResponse1.body.schedule.forEach((sched: any) => {
+                expect(sched.interval).to.eql('12h');
+                expect(sched.status).to.match(/complete|pending|running|error|timeout/);
+              });
+              expect(getResponse1.body.schedule[0].run_at).to.eql('2023-10-20T00:00:00.000Z');
+              expect(getResponse1.body.schedule[1].run_at).to.eql('2023-10-20T12:00:00.000Z');
+              expect(getResponse1.body.schedule[2].run_at).to.eql('2023-10-21T00:00:00.000Z');
+              expect(getResponse1.body.schedule[3].run_at).to.eql('2023-10-21T12:00:00.000Z');
+              expect(getResponse1.body.schedule[4].run_at).to.eql('2023-10-22T00:00:00.000Z');
+              expect(getResponse1.body.schedule[5].run_at).to.eql('2023-10-22T12:00:00.000Z');
+              expect(getResponse1.body.schedule[6].run_at).to.eql('2023-10-23T00:00:00.000Z');
+              expect(getResponse1.body.schedule[7].run_at).to.eql('2023-10-23T12:00:00.000Z');
+              expect(getResponse1.body.schedule[8].run_at).to.eql('2023-10-24T00:00:00.000Z');
+              expect(getResponse1.body.schedule[9].run_at).to.eql('2023-10-24T12:00:00.000Z');
+              expect(getResponse1.body.schedule[10].run_at).to.eql('2023-10-25T00:00:00.000Z');
+              expect(getResponse1.body.schedule[11].run_at).to.eql('2023-10-25T12:00:00.000Z');
 
               expect(getResponse2.body.id).to.eql(backfillId2);
               expect(getResponse2.body.duration).to.eql('12h');
               expect(getResponse2.body.enabled).to.eql(true);
               expect(getResponse2.body.start).to.eql('2023-10-19T12:00:00.000Z');
-              expect(getResponse2.body.end).to.eql('2023-10-20T00:00:00.000Z');
+              expect(getResponse2.body.end).to.eql('2023-10-23T12:00:00.000Z');
               expect(getResponse2.body.status).to.eql('pending');
               expect(getResponse2.body.space_id).to.eql(space.id);
               expect(typeof getResponse2.body.created_at).to.be('string');
               testExpectedRule(getResponse2.body, ruleId2, false);
-              expect(getResponse2.body.schedule).to.eql([
-                {
-                  run_at: '2023-10-20T00:00:00.000Z',
-                  status: 'pending',
-                  interval: '12h',
-                },
-              ]);
+              expect(getResponse2.body.schedule.length).to.eql(8);
+              getResponse2.body.schedule.forEach((sched: any) => {
+                expect(sched.interval).to.eql('12h');
+                expect(sched.status).to.match(/complete|pending|running|error|timeout/);
+              });
+              expect(getResponse2.body.schedule[0].run_at).to.eql('2023-10-20T00:00:00.000Z');
+              expect(getResponse2.body.schedule[1].run_at).to.eql('2023-10-20T12:00:00.000Z');
+              expect(getResponse2.body.schedule[2].run_at).to.eql('2023-10-21T00:00:00.000Z');
+              expect(getResponse2.body.schedule[3].run_at).to.eql('2023-10-21T12:00:00.000Z');
+              expect(getResponse2.body.schedule[4].run_at).to.eql('2023-10-22T00:00:00.000Z');
+              expect(getResponse2.body.schedule[5].run_at).to.eql('2023-10-22T12:00:00.000Z');
+              expect(getResponse2.body.schedule[6].run_at).to.eql('2023-10-23T00:00:00.000Z');
+              expect(getResponse2.body.schedule[7].run_at).to.eql('2023-10-23T12:00:00.000Z');
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);

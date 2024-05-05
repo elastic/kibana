@@ -25,24 +25,24 @@ describe('getNotebook', () => {
     jest.clearAllMocks();
   });
 
-  it('throws an error if given an unknown notebook id', () => {
-    expect(getNotebook('some-fake-id', options)).rejects.toThrow('Unknown Notebook ID');
+  it('throws an error if given an unknown notebook id', async () => {
+    await expect(getNotebook('some-fake-id', options)).rejects.toThrow('Unknown Notebook ID');
     expect(mockLogger.warn).toHaveBeenCalledTimes(1);
   });
 
-  it('throws an error if the file is not found', () => {
+  it('throws an error if the file is not found', async () => {
     const notebookId = DEFAULT_NOTEBOOKS.notebooks[0].id;
     jest.mocked(fs.access).mockReset().mockRejectedValue(new Error('Boom'));
 
-    expect(getNotebook(notebookId, options)).rejects.toThrow('Failed to fetch notebook.');
+    await expect(getNotebook(notebookId, options)).rejects.toThrow('Failed to fetch notebook.');
   });
 
-  it('Reads notebook', () => {
+  it('Reads notebook', async () => {
     const notebookId = DEFAULT_NOTEBOOKS.notebooks[0].id;
 
     jest.mocked(fs.access).mockReset().mockResolvedValue(undefined);
 
-    expect(getNotebook(notebookId, options)).resolves.toMatchObject({
+    await expect(getNotebook(notebookId, options)).resolves.toMatchObject({
       cells: expect.anything(),
       metadata: expect.anything(),
     });
