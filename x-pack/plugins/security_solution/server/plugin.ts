@@ -308,6 +308,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         this.ruleMonitoringService.createRuleExecutionLogClientForExecutors,
       version: pluginContext.env.packageInfo.version,
       experimentalFeatures: config.experimentalFeatures,
+      alerting: plugins.alerting,
     };
 
     const queryRuleAdditionalOptions: CreateQueryRuleAdditionalOptions = {
@@ -320,7 +321,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     const securityRuleTypeWrapper = createSecurityRuleTypeWrapper(securityRuleTypeOptions);
 
     plugins.alerting.registerType(securityRuleTypeWrapper(createEqlAlertType(ruleOptions)));
-    if (config.settings.ESQLEnabled && !experimentalFeatures.esqlRulesDisabled) {
+    if (!experimentalFeatures.esqlRulesDisabled) {
       plugins.alerting.registerType(securityRuleTypeWrapper(createEsqlAlertType(ruleOptions)));
     }
     plugins.alerting.registerType(

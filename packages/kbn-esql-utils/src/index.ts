@@ -11,7 +11,6 @@ export { getESQLAdHocDataview, getIndexForESQLQuery } from './utils/get_esql_adh
 export { getInitialESQLQuery } from './utils/get_initial_esql_query';
 export { getESQLWithSafeLimit } from './utils/get_esql_with_safe_limit';
 export {
-  getIndexPatternFromSQLQuery,
   getIndexPatternFromESQLQuery,
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,

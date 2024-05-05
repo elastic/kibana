@@ -8,7 +8,6 @@
 
 export {
   getESQLAdHocDataview,
-  getIndexPatternFromSQLQuery,
   getIndexPatternFromESQLQuery,
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
