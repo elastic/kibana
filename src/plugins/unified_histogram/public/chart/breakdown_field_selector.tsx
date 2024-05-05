@@ -8,7 +8,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiSelectableOption } from '@elastic/eui';
-import { FieldIcon, getFieldIconProps } from '@kbn/field-utils';
+import { FieldIcon, getFieldIconProps, fieldNameWildcardMatcher } from '@kbn/field-utils';
 import { css } from '@emotion/react';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
@@ -102,6 +102,12 @@ export const BreakdownFieldSelector = ({
           defaultMessage: 'Select breakdown field',
         }
       )}
+      optionMatcher={({ option, searchValue }) => {
+        return fieldNameWildcardMatcher(
+          { name: option.key || option.label, displayName: option.label },
+          searchValue
+        );
+      }}
       options={fieldOptions}
       onChange={onChange}
     />

@@ -8,6 +8,7 @@
 
 import classNames from 'classnames';
 import { sortBy, uniq } from 'lodash';
+import { fieldNameWildcardMatcher } from '@kbn/field-utils';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -128,6 +129,12 @@ export const FieldPicker = ({
         if (!dataView || !changedOption.key) return;
         const field = dataView.getFieldByName(changedOption.key);
         if (field) onSelectField?.(field);
+      }}
+      optionMatcher={({ option, searchValue }) => {
+        return fieldNameWildcardMatcher(
+          { name: option.key || option.label, displayName: option.label },
+          searchValue
+        );
       }}
       searchProps={{
         'data-test-subj': 'field-search-input',
