@@ -55,48 +55,47 @@ describe('Get Logstash Stats', () => {
         bool: {
           filter: [
             {
-              range: {
-                timestamp: {
-                  format: 'epoch_millis',
-                  gte: 1646784000000,
-                  lte: 1646785200000,
-                },
-              },
-            },
-            {
               terms: {
                 'logstash_state.pipeline.ephemeral_id': ['a', 'b', 'c'],
               },
             },
             {
               bool: {
-                must: {
-                  term: { type: 'logstash_state' },
-                },
+                should: [
+                  { term: { type: 'logstash_state' } },
+                  { term: { 'metricset.name': 'node' } },
+                ],
               },
             },
           ],
         },
       };
 
-      await fetchLogstashState(callCluster, clusterUuid, ephemeralIds, start, end, {} as any);
+      await fetchLogstashState(
+        callCluster,
+        clusterUuid,
+        ephemeralIds,
+        start,
+        end,
+        {} as any,
+        true
+      );
       const { args } = searchMock.firstCall;
       const [{ body }] = args;
       expect(body.query).toEqual(expected);
     });
 
-    it('should set `from: 0, to: 10000` in the query', async () => {
-      await fetchLogstashState(callCluster, clusterUuid, ephemeralIds, start, end, {} as any);
+    it('should set `size: 10` in the query', async () => {
+      await fetchLogstashState(callCluster, clusterUuid, ephemeralIds, start, end, {} as any, true);
       const { args } = searchMock.firstCall;
       const [{ body }] = args;
-      expect(body.from).toEqual(0);
-      expect(body.size).toEqual(10000);
+      expect(body.size).toEqual(10);
     });
   });
 
   describe('fetchLogstashStats', () => {
     it('should set `from: 0, to: 10000` in the query', async () => {
-      await fetchLogstashStats(callCluster, clusterUuids, start, end, {} as any);
+      await fetchLogstashStats(callCluster, clusterUuids, start, end, {} as any, false);
       const { args } = searchMock.firstCall;
       const [{ body }] = args;
 
@@ -110,7 +109,7 @@ describe('Get Logstash Stats', () => {
       const resultsEmpty = undefined;
 
       const options = getBaseOptions();
-      processStatsResults(resultsEmpty as any, options);
+      processStatsResults(resultsEmpty as any, options, true);
 
       expect(options.clusters).toStrictEqual({});
     });
@@ -144,7 +143,7 @@ describe('Get Logstash Stats', () => {
       };
 
       const options = getBaseOptions();
-      processStatsResults(results as any, options);
+      processStatsResults(results as any, options, true);
 
       expect(options.clusters).toStrictEqual({
         FlV4ckTxQ0a78hmBkzzc9A: {
@@ -233,7 +232,7 @@ describe('Get Logstash Stats', () => {
       };
 
       const options = getBaseOptions();
-      processStatsResults(results as any, options);
+      processStatsResults(results as any, options, true);
 
       expect(options.allEphemeralIds).toStrictEqual({
         FlV4ckTxQ0a78hmBkzzc9A: [
@@ -280,12 +279,12 @@ describe('Get Logstash Stats', () => {
 
       // logstashStatsResultSet is an array of many small query results
       logstashStatsResultSet.forEach((results: any) => {
-        processStatsResults(results, options);
+        processStatsResults(results, options, true);
       });
 
       resultsMap.forEach((value: string[], clusterUuid: string) => {
         value.forEach((results: any) => {
-          processLogstashStateResults(results, clusterUuid, options);
+          processLogstashStateResults(results, clusterUuid, options, true);
         });
       });
 
@@ -402,7 +401,7 @@ describe('Get Logstash Stats', () => {
           ],
           cluster_stats: {
             collection_types: {
-              metricbeat: 1,
+              internal_collection: 1,
             },
             pipelines: {
               batch_size_avg: 406.5,
