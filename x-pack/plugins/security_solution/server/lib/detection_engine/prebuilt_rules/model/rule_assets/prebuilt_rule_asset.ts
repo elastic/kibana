@@ -10,6 +10,7 @@ import {
   RuleSignatureId,
   RuleVersion,
   BaseCreateProps,
+  RequiredFieldArray,
   TypeSpecificCreateProps,
 } from '../../../../../../common/api/detection_engine/model/rule_schema';
 
@@ -28,9 +29,15 @@ import {
  *  - version is a required field that must exist
  */
 export type PrebuiltRuleAsset = z.infer<typeof PrebuiltRuleAsset>;
-export const PrebuiltRuleAsset = BaseCreateProps.and(TypeSpecificCreateProps).and(
+export const PrebuiltRuleAsset = BaseCreateProps.merge(
   z.object({
-    rule_id: RuleSignatureId,
-    version: RuleVersion,
+    required_fields: RequiredFieldArray.optional(),
   })
-);
+)
+  .and(TypeSpecificCreateProps)
+  .and(
+    z.object({
+      rule_id: RuleSignatureId,
+      version: RuleVersion,
+    })
+  );

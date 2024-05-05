@@ -9,6 +9,7 @@ import * as z from 'zod';
 import {
   BaseCreateProps,
   ResponseFields,
+  RequiredFieldInput,
   RuleSignatureId,
   TypeSpecificCreateProps,
 } from '../../model/rule_schema';
@@ -29,5 +30,6 @@ export const RuleToImport = BaseCreateProps.and(TypeSpecificCreateProps).and(
   ResponseFields.partial().extend({
     rule_id: RuleSignatureId,
     immutable: z.literal(false).default(false),
+    required_fields: z.array(RequiredFieldInput).default([]),
   })
 );
