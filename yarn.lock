@@ -5583,6 +5583,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/esql-composer@link:packages/kbn-esql-composer":
+  version "0.0.0"
+  uid ""
+
 "@kbn/esql-datagrid@link:src/platform/plugins/shared/esql_datagrid":
   version "0.0.0"
   uid ""
