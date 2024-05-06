@@ -19,7 +19,7 @@ import {
 } from '../../../../../../common/endpoint/constants';
 import type { NormalizedExternalConnectorClient } from '../../..';
 import { applyEsClientSearchMock } from '../../../../mocks/utils.mock';
-import { SENTINEL_ONE_ACTIVITY_INDEX } from '../../../../../../common';
+import { SENTINEL_ONE_ACTIVITY_INDEX_PATTERN } from '../../../../../../common';
 import { SentinelOneDataGenerator } from '../../../../../../common/endpoint/data_generators/sentinelone_data_generator';
 import type {
   EndpointActionResponse,
@@ -412,7 +412,7 @@ describe('SentinelOneActionsClient class', () => {
 
         applyEsClientSearchMock({
           esClientMock: classConstructorOptions.esClient,
-          index: SENTINEL_ONE_ACTIVITY_INDEX,
+          index: SENTINEL_ONE_ACTIVITY_INDEX_PATTERN,
           response: s1ActivitySearchResponse,
         });
       });
@@ -493,7 +493,7 @@ describe('SentinelOneActionsClient class', () => {
               sort: [{ 'sentinel_one.activity.updated_at': 'asc' }],
             },
           },
-          index: SENTINEL_ONE_ACTIVITY_INDEX,
+          index: SENTINEL_ONE_ACTIVITY_INDEX_PATTERN,
           query: {
             bool: {
               minimum_should_match: 1,
@@ -533,7 +533,7 @@ describe('SentinelOneActionsClient class', () => {
               sort: [{ 'sentinel_one.activity.updated_at': 'asc' }],
             },
           },
-          index: SENTINEL_ONE_ACTIVITY_INDEX,
+          index: SENTINEL_ONE_ACTIVITY_INDEX_PATTERN,
           query: {
             bool: {
               minimum_should_match: 1,

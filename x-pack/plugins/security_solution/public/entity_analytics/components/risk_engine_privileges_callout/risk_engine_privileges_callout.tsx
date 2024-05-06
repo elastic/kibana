@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import type { CallOutMessage } from '../../../common/components/callouts';
-import { CallOutSwitcher } from '../../../common/components/callouts';
+import { CallOut } from '../../../common/components/callouts';
 import { MissingPrivilegesCallOutBody, MISSING_PRIVILEGES_CALLOUT_TITLE } from './translations';
 import type { RiskEngineMissingPrivilegesResponse } from '../../hooks/use_missing_risk_engine_privileges';
 
@@ -25,6 +26,9 @@ export const RiskEnginePrivilegesCallOut: React.FC<{
   };
 
   return (
-    message && <CallOutSwitcher namespace="entity_analytics" condition={true} message={message} />
+    <>
+      <CallOut message={message} showDismissButton={false} />
+      <EuiSpacer size="l" />
+    </>
   );
 };

@@ -22,26 +22,47 @@ import { RuleRunMetrics } from '../rule_run_metrics_store';
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;
 
-export interface RuleContextOpts {
-  ruleId: string;
-  ruleType: UntypedNormalizedRuleType;
-  consumer: string;
+export interface RuleContext {
+  id: string;
+  type: UntypedNormalizedRuleType;
+  consumer?: string;
+  name?: string;
+  revision?: number;
+}
+export interface ContextOpts {
+  savedObjectId: string;
+  savedObjectType: string;
   namespace?: string;
   spaceId: string;
   executionId: string;
   taskScheduledAt: Date;
-  ruleName?: string;
-  ruleRevision?: number;
 }
 
-type RuleContext = RuleContextOpts & {
+export type Context = ContextOpts & {
   taskScheduleDelay: number;
 };
+
+export const executionType = {
+  STANDARD: 'standard',
+  BACKFILL: 'backfill',
+} as const;
+export type ExecutionType = typeof executionType[keyof typeof executionType];
+
+interface BackfillOpts {
+  id: string;
+  start?: string;
+  interval?: string;
+}
 
 interface DoneOpts {
   timings?: TaskRunnerTimings;
   status?: RuleExecutionStatus;
   metrics?: RuleRunMetrics | null;
+  backfill?: BackfillOpts;
+}
+
+interface LogTimeoutOpts {
+  backfill?: BackfillOpts;
 }
 
 interface AlertOpts {
@@ -67,11 +88,22 @@ export interface ActionOpts {
   };
 }
 
+export interface SavedObjects {
+  id: string;
+  type: string;
+  namespace?: string;
+  relation?: string;
+  typeId?: string;
+}
+
 export class AlertingEventLogger {
   private eventLogger: IEventLogger;
   private isInitialized = false;
   private startTime?: Date;
-  private ruleContext?: RuleContextOpts;
+  private context?: ContextOpts;
+  private ruleData?: RuleContext;
+  private relatedSavedObjects: SavedObjects[] = [];
+  private executionType: ExecutionType = executionType.STANDARD;
 
   // this is the "execute" event that will be updated over the lifecycle of this class
   private event: IEvent;
@@ -85,32 +117,85 @@ export class AlertingEventLogger {
     return this.event;
   }
 
-  public initialize(context: RuleContextOpts) {
-    if (this.isInitialized) {
+  public initialize({
+    context,
+    runDate,
+    ruleData,
+    type = executionType.STANDARD,
+  }: {
+    context: ContextOpts;
+    runDate: Date;
+    type?: ExecutionType;
+    ruleData?: RuleContext;
+  }) {
+    if (this.isInitialized || !context) {
       throw new Error('AlertingEventLogger already initialized');
     }
-    this.isInitialized = true;
-    this.ruleContext = context;
-  }
-
-  public start(runDate: Date) {
-    if (!this.isInitialized || !this.ruleContext) {
-      throw new Error('AlertingEventLogger not initialized');
-    }
-
+    this.context = context;
+    this.ruleData = ruleData;
+    this.executionType = type;
     this.startTime = runDate;
 
-    const context = {
-      ...this.ruleContext,
-      taskScheduleDelay: this.startTime.getTime() - this.ruleContext.taskScheduledAt.getTime(),
+    const ctx = {
+      ...this.context,
+      taskScheduleDelay: this.startTime.getTime() - this.context.taskScheduledAt.getTime(),
     };
 
-    // Initialize the "execute" event
-    this.event = initializeExecuteRecord(context);
+    // Populate the "execute" event based on execution type
+    switch (type) {
+      case executionType.BACKFILL:
+        this.initializeBackfill(ctx);
+        break;
+      default:
+        this.initializeStandard(ctx, ruleData);
+    }
+
+    this.isInitialized = true;
     this.eventLogger.startTiming(this.event, this.startTime);
+  }
+
+  private initializeBackfill(ctx: Context) {
+    this.relatedSavedObjects = [
+      {
+        id: ctx.savedObjectId,
+        type: ctx.savedObjectType,
+        namespace: ctx.namespace,
+        relation: SAVED_OBJECT_REL_PRIMARY,
+      },
+    ];
+
+    // not logging an execute-start event for backfills so just fill in the initial event
+    this.event = initializeExecuteBackfillRecord(ctx, this.relatedSavedObjects);
+  }
+
+  private initializeStandard(ctx: Context, ruleData?: RuleContext) {
+    if (!ruleData) {
+      throw new Error('AlertingEventLogger requires rule data');
+    }
+
+    this.relatedSavedObjects = [
+      {
+        id: ctx.savedObjectId,
+        type: ctx.savedObjectType,
+        typeId: ruleData.type.id,
+        namespace: ctx.namespace,
+        relation: SAVED_OBJECT_REL_PRIMARY,
+      },
+    ];
+
+    // Initialize the "execute" event
+    this.event = initializeExecuteRecord(ctx, ruleData, this.relatedSavedObjects);
 
     // Create and log "execute-start" event
-    const executeStartEvent = createExecuteStartRecord(context, this.startTime);
+    const executeStartEvent = {
+      ...this.event,
+      event: {
+        ...this.event.event,
+        action: EVENT_LOG_ACTIONS.executeStart,
+        ...(this.startTime ? { start: this.startTime.toISOString() } : {}),
+      },
+      message: `rule execution start: "${ruleData.id}"`,
+    };
     this.eventLogger.logEvent(executeStartEvent);
   }
 
@@ -123,13 +208,65 @@ export class AlertingEventLogger {
     };
   }
 
-  public setRuleName(ruleName: string) {
-    if (!this.isInitialized || !this.event || !this.ruleContext) {
-      throw new Error('AlertingEventLogger not initialized');
+  public addOrUpdateRuleData({
+    name,
+    id,
+    consumer,
+    type,
+    revision,
+  }: {
+    name?: string;
+    id?: string;
+    consumer?: string;
+    revision?: number;
+    type?: UntypedNormalizedRuleType;
+  }) {
+    if (!this.isInitialized) {
+      throw new Error(`AlertingEventLogger not initialized`);
+    }
+    if (!this.ruleData) {
+      if (!id || !type) throw new Error(`Cannot update rule data before it is initialized`);
+
+      this.ruleData = {
+        id,
+        type,
+      };
     }
 
-    this.ruleContext.ruleName = ruleName;
-    updateEvent(this.event, { ruleName });
+    if (name) {
+      this.ruleData.name = name;
+    }
+
+    if (consumer) {
+      this.ruleData.consumer = consumer;
+    }
+
+    if (revision) {
+      this.ruleData.revision = revision;
+    }
+
+    let updatedRelatedSavedObjects = false;
+    if (id && type) {
+      // add this to saved objects array if it doesn't already exists
+      if (!this.relatedSavedObjects.find((so) => so.id === id && so.typeId === type.id)) {
+        updatedRelatedSavedObjects = true;
+        this.relatedSavedObjects.push({
+          id: id!,
+          typeId: type?.id,
+          type: RULE_SAVED_OBJECT_TYPE,
+          namespace: this.context?.namespace,
+        });
+      }
+    }
+
+    updateEventWithRuleData(this.event, {
+      ruleName: name,
+      ruleId: id,
+      ruleType: type,
+      consumer,
+      revision,
+      savedObjects: updatedRelatedSavedObjects ? this.relatedSavedObjects : undefined,
+    });
   }
 
   public setExecutionSucceeded(message: string) {
@@ -161,33 +298,56 @@ export class AlertingEventLogger {
     });
   }
 
-  public logTimeout() {
-    if (!this.isInitialized || !this.ruleContext) {
+  public logTimeout({ backfill }: LogTimeoutOpts = {}) {
+    if (!this.isInitialized || !this.context) {
       throw new Error('AlertingEventLogger not initialized');
     }
 
-    this.eventLogger.logEvent(createExecuteTimeoutRecord(this.ruleContext));
+    if (backfill && this.executionType !== executionType.BACKFILL) {
+      throw new Error('Cannot set backfill fields for non-backfill event log doc');
+    }
+
+    const executeTimeoutEvent = createExecuteTimeoutRecord(
+      this.context,
+      this.relatedSavedObjects,
+      this.executionType,
+      this.ruleData
+    );
+
+    if (backfill) {
+      updateEvent(executeTimeoutEvent, { backfill });
+    }
+
+    this.eventLogger.logEvent(executeTimeoutEvent);
   }
 
   public logAlert(alert: AlertOpts) {
-    if (!this.isInitialized || !this.ruleContext) {
+    if (!this.isInitialized || !this.context || !this.ruleData) {
       throw new Error('AlertingEventLogger not initialized');
     }
 
-    this.eventLogger.logEvent(createAlertRecord(this.ruleContext, alert));
+    this.eventLogger.logEvent(
+      createAlertRecord(this.context, this.ruleData, this.relatedSavedObjects, alert)
+    );
   }
 
   public logAction(action: ActionOpts) {
-    if (!this.isInitialized || !this.ruleContext) {
+    if (!this.isInitialized || !this.context || !this.ruleData) {
       throw new Error('AlertingEventLogger not initialized');
     }
 
-    this.eventLogger.logEvent(createActionExecuteRecord(this.ruleContext, action));
+    this.eventLogger.logEvent(
+      createActionExecuteRecord(this.context, this.ruleData, this.relatedSavedObjects, action)
+    );
   }
 
-  public done({ status, metrics, timings }: DoneOpts) {
-    if (!this.isInitialized || !this.event || !this.ruleContext) {
+  public done({ status, metrics, timings, backfill }: DoneOpts) {
+    if (!this.isInitialized || !this.event || !this.context || !this.ruleData) {
       throw new Error('AlertingEventLogger not initialized');
+    }
+
+    if (backfill && this.executionType !== executionType.BACKFILL) {
+      throw new Error('Cannot set backfill fields for non-backfill event log doc');
     }
 
     this.eventLogger.stopTiming(this.event);
@@ -204,7 +364,7 @@ export class AlertingEventLogger {
           ...(this.event.message && this.event.event?.outcome === 'failure'
             ? {}
             : {
-                message: `${this.ruleContext.ruleType.id}:${this.ruleContext.ruleId}: execution failed`,
+                message: `${this.ruleData.type?.id}:${this.context.savedObjectId}: execution failed`,
               }),
         });
       } else {
@@ -226,28 +386,24 @@ export class AlertingEventLogger {
       updateEvent(this.event, { timings });
     }
 
+    if (backfill) {
+      updateEvent(this.event, { backfill });
+    }
+
     this.eventLogger.logEvent(this.event);
   }
 }
 
-export function createExecuteStartRecord(context: RuleContext, startTime?: Date) {
-  const event = initializeExecuteRecord(context);
-  return {
-    ...event,
-    event: {
-      ...event.event,
-      action: EVENT_LOG_ACTIONS.executeStart,
-      ...(startTime ? { start: startTime.toISOString() } : {}),
-    },
-    message: `rule execution start: "${context.ruleId}"`,
-  };
-}
-
-export function createAlertRecord(context: RuleContextOpts, alert: AlertOpts) {
+export function createAlertRecord(
+  context: ContextOpts,
+  ruleData: RuleContext,
+  savedObjects: SavedObjects[],
+  alert: AlertOpts
+) {
   return createAlertEventLogRecordObject({
-    ruleId: context.ruleId,
-    ruleType: context.ruleType,
-    consumer: context.consumer,
+    ruleId: ruleData.id,
+    ruleType: ruleData.type,
+    consumer: ruleData.consumer,
     namespace: context.namespace,
     spaceId: context.spaceId,
     executionId: context.executionId,
@@ -257,101 +413,111 @@ export function createAlertRecord(context: RuleContextOpts, alert: AlertOpts) {
     instanceId: alert.id,
     group: alert.group,
     message: alert.message,
-    savedObjects: [
-      {
-        id: context.ruleId,
-        type: RULE_SAVED_OBJECT_TYPE,
-        typeId: context.ruleType.id,
-        relation: SAVED_OBJECT_REL_PRIMARY,
-      },
-    ],
-    ruleName: context.ruleName,
+    savedObjects,
+    ruleName: ruleData.name,
     flapping: alert.flapping,
     maintenanceWindowIds: alert.maintenanceWindowIds,
-    ruleRevision: context.ruleRevision,
+    ruleRevision: ruleData.revision,
   });
 }
 
-export function createActionExecuteRecord(context: RuleContextOpts, action: ActionOpts) {
+export function createActionExecuteRecord(
+  context: ContextOpts,
+  ruleData: RuleContext,
+  savedObjects: SavedObjects[],
+  action: ActionOpts
+) {
   return createAlertEventLogRecordObject({
-    ruleId: context.ruleId,
-    ruleType: context.ruleType,
-    consumer: context.consumer,
+    ruleId: ruleData.id,
+    ruleType: ruleData.type,
+    consumer: ruleData.consumer,
     namespace: context.namespace,
     spaceId: context.spaceId,
     executionId: context.executionId,
     action: EVENT_LOG_ACTIONS.executeAction,
     instanceId: action.alertId,
     group: action.alertGroup,
-    message: `alert: ${context.ruleType.id}:${context.ruleId}: '${context.ruleName}' instanceId: '${action.alertId}' scheduled actionGroup: '${action.alertGroup}' action: ${action.typeId}:${action.id}`,
+    message: `alert: ${ruleData.type?.id}:${ruleData.id}: '${ruleData.name}' instanceId: '${action.alertId}' scheduled actionGroup: '${action.alertGroup}' action: ${action.typeId}:${action.id}`,
     savedObjects: [
-      {
-        id: context.ruleId,
-        type: RULE_SAVED_OBJECT_TYPE,
-        typeId: context.ruleType.id,
-        relation: SAVED_OBJECT_REL_PRIMARY,
-      },
+      ...savedObjects,
       {
         type: 'action',
         id: action.id,
         typeId: action.typeId,
       },
     ],
-    ruleName: context.ruleName,
+    ruleName: ruleData.name,
     alertSummary: action.alertSummary,
-    ruleRevision: context.ruleRevision,
+    ruleRevision: ruleData.revision,
   });
 }
 
-export function createExecuteTimeoutRecord(context: RuleContextOpts) {
+export function createExecuteTimeoutRecord(
+  context: ContextOpts,
+  savedObjects: SavedObjects[],
+  type: ExecutionType,
+  ruleData?: RuleContext
+) {
+  let message = '';
+  switch (type) {
+    case executionType.BACKFILL:
+      message = `backfill "${context.savedObjectId}" cancelled due to timeout`;
+      break;
+    default:
+      message = `rule: ${ruleData?.type?.id}:${context.savedObjectId}: '${
+        ruleData?.name ?? ''
+      }' execution cancelled due to timeout - exceeded rule type timeout of ${
+        ruleData?.type?.ruleTaskTimeout
+      }`;
+  }
   return createAlertEventLogRecordObject({
-    ruleId: context.ruleId,
-    ruleType: context.ruleType,
-    consumer: context.consumer,
+    ruleId: ruleData?.id,
+    ruleType: ruleData?.type,
+    consumer: ruleData?.consumer,
     namespace: context.namespace,
     spaceId: context.spaceId,
     executionId: context.executionId,
     action: EVENT_LOG_ACTIONS.executeTimeout,
-    message: `rule: ${context.ruleType.id}:${context.ruleId}: '${
-      context.ruleName ?? ''
-    }' execution cancelled due to timeout - exceeded rule type timeout of ${
-      context.ruleType.ruleTaskTimeout
-    }`,
-    savedObjects: [
-      {
-        id: context.ruleId,
-        type: RULE_SAVED_OBJECT_TYPE,
-        typeId: context.ruleType.id,
-        relation: SAVED_OBJECT_REL_PRIMARY,
-      },
-    ],
-    ruleName: context.ruleName,
-    ruleRevision: context.ruleRevision,
+    message,
+    savedObjects,
+    ruleName: ruleData?.name,
+    ruleRevision: ruleData?.revision,
   });
 }
 
-export function initializeExecuteRecord(context: RuleContext) {
+export function initializeExecuteRecord(
+  context: Context,
+  ruleData: RuleContext,
+  so: SavedObjects[]
+) {
   return createAlertEventLogRecordObject({
-    ruleId: context.ruleId,
-    ruleType: context.ruleType,
-    consumer: context.consumer,
+    ruleId: ruleData.id,
+    ruleType: ruleData.type,
+    consumer: ruleData.consumer,
+    ruleRevision: ruleData.revision,
     namespace: context.namespace,
     spaceId: context.spaceId,
     executionId: context.executionId,
     action: EVENT_LOG_ACTIONS.execute,
-    ruleRevision: context.ruleRevision,
     task: {
       scheduled: context.taskScheduledAt.toISOString(),
       scheduleDelay: Millis2Nanos * context.taskScheduleDelay,
     },
-    savedObjects: [
-      {
-        id: context.ruleId,
-        type: RULE_SAVED_OBJECT_TYPE,
-        typeId: context.ruleType.id,
-        relation: SAVED_OBJECT_REL_PRIMARY,
-      },
-    ],
+    savedObjects: so,
+  });
+}
+
+export function initializeExecuteBackfillRecord(context: Context, so: SavedObjects[]) {
+  return createAlertEventLogRecordObject({
+    namespace: context.namespace,
+    spaceId: context.spaceId,
+    executionId: context.executionId,
+    action: EVENT_LOG_ACTIONS.executeBackfill,
+    task: {
+      scheduled: context.taskScheduledAt.toISOString(),
+      scheduleDelay: Millis2Nanos * context.taskScheduleDelay,
+    },
+    savedObjects: so,
   });
 }
 
@@ -360,12 +526,92 @@ interface UpdateEventOpts {
   outcome?: string;
   alertingOutcome?: string;
   error?: string;
-  ruleName?: string;
   status?: string;
   reason?: string;
   metrics?: RuleRunMetrics;
   timings?: TaskRunnerTimings;
+  backfill?: BackfillOpts;
   maintenanceWindowIds?: string[];
+}
+
+interface UpdateRuleOpts {
+  ruleName?: string;
+  ruleId?: string;
+  consumer?: string;
+  ruleType?: UntypedNormalizedRuleType;
+  revision?: number;
+  savedObjects?: SavedObjects[];
+}
+
+export function updateEventWithRuleData(event: IEvent, opts: UpdateRuleOpts) {
+  const { ruleName, ruleId, consumer, ruleType, revision, savedObjects } = opts;
+  if (!event) {
+    throw new Error('Cannot update event because it is not initialized.');
+  }
+
+  if (ruleName) {
+    event.rule = {
+      ...event.rule,
+      name: ruleName,
+    };
+  }
+
+  if (ruleId) {
+    event.rule = {
+      ...event.rule,
+      id: ruleId,
+    };
+  }
+
+  if (consumer) {
+    event.kibana = event.kibana || {};
+    event.kibana.alert = event.kibana.alert || {};
+    event.kibana.alert.rule = event.kibana.alert.rule || {};
+    event.kibana.alert.rule.consumer = consumer;
+  }
+
+  if (ruleType) {
+    event.kibana = event.kibana || {};
+    event.kibana.alert = event.kibana.alert || {};
+    event.kibana.alert.rule = event.kibana.alert.rule || {};
+    if (ruleType.id) {
+      event.kibana.alert.rule.rule_type_id = ruleType.id;
+      event.rule = {
+        ...event.rule,
+        category: ruleType.id,
+      };
+    }
+    if (ruleType.minimumLicenseRequired) {
+      event.rule = {
+        ...event.rule,
+        license: ruleType.minimumLicenseRequired,
+      };
+    }
+    if (ruleType.producer) {
+      event.rule = {
+        ...event.rule,
+        ruleset: ruleType.producer,
+      };
+    }
+  }
+
+  if (revision) {
+    event.kibana = event.kibana || {};
+    event.kibana.alert = event.kibana.alert || {};
+    event.kibana.alert.rule = event.kibana.alert.rule || {};
+    event.kibana.alert.rule.revision = revision;
+  }
+
+  if (savedObjects && savedObjects.length > 0) {
+    event.kibana = event.kibana || {};
+    event.kibana.saved_objects = savedObjects.map((so) => ({
+      ...(so.relation ? { rel: so.relation } : {}),
+      type: so.type,
+      id: so.id,
+      type_id: so.typeId,
+      namespace: so.namespace,
+    }));
+  }
 }
 
 export function updateEvent(event: IEvent, opts: UpdateEventOpts) {
@@ -373,12 +619,12 @@ export function updateEvent(event: IEvent, opts: UpdateEventOpts) {
     message,
     outcome,
     error,
-    ruleName,
     status,
     reason,
     metrics,
     timings,
     alertingOutcome,
+    backfill,
     maintenanceWindowIds,
   } = opts;
   if (!event) {
@@ -402,13 +648,6 @@ export function updateEvent(event: IEvent, opts: UpdateEventOpts) {
   if (error) {
     event.error = event.error || {};
     event.error.message = error;
-  }
-
-  if (ruleName) {
-    event.rule = {
-      ...event.rule,
-      name: ruleName,
-    };
   }
 
   if (status) {
@@ -445,6 +684,14 @@ export function updateEvent(event: IEvent, opts: UpdateEventOpts) {
       es_search_duration_ms: metrics.esSearchDurationMs ? metrics.esSearchDurationMs : 0,
       total_search_duration_ms: metrics.totalSearchDurationMs ? metrics.totalSearchDurationMs : 0,
     };
+  }
+
+  if (backfill) {
+    event.kibana = event.kibana || {};
+    event.kibana.alert = event.kibana.alert || {};
+    event.kibana.alert.rule = event.kibana.alert.rule || {};
+    event.kibana.alert.rule.execution = event.kibana.alert.rule.execution || {};
+    event.kibana.alert.rule.execution.backfill = backfill;
   }
 
   if (timings) {

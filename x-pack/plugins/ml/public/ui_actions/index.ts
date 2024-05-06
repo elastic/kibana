@@ -18,6 +18,7 @@ import { createAddSwimlanePanelAction } from './create_swim_lane';
 import { createEditAnomalyChartsPanelAction } from './edit_anomaly_charts_panel_action';
 import { createEditSwimlanePanelAction } from './edit_swimlane_panel_action';
 import { createEditSingleMetricViewerPanelAction } from './edit_single_metric_viewer_panel_action';
+import { createAddSingleMetricViewerPanelAction } from './create_single_metric_viewer';
 import {
   createCategorizationADJobAction,
   createCategorizationADJobTrigger,
@@ -45,6 +46,9 @@ export function registerMlUiActions(
   core: CoreSetup<MlStartDependencies, MlPluginStart>
 ) {
   // Initialize actions
+  const addSingleMetricViewerPanelAction = createAddSingleMetricViewerPanelAction(
+    core.getStartServices
+  );
   const addSwimlanePanelAction = createAddSwimlanePanelAction(core.getStartServices);
   const editSwimlanePanelAction = createEditSwimlanePanelAction(core.getStartServices);
   const editSingleMetricViewerPanelAction = createEditSingleMetricViewerPanelAction(
@@ -68,8 +72,8 @@ export function registerMlUiActions(
   uiActions.registerAction(categorizationADJobAction);
 
   // Assign triggers
+  uiActions.addTriggerAction('ADD_PANEL_TRIGGER', addSingleMetricViewerPanelAction);
   uiActions.addTriggerAction('ADD_PANEL_TRIGGER', addSwimlanePanelAction);
-
   uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, editSwimlanePanelAction);
   uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, editSingleMetricViewerPanelAction);
   uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, editExplorerPanelAction);

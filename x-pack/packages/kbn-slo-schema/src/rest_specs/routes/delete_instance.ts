@@ -9,7 +9,14 @@ import * as t from 'io-ts';
 import { sloIdSchema } from '../../schema/slo';
 
 const deleteSLOInstancesParamsSchema = t.type({
-  body: t.type({ list: t.array(t.type({ sloId: sloIdSchema, instanceId: t.string })) }),
+  body: t.type({
+    list: t.array(
+      t.intersection([
+        t.type({ sloId: sloIdSchema, instanceId: t.string }),
+        t.partial({ excludeRollup: t.boolean }),
+      ])
+    ),
+  }),
 });
 
 type DeleteSLOInstancesInput = t.OutputOf<typeof deleteSLOInstancesParamsSchema.props.body>;
