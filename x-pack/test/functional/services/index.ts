@@ -132,4 +132,5 @@ export const services = {
   sampleData: SampleDataServiceProvider,
   dataStreams: DataStreamProvider,
   slo: kibanaXPackApiIntegrationServices.slo,
+  dataViewApi: kibanaXPackApiIntegrationServices.dataViewApi,
 };
