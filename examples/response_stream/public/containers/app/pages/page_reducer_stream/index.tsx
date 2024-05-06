@@ -131,7 +131,7 @@ export const PageReducerStream: FC = () => {
 
           <BarSeries
             id="commits"
-            xScaleType={ScaleType.Linear}
+            xScaleType={ScaleType.Ordinal}
             yScaleType={ScaleType.Linear}
             xAccessor="x"
             yAccessors={['y']}
