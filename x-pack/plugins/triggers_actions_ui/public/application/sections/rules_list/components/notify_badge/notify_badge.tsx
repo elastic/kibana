@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useRef } from 'react';
 import moment from 'moment';
 import {
   EuiButton,
@@ -89,6 +89,27 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
   const snoozeTimeLeft = useMemo(
     () => (isSnoozedUntil ? getTimeRemaining(isSnoozedUntil) : undefined),
     [isSnoozedUntil]
+  );
+
+  const focusTrapButtonRef = useRef<HTMLButtonElement>(null);
+
+  // "onRuleChanged" fn triggers a full re-render of button component,
+  // preventing us from returning focus to the cell that initiated these changes.
+  // This method acts as a wrapper around "onRuleChanged" and ensures that focus is returned
+  // to the correct location after the main action is executed.
+  const onRuleChangedWrapped: RulesListNotifyBadgeProps['onRuleChanged'] = useMemo(
+    () =>
+      async (...args) => {
+        const returnFocusTimeout = 100;
+        try {
+          await onRuleChanged(...args);
+        } finally {
+          setTimeout(() => {
+            focusTrapButtonRef.current?.focus();
+          }, returnFocusTimeout);
+        }
+      },
+    [onRuleChanged]
   );
 
   const {
@@ -192,6 +213,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         iconType="bellSlash"
         color="accent"
         onClick={openPopover}
+        buttonRef={focusTrapButtonRef}
       >
         <EuiText size="xs">{formattedSnoozeText}</EuiText>
       </EuiButton>
@@ -210,6 +232,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         color="text"
         aria-label={OPEN_SNOOZE_PANEL_ARIA_LABEL}
         onClick={openPopover}
+        buttonRef={focusTrapButtonRef}
       >
         <EuiText size="xs">{formattedSnoozeText}</EuiText>
       </EuiButton>
@@ -232,6 +255,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         className={isPopoverOpen || isLoading ? '' : showOnHoverClass}
         iconType="bell"
         onClick={openPopover}
+        buttonRef={focusTrapButtonRef}
       />
     );
   }, [isPopoverOpen, isLoading, isDisabled, showOnHover, openPopover]);
@@ -248,6 +272,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         iconType="bellSlash"
         color="accent"
         onClick={openPopover}
+        buttonRef={focusTrapButtonRef}
       />
     );
   }, [isLoading, isDisabled, openPopover]);
@@ -305,7 +330,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         setRequestInFlightLoading(true);
         closePopover();
         await snoozeRule(schedule);
-        await onRuleChanged();
+        await onRuleChangedWrapped();
         toasts.addSuccess(SNOOZE_SUCCESS_MESSAGE);
       } catch (e) {
         toasts.addDanger(SNOOZE_FAILED_MESSAGE);
@@ -313,7 +338,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         setRequestInFlightLoading(false);
       }
     },
-    [setRequestInFlightLoading, snoozeRule, onRuleChanged, toasts, closePopover]
+    [closePopover, snoozeRule, onRuleChangedWrapped, toasts]
   );
 
   const onApplyUnsnooze = useCallback(
@@ -322,7 +347,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         setRequestInFlightLoading(true);
         closePopover();
         await unsnoozeRule(scheduleIds);
-        await onRuleChanged();
+        await onRuleChangedWrapped();
         toasts.addSuccess(UNSNOOZE_SUCCESS_MESSAGE);
       } catch (e) {
         toasts.addDanger(SNOOZE_FAILED_MESSAGE);
@@ -330,7 +355,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         setRequestInFlightLoading(false);
       }
     },
-    [setRequestInFlightLoading, unsnoozeRule, onRuleChanged, toasts, closePopover]
+    [closePopover, unsnoozeRule, onRuleChangedWrapped, toasts]
   );
 
   const popover = (
