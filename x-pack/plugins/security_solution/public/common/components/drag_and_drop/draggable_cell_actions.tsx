@@ -38,6 +38,7 @@ export const DraggableCellActions = React.memo<PropsWithChildren<DraggableCellAc
         data={data}
         sourcererScopeId={sourcererScopeId}
         metadata={{ scopeId }}
+        data-test-subj="draggableCellActions"
       >
         {children}
       </SecurityCellActions>
