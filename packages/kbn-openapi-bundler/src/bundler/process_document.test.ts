@@ -48,6 +48,9 @@ describe('processDocument', () => {
     const processor: DocumentNodeProcessor = {
       enter(node) {
         calls.push(`enter - ${(node as NodeWithId).id}`);
+      },
+      shouldRemove(node) {
+        calls.push(`shouldRemove - ${(node as NodeWithId).id}`);
         return false;
       },
       ref(node) {
@@ -82,8 +85,11 @@ describe('processDocument', () => {
     );
 
     expect(calls).toEqual([
+      'shouldRemove - root',
       'enter - root',
+      'shouldRemove - t1',
       'enter - t1',
+      'shouldRemove - TestRef',
       'enter - TestRef',
       'leave - TestRef',
       'ref - t1',
@@ -92,7 +98,7 @@ describe('processDocument', () => {
     ]);
   });
 
-  it('removes a node after "enter" callback returned true', async () => {
+  it('removes a node after "shouldRemove" callback returned true', async () => {
     const nodeToRemove = {
       id: 't2',
       foo: 'bar',
@@ -104,7 +110,7 @@ describe('processDocument', () => {
       t2: nodeToRemove,
     };
     const removeNodeProcessor: DocumentNodeProcessor = {
-      enter(node) {
+      shouldRemove(node) {
         return node === nodeToRemove;
       },
     };
