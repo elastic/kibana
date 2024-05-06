@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 import { WrappedElasticsearchClientError } from '@kbn/observability-plugin/server';
-import { termQuery, rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
+import { termQuery, kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ASSET_TYPE, FIRST_SEEN, LAST_SEEN } from '../../../../common/es_fields/assets';
 import { AssetsESClient } from '../../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
 import { withApmSpan } from '../../../utils/with_apm_span';
@@ -16,9 +16,28 @@ import { ServiceAssetDocument } from './types';
 
 export const MAX_NUMBER_OF_SERVICES = 1_000;
 
-type AssetType = 'host' | 'service';
+type AssetType = 'service';
 
-export async function getServicesFromAssets({
+export function assetsRangeQuery(start: number, end: number): QueryDslQueryContainer[] {
+  return [
+    {
+      range: {
+        [FIRST_SEEN]: {
+          gte: start,
+        },
+      },
+    },
+    {
+      range: {
+        [LAST_SEEN]: {
+          lte: end,
+        },
+      },
+    },
+  ];
+}
+
+export async function getAssets({
   assetsESClient,
   start,
   end,
@@ -33,9 +52,9 @@ export async function getServicesFromAssets({
   assetType: AssetType;
   logger: Logger;
 }) {
-  return withApmSpan('get_services_from_assets', async () => {
+  return withApmSpan('get_assets', async () => {
     try {
-      const response = await assetsESClient.search('get_services_from_assets', {
+      const response = await assetsESClient.search(`get_${assetType}_from_assets`, {
         body: {
           size: MAX_NUMBER_OF_SERVICES,
           track_total_hits: false,
@@ -44,20 +63,7 @@ export async function getServicesFromAssets({
               filter: [
                 ...termQuery(ASSET_TYPE, assetType),
                 ...kqlQuery(kuery),
-                {
-                  range: {
-                    [FIRST_SEEN]: {
-                      gte: start,
-                    },
-                  },
-                },
-                {
-                  range: {
-                    [LAST_SEEN]: {
-                      lte: end,
-                    },
-                  },
-                },
+                ...assetsRangeQuery(start, end),
               ],
             },
           },

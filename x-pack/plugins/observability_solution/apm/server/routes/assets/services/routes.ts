@@ -8,7 +8,7 @@
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import * as t from 'io-ts';
 import { createAssetsESClient } from '../../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
-import { getServicesFromAssets } from './get_services_from_assets';
+import { getAssets } from './get_assets';
 import { kueryRt, rangeRt } from '../../default_api_types';
 import { AssetServicesResponse } from './types';
 
@@ -29,7 +29,7 @@ const servicesAssetsRoute = createApmServerRoute({
 
     const { start, end, kuery } = params.query;
 
-    const services = await getServicesFromAssets({
+    const services = await getAssets({
       assetsESClient,
       start,
       end,

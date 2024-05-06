@@ -11,7 +11,7 @@ type SignalTypes = {
 };
 
 type ServiceItem = {
-  environment: string;
+  environment?: string;
   name: string;
 };
 
