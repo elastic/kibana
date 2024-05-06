@@ -62,9 +62,11 @@ export async function installArchive(archive: string, options?: InstallArchiveOp
   });
   log.info('extracted to %s', chalk.bold(installPath));
 
-  const tmpdir = path.resolve(installPath, 'ES_TMPDIR');
-  fs.mkdirSync(tmpdir, { recursive: true });
-  log.info('created %s', chalk.bold(tmpdir));
+  if (process.env.FTR_DISABLE_ES_TMPDIR !== 'true') {
+    const tmpdir = path.resolve(installPath, 'ES_TMPDIR');
+    fs.mkdirSync(tmpdir, { recursive: true });
+    log.info('created %s', chalk.bold(tmpdir));
+  }
 
   // starting in 6.3, security is disabled by default. Since we bootstrap
   // the keystore, we can enable security ourselves.

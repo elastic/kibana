@@ -389,7 +389,9 @@ export class Cluster {
     this.process = execa(ES_BIN, args, {
       cwd: installPath,
       env: {
-        ...(installPath ? { ES_TMPDIR: path.resolve(installPath, 'ES_TMPDIR') } : {}),
+        ...(installPath && process.env.FTR_DISABLE_ES_TMPDIR !== 'true'
+          ? { ES_TMPDIR: path.resolve(installPath, 'ES_TMPDIR') }
+          : {}),
         ...process.env,
         JAVA_HOME: '', // By default, we want to always unset JAVA_HOME so that the bundled JDK will be used
         ES_JAVA_OPTS: esJavaOpts,
