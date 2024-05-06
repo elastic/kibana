@@ -1172,9 +1172,9 @@ export class TimeSeriesExplorer extends React.Component {
                 showForecast={showForecast}
                 showModelBoundsCheckbox={showModelBoundsCheckbox}
                 showModelBounds={showModelBounds}
-                toggleShowModelBoundsHandler={this.toggleShowModelBoundsHandler}
-                toggleShowAnnotationsHandler={this.toggleShowAnnotationsHandler}
-                toggleShowForecastHandler={this.toggleShowForecastHandler}
+                onShowModelBoundsChange={this.toggleShowModelBoundsHandler}
+                onShowAnnotationsChange={this.toggleShowAnnotationsHandler}
+                onShowForecastChange={this.toggleShowForecastHandler}
               />
 
               <TimeSeriesChartWithTooltips

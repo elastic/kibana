@@ -41,9 +41,9 @@ interface Props {
   showForecast: boolean;
   showModelBoundsCheckbox: boolean;
   showModelBounds: boolean;
-  toggleShowModelBoundsHandler: () => void;
-  toggleShowAnnotationsHandler: () => void;
-  toggleShowForecastHandler: () => void;
+  onShowModelBoundsChange: () => void;
+  onShowAnnotationsChange: () => void;
+  onShowForecastChange: () => void;
 }
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
@@ -67,9 +67,9 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
   showForecastCheckbox,
   showModelBounds,
   showModelBoundsCheckbox,
-  toggleShowAnnotationsHandler,
-  toggleShowModelBoundsHandler,
-  toggleShowForecastHandler,
+  onShowAnnotationsChange,
+  onShowModelBoundsChange,
+  onShowForecastChange,
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [createInDashboard, setCreateInDashboard] = useState<boolean>(false);
@@ -152,7 +152,7 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
                 defaultMessage: 'show model bounds',
               })}
               checked={showModelBounds}
-              onChange={toggleShowModelBoundsHandler}
+              onChange={onShowModelBoundsChange}
             />
           </EuiFlexItem>
         )}
@@ -165,7 +165,7 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
                 defaultMessage: 'annotations',
               })}
               checked={showAnnotations}
-              onChange={toggleShowAnnotationsHandler}
+              onChange={onShowAnnotationsChange}
             />
           </EuiFlexItem>
         )}
@@ -182,7 +182,7 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
                 </span>
               }
               checked={showForecast}
-              onChange={toggleShowForecastHandler}
+              onChange={onShowForecastChange}
             />
           </EuiFlexItem>
         )}
