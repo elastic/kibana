@@ -12,6 +12,9 @@ import { batch } from 'react-redux';
 import type { HttpSetup, HttpFetchOptions } from '@kbn/core/public';
 import { fetchStream } from '.';
 
+/**
+ * Async thunk to start the stream.
+ */
 export const startStream = createAsyncThunk(
   'startStream',
   async (
@@ -28,16 +31,10 @@ export const startStream = createAsyncThunk(
     const { http, endpoint, apiVersion, abortCtrl, body, headers } = options;
     const state = getState() as StreamState;
 
-    if (state.isRunning) {
-      dispatch(addError('Instant restart while running not supported yet.'));
+    // If the `pending` action resolved in adding an error, don't run the stream.
+    if (state.errors.length > 0) {
       return;
     }
-
-    batch(() => {
-      dispatch(resetErrors());
-      dispatch(setIsRunning(true));
-      dispatch(setIsCancelled(false));
-    });
 
     for await (const [fetchStreamError, actions] of fetchStream(
       http,
@@ -58,8 +55,6 @@ export const startStream = createAsyncThunk(
         });
       }
     }
-
-    dispatch(setIsRunning(false));
   }
 );
 
@@ -88,18 +83,23 @@ export const streamSlice = createSlice({
       state.isCancelled = true;
       state.isRunning = false;
     },
-    resetErrors: (state: StreamState) => {
+  },
+  extraReducers: (builder) => {
+    builder.addCase(startStream.pending, (state) => {
+      if (state.isRunning) {
+        state.errors.push('Instant restart while running not supported yet.');
+        return;
+      }
+
       state.errors = [];
-    },
-    setIsCancelled: (state: StreamState, action: PayloadAction<boolean>) => {
-      state.isCancelled = action.payload;
-    },
-    setIsRunning: (state: StreamState, action: PayloadAction<boolean>) => {
-      state.isRunning = action.payload;
-    },
+      state.isCancelled = false;
+      state.isRunning = true;
+    });
+    builder.addCase(startStream.fulfilled, (state) => {
+      state.isRunning = false;
+    });
   },
 });
 
 // Action creators are generated for each case reducer function
-export const { addError, cancelStream, resetErrors, setIsCancelled, setIsRunning } =
-  streamSlice.actions;
+export const { addError, cancelStream } = streamSlice.actions;
