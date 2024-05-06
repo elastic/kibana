@@ -245,18 +245,7 @@ export const schema: FormSchema<DefineStepRule> = {
     ],
   },
   relatedIntegrations: {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldRelatedIntegrationsLabel',
-      {
-        defaultMessage: 'Related integrations',
-      }
-    ),
-    helpText: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldRelatedIntegrationsHelpText',
-      {
-        defaultMessage: 'Integration related to this Rule.',
-      }
-    ),
+    type: FIELD_TYPES.JSON,
   },
   requiredFields: {
     label: i18n.translate(
