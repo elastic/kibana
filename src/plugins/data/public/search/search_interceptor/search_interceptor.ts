@@ -301,7 +301,7 @@ export class SearchInterceptor {
     const search = () => {
       const [{ isSearchStored }, afterPoll] = searchTracker?.beforePoll() ?? [
         { isSearchStored: false },
-        ({ isSearchStored: _isSearchStored }) => {},
+        () => {},
       ];
       return this.runSearch(
         { id, ...request },
