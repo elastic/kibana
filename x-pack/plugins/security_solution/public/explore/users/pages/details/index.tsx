@@ -191,9 +191,19 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     getGlobalQuery(state, USER_OVERVIEW_RISK_SCORE_QUERY_ID)
   );
 
+  const { refetch: refetchAlertsRiskInputs } = useDeepEqualSelector((state) =>
+    getGlobalQuery(state, TableId.alertsRiskInputs)
+  );
+
   const refetchRiskScore = useCallback(() => {
-    (refetchOverviewRiskScore as Refetch | null)?.();
-  }, [refetchOverviewRiskScore]);
+    if (refetchOverviewRiskScore) {
+      (refetchOverviewRiskScore as Refetch)();
+    }
+
+    if (refetchAlertsRiskInputs) {
+      (refetchAlertsRiskInputs as Refetch)();
+    }
+  }, [refetchAlertsRiskInputs, refetchOverviewRiskScore]);
 
   const { calculateEntityRiskScore } = useCalculateEntityRiskScore(
     RiskScoreEntity.user,
