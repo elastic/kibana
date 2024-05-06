@@ -200,15 +200,15 @@
     padding: $euiSizeXS;
     
     // OVER PANEL
-    border-radius: $euiBorderRadius;
-    z-index: $euiZLevel9; 
-    top: (-$euiSizeL);
+    // border-radius: $euiBorderRadius;
+    // z-index: $euiZLevel9; 
+    // top: (-$euiSizeL);
     
-    // // UNDER PANEL
-    // z-index: -1;
-    // border-top-right-radius: $euiBorderRadius;
-    // border-top-left-radius: $euiBorderRadius;
-    // top: (-$euiSizeXL);
+    // UNDER PANEL
+    z-index: -1;
+    border-top-right-radius: $euiBorderRadius;
+    border-top-left-radius: $euiBorderRadius;
+    top: (-$euiSizeXL);
 
     background-color: $euiColorEmptyShade;
     box-shadow: 0 0 0 1px $euiColorLightShade;
@@ -224,7 +224,7 @@
   }
 
   .embPanel__floatingActionsLeft {
-    left: $euiSizeS;
+    left: $euiSize;
 
     padding: $euiSizeS;
 
@@ -240,6 +240,6 @@
   }
 
   .embPanel__floatingActionsRight {
-    right: $euiSizeS;
+    right: $euiSize;
   }
 }

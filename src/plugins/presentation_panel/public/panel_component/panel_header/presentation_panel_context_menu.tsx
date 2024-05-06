@@ -17,7 +17,6 @@ import {
   EuiContextMenuPanel,
   EuiContextMenuPanelDescriptor,
   EuiIcon,
-  EuiPanel,
   EuiPopover,
   EuiSkeletonText,
   EuiToolTip,
@@ -55,7 +54,7 @@ export const PresentationPanelContextMenu = ({
 }) => {
   const [menuPanelsLoading, setMenuPanelsLoading] = useState(false);
   const [contextMenuActions, setContextMenuActions] = useState<Array<Action<object>>>([]);
-  const [isContextMenuOpen, setIsContextMenuOpen] = useState<boolean | undefined>(undefined);
+  const [isContextMenuOpen, setIsContextMenuOpen] = useState<boolean>(false);
   const [contextMenuPanels, setContextMenuPanels] = useState<EuiContextMenuPanelDescriptor[]>([]);
 
   const [title, parentViewMode] = useBatchedOptionalPublishingSubjects(
@@ -71,11 +70,7 @@ export const PresentationPanelContextMenu = ({
   );
 
   useEffect(() => {
-    /**
-     * isContextMenuOpen starts as undefined which allows this use effect to run on mount. This
-     * is required so that showNotification is calculated on mount.
-     */
-    if (isContextMenuOpen === false || !api) return;
+    if (!api) return;
 
     setMenuPanelsLoading(true);
     let canceled = false;
@@ -153,8 +148,6 @@ export const PresentationPanelContextMenu = ({
 
   const [mainMenu, moreMenu] = contextMenuPanels;
 
-  console.log({ mainMenu, moreMenu });
-
   return (
     <div className="embPanel__floatingActionsWrapper">
       {children}
@@ -185,19 +178,18 @@ export const PresentationPanelContextMenu = ({
               className
             )}
           >
-            {mainMenu?.items &&
-              mainMenu?.items?.map(({ icon, 'data-test-subj': dataTestSubj, onClick, name }) => (
-                <EuiToolTip key={`hoveraction_${dataTestSubj}_${api?.uuid}`} content={name}>
-                  <EuiButtonIcon
-                    iconType={icon as IconType}
-                    color="text"
-                    onClick={onClick as MouseEventHandler}
-                    data-test-subj={dataTestSubj}
-                    aria-label={name as string}
-                  />
-                </EuiToolTip>
-              ))}
-            {moreMenu && (
+            {mainMenu?.items?.map(({ icon, 'data-test-subj': dataTestSubj, onClick, name }, i) => (
+              <EuiToolTip key={`main_action_${dataTestSubj}_${api?.uuid}`} content={name}>
+                <EuiButtonIcon
+                  iconType={icon as IconType}
+                  color="text"
+                  onClick={onClick as MouseEventHandler}
+                  data-test-subj={dataTestSubj}
+                  aria-label={name as string}
+                />
+              </EuiToolTip>
+            ))}
+            {moreMenu?.items?.length && (
               <EuiPopover
                 repositionOnScroll
                 panelPaddingSize="none"
@@ -211,7 +203,6 @@ export const PresentationPanelContextMenu = ({
                     ? 'embeddablePanelContextMenuOpen'
                     : 'embeddablePanelContextMenuClosed'
                 }
-                attachToAnchor
               >
                 {menuPanelsLoading ? (
                   <EuiContextMenuPanel
