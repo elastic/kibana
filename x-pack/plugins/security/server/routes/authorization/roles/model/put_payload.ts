@@ -31,6 +31,7 @@ export const transformPutPayloadToElasticsearchRole = (
   );
 
   return {
+    ...(rolePayload.description && { description: rolePayload.description }),
     metadata: rolePayload.metadata,
     cluster: elasticsearch.cluster || [],
     indices: elasticsearch.indices || [],
@@ -47,6 +48,11 @@ export function getPutPayloadSchema(
   getBasePrivilegeNames: () => { global: string[]; space: string[] }
 ) {
   return schema.object({
+    /**
+     * Optional text to describe the Role
+     */
+    description: schema.maybe(schema.string({ maxLength: 2048 })),
+
     /**
      * An optional meta-data dictionary. Within the metadata, keys that begin with _ are reserved
      * for system usage.
