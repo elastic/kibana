@@ -24,7 +24,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FIELD_STATISTICS_LOADED } from './constants';
-import type { DiscoverStateContainer } from '../../services/discover_state';
+import type { DiscoverStateContainer } from '../../state_management/discover_state';
 export interface RandomSamplingOption {
   mode: 'random_sampling';
   seed: string;
