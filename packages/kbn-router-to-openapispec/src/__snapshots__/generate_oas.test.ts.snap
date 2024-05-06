@@ -30,7 +30,6 @@ Object {
   "openapi": "3.0.0",
   "paths": Object {
     "/foo/{id}": Object {
-      "description": "",
       "get": Object {
         "operationId": "/foo/{id}#0",
         "parameters": Array [
@@ -93,6 +92,7 @@ Object {
           },
         },
       },
+      "summary": "",
     },
   },
   "security": Array [
@@ -134,7 +134,6 @@ Object {
   "openapi": "3.0.0",
   "paths": Object {
     "/bar": Object {
-      "description": "versioned route",
       "get": Object {
         "operationId": "/bar#0",
         "parameters": Array [
@@ -216,9 +215,9 @@ Object {
           },
         },
       },
+      "summary": "versioned route",
     },
     "/foo/{id}": Object {
-      "description": "route",
       "get": Object {
         "operationId": "/foo/{id}#0",
         "parameters": Array [
@@ -347,6 +346,7 @@ Object {
           },
         },
       },
+      "summary": "route",
     },
   },
   "security": Array [
@@ -388,7 +388,6 @@ Object {
   "openapi": "3.0.0",
   "paths": Object {
     "/foo/{id}": Object {
-      "description": "",
       "get": Object {
         "operationId": "/foo/{id}#0",
         "parameters": Array [
@@ -422,9 +421,9 @@ Object {
           },
         },
       },
+      "summary": "",
     },
     "/test": Object {
-      "description": "",
       "get": Object {
         "operationId": "/test#0",
         "parameters": Array [
@@ -457,6 +456,7 @@ Object {
           },
         },
       },
+      "summary": "",
     },
   },
   "security": Array [
