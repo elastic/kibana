@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { IKibanaSearchResponse } from './types';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { isAbortResponse, isRunningResponse } from './utils';
 
 describe('utils', () => {
