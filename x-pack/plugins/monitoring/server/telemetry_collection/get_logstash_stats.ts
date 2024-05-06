@@ -237,7 +237,7 @@ export function processStatsResults(
 export function processLogstashStateResults(
   results: estypes.SearchResponse<LogstashState>,
   clusterUuid: string,
-  { clusters, plugins }: LogstashProcessOptions,
+  { clusters, versions, plugins }: LogstashProcessOptions,
   isSelfMonitoring: boolean
 ) {
   const currHits = results?.hits?.hits || [];
