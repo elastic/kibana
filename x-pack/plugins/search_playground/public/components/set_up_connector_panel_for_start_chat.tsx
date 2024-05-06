@@ -82,6 +82,7 @@ export const SetUpConnectorPanelForStartChat: React.FC = () => {
             defaultMessage="You need to connect to a large-language model to use this feature. Start by adding connection details for your LLM provider."
           />
         }
+        dataTestSubj="connectToLLMChatPanel"
       >
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>

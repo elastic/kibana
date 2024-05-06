@@ -85,7 +85,7 @@ export const StartNewChat: React.FC<StartNewChatProps> = ({ onStartClick }) => {
           <SourcesPanelForStartChat />
         </EuiFlexItem>
 
-        <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexGroup justifyContent="flexEnd" data-test-subj="startChatButton">
           <EuiButton
             fill
             iconType="arrowRight"
