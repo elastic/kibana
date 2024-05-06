@@ -22,14 +22,12 @@ paths:
 components:
   schemas:
     MySchema:
-      type: object
-      properties:
-        allOf:
-          - $ref: '#/components/schemas/SchemaToInline'
-          - type: object
-            properties:
-              mySchemaSubfield:
-                type: boolean
+      allOf:
+        - $ref: '#/components/schemas/SchemaToInline'
+        - type: object
+          properties:
+            mySchemaSubfield:
+              type: boolean
 
     # SchemaToInline is referenced in two branches
     #

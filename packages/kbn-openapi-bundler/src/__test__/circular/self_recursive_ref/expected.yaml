@@ -29,6 +29,7 @@ components:
       type: http
   schemas:
     CircularTestSchema:
-      type: string
-      data:
-        $ref: '#/components/schemas/CircularTestSchema'
+      type: object
+      properties:
+        field:
+          $ref: '#/components/schemas/CircularTestSchema'

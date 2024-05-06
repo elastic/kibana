@@ -38,13 +38,13 @@ components:
       type: http
   schemas:
     CircularTestSchema:
-      type: string
-      data:
-        items:
+      type: object
+      properties:
+        field:
           $ref: '#/components/schemas/AnotherCircularTestSchema'
 
     AnotherCircularTestSchema:
-      anyof:
+      anyOf:
         - $ref: '#/components/schemas/CircularTestSchema'
         - type: string
           enum:

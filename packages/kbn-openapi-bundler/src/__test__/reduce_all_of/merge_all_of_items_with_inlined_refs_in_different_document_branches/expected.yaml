@@ -43,13 +43,11 @@ components:
     MySchema:
       type: object
       properties:
-        type: object
-        properties:
-          SchemaToInlineField1:
-            type: string
-          SchemaToInlineField2:
-            type: number
-          mySchemaSubfield:
-            type: boolean
-        required:
-          - field2
+        SchemaToInlineField1:
+          type: string
+        SchemaToInlineField2:
+          type: number
+        mySchemaSubfield:
+          type: boolean
+      required:
+        - field2
