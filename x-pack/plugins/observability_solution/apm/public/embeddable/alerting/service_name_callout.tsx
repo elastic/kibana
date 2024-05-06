@@ -14,7 +14,7 @@ export function ServiceNameCallout() {
     <EuiCallOut
       title={
         <FormattedMessage
-          id="xpack.apm.alertDetails.error.toastTitle"
+          id="xpack.apm.alertingEmbeddables.serviceName.error.toastTitle"
           defaultMessage="An error occurred when identifying the APM service name or transaction type."
         />
       }
@@ -23,7 +23,7 @@ export function ServiceNameCallout() {
     >
       <p>
         <FormattedMessage
-          id="xpack.apm.alertDetails.error.toastDescription"
+          id="xpack.apm.alertingEmbeddables.serviceName.error.toastDescription"
           defaultMessage="Unable to load the APM visualizations."
         />
       </p>

@@ -14,7 +14,7 @@ export function TimeRangeCallout() {
     <EuiCallOut
       title={
         <FormattedMessage
-          id="xpack.apm.alertDetails.error.toastTitle"
+          id="xpack.apm.alertingEmbeddables.timeRange.error.toastTitle"
           defaultMessage="An error occurred when identifying the alert time range."
         />
       }
@@ -23,7 +23,7 @@ export function TimeRangeCallout() {
     >
       <p>
         <FormattedMessage
-          id="xpack.apm.alertDetails.error.toastDescription"
+          id="xpack.apm.alertingEmbeddables.timeRange.toastDescription"
           defaultMessage="Unable to load the alert details page's charts. Please try to refresh the page if the alert is newly created"
         />
       </p>
