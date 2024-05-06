@@ -210,8 +210,10 @@ const CreateRulePageComponent: React.FC = () => {
   const [isThreatQueryBarValid, setIsThreatQueryBarValid] = useState(false);
 
   const esqlQueryForAboutStep = useEsqlQueryForAboutStep({ defineStepData, activeStep });
+
   const isValidEsqlQuery = useIsValidEsqlQuery(
     defineStepData.queryBar.query.query,
+    defineStepData.ruleType,
     defineStepForm.validateFields
   );
 
