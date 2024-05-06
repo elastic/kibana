@@ -94,7 +94,7 @@ describe('Data table columns', function () {
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
         columnsMeta: {
-          extension: { type: 'number' },
+          extension: { type: 'string' },
           message: { type: 'string', esType: 'keyword' },
           timestamp: { type: 'date', esType: 'dateTime' },
         },
@@ -304,7 +304,7 @@ describe('Data table columns', function () {
       const actual = getEuiGridColumns({
         showColumnTokens: true,
         columnsMeta: {
-          extension: { type: 'number' },
+          extension: { type: 'string' },
           message: { type: 'string', esType: 'keyword' },
         },
         columns,
@@ -408,7 +408,7 @@ describe('Data table columns', function () {
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
         columnsMeta: {
-          extension: { type: 'number' },
+          extension: { type: 'string' },
           message: { type: 'string', esType: 'keyword' },
         },
       });
@@ -438,7 +438,7 @@ describe('Data table columns', function () {
         onFilter: () => {},
         customGridColumnsConfiguration,
         columnsMeta: {
-          extension: { type: 'number' },
+          extension: { type: 'string' },
           message: { type: 'string', esType: 'keyword' },
         },
       });

@@ -52,7 +52,7 @@ Array [
     "displayAsText": "extension",
     "id": "extension",
     "isSortable": true,
-    "schema": "numeric",
+    "schema": "string",
     "visibleCellActions": undefined,
   },
   Object {
@@ -105,7 +105,7 @@ Array [
       columnsMeta={
         Object {
           "extension": Object {
-            "type": "number",
+            "type": "string",
           },
           "message": Object {
             "esType": "keyword",
@@ -1136,7 +1136,7 @@ Array [
       columnsMeta={
         Object {
           "extension": Object {
-            "type": "number",
+            "type": "string",
           },
           "message": Object {
             "esType": "keyword",
@@ -1366,7 +1366,7 @@ Array [
     "displayAsText": "extension",
     "id": "extension",
     "isSortable": false,
-    "schema": "numeric",
+    "schema": "string",
     "visibleCellActions": undefined,
   },
   Object {
@@ -1417,7 +1417,7 @@ Array [
       columnsMeta={
         Object {
           "extension": Object {
-            "type": "number",
+            "type": "string",
           },
           "message": Object {
             "esType": "keyword",
@@ -2857,7 +2857,7 @@ Array [
       columnsMeta={
         Object {
           "extension": Object {
-            "type": "number",
+            "type": "string",
           },
           "message": Object {
             "esType": "keyword",
@@ -3021,7 +3021,7 @@ Array [
     "displayAsText": "extension",
     "id": "extension",
     "isSortable": true,
-    "schema": "numeric",
+    "schema": "string",
     "visibleCellActions": undefined,
   },
   Object {
@@ -3074,7 +3074,7 @@ Array [
       columnsMeta={
         Object {
           "extension": Object {
-            "type": "number",
+            "type": "string",
           },
           "message": Object {
             "esType": "keyword",
