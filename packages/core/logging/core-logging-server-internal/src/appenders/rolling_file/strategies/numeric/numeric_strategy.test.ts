@@ -41,6 +41,11 @@ describe('NumericRollingStrategy', () => {
     resetAllMock();
   });
 
+  it('calls `context.setOrderedRolledFileFn` in constructor', () => {
+    expect(context.setOrderedRolledFileFn).toHaveBeenCalledTimes(1);
+    expect(context.setOrderedRolledFileFn).toHaveBeenCalledWith(expect.any(Function));
+  })
+
   it('calls `getOrderedRolledFiles` with the correct parameters', async () => {
     await strategy.rollout();
 
