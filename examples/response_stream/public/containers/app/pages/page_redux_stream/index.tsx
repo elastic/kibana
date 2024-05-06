@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState, FC } from 'react';
+import React, { useEffect, useRef, useState, FC } from 'react';
 
 import {
   Chart,
@@ -29,22 +29,19 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { useFetchStream } from '@kbn/ml-response-stream/client';
+import { cancelStream, startStream } from '@kbn/ml-response-stream/client';
 
-import { getInitialState } from '../../../../../common/api/stream_state';
-import {
-  resetStream,
-  reducerStreamReducer,
-} from '../../../../../common/api/reducer_stream/reducer';
 import { RESPONSE_STREAM_API_ENDPOINT } from '../../../../../common/api';
+import { reset } from '../../../../../common/api/redux_stream/dev_stream_slice';
 
 import { Page } from '../../../../components/page';
-
 import { useDeps } from '../../../../hooks/use_deps';
 
 import { getStatusMessage } from '../../components/get_status_message';
 
-export const PageReducerStream: FC = () => {
+import { useAppDispatch, useAppSelector } from './hooks';
+
+export const PageReduxStream: FC = () => {
   const {
     core: { http, notifications },
   } = useDeps();
@@ -53,22 +50,29 @@ export const PageReducerStream: FC = () => {
   const [compressResponse, setCompressResponse] = useState(true);
   const [flushFix, setFlushFix] = useState(false);
 
-  const { dispatch, start, cancel, data, errors, isCancelled, isRunning } = useFetchStream(
-    http,
-    RESPONSE_STREAM_API_ENDPOINT.REDUCER_STREAM,
-    '1',
-    { compressResponse, flushFix, simulateErrors },
-    { reducer: reducerStreamReducer, initialState: getInitialState() }
-  );
+  const dispatch = useAppDispatch();
+  const isRunning = useAppSelector((s) => s.stream.isRunning);
+  const isCancelled = useAppSelector((s) => s.stream.isCancelled);
+  const errors = useAppSelector((s) => s.stream.errors);
+  const progress = useAppSelector((s) => s.dev.progress);
+  const entities = useAppSelector((s) => s.dev.entities);
 
-  const { progress, entities } = data;
+  const abortCtrl = useRef(new AbortController());
 
   const onClickHandler = async () => {
     if (isRunning) {
-      cancel();
+      dispatch(cancelStream());
     } else {
-      dispatch(resetStream());
-      start();
+      dispatch(reset());
+      dispatch(
+        startStream({
+          http,
+          endpoint: RESPONSE_STREAM_API_ENDPOINT.REDUX_STREAM,
+          apiVersion: '1',
+          abortCtrl,
+          body: { compressResponse, flushFix, simulateErrors },
+        })
+      );
     }
   };
 
@@ -83,10 +87,10 @@ export const PageReducerStream: FC = () => {
   // TODO This approach needs to be adapted as it might miss when error messages arrive bulk.
   // This is for errors on the application level
   useEffect(() => {
-    if (data.errors.length > 0) {
-      notifications.toasts.addDanger(data.errors[data.errors.length - 1]);
+    if (errors.length > 0) {
+      notifications.toasts.addDanger(errors[errors.length - 1]);
     }
-  }, [data.errors, notifications.toasts]);
+  }, [errors, notifications.toasts]);
 
   const buttonLabel = isRunning ? 'Stop development' : 'Start development';
 
@@ -147,7 +151,7 @@ export const PageReducerStream: FC = () => {
         </Chart>
       </div>
       <EuiText>
-        <p>{getStatusMessage(isRunning, isCancelled, data.progress)}</p>
+        <p>{getStatusMessage(isRunning, isCancelled, progress)}</p>
         <EuiCheckbox
           id="responseStreamSimulateErrorsCheckbox"
           label="Simulate errors (gets applied to new streams only, not currently running ones)."

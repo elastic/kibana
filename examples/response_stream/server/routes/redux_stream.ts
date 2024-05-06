@@ -10,19 +10,19 @@ import type { IRouter, Logger } from '@kbn/core/server';
 import { streamFactory } from '@kbn/ml-response-stream/server';
 
 import {
-  errorAction,
-  updateProgressAction,
-  addToEntityAction,
-  deleteEntityAction,
-  ReducerStreamApiAction,
-} from '../../common/api/reducer_stream/reducer_actions';
+  updateProgress,
+  addToEntity,
+  deleteEntity,
+  error,
+  type ReduxStreamApiAction,
+} from '../../common/api/redux_stream/dev_stream_slice';
 import { reducerStreamRequestBodySchema } from '../../common/api/reducer_stream';
 import { RESPONSE_STREAM_API_ENDPOINT } from '../../common/api';
 
-export const defineReducerStreamRoute = (router: IRouter, logger: Logger) => {
+export const defineReduxStreamRoute = (router: IRouter, logger: Logger) => {
   router.versioned
     .post({
-      path: RESPONSE_STREAM_API_ENDPOINT.REDUCER_STREAM,
+      path: RESPONSE_STREAM_API_ENDPOINT.REDUX_STREAM,
       access: 'internal',
     })
     .addVersion(
@@ -57,7 +57,7 @@ export const defineReducerStreamRoute = (router: IRouter, logger: Logger) => {
           shouldStop = true;
         });
 
-        const { end, push, responseWithHeaders } = streamFactory<ReducerStreamApiAction>(
+        const { end, push, responseWithHeaders } = streamFactory<ReduxStreamApiAction>(
           request.headers,
           logger,
           request.body.compressResponse,
@@ -96,23 +96,23 @@ export const defineReducerStreamRoute = (router: IRouter, logger: Logger) => {
               return;
             }
 
-            push(updateProgressAction(progress));
+            push(updateProgress(progress));
 
             const randomEntity = entities[Math.floor(Math.random() * entities.length)];
             const randomAction = actions[Math.floor(Math.random() * actions.length)];
 
             if (randomAction === 'add') {
               const randomCommits = Math.floor(Math.random() * 100);
-              push(addToEntityAction(randomEntity, randomCommits));
+              push(addToEntity({ entity: randomEntity, value: randomCommits }));
             } else if (randomAction === 'delete') {
-              push(deleteEntityAction(randomEntity));
+              push(deleteEntity(randomEntity));
             } else if (randomAction === 'throw-error') {
               // Throw an error. It should not crash Kibana!
               // It should be caught and logged to the Kibana server console.
               throw new Error('There was a (simulated) server side error!');
             } else if (randomAction === 'emit-error') {
               // Emit an error as a stream action.
-              push(errorAction('(Simulated) error pushed to the stream'));
+              push(error('(Simulated) error pushed to the stream'));
               return;
             }
 

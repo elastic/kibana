@@ -10,6 +10,8 @@ import React from 'react';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common/constants';
 import { PageSimpleStringStream } from './containers/app/pages/page_simple_string_stream';
 import { PageReducerStream } from './containers/app/pages/page_reducer_stream';
+import { PageReduxStream } from './containers/app/pages/page_redux_stream';
+import { ReduxStreamProvider } from './containers/app/pages/page_redux_stream/store';
 
 interface RouteSectionDef {
   title: string;
@@ -37,6 +39,15 @@ export const routes: RouteSectionDef[] = [
         title: 'Reducer stream',
         id: 'reducer-stream',
         component: <PageReducerStream />,
+      },
+      {
+        title: 'Redux stream',
+        id: 'redux-stream',
+        component: (
+          <ReduxStreamProvider>
+            <PageReduxStream />
+          </ReduxStreamProvider>
+        ),
       },
     ],
   },
