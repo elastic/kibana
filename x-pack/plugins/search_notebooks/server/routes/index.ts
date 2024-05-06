@@ -17,6 +17,9 @@ export function defineRoutes({ config, notebooksCache, logger, router }: RouteDe
     {
       path: '/internal/search_notebooks/notebooks',
       validate: {},
+      options: {
+        access: 'internal',
+      },
     },
     async (_context, _request, response) => {
       const notebooks = await getNotebookCatalog({ cache: notebooksCache, config, logger });
@@ -35,6 +38,9 @@ export function defineRoutes({ config, notebooksCache, logger, router }: RouteDe
         params: schema.object({
           notebookId: schema.string(),
         }),
+      },
+      options: {
+        access: 'internal',
       },
     },
     async (_, request, response) => {
