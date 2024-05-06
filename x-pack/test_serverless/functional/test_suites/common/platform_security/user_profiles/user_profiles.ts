@@ -11,9 +11,9 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 const VIEWER_ROLE = 'viewer';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
+  const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['svlCommonPage', 'common', 'userProfiles']);
   const svlUserManager = getService('svlUserManager');
-  const find = getService('find');
 
   describe('User Profile Page', async () => {
     before(async () => {
@@ -38,14 +38,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('should not have edit actions', async () => {
-        const fullNameInputField = await find.allByCssSelector(
-          '[data-test-subj="userProfileFullName"]'
-        );
+        const fullNameInputField = await testSubjects.findAll('userProfileFullName');
 
-        const emailInputField = await find.allByCssSelector('[data-test-subj="userProfileEmail"]');
-        const changePasswordButton = await find.allByCssSelector(
-          '[data-test-subj="openChangePasswordForm"]'
-        );
+        const emailInputField = await testSubjects.findAll('userProfileEmail');
+        const changePasswordButton = await testSubjects.findAll('openChangePasswordForm');
 
         expect(fullNameInputField).to.have.length(0);
         expect(emailInputField).to.have.length(0);

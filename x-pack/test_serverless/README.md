@@ -213,10 +213,10 @@ TEST_CLOUD=1 TEST_CLOUD_HOST_NAME="CLOUD_HOST_NAME" TEST_ES_URL="https://elastic
 ```
 
 Steps to follow to run on QA environment:
-- Go to `CLOUD_HOST_NAME`  and create a project.
+- Go to `CLOUD_HOST_NAME` and create a project.
 - Go to `CLOUD_HOST_NAME/account/keys` and create Cloud specific API Key.
 - We need the key from step 2 to obtain basic auth credentials for ES and Kibana.
-  Make a post request to the following endpoint.
+  Make a POST request to the following endpoint.
   ```
   POST CLOUD_HOST_NAME/api/v1/serverless/projects/<project-type>/<project-id>/_reset-internal-credentials
   Authorization: ApiKey <Cloud-API-key>
