@@ -15,6 +15,7 @@ import {
   RefNode,
   DocumentNode,
   TraverseRootDocumentContext,
+  DocumentNodeProcessor,
 } from '../types';
 import { hasProp } from '../../utils/has_prop';
 import { isChildContext } from '../is_child_context';
@@ -26,12 +27,13 @@ import { inlineRef } from './utils/inline_ref';
  *
  * Bundling means all external references like `../../some_file.schema.yaml#/components/schemas/SomeSchema` saved
  * to the result document under corresponding path `components` -> `schemas` -> `SomeSchema` and `$ref` property's
- * values is updated to `#/components/schemas/SomeSchema`.
+ * values are updated to be local e.g. `#/components/schemas/SomeSchema`.
  *
- * Conditional dereference means inlining references when `inliningPredicate()` returns `true`. If `inliningPredicate`
- * is not passed only bundling happens.
+ * Some references get inlined based on a condition (conditional dereference). It's controlled by inlining
+ * property whose value should be `true`. `inliningPropName` specifies inlining property name e.g. `x-inline`.
+ * Nodes having `x-inline: true` will be inlined.
  */
-export class BundleRefProcessor {
+export class BundleRefProcessor implements DocumentNodeProcessor {
   private refs = new Map<string, ResolvedRef>();
   private nodesToInline = new Set<Readonly<DocumentNode>>();
 
