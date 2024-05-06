@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import { buildExpressionFunction, ExpressionAstFunction } from '@kbn/expressions-plugin/common';
 import { AggregateQuery } from '../../query';
-import { EssqlExpressionFunctionDefinition } from './essql';
 import { EsqlExpressionFunctionDefinition } from './esql';
 
 export const aggregateQueryToAst = ({
@@ -22,19 +21,11 @@ export const aggregateQueryToAst = ({
   titleForInspector?: string;
   descriptionForInspector?: string;
 }): undefined | ExpressionAstFunction => {
-  if ('sql' in query) {
-    return buildExpressionFunction<EssqlExpressionFunctionDefinition>('essql', {
-      query: query.sql,
-      timeField,
-    }).toAst();
-  }
-  if ('esql' in query) {
-    return buildExpressionFunction<EsqlExpressionFunctionDefinition>('esql', {
-      query: query.esql,
-      timeField,
-      locale: i18n.getLocale(),
-      titleForInspector,
-      descriptionForInspector,
-    }).toAst();
-  }
+  return buildExpressionFunction<EsqlExpressionFunctionDefinition>('esql', {
+    query: query.esql,
+    timeField,
+    locale: i18n.getLocale(),
+    titleForInspector,
+    descriptionForInspector,
+  }).toAst();
 };
