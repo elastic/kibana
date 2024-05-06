@@ -15,6 +15,7 @@ export {
   getInitialESQLQuery,
   getESQLWithSafeLimit,
   appendToESQLQuery,
+  getESQLQueryColumns,
   TextBasedLanguages,
 } from './src';
 
