@@ -90,6 +90,7 @@ import type { SetComponents, GetComponents$ } from './contract_components';
 import type { ConfigSettings } from '../common/config_settings';
 import type { OnboardingPageService } from './app/components/onboarding/onboarding_page_service';
 import type { SolutionNavigation } from './app/solution_navigation/solution_navigation';
+import { MapsStartApi } from '@kbn/maps-plugin/public';
 
 export interface SetupPlugins {
   cloud?: CloudSetup;
@@ -130,6 +131,7 @@ export interface StartPlugins {
   timelines: TimelinesUIStart;
   sessionView: SessionViewStart;
   uiActions: UiActionsStart;
+  maps: MapsStartApi;
   ml?: MlPluginStart;
   spaces?: SpacesPluginStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;

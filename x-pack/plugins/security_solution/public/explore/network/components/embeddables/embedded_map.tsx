@@ -9,24 +9,17 @@
 
 import { EuiAccordion, EuiLink, EuiText } from '@elastic/eui';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import { OutPortal } from 'react-reverse-portal';
 import { useSelector } from 'react-redux';
 import { createHtmlPortalNode, InPortal } from 'react-reverse-portal';
 import styled, { css } from 'styled-components';
 import type { Filter, Query } from '@kbn/es-query';
-import {
-  EmbeddablePanel,
-  isErrorEmbeddable,
-  type ErrorEmbeddable,
-} from '@kbn/embeddable-plugin/public';
-import type { MapEmbeddable } from '@kbn/maps-plugin/public/embeddable';
 import { isEqual } from 'lodash/fp';
 import { buildTimeRangeFilter } from '../../../../detections/components/alerts_table/helpers';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useIsFieldInIndexPattern } from '../../../containers/fields';
-import { Loader } from '../../../../common/components/loader';
 import type { GlobalTimeArgs } from '../../../../common/containers/use_global_time';
 import { Embeddable } from './embeddable';
-import { createEmbeddable } from './create_embeddable';
 import { IndexPatternsMissingPrompt } from './index_patterns_missing_prompt';
 import { MapToolTip } from './map_tool_tip/map_tool_tip';
 import * as i18n from './translations';
@@ -36,6 +29,7 @@ import { sourcererSelectors } from '../../../../common/store/sourcerer';
 import type { State } from '../../../../common/store';
 import type { SourcererDataView } from '../../../../common/store/sourcerer/model';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import type { MapApi, RenderTooltipContentParams } from '@kbn/maps-plugin/public';
 
 export const NETWORK_MAP_VISIBLE = 'network_map_visbile';
 
@@ -106,10 +100,6 @@ export const EmbeddedMapComponent = ({
   setQuery,
   startDate,
 }: EmbeddedMapProps) => {
-  const [embeddable, setEmbeddable] = React.useState<MapEmbeddable | undefined | ErrorEmbeddable>(
-    undefined
-  );
-
   const { services } = useKibana();
   const { storage } = services;
 
@@ -174,88 +164,13 @@ export const EmbeddedMapComponent = ({
   // Search InPortal/OutPortal for implementation touch points
   const portalNode = React.useMemo(() => createHtmlPortalNode(), []);
 
-  // Initial Load useEffect
-  useEffect(() => {
-    let isSubscribed = true;
-    async function setupEmbeddable() {
-      // Create & set Embeddable
-      try {
-        const embeddableObject = await createEmbeddable(
-          filters,
-          mapDataViews,
-          query,
-          startDate,
-          endDate,
-          setQuery,
-          portalNode,
-          services.embeddable
-        );
-        if (isSubscribed) {
-          setEmbeddable(embeddableObject);
-        }
-      } catch (e) {
-        if (isSubscribed) {
-          addError(e, { title: i18n.ERROR_CREATING_EMBEDDABLE });
-          setIsError(true);
-        }
-      }
-    }
+  const layerList = useMemo(() => {
+    return getLayerList(mapDataViews);
+  }, [mapDataViews]);
 
-    if (embeddable == null && selectedPatterns.length > 0 && !isIndexError) {
-      setupEmbeddable();
-    }
-
-    return () => {
-      isSubscribed = false;
-    };
-  }, [
-    addError,
-    endDate,
-    embeddable,
-    filters,
-    mapDataViews,
-    query,
-    portalNode,
-    services.embeddable,
-    selectedPatterns,
-    setQuery,
-    startDate,
-    isIndexError,
-  ]);
-
-  // update layer with new index patterns
-  useEffect(() => {
-    const setLayerList = async () => {
-      if (embeddable != null && mapDataViews.length) {
-        // @ts-expect-error
-        await embeddable.setLayerList(getLayerList(mapDataViews));
-        embeddable.reload();
-      }
-    };
-    if (embeddable != null && !isErrorEmbeddable(embeddable)) {
-      setLayerList();
-    }
-  }, [embeddable, mapDataViews]);
-
-  // queryExpression updated useEffect
-  useEffect(() => {
-    if (embeddable != null) {
-      embeddable.updateInput({ query });
-    }
-  }, [embeddable, query]);
-
-  const timeRangeFilter = useMemo(
-    () => buildTimeRangeFilter(startDate, endDate),
-    [startDate, endDate]
-  );
-  useEffect(() => {
-    if (embeddable != null) {
-      // pass time range as filter instead of via timeRange param
-      // if user's data view does not have a time field, the timeRange param is not applied
-      // using filter will always apply the time range
-      embeddable.updateInput({ filters: [...filters, ...timeRangeFilter] });
-    }
-  }, [embeddable, filters, timeRangeFilter]);
+  const appliedFilters = useMemo(() => {
+    return [...filters, ...buildTimeRangeFilter(startDate, endDate)];
+  }, [filters, startDate, endDate]);
 
   const setDefaultMapVisibility = useCallback(
     (isOpen: boolean) => {
@@ -265,11 +180,9 @@ export const EmbeddedMapComponent = ({
     [storage]
   );
 
-  const content = useMemo(() => {
-    if (!storageValue) {
-      return null;
-    }
-    return (
+  const content = !storageValue
+    ? null
+    : (
       <Embeddable>
         <InPortal node={portalNode}>
           <MapToolTip />
@@ -278,15 +191,27 @@ export const EmbeddedMapComponent = ({
         <EmbeddableMap maintainRatio={!isIndexError}>
           {isIndexError ? (
             <IndexPatternsMissingPrompt data-test-subj="missing-prompt" />
-          ) : embeddable != null ? (
-            <EmbeddablePanel embeddable={embeddable} />
-          ) : (
-            <Loader data-test-subj="loading-panel" overlay size="xl" />
-          )}
+          ) : (<services.maps.Map
+            getTooltipRenderer={() => ((tooltipProps: RenderTooltipContentParams) => (
+              <OutPortal node={portalNode} {...tooltipProps} />
+            ))}
+            mapCenter={{ lon: -1.05469, lat: 15.96133, zoom: 1 }}
+            layerList={layerList}
+            filters={appliedFilters}
+            query={query}
+            onApiAvailable={(api: MapApi) => {
+              // Wire up to app refresh action
+              setQuery({
+                id: 'embeddedMap', // Scope to page type if using map elsewhere
+                inspect: null,
+                loading: false,
+                refetch: () => api.reload(),
+              });
+            }}
+          />)}
         </EmbeddableMap>
       </Embeddable>
     );
-  }, [embeddable, isIndexError, portalNode, storageValue]);
 
   return isError ? null : (
     <StyledEuiAccordion
