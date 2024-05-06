@@ -51,6 +51,7 @@
     "@kbn/esql-utils",
     "@kbn/data-view-utils",
     "@kbn/alerting-shared-types",
+    "@kbn/search-types"
   ],
   "exclude": [
     "target/**/*",
