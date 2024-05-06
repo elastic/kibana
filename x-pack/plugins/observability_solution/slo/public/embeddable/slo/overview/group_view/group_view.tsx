@@ -9,7 +9,6 @@ import React, { useState, useEffect } from 'react';
 import { Filter } from '@kbn/es-query';
 import { Subject } from 'rxjs';
 import { SLOView } from '../../../../pages/slos/components/toggle_slo_view';
-import { SloEmbeddableInput } from '../types';
 import { GroupView } from '../../../../pages/slos/components/grouped_slos/group_view';
 import { buildCombinedKqlQuery } from './helpers/build_kql_query';
 
@@ -20,45 +19,29 @@ interface Props {
   sloView: SLOView;
   sort?: string;
   filters?: Filter[];
-  reloadGroupSubject: Subject<SloEmbeddableInput | undefined>;
+  reloadSubject: Subject<boolean>;
 }
 
 export function GroupSloView({
   sloView,
-  groupBy: initialGroupBy = 'status',
-  groups: initialGroups = [],
-  kqlQuery: initialKqlQuery = '',
-  filters: initialFilters = [],
-  reloadGroupSubject,
+  groupBy = 'status',
+  groups = [],
+  kqlQuery = '',
+  filters = [],
+  reloadSubject,
 }: Props) {
   const [lastRefreshTime, setLastRefreshTime] = useState<number | undefined>(undefined);
-  const [groupBy, setGroupBy] = useState(initialGroupBy);
-  const [kqlQuery, setKqlQuery] = useState(initialKqlQuery);
-  const [filters, setFilters] = useState(initialFilters);
-  const [groups, setGroups] = useState(initialGroups);
   const combinedKqlQuery = buildCombinedKqlQuery({ groups, groupBy, kqlQuery });
 
   useEffect(() => {
-    const subs = reloadGroupSubject?.subscribe((input) => {
-      if (input) {
-        const nGroupBy = input?.groupFilters?.groupBy ?? groupBy;
-        setGroupBy(nGroupBy);
-
-        const nKqlInput = input?.groupFilters?.kqlQuery ?? kqlQuery;
-        setKqlQuery(nKqlInput);
-
-        const nFilters = input?.groupFilters?.filters ?? filters;
-        setFilters(nFilters);
-
-        const nGroups = input?.groupFilters?.groups ?? groups;
-        setGroups(nGroups);
-      }
+    reloadSubject?.subscribe(() => {
       setLastRefreshTime(Date.now());
     });
     return () => {
-      subs?.unsubscribe();
+      reloadSubject?.unsubscribe();
     };
-  }, [filters, groupBy, groups, kqlQuery, reloadGroupSubject]);
+  }, [reloadSubject]);
+
   return (
     <GroupView
       sloView={sloView}
