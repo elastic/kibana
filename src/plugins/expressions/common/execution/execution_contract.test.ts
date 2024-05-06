@@ -23,7 +23,6 @@ const createExecution = (
     executor,
     ast: parseExpression(expression),
     params: { ...context },
-    functionCache: new Map(),
   });
   return execution;
 };
