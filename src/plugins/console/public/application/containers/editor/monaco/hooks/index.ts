@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { useSetInputEditor } from './use_set_input_editor';
-export { useRestoreRequestFromHistory } from './use_restore_request_from_history';
-export { useSendCurrentRequest, sendRequest } from './use_send_current_request';
-export { useSaveCurrentTextObject } from './use_save_current_text_object';
-export { useDataInit } from './use_data_init';
+export { useResizeCheckerUtils } from './use_resize_checker_utils';
+export { useSetInitialValue } from './use_set_initial_value';
+export { useSetupAutocompletePolling } from './use_setup_autocomplete_polling';
+export { useSetupAutosave } from './use_setup_autosave';

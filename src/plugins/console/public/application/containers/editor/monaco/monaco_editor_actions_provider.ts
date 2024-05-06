@@ -8,54 +8,34 @@
 
 import { CSSProperties, Dispatch } from 'react';
 import { debounce } from 'lodash';
-import {
-  ConsoleParsedRequestsProvider,
-  getParsedRequestsProvider,
-  monaco,
-  ParsedRequest,
-} from '@kbn/monaco';
+import { ConsoleParsedRequestsProvider, getParsedRequestsProvider, monaco } from '@kbn/monaco';
 import { IToasts } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
 import type { HttpSetup } from '@kbn/core-http-browser';
+import { containsUrlParams, getLineTokens } from './utils/token_path_utils';
 import { DEFAULT_VARIABLES } from '../../../../../common/constants';
 import { getStorage, StorageKeys } from '../../../../services';
-import { sendRequest } from '../../../hooks/use_send_current_request/send_request';
+import { sendRequest } from '../../../hooks';
 import { MetricsTracker } from '../../../../types';
 import { Actions } from '../../../stores/request';
+
 import {
-  containsUrlParams,
+  AutocompleteType,
+  getBodyCompletionItems,
   getCurlRequest,
-  getDocumentationLink,
-  getLineTokens,
+  getDocumentationLinkFromAutocomplete,
   getMethodCompletionItems,
   getRequestEndLineNumber,
   getRequestStartLineNumber,
   getUrlParamsCompletionItems,
   getUrlPathCompletionItems,
   replaceRequestVariables,
+  SELECTED_REQUESTS_CLASSNAME,
   stringifyRequest,
   trackSentRequests,
-  getBodyCompletionItems,
 } from './utils';
 
-const selectedRequestsClass = 'console__monaco_editor__selectedRequests';
-
-export interface EditorRequest {
-  method: string;
-  url: string;
-  data: string[];
-}
-
-interface AdjustedParsedRequest extends ParsedRequest {
-  startLineNumber: number;
-  endLineNumber: number;
-}
-enum AutocompleteType {
-  PATH = 'path',
-  URL_PARAMS = 'url_params',
-  METHOD = 'method',
-  BODY = 'body',
-}
+import type { AdjustedParsedRequest } from './types';
 
 export class MonacoEditorActionsProvider {
   private parsedRequestsProvider: ConsoleParsedRequestsProvider;
@@ -126,7 +106,7 @@ export class MonacoEditorActionsProvider {
           range: selectedRange,
           options: {
             isWholeLine: true,
-            className: selectedRequestsClass,
+            className: SELECTED_REQUESTS_CLASSNAME,
           },
         },
       ]);
@@ -256,7 +236,7 @@ export class MonacoEditorActionsProvider {
     }
     const request = requests[0];
 
-    return getDocumentationLink(request, docLinkVersion);
+    return getDocumentationLinkFromAutocomplete(request, docLinkVersion);
   }
 
   private async getAutocompleteType(
