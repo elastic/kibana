@@ -53,38 +53,34 @@ For Elastic Serverless, {x} is available in your {es} project UI.
 To use {x}, you'll need the following:
 
 1. An Elastic Cloud (*v8.14.0+*) deployment or {es} *Serverless* project. (Start a https://cloud.elastic.co/registration[free trial]).
-2. An account with a *supported LLM provider*. {x} supports the following:
-** *Amazon Bedrock*
-+
-.See available models
-[%collapsible]
-==============
-* Anthropic: Claude 3 Sonnet
-* Anthropic: Claude 3 Haiku 
-
-[NOTE]
-====
-Amazon Bedrock models currently do not support streaming.
-====
-==============
-** *OpenAI*
-+
-.See available models
-[%collapsible]
-==============
-* GPT-3 turbo
-* GPT-4 turbo
-==============
-** *Azure OpenAI*
-+
-.See available models
-[%collapsible]
-==============
-* GPT-3 turbo
-* GPT-4 turbo
-==============
-3. At least one *{es} index* with documents to search.
+2. At least one *{es} index* with documents to search.
 ** See <<playground-getting-started-ingest, ingest data>> if you'd like to ingest sample data.
+3. An account with a *supported LLM provider*. {x} supports the following:
++
+[cols="2a,2a,1a", options="header"]
+|===
+| Provider | Models | Notes
+
+| *Amazon Bedrock*
+a|
+* Anthropic: Claude 3 Sonnet
+* Anthropic: Claude 3 Haiku
+a|
+Does not currently support streaming.
+
+| *OpenAI*
+a|
+* GPT-3 turbo
+* GPT-4 turbo
+a|
+
+| *Azure OpenAI*
+a|
+* GPT-3 turbo
+* GPT-4 turbo
+a|
+
+|===
 
 [float]
 [[playground-getting-started]]
