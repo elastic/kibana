@@ -579,8 +579,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         : `${OBSERVABILITY_DOCS}custom-threshold-alert.html`,
       monitorStatus: `${OBSERVABILITY_DOCS}monitor-status-alert.html`,
       monitorUptime: isServerless
-      ? `${SERVERLESS_OBSERVABILITY_DOCS}monitor-synthetics`
-      : `${OBSERVABILITY_DOCS}monitor-uptime.html`,
+        ? `${SERVERLESS_OBSERVABILITY_DOCS}monitor-synthetics`
+        : `${OBSERVABILITY_DOCS}monitor-uptime.html`,
       tlsCertificate: `${OBSERVABILITY_DOCS}tls-certificate-alert.html`,
       uptimeDurationAnomaly: `${OBSERVABILITY_DOCS}duration-anomaly-alert.html`,
       monitorLogs: isServerless
@@ -597,14 +597,14 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         ? `${SERVERLESS_OBSERVABILITY_DOCS}alerting`
         : `${OBSERVABILITY_DOCS}create-alerts.html`,
       syntheticsAlerting: isServerless
-      ? `${SERVERLESS_OBSERVABILITY_DOCS}synthetics-settings#alerting`
-      : `${OBSERVABILITY_DOCS}synthetics-settings.html#synthetics-settings-alerting`,
+        ? `${SERVERLESS_OBSERVABILITY_DOCS}synthetics-settings#alerting`
+        : `${OBSERVABILITY_DOCS}synthetics-settings.html#synthetics-settings-alerting`,
       syntheticsCommandReference: isServerless
-      ? `${SERVERLESS_OBSERVABILITY_DOCS}synthetics-configuration#playwrightoptions`
-      : `${OBSERVABILITY_DOCS}synthetics-configuration.html#synthetics-configuration-playwright-options`,
+        ? `${SERVERLESS_OBSERVABILITY_DOCS}synthetics-configuration#playwrightoptions`
+        : `${OBSERVABILITY_DOCS}synthetics-configuration.html#synthetics-configuration-playwright-options`,
       syntheticsProjectMonitors: isServerless
-      ? `${SERVERLESS_OBSERVABILITY_DOCS}synthetics-get-started-project`
-      : `${OBSERVABILITY_DOCS}synthetic-run-tests.html#synthetic-monitor-choose-project`,
+        ? `${SERVERLESS_OBSERVABILITY_DOCS}synthetics-get-started-project`
+        : `${OBSERVABILITY_DOCS}synthetic-run-tests.html#synthetic-monitor-choose-project`,
       syntheticsMigrateFromIntegration: `${OBSERVABILITY_DOCS}synthetics-migrate-from-integration.html`,
       sloBurnRateRule: isServerless
         ? `${SERVERLESS_OBSERVABILITY_DOCS}create-slo-burn-rate-alert-rule`
@@ -953,8 +953,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     synthetics: {
       featureRoles: isServerless
-      ? `${SERVERLESS_OBSERVABILITY_DOCS} synthetics-feature-roles`
-      : `${OBSERVABILITY_DOCS}monitor-uptime-synthetics.html`,
+        ? `${SERVERLESS_OBSERVABILITY_DOCS} synthetics-feature-roles`
+        : `${OBSERVABILITY_DOCS}monitor-uptime-synthetics.html`,
     },
     telemetry: {
       settings: `${KIBANA_DOCS}telemetry-settings-kbn.html`,
