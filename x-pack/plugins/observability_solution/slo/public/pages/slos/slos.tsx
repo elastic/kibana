@@ -6,8 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import React, { useEffect } from 'react';
+import { EuiSpacer } from '@elastic/eui';
+import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
+import { SLOsOverview } from './components/slos_overview/slos_overview';
 import { paths } from '../../../common/locators/paths';
 import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { SloOutdatedCallout } from '../../components/slo/slo_outdated_callout';
@@ -66,6 +68,8 @@ export function SlosPage() {
     >
       <HeaderMenu />
       <SloOutdatedCallout />
+      <SLOsOverview />
+      <EuiSpacer size="m" />
       <SloList />
     </ObservabilityPageTemplate>
   );

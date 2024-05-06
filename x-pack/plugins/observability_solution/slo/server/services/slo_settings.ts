@@ -20,12 +20,15 @@ export const getSloSettings = async (soClient: SavedObjectsClientContract) => {
       SO_SLO_SETTINGS_TYPE,
       sloSettingsObjectId(soClient.getCurrentNamespace())
     );
+    // set if it's not there
+    soObject.attributes.staleThresholdInHours = soObject.attributes.staleThresholdInHours ?? 2;
     return sloSettingsSchema.encode(soObject.attributes);
   } catch (e) {
     if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
       return {
         useAllRemoteClusters: false,
         selectedRemoteClusters: [],
+        staleThresholdInHours: 48,
       };
     }
     throw e;
@@ -52,12 +55,10 @@ export const getListOfSummaryIndices = async (
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
 ) => {
-  const indices: string[] = [SLO_SUMMARY_DESTINATION_INDEX_PATTERN];
-
   const settings = await getSloSettings(soClient);
   const { useAllRemoteClusters, selectedRemoteClusters } = settings;
   if (!useAllRemoteClusters && selectedRemoteClusters.length === 0) {
-    return indices;
+    return { indices: [SLO_SUMMARY_DESTINATION_INDEX_PATTERN], settings };
   }
 
   const clustersByName = await esClient.cluster.remoteInfo();
@@ -67,5 +68,5 @@ export const getListOfSummaryIndices = async (
     isConnected: clustersByName[clusterName].connected,
   }));
 
-  return getListOfSloSummaryIndices(settings, clusterInfo);
+  return { indices: getListOfSloSummaryIndices(settings, clusterInfo), settings };
 };

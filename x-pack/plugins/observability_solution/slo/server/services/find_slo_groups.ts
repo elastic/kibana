@@ -59,7 +59,7 @@ export class FindSLOGroups {
       this.logger.error(`Failed to parse filters: ${e.message}`);
     }
 
-    const indices = await getListOfSummaryIndices(this.soClient, this.esClient);
+    const { indices } = await getListOfSummaryIndices(this.soClient, this.esClient);
 
     const hasSelectedTags = groupBy === 'slo.tags' && groupsFilter.length > 0;
 

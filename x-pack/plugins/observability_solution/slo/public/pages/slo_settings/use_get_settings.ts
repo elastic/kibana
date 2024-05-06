@@ -30,4 +30,5 @@ export const useGetSettings = () => {
 const defaultSettings: GetSLOSettingsResponse = {
   useAllRemoteClusters: false,
   selectedRemoteClusters: [],
+  staleThresholdInHours: 48,
 };

@@ -11,7 +11,7 @@ import { ALL_VALUE, Paginated, Pagination } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import { partition } from 'lodash';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../common/constants';
-import { Groupings, SLODefinition, SLOId, Summary } from '../domain/models';
+import { Groupings, SLODefinition, SLOId, StoredSLOSettings, Summary } from '../domain/models';
 import { toHighPrecision } from '../utils/number';
 import { createEsParams, typedSearch } from '../utils/queries';
 import { getListOfSummaryIndices } from './slo_settings';
@@ -70,7 +70,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
       this.logger.error(`Failed to parse filters: ${e.message}`);
     }
 
-    const indices = await getListOfSummaryIndices(this.soClient, this.esClient);
+    const { indices, settings } = await getListOfSummaryIndices(this.soClient, this.esClient);
     const esParams = createEsParams({
       index: indices,
       track_total_hits: true,
@@ -78,6 +78,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
         bool: {
           filter: [
             { term: { spaceId: this.spaceId } },
+            ...getSummaryOutdatedFilter(settings, kqlQuery),
             getElasticsearchQueryOrThrow(kqlQuery),
             ...(parsedFilters.filter ?? []),
           ],
@@ -187,6 +188,21 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
       },
     });
   }
+}
+
+function getSummaryOutdatedFilter(settings: StoredSLOSettings, kqlFilter: string) {
+  if (kqlFilter.includes('summaryUpdatedAt') || !settings.staleThresholdInHours) {
+    return [];
+  }
+  return [
+    {
+      range: {
+        summaryUpdatedAt: {
+          gte: `now-${settings.staleThresholdInHours}h`,
+        },
+      },
+    },
+  ];
 }
 
 function getRemoteClusterName(index: string) {

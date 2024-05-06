@@ -13,6 +13,7 @@ describe('getListOfSloSummaryIndices', () => {
     const settings = {
       useAllRemoteClusters: false,
       selectedRemoteClusters: [],
+      staleThresholdInHours: 48,
     };
     const result = getListOfSloSummaryIndices(settings, []);
     expect(result).toBe(SLO_SUMMARY_DESTINATION_INDEX_PATTERN);
@@ -22,6 +23,7 @@ describe('getListOfSloSummaryIndices', () => {
     const settings = {
       useAllRemoteClusters: true,
       selectedRemoteClusters: [],
+      staleThresholdInHours: 48,
     };
     const clustersByName = [
       { name: 'cluster1', isConnected: true },
@@ -37,6 +39,7 @@ describe('getListOfSloSummaryIndices', () => {
     const settings = {
       useAllRemoteClusters: false,
       selectedRemoteClusters: ['cluster1'],
+      staleThresholdInHours: 48,
     };
     const clustersByName = [
       { name: 'cluster1', isConnected: true },
