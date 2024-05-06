@@ -32,6 +32,7 @@ export const testSchema = schema.object({
     scheme: ['prototest'],
     defaultValue: () => 'prototest://something',
   }),
+  any: schema.any({ meta: { description: 'any type' } }),
 });
 
 type RouterMeta = ReturnType<Router['getRoutes']>[number];

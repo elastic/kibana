@@ -68,8 +68,8 @@ export const processVersionedRouter = (
         handler && extractValidationSchemaFromVersionedHandler(handler)?.request?.body
       );
       const path: OpenAPIV3.PathItemObject = {
-        summary: route.options.description ?? '',
         [route.method]: {
+          summary: route.options.description ?? '',
           requestBody: hasBody
             ? {
                 content: extractVersionedRequestBody(route, converter),

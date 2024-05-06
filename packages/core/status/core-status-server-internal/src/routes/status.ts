@@ -94,14 +94,25 @@ export const registerStatusRoute = ({
         request: {
           query: schema.object(
             {
-              v7format: schema.maybe(schema.boolean()),
-              v8format: schema.maybe(schema.boolean()),
+              v7format: schema.maybe(
+                schema.boolean({
+                  meta: { description: 'Set to "true" to get the response in v7 format.' },
+                })
+              ),
+              v8format: schema.maybe(
+                schema.boolean({
+                  meta: { description: 'Set to "true" to get the response in v8 format.' },
+                })
+              ),
             },
             {
               validate: ({ v7format, v8format }) => {
                 if (typeof v7format === 'boolean' && typeof v8format === 'boolean') {
                   return `provide only one format option: v7format or v8format`;
                 }
+              },
+              meta: {
+                description: `Return status in a specific format. If both v7 and v8 are requested the request will be rejected.`,
               },
             }
           ),

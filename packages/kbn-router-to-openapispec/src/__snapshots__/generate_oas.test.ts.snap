@@ -34,6 +34,7 @@ Object {
         "operationId": "/foo/{id}#0",
         "parameters": Array [
           Object {
+            "description": "The version of the API to use",
             "in": "header",
             "name": "elastic-api-version",
             "schema": Object {
@@ -91,8 +92,8 @@ Object {
             "description": "No description",
           },
         },
+        "summary": "",
       },
-      "summary": "",
     },
   },
   "security": Array [
@@ -138,6 +139,7 @@ Object {
         "operationId": "/bar#0",
         "parameters": Array [
           Object {
+            "description": "The version of the API to use",
             "in": "header",
             "name": "elastic-api-version",
             "schema": Object {
@@ -214,14 +216,15 @@ Object {
             },
           },
         },
+        "summary": "versioned route",
       },
-      "summary": "versioned route",
     },
     "/foo/{id}": Object {
       "get": Object {
         "operationId": "/foo/{id}#0",
         "parameters": Array [
           Object {
+            "description": "The version of the API to use",
             "in": "header",
             "name": "elastic-api-version",
             "schema": Object {
@@ -261,6 +264,7 @@ Object {
               "schema": Object {
                 "additionalProperties": false,
                 "properties": Object {
+                  "any": Object {},
                   "booleanDefault": Object {
                     "default": true,
                     "description": "defaults to to true",
@@ -325,6 +329,7 @@ Object {
                   "map",
                   "record",
                   "union",
+                  "any",
                 ],
                 "type": "object",
               },
@@ -345,8 +350,8 @@ Object {
             "description": "route",
           },
         },
+        "summary": "route",
       },
-      "summary": "route",
     },
   },
   "security": Array [
@@ -392,6 +397,7 @@ Object {
         "operationId": "/foo/{id}#0",
         "parameters": Array [
           Object {
+            "description": "The version of the API to use",
             "in": "header",
             "name": "elastic-api-version",
             "schema": Object {
@@ -420,14 +426,15 @@ Object {
             "description": "No description",
           },
         },
+        "summary": "",
       },
-      "summary": "",
     },
     "/test": Object {
       "get": Object {
         "operationId": "/test#0",
         "parameters": Array [
           Object {
+            "description": "The version of the API to use",
             "in": "header",
             "name": "elastic-api-version",
             "schema": Object {
@@ -455,8 +462,8 @@ Object {
             },
           },
         },
+        "summary": "",
       },
-      "summary": "",
     },
   },
   "security": Array [
