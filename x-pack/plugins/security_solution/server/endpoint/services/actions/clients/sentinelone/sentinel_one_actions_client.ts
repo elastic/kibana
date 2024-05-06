@@ -12,10 +12,10 @@ import {
 import { groupBy } from 'lodash';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type {
-  SentinelOneGetAgentsParams,
-  SentinelOneGetAgentsResponse,
   SentinelOneGetActivitiesParams,
   SentinelOneGetActivitiesResponse,
+  SentinelOneGetAgentsParams,
+  SentinelOneGetAgentsResponse,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
 import type {
   QueryDslQueryContainer,
@@ -32,16 +32,15 @@ import { SENTINEL_ONE_ACTIVITY_INDEX_PATTERN } from '../../../../../../common';
 import { catchAndWrapError } from '../../../../utils';
 import type {
   CommonResponseActionMethodOptions,
-  GetFileInfoResponse,
-  ProcessPendingActionsMethodOptions,
   GetFileDownloadMethodResponse,
+  ProcessPendingActionsMethodOptions,
 } from '../lib/types';
 import type {
   ResponseActionAgentType,
   ResponseActionsApiCommandNames,
 } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { stringify } from '../../../../utils/stringify';
-import { ResponseActionsClientError } from '../errors';
+import { ResponseActionAgentResponseEsDocNotFound, ResponseActionsClientError } from '../errors';
 import type {
   ActionDetails,
   EndpointActionDataParameterTypes,
@@ -51,12 +50,13 @@ import type {
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
   SentinelOneActionRequestCommonMeta,
+  SentinelOneActivityDataForType80,
   SentinelOneActivityEsDoc,
   SentinelOneGetFileRequestMeta,
+  SentinelOneGetFileResponseMeta,
   SentinelOneIsolationRequestMeta,
   SentinelOneIsolationResponseMeta,
-  SentinelOneGetFileResponseMeta,
-  SentinelOneActivityDataForType80,
+  UploadedFileInfo,
 } from '../../../../../../common/endpoint/types';
 import type {
   IsolationRouteRequestBody,
@@ -465,7 +465,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     ).actionDetails;
   }
 
-  async getFileInfo(actionId: string, agentId: string): Promise<GetFileInfoResponse> {
+  async getFileInfo(actionId: string, agentId: string): Promise<UploadedFileInfo> {
     if (
       !this.options.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled
     ) {
@@ -474,28 +474,42 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         400
       );
     }
+    await this.ensureValidActionId(actionId);
 
-    const [_, responseDocs] = await Promise.all([
-      this.ensureValidActionId(actionId),
-      this.fetchActionResponseEsDocs(actionId, [agentId]),
-    ]);
-    const agentResponse = responseDocs[agentId];
+    const fileInfo: UploadedFileInfo = {
+      actionId,
+      agentId,
+      id: agentId,
+      agentType: this.agentType,
+      status: 'AWAITING_UPLOAD',
+      created: '',
+      name: '',
+      size: 0,
+      mimeType: '',
+    };
 
-    if (!agentResponse) {
-      throw new ResponseActionsClientError(
-        `File not found for action id [${actionId}] and agent id [${actionId}]`,
-        404
-      );
+    try {
+      const agentResponse = await this.fetchGetFileResponseEsDocForAgentId(actionId, agentId);
+
+      // Unfortunately, there is no way to determine if a file is still available in SentinelOne without actually
+      // calling the download API, which would return the following error:
+      // {  "errors":[ {
+      //      "code":4100010,
+      //      "detail":"The requested files do not exist. Fetched files are deleted after 3 days, or earlier if more than 30 files are fetched.",
+      //      "title":"Resource not found"
+      // } ] }
+      fileInfo.status = 'READY';
+      fileInfo.created = agentResponse.meta?.createdAt ?? '';
+      fileInfo.name = agentResponse.meta?.filename ?? '';
+      fileInfo.mimeType = 'application/octet-stream';
+    } catch (e) {
+      // Ignore "no response doc" error for the agent and just return the file info with the status of 'AWAITING_UPLOAD'
+      if (!(e instanceof ResponseActionAgentResponseEsDocNotFound)) {
+        throw e;
+      }
     }
 
-    if (agentResponse.EndpointActions.data.command !== 'get-file') {
-      throw new ResponseActionsClientError(
-        `File information not supported for response action [${agentResponse.EndpointActions.data.command}]`,
-        400
-      );
-    }
-
-    // FIXME:PT working here. Need to finish implementation to return normalized data for get file info
+    return fileInfo;
   }
 
   async getFileDownload(actionId: string, agentId: string): Promise<GetFileDownloadMethodResponse> {
@@ -508,16 +522,11 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       );
     }
 
-    const [_, responseDocs] = await Promise.all([
-      this.ensureValidActionId(actionId),
-      this.fetchActionResponseEsDocs(actionId, [agentId]),
-    ]);
+    await this.ensureValidActionId(actionId);
 
-    if (actionDetails.command !== 'get-file') {
-      throw new ResponseActionsClientError(
-        `Action id [${actionId}] for command [${actionDetails.command}] does not support file downloads`
-      );
-    }
+    const agentResponse = await this.fetchGetFileResponseEsDocForAgentId(actionId, agentId);
+
+    // FIXME:PT finish implementation
   }
 
   async processPendingActions({
@@ -575,6 +584,36 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         }
       }
     }
+  }
+
+  private async fetchGetFileResponseEsDocForAgentId(
+    actionId: string,
+    agentId: string
+  ): Promise<
+    LogsEndpointActionResponse<ResponseActionGetFileOutputContent, SentinelOneGetFileResponseMeta>
+  > {
+    const agentResponse = (
+      await this.fetchActionResponseEsDocs<
+        ResponseActionGetFileOutputContent,
+        SentinelOneGetFileResponseMeta
+      >(actionId, [agentId])
+    )[agentId];
+
+    if (!agentResponse) {
+      throw new ResponseActionAgentResponseEsDocNotFound(
+        `Action ID [${actionId}] for agent ID [${actionId}] is still pending`,
+        404
+      );
+    }
+
+    if (agentResponse.EndpointActions.data.command !== 'get-file') {
+      throw new ResponseActionsClientError(
+        `Invalid action ID [${actionId}] - Not a get-file action: [${agentResponse.EndpointActions.data.command}]`,
+        400
+      );
+    }
+
+    return agentResponse;
   }
 
   /**
@@ -791,7 +830,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     const getLookupKey = (agentId: string, commandBatchUuid: string): string =>
       `${agentId}:${commandBatchUuid}`;
     const searchRequestOptions: SearchRequest = {
-      index: SENTINEL_ONE_ACTIVITY_INDEX,
+      index: SENTINEL_ONE_ACTIVITY_INDEX_PATTERN,
       size: ACTIONS_SEARCH_PAGE_SIZE,
       query: {
         bool: {
@@ -854,7 +893,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     if (Object.keys(actionsByAgentAndBatchId).length) {
       this.log.debug(
-        `searching for get-file responses from [${SENTINEL_ONE_ACTIVITY_INDEX}] index with:\n${stringify(
+        `searching for get-file responses from [${SENTINEL_ONE_ACTIVITY_INDEX_PATTERN}] index with:\n${stringify(
           searchRequestOptions,
           15
         )}`
@@ -916,6 +955,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
                   activityLogEntryId,
                   elasticDocId: s1Hit._id,
                   downloadUrl,
+                  createdAt: s1ActivityDoc?.sentinel_one.activity.updated_at ?? '',
+                  filename: s1ActivityDoc?.sentinel_one.activity.data.flattened.filename ?? '',
                 },
               })
             );

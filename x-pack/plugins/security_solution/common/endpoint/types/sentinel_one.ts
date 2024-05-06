@@ -19,6 +19,7 @@ export interface SentinelOneActivityEsDoc<TData = unknown> {
         id: string;
       };
       updated_at: string;
+      created_at: string;
       description: {
         primary: string;
         secondary?: string;
@@ -111,4 +112,7 @@ export interface SentinelOneGetFileResponseMeta {
   activityLogEntryId: string;
   /** The S1 download url (relative URI) for the file that was retrieved */
   downloadUrl: string;
+  /** When the file was created/uploaded to SentinelOne */
+  createdAt: string;
+  filename: string;
 }
