@@ -100,7 +100,7 @@ describe.skip(
         visitRuleAlerts(ruleName);
         closeAllToasts();
 
-        changeAlertsFilter('process.name: "sshd"');
+        changeAlertsFilter('process.name: "agentbeat"');
         cy.getByTestSubj('expand-event').eq(0).click();
         cy.getByTestSubj('securitySolutionFlyoutNavigationExpandDetailButton').click();
         cy.getByTestSubj('securitySolutionFlyoutResponseTab').click();
