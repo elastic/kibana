@@ -9,7 +9,7 @@
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import { CoreSetup, CoreStart } from '@kbn/core/public';
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
-import { IEsSearchRequest } from '../../../common/search';
+import { IEsSearchRequest } from '@kbn/search-types';
 import { SearchInterceptor } from './search_interceptor';
 import { AbortError } from '@kbn/kibana-utils-plugin/public';
 import { EsError, type IEsError } from '@kbn/search-errors';
