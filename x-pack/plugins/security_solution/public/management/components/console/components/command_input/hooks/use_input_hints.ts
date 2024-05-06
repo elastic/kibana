@@ -106,6 +106,8 @@ export const useInputHints = (isExecuteAsCliEnabled: boolean = false) => {
               value: EXECUTE_AS_CLI_HINT(commandEntered),
             },
           });
+
+          dispatch({ type: 'setInputState', payload: { value: undefined } });
         } else {
           dispatch({
             type: 'updateFooterContent',
@@ -125,5 +127,12 @@ export const useInputHints = (isExecuteAsCliEnabled: boolean = false) => {
       });
       dispatch({ type: 'setInputState', payload: { value: undefined } });
     }
-  }, [commandEntered, commandEnteredDefinition, dispatch, isInputPopoverOpen, leftOfCursorText]);
+  }, [
+    commandEntered,
+    commandEnteredDefinition,
+    dispatch,
+    isExecuteAsCliEnabled,
+    isInputPopoverOpen,
+    leftOfCursorText,
+  ]);
 };
