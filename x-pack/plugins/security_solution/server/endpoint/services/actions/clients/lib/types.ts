@@ -6,7 +6,6 @@
  */
 
 import type { Readable } from 'stream';
-import type { FleetFile } from '@kbn/fleet-plugin/server';
 import type {
   ActionDetails,
   KillOrSuspendProcessRequestBody,
@@ -32,7 +31,6 @@ import type {
   UploadActionApiRequestBody,
   BaseActionRequestBody,
 } from '../../../../../../common/api/endpoint';
-import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 
 type OmitUnsupportedAttributes<T extends BaseActionRequestBody> = Omit<
   T,
@@ -70,10 +68,6 @@ export interface GetFileDownloadMethodResponse {
   stream: Readable;
   fileName: string;
   mimeType?: string;
-}
-
-export interface GetFileInfoResponse extends FleetFile {
-  agentType: ResponseActionAgentType;
 }
 
 /**

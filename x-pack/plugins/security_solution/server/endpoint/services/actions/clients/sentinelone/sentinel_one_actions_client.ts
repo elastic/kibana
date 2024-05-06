@@ -16,12 +16,14 @@ import type {
   SentinelOneGetActivitiesResponse,
   SentinelOneGetAgentsParams,
   SentinelOneGetAgentsResponse,
+  SentinelOneDownloadAgentFileParams,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
 import type {
   QueryDslQueryContainer,
   SearchHit,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { Readable } from 'stream';
 import { ACTIONS_SEARCH_PAGE_SIZE } from '../../constants';
 import { SENTINEL_ONE_ZIP_PASSCODE } from '../../../../../../common/endpoint/service/response_actions/sentinel_one';
 import type {
@@ -526,7 +528,32 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     const agentResponse = await this.fetchGetFileResponseEsDocForAgentId(actionId, agentId);
 
-    // FIXME:PT finish implementation
+    if (!agentResponse.meta?.activityLogEntryId) {
+      throw new ResponseActionsClientError(
+        `Unable to retrieve file from SentinelOne. Response ES document is missing [meta.activityLogEntryId]`
+      );
+    }
+
+    const downloadAgentFileMethodOptions: SentinelOneDownloadAgentFileParams = {
+      agentUUID: agentId,
+      activityId: agentResponse.meta?.activityLogEntryId,
+    };
+    const { data } = await this.sendAction<Readable>(
+      SUB_ACTION.DOWNLOAD_AGENT_FILE,
+      downloadAgentFileMethodOptions
+    );
+
+    if (!data) {
+      throw new ResponseActionsClientError(
+        `Unable to establish a readable stream for file with SentinelOne`
+      );
+    }
+
+    return {
+      stream: data,
+      fileName: agentResponse.meta.filename,
+      mimeType: undefined,
+    };
   }
 
   async processPendingActions({
