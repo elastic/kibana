@@ -131,34 +131,37 @@ const ChangePointDetectionWrapper: FC<ChangePointDetectionPropsWithDeps> = ({
     );
   }, [manualReload$]);
 
+  // TODO: Remove data-shared-item as part of https://github.com/elastic/kibana/issues/179376>
   return (
-    <KibanaRenderContextProvider {...coreStart}>
-      <AiopsAppContext.Provider value={aiopsAppContextValue}>
-        <DatePickerContextProvider {...datePickerDeps}>
-          <ReloadContextProvider reload$={resultObservable$}>
-            <DataSourceContextProvider dataViewId={dataViewId}>
-              <FilterQueryContextProvider timeRange={timeRange}>
-                <ChangePointDetectionControlsContextProvider>
-                  <ChartGridEmbeddableWrapper
-                    viewType={viewType}
-                    timeRange={timeRange}
-                    fn={fn}
-                    metricField={metricField}
-                    splitField={splitField}
-                    maxSeriesToPlot={maxSeriesToPlot}
-                    dataViewId={dataViewId}
-                    partitions={partitions}
-                    onLoading={onLoading}
-                    onRenderComplete={onRenderComplete}
-                    onError={onError}
-                  />
-                </ChangePointDetectionControlsContextProvider>
-              </FilterQueryContextProvider>
-            </DataSourceContextProvider>
-          </ReloadContextProvider>
-        </DatePickerContextProvider>
-      </AiopsAppContext.Provider>
-    </KibanaRenderContextProvider>
+    <div data-shared-item="">
+      <KibanaRenderContextProvider {...coreStart}>
+        <AiopsAppContext.Provider value={aiopsAppContextValue}>
+          <DatePickerContextProvider {...datePickerDeps}>
+            <ReloadContextProvider reload$={resultObservable$}>
+              <DataSourceContextProvider dataViewId={dataViewId}>
+                <FilterQueryContextProvider timeRange={timeRange}>
+                  <ChangePointDetectionControlsContextProvider>
+                    <ChartGridEmbeddableWrapper
+                      viewType={viewType}
+                      timeRange={timeRange}
+                      fn={fn}
+                      metricField={metricField}
+                      splitField={splitField}
+                      maxSeriesToPlot={maxSeriesToPlot}
+                      dataViewId={dataViewId}
+                      partitions={partitions}
+                      onLoading={onLoading}
+                      onRenderComplete={onRenderComplete}
+                      onError={onError}
+                    />
+                  </ChangePointDetectionControlsContextProvider>
+                </FilterQueryContextProvider>
+              </DataSourceContextProvider>
+            </ReloadContextProvider>
+          </DatePickerContextProvider>
+        </AiopsAppContext.Provider>
+      </KibanaRenderContextProvider>
+    </div>
   );
 };
 
