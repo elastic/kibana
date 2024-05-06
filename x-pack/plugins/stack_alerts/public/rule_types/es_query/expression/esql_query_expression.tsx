@@ -82,7 +82,7 @@ export const EsqlQueryExpression: React.FC<
   const setDefaultExpressionValues = async () => {
     setRuleProperty('params', currentRuleParams);
     setQuery(esqlQuery ?? { esql: '' });
-    if (esqlQuery && 'esql' in esqlQuery) {
+    if (esqlQuery) {
       if (esqlQuery.esql) {
         refreshTimeFields(esqlQuery);
         refreshEsFields(esqlQuery, false);
