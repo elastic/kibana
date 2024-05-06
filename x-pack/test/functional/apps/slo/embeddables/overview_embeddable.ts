@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { CreateSLOInput } from '@kbn/slo-schema';
 import { cleanup } from '@kbn/infra-forge';
 import { loadTestData } from '../../../../api_integration/apis/slos/helper/load_test_data';
 import { SloEsClient } from '../../../../api_integration/apis/slos/helper/es';
@@ -20,49 +19,52 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const slo = getService('slo');
   const sloUi = getService('sloUi');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const testSubjects = getService('testSubjects');
-  const comboBox = getService('comboBox');
-  const retry = getService('retry');
+
   describe('overview embeddable', function () {
-    let createSLOInput: CreateSLOInput;
     before(async () => {
       await loadTestData(getService);
       await slo.deleteAllSLOs();
-    });
-
-    beforeEach(async () => {
-      createSLOInput = sloData;
-      await slo.create(createSLOInput);
-    });
-
-    afterEach(async () => {
-      await slo.deleteAllSLOs();
+      await slo.create(sloData);
+      await PageObjects.dashboard.navigateToApp();
+      await PageObjects.dashboard.clickNewDashboard();
+      await PageObjects.dashboard.switchToEditMode();
     });
 
     after(async () => {
+      await slo.deleteAllSLOs();
       await cleanup({ esClient, logger });
       await sloEsClient.deleteTestSourceData();
     });
 
-    it('should open SLO configuration flyout', async () => {
-      await retry.tryForTime(60 * 1000, async () => {
-        await PageObjects.dashboard.navigateToApp();
-        await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.dashboard.switchToEditMode();
+    describe('Single SLO', function () {
+      it('should open SLO configuration flyout', async () => {
         await dashboardAddPanel.clickEditorMenuButton();
         await dashboardAddPanel.clickEmbeddableFactoryGroupButton('slos');
         await dashboardAddPanel.clickAddNewPanelFromUIActionLink('SLO Overview');
-        await testSubjects.existOrFail('sloOverviewConfiguration', { timeout: 2000 });
+        await sloUi.common.assertSloOverviewConfigurationExists();
+      });
+
+      it('should have an overview mode selector', async () => {
+        await sloUi.common.assertOverviewModeSelectorExists();
+      });
+
+      it('can select an SLO', async () => {
+        await sloUi.common.assertOverviewSloSelectorExists();
+        await sloUi.common.setComboBoxSloSelection();
+        await sloUi.common.clickOverviewCofigurationSaveButton();
+      });
+
+      it('creates an overview panel', async () => {
+        await sloUi.common.assertSingleOverviewPanelExists();
       });
     });
 
-    it('should be able to select an SLO', async () => {
-      await retry.tryForTime(60 * 1000, async () => {
-        await testSubjects.existOrFail('singleSloSelector', { timeout: 2000 });
-        await testSubjects.click('sloSelector');
-        await comboBox.set('sloSelector > comboBoxInput', 'Test SLO for api integration');
-        await sloUi.common.clickCofigurationSaveButton();
-        await sloUi.common.assertOverviewPanelExists();
+    describe('Group of SLOs', function () {
+      it('can select Group Overview mode in the Flyout configuration', async () => {
+        await dashboardAddPanel.clickEditorMenuButton();
+        await dashboardAddPanel.clickEmbeddableFactoryGroupButton('slos');
+        await dashboardAddPanel.clickAddNewPanelFromUIActionLink('SLO Overview');
+        await sloUi.common.clickOverviewMode();
       });
     });
   });

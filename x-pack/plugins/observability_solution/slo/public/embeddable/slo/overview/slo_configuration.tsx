@@ -157,7 +157,7 @@ function GroupSloConfiguration({
 
   return (
     <>
-      <EuiFlyoutBody className="sloOverviewEmbeddable">
+      <EuiFlyoutBody className="sloGroupOverviewConfiguration">
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFlexGroup>
@@ -200,7 +200,7 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
   );
 
   return (
-    <EuiFlyout data-test-subj="sloOverviewConfiguration" onClose={onCancel}>
+    <EuiFlyout data-test-subj="sloSingleOverviewConfiguration" onClose={onCancel}>
       <EuiFlyoutHeader>
         <EuiFlexGroup direction="column">
           <EuiFlexItem>
