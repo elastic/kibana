@@ -68,7 +68,7 @@ import { useStartTransaction } from '../../../../common/lib/apm/use_start_transa
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
 import { useRuleForms, useRuleIndexPattern } from '../form';
-import { useEsqlIndex, useEsqlQueryForAboutStep } from '../../hooks';
+import { useEsqlIndex, useEsqlQueryForAboutStep, useIsValidEsqlQuery } from '../../hooks';
 import { CustomHeaderPageMemo } from '..';
 
 const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
@@ -149,6 +149,56 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     actionsStepDefault: ruleActionsData,
   });
 
+  const esqlQueryForAboutStep = useEsqlQueryForAboutStep({ defineStepData, activeStep });
+
+  // const esqlIndex = useEsqlIndex(
+  //   defineStepData.queryBar.query.query,
+  //   defineStepData.ruleType,
+  //   // allow to compute index from query only when query is valid or user switched to another tab
+  //   // to prevent multiple data view initiations with partly typed index names
+  //   defineStepForm.isValid || activeStep !== RuleStep.defineRule
+  // );
+
+  // ---
+
+  const isValidEsqlQuery = useIsValidEsqlQuery(
+    defineStepData.queryBar.query.query,
+    defineStepForm.validateFields
+  );
+
+  const esqlIndex = useEsqlIndex(
+    defineStepData.queryBar.query.query,
+    defineStepData.ruleType,
+    isValidEsqlQuery
+  );
+
+  // ---
+
+  const memoizedIndex = useMemo(
+    () => (isEsqlRule(defineStepData.ruleType) ? esqlIndex : defineStepData.index),
+    [defineStepData.index, esqlIndex, defineStepData.ruleType]
+  );
+
+  const isPreviewDisabled = getIsRulePreviewDisabled({
+    ruleType: defineStepData.ruleType,
+    isQueryBarValid,
+    isThreatQueryBarValid,
+    index: memoizedIndex,
+    dataViewId: defineStepData.dataViewId,
+    dataSourceType: defineStepData.dataSourceType,
+    threatIndex: defineStepData.threatIndex,
+    threatMapping: defineStepData.threatMapping,
+    machineLearningJobId: defineStepData.machineLearningJobId,
+    queryBar: defineStepData.queryBar,
+    newTermsFields: defineStepData.newTermsFields,
+  });
+
+  const loading = userInfoLoading || listsConfigLoading;
+  const { isSavedQueryLoading, savedQuery } = useGetSavedQuery({
+    savedQueryId: 'saved_id' in rule ? rule.saved_id : undefined,
+    ruleType: rule?.type,
+  });
+
   // Since in the edit step we start with an existing rule, we assume that
   // the steps are valid if isValid is undefined. Once the user triggers validation by
   // trying to submit the edits, the isValid statuses will be tracked and the callout appears
@@ -179,40 +229,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   const invalidSteps = ruleStepsOrder.filter((step) => {
     return !stepIsValid(step);
   });
-
-  const esqlQueryForAboutStep = useEsqlQueryForAboutStep({ defineStepData, activeStep });
-  const esqlIndex = useEsqlIndex(
-    defineStepData.queryBar.query.query,
-    defineStepData.ruleType,
-    // allow to compute index from query only when query is valid or user switched to another tab
-    // to prevent multiple data view initiations with partly typed index names
-    stepIsValid(RuleStep.defineRule) || activeStep !== RuleStep.defineRule
-  );
-  const memoizedIndex = useMemo(
-    () => (isEsqlRule(defineStepData.ruleType) ? esqlIndex : defineStepData.index),
-    [defineStepData.index, esqlIndex, defineStepData.ruleType]
-  );
-
-  const isPreviewDisabled = getIsRulePreviewDisabled({
-    ruleType: defineStepData.ruleType,
-    isQueryBarValid,
-    isThreatQueryBarValid,
-    index: memoizedIndex,
-    dataViewId: defineStepData.dataViewId,
-    dataSourceType: defineStepData.dataSourceType,
-    threatIndex: defineStepData.threatIndex,
-    threatMapping: defineStepData.threatMapping,
-    machineLearningJobId: defineStepData.machineLearningJobId,
-    queryBar: defineStepData.queryBar,
-    newTermsFields: defineStepData.newTermsFields,
-  });
-
-  const loading = userInfoLoading || listsConfigLoading;
-  const { isSavedQueryLoading, savedQuery } = useGetSavedQuery({
-    savedQueryId: 'saved_id' in rule ? rule.saved_id : undefined,
-    ruleType: rule?.type,
-  });
-
   const actionMessageParams = useMemo(() => getActionMessageParams(rule?.type), [rule?.type]);
 
   const { indexPattern, isIndexPatternLoading, browserFields } = useRuleIndexPattern({
