@@ -30,11 +30,11 @@ import {
 import { popularizeField, useColumns } from '@kbn/unified-data-table';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { BehaviorSubject } from 'rxjs';
-import { useSavedSearchInitial } from '../../services/discover_state_provider';
-import { DiscoverStateContainer } from '../../services/discover_state';
+import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
+import { DiscoverStateContainer } from '../../state_management/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
-import { useInternalStateSelector } from '../../services/discover_internal_state_container';
-import { useAppStateSelector } from '../../services/discover_app_state_container';
+import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
+import { useAppStateSelector } from '../../state_management/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverNoResults } from '../no_results';
 import { LoadingSpinner } from '../loading_spinner/loading_spinner';
@@ -42,7 +42,7 @@ import { DiscoverSidebarResponsive } from '../sidebar';
 import { DiscoverTopNav } from '../top_nav/discover_topnav';
 import { getResultState } from '../../utils/get_result_state';
 import { DiscoverUninitialized } from '../uninitialized/uninitialized';
-import { DataMainMsg, RecordRawType } from '../../services/discover_data_state_container';
+import { DataMainMsg, RecordRawType } from '../../state_management/discover_data_state_container';
 import { FetchStatus, SidebarToggleState } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
@@ -71,6 +71,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     filterManager,
     history,
     spaces,
+    observabilityAIAssistant,
   } = useDiscoverServices();
   const pageBackgroundColor = useEuiBackgroundColor('plain');
   const globalQueryState = data.query.getState();
@@ -131,6 +132,16 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     columns,
     sort,
   });
+
+  // The assistant is getting the state from the url correctly
+  // expect from the index pattern where we have only the dataview id
+  useEffect(() => {
+    return observabilityAIAssistant?.service.setScreenContext({
+      screenDescription: `The user is looking at the Discover view on the ${
+        isPlainRecord ? 'ES|QL' : 'dataView'
+      } mode. The index pattern is the ${dataView.getIndexPattern()}`,
+    });
+  }, [dataView, isPlainRecord, observabilityAIAssistant?.service]);
 
   const onAddFilter = useCallback(
     (field: DataViewField | string, values: unknown, operation: '+' | '-') => {

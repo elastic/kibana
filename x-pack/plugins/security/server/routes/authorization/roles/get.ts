@@ -28,12 +28,14 @@ export function defineGetRolesRoutes({
     createLicensedRouteHandler(async (context, request, response) => {
       try {
         const esClient = (await context.core).elasticsearch.client;
+
         const [features, elasticsearchRoles] = await Promise.all([
           getFeatures(),
           await esClient.asCurrentUser.security.getRole({
             name: request.params.name,
           }),
         ]);
+
         const elasticsearchRole = elasticsearchRoles[request.params.name];
 
         if (elasticsearchRole) {

@@ -295,6 +295,8 @@ export const SelectConnector: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFieldSearch
+            data-test-subj="entSearchContent-connectors-selectConnector-searchInput"
+            data-telemetry-id="entSearchContent-connectors-selectConnector-searchInput"
             aria-label={i18n.translate(
               'xpack.enterpriseSearch.content.indices.selectConnector.search.ariaLabel',
               { defaultMessage: 'Search through connectors' }
@@ -365,6 +367,8 @@ export const SelectConnector: React.FC = () => {
                   />
                 </p>
                 <EuiButton
+                  data-test-subj="entSearchContent-connectors-selectConnector-cloudCallout-trialButton"
+                  data-telemetry-id="entSearchContent-connectors-selectConnector-cloudCallout-trialButton"
                   color="primary"
                   fill
                   href="https://www.elastic.co/cloud/cloud-trial-overview"

@@ -10,6 +10,12 @@
  * Mock kbn/monaco to provide the console parser code directly without a web worker
  */
 const mockGetParsedRequests = jest.fn();
+
+/*
+ * Mock the function "populateContext" that accesses the autocomplete definitions
+ */
+const mockPopulateContext = jest.fn();
+
 jest.mock('@kbn/monaco', () => {
   const original = jest.requireActual('@kbn/monaco');
   return {
@@ -29,6 +35,14 @@ jest.mock('../../../../services', () => {
     }),
     StorageKeys: {
       VARIABLES: 'test',
+    },
+  };
+});
+
+jest.mock('../../../../lib/autocomplete/engine', () => {
+  return {
+    populateContext: (...args: any) => {
+      mockPopulateContext(args);
     },
   };
 });
@@ -99,6 +113,101 @@ describe('Editor actions provider', () => {
     it('returns the correct string if there is a request in the selection range', async () => {
       const curl = await editorActionsProvider.getCurl('http://localhost');
       expect(curl).toBe('curl -XGET "http://localhost/_search" -H "kbn-xsrf: reporting"');
+    });
+  });
+
+  describe('getDocumentationLink', () => {
+    const docLinkVersion = '8.13';
+    const docsLink = 'http://elastic.co/_search';
+    // mock the populateContext function that finds the correct autocomplete endpoint object and puts it into the context object
+    mockPopulateContext.mockImplementation((...args) => {
+      const context = args[0][1];
+      context.endpoint = {
+        documentation: docsLink,
+      };
+    });
+    it('returns null if no requests', async () => {
+      mockGetParsedRequests.mockResolvedValue([]);
+      const link = await editorActionsProvider.getDocumentationLink(docLinkVersion);
+      expect(link).toBe(null);
+    });
+
+    it('returns null if there is a request but not in the selection range', async () => {
+      editor.getSelection.mockReturnValue({
+        // the request is on line 1, the user selected line 2
+        startLineNumber: 2,
+        endLineNumber: 2,
+      } as unknown as monaco.Selection);
+      const link = await editorActionsProvider.getDocumentationLink(docLinkVersion);
+      expect(link).toBe(null);
+    });
+
+    it('returns the correct link if there is a request in the selection range', async () => {
+      const link = await editorActionsProvider.getDocumentationLink(docLinkVersion);
+      expect(link).toBe(docsLink);
+    });
+  });
+
+  describe('provideCompletionItems', () => {
+    const mockModel = {
+      getWordUntilPosition: () => {
+        return {
+          startColumn: 1,
+        };
+      },
+      getPositionAt: () => {
+        return {
+          lineNumber: 1,
+        };
+      },
+      getLineCount: () => 1,
+      getLineContent: () => 'GET ',
+      getValueInRange: () => 'GET ',
+    } as unknown as jest.Mocked<monaco.editor.ITextModel>;
+    const mockPosition = { lineNumber: 1, column: 1 } as jest.Mocked<monaco.Position>;
+    const mockContext = {} as jest.Mocked<monaco.languages.CompletionContext>;
+    const token = {} as jest.Mocked<monaco.CancellationToken>;
+    it('returns completion items for method if no requests', async () => {
+      mockGetParsedRequests.mockResolvedValue([]);
+      const completionItems = await editorActionsProvider.provideCompletionItems(
+        mockModel,
+        mockPosition,
+        mockContext,
+        token
+      );
+      expect(completionItems?.suggestions.length).toBe(6);
+      const methods = completionItems?.suggestions.map((suggestion) => suggestion.label);
+      expect((methods as string[]).sort()).toEqual([
+        'DELETE',
+        'GET',
+        'HEAD',
+        'PATCH',
+        'POST',
+        'PUT',
+      ]);
+    });
+
+    it('returns completion items for url path if method already typed in', async () => {
+      // mock a parsed request that only has a method
+      mockGetParsedRequests.mockResolvedValue([
+        {
+          startOffset: 0,
+          method: 'GET',
+        },
+      ]);
+      mockPopulateContext.mockImplementation((...args) => {
+        const context = args[0][1];
+        context.autoCompleteSet = [{ name: '_search' }, { name: '_cat' }];
+      });
+      const completionItems = await editorActionsProvider.provideCompletionItems(
+        mockModel,
+        mockPosition,
+        mockContext,
+        token
+      );
+      expect(completionItems?.suggestions.length).toBe(2);
+      const endpoints = completionItems?.suggestions.map((suggestion) => suggestion.label);
+      expect((endpoints as string[]).sort()).toEqual(['_cat', '_search']);
     });
   });
 });

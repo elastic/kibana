@@ -9,11 +9,11 @@ import { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-
 
 import { getConnectorType as getCasesWebhookConnectorType } from './cases_webhook';
 import { getConnectorType as getJiraConnectorType } from './jira';
-import { getConnectorType as getResilientConnectorType } from './resilient';
 import { getServiceNowITSMConnectorType } from './servicenow_itsm';
 import { getServiceNowSIRConnectorType } from './servicenow_sir';
 import { getServiceNowITOMConnectorType } from './servicenow_itom';
 import { getTinesConnectorType } from './tines';
+import { getResilientConnectorType } from './resilient';
 import { getActionType as getTorqConnectorType } from './torq';
 import { getConnectorType as getEmailConnectorType } from './email';
 import { getConnectorType as getIndexConnectorType } from './es_index';
@@ -40,8 +40,6 @@ export { ConnectorTypeId as CasesWebhookConnectorTypeId } from './cases_webhook'
 export type { ActionParamsType as CasesWebhookActionParams } from './cases_webhook';
 export { ConnectorTypeId as JiraConnectorTypeId } from './jira';
 export type { ActionParamsType as JiraActionParams } from './jira';
-export { ConnectorTypeId as ResilientConnectorTypeId } from './resilient';
-export type { ActionParamsType as ResilientActionParams } from './resilient';
 export { ServiceNowITSMConnectorTypeId } from './servicenow_itsm';
 export { ServiceNowSIRConnectorTypeId } from './servicenow_sir';
 export { ConnectorTypeId as EmailConnectorTypeId } from './email';
@@ -101,7 +99,6 @@ export function registerConnectorTypes({
   actions.registerType(getServiceNowSIRConnectorType());
   actions.registerType(getServiceNowITOMConnectorType());
   actions.registerType(getJiraConnectorType());
-  actions.registerType(getResilientConnectorType());
   actions.registerType(getTeamsConnectorType());
   actions.registerType(getTorqConnectorType());
 
@@ -111,6 +108,7 @@ export function registerConnectorTypes({
   actions.registerSubActionConnectorType(getBedrockConnectorType());
   actions.registerSubActionConnectorType(getD3SecurityConnectorType());
   actions.registerSubActionConnectorType(getTheHiveConnectorType());
+  actions.registerSubActionConnectorType(getResilientConnectorType());
 
   if (experimentalFeatures.sentinelOneConnectorOn) {
     actions.registerSubActionConnectorType(getSentinelOneConnectorType());
