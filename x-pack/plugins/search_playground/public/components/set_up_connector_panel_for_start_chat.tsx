@@ -36,19 +36,19 @@ export const SetUpConnectorPanelForStartChat: React.FC = () => {
     setConnectorFlyoutOpen(false);
   };
   const handleSetupGenAiConnector = () => {
-    usageTracker.click(AnalyticsEvents.genAiConnectorCreated);
+    usageTracker?.click(AnalyticsEvents.genAiConnectorCreated);
     setConnectorFlyoutOpen(true);
   };
 
   useEffect(() => {
     if (connectors?.length) {
       if (showCallout) {
-        usageTracker.load(AnalyticsEvents.genAiConnectorAdded);
+        usageTracker?.load(AnalyticsEvents.genAiConnectorAdded);
       } else {
-        usageTracker.load(AnalyticsEvents.genAiConnectorExists);
+        usageTracker?.load(AnalyticsEvents.genAiConnectorExists);
       }
     } else {
-      usageTracker.load(AnalyticsEvents.genAiConnectorSetup);
+      usageTracker?.load(AnalyticsEvents.genAiConnectorSetup);
     }
   }, [connectors?.length, showCallout, usageTracker]);
 

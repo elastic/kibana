@@ -37,7 +37,7 @@ export const StartNewChat: React.FC<StartNewChatProps> = ({ onStartClick }) => {
   const usageTracker = useUsageTracker();
 
   useEffect(() => {
-    usageTracker.load(AnalyticsEvents.startNewChatPageLoaded);
+    usageTracker?.load(AnalyticsEvents.startNewChatPageLoaded);
   }, [usageTracker]);
 
   return (
