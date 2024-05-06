@@ -1991,6 +1991,10 @@
       "namespace": {
         "type": "keyword"
       },
+      "overrides": {
+        "index": false,
+        "type": "flattened"
+      },
       "package": {
         "properties": {
           "name": {
