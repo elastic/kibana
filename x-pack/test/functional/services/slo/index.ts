@@ -6,10 +6,10 @@
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { SloCommonServiceProvider } from './common';
+import { SloUiCommonServiceProvider } from './common';
 
-export function SloServiceProvider(context: FtrProviderContext) {
+export function SloUiServiceProvider(context: FtrProviderContext) {
   return {
-    // common: SloCommonServiceProvider(context),
+    common: SloUiCommonServiceProvider(context),
   };
 }

@@ -18,10 +18,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const sloEsClient = new SloEsClient(esClient);
   const logger = getService('log');
   const slo = getService('slo');
+  const sloUi = getService('sloUi');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
-
+  const retry = getService('retry');
   describe('overview embeddable', function () {
     let createSLOInput: CreateSLOInput;
     before(async () => {
@@ -44,20 +45,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should open SLO configuration flyout', async () => {
-      await PageObjects.dashboard.navigateToApp();
-      await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.dashboard.switchToEditMode();
-      await dashboardAddPanel.clickEditorMenuButton();
-      await dashboardAddPanel.clickEmbeddableFactoryGroupButton('slos');
-      await dashboardAddPanel.clickAddNewPanelFromUIActionLink('SLO Overview');
-      await testSubjects.existOrFail('sloOverviewConfiguration', { timeout: 2000 });
+      await retry.tryForTime(60 * 1000, async () => {
+        await PageObjects.dashboard.navigateToApp();
+        await PageObjects.dashboard.clickNewDashboard();
+        await PageObjects.dashboard.switchToEditMode();
+        await dashboardAddPanel.clickEditorMenuButton();
+        await dashboardAddPanel.clickEmbeddableFactoryGroupButton('slos');
+        await dashboardAddPanel.clickAddNewPanelFromUIActionLink('SLO Overview');
+        await testSubjects.existOrFail('sloOverviewConfiguration', { timeout: 2000 });
+      });
     });
 
     it('should be able to select an SLO', async () => {
-      await testSubjects.existOrFail('singleSloSelector', { timeout: 2000 });
-      await testSubjects.click('sloSelector');
-      await comboBox.set('sloSelector > comboBoxInput', 'Test SLO for api integration');
-      await testSubjects.clickWhenNotDisabledWithoutRetry('sloConfirmButton');
+      await retry.tryForTime(60 * 1000, async () => {
+        await testSubjects.existOrFail('singleSloSelector', { timeout: 2000 });
+        await testSubjects.click('sloSelector');
+        await comboBox.set('sloSelector > comboBoxInput', 'Test SLO for api integration');
+        await sloUi.common.clickCofigurationSaveButton();
+        await sloUi.common.assertOverviewPanelExists();
+      });
     });
   });
 }
