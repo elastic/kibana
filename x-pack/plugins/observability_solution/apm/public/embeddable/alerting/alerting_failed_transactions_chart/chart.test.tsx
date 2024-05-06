@@ -6,16 +6,12 @@
  */
 
 import React from 'react';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { render, waitFor } from '@testing-library/react';
 import { APMAlertingFailedTransactionsChart } from './chart';
 import { ApmEmbeddableContext } from '../../embeddable_context';
 import { MOCK_ALERT, MOCK_RULE, MOCK_DEPS } from '../testing/fixtures';
-
-jest.mock('../../../context/apm_service/use_service_transaction_types_fetcher', () => ({
-  useServiceTransactionTypesFetcher: jest.fn(() => ({
-    transactionTypes: ['request'],
-  })),
-}));
+import * as transactionFetcher from '../../../context/apm_service/use_service_transaction_types_fetcher';
 
 jest.mock('../../../context/apm_service/use_service_agent_fetcher', () => ({
   useServiceAgentFetcher: jest.fn(() => ({
@@ -25,6 +21,11 @@ jest.mock('../../../context/apm_service/use_service_agent_fetcher', () => ({
 
 describe('renders chart', () => {
   const serviceName = 'ops-bean';
+  beforeEach(() => {
+    jest
+      .spyOn(transactionFetcher, 'useServiceTransactionTypesFetcher')
+      .mockReturnValue({ transactionTypes: ['request'], status: FETCH_STATUS.SUCCESS });
+  });
   it('renders error when serviceName is not defined', async () => {
     const { getByText } = render(
       <ApmEmbeddableContext deps={MOCK_DEPS}>
@@ -57,6 +58,49 @@ describe('renders chart', () => {
     );
     await waitFor(() => {
       expect(getByText('Failed transaction rate')).toBeInTheDocument();
+    });
+  });
+
+  it('supports custom transactionType when transactionType is included in transaction types list', async () => {
+    jest
+      .spyOn(transactionFetcher, 'useServiceTransactionTypesFetcher')
+      .mockReturnValue({ transactionTypes: ['request', 'custom'], status: FETCH_STATUS.SUCCESS });
+    const { getByText } = render(
+      <ApmEmbeddableContext deps={MOCK_DEPS}>
+        <APMAlertingFailedTransactionsChart
+          rule={MOCK_RULE}
+          rangeFrom="now-15m"
+          rangeTo="now"
+          serviceName={serviceName}
+          alert={MOCK_ALERT}
+          transactionType="custom"
+        />
+      </ApmEmbeddableContext>
+    );
+    await waitFor(() => {
+      expect(getByText('custom')).toBeInTheDocument();
+    });
+  });
+
+  it('does not support custom transactionType when transactionType is not included in transaction types list', async () => {
+    jest
+      .spyOn(transactionFetcher, 'useServiceTransactionTypesFetcher')
+      .mockReturnValue({ transactionTypes: ['request'], status: FETCH_STATUS.SUCCESS });
+    const { queryByText, getByText } = render(
+      <ApmEmbeddableContext deps={MOCK_DEPS}>
+        <APMAlertingFailedTransactionsChart
+          rule={MOCK_RULE}
+          rangeFrom="now-15m"
+          rangeTo="now"
+          serviceName={serviceName}
+          alert={MOCK_ALERT}
+          transactionType="custom"
+        />
+      </ApmEmbeddableContext>
+    );
+    await waitFor(() => {
+      expect(queryByText('custom')).not.toBeInTheDocument();
+      expect(getByText('request')).toBeInTheDocument();
     });
   });
 });
