@@ -21,7 +21,7 @@ import { APMAlertingFailedTransactionsChart } from './chart';
 export const APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE =
   'APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE';
 
-export const getApmFailedTransactionsChartEmbeddableFactory = (deps: EmbeddableDeps) => {
+export const getApmAlertingFailedTransactionsChartEmbeddableFactory = (deps: EmbeddableDeps) => {
   const factory: ReactEmbeddableFactory<
     EmbeddableAPMAlertingVizProps,
     DefaultEmbeddableApi<EmbeddableAPMAlertingVizProps>

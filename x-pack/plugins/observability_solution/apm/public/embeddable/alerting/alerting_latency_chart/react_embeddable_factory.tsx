@@ -20,7 +20,7 @@ import { APMAlertingLatencyChart } from './chart';
 
 export const APM_ALERTING_LATENCY_CHART_EMBEDDABLE = 'APM_ALERTING_LATENCY_CHART_EMBEDDABLE';
 
-export const getApmLatencyChartEmbeddableFactory = (deps: EmbeddableDeps) => {
+export const getApmAlertingLatencyChartEmbeddableFactory = (deps: EmbeddableDeps) => {
   const factory: ReactEmbeddableFactory<
     EmbeddableAPMAlertingVizProps,
     DefaultEmbeddableApi<EmbeddableAPMAlertingVizProps>
