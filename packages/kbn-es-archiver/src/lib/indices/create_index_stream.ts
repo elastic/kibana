@@ -158,7 +158,11 @@ export function createCreateIndexStream({
         }
 
         // create the index without the aliases
-        await client.indices.create(
+        console.log(
+          'creating index:',
+          JSON.stringify({ index, settings, mappings, aliases }, null, 2)
+        );
+        const foo = await client.indices.create(
           {
             index,
             body: {
@@ -170,6 +174,8 @@ export function createCreateIndexStream({
             headers: ES_CLIENT_HEADERS,
           }
         );
+
+        console.log('creation result', JSON.stringify(foo, null, 2));
 
         // create the aliases on a separate step (see https://github.com/elastic/kibana/issues/158918)
         const actions: estypes.IndicesUpdateAliasesAction[] = Object.keys(aliases ?? {}).map(

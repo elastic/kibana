@@ -85,6 +85,7 @@ export async function loadAction({
   const recordStream = concatStreamProviders(
     files.map((filename) => () => {
       log.info('[%s] Loading %j', name, filename);
+      console.log('Loading file', name, filename);
 
       return pipeline(
         createReadStream(resolve(inputDir, filename)),

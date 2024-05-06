@@ -30,6 +30,8 @@ export function createIndexDocRecordsStream(
     const ops = new WeakMap<any, any>();
     const errors: string[] = [];
     let isRelevant = false;
+
+    const concurrency = performance?.concurrency || DEFAULT_PERFORMANCE_OPTIONS.concurrency;
     const datasource = docs.map((doc) => {
       const body = doc.source;
       const op = doc.data_stream ? BulkOperation.Create : operation;
@@ -50,12 +52,13 @@ export function createIndexDocRecordsStream(
     if (isRelevant) {
       console.log('datasource:', JSON.stringify(datasource, null, 2));
       console.log('ops:', JSON.stringify(ops, null, 2));
+      console.log('concurrency', concurrency);
     }
 
     await client.helpers.bulk(
       {
         retries: 5,
-        concurrency: performance?.concurrency || DEFAULT_PERFORMANCE_OPTIONS.concurrency,
+        concurrency,
         datasource,
         onDocument(doc) {
           return ops.get(doc);
