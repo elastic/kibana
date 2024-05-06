@@ -1114,7 +1114,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             </IntendedRuleTypeEuiFormRow>
           </>
 
-          <EuiSpacer size="xl" />
+          <EuiSpacer size="l" />
 
           {!isMlRule(ruleType) && (
             <>
@@ -1123,7 +1123,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 indexPatternFields={indexPattern.fields}
                 isIndexPatternLoading={isIndexPatternLoading}
               />
-              <EuiSpacer size="xl" />
+              <EuiSpacer size="l" />
             </>
           )}
 
