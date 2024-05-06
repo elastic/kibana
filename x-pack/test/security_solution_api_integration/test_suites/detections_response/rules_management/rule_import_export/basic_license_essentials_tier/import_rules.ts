@@ -119,6 +119,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should be able to import rules with defaultable fields', async () => {
         const defaultableFields: BaseDefaultableFields = {
+          max_signals: 100,
           setup: '# some setup markdown',
           related_integrations: [
             { package: 'package-a', version: '^1.2.3' },
