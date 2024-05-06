@@ -9,10 +9,39 @@
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { ContainerOutput } from '@kbn/embeddable-plugin/public';
 import { Filter } from '@kbn/es-query';
+import {
+  HasSerializableState,
+  PresentationContainer,
+  PublishesLastSavedState,
+} from '@kbn/presentation-containers';
+import { PublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
+import {
+  HasParentApi,
+  PublishesFilters,
+  PublishesUnifiedSearch,
+  PublishesUnsavedChanges,
+  PublishingSubject,
+} from '@kbn/presentation-publishing';
 import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
 
 import { ControlGroupInput, PersistableControlGroupInput } from '../../common/control_group/types';
-import { TimeSlice } from '../../common/types';
+import { ControlStyle, ControlWidth, TimeSlice } from '../../common/types';
+
+export interface PublishesControlGroupDisplaySettings {
+  style$: PublishingSubject<ControlStyle>;
+  defaultGrow$: PublishingSubject<boolean>;
+  defaultWidth$: PublishingSubject<ControlWidth>;
+  setDefaultControlGrow: (grow: boolean) => void;
+  setDefaultControlWidth: (width: ControlWidth) => void;
+}
+
+export type ControlGroupApi = PresentationContainer &
+  HasSerializableState &
+  PublishesFilters &
+  PublishesSettings &
+  PublishesUnsavedChanges<PersistableControlGroupInput> & // unsaved changes = diff published filters + combine all children unsaved changes
+  PublishesControlGroupDisplaySettings &
+  Partial<HasParentApi<PublishesUnifiedSearch & PublishesLastSavedState>>;
 
 export interface ControlFilterOutput {
   filters?: Filter[];

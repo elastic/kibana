@@ -416,7 +416,7 @@ export class TimeSliderControlEmbeddable
     );
   }
 
-  public isChained() {
-    return false;
-  }
+  public isChained = () => false;
+
+  public isEditingEnabled = () => false;
 }

@@ -11,8 +11,18 @@ import { isEmpty, isEqual } from 'lodash';
 import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { batch } from 'react-redux';
-import { merge, Subject, Subscription, switchMap, tap } from 'rxjs';
-import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs';
+import {
+  BehaviorSubject,
+  debounceTime,
+  distinctUntilChanged,
+  map,
+  merge,
+  skip,
+  Subject,
+  Subscription,
+  switchMap,
+  tap,
+} from 'rxjs';
 
 import { DataView, FieldSpec } from '@kbn/data-views-plugin/public';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
@@ -28,18 +38,26 @@ import { i18n } from '@kbn/i18n';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
+import { PublishingSubject } from '@kbn/presentation-publishing';
 import {
   ControlGroupContainer,
   ControlInput,
   ControlOutput,
+  ControlWidth,
   OptionsListEmbeddableInput,
   OPTIONS_LIST_CONTROL,
 } from '../..';
-import { ControlFilterOutput } from '../../control_group/types';
+import { ControlFilterOutput, ControlGroupApi } from '../../control_group/types';
 import { pluginServices } from '../../services';
 import { ControlsDataViewsService } from '../../services/data_views/types';
 import { ControlsOptionsListService } from '../../services/options_list/types';
-import { IClearableControl } from '../../types';
+import {
+  ControlEmbeddable,
+  DataControlInput,
+  DefaultControlApi,
+  DefaultControlInternalApi,
+  IClearableControl,
+} from '../../types';
 import { OptionsListControl } from '../components/options_list_control';
 import { getDefaultComponentState, optionsListReducers } from '../options_list_reducers';
 import { MIN_OPTIONS_LIST_REQUEST_SIZE, OptionsListReduxState } from '../types';
@@ -54,6 +72,42 @@ const diffDataFetchProps = (
   if (!deepEqual(currentWithoutFilters, lastWithoutFilters)) return false;
   if (!compareFilters(lastFilters ?? [], currentFilters ?? [], COMPARE_ALL_OPTIONS)) return false;
   return true;
+};
+
+const legacyControlToApi = (
+  embeddable: ControlEmbeddable<DataControlInput>
+): ControlEmbeddable<DataControlInput> &
+  Omit<DefaultControlApi, 'parentApi'> &
+  DefaultControlInternalApi => {
+  const input = embeddable.getExplicitInput();
+  const grow$ = new BehaviorSubject<boolean | undefined>(input.grow);
+  const width$ = new BehaviorSubject<ControlWidth | undefined>(input.width);
+  const dataView = new BehaviorSubject<DataView | undefined>(undefined);
+  const fieldName$ = new BehaviorSubject<string | undefined>(input.fieldName);
+
+  return {
+    ...embeddable,
+    unsavedChanges: new BehaviorSubject<object | undefined>(undefined),
+    resetUnsavedChanges: () => {},
+    grow$,
+    width$,
+    dataView,
+    fieldName$,
+    setGrow: (grow) => {
+      grow$.next(grow);
+      (embeddable.parent as ControlGroupContainer)?.dispatch.setControlGrow({
+        grow,
+        embeddableId: embeddable.uuid,
+      });
+    },
+    setWidth: (width) => {
+      width$.next(width);
+      (embeddable.parent as ControlGroupContainer)?.dispatch.setControlWidth({
+        width,
+        embeddableId: embeddable.uuid,
+      });
+    },
+  };
 };
 
 interface OptionsListDataFetchProps {
@@ -81,7 +135,7 @@ type OptionsListReduxEmbeddableTools = ReduxEmbeddableTools<
 
 export class OptionsListEmbeddable
   extends Embeddable<OptionsListEmbeddableInput, ControlOutput>
-  implements IClearableControl
+  implements IClearableControl, DefaultControlApi, DefaultControlInternalApi
 {
   public readonly type = OPTIONS_LIST_CONTROL;
   public deferEmbeddableLoad = true;
@@ -98,7 +152,7 @@ export class OptionsListEmbeddable
   private typeaheadSubject: Subject<string> = new Subject<string>();
   private loadMoreSubject: Subject<number> = new Subject<number>();
   private abortController?: AbortController;
-  private dataView?: DataView;
+  public dataView = new BehaviorSubject<DataView | undefined>(undefined);
   private field?: FieldSpec;
 
   // state management
@@ -106,6 +160,16 @@ export class OptionsListEmbeddable
   public getState: OptionsListReduxEmbeddableTools['getState'];
   public dispatch: OptionsListReduxEmbeddableTools['dispatch'];
   public onStateChange: OptionsListReduxEmbeddableTools['onStateChange'];
+
+  /** TODO: These stubs will be removed once the options list is transitioned */
+  public unsavedChanges = new BehaviorSubject<object | undefined>(undefined);
+  public resetUnsavedChanges = () => {};
+  public serializeState = () => ({ rawState: {} });
+  public grow$: BehaviorSubject<boolean | undefined>;
+  public width$: BehaviorSubject<ControlWidth | undefined>;
+  public setGrow: (grow: boolean) => void;
+  public setWidth: (width: ControlWidth) => void;
+  public fieldName$: BehaviorSubject<string | undefined>;
 
   private cleanupStateTools: () => void;
 
@@ -122,6 +186,7 @@ export class OptionsListEmbeddable
     ({ dataViews: this.dataViewsService, optionsList: this.optionsListService } =
       pluginServices.getServices());
 
+    console.log('construct');
     this.typeaheadSubject = new Subject<string>();
     this.loadMoreSubject = new Subject<number>();
 
@@ -139,6 +204,32 @@ export class OptionsListEmbeddable
     this.dispatch = reduxEmbeddableTools.dispatch;
     this.cleanupStateTools = reduxEmbeddableTools.cleanup;
     this.onStateChange = reduxEmbeddableTools.onStateChange;
+    ({
+      grow$: this.grow$,
+      width$: this.width$,
+      setGrow: this.setGrow,
+      setWidth: this.setWidth,
+      fieldName$: this.fieldName$,
+    } = legacyControlToApi(this));
+
+    this.parentApi = this.parentApi as ControlGroupContainer;
+    /** TODO */
+    // this.subscriptions.add(
+    //   this.getInput$()
+    //     .pipe(
+    //       skip(1),
+    //       distinctUntilChanged((prev, current) => {
+    //         return prev.grow === current.grow && prev.width === current.width;
+    //       })
+    //     )
+    //     .subscribe(({ grow, width }) => {
+    //       console.log('FIRE', { grow, width });
+    //       this.grow$.next(grow);
+    //       this.width$.next(width);
+    //       // (this.parentApi as ControlGroupApi).setDefaultControlGrow(grow);
+    //       // (this.parentApi as ControlGroupApi).setDefaultControlWidth(width);
+    //     })
+    // );
 
     this.initialize();
   }
@@ -257,16 +348,17 @@ export class OptionsListEmbeddable
 
     if (!this.dataView || this.dataView.id !== dataViewId) {
       try {
-        this.dataView = await this.dataViewsService.get(dataViewId);
+        this.dataView.next(await this.dataViewsService.get(dataViewId));
       } catch (e) {
         this.dispatch.setErrorMessage(e.message);
       }
 
-      this.dispatch.setDataViewId(this.dataView?.id);
+      this.dispatch.setDataViewId(this.dataView.getValue()?.id);
     }
 
-    if (this.dataView && (!this.field || this.field.name !== fieldName)) {
-      const field = this.dataView.getFieldByName(fieldName);
+    const currentDataView = await this.dataViewsService.get(dataViewId);
+    if (currentDataView && (!this.field || this.field.name !== fieldName)) {
+      const field = currentDataView.getFieldByName(fieldName);
       if (field) {
         this.field = field.toSpec();
         this.dispatch.setField(this.field);
@@ -280,7 +372,7 @@ export class OptionsListEmbeddable
       }
     }
 
-    return { dataView: this.dataView, field: this.field };
+    return { dataView: this.dataView.getValue(), field: this.field };
   };
 
   private runOptionsListQuery = async (size: number = MIN_OPTIONS_LIST_REQUEST_SIZE) => {
@@ -477,7 +569,7 @@ export class OptionsListEmbeddable
     );
   };
 
-  public isChained() {
-    return true;
-  }
+  public isChained = () => true;
+
+  public isEditingEnabled = () => true;
 }

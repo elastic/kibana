@@ -6,13 +6,22 @@
  * Side Public License, v 1.
  */
 
+import deepEqual from 'fast-deep-equal';
+
 import { compareFilters, COMPARE_ALL_OPTIONS, Filter, uniqFilters } from '@kbn/es-query';
 import { isEqual, pick } from 'lodash';
 import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { batch, Provider, TypedUseSelectorHook, useSelector } from 'react-redux';
-import { BehaviorSubject, merge, Subject, Subscription } from 'rxjs';
-import { debounceTime, distinctUntilChanged, skip } from 'rxjs';
+import {
+  BehaviorSubject,
+  debounceTime,
+  distinctUntilChanged,
+  merge,
+  skip,
+  Subject,
+  Subscription,
+} from 'rxjs';
 
 import { OverlayRef } from '@kbn/core/public';
 import { Container, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
@@ -24,7 +33,11 @@ import {
   persistableControlGroupInputIsEqual,
   persistableControlGroupInputKeys,
 } from '../../../common';
-import { TimeSlice } from '../../../common/types';
+import {
+  DEFAULT_CONTROL_GROW,
+  DEFAULT_CONTROL_WIDTH,
+} from '../../../common/control_group/control_group_constants';
+import { ControlWidth, TimeSlice } from '../../../common/types';
 import { pluginServices } from '../../services';
 import { ControlsStorageService } from '../../services/storage/types';
 import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
@@ -43,6 +56,7 @@ import {
 import { startDiffingControlGroupState } from '../state/control_group_diffing_integration';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import {
+  ControlGroupApi,
   ControlGroupComponentState,
   ControlGroupFilterOutput,
   ControlGroupInput,
@@ -80,11 +94,10 @@ type ControlGroupReduxEmbeddableTools = ReduxEmbeddableTools<
   typeof controlGroupReducers
 >;
 
-export class ControlGroupContainer extends Container<
-  ControlInput,
-  ControlGroupInput,
-  ControlGroupOutput
-> {
+export class ControlGroupContainer
+  extends Container<ControlInput, ControlGroupInput, ControlGroupOutput>
+  implements ControlGroupApi
+{
   public readonly type = CONTROL_GROUP_TYPE;
   public readonly anyControlOutputConsumerLoading$: Subject<boolean> = new Subject();
 
@@ -115,9 +128,12 @@ export class ControlGroupContainer extends Container<
   public onControlRemoved$: Subject<string>;
 
   /** This currently reports the **entire** persistable control group input on unsaved changes */
-  public unsavedChanges: BehaviorSubject<PersistableControlGroupInput | undefined>;
-
+  public unsavedChanges = new BehaviorSubject<PersistableControlGroupInput | undefined>(undefined);
   public fieldFilterPredicate: FieldFilterPredicate | undefined;
+
+  /** TODO */
+  public defaultGrow$: BehaviorSubject<boolean>;
+  public defaultWidth$: BehaviorSubject<ControlWidth>;
 
   constructor(
     reduxToolsPackage: ReduxToolsPackage,
@@ -161,6 +177,29 @@ export class ControlGroupContainer extends Container<
     this.cleanupStateTools = reduxEmbeddableTools.cleanup;
     this.onStateChange = reduxEmbeddableTools.onStateChange;
 
+    this.defaultGrow$ = new BehaviorSubject<boolean>(initialInput.grow || DEFAULT_CONTROL_GROW);
+    this.defaultWidth$ = new BehaviorSubject<ControlWidth>(
+      initialInput.width || DEFAULT_CONTROL_WIDTH
+    );
+
+    /** TODO */
+    // this.subscriptions.add(
+    //   this.getInput$()
+    //     .pipe(
+    //       skip(1),
+    //       distinctUntilChanged((prev, current) => {
+    //         return deepEqual(prev.panels, current.panels);
+    //       })
+    //     )
+    //     .subscribe(({ grow, width }) => {
+    //       console.log('FIRE', { grow, width });
+    //       // this.grow$.next(grow);
+    //       // this.width$.next(width);
+    //       this.defaultGrow$.next(grow);
+    //       this.defaultWidth$.next(width);
+    //     })
+    // );
+
     this.store = reduxEmbeddableTools.store;
 
     this.invalidSelectionsState = this.getChildIds().reduce((prev, id) => {
@@ -180,11 +219,23 @@ export class ControlGroupContainer extends Container<
         }
       );
 
+      // const children: Array<ControlEmbeddable & DefaultControlApi> = Object.values(
+      //   this.children$.getValue()
+      // );
+      // children.forEach((child) => {
+      //   console.log('child', child);
+      //   child.grow$ = new BehaviorSubject<boolean | undefined>(child.getInput().grow);
+      // });
+
       this.initialized$.next(true);
     });
 
     this.fieldFilterPredicate = fieldFilterPredicate;
   }
+
+  public setDefaultControlGrow = (grow: boolean) => this.defaultGrow$.next(grow);
+
+  public setDefaultControlWidth = (width: ControlWidth) => this.defaultWidth$.next(width);
 
   public canShowInvalidSelectionsWarning = () =>
     this.storageService.getShowInvalidSelectionWarning() ?? true;
@@ -310,6 +361,11 @@ export class ControlGroupContainer extends Container<
   public getPersistableInput: () => PersistableControlGroupInput & { id: string } = () => {
     const input = this.getInput();
     return pick(input, [...persistableControlGroupInputKeys, 'id']);
+  };
+
+  /** TODO */
+  public serializeState = () => {
+    return { rawState: {} };
   };
 
   public updateInputAndReinitialize = (newInput: Partial<ControlGroupInput>) => {

@@ -9,47 +9,75 @@
 import React from 'react';
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
-import { ACTION_EDIT_CONTROL, ControlGroupContainer } from '..';
+import { apiIsPresentationContainer, PresentationContainer } from '@kbn/presentation-containers';
+import {
+  apiCanAccessViewMode,
+  apiHasParentApi,
+  apiHasType,
+  apiHasUniqueId,
+  apiIsOfType,
+  EmbeddableApiContext,
+  getInheritedViewMode,
+  hasEditCapabilities,
+  HasEditCapabilities,
+  HasParentApi,
+  HasType,
+  HasUniqueId,
+  PublishesPanelTitle,
+} from '@kbn/presentation-publishing';
+import { ACTION_EDIT_CONTROL, ControlGroupContainer, CONTROL_GROUP_TYPE } from '..';
 import { pluginServices } from '../../services';
-import { ControlEmbeddable, DataControlInput } from '../../types';
+import { DefaultControlInternalApi, PublishesControlDisplaySettings } from '../../types';
 import { ControlGroupStrings } from '../control_group_strings';
 import { ControlGroupContainerContext, setFlyoutRef } from '../embeddable/control_group_container';
-import { isControlGroup } from '../embeddable/control_group_helpers';
 import { DeleteControlAction } from './delete_control_action';
 import { EditControlFlyout } from './edit_control_flyout';
 
-export interface EditControlActionContext {
-  embeddable: ControlEmbeddable<DataControlInput>;
-}
+export type EditControlActionApi = HasType &
+  HasUniqueId &
+  PublishesPanelTitle &
+  HasEditCapabilities &
+  PublishesControlDisplaySettings &
+  DefaultControlInternalApi &
+  HasParentApi<PresentationContainer & HasType>;
 
-export class EditControlAction implements Action<EditControlActionContext> {
+const isApiCompatible = (api: unknown | null): api is EditControlActionApi =>
+  Boolean(
+    apiHasType(api) &&
+      apiHasUniqueId(api) &&
+      hasEditCapabilities(api) &&
+      apiHasParentApi(api) &&
+      apiCanAccessViewMode(api.parentApi) &&
+      apiIsOfType(api.parentApi, CONTROL_GROUP_TYPE) &&
+      apiIsPresentationContainer(api.parentApi)
+  );
+
+export class EditControlAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_EDIT_CONTROL;
   public readonly id = ACTION_EDIT_CONTROL;
   public order = 2;
 
-  private getEmbeddableFactory;
   private openFlyout;
   private theme;
   private i18n;
 
   constructor(private deleteControlAction: DeleteControlAction) {
     ({
-      embeddable: { getEmbeddableFactory: this.getEmbeddableFactory },
       overlays: { openFlyout: this.openFlyout },
       core: { theme: this.theme, i18n: this.i18n },
     } = pluginServices.getServices());
   }
 
-  public readonly MenuItem = ({ context }: { context: EditControlActionContext }) => {
-    const { embeddable } = context;
+  public readonly MenuItem = ({ context }: { context: EmbeddableApiContext }) => {
+    if (!isApiCompatible(context.embeddable)) throw new IncompatibleActionError();
     return (
       <EuiToolTip content={this.getDisplayName(context)}>
         <EuiButtonIcon
-          data-test-subj={`control-action-${embeddable.id}-edit`}
+          data-test-subj={`control-action-${context.embeddable.uuid}-edit`}
           aria-label={this.getDisplayName(context)}
           iconType={this.getIconType(context)}
           onClick={() => this.execute(context)}
@@ -59,40 +87,28 @@ export class EditControlAction implements Action<EditControlActionContext> {
     );
   };
 
-  public getDisplayName({ embeddable }: EditControlActionContext) {
-    if (!embeddable.parent || !isControlGroup(embeddable.parent)) {
-      throw new IncompatibleActionError();
-    }
+  public getDisplayName({ embeddable }: EmbeddableApiContext) {
+    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
     return ControlGroupStrings.floatingActions.getEditButtonTitle();
   }
 
-  public getIconType({ embeddable }: EditControlActionContext) {
-    if (!embeddable.parent || !isControlGroup(embeddable.parent)) {
-      throw new IncompatibleActionError();
-    }
+  public getIconType({ embeddable }: EmbeddableApiContext) {
+    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
     return 'pencil';
   }
 
-  public async isCompatible({ embeddable }: EditControlActionContext) {
-    if (isErrorEmbeddable(embeddable)) return false;
-    const controlGroup = embeddable.parent;
-    const factory = this.getEmbeddableFactory(embeddable.type);
-
-    return Boolean(
-      controlGroup &&
-        isControlGroup(controlGroup) &&
-        controlGroup.getInput().viewMode === ViewMode.EDIT &&
-        factory &&
-        (await factory.isEditable())
+  public async isCompatible({ embeddable }: EmbeddableApiContext) {
+    return (
+      isApiCompatible(embeddable) &&
+      getInheritedViewMode(embeddable.parentApi) === ViewMode.EDIT &&
+      embeddable.isEditingEnabled()
     );
   }
 
-  public async execute({ embeddable }: EditControlActionContext) {
-    if (!embeddable.parent || !isControlGroup(embeddable.parent)) {
-      throw new IncompatibleActionError();
-    }
-    const controlGroup = embeddable.parent as ControlGroupContainer;
+  public async execute({ embeddable }: EmbeddableApiContext) {
+    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
 
+    const controlGroup = embeddable.parentApi as ControlGroupContainer;
     const flyoutInstance = this.openFlyout(
       toMountPoint(
         <ControlGroupContainerContext.Provider value={controlGroup}>

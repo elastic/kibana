@@ -12,22 +12,29 @@ import React from 'react';
 import { EmbeddableFactoryNotFoundError } from '@kbn/embeddable-plugin/public';
 
 import {
-  DataControlInput,
-  ControlEmbeddable,
-  IEditableControlFactory,
-  DataControlEditorChanges,
-} from '../../types';
+  useBatchedOptionalPublishingSubjects,
+  useBatchedPublishingSubjects,
+} from '@kbn/presentation-publishing';
 import { pluginServices } from '../../services';
+import {
+  ControlEmbeddable,
+  DataControlEditorChanges,
+  DataControlInput,
+  DefaultControlApi,
+  IEditableControlFactory,
+} from '../../types';
 import { ControlGroupStrings } from '../control_group_strings';
-import { useControlGroupContainer } from '../embeddable/control_group_container';
 import { ControlEditor } from '../editor/control_editor';
+import { ControlGroupContainer } from '../embeddable/control_group_container';
+import { ControlGroupApi } from '../types';
+import { EditControlActionApi } from './edit_control_action';
 
 export const EditControlFlyout = ({
   embeddable,
   closeFlyout,
   removeControl,
 }: {
-  embeddable: ControlEmbeddable<DataControlInput>;
+  embeddable: EditControlActionApi;
   closeFlyout: () => void;
   removeControl: () => void;
 }) => {
@@ -36,21 +43,36 @@ export const EditControlFlyout = ({
     overlays: { openConfirm },
     controls: { getControlFactory },
   } = pluginServices.getServices();
-  // Redux embeddable container Context
-  const controlGroup = useControlGroupContainer();
 
-  // current state
-  const panels = controlGroup.select((state) => state.explicitInput.panels);
-  const panel = panels[embeddable.id];
+  const controlGroup = embeddable.parentApi as unknown as ControlGroupContainer & ControlGroupApi;
+
+  const [
+    controlWidth,
+    controlGrow,
+    panelTitle,
+    dataViewId,
+    controlField,
+    defaultControlWidth,
+    defaultControlGrow,
+  ] = useBatchedPublishingSubjects(
+    embeddable.width$,
+    embeddable.grow$,
+    embeddable.panelTitle,
+    embeddable.dataViewId$,
+    embeddable.fieldName$,
+    controlGroup.defaultWidth$,
+    controlGroup.defaultGrow$
+  );
+  // const [defaultPanelTitle] = useBatchedOptionalPublishingSubjects(embeddable.defaultPanelTitle);
 
   const onCancel = (changes: DataControlEditorChanges) => {
+    console.log(changes, { dataViewId, controlField, panelTitle, controlGrow, controlWidth });
     if (
-      isEqual(panel.explicitInput, {
-        ...panel.explicitInput,
-        ...changes.input,
-      }) &&
-      changes.grow === panel.grow &&
-      changes.width === panel.width
+      dataViewId === changes.input.dataViewId &&
+      controlField === changes.input.fieldName &&
+      panelTitle === changes.input.title &&
+      controlGrow === changes.grow &&
+      controlWidth === changes.width
     ) {
       closeFlyout();
       return;
@@ -72,38 +94,57 @@ export const EditControlFlyout = ({
       closeFlyout();
       return;
     }
-    const factory = getControlFactory(type) as IEditableControlFactory;
-    if (!factory) throw new EmbeddableFactoryNotFoundError(type);
-    let inputToReturn = changes.input;
-    if (factory.presaveTransformFunction) {
-      inputToReturn = factory.presaveTransformFunction(inputToReturn, embeddable);
-    }
-
-    if (changes.width && changes.width !== panel.width)
-      controlGroup.dispatch.setControlWidth({
-        width: changes.width,
-        embeddableId: embeddable.id,
-      });
-    if (changes.grow !== undefined && changes.grow !== panel.grow) {
-      controlGroup.dispatch.setControlGrow({
-        grow: changes.grow,
-        embeddableId: embeddable.id,
-      });
-    }
 
     closeFlyout();
-    if (panel.type === type) {
-      controlGroup.updateInputForChild(embeddable.id, inputToReturn);
-    } else {
-      await controlGroup.replaceEmbeddable(embeddable.id, inputToReturn, type);
+    // controlGroup.replacePanel(embeddable.uuid, {
+    //   panelType: type,
+    //   initialState: { ...inputToReturn, grow: changes.grow, width: changes.width },
+    // });
+
+    // if (changes.width && changes.width !== controlWidth)
+    //   controlGroup.dispatch.setControlWidth({
+    //     width: changes.width,
+    //     embeddableId: embeddable.uuid,
+    //   });
+    // if (changes.grow !== undefined && changes.grow !== controlGrow) {
+    //   controlGroup.dispatch.setControlGrow({
+    //     grow: changes.grow,
+    //     embeddableId: embeddable.uuid,
+    //   });
+    // }
+
+    if (changes.width && changes.width !== controlWidth) {
+      embeddable.setWidth(changes.width);
+      if (controlWidth) controlGroup.setDefaultControlWidth(changes.width);
     }
+    if (changes.grow !== undefined && changes.grow !== controlGrow) {
+      embeddable.setGrow(changes.grow);
+      if (controlGrow !== undefined) controlGroup.setDefaultControlGrow(changes.grow);
+    }
+
+    if (embeddable.type !== type) {
+      controlGroup.replacePanel(embeddable.uuid, { panelType: type, initialState: changes.input });
+    }
+
+    // if (embeddable.type === type) {
+
+    // } else {
+    //   // const factory = getControlFactory(type) as IEditableControlFactory;
+    //   // if (!factory) throw new EmbeddableFactoryNotFoundError(type);
+    //   // let inputToReturn = changes.input;
+    //   // if (factory.presaveTransformFunction) {
+    //   //   inputToReturn = factory.presaveTransformFunction(inputToReturn, embeddable);
+    //   // }
+
+    //   controlGroup.replacePanel(embeddable.uuid, { panelType: type, initialState: changes.input });
+    // }
   };
 
   return (
     <ControlEditor
       isCreate={false}
-      width={panel.width}
-      grow={panel.grow}
+      width={controlWidth ?? defaultControlWidth}
+      grow={controlGrow === undefined ? defaultControlGrow : controlGrow}
       embeddable={embeddable}
       onCancel={onCancel}
       setLastUsedDataViewId={(lastUsed) => controlGroup.setLastUsedDataViewId(lastUsed)}
