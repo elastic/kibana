@@ -17,6 +17,7 @@ import {
   PackagePolicyRestrictionRelatedError,
   FleetUnauthorizedError,
   HostedAgentPolicyRestrictionRelatedError,
+  AgentPolicyInvalidError,
 } from '../errors';
 import type {
   AgentPolicy,
@@ -114,7 +115,7 @@ function getAgentPolicyCreateMock() {
   return soClient;
 }
 let mockedLogger: jest.Mocked<Logger>;
-describe('agent policy', () => {
+describe('Agent policy', () => {
   beforeEach(() => {
     mockedLogger = loggerMock.create();
     mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
@@ -227,6 +228,42 @@ describe('agent policy', () => {
       ).resolves.not.toThrowError(
         new FleetUnauthorizedError('Tamper protection requires Platinum license')
       );
+    });
+
+    it('should throw AgentPolicyInvalidError if support_agentless is defined in stateful', async () => {
+      jest
+        .spyOn(appContextService, 'getCloud')
+        .mockReturnValue({ isServerlessEnabled: false } as any);
+
+      const soClient = getAgentPolicyCreateMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      await expect(
+        agentPolicyService.create(soClient, esClient, {
+          name: 'test',
+          namespace: 'default',
+          supports_agentless: true,
+        })
+      ).rejects.toThrowError(
+        new AgentPolicyInvalidError('supports_agentless is only allowed in serverless')
+      );
+    });
+
+    it('should not throw in serverless if support_agentless is set', async () => {
+      jest
+        .spyOn(appContextService, 'getCloud')
+        .mockReturnValue({ isServerlessEnabled: true } as any);
+
+      const soClient = getAgentPolicyCreateMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      await expect(
+        agentPolicyService.create(soClient, esClient, {
+          name: 'test',
+          namespace: 'default',
+          supports_agentless: true,
+        })
+      ).resolves.not.toThrow();
     });
   });
 
@@ -780,6 +817,55 @@ describe('agent policy', () => {
           is_protected: true,
         })
       ).rejects.toThrowError(new Error('Cannot enable Agent Tamper Protection: reason'));
+    });
+
+    it('should throw AgentPolicyInvalidError if support_agentless is defined in stateful', async () => {
+      jest
+        .spyOn(appContextService, 'getCloud')
+        .mockReturnValue({ isServerlessEnabled: false } as any);
+
+      const soClient = getAgentPolicyCreateMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      soClient.get.mockResolvedValue({
+        attributes: {},
+        id: 'test-id',
+        type: 'mocked',
+        references: [],
+      });
+
+      await expect(
+        agentPolicyService.update(soClient, esClient, 'test-id', {
+          name: 'test',
+          namespace: 'default',
+          supports_agentless: true,
+        })
+      ).rejects.toThrowError(
+        new AgentPolicyInvalidError('supports_agentless is only allowed in serverless')
+      );
+    });
+
+    it('should not throw in serverless if support_agentless is set', async () => {
+      jest
+        .spyOn(appContextService, 'getCloud')
+        .mockReturnValue({ isServerlessEnabled: true } as any);
+
+      const soClient = getAgentPolicyCreateMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.get.mockResolvedValue({
+        attributes: {},
+        id: 'test-id',
+        type: 'mocked',
+        references: [],
+      });
+
+      await expect(
+        agentPolicyService.update(soClient, esClient, 'test-id', {
+          name: 'test',
+          namespace: 'default',
+          supports_agentless: true,
+        })
+      ).resolves.not.toThrow();
     });
   });
 

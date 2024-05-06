@@ -22,6 +22,8 @@ import type { AgentPolicy, NewPackagePolicy, Output, DownloadSource } from '../t
 
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 
+import { appContextService } from './app_context';
+
 import * as agentPolicy from './agent_policy';
 
 import {
@@ -300,6 +302,7 @@ jest.mock('./app_context', () => ({
       generateTokenForPolicyId: jest.fn(),
     }),
     getExternalCallbacks: jest.fn(),
+    getCloud: jest.fn(),
   },
 }));
 
@@ -461,7 +464,7 @@ describe('policy preconfiguration', () => {
       );
     });
 
-    it('should install prelease packages if needed', async () => {
+    it('should install prerelease packages if needed', async () => {
       const soClient = getPutPreconfiguredPackagesMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
@@ -873,6 +876,69 @@ describe('policy preconfiguration', () => {
       ).rejects.toThrow(
         '[Test policy] could not be added. [test_package] is not installed, add [test_package] to [xpack.fleet.packages] or remove it from [Test package].'
       );
+    });
+
+    it('should return a non fatal error if support_agentless is defined in stateful', async () => {
+      const soClient = getPutPreconfiguredPackagesMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      jest
+        .spyOn(appContextService, 'getCloud')
+        .mockReturnValue({ isServerlessEnabled: false } as any);
+
+      const policies: PreconfiguredAgentPolicy[] = [
+        {
+          name: 'Test policy',
+          namespace: 'default',
+          id: 'test-id',
+          supports_agentless: true,
+          package_policies: [],
+        },
+      ];
+
+      const { nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
+        soClient,
+        esClient,
+        policies,
+        [{ name: 'CANNOT_MATCH', version: 'x.y.z' }],
+        mockDefaultOutput,
+        mockDefaultDownloadService,
+        DEFAULT_SPACE_ID
+      );
+      // @ts-ignore-next-line
+      expect(nonFatalErrors[0].error.toString()).toEqual(
+        'FleetError: `supports_agentless` is only allowed in serverless environments'
+      );
+    });
+
+    it('should not return an error if support_agentless is defined in serverless', async () => {
+      const soClient = getPutPreconfiguredPackagesMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      jest
+        .spyOn(appContextService, 'getCloud')
+        .mockReturnValue({ isServerlessEnabled: true } as any);
+
+      const policies: PreconfiguredAgentPolicy[] = [
+        {
+          name: 'Test policy',
+          namespace: 'default',
+          id: 'test-id',
+          supports_agentless: true,
+          package_policies: [],
+        },
+      ];
+
+      const { policies: resPolicies, nonFatalErrors } =
+        await ensurePreconfiguredPackagesAndPolicies(
+          soClient,
+          esClient,
+          policies,
+          [{ name: 'CANNOT_MATCH', version: 'x.y.z' }],
+          mockDefaultOutput,
+          mockDefaultDownloadService,
+          DEFAULT_SPACE_ID
+        );
+      expect(nonFatalErrors.length).toBe(0);
+      expect(resPolicies[0].id).toEqual('test-id');
     });
 
     it('should not attempt to recreate or modify an agent policy if its ID is unchanged', async () => {
