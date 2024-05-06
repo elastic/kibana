@@ -7,16 +7,16 @@
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import { kqlCustomIndicatorSchema, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
-
-import { InvalidTransformError } from '../../errors';
-import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
 import { getElasticsearchQueryOrThrow, parseIndex, TransformGenerator } from '.';
 import {
+  getSLOTransformId,
   SLO_DESTINATION_INDEX_NAME,
   SLO_INGEST_PIPELINE_NAME,
-  getSLOTransformId,
 } from '../../../common/constants';
+import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
 import { KQLCustomIndicator, SLODefinition } from '../../domain/models';
+import { InvalidTransformError } from '../../errors';
+import { getTimesliceTargetComparator } from './common';
 
 export class KQLCustomTransformGenerator extends TransformGenerator {
   public getTransformParams(slo: SLODefinition): TransformPutTransformRequest {
@@ -86,7 +86,9 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
               goodEvents: 'slo.numerator>_count',
               totalEvents: 'slo.denominator>_count',
             },
-            script: `params.goodEvents / params.totalEvents >= ${slo.objective.timesliceTarget} ? 1 : 0`,
+            script: `params.goodEvents / params.totalEvents ${getTimesliceTargetComparator(
+              slo.objective.timesliceTarget!
+            )} ${slo.objective.timesliceTarget} ? 1 : 0`,
           },
         },
       }),

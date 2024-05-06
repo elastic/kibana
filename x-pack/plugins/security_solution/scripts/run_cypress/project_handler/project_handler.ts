@@ -65,8 +65,8 @@ export class ProjectHandler {
   // Method to invoke the create project API for serverless.
   async createSecurityProject(
     projectName: string,
-    productTypes: ProductType[],
-    commit: string
+    productTypes?: ProductType[],
+    commit?: string
   ): Promise<Project | undefined> {
     throw new Error(this.DEFAULT_ERROR_MSG);
   }

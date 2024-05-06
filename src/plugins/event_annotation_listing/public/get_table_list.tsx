@@ -7,7 +7,6 @@
  */
 
 import React, { FC } from 'react';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
 import { type TableListTabParentProps } from '@kbn/content-management-tabbed-table-list-view';
@@ -42,7 +41,6 @@ export const getTableList = (
       <TableListViewKibanaProvider
         {...{
           core: services.core,
-          toMountPoint,
           savedObjectsTagging: services.savedObjectsTagging,
           FormattedRelative,
         }}

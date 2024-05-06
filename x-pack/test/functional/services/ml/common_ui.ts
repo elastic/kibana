@@ -439,6 +439,15 @@ export function MachineLearningCommonUIProvider({
       });
     },
 
+    async assertDatePickerDataTierOptionsVisible(shouldBeVisible: boolean) {
+      const selector = 'mlDatePickerButtonDataTierOptions';
+      if (shouldBeVisible === true) {
+        await testSubjects.existOrFail(selector);
+      } else {
+        await testSubjects.missingOrFail(selector);
+      }
+    },
+
     async getSwitchCheckedState(testSubj: string): Promise<boolean> {
       const isSelected = await testSubjects.getAttribute(testSubj, 'aria-checked');
       return isSelected === 'true';
