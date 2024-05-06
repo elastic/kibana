@@ -247,13 +247,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     });
   }, [timelineDataService.query.timefilter.timefilter, timelineFilters.from, timelineFilters.to]);
 
-  // Sync the index pattern
-  useEffect(() => {
-    if (indexPattern.id) {
-      timelineDataService.dataViews.setDefault(indexPattern.id);
-    }
-  }, [timelineDataService, indexPattern]);
-
   // Sync the base query
   useEffect(() => {
     timelineDataService.query.queryString.setQuery(
