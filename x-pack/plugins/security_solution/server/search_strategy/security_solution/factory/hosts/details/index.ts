@@ -7,7 +7,7 @@
 
 import { get } from 'lodash/fp';
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/search-types';
 import type {
   IScopedClusterClient,
   KibanaRequest,
