@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
   ]);
 
-  describe.only('Dashboard control group with multiple data views', () => {
+  describe('Dashboard control group with multiple data views', () => {
     let controlIds: string[];
 
     before(async () => {
