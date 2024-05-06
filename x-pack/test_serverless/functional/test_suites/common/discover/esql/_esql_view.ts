@@ -34,7 +34,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const defaultSettings = {
     defaultIndex: 'logstash-*',
-    enableESQL: true,
   };
 
   describe('discover esql view', async function () {
@@ -351,9 +350,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('querySubmitButton');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
         await testSubjects.click('TextBasedLangEditor-expand');
         await testSubjects.click('TextBasedLangEditor-toggle-query-history-button');
+        await testSubjects.click('TextBasedLangEditor-queryHistory-runQuery-button');
         const historyItem = await esql.getHistoryItem(0);
         await historyItem.findByTestSubject('TextBasedLangEditor-queryHistory-error');
       });
