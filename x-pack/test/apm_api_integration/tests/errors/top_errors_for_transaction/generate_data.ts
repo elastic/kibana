@@ -21,12 +21,12 @@ export const config = {
 };
 
 export async function generateData({
-  synthtraceEsClient,
+  apmSynthtraceEsClient,
   serviceName,
   start,
   end,
 }: {
-  synthtraceEsClient: ApmSynthtraceEsClient;
+  apmSynthtraceEsClient: ApmSynthtraceEsClient;
   serviceName: string;
   start: number;
   end: number;
@@ -72,5 +72,5 @@ export async function generateData({
     ];
   });
 
-  await synthtraceEsClient.index(documents);
+  await apmSynthtraceEsClient.index(documents);
 }

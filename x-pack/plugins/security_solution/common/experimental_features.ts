@@ -261,6 +261,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the new modal for the value list items
    */
   valueListItemsModalEnabled: true,
+
+  /**
+   * Enables the new rule's bulk action to manage custom highlighted fields
+   */
+  bulkCustomHighlightedFieldsEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

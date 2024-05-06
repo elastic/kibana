@@ -6,7 +6,7 @@
  */
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
-import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/data-plugin/common';
+import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
 import { number } from 'io-ts';
 import {
   SearchRequest,
