@@ -11941,12 +11941,12 @@
               {
                 "parentPluginId": "data",
                 "id": "def-common.aggregateQueryToAst.$1.query",
-                "type": "CompoundType",
+                "type": "Object",
                 "tags": [],
                 "label": "query",
                 "description": [],
                 "signature": [
-                  "{ sql: string; } | { esql: string; }"
+                  "{ esql: string; }"
                 ],
                 "path": "src/plugins/data/common/search/expressions/aggregate_query_to_ast.ts",
                 "deprecated": false,
