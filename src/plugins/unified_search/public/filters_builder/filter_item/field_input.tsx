@@ -8,7 +8,7 @@
 
 import React, { useCallback, useContext, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { fieldNameWildcardMatcher } from '@kbn/field-utils';
+import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
 import { FieldIcon } from '@kbn/react-field';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
@@ -84,12 +84,7 @@ export function FieldInput({ field, dataView, onHandleField }: FieldInputProps) 
       inputRef={(ref) => {
         inputRef.current = ref;
       }}
-      optionMatcher={({ option, searchValue }) => {
-        return fieldNameWildcardMatcher(
-          { name: option.name || option.label, displayName: option.label },
-          searchValue
-        );
-      }}
+      optionMatcher={comboBoxFieldOptionMatcher}
       options={euiOptions}
       selectedOptions={selectedEuiOptions}
       onChange={onComboBoxChange}

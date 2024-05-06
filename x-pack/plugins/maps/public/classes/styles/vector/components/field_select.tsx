@@ -10,7 +10,7 @@ import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count'
 import { EuiComboBox, EuiComboBoxProps, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
-import { fieldNameWildcardMatcher } from '@kbn/field-utils';
+import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
 import {
   FIELD_ORIGIN,
   MIDDLE_TRUNCATION_PROPS,
@@ -134,12 +134,7 @@ export function FieldSelect({ fields, selectedFieldName, onChange, styleName, ..
       singleSelection={SINGLE_SELECTION_AS_TEXT_PROPS}
       truncationProps={MIDDLE_TRUNCATION_PROPS}
       inputPopoverProps={{ panelMinWidth }}
-      optionMatcher={({ option, searchValue }) => {
-        return fieldNameWildcardMatcher(
-          { name: option.name || option.label, displayName: option.label },
-          searchValue
-        );
-      }}
+      optionMatcher={comboBoxFieldOptionMatcher}
       {...rest}
     />
   );

@@ -35,7 +35,7 @@ export interface ToolbarSelectorProps {
   options: SelectableEntry[];
   searchable: boolean;
   onChange?: (chosenOption: SelectableEntry | undefined) => void;
-  optionMatcher: EuiSelectableProps['optionMatcher'];
+  optionMatcher?: EuiSelectableProps['optionMatcher'];
 }
 
 export const ToolbarSelector: React.FC<ToolbarSelectorProps> = ({

@@ -8,7 +8,7 @@
 
 import classNames from 'classnames';
 import { sortBy, uniq } from 'lodash';
-import { fieldNameWildcardMatcher } from '@kbn/field-utils';
+import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -64,6 +64,7 @@ export const FieldPicker = ({
     const options: EuiSelectableOption[] = (availableFields ?? []).map((field) => {
       return {
         key: field.name,
+        name: field.name,
         label: field.displayName ?? field.name,
         className: 'presFieldPicker__fieldButton',
         checked: field.name === selectedFieldName ? 'on' : undefined,
@@ -130,12 +131,7 @@ export const FieldPicker = ({
         const field = dataView.getFieldByName(changedOption.key);
         if (field) onSelectField?.(field);
       }}
-      optionMatcher={({ option, searchValue }) => {
-        return fieldNameWildcardMatcher(
-          { name: option.key || option.label, displayName: option.label },
-          searchValue
-        );
-      }}
+      optionMatcher={comboBoxFieldOptionMatcher}
       searchProps={{
         'data-test-subj': 'field-search-input',
         placeholder: i18n.translate('presentationUtil.fieldSearch.searchPlaceHolder', {
