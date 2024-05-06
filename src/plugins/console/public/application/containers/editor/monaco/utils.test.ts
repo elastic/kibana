@@ -60,7 +60,6 @@ describe('monaco editor utils', () => {
     });
   });
 
-
   describe('stringifyRequest', () => {
     const request = {
       startOffset: 0,
