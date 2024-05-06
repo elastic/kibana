@@ -15,23 +15,24 @@ import {
   TheHiveUpdateIncidentResponseSchema,
   TheHiveAddCommentResponseSchema,
   TheHiveCreateAlertResponseSchema,
+  PushToServiceIncidentSchema,
 } from '../../../common/thehive/schema';
-import type {
-  ExecutorSubActionPushParams,
-  ExecutorSubActionCreateAlertParams,
-} from '../../../common/thehive/types';
+import type { ExecutorSubActionCreateAlertParams, Incident } from '../../../common/thehive/types';
 
 const mockTime = new Date('2024-04-03T09:10:30.000');
 
 describe('TheHiveConnector', () => {
-  const connector = new TheHiveConnector({
-    configurationUtilities: actionsConfigMock.create(),
-    connector: { id: '1', type: THEHIVE_CONNECTOR_ID },
-    config: { url: 'https://example.com', organisation: null },
-    secrets: { apiKey: 'test123' },
-    logger: loggingSystemMock.createLogger(),
-    services: actionsMock.createServices(),
-  });
+  const connector = new TheHiveConnector(
+    {
+      configurationUtilities: actionsConfigMock.create(),
+      connector: { id: '1', type: THEHIVE_CONNECTOR_ID },
+      config: { url: 'https://example.com', organisation: null },
+      secrets: { apiKey: 'test123' },
+      logger: loggingSystemMock.createLogger(),
+      services: actionsMock.createServices(),
+    },
+    PushToServiceIncidentSchema
+  );
 
   let mockRequest: jest.Mock;
   let mockError: jest.Mock;
@@ -114,13 +115,12 @@ describe('TheHiveConnector', () => {
       jest.clearAllMocks();
     });
 
-    const incident: ExecutorSubActionPushParams['incident'] = {
+    const incident: Incident = {
       title: 'title',
       description: 'description',
       severity: 1,
       tlp: 2,
       tags: ['tag1', 'tag2'],
-      externalId: null,
     };
 
     it('TheHive API call is successful with correct parameters', async () => {
@@ -164,13 +164,12 @@ describe('TheHiveConnector', () => {
       jest.clearAllMocks();
     });
 
-    const incident: ExecutorSubActionPushParams['incident'] = {
+    const incident: Incident = {
       title: 'new title',
       description: 'new description',
       severity: 3,
       tlp: 1,
       tags: ['tag3'],
-      externalId: null,
     };
 
     it('TheHive API call is successful with correct parameters', async () => {
@@ -225,7 +224,7 @@ describe('TheHiveConnector', () => {
     });
 
     it('TheHive API call is successful with correct parameters', async () => {
-      const response = await connector.addComment({
+      await connector.addComment({
         incidentId: '~172064',
         comment: 'test comment',
       });
@@ -239,11 +238,6 @@ describe('TheHiveConnector', () => {
           Authorization: 'Bearer test123',
           'X-Organisation': null,
         },
-      });
-      expect(response).toEqual({
-        commentId: '~41156688',
-        externalCommentId: '~41156688',
-        pushedDate: '2024-04-03T15:31:20.100Z',
       });
     });
 
@@ -330,12 +324,7 @@ describe('TheHiveConnector', () => {
           'X-Organisation': null,
         },
       });
-      expect(response).toEqual({
-        id: '~172064',
-        url: 'https://example.com/cases/~172064/details',
-        title: 'title',
-        pushedDate: mockTime.toISOString(),
-      });
+      expect(response).toEqual(mockResponse.data);
     });
 
     it('errors during API calls are properly handled', async () => {

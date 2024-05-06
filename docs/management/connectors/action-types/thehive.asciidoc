@@ -49,7 +49,7 @@ image::management/connectors/images/thehive-params-alert-test.png[TheHive alert 
 
 TheHive actions have the following configuration properties.
 
-EventAction:: Action that will be performed in thehive. Supported actions are Create Case (default) and Create Alert.
+Event Action:: Action that will be performed in thehive. Supported actions are Create Case (default) and Create Alert.
 Title:: Title of the incident.
 Description:: The details about the incident.
 Severity:: Severity of the incident. This can be one of `LOW`, `MEDIUM`(default), `HIGH` or `CRITICAL`.

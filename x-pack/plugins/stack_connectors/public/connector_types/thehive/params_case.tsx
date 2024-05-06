@@ -11,7 +11,7 @@ import {
   TextAreaWithMessageVariables,
   ActionParamsProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { EuiFormRow, EuiSelect, EuiText, EuiComboBox } from '@elastic/eui';
+import { EuiFormRow, EuiSelect, EuiComboBox } from '@elastic/eui';
 import { ExecutorParams, ExecutorSubActionPushParams } from '../../../common/thehive/types';
 import { severityOptions, tlpOptions } from './constants';
 import * as translations from './translations';
@@ -67,73 +67,53 @@ export const TheHiveParamsCaseFields: React.FC<ActionParamsProps<ExecutorParams>
     editSubActionProperty('tags', [...(incident.tags ?? []), searchValue]);
   };
 
-  const onChange = (selectedOptions: Array<{ label: string }>) => {
-    setSelected(selectedOptions);
+  const onChange = (selectedOptionList: Array<{ label: string }>) => {
+    setSelected(selectedOptionList);
     editSubActionProperty(
       'tags',
-      selectedOptions.map((option) => option.label)
+      selectedOptionList.map((option) => option.label)
     );
   };
 
   return (
     <>
-      <EuiFormRow
-        data-test-subj="title-row"
-        fullWidth
-        error={errors['pushToServiceParam.incident.title']}
-        isInvalid={
-          errors['pushToServiceParam.incident.title'] !== undefined &&
-          errors['pushToServiceParam.incident.title'].length > 0 &&
-          incident.title !== undefined
-        }
-        label={translations.TITLE_LABEL}
-        labelAppend={
-          <EuiText size="xs" color="subdued">
-            Required
-          </EuiText>
-        }
-      >
-        <TextFieldWithMessageVariables
-          index={index}
-          editAction={editSubActionProperty}
-          paramsProperty={'title'}
-          inputTargetValue={incident.title ?? undefined}
-          errors={errors['pushToServiceParam.incident.title'] as string[]}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        data-test-subj="description-row"
-        fullWidth
-        error={errors['pushToServiceParam.incident.description']}
-        isInvalid={
-          errors['pushToServiceParam.incident.description'] !== undefined &&
-          errors['pushToServiceParam.incident.description'].length > 0 &&
-          incident.description !== undefined
-        }
+      <TextFieldWithMessageVariables
+        index={index}
+        editAction={editSubActionProperty}
+        messageVariables={messageVariables}
+        paramsProperty={'title'}
+        inputTargetValue={incident.title ?? undefined}
+        wrapField={true}
+        formRowProps={{
+          label: translations.TITLE_LABEL,
+          fullWidth: true,
+          helpText: '',
+          isInvalid:
+            errors['pushToServiceParam.incident.title'] !== undefined &&
+            errors['pushToServiceParam.incident.title'].length > 0 &&
+            incident.title !== undefined,
+          error: errors['pushToServiceParam.incident.title'] as string,
+        }}
+        errors={errors['pushToServiceParam.incident.title'] as string[]}
+      />
+      <TextAreaWithMessageVariables
+        index={index}
         label={translations.DESCRIPTION_LABEL}
-        labelAppend={
-          <EuiText size="xs" color="subdued">
-            Required
-          </EuiText>
-        }
-      >
-        <TextFieldWithMessageVariables
-          index={index}
-          editAction={editSubActionProperty}
-          paramsProperty={'description'}
-          inputTargetValue={incident.description ?? undefined}
-          errors={errors['pushToServiceParam.incident.description'] as string[]}
-        />
-      </EuiFormRow>
+        editAction={editSubActionProperty}
+        messageVariables={messageVariables}
+        paramsProperty={'description'}
+        inputTargetValue={incident.description ?? undefined}
+        errors={errors['pushToServiceParam.incident.description'] as string[]}
+      />
       <EuiFormRow fullWidth error={errors.severity} label={translations.SEVERITY_LABEL}>
         <EuiSelect
           fullWidth
-          data-test-subj="eventSeveritySelect"
+          data-test-subj="severitySelectInput"
           value={severity}
           options={severityOptions}
           onChange={(e) => {
-            editSubActionProperty('severity', parseInt(e.target.value));
-            setSeverity(parseInt(e.target.value));
+            editSubActionProperty('severity', parseInt(e.target.value, 10));
+            setSeverity(parseInt(e.target.value, 10));
           }}
         />
       </EuiFormRow>
@@ -141,19 +121,18 @@ export const TheHiveParamsCaseFields: React.FC<ActionParamsProps<ExecutorParams>
         <EuiSelect
           fullWidth
           value={tlp}
-          data-test-subj="eventTlpSelect"
+          data-test-subj="tlpSelectInput"
           options={tlpOptions}
           onChange={(e) => {
-            editSubActionProperty('tlp', parseInt(e.target.value));
-            setTlp(parseInt(e.target.value));
+            editSubActionProperty('tlp', parseInt(e.target.value, 10));
+            setTlp(parseInt(e.target.value, 10));
           }}
         />
       </EuiFormRow>
       <EuiFormRow fullWidth label={translations.TAGS_LABEL}>
         <EuiComboBox
-          data-test-subj="eventTags"
+          data-test-subj="tagsInput"
           fullWidth
-          options={[]}
           placeholder="Tags"
           selectedOptions={selectedOptions}
           onCreateOption={onCreateOption}
@@ -161,7 +140,6 @@ export const TheHiveParamsCaseFields: React.FC<ActionParamsProps<ExecutorParams>
         />
       </EuiFormRow>
       <TextAreaWithMessageVariables
-        data-test-subj="comment"
         index={index}
         editAction={editComment}
         messageVariables={messageVariables}

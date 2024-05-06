@@ -56,14 +56,14 @@ describe('TheHiveParamsFields renders', () => {
   it('all Params fields is rendered', () => {
     const { getByTestId } = render(<TheHiveParamsFields {...defaultProps} />);
 
-    expect(getByTestId('title-row')).toBeInTheDocument();
-    expect(getByTestId('description-row')).toBeInTheDocument();
-    expect(getByTestId('eventTags')).toBeInTheDocument();
-    expect(getByTestId('eventSeveritySelect')).toBeInTheDocument();
-    expect(getByTestId('eventTlpSelect')).toBeInTheDocument();
+    expect(getByTestId('titleInput')).toBeInTheDocument();
+    expect(getByTestId('descriptionTextArea')).toBeInTheDocument();
+    expect(getByTestId('tagsInput')).toBeInTheDocument();
+    expect(getByTestId('severitySelectInput')).toBeInTheDocument();
+    expect(getByTestId('tlpSelectInput')).toBeInTheDocument();
     expect(getByTestId('commentsTextArea')).toBeInTheDocument();
 
-    expect(getByTestId('eventSeveritySelect')).toHaveValue('2');
-    expect(getByTestId('eventTlpSelect')).toHaveValue('2');
+    expect(getByTestId('severitySelectInput')).toHaveValue('2');
+    expect(getByTestId('tlpSelectInput')).toHaveValue('2');
   });
 });

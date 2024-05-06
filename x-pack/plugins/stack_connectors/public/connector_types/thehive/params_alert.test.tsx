@@ -55,16 +55,16 @@ describe('TheHiveParamsFields renders', () => {
   it('all Params fields is rendered', () => {
     const { getByTestId } = render(<TheHiveParamsAlertFields {...defaultProps} />);
 
-    expect(getByTestId('alert-title-row')).toBeInTheDocument();
-    expect(getByTestId('alert-description-row')).toBeInTheDocument();
-    expect(getByTestId('alert-eventTags')).toBeInTheDocument();
-    expect(getByTestId('alert-eventSeveritySelect')).toBeInTheDocument();
-    expect(getByTestId('alert-eventTlpSelect')).toBeInTheDocument();
-    expect(getByTestId('alert-type-row')).toBeInTheDocument();
-    expect(getByTestId('alert-source-row')).toBeInTheDocument();
-    expect(getByTestId('alert-sourceRef-row')).toBeInTheDocument();
+    expect(getByTestId('titleInput')).toBeInTheDocument();
+    expect(getByTestId('descriptionTextArea')).toBeInTheDocument();
+    expect(getByTestId('tagsInput')).toBeInTheDocument();
+    expect(getByTestId('severitySelectInput')).toBeInTheDocument();
+    expect(getByTestId('tlpSelectInput')).toBeInTheDocument();
+    expect(getByTestId('typeInput')).toBeInTheDocument();
+    expect(getByTestId('sourceInput')).toBeInTheDocument();
+    expect(getByTestId('sourceRefInput')).toBeInTheDocument();
 
-    expect(getByTestId('alert-eventSeveritySelect')).toHaveValue('2');
-    expect(getByTestId('alert-eventTlpSelect')).toHaveValue('2');
+    expect(getByTestId('severitySelectInput')).toHaveValue('2');
+    expect(getByTestId('tlpSelectInput')).toHaveValue('2');
   });
 });

@@ -42,14 +42,14 @@ export const EVENT_ACTION_LABEL = i18n.translate(
 export const TITLE_LABEL = i18n.translate(
   'xpack.stackConnectors.components.thehive.titleFieldLabel',
   {
-    defaultMessage: 'Title',
+    defaultMessage: 'Title*',
   }
 );
 
 export const DESCRIPTION_LABEL = i18n.translate(
   'xpack.stackConnectors.components.thehive.descriptionFieldLabel',
   {
-    defaultMessage: 'Description',
+    defaultMessage: 'Description*',
   }
 );
 
@@ -84,21 +84,21 @@ export const COMMENTS_LABEL = i18n.translate(
 export const TYPE_LABEL = i18n.translate(
   'xpack.stackConnectors.components.thehive.typeFieldLabel',
   {
-    defaultMessage: 'Type',
+    defaultMessage: 'Type*',
   }
 );
 
 export const SOURCE_LABEL = i18n.translate(
   'xpack.stackConnectors.components.thehive.sourceFieldLabel',
   {
-    defaultMessage: 'Source',
+    defaultMessage: 'Source*',
   }
 );
 
 export const SOURCE_REF_LABEL = i18n.translate(
   'xpack.stackConnectors.components.thehive.sourceRefFieldLabel',
   {
-    defaultMessage: 'Source Reference',
+    defaultMessage: 'Source Reference*',
   }
 );
 

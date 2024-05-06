@@ -7,6 +7,7 @@
 
 import { ServiceParams, CaseConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
+import { Type } from '@kbn/config-schema';
 import { SUB_ACTION } from '../../../common/thehive/constants';
 import {
   TheHiveIncidentResponseSchema,
@@ -18,23 +19,31 @@ import {
 import type {
   TheHiveConfig,
   TheHiveSecrets,
-  ExecutorSubActionPushParams,
   ExecutorSubActionCreateAlertParams,
   TheHiveFailureResponse,
   ExternalServiceIncidentResponse,
-  ExternalServiceCommentResponse,
+  Incident,
+  GetIncidentResponse,
 } from '../../../common/thehive/types';
 
 export const API_VERSION = 'v1';
 
-export class TheHiveConnector extends CaseConnector<TheHiveConfig, TheHiveSecrets> {
+export class TheHiveConnector extends CaseConnector<
+  TheHiveConfig,
+  TheHiveSecrets,
+  Incident,
+  GetIncidentResponse
+> {
   private url: string;
   private apiKey: string;
   private organisation: string | null;
   private urlWithoutTrailingSlash: string;
 
-  constructor(params: ServiceParams<TheHiveConfig, TheHiveSecrets>) {
-    super(params);
+  constructor(
+    params: ServiceParams<TheHiveConfig, TheHiveSecrets>,
+    pushToServiceParamsExtendedSchema: Record<string, Type<unknown>>
+  ) {
+    super(params, pushToServiceParamsExtendedSchema);
 
     this.registerSubAction({
       name: SUB_ACTION.CREATE_ALERT,
@@ -59,9 +68,7 @@ export class TheHiveConnector extends CaseConnector<TheHiveConfig, TheHiveSecret
     return `API Error: ${error.response?.data?.type} - ${error.response?.data?.message}`;
   }
 
-  public async createIncident(
-    incident: ExecutorSubActionPushParams['incident']
-  ): Promise<ExternalServiceIncidentResponse> {
+  public async createIncident(incident: Incident): Promise<ExternalServiceIncidentResponse> {
     const res = await this.request({
       method: 'post',
       url: `${this.url}/api/${API_VERSION}/case`,
@@ -78,26 +85,14 @@ export class TheHiveConnector extends CaseConnector<TheHiveConfig, TheHiveSecret
     };
   }
 
-  public async addComment({
-    incidentId,
-    comment,
-  }: {
-    incidentId: string;
-    comment: string;
-  }): Promise<ExternalServiceCommentResponse> {
-    const res = await this.request({
+  public async addComment({ incidentId, comment }: { incidentId: string; comment: string }) {
+    await this.request({
       method: 'post',
       url: `${this.url}/api/${API_VERSION}/case/${incidentId}/comment`,
       data: { message: comment },
       headers: this.getAuthHeaders(),
       responseSchema: TheHiveAddCommentResponseSchema,
     });
-
-    return {
-      commentId: res.data._id,
-      externalCommentId: res.data._id,
-      pushedDate: new Date(res.data.createdAt).toISOString(),
-    };
   }
 
   public async updateIncident({
@@ -105,7 +100,7 @@ export class TheHiveConnector extends CaseConnector<TheHiveConfig, TheHiveSecret
     incident,
   }: {
     incidentId: string;
-    incident: ExecutorSubActionPushParams['incident'];
+    incident: Incident;
   }): Promise<ExternalServiceIncidentResponse> {
     await this.request({
       method: 'patch',
@@ -123,19 +118,14 @@ export class TheHiveConnector extends CaseConnector<TheHiveConfig, TheHiveSecret
     };
   }
 
-  public async getIncident({ id }: { id: string }): Promise<ExternalServiceIncidentResponse> {
+  public async getIncident({ id }: { id: string }): Promise<GetIncidentResponse> {
     const res = await this.request({
       url: `${this.url}/api/${API_VERSION}/case/${id}`,
       headers: this.getAuthHeaders(),
       responseSchema: TheHiveIncidentResponseSchema,
     });
 
-    return {
-      id: res.data._id,
-      title: res.data.title,
-      url: `${this.urlWithoutTrailingSlash}/cases/${res.data._id}/details`,
-      pushedDate: new Date().toISOString(),
-    };
+    return res.data;
   }
 
   public async createAlert(alert: ExecutorSubActionCreateAlertParams) {

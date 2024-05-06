@@ -13,6 +13,7 @@ import {
   ExecutorSubActionPushParamsSchema,
   ExecutorSubActionCreateAlertParamsSchema,
   TheHiveFailureResponseSchema,
+  TheHiveIncidentResponseSchema,
 } from './schema';
 
 export type TheHiveConfig = TypeOf<typeof TheHiveConfigSchema>;
@@ -33,8 +34,6 @@ export interface ExternalServiceIncidentResponse {
   pushedDate: string;
 }
 
-export interface ExternalServiceCommentResponse {
-  commentId: string;
-  pushedDate: string;
-  externalCommentId?: string;
-}
+export type Incident = Omit<ExecutorSubActionPushParams['incident'], 'externalId'>;
+
+export type GetIncidentResponse = TypeOf<typeof TheHiveIncidentResponseSchema>;
