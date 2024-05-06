@@ -19,68 +19,127 @@ import type {
 } from '@kbn/core-status-common-internal';
 
 const serviceStatusLevelId: () => Type<ServiceStatusLevelId> = () =>
-  schema.oneOf([
-    schema.literal('available'),
-    schema.literal('degraded'),
-    schema.literal('unavailable'),
-    schema.literal('critical'),
-  ]);
+  schema.oneOf(
+    [
+      schema.literal('available'),
+      schema.literal('degraded'),
+      schema.literal('unavailable'),
+      schema.literal('critical'),
+    ],
+    { meta: { description: 'Service status levels as human and machine readable values.' } }
+  );
 
 const statusInfoServiceStatus: () => Type<
   Omit<ServiceStatus, 'level'> & { level: ServiceStatusLevelId }
 > = () =>
   schema.object({
     level: serviceStatusLevelId(),
-    summary: schema.string(),
-    detail: schema.maybe(schema.string()),
-    documentationUrl: schema.maybe(schema.string()),
-    meta: schema.recordOf(schema.string(), schema.any()),
+    summary: schema.string({
+      meta: { description: 'A human readable summary of the service status.' },
+    }),
+    detail: schema.maybe(
+      schema.string({ meta: { description: 'Human readable detail of the service status.' } })
+    ),
+    documentationUrl: schema.maybe(
+      schema.string({
+        meta: { description: 'A URL to further documentation regarding this service.' },
+      })
+    ),
+    meta: schema.recordOf(schema.string(), schema.any(), {
+      meta: { description: 'An unstructured set of extra metadata about this service.' },
+    }),
   });
 
 const statusInfoCoreStatus: () => Type<StatusInfoCoreStatus> = () =>
-  schema.object({
-    elasticsearch: statusInfoServiceStatus(),
-    savedObjects: statusInfoServiceStatus(),
-  });
+  schema.object(
+    {
+      elasticsearch: statusInfoServiceStatus(),
+      savedObjects: statusInfoServiceStatus(),
+    },
+    { meta: { description: 'Statuses of core Kibana services.' } }
+  );
 
 /** Only include a subset of fields for OAS documentation, for now */
 const serverMetrics: () => Type<Partial<ServerMetrics>> = () =>
-  schema.object({
-    elasticsearch_client: schema.object({
-      totalActiveSockets: schema.number(),
-      totalIdleSockets: schema.number(),
-      totalQueuedRequests: schema.number(),
-    }),
-    last_updated: schema.string(),
-    collection_interval_in_millis: schema.number(),
-  });
+  schema.object(
+    {
+      elasticsearch_client: schema.object(
+        {
+          totalActiveSockets: schema.number({
+            meta: { description: 'Count of network sockets currently in use.' },
+          }),
+          totalIdleSockets: schema.number({
+            meta: { description: 'Count of network sockets currently idle.' },
+          }),
+          totalQueuedRequests: schema.number({
+            meta: { description: 'Count of requests not yet assigned to sockets.' },
+          }),
+        },
+        { meta: { description: `Current network metrics of Kibana's Elasticsearch client.` } }
+      ),
+      last_updated: schema.string({ meta: { description: 'The time metrics were collected.' } }),
+      collection_interval_in_millis: schema.number({
+        meta: { description: 'The interval at which metrics should be collected.' },
+      }),
+    },
+    {
+      meta: {
+        description: 'Metric groups collected by Kibana.',
+      },
+    }
+  );
 
 const buildFlavour: () => Type<BuildFlavor> = () =>
-  schema.oneOf([schema.literal('serverless'), schema.literal('traditional')]);
+  schema.oneOf([schema.literal('serverless'), schema.literal('traditional')], {
+    meta: {
+      description:
+        'The build flavour determines configuration and behavior of Kibana. On premise users will almost always run the "traditional" flavour, while other flavours are reserved for Elastic-specific use cases.',
+    },
+  });
 
 const serverVersion: () => Type<ServerVersion> = () =>
   schema.object({
-    number: schema.string(),
-    build_hash: schema.string(),
-    build_number: schema.number(),
-    build_snapshot: schema.boolean(),
+    number: schema.string({
+      meta: { description: 'A semantic version number.' },
+    }),
+    build_hash: schema.string({
+      meta: {
+        description: 'A unique hash value representing the git commit of this Kibana build.',
+      },
+    }),
+    build_number: schema.number({
+      meta: {
+        description:
+          'A monotonically increasing number, each subsequent build will have a higher number.',
+      },
+    }),
+    build_snapshot: schema.boolean({
+      meta: { description: 'Whether this build is a snapshot build.' },
+    }),
     build_flavor: buildFlavour(),
-    build_date: schema.string(),
+    build_date: schema.string({ meta: { description: 'The date and time of this build.' } }),
   });
 
 const statusInfo: () => Type<StatusInfo> = () =>
   schema.object({
     overall: statusInfoServiceStatus(),
     core: statusInfoCoreStatus(),
-    plugins: schema.recordOf(schema.string(), statusInfoServiceStatus()),
+    plugins: schema.recordOf(schema.string(), statusInfoServiceStatus(), {
+      meta: { description: 'A dynamic mapping of plugin ID to plugin status.' },
+    }),
   });
 
 /** Excluding metrics for brevity, for now */
 const fullStatusResponse: () => Type<Omit<StatusResponse, 'metrics'>> = () =>
   schema.object(
     {
-      name: schema.string(),
-      uuid: schema.string(),
+      name: schema.string({ meta: { description: 'Kibana instance name.' } }),
+      uuid: schema.string({
+        meta: {
+          description:
+            'Unique, generated Kibana instance UUID. This UUID should persist even if the Kibana process restarts.',
+        },
+      }),
       version: serverVersion(),
       status: statusInfo(),
       metrics: serverMetrics(),
@@ -112,7 +171,7 @@ const redactedStatusResponse = () =>
 
 /** Lazily load this schema */
 export const statusResponse = () =>
-  schema.oneOf([redactedStatusResponse(), fullStatusResponse()], {
+  schema.oneOf([fullStatusResponse(), redactedStatusResponse()], {
     meta: {
       description: `Kibana's operational status. A minimal response is sent for unauthorized users.`,
     },
