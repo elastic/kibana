@@ -105,6 +105,7 @@ const redactedStatusResponse = () =>
     {
       meta: {
         id: 'core.status.redactedResponse',
+        description: `A minimal representation of Kibana's operational status.`,
       },
     }
   );
