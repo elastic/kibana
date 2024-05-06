@@ -651,12 +651,7 @@ export function MachineLearningJobWizardCommonProvider(
       });
     },
 
-    async assertShortDurationTimeRange() {
-      const { startDate: origStartDate } = await this.getSelectedDateRange();
-
-      // calculate the new end datedate
-      const shortDurationEndDate = `${origStartDate?.split(':', 1)[0]}:01:00.000`;
-
+    async setShortDurationTimeRange(shortDurationEndDate: string) {
       // set the new end date
       await testSubjects.setValue('mlJobWizardDatePickerRangeEndDate', shortDurationEndDate, {
         clearWithKeyboard: true,
@@ -665,9 +660,6 @@ export function MachineLearningJobWizardCommonProvider(
 
       // click away from time popover
       await this.goToTimeRangeStep();
-
-      // assert time is set as expected
-      await this.assertDateRangeSelection(origStartDate as string, shortDurationEndDate);
     },
 
     async goToJobDetailsStep() {

@@ -408,7 +408,19 @@ export default function ({ getService }: FtrProviderContext) {
 
       await ml.jobWizardCommon.goToTimeRangeStep();
 
-      await ml.jobWizardCommon.assertShortDurationTimeRange();
+      const { startDate: origStartDate } = await ml.jobWizardCommon.getSelectedDateRange();
+
+      await ml.testExecution.logTestStep('calculate the new end date');
+      const shortDurationEndDate = `${origStartDate?.split(':', 1)[0]}:01:00.000`;
+
+      await ml.testExecution.logTestStep('set the new end date');
+      await ml.jobWizardCommon.setShortDurationTimeRange(shortDurationEndDate);
+
+      // assert time is set as expected
+      await ml.jobWizardCommon.assertDateRangeSelection(
+        origStartDate as string,
+        shortDurationEndDate
+      );
 
       await ml.jobWizardCommon.clickNextButton();
       await ml.jobWizardCommon.clickNextButton();
