@@ -58,6 +58,7 @@ import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { UpsellingService } from '@kbn/security-solution-upselling/service';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import type { PluginStartContract } from '@kbn/alerting-plugin/public/plugin';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -147,6 +148,7 @@ export interface StartPlugins {
   dataViewEditor: DataViewEditorStart;
   charts: ChartsPluginStart;
   savedSearch: SavedSearchPublicPluginStart;
+  alerting: PluginStartContract;
   core: CoreStart;
 }
 
