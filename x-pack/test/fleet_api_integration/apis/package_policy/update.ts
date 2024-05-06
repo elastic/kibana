@@ -521,6 +521,62 @@ export default function (providerContext: FtrProviderContext) {
         .expect(400);
     });
 
+    it('should allow to override inputs', async function () {
+      await supertest
+        .put(`/api/fleet/package_policies/${endpointPackagePolicyId}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          overrides: {
+            inputs: {
+              'policy-id': {
+                log_level: 'debug',
+              },
+            },
+          },
+        })
+        .expect(200);
+    });
+
+    it('should not allow to override compiled_streams', async function () {
+      await supertest
+        .put(`/api/fleet/package_policies/${endpointPackagePolicyId}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          overrides: {
+            inputs: {
+              compiled_streams: {},
+            },
+          },
+        })
+        .expect(400);
+    });
+
+    it('should not allow to override compiled_inputs', async function () {
+      await supertest
+        .put(`/api/fleet/package_policies/${endpointPackagePolicyId}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          overrides: {
+            inputs: {
+              compiled_inputs: {},
+            },
+          },
+        })
+        .expect(400);
+    });
+
+    it('should not allow to override properties other than inputs', async function () {
+      await supertest
+        .put(`/api/fleet/package_policies/${endpointPackagePolicyId}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          overrides: {
+            name: 'test',
+          },
+        })
+        .expect(400);
+    });
+
     describe('Simplified package policy', async () => {
       it('should work with valid values', async function () {
         await supertest

@@ -112,7 +112,14 @@ export const SelectInferenceId = ({
   }, [models]);
 
   useEffect(() => {
-    setOptions([...defaultInferenceIds, ...inferenceIdOptionsFromModels]);
+    const mergedOptions = {
+      ...inferenceIdOptionsFromModels.reduce(
+        (acc, option) => ({ ...acc, [option.label]: option }),
+        {}
+      ),
+      ...defaultInferenceIds.reduce((acc, option) => ({ ...acc, [option.label]: option }), {}),
+    };
+    setOptions(Object.values(mergedOptions));
   }, [inferenceIdOptionsFromModels, defaultInferenceIds]);
   const [isCreateInferenceApiLoading, setIsCreateInferenceApiLoading] = useState(false);
 
@@ -184,6 +191,7 @@ export const SelectInferenceId = ({
                     iconType="arrowDown"
                     iconSide="right"
                     color="text"
+                    data-test-subj="inferenceIdButton"
                     onClick={() => {
                       setIsInferencePopoverVisible(!isInferencePopoverVisible);
                     }}
@@ -298,7 +306,7 @@ export const SelectInferenceId = ({
   };
   return (
     <Form form={form}>
-      <EuiFlexGroup>
+      <EuiFlexGroup data-test-subj="selectInferenceId">
         <EuiFlexItem grow={false}>
           {inferencePopover()}
           {isInferenceFlyoutVisible && (

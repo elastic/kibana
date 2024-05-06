@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ReactElement } from 'react';
+import React, { ReactElement, FC, PropsWithChildren } from 'react';
 import { render, RenderOptions } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -32,7 +32,7 @@ const queryClient = new QueryClient({
   },
 });
 
-const AllTheProviders: React.FC = ({ children }) => {
+const AllTheProviders: FC<PropsWithChildren<unknown>> = ({ children }) => {
   return (
     <KibanaThemeProvider theme={core.theme}>
       <KibanaContextProvider services={{ ...core, ...services }}>
