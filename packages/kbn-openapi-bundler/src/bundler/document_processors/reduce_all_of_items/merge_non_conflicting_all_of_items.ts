@@ -100,9 +100,7 @@ function canMergeObjectSchemas(schemas: OpenAPIV3.SchemaObject[]): boolean {
   const props = new Map<string, OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject>();
   let objectSchemasCounter = 0;
 
-  for (let i = 0; i < schemas.length; ++i) {
-    const node = schemas[i];
-
+  for (const node of schemas) {
     if (!isObjectNode(node) || !isPlainObjectType(node.properties)) {
       continue;
     }
