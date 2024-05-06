@@ -17,6 +17,7 @@ import {
   EuiContextMenuPanel,
   EuiContextMenuPanelDescriptor,
   EuiIcon,
+  EuiPanel,
   EuiPopover,
   EuiSkeletonText,
   EuiToolTip,
@@ -150,7 +151,9 @@ export const PresentationPanelContextMenu = ({
     />
   );
 
-  const [mainMenu, moreMenuPanels] = contextMenuPanels;
+  const [mainMenu, moreMenu] = contextMenuPanels;
+
+  console.log({ mainMenu, moreMenu });
 
   return (
     <div className="embPanel__floatingActionsWrapper">
@@ -190,43 +193,46 @@ export const PresentationPanelContextMenu = ({
                     color="text"
                     onClick={onClick as MouseEventHandler}
                     data-test-subj={dataTestSubj}
-                    aria-label={name}
+                    aria-label={name as string}
                   />
                 </EuiToolTip>
               ))}
-            <EuiPopover
-              repositionOnScroll
-              panelPaddingSize="none"
-              anchorPosition="downRight"
-              button={ContextMenuButton}
-              isOpen={isContextMenuOpen}
-              className={contextMenuClasses}
-              closePopover={() => setIsContextMenuOpen(false)}
-              data-test-subj={
-                isContextMenuOpen
-                  ? 'embeddablePanelContextMenuOpen'
-                  : 'embeddablePanelContextMenuClosed'
-              }
-            >
-              {menuPanelsLoading ? (
-                <EuiContextMenuPanel
-                  className="embPanel__optionsMenuPopover-loading"
-                  title={i18n.translate('presentationPanel.contextMenu.loadingTitle', {
-                    defaultMessage: 'Options',
-                  })}
-                >
-                  <EuiContextMenuItem>
-                    <EuiSkeletonText />
-                  </EuiContextMenuItem>
-                </EuiContextMenuPanel>
-              ) : (
-                <EuiContextMenu
-                  data-test-subj="presentationPanelContextMenuItems"
-                  initialPanelId="mainMenu"
-                  panels={[moreMenuPanels]}
-                />
-              )}
-            </EuiPopover>
+            {moreMenu && (
+              <EuiPopover
+                repositionOnScroll
+                panelPaddingSize="none"
+                anchorPosition="downRight"
+                button={ContextMenuButton}
+                isOpen={isContextMenuOpen}
+                className={contextMenuClasses}
+                closePopover={() => setIsContextMenuOpen(false)}
+                data-test-subj={
+                  isContextMenuOpen
+                    ? 'embeddablePanelContextMenuOpen'
+                    : 'embeddablePanelContextMenuClosed'
+                }
+                attachToAnchor
+              >
+                {menuPanelsLoading ? (
+                  <EuiContextMenuPanel
+                    className="embPanel__optionsMenuPopover-loading"
+                    title={i18n.translate('presentationPanel.contextMenu.loadingTitle', {
+                      defaultMessage: 'Options',
+                    })}
+                  >
+                    <EuiContextMenuItem>
+                      <EuiSkeletonText />
+                    </EuiContextMenuItem>
+                  </EuiContextMenuPanel>
+                ) : (
+                  <EuiContextMenu
+                    data-test-subj="presentationPanelContextMenuItems"
+                    initialPanelId={moreMenu.id}
+                    panels={[moreMenu]}
+                  />
+                )}
+              </EuiPopover>
+            )}
           </div>
         </>
       )}
