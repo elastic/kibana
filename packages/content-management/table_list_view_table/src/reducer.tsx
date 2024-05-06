@@ -25,11 +25,13 @@ export function getReducer<T extends UserContentCommonSchema>() {
         const items = action.data.response.hits;
         let tableSort;
         let hasUpdatedAtMetadata = state.hasUpdatedAtMetadata;
+        let hasCreatedByMetadata = state.hasCreatedByMetadata;
 
         if (!state.hasInitialFetchReturned) {
           // We only get the state on the initial fetch of items
           // After that we don't want to reset the columns or change the sort after fetching
           hasUpdatedAtMetadata = Boolean(items.find((item) => Boolean(item.updatedAt)));
+          hasCreatedByMetadata = Boolean(items.find((item) => Boolean(item.createdBy)));
 
           // Only change the table sort if it hasn't been changed already.
           // For example if its state comes from the URL, we don't want to override it here.
@@ -58,6 +60,7 @@ export function getReducer<T extends UserContentCommonSchema>() {
           hasNoItems,
           totalItems: action.data.response.total,
           hasUpdatedAtMetadata,
+          hasCreatedByMetadata,
           tableSort: tableSort ?? state.tableSort,
           pagination: {
             ...state.pagination,
