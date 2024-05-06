@@ -187,7 +187,7 @@ describe('get_data_telemetry', () => {
           size_in_bytes: 999,
         },
         {
-          pattern_name: 'third-party-logs',
+          pattern_name: 'generic-logs',
           index_count: 2,
           doc_count: 100,
           size_in_bytes: 10,
