@@ -10,7 +10,7 @@ import * as Rx from 'rxjs';
 
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import type { ISearchClient } from '@kbn/data-plugin/common';
+import type { ISearchClient } from '@kbn/search-types';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { createSearchRequestHandlerContext } from '@kbn/data-plugin/server/search/mocks';
 import type { SearchCursorSettings } from './search_cursor';
