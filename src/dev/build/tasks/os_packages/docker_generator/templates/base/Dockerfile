@@ -32,7 +32,14 @@ COPY {{artifactTarball}} /tmp/kibana.tar.gz
 
 RUN mkdir /usr/share/kibana
 WORKDIR /usr/share/kibana
-RUN tar --strip-components=1 -zxf /tmp/kibana.tar.gz
+RUN tar \
+{{#serverless}}
+  # Exclude serverless.yml disabled assets
+  --exclude=screenshotting-plugin/chromium \
+  --exclude=screenshotting-plugin/server/assets \
+{{/serverless}}
+  --strip-components=1 \
+  -zxf /tmp/kibana.tar.gz
 # Ensure that group permissions are the same as user permissions.
 # This will help when relying on GID-0 to run Kibana, rather than UID-1000.
 # OpenShift does this, for example.
