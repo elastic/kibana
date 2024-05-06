@@ -24,6 +24,13 @@ const metadataTab: Tab = {
   }),
 };
 
+const metricsTab: Tab = {
+  id: ContentTabIds.METRICS,
+  name: i18n.translate('xpack.infra.nodeDetails.tabs.metrics.title', {
+    defaultMessage: 'Metrics',
+  }),
+};
+
 const processesTab: Tab = {
   id: ContentTabIds.PROCESSES,
   name: i18n.translate('xpack.infra.metrics.nodeDetails.tabs.processes', {
@@ -76,6 +83,7 @@ const dashboardsTab: Tab = {
 export const hostDetailsTabs: Tab[] = [
   overviewTab,
   metadataTab,
+  metricsTab,
   processesTab,
   profilingTab,
   logsTab,
