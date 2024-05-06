@@ -17,7 +17,7 @@ interface K8sContainerDocument extends Fields {
   'metricset.name'?: string;
 }
 
-class K8sContainer extends Entity<K8sContainerDocument> {
+export class K8sContainer extends Entity<K8sContainerDocument> {
   metrics() {
     return new K8sContainerMetrics({
       ...this.fields,

@@ -25,7 +25,7 @@ export class Pod extends Entity<PodDocument> {
     });
   }
 
-  k8sContainer(id: string) {
+  container(id: string) {
     return k8sContainer(id, this.fields['kubernetes.pod.uid'], this.fields['kubernetes.node.name']);
   }
 }

@@ -15,7 +15,7 @@ interface DockerContainerDocument extends Fields {
   'metricset.name'?: string;
 }
 
-class DockerContainer extends Entity<DockerContainerDocument> {
+export class DockerContainer extends Entity<DockerContainerDocument> {
   metrics() {
     return new DockerContainerMetrics({
       ...this.fields,
