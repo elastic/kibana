@@ -129,12 +129,17 @@ export const commandDefinitions: CommandDefinition[] = [
         function isAggFunction(arg: ESQLAstItem): arg is ESQLFunction {
           return isFunctionItem(arg) && getFunctionDefinition(arg.name)?.type === 'agg';
         }
+        function isGroupingFunction(arg: ESQLAstItem): arg is ESQLFunction {
+          return isFunctionItem(arg) && getFunctionDefinition(arg.name)?.type === 'grouping';
+        }
         function isOtherFunction(arg: ESQLAstItem): arg is ESQLFunction {
           return isFunctionItem(arg) && getFunctionDefinition(arg.name)?.type !== 'agg';
         }
 
         function checkAggExistence(arg: ESQLFunction): boolean {
-          if (isAggFunction(arg)) {
+          // TODO the grouping function check may not
+          // hold true for all future cases
+          if (isAggFunction(arg) || isGroupingFunction(arg)) {
             return true;
           }
           if (isOtherFunction(arg)) {
@@ -172,7 +177,9 @@ export const commandDefinitions: CommandDefinition[] = [
           // * or if it's a builtin function, then all operands are agg functions or literals
           // * or if it's a eval function then all arguments are agg functions or literals
           function checkFunctionContent(arg: ESQLFunction) {
-            if (isAggFunction(arg)) {
+            // TODO the grouping function check may not
+            // hold true for all future cases
+            if (isAggFunction(arg) || isGroupingFunction(arg)) {
               return true;
             }
             return (arg as ESQLFunction).args.every(
