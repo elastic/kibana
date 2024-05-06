@@ -9,10 +9,8 @@
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import { useEffect } from 'react';
 import type { Embeddable } from '@kbn/embeddable-plugin/public';
-import type { ESQLSearchReponse } from '@kbn/es-types';
-import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
+import { getESQLQueryColumns } from '@kbn/esql-utils';
 import type { ISearchStart } from '@kbn/data-plugin/public';
-import { ESQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import {
   LensConfigBuilder,
   type LensConfig,
@@ -28,7 +26,6 @@ import {
   type LensTreeMapConfig,
   LensDataset,
 } from '@kbn/lens-embeddable-utils/config_builder';
-import { lastValueFrom } from 'rxjs';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import type { AwaitingDashboardAPI } from '../../dashboard_container';
@@ -46,54 +43,6 @@ const chartTypes = [
   'tagcloud',
   'treemap',
 ] as const;
-
-async function getColumns({
-  esqlQuery,
-  search,
-  signal,
-}: {
-  esqlQuery: string;
-  search: ISearchStart;
-  signal: AbortSignal;
-}): Promise<
-  Array<{
-    columnId: string;
-    fieldName: string;
-    meta: {
-      type: string;
-    };
-    inMetricDimension: boolean;
-  }>
-> {
-  const response = await lastValueFrom(
-    search.search(
-      {
-        params: {
-          query: `${esqlQuery} | LIMIT 0`,
-        },
-      },
-      {
-        abortSignal: signal,
-        strategy: ESQL_SEARCH_STRATEGY,
-      }
-    )
-  );
-
-  const columns =
-    (response.rawResponse as unknown as ESQLSearchReponse).columns?.map(({ name, type }) => {
-      const kibanaType = esFieldTypeToKibanaFieldType(type);
-      const column = {
-        columnId: name,
-        fieldName: name,
-        meta: { type: kibanaType },
-        inMetricDimension: kibanaType === 'number',
-      };
-
-      return column;
-    }) ?? [];
-
-  return columns;
-}
 
 export function useObservabilityAIAssistantContext({
   observabilityAIAssistant,
@@ -254,9 +203,9 @@ export function useObservabilityAIAssistantContext({
                 } = args;
 
                 const [columns] = await Promise.all([
-                  getColumns({
-                    search,
+                  getESQLQueryColumns({
                     esqlQuery: query,
+                    search: search.search,
                     signal,
                   }),
                 ]);
@@ -266,8 +215,8 @@ export function useObservabilityAIAssistantContext({
                 let config: LensConfig;
 
                 const firstMetricColumn = columns.find(
-                  (column) => column.inMetricDimension
-                )?.columnId;
+                  (column) => column.meta.type === 'number'
+                )?.id;
 
                 const dataset: LensDataset = {
                   esql: query,
