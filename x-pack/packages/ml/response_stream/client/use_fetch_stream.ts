@@ -111,7 +111,9 @@ export function useFetchStream<B extends object, R extends Reducer<any, any>>(
       if (fetchStreamError !== null) {
         addError(fetchStreamError);
       } else if (Array.isArray(actions) && actions.length > 0) {
-        dispatch(actions as ReducerAction<CustomReducer<R>>);
+        for (const action of actions) {
+          dispatch(action as ReducerAction<CustomReducer<R>>);
+        }
       }
     }
 
