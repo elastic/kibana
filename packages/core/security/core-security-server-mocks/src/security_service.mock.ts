@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type {
+import {
   SecurityServiceSetup,
   SecurityServiceStart,
   SecurityRequestHandlerContext,
@@ -15,6 +15,7 @@ import type {
   InternalSecurityServiceSetup,
   InternalSecurityServiceStart,
 } from '@kbn/core-security-server-internal';
+import { auditServiceMock, type MockedAuditService } from './audit.mock';
 
 const createSetupMock = () => {
   const mock: jest.Mocked<SecurityServiceSetup> = {
@@ -24,11 +25,16 @@ const createSetupMock = () => {
   return mock;
 };
 
-const createStartMock = () => {
-  const mock: jest.MockedObjectDeep<SecurityServiceStart> = {
+export type SecurityStartMock = jest.MockedObjectDeep<Omit<SecurityServiceStart, 'audit'>> & {
+  audit: MockedAuditService;
+};
+
+const createStartMock = (): SecurityStartMock => {
+  const mock = {
     authc: {
       getCurrentUser: jest.fn(),
     },
+    audit: auditServiceMock.create(),
   };
 
   return mock;
@@ -42,11 +48,18 @@ const createInternalSetupMock = () => {
   return mock;
 };
 
-const createInternalStartMock = () => {
-  const mock: jest.MockedObjectDeep<InternalSecurityServiceStart> = {
+export type InternalSecurityStartMock = jest.MockedObjectDeep<
+  Omit<InternalSecurityServiceStart, 'audit'>
+> & {
+  audit: MockedAuditService;
+};
+
+const createInternalStartMock = (): InternalSecurityStartMock => {
+  const mock = {
     authc: {
       getCurrentUser: jest.fn(),
     },
+    audit: auditServiceMock.create(),
   };
 
   return mock;
@@ -66,6 +79,12 @@ const createRequestHandlerContextMock = () => {
   const mock: jest.MockedObjectDeep<SecurityRequestHandlerContext> = {
     authc: {
       getCurrentUser: jest.fn(),
+    },
+    audit: {
+      logger: {
+        log: jest.fn(),
+        enabled: true,
+      },
     },
   };
   return mock;
