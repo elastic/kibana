@@ -39,6 +39,11 @@ RUN tar --strip-components=1 -zxf /tmp/kibana.tar.gz
 # REF: https://docs.openshift.org/latest/creating_images/guidelines.html
 RUN chmod -R g=u /usr/share/kibana
 
+{{#serverless}}
+# Remove disabled assets taking up disk space 
+RUN rm -rf /usr/share/kibana/node_modules/@kbn/screenshotting-plugin/{chromium,server/assets}
+{{/serverless}}
+
 {{#cloud}}
 COPY {{filebeatTarball}} /tmp/filebeat.tar.gz
 COPY {{metricbeatTarball}} /tmp/metricbeat.tar.gz
