@@ -181,7 +181,10 @@ export class ProjectNavigationService {
                   ? {
                       definitions: solutionNavDefinitions,
                       activeId: activeSolutionNavDefinitionId,
-                      onChange: this.changeActiveSolutionNavigation.bind(this),
+                      onChange: (id: string) => {
+                        this.goToSolutionHome(id);
+                        this.changeActiveSolutionNavigation(id);
+                      },
                     }
                   : undefined;
 
@@ -259,7 +262,6 @@ export class ProjectNavigationService {
 
           if (!initialised && solutionForCurrentLocation === id) {
             this.activeSolutionNavDefinitionId$.next(id);
-            this.goToSolutionHome(id);
             initialised = true;
           }
         },
@@ -422,8 +424,9 @@ export class ProjectNavigationService {
       throw new Error(`No home page defined for solution navigation ${definition.id}`);
     }
 
-    const url = this.http.basePath.remove(link.url);
-    this.application?.navigateToUrl(url);
+    const location = createLocation(link.url);
+    this.location$.next(location);
+    this.application?.navigateToUrl(link.url);
   }
 
   private changeActiveSolutionNavigation(id: string | null) {
