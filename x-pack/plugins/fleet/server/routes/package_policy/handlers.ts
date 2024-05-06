@@ -298,15 +298,21 @@ export const createPackagePolicyHandler: FleetRequestHandler<
       .getLogger()
       .error(`Error while creating package policy due to error: ${error.message}`);
     if (!wasPackageAlreadyInstalled) {
-      appContextService
-        .getLogger()
-        .info(`rollback ${pkg!.name}-${pkg!.version} package installation after error`);
-      await removeInstallation({
+      const installation = await getInstallation({
         savedObjectsClient: soClient,
         pkgName: pkg!.name,
-        pkgVersion: pkg!.version,
-        esClient,
       });
+      if (installation) {
+        appContextService
+          .getLogger()
+          .info(`rollback ${pkg!.name}-${pkg!.version} package installation after error`);
+        await removeInstallation({
+          savedObjectsClient: soClient,
+          pkgName: pkg!.name,
+          pkgVersion: pkg!.version,
+          esClient,
+        });
+      }
     }
 
     if (error.statusCode) {
