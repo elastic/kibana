@@ -25,8 +25,6 @@ import {
   UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
 } from '../constants';
 
-import { appContextService } from '../services';
-
 import { migrateSyntheticsPackagePolicyToV8120 } from './migrations/synthetics/to_v8_12_0';
 
 import {
@@ -94,8 +92,10 @@ import { settingsV1 } from './model_versions/v1';
  * Please update typings in `/common/types` as well as
  * schemas in `/server/types` if mappings are updated.
  */
-export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => {
-  const { useSpaceAwareness } = appContextService.getExperimentalFeatures();
+export const getSavedObjectTypes = (
+  options = { useSpaceAwareness: false }
+): { [key: string]: SavedObjectsType } => {
+  const { useSpaceAwareness } = options;
 
   return {
     // Deprecated
@@ -775,8 +775,11 @@ export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => {
   };
 };
 
-export function registerSavedObjects(savedObjects: SavedObjectsServiceSetup) {
-  const savedObjectTypes = getSavedObjectTypes();
+export function registerSavedObjects(
+  savedObjects: SavedObjectsServiceSetup,
+  options = { useSpaceAwareness: false }
+) {
+  const savedObjectTypes = getSavedObjectTypes({ useSpaceAwareness: options.useSpaceAwareness });
   Object.values(savedObjectTypes).forEach((type) => {
     savedObjects.registerType(type);
   });
