@@ -37,8 +37,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     end: number | string;
     kuery: string;
   }) {
-    console.log('start', new Date(start).toISOString());
-    console.log('end', new Date(end).toISOString());
     const response = await apmApiClient.readUser({
       endpoint: 'GET /internal/apm/assets/services',
       params: {
