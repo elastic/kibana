@@ -9,7 +9,8 @@
 import { DocumentNodeProcessor } from '../../types';
 
 /**
- * Creates a node processor to flatten folded allOf items.
+ * Creates a node processor to flatten folded `allOf` items. Folded means `allOf` has items
+ * which are another `allOf`s instead of being e.g. object schemas.
  *
  * Folded `allOf` schemas is usually a result of inlining references.
  *
