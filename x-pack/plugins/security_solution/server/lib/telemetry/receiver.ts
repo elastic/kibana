@@ -596,7 +596,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       yield alerts;
     }
 
-    this.closePointInTime(pitId);
+    await this.closePointInTime(pitId);
   }
 
   public async fetchPolicyConfigs(id: string) {
