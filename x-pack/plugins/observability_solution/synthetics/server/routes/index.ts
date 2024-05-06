@@ -58,15 +58,11 @@ import { addSyntheticsParamsRoute } from './settings/params/add_param';
 import { deleteSyntheticsParamsRoute } from './settings/params/delete_param';
 
 export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
-  addSyntheticsMonitorRoute,
   addSyntheticsProjectMonitorRoute,
   getSyntheticsEnablementRoute,
-  deleteSyntheticsMonitorRoute,
   deleteSyntheticsMonitorProjectRoute,
   disableSyntheticsRoute,
-  editSyntheticsMonitorRoute,
   getServiceLocationsRoute,
-  getSyntheticsMonitorRoute,
   getSyntheticsProjectMonitorsRoute,
   getAllSyntheticsMonitorRoute,
   getSyntheticsMonitorOverviewRoute,
@@ -109,4 +105,8 @@ export const syntheticsAppPublicRestApiRoutes: SyntheticsRestApiRouteFactory[] =
   addPrivateLocationRoute,
   deletePrivateLocationRoute,
   getPrivateLocationsRoute,
+  getSyntheticsMonitorRoute,
+  addSyntheticsMonitorRoute,
+  editSyntheticsMonitorRoute,
+  deleteSyntheticsMonitorRoute,
 ];

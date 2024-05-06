@@ -9,10 +9,7 @@ import { render } from '@testing-library/react';
 import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import {
-  expectTextsInDocument,
-  expectTextsNotInDocument,
-} from '../../../utils/test_helpers';
+import { expectTextsInDocument, expectTextsNotInDocument } from '../../../utils/test_helpers';
 import { TimeComparison } from '.';
 import * as urlHelpers from '../links/url_helpers';
 import moment from 'moment';
@@ -91,10 +88,7 @@ function getWrapper({
 describe('TimeComparison component', () => {
   const mockMLJobs = () => {
     jest
-      .spyOn(
-        useAnomalyDetectionJobsContextModule,
-        'useAnomalyDetectionJobsContext'
-      )
+      .spyOn(useAnomalyDetectionJobsContextModule, 'useAnomalyDetectionJobsContext')
       .mockReturnValue(
         // @ts-ignore mocking only partial data
         {
@@ -103,12 +97,10 @@ describe('TimeComparison component', () => {
         }
       );
 
-    jest
-      .spyOn(useEnvironmentContextModule, 'useEnvironmentsContext')
-      .mockReturnValue({
-        // @ts-ignore mocking only partial data
-        preferredEnvironment: 'prod',
-      });
+    jest.spyOn(useEnvironmentContextModule, 'useEnvironmentsContext').mockReturnValue({
+      // @ts-ignore mocking only partial data
+      preferredEnvironment: 'prod',
+    });
   };
   beforeAll(() => {
     moment.tz.setDefault('Europe/Amsterdam');
@@ -129,14 +121,12 @@ describe('TimeComparison component', () => {
     }) as unknown as ApmPluginContextValue;
 
     it('shows disabled option for expected bounds when there are ML jobs available with sufficient permission', () => {
-      jest
-        .spyOn(useEnvironmentContextModule, 'useEnvironmentsContext')
-        .mockReturnValueOnce(
-          // @ts-ignore mocking only partial data
-          {
-            preferredEnvironment: ENVIRONMENT_ALL.value,
-          }
-        );
+      jest.spyOn(useEnvironmentContextModule, 'useEnvironmentsContext').mockReturnValueOnce(
+        // @ts-ignore mocking only partial data
+        {
+          preferredEnvironment: ENVIRONMENT_ALL.value,
+        }
+      );
 
       const Wrapper = getWrapper({
         url: '/services/frontend/transactions',
@@ -155,18 +145,15 @@ describe('TimeComparison component', () => {
         'Expected bounds (Anomaly detection must be enabled for env)',
       ]);
       expect(
-        (component.getByTestId('comparisonSelect') as HTMLSelectElement)
-          .selectedIndex
+        (component.getByTestId('comparisonSelect') as HTMLSelectElement).selectedIndex
       ).toEqual(0);
     });
 
     it('shows enabled option for expected bounds when there are ML jobs available matching the preferred environment', () => {
-      jest
-        .spyOn(useEnvironmentContextModule, 'useEnvironmentsContext')
-        .mockReturnValueOnce({
-          // @ts-ignore mocking only partial data
-          preferredEnvironment: 'prod',
-        });
+      jest.spyOn(useEnvironmentContextModule, 'useEnvironmentsContext').mockReturnValueOnce({
+        // @ts-ignore mocking only partial data
+        preferredEnvironment: 'prod',
+      });
 
       const Wrapper = getWrapper({
         url: '/services/frontend/overview',
@@ -181,22 +168,15 @@ describe('TimeComparison component', () => {
         wrapper: Wrapper,
       });
       expect(spy).not.toHaveBeenCalled();
-      expectTextsInDocument(component, [
-        '20/05/19 18:32 - 27/05/20 18:32',
-        'Expected bounds',
-      ]);
+      expectTextsInDocument(component, ['20/05/19 18:32 - 27/05/20 18:32', 'Expected bounds']);
       expect(
-        (component.getByTestId('comparisonSelect') as HTMLSelectElement)
-          .selectedIndex
+        (component.getByTestId('comparisonSelect') as HTMLSelectElement).selectedIndex
       ).toEqual(0);
     });
 
     it('does not show option for expected bounds when there are no ML jobs available', () => {
       jest
-        .spyOn(
-          useAnomalyDetectionJobsContextModule,
-          'useAnomalyDetectionJobsContext'
-        )
+        .spyOn(useAnomalyDetectionJobsContextModule, 'useAnomalyDetectionJobsContext')
         .mockReturnValue(
           // @ts-ignore mocking only partial data
           {
@@ -223,8 +203,7 @@ describe('TimeComparison component', () => {
       ]);
       expectTextsInDocument(component, ['20/05/19 18:32 - 27/05/20 18:32']);
       expect(
-        (component.getByTestId('comparisonSelect') as HTMLSelectElement)
-          .selectedIndex
+        (component.getByTestId('comparisonSelect') as HTMLSelectElement).selectedIndex
       ).toEqual(0);
     });
 
@@ -256,14 +235,12 @@ describe('TimeComparison component', () => {
     });
 
     it('does not show option for expected bounds if user does not have access to ML jobs', () => {
-      jest
-        .spyOn(useEnvironmentContextModule, 'useEnvironmentsContext')
-        .mockReturnValueOnce(
-          // @ts-ignore mocking only partial data
-          {
-            preferredEnvironment: ENVIRONMENT_ALL.value,
-          }
-        );
+      jest.spyOn(useEnvironmentContextModule, 'useEnvironmentsContext').mockReturnValueOnce(
+        // @ts-ignore mocking only partial data
+        {
+          preferredEnvironment: ENVIRONMENT_ALL.value,
+        }
+      );
 
       const Wrapper = getWrapper({
         url: '/services/frontend/transactions',
@@ -286,8 +263,7 @@ describe('TimeComparison component', () => {
         'Expected bounds (Anomaly detection must be enabled for env)',
       ]);
       expect(
-        (component.getByTestId('comparisonSelect') as HTMLSelectElement)
-          .selectedIndex
+        (component.getByTestId('comparisonSelect') as HTMLSelectElement).selectedIndex
       ).toEqual(0);
     });
   });
@@ -315,8 +291,7 @@ describe('TimeComparison component', () => {
       const component = render(<TimeComparison />, { wrapper: Wrapper });
       expectTextsInDocument(component, ['Day before', 'Week before']);
       expect(
-        (component.getByTestId('comparisonSelect') as HTMLSelectElement)
-          .selectedIndex
+        (component.getByTestId('comparisonSelect') as HTMLSelectElement).selectedIndex
       ).toEqual(0);
     });
 
@@ -330,8 +305,7 @@ describe('TimeComparison component', () => {
       const component = render(<TimeComparison />, { wrapper: Wrapper });
       expectTextsInDocument(component, ['Day before', 'Week before']);
       expect(
-        (component.getByTestId('comparisonSelect') as HTMLSelectElement)
-          .selectedIndex
+        (component.getByTestId('comparisonSelect') as HTMLSelectElement).selectedIndex
       ).toEqual(0);
     });
   });
@@ -379,8 +353,7 @@ describe('TimeComparison component', () => {
       expectTextsNotInDocument(component, ['Day before']);
       expectTextsInDocument(component, ['Week before']);
       expect(
-        (component.getByTestId('comparisonSelect') as HTMLSelectElement)
-          .selectedIndex
+        (component.getByTestId('comparisonSelect') as HTMLSelectElement).selectedIndex
       ).toEqual(0);
     });
   });
@@ -399,8 +372,7 @@ describe('TimeComparison component', () => {
       expect(spy).not.toHaveBeenCalled();
       expectTextsInDocument(component, ['19/05 18:32 - 27/05 18:32']);
       expect(
-        (component.getByTestId('comparisonSelect') as HTMLSelectElement)
-          .selectedIndex
+        (component.getByTestId('comparisonSelect') as HTMLSelectElement).selectedIndex
       ).toEqual(0);
     });
 
@@ -417,8 +389,7 @@ describe('TimeComparison component', () => {
       expect(spy).not.toHaveBeenCalled();
       expectTextsInDocument(component, ['20/05/19 18:32 - 27/05/20 18:32']);
       expect(
-        (component.getByTestId('comparisonSelect') as HTMLSelectElement)
-          .selectedIndex
+        (component.getByTestId('comparisonSelect') as HTMLSelectElement).selectedIndex
       ).toEqual(0);
     });
   });

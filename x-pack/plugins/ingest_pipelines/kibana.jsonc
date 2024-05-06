@@ -19,7 +19,8 @@
     ],
     "optionalPlugins": [
       "security",
-      "usageCollection"
+      "usageCollection",
+      "console"
     ],
     "requiredBundles": [
       "esUiShared",

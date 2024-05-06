@@ -17,7 +17,7 @@ import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
 
 import type { Threshold, ThresholdNormalized } from '../api/detection_engine/model/rule_schema';
-import { SUPPRESSIBLE_ALERT_RULES } from './constants';
+import { SUPPRESSIBLE_ALERT_RULES, SUPPRESSIBLE_ALERT_RULES_GA } from './constants';
 
 export const hasLargeValueItem = (
   exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
@@ -60,6 +60,9 @@ export const normalizeThresholdField = (
       [thresholdField!];
 };
 
+export const isEqlSequenceQuery = (ruleQuery: string | undefined): boolean =>
+  ruleQuery?.trim().startsWith('sequence') ?? false;
+
 export const normalizeThresholdObject = (threshold: Threshold): ThresholdNormalized => {
   return {
     ...threshold,
@@ -73,6 +76,7 @@ export const normalizeMachineLearningJobIds = (value: string | string[]): string
 export const isSuppressibleAlertRule = (ruleType: Type): boolean => {
   return SUPPRESSIBLE_ALERT_RULES.includes(ruleType);
 };
+
 export const isSuppressionRuleConfiguredWithDuration = (ruleType: Type) =>
   isSuppressibleAlertRule(ruleType);
 
@@ -81,3 +85,11 @@ export const isSuppressionRuleConfiguredWithGroupBy = (ruleType: Type) =>
 
 export const isSuppressionRuleConfiguredWithMissingFields = (ruleType: Type) =>
   !isThresholdRule(ruleType) && isSuppressibleAlertRule(ruleType);
+
+/**
+ * checks if rule type alert suppression is GA(Global availability)
+ * needed to determine for which rule types to show Technical Preview badge
+ */
+export const isSuppressionRuleInGA = (ruleType: Type): boolean => {
+  return isSuppressibleAlertRule(ruleType) && SUPPRESSIBLE_ALERT_RULES_GA.includes(ruleType);
+};

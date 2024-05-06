@@ -6,13 +6,7 @@
  */
 /* Error Rate */
 
-import {
-  EuiFlexItem,
-  EuiPanel,
-  EuiFlexGroup,
-  EuiTitle,
-  EuiIconTip,
-} from '@elastic/eui';
+import { EuiFlexItem, EuiPanel, EuiFlexGroup, EuiTitle, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { RecursivePartial } from '@elastic/eui';
@@ -99,15 +93,7 @@ function FailedTransactionChart({
         );
       }
     },
-    [
-      environment,
-      serviceName,
-      start,
-      end,
-      transactionType,
-      transactionName,
-      preferred,
-    ]
+    [environment, serviceName, start, end, transactionType, transactionName, preferred]
   );
   const timeseriesErrorRate = [
     {

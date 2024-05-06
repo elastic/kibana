@@ -254,7 +254,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     }
 
     await filterBar.addFilter({ field: 'rule_id', operation: 'is', value: ruleId });
-    await PageObjects.discover.waitUntilSearchingHasFinished();
+
+    await retry.waitFor('results', async () => {
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      const alreadyHasData = await testSubjects.exists('docTable');
+
+      if (!alreadyHasData) {
+        await testSubjects.click('querySubmitButton');
+      }
+
+      return alreadyHasData;
+    });
 
     const link = await getResultsLink();
     await filterBar.removeFilter('rule_id'); // clear filter bar
@@ -342,8 +354,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(await titleElem.getAttribute('value')).to.equal(dataView);
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/180311
-  describe.skip('Search source Alert', () => {
+  describe('Search source Alert', () => {
     before(async () => {
       await security.testUser.setRoles(['discover_alert']);
       await PageObjects.svlCommonPage.loginAsAdmin();

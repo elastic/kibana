@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexGroupProps,
-  EuiFlexItem,
-  EuiLink,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexGroupProps, EuiFlexItem, EuiLink } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useProfilingPlugin } from '../../../../hooks/use_profiling_plugin';

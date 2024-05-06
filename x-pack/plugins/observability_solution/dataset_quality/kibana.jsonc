@@ -25,7 +25,7 @@
       "lens"
     ],
     "optionalPlugins": [],
-    "requiredBundles": [],
+    "requiredBundles": ["unifiedHistogram"],
     "extraPublicDirs": [
       "common"
     ]

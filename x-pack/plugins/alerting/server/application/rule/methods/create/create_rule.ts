@@ -155,7 +155,7 @@ export async function createRule<Params extends RuleParams = never>(
       actionsAuthorization: context.actionsAuthorization,
       connectorAdapterRegistry: context.connectorAdapterRegistry,
       systemActions: data.systemActions,
-      rule: { consumer: data.consumer },
+      rule: { consumer: data.consumer, producer: ruleType.producer },
     })
   );
 
@@ -237,7 +237,7 @@ export async function createRule<Params extends RuleParams = never>(
       id: createdRuleSavedObject.id,
       logger: context.logger,
       ruleType: context.ruleTypeRegistry.get(createdRuleSavedObject.attributes.alertTypeId),
-      references,
+      references: createdRuleSavedObject.references,
     },
     (connectorId: string) => actionsClient.isSystemAction(connectorId)
   );

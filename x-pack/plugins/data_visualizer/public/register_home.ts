@@ -7,21 +7,22 @@
 
 import { i18n } from '@kbn/i18n';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { FileDataVisualizerWrapper } from './lazy_load_bundle/component_wrapper';
+import { getFileDataVisualizerWrapper } from './lazy_load_bundle/component_wrapper';
 import {
   featureTitle,
   FILE_DATA_VIS_TAB_ID,
   applicationPath,
   featureId,
 } from '../common/constants';
+import type { ResultLinks } from '../common/app';
 
-export function registerHomeAddData(home: HomePublicPluginSetup) {
+export function registerHomeAddData(home: HomePublicPluginSetup, resultsLinks: ResultLinks) {
   home.addData.registerAddDataTab({
     id: FILE_DATA_VIS_TAB_ID,
     name: i18n.translate('xpack.dataVisualizer.file.embeddedTabTitle', {
       defaultMessage: 'Upload file',
     }),
-    component: FileDataVisualizerWrapper,
+    getComponent: () => getFileDataVisualizerWrapper(resultsLinks),
   });
 }
 

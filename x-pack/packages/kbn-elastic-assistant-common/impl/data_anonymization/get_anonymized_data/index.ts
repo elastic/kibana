@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { Replacements } from '../../schemas';
 import { AnonymizationFieldResponse } from '../../schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { isAllowed } from '../helpers';
 import type { AnonymizedData, GetAnonymizedValues } from '../types';
@@ -16,12 +17,12 @@ export const getAnonymizedData = ({
   rawData,
 }: {
   anonymizationFields?: AnonymizationFieldResponse[];
-  currentReplacements: Record<string, string> | undefined;
+  currentReplacements: Replacements | undefined;
   getAnonymizedValue: ({
     currentReplacements,
     rawValue,
   }: {
-    currentReplacements: Record<string, string> | undefined;
+    currentReplacements: Replacements | undefined;
     rawValue: string;
   }) => string;
   getAnonymizedValues: GetAnonymizedValues;

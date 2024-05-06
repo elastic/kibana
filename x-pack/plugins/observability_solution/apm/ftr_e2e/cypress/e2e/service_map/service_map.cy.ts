@@ -80,8 +80,7 @@ describe('service map', () => {
         cy.getByTestSubj('serviceMap').matchImage({
           imagesPath: '{spec_path}/snapshots',
           title: 'detailed_service_map',
-          matchAgainstPath:
-            'cypress/e2e/service_map/snapshots/detailed_service_map.png',
+          matchAgainstPath: 'cypress/e2e/service_map/snapshots/detailed_service_map.png',
           maxDiffThreshold: 0.02, // maximum threshold above which the test should fail
         })
       );
@@ -102,11 +101,7 @@ describe('service map', () => {
 });
 
 function prepareCanvasForScreenshot() {
-  cy.get('html, body').invoke(
-    'attr',
-    'style',
-    'height: auto; scroll-behavior: auto;'
-  );
+  cy.get('html, body').invoke('attr', 'style', 'height: auto; scroll-behavior: auto;');
 
   cy.wait(300);
   cy.getByTestSubj('centerServiceMap').click();

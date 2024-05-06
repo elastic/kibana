@@ -21,6 +21,7 @@ import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { builtinFunctions } from '../definitions/builtin';
 import { commandDefinitions } from '../definitions/commands';
 import { evalFunctionsDefinitions } from '../definitions/functions';
+import { groupingFunctionDefinitions } from '../definitions/grouping';
 import { getFunctionSignatures } from '../definitions/helpers';
 import { chronoLiterals, timeLiterals } from '../definitions/literals';
 import {
@@ -128,7 +129,11 @@ let commandLookups: Map<string, CommandDefinition> | undefined;
 function buildFunctionLookup() {
   if (!fnLookups) {
     fnLookups = builtinFunctions
-      .concat(evalFunctionsDefinitions, statsAggregationFunctionDefinitions)
+      .concat(
+        evalFunctionsDefinitions,
+        statsAggregationFunctionDefinitions,
+        groupingFunctionDefinitions
+      )
       .reduce((memo, def) => {
         memo.set(def.name, def);
         if (def.alias) {
@@ -233,7 +238,10 @@ export function isArrayType(type: string) {
   return ARRAY_REGEXP.test(type);
 }
 
-export function extractSingleType(type: string) {
+/**
+ * Given an array type for example `string[]` it will return `string`
+ */
+export function extractSingularType(type: string) {
   return type.replace(ARRAY_REGEXP, '');
 }
 
@@ -377,7 +385,9 @@ export function isEqualType(
   if (arg.type === 'function') {
     if (isSupportedFunction(arg.name, parentCommand).supported) {
       const fnDef = buildFunctionLookup().get(arg.name)!;
-      return fnDef.signatures.some((signature) => argType === signature.returnType);
+      return fnDef.signatures.some(
+        (signature) => signature.returnType === 'any' || argType === signature.returnType
+      );
     }
   }
   if (arg.type === 'timeInterval') {
@@ -394,7 +404,8 @@ export function isEqualType(
       return false;
     }
     const wrappedTypes = Array.isArray(validHit.type) ? validHit.type : [validHit.type];
-    return wrappedTypes.some((ct) => argType === ct);
+    // if final type is of type any make it pass for now
+    return wrappedTypes.some((ct) => ct === 'any' || argType === ct);
   }
 }
 

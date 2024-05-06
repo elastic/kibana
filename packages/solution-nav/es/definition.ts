@@ -123,7 +123,7 @@ const navTree: NavigationTreeDefinition = {
           }),
           children: [
             {
-              link: 'enterpriseSearchContent:playground',
+              link: 'enterpriseSearchApplications:playground',
             },
             {
               title: i18n.translate('navigation.searchNav.build.searchApplications', {
@@ -255,6 +255,7 @@ const navTree: NavigationTreeDefinition = {
                 { link: 'management:objects' },
                 { link: 'management:tags' },
                 { link: 'management:search_sessions' },
+                { link: 'management:aiAssistantManagementSelection' },
                 { link: 'management:spaces' },
                 { link: 'management:settings' },
               ],

@@ -11,16 +11,11 @@ import { createCallApmApi } from '../../../../../services/rest/create_call_apm_a
 import { LinkPreview } from './link_preview';
 
 export default {
-  title:
-    'app/settings/CustomizeUI/CustomLink/CreateEditCustomLinkFlyout/LinkPreview',
+  title: 'app/settings/CustomizeUI/CustomLink/CreateEditCustomLinkFlyout/LinkPreview',
   component: LinkPreview,
 };
 
-export function Example({
-  filters,
-  label,
-  url,
-}: ComponentProps<typeof LinkPreview>) {
+export function Example({ filters, label, url }: ComponentProps<typeof LinkPreview>) {
   const coreMock = {
     http: {
       get: async () => ({ transaction: { id: '0' } }),

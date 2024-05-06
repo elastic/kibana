@@ -26,6 +26,7 @@ export function getRoutePaths() {
     TopNHosts: `${BASE_ROUTE_PATH}/topn/hosts`,
     TopNThreads: `${BASE_ROUTE_PATH}/topn/threads`,
     TopNTraces: `${BASE_ROUTE_PATH}/topn/traces`,
+    APMTransactions: `${BASE_ROUTE_PATH}/topn/functions/apm/transactions`,
     Flamechart: `${BASE_ROUTE_PATH}/flamechart`,
     HasSetupESResources: `${BASE_ROUTE_PATH}/setup/es_resources`,
     SetupDataCollectionInstructions: `${BASE_ROUTE_PATH}/setup/instructions`,

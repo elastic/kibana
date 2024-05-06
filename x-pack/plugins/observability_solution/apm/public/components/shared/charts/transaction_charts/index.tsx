@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGrid,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
-  EuiFlexGroup,
-} from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer, EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { AnnotationsContextProvider } from '../../../../context/annotations/annotations_context';
@@ -69,10 +63,7 @@ export function TransactionCharts({
 
   const serviceOverviewThroughputChart = (
     <EuiFlexItem style={{ flexShrink: 1 }}>
-      <ServiceOverviewThroughputChart
-        kuery={kuery}
-        transactionName={transactionName}
-      />
+      <ServiceOverviewThroughputChart kuery={kuery} transactionName={transactionName} />
     </EuiFlexItem>
   );
 
@@ -117,11 +108,7 @@ export function TransactionCharts({
                 {!isMobileAgent && coldStartRateOrBreakdownChart}
               </EuiFlexGroup>
               <EuiSpacer size="l" />
-              <EuiFlexGroup
-                direction={rowDirection}
-                gutterSize="s"
-                responsive={false}
-              >
+              <EuiFlexGroup direction={rowDirection} gutterSize="s" responsive={false}>
                 {failedTransactionRateChart}
                 {!isOpenTelemetryAgent && !isRumAgent && (
                   <EuiFlexItem grow={2}>

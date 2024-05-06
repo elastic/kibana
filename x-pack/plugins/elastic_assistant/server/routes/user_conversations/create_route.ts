@@ -70,6 +70,7 @@ export const createConversationRoute = (router: ElasticAssistantPluginRouter): v
               body: `conversation title: "${request.body.title}" already exists`,
             });
           }
+
           const createdConversation = await dataClient?.createConversation({
             conversation: request.body,
             authenticatedUser,

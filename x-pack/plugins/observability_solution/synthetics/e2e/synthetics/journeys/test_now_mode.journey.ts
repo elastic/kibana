@@ -99,6 +99,7 @@ journey(`TestNowMode`, async ({ page, params }) => {
   step('Add a browser monitor', async () => {
     await services.addTestMonitor('Browser Monitor', {
       type: 'browser',
+      form_monitor_type: 'single',
       'source.inline.script':
         "step('Go to https://www.google.com', async () => {\n  await page.goto('https://www.google.com');\n});\n\nstep('Go to https://www.google.com', async () => {\n  await page.goto('https://www.google.com');\n});",
       urls: 'https://www.google.com',
@@ -136,9 +137,7 @@ journey(`TestNowMode`, async ({ page, params }) => {
     await services.addTestSummaryDocument({ testRunId, docType: 'stepEnd', stepIndex: 1 });
 
     await page.waitForSelector('text=1 step completed');
-    await page.waitForSelector(
-      '.euiTableRowCell--hideForMobile :has-text("Go to https://www.google.com")'
-    );
+    await page.waitForSelector('.euiTableRowCell:has-text("Go to https://www.google.com")');
     expect(await page.getByTestId('stepDurationText1').first()).toHaveText('1.4 sec');
     await page.waitForSelector('text=Complete');
   });

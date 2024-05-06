@@ -19,21 +19,18 @@ interface Props {
 export function ErrorMetadata({ error }: Props) {
   const { data: errorEvent, status } = useFetcher(
     (callApmApi) => {
-      return callApmApi(
-        'GET /internal/apm/event_metadata/{processorEvent}/{id}',
-        {
-          params: {
-            path: {
-              processorEvent: ProcessorEvent.error,
-              id: error.error.id,
-            },
-            query: {
-              start: error['@timestamp'],
-              end: error['@timestamp'],
-            },
+      return callApmApi('GET /internal/apm/event_metadata/{processorEvent}/{id}', {
+        params: {
+          path: {
+            processorEvent: ProcessorEvent.error,
+            id: error.error.id,
           },
-        }
-      );
+          query: {
+            start: error['@timestamp'],
+            end: error['@timestamp'],
+          },
+        },
+      });
     },
     [error]
   );
@@ -43,10 +40,5 @@ export function ErrorMetadata({ error }: Props) {
     [errorEvent?.metadata]
   );
 
-  return (
-    <MetadataTable
-      sections={sections}
-      isLoading={status === FETCH_STATUS.LOADING}
-    />
-  );
+  return <MetadataTable sections={sections} isLoading={status === FETCH_STATUS.LOADING} />;
 }

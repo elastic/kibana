@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+export * from './cancel_sync';
 export * from './cancel_syncs';
 export * from './collect_connector_stats';
 export * from './create_connector';

@@ -9,7 +9,7 @@
    "source": [
     "# Semantic search quick start\n",
     "\n",
-    "<a target=\"_blank\" href=\"https://colab.research.google.com/github/elastic/elasticsearch-labs/blob/main/notebooks/search/00-quick-start.ipynb\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>\n",
+    "[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/elastic/elasticsearch-labs/blob/main/notebooks/search/00-quick-start.ipynb)\n",
     "\n",
     "This interactive notebook will introduce you to some basic operations with Elasticsearch, using the official [Elasticsearch Python client](https://www.elastic.co/guide/en/elasticsearch/client/python-api/current/connecting.html).\n",
     "You'll perform semantic search using [Sentence Transformers](https://www.sbert.net) for text embedding. Learn how to integrate traditional text-based search with semantic search, for a hybrid search system."

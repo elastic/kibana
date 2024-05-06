@@ -58,12 +58,9 @@ main () {
   rm -rf elasticsearch
   git clone https://github.com/elastic/elasticsearch --depth 1
 
-  rm -rf open-source
-  git clone https://github.com/elastic/open-source --depth 1
-
   cd "$KIBANA_DIR"
 
-  license_header=$(cat "$PARENT_DIR/open-source/legal/elastic-license-2.0-header.txt")
+  license_header=$(cat "$KIBANA_DIR/licenses/ELASTIC-LICENSE-2.0-HEADER.txt")
 
   report_main_step "Synchronizing lexer grammar..."
   synchronize_lexer_grammar "$license_header"

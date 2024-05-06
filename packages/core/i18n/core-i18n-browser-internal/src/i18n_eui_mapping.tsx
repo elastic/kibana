@@ -38,10 +38,12 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       defaultMessage: 'Select all rows',
       description: 'ARIA and displayed label on a checkbox to select all table rows',
     }),
-    'euiBasicTable.selectThisRow': i18n.translate('core.euiBasicTable.selectThisRow', {
-      defaultMessage: 'Select this row',
-      description: 'ARIA and displayed label on a checkbox to select a single table row',
-    }),
+    'euiBasicTable.selectThisRow': ({ index }: EuiValues) =>
+      i18n.translate('core.euiBasicTable.selectThisRow', {
+        defaultMessage: 'Select row {index}',
+        values: { index },
+        description: 'ARIA and displayed label on a checkbox to select a single table row',
+      }),
     'euiBasicTable.tableCaptionWithPagination': ({ tableCaption, page, pageCount }: EuiValues) =>
       i18n.translate('core.euiBasicTable.tableCaptionWithPagination', {
         defaultMessage: '{tableCaption}; Page {page} of {pageCount}.',
@@ -192,6 +194,18 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiCollapsibleNavButton.ariaLabelOpen': i18n.translate(
       'core.euiCollapsibleNavButton.ariaLabelOpen',
       { defaultMessage: 'Open navigation' }
+    ),
+    'euiCollapsibleNavKibanaSolution.switcherTitle': i18n.translate(
+      'core.euiCollapsibleNavKibanaSolution.switcherTitle',
+      { defaultMessage: 'Solution view' }
+    ),
+    'euiCollapsibleNavKibanaSolution.switcherAriaLabel': i18n.translate(
+      'core.euiCollapsibleNavKibanaSolution.switcherAriaLabel',
+      { defaultMessage: '- click to switch to another solution' }
+    ),
+    'euiCollapsibleNavKibanaSolution.groupLabel': i18n.translate(
+      'core.euiCollapsibleNavKibanaSolution.groupLabel',
+      { defaultMessage: 'Navigate to solution' }
     ),
     'euiColorPicker.alphaLabel': i18n.translate('core.euiColorPicker.alphaLabel', {
       defaultMessage: 'Alpha channel (opacity) value',

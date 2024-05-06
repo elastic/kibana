@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { omit } from 'lodash';
@@ -106,9 +100,7 @@ export function CrashGroupDetails() {
       appVersion,
       netConnectionType,
     },
-  } = useApmParams(
-    '/mobile-services/{serviceName}/errors-and-crashes/crashes/{groupId}'
-  );
+  } = useApmParams('/mobile-services/{serviceName}/errors-and-crashes/crashes/{groupId}');
 
   const kueryWithMobileFilters = getKueryWithMobileFilters({
     device,
@@ -122,23 +114,20 @@ export function CrashGroupDetails() {
   useBreadcrumb(
     () => ({
       title: groupId,
-      href: apmRouter.link(
-        '/mobile-services/{serviceName}/errors-and-crashes/crashes/{groupId}',
-        {
-          path: {
-            serviceName,
-            groupId,
-          },
-          query: {
-            rangeFrom,
-            rangeTo,
-            environment,
-            kuery: kueryWithMobileFilters,
-            serviceGroup,
-            comparisonEnabled,
-          },
-        }
-      ),
+      href: apmRouter.link('/mobile-services/{serviceName}/errors-and-crashes/crashes/{groupId}', {
+        path: {
+          serviceName,
+          groupId,
+        },
+        query: {
+          rangeFrom,
+          rangeTo,
+          environment,
+          kuery: kueryWithMobileFilters,
+          serviceGroup,
+          comparisonEnabled,
+        },
+      }),
     }),
     [
       apmRouter,
@@ -158,15 +147,11 @@ export function CrashGroupDetails() {
     groupId,
   });
 
-  const {
-    data: errorSamplesData = emptyErrorSamples,
-    status: errorSamplesFetchStatus,
-  } = useFetcher(
-    (callApmApi) => {
-      if (start && end) {
-        return callApmApi(
-          'GET /internal/apm/services/{serviceName}/errors/{groupId}/samples',
-          {
+  const { data: errorSamplesData = emptyErrorSamples, status: errorSamplesFetchStatus } =
+    useFetcher(
+      (callApmApi) => {
+        if (start && end) {
+          return callApmApi('GET /internal/apm/services/{serviceName}/errors/{groupId}/samples', {
             params: {
               path: {
                 serviceName,
@@ -179,12 +164,11 @@ export function CrashGroupDetails() {
                 end,
               },
             },
-          }
-        );
-      }
-    },
-    [environment, kueryWithMobileFilters, serviceName, start, end, groupId]
-  );
+          });
+        }
+      },
+      [environment, kueryWithMobileFilters, serviceName, start, end, groupId]
+    );
 
   const { crashDistributionData, status: crashDistributionStatus } =
     useCrashGroupDistributionFetcher({
@@ -195,9 +179,7 @@ export function CrashGroupDetails() {
     });
 
   useEffect(() => {
-    const selectedSample = errorSamplesData?.errorSampleIds.find(
-      (sample) => sample === errorId
-    );
+    const selectedSample = errorSamplesData?.errorSampleIds.find((sample) => sample === errorId);
 
     if (errorSamplesFetchStatus === FETCH_STATUS.SUCCESS && !selectedSample) {
       // selected sample was not found. select a new one:
@@ -218,10 +200,7 @@ export function CrashGroupDetails() {
 
   return (
     <>
-      <CrashGroupHeader
-        groupId={groupId}
-        occurrencesCount={errorSamplesData?.occurrencesCount}
-      />
+      <CrashGroupHeader groupId={groupId} occurrencesCount={errorSamplesData?.occurrencesCount} />
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="s">
         <ChartPointerEventContextProvider>
@@ -234,12 +213,9 @@ export function CrashGroupDetails() {
                 { defaultMessage: 'Crash occurrences' }
               )}
               height={300}
-              tip={i18n.translate(
-                'xpack.apm.serviceDetails.metrics.errorOccurrencesChart.tip',
-                {
-                  defaultMessage: `Crash occurrence is measured in crashes per minute.`,
-                }
-              )}
+              tip={i18n.translate('xpack.apm.serviceDetails.metrics.errorOccurrencesChart.tip', {
+                defaultMessage: `Crash occurrence is measured in crashes per minute.`,
+              })}
             />
           </EuiFlexItem>
         </ChartPointerEventContextProvider>

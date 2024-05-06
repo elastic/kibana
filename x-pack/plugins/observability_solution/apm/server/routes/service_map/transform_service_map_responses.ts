@@ -22,10 +22,7 @@ import {
 } from '../../../common/service_map';
 import { ConnectionsResponse, ServicesResponse } from './get_service_map';
 import { ServiceAnomaliesResponse } from './get_service_anomalies';
-import {
-  groupResourceNodes,
-  GroupResourceNodesResponse,
-} from './group_resource_nodes';
+import { groupResourceNodes, GroupResourceNodesResponse } from './group_resource_nodes';
 
 function getConnectionNodeId(node: ConnectionNode): string {
   if ('span.destination.service.resource' in node) {
@@ -36,9 +33,7 @@ function getConnectionNodeId(node: ConnectionNode): string {
 }
 
 export function getConnectionId(connection: Connection) {
-  return `${getConnectionNodeId(connection.source)}~${getConnectionNodeId(
-    connection.destination
-  )}`;
+  return `${getConnectionNodeId(connection.source)}~${getConnectionNodeId(connection.destination)}`;
 }
 
 function addMessagingConnections(
@@ -51,16 +46,13 @@ function addMessagingConnections(
   const messagingDestinations = connections
     .map((connection) => connection.destination)
     .filter(
-      (dest) =>
-        dest['span.type'] === 'messaging' &&
-        SPAN_DESTINATION_SERVICE_RESOURCE in dest
+      (dest) => dest['span.type'] === 'messaging' && SPAN_DESTINATION_SERVICE_RESOURCE in dest
     );
   const newConnections = messagingDestinations
     .map((node) => {
       const matchedService = discoveredServices.find(
         ({ from }) =>
-          node[SPAN_DESTINATION_SERVICE_RESOURCE] ===
-          from[SPAN_DESTINATION_SERVICE_RESOURCE]
+          node[SPAN_DESTINATION_SERVICE_RESOURCE] === from[SPAN_DESTINATION_SERVICE_RESOURCE]
       )?.to;
       if (matchedService) {
         return {
@@ -96,9 +88,7 @@ export function getAllNodes(
 
 export function getServiceNodes(allNodes: ConnectionNode[]) {
   // List of nodes that are services
-  const serviceNodes = allNodes.filter(
-    (node) => SERVICE_NAME in node
-  ) as ServiceConnectionNode[];
+  const serviceNodes = allNodes.filter((node) => SERVICE_NAME in node) as ServiceConnectionNode[];
 
   return serviceNodes;
 }
@@ -116,10 +106,7 @@ export function transformServiceMapResponses({
   response: ServiceMapResponse;
 }): TransformServiceMapResponse {
   const { discoveredServices, services, connections, anomalies } = response;
-  const allConnections = addMessagingConnections(
-    connections,
-    discoveredServices
-  );
+  const allConnections = addMessagingConnections(connections, discoveredServices);
   const allNodes = getAllNodes(services, allConnections);
   const serviceNodes = getServiceNodes(allNodes);
 
@@ -138,18 +125,11 @@ export function transformServiceMapResponses({
     const outboundConnectionExists = allConnections.some(
       (con) =>
         SPAN_DESTINATION_SERVICE_RESOURCE in con.source &&
-        con.source[SPAN_DESTINATION_SERVICE_RESOURCE] ===
-          node[SPAN_DESTINATION_SERVICE_RESOURCE]
+        con.source[SPAN_DESTINATION_SERVICE_RESOURCE] === node[SPAN_DESTINATION_SERVICE_RESOURCE]
     );
     const matchedService = discoveredServices.find(({ from }) => {
-      if (
-        !outboundConnectionExists &&
-        SPAN_DESTINATION_SERVICE_RESOURCE in node
-      ) {
-        return (
-          node[SPAN_DESTINATION_SERVICE_RESOURCE] ===
-          from[SPAN_DESTINATION_SERVICE_RESOURCE]
-        );
+      if (!outboundConnectionExists && SPAN_DESTINATION_SERVICE_RESOURCE in node) {
+        return node[SPAN_DESTINATION_SERVICE_RESOURCE] === from[SPAN_DESTINATION_SERVICE_RESOURCE];
       }
       return false;
     })?.to;
@@ -166,9 +146,7 @@ export function transformServiceMapResponses({
     const mergedServiceNode = Object.assign({}, ...matchedServiceNodes);
 
     const serviceAnomalyStats = serviceName
-      ? anomalies.serviceAnomalies.find(
-          (item) => item.serviceName === serviceName
-        )
+      ? anomalies.serviceAnomalies.find((item) => item.serviceName === serviceName)
       : undefined;
 
     if (matchedServiceNodes.length) {
@@ -182,9 +160,7 @@ export function transformServiceMapResponses({
       };
     }
 
-    const allMatchedExternalNodes = externalNodes.filter(
-      (n) => n.id === node.id
-    );
+    const allMatchedExternalNodes = externalNodes.filter((n) => n.id === node.id);
 
     const firstMatchedNode = allMatchedExternalNodes[0];
 
@@ -194,9 +170,7 @@ export function transformServiceMapResponses({
         ...firstMatchedNode,
         label: firstMatchedNode[SPAN_DESTINATION_SERVICE_RESOURCE],
         [SPAN_TYPE]: allMatchedExternalNodes.map((n) => n[SPAN_TYPE]).sort()[0],
-        [SPAN_SUBTYPE]: allMatchedExternalNodes
-          .map((n) => n[SPAN_SUBTYPE])
-          .sort()[0],
+        [SPAN_SUBTYPE]: allMatchedExternalNodes.map((n) => n[SPAN_SUBTYPE]).sort()[0],
       },
     };
   }, {} as Record<string, ConnectionNode>);
@@ -215,8 +189,7 @@ export function transformServiceMapResponses({
       const label =
         sourceData[SERVICE_NAME] +
         ' to ' +
-        (targetData[SERVICE_NAME] ||
-          targetData[SPAN_DESTINATION_SERVICE_RESOURCE]);
+        (targetData[SERVICE_NAME] || targetData[SPAN_DESTINATION_SERVICE_RESOURCE]);
 
       return {
         source: sourceData.id,
@@ -243,13 +216,10 @@ export function transformServiceMapResponses({
 
   type ConnectionWithId = ValuesType<typeof mappedConnections>;
 
-  const connectionsById = mappedConnections.reduce(
-    (connectionMap, connection) => {
-      connectionMap[connection.id] = connection;
-      return connectionMap;
-    },
-    {} as Record<string, ConnectionWithId>
-  );
+  const connectionsById = mappedConnections.reduce((connectionMap, connection) => {
+    connectionMap[connection.id] = connection;
+    return connectionMap;
+  }, {} as Record<string, ConnectionWithId>);
 
   // Instead of adding connections in two directions,
   // we add a `bidirectional` flag to use in styling
@@ -259,31 +229,27 @@ export function transformServiceMapResponses({
       // make sure that order is stable
       'id'
     ) as ConnectionWithId[]
-  ).reduce<
-    Array<
-      ConnectionWithId & { bidirectional?: boolean; isInverseEdge?: boolean }
-    >
-  >((prev, connection) => {
-    const reversedConnection = prev.find(
-      (c) => c.target === connection.source && c.source === connection.target
-    );
+  ).reduce<Array<ConnectionWithId & { bidirectional?: boolean; isInverseEdge?: boolean }>>(
+    (prev, connection) => {
+      const reversedConnection = prev.find(
+        (c) => c.target === connection.source && c.source === connection.target
+      );
 
-    if (reversedConnection) {
-      reversedConnection.bidirectional = true;
-      return prev.concat({
-        ...connection,
-        isInverseEdge: true,
-      });
-    }
+      if (reversedConnection) {
+        reversedConnection.bidirectional = true;
+        return prev.concat({
+          ...connection,
+          isInverseEdge: true,
+        });
+      }
 
-    return prev.concat(connection);
-  }, []);
+      return prev.concat(connection);
+    },
+    []
+  );
 
   // Put everything together in elements, with everything in the "data" property
-  const elements: ConnectionElement[] = [
-    ...dedupedConnections,
-    ...dedupedNodes,
-  ].map((element) => ({
+  const elements: ConnectionElement[] = [...dedupedConnections, ...dedupedNodes].map((element) => ({
     data: element,
   }));
 

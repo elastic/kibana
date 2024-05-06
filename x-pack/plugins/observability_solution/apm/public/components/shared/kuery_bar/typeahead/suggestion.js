@@ -47,17 +47,14 @@ const ListItem = euiStyled.li`
   height: ${({ theme }) => theme.eui.euiSizeXL};
   align-items: center;
   display: flex;
-  background: ${({ selected, theme }) =>
-    selected ? theme.eui.euiColorLightestShade : 'initial'};
+  background: ${({ selected, theme }) => (selected ? theme.eui.euiColorLightestShade : 'initial')};
   cursor: pointer;
   border-radius: ${({ theme }) => theme.eui.euiBorderRadiusSmall};
 
   ${Description} {
     p span {
       background: ${({ selected, theme }) =>
-        selected
-          ? theme.eui.euiColorEmptyShade
-          : theme.eui.euiColorLightestShade};
+        selected ? theme.eui.euiColorEmptyShade : theme.eui.euiColorLightestShade};
     }
   }
 `;
