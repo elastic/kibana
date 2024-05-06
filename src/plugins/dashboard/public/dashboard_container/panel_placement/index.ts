@@ -9,3 +9,7 @@
 export { placePanel } from './place_panel';
 
 export { placeClonePanel } from './place_clone_panel_strategy';
+
+export { registerDashboardPanelPlacementSetting } from './panel_placement_registry';
+
+export type { GetPanelPlacementSettings, IProvidesLegacyPanelPlacementSettings } from './types';
