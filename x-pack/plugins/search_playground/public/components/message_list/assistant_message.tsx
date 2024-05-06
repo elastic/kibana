@@ -26,23 +26,22 @@ import type { AIMessage as AIMessageType } from '../../types';
 
 import { CopyActionButton } from './copy_action_button';
 import { CitationsTable } from './citations_table';
+import { TokenEstimateTooltip } from './token_estimate_tooltip';
 
-type AssistantMessageProps = Pick<
-  AIMessageType,
-  'content' | 'createdAt' | 'citations' | 'retrievalDocs'
->;
+interface AssistantMessageProps {
+  message: Pick<
+    AIMessageType,
+    'content' | 'createdAt' | 'citations' | 'retrievalDocs' | 'inputTokens'
+  >;
+}
 
 const AIMessageCSS = css`
   white-space: break-spaces;
 `;
 
-export const AssistantMessage: React.FC<AssistantMessageProps> = ({
-  content,
-  createdAt,
-  citations,
-  retrievalDocs,
-}) => {
+export const AssistantMessage: React.FC<AssistantMessageProps> = ({ message }) => {
   const [isDocsFlyoutOpen, setIsDocsFlyoutOpen] = useState(false);
+  const { content, createdAt, citations, retrievalDocs, inputTokens } = message;
   const username = i18n.translate('xpack.searchPlayground.chat.message.assistant.username', {
     defaultMessage: 'AI',
   });
@@ -61,11 +60,14 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({
                     id="xpack.searchPlayground.chat.message.assistant.retrievalDocs"
                     defaultMessage="Grounding answer based on"
                   />
+                  {` `}
                 </p>
               </EuiText>
+
               <EuiButtonEmpty
                 css={{ blockSize: 'auto' }}
                 size="s"
+                flush="left"
                 onClick={() => setIsDocsFlyoutOpen(true)}
               >
                 <FormattedMessage
@@ -107,12 +109,15 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({
           }
         )}
         actions={
-          <CopyActionButton
-            copyText={String(content)}
-            ariaLabel={i18n.translate('xpack.searchPlayground.chat.message.assistant.copyLabel', {
-              defaultMessage: 'Copy assistant message',
-            })}
-          />
+          <>
+            <TokenEstimateTooltip context={inputTokens.context} total={inputTokens.total} />
+            <CopyActionButton
+              copyText={String(content)}
+              ariaLabel={i18n.translate('xpack.searchPlayground.chat.message.assistant.copyLabel', {
+                defaultMessage: 'Copy assistant message',
+              })}
+            />
+          </>
         }
       >
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">

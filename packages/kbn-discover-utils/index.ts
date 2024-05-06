@@ -13,7 +13,6 @@ export {
   DEFAULT_COLUMNS_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
   DOC_TABLE_LEGACY,
-  ENABLE_ESQL,
   FIELDS_LIMIT_SETTING,
   HIDE_ANNOUNCEMENTS,
   MAX_DOC_FIELDS_DISPLAYED,
@@ -31,12 +30,17 @@ export {
   IgnoredReason,
   buildDataTableRecord,
   buildDataTableRecordList,
+  fieldConstants,
   formatFieldValue,
   formatHit,
   getDocId,
+  getLogDocumentOverview,
   getIgnoredReason,
+  getMessageFieldWithFallbacks,
   getShouldShowFieldHandler,
   isNestedFieldParent,
   isLegacyTableEnabled,
   usePager,
 } from './src';
+
+export * from './src/types';

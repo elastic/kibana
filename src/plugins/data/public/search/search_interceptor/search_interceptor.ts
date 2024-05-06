@@ -50,18 +50,19 @@ import { BatchedFunc, BfetchPublicSetup, DISABLE_BFETCH } from '@kbn/bfetch-plug
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { AbortError, KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 import { BfetchRequestError } from '@kbn/bfetch-error';
+import type {
+  SanitizedConnectionRequestParams,
+  IKibanaSearchRequest,
+  ISearchOptionsSerializable,
+} from '@kbn/search-types';
 import { createEsError, isEsError, renderSearchError } from '@kbn/search-errors';
+import type { IKibanaSearchResponse, ISearchOptions } from '@kbn/search-types';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
   IAsyncSearchOptions,
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
   isRunningResponse,
-  ISearchOptions,
-  ISearchOptionsSerializable,
   pollSearch,
   UI_SETTINGS,
-  type SanitizedConnectionRequestParams,
 } from '../../../common';
 import { SearchUsageCollector } from '../collectors';
 import { SearchTimeoutError, TimeoutErrorMode } from './timeout_error';
@@ -339,11 +340,19 @@ export class SearchInterceptor {
           isSavedToBackground = true;
         });
 
-    const sendCancelRequest = once(() => {
-      this.deps.http.delete(`/internal/search/${strategy}/${id}`, { version: '1' });
-    });
+    const sendCancelRequest = once(() =>
+      this.deps.http.delete(`/internal/search/${strategy}/${id}`, { version: '1' })
+    );
 
-    const cancel = () => id && !isSavedToBackground && sendCancelRequest();
+    const cancel = async () => {
+      if (!id || isSavedToBackground) return;
+      try {
+        await sendCancelRequest();
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error(e);
+      }
+    };
 
     // Async search requires a series of requests
     // 1) POST /<index pattern>/_async_search/
