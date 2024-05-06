@@ -33,7 +33,8 @@ type StreamType<T extends StreamTypeUnion> = T extends string
   ? T
   : never;
 
-export interface StreamFactoryReturnType<T extends StreamTypeUnion> {
+// Fallback to never is there for backwards compatibility.
+export interface StreamFactoryReturnType<T extends StreamTypeUnion = never> {
   DELIMITER: string;
   end: () => void;
   push: (d: StreamType<T>, drain?: boolean) => void;
