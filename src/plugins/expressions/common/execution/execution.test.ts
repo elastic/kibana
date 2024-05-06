@@ -35,7 +35,6 @@ const createExecution = (
       ...context,
       debug,
     },
-    functionCache: new Map(),
   });
   return execution;
 };
@@ -234,7 +233,6 @@ describe('Execution', () => {
         executor,
         expression,
         params: {},
-        functionCache: new Map(),
       });
       expect(execution.expression).toBe(expression);
     });
@@ -246,7 +244,6 @@ describe('Execution', () => {
         ast: parseExpression(expression),
         executor,
         params: {},
-        functionCache: new Map(),
       });
       expect(execution.expression).toBe(expression);
     });
@@ -1238,7 +1235,6 @@ describe('Execution', () => {
           executor,
           ast: parseExpression('add val=1 | throws | add val=3'),
           params: { debug: true },
-          functionCache: new Map(),
         });
         execution.start(0);
         await execution.result.toPromise();
@@ -1257,7 +1253,6 @@ describe('Execution', () => {
           executor,
           ast: parseExpression('add val=1 | throws | add val=3'),
           params: { debug: true },
-          functionCache: new Map(),
         });
         execution.start(0);
         await execution.result.toPromise();
@@ -1279,7 +1274,6 @@ describe('Execution', () => {
           executor,
           ast: parseExpression('add val=1 | throws | add val=3'),
           params: { debug: true },
-          functionCache: new Map(),
         });
         execution.start(0);
         await execution.result.toPromise();
