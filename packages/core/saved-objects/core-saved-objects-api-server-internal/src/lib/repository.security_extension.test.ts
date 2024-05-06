@@ -425,7 +425,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       );
     });
 
-    test(`adds created_by to the saved object when the current user is available`, async () => {
+    test(`adds created_by, updated_by to the saved object when the current user is available`, async () => {
       const profileUid = 'profileUid';
       mockSecurityExt.getCurrentUser.mockImplementationOnce(() =>
         mockAuthenticatedUser({ profile_uid: profileUid })
@@ -434,14 +434,16 @@ describe('SavedObjectsRepository Security Extension', () => {
         namespace,
       });
       expect(response.created_by).toBe(profileUid);
+      expect(response.updated_by).toBe(profileUid);
     });
 
-    test(`keeps created_by empty if the current user is not available`, async () => {
+    test(`keeps created_by, updated_by empty if the current user is not available`, async () => {
       mockSecurityExt.getCurrentUser.mockImplementationOnce(() => null);
       const response = await repository.create(MULTI_NAMESPACE_CUSTOM_INDEX_TYPE, attributes, {
         namespace,
       });
       expect(response).not.toHaveProperty('created_by');
+      expect(response).not.toHaveProperty('updated_by');
     });
   });
 
