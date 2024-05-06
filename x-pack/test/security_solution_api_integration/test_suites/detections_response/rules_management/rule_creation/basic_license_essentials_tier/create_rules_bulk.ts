@@ -10,9 +10,9 @@ import expect from 'expect';
 import { EsArchivePathBuilder } from '../../../../../es_archive_path_builder';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
+  getCustomQueryRuleParams,
   getSimpleRule,
   getSimpleRuleOutput,
-  getCustomQueryRuleParams,
   getSimpleRuleOutputWithoutRuleId,
   getSimpleRuleWithoutRuleId,
   removeServerGeneratedProperties,
@@ -71,6 +71,8 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should create a rule with defaultable fields', async () => {
         const expectedRule = getCustomQueryRuleParams({
           rule_id: 'rule-1',
+          max_signals: 200,
+          setup: '# some setup markdown',
           related_integrations: [
             { package: 'package-a', version: '^1.2.3' },
             { package: 'package-b', integration: 'integration-b', version: '~1.1.1' },
