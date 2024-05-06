@@ -45,7 +45,6 @@ describe('APMEventClient', () => {
         indices: {} as any,
         options: {
           includeFrozen: false,
-          forceSyntheticSource: false,
         },
       });
 
@@ -70,7 +69,7 @@ describe('APMEventClient', () => {
 
     await new Promise((resolve) => {
       setTimeout(() => {
-        incomingRequest.on('abort', () => {
+        void incomingRequest.on('abort', () => {
           setTimeout(() => {
             resolve(undefined);
           }, 100);

@@ -12,7 +12,7 @@ import type {
   QueryDslFieldAndFormat,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { ISearchRequestParams } from '@kbn/data-plugin/common';
+import type { ISearchRequestParams } from '@kbn/search-types';
 import type {
   NetworkTopNFlowCountRequestOptions,
   NetworkTopNFlowRequestOptions,
@@ -56,8 +56,8 @@ export const buildTopNFlowQuery = ({
           format: 'strict_date_optional_time',
         },
       ],
+      size: 0,
     },
-    size: 0,
     track_total_hits: false,
   };
   return dslQuery;
@@ -75,8 +75,12 @@ export const buildTopNFlowCountQuery = ({
     allow_no_indices: true,
     index: defaultIndex,
     ignore_unavailable: true,
-    body: { aggregations: getCountAgg(flowTarget), query, _source: false },
-    size: 0,
+    body: {
+      aggregations: getCountAgg(flowTarget),
+      query,
+      _source: false,
+      size: 0,
+    },
     track_total_hits: false,
   };
   return dslQuery;
