@@ -98,7 +98,9 @@
     "@kbn/shared-svg",
     "@kbn/aiops-log-rate-analysis",
     "@kbn/search-types",
-    "@kbn/alerting-comparators"
+    "@kbn/alerting-comparators",
+    "@kbn/react-hooks",
+    "@kbn/search-types"
   ],
   "exclude": [
     "target/**/*"
