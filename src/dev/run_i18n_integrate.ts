@@ -11,7 +11,7 @@ import { Listr } from 'listr2';
 
 import { createFailError } from '@kbn/dev-cli-errors';
 import { run } from '@kbn/dev-cli-runner';
-import { ErrorReporter, I18nConfig, integrateLocaleFiles } from './i18n';
+import { ErrorReporter, integrateLocaleFiles } from './i18n';
 import { extractDefaultMessages, mergeConfigs } from './i18n/tasks';
 import { I18nCheckTaskContext } from './i18n/types';
 
