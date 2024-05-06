@@ -23,7 +23,7 @@ steps:
 
         To run this locally:
         \`\`\`
-        node scripts/es serverless --tag $ES_SERVERLESS_IMAGE
+        node scripts/es serverless --image $ES_SERVERLESS_IMAGE
         \`\`\`
       EOF
 
