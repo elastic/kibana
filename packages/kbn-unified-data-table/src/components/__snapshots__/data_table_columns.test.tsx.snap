@@ -2626,6 +2626,8 @@ Array [
     },
     "cellActions": Array [
       [Function],
+      [Function],
+      [Function],
     ],
     "display": <Memo(DataTableTimeColumnHeader)
       dataView={
@@ -2783,7 +2785,9 @@ Array [
           "customDescription": undefined,
           "customLabel": undefined,
           "defaultFormatter": undefined,
-          "esTypes": undefined,
+          "esTypes": Array [
+            "dateTime",
+          ],
           "lang": undefined,
           "name": "timestamp",
           "readFromDocValues": false,
@@ -2791,7 +2795,7 @@ Array [
           "scripted": false,
           "searchable": true,
           "subType": undefined,
-          "type": "unknown",
+          "type": "date",
         }
       }
       headerRowHeight={5}
@@ -2800,7 +2804,7 @@ Array [
     "id": "timestamp",
     "initialWidth": 212,
     "isSortable": true,
-    "schema": "kibana-json",
+    "schema": "datetime",
     "visibleCellActions": undefined,
   },
   Object {
@@ -2844,10 +2848,27 @@ Array [
     },
     "cellActions": Array [
       [Function],
+      [Function],
+      [Function],
     ],
     "display": <Memo(DataTableColumnHeader)
       columnDisplayName="extension"
       columnName="extension"
+      columnsMeta={
+        Object {
+          "extension": Object {
+            "type": "number",
+          },
+          "message": Object {
+            "esType": "keyword",
+            "type": "string",
+          },
+          "timestamp": Object {
+            "esType": "dateTime",
+            "type": "date",
+          },
+        }
+      }
       dataView={
         Object {
           "docvalueFields": Array [],
@@ -3000,7 +3021,7 @@ Array [
     "displayAsText": "extension",
     "id": "extension",
     "isSortable": true,
-    "schema": "kibana-json",
+    "schema": "numeric",
     "visibleCellActions": undefined,
   },
   Object {
@@ -3044,10 +3065,27 @@ Array [
     },
     "cellActions": Array [
       [Function],
+      [Function],
+      [Function],
     ],
     "display": <Memo(DataTableColumnHeader)
       columnDisplayName="message"
       columnName="message"
+      columnsMeta={
+        Object {
+          "extension": Object {
+            "type": "number",
+          },
+          "message": Object {
+            "esType": "keyword",
+            "type": "string",
+          },
+          "timestamp": Object {
+            "esType": "dateTime",
+            "type": "date",
+          },
+        }
+      }
       dataView={
         Object {
           "docvalueFields": Array [],
@@ -3200,7 +3238,7 @@ Array [
     "displayAsText": "message",
     "id": "message",
     "isSortable": true,
-    "schema": "kibana-json",
+    "schema": "string",
     "visibleCellActions": undefined,
   },
 ]

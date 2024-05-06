@@ -93,6 +93,11 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
+        columnsMeta: {
+          extension: { type: 'number' },
+          message: { type: 'string', esType: 'keyword' },
+          timestamp: { type: 'date', esType: 'dateTime' },
+        },
       });
       expect(actual).toMatchSnapshot();
     });
