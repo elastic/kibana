@@ -131,7 +131,7 @@ const getDocumentTypesInfo = async ({
 
   const hasAnyLegacyDocuments = sourceRequests.some(
     ({ documentType, rollupInterval }, index) =>
-      isRetroCompatibleDocType(documentType, rollupInterval) &&
+      isLegacyDocType(documentType, rollupInterval) &&
       allResponses[index + QUERY_INDEX.DURATION_SUMMARY_NOT_SUPPORTED].hits.total.value > 0
   );
 
@@ -147,9 +147,7 @@ const getDocumentTypesInfo = async ({
     return {
       documentType,
       rollupInterval,
-      hasDocs: isRetroCompatibleDocType(documentType, rollupInterval)
-        ? hasDocs
-        : canUseContinousRollupDocs,
+      hasDocs: isLegacyDocType(documentType, rollupInterval) ? hasDocs : canUseContinousRollupDocs,
       // all >=8.7 document types with rollups support duration summary
       hasDurationSummaryField: canUseContinousRollupDocs,
     };
@@ -184,7 +182,7 @@ const getDocumentTypeRequestsFn =
         rollupInterval,
         filters: [...kql, ...currentRange],
       }),
-      ...(isRetroCompatibleDocType(documentType, rollupInterval)
+      ...(isLegacyDocType(documentType, rollupInterval)
         ? {
             durationSummaryNotSupportedQuery: getRequest({
               documentType,
@@ -196,10 +194,7 @@ const getDocumentTypeRequestsFn =
     }));
   };
 
-const isRetroCompatibleDocType = (
-  documentType: ApmDocumentType,
-  rollupInterval: RollupInterval
-) => {
+const isLegacyDocType = (documentType: ApmDocumentType, rollupInterval: RollupInterval) => {
   return (
     documentType === ApmDocumentType.TransactionMetric &&
     rollupInterval === RollupInterval.OneMinute
