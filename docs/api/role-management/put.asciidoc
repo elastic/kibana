@@ -210,6 +210,12 @@ $ curl -X PUT api/security/role/my_kibana_role
         "names": [ "remote_index1", "remote_index2" ],
         "privileges": [ "all" ]
       }
+    ],
+    "remote_cluster": [
+      {
+        "clusters": [ "remote_cluster1" ],
+        "privileges": [ "monitor_enrich" ]
+      }
     ]
   },
   "kibana": [
