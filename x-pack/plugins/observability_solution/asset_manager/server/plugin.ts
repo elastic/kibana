@@ -80,7 +80,7 @@ export class AssetManagerServerPlugin
       esClient: core.elasticsearch.client.asInternalUser,
       template: assetsIndexTemplateConfig,
       logger: this.logger,
-    });
+    }).catch(() => {}); // it shouldn't reject, but just in case
 
     return {};
   }

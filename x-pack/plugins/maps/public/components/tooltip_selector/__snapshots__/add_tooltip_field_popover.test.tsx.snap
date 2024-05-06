@@ -29,6 +29,7 @@ exports[`Should remove selected fields from selectable 1`] = `
   <EuiSelectable
     isPreFiltered={false}
     onChange={[Function]}
+    optionMatcher={[Function]}
     options={
       Array [
         Object {
@@ -103,6 +104,7 @@ exports[`Should render 1`] = `
   <EuiSelectable
     isPreFiltered={false}
     onChange={[Function]}
+    optionMatcher={[Function]}
     options={
       Array [
         Object {

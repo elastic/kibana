@@ -223,7 +223,7 @@
     "prebuilt_rules_large_prebuilt_rules_package:server:serverless": "npm run initialize-server:rm prebuilt_rules/large_prebuilt_rules_package serverless",
     "prebuilt_rules_large_prebuilt_rules_package:runner:serverless": "npm run run-tests:rm prebuilt_rules/large_prebuilt_rules_package serverless serverlessEnv",
     "prebuilt_rules_large_prebuilt_rules_package:qa:serverless": "npm run run-tests:rm prebuilt_rules/large_prebuilt_rules_package serverless qaPeriodicEnv",
-    "prebuilt_rules_large_prebuilt_rules_package:qa:serverles:release": "npm run run-tests:rm prebuilt_rules/large_prebuilt_rules_package serverlessQA qaEnv",
+    "prebuilt_rules_large_prebuilt_rules_package:qa:serverless:release": "npm run run-tests:rm prebuilt_rules/large_prebuilt_rules_package serverlessQA qaEnv",
     "prebuilt_rules_large_prebuilt_rules_package:server:ess": "npm run initialize-server:rm prebuilt_rules/large_prebuilt_rules_package ess",
     "prebuilt_rules_large_prebuilt_rules_package:runner:ess": "npm run run-tests:rm prebuilt_rules/large_prebuilt_rules_package ess essEnv",
 
