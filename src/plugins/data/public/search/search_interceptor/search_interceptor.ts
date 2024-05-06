@@ -29,7 +29,7 @@ import {
   take,
   takeUntil,
   tap,
-} from 'rxjs/operators';
+} from 'rxjs';
 import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import { PublicMethodsOf } from '@kbn/utility-types';
@@ -50,22 +50,24 @@ import { BatchedFunc, BfetchPublicSetup, DISABLE_BFETCH } from '@kbn/bfetch-plug
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { AbortError, KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 import { BfetchRequestError } from '@kbn/bfetch-error';
+import type {
+  SanitizedConnectionRequestParams,
+  IKibanaSearchRequest,
+  ISearchOptionsSerializable,
+} from '@kbn/search-types';
 import { createEsError, isEsError, renderSearchError } from '@kbn/search-errors';
+import type { IKibanaSearchResponse, ISearchOptions } from '@kbn/search-types';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
   IAsyncSearchOptions,
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
   isRunningResponse,
-  ISearchOptions,
-  ISearchOptionsSerializable,
   pollSearch,
   UI_SETTINGS,
-  type SanitizedConnectionRequestParams,
 } from '../../../common';
 import { SearchUsageCollector } from '../collectors';
 import { SearchTimeoutError, TimeoutErrorMode } from './timeout_error';
 import { SearchSessionIncompleteWarning } from './search_session_incomplete_warning';
+import { toPartialResponseAfterTimeout } from './to_partial_response';
 import { ISessionService, SearchSessionState } from '../session';
 import { SearchResponseCache } from './search_response_cache';
 import { SearchAbortController } from './search_abort_controller';
@@ -257,6 +259,8 @@ export class SearchInterceptor {
 
     if (combined.sessionId !== undefined) serializableOptions.sessionId = combined.sessionId;
     if (combined.isRestore !== undefined) serializableOptions.isRestore = combined.isRestore;
+    if (combined.retrieveResults !== undefined)
+      serializableOptions.retrieveResults = combined.retrieveResults;
     if (combined.legacyHitsTotal !== undefined)
       serializableOptions.legacyHitsTotal = combined.legacyHitsTotal;
     if (combined.strategy !== undefined) serializableOptions.strategy = combined.strategy;
@@ -336,11 +340,19 @@ export class SearchInterceptor {
           isSavedToBackground = true;
         });
 
-    const sendCancelRequest = once(() => {
-      this.deps.http.delete(`/internal/search/${strategy}/${id}`, { version: '1' });
-    });
+    const sendCancelRequest = once(() =>
+      this.deps.http.delete(`/internal/search/${strategy}/${id}`, { version: '1' })
+    );
 
-    const cancel = () => id && !isSavedToBackground && sendCancelRequest();
+    const cancel = async () => {
+      if (!id || isSavedToBackground) return;
+      try {
+        await sendCancelRequest();
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error(e);
+      }
+    };
 
     // Async search requires a series of requests
     // 1) POST /<index pattern>/_async_search/
@@ -509,6 +521,17 @@ export class SearchInterceptor {
         return response$.pipe(
           takeUntil(aborted$),
           catchError((e) => {
+            // If we aborted (search:timeout advanced setting) and there was a partial response, return it instead of just erroring out
+            if (searchAbortController.isTimeout()) {
+              return from(
+                this.runSearch(request, { ...searchOptions, retrieveResults: true })
+              ).pipe(
+                tap(() =>
+                  this.handleSearchError(e, request?.params?.body ?? {}, searchOptions, true)
+                ),
+                map(toPartialResponseAfterTimeout)
+              );
+            }
             return throwError(
               this.handleSearchError(
                 e,

@@ -29,10 +29,11 @@ export async function getSecurityIndexPatterns(): Promise<IndexPatternMeta[]> {
   const indexPatternCache = await getIndexPatternService().getCache();
   return indexPatternCache!
     .filter((savedObject) => {
-      return (securityIndexPatternTitles as string[]).some((indexPatternTitle) => {
-        // glob matching index pattern title
-        return minimatch(indexPatternTitle, savedObject?.attributes?.title);
-      });
+      return securityIndexPatternTitles.some((indexPatternTitle) =>
+        savedObject.attributes.title
+          .split(',')
+          .some((pattern) => minimatch(indexPatternTitle, pattern))
+      );
     })
     .map((savedObject) => {
       return {

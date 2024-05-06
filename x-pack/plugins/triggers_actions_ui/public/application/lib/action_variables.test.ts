@@ -7,7 +7,7 @@
 
 import { RuleType, ActionVariables } from '../../types';
 import { transformActionVariables } from './action_variables';
-import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 
 beforeEach(() => jest.resetAllMocks());
 
@@ -325,7 +325,7 @@ function getAlertType(actionVariables: ActionVariables): RuleType {
     defaultActionGroupId: 'default',
     recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
     authorizedConsumers: {},
-    producer: ALERTS_FEATURE_ID,
+    producer: ALERTING_FEATURE_ID,
     minimumLicenseRequired: 'basic',
     enabledInLicense: true,
   };

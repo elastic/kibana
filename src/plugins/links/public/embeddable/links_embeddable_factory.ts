@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/dashboard-plugin/public';
+import { DASHBOARD_GRID_COLUMN_COUNT, PanelPlacementStrategy } from '@kbn/dashboard-plugin/public';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 import { IProvidesPanelPlacementSettings } from '@kbn/dashboard-plugin/public/dashboard_container/component/panel_placement/types';
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
@@ -26,11 +26,7 @@ import { LinksAttributes } from '../../common/content_management';
 import { extract, inject } from '../../common/embeddable';
 import { LinksStrings } from '../components/links_strings';
 import { getLinksAttributeService } from '../services/attribute_service';
-import {
-  coreServices,
-  presentationUtil,
-  untilPluginStartServicesReady,
-} from '../services/kibana_services';
+import { coreServices, untilPluginStartServicesReady } from '../services/kibana_services';
 import type { LinksEmbeddable } from './links_embeddable';
 import { LinksByReferenceInput, LinksEditorFlyoutReturn, LinksInput } from './types';
 
@@ -80,7 +76,7 @@ export class LinksFactoryDefinition
     const isHorizontal = attributes.layout === 'horizontal';
     const width = isHorizontal ? DASHBOARD_GRID_COLUMN_COUNT : 8;
     const height = isHorizontal ? 4 : (attributes.links?.length ?? 1 * 3) + 4;
-    return { width, height, strategy: 'placeAtTop' };
+    return { width, height, strategy: PanelPlacementStrategy.placeAtTop };
   };
 
   public async isEditable() {
@@ -89,7 +85,7 @@ export class LinksFactoryDefinition
   }
 
   public canCreateNew() {
-    return presentationUtil.labsService.isProjectEnabled('labs:dashboard:linksPanel');
+    return true;
   }
 
   public getDefaultInput(): Partial<LinksInput> {

@@ -23,11 +23,7 @@ export async function getDiagnosticsPrivileges({
     apmIndices.transaction,
   ]);
 
-  const clusterPrivileges = [
-    'manage_index_templates',
-    'monitor',
-    'read_pipeline',
-  ];
+  const clusterPrivileges = ['manage_index_templates', 'monitor', 'read_pipeline'];
   const { index, cluster } = await esClient.security.hasPrivileges({
     body: {
       index: [

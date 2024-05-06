@@ -55,6 +55,10 @@ export class UiActionsService {
     this.triggerToActions.set(trigger.id, []);
   };
 
+  public readonly hasTrigger = (triggerId: string): boolean => {
+    return Boolean(this.triggers.get(triggerId));
+  };
+
   public readonly getTrigger = (triggerId: string): TriggerContract => {
     const trigger = this.triggers.get(triggerId);
 

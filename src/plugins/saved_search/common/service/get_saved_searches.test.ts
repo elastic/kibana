@@ -148,6 +148,7 @@ describe('getSavedSearch', () => {
         "title": "test1",
         "usesAdHocDataView": undefined,
         "viewMode": undefined,
+        "visContext": undefined,
       }
     `);
   });
@@ -256,6 +257,7 @@ describe('getSavedSearch', () => {
         "title": "test2",
         "usesAdHocDataView": undefined,
         "viewMode": undefined,
+        "visContext": undefined,
       }
     `);
   });

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { EuiText, EuiHorizontalRule } from '@elastic/eui';
 import type { SerializedStyles } from '@emotion/react';
 import { css } from '@emotion/react';
-import type { Category } from '../../../common/api/log_categorization/types';
+import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 import { useIsDarkTheme } from '../../hooks/use_eui_theme';
 
 interface Props {
@@ -175,7 +175,7 @@ export const FormattedTokens: FC<Props> = ({ category }) => {
   );
 };
 
-const WrapInText: FC = ({ children }) => (
+const WrapInText: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <EuiText css={{ fontWeight: 'bold' }} size="s">
     {children}
   </EuiText>

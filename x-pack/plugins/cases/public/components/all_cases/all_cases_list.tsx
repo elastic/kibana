@@ -7,8 +7,8 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiTableSelectionType } from '@elastic/eui';
-import { EuiProgress } from '@elastic/eui';
-import styled, { css } from 'styled-components';
+import { EuiProgress, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import deepEqual from 'react-fast-compare';
 
 import type { CaseUI, FilterOptions, CasesUI } from '../../../common/ui/types';
@@ -34,19 +34,6 @@ import { useCasesColumnsSelection } from './use_cases_columns_selection';
 import { DEFAULT_CASES_TABLE_STATE } from '../../containers/constants';
 import { CasesTableUtilityBar } from './utility_bar';
 
-const ProgressLoader = styled(EuiProgress)`
-  ${({ $isShow }: { $isShow: boolean }) =>
-    $isShow
-      ? css`
-          top: 2px;
-          border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
-          z-index: ${({ theme }) => theme.eui.euiZHeader};
-        `
-      : `
-      display: none;
-    `}
-`;
-
 const getSortField = (field: string): SortFieldCase =>
   // @ts-ignore
   SortFieldCase[field] ?? SortFieldCase.title;
@@ -62,6 +49,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const { owner, permissions } = useCasesContext();
     const availableSolutions = useAvailableCasesOwners(getAllPermissionsExceptFrom('delete'));
     const isLoading = useIsLoadingCases();
+    const { euiTheme } = useEuiTheme();
 
     const hasOwner = !!owner.length;
 
@@ -196,12 +184,23 @@ export const AllCasesList = React.memo<AllCasesListProps>(
 
     return (
       <>
-        <ProgressLoader
+        <EuiProgress
           size="xs"
           color="accent"
           className="essentialAnimation"
-          $isShow={isLoading || isLoadingCases || isLoadingColumns}
+          css={
+            isLoading || isLoadingCases || isLoadingColumns
+              ? css`
+                  top: ${euiTheme.size.xxs};
+                  border-radius: ${euiTheme.border.radius};
+                  z-index: ${euiTheme.levels.header};
+                `
+              : css`
+                  display: none;
+                `
+          }
         />
+
         {!isSelectorView ? <CasesMetrics /> : null}
         <CasesTableFilters
           countClosedCases={data.countClosedCases}

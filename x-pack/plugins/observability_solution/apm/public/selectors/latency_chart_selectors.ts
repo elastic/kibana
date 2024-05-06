@@ -32,10 +32,7 @@ export function getLatencyChartSelector({
   latencyAggregationType: LatencyAggregationType;
   previousPeriodLabel: string;
 }): Partial<LatencyChartData> {
-  if (
-    !latencyChart?.currentPeriod.latencyTimeseries ||
-    !latencyAggregationType
-  ) {
+  if (!latencyChart?.currentPeriod.latencyTimeseries || !latencyAggregationType) {
     return {};
   }
   return {
@@ -91,10 +88,9 @@ function getLatencyTimeseries({
     case 'avg': {
       const { currentPeriodColor } = getTimeSeriesColor(ChartType.LATENCY_AVG);
       return {
-        title: i18n.translate(
-          'xpack.apm.transactions.latency.chart.averageLabel',
-          { defaultMessage: 'Average' }
-        ),
+        title: i18n.translate('xpack.apm.transactions.latency.chart.averageLabel', {
+          defaultMessage: 'Average',
+        }),
         data: latencyTimeseries,
         legendValue: asDuration(overallAvgDuration),
         type: 'linemark',
@@ -104,10 +100,9 @@ function getLatencyTimeseries({
     case 'p95': {
       const { currentPeriodColor } = getTimeSeriesColor(ChartType.LATENCY_P95);
       return {
-        title: i18n.translate(
-          'xpack.apm.transactions.latency.chart.95thPercentileLabel',
-          { defaultMessage: '95th percentile' }
-        ),
+        title: i18n.translate('xpack.apm.transactions.latency.chart.95thPercentileLabel', {
+          defaultMessage: '95th percentile',
+        }),
         titleShort: '95th',
         data: latencyTimeseries,
         type: 'linemark',
@@ -117,10 +112,9 @@ function getLatencyTimeseries({
     case 'p99': {
       const { currentPeriodColor } = getTimeSeriesColor(ChartType.LATENCY_P99);
       return {
-        title: i18n.translate(
-          'xpack.apm.transactions.latency.chart.99thPercentileLabel',
-          { defaultMessage: '99th percentile' }
-        ),
+        title: i18n.translate('xpack.apm.transactions.latency.chart.99thPercentileLabel', {
+          defaultMessage: '99th percentile',
+        }),
         titleShort: '99th',
         data: latencyTimeseries,
         type: 'linemark',

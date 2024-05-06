@@ -668,6 +668,41 @@
         "ci:serverless-test-all"
       ],
       "enabled": true
+    },
+    {
+      "groupName": "AlertingEmails",
+      "matchPackageNames": [
+        "nodemailer"
+      ],
+      "reviewers": [
+        "team:response-ops"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:prev-minor"
+      ],
+      "enabled": true
+    },
+    {
+      "groupName": "machine learning modules",
+      "matchPackageNames": [
+        "apidoc-markdown"
+      ],
+      "reviewers": [
+        "team:ml-ui"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:ML",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true
     }
   ]
 }

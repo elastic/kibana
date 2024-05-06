@@ -13,6 +13,7 @@ import { css } from '@emotion/react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '../../../../common/lib/kibana';
 import { useRightPanelContext } from '../context';
 import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
 import {
@@ -20,16 +21,14 @@ import {
   ALERT_DESCRIPTION_TITLE_TEST_ID,
   RULE_SUMMARY_BUTTON_TEST_ID,
 } from './test_ids';
-import {
-  DocumentDetailsPreviewPanelKey,
-  type PreviewPanelProps,
-  RulePreviewPanel,
-} from '../../preview';
+import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
+import { type PreviewPanelProps, RulePreviewPanel } from '../../preview';
 
 /**
  * Displays the rule description of a signal document.
  */
 export const AlertDescription: FC = () => {
+  const { telemetry } = useKibana().services;
   const { dataFormattedForFieldBrowser, scopeId, eventId, indexName, isPreview } =
     useRightPanelContext();
   const { isAlert, ruleDescription, ruleName, ruleId } = useBasicDataFromDetailsData(
@@ -56,7 +55,11 @@ export const AlertDescription: FC = () => {
         ruleId,
       },
     });
-  }, [eventId, openPreviewPanel, indexName, scopeId, ruleId]);
+    telemetry.reportDetailsFlyoutOpened({
+      location: scopeId,
+      panel: 'preview',
+    });
+  }, [eventId, openPreviewPanel, indexName, scopeId, ruleId, telemetry]);
 
   const viewRule = useMemo(
     () => (

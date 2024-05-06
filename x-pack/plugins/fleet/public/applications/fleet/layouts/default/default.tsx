@@ -9,7 +9,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Section } from '../../sections';
-import { useLink, useConfig } from '../../hooks';
+import { useLink, useConfig, useAuthz } from '../../hooks';
 import { WithHeaderLayout } from '../../../../layouts';
 
 import { ExperimentalFeaturesService } from '../../services';
@@ -29,6 +29,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
 }) => {
   const { getHref } = useLink();
   const { agents } = useConfig();
+  const authz = useAuthz();
   const { agentTamperProtectionEnabled } = ExperimentalFeaturesService.get();
 
   const tabs = [
@@ -40,7 +41,9 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
       href: getHref('agent_list'),
       disabled: !agents?.enabled,
       'data-test-subj': 'fleet-agents-tab',
+      isHidden: !authz.fleet.readAgents,
     },
+
     {
       name: (
         <FormattedMessage
@@ -48,6 +51,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
           defaultMessage="Agent policies"
         />
       ),
+      isHidden: !authz.fleet.readAgentPolicies,
       isSelected: section === 'agent_policies',
       href: getHref('policies_list'),
       'data-test-subj': 'fleet-agent-policies-tab',
@@ -59,6 +63,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
           defaultMessage="Enrollment tokens"
         />
       ),
+      isHidden: !authz.fleet.allAgents,
       isSelected: section === 'enrollment_tokens',
       href: getHref('enrollment_tokens'),
       'data-test-subj': 'fleet-enrollment-tokens-tab',
@@ -73,7 +78,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
       isSelected: section === 'uninstall_tokens',
       href: getHref('uninstall_tokens'),
       'data-test-subj': 'fleet-uninstall-tokens-tab',
-      isHidden: !agentTamperProtectionEnabled, // needed only for agentTamperProtectionEnabled feature flag
+      isHidden: !authz.fleet.allAgents || !agentTamperProtectionEnabled, // needed only for agentTamperProtectionEnabled feature flag
     },
     {
       name: (
@@ -93,12 +98,15 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
           defaultMessage="Settings"
         />
       ),
+      isHidden: !authz.fleet.readSettings,
       isSelected: section === 'settings',
       href: getHref('settings'),
       'data-test-subj': 'fleet-settings-tab',
     },
-    // the filtering below is needed only for agentTamperProtectionEnabled feature flag
-  ].filter(({ isHidden }) => !isHidden);
+  ]
+    // Removed hidden tabs
+    .filter(({ isHidden }) => !isHidden)
+    .map(({ isHidden, ...tab }) => tab);
 
   return (
     <WithHeaderLayout leftColumn={<DefaultPageTitle />} rightColumn={rightColumn} tabs={tabs}>

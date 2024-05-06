@@ -10,7 +10,7 @@ import type { TopNavMenuBadgeProps } from '@kbn/navigation-plugin/public';
 import { getTopNavUnsavedChangesBadge } from '@kbn/unsaved-changes-badge';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import { i18n } from '@kbn/i18n';
-import { DiscoverStateContainer } from '../../services/discover_state';
+import { DiscoverStateContainer } from '../../state_management/discover_state';
 import type { TopNavCustomization } from '../../../../customizations';
 import { onSaveSearch } from './on_save_search';
 import { DiscoverServices } from '../../../../build_services';
@@ -45,15 +45,24 @@ export const getTopNavBadges = ({
   if (hasUnsavedChanges && !defaultBadges?.unsavedChangesBadge?.disabled) {
     entries.push({
       data: getTopNavUnsavedChangesBadge({
-        onRevert: stateContainer.actions.undoSavedSearchChanges,
-        onSave: !isManaged
+        onRevert: async () => {
+          const lensEditFlyoutCancelButton = document.getElementById('lnsCancelEditOnFlyFlyout');
+          if (lensEditFlyoutCancelButton) {
+            lensEditFlyoutCancelButton.click?.();
+          }
+          await stateContainer.actions.undoSavedSearchChanges();
+        },
+        onSave:
+          services.capabilities.discover.save && !isManaged
+            ? async () => {
+                await saveSearch();
+              }
+            : undefined,
+        onSaveAs: services.capabilities.discover.save
           ? async () => {
-              await saveSearch();
+              await saveSearch(true);
             }
           : undefined,
-        onSaveAs: async () => {
-          await saveSearch(true);
-        },
       }),
       order: defaultBadges?.unsavedChangesBadge?.order ?? 100,
     });

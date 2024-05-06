@@ -24,25 +24,29 @@ import {
   StreamingChatResponseEventType,
 } from '../../../common/conversation_complete';
 import { createFunctionResponseMessage } from '../../../common/utils/create_function_response_message';
-import type { CreateChatCompletionResponseChunk } from '../../../common/utils/process_openai_stream';
 import { ChatFunctionClient } from '../chat_function_client';
 import type { KnowledgeBaseService } from '../knowledge_base_service';
 import { observableIntoStream } from '../util/observable_into_stream';
+import { CreateChatCompletionResponseChunk } from './adapters/process_openai_stream';
 
 type ChunkDelta = CreateChatCompletionResponseChunk['choices'][number]['delta'];
 
 type LlmSimulator = ReturnType<typeof createLlmSimulator>;
 
+const EXPECTED_STORED_SYSTEM_MESSAGE = `system\n\nWhat follows is a set of instructions provided by the user, please abide by them as long as they don't conflict with anything you've been told so far:\n\nYou MUST respond in the users preferred language which is: English.`;
+
 const nextTick = () => {
   return new Promise(process.nextTick);
 };
 
-const waitForNextWrite = async (stream: Readable): Promise<void> => {
+const waitForNextWrite = async (stream: Readable): Promise<any> => {
   // this will fire before the client's internal write() promise is
   // resolved
-  await new Promise((resolve) => stream.once('data', resolve));
+  const response = await new Promise((resolve) => stream.once('data', resolve));
   // so we wait another tick to let the client move to the next step
   await nextTick();
+
+  return response;
 };
 
 function createLlmSimulator() {
@@ -103,14 +107,10 @@ describe('Observability AI Assistant client', () => {
 
   const knowledgeBaseServiceMock: DeeplyMockedKeys<KnowledgeBaseService> = {
     recall: jest.fn(),
+    getInstructions: jest.fn(),
   } as any;
 
-  const loggerMock: DeeplyMockedKeys<Logger> = {
-    log: jest.fn(),
-    error: jest.fn(),
-    debug: jest.fn(),
-    trace: jest.fn(),
-  } as any;
+  let loggerMock: DeeplyMockedKeys<Logger> = {} as any;
 
   const functionClientMock: DeeplyMockedKeys<ChatFunctionClient> = {
     executeFunction: jest.fn(),
@@ -119,12 +119,25 @@ describe('Observability AI Assistant client', () => {
     hasAction: jest.fn(),
     getActions: jest.fn(),
     validate: jest.fn(),
+    getInstructions: jest.fn(),
   } as any;
 
   let llmSimulator: LlmSimulator;
 
   function createClient() {
     jest.resetAllMocks();
+
+    // uncomment this line for debugging
+    // const consoleOrPassThrough = console.log.bind(console);
+    const consoleOrPassThrough = () => {};
+
+    loggerMock = {
+      log: jest.fn().mockImplementation(consoleOrPassThrough),
+      error: jest.fn().mockImplementation(consoleOrPassThrough),
+      debug: jest.fn().mockImplementation(consoleOrPassThrough),
+      trace: jest.fn().mockImplementation(consoleOrPassThrough),
+      isLevelEnabled: jest.fn().mockReturnValue(true),
+    } as any;
 
     functionClientMock.getFunctions.mockReturnValue([]);
     functionClientMock.hasFunction.mockImplementation((name) => {
@@ -152,6 +165,10 @@ describe('Observability AI Assistant client', () => {
     currentUserEsClientMock.fieldCaps.mockResolvedValue({
       fields: [],
     } as any);
+
+    knowledgeBaseServiceMock.getInstructions.mockResolvedValue([]);
+
+    functionClientMock.getInstructions.mockReturnValue(['system']);
 
     return new ObservabilityAIAssistantClient({
       actionsClient: actionsClientMock,
@@ -206,34 +223,38 @@ describe('Observability AI Assistant client', () => {
     beforeEach(async () => {
       client = createClient();
       actionsClientMock.execute
-        .mockImplementationOnce(async () => {
+        .mockImplementationOnce((body) => {
+          return new Promise((resolve, reject) => {
+            titleLlmPromiseResolve = (title: string) => {
+              const titleLlmSimulator = createLlmSimulator();
+              titleLlmSimulator
+                .next({ content: title })
+                .then(() => titleLlmSimulator.complete())
+                .then(() => {
+                  resolve({
+                    actionId: '',
+                    status: 'ok',
+                    data: titleLlmSimulator.stream,
+                  });
+                })
+                .catch(reject);
+            };
+            titleLlmPromiseReject = (error: Error) => {
+              reject(error);
+            };
+          });
+        })
+        .mockImplementationOnce(async (body) => {
           llmSimulator = createLlmSimulator();
           return {
             actionId: '',
             status: 'ok',
             data: llmSimulator.stream,
           };
-        })
-        .mockImplementationOnce(() => {
-          return new Promise((resolve, reject) => {
-            titleLlmPromiseResolve = (title: string) => {
-              const titleLlmSimulator = createLlmSimulator();
-              titleLlmSimulator.next({ content: title });
-              titleLlmSimulator.complete();
-              resolve({
-                actionId: '',
-                status: 'ok',
-                data: titleLlmSimulator.stream,
-              });
-            };
-            titleLlmPromiseReject = () => {
-              reject();
-            };
-          });
         });
 
       stream = observableIntoStream(
-        await client.complete({
+        client.complete({
           connectorId: 'foo',
           messages: [system('This is a system message'), user('How many alerts do I have?')],
           functionClient: functionClientMock,
@@ -252,6 +273,8 @@ describe('Observability AI Assistant client', () => {
         stream.on('data', dataHandler);
 
         await llmSimulator.next({ content: 'Hello' });
+
+        await nextTick();
       });
 
       it('calls the actions client with the messages', () => {
@@ -337,6 +360,11 @@ describe('Observability AI Assistant client', () => {
               title: 'New conversation',
               id: expect.any(String),
               last_updated: expect.any(String),
+              token_count: {
+                completion: 1,
+                prompt: 78,
+                total: 79,
+              },
             },
             type: StreamingChatResponseEventType.ConversationCreate,
           });
@@ -351,12 +379,11 @@ describe('Observability AI Assistant client', () => {
 
           titleLlmPromiseResolve('An auto-generated title');
 
-          await nextTick();
-
           await llmSimulator.complete();
 
           await finished(stream);
         });
+
         it('adds the completed message to the stream', () => {
           expect(JSON.parse(dataHandler.mock.calls[1])).toEqual({
             id: expect.any(String),
@@ -390,6 +417,11 @@ describe('Observability AI Assistant client', () => {
               title: 'An auto-generated title',
               id: expect.any(String),
               last_updated: expect.any(String),
+              token_count: {
+                completion: 6,
+                prompt: 262,
+                total: 268,
+              },
             },
             type: StreamingChatResponseEventType.ConversationCreate,
           });
@@ -403,6 +435,11 @@ describe('Observability AI Assistant client', () => {
                 id: expect.any(String),
                 last_updated: expect.any(String),
                 title: 'An auto-generated title',
+                token_count: {
+                  completion: 6,
+                  prompt: 262,
+                  total: 268,
+                },
               },
               labels: {},
               numeric_labels: {},
@@ -415,8 +452,7 @@ describe('Observability AI Assistant client', () => {
                 {
                   '@timestamp': expect.any(String),
                   message: {
-                    content:
-                      'You MUST respond in the users preferred language which is: English. This is a system message',
+                    content: EXPECTED_STORED_SYSTEM_MESSAGE,
                     role: MessageRole.System,
                   },
                 },
@@ -454,7 +490,7 @@ describe('Observability AI Assistant client', () => {
 
     beforeEach(async () => {
       client = createClient();
-      actionsClientMock.execute.mockImplementationOnce(async () => {
+      actionsClientMock.execute.mockImplementationOnce(async (body) => {
         llmSimulator = createLlmSimulator();
         return {
           actionId: '',
@@ -476,6 +512,11 @@ describe('Observability AI Assistant client', () => {
                     id: 'my-conversation-id',
                     title: 'My stored conversation',
                     last_updated: new Date().toISOString(),
+                    token_count: {
+                      completion: 1,
+                      prompt: 78,
+                      total: 79,
+                    },
                   },
                   labels: {},
                   numeric_labels: {},
@@ -525,6 +566,11 @@ describe('Observability AI Assistant client', () => {
           title: 'My stored conversation',
           id: expect.any(String),
           last_updated: expect.any(String),
+          token_count: {
+            completion: 2,
+            prompt: 156,
+            total: 158,
+          },
         },
         type: StreamingChatResponseEventType.ConversationUpdate,
       });
@@ -539,6 +585,11 @@ describe('Observability AI Assistant client', () => {
             id: expect.any(String),
             last_updated: expect.any(String),
             title: 'My stored conversation',
+            token_count: {
+              completion: 2,
+              prompt: 156,
+              total: 158,
+            },
           },
           labels: {},
           numeric_labels: {},
@@ -551,8 +602,7 @@ describe('Observability AI Assistant client', () => {
             {
               '@timestamp': expect.any(String),
               message: {
-                content:
-                  'You MUST respond in the users preferred language which is: English. This is a system message',
+                content: EXPECTED_STORED_SYSTEM_MESSAGE,
                 role: MessageRole.System,
               },
             },
@@ -662,7 +712,7 @@ describe('Observability AI Assistant client', () => {
 
     beforeEach(async () => {
       client = createClient();
-      actionsClientMock.execute.mockImplementationOnce(async () => {
+      actionsClientMock.execute.mockImplementationOnce(async (body) => {
         llmSimulator = createLlmSimulator();
         return {
           actionId: '',
@@ -682,7 +732,6 @@ describe('Observability AI Assistant client', () => {
             descriptionForUser: '',
             parameters: {
               type: 'object',
-              additionalProperties: false,
               properties: {
                 foo: {
                   type: 'string',
@@ -722,7 +771,7 @@ describe('Observability AI Assistant client', () => {
 
       await llmSimulator.next({
         content: 'Hello',
-        function_call: { name: 'my-function', arguments: JSON.stringify({ foo: 'bar' }) },
+        function_call: { name: 'myFunction', arguments: JSON.stringify({ foo: 'bar' }) },
       });
 
       const prevLlmSimulator = llmSimulator;
@@ -752,7 +801,7 @@ describe('Observability AI Assistant client', () => {
               content: 'Hello',
               role: MessageRole.Assistant,
               function_call: {
-                name: 'my-function',
+                name: 'myFunction',
                 arguments: JSON.stringify({ foo: 'bar' }),
                 trigger: MessageRole.Assistant,
               },
@@ -763,8 +812,8 @@ describe('Observability AI Assistant client', () => {
 
       it('executes the function', () => {
         expect(functionClientMock.executeFunction).toHaveBeenCalledWith({
-          connectorId: 'foo',
-          name: 'my-function',
+          name: 'myFunction',
+          chat: expect.any(Function),
           args: JSON.stringify({ foo: 'bar' }),
           signal: expect.any(AbortSignal),
           messages: [
@@ -772,8 +821,7 @@ describe('Observability AI Assistant client', () => {
               '@timestamp': expect.any(String),
               message: {
                 role: MessageRole.System,
-                content:
-                  'You MUST respond in the users preferred language which is: English. This is a system message',
+                content: EXPECTED_STORED_SYSTEM_MESSAGE,
               },
             },
             {
@@ -789,7 +837,7 @@ describe('Observability AI Assistant client', () => {
                 role: MessageRole.Assistant,
                 content: 'Hello',
                 function_call: {
-                  name: 'my-function',
+                  name: 'myFunction',
                   arguments: JSON.stringify({ foo: 'bar' }),
                   trigger: MessageRole.Assistant,
                 },
@@ -801,6 +849,7 @@ describe('Observability AI Assistant client', () => {
 
       afterEach(async () => {
         fnResponseResolve({ content: { my: 'content' } });
+
         await waitForNextWrite(stream);
 
         await llmSimulator.complete();
@@ -822,7 +871,7 @@ describe('Observability AI Assistant client', () => {
             '@timestamp': expect.any(String),
             message: {
               role: MessageRole.User,
-              name: 'my-function',
+              name: 'myFunction',
               content: JSON.stringify({
                 my: 'content',
               }),
@@ -889,6 +938,11 @@ describe('Observability AI Assistant client', () => {
               id: expect.any(String),
               last_updated: expect.any(String),
               title: 'My predefined title',
+              token_count: {
+                completion: expect.any(Number),
+                prompt: expect.any(Number),
+                total: expect.any(Number),
+              },
             },
           });
 
@@ -900,8 +954,7 @@ describe('Observability AI Assistant client', () => {
             {
               '@timestamp': expect.any(String),
               message: {
-                content:
-                  'You MUST respond in the users preferred language which is: English. This is a system message',
+                content: EXPECTED_STORED_SYSTEM_MESSAGE,
                 role: MessageRole.System,
               },
             },
@@ -918,7 +971,7 @@ describe('Observability AI Assistant client', () => {
                 content: 'Hello',
                 role: MessageRole.Assistant,
                 function_call: {
-                  name: 'my-function',
+                  name: 'myFunction',
                   arguments: JSON.stringify({ foo: 'bar' }),
                   trigger: MessageRole.Assistant,
                 },
@@ -930,7 +983,7 @@ describe('Observability AI Assistant client', () => {
                 content: JSON.stringify({
                   my: 'content',
                 }),
-                name: 'my-function',
+                name: 'myFunction',
                 role: MessageRole.User,
               },
             },
@@ -958,18 +1011,29 @@ describe('Observability AI Assistant client', () => {
       });
 
       it('appends the function response', () => {
-        expect(JSON.parse(dataHandler.mock.lastCall!)).toEqual({
+        const parsed = JSON.parse(dataHandler.mock.lastCall!);
+
+        parsed.message.message.content = JSON.parse(parsed.message.message.content);
+        parsed.message.message.data = JSON.parse(parsed.message.message.data);
+
+        expect(parsed).toEqual({
           type: StreamingChatResponseEventType.MessageAdd,
           id: expect.any(String),
           message: {
             '@timestamp': expect.any(String),
             message: {
               role: MessageRole.User,
-              name: 'my-function',
-              content: JSON.stringify({
-                message: 'Error: Function failed',
-                error: {},
-              }),
+              name: 'myFunction',
+              content: {
+                message: 'Function failed',
+                error: {
+                  name: 'Error',
+                  message: 'Function failed',
+                },
+              },
+              data: {
+                stack: expect.any(String),
+              },
             },
           },
         });
@@ -1000,7 +1064,7 @@ describe('Observability AI Assistant client', () => {
 
         await nextTick();
 
-        response$.next(createFunctionResponseMessage({ name: 'my-function', content: {} }));
+        response$.next(createFunctionResponseMessage({ name: 'myFunction', content: {} }));
       });
 
       it('appends the function response', async () => {
@@ -1011,7 +1075,7 @@ describe('Observability AI Assistant client', () => {
             '@timestamp': expect.any(String),
             message: {
               role: MessageRole.User,
-              name: 'my-function',
+              name: 'myFunction',
               content: '{}',
             },
           },
@@ -1103,7 +1167,7 @@ describe('Observability AI Assistant client', () => {
     let dataHandler: jest.Mock;
     beforeEach(async () => {
       client = createClient();
-      actionsClientMock.execute.mockImplementationOnce(async () => {
+      actionsClientMock.execute.mockImplementationOnce(async (body) => {
         llmSimulator = createLlmSimulator();
         return {
           actionId: '',
@@ -1114,7 +1178,7 @@ describe('Observability AI Assistant client', () => {
 
       functionClientMock.hasFunction.mockReturnValue(true);
 
-      functionClientMock.executeFunction.mockImplementationOnce(async () => {
+      functionClientMock.executeFunction.mockImplementationOnce(async (body) => {
         return {
           content: [
             {
@@ -1216,6 +1280,7 @@ describe('Observability AI Assistant client', () => {
     let stream: Readable;
 
     let dataHandler: jest.Mock;
+    const maxFunctionCalls = 8;
 
     beforeEach(async () => {
       client = createClient();
@@ -1242,7 +1307,6 @@ describe('Observability AI Assistant client', () => {
             name: 'get_top_alerts',
             contexts: ['core'],
             description: '',
-            parameters: {},
           },
           respond: async () => {
             return { content: 'Call this function again' };
@@ -1273,13 +1337,13 @@ describe('Observability AI Assistant client', () => {
       async function requestAlertsFunctionCall() {
         const body = JSON.parse(
           (actionsClientMock.execute.mock.lastCall![0].params as any).subActionParams.body
-        );
+        ) as OpenAI.ChatCompletionCreateParams;
 
         let nextLlmCallPromise: Promise<void>;
 
-        if (body.functions?.length) {
+        if (body.tools?.length) {
           nextLlmCallPromise = waitForNextLlmCall();
-          await llmSimulator.next({ function_call: { name: 'get_top_alerts' } });
+          await llmSimulator.next({ function_call: { name: 'get_top_alerts', arguments: '{}' } });
         } else {
           nextLlmCallPromise = Promise.resolve();
           await llmSimulator.next({ content: 'Looks like we are done here' });
@@ -1292,26 +1356,18 @@ describe('Observability AI Assistant client', () => {
 
       await nextTick();
 
-      await requestAlertsFunctionCall();
-
-      await requestAlertsFunctionCall();
-
-      await requestAlertsFunctionCall();
-
-      await requestAlertsFunctionCall();
-
-      await requestAlertsFunctionCall();
-
-      await requestAlertsFunctionCall();
+      for (let i = 0; i <= maxFunctionCalls; i++) {
+        await requestAlertsFunctionCall();
+      }
 
       await finished(stream);
     });
 
-    it('executed the function no more than three times', () => {
-      expect(functionClientMock.executeFunction).toHaveBeenCalledTimes(5);
+    it(`executed the function no more than ${maxFunctionCalls} times`, () => {
+      expect(functionClientMock.executeFunction).toHaveBeenCalledTimes(maxFunctionCalls);
     });
 
-    it('does not give the LLM the choice to call a function anymore', () => {
+    it('asks the LLM to suggest next steps', () => {
       const firstBody = JSON.parse(
         (actionsClientMock.execute.mock.calls[0][0].params as any).subActionParams.body
       );
@@ -1319,9 +1375,86 @@ describe('Observability AI Assistant client', () => {
         (actionsClientMock.execute.mock.lastCall![0].params as any).subActionParams.body
       );
 
-      expect(firstBody.functions.length).toBe(1);
+      expect(firstBody.tools.length).toEqual(1);
 
-      expect(body.functions).toBeUndefined();
+      expect(body.tools).toBeUndefined();
+    });
+  });
+
+  describe('when context has not been injected since last user message', () => {
+    let dataHandler: jest.Mock;
+
+    beforeEach(async () => {
+      client = createClient();
+      actionsClientMock.execute.mockImplementationOnce(async () => {
+        llmSimulator = createLlmSimulator();
+        return {
+          actionId: '',
+          status: 'ok',
+          data: llmSimulator.stream,
+        };
+      });
+
+      functionClientMock.hasFunction.mockReturnValue(true);
+      functionClientMock.executeFunction.mockImplementationOnce(async () => {
+        return {
+          content: [
+            {
+              id: 'my_document',
+              text: 'My document',
+            },
+          ],
+        };
+      });
+
+      const stream = observableIntoStream(
+        await client.complete({
+          connectorId: 'foo',
+          messages: [system('This is a system message'), user('How many alerts do I have?')],
+          functionClient: functionClientMock,
+          signal: new AbortController().signal,
+          persist: false,
+        })
+      );
+
+      dataHandler = jest.fn();
+
+      stream.on('data', dataHandler);
+
+      await waitForNextWrite(stream);
+
+      await llmSimulator.next({
+        content: 'Hello',
+      });
+
+      await llmSimulator.complete();
+
+      await finished(stream);
+    });
+
+    it('executes the context function', async () => {
+      expect(functionClientMock.executeFunction).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'context' })
+      );
+    });
+
+    it('appends the context request message', async () => {
+      expect(JSON.parse(dataHandler.mock.calls[0])).toEqual({
+        type: StreamingChatResponseEventType.MessageAdd,
+        id: expect.any(String),
+        message: {
+          '@timestamp': expect.any(String),
+          message: {
+            content: '',
+            role: MessageRole.Assistant,
+            function_call: {
+              name: 'context',
+              arguments: JSON.stringify({ queries: [], categories: [] }),
+              trigger: MessageRole.Assistant,
+            },
+          },
+        },
+      });
     });
   });
 
@@ -1440,9 +1573,10 @@ describe('Observability AI Assistant client', () => {
         persist: false,
       })
       .subscribe(() => {}); // To trigger call to chat
+    await nextTick();
 
     expect(chatSpy.mock.calls[0][1].messages[0].message.content).toEqual(
-      'You MUST respond in the users preferred language which is: English. This is a system message'
+      EXPECTED_STORED_SYSTEM_MESSAGE
     );
   });
 
@@ -1469,9 +1603,10 @@ describe('Observability AI Assistant client', () => {
         responseLanguage: 'Orcish',
       })
       .subscribe(() => {}); // To trigger call to chat
+    await nextTick();
 
     expect(chatSpy.mock.calls[0][1].messages[0].message.content).toEqual(
-      'You MUST respond in the users preferred language which is: Orcish. This is a system message'
+      EXPECTED_STORED_SYSTEM_MESSAGE.replace('English', 'Orcish')
     );
   });
 

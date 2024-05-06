@@ -24,6 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const listingTable = getService('listingTable');
   const queryBar = getService('queryBar');
+  const dataViews = getService('dataViews');
 
   describe('lens query context', () => {
     before(async () => {
@@ -200,9 +201,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.switchDataPanelIndexPattern('log*');
       await browser.refresh();
       // Lens app can take a while to be fully functional after refresh, retry assertion
-      await retry.try(async () => {
-        expect(await PageObjects.lens.getDataPanelIndexPattern()).to.equal('log*');
-      });
+      await dataViews.waitForSwitcherToBe('log*');
     });
 
     it('keeps time range and pinned filters after refreshing directly after saving', async () => {

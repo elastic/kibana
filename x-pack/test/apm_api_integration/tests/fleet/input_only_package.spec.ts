@@ -33,7 +33,7 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
   const bettertest = getBettertest(supertest);
   const config = getService('config');
   const synthtraceKibanaClient = getService('synthtraceKibanaClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const API_KEY_NAME = 'apm_api_key_testing';
   const APM_AGENT_POLICY_NAME = 'apm_agent_policy_testing';
@@ -88,13 +88,13 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
   registry.when('APM package policy', { config: 'basic', archives: [] }, () => {
     async function getAgentPolicyPermissions(agentPolicyId: string, packagePolicyId: string) {
       const res = await bettertest<{
-        item: { output_permissions: { default: Record<string, SecurityRoleDescriptor> } };
+        item: { output_permissions: { [key: string]: Record<string, SecurityRoleDescriptor> } };
       }>({
         pathname: `/api/fleet/agent_policies/${agentPolicyId}/full`,
         method: 'get',
       });
 
-      return res.body.item.output_permissions.default[packagePolicyId];
+      return Object.values(res.body.item.output_permissions)[0][packagePolicyId];
     }
 
     describe('input only package', () => {
@@ -104,7 +104,7 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
 
       async function cleanAll() {
         try {
-          await synthtraceEsClient.clean();
+          await apmSynthtraceEsClient.clean();
           await es.security.invalidateApiKey({ name: API_KEY_NAME });
           await deleteAgentPolicyAndPackagePolicyByName({
             bettertest,

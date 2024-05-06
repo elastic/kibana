@@ -25,4 +25,9 @@ export const configSchema = schema.object({
   dfa: enabledSchema,
   nlp: enabledSchema,
   compatibleModuleType: compatibleModuleTypeSchema,
+  experimental: schema.maybe(
+    schema.object({
+      ruleFormV2: enabledSchema,
+    })
+  ),
 });

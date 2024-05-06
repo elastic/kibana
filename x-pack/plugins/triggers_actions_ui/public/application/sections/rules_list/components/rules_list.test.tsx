@@ -307,11 +307,11 @@ describe('rules_list component empty', () => {
     renderWithProviders(<RulesList showCreateRuleButtonInPrompt />);
 
     const createRuleEl = await screen.findByText('Create rule');
-    expect(screen.queryByTestId('addRuleFlyoutTitle')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ruleTypeModal')).not.toBeInTheDocument();
 
     fireEvent.click(createRuleEl);
 
-    expect(await screen.findByTestId('addRuleFlyoutTitle')).toBeInTheDocument();
+    expect(await screen.findByTestId('ruleTypeModal')).toBeInTheDocument();
   });
 });
 

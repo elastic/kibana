@@ -81,14 +81,20 @@ import { visualizeGeoFieldAction } from './trigger_actions/visualize_geo_field_a
 import { APP_NAME, APP_ICON_SOLUTION, APP_ID, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { getMapsVisTypeAlias } from './maps_vis_type_alias';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
-import { setIsCloudEnabled, setMapAppConfig, setStartServices } from './kibana_services';
+import {
+  setIsCloudEnabled,
+  setMapAppConfig,
+  setSpaceId,
+  setStartServices,
+} from './kibana_services';
 import { MapInspectorView } from './inspector/map_adapter/map_inspector_view';
 import { VectorTileInspectorView } from './inspector/vector_tile_adapter/vector_tile_inspector_view';
 
-import { setupLensChoroplethChart } from './lens';
+import { PassiveMapLazy, setupLensChoroplethChart } from './lens';
 import { CONTENT_ID, LATEST_VERSION, MapAttributes } from '../common/content_management';
 import { savedObjectToEmbeddableAttributes } from './map_attribute_service';
 import { MapByValueInput } from './embeddable';
+import { MapComponentLazy } from './embeddable/map_component_lazy';
 
 export interface MapsPluginSetupDependencies {
   cloud?: CloudSetup;
@@ -204,9 +210,13 @@ export class MapsPlugin
       euiIconType: APP_ICON_SOLUTION,
       category: DEFAULT_APP_CATEGORIES.kibana,
       async mount(params: AppMountParameters) {
-        const [coreStart, { savedObjectsTagging }] = await core.getStartServices();
+        const [coreStart, { savedObjectsTagging, spaces }] = await core.getStartServices();
         const UsageTracker =
           plugins.usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
+        const activeSpace = await spaces?.getActiveSpace();
+        if (activeSpace) {
+          setSpaceId(activeSpace.id);
+        }
         const { renderApp } = await import('./render_app');
         return renderApp(params, { coreStart, AppUsageTracker: UsageTracker, savedObjectsTagging });
       },
@@ -266,6 +276,8 @@ export class MapsPlugin
     return {
       createLayerDescriptors,
       suggestEMSTermJoinConfig,
+      Map: MapComponentLazy,
+      PassiveMap: PassiveMapLazy,
     };
   }
 }

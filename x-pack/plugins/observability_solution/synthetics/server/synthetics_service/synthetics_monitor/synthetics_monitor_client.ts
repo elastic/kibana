@@ -89,7 +89,6 @@ export class SyntheticsMonitorClient {
     monitors: Array<{
       monitor: MonitorFields;
       id: string;
-      previousMonitor: SavedObject<EncryptedSyntheticsMonitorAttributes>;
       decryptedPreviousMonitor: SavedObject<SyntheticsMonitorWithSecretsAttributes>;
     }>,
     routeContext: RouteContext,
@@ -136,7 +135,10 @@ export class SyntheticsMonitorClient {
         });
       }
 
-      if (privateLocations.length > 0 || this.hasPrivateLocations(editedMonitor.previousMonitor)) {
+      if (
+        privateLocations.length > 0 ||
+        this.hasPrivateLocations(editedMonitor.decryptedPreviousMonitor)
+      ) {
         privateConfigs.push({ config: editedConfig, globalParams: params });
       }
     }
@@ -352,8 +354,7 @@ export class SyntheticsMonitorClient {
       });
     }
 
-    // no need to wait here
-    finder.close();
+    finder.close().catch(() => {});
 
     return monitors;
   }

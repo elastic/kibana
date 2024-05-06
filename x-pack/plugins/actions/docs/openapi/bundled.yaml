@@ -1540,7 +1540,7 @@ components:
           type: string
           description: |
             The generative artificial intelligence model for Amazon Bedrock to use. Current support is for the Anthropic Claude models.
-          default: anthropic.claude-v2:1
+          default: anthropic.claude-3-sonnet-20240229-v1:0
     secrets_properties_bedrock:
       title: Connector secrets properties for an Amazon Bedrock connector
       description: Defines secrets for connectors when type is `.bedrock`.
@@ -4301,6 +4301,12 @@ components:
                     - type: array
                       items:
                         type: string
+                otherFields:
+                  type: object
+                  additionalProperties: true
+                  maxProperties: 20
+                  description: |
+                    Custom field identifiers and their values for Jira connectors.
                 parent:
                   type: string
                   description: The ID or key of the parent issue for Jira connectors. Applies only to `Sub-task` types of issues.

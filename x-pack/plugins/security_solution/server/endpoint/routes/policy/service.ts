@@ -7,7 +7,7 @@
 
 import type { IScopedClusterClient, KibanaRequest } from '@kbn/core/server';
 import type { Agent } from '@kbn/fleet-plugin/common/types/models';
-import type { ISearchRequestParams } from '@kbn/data-plugin/common';
+import type { ISearchRequestParams } from '@kbn/search-types';
 import type { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
 import { INITIAL_POLICY_ID } from '.';
 import type { EndpointAppContext } from '../../types';

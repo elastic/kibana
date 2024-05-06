@@ -14,10 +14,6 @@ import {
   SavedObjectReference,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
-import {
-  LoadedIndirectParams,
-  LoadIndirectParamsResult,
-} from '@kbn/task-manager-plugin/server/task';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { RunRuleParams, TaskRunnerContext } from './types';
 import { ErrorWithReason, validateRuleTypeParams } from '../lib';
@@ -30,18 +26,16 @@ import {
 import { MONITORING_HISTORY_LIMIT, RuleTypeParams } from '../../common';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 
-export interface RuleData extends LoadedIndirectParams<RawRule> {
-  indirectParams: RawRule;
+interface RuleData {
+  rawRule: RawRule;
   version: string | undefined;
   references: SavedObjectReference[];
 }
 
-export type RuleDataResult<T extends LoadedIndirectParams> = LoadIndirectParamsResult<T>;
-
 interface ValidateRuleAndCreateFakeRequestParams<Params extends RuleTypeParams> {
   context: TaskRunnerContext;
   paramValidator?: RuleTypeParamsValidator<Params>;
-  ruleData: RuleDataResult<RuleData>;
+  ruleData: RuleData;
   ruleId: string;
   ruleTypeRegistry: RuleTypeRegistry;
   spaceId: string;
@@ -56,23 +50,16 @@ interface ValidateRuleAndCreateFakeRequestParams<Params extends RuleTypeParams> 
 export function validateRuleAndCreateFakeRequest<Params extends RuleTypeParams>(
   params: ValidateRuleAndCreateFakeRequestParams<Params>
 ): RunRuleParams<Params> {
-  // If there was a prior error loading the decrypted rule SO, exit early
-  if (params.ruleData.error) {
-    throw params.ruleData.error;
-  }
-
   const {
     context,
     paramValidator,
-    ruleData: {
-      data: { indirectParams, references, version },
-    },
+    ruleData: { rawRule, references, version },
     ruleId,
     ruleTypeRegistry,
     spaceId,
   } = params;
 
-  const { enabled, apiKey, alertTypeId: ruleTypeId } = indirectParams;
+  const { enabled, apiKey, alertTypeId: ruleTypeId } = rawRule;
 
   if (!enabled) {
     throw createTaskRunError(
@@ -89,7 +76,7 @@ export function validateRuleAndCreateFakeRequest<Params extends RuleTypeParams>(
   const rule = rulesClient.getAlertFromRaw({
     id: ruleId,
     ruleTypeId,
-    rawRule: indirectParams as RawRule,
+    rawRule,
     references,
     includeLegacyId: false,
     omitGeneratedValues: false,
@@ -150,15 +137,16 @@ export async function getDecryptedRule(
       { namespace }
     );
   } catch (e) {
+    const error = new ErrorWithReason(RuleExecutionStatusErrorReasons.Decrypt, e);
     if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-      throw createTaskRunError(e, TaskErrorSource.USER);
+      throw createTaskRunError(error, TaskErrorSource.USER);
     }
-    throw createTaskRunError(e, TaskErrorSource.FRAMEWORK);
+    throw createTaskRunError(error, TaskErrorSource.FRAMEWORK);
   }
 
   return {
     version: rawRule.version,
-    indirectParams: rawRule.attributes,
+    rawRule: rawRule.attributes,
     references: rawRule.references,
   };
 }

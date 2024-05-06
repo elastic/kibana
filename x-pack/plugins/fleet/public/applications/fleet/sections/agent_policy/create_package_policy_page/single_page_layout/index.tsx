@@ -15,13 +15,17 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiCode,
   EuiErrorBoundary,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiSpacer,
   EuiSteps,
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
+
+import { SECRETS_MINIMUM_FLEET_SERVER_VERSION } from '../../../../../../../common/constants';
 
 import {
   getNumTransformAssets,
@@ -36,8 +40,11 @@ import { SetupTechnology } from '../../../../types';
 import {
   sendGetAgentStatus,
   useConfig,
+  useFleetStatus,
   useGetPackageInfoByKeyQuery,
+  useStartServices,
   useUIExtension,
+  useAuthz,
 } from '../../../../hooks';
 import {
   DevtoolsRequestFlyoutButton,
@@ -60,6 +67,8 @@ import {
 } from '../components';
 
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/services/generate_new_agent_policy';
+
+import { packageHasAtLeastOneSecret } from '../utils';
 
 import { CreatePackagePolicySinglePageLayout, PostInstallAddAgentModal } from './components';
 import { useDevToolsRequest, useOnSubmit, useSetupTechnology } from './hooks';
@@ -91,8 +100,10 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   const {
     agents: { enabled: isFleetEnabled },
   } = useConfig();
+  const hasFleetAddAgentsPrivileges = useAuthz().fleet.addAgents;
   const { params } = useRouteMatch<AddToPolicyParams>();
-
+  const fleetStatus = useFleetStatus();
+  const { docLinks } = useStartServices();
   const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>(
     generateNewAgentPolicyWithDefaults({ name: 'Agent policy 1' })
   );
@@ -129,6 +140,11 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     [packageInfo?.policy_templates, params]
   );
 
+  const showSecretsDisabledCallout =
+    !fleetStatus.isSecretsStorageEnabled &&
+    packageInfo &&
+    packageHasAtLeastOneSecret({ packageInfo });
+
   // Save package policy
   const {
     onSubmit,
@@ -153,6 +169,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     withSysMonitoring,
     queryParamsPolicyId,
     integrationToEnable: integrationInfo?.name,
+    hasFleetAddAgentsPrivileges,
   });
 
   const setPolicyValidation = useCallback(
@@ -209,10 +226,15 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       }
     };
 
+    if (selectedPolicyTab === SelectedPolicyTab.NEW) {
+      setAgentCount(0);
+      return;
+    }
+
     if (isFleetEnabled && agentPolicyId) {
       getAgentCount();
     }
-  }, [agentPolicyId, isFleetEnabled]);
+  }, [agentPolicyId, selectedPolicyTab, isFleetEnabled]);
 
   const handleExtensionViewOnChange = useCallback<
     PackagePolicyEditExtensionComponentProps['onChange']
@@ -386,6 +408,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       }),
       'data-test-subj': 'dataCollectionSetupStep',
       children: replaceStepConfigurePackagePolicy || stepConfigurePackagePolicy,
+      headingElement: 'h2',
     },
   ];
 
@@ -395,6 +418,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         defaultMessage: 'Where to add this integration?',
       }),
       children: stepSelectAgentPolicy,
+      headingElement: 'h2',
     });
   }
 
@@ -490,6 +514,38 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             <EuiSpacer size="xl" />
           </>
         ) : null}
+        {showSecretsDisabledCallout && (
+          <>
+            <EuiCallOut
+              size="m"
+              color="warning"
+              title={
+                <FormattedMessage
+                  id="xpack.fleet.createPackagePolicy.secretsDisabledCalloutTitle"
+                  defaultMessage="Policy secrets are disabled"
+                />
+              }
+            >
+              <FormattedMessage
+                id="xpack.fleet.createPackagePolicy.secretsDisabledCalloutDescription"
+                defaultMessage="This integration contains {policySecretsLink}, but you have a Fleet Server running on a version earlier than {minimumSecretsVersion}. Please upgrade your Fleet Server to enable policy secrets for all integrations."
+                values={{
+                  policySecretsLink: (
+                    <EuiLink href={docLinks.links.fleet.policySecrets} target="_blank">
+                      <FormattedMessage
+                        id="xpack.fleet.createPackagePolicy.secretsDisabledCalloutDocsLink"
+                        defaultMessage="policy secrets"
+                      />
+                    </EuiLink>
+                  ),
+                  minimumSecretsVersion: <EuiCode>{SECRETS_MINIMUM_FLEET_SERVER_VERSION}</EuiCode>,
+                }}
+              />
+            </EuiCallOut>
+
+            <EuiSpacer size="m" />
+          </>
+        )}
         <StepsWithLessPadding steps={steps} />
         <EuiSpacer size="xl" />
         <EuiSpacer size="xl" />

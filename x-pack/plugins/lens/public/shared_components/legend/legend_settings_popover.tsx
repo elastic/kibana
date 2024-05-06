@@ -13,16 +13,19 @@ import {
   EuiSwitch,
   EuiSwitchEvent,
   EuiFieldNumber,
+  EuiFlexItem,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import { Position, VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-ui-components';
+import { XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import { ToolbarPopover, type ToolbarPopoverProps } from '../toolbar_popover';
 import { LegendLocationSettings } from './location/legend_location_settings';
 import { ColumnsNumberSetting } from './layout/columns_number_setting';
 import { LegendSizeSettings } from './size/legend_size_settings';
 
-export interface LegendSettingsPopoverProps {
+export interface LegendSettingsPopoverProps<S = XYLegendValue> {
   /**
    * Determines the legend display options
    */
@@ -106,15 +109,15 @@ export interface LegendSettingsPopoverProps {
   /**
    * value in legend status
    */
-  valueInLegend?: boolean;
+  legendStats?: S[];
   /**
    * Callback on value in legend status change
    */
-  onValueInLegendChange?: (event: EuiSwitchEvent) => void;
+  onLegendStatsChange?: (checked?: boolean) => void;
   /**
    * If true, value in legend switch is rendered
    */
-  renderValueInLegendSwitch?: boolean;
+  allowLegendStats?: boolean;
   /**
    * Button group position
    */
@@ -141,13 +144,23 @@ const MIN_TRUNCATE_LINES = 1;
 export const MaxLinesInput = ({
   value,
   setValue,
+  disabled,
 }: {
   value: number;
   setValue: (value: number) => void;
+  disabled?: boolean;
 }) => {
   const { inputValue, handleInputChange } = useDebouncedValue({ value, onChange: setValue });
   return (
     <EuiFieldNumber
+      disabled={disabled}
+      fullWidth
+      prepend={i18n.translate('xpack.lens.shared.maxLinesLabel', {
+        defaultMessage: 'Line limit',
+      })}
+      aria-label={i18n.translate('xpack.lens.shared.maxLinesLabel', {
+        defaultMessage: 'Line limit',
+      })}
       data-test-subj="lens-legend-max-lines-input"
       value={inputValue}
       min={MIN_TRUNCATE_LINES}
@@ -165,8 +178,11 @@ export const MaxLinesInput = ({
 };
 
 const noop = () => {};
+const PANEL_STYLE = {
+  width: '500px',
+};
 
-export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopoverProps> = ({
+export function LegendSettingsPopover<T = XYLegendValue>({
   legendOptions,
   mode,
   onDisplayChange,
@@ -182,9 +198,9 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
   renderNestedLegendSwitch,
   nestedLegend,
   onNestedLegendChange = noop,
-  valueInLegend,
-  onValueInLegendChange = noop,
-  renderValueInLegendSwitch,
+  legendStats,
+  onLegendStatsChange = noop,
+  allowLegendStats,
   groupPosition = 'right',
   maxLines,
   onMaxLinesChange = noop,
@@ -193,7 +209,7 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
   legendSize,
   onLegendSizeChange,
   showAutoLegendSizeOption,
-}) => {
+}: LegendSettingsPopoverProps<T>) {
   return (
     <ToolbarPopover
       title={i18n.translate('xpack.lens.shared.legendLabel', {
@@ -202,12 +218,14 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
       type="legend"
       groupPosition={groupPosition}
       buttonDataTestSubj="lnsLegendButton"
+      panelStyle={PANEL_STYLE}
     >
       <EuiFormRow
         display="columnCompressed"
         label={i18n.translate('xpack.lens.shared.legendVisibilityLabel', {
           defaultMessage: 'Display',
         })}
+        fullWidth
       >
         <EuiButtonGroup
           isFullWidth
@@ -215,7 +233,6 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
             defaultMessage: 'Display',
           })}
           data-test-subj="lens-legend-display-btn"
-          name="legendDisplay"
           buttonSize="compressed"
           options={legendOptions}
           idSelected={legendOptions.find(({ value }) => value === mode)!.id}
@@ -250,43 +267,44 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
               isLegendOutside={location === 'outside'}
             />
           )}
+
           <EuiFormRow
-            display="columnCompressedSwitch"
-            label={i18n.translate('xpack.lens.shared.truncateLegend', {
-              defaultMessage: 'Truncate text',
+            display="columnCompressed"
+            label={i18n.translate('xpack.lens.shared.labelTruncation', {
+              defaultMessage: 'Label truncation',
             })}
+            fullWidth
           >
-            <EuiSwitch
-              compressed
-              label={i18n.translate('xpack.lens.shared.truncateLegend', {
-                defaultMessage: 'Truncate text',
-              })}
-              data-test-subj="lens-legend-truncate-switch"
-              showLabel={false}
-              checked={shouldTruncate ?? true}
-              onChange={onTruncateLegendChange}
-            />
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiSwitch
+                  compressed
+                  label={i18n.translate('xpack.lens.shared.labelTruncation', {
+                    defaultMessage: 'Label truncation',
+                  })}
+                  data-test-subj="lens-legend-truncate-switch"
+                  showLabel={false}
+                  checked={shouldTruncate ?? true}
+                  onChange={onTruncateLegendChange}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow>
+                <MaxLinesInput
+                  disabled={!shouldTruncate}
+                  value={maxLines ?? DEFAULT_TRUNCATE_LINES}
+                  setValue={onMaxLinesChange}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFormRow>
-          {shouldTruncate && (
-            <EuiFormRow
-              label={i18n.translate('xpack.lens.shared.maxLinesLabel', {
-                defaultMessage: 'Maximum lines',
-              })}
-              fullWidth
-              display="columnCompressed"
-            >
-              <MaxLinesInput
-                value={maxLines ?? DEFAULT_TRUNCATE_LINES}
-                setValue={onMaxLinesChange}
-              />
-            </EuiFormRow>
-          )}
+
           {renderNestedLegendSwitch && (
             <EuiFormRow
               display="columnCompressedSwitch"
               label={i18n.translate('xpack.lens.shared.nestedLegendLabel', {
                 defaultMessage: 'Nested',
               })}
+              fullWidth
             >
               <EuiSwitch
                 compressed
@@ -300,12 +318,13 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
               />
             </EuiFormRow>
           )}
-          {renderValueInLegendSwitch && (
+          {allowLegendStats && (
             <EuiFormRow
               display="columnCompressedSwitch"
               label={i18n.translate('xpack.lens.shared.valueInLegendLabel', {
                 defaultMessage: 'Show value',
               })}
+              fullWidth
             >
               <EuiSwitch
                 compressed
@@ -314,8 +333,10 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
                 })}
                 data-test-subj="lens-legend-show-value"
                 showLabel={false}
-                checked={!!valueInLegend}
-                onChange={onValueInLegendChange}
+                checked={!!legendStats?.length}
+                onChange={(ev) => {
+                  onLegendStatsChange(ev.target.checked);
+                }}
               />
             </EuiFormRow>
           )}
@@ -323,4 +344,4 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
       )}
     </ToolbarPopover>
   );
-};
+}

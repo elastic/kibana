@@ -43,7 +43,9 @@ export function complete(
     conversationId,
     messages: initialMessages,
     persist,
+    disableFunctions,
     signal,
+    responseLanguage,
   }: {
     client: Pick<ObservabilityAIAssistantChatService, 'chat' | 'complete'>;
     getScreenContexts: () => ObservabilityAIAssistantScreenContext[];
@@ -51,7 +53,9 @@ export function complete(
     conversationId?: string;
     messages: Message[];
     persist: boolean;
+    disableFunctions: boolean;
     signal: AbortSignal;
+    responseLanguage: string;
   },
   requestCallback: (
     params: ObservabilityAIAssistantAPIClientRequestParamsOf<'POST /internal/observability_ai_assistant/chat/complete'>
@@ -63,7 +67,15 @@ export function complete(
 
     const response$ = requestCallback({
       params: {
-        body: { connectorId, messages: initialMessages, persist, screenContexts, conversationId },
+        body: {
+          connectorId,
+          messages: initialMessages,
+          persist,
+          disableFunctions,
+          screenContexts,
+          conversationId,
+          responseLanguage,
+        },
       },
     }).pipe(
       filter(
@@ -134,6 +146,8 @@ export function complete(
               messages: initialMessages.concat(nextMessages),
               signal,
               persist,
+              responseLanguage,
+              disableFunctions,
             },
             requestCallback
           ).subscribe(subscriber);

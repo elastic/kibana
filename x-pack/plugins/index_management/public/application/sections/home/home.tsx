@@ -145,7 +145,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
         />
         <Route exact path={`/${Section.EnrichPolicies}`} component={EnrichPoliciesList} />
       </Routes>
-      {consolePlugin?.renderEmbeddableConsole?.() ?? <></>}
+      {consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null}
     </>
   );
   return (

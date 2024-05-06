@@ -14,16 +14,16 @@ import { VIEW_BY_JOB_LABEL } from '../../application/explorer/explorer_constants
 import { AnomalySwimlaneInitializer } from './anomaly_swimlane_initializer';
 import { getDefaultSwimlanePanelTitle } from './anomaly_swimlane_embeddable';
 import { HttpService } from '../../application/services/http_service';
-import type { AnomalySwimlaneEmbeddableInput } from '..';
+import type { AnomalySwimlaneEmbeddableUserInput, AnomalySwimLaneEmbeddableState } from '..';
 import { resolveJobSelection } from '../common/resolve_job_selection';
 import { mlApiServicesProvider } from '../../application/services/ml_api_service';
 
 export async function resolveAnomalySwimlaneUserInput(
   coreStart: CoreStart,
   dataViews: DataViewsContract,
-  input?: AnomalySwimlaneEmbeddableInput
-): Promise<Partial<AnomalySwimlaneEmbeddableInput>> {
-  const { http, overlays, theme, i18n } = coreStart;
+  input?: Partial<AnomalySwimLaneEmbeddableState>
+): Promise<AnomalySwimlaneEmbeddableUserInput> {
+  const { http, overlays, ...startServices } = coreStart;
 
   const { getJobs } = mlApiServicesProvider(new HttpService(http));
 
@@ -44,7 +44,6 @@ export async function resolveAnomalySwimlaneUserInput(
               modalSession.close();
               resolve({
                 jobIds,
-                title: explicitInput.panelTitle,
                 ...explicitInput,
               });
             }}
@@ -53,7 +52,7 @@ export async function resolveAnomalySwimlaneUserInput(
               reject();
             }}
           />,
-          { theme, i18n }
+          startServices
         )
       );
     } catch (error) {

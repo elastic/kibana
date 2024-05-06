@@ -403,7 +403,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('get metadata transforms', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/175791
+    describe.skip('get metadata transforms', () => {
       const testRegex = /(endpoint|logs-endpoint)\.metadata_(united|current)-default-*/;
       let currentTransformName = metadataTransformPrefix;
       let unitedTransformName = METADATA_UNITED_TRANSFORM;

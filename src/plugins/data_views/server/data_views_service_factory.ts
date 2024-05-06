@@ -50,6 +50,7 @@ export const dataViewsServiceFactory = (deps: DataViewsServiceFactoryDeps) =>
       apiClient: new IndexPatternsApiServer(
         elasticsearchClient,
         savedObjectsClient,
+        uiSettingsClient,
         rollupsEnabled
       ),
       fieldFormats: formats,

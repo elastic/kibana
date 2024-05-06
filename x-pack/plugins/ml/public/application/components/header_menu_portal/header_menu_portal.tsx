@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC, ReactNode } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React, { useContext, useEffect, useMemo } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -13,13 +13,8 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { useMlKibana } from '../../contexts/kibana';
 import { MlPageControlsContext } from '../ml_page';
 
-export interface HeaderMenuPortalProps {
-  children: ReactNode;
-}
-
-export const HeaderMenuPortal: FC<HeaderMenuPortalProps> = ({ children }) => {
+export const HeaderMenuPortal: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const { services } = useMlKibana();
-  const { theme, i18n } = services;
 
   const { setHeaderActionMenu } = useContext(MlPageControlsContext);
 
@@ -35,7 +30,7 @@ export const HeaderMenuPortal: FC<HeaderMenuPortalProps> = ({ children }) => {
         <KibanaContextProvider services={services}>
           <OutPortal node={portalNode} />
         </KibanaContextProvider>,
-        { theme, i18n }
+        services
       );
       return mount(element);
     });
@@ -44,8 +39,7 @@ export const HeaderMenuPortal: FC<HeaderMenuPortalProps> = ({ children }) => {
       portalNode.unmount();
       setHeaderActionMenu(undefined);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [portalNode, setHeaderActionMenu, services.theme.theme$]);
+  }, [portalNode, setHeaderActionMenu, services]);
 
   return <InPortal node={portalNode}>{children}</InPortal>;
 };

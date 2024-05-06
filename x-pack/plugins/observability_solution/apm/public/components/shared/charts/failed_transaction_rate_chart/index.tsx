@@ -55,21 +55,14 @@ export const errorRateI18n = i18n.translate('xpack.apm.errorRate.tip', {
   defaultMessage:
     "The percentage of failed transactions for the selected service. HTTP server transactions with a 4xx status code (client error) aren't considered failures because the caller, not the server, caused the failure.",
 });
-export function FailedTransactionRateChart({
-  height,
-  showAnnotations = true,
-  kuery,
-}: Props) {
+export function FailedTransactionRateChart({ height, showAnnotations = true, kuery }: Props) {
   const {
     urlParams: { transactionName },
   } = useLegacyUrlParams();
 
   const {
     query: { rangeFrom, rangeTo, comparisonEnabled, offset },
-  } = useAnyOfApmParams(
-    '/services/{serviceName}',
-    '/mobile-services/{serviceName}'
-  );
+  } = useAnyOfApmParams('/services/{serviceName}', '/mobile-services/{serviceName}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -89,8 +82,7 @@ export function FailedTransactionRateChart({
     AnomalyDetectorType.txFailureRate
   );
 
-  const { serviceName, transactionType, transactionTypeStatus } =
-    useApmServiceContext();
+  const { serviceName, transactionType, transactionTypeStatus } = useApmServiceContext();
 
   const comparisonChartTheme = getComparisonChartTheme();
 
@@ -115,10 +107,7 @@ export function FailedTransactionRateChart({
                 end,
                 transactionType,
                 transactionName,
-                offset:
-                  comparisonEnabled && isTimeComparison(offset)
-                    ? offset
-                    : undefined,
+                offset: comparisonEnabled && isTimeComparison(offset) ? offset : undefined,
                 documentType: preferred.source.documentType,
                 rollupInterval: preferred.source.rollupInterval,
                 bucketSizeInSeconds: preferred.bucketSizeInSeconds,

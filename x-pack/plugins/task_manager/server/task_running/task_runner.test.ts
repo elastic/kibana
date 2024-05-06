@@ -552,6 +552,112 @@ describe('TaskManagerRunner', () => {
       );
     });
 
+    test(`it logs an error when failing to increment a task's attempts when markTaskAsRunning fails and throws an error object`, async () => {
+      const id = _.random(1, 20).toString();
+      const initialAttempts = _.random(1, 3);
+      const timeoutMinutes = 1;
+      const { runner, store, logger } = await pendingStageSetup({
+        instance: {
+          id,
+          attempts: initialAttempts,
+          schedule: undefined,
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            timeout: `${timeoutMinutes}m`,
+            createTaskRunner: () => ({
+              run: async () => undefined,
+            }),
+          },
+        },
+      });
+
+      store.update.mockRejectedValueOnce(SavedObjectsErrorHelpers.createBadRequestError('type'));
+      store.update.mockRejectedValueOnce({
+        type: 'type',
+        id: 'id',
+        error: {
+          statusCode: 409,
+          error: 'Conflict',
+          message: 'Saved object [type/id] conflict',
+        },
+      });
+
+      await expect(runner.markTaskAsRunning()).rejects.toMatchInlineSnapshot(
+        `[Error: type: Bad Request]`
+      );
+
+      const loggerCall = logger.error.mock.calls[0][0];
+      expect(loggerCall as string).toMatchInlineSnapshot(
+        `"[Task Runner] Task ${id} failed to release claim after failure: Error: Saved object [type/id] conflict"`
+      );
+
+      expect(store.update).toHaveBeenCalledWith(
+        {
+          ...mockInstance({
+            id,
+            attempts: initialAttempts + 1,
+            schedule: undefined,
+          }),
+          status: TaskStatus.Idle,
+          startedAt: null,
+          retryAt: null,
+          ownerId: null,
+        },
+        { validate: false }
+      );
+    });
+
+    test(`it logs an error when failing to increment a task's attempts when markTaskAsRunning fails`, async () => {
+      const id = _.random(1, 20).toString();
+      const initialAttempts = _.random(1, 3);
+      const timeoutMinutes = 1;
+      const { runner, store, logger } = await pendingStageSetup({
+        instance: {
+          id,
+          attempts: initialAttempts,
+          schedule: undefined,
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            timeout: `${timeoutMinutes}m`,
+            createTaskRunner: () => ({
+              run: async () => undefined,
+            }),
+          },
+        },
+      });
+
+      store.update.mockRejectedValueOnce(SavedObjectsErrorHelpers.createBadRequestError('type'));
+      store.update.mockRejectedValueOnce(SavedObjectsErrorHelpers.createBadRequestError('type'));
+
+      await expect(runner.markTaskAsRunning()).rejects.toMatchInlineSnapshot(
+        `[Error: type: Bad Request]`
+      );
+
+      const loggerCall = logger.error.mock.calls[0][0];
+      expect(loggerCall as string).toMatchInlineSnapshot(
+        `"[Task Runner] Task ${id} failed to release claim after failure: Error: type: Bad Request"`
+      );
+
+      expect(store.update).toHaveBeenCalledWith(
+        {
+          ...mockInstance({
+            id,
+            attempts: initialAttempts + 1,
+            schedule: undefined,
+          }),
+          status: TaskStatus.Idle,
+          startedAt: null,
+          retryAt: null,
+          ownerId: null,
+        },
+        { validate: false }
+      );
+    });
+
     test(`it doesnt try to increment a task's attempts when markTaskAsRunning fails for version conflict`, async () => {
       const id = _.random(1, 20).toString();
       const initialAttempts = _.random(1, 3);

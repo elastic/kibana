@@ -46,7 +46,9 @@
             "type": "Function",
             "tags": [],
             "label": "tryForTime",
-            "description": [],
+            "description": [
+              "\nUse to retry block within {timeout} period and return block result."
+            ],
             "signature": [
               "<T>(timeout: number, block: () => Promise<T>, onFailureBlock?: (() => Promise<T>) | undefined, retryDelay?: number | undefined) => Promise<T>"
             ],
@@ -60,7 +62,9 @@
                 "type": "number",
                 "tags": [],
                 "label": "timeout",
-                "description": [],
+                "description": [
+                  "retrying timeout"
+                ],
                 "signature": [
                   "number"
                 ],
@@ -75,7 +79,9 @@
                 "type": "Function",
                 "tags": [],
                 "label": "block",
-                "description": [],
+                "description": [
+                  "retriable action"
+                ],
                 "signature": [
                   "() => Promise<T>"
                 ],
@@ -90,7 +96,9 @@
                 "type": "Function",
                 "tags": [],
                 "label": "onFailureBlock",
-                "description": [],
+                "description": [
+                  "optional action to run before the new retriable action attempt"
+                ],
                 "signature": [
                   "(() => Promise<T>) | undefined"
                 ],
@@ -105,7 +113,9 @@
                 "type": "number",
                 "tags": [],
                 "label": "retryDelay",
-                "description": [],
+                "description": [
+                  "optional delay before the new attempt"
+                ],
                 "signature": [
                   "number | undefined"
                 ],
@@ -115,7 +125,9 @@
                 "isRequired": false
               }
             ],
-            "returnComment": []
+            "returnComment": [
+              "result from retriable action"
+            ]
           },
           {
             "parentPluginId": "@kbn/ftr-common-functional-services",
@@ -185,7 +197,9 @@
             "type": "Function",
             "tags": [],
             "label": "waitForWithTimeout",
-            "description": [],
+            "description": [
+              "\nUse to wait for block condition to be true"
+            ],
             "signature": [
               "(description: string, timeout: number, block: () => Promise<boolean>, onFailureBlock?: (() => Promise<any>) | undefined) => Promise<void>"
             ],
@@ -199,7 +213,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "description",
-                "description": [],
+                "description": [
+                  "description for retriable action"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -214,7 +230,9 @@
                 "type": "number",
                 "tags": [],
                 "label": "timeout",
-                "description": [],
+                "description": [
+                  "retrying timeout"
+                ],
                 "signature": [
                   "number"
                 ],
@@ -229,7 +247,9 @@
                 "type": "Function",
                 "tags": [],
                 "label": "block",
-                "description": [],
+                "description": [
+                  "retriable action"
+                ],
                 "signature": [
                   "() => Promise<boolean>"
                 ],
@@ -244,7 +264,9 @@
                 "type": "Function",
                 "tags": [],
                 "label": "onFailureBlock",
-                "description": [],
+                "description": [
+                  "optional action to run before the new retriable action attempt"
+                ],
                 "signature": [
                   "(() => Promise<any>) | undefined"
                 ],
@@ -317,6 +339,95 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-services",
+            "id": "def-common.RetryService.tryWithRetries",
+            "type": "Function",
+            "tags": [],
+            "label": "tryWithRetries",
+            "description": [
+              "\nUse to retry block {options.retryCount} times within {options.timeout} period and return block result"
+            ],
+            "signature": [
+              "<T>(description: string, block: () => Promise<T>, options: TryWithRetriesOptions, onFailureBlock?: (() => Promise<T>) | undefined) => Promise<T>"
+            ],
+            "path": "packages/kbn-ftr-common-functional-services/services/retry/retry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-services",
+                "id": "def-common.RetryService.tryWithRetries.$1",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [
+                  "description for retriable action"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-services/services/retry/retry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-services",
+                "id": "def-common.RetryService.tryWithRetries.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "block",
+                "description": [
+                  "retriable action"
+                ],
+                "signature": [
+                  "() => Promise<T>"
+                ],
+                "path": "packages/kbn-ftr-common-functional-services/services/retry/retry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-services",
+                "id": "def-common.RetryService.tryWithRetries.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "options.retryCount for how many attempts to retry"
+                ],
+                "signature": [
+                  "TryWithRetriesOptions"
+                ],
+                "path": "packages/kbn-ftr-common-functional-services/services/retry/retry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-services",
+                "id": "def-common.RetryService.tryWithRetries.$4",
+                "type": "Function",
+                "tags": [],
+                "label": "onFailureBlock",
+                "description": [
+                  "optional action to run before the new retriable action attempt"
+                ],
+                "signature": [
+                  "(() => Promise<T>) | undefined"
+                ],
+                "path": "packages/kbn-ftr-common-functional-services/services/retry/retry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": [
+              "result from retriable action"
+            ]
           }
         ],
         "initialIsOpen": false

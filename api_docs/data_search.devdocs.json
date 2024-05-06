@@ -2648,6 +2648,9 @@
             "tags": [],
             "label": "completion_status",
             "description": [],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/plugins/data/server/search/strategies/ese_search/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2870,9 +2873,11 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "{ search?: string | undefined; page?: number | undefined; filter?: any; aggs?: Record<string, ",
+                  "{ page?: number | undefined; filter?: any; aggs?: Record<string, ",
                   "AggregationsAggregationContainer",
-                  "> | undefined; namespaces?: string[] | undefined; perPage?: number | undefined; fields?: string[] | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; hasReference?: ",
+                  "> | undefined; search?: string | undefined; namespaces?: string[] | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; sortField?: string | undefined; sortOrder?: ",
+                  "SortOrder",
+                  " | undefined; hasReference?: ",
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
                     "scope": "common",
@@ -2888,7 +2893,7 @@
                     "section": "def-common.SavedObjectsFindOptionsReference",
                     "text": "SavedObjectsFindOptionsReference"
                   },
-                  "[] | undefined; sortField?: string | undefined; preference?: string | undefined; pit?: ",
+                  "[] | undefined; fields?: string[] | undefined; preference?: string | undefined; pit?: ",
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
                     "scope": "common",
@@ -2896,8 +2901,6 @@
                     "section": "def-common.SavedObjectsPitParams",
                     "text": "SavedObjectsPitParams"
                   },
-                  " | undefined; sortOrder?: ",
-                  "SortOrder",
                   " | undefined; searchAfter?: ",
                   "SortResults",
                   " | undefined; rootSearchFields?: string[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; hasNoReference?: ",
@@ -6991,19 +6994,7 @@
                     "section": "def-common.SearchSource",
                     "text": "SearchSource"
                   },
-                  "; fetch: (options?: ",
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.SearchSourceSearchOptions",
-                    "text": "SearchSourceSearchOptions"
-                  },
-                  ") => Promise<",
-                  "SearchResponse",
-                  "<unknown, Record<string, ",
-                  "AggregationsAggregate",
-                  ">>>; history: ",
+                  "; history: ",
                   "SearchRequest",
                   "[]; setField: <K extends keyof ",
                   {
@@ -7171,7 +7162,19 @@
                   "SearchResponse",
                   "<T, Record<string, ",
                   "AggregationsAggregate",
-                  ">>>>; onRequestStart: (handler: (searchSource: ",
+                  ">>>>; fetch: (options?: ",
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataSearchPluginApi",
+                    "section": "def-common.SearchSourceSearchOptions",
+                    "text": "SearchSourceSearchOptions"
+                  },
+                  ") => Promise<",
+                  "SearchResponse",
+                  "<unknown, Record<string, ",
+                  "AggregationsAggregate",
+                  ">>>; onRequestStart: (handler: (searchSource: ",
                   {
                     "pluginId": "data",
                     "scope": "common",
@@ -11902,7 +11905,7 @@
         "label": "aggregateQueryToAst",
         "description": [],
         "signature": [
-          "(query: ",
+          "({ query, timeField, titleForInspector, descriptionForInspector, }: { query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -11910,7 +11913,7 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          ", timeField?: string | undefined) => ",
+          "; timeField?: string | undefined; titleForInspector?: string | undefined; descriptionForInspector?: string | undefined; }) => ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -11927,38 +11930,71 @@
           {
             "parentPluginId": "data",
             "id": "def-common.aggregateQueryToAst.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
-            "label": "query",
+            "label": "{\n  query,\n  timeField,\n  titleForInspector,\n  descriptionForInspector,\n}",
             "description": [],
-            "signature": [
+            "path": "src/plugins/data/common/search/expressions/aggregate_query_to_ast.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
               {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.AggregateQuery",
-                "text": "AggregateQuery"
+                "parentPluginId": "data",
+                "id": "def-common.aggregateQueryToAst.$1.query",
+                "type": "Object",
+                "tags": [],
+                "label": "query",
+                "description": [],
+                "signature": [
+                  "{ esql: string; }"
+                ],
+                "path": "src/plugins/data/common/search/expressions/aggregate_query_to_ast.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.aggregateQueryToAst.$1.timeField",
+                "type": "string",
+                "tags": [],
+                "label": "timeField",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/data/common/search/expressions/aggregate_query_to_ast.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.aggregateQueryToAst.$1.titleForInspector",
+                "type": "string",
+                "tags": [],
+                "label": "titleForInspector",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/data/common/search/expressions/aggregate_query_to_ast.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.aggregateQueryToAst.$1.descriptionForInspector",
+                "type": "string",
+                "tags": [],
+                "label": "descriptionForInspector",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/data/common/search/expressions/aggregate_query_to_ast.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
-            ],
-            "path": "src/plugins/data/common/search/expressions/aggregate_query_to_ast.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.aggregateQueryToAst.$2",
-            "type": "string",
-            "tags": [],
-            "label": "timeField",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data/common/search/expressions/aggregate_query_to_ast.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
+            ]
           }
         ],
         "returnComment": [],
@@ -16594,7 +16630,7 @@
             "section": "def-common.IKibanaSearchResponse",
             "text": "IKibanaSearchResponse"
           },
-          "<any>>(search: () => Promise<Response>, cancel?: (() => void) | undefined, { pollInterval, abortSignal }?: ",
+          "<any>>(search: () => Promise<Response>, cancel?: (() => Promise<void>) | undefined, { pollInterval, abortSignal }?: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -16633,7 +16669,7 @@
             "label": "cancel",
             "description": [],
             "signature": [
-              "(() => void) | undefined"
+              "(() => Promise<void>) | undefined"
             ],
             "path": "src/plugins/data/common/search/poll_search.ts",
             "deprecated": false,
@@ -25556,7 +25592,7 @@
             "label": "aggregate",
             "description": [],
             "signature": [
-              "\"concat\" | \"min\" | \"max\" | \"sum\" | \"average\""
+              "\"min\" | \"max\" | \"sum\" | \"concat\" | \"average\""
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/top_hit.ts",
             "deprecated": false,
@@ -26556,7 +26592,13 @@
             "text": "IKibanaSearchRequest"
           },
           "<",
-          "EqlSearchRequest",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.EqlRequestParams",
+            "text": "EqlRequestParams"
+          },
           ">"
         ],
         "path": "src/plugins/data/common/search/strategies/eql_search/types.ts",
@@ -28261,6 +28303,22 @@
             "label": "isRestore",
             "description": [
               "\nWhether the session is restored (i.e. search requests should re-use the stored search IDs,\nrather than starting from scratch)"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.ISearchOptions.retrieveResults",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "retrieveResults",
+            "description": [
+              "\nBy default, when polling, we don't retrieve the results of the search request (until it is complete). (For async\nsearch, this is the difference between calling _async_search/{id} and _async_search/status/{id}.) setting this to\n`true` will request the search results, regardless of whether or not the search is complete."
             ],
             "signature": [
               "boolean | undefined"
@@ -30751,15 +30809,7 @@
         "label": "AggConfigOptions",
         "description": [],
         "signature": [
-          "{ type: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IAggType",
-            "text": "IAggType"
-          },
-          "; id?: string | undefined; params?: {} | ",
+          "{ params?: {} | ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -30767,7 +30817,15 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          " | undefined; enabled?: boolean | undefined; schema?: string | undefined; }"
+          " | undefined; id?: string | undefined; type: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.IAggType",
+            "text": "IAggType"
+          },
+          "; enabled?: boolean | undefined; schema?: string | undefined; }"
         ],
         "path": "src/plugins/data/common/search/aggs/agg_config.ts",
         "deprecated": false,
@@ -31700,15 +31758,7 @@
         "label": "CreateAggConfigParams",
         "description": [],
         "signature": [
-          "{ type: string | ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IAggType",
-            "text": "IAggType"
-          },
-          "; id?: string | undefined; params?: {} | ",
+          "{ params?: {} | ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -31716,7 +31766,15 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          " | undefined; enabled?: boolean | undefined; schema?: string | undefined; }"
+          " | undefined; id?: string | undefined; type: string | ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.IAggType",
+            "text": "IAggType"
+          },
+          "; enabled?: boolean | undefined; schema?: string | undefined; }"
         ],
         "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
         "deprecated": false,
@@ -31874,6 +31932,8 @@
         "label": "EqlRequestParams",
         "description": [],
         "signature": [
+          "EqlSearchRequest",
+          " | ",
           "EqlSearchRequest"
         ],
         "path": "src/plugins/data/common/search/strategies/eql_search/types.ts",
@@ -33991,7 +34051,7 @@
             "section": "def-common.KibanaExecutionContext",
             "text": "KibanaExecutionContext"
           },
-          " | undefined; isStored?: boolean | undefined; isRestore?: boolean | undefined; sessionId?: string | undefined; strategy?: string | undefined; legacyHitsTotal?: boolean | undefined; isSearchStored?: boolean | undefined; }"
+          " | undefined; isStored?: boolean | undefined; isRestore?: boolean | undefined; sessionId?: string | undefined; strategy?: string | undefined; legacyHitsTotal?: boolean | undefined; isSearchStored?: boolean | undefined; retrieveResults?: boolean | undefined; }"
         ],
         "path": "src/plugins/data/common/search/types.ts",
         "deprecated": false,
@@ -34032,19 +34092,7 @@
             "section": "def-common.SearchSource",
             "text": "SearchSource"
           },
-          "; fetch: (options?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.SearchSourceSearchOptions",
-            "text": "SearchSourceSearchOptions"
-          },
-          ") => Promise<",
-          "SearchResponse",
-          "<unknown, Record<string, ",
-          "AggregationsAggregate",
-          ">>>; history: ",
+          "; history: ",
           "SearchRequest",
           "[]; setField: <K extends keyof ",
           {
@@ -34212,7 +34260,19 @@
           "SearchResponse",
           "<T, Record<string, ",
           "AggregationsAggregate",
-          ">>>>; onRequestStart: (handler: (searchSource: ",
+          ">>>>; fetch: (options?: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.SearchSourceSearchOptions",
+            "text": "SearchSourceSearchOptions"
+          },
+          ") => Promise<",
+          "SearchResponse",
+          "<unknown, Record<string, ",
+          "AggregationsAggregate",
+          ">>>; onRequestStart: (handler: (searchSource: ",
           {
             "pluginId": "data",
             "scope": "common",

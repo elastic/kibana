@@ -17,6 +17,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   describe('runtime fields', function () {
+    // Bug: https://github.com/elastic/kibana/issues/178939
+    this.tags('failsOnMKI');
     before(async function () {
       await browser.setWindowSize(1200, 800);
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
@@ -36,7 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('app-card-dataViews');
         await PageObjects.settings.clickIndexPatternLogstash();
         const startingCount = parseInt(await PageObjects.settings.getFieldsTabCount(), 10);
-        await log.debug('add runtime field');
+        log.debug('add runtime field');
         await PageObjects.settings.addRuntimeField(
           fieldName,
           'Keyword',
@@ -44,7 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           false
         );
 
-        await log.debug('check that field preview is rendered');
+        log.debug('check that field preview is rendered');
         expect(await testSubjects.exists('fieldPreviewItem', { timeout: 1500 })).to.be(true);
 
         await PageObjects.settings.clickSaveField();

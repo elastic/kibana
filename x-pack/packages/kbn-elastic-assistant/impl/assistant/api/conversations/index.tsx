@@ -6,5 +6,5 @@
  */
 
 export * from './conversations';
-export * from './use_bulk_actions_conversations';
+export * from './bulk_update_actions_conversations';
 export * from './use_fetch_current_user_conversations';

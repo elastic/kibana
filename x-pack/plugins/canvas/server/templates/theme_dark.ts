@@ -30,7 +30,7 @@ export const dark: CanvasTemplate = {
             id: 'element-ee400dfc-0752-4eeb-86d9-af381f669d25',
             position: { left: 48, top: 341, width: 597, height: 213, angle: 0, parent: null },
             expression:
-              'filters\n| demodata\n| markdown "# Title\n## Author Name\n\nMonth Day, Year"\n| render \n  css=".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 64px !important;\ncolor: white !important;\n}\n.canvasMarkdown h2,\n.canvasMarkdown p {\ncolor: #C4C4C4;\n}\n.canvasMarkdown p {\nfont-size: 16px;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "# Title\n## Author Name\n\nMonth Day, Year"\n| render \n  css=".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 64px !important;\ncolor: white !important;\n}\n.canvasMarkdown h2,\n.canvasMarkdown p {\ncolor: #C4C4C4;\n}\n.canvasMarkdown p {\nfont-size: 16px;\n}"',
           },
           {
             id: 'element-0db94902-9166-49f6-9b53-8b1e704baeac',
@@ -50,7 +50,7 @@ export const dark: CanvasTemplate = {
             id: 'element-c23d83a2-a053-4cb4-940b-22c591c89414',
             position: { left: 32, top: 215, width: 1017, height: 93, angle: 0, parent: null },
             expression:
-              'filters\n| demodata\n| markdown "# Add title here" \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="center" color="#000000" weight="normal" underline=false italic=false}\n| render \n  css=".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 64px !important;\ncolor: white !important;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "# Add title here" \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="center" color="#000000" weight="normal" underline=false italic=false}\n| render \n  css=".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 64px !important;\ncolor: white !important;\n}"',
           },
           {
             id: 'element-bac954f0-cc73-4f76-bed5-3489b3a5e342',
@@ -70,7 +70,7 @@ export const dark: CanvasTemplate = {
             id: 'element-34bddaa0-2228-49af-8b7d-12b7b3115753',
             position: { left: 32, top: 215, width: 1017, height: 178, angle: 0, parent: null },
             expression:
-              'filters\n| demodata\n| markdown "# Add title here\n## Add subtitle here" \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="center" color="#000000" weight="normal" underline=false italic=false}\n| render \n  css=".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 64px !important;\ncolor: white !important;\n}\n.canvasMarkdown h2,\n.canvasMarkdown p {\ncolor: #C4C4C4;\n}\n.canvasMarkdown p {\nfont-size: 16px;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "# Add title here\n## Add subtitle here" \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=14 align="center" color="#000000" weight="normal" underline=false italic=false}\n| render \n  css=".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 64px !important;\ncolor: white !important;\n}\n.canvasMarkdown h2,\n.canvasMarkdown p {\ncolor: #C4C4C4;\n}\n.canvasMarkdown p {\nfont-size: 16px;\n}"',
           },
           {
             id: 'element-e4770404-af5d-4b2f-a79d-1ec3f23f5e5e',
@@ -90,7 +90,7 @@ export const dark: CanvasTemplate = {
             id: 'element-4aece7e9-9b9f-4a8b-8672-7e609c0b4646',
             position: { left: 47, top: 100, width: 984, height: 73, angle: 0, parent: null },
             expression:
-              'filters\n| demodata\n| markdown "# Add title here"\n| render \n  css=".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 48px !important;\ncolor: white !important;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "# Add title here"\n| render \n  css=".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 48px !important;\ncolor: white !important;\n}"',
           },
           {
             id: 'element-95ee5462-e4c4-49b0-a884-d5f2de1932a1',
@@ -102,7 +102,7 @@ export const dark: CanvasTemplate = {
             id: 'element-88c815f5-fca9-4cac-a9c2-5cf53cfe5429',
             position: { left: 47, top: 216, width: 984, height: 430, angle: 0, parent: null },
             expression:
-              'filters\n| demodata\n| markdown "Add slide content here\n- first item\n- second item\n- third item"\n| render \n  css=".canvasRenderEl {\n\n}\n.canvasMarkdown p,\n.canvasMarkdown li {\ncolor: #C4C4C4;\nfont-size: 24px;\n}\n.canvasMarkdown li {\nmargin-bottom: 16px;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "Add slide content here\n- first item\n- second item\n- third item"\n| render \n  css=".canvasRenderEl {\n\n}\n.canvasMarkdown p,\n.canvasMarkdown li {\ncolor: #C4C4C4;\nfont-size: 24px;\n}\n.canvasMarkdown li {\nmargin-bottom: 16px;\n}"',
           },
         ],
         groups: [],
@@ -116,7 +116,7 @@ export const dark: CanvasTemplate = {
             id: 'element-c1fd013a-f95b-4ebe-b6da-b43312672016',
             position: { left: 47, top: 100, width: 984, height: 73, angle: 0, parent: null },
             expression:
-              'filters\n| demodata\n| markdown "# Add title here"\n| render \n  css=".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 48px !important;\ncolor: white !important;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "# Add title here"\n| render \n  css=".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 48px !important;\ncolor: white !important;\n}"',
           },
           {
             id: 'element-5d2f6707-ddcb-4936-88a1-7fcaccc12d64',
@@ -128,13 +128,13 @@ export const dark: CanvasTemplate = {
             id: 'element-e434ce4d-09a7-42d0-a149-12ed7a115af3',
             position: { left: 47, top: 216, width: 471, height: 430, angle: 0, parent: null },
             expression:
-              'filters\n| demodata\n| markdown "Left column\n- first item\n- second item\n- third item"\n| render \n  css=".canvasRenderEl {\n\n}\n.canvasMarkdown p,\n.canvasMarkdown li {\ncolor: #C4C4C4;\nfont-size: 24px;\n}\n.canvasMarkdown li {\nmargin-bottom: 16px;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "Left column\n- first item\n- second item\n- third item"\n| render \n  css=".canvasRenderEl {\n\n}\n.canvasMarkdown p,\n.canvasMarkdown li {\ncolor: #C4C4C4;\nfont-size: 24px;\n}\n.canvasMarkdown li {\nmargin-bottom: 16px;\n}"',
           },
           {
             id: 'element-9005be46-47ea-4478-96b1-a51b1c4d06e9',
             position: { left: 560, top: 216, width: 471, height: 430, angle: 0, parent: null },
             expression:
-              'filters\n| demodata\n| markdown "Right column\n- first item\n- second item\n"\n| render \n  css=".canvasRenderEl {\n\n}\n.canvasMarkdown p,\n.canvasMarkdown li {\ncolor: #C4C4C4;\nfont-size: 24px;\n}\n.canvasMarkdown li {\nmargin-bottom: 16px;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "Right column\n- first item\n- second item\n"\n| render \n  css=".canvasRenderEl {\n\n}\n.canvasMarkdown p,\n.canvasMarkdown li {\ncolor: #C4C4C4;\nfont-size: 24px;\n}\n.canvasMarkdown li {\nmargin-bottom: 16px;\n}"',
           },
         ],
         groups: [],
@@ -154,7 +154,7 @@ export const dark: CanvasTemplate = {
             id: 'element-dd72cc53-56fa-490a-a996-9d76f407608f',
             position: { left: 47, top: 100, width: 984, height: 73, angle: 0, parent: null },
             expression:
-              'filters\n| demodata\n| markdown "# Add title here"\n| render \n  css=".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 48px !important;\ncolor: white !important;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "# Add title here"\n| render \n  css=".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 48px !important;\ncolor: white !important;\n}"',
           },
           {
             id: 'element-2fb265fa-5730-4bd7-b451-d3da8780962e',
@@ -166,13 +166,13 @@ export const dark: CanvasTemplate = {
             id: 'element-eb5a1a58-21b1-491e-bf8b-68c207afaae8',
             position: { left: 47, top: 216, width: 471, height: 430, angle: 0, parent: null },
             expression:
-              'filters\n| demodata\n| markdown "Left column\n- first item\n- second item\n- third item"\n| render \n  css=".canvasRenderEl {\n\n}\n.canvasMarkdown p,\n.canvasMarkdown li {\ncolor: #C4C4C4;\nfont-size: 24px;\n}\n.canvasMarkdown li {\nmargin-bottom: 16px;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "Left column\n- first item\n- second item\n- third item"\n| render \n  css=".canvasRenderEl {\n\n}\n.canvasMarkdown p,\n.canvasMarkdown li {\ncolor: #C4C4C4;\nfont-size: 24px;\n}\n.canvasMarkdown li {\nmargin-bottom: 16px;\n}"',
           },
           {
             id: 'element-f52077e5-13db-49e9-842e-a8058b578c79',
             position: { left: 560, top: 216, width: 471, height: 430, angle: 0, parent: null },
             expression:
-              'filters\n| demodata\n| markdown "Right column\n- first item\n- second item\n"\n| render \n  css=".canvasRenderEl {\n\n}\n.canvasMarkdown p,\n.canvasMarkdown li {\ncolor: #000000;\nfont-size: 24px;\n}\n.canvasMarkdown li {\nmargin-bottom: 16px;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "Right column\n- first item\n- second item\n"\n| render \n  css=".canvasRenderEl {\n\n}\n.canvasMarkdown p,\n.canvasMarkdown li {\ncolor: #000000;\nfont-size: 24px;\n}\n.canvasMarkdown li {\nmargin-bottom: 16px;\n}"',
           },
         ],
         groups: [],
@@ -186,7 +186,7 @@ export const dark: CanvasTemplate = {
             id: 'element-f22a65da-6283-4d86-83ae-de753ebbcdc6',
             position: { left: 47, top: 100, width: 984, height: 73, angle: 0, parent: null },
             expression:
-              'filters\n| demodata\n| markdown "# Add title here"\n| render \n  css=".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 48px !important;\ncolor: white !important;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "# Add title here"\n| render \n  css=".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 48px !important;\ncolor: white !important;\n}"',
           },
           {
             id: 'element-9bc2b537-7022-4a46-8dc2-8f348c4f98fc',
@@ -198,7 +198,7 @@ export const dark: CanvasTemplate = {
             id: 'element-b91303dd-c046-4492-b97d-67517f1920b8',
             position: { left: 47, top: 219, width: 984, height: 409, angle: 0, parent: null },
             expression:
-              'filters\n| demodata\n| pointseries x="time" y="mean(price)"\n| plot defaultStyle={seriesStyle lines="2" fill=1 bars="0" points="1"} \n  palette={palette "#1ea593" "#2b70f7" "#ce0060" "#38007e" "#fca5d3" "#f37020" "#e49e29" "#b0916f" "#7b000b" "#34130c" gradient=false} \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=16 align="left" color="#FFFFFF" weight="normal" underline=false italic=false}\n| render containerStyle={containerStyle backgroundColor="rgba(255,255,255,0)"}',
+              'kibana\n| selectFilter\n| demodata\n| pointseries x="time" y="mean(price)"\n| plot defaultStyle={seriesStyle lines="2" fill=1 bars="0" points="1"} \n  palette={palette "#1ea593" "#2b70f7" "#ce0060" "#38007e" "#fca5d3" "#f37020" "#e49e29" "#b0916f" "#7b000b" "#34130c" gradient=false} \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=16 align="left" color="#FFFFFF" weight="normal" underline=false italic=false}\n| render containerStyle={containerStyle backgroundColor="rgba(255,255,255,0)"}',
           },
         ],
         groups: [],
@@ -212,7 +212,7 @@ export const dark: CanvasTemplate = {
             id: 'element-ff1e55a5-c0d8-410d-99e0-0a08f4640d57',
             position: { left: 47, top: 100, width: 392, height: 73, angle: 0, parent: null },
             expression:
-              'filters\n| demodata\n| markdown "# Add title here"\n| render \n  css=".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 48px !important;\ncolor: white !important;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "# Add title here"\n| render \n  css=".canvasRenderEl {\n\n}\n.canvasMarkdown h1 {\nfont-size: 48px !important;\ncolor: white !important;\n}"',
           },
           {
             id: 'element-e8dc178e-71e8-4f97-a6ad-4a298a144fd0',
@@ -224,13 +224,13 @@ export const dark: CanvasTemplate = {
             id: 'element-2fbb0b23-85a0-49b1-8d71-8d1b43fb704d',
             position: { left: 439, top: 173, width: 592, height: 475, angle: 0, parent: null },
             expression:
-              'filters\n| demodata\n| pointseries color="project" size="max(price)"\n| pie hole=48 labels=true legend=false \n  palette={palette "#1ea593" "#2b70f7" "#ce0060" "#38007e" "#fca5d3" "#f37020" "#e49e29" "#b0916f" "#7b000b" "#34130c" gradient=false} \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=16 align="center" color="#FFFFFF" weight="normal" underline=false italic=false} labelRadius=100 radius=0.7\n| render css=".canvasRenderEl {\n\n}\n.pieLabel div {\nline-height: 1.4 !important;\n}\n"',
+              'kibana\n| selectFilter\n| demodata\n| pointseries color="project" size="max(price)"\n| pie hole=48 labels=true legend=false \n  palette={palette "#1ea593" "#2b70f7" "#ce0060" "#38007e" "#fca5d3" "#f37020" "#e49e29" "#b0916f" "#7b000b" "#34130c" gradient=false} \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=16 align="center" color="#FFFFFF" weight="normal" underline=false italic=false} labelRadius=100 radius=0.7\n| render css=".canvasRenderEl {\n\n}\n.pieLabel div {\nline-height: 1.4 !important;\n}\n"',
           },
           {
             id: 'element-243de880-9a39-4e05-b66a-5123a90fdbfb',
             position: { left: 47, top: 205, width: 392, height: 384, angle: 0, parent: null },
             expression:
-              'filters\n| demodata\n| markdown "- first item\n- second item\n- third item"\n| render \n  css=".canvasRenderEl {\n\n}\n.canvasMarkdown p,\n.canvasMarkdown li {\ncolor: #C4C4C4;\nfont-size: 24px;\n}\n.canvasMarkdown li {\nmargin-bottom: 16px;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "- first item\n- second item\n- third item"\n| render \n  css=".canvasRenderEl {\n\n}\n.canvasMarkdown p,\n.canvasMarkdown li {\ncolor: #C4C4C4;\nfont-size: 24px;\n}\n.canvasMarkdown li {\nmargin-bottom: 16px;\n}"',
           },
         ],
         groups: [],
@@ -250,25 +250,25 @@ export const dark: CanvasTemplate = {
             id: 'element-853fe6b2-0eba-414a-8c9f-e6930bc53109',
             position: { left: 744, top: 264, width: 200, height: 200, angle: 0, parent: null },
             expression:
-              'filters\n| demodata\n| math "median(percent_uptime)"\n| progress shape="wheel" label={formatnumber "0%"} \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=24 align="center" color="#FFFFFF" weight="normal" underline=false italic=false} valueColor="#01b2a4" barColor="rgba(255,255,255,0.25)"\n| render',
+              'kibana\n| selectFilter\n| demodata\n| math "median(percent_uptime)"\n| progress shape="wheel" label={formatnumber "0%"} \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=24 align="center" color="#FFFFFF" weight="normal" underline=false italic=false} valueColor="#01b2a4" barColor="rgba(255,255,255,0.25)"\n| render',
           },
           {
             id: 'element-60fa5d2e-6d06-4e05-b465-29fdaa0c7933',
             position: { left: 49, top: 100, width: 982, height: 63, angle: 0, parent: null },
             expression:
-              'filters\n| demodata\n| markdown "# Add title here"\n| render \n  css=".canvasMarkdown h1 {\nfont-size: 48px !important;\ncolor: white !important;\n}"',
+              'kibana\n| selectFilter\n| demodata\n| markdown "# Add title here"\n| render \n  css=".canvasMarkdown h1 {\nfont-size: 48px !important;\ncolor: white !important;\n}"',
           },
           {
             id: 'element-a20eae11-2cee-4cee-b2f4-f5d4a56576ba',
             position: { left: 440, top: 264, width: 200, height: 200, angle: 0, parent: null },
             expression:
-              'filters\n| demodata\n| math "mean(percent_uptime)"\n| progress shape="wheel" label={formatnumber "0%"} \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=24 align="center" color="#FFFFFF" weight="normal" underline=false italic=false} valueColor="#01b2a4" barColor="rgba(255,255,255,0.25)"\n| render',
+              'kibana\n| selectFilter\n| demodata\n| math "mean(percent_uptime)"\n| progress shape="wheel" label={formatnumber "0%"} \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=24 align="center" color="#FFFFFF" weight="normal" underline=false italic=false} valueColor="#01b2a4" barColor="rgba(255,255,255,0.25)"\n| render',
           },
           {
             id: 'element-71d07e0f-5d99-471a-9864-99cb04839ef0',
             position: { left: 121, top: 264, width: 200, height: 200, angle: 0, parent: null },
             expression:
-              'filters\n| demodata\n| math "median(percent_uptime)"\n| progress shape="wheel" label={formatnumber "0%"} \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=24 align="center" color="#FFFFFF" weight="normal" underline=false italic=false} valueColor="#01b2a4" barColor="rgba(255,255,255,0.25)" max=1\n| render',
+              'kibana\n| selectFilter\n| demodata\n| math "median(percent_uptime)"\n| progress shape="wheel" label={formatnumber "0%"} \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=24 align="center" color="#FFFFFF" weight="normal" underline=false italic=false} valueColor="#01b2a4" barColor="rgba(255,255,255,0.25)" max=1\n| render',
           },
         ],
         groups: [],
@@ -288,31 +288,31 @@ export const dark: CanvasTemplate = {
             id: 'element-799537e1-7456-4ff0-80fa-d52f0de9a6fe',
             position: { left: 48, top: 250, width: 983, height: 195, angle: 0, parent: null },
             expression:
-              'filters\n| demodata\n| pointseries x="time" y="mean(price)"\n| plot defaultStyle={seriesStyle lines="1" fill=1 bars="0" points="1"} \n  palette={palette "#1ea593" "#2b70f7" "#ce0060" "#38007e" "#fca5d3" "#f37020" "#e49e29" "#b0916f" "#7b000b" "#34130c" gradient=false} \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=16 align="left" color="#FFFFFF" weight="normal" underline=false italic=false}\n| render containerStyle={containerStyle backgroundColor="rgba(255,255,255,0)"}',
+              'kibana\n| selectFilter\n| demodata\n| pointseries x="time" y="mean(price)"\n| plot defaultStyle={seriesStyle lines="1" fill=1 bars="0" points="1"} \n  palette={palette "#1ea593" "#2b70f7" "#ce0060" "#38007e" "#fca5d3" "#f37020" "#e49e29" "#b0916f" "#7b000b" "#34130c" gradient=false} \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=16 align="left" color="#FFFFFF" weight="normal" underline=false italic=false}\n| render containerStyle={containerStyle backgroundColor="rgba(255,255,255,0)"}',
           },
           {
             id: 'element-eece5bd6-d25b-4ffb-91ba-49a6c5d9f21b',
             position: { left: 47, top: 466, width: 984, height: 205, angle: 0, parent: null },
             expression:
-              'filters\n| demodata\n| pointseries x="time" y="mean(price)"\n| plot defaultStyle={seriesStyle lines="1"} \n  palette={palette "#1ea593" "#2b70f7" "#ce0060" "#38007e" "#fca5d3" "#f37020" "#e49e29" "#b0916f" "#7b000b" "#34130c" gradient=false} \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=16 align="left" color="#FFFFFF" weight="normal" underline=false italic=false}\n| render',
+              'kibana\n| selectFilter\n| demodata\n| pointseries x="time" y="mean(price)"\n| plot defaultStyle={seriesStyle lines="1"} \n  palette={palette "#1ea593" "#2b70f7" "#ce0060" "#38007e" "#fca5d3" "#f37020" "#e49e29" "#b0916f" "#7b000b" "#34130c" gradient=false} \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=16 align="left" color="#FFFFFF" weight="normal" underline=false italic=false}\n| render',
           },
           {
             id: 'element-7d5b43e6-c90f-4b02-b363-421ab4debd1f',
             position: { left: 443, top: 114, width: 200, height: 100, angle: 0, parent: null },
             expression:
-              'filters\n| demodata\n| math "median(percent_uptime)"\n| progress shape="semicircle" label={formatnumber "0%"} \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=24 align="center" color="#FFFFFF" weight="normal" underline=false italic=false} valueColor="#01b2a4" barColor="rgba(255,255,255,0.25)"\n| render',
+              'kibana\n| selectFilter\n| demodata\n| math "median(percent_uptime)"\n| progress shape="semicircle" label={formatnumber "0%"} \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=24 align="center" color="#FFFFFF" weight="normal" underline=false italic=false} valueColor="#01b2a4" barColor="rgba(255,255,255,0.25)"\n| render',
           },
           {
             id: 'element-561c433a-cbae-47dd-8082-9ddf627875ac',
             position: { left: 773.75, top: 114, width: 200, height: 100, angle: 0, parent: null },
             expression:
-              'filters\n| demodata\n| math "mean(percent_uptime)"\n| progress shape="semicircle" label={formatnumber "0%"} \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=24 align="center" color="#FFFFFF" weight="normal" underline=false italic=false} valueColor="#01b2a4" barColor="rgba(255,255,255,0.25)"\n| render',
+              'kibana\n| selectFilter\n| demodata\n| math "mean(percent_uptime)"\n| progress shape="semicircle" label={formatnumber "0%"} \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=24 align="center" color="#FFFFFF" weight="normal" underline=false italic=false} valueColor="#01b2a4" barColor="rgba(255,255,255,0.25)"\n| render',
           },
           {
             id: 'element-9f574a47-64cd-4c76-a07e-6a9d8a1a0e93',
             position: { left: 104.25, top: 114, width: 200, height: 100, angle: 0, parent: null },
             expression:
-              'filters\n| demodata\n| math "mean(percent_uptime)"\n| progress shape="semicircle" label={formatnumber "0%"} \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=24 align="center" color="#FFFFFF" weight="normal" underline=false italic=false} valueColor="#01b2a4" barColor="rgba(255,255,255,0.25)"\n| render',
+              'kibana\n| selectFilter\n| demodata\n| math "mean(percent_uptime)"\n| progress shape="semicircle" label={formatnumber "0%"} \n  font={font family="\'Open Sans\', Helvetica, Arial, sans-serif" size=24 align="center" color="#FFFFFF" weight="normal" underline=false italic=false} valueColor="#01b2a4" barColor="rgba(255,255,255,0.25)"\n| render',
           },
         ],
         groups: [],

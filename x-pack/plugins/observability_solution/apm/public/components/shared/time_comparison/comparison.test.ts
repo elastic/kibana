@@ -32,9 +32,7 @@ describe('Comparison test suite', () => {
   beforeAll(() => {
     moment.tz.setDefault('Europe/London');
     const mockDateNow = '2022-01-14T18:30:15.500Z';
-    dateNowSpy = jest
-      .spyOn(Date, 'now')
-      .mockReturnValue(new Date(mockDateNow).getTime());
+    dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(new Date(mockDateNow).getTime());
   });
 
   afterAll(() => {

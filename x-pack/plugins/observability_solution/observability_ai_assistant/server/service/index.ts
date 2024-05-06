@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import * as Boom from '@hapi/boom';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server/plugin';
 import { createConcreteWriteIndex, getDataStreamAdapter } from '@kbn/alerting-plugin/server';
 import type { CoreSetup, CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
@@ -96,6 +95,8 @@ export class ObservabilityAIAssistantService {
     this.logger = logger;
     this.getModelId = getModelId;
 
+    this.allowInit();
+
     taskManager.registerTaskDefinitions({
       [INDEX_QUEUED_DOCUMENTS_TASK_TYPE]: {
         title: 'Index queued KB articles',
@@ -122,7 +123,18 @@ export class ObservabilityAIAssistantService {
     });
   }
 
-  init = once(async () => {
+  init = async () => {};
+
+  private allowInit = () => {
+    this.init = once(async () => {
+      return this.doInit().catch((error) => {
+        this.allowInit();
+        throw error;
+      });
+    });
+  };
+
+  private doInit = async () => {
     try {
       const [coreStart, pluginsStart] = await this.core.getStartServices();
 
@@ -242,7 +254,7 @@ export class ObservabilityAIAssistantService {
       this.logger.debug(error);
       throw error;
     }
-  });
+  };
 
   async getClient({
     request,
@@ -261,11 +273,8 @@ export class ObservabilityAIAssistantService {
         [CoreStart, { security: SecurityPluginStart; actions: ActionsPluginStart }, unknown]
       >,
     ]);
+    // user will not be found when executed from system connector context
     const user = plugins.security.authc.getCurrentUser(request);
-
-    if (!user) {
-      throw Boom.forbidden(`User not found for current request`);
-    }
 
     const basePath = coreStart.http.basePath.get(request);
 
@@ -280,10 +289,12 @@ export class ObservabilityAIAssistantService {
       },
       resources: this.resourceNames,
       logger: this.logger,
-      user: {
-        id: user.profile_uid,
-        name: user.username,
-      },
+      user: user
+        ? {
+            id: user.profile_uid,
+            name: user.username,
+          }
+        : undefined,
       knowledgeBaseService: this.kbService!,
     });
   }

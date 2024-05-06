@@ -146,7 +146,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             { metric: 'cpuUsage', value: '0.8%' },
             { metric: 'normalizedLoad1m', value: '1.4%' },
             { metric: 'memoryUsage', value: '18.0%' },
-            { metric: 'diskUsage', value: '17.5%' },
+            { metric: 'diskUsage', value: '35.0%' },
           ].forEach(({ metric, value }) => {
             it(`${metric} tile should show ${value}`, async () => {
               await retry.tryForTime(3 * 1000, async () => {
@@ -158,9 +158,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             });
           });
 
-          it('should render 9 charts in the Metrics section', async () => {
-            const hosts = await pageObjects.assetDetails.getAssetDetailsMetricsCharts();
-            expect(hosts.length).to.equal(9);
+          [
+            { metric: 'cpu', chartsCount: 2 },
+            { metric: 'memory', chartsCount: 1 },
+            { metric: 'disk', chartsCount: 2 },
+            { metric: 'network', chartsCount: 1 },
+          ].forEach(({ metric, chartsCount }) => {
+            it(`should render ${chartsCount} ${metric} chart(s) in the Metrics section`, async () => {
+              const hosts = await pageObjects.assetDetails.getOverviewTabHostMetricCharts(metric);
+              expect(hosts.length).to.equal(chartsCount);
+            });
           });
 
           it('should show alerts', async () => {
@@ -176,6 +183,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           it('should show metadata table', async () => {
             await pageObjects.assetDetails.metadataTableExists();
+          });
+        });
+
+        describe('Metrics Tab', () => {
+          before(async () => {
+            await pageObjects.assetDetails.clickMetricsTab();
+          });
+
+          it('should show metrics content', async () => {
+            await pageObjects.assetDetails.metricsChartsContentExists();
           });
         });
 

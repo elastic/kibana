@@ -45,12 +45,9 @@ export async function getExitSpanFailureRate({
       rollupInterval: RollupInterval.OneMinute,
       intervalString,
       filter: filter.concat(
-        ...termQuery(
-          SPAN_DESTINATION_SERVICE_RESOURCE,
-          spanDestinationServiceResource
-        )
+        ...termQuery(SPAN_DESTINATION_SERVICE_RESOURCE, spanDestinationServiceResource)
       ),
-      groupBy: SPAN_DESTINATION_SERVICE_RESOURCE,
+      groupByFields: [SPAN_DESTINATION_SERVICE_RESOURCE],
       aggs: {
         successful: {
           filter: {
@@ -86,8 +83,7 @@ export async function getExitSpanFailureRate({
               successful_or_failed: `successful_or_failed>count`,
               successful: `successful>count`,
             },
-            script:
-              '100 * (1 - (params.successful / params.successful_or_failed))',
+            script: '100 * (1 - (params.successful / params.successful_or_failed))',
           },
         },
       },

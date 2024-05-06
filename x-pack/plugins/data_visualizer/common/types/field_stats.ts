@@ -7,10 +7,10 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Query } from '@kbn/es-query';
-import type { IKibanaSearchResponse } from '@kbn/data-plugin/common';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
-import type { TimeBucketsInterval } from '../services/time_buckets';
+import type { TimeBucketsInterval } from '@kbn/ml-time-buckets';
 
 export interface RandomSamplingOption {
   mode: 'random_sampling';
@@ -93,6 +93,7 @@ export interface StringFieldStats {
   fieldName: string;
   isTopValuesSampled: boolean;
   topValues: Bucket[];
+  sampledValues?: Bucket[];
   topValuesSampleSize?: number;
   topValuesSamplerShardSize?: number;
 }

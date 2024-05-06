@@ -32,8 +32,7 @@ export function criticalPathToFlamegraph(
 
   const { criticalPath, colors } = params;
 
-  const { rootNodes, maxDepth, numNodes } =
-    getAggregatedCriticalPathRootNodes(params);
+  const { rootNodes, maxDepth, numNodes } = getAggregatedCriticalPathRootNodes(params);
 
   // include the root node
   const totalSize = numNodes + 1;
@@ -56,25 +55,18 @@ export function criticalPathToFlamegraph(
 
   let index = 0;
 
-  const availableColors: Array<[number, number, number, number]> = colors.map(
-    (vizColor) => {
-      const rgb = parseToRgb(lightenColor(vizColor));
+  const availableColors: Array<[number, number, number, number]> = colors.map((vizColor) => {
+    const rgb = parseToRgb(lightenColor(vizColor));
 
-      return [rgb.red / 255, rgb.green / 255, rgb.blue / 255, 1];
-    }
-  );
+    return [rgb.red / 255, rgb.green / 255, rgb.blue / 255, 1];
+  });
 
   const pickColor = memoize((identifier: string) => {
-    const idx =
-      Math.abs(seedrandom(identifier).int32()) % availableColors.length;
+    const idx = Math.abs(seedrandom(identifier).int32()) % availableColors.length;
     return availableColors[idx];
   });
 
-  function addNodeToFlamegraph(
-    node: CriticalPathTreeNode,
-    x: number,
-    y: number
-  ) {
+  function addNodeToFlamegraph(node: CriticalPathTreeNode, x: number, y: number) {
     let nodeOperationId: string;
     let nodeLabel: string;
     let operationMetadata: CriticalPathResponse['metadata'][string] | undefined;
@@ -101,9 +93,7 @@ export function criticalPathToFlamegraph(
     const identifier =
       operationMetadata?.['processor.event'] === 'transaction'
         ? operationMetadata['transaction.type']
-        : operationMetadata?.['span.subtype'] ||
-          operationMetadata?.['span.type'] ||
-          '';
+        : operationMetadata?.['span.subtype'] || operationMetadata?.['span.type'] || '';
 
     color.set(pickColor(identifier), index * 4);
 

@@ -28,7 +28,8 @@
     ],
     "optionalPlugins": [
       "indexManagement",
-      "usageCollection",
+      "searchConnectors",
+      "usageCollection"
     ],
     "requiredBundles": [
       "kibanaReact"

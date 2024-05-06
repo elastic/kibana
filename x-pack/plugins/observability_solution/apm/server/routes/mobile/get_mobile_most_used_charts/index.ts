@@ -7,10 +7,7 @@
 
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { mergeCountWithOther } from './merge_other_count';
-import {
-  MobileProperty,
-  MobilePropertyType,
-} from '../../../../common/mobile_types';
+import { MobileProperty, MobilePropertyType } from '../../../../common/mobile_types';
 import { getDeviceOSApp } from '../get_device_os_app';
 import { getNCT } from '../get_nct';
 
@@ -49,8 +46,10 @@ export async function getMobileMostUsedCharts({
     end,
     size: MAX_ITEMS_PER_CHART,
   };
-  const [mobileTransactionEventsResponse, mobileNetworkConnectionTypeResponse] =
-    await Promise.all([getDeviceOSApp(commonProps), getNCT(commonProps)]);
+  const [mobileTransactionEventsResponse, mobileNetworkConnectionTypeResponse] = await Promise.all([
+    getDeviceOSApp(commonProps),
+    getNCT(commonProps),
+  ]);
 
   return [
     {
@@ -58,8 +57,7 @@ export async function getMobileMostUsedCharts({
       options:
         mergeCountWithOther(
           mobileTransactionEventsResponse.aggregations?.devices?.buckets,
-          mobileTransactionEventsResponse.aggregations?.devices
-            ?.sum_other_doc_count
+          mobileTransactionEventsResponse.aggregations?.devices?.sum_other_doc_count
         ) || [],
     },
     {
@@ -67,8 +65,7 @@ export async function getMobileMostUsedCharts({
       options:
         mergeCountWithOther(
           mobileTransactionEventsResponse.aggregations?.osVersions?.buckets,
-          mobileTransactionEventsResponse.aggregations?.osVersions
-            ?.sum_other_doc_count
+          mobileTransactionEventsResponse.aggregations?.osVersions?.sum_other_doc_count
         ) || [],
     },
     {
@@ -76,18 +73,15 @@ export async function getMobileMostUsedCharts({
       options:
         mergeCountWithOther(
           mobileTransactionEventsResponse.aggregations?.appVersions?.buckets,
-          mobileTransactionEventsResponse.aggregations?.appVersions
-            ?.sum_other_doc_count
+          mobileTransactionEventsResponse.aggregations?.appVersions?.sum_other_doc_count
         ) || [],
     },
     {
       key: MobileProperty.NetworkConnectionType,
       options:
         mergeCountWithOther(
-          mobileNetworkConnectionTypeResponse.aggregations?.netConnectionTypes
-            ?.buckets,
-          mobileNetworkConnectionTypeResponse.aggregations?.netConnectionTypes
-            ?.sum_other_doc_count
+          mobileNetworkConnectionTypeResponse.aggregations?.netConnectionTypes?.buckets,
+          mobileNetworkConnectionTypeResponse.aggregations?.netConnectionTypes?.sum_other_doc_count
         ) || [],
     },
   ];

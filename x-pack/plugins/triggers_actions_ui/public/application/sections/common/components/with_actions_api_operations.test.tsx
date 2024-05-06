@@ -41,6 +41,6 @@ describe('with_action_api_operations', () => {
     component.find('button').simulate('click');
 
     expect(actionApis.loadActionTypes).toHaveBeenCalledTimes(1);
-    expect(actionApis.loadActionTypes).toHaveBeenCalledWith({ http });
+    expect(actionApis.loadActionTypes).toHaveBeenCalledWith({ http, includeSystemActions: true });
   });
 });

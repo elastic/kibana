@@ -6,12 +6,10 @@
  * Side Public License, v 1.
  */
 
-import {
-  DefaultEmbeddableApi,
-  SerializedReactEmbeddableTitles,
-} from '@kbn/embeddable-plugin/public';
+import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import { SerializedTitles } from '@kbn/presentation-publishing';
 
-export type MarkdownEditorSerializedState = SerializedReactEmbeddableTitles & {
+export type MarkdownEditorSerializedState = SerializedTitles & {
   content: string;
 };
 

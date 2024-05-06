@@ -72,7 +72,7 @@ export const THREAT_MATCH_CUSTOM_QUERY_INPUT =
 export const THREAT_MATCH_QUERY_INPUT =
   '[data-test-subj="detectionEngineStepDefineThreatRuleQueryBar"] [data-test-subj="queryInput"]';
 
-export const THREAT_MATCH_INDICATOR_INDEX =
+export const CUSTOM_INDEX_PATTERN_INPUT =
   '[data-test-subj="detectionEngineStepDefineRuleIndices"] [data-test-subj="comboBoxInput"]';
 
 export const THREAT_MATCH_INDICATOR_INDICATOR_INDEX =
@@ -117,15 +117,27 @@ export const EQL_QUERY_VALIDATION_SPINNER = '[data-test-subj="eql-validation-loa
 
 export const EQL_QUERY_VALIDATION_ERROR = '[data-test-subj="eql-validation-errors-popover-button"]';
 
+export const EQL_OPTIONS_POPOVER_TRIGGER = '[data-test-subj="eql-settings-trigger"]';
+
+export const EQL_OPTIONS_TIMESTAMP_INPUT =
+  '[data-test-subj="eql-timestamp-field"] [data-test-subj="comboBoxInput"]';
+
 export const IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK =
   '[data-test-subj="importQueryFromSavedTimeline"]';
+
+export const RELATED_INTEGRATION_COMBO_BOX_INPUT =
+  '[data-test-subj="relatedIntegrationComboBox"] [data-test-subj="comboBoxSearchInput"]';
 
 export const INDICATOR_MATCH_TYPE = '[data-test-subj="threatMatchRuleType"]';
 
 export const INPUT = '[data-test-subj="input"]';
 
+export const MAX_SIGNALS_INPUT = '[data-test-subj="detectionEngineStepAboutRuleMaxSignals"]';
+
 export const INVESTIGATION_NOTES_TEXTAREA =
   '[data-test-subj="detectionEngineStepAboutRuleNote"] textarea';
+
+export const SETUP_GUIDE_TEXTAREA = '[data-test-subj="detectionEngineStepAboutRuleSetup"] textarea';
 
 export const FALSE_POSITIVES_INPUT =
   '[data-test-subj="detectionEngineStepAboutRuleFalsePositives"] input';

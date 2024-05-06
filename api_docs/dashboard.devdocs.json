@@ -209,10 +209,50 @@
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesUnifiedSearch",
-            "text": "PublishesUnifiedSearch"
+            "section": "def-common.PublishesTimeRange",
+            "text": "PublishesTimeRange"
           },
-          " & ",
+          " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; filters$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[] | undefined>; query$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          " | undefined>; } & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -263,10 +303,50 @@
                 "pluginId": "@kbn/presentation-publishing",
                 "scope": "common",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PublishesUnifiedSearch",
-                "text": "PublishesUnifiedSearch"
+                "section": "def-common.PublishesTimeRange",
+                "text": "PublishesTimeRange"
               },
-              " & ",
+              " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; filters$: ",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "common",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-common.PublishingSubject",
+                "text": "PublishingSubject"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[] | undefined>; query$: ",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "common",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-common.PublishingSubject",
+                "text": "PublishingSubject"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              " | undefined>; } & ",
               {
                 "pluginId": "@kbn/presentation-publishing",
                 "scope": "common",
@@ -306,6 +386,54 @@
               }
             ],
             "path": "src/plugins/dashboard/public/dashboard_app/locator/get_dashboard_locator_params.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboard",
+        "id": "def-public.registerDashboardPanelPlacementSetting",
+        "type": "Function",
+        "tags": [],
+        "label": "registerDashboardPanelPlacementSetting",
+        "description": [],
+        "signature": [
+          "(embeddableType: string, getPanelPlacementSettings: GetPanelPlacementSettings<object>) => void"
+        ],
+        "path": "src/plugins/dashboard/public/dashboard_container/external_api/dashboard_panel_placement_registry.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.registerDashboardPanelPlacementSetting.$1",
+            "type": "string",
+            "tags": [],
+            "label": "embeddableType",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/plugins/dashboard/public/dashboard_container/external_api/dashboard_panel_placement_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.registerDashboardPanelPlacementSetting.$2",
+            "type": "Function",
+            "tags": [],
+            "label": "getPanelPlacementSettings",
+            "description": [],
+            "signature": [
+              "GetPanelPlacementSettings<object>"
+            ],
+            "path": "src/plugins/dashboard/public/dashboard_container/external_api/dashboard_panel_placement_registry.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -539,10 +667,10 @@
             "signature": [
               "((dashboardId?: string | undefined) => ",
               {
-                "pluginId": "embeddable",
-                "scope": "public",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-public.EmbeddableAppContext",
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "common",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-common.EmbeddableAppContext",
                 "text": "EmbeddableAppContext"
               },
               ") | undefined"
@@ -598,7 +726,20 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "dashboard",
+        "id": "def-public.PanelPlacementStrategy",
+        "type": "Enum",
+        "tags": [],
+        "label": "PanelPlacementStrategy",
+        "description": [],
+        "path": "src/plugins/dashboard/public/dashboard_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
       {
         "parentPluginId": "dashboard",
@@ -689,10 +830,50 @@
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesUnifiedSearch",
-            "text": "PublishesUnifiedSearch"
+            "section": "def-common.PublishesTimeRange",
+            "text": "PublishesTimeRange"
           },
-          " & ",
+          " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; filters$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[] | undefined>; query$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          " | undefined>; } & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -1721,6 +1902,7 @@
             "label": "executionContext",
             "description": [],
             "signature": [
+              "{ readonly type?: string | undefined; readonly name?: string | undefined; readonly page?: string | undefined; readonly id?: string | undefined; readonly description?: string | undefined; readonly url?: string | undefined; readonly meta?: { [key: string]: string | number | boolean | undefined; } | undefined; child?: ",
               {
                 "pluginId": "@kbn/core-execution-context-common",
                 "scope": "common",
@@ -1728,7 +1910,7 @@
                 "section": "def-common.KibanaExecutionContext",
                 "text": "KibanaExecutionContext"
               },
-              " | undefined"
+              " | undefined; }"
             ],
             "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
             "deprecated": false,
@@ -2066,7 +2248,7 @@
             "section": "def-common.Query",
             "text": "Query"
           },
-          " | undefined; version?: string | undefined; filters?: ",
+          " | undefined; filters?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -2074,7 +2256,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[] | undefined; description?: string | undefined; refreshInterval?: ",
+          "[] | undefined; description?: string | undefined; version?: string | undefined; refreshInterval?: ",
           {
             "pluginId": "data",
             "scope": "common",

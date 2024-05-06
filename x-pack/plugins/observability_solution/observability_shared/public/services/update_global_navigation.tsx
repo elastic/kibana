@@ -8,7 +8,7 @@
 import { Subject } from 'rxjs';
 import { AppUpdater, ApplicationStart, AppDeepLink } from '@kbn/core/public';
 import { CasesDeepLinkId } from '@kbn/cases-plugin/public';
-import { casesFeatureId, sloFeatureId } from '../../common';
+import { casesFeatureId } from '../../common';
 
 export function updateGlobalNavigation({
   capabilities,
@@ -19,19 +19,20 @@ export function updateGlobalNavigation({
   deepLinks: AppDeepLink[];
   updater$: Subject<AppUpdater>;
 }) {
-  const { apm, logs, metrics, uptime } = capabilities.navLinks;
+  const { apm, logs, metrics, uptime, slo } = capabilities.navLinks;
   const someVisible = Object.values({
     apm,
     logs,
     metrics,
     uptime,
+    slo,
   }).some((visible) => visible);
 
   const updatedDeepLinks = deepLinks
     .map((link) => {
       switch (link.id) {
         case CasesDeepLinkId.cases:
-          if (capabilities[casesFeatureId].read_cases && someVisible) {
+          if (capabilities[casesFeatureId].read_cases) {
             return {
               ...link,
               visibleIn: ['sideNav', 'globalSearch'],
@@ -54,14 +55,6 @@ export function updateGlobalNavigation({
             };
           }
           return null;
-        case 'slos':
-          if (!!capabilities[sloFeatureId]?.read) {
-            return {
-              ...link,
-              visibleIn: ['sideNav', 'globalSearch'],
-            };
-          }
-          return null;
         default:
           return link;
       }
@@ -70,9 +63,6 @@ export function updateGlobalNavigation({
 
   updater$.next(() => ({
     deepLinks: updatedDeepLinks,
-    visibleIn:
-      someVisible || !!capabilities[sloFeatureId]?.read
-        ? ['sideNav', 'globalSearch', 'home', 'kibanaOverview']
-        : [],
+    visibleIn: someVisible ? ['sideNav', 'globalSearch', 'home', 'kibanaOverview'] : [],
   }));
 }

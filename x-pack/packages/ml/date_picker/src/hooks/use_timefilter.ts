@@ -8,7 +8,7 @@
 import { useEffect, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { merge, type Observable } from 'rxjs';
-import { distinctUntilChanged, map } from 'rxjs/operators';
+import { distinctUntilChanged, map } from 'rxjs';
 import { isEqual } from 'lodash';
 
 import type { TimeRange } from '@kbn/es-query';

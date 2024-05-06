@@ -95,7 +95,6 @@ const MetricsApp: React.FC<{
         storage={storage}
         theme$={theme$}
         triggersActionsUI={plugins.triggersActionsUi}
-        observabilityAIAssistant={plugins.observabilityAIAssistant}
       >
         <SourceProvider sourceId="default">
           <PluginConfigProvider value={pluginConfig}>

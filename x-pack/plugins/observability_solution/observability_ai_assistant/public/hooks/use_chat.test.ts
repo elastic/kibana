@@ -26,17 +26,26 @@ const mockChatService: MockedChatService = {
   chat: jest.fn(),
   complete: jest.fn(),
   sendAnalyticsEvent: jest.fn(),
-  getContexts: jest.fn().mockReturnValue([{ name: 'core', description: '' }]),
   getFunctions: jest.fn().mockReturnValue([]),
   hasFunction: jest.fn().mockReturnValue(false),
   hasRenderFunction: jest.fn().mockReturnValue(true),
   renderFunction: jest.fn(),
+  getSystemMessage: jest.fn().mockReturnValue({
+    '@timestamp': new Date().toISOString(),
+    message: {
+      content: 'system',
+      role: MessageRole.System,
+    },
+  }),
 };
 
 const addErrorMock = jest.fn();
 
 jest.spyOn(useKibanaModule, 'useKibana').mockReturnValue({
   services: {
+    uiSettings: {
+      get: jest.fn(),
+    },
     notifications: {
       toasts: {
         addError: addErrorMock,

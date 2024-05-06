@@ -116,29 +116,34 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.assetDetails.clickOverviewTab();
         });
 
-        [{ tab: 'metadata' }, { tab: 'processes' }, { tab: 'logs' }, { tab: 'anomalies' }].forEach(
-          ({ tab }) => {
-            it(`should keep the same date range across tabs: ${tab}`, async () => {
-              const clickFuncs: Record<string, () => void> = {
-                metadata: pageObjects.assetDetails.clickMetadataTab,
-                processes: pageObjects.assetDetails.clickProcessesTab,
-                logs: pageObjects.assetDetails.clickLogsTab,
-                anomalies: pageObjects.assetDetails.clickAnomaliesTab,
-              };
+        [
+          { tab: 'metadata' },
+          { tab: 'processes' },
+          { tab: 'metrics' },
+          { tab: 'logs' },
+          { tab: 'anomalies' },
+        ].forEach(({ tab }) => {
+          it(`should keep the same date range across tabs: ${tab}`, async () => {
+            const clickFuncs: Record<string, () => void> = {
+              metadata: pageObjects.assetDetails.clickMetadataTab,
+              processes: pageObjects.assetDetails.clickProcessesTab,
+              logs: pageObjects.assetDetails.clickLogsTab,
+              anomalies: pageObjects.assetDetails.clickAnomaliesTab,
+              metrics: pageObjects.assetDetails.clickMetricsTab,
+            };
 
-              await clickFuncs[tab]();
+            await clickFuncs[tab]();
 
-              const datePickerValue = await pageObjects.timePicker.getTimeConfig();
-              expect(await pageObjects.timePicker.timePickerExists()).to.be(true);
-              expect(datePickerValue.start).to.equal(
-                START_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT)
-              );
-              expect(datePickerValue.end).to.equal(
-                END_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT)
-              );
-            });
-          }
-        );
+            const datePickerValue = await pageObjects.timePicker.getTimeConfig();
+            expect(await pageObjects.timePicker.timePickerExists()).to.be(true);
+            expect(datePickerValue.start).to.equal(
+              START_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT)
+            );
+            expect(datePickerValue.end).to.equal(
+              END_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT)
+            );
+          });
+        });
 
         it('preserves selected date range between page reloads', async () => {
           const start = moment.utc(START_HOST_ALERTS_DATE).format(DATE_PICKER_FORMAT);
@@ -193,9 +198,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             });
           });
 
-          it('should render 12 charts in the Metrics section', async () => {
-            const hosts = await pageObjects.assetDetails.getAssetDetailsMetricsCharts();
-            expect(hosts.length).to.equal(12);
+          [
+            { metric: 'cpu', chartsCount: 2 },
+            { metric: 'memory', chartsCount: 1 },
+            { metric: 'disk', chartsCount: 2 },
+            { metric: 'network', chartsCount: 1 },
+          ].forEach(({ metric, chartsCount }) => {
+            it(`should render ${chartsCount} ${metric} chart(s) in the Metrics section`, async () => {
+              const hosts = await pageObjects.assetDetails.getOverviewTabHostMetricCharts(metric);
+              expect(hosts.length).to.equal(chartsCount);
+            });
           });
 
           it('should show all section as collapsable', async () => {
@@ -357,6 +369,29 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
         });
 
+        describe('Metrics Tab', () => {
+          before(async () => {
+            await pageObjects.assetDetails.clickMetricsTab();
+          });
+
+          [
+            { metric: 'cpu', chartsCount: 4 },
+            { metric: 'memory', chartsCount: 2 },
+            { metric: 'disk', chartsCount: 3 },
+            { metric: 'network', chartsCount: 1 },
+            { metric: 'log', chartsCount: 1 },
+          ].forEach(({ metric, chartsCount }) => {
+            it(`should render ${chartsCount} ${metric} chart(s)`, async () => {
+              const charts = await pageObjects.assetDetails.getMetricsTabHostCharts(metric);
+              expect(charts.length).to.equal(chartsCount);
+            });
+
+            it(`should render a quick access for ${metric} in the side panel`, async () => {
+              await pageObjects.assetDetails.quickAccessItemExists(metric);
+            });
+          });
+        });
+
         describe('Processes Tab', () => {
           before(async () => {
             await pageObjects.assetDetails.clickProcessesTab();
@@ -405,7 +440,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           it('should render logs tab', async () => {
-            await testSubjects.existOrFail('infraAssetDetailsLogsTabContent');
+            await pageObjects.assetDetails.logsExists();
           });
 
           it('preserves search term between page reloads', async () => {
@@ -457,7 +492,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           it('should render alerts count for a host inside a flyout', async () => {
             await pageObjects.assetDetails.clickOverviewTab();
 
-            retry.tryForTime(30 * 1000, async () => {
+            await retry.tryForTime(30 * 1000, async () => {
               await observability.components.alertSummaryWidget.getFullSizeComponentSelectorOrFail();
             });
 
@@ -511,14 +546,53 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               });
             });
 
-            it('should render 12 charts in the Metrics section', async () => {
-              const hosts = await pageObjects.assetDetails.getAssetDetailsMetricsCharts();
-              expect(hosts.length).to.equal(12);
+            [
+              { metric: 'cpu', chartsCount: 2 },
+              { metric: 'memory', chartsCount: 1 },
+              { metric: 'disk', chartsCount: 2 },
+              { metric: 'network', chartsCount: 1 },
+              { metric: 'kubernetes', chartsCount: 2 },
+            ].forEach(({ metric, chartsCount }) => {
+              it(`should render ${chartsCount} ${metric} chart`, async () => {
+                await retry.try(async () => {
+                  const charts = await (metric === 'kubernetes'
+                    ? pageObjects.assetDetails.getOverviewTabKubernetesMetricCharts()
+                    : pageObjects.assetDetails.getOverviewTabHostMetricCharts(metric));
+
+                  expect(charts.length).to.equal(chartsCount);
+                });
+              });
+            });
+          });
+
+          describe('Metrics Tab', () => {
+            before(async () => {
+              await pageObjects.assetDetails.clickMetricsTab();
             });
 
-            it('should render 4 charts in the Kubernetes Metrics section', async () => {
-              const hosts = await pageObjects.assetDetails.getAssetDetailsKubernetesMetricsCharts();
-              expect(hosts.length).to.equal(4);
+            [
+              { metric: 'cpu', chartsCount: 4 },
+              { metric: 'memory', chartsCount: 2 },
+              { metric: 'disk', chartsCount: 3 },
+              { metric: 'network', chartsCount: 1 },
+              { metric: 'log', chartsCount: 1 },
+              { metric: 'kubernetes', chartsCount: 4 },
+            ].forEach(({ metric, chartsCount }) => {
+              it(`should render ${chartsCount} ${metric} chart(s)`, async () => {
+                retry.try(async () => {
+                  const charts = await (metric === 'kubernetes'
+                    ? pageObjects.assetDetails.getMetricsTabKubernetesCharts()
+                    : pageObjects.assetDetails.getMetricsTabHostCharts(metric));
+
+                  expect(charts.length).to.equal(chartsCount);
+                });
+              });
+
+              it(`should render a quick access for ${metric} in the side panel`, async () => {
+                await retry.try(async () => {
+                  await pageObjects.assetDetails.quickAccessItemExists(metric);
+                });
+              });
             });
           });
         });

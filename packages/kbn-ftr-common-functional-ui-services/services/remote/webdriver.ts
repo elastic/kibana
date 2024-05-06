@@ -10,7 +10,7 @@ import { resolve } from 'path';
 import Fs from 'fs';
 
 import * as Rx from 'rxjs';
-import { mergeMap, map, catchError, ignoreElements, takeWhile } from 'rxjs/operators';
+import { mergeMap, map, catchError, ignoreElements, takeWhile } from 'rxjs';
 import { Lifecycle } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
 import chromeDriver from 'chromedriver';

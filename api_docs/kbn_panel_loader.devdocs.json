@@ -11,7 +11,7 @@
         "label": "PanelLoader",
         "description": [],
         "signature": [
-          "(props: { showShadow?: boolean | undefined; dataTestSubj?: string | undefined; }) => JSX.Element"
+          "(props: { showShadow?: boolean | undefined; showBorder?: boolean | undefined; dataTestSubj?: string | undefined; }) => JSX.Element"
         ],
         "path": "packages/kbn-panel-loader/index.tsx",
         "deprecated": false,
@@ -34,6 +34,20 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "showShadow",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "packages/kbn-panel-loader/index.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/panel-loader",
+                "id": "def-public.PanelLoader.$1.showBorder",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "showBorder",
                 "description": [],
                 "signature": [
                   "boolean | undefined"

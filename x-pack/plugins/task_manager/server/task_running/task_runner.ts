@@ -504,7 +504,7 @@ export class TaskManagerRunner implements TaskRunner {
           // try to release claim as an unknown failure prevented us from marking as running
           mapErr((errReleaseClaim: Error) => {
             this.logger.error(
-              `[Task Runner] Task ${this.id} failed to release claim after failure: ${errReleaseClaim}`
+              `[Task Runner] Task ${this.id} failed to release claim after failure: Error: ${errReleaseClaim.message}`
             );
           }, await this.releaseClaimAndIncrementAttempts());
         }

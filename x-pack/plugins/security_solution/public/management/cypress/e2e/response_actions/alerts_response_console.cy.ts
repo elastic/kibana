@@ -9,6 +9,7 @@ import { closeAllToasts } from '../../tasks/toasts';
 import {
   getAlertsTableRows,
   openAlertDetailsView,
+  openAlertDetailsViewFromTimeline,
   openInvestigateInTimelineView,
   openResponderFromEndpointAlertDetails,
 } from '../../screens/alerts';
@@ -104,9 +105,7 @@ describe(
 
       getAlertsTableRows().should('have.length.greaterThan', 0);
       openInvestigateInTimelineView();
-      cy.getByTestSubj('timeline-container').within(() => {
-        openAlertDetailsView();
-      });
+      openAlertDetailsViewFromTimeline();
       openResponderFromEndpointAlertDetails();
       ensureOnResponder();
     });

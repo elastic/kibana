@@ -5,33 +5,16 @@
  * 2.0.
  */
 
-import { CollectorFetchContext, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { firstValueFrom } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
-import { GetLicense } from '.';
-import { ReportingCore } from '..';
-import { getReportingUsage } from './get_reporting_usage';
-import { reportingSchema } from './schema';
-import { ReportingUsageType } from './types';
+import { firstValueFrom, map } from 'rxjs';
 
-/*
- * @return {Object} kibana usage stats type collection object
- */
-export function getReportingUsageCollector(
-  usageCollection: UsageCollectionSetup,
-  getLicense: GetLicense,
-  exportTypesRegistry: ExportTypesRegistry,
-  isReady: () => Promise<boolean>
-) {
-  return usageCollection.makeUsageCollector<ReportingUsageType>({
-    type: 'reporting',
-    fetch: ({ esClient }: CollectorFetchContext) => {
-      return getReportingUsage(getLicense, esClient, exportTypesRegistry);
-    },
-    isReady,
-    schema: reportingSchema,
-  });
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { ICollector } from '@kbn/usage-collection-plugin/server/collector/types';
+import { ReportingCore } from '..';
+import { ReportingSchema } from './collection_schema';
+
+export interface ReportingUsageType {
+  available: boolean;
+  enabled: boolean;
 }
 
 export function registerReportingUsageCollector(
@@ -42,27 +25,28 @@ export function registerReportingUsageCollector(
     return;
   }
 
-  const exportTypesRegistry = reporting.getExportTypesRegistry();
+  const isReady = reporting.pluginStartsUp.bind(reporting);
+
   const getLicense = async () => {
     const { licensing } = await reporting.getPluginStartDeps();
     return await firstValueFrom(
-      licensing.license$.pipe(
-        map(({ isAvailable, type }) => ({
-          isAvailable: () => isAvailable,
-          license: {
-            getType: () => type,
-          },
-        }))
-      )
+      licensing.license$.pipe(map(({ isAvailable }) => ({ isAvailable })))
     );
   };
-  const collectionIsReady = reporting.pluginStartsUp.bind(reporting);
 
-  const collector = getReportingUsageCollector(
-    usageCollection,
-    getLicense,
-    exportTypesRegistry,
-    collectionIsReady
-  );
+  const collector: ICollector<ReportingUsageType> =
+    usageCollection.makeUsageCollector<ReportingUsageType>({
+      type: 'reporting',
+      fetch: () =>
+        getLicense().then((license) => {
+          return {
+            available: license.isAvailable === true, // is available under all non-expired licenses
+            enabled: true, // is enabled, by nature of this code path executing
+          };
+        }),
+      isReady,
+      schema: ReportingSchema,
+    });
+
   usageCollection.registerCollector(collector);
 }

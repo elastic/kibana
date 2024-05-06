@@ -5,18 +5,9 @@
  * 2.0.
  */
 import React from 'react';
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSelect,
-  EuiSelectOption,
-} from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSelectOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  TraceSearchQuery,
-  TraceSearchType,
-} from '../../../../../common/trace_explorer';
+import { TraceSearchQuery, TraceSearchType } from '../../../../../common/trace_explorer';
 import { useAdHocApmDataView } from '../../../../hooks/use_adhoc_apm_data_view';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
@@ -45,12 +36,7 @@ const options: EuiSelectOption[] = [
   },
 ];
 
-export function TraceSearchBox({
-  query,
-  onQueryChange,
-  onQueryCommit,
-  loading,
-}: Props) {
+export function TraceSearchBox({ query, onQueryChange, onQueryCommit, loading }: Props) {
   const {
     unifiedSearch: {
       ui: { QueryStringInput },
@@ -97,12 +83,9 @@ export function TraceSearchBox({
                           query: String(e.query ?? ''),
                         });
                       }}
-                      appName={i18n.translate(
-                        'xpack.apm.traceExplorer.appName',
-                        {
-                          defaultMessage: 'APM',
-                        }
-                      )}
+                      appName={i18n.translate('xpack.apm.traceExplorer.appName', {
+                        defaultMessage: 'APM',
+                      })}
                     />
                   </form>
                 )}

@@ -9,26 +9,25 @@
 import { putRuntimeField } from './put_runtime_field';
 import { dataViewsService } from '../../../mocks';
 import { getUsageCollection } from '../test_utils';
-import { DataView } from '../../../../common';
+import { DataViewLazy } from '../../../../common';
 
 describe('put runtime field', () => {
-  it('call usageCollection', () => {
+  it('call usageCollection', async () => {
     const usageCollection = getUsageCollection();
 
-    dataViewsService.get.mockImplementation(
+    dataViewsService.getDataViewLazy.mockImplementation(
       async (id: string) =>
         ({
           removeRuntimeField: jest.fn(),
           addRuntimeField: jest.fn(),
-          fields: {
-            getByName: jest.fn().mockReturnValue({
-              runtimeField: {},
-            }),
-          },
-        } as unknown as DataView)
+          getFieldByName: jest.fn().mockReturnValue({
+            runtimeField: {},
+          }),
+          getRuntimeField: jest.fn(),
+        } as unknown as DataViewLazy)
     );
 
-    putRuntimeField({
+    await putRuntimeField({
       dataViewsService,
       counterName: 'PUT /path',
       usageCollection,

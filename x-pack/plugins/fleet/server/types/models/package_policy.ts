@@ -111,6 +111,25 @@ const PackagePolicyBaseSchema = {
   output_id: schema.maybe(schema.string()),
   inputs: schema.arrayOf(schema.object(PackagePolicyInputsSchema)),
   vars: schema.maybe(ConfigRecordSchema),
+  overrides: schema.maybe(
+    schema.nullable(
+      schema.object({
+        inputs: schema.maybe(
+          schema.recordOf(schema.string(), schema.any(), {
+            validate: (val) => {
+              if (
+                Object.keys(val).some(
+                  (key) => key.match(/^compiled_inputs(\.)?/) || key.match(/^compiled_stream(\.)?/)
+                )
+              ) {
+                return 'Overrides of compiled_inputs and compiled_stream are not allowed';
+              }
+            },
+          })
+        ),
+      })
+    )
+  ),
 };
 
 export const NewPackagePolicySchema = schema.object({
@@ -160,18 +179,11 @@ const SimplifiedVarsSchema = schema.recordOf(
   )
 );
 
-export const SimplifiedCreatePackagePolicyRequestBodySchema = schema.object({
+export const SimplifiedPackagePolicyBaseSchema = schema.object({
   id: schema.maybe(schema.string()),
   name: schema.string(),
   description: schema.maybe(schema.string()),
-  policy_id: schema.string(),
   namespace: schema.maybe(schema.string()),
-  package: schema.object({
-    name: schema.string(),
-    version: schema.string(),
-    experimental_data_stream_features: schema.maybe(ExperimentalDataStreamFeatures),
-  }),
-  force: schema.maybe(schema.boolean()),
   vars: schema.maybe(SimplifiedVarsSchema),
   inputs: schema.maybe(
     schema.recordOf(
@@ -192,6 +204,26 @@ export const SimplifiedCreatePackagePolicyRequestBodySchema = schema.object({
     )
   ),
 });
+
+export const SimplifiedPackagePolicyPreconfiguredSchema = SimplifiedPackagePolicyBaseSchema.extends(
+  {
+    id: schema.string(),
+    package: schema.object({
+      name: schema.string(),
+    }),
+  }
+);
+
+export const SimplifiedCreatePackagePolicyRequestBodySchema =
+  SimplifiedPackagePolicyBaseSchema.extends({
+    policy_id: schema.string(),
+    force: schema.maybe(schema.boolean()),
+    package: schema.object({
+      name: schema.string(),
+      version: schema.string(),
+      experimental_data_stream_features: schema.maybe(ExperimentalDataStreamFeatures),
+    }),
+  });
 
 export const UpdatePackagePolicyRequestBodySchema = schema.object({
   ...CreatePackagePolicyProps,

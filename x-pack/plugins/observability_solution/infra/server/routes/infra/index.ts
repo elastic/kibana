@@ -14,8 +14,9 @@ import {
   GetInfraMetricsResponsePayloadRT,
 } from '../../../common/http_api/infra';
 import { InfraBackendLibs } from '../../lib/infra_types';
-import { getInfraAlertsClient } from './lib/helpers/get_infra_alerts_client';
+import { getInfraAlertsClient } from '../../lib/helpers/get_infra_alerts_client';
 import { getHosts } from './lib/host/get_hosts';
+import { getInfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
 
 export const initInfraMetricsRoute = (libs: InfraBackendLibs) => {
   const validateBody = createRouteValidationFunction(GetInfraMetricsRequestBodyPayloadRT);
@@ -30,23 +31,26 @@ export const initInfraMetricsRoute = (libs: InfraBackendLibs) => {
         body: validateBody,
       },
     },
-    async (_, request, response) => {
-      const [{ savedObjects }, { data }] = await libs.getStartServices();
+    async (requestContext, request, response) => {
       const params: GetInfraMetricsRequestBodyPayload = request.body;
 
       try {
-        const searchClient = data.search.asScoped(request);
+        const infraMetricsClient = await getInfraMetricsClient({
+          framework,
+          request,
+          infraSources: libs.sources,
+          requestContext,
+          sourceId: params.sourceId,
+        });
+
         const alertsClient = await getInfraAlertsClient({
           getStartServices: libs.getStartServices,
           request,
         });
-        const soClient = savedObjects.getScopedClient(request);
-        const source = await libs.sources.getSourceConfiguration(soClient, params.sourceId);
 
         const hosts = await getHosts({
-          searchClient,
+          infraMetricsClient,
           alertsClient,
-          sourceConfig: source.configuration,
           params,
         });
 

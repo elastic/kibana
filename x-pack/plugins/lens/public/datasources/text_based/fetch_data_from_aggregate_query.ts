@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { pluck } from 'rxjs/operators';
+import { pluck } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
 import { Query, AggregateQuery, Filter } from '@kbn/es-query';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';

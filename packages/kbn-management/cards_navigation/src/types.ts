@@ -20,7 +20,6 @@ export enum AppIds {
   SAVED_OBJECTS = 'objects',
   TAGS = 'tags',
   FILES_MANAGEMENT = 'filesManagement',
-  API_KEYS = 'api_keys',
   DATA_VIEWS = 'dataViews',
   REPORTING = 'reporting',
   CONNECTORS = 'triggersActionsConnectors',
@@ -28,6 +27,7 @@ export enum AppIds {
   MAINTENANCE_WINDOWS = 'maintenanceWindows',
   SERVERLESS_SETTINGS = 'settings',
   ROLES = 'roles',
+  API_KEYS = 'api_keys',
 }
 
 // Create new type that is a union of all the appId values
@@ -35,6 +35,7 @@ export type AppId = `${AppIds}`;
 
 export const appCategories = {
   DATA: 'data',
+  ACCESS: 'access',
   ALERTS: 'alerts',
   CONTENT: 'content',
   OTHER: 'other',

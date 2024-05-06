@@ -23,12 +23,12 @@ export const assistantAnonymizationFieldsFieldMap: FieldMap = {
     array: false,
     required: false,
   },
-  default_allow: {
+  allowed: {
     type: 'boolean',
     array: false,
     required: false,
   },
-  default_allow_replacement: {
+  anonymized: {
     type: 'boolean',
     array: false,
     required: false,
@@ -49,21 +49,6 @@ export const assistantAnonymizationFieldsFieldMap: FieldMap = {
     required: false,
   },
   created_by: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  users: {
-    type: 'nested',
-    array: true,
-    required: false,
-  },
-  'users.id': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'users.name': {
     type: 'keyword',
     array: false,
     required: false,

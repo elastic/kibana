@@ -49,6 +49,8 @@ import {
   fillAboutRuleAndContinue,
   fillDefineEqlRuleAndContinue,
   fillScheduleRuleAndContinue,
+  getIndexPatternClearButton,
+  getRuleIndexInput,
   selectEqlRuleType,
   waitForAlertsToPopulate,
 } from '../../../../tasks/create_new_rule';
@@ -56,6 +58,13 @@ import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { openRuleManagementPageViaBreadcrumbs } from '../../../../tasks/rules_management';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
+import {
+  EQL_OPTIONS_POPOVER_TRIGGER,
+  EQL_OPTIONS_TIMESTAMP_INPUT,
+  EQL_QUERY_INPUT,
+  EQL_QUERY_VALIDATION_ERROR,
+  RULES_CREATION_FORM,
+} from '../../../../screens/create_new_rule';
 
 describe('EQL rules', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
@@ -172,6 +181,36 @@ describe('EQL rules', { tags: ['@ess', '@serverless'] }, () => {
           expect(text).contains(rule.name);
           expect(text).contains(rule.severity);
         });
+    });
+  });
+
+  describe('with source data requiring EQL overrides', () => {
+    before(() => {
+      cy.task('esArchiverLoad', { archiveName: 'no_at_timestamp_field', type: 'ftr' });
+    });
+
+    after(() => {
+      cy.task('esArchiverUnload', { archiveName: 'no_at_timestamp_field', type: 'ftr' });
+    });
+
+    it('includes EQL options in query validation', () => {
+      login();
+      visit(CREATE_RULE_URL);
+      selectEqlRuleType();
+      getIndexPatternClearButton().click();
+      getRuleIndexInput().type(`no_at_timestamp_field{enter}`);
+
+      cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('exist');
+      cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('be.visible');
+      cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).type('any where true');
+
+      cy.get(EQL_QUERY_VALIDATION_ERROR).should('be.visible');
+      cy.get(EQL_QUERY_VALIDATION_ERROR).should('have.text', '1');
+
+      cy.get(RULES_CREATION_FORM).find(EQL_OPTIONS_POPOVER_TRIGGER).click();
+      cy.get(EQL_OPTIONS_TIMESTAMP_INPUT).type('event.ingested{enter}');
+
+      cy.get(EQL_QUERY_VALIDATION_ERROR).should('not.exist');
     });
   });
 });

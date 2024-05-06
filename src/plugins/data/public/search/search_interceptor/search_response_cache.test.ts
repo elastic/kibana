@@ -7,8 +7,8 @@
  */
 
 import { interval, Observable, of, throwError } from 'rxjs';
-import { shareReplay, switchMap, take } from 'rxjs/operators';
-import { IKibanaSearchResponse } from '../..';
+import { shareReplay, switchMap, take } from 'rxjs';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { SearchAbortController } from './search_abort_controller';
 import { SearchResponseCache } from './search_response_cache';
 

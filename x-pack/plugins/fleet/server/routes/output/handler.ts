@@ -234,7 +234,7 @@ export const postLogstashApiKeyHandler: RequestHandler = async (context, request
 export const getLatestOutputHealth: RequestHandler<
   TypeOf<typeof GetLatestOutputHealthRequestSchema.params>
 > = async (context, request, response) => {
-  const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+  const esClient = (await context.core).elasticsearch.client.asInternalUser;
   try {
     const outputHealth = await outputService.getLatestOutputHealth(
       esClient,

@@ -5,37 +5,29 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { euiPaletteColorBlind } from '@elastic/eui';
 
 import type { StatItems } from '../../../../components/stat_items';
-import {
-  useNetworkKpiUniquePrivateIps,
-  ID,
-} from '../../../containers/kpi_network/unique_private_ips';
 import type { NetworkKpiProps } from '../types';
 import * as i18n from './translations';
 import { kpiUniquePrivateIpsSourceMetricLensAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_source_metric';
 import { kpiUniquePrivateIpsDestinationMetricLensAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_destination_metric';
 import { kpiUniquePrivateIpsAreaLensAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_area';
 import { kpiUniquePrivateIpsBarLensAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_bar';
-import { KpiBaseComponentManage } from '../../../../hosts/components/kpi_hosts/common';
-import { useQueryToggle } from '../../../../../common/containers/query_toggle';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { InputsModelId } from '../../../../../common/store/inputs/constants';
-import { useRefetchByRestartingSession } from '../../../../../common/components/page/use_refetch_by_session';
+import { KpiBaseComponent } from '../../../../components/kpi';
 
 const euiVisColorPalette = euiPaletteColorBlind();
 const euiColorVis2 = euiVisColorPalette[2];
 const euiColorVis3 = euiVisColorPalette[3];
+export const ID = 'networkKpiUniquePrivateIpsQuery';
 
-export const fieldsMapping: Readonly<StatItems[]> = [
+export const uniquePrivateIpsStatItems: Readonly<StatItems[]> = [
   {
     key: 'uniqueIps',
     fields: [
       {
         key: 'uniqueSourcePrivateIps',
-        value: null,
         name: i18n.SOURCE_CHART_LABEL,
         description: i18n.SOURCE_UNIT_LABEL,
         color: euiColorVis2,
@@ -44,7 +36,6 @@ export const fieldsMapping: Readonly<StatItems[]> = [
       },
       {
         key: 'uniqueDestinationPrivateIps',
-        value: null,
         name: i18n.DESTINATION_CHART_LABEL,
         description: i18n.DESTINATION_UNIT_LABEL,
         color: euiColorVis3,
@@ -60,52 +51,8 @@ export const fieldsMapping: Readonly<StatItems[]> = [
   },
 ];
 
-const NetworkKpiUniquePrivateIpsComponent: React.FC<NetworkKpiProps> = ({
-  filterQuery,
-  from,
-  indexNames,
-  to,
-  updateDateRange,
-  setQuery,
-  skip,
-}) => {
-  const { toggleStatus } = useQueryToggle(ID);
-  const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
-  const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
-
-  useEffect(() => {
-    setQuerySkip(skip || !toggleStatus);
-  }, [skip, toggleStatus]);
-
-  const [loading, { refetch, id, inspect, ...data }] = useNetworkKpiUniquePrivateIps({
-    filterQuery,
-    endDate: to,
-    indexNames,
-    startDate: from,
-    skip: querySkip || isChartEmbeddablesEnabled,
-  });
-
-  const { session, refetchByRestartingSession } = useRefetchByRestartingSession({
-    inputId: InputsModelId.global,
-    queryId: id,
-  });
-
-  return (
-    <KpiBaseComponentManage
-      data={data}
-      id={id}
-      inspect={inspect}
-      loading={loading}
-      fieldsMapping={fieldsMapping}
-      from={from}
-      to={to}
-      updateDateRange={updateDateRange}
-      refetch={isChartEmbeddablesEnabled ? refetchByRestartingSession : refetch}
-      setQuery={setQuery}
-      setQuerySkip={setQuerySkip}
-      session={isChartEmbeddablesEnabled ? session : undefined}
-    />
-  );
+const NetworkKpiUniquePrivateIpsComponent: React.FC<NetworkKpiProps> = ({ from, to }) => {
+  return <KpiBaseComponent id={ID} statItems={uniquePrivateIpsStatItems} from={from} to={to} />;
 };
 
 export const NetworkKpiUniquePrivateIps = React.memo(NetworkKpiUniquePrivateIpsComponent);

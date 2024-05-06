@@ -61,4 +61,4 @@ export const UncommonProcessQueryTabBody = ({
   );
 };
 
-UncommonProcessQueryTabBody.dispalyName = 'UncommonProcessQueryTabBody';
+UncommonProcessQueryTabBody.displayName = 'UncommonProcessQueryTabBody';

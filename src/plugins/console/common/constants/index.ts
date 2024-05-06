@@ -15,3 +15,4 @@ export {
   OVERRIDES_SUBFOLDER,
   MANUAL_SUBFOLDER,
 } from './autocomplete_definitions';
+export { DEFAULT_INPUT_VALUE } from './editor_input';

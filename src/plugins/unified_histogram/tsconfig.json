@@ -23,7 +23,6 @@
     "@kbn/ui-actions-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/visualizations-plugin",
-    "@kbn/discover-utils",
     "@kbn/resizable-layout",
     "@kbn/shared-ux-button-toolbar",
     "@kbn/calculate-width-from-char-count",
@@ -31,6 +30,9 @@
     "@kbn/i18n-react",
     "@kbn/field-utils",
     "@kbn/esql-utils",
+    "@kbn/discover-utils",
+    "@kbn/visualization-utils",
+    "@kbn/search-types",
   ],
   "exclude": [
     "target/**/*",

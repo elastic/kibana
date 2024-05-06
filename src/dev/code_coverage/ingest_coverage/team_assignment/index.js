@@ -13,7 +13,7 @@ import { parse } from './parse_owners';
 import { flush } from './flush';
 import { enumeratePatterns } from './enumerate_patterns';
 import { pipe } from '../utils';
-import { reduce } from 'rxjs/operators';
+import { reduce } from 'rxjs';
 
 const flags = {
   string: ['src', 'dest'],

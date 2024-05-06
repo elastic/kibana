@@ -24,7 +24,6 @@
       "licensing",
       "observability",
       "observabilityShared",
-      "observabilityAIAssistant",
       "ruleRegistry",
       "security",
       "share",
@@ -42,7 +41,9 @@
       "ml",
       "serverless",
       "spaces",
-      "telemetry"
+      "telemetry",
+      "licenseManagement",
+      "observabilityAIAssistant"
     ],
     "requiredBundles": [
       "data",

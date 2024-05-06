@@ -95,29 +95,9 @@ export interface FailedTaskResult {
   status: TaskStatus.Failed | TaskStatus.DeadLetter;
 }
 
-type IndirectParamsType = Record<string, unknown>;
-
-export interface LoadedIndirectParams<
-  IndirectParams extends IndirectParamsType = IndirectParamsType
-> {
-  [key: string]: unknown;
-  indirectParams: IndirectParams;
-}
-
-export type LoadIndirectParamsResult<T extends LoadedIndirectParams = LoadedIndirectParams> =
-  | {
-      data: T;
-      error?: never;
-    }
-  | {
-      data?: never;
-      error: Error;
-    };
-export type LoadIndirectParamsFunction = () => Promise<LoadIndirectParamsResult>;
 export type RunFunction = () => Promise<RunResult | undefined | void>;
 export type CancelFunction = () => Promise<RunResult | undefined | void>;
 export interface CancellableTask<T = never> {
-  loadIndirectParams?: LoadIndirectParamsFunction;
   run: RunFunction;
   cancel?: CancelFunction;
   cleanup?: () => Promise<void>;
@@ -184,8 +164,6 @@ export const taskDefinitionSchema = schema.object(
     ),
 
     paramsSchema: schema.maybe(schema.any()),
-    // schema of the data fetched by the task runner (in loadIndirectParams) e.g. rule, action etc.
-    indirectParamsSchema: schema.maybe(schema.any()),
   },
   {
     validate({ timeout, priority }) {
@@ -220,7 +198,6 @@ export type TaskDefinition = Omit<TypeOf<typeof taskDefinitionSchema>, 'paramsSc
     }
   >;
   paramsSchema?: ObjectType;
-  indirectParamsSchema?: ObjectType;
 };
 
 export enum TaskStatus {

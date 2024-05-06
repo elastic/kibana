@@ -13,12 +13,12 @@ import {
   type EuiDataGridColumnCellAction,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import { type DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { ExpandButton } from './data_table_expand_button';
 import { ControlColumns, CustomGridColumnsConfiguration, UnifiedDataTableSettings } from '../types';
-import type { ValueToStringConverter, DataTableColumnTypes } from '../types';
+import type { ValueToStringConverter, DataTableColumnsMeta } from '../types';
 import { buildCellActions } from './default_cell_actions';
 import { getSchemaByKbnType } from './data_table_schema';
 import { SelectButton } from './data_table_document_selection';
@@ -93,7 +93,7 @@ function buildEuiGridColumn({
   editField,
   columnCellActions,
   visibleCellActions,
-  columnTypes,
+  columnsMeta,
   showColumnTokens,
   headerRowHeight,
   customGridColumnsConfiguration,
@@ -113,12 +113,22 @@ function buildEuiGridColumn({
   editField?: (fieldName: string) => void;
   columnCellActions?: EuiDataGridColumnCellAction[];
   visibleCellActions?: number;
-  columnTypes?: DataTableColumnTypes;
+  columnsMeta?: DataTableColumnsMeta;
   showColumnTokens?: boolean;
   headerRowHeight?: number;
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
 }) {
-  const dataViewField = dataView.getFieldByName(columnName);
+  const dataViewField = !isPlainRecord
+    ? dataView.getFieldByName(columnName)
+    : new DataViewField({
+        name: columnName,
+        type: columnsMeta?.[columnName]?.type ?? 'unknown',
+        esTypes: columnsMeta?.[columnName]?.esType
+          ? ([columnsMeta[columnName].esType] as string[])
+          : undefined,
+        searchable: true,
+        aggregatable: false,
+      });
   const editFieldButton =
     editField &&
     dataViewField &&
@@ -140,19 +150,22 @@ function buildEuiGridColumn({
       : [];
   }
 
-  const columnType = columnTypes?.[columnName] ?? dataViewField?.type;
+  const columnType = columnsMeta?.[columnName]?.type ?? dataViewField?.type;
 
   const column: EuiDataGridColumn = {
     id: columnName,
     schema: getSchemaByKbnType(columnType),
-    isSortable: isSortEnabled && (isPlainRecord || dataViewField?.sortable === true),
+    isSortable:
+      isSortEnabled &&
+      // TODO: would be great to have something like `sortable` flag for text based columns too
+      ((isPlainRecord && columnName !== '_source') || dataViewField?.sortable === true),
     display:
       showColumnTokens || headerRowHeight !== 1 ? (
         <DataTableColumnHeaderMemoized
           dataView={dataView}
           columnName={columnName}
           columnDisplayName={columnDisplayName}
-          columnTypes={columnTypes}
+          columnsMeta={columnsMeta}
           showColumnTokens={showColumnTokens}
           headerRowHeight={headerRowHeight}
         />
@@ -241,7 +254,7 @@ export function getEuiGridColumns({
   onFilter,
   editField,
   visibleCellActions,
-  columnTypes,
+  columnsMeta,
   showColumnTokens,
   headerRowHeightLines,
   customGridColumnsConfiguration,
@@ -260,10 +273,10 @@ export function getEuiGridColumns({
   };
   hasEditDataViewPermission: () => boolean;
   valueToStringConverter: ValueToStringConverter;
-  onFilter: DocViewFilterFn;
+  onFilter?: DocViewFilterFn;
   editField?: (fieldName: string) => void;
   visibleCellActions?: number;
-  columnTypes?: DataTableColumnTypes;
+  columnsMeta?: DataTableColumnsMeta;
   showColumnTokens?: boolean;
   headerRowHeightLines: number;
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
@@ -289,7 +302,7 @@ export function getEuiGridColumns({
       onFilter,
       editField,
       visibleCellActions,
-      columnTypes,
+      columnsMeta,
       showColumnTokens,
       headerRowHeight,
       customGridColumnsConfiguration,
@@ -300,7 +313,7 @@ export function getEuiGridColumns({
 export function canPrependTimeFieldColumn(
   columns: string[],
   timeFieldName: string | undefined,
-  columnTypes: DataTableColumnTypes | undefined,
+  columnsMeta: DataTableColumnsMeta | undefined,
   showTimeCol: boolean,
   isPlainRecord: boolean
 ) {
@@ -309,7 +322,7 @@ export function canPrependTimeFieldColumn(
   }
 
   if (isPlainRecord) {
-    return !!columnTypes && timeFieldName in columnTypes && columns.includes('_source');
+    return !!columnsMeta && timeFieldName in columnsMeta && columns.includes('_source');
   }
 
   return true;

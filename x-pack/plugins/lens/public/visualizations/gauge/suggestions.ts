@@ -6,16 +6,21 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { GaugeShape } from '@kbn/expression-gauge-plugin/common';
 import {
   GaugeShapes,
   GaugeTicksPositions,
   GaugeLabelMajorModes,
 } from '@kbn/expression-gauge-plugin/common';
-import { IconChartHorizontalBullet, IconChartVerticalBullet } from '@kbn/chart-icons';
+import {
+  IconChartGaugeCircle,
+  IconChartGaugeSemiCircle,
+  IconChartGaugeArc,
+  IconChartHorizontalBullet,
+  IconChartVerticalBullet,
+} from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import type { TableSuggestion, Visualization } from '../../types';
-import type { GaugeVisualizationState } from './constants';
+import type { TableSuggestion, Visualization, VisualizationSuggestion } from '../../types';
+import { gaugeTitlesByType, GaugeVisualizationState } from './constants';
 
 const isNotNumericMetric = (table: TableSuggestion) =>
   table.columns?.[0]?.operation.dataType !== 'number' ||
@@ -28,7 +33,6 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
   table,
   state,
   keptLayerIds,
-  subVisualizationId,
 }) => {
   const isGauge = Boolean(
     state && (state.minAccessor || state.maxAccessor || state.goalAccessor || state.metricAccessor)
@@ -48,15 +52,10 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
     return [];
   }
 
-  const shape: GaugeShape =
-    state?.shape === GaugeShapes.VERTICAL_BULLET
-      ? GaugeShapes.VERTICAL_BULLET
-      : GaugeShapes.HORIZONTAL_BULLET;
-
-  const baseSuggestion = {
+  const baseSuggestion: VisualizationSuggestion<GaugeVisualizationState> = {
     state: {
       ...state,
-      shape,
+      shape: state?.shape ?? GaugeShapes.HORIZONTAL_BULLET,
       layerId: table.layerId,
       layerType: LayerTypes.DATA,
       ticksPosition: GaugeTicksPositions.AUTO,
@@ -65,31 +64,69 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
     title: i18n.translate('xpack.lens.gauge.gaugeLabel', {
       defaultMessage: 'Gauge',
     }),
-    previewIcon:
-      shape === GaugeShapes.VERTICAL_BULLET ? IconChartVerticalBullet : IconChartHorizontalBullet,
+    previewIcon: IconChartHorizontalBullet,
     score: 0.5,
     hide: !isGauge || state?.metricAccessor === undefined, // only display for gauges for beta
     incomplete: state?.metricAccessor === undefined,
   };
 
-  const suggestions = isGauge
+  const suggestions: Array<VisualizationSuggestion<GaugeVisualizationState>> = isGauge
     ? [
         {
           ...baseSuggestion,
-          previewIcon:
-            state?.shape === GaugeShapes.VERTICAL_BULLET
-              ? IconChartHorizontalBullet
-              : IconChartVerticalBullet,
+          title: gaugeTitlesByType.verticalBullet,
+          previewIcon: IconChartVerticalBullet,
           state: {
             ...baseSuggestion.state,
             ...state,
-            shape:
-              state?.shape === GaugeShapes.VERTICAL_BULLET
-                ? GaugeShapes.HORIZONTAL_BULLET
-                : GaugeShapes.VERTICAL_BULLET,
+            shape: GaugeShapes.VERTICAL_BULLET,
+          },
+          score: 1,
+        },
+        {
+          ...baseSuggestion,
+          title: gaugeTitlesByType.horizontalBullet,
+          previewIcon: IconChartHorizontalBullet,
+          state: {
+            ...baseSuggestion.state,
+            ...state,
+            shape: GaugeShapes.HORIZONTAL_BULLET,
+          },
+          score: 1,
+        },
+        {
+          ...baseSuggestion,
+          title: gaugeTitlesByType.semiCircle,
+          previewIcon: IconChartGaugeSemiCircle,
+          state: {
+            ...baseSuggestion.state,
+            ...state,
+            shape: GaugeShapes.SEMI_CIRCLE,
+          },
+          score: 0.1,
+        },
+        {
+          ...baseSuggestion,
+          title: gaugeTitlesByType.arc,
+          previewIcon: IconChartGaugeArc,
+          state: {
+            ...baseSuggestion.state,
+            ...state,
+            shape: GaugeShapes.ARC,
           },
         },
-      ]
+        {
+          ...baseSuggestion,
+          title: gaugeTitlesByType.circle,
+          previewIcon: IconChartGaugeCircle,
+          state: {
+            ...baseSuggestion.state,
+            ...state,
+            shape: GaugeShapes.CIRCLE,
+          },
+          score: 0.1,
+        },
+      ].filter((s) => s.state.shape !== state?.shape)
     : [
         {
           ...baseSuggestion,

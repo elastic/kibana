@@ -21,7 +21,7 @@ function formatHit(hit: { [key: string]: { mappings: any } }, indexName: string)
   };
 }
 
-export function registerMappingRoute({ router, lib: { handleEsError } }: RouteDependencies) {
+export function registerGetMappingRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.get(
     { path: addBasePath('/mapping/{indexName}'), validate: { params: paramsSchema } },
     async (context, request, response) => {

@@ -13,9 +13,10 @@ import type {
   FactoryQueryTypes,
   StrategyRequestInputType,
 } from '../../../../common/search_strategy';
-import { Observable } from 'rxjs';
+import { of, throwError } from 'rxjs';
 
 jest.mock('@kbn/securitysolution-hook-utils');
+
 const mockAddToastError = jest.fn();
 const mockAddToastWarning = jest.fn();
 jest.mock('../../hooks/use_app_toasts', () => ({
@@ -25,20 +26,13 @@ jest.mock('../../hooks/use_app_toasts', () => ({
   })),
 }));
 
-// default to completed response
-const mockResponse = jest.fn(
-  () =>
-    ({
-      rawResponse: {},
-      isPartial: false,
-      isRunning: false,
-    } as unknown)
-);
-const mockSearch = jest.fn(
-  () =>
-    new Observable((subscription) => {
-      subscription.next(mockResponse());
-    })
+const mockSearch = jest.fn(() =>
+  // default to completed response
+  of({
+    rawResponse: {},
+    isPartial: false,
+    isRunning: false,
+  })
 );
 jest.mock('../../lib/kibana', () => {
   const original = jest.requireActual('../../lib/kibana');
@@ -269,7 +263,7 @@ describe('useSearchStrategy', () => {
   describe('search function', () => {
     it('should track successful search result', () => {
       const { result } = renderHook(() => useSearch<FactoryQueryTypes>(factoryQueryType));
-      result.current({ request, abortSignal: new AbortController().signal });
+      result.current({ request, abortSignal: new AbortController().signal }).subscribe();
 
       expect(mockStartTracking).toBeCalledTimes(1);
       expect(mockEndTracking).toBeCalledTimes(1);
@@ -277,24 +271,25 @@ describe('useSearchStrategy', () => {
     });
 
     it('should handle search error', () => {
-      mockResponse.mockImplementation(() => {
-        throw new Error('simulated search error');
+      const error = 'simulated search error';
+      mockSearch.mockImplementationOnce(() => {
+        return throwError(() => Error(error));
       });
 
       const { result } = renderHook(() => useSearch<FactoryQueryTypes>(factoryQueryType));
-      result.current({ request, abortSignal: new AbortController().signal });
+      result.current({ request, abortSignal: new AbortController().signal }).subscribe();
 
       expect(mockStartTracking).toBeCalledTimes(1);
       expect(mockEndTracking).toBeCalledWith('error');
     });
 
     it('should track error search result', () => {
-      mockResponse.mockImplementationOnce(() => {
-        throw Error('fake server error');
+      mockSearch.mockImplementationOnce(() => {
+        return throwError(() => Error('fake server error'));
       });
 
       const { result } = renderHook(() => useSearch<FactoryQueryTypes>(factoryQueryType));
-      result.current({ request, abortSignal: new AbortController().signal });
+      result.current({ request, abortSignal: new AbortController().signal }).subscribe();
 
       expect(mockStartTracking).toBeCalledTimes(1);
       expect(mockEndTracking).toBeCalledTimes(1);
@@ -303,13 +298,13 @@ describe('useSearchStrategy', () => {
 
     it('should track aborted search result', () => {
       const abortController = new AbortController();
-      mockResponse.mockImplementationOnce(() => {
+      mockSearch.mockImplementationOnce(() => {
         abortController.abort();
-        throw Error('fake aborted');
+        return throwError(() => Error('fake aborted'));
       });
 
       const { result } = renderHook(() => useSearch<FactoryQueryTypes>(factoryQueryType));
-      result.current({ request, abortSignal: abortController.signal });
+      result.current({ request, abortSignal: abortController.signal }).subscribe();
 
       expect(mockStartTracking).toBeCalledTimes(1);
       expect(mockEndTracking).toBeCalledTimes(1);

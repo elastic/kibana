@@ -664,6 +664,22 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JourneyConfig.getSynthtraceConfig",
+            "type": "Function",
+            "tags": [],
+            "label": "getSynthtraceConfig",
+            "description": [],
+            "signature": [
+              "() => JourneySynthtrace<CtxExt, any> | undefined"
+            ],
+            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

@@ -34,16 +34,14 @@ import { uptimeRuleTypeFieldMap } from './alert_rules/common';
 
 export class Plugin implements PluginType {
   private savedObjectsClient?: SavedObjectsClientContract;
-  private initContext: PluginInitializerContext;
-  private logger: Logger;
+  private readonly logger: Logger;
   private server?: SyntheticsServerSetup;
   private syntheticsService?: SyntheticsService;
   private syntheticsMonitorClient?: SyntheticsMonitorClient;
   private readonly telemetryEventsSender: TelemetryEventsSender;
 
-  constructor(initializerContext: PluginInitializerContext<UptimeConfig>) {
-    this.initContext = initializerContext;
-    this.logger = initializerContext.logger.get();
+  constructor(private readonly initContext: PluginInitializerContext<UptimeConfig>) {
+    this.logger = initContext.logger.get();
     this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
   }
 
@@ -52,7 +50,6 @@ export class Plugin implements PluginType {
 
     savedObjectsAdapter.config = config;
 
-    this.logger = this.initContext.logger.get();
     const { ruleDataService } = plugins.ruleRegistry;
 
     const ruleDataClient = ruleDataService.initializeIndex({
@@ -82,7 +79,7 @@ export class Plugin implements PluginType {
 
     this.syntheticsService = new SyntheticsService(this.server);
 
-    this.syntheticsService.setup(plugins.taskManager);
+    this.syntheticsService.setup(plugins.taskManager).catch(() => {});
 
     this.syntheticsMonitorClient = new SyntheticsMonitorClient(this.syntheticsService, this.server);
 
@@ -110,11 +107,12 @@ export class Plugin implements PluginType {
       this.server.encryptedSavedObjects = pluginsStart.encryptedSavedObjects;
       this.server.savedObjectsClient = this.savedObjectsClient;
       this.server.spaces = pluginsStart.spaces;
+      this.server.isElasticsearchServerless = coreStart.elasticsearch.getCapabilities().serverless;
     }
 
     this.syntheticsService?.start(pluginsStart.taskManager);
 
-    this.telemetryEventsSender.start(pluginsStart.telemetry, coreStart);
+    this.telemetryEventsSender.start(pluginsStart.telemetry, coreStart).catch(() => {});
   }
 
   public stop() {}

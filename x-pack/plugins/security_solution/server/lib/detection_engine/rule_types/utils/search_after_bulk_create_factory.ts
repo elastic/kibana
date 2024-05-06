@@ -140,7 +140,13 @@ export const searchAfterAndBulkCreateFactory = async ({
             );
           }
 
-          if (lastSortIds != null && lastSortIds.length !== 0) {
+          // ES can return negative sort id for date field, when sort order set to desc
+          // this could happen when event has empty sort field
+          // https://github.com/elastic/kibana/issues/174573 (happens to IM rule only since it uses desc order for events search)
+          // when negative sort id used in subsequent request it fails, so when negative sort value found we don't do next request
+          const hasNegativeNumber = lastSortIds?.some((val) => val < 0);
+
+          if (lastSortIds != null && lastSortIds.length !== 0 && !hasNegativeNumber) {
             sortIds = lastSortIds;
             hasSortId = true;
           } else {
@@ -164,7 +170,6 @@ export const searchAfterAndBulkCreateFactory = async ({
         // if there is a sort id to continue the search_after with.
         if (includedEvents.length !== 0) {
           const enrichedEvents = await enrichment(includedEvents);
-
           const bulkCreateResult = await bulkCreateExecutor({
             enrichedEvents,
             toReturn,

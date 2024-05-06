@@ -84,6 +84,7 @@ export interface IAlertsClient<
     alertIds: string[];
     maintenanceWindowIds: string[];
   } | null>;
+  isTrackedAlert(id: string): boolean;
   getSummarizedAlerts?(params: GetSummarizedAlertsParams): Promise<SummarizedAlerts>;
   getAlertsToSerialize(): {
     alertsToReturn: Record<string, RawAlertInstance>;
@@ -129,6 +130,7 @@ export interface LogAlertsOpts {
 export interface InitializeExecutionOpts {
   maxAlerts: number;
   ruleLabel: string;
+  runTimestamp?: Date;
   startedAt: Date | null;
   flappingSettings: RulesSettingsFlappingProperties;
   activeAlertsFromState: Record<string, RawAlertInstance>;
@@ -152,6 +154,7 @@ export interface PublicAlertsClient<
   report(
     alert: ReportedAlert<AlertData, State, Context, ActionGroupIds>
   ): ReportedAlertData<AlertData>;
+  isTrackedAlert(id: string): boolean;
   setAlertData(alert: UpdateableAlert<AlertData, State, Context, ActionGroupIds>): void;
   getAlertLimitValue: () => number;
   setAlertLimitReached: (reached: boolean) => void;

@@ -16,6 +16,7 @@ import { mockManagementPlugin } from '../../mocks';
 import { createComponentWithContext } from '../test_utils';
 
 jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
   EuiBasicTable: 'eui-basic-table',
   EuiButton: 'eui-button',
   EuiButtonEmpty: 'eui-button-empty',
