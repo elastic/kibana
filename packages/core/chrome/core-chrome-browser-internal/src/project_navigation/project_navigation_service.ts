@@ -250,17 +250,21 @@ export class ProjectNavigationService {
           this.navigationTreeUi$.next(navigationTreeUI);
           this.projectNavigationNavTreeFlattened = flattenNav(navigationTree);
 
-          let solutionForCurrentLocation = id;
-
           // Verify if the current location is part of the navigation tree of
           // the initiated solution. If not, we need to find the correct solution
           const activeNodes = this.updateActiveProjectNavigationNodes();
+          let willChangeSolution = false;
+
           if (activeNodes.length === 0) {
-            solutionForCurrentLocation = this.findSolutionForCurrentLocation() ?? id;
-            this.changeActiveSolutionNavigation(solutionForCurrentLocation);
+            const solutionForCurrentLocation = this.findSolutionForCurrentLocation();
+            if (solutionForCurrentLocation) {
+              willChangeSolution = true;
+              this.goToSolutionHome(solutionForCurrentLocation);
+              this.changeActiveSolutionNavigation(solutionForCurrentLocation);
+            }
           }
 
-          if (!initialised && solutionForCurrentLocation === id) {
+          if (!initialised && !willChangeSolution) {
             this.activeSolutionNavDefinitionId$.next(id);
             initialised = true;
           }
