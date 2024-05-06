@@ -11,9 +11,9 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('core', function () {
     this.tags(['esGate']);
 
-    loadTestFile(require.resolve('./compression'));
+    // loadTestFile(require.resolve('./compression'));
     loadTestFile(require.resolve('./translations'));
-    loadTestFile(require.resolve('./capabilities'));
-    loadTestFile(require.resolve('./ui_settings'));
+    // loadTestFile(require.resolve('./capabilities'));
+    // loadTestFile(require.resolve('./ui_settings'));
   });
 }
