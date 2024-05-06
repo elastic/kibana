@@ -9,12 +9,12 @@
 import React from 'react';
 // import { css } from '@emotion/react';
 // import { useEuiTheme } from '@elastic/eui';
-// import type { DataTableRecord, FormattedHit } from '@kbn/discover-utils/types';
+import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { Tree } from './Tree';
 
 const TreeMemoized = React.memo(Tree);
 
-export const JSONViewer = ({ data }: { data: unknown }) => {
+export const JSONViewer = ({ data }: { data: EsHitRecord }) => {
   // const { euiTheme } = useEuiTheme();
   // const iconCSS = css`
   //   margin-right: ${euiTheme.size.m};

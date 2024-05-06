@@ -7,11 +7,20 @@
  */
 
 import React, { useState, useCallback } from 'react';
-// import { css } from '@emotion/react';
-import { EuiIcon } from '@elastic/eui';
-
-import { TreeKeyValue } from './tree_key_value';
+import { css } from '@emotion/react';
+import { EuiIcon, useEuiTheme } from '@elastic/eui';
+import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { Label } from './label';
+
+const FIELDS_COLORS = {
+  dark: '#a68ac5',
+  light: '#765b96',
+};
+
+const VALUES_COLORS = {
+  dark: '#d97797',
+  light: '#a34a68',
+};
 
 export const TreeChild = ({
   node,
@@ -19,7 +28,7 @@ export const TreeChild = ({
   isRootElement,
   parent,
 }: {
-  node: unknown;
+  node: EsHitRecord;
   i: number;
   isRootElement?: boolean;
   parent?: unknown;
@@ -37,30 +46,49 @@ export const TreeChild = ({
     parent,
   };
 
+  const { euiTheme } = useEuiTheme();
+
   return (
-    <div>
-      <div>
-        <button onClick={handleExpandElement}>
-          <EuiIcon type="minus" color="primary" />
-        </button>
-        <span>
-          <Label {...itemLabelProps} />
-        </span>
-      </div>
-      {node &&
+    <>
+      <>
+        <EuiIcon
+          type={expanded ? 'minus' : 'plus'}
+          color="primary"
+          role="button"
+          onClick={handleExpandElement}
+        />
+        <Label {...itemLabelProps} />
+      </>
+      {expanded &&
+        node &&
         Object.keys(node).map((subel, n) => {
           return (
-            <div key={n}>
-              <div>
-                {typeof node[subel] !== 'object' || node[subel] == null ? (
-                  <TreeKeyValue key={subel} value={node[subel]} />
-                ) : (
-                  <TreeChild i={i} node={node[subel]} parent={subel} />
-                )}
-              </div>
+            <div
+              key={n}
+              css={css`
+                font-family: ${euiTheme.font.familyCode};
+              `}
+            >
+              {typeof node[subel] !== 'object' || node[subel] == null ? (
+                <>
+                  <span
+                    css={css`
+                      color: ${FIELDS_COLORS.light};
+                    `}
+                  >{`${subel}`}</span>{' '}
+                  :
+                  <span
+                    css={css`
+                      color: ${VALUES_COLORS.light};
+                    `}
+                  >{`${node[subel]}`}</span>
+                </>
+              ) : (
+                <TreeChild i={i} node={node[subel]} parent={subel} />
+              )}
             </div>
           );
         })}
-    </div>
+    </>
   );
 };

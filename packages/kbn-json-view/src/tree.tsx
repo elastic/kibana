@@ -7,11 +7,12 @@
  */
 
 import React from 'react';
+import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { TreeChild } from './tree_child';
 
 const TreeChildMemoized = React.memo(TreeChild);
 
-export const Tree = ({ data }: { data: unknown }) => {
+export const Tree = ({ data }: { data: EsHitRecord }) => {
   return (
     <>
       {Object.keys(data).length !== 0 &&

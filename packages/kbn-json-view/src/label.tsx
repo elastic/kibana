@@ -7,9 +7,10 @@
  */
 
 import React from 'react';
+import type { EsHitRecord } from '@kbn/discover-utils/types';
 
 const getLabel = (
-  node: unknown,
+  node: EsHitRecord,
   i: number,
   isRootElement: boolean | undefined,
   parent: unknown
@@ -18,25 +19,21 @@ const getLabel = (
   const childIsObjectLiteral = typeof node === 'object' && !childIsArray && !isRootElement;
   const numChildren = Object.keys(node).length;
 
-  try {
-    if (childIsArray) {
-      return {
-        text: parent || 'array',
-        decorator: `[${node.length}]`,
-      };
-    } else if (childIsObjectLiteral) {
-      return {
-        text: parent || 'object',
-        decorator: `{${numChildren}}`,
-      };
-    } else {
-      return {
-        text: `${i}` || 'object',
-        decorator: `{${numChildren}}`,
-      };
-    }
-  } catch (e) {
-    console.error(e);
+  if (childIsArray) {
+    return {
+      text: parent || 'array',
+      decorator: `[${node.length}]`,
+    };
+  } else if (childIsObjectLiteral) {
+    return {
+      text: parent || 'object',
+      decorator: `{${numChildren}}`,
+    };
+  } else {
+    return {
+      text: `${i}` || 'object',
+      decorator: `{${numChildren}}`,
+    };
   }
 };
 
@@ -46,7 +43,7 @@ export const Label = ({
   isRootElement,
   parent,
 }: {
-  node: unknown;
+  node: EsHitRecord;
   i: number;
   isRootElement?: boolean;
   parent?: unknown;

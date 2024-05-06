@@ -21,6 +21,7 @@ import {
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
 } from '@elastic/eui';
+import { JSONViewer } from '@kbn/json-view';
 import classnames from 'classnames';
 import { getInnerColumns } from '../utils/columns';
 
@@ -55,8 +56,10 @@ export function SourceDocument({
         maxEntries
       )
     : formatHit(row, dataView, shouldShowFieldHandler, maxEntries, fieldFormats);
-  
-  console.dir(pairs);
+
+  // console.dir(row.raw);
+
+  return <JSONViewer data={row.raw} />;
 
   return (
     <EuiDescriptionList
