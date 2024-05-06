@@ -159,7 +159,7 @@ export const WaffleGroupByControls = ({
     <DropdownButton
       label={i18n.translate('xpack.infra.waffle.groupByLabel', { defaultMessage: 'Group by' })}
       onClick={togglePopover}
-      data-test-subj={'waffleGroupByDropdown'}
+      data-test-subj="waffleGroupByDropdown"
     >
       {buttonBody}
     </DropdownButton>

@@ -12,7 +12,7 @@ import {
   type Filter,
   isCombinedFilter,
 } from '@kbn/es-query';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import type { InfraCustomDashboardAssetType } from '../../../common/custom_dashboards';
 

@@ -25,7 +25,6 @@ export function useMetricsExplorerData({
   timestamps: MetricsExplorerTimestamp;
   enabled?: boolean;
 }) {
-  // Your code logic here
   const { http } = useKibana().services;
   const { metricsView } = useMetricsDataViewContext();
 

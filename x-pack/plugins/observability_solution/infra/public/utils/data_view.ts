@@ -25,13 +25,13 @@ interface DataViewAttributes {
   name?: string;
 }
 
-export async function resolveDataView({
+export const resolveDataView = ({
   dataViewId,
   dataViewsService,
 }: {
   dataViewId: string;
   dataViewsService: DataViewsContract;
-}) {
+}) => {
   try {
     return resolvePersistedDataView({ dataViewsService, dataViewId });
   } catch {
@@ -43,7 +43,7 @@ export async function resolveDataView({
       },
     });
   }
-}
+};
 
 export const resolvePersistedDataView = async ({
   dataViewsService,
