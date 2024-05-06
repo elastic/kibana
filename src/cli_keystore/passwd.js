@@ -7,8 +7,9 @@
  */
 
 import { Logger } from '../cli/logger';
+import { question } from '../cli/keystore/utils';
 
-export async function list(keystore, options = {}) {
+export async function passwd(keystore, options = {}) {
   const logger = new Logger(options);
   await keystore.load();
 
@@ -16,14 +17,18 @@ export async function list(keystore, options = {}) {
     return logger.error("ERROR: Kibana keystore not found. Use 'create' command to create one.");
   }
 
-  const keys = keystore.keys();
-  logger.log(keys.join('\n'));
+  const password =
+    (await question('Enter new password for the kibana keystore (empty for no password)', {
+      mask: '*',
+    })) || '';
+  keystore.setPassword(password);
+  keystore.save();
 }
 
-export function listCli(program, keystore) {
+export function passwdCli(program, keystore) {
   program
-    .command('list')
-    .description('List entries in the keystore')
+    .command('passwd')
+    .description('Changes the password of a keystore')
     .option('-s, --silent', 'prevent all logging')
-    .action(list.bind(null, keystore));
+    .action(passwd.bind(null, keystore));
 }
