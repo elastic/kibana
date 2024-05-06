@@ -10,7 +10,7 @@ import { throwError as throwErrorRx, of } from 'rxjs';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { discoverServiceMock } from '../../../__mocks__/services';
-import { IKibanaSearchResponse } from '@kbn/data-plugin/public';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { FetchDeps } from './fetch_all';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
