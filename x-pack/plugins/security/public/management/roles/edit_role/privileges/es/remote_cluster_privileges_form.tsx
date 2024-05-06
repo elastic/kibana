@@ -82,16 +82,6 @@ export const RemoteClusterPrivilegesForm: React.FunctionComponent<Props> = ({
     [remoteClusterPrivilege, onChange]
   );
 
-  const onCreateCustomPrivilege = useCallback(
-    (customPrivilege: string) => {
-      onChange({
-        ...remoteClusterPrivilege,
-        privileges: [...remoteClusterPrivilege.privileges, customPrivilege],
-      });
-    },
-    [remoteClusterPrivilege, onChange]
-  );
-
   return (
     <Fragment>
       <EuiSpacer size="m" />
@@ -148,7 +138,6 @@ export const RemoteClusterPrivilegesForm: React.FunctionComponent<Props> = ({
                     options={availableRemoteClusterPrivileges.map(toOption)}
                     selectedOptions={remoteClusterPrivilege.privileges.map(toOption)}
                     onChange={onPrivilegeChange}
-                    onCreateOption={onCreateCustomPrivilege}
                     isDisabled={isRoleReadOnly}
                     placeholder={i18n.translate(
                       'xpack.security.management.editRole.remoteClusterPrivilegeForm.privilegesPlaceholder',

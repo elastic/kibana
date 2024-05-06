@@ -36,9 +36,16 @@ export const RemoteClusterPrivileges: React.FunctionComponent<Props> = ({
   validator,
 }) => {
   const remoteClusterPrivileges = useMemo(() => role.elasticsearch.remote_cluster ?? [], [role]);
-  const { allowRoleRemoteIndexPrivileges, allowRemoteClusterPrivileges } = license.getFeatures();
-  const remoteClusterPrivilegesDisabled = !allowRoleRemoteIndexPrivileges;
-  const isReadOnly = !editable || isRoleReadOnly(role) || !allowRemoteClusterPrivileges;
+  const remoteClusterPrivilegesDisabled = useMemo(() => {
+    const { allowRemoteClusterPrivileges } = license.getFeatures();
+
+    return !allowRemoteClusterPrivileges;
+  }, [license]);
+
+  const isReadOnly = useMemo(
+    () => !editable || isRoleReadOnly(role) || remoteClusterPrivilegesDisabled,
+    [role, editable, remoteClusterPrivilegesDisabled]
+  );
 
   const onRoleChange = useCallback(
     (remoteCluster: RoleRemoteClusterPrivilege[]) => {

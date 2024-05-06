@@ -6,6 +6,7 @@
  */
 
 import { EuiButtonIcon } from '@elastic/eui';
+import type { EuiComboBoxProps } from '@elastic/eui';
 import React from 'react';
 
 import '@kbn/code-editor-mock/jest_helper';
@@ -32,7 +33,35 @@ test('it renders without crashing', () => {
   expect(wrapper).toMatchSnapshot();
 });
 
-test('it allows for custom remote cluster privileges', () => {
+test('it allows for custom remote cluster input', () => {
+  const onChange = jest.fn();
+  const wrapper = mountWithIntl(
+    <RemoteClusterPrivilegesForm
+      remoteClusterPrivilege={{
+        clusters: ['cluster1'],
+        privileges: ['monitor_enrich'],
+      }}
+      formIndex={0}
+      availableRemoteClusterPrivileges={['monitor_enrich']}
+      isRoleReadOnly={false}
+      validator={new RoleValidator()}
+      onChange={onChange}
+      onDelete={jest.fn()}
+    />
+  );
+
+  const privilegesSelect = wrapper.find(
+    'EuiComboBox[data-test-subj="remoteClusterClustersInput0"]'
+  );
+
+  (privilegesSelect.props() as any).onCreateOption('custom-cluster');
+
+  expect(onChange).toHaveBeenCalledWith(
+    expect.objectContaining({ clusters: ['cluster1', 'custom-cluster'] })
+  );
+});
+
+test('it does not allow for custom remote cluster privileges', () => {
   const onChange = jest.fn();
   const wrapper = mountWithIntl(
     <RemoteClusterPrivilegesForm
@@ -53,11 +82,7 @@ test('it allows for custom remote cluster privileges', () => {
     'EuiComboBox[data-test-subj="remoteClusterPrivilegesInput0"]'
   );
 
-  (privilegesSelect.props() as any).onCreateOption('custom-index-privilege');
-
-  expect(onChange).toHaveBeenCalledWith(
-    expect.objectContaining({ privileges: ['monitor_enrich', 'custom-index-privilege'] })
-  );
+  expect((privilegesSelect.props() as EuiComboBoxProps<unknown>).onCreateOption).toBe(undefined);
 });
 
 test('it allows for custom remote cluster clusters input', () => {

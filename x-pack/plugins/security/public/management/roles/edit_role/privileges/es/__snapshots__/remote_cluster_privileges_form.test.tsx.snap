@@ -76,7 +76,7 @@ exports[`it renders without crashing 1`] = `
                 isClearable={true}
                 isDisabled={false}
                 onChange={[Function]}
-                onCreateOption={[Function]}
+                optionMatcher={[Function]}
                 options={
                   Array [
                     Object {
