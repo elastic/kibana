@@ -7,25 +7,19 @@
 
 import type { CreateSLOInput } from '@kbn/slo-schema';
 import { cleanup } from '@kbn/infra-forge';
-import expect from '@kbn/expect';
 import { loadTestData } from '../../../../api_integration/apis/slos/helper/load_test_data';
 import { SloEsClient } from '../../../../api_integration/apis/slos/helper/es';
 import { sloData } from '../../../../api_integration/apis/slos/fixtures/create_slo';
-
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'dashboard']);
-  const kibanaServer = getService('kibanaServer');
   const esClient = getService('es');
-  const supertestAPI = getService('supertest');
   const sloEsClient = new SloEsClient(esClient);
   const logger = getService('log');
   const slo = getService('slo');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
   const comboBox = getService('comboBox');
 
   describe('overview embeddable', function () {
