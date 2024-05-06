@@ -7,7 +7,7 @@
  */
 
 import { Logger } from '../cli/logger';
-import { confirm, question } from './utils';
+import { confirm, question } from '../cli/keystore/utils';
 // import from path since add.test.js mocks 'fs' required for @kbn/utils
 import { createPromiseFromStreams, createConcatStream } from '@kbn/utils/src/streams';
 
@@ -23,6 +23,8 @@ import { createPromiseFromStreams, createConcatStream } from '@kbn/utils/src/str
 export async function add(keystore, key, options = {}) {
   const logger = new Logger(options);
   let value;
+
+  await keystore.load();
 
   if (!keystore.exists()) {
     return logger.error("ERROR: Kibana keystore not found. Use 'create' command to create one.");
