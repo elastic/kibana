@@ -72,6 +72,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should create a rule with defaultable fields', async () => {
         const expectedRule = getCustomQueryRuleParams({
           rule_id: 'rule-1',
+          max_signals: 200,
           setup: '# some setup markdown',
           related_integrations: [
             { package: 'package-a', version: '^1.2.3' },
@@ -173,6 +174,37 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body).toEqual({
           message: 'rule_id: "rule-1" already exists',
           status_code: 409,
+        });
+      });
+
+      describe('max_signals', () => {
+        beforeEach(async () => {
+          await deleteAllRules(supertest, log);
+        });
+
+        it('creates a rule with max_signals defaulted to 100 when not present', async () => {
+          const { body } = await securitySolutionApi
+            .createRule({
+              body: getCustomQueryRuleParams(),
+            })
+            .expect(200);
+
+          expect(body.max_signals).toEqual(100);
+        });
+
+        it('does NOT create a rule when max_signals is less than 1', async () => {
+          const { body } = await securitySolutionApi
+            .createRule({
+              body: {
+                ...getCustomQueryRuleParams(),
+                max_signals: 0,
+              },
+            })
+            .expect(400);
+
+          expect(body.message).toBe(
+            '[request body]: max_signals: Number must be greater than or equal to 1'
+          );
         });
       });
     });
