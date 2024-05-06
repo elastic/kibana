@@ -66,7 +66,7 @@ import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_compon
 import { handleSourceColumnState } from '../utils/state_helpers';
 import { updateSearchSource } from './utils/update_search_source';
 import { FieldStatisticsTable } from '../application/main/components/field_stats_table';
-import { fetchTextBased } from '../application/main/utils/fetch_text_based';
+import { fetchTextBased } from '../application/main/data_fetching/fetch_text_based';
 import { isTextBasedQuery } from '../application/main/utils/is_text_based_query';
 import { getValidViewMode } from '../application/main/utils/get_valid_view_mode';
 import { ADHOC_DATA_VIEW_RENDER_EVENT } from '../constants';
@@ -651,10 +651,7 @@ export class SavedSearchEmbeddable
       Array.isArray(searchProps.columns)
     ) {
       ReactDOM.render(
-        <KibanaRenderContextProvider
-          theme={searchProps.services.core.theme}
-          i18n={searchProps.services.core.i18n}
-        >
+        <KibanaRenderContextProvider {...searchProps.services.core}>
           <KibanaContextProvider services={searchProps.services}>
             <FieldStatisticsTable
               dataView={searchProps.dataView}
@@ -694,10 +691,7 @@ export class SavedSearchEmbeddable
       const { getTriggerCompatibleActions } = searchProps.services.uiActions;
 
       ReactDOM.render(
-        <KibanaRenderContextProvider
-          theme={searchProps.services.core.theme}
-          i18n={searchProps.services.core.i18n}
-        >
+        <KibanaRenderContextProvider {...searchProps.services.core}>
           <KibanaContextProvider services={searchProps.services}>
             <CellActionsProvider getTriggerCompatibleActions={getTriggerCompatibleActions}>
               <SavedSearchEmbeddableComponent

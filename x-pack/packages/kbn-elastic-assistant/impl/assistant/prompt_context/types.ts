@@ -57,7 +57,7 @@ export interface PromptContext {
   id: string;
 
   /**
-   * Replacements associated with the context, i.e. replacements for an insight provided as context
+   * Replacements associated with the context, i.e. replacements for an attack discovery provided as context
    */
   replacements?: Replacements;
 
@@ -82,7 +82,7 @@ export interface SelectedPromptContext {
   promptContextId: string;
   /** this data is not anonymized  */
   rawData: string | Record<string, string[]>;
-  /** replacements associated with the context, i.e. replacements for an insight provided as context */
+  /** replacements associated with the context, i.e. replacements for an attack discovery provided as context */
   replacements?: Replacements;
 }
 

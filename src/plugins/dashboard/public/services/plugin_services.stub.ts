@@ -25,6 +25,7 @@ import { dataViewEditorServiceFactory } from './data_view_editor/data_view_edito
 import { documentationLinksServiceFactory } from './documentation_links/documentation_links.stub';
 import { embeddableServiceFactory } from './embeddable/embeddable.stub';
 import { httpServiceFactory } from './http/http.stub';
+import { i18nServiceFactory } from './i18n/i18n.stub';
 import { initializerContextServiceFactory } from './initializer_context/initializer_context.stub';
 import { navigationServiceFactory } from './navigation/navigation.stub';
 import { notificationsServiceFactory } from './notifications/notifications.stub';
@@ -42,6 +43,7 @@ import { customBrandingServiceFactory } from './custom_branding/custom_branding.
 import { savedObjectsManagementServiceFactory } from './saved_objects_management/saved_objects_management_service.stub';
 import { contentManagementServiceFactory } from './content_management/content_management_service.stub';
 import { serverlessServiceFactory } from './serverless/serverless_service.stub';
+import { userProfileServiceFactory } from './user_profile/user_profile_service.stub';
 import { noDataPageServiceFactory } from './no_data_page/no_data_page_service.stub';
 import { uiActionsServiceFactory } from './ui_actions/ui_actions_service.stub';
 
@@ -58,6 +60,7 @@ export const providers: PluginServiceProviders<DashboardServices> = {
   documentationLinks: new PluginServiceProvider(documentationLinksServiceFactory),
   embeddable: new PluginServiceProvider(embeddableServiceFactory),
   http: new PluginServiceProvider(httpServiceFactory),
+  i18n: new PluginServiceProvider(i18nServiceFactory),
   initializerContext: new PluginServiceProvider(initializerContextServiceFactory),
   navigation: new PluginServiceProvider(navigationServiceFactory),
   notifications: new PluginServiceProvider(notificationsServiceFactory),
@@ -76,6 +79,7 @@ export const providers: PluginServiceProviders<DashboardServices> = {
   serverless: new PluginServiceProvider(serverlessServiceFactory),
   noDataPage: new PluginServiceProvider(noDataPageServiceFactory),
   uiActions: new PluginServiceProvider(uiActionsServiceFactory),
+  userProfile: new PluginServiceProvider(userProfileServiceFactory),
 };
 
 export const registry = new PluginServiceRegistry<DashboardServices>(providers);
