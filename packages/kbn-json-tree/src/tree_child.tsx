@@ -85,6 +85,12 @@ export const TreeChild = ({
                 })
           }
           onClick={handleExpandElement}
+          css={css`
+            font-family: ${euiTheme.font.familyCode};
+            margin-right: ${euiTheme.size.s};
+            inline-size: ${euiTheme.size.base};
+            block-size: ${euiTheme.size.base};
+          `}
         />
         <Label {...itemLabelProps} />
       </>
