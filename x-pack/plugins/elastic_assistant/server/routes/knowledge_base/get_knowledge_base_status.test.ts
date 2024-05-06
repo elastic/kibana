@@ -37,7 +37,7 @@ describe('Get Knowledge Base Status Route', () => {
     });
 
     test('returns 500 if error is thrown in checking kb status', async () => {
-      context.core.elasticsearch.client.asCurrentUser.indices.exists.mockRejectedValue(
+      context.core.elasticsearch.client.asInternalUser.indices.exists.mockRejectedValue(
         new Error('Test error')
       );
       const response = await server.inject(

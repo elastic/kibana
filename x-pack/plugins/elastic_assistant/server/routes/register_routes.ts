@@ -56,12 +56,16 @@ export const registerRoutes = (
 
   // Knowledge Base
   deleteKnowledgeBaseRoute(router);
-  const getElserId: GetElser = once(
-    async (request: KibanaRequest, savedObjectsClient: SavedObjectsClientContract) => {
-      return (await plugins.ml.trainedModelsProvider(request, savedObjectsClient).getELSER())
-        .model_id;
-    }
-  );
+  const getElserId: GetElser = once(async () => {
+    return (
+      (
+        await plugins.ml
+          // Force check to happen as internal user
+          .trainedModelsProvider({} as KibanaRequest, {} as SavedObjectsClientContract)
+          .getELSER()
+      ).model_id
+    );
+  });
   getKnowledgeBaseStatusRoute(router, getElserId);
   postKnowledgeBaseRoute(router, getElserId);
 

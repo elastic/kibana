@@ -136,7 +136,7 @@ export const postEvaluateRoute = (
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
           // Default ELSER model
-          const elserId = await getElser(request, (await context.core).savedObjects.getClient());
+          const elserId = await getElser();
 
           // Skeleton request from route to pass to the agents
           // params will be passed to the actions executor

@@ -21,10 +21,12 @@ import { ElasticsearchStore } from '../../lib/langchain/elasticsearch_store/elas
 import { ESQL_DOCS_LOADED_QUERY, ESQL_RESOURCE, KNOWLEDGE_BASE_INDEX_PATTERN } from './constants';
 import { getKbResource } from './get_kb_resource';
 import { loadESQL } from '../../lib/langchain/content_loaders/esql_loader';
+import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
 
 /**
  * Load Knowledge Base index, pipeline, and resources (collection of documents)
  * @param router
+ * @param getElser
  */
 export const postKnowledgeBaseRoute = (
   router: ElasticAssistantPluginRouter,
@@ -35,9 +37,7 @@ export const postKnowledgeBaseRoute = (
       access: 'internal',
       path: KNOWLEDGE_BASE,
       options: {
-        // Note: Relying on current user privileges to scope an esClient.
-        // Add `access:kbnElasticAssistant` to limit API access to only users with assistant privileges
-        tags: [],
+        tags: ['access:elasticAssistant'],
       },
     })
     .addVersion(
@@ -58,12 +58,43 @@ export const postKnowledgeBaseRoute = (
         const assistantContext = await context.elasticAssistant;
         const logger = assistantContext.logger;
         const telemetry = assistantContext.telemetry;
+        const elserId = await getElser();
+
+        const pluginName = getPluginNameFromRequest({
+          request,
+          defaultPluginName: DEFAULT_PLUGIN_NAME,
+          logger,
+        });
+        const enableKnowledgeBaseByDefault =
+          assistantContext.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
+
+        if (enableKnowledgeBaseByDefault) {
+          // Go ahead and do that now, right here's the place :)
+          const knowledgeBaseDataClient =
+            await assistantContext.getAIAssistantKnowledgeBaseDataClient(true);
+          // Temporarily get esClient for current user until `kibana_system` user has `inference_admin` role
+          // See https://github.com/elastic/elasticsearch/pull/108262
+          const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+
+          //
+          const esStore = new ElasticsearchStore(
+            esClient,
+            `.kibana-elastic-ai-assistant-knowledge-base-default`,
+            logger,
+            telemetry,
+            elserId,
+            getKbResource(request)
+          );
+          //
+
+          await knowledgeBaseDataClient?.setupKnowledgeBase({ elserId, esClient, esStore });
+
+          return response.ok({ body: { success: true } });
+        }
 
         try {
           const core = await context.core;
-          // Get a scoped esClient for creating the Knowledge Base index, pipeline, and documents
-          const esClient = core.elasticsearch.client.asCurrentUser;
-          const elserId = await getElser(request, core.savedObjects.getClient());
+          const esClient = core.elasticsearch.client.asInternalUser;
           const kbResource = getKbResource(request);
           const esStore = new ElasticsearchStore(
             esClient,

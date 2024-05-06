@@ -109,10 +109,6 @@ export class ElasticsearchStore extends VectorStore {
     if (!pipelineExists) {
       await this.createPipeline();
     }
-    const indexExists = await this.indexExists();
-    if (!indexExists) {
-      await this.createIndex();
-    }
 
     const operations = documents.flatMap(({ pageContent, metadata }) => [
       { index: { _index: this.index, _id: uuid.v4() } },
@@ -400,7 +396,6 @@ export class ElasticsearchStore extends VectorStore {
       });
 
       this.logger.debug(`modelId: ${modelId}`);
-      this.logger.debug(`getResponse: ${JSON.stringify(getResponse, null, 2)}`);
 
       // For standardized way of checking deployment status see: https://github.com/elastic/elasticsearch/issues/106986
       const isReadyESS = (stats: MlTrainedModelStats) =>

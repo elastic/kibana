@@ -36,9 +36,7 @@ export const getKnowledgeBaseStatusRoute = (
       access: 'internal',
       path: KNOWLEDGE_BASE,
       options: {
-        // Note: Relying on current user privileges to scope an esClient.
-        // Add `access:kbnElasticAssistant` to limit API access to only users with assistant privileges
-        tags: [],
+        tags: ['access:elasticAssistant'],
       },
     })
     .addVersion(
@@ -57,9 +55,8 @@ export const getKnowledgeBaseStatusRoute = (
         const telemetry = assistantContext.telemetry;
 
         try {
-          // Get a scoped esClient for finding the status of the Knowledge Base index, pipeline, and documents
-          const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-          const elserId = await getElser(request, (await context.core).savedObjects.getClient());
+          const esClient = (await context.core).elasticsearch.client.asInternalUser;
+          const elserId = await getElser();
           const kbResource = getKbResource(request);
           const esStore = new ElasticsearchStore(
             esClient,

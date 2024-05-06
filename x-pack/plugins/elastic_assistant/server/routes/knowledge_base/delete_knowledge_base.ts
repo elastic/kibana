@@ -32,9 +32,7 @@ export const deleteKnowledgeBaseRoute = (
       access: 'internal',
       path: KNOWLEDGE_BASE,
       options: {
-        // Note: Relying on current user privileges to scope an esClient.
-        // Add `access:kbnElasticAssistant` to limit API access to only users with assistant privileges
-        tags: [],
+        tags: ['access:elasticAssistant'],
       },
     })
     .addVersion(
@@ -58,8 +56,7 @@ export const deleteKnowledgeBaseRoute = (
               ? decodeURIComponent(request.params.resource)
               : undefined;
 
-          // Get a scoped esClient for deleting the Knowledge Base index, pipeline, and documents
-          const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+          const esClient = (await context.core).elasticsearch.client.asInternalUser;
           const esStore = new ElasticsearchStore(
             esClient,
             KNOWLEDGE_BASE_INDEX_PATTERN,

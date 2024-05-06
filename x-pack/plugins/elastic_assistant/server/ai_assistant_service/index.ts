@@ -25,6 +25,9 @@ import { conversationsFieldMap } from '../ai_assistant_data_clients/conversation
 import { assistantPromptsFieldMap } from '../ai_assistant_data_clients/prompts/field_maps_configuration';
 import { assistantAnonymizationFieldsFieldMap } from '../ai_assistant_data_clients/anonymization_fields/field_maps_configuration';
 import { AIAssistantDataClient } from '../ai_assistant_data_clients';
+import { knowledgeBaseFieldMap } from '../ai_assistant_data_clients/knowledge_base/field_maps_configuration';
+import { AIAssistantKnowledgeBaseDataClient } from '../ai_assistant_data_clients/knowledge_base';
+import { knowledgeBaseIngestPipeline } from '../ai_assistant_data_clients/knowledge_base/ingest_pipeline';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 
@@ -47,7 +50,7 @@ export interface CreateAIAssistantClientParams {
 }
 
 export type CreateDataStream = (params: {
-  resource: 'conversations' | 'prompts' | 'anonymizationFields';
+  resource: 'anonymizationFields' | 'conversations' | 'knowledgeBase' | 'prompts';
   fieldMap: FieldMap;
   kibanaVersion: string;
   spaceId?: string;
@@ -55,8 +58,11 @@ export type CreateDataStream = (params: {
 
 export class AIAssistantService {
   private initialized: boolean;
+  // Temporary 'feature flag' to determine if we should initialize the knowledge base, toggled when accessing data client
+  private initializeKnowledgeBase: boolean = false;
   private isInitializing: boolean = false;
   private conversationsDataStream: DataStreamSpacesAdapter;
+  private knowledgeBaseDataStream: DataStreamSpacesAdapter;
   private promptsDataStream: DataStreamSpacesAdapter;
   private anonymizationFieldsDataStream: DataStreamSpacesAdapter;
   private resourceInitializationHelper: ResourceInstallationHelper;
@@ -68,6 +74,11 @@ export class AIAssistantService {
       resource: 'conversations',
       kibanaVersion: options.kibanaVersion,
       fieldMap: conversationsFieldMap,
+    });
+    this.knowledgeBaseDataStream = this.createDataStream({
+      resource: 'knowledgeBase',
+      kibanaVersion: options.kibanaVersion,
+      fieldMap: knowledgeBaseFieldMap,
     });
     this.promptsDataStream = this.createDataStream({
       resource: 'prompts',
@@ -124,6 +135,39 @@ export class AIAssistantService {
         pluginStop$: this.options.pluginStop$,
       });
 
+      if (this.initializeKnowledgeBase) {
+        await this.knowledgeBaseDataStream.install({
+          esClient,
+          logger: this.options.logger,
+          pluginStop$: this.options.pluginStop$,
+        });
+
+        // TODO: Add generic ingest pipeline support to `kbn-data-stream-adapter` package?
+        // TODO: Inject `elserId`
+        let pipelineExists = false;
+        try {
+          const response = await esClient.ingest.getPipeline({
+            id: this.resourceNames.pipelines.knowledgeBase,
+          });
+          pipelineExists = Object.keys(response).length > 0;
+        } catch (e) {
+          // The GET /_ingest/pipeline/{pipelineId} API returns an empty object w/ 404 Not Found.
+          pipelineExists = false;
+        }
+        if (!pipelineExists) {
+          this.options.logger.info('Installing ingest pipeline');
+          const response = await esClient.ingest.putPipeline(
+            knowledgeBaseIngestPipeline({
+              id: this.resourceNames.pipelines.knowledgeBase,
+              modelId: '.elser_model_2',
+            })
+          );
+          this.options.logger.info(`Installed ingest pipeline: ${response.acknowledged}`);
+        } else {
+          this.options.logger.info('Ingest pipeline already exists');
+        }
+      }
+
       await this.promptsDataStream.install({
         esClient,
         logger: this.options.logger,
@@ -149,30 +193,30 @@ export class AIAssistantService {
   private readonly resourceNames: AssistantResourceNames = {
     componentTemplate: {
       conversations: getResourceName('component-template-conversations'),
+      knowledgeBase: getResourceName('component-template-knowledge-base'),
       prompts: getResourceName('component-template-prompts'),
       anonymizationFields: getResourceName('component-template-anonymization-fields'),
-      kb: getResourceName('component-template-kb'),
     },
     aliases: {
       conversations: getResourceName('conversations'),
+      knowledgeBase: getResourceName('knowledge-base'),
       prompts: getResourceName('prompts'),
       anonymizationFields: getResourceName('anonymization-fields'),
-      kb: getResourceName('kb'),
     },
     indexPatterns: {
       conversations: getResourceName('conversations*'),
+      knowledgeBase: getResourceName('knowledge-base*'),
       prompts: getResourceName('prompts*'),
       anonymizationFields: getResourceName('anonymization-fields*'),
-      kb: getResourceName('kb*'),
     },
     indexTemplate: {
       conversations: getResourceName('index-template-conversations'),
+      knowledgeBase: getResourceName('index-template-knowledge-base'),
       prompts: getResourceName('index-template-prompts'),
       anonymizationFields: getResourceName('index-template-anonymization-fields'),
-      kb: getResourceName('index-template-kb'),
     },
     pipelines: {
-      kb: getResourceName('kb-ingest-pipeline'),
+      knowledgeBase: getResourceName('ingest-pipeline-knowledge-base'),
     },
   };
 
@@ -182,7 +226,7 @@ export class AIAssistantService {
       opts.spaceId
     );
 
-    // If space evel resources initialization failed, retry
+    // If space level resources initialization failed, retry
     if (!initialized && error) {
       let initRetryPromise: Promise<InitializationPromise> | undefined;
 
@@ -236,7 +280,33 @@ export class AIAssistantService {
       elasticsearchClientPromise: this.options.elasticsearchClientPromise,
       spaceId: opts.spaceId,
       kibanaVersion: this.options.kibanaVersion,
-      indexPatternsResorceName: this.resourceNames.aliases.conversations,
+      indexPatternsResourceName: this.resourceNames.aliases.conversations,
+      currentUser: opts.currentUser,
+    });
+  }
+
+  public async createAIAssistantKnowledgeBaseDataClient(
+    opts: CreateAIAssistantClientParams & { initializeKnowledgeBase: boolean }
+  ): Promise<AIAssistantKnowledgeBaseDataClient | null> {
+    // Note: Due to plugin lifecycle and feature flag registration timing, we need to pass in the feature flag here
+    // Remove this param and initialization when the `assistantKnowledgeBaseByDefault` feature flag is removed
+    if (opts.initializeKnowledgeBase) {
+      this.initializeKnowledgeBase = true;
+      await this.initializeResources();
+    }
+
+    const res = await this.checkResourcesInstallation(opts);
+
+    if (res === null) {
+      return null;
+    }
+
+    return new AIAssistantKnowledgeBaseDataClient({
+      logger: this.options.logger,
+      elasticsearchClientPromise: this.options.elasticsearchClientPromise,
+      spaceId: opts.spaceId,
+      kibanaVersion: this.options.kibanaVersion,
+      indexPatternsResourceName: this.resourceNames.aliases.conversations,
       currentUser: opts.currentUser,
     });
   }
@@ -255,7 +325,7 @@ export class AIAssistantService {
       elasticsearchClientPromise: this.options.elasticsearchClientPromise,
       spaceId: opts.spaceId,
       kibanaVersion: this.options.kibanaVersion,
-      indexPatternsResorceName: this.resourceNames.aliases.prompts,
+      indexPatternsResourceName: this.resourceNames.aliases.prompts,
       currentUser: opts.currentUser,
     });
   }
@@ -274,7 +344,7 @@ export class AIAssistantService {
       elasticsearchClientPromise: this.options.elasticsearchClientPromise,
       spaceId: opts.spaceId,
       kibanaVersion: this.options.kibanaVersion,
-      indexPatternsResorceName: this.resourceNames.aliases.anonymizationFields,
+      indexPatternsResourceName: this.resourceNames.aliases.anonymizationFields,
       currentUser: opts.currentUser,
     });
   }
@@ -308,6 +378,15 @@ export class AIAssistantService {
         await this.conversationsDataStream.installSpace(spaceId);
       }
 
+      if (this.initializeKnowledgeBase) {
+        const knowledgeBaseIndexName = await this.knowledgeBaseDataStream.getInstalledSpaceName(
+          spaceId
+        );
+        if (!knowledgeBaseIndexName) {
+          await this.knowledgeBaseDataStream.installSpace(spaceId);
+        }
+      }
+
       const promptsIndexName = await this.promptsDataStream.getInstalledSpaceName(spaceId);
       if (!promptsIndexName) {
         await this.promptsDataStream.installSpace(spaceId);
@@ -334,7 +413,7 @@ export class AIAssistantService {
       elasticsearchClientPromise: this.options.elasticsearchClientPromise,
       spaceId,
       kibanaVersion: this.options.kibanaVersion,
-      indexPatternsResorceName: this.resourceNames.aliases.anonymizationFields,
+      indexPatternsResourceName: this.resourceNames.aliases.anonymizationFields,
       currentUser: null,
     });
 

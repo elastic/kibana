@@ -47,7 +47,10 @@ interface Props {
  */
 export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
   ({ knowledgeBase, setUpdatedKnowledgeBaseSettings }) => {
-    const { http } = useAssistantContext();
+    const {
+      assistantFeatures: { assistantKnowledgeBaseByDefault: enableKnowledgeBaseByDefault },
+      http,
+    } = useAssistantContext();
     const {
       data: kbStatus,
       isLoading,
@@ -67,7 +70,9 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
     const isESQLAvailable =
       knowledgeBase.isEnabledKnowledgeBase && isKnowledgeBaseAvailable && isKnowledgeBaseEnabled;
     // Prevent enabling if elser doesn't exist, but always allow to disable
-    const isSwitchDisabled = !kbStatus?.elser_exists && !knowledgeBase.isEnabledKnowledgeBase;
+    const isSwitchDisabled = enableKnowledgeBaseByDefault
+      ? false
+      : !kbStatus?.elser_exists && !knowledgeBase.isEnabledKnowledgeBase;
 
     // Calculated health state for EuiHealth component
     const elserHealth = isElserEnabled ? 'success' : 'subdued';
@@ -84,12 +89,18 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
           isEnabledKnowledgeBase: event.target.checked,
         });
 
-        // If enabling and ELSER exists, try to set up automatically
-        if (event.target.checked && kbStatus?.elser_exists) {
+        // If enabling and ELSER exists or automatic KB setup FF is enabled, try to set up automatically
+        if (event.target.checked && (enableKnowledgeBaseByDefault || kbStatus?.elser_exists)) {
           setupKB(ESQL_RESOURCE);
         }
       },
-      [kbStatus?.elser_exists, knowledgeBase, setUpdatedKnowledgeBaseSettings, setupKB]
+      [
+        enableKnowledgeBaseByDefault,
+        kbStatus?.elser_exists,
+        knowledgeBase,
+        setUpdatedKnowledgeBaseSettings,
+        setupKB,
+      ]
     );
 
     const isEnabledKnowledgeBaseSwitch = useMemo(() => {

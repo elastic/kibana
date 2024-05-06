@@ -315,7 +315,7 @@ export const postActionsConnectorExecuteRoute = (
               []) as unknown as Array<Pick<Message, 'content' | 'role'>>
           );
 
-          const elserId = await getElser(request, (await context.core).savedObjects.getClient());
+          const elserId = await getElser();
 
           const anonymizationFieldsRes =
             await anonymizationFieldsDataClient?.findDocuments<EsAnonymizationFieldsSchema>({

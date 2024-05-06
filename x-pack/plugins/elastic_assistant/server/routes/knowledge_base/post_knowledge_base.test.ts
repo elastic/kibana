@@ -38,7 +38,7 @@ describe('Post Knowledge Base Route', () => {
     });
 
     test('returns 500 if error is thrown when creating resources', async () => {
-      context.core.elasticsearch.client.asCurrentUser.indices.exists.mockRejectedValue(
+      context.core.elasticsearch.client.asInternalUser.indices.exists.mockRejectedValue(
         new Error('Test error')
       );
       const response = await server.inject(
