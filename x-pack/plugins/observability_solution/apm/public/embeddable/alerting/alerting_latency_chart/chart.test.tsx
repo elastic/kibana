@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
-import { APMAlertingThroughputChart } from './chart';
+import { APMAlertingLatencyChart } from './chart';
 import { ApmEmbeddableContext } from '../../embeddable_context';
 import { MOCK_ALERT, MOCK_RULE, MOCK_DEPS } from '../testing/fixtures';
 
@@ -25,11 +25,10 @@ jest.mock('../../../context/apm_service/use_service_agent_fetcher', () => ({
 
 describe('renders chart', () => {
   const serviceName = 'ops-bean';
-
   it('renders error when serviceName is not defined', async () => {
     const { getByText } = render(
       <ApmEmbeddableContext deps={MOCK_DEPS}>
-        <APMAlertingThroughputChart
+        <APMAlertingLatencyChart
           rule={MOCK_RULE}
           rangeFrom="now-15m"
           rangeTo="now"
@@ -47,7 +46,7 @@ describe('renders chart', () => {
   it('renders when serviceName is defined', async () => {
     const { getByText } = render(
       <ApmEmbeddableContext deps={MOCK_DEPS}>
-        <APMAlertingThroughputChart
+        <APMAlertingLatencyChart
           rule={MOCK_RULE}
           rangeFrom="now-15m"
           rangeTo="now"
@@ -57,7 +56,7 @@ describe('renders chart', () => {
       </ApmEmbeddableContext>
     );
     await waitFor(() => {
-      expect(getByText('Throughput')).toBeInTheDocument();
+      expect(getByText('Latency')).toBeInTheDocument();
     });
   });
 });
