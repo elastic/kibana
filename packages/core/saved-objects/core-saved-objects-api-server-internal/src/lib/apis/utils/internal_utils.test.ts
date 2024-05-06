@@ -148,6 +148,7 @@ describe('#getSavedObjectFromSource', () => {
       references,
       type,
       updated_at,
+      updated_by,
       created_by,
       version: encodeHitVersion(doc),
     });
