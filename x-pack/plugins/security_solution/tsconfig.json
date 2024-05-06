@@ -200,6 +200,7 @@
     "@kbn/management-plugin",
     "@kbn/security-plugin-types-server",
     "@kbn/deeplinks-security",
-    "@kbn/react-kibana-context-render"
+    "@kbn/react-kibana-context-render",
+    "@kbn/search-types"
   ]
 }

@@ -13,9 +13,10 @@ import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { chronoLiterals, timeLiterals } from '../definitions/literals';
 import { commandDefinitions } from '../definitions/commands';
 import { getUnitDuration, TRIGGER_SUGGESTION_COMMAND } from './factories';
-import { camelCase } from 'lodash';
+import { camelCase, partition } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { groupingFunctionDefinitions } from '../definitions/grouping';
+import { FunctionArgSignature } from '../definitions/types';
 
 const triggerCharacters = [',', '(', '=', ' '];
 
@@ -1115,26 +1116,35 @@ describe('autocomplete', () => {
                 i + 1 < (signature.minParams ?? 0) ||
                 signature.params.filter(({ optional }, j) => !optional && j > i).length > 0;
 
-              const allPossibleParamTypes = Array.from(
-                new Set(fn.signatures.map((s) => s.params[i].type))
+              const allParamDefs = fn.signatures.map((s) => s.params[i]);
+
+              // get all possible types for this param
+              const [constantOnlyParamDefs, acceptsFieldParamDefs] = partition(
+                allParamDefs,
+                (p) => p.constantOnly || /_literal/.test(param.type)
               );
+
+              const getTypesFromParamDefs = (paramDefs: FunctionArgSignature[]) =>
+                Array.from(new Set(paramDefs.map((p) => p.type)));
+
+              const suggestedConstants = param.literalSuggestions || param.literalOptions;
 
               testSuggestions(
                 `from a | eval ${fn.name}(${Array(i).fill('field').join(', ')}${i ? ',' : ''} )`,
-                param.literalOptions?.length
-                  ? param.literalOptions.map((option) => `"${option}"${canHaveMoreArgs ? ',' : ''}`)
+                suggestedConstants?.length
+                  ? suggestedConstants.map((option) => `"${option}"${canHaveMoreArgs ? ',' : ''}`)
                   : [
-                      ...getFieldNamesByType(allPossibleParamTypes).map((f) =>
-                        canHaveMoreArgs ? `${f},` : f
+                      ...getFieldNamesByType(getTypesFromParamDefs(acceptsFieldParamDefs)).map(
+                        (f) => (canHaveMoreArgs ? `${f},` : f)
                       ),
                       ...getFunctionSignaturesByReturnType(
                         'eval',
-                        allPossibleParamTypes,
+                        getTypesFromParamDefs(acceptsFieldParamDefs),
                         { evalMath: true },
                         undefined,
                         [fn.name]
                       ).map((l) => (canHaveMoreArgs ? `${l},` : l)),
-                      ...getLiteralsByType(allPossibleParamTypes).map((d) =>
+                      ...getLiteralsByType(getTypesFromParamDefs(constantOnlyParamDefs)).map((d) =>
                         canHaveMoreArgs ? `${d},` : d
                       ),
                     ]
@@ -1143,20 +1153,20 @@ describe('autocomplete', () => {
                 `from a | eval var0 = ${fn.name}(${Array(i).fill('field').join(', ')}${
                   i ? ',' : ''
                 } )`,
-                param.literalOptions?.length
-                  ? param.literalOptions.map((option) => `"${option}"${canHaveMoreArgs ? ',' : ''}`)
+                suggestedConstants?.length
+                  ? suggestedConstants.map((option) => `"${option}"${canHaveMoreArgs ? ',' : ''}`)
                   : [
-                      ...getFieldNamesByType(allPossibleParamTypes).map((f) =>
-                        canHaveMoreArgs ? `${f},` : f
+                      ...getFieldNamesByType(getTypesFromParamDefs(acceptsFieldParamDefs)).map(
+                        (f) => (canHaveMoreArgs ? `${f},` : f)
                       ),
                       ...getFunctionSignaturesByReturnType(
                         'eval',
-                        allPossibleParamTypes,
+                        getTypesFromParamDefs(acceptsFieldParamDefs),
                         { evalMath: true },
                         undefined,
                         [fn.name]
                       ).map((l) => (canHaveMoreArgs ? `${l},` : l)),
-                      ...getLiteralsByType(allPossibleParamTypes).map((d) =>
+                      ...getLiteralsByType(getTypesFromParamDefs(constantOnlyParamDefs)).map((d) =>
                         canHaveMoreArgs ? `${d},` : d
                       ),
                     ]
