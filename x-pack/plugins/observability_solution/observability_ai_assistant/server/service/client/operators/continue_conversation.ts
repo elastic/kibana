@@ -120,6 +120,10 @@ function getFunctionDefinitions({
   functionLimitExceeded: boolean;
   disableFunctions: boolean;
 }) {
+  if (functionLimitExceeded || disableFunctions) {
+    return [];
+  }
+
   const systemFunctions = functionClient
     .getFunctions()
     .map((fn) => fn.definition)
@@ -129,15 +133,11 @@ function getFunctionDefinitions({
         [FunctionVisibility.AssistantOnly, FunctionVisibility.All].includes(def.visibility)
     );
 
-  const actions = functionLimitExceeded ? [] : functionClient.getActions();
+  const actions = functionClient.getActions();
 
   const allDefinitions = systemFunctions
     .concat(actions)
     .map((definition) => pick(definition, 'name', 'description', 'parameters'));
-
-  if (disableFunctions || functionLimitExceeded) {
-    return allDefinitions.filter((def) => def.name === 'context');
-  }
 
   return allDefinitions;
 }
