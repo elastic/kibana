@@ -35,6 +35,7 @@
     "@kbn/alerts-as-data-utils",
     "@kbn/logging",
     "@kbn/search-errors",
+    "@kbn/search-types",
   ],
   "exclude": [
     "target/**/*",

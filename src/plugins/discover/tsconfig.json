@@ -84,7 +84,8 @@
     "@kbn/shared-ux-markdown",
     "@kbn/data-view-utils",
     "@kbn/presentation-publishing",
-    "@kbn/observability-ai-assistant-plugin"
+    "@kbn/observability-ai-assistant-plugin",
+    "@kbn/search-types"
   ],
   "exclude": ["target/**/*"]
 }
