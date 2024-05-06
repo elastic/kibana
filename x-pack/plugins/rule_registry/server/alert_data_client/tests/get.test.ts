@@ -112,16 +112,14 @@ describe('get()', () => {
     const result = await alertsClient.get({ id: '1', index: '.alerts-observability.apm.alerts' });
     expect(result).toMatchInlineSnapshot(`
       Object {
+        "kibana.alert.rule.consumer": "apm",
+        "kibana.alert.rule.rule_type_id": "apm.error_rate",
+        "kibana.alert.status": "active",
+        "kibana.space_ids": Array [
+          "test_default_space_id",
+        ],
+        "message": "hello world 1",
         "_index": ".alerts-observability.apm.alerts",
-        "_source": Object {
-          "kibana.alert.rule.consumer": "apm",
-          "kibana.alert.rule.rule_type_id": "apm.error_rate",
-          "kibana.alert.status": "active",
-          "kibana.space_ids": Array [
-            "test_default_space_id",
-          ],
-          "message": "hello world 1",
-        },
       }
     `);
     expect(esClientMock.search).toHaveBeenCalledTimes(1);
@@ -349,16 +347,14 @@ describe('get()', () => {
 
       expect(result).toMatchInlineSnapshot(`
         Object {
+          "kibana.alert.rule.consumer": "apm",
+          "kibana.alert.rule.rule_type_id": "apm.error_rate",
+          "kibana.alert.status": "active",
+          "kibana.space_ids": Array [
+            "test_default_space_id",
+          ],
+          "message": "hello world 1",
           "_index": ".alerts-observability.apm.alerts",
-          "_source": Object {
-            "kibana.alert.rule.consumer": "apm",
-            "kibana.alert.rule.rule_type_id": "apm.error_rate",
-            "kibana.alert.status": "active",
-            "kibana.space_ids": Array [
-              "test_default_space_id",
-            ],
-            "message": "hello world 1",
-          },
         }
       `);
     });
