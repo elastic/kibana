@@ -80,7 +80,8 @@
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-context-theme",
     "@kbn/presentation-publishing",
-    "@kbn/shared-ux-utility"
+    "@kbn/shared-ux-utility",
+    "@kbn/search-types"
   ],
   "exclude": [
     "target/**/*",

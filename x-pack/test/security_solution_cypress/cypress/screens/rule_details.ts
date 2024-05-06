@@ -156,6 +156,8 @@ export const ALERT_SUPPRESSION_INSUFFICIENT_LICENSING_ICON =
 export const HIGHLIGHTED_ROWS_IN_TABLE =
   '[data-test-subj="euiDataGridBody"] .alertsTableHighlightedRow';
 
+export const MAX_SIGNALS_DETAILS = '[data-test-subj="maxSignalsPropertyValue"]';
+
 export const DESCRIPTION_SETUP_GUIDE_BUTTON = '[data-test-subj="stepAboutDetailsToggle-setup"]';
 
 export const DESCRIPTION_SETUP_GUIDE_CONTENT = '[data-test-subj="stepAboutDetailsSetupContent"]';
