@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/search-types';
 import type { CursorType, Inspect, Maybe, PageInfoPaginated } from '../../../common';
 import type { GeoItem, TopNetworkTablesEcsField } from '../common';
 

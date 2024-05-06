@@ -42,12 +42,12 @@ import useObservable from 'react-use/lib/useObservable';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../../../common/constants';
-import { useInternalStateSelector } from '../../services/discover_internal_state_container';
-import { useAppStateSelector } from '../../services/discover_app_state_container';
+import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
+import { useAppStateSelector } from '../../state_management/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
-import { RecordRawType } from '../../services/discover_data_state_container';
-import { DiscoverStateContainer } from '../../services/discover_state';
+import { RecordRawType } from '../../state_management/discover_data_state_container';
+import { DiscoverStateContainer } from '../../state_management/discover_state';
 import { useDataState } from '../../hooks/use_data_state';
 import { DocTableInfinite } from '../../../../components/doc_table/doc_table_infinite';
 import { DocumentExplorerCallout } from '../document_explorer_callout';
@@ -62,7 +62,7 @@ import {
   getAllowedSampleSize,
 } from '../../../../utils/get_allowed_sample_size';
 import { DiscoverGridFlyout } from '../../../../components/discover_grid_flyout';
-import { useSavedSearchInitial } from '../../services/discover_state_provider';
+import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
 import { useFetchMoreRecords } from './use_fetch_more_records';
 import { SelectedVSAvailableCallout } from './selected_vs_available_callout';
 import { useDiscoverCustomization } from '../../../../customizations';

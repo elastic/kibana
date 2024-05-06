@@ -370,6 +370,7 @@ examples/developer_examples @elastic/appex-sharedux
 examples/discover_customization_examples @elastic/kibana-data-discovery
 x-pack/plugins/discover_enhanced @elastic/kibana-data-discovery
 src/plugins/discover @elastic/kibana-data-discovery
+src/plugins/discover_shared @elastic/kibana-data-discovery @elastic/obs-ux-logs-team
 packages/kbn-discover-utils @elastic/kibana-data-discovery
 packages/kbn-doc-links @elastic/docs
 packages/kbn-docs-utils @elastic/kibana-operations
@@ -706,6 +707,7 @@ packages/kbn-search-index-documents @elastic/enterprise-search-frontend
 x-pack/plugins/search_notebooks @elastic/enterprise-search-frontend
 x-pack/plugins/search_playground @elastic/enterprise-search-frontend
 packages/kbn-search-response-warnings @elastic/kibana-data-discovery
+packages/kbn-search-types @elastic/kibana-data-discovery
 x-pack/plugins/searchprofiler @elastic/kibana-management
 x-pack/test/security_api_integration/packages/helpers @elastic/kibana-security
 packages/kbn-security-hardening @elastic/kibana-security
@@ -1348,8 +1350,9 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/plugins/security_solution_ess/ @elastic/security-solution
 /x-pack/plugins/security_solution_serverless/ @elastic/security-solution
 
-# AI Assistant in Security Solution
+# GenAI in Security Solution
 /x-pack/plugins/security_solution/public/assistant @elastic/security-generative-ai
+/x-pack/plugins/security_solution/public/attack_discovery @elastic/security-generative-ai
 /x-pack/test/security_solution_cypress/cypress/e2e/ai_assistant @elastic/security-generative-ai
 
 # Security Solution cross teams ownership
