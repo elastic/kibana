@@ -12,6 +12,9 @@ import { OpenAPIV3 } from 'openapi-types';
 import { isPlainObjectType } from '../../../utils/is_plain_object_type';
 import { DocumentNodeProcessor } from '../../types';
 
+type MergedObjectSchema = Required<Pick<OpenAPIV3.SchemaObject, 'type' | 'properties'>> &
+  Pick<OpenAPIV3.SchemaObject, 'required'>;
+
 /**
  * Creates a node processor to merge object schema definitions when there are no conflicts
  * between them.
@@ -65,37 +68,47 @@ export function createMergeNonConflictingAllOfItemsProcessor(): DocumentNodeProc
         return;
       }
 
-      const mergedProperties = {} as Record<string, OpenAPIV3.SchemaObject>;
+      const resultItems: [
+        MergedObjectSchema,
+        ...Array<OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject>
+      ] = [
+        {
+          type: 'object',
+          properties: {},
+        },
+      ];
       const mergedRequired = new Set<string>();
 
-      for (let i = 0; i < allOfNode.allOf.length; ++i) {
-        const node = allOfNode.allOf[i];
-
-        if (!isObjectNode(node)) {
+      for (const item of allOfNode.allOf) {
+        if (!isObjectNode(item) || !isPlainObjectType(item.properties)) {
+          resultItems.push(item);
           continue;
         }
 
-        Object.assign(mergedProperties, node.properties);
+        Object.assign(resultItems[0].properties, item.properties);
 
-        for (const requiredField of node.required ?? []) {
+        for (const requiredField of item.required ?? []) {
           mergedRequired.add(requiredField);
         }
-
-        allOfNode.allOf.splice(i--, 1);
       }
-
-      allOfNode.allOf.unshift({
-        type: 'object',
-        properties: mergedProperties,
-      });
 
       if (mergedRequired.size > 0) {
-        allOfNode.allOf[0].required = Array.from(mergedRequired);
+        resultItems[0].required = Array.from(mergedRequired);
       }
+
+      allOfNode.allOf = resultItems;
     },
   };
 }
 
+/**
+ * Object schemas can be merged when
+ *
+ * - as minimum there are two object schemas
+ * - object schemas DO NOT contain conflicting fields (same name but different definition)
+ * - object schemas DO NOT contain fields besides `type`, `properties` and `required`
+ *
+ */
 function canMergeObjectSchemas(schemas: OpenAPIV3.SchemaObject[]): boolean {
   const props = new Map<string, OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject>();
   let objectSchemasCounter = 0;
