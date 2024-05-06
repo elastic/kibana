@@ -17,7 +17,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { HttpSetup, NotificationsStart } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { QueryClient, useQueryClient } from '@tanstack/react-query';
 import type { RuleResponse } from '../common/types';
@@ -40,7 +40,9 @@ export const showCreateDetectionRuleSuccessToast = (
   http: HttpSetup,
   ruleResponse: RuleResponse
 ) => {
-  const { notifications, ...startServices } = cloudSecurityStartServices;
+  const { notifications, analytics, i18n, theme } = cloudSecurityStartServices;
+  const startServices = { analytics, i18n, theme };
+
   return notifications.toasts.addSuccess({
     toastLifeTimeMs: 10000,
     color: 'success',
@@ -95,7 +97,9 @@ export const showChangeBenchmarkRuleStatesSuccessToast = (
     numberOfDetectionRules: number;
   }
 ) => {
-  const { notifications, ...startServices } = cloudSecurityStartServices;
+  const { notifications, analytics, i18n, theme } = cloudSecurityStartServices;
+  const startServices = { analytics, i18n, theme };
+
   return notifications.toasts.addSuccess({
     toastLifeTimeMs: 10000,
     color: 'success',
@@ -178,9 +182,6 @@ export const TakeAction = ({
     prefix: 'smallContextMenuPopover',
   });
 
-  const { http, ...startServices } = useKibana().services;
-  const { notifications } = startServices;
-
   const button = (
     <EuiButton
       isLoading={isLoading}
@@ -201,10 +202,8 @@ export const TakeAction = ({
         createRuleFn={createRuleFn}
         setIsLoading={setIsLoading}
         closePopover={closePopover}
-        http={http}
         queryClient={queryClient}
         isCreateDetectionRuleDisabled={isCreateDetectionRuleDisabled}
-        startServices={startServices}
       />
     );
   if (enableBenchmarkRuleFn)
@@ -214,9 +213,6 @@ export const TakeAction = ({
         enableBenchmarkRuleFn={enableBenchmarkRuleFn}
         setIsLoading={setIsLoading}
         closePopover={closePopover}
-        notifications={notifications}
-        http={http}
-        queryClient={queryClient}
       />
     );
   if (disableBenchmarkRuleFn)
@@ -226,9 +222,6 @@ export const TakeAction = ({
         disableBenchmarkRuleFn={disableBenchmarkRuleFn}
         setIsLoading={setIsLoading}
         closePopover={closePopover}
-        notifications={notifications}
-        http={http}
-        queryClient={queryClient}
       />
     );
 
@@ -251,19 +244,17 @@ const CreateDetectionRule = ({
   createRuleFn,
   setIsLoading,
   closePopover,
-  http,
   queryClient,
   isCreateDetectionRuleDisabled = false,
-  startServices,
 }: {
   createRuleFn: (http: HttpSetup) => Promise<RuleResponse>;
   setIsLoading: (isLoading: boolean) => void;
   closePopover: () => void;
-  http: HttpSetup;
   queryClient: QueryClient;
   isCreateDetectionRuleDisabled: boolean;
-  startServices: CloudSecurityPostureStartServices;
 }) => {
+  const { http, ...startServices } = useKibana().services;
+
   return (
     <EuiContextMenuItem
       key="createRule"
@@ -296,9 +287,6 @@ const EnableBenchmarkRule = ({
   enableBenchmarkRuleFn: () => Promise<void>;
   setIsLoading: (isLoading: boolean) => void;
   closePopover: () => void;
-  notifications: NotificationsStart;
-  http: HttpSetup;
-  queryClient: QueryClient;
 }) => {
   return (
     <EuiContextMenuItem
@@ -324,9 +312,6 @@ const DisableBenchmarkRule = ({
   disableBenchmarkRuleFn: () => Promise<void>;
   setIsLoading: (isLoading: boolean) => void;
   closePopover: () => void;
-  notifications: NotificationsStart;
-  http: HttpSetup;
-  queryClient: QueryClient;
 }) => {
   return (
     <EuiContextMenuItem
