@@ -1204,6 +1204,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /src/setup_node_env/ @elastic/kibana-operations
 /src/cli/keystore/ @elastic/kibana-operations
 /src/cli/serve/ @elastic/kibana-operations
+/src/cli_keystore/ @elastic/kibana-operations
 /.github/workflows/ @elastic/kibana-operations
 /vars/ @elastic/kibana-operations
 /.bazelignore @elastic/kibana-operations
