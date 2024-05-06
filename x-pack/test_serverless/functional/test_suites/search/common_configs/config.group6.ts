@@ -15,9 +15,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [
       require.resolve('../../common/discover/embeddable'),
       require.resolve('../../common/discover/x_pack'),
-      require.resolve('../../common/discover/esql'),
       require.resolve('../../common/discover_ml_uptime/discover'),
       require.resolve('../../common/context'),
+      require.resolve('../../common/discover/esql'),
     ],
     junit: {
       reportName: 'Serverless Search Functional Tests - Common Group 6',
