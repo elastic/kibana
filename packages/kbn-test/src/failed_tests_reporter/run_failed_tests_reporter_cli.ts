@@ -145,7 +145,13 @@ export function runFailedTestsReporterCli() {
               continue;
             }
 
-            const newIssue = await createFailureIssue(buildUrl, failure, githubApi, branch, pipeline);
+            const newIssue = await createFailureIssue(
+              buildUrl,
+              failure,
+              githubApi,
+              branch,
+              pipeline
+            );
             existingIssues.addNewlyCreated(failure, newIssue);
             pushMessage('Test has not failed recently on tracked branches');
             if (updateGithub) {
