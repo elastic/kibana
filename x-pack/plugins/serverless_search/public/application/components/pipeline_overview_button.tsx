@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import { useKibanaServices } from '../hooks/use_kibana';
 
-export const PipelineButtonOverview: React.FC = () => {
+export const PipelineOverviewButton: React.FC = () => {
   const { http } = useKibanaServices();
 
   return (
@@ -20,7 +20,7 @@ export const PipelineButtonOverview: React.FC = () => {
       <EuiSpacer />
       <EuiButton
         iconType="plusInCircle"
-        size="s"
+        size="m"
         href={http.basePath.prepend('/app/management/ingest/ingest_pipelines/create')}
         data-test-subj="create-a-pipeline-button"
       >
