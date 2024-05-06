@@ -31,7 +31,7 @@ const ES_TEST_INDEX_SOURCE = 'transform-alert:transform-health';
 const ES_TEST_INDEX_REFERENCE = '-na-';
 const ES_TEST_OUTPUT_INDEX_NAME = `${ES_TEST_INDEX_NAME}-ts-output`;
 
-const RULE_INTERVAL_SECONDS = 10;
+const RULE_INTERVAL_SECONDS = 1000;
 
 interface CreateRuleParams {
   name: string;
