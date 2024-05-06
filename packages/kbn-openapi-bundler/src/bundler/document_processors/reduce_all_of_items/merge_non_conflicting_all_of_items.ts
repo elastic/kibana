@@ -59,7 +59,7 @@ type MergedObjectSchema = Required<Pick<OpenAPIV3.SchemaObject, 'type' | 'proper
  */
 export function createMergeNonConflictingAllOfItemsProcessor(): DocumentNodeProcessor {
   return {
-    leave(allOfNode) {
+    onNodeLeave(allOfNode) {
       if (
         !('allOf' in allOfNode) ||
         !Array.isArray(allOfNode.allOf) ||

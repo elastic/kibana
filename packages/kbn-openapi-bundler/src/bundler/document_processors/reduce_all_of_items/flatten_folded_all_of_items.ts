@@ -48,7 +48,7 @@ import { DocumentNodeProcessor } from '../../types';
  */
 export function createFlattenFoldedAllOfItemsProcessor(): DocumentNodeProcessor {
   return {
-    leave(node) {
+    onNodeLeave(node) {
       if (!('allOf' in node) || !Array.isArray(node.allOf)) {
         return;
       }

@@ -14,7 +14,7 @@ import { DocumentNodeProcessor } from '../types';
  */
 export function createRemovePropsProcessor(propNames: string[]): DocumentNodeProcessor {
   return {
-    leave(node) {
+    onNodeLeave(node) {
       if (!isPlainObjectType(node)) {
         return;
       }

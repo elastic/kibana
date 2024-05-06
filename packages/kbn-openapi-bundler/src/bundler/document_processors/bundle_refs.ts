@@ -39,13 +39,13 @@ export class BundleRefProcessor implements DocumentNodeProcessor {
 
   constructor(private inliningPropName: string) {}
 
-  enter(node: Readonly<DocumentNode>): void {
+  onNodeEnter(node: Readonly<DocumentNode>): void {
     if (hasProp(node, this.inliningPropName, true)) {
       this.nodesToInline.add(node);
     }
   }
 
-  ref(node: RefNode, resolvedRef: ResolvedRef, context: TraverseDocumentContext): void {
+  onRefNodeLeave(node: RefNode, resolvedRef: ResolvedRef, context: TraverseDocumentContext): void {
     if (!resolvedRef.pointer.startsWith('/components')) {
       throw new Error(
         `$ref pointer ${chalk.yellow(

@@ -19,13 +19,13 @@ describe('processDocument', () => {
       document: {} as Document,
     };
     const calls: string[] = [];
-    const processor1 = {
-      leave() {
+    const processor1: DocumentNodeProcessor = {
+      onNodeLeave() {
         calls.push('processor1');
       },
     };
-    const processor2 = {
-      leave() {
+    const processor2: DocumentNodeProcessor = {
+      onNodeLeave() {
         calls.push('processor2');
       },
     };
@@ -46,17 +46,17 @@ describe('processDocument', () => {
     const calls: string[] = [];
     const refResolver = new RefResolver();
     const processor: DocumentNodeProcessor = {
-      enter(node) {
+      onNodeEnter(node) {
         calls.push(`enter - ${(node as NodeWithId).id}`);
       },
       shouldRemove(node) {
         calls.push(`shouldRemove - ${(node as NodeWithId).id}`);
         return false;
       },
-      ref(node) {
+      onRefNodeLeave(node) {
         calls.push(`ref - ${(node as NodeWithId).id}`);
       },
-      leave(node) {
+      onNodeLeave(node) {
         calls.push(`leave - ${(node as NodeWithId).id}`);
       },
     };

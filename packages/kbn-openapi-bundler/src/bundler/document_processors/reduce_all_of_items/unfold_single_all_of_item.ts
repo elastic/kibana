@@ -39,7 +39,7 @@ import { DocumentNodeProcessor } from '../../types';
  */
 export function createUnfoldSingleAllOfItemProcessor(): DocumentNodeProcessor {
   return {
-    leave(node) {
+    onNodeLeave(node) {
       if (!('allOf' in node) || !Array.isArray(node.allOf) || node.allOf.length > 1) {
         return;
       }

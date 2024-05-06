@@ -103,19 +103,19 @@ export type TraverseDocumentEntryContext = TraverseDocumentContext & {
  * - `false` - keep the node
  *
  */
-export type ShouldRemoveProcessorFn = (
+export type ShouldRemoveNodeProcessorFn = (
   node: Readonly<DocumentNode>,
   context: TraverseDocumentEntryContext
 ) => boolean;
 
-export type EntryProcessorFn = (
+export type OnNodeEntryProcessorFn = (
   node: Readonly<DocumentNode>,
   context: TraverseDocumentEntryContext
 ) => void;
 
-export type LeaveProcessorFn = (node: DocumentNode, context: TraverseDocumentContext) => void;
+export type OnNodeLeaveProcessorFn = (node: DocumentNode, context: TraverseDocumentContext) => void;
 
-export type RefProcessorFn = (
+export type OnRefNodeLeaveProcessorFn = (
   node: RefNode,
   resolvedRef: ResolvedRef,
   context: TraverseDocumentContext
@@ -135,28 +135,29 @@ export type RefProcessorFn = (
  *
  * 1st phase
  *
- * - `enter` - Callback function is invoked at the first phase (diving from root to leaves) while traversing
- *             the document. It can be considered in a similar way events dive in DOM during capture phase.
- *             In the other words it means entering a subtree. It allows to analyze unprocessed nodes.
+ * - `onNodeEnter` - Callback function is invoked at the first phase (diving from root to leaves) while
+ *             traversing the document. It can be considered in a similar way events dive in DOM during
+ *             capture phase. In the other words it means entering a subtree. It allows to analyze
+ *             unprocessed nodes.
  *
- * - `shouldRemove` - Callback function is invoked at the first phase (diving from root to leaves) while traversing
- *             the document. It controls whether the node will be excluded from further processing and the
- *             result document eventually. Returning `true` excluded the node while returning `false` passes
- *             the node untouched.
+ * - `shouldRemove` - Callback function is invoked at the first phase (diving from root to leaves) while
+ *             traversing the document. It controls whether the node will be excluded from further processing
+ *             and the result document eventually. Returning `true` excluded the node while returning `false`
+ *             passes the node untouched.
  *
  * 2nd phase
  *
- * - `leave` - Callback function is invoked upon leaving any type of node. It give an opportunity to modify
- *             the document like inline references or remove unwanted properties. It can be considered in
- *             a similar way event bubble in DOM during bubble phase. In the other words it means leaving
+ * - `onNodeLeave` - Callback function is invoked upon leaving any type of node. It give an opportunity to
+ *             modify the document like inline references or remove unwanted properties. It can be considered
+ *             in a similar way event bubble in DOM during bubble phase. In the other words it means leaving
  *             a subtree.
  *
- * - `ref` - Callback function is invoked upon leaving a reference node (a node having `$ref` key)
+ * - `onRefNodeLeave` - Callback function is invoked upon leaving a reference node (a node having `$ref` key)
  *
  */
 export interface DocumentNodeProcessor {
-  shouldRemove?: ShouldRemoveProcessorFn;
-  enter?: EntryProcessorFn;
-  leave?: LeaveProcessorFn;
-  ref?: RefProcessorFn;
+  shouldRemove?: ShouldRemoveNodeProcessorFn;
+  onNodeEnter?: OnNodeEntryProcessorFn;
+  onNodeLeave?: OnNodeLeaveProcessorFn;
+  onRefNodeLeave?: OnRefNodeLeaveProcessorFn;
 }

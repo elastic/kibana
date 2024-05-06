@@ -146,14 +146,14 @@ export async function processDocument(
       // If ref has been inlined by one of the processors it's not a ref node anymore
       // so we can skip the following processors
       if (isRefNode(traverseItem.node) && traverseItem.resolvedRef) {
-        processor.ref?.(
+        processor.onRefNodeLeave?.(
           traverseItem.node as RefNode,
           traverseItem.resolvedRef,
           traverseItem.context
         );
       }
 
-      processor.leave?.(traverseItem.node, traverseItem.context);
+      processor.onNodeLeave?.(traverseItem.node, traverseItem.context);
     }
   }
 }
@@ -172,7 +172,7 @@ function applyEnterProcessors(
   processors: DocumentNodeProcessor[]
 ): void {
   for (const processor of processors) {
-    processor.enter?.(traverseItem.node, {
+    processor.onNodeEnter?.(traverseItem.node, {
       ...traverseItem.context,
       parentNode: traverseItem.parentNode,
       parentKey: traverseItem.parentKey,
