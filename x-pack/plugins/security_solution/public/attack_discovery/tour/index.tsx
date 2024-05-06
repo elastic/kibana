@@ -10,8 +10,10 @@
  *
  * */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiTourStep } from '@elastic/eui';
+import { useRouteSpy } from '../../common/utils/route/use_route_spy';
+import { VideoToast } from './video_toast';
 import { useIsElementMounted } from '../../detection_engine/rule_management_ui/components/rules_table/rules_table/guided_onboarding/use_is_element_mounted';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS, SecurityPageName } from '../../../common/constants';
 import { useKibana, useNavigation } from '../../common/lib/kibana';
@@ -21,7 +23,6 @@ import * as i18n from './translations';
 interface TourState {
   currentTourStep: number;
   isTourActive: boolean;
-  tourPopoverWidth: number;
 }
 
 const AttackDiscoveryTourComp = () => {
@@ -30,9 +31,25 @@ const AttackDiscoveryTourComp = () => {
   } = useKibana();
 
   const { navigateTo } = useNavigation();
+  const [{ pageName }] = useRouteSpy();
   const [tourState, setTourState] = useState<TourState>(
     storage.get(NEW_FEATURES_TOUR_STORAGE_KEYS.ATTACK_DISCOVERY) ?? tourConfig
   );
+
+  useEffect(() => {
+    if (tourState.isTourActive && pageName === SecurityPageName.attackDiscovery) {
+      setTourState((prev) => {
+        storage.set(NEW_FEATURES_TOUR_STORAGE_KEYS.ATTACK_DISCOVERY, {
+          ...prev,
+          currentTourStep: 2,
+        });
+        return {
+          ...prev,
+          currentTourStep: 2,
+        };
+      });
+    }
+  }, [pageName, storage, tourState.isTourActive]);
 
   const finishTour = useCallback(() => {
     setTourState((prev) => {
@@ -62,7 +79,6 @@ const AttackDiscoveryTourComp = () => {
         ...prev,
         currentTourStep: prev.currentTourStep + 1,
       });
-      console.log('setCurrentTourStep to: ', prev.currentTourStep + 1);
       return {
         ...prev,
         currentTourStep: prev.currentTourStep + 1,
@@ -88,35 +104,31 @@ const AttackDiscoveryTourComp = () => {
   if (!tourState.isTourActive || !isElementAtCurrentStepMounted) {
     return null;
   }
-
   return (
     <>
       {attackDiscoveryTourSteps.map((steps, idx) => {
         const stepCount = idx + 1;
         if (tourState.currentTourStep !== stepCount) return null;
         const panelProps = {
-          'data-test-subj': `attackDiscovery-tour-step-${idx + 1}`,
+          'data-test-subj': `attackDiscovery-tour-step-${stepCount}`,
         };
-        return (
+        return tourState.currentTourStep === 1 ? (
           <EuiTourStep
             anchor={`#${steps.anchor}`}
             content={steps.content}
-            decoration="none"
             footerAction={getFooterAction()}
-            isStepOpen={tourState.isTourActive && tourState.currentTourStep === idx + 1}
+            isStepOpen={tourState.isTourActive && tourState.currentTourStep === stepCount}
             key={idx}
-            maxWidth={tourState.tourPopoverWidth}
+            maxWidth={450}
             onFinish={finishTour}
             panelProps={panelProps}
             repositionOnScroll
             step={stepCount}
-            stepsTotal={2}
+            stepsTotal={1}
             title={steps.title}
-            hasArrow={tourState.currentTourStep === 1}
-            attachToAnchor={tourState.currentTourStep === 1}
-            display={'block'}
-            offset={100}
           />
+        ) : (
+          pageName === SecurityPageName.attackDiscovery && <VideoToast onClose={finishTour} />
         );
       })}
     </>

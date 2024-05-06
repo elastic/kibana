@@ -10,11 +10,11 @@ import { css } from '@emotion/react';
 import React, { useCallback } from 'react';
 import * as i18n from './translations';
 
-const VIDEO_CONTENT_HEIGHT = 250;
-const VIDEO_CONTENT_WIDTH = 400;
-const VIDEO_SOURCE = '//play.vidyard.com/K6kKDBbP9SpXife9s2tHNP.html?';
+const VIDEO_CONTENT_HEIGHT = 160;
+const VIDEO_CONTENT_WIDTH = 250;
+const VIDEO_SOURCE = '//play.vidyard.com/BrDaDBAAvdygvemFKNAkBW.html?';
 
-const VideoComponent: React.FC = () => {
+const VideoComponent: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const ref = React.useRef<HTMLIFrameElement>(null);
   const [isVideoPlaying, setIsVideoPlaying] = React.useState(false);
 
@@ -25,7 +25,7 @@ const VideoComponent: React.FC = () => {
   return (
     <EuiPortal>
       <div style={{ position: 'fixed', bottom: 16, right: 16, zIndex: 9999 }}>
-        <EuiToast onClose={() => {}} css={{ maxWidth: VIDEO_CONTENT_WIDTH }}>
+        <EuiToast onClose={onClose} css={{ maxWidth: VIDEO_CONTENT_WIDTH }}>
           <div
             css={css`
               height: ${VIDEO_CONTENT_HEIGHT}px;
@@ -41,15 +41,15 @@ const VideoComponent: React.FC = () => {
               referrerPolicy="no-referrer"
               sandbox="allow-scripts allow-same-origin"
               scrolling="no"
-              allow={isVideoPlaying ? 'autoplay;' : undefined}
+              allow={isVideoPlaying ? 'autoplay; fullscreen' : 'fullscreen'}
               src={`${VIDEO_SOURCE}${isVideoPlaying ? '?autoplay=1' : ''}`}
               title={i18n.WATCH_OVERVIEW_VIDEO}
             />
           </div>
           <EuiText size="s" grow={false}>
-            <h3>
+            <h4>
               <EuiIcon type="cheer" color="success" /> {i18n.ATTACK_DISCOVERY_TOUR_VIDEO_STEP_TITLE}
-            </h3>
+            </h4>
             <p>{i18n.ATTACK_DISCOVERY_TOUR_VIDEO_STEP_DESC}</p>
           </EuiText>
           <EuiSpacer size="m" />

@@ -17,7 +17,6 @@ import { uniq } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocalStorage } from 'react-use';
 
-import { VideoToast } from '../tour/video_toast';
 import { SecurityRoutePageWrapper } from '../../common/components/security_route_page_wrapper';
 import { SecurityPageName } from '../../../common/constants';
 import { HeaderPage } from '../../common/components/header_page';
@@ -239,7 +238,6 @@ const AttackDiscoveryPageComponent: React.FC = () => {
 
           <EuiFlexItem grow={true} />
         </EuiFlexGroup>
-        <VideoToast />
         <SpyRoute pageName={SecurityPageName.attackDiscovery} />
       </SecurityRoutePageWrapper>
     </div>

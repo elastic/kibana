@@ -28,5 +28,4 @@ export const attackDiscoveryTourSteps = [
 export const tourConfig = {
   currentTourStep: 1,
   isTourActive: true,
-  tourPopoverWidth: 450,
 };
