@@ -126,7 +126,7 @@ export class ExpressionLoader {
     if (expression) {
       this.loadData(expression, this.params);
     } else if (this.data) {
-      this.render(this.data);
+\      this.render(this.data);
     }
   }
 

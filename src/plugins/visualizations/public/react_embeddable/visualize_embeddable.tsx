@@ -8,21 +8,22 @@
 
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
+import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
+import { useExpressionRenderer } from '@kbn/expressions-plugin/public';
 import {
   apiHasExecutionContext,
   apiPublishesUnifiedSearch,
   fetch$,
   initializeTitles,
-  useInheritedViewMode,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import React, { useRef } from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, merge } from 'rxjs';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../../common/constants';
 import { createVisAsync } from '../vis_async';
+import { getExpressionRenderParams } from './get_expression_render_params';
 import { MarkdownEditorApi, MarkdownEditorSerializedState } from './types';
-import { useExpressionHandler } from './use_expression_handler';
 
 export const visualizeEmbeddableFactory: ReactEmbeddableFactory<
   MarkdownEditorSerializedState,
@@ -51,12 +52,13 @@ export const visualizeEmbeddableFactory: ReactEmbeddableFactory<
     const vis = await createVisAsync(visFromState.type, visFromState);
 
     const vis$ = new BehaviorSubject(vis);
-    const searchSessionId$ = new BehaviorSubject<string | null>(undefined);
-    const unifiedSearch$ = new BehaviorSubject<{
-      timeRange: TimeRange;
-      query: Query;
-      filter: Filter;
-    }>(undefined);
+    const expressionParams$ = new BehaviorSubject<
+      | {
+          expression: ExpressionAstExpression;
+        }
+      | {}
+    >({});
+    const expressionAbortController$ = new BehaviorSubject<AbortController>(new AbortController());
     const executionContext = apiHasExecutionContext(parentApi)
       ? parentApi.executionContext
       : undefined;
@@ -97,45 +99,40 @@ export const visualizeEmbeddableFactory: ReactEmbeddableFactory<
         ...titleComparators,
       }
     );
+    fetch$(api).subscribe(async (data) => {
+      const unifiedSearch = apiPublishesUnifiedSearch(parentApi)
+        ? {
+            query: data.query,
+            filters: data.filters,
+            timeRange: data.timeRange,
+          }
+        : {};
+      const searchSessionId = apiPublishesSearchSession(parentApi) ? data.searchSessionId : '';
+      const currentVis = vis$.getValue();
 
-    fetch$(api).subscribe((data) => {
-      if (apiPublishesUnifiedSearch(parentApi)) {
-        unifiedSearch$.next({
-          query: data.query,
-          filters: data.filters,
-          timeRange: data.timeRange,
-        });
-      }
-      if (apiPublishesSearchSession(parentApi)) {
-        searchSessionId$.next(data.searchSessionId);
-      }
+      if (!unifiedSearch || !currentVis || !searchSessionId) return;
+      const { params, abortController } = await getExpressionRenderParams({
+        unifiedSearch,
+        vis: currentVis,
+        searchSessionId,
+        parentExecutionContext: executionContext,
+        abortController: expressionAbortController$.getValue(),
+      });
+      expressionParams$.next(params);
+      expressionAbortController$.next(abortController);
     });
+
     return {
       api,
       Component: () => {
         // get state for rendering
-        const currentVis = useStateFromPublishingSubject(vis$);
-        const viewMode = useInheritedViewMode(api) ?? 'view';
-        const nodeRef = useRef<HTMLDivElement>(null);
-        const unifiedSearch = useStateFromPublishingSubject(unifiedSearch$);
-        const searchSessionId = useStateFromPublishingSubject(searchSessionId$);
-
-        const expressionHandler = useExpressionHandler({
-          domNode: nodeRef.current,
-          viewMode,
-          vis: currentVis,
-          unifiedSearch,
-          searchSessionId,
-          parentExecutionContext: executionContext,
-        });
+        const expressionParams = useStateFromPublishingSubject(expressionParams$);
+        const domNode = useRef<HTMLDivElement>(null);
+        useExpressionRenderer(domNode, expressionParams);
 
         return (
-          <div
-            ref={nodeRef}
-            data-description={currentVis.description}
-            data-test-subj="reactVisualizeEmbeddableContainer"
-          >
-            {JSON.stringify(currentVis)}
+          <div style={{ width: '100%' }} ref={domNode}>
+            Loading
           </div>
         );
       },

@@ -97,6 +97,7 @@ export function useExpressionRenderer(
         // error handling api which is easier to work with from react
         // if custom renderError is not provided then we fallback to default error handling from ExpressionLoader
         onRenderError: (domNode, newError, handlers) => {
+          console.log('RENDER ERROR');
           errorRenderHandlerRef.current = handlers;
           setState({
             error: newError,
