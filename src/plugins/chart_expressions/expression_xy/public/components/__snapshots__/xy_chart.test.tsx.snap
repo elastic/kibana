@@ -979,6 +979,13 @@ exports[`XYChart component it renders area 1`] = `
               "spacingBuffer": 10,
               "verticalWidth": 200,
             },
+            "lineAnnotation": Object {
+              "line": Object {
+                "opacity": 1,
+                "stroke": "#69707D",
+                "strokeWidth": 1,
+              },
+            },
             "lineSeriesStyle": Object {
               "fit": Object {
                 "line": Object {
@@ -1076,6 +1083,12 @@ exports[`XYChart component it renders area 1`] = `
               "radialPadding": 0.017453292519943295,
               "sectorLineStroke": "#FFF",
               "sectorLineWidth": 1.5,
+            },
+            "rectAnnotation": Object {
+              "fill": "#69707D",
+              "opacity": 0.25,
+              "stroke": "#69707D",
+              "strokeWidth": 0,
             },
             "scales": Object {
               "barsPadding": 0.25,
@@ -2515,6 +2528,13 @@ exports[`XYChart component it renders bar 1`] = `
               "spacingBuffer": 10,
               "verticalWidth": 200,
             },
+            "lineAnnotation": Object {
+              "line": Object {
+                "opacity": 1,
+                "stroke": "#69707D",
+                "strokeWidth": 1,
+              },
+            },
             "lineSeriesStyle": Object {
               "fit": Object {
                 "line": Object {
@@ -2612,6 +2632,12 @@ exports[`XYChart component it renders bar 1`] = `
               "radialPadding": 0.017453292519943295,
               "sectorLineStroke": "#FFF",
               "sectorLineWidth": 1.5,
+            },
+            "rectAnnotation": Object {
+              "fill": "#69707D",
+              "opacity": 0.25,
+              "stroke": "#69707D",
+              "strokeWidth": 0,
             },
             "scales": Object {
               "barsPadding": 0.25,
@@ -4051,6 +4077,13 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               "spacingBuffer": 10,
               "verticalWidth": 200,
             },
+            "lineAnnotation": Object {
+              "line": Object {
+                "opacity": 1,
+                "stroke": "#69707D",
+                "strokeWidth": 1,
+              },
+            },
             "lineSeriesStyle": Object {
               "fit": Object {
                 "line": Object {
@@ -4148,6 +4181,12 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               "radialPadding": 0.017453292519943295,
               "sectorLineStroke": "#FFF",
               "sectorLineWidth": 1.5,
+            },
+            "rectAnnotation": Object {
+              "fill": "#69707D",
+              "opacity": 0.25,
+              "stroke": "#69707D",
+              "strokeWidth": 0,
             },
             "scales": Object {
               "barsPadding": 0.25,
@@ -5587,6 +5626,13 @@ exports[`XYChart component it renders line 1`] = `
               "spacingBuffer": 10,
               "verticalWidth": 200,
             },
+            "lineAnnotation": Object {
+              "line": Object {
+                "opacity": 1,
+                "stroke": "#69707D",
+                "strokeWidth": 1,
+              },
+            },
             "lineSeriesStyle": Object {
               "fit": Object {
                 "line": Object {
@@ -5684,6 +5730,12 @@ exports[`XYChart component it renders line 1`] = `
               "radialPadding": 0.017453292519943295,
               "sectorLineStroke": "#FFF",
               "sectorLineWidth": 1.5,
+            },
+            "rectAnnotation": Object {
+              "fill": "#69707D",
+              "opacity": 0.25,
+              "stroke": "#69707D",
+              "strokeWidth": 0,
             },
             "scales": Object {
               "barsPadding": 0.25,
@@ -7123,6 +7175,13 @@ exports[`XYChart component it renders stacked area 1`] = `
               "spacingBuffer": 10,
               "verticalWidth": 200,
             },
+            "lineAnnotation": Object {
+              "line": Object {
+                "opacity": 1,
+                "stroke": "#69707D",
+                "strokeWidth": 1,
+              },
+            },
             "lineSeriesStyle": Object {
               "fit": Object {
                 "line": Object {
@@ -7220,6 +7279,12 @@ exports[`XYChart component it renders stacked area 1`] = `
               "radialPadding": 0.017453292519943295,
               "sectorLineStroke": "#FFF",
               "sectorLineWidth": 1.5,
+            },
+            "rectAnnotation": Object {
+              "fill": "#69707D",
+              "opacity": 0.25,
+              "stroke": "#69707D",
+              "strokeWidth": 0,
             },
             "scales": Object {
               "barsPadding": 0.25,
@@ -8659,6 +8724,13 @@ exports[`XYChart component it renders stacked bar 1`] = `
               "spacingBuffer": 10,
               "verticalWidth": 200,
             },
+            "lineAnnotation": Object {
+              "line": Object {
+                "opacity": 1,
+                "stroke": "#69707D",
+                "strokeWidth": 1,
+              },
+            },
             "lineSeriesStyle": Object {
               "fit": Object {
                 "line": Object {
@@ -8756,6 +8828,12 @@ exports[`XYChart component it renders stacked bar 1`] = `
               "radialPadding": 0.017453292519943295,
               "sectorLineStroke": "#FFF",
               "sectorLineWidth": 1.5,
+            },
+            "rectAnnotation": Object {
+              "fill": "#69707D",
+              "opacity": 0.25,
+              "stroke": "#69707D",
+              "strokeWidth": 0,
             },
             "scales": Object {
               "barsPadding": 0.25,
@@ -10195,6 +10273,13 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               "spacingBuffer": 10,
               "verticalWidth": 200,
             },
+            "lineAnnotation": Object {
+              "line": Object {
+                "opacity": 1,
+                "stroke": "#69707D",
+                "strokeWidth": 1,
+              },
+            },
             "lineSeriesStyle": Object {
               "fit": Object {
                 "line": Object {
@@ -10292,6 +10377,12 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               "radialPadding": 0.017453292519943295,
               "sectorLineStroke": "#FFF",
               "sectorLineWidth": 1.5,
+            },
+            "rectAnnotation": Object {
+              "fill": "#69707D",
+              "opacity": 0.25,
+              "stroke": "#69707D",
+              "strokeWidth": 0,
             },
             "scales": Object {
               "barsPadding": 0.25,
@@ -11761,6 +11852,13 @@ exports[`XYChart component split chart should render split chart if both, splitR
               "spacingBuffer": 10,
               "verticalWidth": 200,
             },
+            "lineAnnotation": Object {
+              "line": Object {
+                "opacity": 1,
+                "stroke": "#69707D",
+                "strokeWidth": 1,
+              },
+            },
             "lineSeriesStyle": Object {
               "fit": Object {
                 "line": Object {
@@ -11858,6 +11956,12 @@ exports[`XYChart component split chart should render split chart if both, splitR
               "radialPadding": 0.017453292519943295,
               "sectorLineStroke": "#FFF",
               "sectorLineWidth": 1.5,
+            },
+            "rectAnnotation": Object {
+              "fill": "#69707D",
+              "opacity": 0.25,
+              "stroke": "#69707D",
+              "strokeWidth": 0,
             },
             "scales": Object {
               "barsPadding": 0.25,
@@ -13535,6 +13639,13 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               "spacingBuffer": 10,
               "verticalWidth": 200,
             },
+            "lineAnnotation": Object {
+              "line": Object {
+                "opacity": 1,
+                "stroke": "#69707D",
+                "strokeWidth": 1,
+              },
+            },
             "lineSeriesStyle": Object {
               "fit": Object {
                 "line": Object {
@@ -13632,6 +13743,12 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               "radialPadding": 0.017453292519943295,
               "sectorLineStroke": "#FFF",
               "sectorLineWidth": 1.5,
+            },
+            "rectAnnotation": Object {
+              "fill": "#69707D",
+              "opacity": 0.25,
+              "stroke": "#69707D",
+              "strokeWidth": 0,
             },
             "scales": Object {
               "barsPadding": 0.25,
@@ -15302,6 +15419,13 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               "spacingBuffer": 10,
               "verticalWidth": 200,
             },
+            "lineAnnotation": Object {
+              "line": Object {
+                "opacity": 1,
+                "stroke": "#69707D",
+                "strokeWidth": 1,
+              },
+            },
             "lineSeriesStyle": Object {
               "fit": Object {
                 "line": Object {
@@ -15399,6 +15523,12 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               "radialPadding": 0.017453292519943295,
               "sectorLineStroke": "#FFF",
               "sectorLineWidth": 1.5,
+            },
+            "rectAnnotation": Object {
+              "fill": "#69707D",
+              "opacity": 0.25,
+              "stroke": "#69707D",
+              "strokeWidth": 0,
             },
             "scales": Object {
               "barsPadding": 0.25,
