@@ -132,6 +132,7 @@ export const getRenderCellValueFn = ({
           shouldShowFieldHandler={shouldShowFieldHandler}
           maxEntries={maxEntries}
           isPlainRecord={isPlainRecord}
+          isDarkMode={ctx.isDarkMode}
         />
       );
     }

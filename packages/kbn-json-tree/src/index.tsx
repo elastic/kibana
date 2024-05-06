@@ -7,22 +7,22 @@
  */
 
 import React from 'react';
-import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { TreeChild } from './tree_child';
 
 const TreeChildMemoized = React.memo(TreeChild);
 
-export const Tree = ({ data }: { data: EsHitRecord }) => {
+export const JSONTree = ({
+  data,
+  isDarkMode,
+}: {
+  data: Record<string, unknown>;
+  isDarkMode: boolean;
+}) => {
   return (
     <>
-      {Object.keys(data).length !== 0 &&
-        (Array.isArray(data) ? (
-          data.map((node, i) => {
-            return <TreeChildMemoized key={i} node={node} i={i} isRootElement={true} />;
-          })
-        ) : (
-          <TreeChildMemoized node={data} i={0} />
-        ))}
+      {Object.keys(data).length !== 0 && (
+        <TreeChildMemoized node={data} i={0} isDarkMode={isDarkMode} isRootElement />
+      )}
     </>
   );
 };

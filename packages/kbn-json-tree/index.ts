@@ -6,9 +6,4 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  preset: '@kbn/test/jest_node',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-json-view'],
-  setupFilesAfterEnv: ['<rootDir>/packages/kbn-json-view/setup_tests.ts'],
-};
+export { JSONTree } from './src';

@@ -1,6 +1,6 @@
 {
   "type": "shared-common",
-  "id": "@kbn/json-view",
+  "id": "@kbn/json-tree",
   "owner": "@elastic/kibana-esql",
   "devOnly": true
 }

@@ -5046,7 +5046,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/json-view@link:packages/kbn-json-view":
+"@kbn/json-tree@link:packages/kbn-json-tree":
   version "0.0.0"
   uid ""
 
