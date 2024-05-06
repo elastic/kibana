@@ -86,7 +86,6 @@ export const TimeRangePicker: FC<Props> = ({ setTimeRange, timeRange }) => {
           }
           endDateControl={
             <EuiDatePicker
-              // @ts-ignore
               popperProps={{
                 'data-test-subj': 'mlJobWizardDatePickerRangeEndDate',
               }}
