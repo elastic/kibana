@@ -7,7 +7,7 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { useSaveCurrentTextObject } from '../../../hooks';
+import { useSaveCurrentTextObject } from '../../../../hooks';
 
 interface SetupAutosaveParams {
   /** The current input value in the Console editor. */

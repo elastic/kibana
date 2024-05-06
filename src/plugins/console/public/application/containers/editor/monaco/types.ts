@@ -6,8 +6,15 @@
  * Side Public License, v 1.
  */
 
-export { useSetInputEditor } from './use_set_input_editor';
-export { useRestoreRequestFromHistory } from './use_restore_request_from_history';
-export { useSendCurrentRequest, sendRequest } from './use_send_current_request';
-export { useSaveCurrentTextObject } from './use_save_current_text_object';
-export { useDataInit } from './use_data_init';
+import type { ParsedRequest } from '@kbn/monaco';
+
+export interface EditorRequest {
+  method: string;
+  url: string;
+  data: string[];
+}
+
+export interface AdjustedParsedRequest extends ParsedRequest {
+  startLineNumber: number;
+  endLineNumber: number;
+}
