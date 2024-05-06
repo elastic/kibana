@@ -41,8 +41,24 @@ export async function getServicesFromAssets({
           track_total_hits: false,
           query: {
             bool: {
-              filter: [...termQuery(ASSET_TYPE, assetType), ...kqlQuery(kuery)],
-              should: [...rangeQuery(start, end, FIRST_SEEN), ...rangeQuery(start, end, LAST_SEEN)],
+              filter: [
+                ...termQuery(ASSET_TYPE, assetType),
+                ...kqlQuery(kuery),
+                {
+                  range: {
+                    [FIRST_SEEN]: {
+                      gte: start,
+                    },
+                  },
+                },
+                {
+                  range: {
+                    [LAST_SEEN]: {
+                      lte: end,
+                    },
+                  },
+                },
+              ],
             },
           },
         },
