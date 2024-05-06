@@ -1028,6 +1028,10 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 
 ### Observability Plugins
 
+# Observability AI Assistant
+x-pack/test/observability_ai_assistant_api_integration @elastic/obs-ai-assistant
+x-pack/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
+
 # Observability robots
 /.github/workflows/deploy-my-kibana.yml @elastic/observablt-robots
 /.github/workflows/undeploy-my-kibana.yml @elastic/observablt-robots
