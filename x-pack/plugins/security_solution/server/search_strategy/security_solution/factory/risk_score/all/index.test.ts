@@ -9,7 +9,7 @@ import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { riskScore } from '.';
-import type { IEsSearchResponse } from '@kbn/data-plugin/public';
+import type { IEsSearchResponse } from '@kbn/search-types';
 import type { HostRiskScore } from '../../../../../../common/search_strategy';
 import { RiskScoreEntity, RiskSeverity } from '../../../../../../common/search_strategy';
 import * as buildQuery from './query.risk_score.dsl';
