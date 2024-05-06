@@ -50,6 +50,7 @@
     "@kbn/es-query",
     "@kbn/analytics-client",
     "@kbn/core-analytics-browser",
+    "@kbn/react-hooks",
   ],
   "exclude": [
     "target/**/*"
