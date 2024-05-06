@@ -23,14 +23,12 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import type { Observable } from 'rxjs';
-import type { CoreTheme } from '@kbn/core/public';
-
 import {
   getNumTransformAssets,
   TransformInstallWithCurrentUserPermissionCallout,
 } from '../../../../../../../components/transform_install_as_current_user_callout';
 
+import type { FleetStartServices } from '../../../../../../../plugin';
 import type { PackageInfo } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
 import {
@@ -117,10 +115,10 @@ const LatestVersionLink = ({ name, version }: { name: string; version: string })
 
 interface Props {
   packageInfo: PackageInfo;
-  theme$: Observable<CoreTheme>;
+  startServices: Pick<FleetStartServices, 'analytics' | 'i18n' | 'theme'>;
 }
 
-export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Props) => {
+export const SettingsPage: React.FC<Props> = memo(({ packageInfo, startServices }: Props) => {
   const { name, title, latestVersion, version, keepPoliciesUpToDate } = packageInfo;
   const [isUpgradingPackagePolicies, setIsUpgradingPackagePolicies] = useState<boolean>(false);
   const [isChangelogModalOpen, setIsChangelogModalOpen] = useState(false);
@@ -339,7 +337,7 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Prop
                         dryRunData={dryRunData}
                         isUpgradingPackagePolicies={isUpgradingPackagePolicies}
                         setIsUpgradingPackagePolicies={setIsUpgradingPackagePolicies}
-                        theme$={theme$}
+                        startServices={startServices}
                       />
                     </p>
                   </>
