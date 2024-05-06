@@ -7,9 +7,10 @@
 
 import type { Rule } from '@kbn/alerting-plugin/common';
 import type { TopAlert } from '@kbn/observability-plugin/public';
+import { SerializedTitles } from '@kbn/presentation-publishing';
 import type { BoolQuery } from '@kbn/es-query';
 
-export interface EmbeddableAPMAlertingVizProps {
+export interface EmbeddableAPMAlertingVizProps extends SerializedTitles {
   rule: Rule;
   alert: TopAlert;
   transactionName?: string;
