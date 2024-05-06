@@ -106,6 +106,7 @@ export function InternalDashboardTopNav({
 
   const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
   const query = dashboard.select((state) => state.explicitInput.query);
+  const filters = dashboard.select((state) => state.explicitInput.filters);
   const title = dashboard.select((state) => state.explicitInput.title);
 
   // store data views in state & subscribe to dashboard data view changes.
@@ -366,7 +367,7 @@ export function InternalDashboardTopNav({
         <DashboardEditingToolbar isDisabled={!!focusedPanelId} />
       ) : null}
       {showBorderBottom && <EuiHorizontalRule id="dashboardTopNavHorizontalRule" margin="none" />}
-      {isCourierIgnoreFilterEnabled && allDataViews.length > 1 && (
+      {isCourierIgnoreFilterEnabled && allDataViews.length > 1 && filters.length > 0 && (
         <IgnoreFilterTour dataViews={allDataViews} />
       )}
     </div>

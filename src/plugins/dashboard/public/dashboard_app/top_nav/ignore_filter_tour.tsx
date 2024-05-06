@@ -40,6 +40,7 @@ export const IgnoreFilterTour = ({ dataViews = [] }: { dataViews: DataView[] }) 
 
   return (
     <EuiTourStep
+      data-test-subj="ignore_filter_tour"
       anchor='[data-test-subj="addFilter"]'
       title={
         <>
@@ -97,6 +98,7 @@ export const IgnoreFilterTour = ({ dataViews = [] }: { dataViews: DataView[] }) 
                   localStorage.setItem('FILTER_TOUR_OPT_OUT_LOCAL_KEY', 'true');
                 }
               }}
+              data-test-subj="ignore_filter_tour_dismiss_button"
             >
               {filterTourStrings.closeButton}
             </EuiButtonEmpty>
