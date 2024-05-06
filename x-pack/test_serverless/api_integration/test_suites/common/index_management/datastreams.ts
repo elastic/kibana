@@ -24,6 +24,8 @@ export default function ({ getService }: FtrProviderContext) {
   let getDatastream: typeof helpers['getDatastream'];
 
   describe('Data streams', function () {
+    // see details: https://github.com/elastic/kibana/issues/182647
+    this.tags(['failsOnMKI']);
     before(async () => {
       ({
         datastreams: { helpers },
