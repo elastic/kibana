@@ -88,7 +88,7 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
 
         if (jobIds.length === 1) {
           if (!titleManuallyChanged.current) {
-            setPanelTitle(getDefaultSingleMetricViewerPanelTitle(jobIds));
+            setPanelTitle(getDefaultSingleMetricViewerPanelTitle(jobIds[0]));
           }
           if (mlApiServices) {
             fetchJob().catch((error) => {
@@ -199,7 +199,7 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
               data-test-subj="mlsingleMetricViewerInitializerCancelButton"
             >
               <FormattedMessage
-                id="mlsingleMetricViewerInitializerCancelButtonLabel"
+                id="xpack.ml.singleMetricViewerEmbeddable.CancelButtonLabel"
                 defaultMessage="Cancel"
               />
             </EuiButtonEmpty>
