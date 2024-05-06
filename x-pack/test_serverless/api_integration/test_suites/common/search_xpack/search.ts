@@ -48,7 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('search', () => {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createApiKeyForRole('viewer');
       // ensure es not empty
       await es.index({
         index: 'search-api-test',
