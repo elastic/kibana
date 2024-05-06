@@ -52,6 +52,7 @@ function getOptions(fields: FieldProps[], selectedFields: FieldProps[]): EuiSele
     .map((field) => {
       return {
         value: field.name,
+        name: field.name,
         prepend:
           'type' in field ? (
             <FieldIcon className="eui-alignMiddle" type={field.type} fill="none" />
