@@ -200,7 +200,7 @@ export type AlertsIndexNamespace = z.infer<typeof AlertsIndexNamespace>;
 export const AlertsIndexNamespace = z.string();
 
 export type MaxSignals = z.infer<typeof MaxSignals>;
-export const MaxSignals = z.number().int().min(1);
+export const MaxSignals = z.number().int().min(1).max(1000);
 
 export type ThreatSubtechnique = z.infer<typeof ThreatSubtechnique>;
 export const ThreatSubtechnique = z.object({
