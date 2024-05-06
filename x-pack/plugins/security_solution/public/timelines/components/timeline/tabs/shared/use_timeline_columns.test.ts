@@ -8,7 +8,6 @@
 import { TestProviders } from '../../../../../common/mock';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { renderHook } from '@testing-library/react-hooks';
-import { useLicense } from '../../../../../common/hooks/use_license';
 import { useTimelineColumns } from './use_timeline_columns';
 import { defaultUdtHeaders } from '../../unified_components/default_headers';
 import { defaultHeaders } from '../../body/column_headers/default_headers';
@@ -19,14 +18,6 @@ jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
 }));
 
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
-
-jest.mock('../../../../../common/hooks/use_license', () => ({
-  useLicense: jest.fn().mockReturnValue({
-    isEnterprise: () => true,
-  }),
-}));
-
-const useLicenseMock = useLicense as jest.Mock;
 
 describe('useTimelineColumns', () => {
   const mockColumns: ColumnHeaderOptions[] = [
@@ -108,45 +99,18 @@ describe('useTimelineColumns', () => {
     });
   });
 
-  describe('leadingControlColumns', () => {
-    it('should return the leading control columns', () => {
-      const { result } = renderHook(() => useTimelineColumns([]), {
-        wrapper: TestProviders,
-      });
-      expect(result.current.leadingControlColumns).toMatchSnapshot();
-    });
-    it('should have a width of 152 for 5 actions', () => {
-      useLicenseMock.mockReturnValue({
-        isEnterprise: () => false,
-      });
-      const { result } = renderHook(() => useTimelineColumns([]), {
-        wrapper: TestProviders,
-      });
-      expect(result.current.leadingControlColumns[0].width).toBe(152);
-    });
-    it('should have a width of 180 for 6 actions', () => {
-      useLicenseMock.mockReturnValue({
-        isEnterprise: () => true,
-      });
-      const { result } = renderHook(() => useTimelineColumns([]), {
-        wrapper: TestProviders,
-      });
-      expect(result.current.leadingControlColumns[0].width).toBe(180);
-    });
-  });
-
   describe('getTimelineQueryFieldsFromColumns', () => {
     it('should return the list of all the fields', () => {
       const { result } = renderHook(() => useTimelineColumns([]), {
         wrapper: TestProviders,
       });
-      expect(result.current.getTimelineQueryFieldsFromColumns()).toMatchSnapshot();
+      expect(result.current.timelineQueryFieldsFromColumns).toMatchSnapshot();
     });
     it('should have a width of 152 for 5 actions', () => {
       const { result } = renderHook(() => useTimelineColumns(mockColumns), {
         wrapper: TestProviders,
       });
-      expect(result.current.getTimelineQueryFieldsFromColumns()).toMatchSnapshot();
+      expect(result.current.timelineQueryFieldsFromColumns).toMatchSnapshot();
     });
   });
 });

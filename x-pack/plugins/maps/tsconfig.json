@@ -87,7 +87,9 @@
     "@kbn/presentation-publishing",
     "@kbn/saved-objects-finder-plugin",
     "@kbn/esql-utils",
-    "@kbn/apm-data-view"
+    "@kbn/apm-data-view",
+    "@kbn/shared-ux-utility",
+    "@kbn/react-kibana-context-render"
   ],
   "exclude": [
     "target/**/*",

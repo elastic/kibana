@@ -14,8 +14,10 @@ export {
   DASHBOARD_APP_ID,
   LEGACY_DASHBOARD_APP_ID,
   DASHBOARD_GRID_COLUMN_COUNT,
+  PanelPlacementStrategy,
 } from './dashboard_constants';
 export {
+  registerDashboardPanelPlacementSetting,
   type DashboardAPI,
   type AwaitingDashboardAPI,
   DashboardRenderer,

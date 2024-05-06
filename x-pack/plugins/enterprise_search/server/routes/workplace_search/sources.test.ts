@@ -556,7 +556,7 @@ describe('sources routes', () => {
       });
     });
 
-    it('creates a request handler', () => {
+    it('creates a request handler', async () => {
       const mockRequest = {
         params: {
           sourceId: '123',
@@ -564,7 +564,7 @@ describe('sources routes', () => {
         },
       };
 
-      mockRouter.callRoute(mockRequest);
+      await mockRouter.callRoute(mockRequest);
 
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/ws/sources/:sourceId/reindex_job/:jobId',
@@ -1343,8 +1343,8 @@ describe('sources routes', () => {
       });
     });
 
-    it('creates a request handler', () => {
-      mockRouter.callRoute(mockRequest as any);
+    it('creates a request handler', async () => {
+      await mockRouter.callRoute(mockRequest as any);
 
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/ws/sources/create',

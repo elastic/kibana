@@ -11,6 +11,7 @@ import type { Dispatch } from 'redux';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
+import type { EuiDataGridControlColumn } from '@elastic/eui';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
@@ -20,6 +21,7 @@ import { InputsModelId } from '../../../../../common/store/inputs/constants';
 import { useInvalidFilterQuery } from '../../../../../common/hooks/use_invalid_filter_query';
 import { timelineActions, timelineSelectors } from '../../../../store';
 import type { Direction } from '../../../../../../common/search_strategy';
+import type { ControlColumnProps } from '../../../../../../common/types';
 import { useTimelineEvents } from '../../../../containers';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { StatefulBody } from '../../body';
@@ -58,6 +60,7 @@ import {
 } from '../shared/utils';
 import type { TimelineTabCommonProps } from '../shared/types';
 import { useTimelineColumns } from '../shared/use_timeline_columns';
+import { useTimelineControlColumn } from '../shared/use_timeline_control_columns';
 
 const compareQueryProps = (prevProps: Props, nextProps: Props) =>
   prevProps.kqlMode === nextProps.kqlMode &&
@@ -90,6 +93,8 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   sort,
   timerangeKind,
   expandedDetail,
+  pinnedEventIds,
+  eventIdToNoteIds,
 }) => {
   const dispatch = useDispatch();
   const {
@@ -102,12 +107,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     // in order to include the exclude filters in the search that are not stored in the timeline
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
-  const {
-    augmentedColumnHeaders,
-    defaultColumns,
-    getTimelineQueryFieldsFromColumns,
-    leadingControlColumns,
-  } = useTimelineColumns(columns);
 
   const { uiSettings, timelineDataService } = useKibana().services;
   const {
@@ -182,14 +181,8 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     }));
   }, [sort]);
 
-  useEffect(() => {
-    dispatch(
-      timelineActions.initializeTimelineSettings({
-        id: timelineId,
-        defaultColumns,
-      })
-    );
-  }, [dispatch, timelineId, defaultColumns]);
+  const { augmentedColumnHeaders, defaultColumns, timelineQueryFieldsFromColumns } =
+    useTimelineColumns(columns);
 
   const [
     dataLoadingState,
@@ -197,7 +190,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   ] = useTimelineEvents({
     dataViewId,
     endDate: end,
-    fields: getTimelineQueryFieldsFromColumns(),
+    fields: timelineQueryFieldsFromColumns,
     filterQuery: combinedQueries?.filterQuery,
     id: timelineId,
     indexNames: selectedPatterns,
@@ -209,6 +202,17 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     startDate: start,
     timerangeKind,
   });
+
+  const leadingControlColumns = useTimelineControlColumn(columns, sort);
+
+  useEffect(() => {
+    dispatch(
+      timelineActions.initializeTimelineSettings({
+        id: timelineId,
+        defaultColumns,
+      })
+    );
+  }, [dispatch, timelineId, defaultColumns]);
 
   const isQueryLoading = useMemo(
     () => [DataLoadingState.loading, DataLoadingState.loadingMore].includes(dataLoadingState),
@@ -288,6 +292,9 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         onEventClosed={onEventClosed}
         expandedDetail={expandedDetail}
         showExpandedDetails={showExpandedDetails}
+        leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
+        eventIdToNoteIds={eventIdToNoteIds}
+        pinnedEventIds={pinnedEventIds}
         onChangePage={loadPage}
         activeTab={activeTab}
         updatedAt={refreshedAt}
@@ -338,7 +345,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                   itemsCount: totalCount,
                   itemsPerPage,
                 })}
-                leadingControlColumns={leadingControlColumns}
+                leadingControlColumns={leadingControlColumns as ControlColumnProps[]}
                 trailingControlColumns={timelineEmptyTrailingControlColumns}
               />
             </StyledEuiFlyoutBody>
@@ -397,6 +404,8 @@ const makeMapStateToProps = () => {
       activeTab,
       columns,
       dataProviders,
+      pinnedEventIds,
+      eventIdToNoteIds,
       expandedDetail,
       filters,
       itemsPerPage,
@@ -432,6 +441,8 @@ const makeMapStateToProps = () => {
       expandedDetail,
       filters: timelineFilter,
       timelineId,
+      pinnedEventIds,
+      eventIdToNoteIds,
       isLive: input.policy.kind === 'interval',
       itemsPerPage,
       itemsPerPageOptions,
@@ -475,8 +486,11 @@ const QueryTabContent = connector(
       prevProps.showCallOutUnauthorizedMsg === nextProps.showCallOutUnauthorizedMsg &&
       prevProps.showExpandedDetails === nextProps.showExpandedDetails &&
       prevProps.status === nextProps.status &&
+      prevProps.status === nextProps.status &&
       prevProps.timelineId === nextProps.timelineId &&
+      deepEqual(prevProps.eventIdToNoteIds, nextProps.eventIdToNoteIds) &&
       deepEqual(prevProps.columns, nextProps.columns) &&
+      deepEqual(prevProps.pinnedEventIds, nextProps.pinnedEventIds) &&
       deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
       deepEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions) &&
       deepEqual(prevProps.sort, nextProps.sort)

@@ -7,7 +7,7 @@
 
 import { EuiIcon } from '@elastic/eui';
 import { useFormikContext } from 'formik';
-import type { FunctionComponent } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React, { useEffect } from 'react';
 
 import { useFormChangesContext } from './form_changes';
@@ -36,7 +36,7 @@ export interface FormLabelProps {
  * @throws Error if not a child of a `<Formik>` component.
  * @throws Error if not a child of a `<FormChanges>` component.
  */
-export const FormLabel: FunctionComponent<FormLabelProps> = (props) => {
+export const FormLabel: FC<PropsWithChildren<FormLabelProps>> = (props) => {
   const formik = useFormikContext();
   const { report } = useFormChangesContext();
 
