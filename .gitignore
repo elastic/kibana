@@ -95,16 +95,16 @@ npm-debug.log*
 /x-pack/plugins/observability_solution/apm/ftr_e2e/cypress/e2e/service_map/snapshots/*.diff.png
 
 # transpiled cypress config
-x-pack/plugins/fleet/cypress.config.d.ts
-x-pack/plugins/fleet/cypress.config.js
+x-pack/platform/fleet/cypress.config.d.ts
+x-pack/platform/fleet/cypress.config.js
 x-pack/plugins/osquery/cypress.config.d.ts
 x-pack/plugins/osquery/cypress.config.js
 x-pack/plugins/enterprise_search/cypress.config.d.ts
 x-pack/plugins/enterprise_search/cypress.config.js
-x-pack/plugins/security_solution/public/management/cypress.config.d.ts
-x-pack/plugins/security_solution/public/management/cypress.config.js
-x-pack/plugins/security_solution/public/management/cypress_endpoint.config.d.ts
-x-pack/plugins/security_solution/public/management/cypress_endpoint.config.js
+x-pack/security/security_solution/public/management/cypress.config.d.ts
+x-pack/security/security_solution/public/management/cypress.config.js
+x-pack/security/security_solution/public/management/cypress_endpoint.config.d.ts
+x-pack/security/security_solution/public/management/cypress_endpoint.config.js
 
 # release notes script output
 report.csv
