@@ -108,10 +108,10 @@ describe('Put payload schema', () => {
           kibana: [{ spaces: ['foo-*'] }],
         })
       ).toThrowErrorMatchingInlineSnapshot(`
-"[kibana.0.spaces]: types that failed validation:
-- [kibana.0.spaces.0.0]: expected value to equal [*]
-- [kibana.0.spaces.1.0]: must be lower case, a-z, 0-9, '_', and '-' are allowed"
-`);
+        "[kibana.0.spaces]: types that failed validation:
+        - [kibana.0.spaces.0.0]: expected value to equal [*]
+        - [kibana.0.spaces.1.0]: must be lower case, a-z, 0-9, '_', and '-' are allowed"
+      `);
     });
 
     test(`can't assign space and global in same entry`, () => {
@@ -120,10 +120,10 @@ describe('Put payload schema', () => {
           kibana: [{ spaces: ['*', 'foo-space'] }],
         })
       ).toThrowErrorMatchingInlineSnapshot(`
-"[kibana.0.spaces]: types that failed validation:
-- [kibana.0.spaces.0.1]: expected value to equal [*]
-- [kibana.0.spaces.1.0]: must be lower case, a-z, 0-9, '_', and '-' are allowed"
-`);
+        "[kibana.0.spaces]: types that failed validation:
+        - [kibana.0.spaces.0.1]: expected value to equal [*]
+        - [kibana.0.spaces.1.0]: must be lower case, a-z, 0-9, '_', and '-' are allowed"
+      `);
     });
 
     test(`only allows known Kibana space base privileges`, () => {
@@ -452,6 +452,40 @@ describe('Put payload schema', () => {
         },
       }
     `);
+  });
+
+  test(`doesn't allow empty privilege for remote_cluster`, () => {
+    expect(() =>
+      getPutPayloadSchema(() => basePrivilegeNamesMap).validate({
+        elasticsearch: {
+          remote_cluster: [
+            {
+              privileges: [],
+              clusters: ['cluster1'],
+            },
+          ],
+        },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[elasticsearch.remote_cluster.0.privileges]: array size is [0], but cannot be smaller than [1]"`
+    );
+  });
+
+  test(`doesn't allow empty clusters for remote_cluster`, () => {
+    expect(() =>
+      getPutPayloadSchema(() => basePrivilegeNamesMap).validate({
+        elasticsearch: {
+          remote_cluster: [
+            {
+              privileges: ['enrich_monitor'],
+              clusters: [],
+            },
+          ],
+        },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[elasticsearch.remote_cluster.0.clusters]: array size is [0], but cannot be smaller than [1]"`
+    );
   });
 
   // This is important for backwards compatibility

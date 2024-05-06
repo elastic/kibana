@@ -109,6 +109,7 @@ exports[`it renders without crashing 1`] = `
     }
   }
   isClearable={true}
+  optionMatcher={[Function]}
   options={
     Array [
       Object {
