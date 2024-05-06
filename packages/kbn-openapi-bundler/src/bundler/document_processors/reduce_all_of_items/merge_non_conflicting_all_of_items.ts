@@ -66,7 +66,7 @@ export function createMergeNonConflictingAllOfItemsProcessor(): DocumentNodeProc
       }
 
       const mergedProperties = {} as Record<string, OpenAPIV3.SchemaObject>;
-      const mergedRequired: string[] = [];
+      const mergedRequired = new Set<string>();
 
       for (let i = 0; i < allOfNode.allOf.length; ++i) {
         const node = allOfNode.allOf[i];
@@ -78,7 +78,7 @@ export function createMergeNonConflictingAllOfItemsProcessor(): DocumentNodeProc
         Object.assign(mergedProperties, node.properties);
 
         for (const requiredField of node.required ?? []) {
-          mergedRequired.push(requiredField);
+          mergedRequired.add(requiredField);
         }
 
         allOfNode.allOf.splice(i--, 1);
@@ -89,8 +89,8 @@ export function createMergeNonConflictingAllOfItemsProcessor(): DocumentNodeProc
         properties: mergedProperties,
       });
 
-      if (mergedRequired.length > 0) {
-        allOfNode.allOf[0].required = mergedRequired;
+      if (mergedRequired.size > 0) {
+        allOfNode.allOf[0].required = Array.from(mergedRequired);
       }
     },
   };

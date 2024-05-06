@@ -30,5 +30,8 @@ paths:
                     properties:
                       fieldA:
                         type: string
+                      fieldB:
+                        type: string
                     required:
                       - fieldA
+                      - fieldB
