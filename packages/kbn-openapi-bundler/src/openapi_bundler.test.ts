@@ -173,11 +173,24 @@ describe('OpenAPI Bundler', () => {
 
   describe('remove props', () => {
     it('removes "x-codegen-enabled" property', async () => {
-      await bundleFolder('remove_props');
-      await expectBundleToMatchFile(
-        DEFAULT_BUNDLED_FILE_PATH,
-        join('remove_props', 'expected.yaml')
-      );
+      const folder = join('remove_props', 'x_codegen_enabled');
+
+      await bundleFolder(folder);
+      await expectBundleToMatchFile(DEFAULT_BUNDLED_FILE_PATH, join(folder, 'expected.yaml'));
+    });
+
+    it('removes "x-inline" property', async () => {
+      const folder = join('remove_props', 'x_inline');
+
+      await bundleFolder(folder);
+      await expectBundleToMatchFile(DEFAULT_BUNDLED_FILE_PATH, join(folder, 'expected.yaml'));
+    });
+
+    it('removes "x-modify" property', async () => {
+      const folder = join('remove_props', 'x_modify');
+
+      await bundleFolder(folder);
+      await expectBundleToMatchFile(DEFAULT_BUNDLED_FILE_PATH, join(folder, 'expected.yaml'));
     });
   });
 
