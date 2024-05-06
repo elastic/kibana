@@ -56,7 +56,7 @@ export const DATA_DATASETS_INDEX_PATTERNS = [
   { pattern: 'fluentbit*', patternName: 'fluentbit' },
   { pattern: '*nginx*', patternName: 'nginx' },
   { pattern: '*apache*', patternName: 'apache' }, // Already in Security (keeping it in here for documentation)
-  { pattern: '*logs*', patternName: 'third-party-logs' },
+  { pattern: '*logs*', patternName: 'generic-logs' },
 
   // Security - Elastic
   { pattern: 'logstash-*', patternName: 'logstash', shipper: 'logstash' },

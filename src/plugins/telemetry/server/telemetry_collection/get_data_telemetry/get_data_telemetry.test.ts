@@ -72,8 +72,8 @@ describe('get_data_telemetry', () => {
           { name: 'metricbeat-1234', docCount: 100, sizeInBytes: 10, isECS: false },
           { name: '.app-search-1234', docCount: 0 },
           { name: '.internal.alerts-stack.alerts-default-0000001', sizeInBytes: 999 },
-          { name: 'some-random-logs', docCount: 100, sizeInBytes: 10 }, // Matching pattern with a dot in the name
-          { name: 'my-prod-filebeat-123', docCount: 100, sizeInBytes: 10 }, // Matching pattern with a dot in the name
+          { name: 'some-random-logs', docCount: 100, sizeInBytes: 10 },
+          { name: 'my-prod-filebeat-123', docCount: 100, sizeInBytes: 10 },
           { name: 'logs-endpoint.1234', docCount: 0 }, // Matching pattern with a dot in the name
           { name: 'ml_host_risk_score_latest_default', docCount: 0 },
           { name: 'ml_host_risk_score_latest', docCount: 0 }, // This should not match,
