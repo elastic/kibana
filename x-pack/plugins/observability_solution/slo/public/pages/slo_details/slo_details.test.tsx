@@ -23,6 +23,7 @@ import { buildSlo } from '../../data/slo/slo';
 import { ActiveAlerts } from '../../hooks/active_alerts';
 import { useCapabilities } from '../../hooks/use_capabilities';
 import { useDeleteSlo } from '../../hooks/use_delete_slo';
+import { useDeleteSloInstance } from '../../hooks/use_delete_slo_instance';
 import { useFetchActiveAlerts } from '../../hooks/use_fetch_active_alerts';
 import { useFetchHistoricalSummary } from '../../hooks/use_fetch_historical_summary';
 import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
@@ -45,6 +46,7 @@ jest.mock('../../hooks/use_fetch_active_alerts');
 jest.mock('../../hooks/use_fetch_slo_details');
 jest.mock('../../hooks/use_fetch_historical_summary');
 jest.mock('../../hooks/use_delete_slo');
+jest.mock('../../hooks/use_delete_slo_instance');
 
 const useKibanaMock = useKibana as jest.Mock;
 
@@ -54,6 +56,7 @@ const useFetchActiveAlertsMock = useFetchActiveAlerts as jest.Mock;
 const useFetchSloDetailsMock = useFetchSloDetails as jest.Mock;
 const useFetchHistoricalSummaryMock = useFetchHistoricalSummary as jest.Mock;
 const useDeleteSloMock = useDeleteSlo as jest.Mock;
+const useDeleteSloInstanceMock = useDeleteSloInstance as jest.Mock;
 const TagsListMock = TagsList as jest.Mock;
 TagsListMock.mockReturnValue(<div>Tags list</div>);
 
@@ -63,6 +66,7 @@ HeaderMenuPortalMock.mockReturnValue(<div>Portal node</div>);
 const mockNavigate = jest.fn();
 const mockLocator = jest.fn();
 const mockDelete = jest.fn();
+const mockDeleteInstance = jest.fn();
 const mockCapabilities = {
   apm: { show: true },
 } as unknown as Capabilities;
@@ -133,7 +137,8 @@ describe('SLO Details Page', () => {
       data: historicalSummaryData,
     });
     useFetchActiveAlertsMock.mockReturnValue({ isLoading: false, data: new ActiveAlerts() });
-    useDeleteSloMock.mockReturnValue({ mutate: mockDelete });
+    useDeleteSloMock.mockReturnValue({ mutateAsync: mockDelete });
+    useDeleteSloInstanceMock.mockReturnValue({ mutateAsync: mockDeleteInstance });
     jest
       .spyOn(Router, 'useLocation')
       .mockReturnValue({ pathname: '/slos/1234', search: '', state: '', hash: '' });
@@ -287,7 +292,9 @@ describe('SLO Details Page', () => {
 
     fireEvent.click(button!);
 
-    const deleteModalConfirmButton = screen.queryByTestId('confirmModalConfirmButton');
+    const deleteModalConfirmButton = screen.queryByTestId(
+      'observabilitySolutionSloDeleteModalConfirmButton'
+    );
 
     fireEvent.click(deleteModalConfirmButton!);
 

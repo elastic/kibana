@@ -410,7 +410,7 @@
         "label": "KibanaContextProvider",
         "description": [],
         "signature": [
-          "React.FunctionComponent<{ services?: {} | undefined; }>"
+          "React.FunctionComponent<React.PropsWithChildren<{ services?: {} | undefined; }>>"
         ],
         "path": "src/plugins/kibana_react/public/context/context.tsx",
         "deprecated": false,
@@ -512,150 +512,6 @@
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/render_app.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/render_app.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/render_app.tsx"
-          },
-          {
-            "plugin": "expressionImage",
-            "path": "src/plugins/expression_image/public/expression_renderers/image_renderer.tsx"
-          },
-          {
-            "plugin": "expressionImage",
-            "path": "src/plugins/expression_image/public/expression_renderers/image_renderer.tsx"
-          },
-          {
-            "plugin": "expressionImage",
-            "path": "src/plugins/expression_image/public/expression_renderers/image_renderer.tsx"
-          },
-          {
-            "plugin": "expressionMetric",
-            "path": "src/plugins/expression_metric/public/expression_renderers/metric_renderer.tsx"
-          },
-          {
-            "plugin": "expressionMetric",
-            "path": "src/plugins/expression_metric/public/expression_renderers/metric_renderer.tsx"
-          },
-          {
-            "plugin": "expressionMetric",
-            "path": "src/plugins/expression_metric/public/expression_renderers/metric_renderer.tsx"
-          },
-          {
-            "plugin": "expressionError",
-            "path": "src/plugins/expression_error/public/expression_renderers/error_renderer.tsx"
-          },
-          {
-            "plugin": "expressionError",
-            "path": "src/plugins/expression_error/public/expression_renderers/error_renderer.tsx"
-          },
-          {
-            "plugin": "expressionError",
-            "path": "src/plugins/expression_error/public/expression_renderers/error_renderer.tsx"
-          },
-          {
-            "plugin": "expressionError",
-            "path": "src/plugins/expression_error/public/expression_renderers/debug_renderer.tsx"
-          },
-          {
-            "plugin": "expressionError",
-            "path": "src/plugins/expression_error/public/expression_renderers/debug_renderer.tsx"
-          },
-          {
-            "plugin": "expressionError",
-            "path": "src/plugins/expression_error/public/expression_renderers/debug_renderer.tsx"
-          },
-          {
-            "plugin": "expressionRevealImage",
-            "path": "src/plugins/expression_reveal_image/public/expression_renderers/reveal_image_renderer.tsx"
-          },
-          {
-            "plugin": "expressionRevealImage",
-            "path": "src/plugins/expression_reveal_image/public/expression_renderers/reveal_image_renderer.tsx"
-          },
-          {
-            "plugin": "expressionRevealImage",
-            "path": "src/plugins/expression_reveal_image/public/expression_renderers/reveal_image_renderer.tsx"
-          },
-          {
-            "plugin": "expressionRepeatImage",
-            "path": "src/plugins/expression_repeat_image/public/expression_renderers/repeat_image_renderer.tsx"
-          },
-          {
-            "plugin": "expressionRepeatImage",
-            "path": "src/plugins/expression_repeat_image/public/expression_renderers/repeat_image_renderer.tsx"
-          },
-          {
-            "plugin": "expressionRepeatImage",
-            "path": "src/plugins/expression_repeat_image/public/expression_renderers/repeat_image_renderer.tsx"
-          },
-          {
-            "plugin": "expressionShape",
-            "path": "src/plugins/expression_shape/public/expression_renderers/shape_renderer.tsx"
-          },
-          {
-            "plugin": "expressionShape",
-            "path": "src/plugins/expression_shape/public/expression_renderers/shape_renderer.tsx"
-          },
-          {
-            "plugin": "expressionShape",
-            "path": "src/plugins/expression_shape/public/expression_renderers/shape_renderer.tsx"
-          },
-          {
-            "plugin": "expressionShape",
-            "path": "src/plugins/expression_shape/public/expression_renderers/progress_renderer.tsx"
-          },
-          {
-            "plugin": "expressionShape",
-            "path": "src/plugins/expression_shape/public/expression_renderers/progress_renderer.tsx"
-          },
-          {
-            "plugin": "expressionShape",
-            "path": "src/plugins/expression_shape/public/expression_renderers/progress_renderer.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/app.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/app.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/app.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/app.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/app.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/app.tsx"
-          },
-          {
             "plugin": "devTools",
             "path": "src/plugins/dev_tools/public/application.tsx"
           },
@@ -682,18 +538,6 @@
           {
             "plugin": "ingestPipelines",
             "path": "x-pack/plugins/ingest_pipelines/public/shared_imports.ts"
-          },
-          {
-            "plugin": "metricsDataAccess",
-            "path": "x-pack/plugins/metrics_data_access/public/apps/common_providers.tsx"
-          },
-          {
-            "plugin": "metricsDataAccess",
-            "path": "x-pack/plugins/metrics_data_access/public/apps/common_providers.tsx"
-          },
-          {
-            "plugin": "metricsDataAccess",
-            "path": "x-pack/plugins/metrics_data_access/public/apps/common_providers.tsx"
           },
           {
             "plugin": "osquery",
@@ -790,6 +634,18 @@
           {
             "plugin": "searchprofiler",
             "path": "x-pack/plugins/searchprofiler/public/application/index.tsx"
+          },
+          {
+            "plugin": "metricsDataAccess",
+            "path": "x-pack/plugins/observability_solution/metrics_data_access/public/apps/common_providers.tsx"
+          },
+          {
+            "plugin": "metricsDataAccess",
+            "path": "x-pack/plugins/observability_solution/metrics_data_access/public/apps/common_providers.tsx"
+          },
+          {
+            "plugin": "metricsDataAccess",
+            "path": "x-pack/plugins/observability_solution/metrics_data_access/public/apps/common_providers.tsx"
           },
           {
             "plugin": "apm",
@@ -1333,46 +1189,6 @@
             "path": "src/plugins/data/public/search/search_interceptor/search_interceptor.ts"
           },
           {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/visualize_app/index.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/visualize_app/index.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing_table.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing_table.tsx"
-          },
-          {
-            "plugin": "observabilityShared",
-            "path": "x-pack/plugins/observability_solution/observability_shared/public/components/header_menu/header_menu_portal.tsx"
-          },
-          {
-            "plugin": "observabilityShared",
-            "path": "x-pack/plugins/observability_solution/observability_shared/public/components/header_menu/header_menu_portal.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/render_app.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/render_app.tsx"
-          },
-          {
             "plugin": "timelines",
             "path": "x-pack/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx"
           },
@@ -1381,92 +1197,12 @@
             "path": "x-pack/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx"
           },
           {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_confirm_open_unverified.tsx"
+            "plugin": "observabilityShared",
+            "path": "x-pack/plugins/observability_solution/observability_shared/public/components/header_menu/header_menu_portal.tsx"
           },
           {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_confirm_open_unverified.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_confirm_force_install.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_confirm_force_install.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/components/devtools_request_flyout/devtools_request_flyout.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/components/devtools_request_flyout/devtools_request_flyout.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/detail/settings/update_button.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/detail/settings/update_button.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/detail/settings/update_button.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/components/header/header_portal.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/components/header/header_portal.tsx"
+            "plugin": "observabilityShared",
+            "path": "x-pack/plugins/observability_solution/observability_shared/public/components/header_menu/header_menu_portal.tsx"
           },
           {
             "plugin": "cloudSecurityPosture",
@@ -1519,30 +1255,6 @@
           {
             "plugin": "indexManagement",
             "path": "x-pack/plugins/index_management/public/application/components/component_templates/component_template_wizard/component_template_datastreams_rollover/use_datastreams_rollover.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/application.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/application.tsx"
-          },
-          {
-            "plugin": "eventAnnotationListing",
-            "path": "src/plugins/event_annotation_listing/public/get_table_list.tsx"
-          },
-          {
-            "plugin": "eventAnnotationListing",
-            "path": "src/plugins/event_annotation_listing/public/get_table_list.tsx"
-          },
-          {
-            "plugin": "filesManagement",
-            "path": "src/plugins/files_management/public/mount_management_section.tsx"
-          },
-          {
-            "plugin": "filesManagement",
-            "path": "src/plugins/files_management/public/mount_management_section.tsx"
           }
         ],
         "children": [
@@ -2140,7 +1852,7 @@
             "label": "Provider",
             "description": [],
             "signature": [
-              "React.FunctionComponent<{ services?: T | undefined; }>"
+              "React.FunctionComponent<React.PropsWithChildren<{ services?: T | undefined; }>>"
             ],
             "path": "src/plugins/kibana_react/public/context/types.ts",
             "deprecated": false,
