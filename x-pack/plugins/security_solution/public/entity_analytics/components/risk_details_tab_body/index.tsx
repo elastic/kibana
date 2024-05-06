@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -33,6 +33,8 @@ import { useRiskEngineStatus } from '../../api/hooks/use_risk_engine_status';
 import { RiskScoreUpdatePanel } from '../risk_score_update_panel';
 import { HostRiskScoreQueryId, UserRiskScoreQueryId } from '../../common/utils';
 import { useRiskScore } from '../../api/hooks/use_risk_score';
+import { useMissingRiskEnginePrivileges } from '../../hooks/use_missing_risk_engine_privileges';
+import { RiskEnginePrivilegesCallOut } from '../risk_engine_privileges_callout';
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   margin-top: ${({ theme }) => theme.eui.euiSizeL};
@@ -125,6 +127,16 @@ const RiskDetailsTabBodyComponent: React.FC<
     },
     [setOverTimeToggleStatus]
   );
+
+  const privileges = useMissingRiskEnginePrivileges();
+
+  if (!privileges.isLoading && !privileges.hasAllRequiredPrivileges) {
+    return (
+      <EuiPanel hasBorder>
+        <RiskEnginePrivilegesCallOut privileges={privileges} />
+      </EuiPanel>
+    );
+  }
 
   const status = {
     isDisabled: !isModuleEnabled && !loading,

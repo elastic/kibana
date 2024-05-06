@@ -255,6 +255,20 @@
           },
           {
             "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.Role.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
             "id": "def-common.Role.elasticsearch",
             "type": "Object",
             "tags": [],

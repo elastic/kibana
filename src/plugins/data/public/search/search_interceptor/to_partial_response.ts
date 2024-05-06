@@ -47,6 +47,7 @@ export function toPartialResponseAfterTimeout(response: IEsSearchResponse): IEsS
       isRunning: false,
       rawResponse: {
         ...rawResponse,
+        timed_out: true,
         _clusters: {
           ...clusters,
           details,
