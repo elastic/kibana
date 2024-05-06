@@ -94,9 +94,17 @@ export class SloPlugin
 
       const hasPlatinumLicense = license.hasAtLeast('platinum');
       if (hasPlatinumLicense) {
+        const [coreStart, pluginsStart] = await coreSetup.getStartServices();
+        pluginsStart.dashboard.registerDashboardPanelPlacementSetting(
+          SLO_OVERVIEW_EMBEDDABLE_ID,
+          (serializedState: SloOverviewEmbeddableState | undefined) => {
+            if (serializedState?.showAllGroupByInstances || serializedState?.groupFilters) {
+              return { width: 24, height: 8 };
+            }
+            return { width: 12, height: 8 };
+          }
+        );
         registerReactEmbeddableFactory(SLO_OVERVIEW_EMBEDDABLE_ID, async () => {
-          const [coreStart, pluginsStart] = await coreSetup.getStartServices();
-
           const deps = { ...coreStart, ...pluginsStart };
 
           const { getOverviewEmbeddableFactory } = await import(
@@ -117,8 +125,6 @@ export class SloPlugin
         registerSloAlertsEmbeddableFactory();
 
         registerReactEmbeddableFactory(SLO_ERROR_BUDGET_ID, async () => {
-          const [coreStart, pluginsStart] = await coreSetup.getStartServices();
-
           const deps = { ...coreStart, ...pluginsStart };
 
           const { getErrorBudgetEmbeddableFactory } = await import(
@@ -148,16 +154,6 @@ export class SloPlugin
   public start(coreStart: CoreStart, pluginsStart: SloPublicPluginsStart) {
     const kibanaVersion = this.initContext.env.packageInfo.version;
     const { ruleTypeRegistry, actionTypeRegistry } = pluginsStart.triggersActionsUi;
-
-    pluginsStart.dashboard.registerDashboardPanelPlacementSetting(
-      SLO_OVERVIEW_EMBEDDABLE_ID,
-      (serializedState: SloOverviewEmbeddableState | undefined) => {
-        if (serializedState?.showAllGroupByInstances || serializedState?.groupFilters) {
-          return { width: 24, height: 8 };
-        }
-        return { width: 12, height: 8 };
-      }
-    );
 
     return {
       getCreateSLOFlyout: getCreateSLOFlyoutLazy({
