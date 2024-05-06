@@ -27,16 +27,13 @@ export function LatencyAggregationTypeSelect({
     <EuiSelect
       data-test-subj="apmLatencyChartSelect"
       compressed
-      prepend={i18n.translate(
-        'xpack.apm.serviceOverview.latencyChartTitle.prepend',
-        { defaultMessage: 'Metric' }
-      )}
+      prepend={i18n.translate('xpack.apm.serviceOverview.latencyChartTitle.prepend', {
+        defaultMessage: 'Metric',
+      })}
       options={options}
       value={latencyAggregationType}
       onChange={(nextOption) =>
-        setLatencyAggregationType(
-          nextOption.target.value as LatencyAggregationType
-        )
+        setLatencyAggregationType(nextOption.target.value as LatencyAggregationType)
       }
     />
   );
