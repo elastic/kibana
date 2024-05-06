@@ -28,7 +28,7 @@ export async function extractUntrackedMessagesTask({
   reporter: ErrorReporter;
 }) {
   const inputPaths = Array.isArray(path) ? path : [path || './'];
-  const availablePaths = Object.values(config?.paths ?? {}).flat();
+  const availablePaths = Object.values(config.paths).flat();
   const ignore = availablePaths.concat([
     '**/build/**',
     '**/__fixtures__/**',
@@ -49,7 +49,7 @@ export async function extractUntrackedMessagesTask({
     });
 
     const files = await Promise.all(
-      filterEntries(entries, config?.exclude ?? [])
+      filterEntries(entries, config.exclude)
         .filter((entry) => {
           const normalizedEntry = normalizePath(entry);
           return !availablePaths.some(
