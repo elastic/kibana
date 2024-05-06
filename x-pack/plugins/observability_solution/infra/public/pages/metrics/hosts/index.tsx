@@ -6,7 +6,6 @@
  */
 
 import { EuiErrorBoundary } from '@elastic/eui';
-import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import React from 'react';
 import { useTrackPageview, FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
@@ -60,56 +59,51 @@ export const HostsPage = () => {
 
   return (
     <EuiErrorBoundary>
-      <PerformanceContextProvider>
-        <div className={APP_WRAPPER_CLASS}>
-          <MetricsPageTemplate
-            hasData={metricIndicesExist}
-            pageHeader={{
-              alignItems: 'center',
-              pageTitle: (
-                <div
-                  css={css`
-                    display: flex;
-                    align-items: center;
-                    gap: 0.75rem;
-                  `}
-                >
-                  <h1>{hostsTitle}</h1>
-                  <BetaBadge
-                    tooltipContent={i18n.translate(
-                      'xpack.infra.hostsViewPage.betaBadgeDescription',
-                      {
-                        defaultMessage:
-                          'This feature is currently in beta. If you encounter any bugs or have feedback, we’d love to hear from you. Please open a support issue and/or share your feedback via the "Tell us what you think!" feedback button.',
-                      }
-                    )}
-                  />
-                </div>
-              ),
-              rightSideItems: [
-                <FeatureFeedbackButton
-                  data-test-subj="infraHostsPageTellUsWhatYouThinkButton"
-                  formUrl={HOSTS_FEEDBACK_LINK}
-                  kibanaVersion={kibanaVersion}
-                  isCloudEnv={isCloudEnv}
-                  isServerlessEnv={isServerlessEnv}
-                />,
-              ],
-            }}
-            pageSectionProps={{
-              contentProps: {
-                css: fullHeightContentStyles,
-              },
-            }}
-          >
-            {source && (
-              <MetricsDataViewProvider metricAlias={source.configuration.metricAlias}>
-                <HostContainer />
-              </MetricsDataViewProvider>
-            )}
-          </MetricsPageTemplate>
-        </div>
-      </PerformanceContextProvider>
+      <div className={APP_WRAPPER_CLASS}>
+        <MetricsPageTemplate
+          hasData={metricIndicesExist}
+          pageHeader={{
+            alignItems: 'center',
+            pageTitle: (
+              <div
+                css={css`
+                  display: flex;
+                  align-items: center;
+                  gap: 0.75rem;
+                `}
+              >
+                <h1>{hostsTitle}</h1>
+                <BetaBadge
+                  tooltipContent={i18n.translate('xpack.infra.hostsViewPage.betaBadgeDescription', {
+                    defaultMessage:
+                      'This feature is currently in beta. If you encounter any bugs or have feedback, we’d love to hear from you. Please open a support issue and/or share your feedback via the "Tell us what you think!" feedback button.',
+                  })}
+                />
+              </div>
+            ),
+            rightSideItems: [
+              <FeatureFeedbackButton
+                data-test-subj="infraHostsPageTellUsWhatYouThinkButton"
+                formUrl={HOSTS_FEEDBACK_LINK}
+                kibanaVersion={kibanaVersion}
+                isCloudEnv={isCloudEnv}
+                isServerlessEnv={isServerlessEnv}
+              />,
+            ],
+          }}
+          pageSectionProps={{
+            contentProps: {
+              css: fullHeightContentStyles,
+            },
+          }}
+        >
+          {source && (
+            <MetricsDataViewProvider metricAlias={source.configuration.metricAlias}>
+              <HostContainer />
+            </MetricsDataViewProvider>
+          )}
+        </MetricsPageTemplate>
+      </div>
     </EuiErrorBoundary>
   );
 };
