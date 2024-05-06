@@ -14,7 +14,7 @@ import { ChartPointerEventContextProvider } from '../context/chart_pointer_event
 import { EmbeddableDeps } from './types';
 import { TimeRangeMetadataContextProvider } from '../context/time_range_metadata/time_range_metadata_context';
 
-interface APMEmbeddableContextProps {
+export interface ApmEmbeddableContextProps {
   deps: EmbeddableDeps;
   children: React.ReactNode;
   rangeFrom?: string;
@@ -22,13 +22,13 @@ interface APMEmbeddableContextProps {
   kuery?: string;
 }
 
-export function APMEmbeddableContext({
+export function ApmEmbeddableContext({
   rangeFrom = 'now-15m',
   rangeTo = 'now',
   kuery = '',
   deps,
   children,
-}: APMEmbeddableContextProps) {
+}: ApmEmbeddableContextProps) {
   const services: ApmPluginContextValue = {
     config: deps.config,
     core: deps.coreStart,

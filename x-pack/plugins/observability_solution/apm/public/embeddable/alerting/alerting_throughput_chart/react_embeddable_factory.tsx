@@ -15,7 +15,7 @@ import {
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { EmbeddableAPMAlertingVizProps } from '../types';
 import type { EmbeddableDeps } from '../../types';
-import { APMEmbeddableContext } from '../../embeddable_context';
+import { ApmEmbeddableContext } from '../../embeddable_context';
 import { APMAlertingThroughputChart } from './chart';
 
 export const APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE = 'APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE';
@@ -119,7 +119,7 @@ export const getApmThroughputEmbeddableFactory = (deps: EmbeddableDeps) => {
           }, []);
 
           return (
-            <APMEmbeddableContext deps={deps} rangeFrom={rangeFrom} rangeTo={rangeTo}>
+            <ApmEmbeddableContext deps={deps} rangeFrom={rangeFrom} rangeTo={rangeTo}>
               <APMAlertingThroughputChart
                 rule={rule}
                 alert={alert}
@@ -133,7 +133,7 @@ export const getApmThroughputEmbeddableFactory = (deps: EmbeddableDeps) => {
                 kuery={kuery}
                 filters={filters}
               />
-            </APMEmbeddableContext>
+            </ApmEmbeddableContext>
           );
         },
       };

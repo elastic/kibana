@@ -15,7 +15,7 @@ import {
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { EmbeddableAPMAlertingVizProps } from '../types';
 import type { EmbeddableDeps } from '../../types';
-import { APMEmbeddableContext } from '../../embeddable_context';
+import { ApmEmbeddableContext } from '../../embeddable_context';
 import { APMAlertingFailedTransactionsChart } from './chart';
 
 export const APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE =
@@ -120,7 +120,7 @@ export const getApmFailedTransactionsChartEmbeddableFactory = (deps: EmbeddableD
           }, []);
 
           return (
-            <APMEmbeddableContext deps={deps} rangeFrom={rangeFrom} rangeTo={rangeTo}>
+            <ApmEmbeddableContext deps={deps} rangeFrom={rangeFrom} rangeTo={rangeTo}>
               <APMAlertingFailedTransactionsChart
                 rule={rule}
                 alert={alert}
@@ -134,7 +134,7 @@ export const getApmFailedTransactionsChartEmbeddableFactory = (deps: EmbeddableD
                 kuery={kuery}
                 filters={filters}
               />
-            </APMEmbeddableContext>
+            </ApmEmbeddableContext>
           );
         },
       };

@@ -77,7 +77,9 @@ export function useAlertingProps({
   }, [currentTransactionType]);
 
   useEffect(() => {
-    setTransactionType(defaultTransactionType);
+    if (defaultTransactionType) {
+      setTransactionType(defaultTransactionType);
+    }
   }, [defaultTransactionType]);
 
   return {
