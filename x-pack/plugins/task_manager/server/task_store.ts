@@ -459,7 +459,7 @@ export class TaskStore {
       } = await this.esClientWithoutRetries.search<SavedObjectsRawDoc['_source']>({
         index: this.index,
         ignore_unavailable: true,
-        ...(opts.routing ? { routing: opts.routing.join(',') } : {}),
+        // ...(opts.routing ? { routing: opts.routing.join(',') } : {}),
         body: {
           ...omit(opts, 'routing'),
           query,
@@ -513,10 +513,10 @@ export class TaskStore {
   ): Promise<UpdateByQueryResult> {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
     try {
-      if (opts.routing) {
-        // eslint-disable-next-line no-console
-        console.log('Running Update By Query on', opts.routing);
-      }
+      // if (opts.routing) {
+      //   // eslint-disable-next-line no-console
+      //   console.log('Running Update By Query on', opts.routing);
+      // }
 
       const // eslint-disable-next-line @typescript-eslint/naming-convention
         { total, updated, version_conflicts } = await this.esClientWithoutRetries.updateByQuery(
@@ -525,7 +525,7 @@ export class TaskStore {
             ignore_unavailable: true,
             refresh: true,
             conflicts: 'proceed',
-            ...(opts.routing ? { routing: opts.routing.join(',') } : {}),
+            // ...(opts.routing ? { routing: opts.routing.join(',') } : {}),
             body: {
               ...omit(opts, 'routing'),
               max_docs,
