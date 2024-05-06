@@ -114,22 +114,26 @@ function executeFunctionAndCatchError({
 function getFunctionDefinitions({
   functionClient,
   functionLimitExceeded,
+  disableFunctions,
 }: {
   functionClient: ChatFunctionClient;
   functionLimitExceeded: boolean;
+  disableFunctions: boolean;
 }) {
-  const systemFunctions = functionLimitExceeded
-    ? []
-    : functionClient
-        .getFunctions()
-        .map((fn) => fn.definition)
-        .filter(
-          (def) =>
-            !def.visibility ||
-            [FunctionVisibility.AssistantOnly, FunctionVisibility.All].includes(def.visibility)
-        );
+  if (functionLimitExceeded || disableFunctions) {
+    return [];
+  }
 
-  const actions = functionLimitExceeded ? [] : functionClient.getActions();
+  const systemFunctions = functionClient
+    .getFunctions()
+    .map((fn) => fn.definition)
+    .filter(
+      (def) =>
+        !def.visibility ||
+        [FunctionVisibility.AssistantOnly, FunctionVisibility.All].includes(def.visibility)
+    );
+
+  const actions = functionClient.getActions();
 
   const allDefinitions = systemFunctions
     .concat(actions)
@@ -146,6 +150,7 @@ export function continueConversation({
   functionCallsLeft,
   requestInstructions,
   knowledgeBaseInstructions,
+  disableFunctions,
 }: {
   messages: Message[];
   functionClient: ChatFunctionClient;
@@ -154,12 +159,14 @@ export function continueConversation({
   functionCallsLeft: number;
   requestInstructions: Array<string | UserInstruction>;
   knowledgeBaseInstructions: UserInstruction[];
+  disableFunctions: boolean;
 }): Observable<MessageOrChatEvent> {
   let nextFunctionCallsLeft = functionCallsLeft;
 
   const definitions = getFunctionDefinitions({
     functionLimitExceeded: functionCallsLeft <= 0,
     functionClient,
+    disableFunctions,
   });
 
   const messagesWithUpdatedSystemMessage = replaceSystemMessage(
@@ -285,6 +292,7 @@ export function continueConversation({
               signal,
               knowledgeBaseInstructions,
               requestInstructions,
+              disableFunctions,
             });
           })
         )
