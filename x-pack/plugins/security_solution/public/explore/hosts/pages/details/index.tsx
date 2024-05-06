@@ -180,6 +180,11 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     [detailName]
   );
 
+  const additionalFilters = useMemo(
+    () => (rawFilteredQuery ? [rawFilteredQuery] : []),
+    [rawFilteredQuery]
+  );
+
   const entity = useMemo(() => ({ type: 'host' as const, name: detailName }), [detailName]);
   const privileges = useAssetCriticalityPrivileges(entity.name);
 
@@ -281,14 +286,14 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                       <AlertsByStatus
                         signalIndexName={signalIndexName}
                         entityFilter={entityFilter}
-                        additionalFilters={rawFilteredQuery ? [rawFilteredQuery] : []}
+                        additionalFilters={additionalFilters}
                       />
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <AlertCountByRuleByStatus
                         entityFilter={entityFilter}
                         signalIndexName={signalIndexName}
-                        additionalFilters={rawFilteredQuery ? [rawFilteredQuery] : []}
+                        additionalFilters={additionalFilters}
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>

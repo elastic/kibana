@@ -201,6 +201,11 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     { onSuccess: refetchRiskScore }
   );
 
+  const additionalFilters = useMemo(
+    () => (rawFilteredQuery ? [rawFilteredQuery] : []),
+    [rawFilteredQuery]
+  );
+
   const canReadAssetCriticality = !!privileges.data?.has_read_permissions;
   const criticality = useAssetCriticalityData({
     entity,
@@ -272,14 +277,14 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                     <AlertsByStatus
                       signalIndexName={signalIndexName}
                       entityFilter={entityFilter}
-                      additionalFilters={rawFilteredQuery ? [rawFilteredQuery] : []}
+                      additionalFilters={additionalFilters}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <AlertCountByRuleByStatus
                       entityFilter={entityFilter}
                       signalIndexName={signalIndexName}
-                      additionalFilters={rawFilteredQuery ? [rawFilteredQuery] : []}
+                      additionalFilters={additionalFilters}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
