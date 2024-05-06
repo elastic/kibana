@@ -783,7 +783,7 @@ export function Detail() {
             />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_settings}>
-            <SettingsPage packageInfo={packageInfo} theme$={services.theme.theme$} />
+            <SettingsPage packageInfo={packageInfo} startServices={services} />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_assets}>
             <AssetsPage packageInfo={packageInfo} refetchPackageInfo={refetchPackageInfo} />
