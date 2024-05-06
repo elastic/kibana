@@ -103,13 +103,13 @@ describe('Map rules params with flyout', () => {
             excludeHitsFromPreviousRun: false,
           },
           'kibana.alert.evaluation.value': 100870655162.18182,
-          'kibana.alert.evaluation.threshold': 1,
+          'kibana.alert.evaluation.threshold': [1],
         },
       },
       results: [
         {
           observedValue: [100870655162.18182],
-          threshold: [1],
+          threshold: '1',
           comparator: '>',
           pctAboveThreshold: ' (10087065516118.18% above the threshold)',
         },
