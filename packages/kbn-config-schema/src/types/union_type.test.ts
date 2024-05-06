@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { get } from 'lodash';
 import { schema } from '../..';
+import { META_FIELD_X_OAS_LITERAL_ENUM } from '../oas_meta_fields';
 
 test('handles string', () => {
   expect(schema.oneOf([schema.string()]).validate('test')).toBe('test');
@@ -167,6 +169,18 @@ test('fails if nested union type fail', () => {
      - [0]: could not parse object value from json input
      - [1]: expected value of type [number] but got [string]"
   `);
+});
+
+test('meta literal enum', () => {
+  expect(
+    get(
+      schema
+        .oneOf([schema.literal('foo'), schema.literal('bar')], { meta: { literalEnum: true } })
+        .getSchema()
+        .describe(),
+      'metas[0]'
+    )
+  ).toEqual({ [META_FIELD_X_OAS_LITERAL_ENUM]: true });
 });
 
 describe('#extendsDeep', () => {

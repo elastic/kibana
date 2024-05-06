@@ -71,3 +71,4 @@ export const processAny = (schema: OpenAPIV3.SchemaObject): void => {
 };
 
 export { processObject } from './object';
+export { processLiteralEnum } from './enum';

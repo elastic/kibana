@@ -267,6 +267,15 @@ Object {
                     "format": "ipv4",
                     "type": "string",
                   },
+                  "literalEnum": Object {
+                    "description": "my enum",
+                    "enum": Array [
+                      "one",
+                      "two",
+                      "three",
+                    ],
+                    "type": "string",
+                  },
                   "literalType": Object {
                     "enum": Array [
                       "literallythis",
@@ -322,6 +331,7 @@ Object {
                   "map",
                   "record",
                   "union",
+                  "literalEnum",
                 ],
                 "type": "object",
               },

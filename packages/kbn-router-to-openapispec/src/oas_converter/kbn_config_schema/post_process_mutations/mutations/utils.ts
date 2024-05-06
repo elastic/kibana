@@ -38,3 +38,7 @@ export const processDeprecated = (schema: OpenAPIV3.SchemaObject): void => {
 export const deleteField = (schema: Record<any, unknown>, field: string): void => {
   delete schema[field];
 };
+
+export const isLiteralEnum = (schema: OpenAPIV3.SchemaObject) => {
+  return metaFields.META_FIELD_X_OAS_LITERAL_ENUM in schema;
+};

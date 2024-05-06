@@ -28,6 +28,10 @@ export const testSchema = schema.object({
     schema.string({ maxLength: 1, meta: { description: 'Union string' } }),
     schema.number({ min: 0, meta: { description: 'Union number' } }),
   ]),
+  literalEnum: schema.oneOf(
+    [schema.literal('one'), schema.literal('two'), schema.literal('three')],
+    { meta: { literalEnum: true, description: 'my enum' } }
+  ),
   uri: schema.uri({
     scheme: ['prototest'],
     defaultValue: () => 'prototest://something',
