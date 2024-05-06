@@ -222,6 +222,7 @@ export function DiscoverGridFlyout({
   return (
     <EuiPortal>
       <EuiFlyoutResizable
+        className="DiscoverFlyout" // used to override the z-index of the flyout from SecuritySolution
         onClose={onClose}
         type="push"
         size={flyoutWidth}

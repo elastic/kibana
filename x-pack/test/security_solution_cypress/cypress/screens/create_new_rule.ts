@@ -132,8 +132,12 @@ export const INDICATOR_MATCH_TYPE = '[data-test-subj="threatMatchRuleType"]';
 
 export const INPUT = '[data-test-subj="input"]';
 
+export const MAX_SIGNALS_INPUT = '[data-test-subj="detectionEngineStepAboutRuleMaxSignals"]';
+
 export const INVESTIGATION_NOTES_TEXTAREA =
   '[data-test-subj="detectionEngineStepAboutRuleNote"] textarea';
+
+export const SETUP_GUIDE_TEXTAREA = '[data-test-subj="detectionEngineStepAboutRuleSetup"] textarea';
 
 export const FALSE_POSITIVES_INPUT =
   '[data-test-subj="detectionEngineStepAboutRuleFalsePositives"] input';
