@@ -129,7 +129,11 @@ export const appErrorToErrorStack = (error: AppError): Error => {
     : '';
   const stringifiedError = getStringifiedStack(error);
   const adaptedError = new Error(
-    `${String(error.body.message).trim() !== '' ? error.body.message : error.message} ${statusCode}`
+    postprocessErrorString(
+      `${
+        String(error.body.message).trim() !== '' ? error.body.message : error.message
+      } ${statusCode}`
+    )
   );
   // Note although all the Typescript typings say that error.name is a string and exists, we still can encounter an undefined so we
   // do an extra guard here and default to empty string if it is undefined
@@ -239,3 +243,8 @@ export const isEmptyObjectWhenStringified = (item: unknown): boolean => {
     return false;
   }
 };
+
+function postprocessErrorString(str: string): string {
+  // Remove the `[request body]` prefix added by Zod for request validation errors
+  return str.replace(/\[request body\]:/g, '');
+}
