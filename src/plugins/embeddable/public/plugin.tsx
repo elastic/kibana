@@ -182,11 +182,11 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     return {
       registerReactEmbeddableFactory,
       reactEmbeddableRegistryHasKey,
+      registerSavedObjectToPanelMethod,
+      registerReactEmbeddableSavedObject,
 
       registerEmbeddableFactory: this.registerEmbeddableFactory,
-      // @deprecated
       registerEnhancement: this.registerEnhancement,
-      // @deprecated
       setCustomEmbeddableFactoryProvider: (provider: EmbeddableFactoryProvider) => {
         if (this.customEmbeddableFactoryProvider) {
           throw new Error(

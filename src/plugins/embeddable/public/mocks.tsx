@@ -32,12 +32,14 @@ import {
   SelfStyledEmbeddable,
 } from '.';
 import { setKibanaServices } from './kibana_services';
+import { registerReactEmbeddableSavedObject } from './lib';
 import { SelfStyledOptions } from './lib/self_styled_embeddable/types';
 import { EmbeddablePublicPlugin } from './plugin';
 import {
   reactEmbeddableRegistryHasKey,
   registerReactEmbeddableFactory,
 } from './react_embeddable_system';
+import { registerSavedObjectToPanelMethod } from './registry/saved_object_to_panel_methods';
 
 export { mockAttributeService } from './lib/attribute_service/attribute_service.mock';
 export type Setup = jest.Mocked<EmbeddableSetup>;
@@ -97,6 +99,12 @@ export function mockFilterableEmbeddable<OriginalEmbeddableType>(
 
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
+    registerSavedObjectToPanelMethod: jest
+      .fn()
+      .mockImplementation(registerSavedObjectToPanelMethod),
+    registerReactEmbeddableSavedObject: jest
+      .fn()
+      .mockImplementation(registerReactEmbeddableSavedObject),
     registerReactEmbeddableFactory: jest.fn().mockImplementation(registerReactEmbeddableFactory),
     reactEmbeddableRegistryHasKey: jest.fn().mockImplementation(reactEmbeddableRegistryHasKey),
     registerEmbeddableFactory: jest.fn(),
