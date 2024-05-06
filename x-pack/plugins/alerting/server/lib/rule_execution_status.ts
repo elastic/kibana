@@ -6,7 +6,7 @@
  */
 
 import { Logger } from '@kbn/core/server';
-import { ActionsCompletion } from '@kbn/alerting-shared-types';
+import { ActionsCompletion } from '@kbn/alerting-state-types';
 import { RuleResultService } from '../monitoring/rule_result_service';
 import {
   RuleExecutionStatus,

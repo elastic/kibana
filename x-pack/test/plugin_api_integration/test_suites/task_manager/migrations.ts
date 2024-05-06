@@ -15,7 +15,7 @@ import {
   TaskStatus,
 } from '@kbn/task-manager-plugin/server/task';
 import { SavedObjectsUtils } from '@kbn/core/server';
-import type { RuleTaskState, WrappedLifecycleRuleState } from '@kbn/alerting-shared-types';
+import type { RuleTaskState, WrappedLifecycleRuleState } from '@kbn/alerting-state-types';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function createGetTests({ getService }: FtrProviderContext) {

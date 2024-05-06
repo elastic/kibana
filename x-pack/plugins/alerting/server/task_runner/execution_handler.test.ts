@@ -13,7 +13,7 @@ import {
   renderActionParameterTemplatesDefault,
 } from '@kbn/actions-plugin/server/mocks';
 import { KibanaRequest } from '@kbn/core/server';
-import { ActionsCompletion } from '@kbn/alerting-shared-types';
+import { ActionsCompletion } from '@kbn/alerting-state-types';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
 import { InjectActionParamsOpts, injectActionParams } from './inject_action_params';
 import { NormalizedRuleType } from '../rule_type_registry';

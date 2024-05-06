@@ -24,7 +24,7 @@ export type {
   WrappedLifecycleRuleState,
   RuleTaskState,
   RuleTaskParams,
-} from '@kbn/alerting-shared-types';
+} from '@kbn/alerting-state-types';
 export * from './alert_summary';
 export * from './builtin_action_groups';
 export * from './bulk_edit';

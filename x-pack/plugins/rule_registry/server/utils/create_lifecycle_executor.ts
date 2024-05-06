@@ -20,11 +20,11 @@ import {
   isValidAlertIndexName,
 } from '@kbn/alerting-plugin/server';
 import { isFlapping } from '@kbn/alerting-plugin/server/lib';
-import { wrappedStateRt, WrappedLifecycleRuleState } from '@kbn/alerting-shared-types';
+import { wrappedStateRt, WrappedLifecycleRuleState } from '@kbn/alerting-state-types';
 export type {
   TrackedLifecycleAlertState,
   WrappedLifecycleRuleState,
-} from '@kbn/alerting-shared-types';
+} from '@kbn/alerting-state-types';
 import { ParsedExperimentalFields } from '../../common/parse_experimental_fields';
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 import {

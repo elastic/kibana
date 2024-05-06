@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ActionsCompletion } from '@kbn/alerting-shared-types';
+import { ActionsCompletion } from '@kbn/alerting-state-types';
 import { RuleTaskStateAndMetrics } from '../task_runner/types';
 import { getReasonFromError } from './error_with_reason';
 import { getEsErrorMessage } from './errors';

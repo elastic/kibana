@@ -19,7 +19,7 @@ import type {
   MutableRuleTaskState,
   TrackedLifecycleAlertState,
   WrappedLifecycleRuleState,
-} from '@kbn/alerting-shared-types';
+} from '@kbn/alerting-state-types';
 
 import { REMOVED_TYPES } from '../task_type_dictionary';
 import { SerializedConcreteTaskInstance, TaskStatus } from '../task';

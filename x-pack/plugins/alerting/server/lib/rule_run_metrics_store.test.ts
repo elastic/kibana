@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ActionsCompletion } from '@kbn/alerting-shared-types';
+import { ActionsCompletion } from '@kbn/alerting-state-types';
 import { RuleRunMetricsStore } from './rule_run_metrics_store';
 
 describe('RuleRunMetricsStore', () => {
