@@ -26,10 +26,8 @@ function onFilterCell(
   const row = context.rows[rowIndex];
   const value = row.flattened[columnId];
 
-  const filterField = context.isPlainRecord ? field : context.dataView.fields.getByName(columnId);
-
-  if (filterField && context.onFilter) {
-    context.onFilter(filterField, value, mode);
+  if (field && context.onFilter) {
+    context.onFilter(field, value, mode);
   }
 }
 
