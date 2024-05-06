@@ -2873,11 +2873,11 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "{ search?: string | undefined; page?: number | undefined; filter?: any; aggs?: Record<string, ",
+                  "{ page?: number | undefined; filter?: any; aggs?: Record<string, ",
                   "AggregationsAggregationContainer",
-                  "> | undefined; namespaces?: string[] | undefined; perPage?: number | undefined; sortField?: string | undefined; sortOrder?: ",
+                  "> | undefined; search?: string | undefined; namespaces?: string[] | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; sortField?: string | undefined; sortOrder?: ",
                   "SortOrder",
-                  " | undefined; fields?: string[] | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; hasReference?: ",
+                  " | undefined; hasReference?: ",
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
                     "scope": "common",
@@ -2893,7 +2893,7 @@
                     "section": "def-common.SavedObjectsFindOptionsReference",
                     "text": "SavedObjectsFindOptionsReference"
                   },
-                  "[] | undefined; preference?: string | undefined; pit?: ",
+                  "[] | undefined; fields?: string[] | undefined; preference?: string | undefined; pit?: ",
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
                     "scope": "common",
@@ -6996,19 +6996,7 @@
                   },
                   "; history: ",
                   "SearchRequest",
-                  "[]; fetch: (options?: ",
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.SearchSourceSearchOptions",
-                    "text": "SearchSourceSearchOptions"
-                  },
-                  ") => Promise<",
-                  "SearchResponse",
-                  "<unknown, Record<string, ",
-                  "AggregationsAggregate",
-                  ">>>; setField: <K extends keyof ",
+                  "[]; setField: <K extends keyof ",
                   {
                     "pluginId": "data",
                     "scope": "common",
@@ -7174,7 +7162,19 @@
                   "SearchResponse",
                   "<T, Record<string, ",
                   "AggregationsAggregate",
-                  ">>>>; onRequestStart: (handler: (searchSource: ",
+                  ">>>>; fetch: (options?: ",
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataSearchPluginApi",
+                    "section": "def-common.SearchSourceSearchOptions",
+                    "text": "SearchSourceSearchOptions"
+                  },
+                  ") => Promise<",
+                  "SearchResponse",
+                  "<unknown, Record<string, ",
+                  "AggregationsAggregate",
+                  ">>>; onRequestStart: (handler: (searchSource: ",
                   {
                     "pluginId": "data",
                     "scope": "common",
@@ -11941,12 +11941,12 @@
               {
                 "parentPluginId": "data",
                 "id": "def-common.aggregateQueryToAst.$1.query",
-                "type": "CompoundType",
+                "type": "Object",
                 "tags": [],
                 "label": "query",
                 "description": [],
                 "signature": [
-                  "{ sql: string; } | { esql: string; }"
+                  "{ esql: string; }"
                 ],
                 "path": "src/plugins/data/common/search/expressions/aggregate_query_to_ast.ts",
                 "deprecated": false,
@@ -16630,7 +16630,7 @@
             "section": "def-common.IKibanaSearchResponse",
             "text": "IKibanaSearchResponse"
           },
-          "<any>>(search: () => Promise<Response>, cancel?: (() => void) | undefined, { pollInterval, abortSignal }?: ",
+          "<any>>(search: () => Promise<Response>, cancel?: (() => Promise<void>) | undefined, { pollInterval, abortSignal }?: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -16669,7 +16669,7 @@
             "label": "cancel",
             "description": [],
             "signature": [
-              "(() => void) | undefined"
+              "(() => Promise<void>) | undefined"
             ],
             "path": "src/plugins/data/common/search/poll_search.ts",
             "deprecated": false,
@@ -25592,7 +25592,7 @@
             "label": "aggregate",
             "description": [],
             "signature": [
-              "\"concat\" | \"min\" | \"max\" | \"sum\" | \"average\""
+              "\"min\" | \"max\" | \"sum\" | \"concat\" | \"average\""
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/top_hit.ts",
             "deprecated": false,
@@ -34094,19 +34094,7 @@
           },
           "; history: ",
           "SearchRequest",
-          "[]; fetch: (options?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.SearchSourceSearchOptions",
-            "text": "SearchSourceSearchOptions"
-          },
-          ") => Promise<",
-          "SearchResponse",
-          "<unknown, Record<string, ",
-          "AggregationsAggregate",
-          ">>>; setField: <K extends keyof ",
+          "[]; setField: <K extends keyof ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -34272,7 +34260,19 @@
           "SearchResponse",
           "<T, Record<string, ",
           "AggregationsAggregate",
-          ">>>>; onRequestStart: (handler: (searchSource: ",
+          ">>>>; fetch: (options?: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.SearchSourceSearchOptions",
+            "text": "SearchSourceSearchOptions"
+          },
+          ") => Promise<",
+          "SearchResponse",
+          "<unknown, Record<string, ",
+          "AggregationsAggregate",
+          ">>>; onRequestStart: (handler: (searchSource: ",
           {
             "pluginId": "data",
             "scope": "common",
