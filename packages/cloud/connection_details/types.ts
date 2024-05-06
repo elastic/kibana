@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { ValidPermissionsResult } from '@kbn/security-plugin-types-server';
 import type { ApiKey } from './tabs/api_keys_tab/views/success_form/types';
 
 export interface ConnectionDetailsOpts {
@@ -30,5 +29,5 @@ export interface ConnectionDetailsOptsApiKeys {
   createKey: (params: { name: string }) => Promise<{
     apiKey: ApiKey;
   }>;
-  hasPermission: () => Promise<ValidPermissionsResult | undefined>;
+  hasPermission: () => Promise<boolean>;
 }
