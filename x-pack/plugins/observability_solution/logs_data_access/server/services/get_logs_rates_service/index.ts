@@ -9,7 +9,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { estypes } from '@elastic/elasticsearch';
 import { RegisterServicesParams } from '../register_services';
 
-interface Params {
+export interface Params {
   esClient: ElasticsearchClient;
   serviceNames: string[];
   identifyingMetadata: string;
