@@ -24,14 +24,6 @@ export interface TranslationInput {
 
 export interface Translation extends TranslationInput {
   /**
-   * Actual translated messages.
-   */
-  messages: IntlShape['messages'];
-  /**
-   * Locale of the translated messages.
-   */
-  locale: IntlShape['locale'];
-  /**
    * Default locale to fall back to when the translation is not found for the message id.
    * Hardcoded to `en` for Kibana.
    */
