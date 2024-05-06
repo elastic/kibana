@@ -370,6 +370,7 @@ examples/developer_examples @elastic/appex-sharedux
 examples/discover_customization_examples @elastic/kibana-data-discovery
 x-pack/plugins/discover_enhanced @elastic/kibana-data-discovery
 src/plugins/discover @elastic/kibana-data-discovery
+src/plugins/discover_shared @elastic/kibana-data-discovery @elastic/obs-ux-logs-team
 packages/kbn-discover-utils @elastic/kibana-data-discovery
 packages/kbn-doc-links @elastic/docs
 packages/kbn-docs-utils @elastic/kibana-operations
@@ -638,6 +639,7 @@ x-pack/plugins/observability_solution/profiling @elastic/obs-ux-infra_services-t
 packages/kbn-profiling-utils @elastic/obs-ux-infra_services-team
 x-pack/packages/kbn-random-sampling @elastic/kibana-visualizations
 packages/kbn-react-field @elastic/kibana-data-discovery
+packages/kbn-react-hooks @elastic/obs-ux-logs-team
 packages/react/kibana_context/common @elastic/appex-sharedux
 packages/react/kibana_context/render @elastic/appex-sharedux
 packages/react/kibana_context/root @elastic/appex-sharedux
@@ -706,6 +708,7 @@ packages/kbn-search-index-documents @elastic/enterprise-search-frontend
 x-pack/plugins/search_notebooks @elastic/enterprise-search-frontend
 x-pack/plugins/search_playground @elastic/enterprise-search-frontend
 packages/kbn-search-response-warnings @elastic/kibana-data-discovery
+packages/kbn-search-types @elastic/kibana-data-discovery
 x-pack/plugins/searchprofiler @elastic/kibana-management
 x-pack/test/security_api_integration/packages/helpers @elastic/kibana-security
 packages/kbn-security-hardening @elastic/kibana-security
@@ -1027,6 +1030,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 
 # Observability robots
 /.github/workflows/deploy-my-kibana.yml @elastic/observablt-robots
+/.github/workflows/undeploy-my-kibana.yml @elastic/observablt-robots
 /.github/workflows/oblt-github-commands @elastic/observablt-robots
 
 # Infra Monitoring
