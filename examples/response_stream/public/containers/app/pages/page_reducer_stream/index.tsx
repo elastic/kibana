@@ -94,12 +94,12 @@ export const PageReducerStream: FC = () => {
     <Page title={'Reducer stream'}>
       <EuiText>
         <p>
-          This demonstrates a single endpoint with streaming support that sends Redux inspired
-          actions from server to client. The server and client share types of the data to be
-          received. The client uses a custom hook that receives stream chunks and passes them on to
-          `useReducer()` that acts on the Redux type actions it receives. The custom hook includes
-          code to buffer actions and is able to apply them in bulk so the DOM does not get hammered
-          with updates. Hit &quot;Start development&quot; to trigger the bar chart race!
+          This demonstrates a single endpoint with streaming support that sends old school Redux
+          inspired actions from server to client. The server and client share types of the data to
+          be received. The client uses a custom hook that receives stream chunks and passes them on
+          to `useReducer()` that acts on the actions it receives. The custom hook includes code to
+          buffer actions and is able to apply them in bulk so the DOM does not get hammered with
+          updates. Hit &quot;Start development&quot; to trigger the bar chart race!
         </p>
       </EuiText>
       <br />
