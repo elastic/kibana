@@ -115,6 +115,7 @@
     "@kbn/shared-ux-markdown",
     "@kbn/core-http-request-handler-context-server",
     "@kbn/logs-data-access-plugin",
+    "@kbn/search-types",
   ],
   "exclude": ["target/**/*"]
 }
