@@ -7,6 +7,7 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { estypes } from '@elastic/elasticsearch';
+import { RegisterServicesParams } from '../register_services';
 
 interface Params {
   esClient: ElasticsearchClient;
@@ -24,7 +25,7 @@ interface LogRateQueryAggregation {
   services: estypes.AggregationsTermsAggregateBase<LogErrorsAggregation>;
 }
 
-export function createGetLogsRatesService() {
+export function createGetLogsRatesService(params: RegisterServicesParams) {
   return async ({ esClient, identifyingMetadata, serviceNames, timeFrom, timeTo }: Params) => {
     const esResponse = await esClient.search({
       index: 'logs-*-*',
