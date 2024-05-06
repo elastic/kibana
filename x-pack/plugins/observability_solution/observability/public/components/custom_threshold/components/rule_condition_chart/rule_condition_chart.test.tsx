@@ -9,7 +9,7 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { COMPARATORS } from '@kbn/alerting-shared-types';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import {
   Aggregators,
   CustomThresholdSearchSourceFields,

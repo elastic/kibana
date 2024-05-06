@@ -6,7 +6,7 @@
  */
 
 import { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
-import { COMPARATORS } from '@kbn/alerting-shared-types';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import { InventoryMetricConditions } from '../../../../../common/alerting/metrics';
 import { SnapshotCustomMetricInput } from '../../../../../common/http_api';
 import { createConditionScript } from './create_condition_script';

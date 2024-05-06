@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { Color } from '../../../../../common/custom_threshold_rule/color_palette';
-import { COMPARATORS } from '@kbn/alerting-shared-types';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import { shallow } from 'enzyme';
 import React from 'react';
 

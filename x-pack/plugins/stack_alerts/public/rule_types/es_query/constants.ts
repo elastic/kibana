@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { COMPARATORS } from '@kbn/alerting-shared-types';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 export const DEFAULT_VALUES = {
   THRESHOLD_COMPARATOR: COMPARATORS.GREATER_THAN,
   QUERY: `{

@@ -29,7 +29,7 @@ import {
   builtInAggregationTypes,
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { COMPARATORS } from '@kbn/alerting-shared-types';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import { ThresholdVisualization } from './visualization';
 import { IndexThresholdRuleParams } from './types';
 import './expression.scss';

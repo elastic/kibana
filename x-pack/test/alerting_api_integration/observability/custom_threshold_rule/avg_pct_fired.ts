@@ -12,7 +12,7 @@ import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/cus
 import expect from '@kbn/expect';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { parseSearchParams } from '@kbn/share-plugin/common/url_service';
-import { COMPARATORS } from '@kbn/alerting-shared-types';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import { createIndexConnector, createRule } from '../helpers/alerting_api_helper';
 import {
   waitForAlertInIndex,

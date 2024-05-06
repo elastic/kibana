@@ -13,7 +13,7 @@ import { FIRED_ACTION, NO_DATA_ACTION } from './constants';
 import { Evaluation } from './lib/evaluate_rule';
 import type { LogMeta, Logger } from '@kbn/logging';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
-import { COMPARATORS } from '@kbn/alerting-shared-types';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import {
   Aggregators,
   CustomMetricExpressionParams,

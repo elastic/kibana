@@ -8,7 +8,7 @@
 import * as rt from 'io-ts';
 import { DataViewSpec, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { Filter, Query } from '@kbn/es-query';
-import { COMPARATORS } from '@kbn/alerting-shared-types';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import { TimeUnitChar } from '../utils/formatters/duration';
 
 export const ThresholdFormatterTypeRT = rt.keyof({

@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
-import { COMPARATORS } from '@kbn/alerting-shared-types';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import { CustomThresholdAlertFields } from '../types';
 import { Aggregators } from '../../../../common/custom_threshold_rule/types';
 

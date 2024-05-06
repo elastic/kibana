@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { COMPARATORS } from '@kbn/alerting-shared-types';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import { Aggregators, MetricExpressionParams } from '../../../../../common/alerting/metrics';
 import { getElasticsearchMetricQuery } from './metric_query';
 

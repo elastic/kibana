@@ -28,7 +28,7 @@ import {
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
-import { COMPARATORS } from '@kbn/alerting-shared-types';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import { useSourceContext, withSourceProvider } from '../../../containers/metrics_source';
 import { Aggregators, QUERY_INVALID } from '../../../../common/alerting/metrics';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';

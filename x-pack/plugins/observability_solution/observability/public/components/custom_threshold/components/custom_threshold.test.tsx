@@ -10,7 +10,7 @@ import { LIGHT_THEME } from '@elastic/charts';
 import { render } from '@testing-library/react';
 import { Props, Threshold } from './custom_threshold';
 import React from 'react';
-import { COMPARATORS } from '@kbn/alerting-shared-types';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 
 describe('Threshold', () => {
   const renderComponent = (props: Partial<Props> = {}) => {

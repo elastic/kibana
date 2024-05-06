@@ -6,7 +6,7 @@
  */
 import { shallow } from 'enzyme';
 import React from 'react';
-import { COMPARATORS } from '@kbn/alerting-shared-types';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import { Color } from '../../../../common/color_palette';
 import { ThresholdAnnotations } from './threshold_annotations';
 

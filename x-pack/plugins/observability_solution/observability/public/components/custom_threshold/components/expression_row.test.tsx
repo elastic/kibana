@@ -12,7 +12,7 @@ import { act } from 'react-dom/test-utils';
 import { Aggregators } from '../../../../common/custom_threshold_rule/types';
 import { MetricExpression } from '../types';
 import { ExpressionRow } from './expression_row';
-import { COMPARATORS } from '@kbn/alerting-shared-types';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 
 describe('ExpressionRow', () => {
   async function setup(expression: MetricExpression) {

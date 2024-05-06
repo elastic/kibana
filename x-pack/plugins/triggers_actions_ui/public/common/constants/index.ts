@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Comparator, COMPARATORS } from '@kbn/alerting-shared-types';
+import { Comparator, COMPARATORS } from '@kbn/alerting-comparators';
 import { i18n } from '@kbn/i18n';
 
 export { AGGREGATION_TYPES, builtInAggregationTypes } from './aggregation_types';

@@ -16,7 +16,7 @@ import {
   SnapshotMetricType,
   SnapshotMetricTypeKeys,
 } from '@kbn/metrics-data-access-plugin/common';
-import { COMPARATORS } from '@kbn/alerting-shared-types';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import type { InfraConfig } from '../../../../common/plugin_config_types';
 import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
 import {

@@ -13,7 +13,7 @@ import { queryClient } from '@kbn/osquery-plugin/public/query_client';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { act } from 'react-dom/test-utils';
-import { COMPARATORS } from '@kbn/alerting-shared-types';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import { Aggregators } from '../../../common/custom_threshold_rule/types';
 import { useKibana } from '../../utils/kibana_react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
