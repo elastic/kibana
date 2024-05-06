@@ -28,7 +28,7 @@ export interface Props {
   mapCenter?: MapCenterAndZoom;
   onInitialRenderComplete?: () => void;
   onApiAvailable?: (api: MapApi) => void;
-  getTooltipRenderer: () => RenderToolTipContent;
+  getTooltipRenderer?: () => RenderToolTipContent;
   /*
    * Set to false to exclude sharing attributes 'data-*'.
    */
