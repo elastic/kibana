@@ -11,7 +11,7 @@ import {
   DiscoverStateContainer,
   getDiscoverStateContainer,
   DiscoverStateContainerParams,
-} from '../services/discover_state';
+} from '../state_management/discover_state';
 
 /**
  * Creates a state container using the initial params and allows to reset it.
