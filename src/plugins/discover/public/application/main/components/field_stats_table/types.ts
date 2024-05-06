@@ -13,7 +13,7 @@ import type { SerializedTitles } from '@kbn/presentation-publishing';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { type BehaviorSubject } from 'rxjs';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { DiscoverStateContainer } from '../../services/discover_state';
+import type { DiscoverStateContainer } from '../../state_management/discover_state';
 
 export interface RandomSamplingOption {
   mode: 'random_sampling';
