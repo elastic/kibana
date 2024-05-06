@@ -53,15 +53,9 @@ export function createFlattenFoldedAllOfItemsProcessor(): DocumentNodeProcessor 
         return;
       }
 
-      for (let i = 0; i < node.allOf.length; ++i) {
-        const childNode = node.allOf[i];
-
-        if ('allOf' in childNode) {
-          node.allOf.splice(i, 1, ...childNode.allOf);
-
-          i += childNode.allOf.length - 1;
-        }
-      }
+      node.allOf = node.allOf.flatMap((childNode) =>
+        'allOf' in childNode ? childNode.allOf : childNode
+      );
     },
   };
 }
