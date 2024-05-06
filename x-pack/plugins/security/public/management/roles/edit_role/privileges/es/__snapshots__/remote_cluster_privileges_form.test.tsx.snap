@@ -106,7 +106,7 @@ exports[`it renders without crashing 1`] = `
       <EuiButtonIcon
         aria-label="Delete remote cluster privilege"
         color="danger"
-        data-test-subj="addRemoteClusterPrivilegesButtonAdd"
+        data-test-subj="deleteRemoteClusterPrivilegesButton0"
         iconType="trash"
         onClick={[MockFunction]}
       />
