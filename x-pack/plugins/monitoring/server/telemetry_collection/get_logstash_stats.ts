@@ -187,9 +187,9 @@ export function processStatsResults(
     const logstashStats = isSelfMonitoring
       ? hit._source?.logstash_stats
       : hit._source?.logstash?.node?.stats;
-    const clusterStats = clusterUuid !== undefined ? clusters[clusterUuid].cluster_stats : [];
 
-    if (clusterUuid !== undefined && clusterStats !== undefined && logstashStats !== undefined) {
+    if (clusterUuid !== undefined && logstashStats !== undefined) {
+      const clusterStats = clusters[clusterUuid].cluster_stats || {};
       clusters[clusterUuid].count = (clusters[clusterUuid].count || 0) + 1;
 
       const thisVersion = logstashStats.logstash?.version;
