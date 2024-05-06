@@ -113,6 +113,8 @@ describe('Timeline', () => {
       timerangeKind: 'absolute',
       activeTab: TimelineTabs.query,
       show: true,
+      pinnedEventIds: {},
+      eventIdToNoteIds: {},
     };
   });
 

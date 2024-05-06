@@ -345,6 +345,9 @@ export const getDescriptionItem = (
       : [];
   } else if (['interval', 'from'].includes(field)) {
     return buildIntervalDescription(label, get(field, data));
+  } else if (field === 'maxSignals') {
+    const value: number | undefined = get(field, data);
+    return value ? [{ title: label, description: value }] : [];
   }
 
   const description: string = get(field, data);
