@@ -125,23 +125,27 @@ export class SecuritySolutionServerlessPlugin
     const internalESClient = coreStart.elasticsearch.client.asInternalUser;
     const internalSOClient = coreStart.savedObjects.createInternalRepository();
 
-    this.cloudSecurityUsageReportingTask?.start({
-      taskManager: pluginsSetup.taskManager,
-      interval: cloudSecurityMetringTaskProperties.interval,
-    });
+    this.cloudSecurityUsageReportingTask
+      ?.start({
+        taskManager: pluginsSetup.taskManager,
+        interval: cloudSecurityMetringTaskProperties.interval,
+      })
+      .catch(() => {});
 
-    this.endpointUsageReportingTask?.start({
-      taskManager: pluginsSetup.taskManager,
-      interval: ENDPOINT_METERING_TASK.INTERVAL,
-    });
+    this.endpointUsageReportingTask
+      ?.start({
+        taskManager: pluginsSetup.taskManager,
+        interval: ENDPOINT_METERING_TASK.INTERVAL,
+      })
+      .catch(() => {});
 
-    this.nlpCleanupTask?.start({ taskManager: pluginsSetup.taskManager });
+    this.nlpCleanupTask?.start({ taskManager: pluginsSetup.taskManager }).catch(() => {});
 
     setEndpointPackagePolicyServerlessFlag(
       internalSOClient,
       internalESClient,
       pluginsSetup.fleet.packagePolicyService
-    );
+    ).catch(() => {});
     return {};
   }
 
