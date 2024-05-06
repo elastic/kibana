@@ -54,9 +54,12 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     [stateContainer]
   );
 
-  const lastReloadRequestTime$ = stateContainer?.dataState?.refetch$
-    ? stateContainer?.dataState?.refetch$.pipe(map(() => Date.now()))
-    : fallBacklastReloadRequestTime$;
+  const lastReloadRequestTime$ = useMemo(() => {
+    return stateContainer?.dataState?.refetch$
+      ? stateContainer?.dataState?.refetch$.pipe(map(() => Date.now()))
+      : fallBacklastReloadRequestTime$;
+  }, [stateContainer]);
+
   const lastReloadRequestTime = useObservable(lastReloadRequestTime$, 0);
 
   useEffect(() => {
