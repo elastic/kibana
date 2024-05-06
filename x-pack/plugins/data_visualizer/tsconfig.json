@@ -79,7 +79,8 @@
     "@kbn/ml-time-buckets",
     "@kbn/aiops-log-rate-analysis",
     "@kbn/react-kibana-context-render",
-    "@kbn/react-kibana-context-theme"
+    "@kbn/react-kibana-context-theme",
+    "@kbn/search-types"
   ],
   "exclude": [
     "target/**/*",
