@@ -213,6 +213,19 @@
     background-color: $euiColorEmptyShade;
     box-shadow: 0 0 0 1px $euiColorLightShade;
     height: $euiSizeXL;
+
+    &:not(.embPanel__floatingActions--openContextMenu) {
+      opacity: 0;
+      visibility: hidden;
+      // slower transition on hover leave in case the user accidentally stops hover
+      transition: visibility $euiAnimSpeedSlow, opacity $euiAnimSpeedSlow;
+    }
+  
+    &.embPanel__floatingActions--openContextMenu {
+      opacity: 1;
+      visibility: visible;
+      transition: visibility $euiAnimSpeedFast, opacity $euiAnimSpeedFast;
+    }
   }
 
   &:hover, &:focus-within {

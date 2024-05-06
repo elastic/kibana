@@ -157,8 +157,12 @@ export const PresentationPanelContextMenu = ({
             <div
               data-test-subj={`embPanel__floatingActions__${api?.uuid}__left`}
               className={classNames(
-                'embPanel__floatingActions embPanel__floatingActionsLeft',
-                className
+                'embPanel__floatingActions',
+                'embPanel__floatingActionsLeft',
+                className,
+                {
+                  'embPanel__floatingActions--openContextMenu': isContextMenuOpen,
+                }
               )}
             >
               <EuiIcon
@@ -174,8 +178,12 @@ export const PresentationPanelContextMenu = ({
           <div
             data-test-subj={`embPanel__floatingActions__${api?.uuid}__right`}
             className={classNames(
-              'embPanel__floatingActions embPanel__floatingActionsRight',
-              className
+              'embPanel__floatingActions',
+              'embPanel__floatingActionsRight',
+              className,
+              {
+                'embPanel__floatingActions--openContextMenu': isContextMenuOpen,
+              }
             )}
           >
             {mainMenu?.items?.map(({ icon, 'data-test-subj': dataTestSubj, onClick, name }, i) => (
