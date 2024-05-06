@@ -14,7 +14,6 @@ import { deleteField, stripBadDefault, processDeprecated } from './utils';
 import { IContext } from '../context';
 
 const {
-  META_FIELD_X_OAS_ANY,
   META_FIELD_X_OAS_MAX_LENGTH,
   META_FIELD_X_OAS_MIN_LENGTH,
   META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES,
