@@ -194,7 +194,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           (item) => item.service.name === 'multisignal-service'
         );
 
-        console.log('multisignal.asset.signalTypes', multisignal.asset.signalTypes);
         expect(multisignal.asset.signalTypes).to.eql({
           'asset.traces': true,
           'asset.logs': true,

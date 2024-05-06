@@ -75,12 +75,12 @@ export async function getAssets({
 
         return {
           asset: {
-            signalTypes: serviceAsset?.asset?.signalTypes,
-            identifyingMetadata: serviceAsset?.asset?.identifying_metadata,
+            signalTypes: serviceAsset.asset.signalTypes,
+            identifyingMetadata: serviceAsset.asset.identifying_metadata,
           },
           service: {
-            name: serviceAsset?.service?.name,
-            environment: serviceAsset?.service?.environment,
+            name: serviceAsset.service.name,
+            environment: serviceAsset.service.environment,
           },
         };
       });
