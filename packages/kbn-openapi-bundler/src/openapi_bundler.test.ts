@@ -86,13 +86,12 @@ describe('OpenAPI Bundler', () => {
   });
 
   describe('circular references', () => {
-    // Fails because `writeYamlDocument()` has `noRefs: true` setting
-    // it('bundles recursive spec', async () => {
-    //   const folder = join('circular', 'recursive_spec');
+    it('bundles recursive spec', async () => {
+      const folder = join('circular', 'recursive_spec');
 
-    //   await bundleFolder(folder);
-    //   await expectBundleToMatchFile(DEFAULT_BUNDLED_FILE_PATH, join(folder, 'expected.yaml'));
-    // });
+      await bundleFolder(folder);
+      await expectBundleToMatchFile(DEFAULT_BUNDLED_FILE_PATH, join(folder, 'expected.yaml'));
+    });
 
     it('bundles specs with recursive references', async () => {
       const folder = join('circular', 'circular_ref_specs');
