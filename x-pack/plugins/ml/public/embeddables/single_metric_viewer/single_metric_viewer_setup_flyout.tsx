@@ -36,7 +36,6 @@ export async function resolveEmbeddableSingleMetricViewerUserInput(
             <SingleMetricViewerInitializer
               data-test-subj="mlSingleMetricViewerEmbeddableInitializer"
               mlApiServices={mlApiServices}
-              toasts={coreStart.notifications.toasts}
               bounds={timefilter.getBounds()!}
               initialInput={input}
               onCreate={(explicitInput) => {

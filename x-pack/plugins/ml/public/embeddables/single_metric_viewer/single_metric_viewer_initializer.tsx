@@ -21,9 +21,7 @@ import {
   EuiFieldText,
   EuiSpacer,
 } from '@elastic/eui';
-import type { ToastsStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import useMountedState from 'react-use/lib/useMountedState';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
@@ -45,7 +43,6 @@ export interface SingleMetricViewerInitializerProps {
   mlApiServices: MlApiServices;
   onCreate: (props: SingleMetricViewerEmbeddableUserInput) => void;
   onCancel: () => void;
-  toasts: ToastsStart;
 }
 
 export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProps> = ({
@@ -54,7 +51,6 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
   onCreate,
   onCancel,
   mlApiServices,
-  toasts,
 }) => {
   const isMounted = useMountedState();
   const titleManuallyChanged = useRef(false);
@@ -74,6 +70,7 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
   const [selectedEntities, setSelectedEntities] = useState<MlEntity | undefined>(
     !isNewJob && initialInput?.selectedEntities ? initialInput.selectedEntities : undefined
   );
+  const [errorMessage, setErrorMessage] = useState<string | undefined>();
   const isPanelTitleValid = panelTitle.length > 0;
 
   useEffect(
@@ -83,6 +80,7 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
           const { jobs } = await mlApiServices.getJobs({ jobId: jobIds.join(',') });
           if (jobs.length > 0) {
             setJob(jobs[0]);
+            setErrorMessage(undefined);
           }
         }
 
@@ -92,22 +90,14 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
           }
           if (mlApiServices) {
             fetchJob().catch((error) => {
-              toasts.addDanger(
-                i18n.translate(
-                  'xpack.ml.SingleMetricViewerEmbeddable.setupModal.fetchJobErrorNotificationMessage',
-                  {
-                    defaultMessage:
-                      'The following error occurred loading the selected job. {error}',
-                    values: { error: extractErrorMessage(error) },
-                  }
-                )
-              );
+              const errorMsg = extractErrorMessage(error);
+              setErrorMessage(errorMsg);
             });
           }
         }
       }
     },
-    [isMounted, jobIds, mlApiServices, toasts]
+    [isMounted, jobIds, mlApiServices]
   );
 
   const handleStateUpdate = (
@@ -145,7 +135,7 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
       <EuiFlyoutBody>
         <EuiForm>
           <JobSelectorControl
-            errors={[]}
+            errors={errorMessage ? [errorMessage] : []}
             jobsAndGroupIds={jobIds}
             adJobsApiService={mlApiServices.jobs}
             onChange={(update) => {
