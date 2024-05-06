@@ -283,39 +283,6 @@
       },
       {
         "parentPluginId": "@kbn/esql-utils",
-        "id": "def-common.getIndexPatternFromSQLQuery",
-        "type": "Function",
-        "tags": [],
-        "label": "getIndexPatternFromSQLQuery",
-        "description": [],
-        "signature": [
-          "(sqlQuery: string | undefined) => string"
-        ],
-        "path": "packages/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/esql-utils",
-            "id": "def-common.getIndexPatternFromSQLQuery.$1",
-            "type": "string",
-            "tags": [],
-            "label": "sqlQuery",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "packages/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/esql-utils",
         "id": "def-common.getInitialESQLQuery",
         "type": "Function",
         "tags": [],
@@ -419,6 +386,21 @@
     "interfaces": [],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.ENABLE_ESQL",
+        "type": "string",
+        "tags": [],
+        "label": "ENABLE_ESQL",
+        "description": [],
+        "signature": [
+          "\"enableESQL\""
+        ],
+        "path": "packages/kbn-esql-utils/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/esql-utils",
         "id": "def-common.ESQL_LATEST_VERSION",
