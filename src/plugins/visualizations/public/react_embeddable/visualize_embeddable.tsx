@@ -16,13 +16,15 @@ import {
   fetch$,
   initializeTitles,
   useStateFromPublishingSubject,
+  apiPublishesSettings,
+  apiHasDisableTriggers,
 } from '@kbn/presentation-publishing';
 import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import React, { useRef } from 'react';
 import { BehaviorSubject, merge } from 'rxjs';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../../common/constants';
 import { createVisAsync } from '../vis_async';
-import { getExpressionRenderParams } from './get_expression_render_params';
+import { getExpressionRendererProps } from './get_expression_renderer_props';
 import { MarkdownEditorApi, MarkdownEditorSerializedState } from './types';
 
 export const visualizeEmbeddableFactory: ReactEmbeddableFactory<
@@ -61,6 +63,9 @@ export const visualizeEmbeddableFactory: ReactEmbeddableFactory<
     const expressionAbortController$ = new BehaviorSubject<AbortController>(new AbortController());
     const executionContext = apiHasExecutionContext(parentApi)
       ? parentApi.executionContext
+      : undefined;
+    const disableTriggers = apiHasDisableTriggers(parentApi)
+      ? parentApi.disableTriggers
       : undefined;
 
     /**
@@ -109,11 +114,20 @@ export const visualizeEmbeddableFactory: ReactEmbeddableFactory<
         : {};
       const searchSessionId = apiPublishesSearchSession(parentApi) ? data.searchSessionId : '';
       const currentVis = vis$.getValue();
+      const settings = apiPublishesSettings(parentApi)
+        ? {
+            syncColors: parentApi.settings.syncColors$.getValue(),
+            syncCursor: parentApi.settings.syncCursor$.getValue(),
+            syncTooltips: parentApi.settings.syncTooltips$.getValue(),
+          }
+        : {};
 
-      if (!unifiedSearch || !currentVis || !searchSessionId) return;
-      const { params, abortController } = await getExpressionRenderParams({
+      if (!currentVis) return;
+      const { params, abortController } = await getExpressionRendererProps({
         unifiedSearch,
         vis: currentVis,
+        settings,
+        disableTriggers,
         searchSessionId,
         parentExecutionContext: executionContext,
         abortController: expressionAbortController$.getValue(),

@@ -157,7 +157,6 @@ export class VisualizeEmbeddable
       },
       parent
     );
-    console.error('VisualizeEmbeddable', initialInput);
     this.deps = deps;
     this.timefilter = timefilter;
     this.syncColors = this.input.syncColors;
