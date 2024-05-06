@@ -9,37 +9,6 @@
 import type { EcsEvent } from '@elastic/ecs';
 import { CspBenchmarkRuleMetadata } from '../types/latest';
 
-// export type CspFinding = {
-//   '@timestamp': string;
-//   cluster_id: string;
-//   result: CspFindingResult;
-//   resource: CspFindingResource;
-//   rule: CspBenchmarkRuleMetadata;
-//   host: CspFindingHost;
-//   event: EcsEvent;
-//   agent: CspFindingAgent;
-//   ecs: {
-//     version: string;
-//   };
-// } & (
-//   | {
-//       cloud: CspFindingCloud;
-//       rule: {
-//         benchmark: {
-//           posture_type: 'cspm';
-//         };
-//       };
-//     }
-//   | {
-//       orchestrator: CspFindingOrchestrator;
-//       rule: {
-//         benchmark: {
-//           posture_type: 'kspm';
-//         };
-//       };
-//     }
-// );
-
 export type CspFinding = {
   '@timestamp': string;
   cluster_id: string;
