@@ -53,9 +53,10 @@ export const PageReduxStream: FC = () => {
   const dispatch = useAppDispatch();
   const isRunning = useAppSelector((s) => s.stream.isRunning);
   const isCancelled = useAppSelector((s) => s.stream.isCancelled);
-  const errors = useAppSelector((s) => s.stream.errors);
+  const streamErrors = useAppSelector((s) => s.stream.errors);
   const progress = useAppSelector((s) => s.dev.progress);
   const entities = useAppSelector((s) => s.dev.entities);
+  const errors = useAppSelector((s) => s.dev.errors);
 
   const abortCtrl = useRef(new AbortController());
 
@@ -79,10 +80,10 @@ export const PageReduxStream: FC = () => {
   // TODO This approach needs to be adapted as it might miss when error messages arrive bulk.
   // This is for low level errors on the stream/HTTP level.
   useEffect(() => {
-    if (errors.length > 0) {
-      notifications.toasts.addDanger(errors[errors.length - 1]);
+    if (streamErrors.length > 0) {
+      notifications.toasts.addDanger(streamErrors[streamErrors.length - 1]);
     }
-  }, [errors, notifications.toasts]);
+  }, [streamErrors, notifications.toasts]);
 
   // TODO This approach needs to be adapted as it might miss when error messages arrive bulk.
   // This is for errors on the application level
