@@ -23,7 +23,7 @@ import fastIsEqual from 'fast-deep-equal';
 import useObservable from 'react-use/lib/useObservable';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { getChangePointDetectionComponent } from '../../shared_components';
-import { initializeChangePointControls } from './initialize_chane_point_controls';
+import { initializeChangePointControls } from './initialize_change_point_controls';
 import type { AiopsPluginStart, AiopsPluginStartDeps } from '../../types';
 import type {
   ChangePointEmbeddableApi,
