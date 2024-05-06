@@ -18,7 +18,7 @@ export default function ({ getService }) {
 
   describe('Script Languages API', function getLanguages() {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createApiKeyForRole('viewer');
     });
     after(async () => {
       await svlUserManager.invalidateApiKeyForRole(roleAuthc);
