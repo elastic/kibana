@@ -18,12 +18,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
   const kibanaServer = getService('kibanaServer');
-  const security = getService('security');
   const PageObjects = getPageObjects(['common', 'dashboard', 'timePicker', 'home']);
 
-  describe.only('dashboard multiple data views', () => {
+  describe('dashboard multiple data views', () => {
     before(async () => {
-      // await security.testUser.setRoles(['kibana_admin', 'kibana_sample_admin']);
       await PageObjects.common.navigateToApp('home');
       await PageObjects.home.goToSampleDataPage();
       await PageObjects.home.addSampleDataSet('flights');
@@ -41,9 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.home.goToSampleDataPage();
       await PageObjects.home.removeSampleDataSet('flights');
       await PageObjects.home.removeSampleDataSet('logs');
-
-      // Revert to default setting
-      await kibanaServer.uiSettings.update({ 'courier:ignoreFilterIfFieldNotInIndex': true });
+      await kibanaServer.uiSettings.unset('courier:ignoreFilterIfFieldNotInIndex');
     });
 
     it('shows tour explaining default filter behavior changes', async () => {
