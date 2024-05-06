@@ -66,8 +66,8 @@ export async function assignConfigFromPath(
  * @param inputPaths List of paths to filter.
  * @param config I18n config instance.
  */
-export function filterConfigPaths(inputPaths: string[], config: I18nConfig) {
-  const availablePaths = Object.values(config.paths).flat();
+export function filterConfigPaths(inputPaths: string[], config?: I18nConfig) {
+  const availablePaths = Object.values(config?.paths ?? []).flat();
   const pathsForExtraction = new Set();
 
   for (const inputPath of inputPaths) {

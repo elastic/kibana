@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import Listr from 'listr';
+import { Listr } from 'listr2';
 import chalk from 'chalk';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { run } from '@kbn/dev-cli-runner';
