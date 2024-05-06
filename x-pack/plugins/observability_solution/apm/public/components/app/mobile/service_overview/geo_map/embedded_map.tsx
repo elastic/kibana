@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { v4 as uuidv4 } from 'uuid';
-import { MapEmbeddable, MapEmbeddableInput, MapEmbeddableOutput } from '@kbn/maps-plugin/public';
-import { MAP_SAVED_OBJECT_TYPE } from '@kbn/maps-plugin/common';
-import { ErrorEmbeddable, ViewMode, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+import { LayerDescriptor } from '@kbn/maps-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -36,108 +33,106 @@ function EmbeddedMapComponent({
 }) {
   const [error, setError] = useState<boolean>();
 
-  const [embeddable, setEmbeddable] = useState<MapEmbeddable | ErrorEmbeddable | undefined>();
+  const [layerList, setLayerList] = useState<LayerDescriptor[]>([]);
 
-  const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
+  const { maps } = useKibana<ApmPluginStartDeps>().services;
 
-  const {
-    embeddable: embeddablePlugin,
-    maps,
-    notifications,
-  } = useKibana<ApmPluginStartDeps>().services;
+  // useEffect(() => {
+  //   async function setupEmbeddable() {
+  //     const factory = embeddablePlugin?.getEmbeddableFactory<
+  //       MapEmbeddableInput,
+  //       MapEmbeddableOutput,
+  //       MapEmbeddable
+  //     >(MAP_SAVED_OBJECT_TYPE);
 
-  useEffect(() => {
-    async function setupEmbeddable() {
-      const factory = embeddablePlugin?.getEmbeddableFactory<
-        MapEmbeddableInput,
-        MapEmbeddableOutput,
-        MapEmbeddable
-      >(MAP_SAVED_OBJECT_TYPE);
+  //     if (!factory) {
+  //       setError(true);
+  //       notifications?.toasts.addDanger({
+  //         title: i18n.translate('xpack.apm.serviceOverview.embeddedMap.error.toastTitle', {
+  //           defaultMessage: 'An error occurred when adding map embeddable',
+  //         }),
+  //         text: i18n.translate('xpack.apm.serviceOverview.embeddedMap.error.toastDescription', {
+  //           defaultMessage: `Embeddable factory with id "{embeddableFactoryId}" was not found.`,
+  //           values: {
+  //             embeddableFactoryId: MAP_SAVED_OBJECT_TYPE,
+  //           },
+  //         }),
+  //       });
+  //       return;
+  //     }
 
-      if (!factory) {
-        setError(true);
-        notifications?.toasts.addDanger({
-          title: i18n.translate('xpack.apm.serviceOverview.embeddedMap.error.toastTitle', {
-            defaultMessage: 'An error occurred when adding map embeddable',
-          }),
-          text: i18n.translate('xpack.apm.serviceOverview.embeddedMap.error.toastDescription', {
-            defaultMessage: `Embeddable factory with id "{embeddableFactoryId}" was not found.`,
-            values: {
-              embeddableFactoryId: MAP_SAVED_OBJECT_TYPE,
-            },
-          }),
-        });
-        return;
-      }
+  //     const input: MapEmbeddableInput = {
+  //       attributes: { title: '' },
+  //       id: uuidv4(),
+  //       title: i18n.translate('xpack.apm.serviceOverview.embeddedMap.input.title', {
+  //         defaultMessage: 'Latency by country',
+  //       }),
+  //       filters,
+  //       viewMode: ViewMode.VIEW,
+  //       mapCenter: { lat: 20.43425, lon: 0, zoom: 1.25 },
+  //       isLayerTOCOpen: false,
+  //       query: {
+  //         query: kuery,
+  //         language: 'kuery',
+  //       },
+  //       timeRange: {
+  //         from: start,
+  //         to: end,
+  //       },
+  //       hideFilterActions: true,
+  //     };
 
-      const input: MapEmbeddableInput = {
-        attributes: { title: '' },
-        id: uuidv4(),
-        title: i18n.translate('xpack.apm.serviceOverview.embeddedMap.input.title', {
-          defaultMessage: 'Latency by country',
-        }),
-        filters,
-        viewMode: ViewMode.VIEW,
-        mapCenter: { lat: 20.43425, lon: 0, zoom: 1.25 },
-        isLayerTOCOpen: false,
-        query: {
-          query: kuery,
-          language: 'kuery',
-        },
-        timeRange: {
-          from: start,
-          to: end,
-        },
-        hideFilterActions: true,
-      };
+  //     const embeddableObject = await factory.create(input);
 
-      const embeddableObject = await factory.create(input);
+  //     setEmbeddable(embeddableObject);
+  //   }
 
-      setEmbeddable(embeddableObject);
-    }
-
-    setupEmbeddable();
-    // Set up exactly once after the component mounts
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  //   setupEmbeddable();
+  //   // Set up exactly once after the component mounts
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
 
   // We can only render after embeddable has already initialized
-  useEffect(() => {
-    if (embeddableRoot.current && embeddable) {
-      embeddable.render(embeddableRoot.current);
-    }
-  }, [embeddable, embeddableRoot]);
+  // useEffect(() => {
+  //   if (embeddableRoot.current && embeddable) {
+  //     embeddable.render(embeddableRoot.current);
+  //   }
+  // }, [embeddable, embeddableRoot]);
 
   useEffect(() => {
-    const setLayerList = async () => {
-      if (embeddable && !isErrorEmbeddable(embeddable) && dataView?.id) {
-        const layerList = await getLayerList({
-          selectedMap,
-          maps,
-          dataViewId: dataView.id,
-        });
-        await Promise.all([embeddable.setLayerList(layerList), embeddable.reload()]);
+    const updateLayers = async () => {
+      if (dataView?.id) {
+        try {
+          const layers = await getLayerList({
+            selectedMap,
+            maps,
+            dataViewId: dataView.id,
+          });
+          setLayerList(layers);
+        } catch (e) {
+          setError(true);
+        }
       }
     };
 
-    setLayerList();
-  }, [embeddable, selectedMap, maps, dataView]);
+    updateLayers();
+  }, [selectedMap, maps, dataView]);
 
-  useEffect(() => {
-    if (embeddable) {
-      embeddable.updateInput({
-        filters,
-        query: {
-          query: kuery,
-          language: 'kuery',
-        },
-        timeRange: {
-          from: start,
-          to: end,
-        },
-      });
-    }
-  }, [start, end, kuery, filters, embeddable, selectedMap]);
+  // useEffect(() => {
+  //   if (embeddable) {
+  //     embeddable.updateInput({
+  //       filters,
+  //       query: {
+  //         query: kuery,
+  //         language: 'kuery',
+  //       },
+  //       timeRange: {
+  //         from: start,
+  //         to: end,
+  //       },
+  //     });
+  //   }
+  // }, [start, end, kuery, filters, embeddable, selectedMap]);
 
   return (
     <>
@@ -161,8 +156,24 @@ function EmbeddedMapComponent({
             z-index: 1;
             min-height: 0;
           `}
-          ref={embeddableRoot}
-        />
+        >
+          {maps &&
+            maps.Map({
+              layerList,
+              filters,
+              query: {
+                query: kuery,
+                language: 'kuery',
+              },
+              timeRange: {
+                from: start,
+                to: end,
+              },
+              isLayerTOCOpen: false,
+              hideFilterActions: true,
+              mapCenter: { lat: 20.43425, lon: 0, zoom: 1.25 },
+            })}
+        </div>
       )}
     </>
   );
