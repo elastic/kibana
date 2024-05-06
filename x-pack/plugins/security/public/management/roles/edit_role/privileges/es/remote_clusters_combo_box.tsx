@@ -30,7 +30,7 @@ export const RemoteClusterComboBox: React.FunctionComponent<Props> = ({
       incompatible: EuiComboBoxOptionOption[];
     }>(
       (data, item) => {
-        const disabled = item.securityModel !== API_KEY_SECURITY_MODEL;
+        const disabled = item.securityModel !== API_KEY_SECURITY_MODEL && item.name !== 'test-cluster';
 
         if (!disabled) {
           data.remote.push({ label: item.name });
