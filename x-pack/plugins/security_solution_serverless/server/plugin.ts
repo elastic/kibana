@@ -58,6 +58,7 @@ export class SecuritySolutionServerlessPlugin
 
   public setup(coreSetup: CoreSetup, pluginsSetup: SecuritySolutionServerlessPluginSetupDeps) {
     this.config = createConfig(this.initializerContext, pluginsSetup.securitySolution);
+    // console.error('WHAT ARE THE PRODUCT TYPES', this.config.productTypes);
     const enabledProductFeatures = getProductProductFeatures(this.config.productTypes);
 
     // securitySolutionEss plugin should always be disabled when securitySolutionServerless is enabled.

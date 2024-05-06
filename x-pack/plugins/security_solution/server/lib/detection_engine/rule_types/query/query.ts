@@ -62,6 +62,7 @@ export const queryExecutor = async ({
     });
 
     const license = await firstValueFrom(licensing.license$);
+    // console.error('WHAT IS THE LICENSE', license.type);
     const hasPlatinumLicense = license.hasAtLeast('platinum');
 
     const result =

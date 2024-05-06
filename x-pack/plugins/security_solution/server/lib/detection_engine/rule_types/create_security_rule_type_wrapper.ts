@@ -67,6 +67,7 @@ export const securityRuleTypeFieldMap = {
 export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
   ({
     lists,
+    actions,
     logger,
     config,
     publicBaseUrl,
@@ -501,6 +502,21 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 await ruleExecutionLogger.logStatusChange({
                   newStatus: RuleExecutionStatusEnum['partial failure'],
                   message: warningMessage,
+                  metrics: {
+                    searchDurations: result.searchAfterTimes,
+                    indexingDurations: result.bulkCreateTimes,
+                    enrichmentDurations: result.enrichmentTimes,
+                  },
+                });
+              }
+
+              const disabledAction = rule.actions.find(
+                (action) => !actions.isActionTypeEnabled(action.actionTypeId)
+              );
+              if (disabledAction) {
+                await ruleExecutionLogger.logStatusChange({
+                  newStatus: RuleExecutionStatusEnum['partial failure'],
+                  message: `Alerts created but the registered action ${disabledAction.actionTypeId} is disabled. Please check your license / tier and ensure the connector is enabled for your given license / tier`,
                   metrics: {
                     searchDurations: result.searchAfterTimes,
                     indexingDurations: result.bulkCreateTimes,
