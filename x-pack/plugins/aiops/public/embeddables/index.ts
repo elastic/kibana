@@ -10,7 +10,7 @@ import { registerReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '@kbn/aiops-change-point-detection/constants';
 import type { AiopsPluginStart, AiopsPluginStartDeps } from '../types';
 
-export const registerEmbeddable = (core: CoreSetup<AiopsPluginStartDeps, AiopsPluginStart>) => {
+export const registerEmbeddables = (core: CoreSetup<AiopsPluginStartDeps, AiopsPluginStart>) => {
   registerReactEmbeddableFactory(EMBEDDABLE_CHANGE_POINT_CHART_TYPE, async () => {
     const { getChangePointChartEmbeddableFactory } = await import('./change_point_chart');
     return getChangePointChartEmbeddableFactory(core.getStartServices);

@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import type { TimeRange } from '@kbn/es-query';
 import { apiHasParentApi, apiPublishesTimeRange } from '@kbn/presentation-publishing';
-import type { ChangePointEmbeddableApi } from '../embeddable/change_point_chart/types';
+import type { ChangePointEmbeddableApi } from '../embeddables/change_point_chart/types';
 import type { AiopsPluginStartDeps } from '../types';
 import type { ChangePointChartActionContext } from './change_point_action_context';
 import { isChangePointChartEmbeddableContext } from './change_point_action_context';

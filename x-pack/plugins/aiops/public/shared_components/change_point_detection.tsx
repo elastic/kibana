@@ -16,6 +16,7 @@ import { EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
 import type { Observable } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs';
 import { combineLatest, BehaviorSubject } from 'rxjs';
+import { ChartGridEmbeddableWrapper } from '../embeddables/change_point_chart/embeddable_chart_component_wrapper';
 import type { AiopsPluginStartDeps } from '../types';
 import { AiopsAppContext, type AiopsAppDependencies } from '../hooks/use_aiops_app_context';
 import { ReloadContextProvider } from '../hooks/use_reload';
@@ -25,7 +26,6 @@ import {
   type ChangePointAnnotation,
   ChangePointDetectionControlsContextProvider,
 } from '../components/change_point_detection/change_point_detection_context';
-import { ChartGridEmbeddableWrapper } from '../embeddable/change_point_chart/embeddable_chart_component_wrapper';
 
 /**
  * Only used to initialize internally
