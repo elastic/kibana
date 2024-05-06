@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/search-types';
 import type { SearchTypes } from '../../../../detection_engine/types';
 import type { Inspect, Maybe } from '../../../common';
 

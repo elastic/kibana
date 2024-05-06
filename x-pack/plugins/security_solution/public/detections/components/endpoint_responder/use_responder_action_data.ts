@@ -21,6 +21,7 @@ import {
   LOADING_ENDPOINT_DATA_TOOLTIP,
   METADATA_API_ERROR_TOOLTIP,
   NOT_FROM_ENDPOINT_HOST_TOOLTIP,
+  SENTINEL_ONE_AGENT_ID_PROPERTY_MISSING,
 } from './translations';
 import { getFieldValue } from '../host_isolation/helpers';
 
@@ -78,7 +79,6 @@ export const useResponderActionData = ({
   tooltip: ReactNode;
 } => {
   const isEndpointHost = agentType === 'endpoint';
-  const isSentinelOneHost = agentType === 'sentinel_one';
   const showResponseActionsConsole = useWithShowResponder();
 
   const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
@@ -93,7 +93,22 @@ export const useResponderActionData = ({
   const [isDisabled, tooltip]: [disabled: boolean, tooltip: ReactNode] = useMemo(() => {
     // v8.13 disabled for third-party agent alerts if the feature flag is not enabled
     if (!isEndpointHost) {
-      return [isSentinelOneHost ? !isSentinelOneV1Enabled : true, undefined];
+      switch (agentType) {
+        case 'sentinel_one':
+          // Disable it if feature flag is disabled
+          if (!isSentinelOneV1Enabled) {
+            return [true, undefined];
+          }
+          // Event must have the property that identifies the agent id
+          if (!getSentinelOneAgentId(eventData ?? null)) {
+            return [true, SENTINEL_ONE_AGENT_ID_PROPERTY_MISSING];
+          }
+
+          return [false, undefined];
+
+        default:
+          return [true, undefined];
+      }
     }
 
     // Still loading host info
@@ -125,11 +140,12 @@ export const useResponderActionData = ({
     return [false, undefined];
   }, [
     isEndpointHost,
-    isSentinelOneHost,
-    isSentinelOneV1Enabled,
     isFetching,
     error,
     hostInfo?.host_status,
+    agentType,
+    isSentinelOneV1Enabled,
+    eventData,
   ]);
 
   const handleResponseActionsClick = useCallback(() => {

@@ -35,7 +35,7 @@
             "section": "def-common.FieldFormat",
             "text": "FieldFormat"
           },
-          ") => (rowA: Record<string, unknown>, rowB: Record<string, unknown>, direction: \"asc\" | \"desc\") => number"
+          ") => (rowA: Record<string, unknown> | null | undefined, rowB: Record<string, unknown> | null | undefined, direction: \"asc\" | \"desc\") => number"
         ],
         "path": "packages/kbn-sort-predicates/src/sorting.ts",
         "deprecated": false,

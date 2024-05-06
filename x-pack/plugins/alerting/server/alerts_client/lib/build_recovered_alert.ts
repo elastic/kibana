@@ -23,6 +23,7 @@ import {
   ALERT_TIME_RANGE,
   ALERT_START,
   ALERT_CONSECUTIVE_MATCHES,
+  ALERT_RULE_EXECUTION_TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { DeepPartial } from '@kbn/utility-types';
 import { Alert as LegacyAlert } from '../../alert/alert';
@@ -42,6 +43,7 @@ interface BuildRecoveredAlertOpts<
   alert: Alert & AlertData;
   legacyAlert: LegacyAlert<LegacyState, LegacyContext, ActionGroupIds | RecoveryActionGroupId>;
   rule: AlertRule;
+  runTimestamp?: string;
   recoveryActionGroup: string;
   payload?: DeepPartial<AlertData>;
   timestamp: string;
@@ -65,6 +67,7 @@ export const buildRecoveredAlert = <
   rule,
   timestamp,
   payload,
+  runTimestamp,
   recoveryActionGroup,
   kibanaVersion,
 }: BuildRecoveredAlertOpts<
@@ -85,6 +88,7 @@ export const buildRecoveredAlert = <
     // Update the timestamp to reflect latest update time
     [TIMESTAMP]: timestamp,
     [EVENT_ACTION]: 'close',
+    [ALERT_RULE_EXECUTION_TIMESTAMP]: runTimestamp ?? timestamp,
     // Set the recovery action group
     [ALERT_ACTION_GROUP]: recoveryActionGroup,
     // Set latest flapping state

@@ -15,7 +15,8 @@ import { useRightPanelContext } from '../context';
 import { getField } from '../../shared/utils';
 import { HostEntityOverview } from './host_entity_overview';
 import { UserEntityOverview } from './user_entity_overview';
-import { DocumentDetailsLeftPanelKey, LeftPanelInsightsTab } from '../../left';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import { LeftPanelInsightsTab } from '../../left';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 
 /**

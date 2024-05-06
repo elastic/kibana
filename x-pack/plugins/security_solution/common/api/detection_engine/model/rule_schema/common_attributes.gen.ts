@@ -50,8 +50,41 @@ export const KqlQueryLanguage = z.enum(['kuery', 'lucene']);
 export type KqlQueryLanguageEnum = typeof KqlQueryLanguage.enum;
 export const KqlQueryLanguageEnum = KqlQueryLanguage.enum;
 
+/**
+ * This field determines whether the rule is a prebuilt Elastic rule. It will be replaced with the `rule_source` field.
+ * @deprecated
+ */
 export type IsRuleImmutable = z.infer<typeof IsRuleImmutable>;
 export const IsRuleImmutable = z.boolean();
+
+/**
+ * Determines whether an external/prebuilt rule has been customized by the user (i.e. any of its fields have been modified and diverged from the base value).
+ */
+export type IsExternalRuleCustomized = z.infer<typeof IsExternalRuleCustomized>;
+export const IsExternalRuleCustomized = z.boolean();
+
+/**
+ * Type of rule source for internally sourced rules, i.e. created within the Kibana apps.
+ */
+export type InternalRuleSource = z.infer<typeof InternalRuleSource>;
+export const InternalRuleSource = z.object({
+  type: z.literal('internal'),
+});
+
+/**
+ * Type of rule source for externally sourced rules, i.e. rules that have an external source, such as the Elastic Prebuilt rules repo.
+ */
+export type ExternalRuleSource = z.infer<typeof ExternalRuleSource>;
+export const ExternalRuleSource = z.object({
+  type: z.literal('external'),
+  is_customized: IsExternalRuleCustomized,
+});
+
+/**
+ * Discriminated union that determines whether the rule is internally sourced (created within the Kibana app) or has an external source, such as the Elastic Prebuilt rules repo.
+ */
+export type RuleSource = z.infer<typeof RuleSource>;
+export const RuleSource = z.discriminatedUnion('type', [ExternalRuleSource, InternalRuleSource]);
 
 /**
  * Determines whether the rule is enabled.
@@ -155,6 +188,7 @@ export const BuildingBlockType = z.string();
 
 /**
  * (deprecated) Has no effect.
+ * @deprecated
  */
 export type AlertsIndex = z.infer<typeof AlertsIndex>;
 export const AlertsIndex = z.string();
