@@ -74,6 +74,7 @@
     "@kbn/data-service",
     "@kbn/shared-ux-utility",
     "@kbn/presentation-containers",
+    "@kbn/search-types",
   ],
   "exclude": [
     "target/**/*",
