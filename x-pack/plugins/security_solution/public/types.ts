@@ -59,6 +59,7 @@ import type { UpsellingService } from '@kbn/security-solution-upselling/service'
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { PluginStartContract } from '@kbn/alerting-plugin/public/plugin';
+import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -90,7 +91,6 @@ import type { SetComponents, GetComponents$ } from './contract_components';
 import type { ConfigSettings } from '../common/config_settings';
 import type { OnboardingPageService } from './app/components/onboarding/onboarding_page_service';
 import type { SolutionNavigation } from './app/solution_navigation/solution_navigation';
-import { MapsStartApi } from '@kbn/maps-plugin/public';
 
 export interface SetupPlugins {
   cloud?: CloudSetup;

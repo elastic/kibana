@@ -7,7 +7,8 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { euiPaletteColorBlind } from '@elastic/eui';
-import { LayerDescriptor, LAYER_TYPE, SCALING_TYPES, SOURCE_TYPES } from '@kbn/maps-plugin/common';
+import type { LayerDescriptor } from '@kbn/maps-plugin/common';
+import { LAYER_TYPE, SCALING_TYPES, SOURCE_TYPES } from '@kbn/maps-plugin/common';
 import type {
   IndexPatternMapping,
   LayerMapping,

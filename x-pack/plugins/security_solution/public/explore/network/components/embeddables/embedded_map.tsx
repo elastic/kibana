@@ -9,12 +9,13 @@
 
 import { EuiAccordion, EuiLink, EuiText } from '@elastic/eui';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
-import { OutPortal } from 'react-reverse-portal';
 import { useSelector } from 'react-redux';
-import { createHtmlPortalNode, InPortal } from 'react-reverse-portal';
+import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import styled, { css } from 'styled-components';
 import type { Filter, Query } from '@kbn/es-query';
 import { isEqual } from 'lodash/fp';
+import type { MapApi, RenderTooltipContentParams } from '@kbn/maps-plugin/public';
+import type { LayerDescriptor } from '@kbn/maps-plugin/common';
 import { buildTimeRangeFilter } from '../../../../detections/components/alerts_table/helpers';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useIsFieldInIndexPattern } from '../../../containers/fields';
@@ -29,7 +30,6 @@ import { sourcererSelectors } from '../../../../common/store/sourcerer';
 import type { State } from '../../../../common/store';
 import type { SourcererDataView } from '../../../../common/store/sourcerer/model';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import type { MapApi, RenderTooltipContentParams } from '@kbn/maps-plugin/public';
 
 export const NETWORK_MAP_VISIBLE = 'network_map_visbile';
 
@@ -116,7 +116,7 @@ export const EmbeddedMapComponent = ({
 
   const isFieldInIndexPattern = useIsFieldInIndexPattern();
 
-  const [mapDataViews, setMapDataViews] = useState<SourcererDataView[]>([]);
+  const [layerList, setLayerList] = useState<LayerDescriptor[]>([]);
   const [availableDataViews, setAvailableDataViews] = useState<SourcererDataView[]>([]);
 
   useEffect(() => {
@@ -130,11 +130,11 @@ export const EmbeddedMapComponent = ({
         // ensures only index patterns with maps fields are passed
         const goodDataViews = availableDataViews.filter((_, i) => apiResponse[i] ?? false);
         if (!canceled) {
-          setMapDataViews(goodDataViews);
+          setLayerList(getLayerList(goodDataViews));
         }
       } catch (e) {
         if (!canceled) {
-          setMapDataViews([]);
+          setLayerList([]);
           addError(e, { title: i18n.ERROR_CREATING_EMBEDDABLE });
           setIsError(true);
         }
@@ -164,10 +164,6 @@ export const EmbeddedMapComponent = ({
   // Search InPortal/OutPortal for implementation touch points
   const portalNode = React.useMemo(() => createHtmlPortalNode(), []);
 
-  const layerList = useMemo(() => {
-    return getLayerList(mapDataViews);
-  }, [mapDataViews]);
-
   const appliedFilters = useMemo(() => {
     return [...filters, ...buildTimeRangeFilter(startDate, endDate)];
   }, [filters, startDate, endDate]);
@@ -180,21 +176,20 @@ export const EmbeddedMapComponent = ({
     [storage]
   );
 
-  const content = !storageValue
-    ? null
-    : (
-      <Embeddable>
-        <InPortal node={portalNode}>
-          <MapToolTip />
-        </InPortal>
+  const content = !storageValue ? null : (
+    <Embeddable>
+      <InPortal node={portalNode}>
+        <MapToolTip />
+      </InPortal>
 
-        <EmbeddableMap maintainRatio={!isIndexError}>
-          {isIndexError ? (
-            <IndexPatternsMissingPrompt data-test-subj="missing-prompt" />
-          ) : (<services.maps.Map
-            getTooltipRenderer={() => ((tooltipProps: RenderTooltipContentParams) => (
-              <OutPortal node={portalNode} {...tooltipProps} />
-            ))}
+      <EmbeddableMap maintainRatio={!isIndexError}>
+        {isIndexError ? (
+          <IndexPatternsMissingPrompt data-test-subj="missing-prompt" />
+        ) : (
+          <services.maps.Map
+            // eslint-disable-next-line react/display-name
+            getTooltipRenderer={() => (tooltipProps: RenderTooltipContentParams) =>
+              <OutPortal node={portalNode} {...tooltipProps} />}
             mapCenter={{ lon: -1.05469, lat: 15.96133, zoom: 1 }}
             layerList={layerList}
             filters={appliedFilters}
@@ -208,10 +203,11 @@ export const EmbeddedMapComponent = ({
                 refetch: () => api.reload(),
               });
             }}
-          />)}
-        </EmbeddableMap>
-      </Embeddable>
-    );
+          />
+        )}
+      </EmbeddableMap>
+    </Embeddable>
+  );
 
   return isError ? null : (
     <StyledEuiAccordion
