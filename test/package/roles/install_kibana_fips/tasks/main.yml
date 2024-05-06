@@ -128,3 +128,11 @@
     owner: vagrant
     group: vagrant
     recurse: yes
+
+- name: increase vm.max_map_count for ES
+  become: yes
+  sysctl:
+    name: vm.max_map_count
+    value: '262144'
+    state: present
+    reload: yes
