@@ -310,7 +310,7 @@ export class ProjectNavigationService {
    */
   private updateActiveProjectNavigationNodes({
     location,
-  }: { location?: Location /* forceUpdate?: boolean*/ } = {}): ChromeProjectNavigationNode[][] {
+  }: { location?: Location } = {}): ChromeProjectNavigationNode[][] {
     const activeNodes = this.findActiveNodes({ location });
     this.activeNodes$.next(activeNodes);
     return activeNodes;
