@@ -49,7 +49,7 @@ components:
           example: 'my.host'
         identifier_type:
           description: Used to define the type of entity.
-          $ref: './common.schema.yaml#/components/schemas/IdentifierType'
+          $ref: '../common/common.schema.yaml#/components/schemas/IdentifierType'
         refresh:
             type: string
             enum: [wait_for]
