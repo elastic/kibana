@@ -9,6 +9,7 @@
 import type { OpenAPIV3 } from 'openapi-types';
 import * as mutations from './mutations';
 import type { IContext } from './context';
+import { isLiteralEnum } from './mutations/utils';
 
 interface PostProcessMutationsArgs {
   schema: OpenAPIV3.SchemaObject;
@@ -49,10 +50,14 @@ const walkSchema = (ctx: IContext, schema: OpenAPIV3.SchemaObject): void => {
   } else {
     for (const arrayContainer of arrayContainers) {
       if (schema[arrayContainer]) {
-        schema[arrayContainer].forEach((s: OpenAPIV3.SchemaObject, idx: number) => {
-          walkSchema(ctx, s);
-          schema[arrayContainer][idx] = ctx.processRef(s);
-        });
+        if (isLiteralEnum(schema)) {
+          mutations.processLiteralEnum(schema);
+        } else {
+          schema[arrayContainer].forEach((s: OpenAPIV3.SchemaObject, idx: number) => {
+            walkSchema(ctx, s);
+            schema[arrayContainer][idx] = ctx.processRef(s);
+          });
+        }
         break;
       }
     }
