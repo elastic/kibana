@@ -25,7 +25,6 @@ RUN cd /tmp && \
      https://{{publicArtifactSubdomain}}.elastic.co/downloads/kibana/{{artifactPrefix}}-$(arch).tar.gz && \
   cd -
 {{/usePublicArtifact}}
-
 {{^usePublicArtifact}}
 COPY {{artifactTarball}} /tmp/kibana.tar.gz
 {{/usePublicArtifact}}
@@ -33,8 +32,8 @@ COPY {{artifactTarball}} /tmp/kibana.tar.gz
 RUN mkdir /usr/share/kibana
 WORKDIR /usr/share/kibana
 RUN tar \
+# Exclude serverless.yml disabled assets
 {{#serverless}}
-  # Exclude serverless.yml disabled assets
   --exclude=screenshotting-plugin/chromium \
   --exclude=screenshotting-plugin/server/assets \
 {{/serverless}}
@@ -45,13 +44,8 @@ RUN tar \
 # OpenShift does this, for example.
 # REF: https://docs.openshift.org/latest/creating_images/guidelines.html
 RUN chmod -R g=u /usr/share/kibana
-
-{{#serverless}}
-# Remove serverless.yml disabled assets 
-RUN rm -rf /usr/share/kibana/node_modules/@kbn/screenshotting-plugin/{chromium,server/assets}
-{{/serverless}}
-
 {{#cloud}}
+
 COPY {{filebeatTarball}} /tmp/filebeat.tar.gz
 COPY {{metricbeatTarball}} /tmp/metricbeat.tar.gz
 
