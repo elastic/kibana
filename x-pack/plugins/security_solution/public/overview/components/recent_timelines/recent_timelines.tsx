@@ -50,7 +50,6 @@ const RecentTimelinesItem = React.memo<RecentTimelinesItemProps>(
       <>
         <HoverPopover
           anchorPosition="rightDown"
-          data-test-subj="overview-recent-timelines"
           hoverContent={
             <EuiToolTip
               content={
@@ -122,7 +121,7 @@ export const RecentTimelines = React.memo<RecentTimelinesProps>(
       );
     }
 
-    return <>{content}</>;
+    return <div data-test-subj="overview-recent-timelines">{content}</div>;
   }
 );
 

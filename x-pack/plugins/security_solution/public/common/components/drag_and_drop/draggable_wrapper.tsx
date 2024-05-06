@@ -97,6 +97,9 @@ type RenderFunctionProp = (
 
 interface Props {
   dataProvider: DataProvider;
+  fieldType?: string;
+  isAggregatable?: boolean;
+  hideTopN?: boolean;
   isDraggable?: boolean;
   render: RenderFunctionProp;
   scopeId?: string;
@@ -126,7 +129,7 @@ export const getStyle = (
 };
 
 const DraggableOnWrapper: React.FC<Props> = React.memo(
-  ({ dataProvider, render, scopeId, truncate }) => {
+  ({ dataProvider, render, scopeId, truncate, hideTopN }) => {
     const [providerRegistered, setProviderRegistered] = useState(false);
     const isDisabled = dataProvider.id.includes(`-${ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID}-`);
     const dispatch = useDispatch();
@@ -259,7 +262,7 @@ const DraggableOnWrapper: React.FC<Props> = React.memo(
 
     if (isDisabled) return <>{content}</>;
     return (
-      <DraggableCellActions data={data} scopeId={scopeId}>
+      <DraggableCellActions data={data} scopeId={scopeId} hideTopN={hideTopN}>
         {content}
       </DraggableCellActions>
     );
@@ -268,7 +271,7 @@ const DraggableOnWrapper: React.FC<Props> = React.memo(
 DraggableOnWrapper.displayName = 'DraggableOnWrapper';
 
 export const DraggableWrapper: React.FC<Props> = React.memo(
-  ({ dataProvider, isDraggable = false, render, scopeId, truncate }) => {
+  ({ dataProvider, isDraggable = false, render, scopeId, truncate, hideTopN }) => {
     const data = useMemo(() => {
       const { value, field } = dataProvider.queryMatch;
       return { value, field };
@@ -316,7 +319,7 @@ export const DraggableWrapper: React.FC<Props> = React.memo(
         return <>{content}</>;
       }
       return (
-        <DraggableCellActions data={data} scopeId={scopeId}>
+        <DraggableCellActions data={data} scopeId={scopeId} hideTopN={hideTopN}>
           {content}
         </DraggableCellActions>
       );

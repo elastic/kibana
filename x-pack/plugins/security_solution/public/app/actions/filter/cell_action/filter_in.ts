@@ -46,7 +46,6 @@ export const createFilterInCellActionFactory = ({
       );
     },
     execute: async ({ data, metadata }) => {
-      console.log('data', data, { metadata });
       const fieldName = data[0]?.field.name;
       const rawValue = data[0]?.value;
       const dataViewId = metadata?.dataViewId;
