@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { fetchFieldsFromESQL } from '@kbn/text-based-editor';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { getESQLQueryColumns } from '@kbn/esql-utils';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 /**
  * react-query configuration to be used to fetch ES|QL fields
@@ -14,12 +14,11 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
  */
 export const getEsqlQueryConfig = ({
   esqlQuery,
-  expressions,
+  data,
 }: {
   esqlQuery: string | undefined;
-  expressions: ExpressionsStart;
+  data: DataPublicPluginStart;
 }) => {
-  const emptyResultsEsqlQuery = `${esqlQuery} | limit 0`;
   return {
     queryKey: [(esqlQuery ?? '').trim()],
     queryFn: async () => {
@@ -27,7 +26,10 @@ export const getEsqlQueryConfig = ({
         return null;
       }
       try {
-        const res = await fetchFieldsFromESQL({ esql: emptyResultsEsqlQuery }, expressions);
+        const res = await getESQLQueryColumns({
+          esqlQuery,
+          search: data.search.search,
+        });
         return res;
       } catch (e) {
         return { error: e };
