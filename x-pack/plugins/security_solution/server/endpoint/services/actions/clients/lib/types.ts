@@ -22,6 +22,7 @@ import type {
   ResponseActionUploadParameters,
   EndpointActionData,
   LogsEndpointActionResponse,
+  UploadedFileInfo,
 } from '../../../../../../common/endpoint/types';
 import type {
   IsolationRouteRequestBody,
@@ -144,5 +145,5 @@ export interface ResponseActionsClient {
    * @param actionId
    * @param fileId
    */
-  getFileInfo(actionId: string, fileId: string): Promise<GetFileInfoResponse>;
+  getFileInfo(actionId: string, fileId: string): Promise<UploadedFileInfo>;
 }

@@ -47,21 +47,8 @@ export const getActionFileInfoRouteHandler = (
         username: user?.username || 'unknown',
         connectorActions: new NormalizedExternalConnectorClient(connectorActions, logger),
       });
-
-      const { actionId, mimeType, status, size, name, id, agents, created } =
-        await responseActionsClient.getFileInfo(requestActionId, fileId);
-
       const response: ActionFileInfoApiResponse = {
-        data: {
-          name,
-          id,
-          mimeType,
-          size,
-          status,
-          created,
-          actionId,
-          agentId: agents.at(0) ?? '',
-        },
+        data: await responseActionsClient.getFileInfo(requestActionId, fileId),
       };
 
       return res.ok({ body: response });

@@ -35,7 +35,6 @@ import {
 } from '../../../../../../common/endpoint/constants';
 import type {
   CommonResponseActionMethodOptions,
-  GetFileInfoResponse,
   ProcessPendingActionsMethodOptions,
   ResponseActionsClient,
   GetFileDownloadMethodResponse,
@@ -58,6 +57,7 @@ import type {
   ResponseActionUploadParameters,
   SuspendProcessActionOutputContent,
   WithAllKeys,
+  UploadedFileInfo,
 } from '../../../../../../common/endpoint/types';
 import type {
   ExecuteActionRequestBody,
@@ -707,7 +707,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     throw new ResponseActionsClientError(`Method getFileDownload() not implemented`, 501);
   }
 
-  public async getFileInfo(actionId: string, fileId: string): Promise<GetFileInfoResponse> {
+  public async getFileInfo(actionId: string, fileId: string): Promise<UploadedFileInfo> {
     throw new ResponseActionsClientError(`Method getFileInfo() not implemented`, 501);
   }
 }

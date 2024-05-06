@@ -41,11 +41,11 @@ import type {
   SuspendProcessActionOutputContent,
   LogsEndpointAction,
   EndpointActionDataParameterTypes,
+  UploadedFileInfo,
 } from '../../../../../../common/endpoint/types';
 import type {
   CommonResponseActionMethodOptions,
   GetFileDownloadMethodResponse,
-  GetFileInfoResponse,
 } from '../lib/types';
 import { DEFAULT_EXECUTE_ACTION_TIMEOUT } from '../../../../../../common/endpoint/service/response_actions/constants';
 
@@ -361,14 +361,36 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
     return fleetFiles.download(fileId);
   }
 
-  async getFileInfo(actionId: string, fileId: string): Promise<GetFileInfoResponse> {
+  async getFileInfo(actionId: string, fileId: string): Promise<UploadedFileInfo> {
     await this.ensureValidActionId(actionId);
 
     const fleetFiles = await this.options.endpointService.getFleetFromHostFilesClient();
-    const file = await fleetFiles.get(fileId);
+    const {
+      name,
+      id,
+      mimeType,
+      size,
+      status,
+      created,
+      agents,
+      actionId: fileActionId,
+    } = await fleetFiles.get(fileId);
+
+    if (fileActionId !== actionId) {
+      throw new ResponseActionsClientError(
+        `Invalid file ID. File [${fileId}] not associated with action ID [${actionId}]`
+      );
+    }
 
     return {
-      ...file,
+      name,
+      id,
+      mimeType,
+      size,
+      status,
+      created,
+      actionId,
+      agentId: agents[0],
       agentType: this.agentType,
     };
   }
