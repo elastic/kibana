@@ -69,14 +69,7 @@ export function defineValidPermissionRoutes({
             }
           });
 
-        const validKeysResponse = response.ok<ValidPermissionsResult>({
-          body: {
-            // @ts-expect-error Elasticsearch client types do not know about cross-cluster API keys yet.
-            apiKeys: validKeys,
-          },
-        });
-
-        return validKeysResponse;
+        return validKeys.length > 0;
       } catch (error) {
         return response.customError(wrapIntoCustomErrorResponse(error));
       }
