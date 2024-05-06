@@ -33,17 +33,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await loadTestData(getService);
       await slo.deleteAllSLOs();
-      // await slo.securityUI.loginAsSloPowerUser();
     });
 
     beforeEach(async () => {
       createSLOInput = sloData;
-      const apiResponse = await supertestAPI
-        .post('/api/observability/slos')
-        .set('kbn-xsrf', 'true')
-        .set('x-elastic-internal-origin', 'foo')
-        .send(createSLOInput);
-      console.log(apiResponse, '!!apiResponse');
+      await slo.create(createSLOInput);
     });
 
     afterEach(async () => {

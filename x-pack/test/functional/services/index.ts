@@ -131,4 +131,5 @@ export const services = {
   aiops: AiopsProvider,
   sampleData: SampleDataServiceProvider,
   dataStreams: DataStreamProvider,
+  slo: kibanaXPackApiIntegrationServices.slo,
 };
