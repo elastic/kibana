@@ -1,0 +1,163 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import expect from '@kbn/expect';
+import moment from 'moment';
+import OpenAI from 'openai';
+import {
+  createLlmProxy,
+  LlmProxy,
+} from '../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ApiTest({ getService, getPageObjects }: FtrProviderContext) {
+  const ui = getService('observabilityAIAssistantUI');
+  const testSubjects = getService('testSubjects');
+  const supertest = getService('supertest');
+  const retry = getService('retry');
+  const log = getService('log');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+  const { common } = getPageObjects(['header', 'common']);
+
+  async function generateErrorData() {
+    const start = moment().subtract(5, 'minutes').valueOf();
+    const end = moment().valueOf();
+    const serviceName = 'opbeans-go';
+
+    const serviceInstance = apm
+      .service({ name: serviceName, environment: 'production', agentName: 'go' })
+      .instance('instance-a');
+
+    const interval = '1m';
+    const documents = [
+      timerange(start, end)
+        .interval(interval)
+        .rate(50)
+        .generator((timestamp) =>
+          serviceInstance
+            .transaction({ transactionName: 'GET /banana' })
+            .errors(
+              serviceInstance
+                .error({ message: 'Some exception', type: 'exception' })
+                .timestamp(timestamp)
+            )
+            .duration(10)
+            .timestamp(timestamp)
+            .failure()
+        ),
+    ];
+
+    await apmSynthtraceEsClient.index(documents);
+  }
+
+  async function createOpenAiConnector(proxy: LlmProxy) {
+    await supertest
+      .post('/api/actions/connector')
+      .set('kbn-xsrf', 'foo')
+      .send({
+        name: 'foo',
+        config: {
+          apiProvider: 'OpenAI',
+          apiUrl: `http://localhost:${proxy.getPort()}`,
+          defaultModel: 'gpt-4',
+        },
+        secrets: { apiKey: 'myApiKey' },
+        connector_type_id: '.gen-ai',
+      })
+      .expect(200);
+  }
+
+  async function deleteConnectors() {
+    const connectors = await supertest.get('/api/actions/connectors').expect(200);
+    const promises = connectors.body.map((connector: { id: string }) => {
+      return supertest
+        .delete(`/api/actions/connector/${connector.id}`)
+        .set('kbn-xsrf', 'foo')
+        .expect(204);
+    });
+
+    try {
+      await Promise.all(promises);
+    } catch (e) {
+      if (e?.response?.status === 404) {
+        return;
+      }
+
+      log.debug('Error deleting connector');
+      throw e;
+    }
+  }
+
+  async function navigateToError() {
+    await common.navigateToApp('apm', {
+      hash: `/services/opbeans-go/errors?rangeFrom=now-15m&rangeTo=now`,
+    });
+
+    await testSubjects.click('errorGroupId');
+  }
+
+  describe('Contextual insights for APM errors', () => {
+    let proxy: LlmProxy;
+
+    before(async () => {
+      await Promise.all([
+        deleteConnectors(), // cleanup previous connectors
+        apmSynthtraceEsClient.clean(), // cleanup previous synthtrace data
+        ui.auth.login(), // login
+      ]);
+
+      await generateErrorData();
+    });
+
+    describe('when there are no connectors', () => {
+      it('should not show the contextual insight component', async () => {
+        await navigateToError();
+        await retry.try(async () => {
+          await testSubjects.missingOrFail('obsAiAssistantInsightButton');
+        });
+      });
+    });
+
+    describe('when there are connectors', () => {
+      before(async () => {
+        proxy = await createLlmProxy(log);
+        await createOpenAiConnector(proxy);
+      });
+
+      it('should show the contextual insight component on the APM error details page', async () => {
+        await navigateToError();
+
+        proxy
+          .intercept(
+            'conversation',
+            (body) => !isFunctionTitleRequest(body),
+            'This error is nothing to worry about. Have a nice day!'
+          )
+          .complete();
+
+        await retry.try(async () => {
+          await testSubjects.click('obsAiAssistantInsightButton');
+          const llmResponse = await testSubjects.getVisibleText('obsAiAssistantInsightResponse');
+          expect(llmResponse).to.contain('This error is nothing to worry about. Have a nice day!');
+        });
+
+        await proxy.waitForAllInterceptorsSettled();
+      });
+
+      after(async () => {
+        await ui.auth.logout();
+        proxy.close();
+      });
+    });
+  });
+}
+
+function isFunctionTitleRequest(body: string) {
+  const parsedBody = JSON.parse(body) as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming;
+  return parsedBody.functions?.find((fn) => fn.name === 'title_conversation') !== undefined;
+}
