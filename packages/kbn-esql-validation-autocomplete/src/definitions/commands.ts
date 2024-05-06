@@ -129,9 +129,6 @@ export const commandDefinitions: CommandDefinition[] = [
         function isAggFunction(arg: ESQLAstItem): arg is ESQLFunction {
           return isFunctionItem(arg) && getFunctionDefinition(arg.name)?.type === 'agg';
         }
-        function isGroupingFunction(arg: ESQLAstItem): arg is ESQLFunction {
-          return isFunctionItem(arg) && getFunctionDefinition(arg.name)?.type === 'grouping';
-        }
         function isOtherFunction(arg: ESQLAstItem): arg is ESQLFunction {
           return isFunctionItem(arg) && getFunctionDefinition(arg.name)?.type !== 'agg';
         }
