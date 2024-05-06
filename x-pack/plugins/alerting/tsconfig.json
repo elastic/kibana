@@ -68,8 +68,8 @@
     "@kbn/core-http-router-server-internal",
     "@kbn/core-execution-context-server-mocks",
     "@kbn/react-kibana-context-render",
-    "@kbn/alerting-shared-types",
-    "@kbn/search-types"
+    "@kbn/search-types",
+    "@kbn/alerting-state-types"
   ],
   "exclude": [
     "target/**/*"

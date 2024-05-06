@@ -66,8 +66,8 @@
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-theme",
     "@kbn/controls-plugin",
-    "@kbn/alerting-shared-types",
-    "@kbn/search-types"
+    "@kbn/search-types",
+    "@kbn/alerting-comparators"
   ],
   "exclude": ["target/**/*"]
 }

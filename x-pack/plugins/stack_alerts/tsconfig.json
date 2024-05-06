@@ -50,8 +50,8 @@
     "@kbn/code-editor",
     "@kbn/esql-utils",
     "@kbn/data-view-utils",
-    "@kbn/alerting-shared-types",
-    "@kbn/search-types"
+    "@kbn/search-types",
+    "@kbn/alerting-comparators"
   ],
   "exclude": [
     "target/**/*",
