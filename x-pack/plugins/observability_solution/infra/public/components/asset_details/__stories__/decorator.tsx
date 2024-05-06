@@ -17,11 +17,8 @@ import type { DecoratorFn } from '@storybook/react';
 import { useParameter } from '@storybook/addons';
 import type { DeepPartial } from 'utility-types';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
-import type {
-  IKibanaSearchRequest,
-  ISearchOptions,
-  SearchSessionState,
-} from '@kbn/data-plugin/public';
+import type { IKibanaSearchRequest, ISearchOptions } from '@kbn/search-types';
+import type { SearchSessionState } from '@kbn/data-plugin/public';
 import type { Theme } from '@elastic/charts/dist/utils/themes/theme';
 import { defaultLogViewAttributes } from '@kbn/logs-shared-plugin/common';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
