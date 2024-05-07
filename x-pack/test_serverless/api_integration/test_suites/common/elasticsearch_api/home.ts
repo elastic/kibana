@@ -16,7 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Home', function () {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('viewer');
+      roleAuthc = await svlUserManager.createApiKeyForDefaultRole();
     });
     after(async () => {
       await svlUserManager.invalidateApiKeyForRole(roleAuthc);
