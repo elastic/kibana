@@ -81,6 +81,9 @@ export function claimAvailableTasksMget(opts: TaskClaimerOpts): Observable<Claim
 async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershipResult> {
   const { getCapacity, claimOwnershipUntil, batches, events$, taskStore } = opts;
   const { definitions, unusedTypes, excludedTaskTypes, taskMaxAttempts } = opts;
+  const { logger } = opts;
+  const loggerTag = claimAvailableTasksMget.name;
+  const logMeta = { tags: [loggerTag] };
   const initialCapacity = getCapacity();
 
   const { docs, versionMap } = await searchAvailableTasks({
@@ -124,13 +127,11 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   }
 
   for (const doc of missingTasks) {
-    // eslint-disable-next-line no-console
-    console.log(`Task ${doc.id} is missing from the task store or something`);
+    logger.info(`Task ${doc.id} is missing from the task store or something`, logMeta);
   }
 
   for (const doc of staleTasks) {
-    // eslint-disable-next-line no-console
-    console.log(`Task ${doc.id} is stale`);
+    logger.info(`Task ${doc.id} is stale`, logMeta);
   }
 
   const candidateTasks = applyLimitedConcurrency(currentTasks, batches);
@@ -159,13 +160,11 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
       } else {
         conflicts++;
         const { id, type, error } = updateResult.error;
-        // eslint-disable-next-line no-console
-        console.log(`Error updating task ${id}:${type} during claim: ${error.message}`);
+        logger.warn(`Error updating task ${id}:${type} during claim: ${error.message}`, logMeta);
       }
     }
   } catch (err) {
-    // eslint-disable-next-line no-console
-    console.log(`Error updating tasks during claim: ${err}`);
+    logger.warn(`Error updating tasks during claim: ${err}`, logMeta);
   }
 
   return {

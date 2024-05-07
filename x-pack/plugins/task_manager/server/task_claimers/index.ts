@@ -6,6 +6,7 @@
  */
 
 import { Subject, Observable } from 'rxjs';
+import { Logger } from '@kbn/core/server';
 
 import { TaskStore } from '../task_store';
 import { TaskClaim, TaskTiming } from '../task_events';
@@ -26,6 +27,7 @@ export interface TaskClaimerOpts {
   unusedTypes: string[];
   excludedTaskTypes: string[];
   taskMaxAttempts: Record<string, number>;
+  logger: Logger;
 }
 
 export interface ClaimOwnershipResult {

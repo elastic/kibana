@@ -175,6 +175,7 @@ export class TaskClaiming {
         definitions: this.definitions,
         taskMaxAttempts: this.taskMaxAttempts,
         excludedTaskTypes: this.excludedTaskTypes,
+        logger: this.logger,
       };
       return this.taskClaimer(opts).pipe(map((claimResult) => asOk(claimResult)));
     }

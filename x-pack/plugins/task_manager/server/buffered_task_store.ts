@@ -54,7 +54,6 @@ export class BufferedTaskStore implements Updatable {
     const docToUpdate = this.taskStore.taskValidator.getValidatedTaskInstanceForUpdating(doc, {
       validate: options.validate,
     });
-    delete doc.version;
     const result = await unwrapPromise(this.bufferedUpdate(docToUpdate));
     return this.taskStore.taskValidator.getValidatedTaskInstanceFromReading(result, {
       validate: options.validate,
