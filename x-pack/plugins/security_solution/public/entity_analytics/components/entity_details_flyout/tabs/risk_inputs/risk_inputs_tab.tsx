@@ -16,6 +16,7 @@ import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { get } from 'lodash/fp';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../../../common/components/page/manage_query';
+import { formatRiskScore } from '../../../../common';
 import type {
   InputAlert,
   UseRiskContributingAlertsResult,
@@ -258,6 +259,7 @@ const ContextsSection: React.FC<{
       <EuiInMemoryTable
         compressed={true}
         loading={loading}
+        data-test-subj="risk-input-contexts-table"
         columns={contextColumns}
         items={[
           {
@@ -362,5 +364,17 @@ const ExtraAlertsMessage: React.FC<ExtraAlertsMessageProps> = ({ riskScore, aler
   );
 };
 
-const formatContribution = (value: number) =>
-  value > 0 ? `+${value.toFixed(2)}` : value.toFixed(2);
+const formatContribution = (value: number): string => {
+  const fixedValue = formatRiskScore(value);
+
+  // prevent +0.00 for values like 0.0001
+  if (fixedValue === '0.00') {
+    return fixedValue;
+  }
+
+  if (value > 0) {
+    return `+${fixedValue}`;
+  }
+
+  return fixedValue;
+};
