@@ -29,7 +29,7 @@ import { CspBenchmarkRuleMetadata } from '../../../common/types/latest';
 import { getRuleList } from '../configurations/findings_flyout/rule_tab';
 import { getRemediationList } from '../configurations/findings_flyout/overview_tab';
 import * as TEST_SUBJECTS from './test_subjects';
-import { useChangeCspRuleState } from './change_csp_rule_state';
+import { useChangeCspRuleState } from './use_change_csp_rule_state';
 import { CspBenchmarkRulesWithStates } from './rules_container';
 import {
   showChangeBenchmarkRuleStatesSuccessToast,

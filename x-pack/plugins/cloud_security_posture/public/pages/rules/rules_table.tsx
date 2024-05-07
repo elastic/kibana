@@ -27,7 +27,7 @@ import { getFindingsDetectionRuleSearchTags } from '../../../common/utils/detect
 import { ColumnNameWithTooltip } from '../../components/column_name_with_tooltip';
 import type { CspBenchmarkRulesWithStates, RulesState } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
-import { RuleStateUpdateRequest, useChangeCspRuleState } from './change_csp_rule_state';
+import { RuleStateUpdateRequest, useChangeCspRuleState } from './use_change_csp_rule_state';
 import { showChangeBenchmarkRuleStatesSuccessToast } from '../../components/take_action';
 import { fetchDetectionRulesByTags } from '../../common/api/use_fetch_detection_rules_by_tags';
 

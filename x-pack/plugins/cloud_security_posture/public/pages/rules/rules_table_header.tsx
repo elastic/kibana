@@ -26,7 +26,10 @@ import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { getFindingsDetectionRuleSearchTagsFromArrayOfRules } from '../../../common/utils/detection_rules';
-import { RuleStateAttributesWithoutStates, useChangeCspRuleState } from './change_csp_rule_state';
+import {
+  RuleStateAttributesWithoutStates,
+  useChangeCspRuleState,
+} from './use_change_csp_rule_state';
 import { CspBenchmarkRulesWithStates } from './rules_container';
 import { MultiSelectFilter } from '../../common/component/multi_select_filter';
 import { showChangeBenchmarkRuleStatesSuccessToast } from '../../components/take_action';
