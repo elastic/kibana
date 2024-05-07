@@ -1626,8 +1626,6 @@
       "@kbn/slo-schema/*": ["x-pack/packages/kbn-slo-schema/*"],
       "@kbn/snapshot-restore-plugin": ["x-pack/plugins/snapshot_restore"],
       "@kbn/snapshot-restore-plugin/*": ["x-pack/plugins/snapshot_restore/*"],
-      "@kbn/solution-nav-es": ["packages/solution-nav/es"],
-      "@kbn/solution-nav-es/*": ["packages/solution-nav/es/*"],
       "@kbn/solution-nav-oblt": ["packages/solution-nav/oblt"],
       "@kbn/solution-nav-oblt/*": ["packages/solution-nav/oblt/*"],
       "@kbn/some-dev-log": ["packages/kbn-some-dev-log"],

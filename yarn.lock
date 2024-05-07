@@ -6302,10 +6302,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/solution-nav-es@link:packages/solution-nav/es":
-  version "0.0.0"
-  uid ""
-
 "@kbn/solution-nav-oblt@link:packages/solution-nav/oblt":
   version "0.0.0"
   uid ""
