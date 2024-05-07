@@ -29,6 +29,9 @@ jest.mock('../../../common/containers/sourcerer', () => ({
     indicesExist: true,
   }),
 }));
+jest.mock('@kbn/expandable-flyout', () => ({
+  useExpandableFlyoutState: jest.fn().mockReturnValue({ left: true }),
+}));
 
 describe('RenderCellValue', () => {
   const columnId = '@timestamp';
@@ -81,5 +84,21 @@ describe('RenderCellValue', () => {
     );
 
     expect(wrapper.find(DefaultCellRenderer).props()).toEqual(props);
+  });
+
+  test('it renders Hidden GuidedOnboardingTourStep when left flyout is open', () => {
+    const RenderCellValue = getRenderCellValueHook({
+      scopeId: SourcererScopeName.default,
+      tableId: TableId.test,
+    });
+    const wrapper = mount(
+      <TestProviders>
+        <DragDropContextWrapper browserFields={mockBrowserFields}>
+          <RenderCellValue {...props} />
+        </DragDropContextWrapper>
+      </TestProviders>
+    );
+
+    expect(wrapper.find('GuidedOnboardingTourStep').prop('hidden')).toEqual(true);
   });
 });
