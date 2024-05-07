@@ -44,7 +44,7 @@ export type FunctionCallChatFunction = (
   name: string,
   params: Omit<
     Parameters<ObservabilityAIAssistantClient['chat']>[1],
-    'connectorId' | 'simulateFunctionCalling'
+    'connectorId' | 'simulateFunctionCalling' | 'tracer'
   >
 ) => Observable<ChatCompletionChunkEvent>;
 
