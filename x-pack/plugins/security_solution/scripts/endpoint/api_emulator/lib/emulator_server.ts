@@ -206,7 +206,7 @@ export class EmulatorServer<TServices extends {} = {}> {
     const pluginExposedInterface = this.server.plugins[pluginName as keyof Hapi.PluginProperties];
 
     if (!pluginExposedInterface) {
-      throw new Error(`No plugin named ${pluginName} registered!`);
+      throw new Error(`No plugin named [${pluginName}] registered!`);
     }
 
     return pluginExposedInterface as TClient;
