@@ -92,6 +92,6 @@
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/datemath",
     "@kbn/presentation-containers",
-    "@kbn/dashboard-plugin",
+    "@kbn/dashboard-plugin"
   ]
 }
