@@ -5,19 +5,26 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { sloData } from '../../../api_integration/apis/slos/fixtures/create_slo';
 
 const OVERVIEW_MODE_SELECTOR = 'sloOverviewModeSelector';
 const SLO_CONFIRM_BUTTON = 'sloConfirmButton';
 const SINGLE_SLO_SELECTOR = 'singleSloSelector';
 const SLO_SINGLE_OVERVIEW_CONFIGURATION = 'sloSingleOverviewConfiguration';
 const SLO_GROUP_OVERVIEW_CONFIGURATION = 'sloGroupOverviewConfiguration';
+const SLO_GROUP_OVERVIEW_CONFIGURATION_GROUP_BY = 'sloGroupOverviewConfigurationGroupBy';
+const SLO_GROUP_OVERVIEW_CONFIGURATION_GROUP = 'sloGroupOverviewConfigurationGroup';
+const SLO_GROUP_OVERVIEW_CONFIGURATION_KQLBAR = 'sloGroupOverviewConfigurationKqlBar';
 const SLO_SINGLE_OVERVIEW_PANEL = 'sloSingleOverviewPanel';
 const SLO_GROUP_OVERVIEW_PANEL = 'sloGroupOverviewPanel';
 
 export function SloUiCommonServiceProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
+  const find = getService('find');
+  const toasts = getService('toasts');
   const retry = getService('retry');
 
   return {
@@ -34,7 +41,7 @@ export function SloUiCommonServiceProvider({ getService }: FtrProviderContext) {
     async setComboBoxSloSelection() {
       await retry.tryForTime(60 * 1000, async () => {
         await testSubjects.click('sloSelector');
-        await comboBox.set('sloSelector > comboBoxInput', 'Test SLO for api integration');
+        await comboBox.set('sloSelector > comboBoxInput', sloData.name);
       });
     },
     async assertOverviewConfigurationSaveButtonIsEnabled(subj: string) {
@@ -69,9 +76,56 @@ export function SloUiCommonServiceProvider({ getService }: FtrProviderContext) {
       });
     },
 
+    async assertGroupOverviewConfigurationGroupByExists() {
+      await retry.tryForTime(60 * 1000, async () => {
+        await testSubjects.existOrFail(SLO_GROUP_OVERVIEW_CONFIGURATION_GROUP_BY);
+      });
+    },
+
+    async assertGroupOverviewConfigurationGroupExists() {
+      await retry.tryForTime(60 * 1000, async () => {
+        await testSubjects.existOrFail(SLO_GROUP_OVERVIEW_CONFIGURATION_GROUP);
+      });
+    },
+
+    async assertGroupOverviewConfigurationKqlBarExists() {
+      await retry.tryForTime(60 * 1000, async () => {
+        await testSubjects.existOrFail(SLO_GROUP_OVERVIEW_CONFIGURATION_KQLBAR);
+      });
+    },
+
+    async dismissAllToasts() {
+      await retry.tryForTime(60 * 1000, async () => {
+        await toasts.dismissAll();
+      });
+    },
+
     async assertSingleOverviewPanelExists() {
       await retry.tryForTime(60 * 1000, async () => {
         await testSubjects.existOrFail(SLO_SINGLE_OVERVIEW_PANEL);
+      });
+    },
+
+    async getSloCardTitle() {
+      const container = await testSubjects.find(SLO_SINGLE_OVERVIEW_PANEL);
+      return await (await container.findByClassName('echMetricText__title')).getVisibleText();
+    },
+
+    async assertSingleOverviewPanelContentExists() {
+      await retry.tryForTime(2000, async () => {
+        expect(
+          await find.existsByCssSelector(
+            `[data-test-subj="${SLO_SINGLE_OVERVIEW_PANEL}"] .echChart`
+          )
+        ).to.eql(true);
+
+        expect(
+          await find.existsByCssSelector(
+            `[data-test-subj="${SLO_SINGLE_OVERVIEW_PANEL}"] .echMetricText__title`
+          )
+        ).to.eql(true);
+
+        expect(await this.getSloCardTitle()).to.eql(sloData.name);
       });
     },
 

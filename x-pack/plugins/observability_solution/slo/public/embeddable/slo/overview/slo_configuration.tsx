@@ -157,7 +157,7 @@ function GroupSloConfiguration({
 
   return (
     <>
-      <EuiFlyoutBody className="sloGroupOverviewConfiguration">
+      <EuiFlyoutBody data-test-subj="sloGroupOverviewConfiguration">
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFlexGroup>

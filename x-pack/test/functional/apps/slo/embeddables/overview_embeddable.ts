@@ -56,6 +56,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('creates an overview panel', async () => {
         await sloUi.common.assertSingleOverviewPanelExists();
+        await sloUi.common.dismissAllToasts();
+      });
+
+      it('renders SLO card item chart', async () => {
+        await sloUi.common.assertSingleOverviewPanelContentExists();
       });
     });
 
@@ -65,6 +70,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardAddPanel.clickEmbeddableFactoryGroupButton('slos');
         await dashboardAddPanel.clickAddNewPanelFromUIActionLink('SLO Overview');
         await sloUi.common.clickOverviewMode();
+        await sloUi.common.assertSloConfigurationGroupOverviewModeIsSelected();
+      });
+
+      it('can select a group by', async () => {
+        await sloUi.common.assertGroupOverviewConfigurationGroupByExists();
+      });
+
+      it('can optionally select a group', async () => {
+        await sloUi.common.assertGroupOverviewConfigurationGroupExists();
+      });
+
+      it('can optionally search for custom query', async () => {
+        await sloUi.common.assertGroupOverviewConfigurationKqlBarExists();
+      });
+
+      it('creates a group overview panel', async () => {
+        await sloUi.common.clickOverviewCofigurationSaveButton();
+        await sloUi.common.assertGroupOverviewPanelExists();
+        await sloUi.common.dismissAllToasts();
       });
     });
   });
