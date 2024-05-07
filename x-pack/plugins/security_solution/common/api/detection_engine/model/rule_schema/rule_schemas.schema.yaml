@@ -117,12 +117,15 @@ components:
         author:
           $ref: './common_attributes.schema.yaml#/components/schemas/RuleAuthorArray'
 
+        # False positive examples
         false_positives:
           $ref: './common_attributes.schema.yaml#/components/schemas/RuleFalsePositiveArray'
 
+        # Reference URLs
         references:
           $ref: './common_attributes.schema.yaml#/components/schemas/RuleReferenceArray'
 
+        # Max alerts per run
         max_signals:
           $ref: './common_attributes.schema.yaml#/components/schemas/MaxSignals'
         threat:
@@ -130,9 +133,11 @@ components:
         setup:
           $ref: './common_attributes.schema.yaml#/components/schemas/SetupGuide'
 
+        # Related integrations
         related_integrations:
           $ref: './common_attributes.schema.yaml#/components/schemas/RelatedIntegrationArray'
 
+        # Required fields
         required_fields:
           type: array
           items:
