@@ -54,7 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Field preview', function () {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('viewer');
+      roleAuthc = await svlUserManager.createApiKeyForDefaultRole();
       await createIndex();
     });
     after(async () => {
