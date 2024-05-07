@@ -7,11 +7,11 @@ preview::[]
 // Variable (attribute) definition 
 :x:                    Playground 
 
-Use {x} to combine your Elasticsearch data with the power of large language models for retrieval augmented generation (RAG).
-The chat interface translates your natural language questions into {es} queries, retrieves the most relevant results from your {es} documents, and then passes those documents to the large language model to generate tailored responses.
+Use {x} to combine your Elasticsearch data with the power of large language models (LLMs) for retrieval augmented generation (RAG).
+The chat interface translates your natural language questions into {es} queries, retrieves the most relevant results from your {es} documents, and passes those documents to the LLM to generate tailored responses.
 
-Once you start chatting with the model, you can start using the UI to inspect and modify the Elasticsearch queries used to search your data.
-You can also inspect the underlying Python code that powers the chat interface, and download this code to integrate into your own application.
+Once you start chatting, use the UI to view and modify the Elasticsearch queries that search your data.
+You can also view the underlying Python code that powers the chat interface, and download this code to integrate into your own application.
 
 Learn how to get started on this page.
 Refer to the following for more advanced topics:
