@@ -17,7 +17,7 @@ import {
 import { CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH } from '../../../common/constants';
 
 export type RuleStateAttributesWithoutStates = Omit<RuleStateAttributes, 'muted'>;
-interface UseChangeCspRuleStateOptions {
+export interface UseChangeCspRuleStateOptions {
   actionOnRule: 'mute' | 'unmute';
   ruleIds: RuleStateAttributesWithoutStates[];
 }
