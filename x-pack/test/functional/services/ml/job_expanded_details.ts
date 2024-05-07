@@ -116,7 +116,6 @@ export function MachineLearningJobExpandedDetailsProvider(
       await retry.tryForTime(60_000, async () => {
         await jobTable.ensureDetailsOpen(jobId);
         await testSubjects.click(jobTable.detailsSelector(jobId, 'mlJobListTab-forecasts'), 3_000);
-        await headerPage.awaitKibanaChrome();
         await headerPage.waitUntilLoadingHasFinished();
         await this.assertJobDetailsTabOpen('mlJobListTab-forecasts');
       });
