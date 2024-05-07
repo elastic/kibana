@@ -7,6 +7,7 @@
 import { capitalize, sortBy } from 'lodash';
 
 import { schema } from '@kbn/config-schema';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import type { InternalRouteDeps } from '.';
 import { wrapError } from '../../../lib/errors';
@@ -24,7 +25,7 @@ interface TypesAggregation {
 }
 
 export function initGetSpaceContentSummaryApi(deps: InternalRouteDeps) {
-  const { router } = deps;
+  const { router, getSpacesService } = deps;
 
   router.get(
     {
@@ -38,6 +39,11 @@ export function initGetSpaceContentSummaryApi(deps: InternalRouteDeps) {
     },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
+        const spaceId = request.params.spaceId;
+        const spacesClient = getSpacesService().createSpacesClient(request);
+
+        await spacesClient.get(spaceId);
+
         const { getClient, typeRegistry } = (await context.core).savedObjects;
         const client = getClient();
 
@@ -50,7 +56,7 @@ export function initGetSpaceContentSummaryApi(deps: InternalRouteDeps) {
         const data = await client.find<unknown, TypesAggregation>({
           type: searchTypeNames,
           perPage: 0,
-          namespaces: [request.params.spaceId],
+          namespaces: [spaceId],
           aggs: {
             typesAggregation: {
               terms: {
@@ -81,6 +87,10 @@ export function initGetSpaceContentSummaryApi(deps: InternalRouteDeps) {
 
         return response.ok({ body: { summary, total: data.total } });
       } catch (error) {
+        if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+          return response.notFound();
+        }
+
         return response.customError(wrapError(error));
       }
     })
