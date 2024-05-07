@@ -12,7 +12,8 @@ import type { TransportRequestOptions } from '@elastic/elasticsearch';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { Observable } from 'rxjs';
-import { IEsSearchRequest, IEsSearchResponse } from '..';
+import { IEsSearchRequest, IEsSearchResponse } from './es_search_types';
+import { IKibanaSearchRequest, IKibanaSearchResponse } from './kibana_search_types';
 
 export type ISearchGeneric = <
   SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
@@ -46,73 +47,10 @@ export type SanitizedConnectionRequestParams = Pick<
   'method' | 'path' | 'querystring'
 >;
 
-export interface IKibanaSearchResponse<RawResponse = any> {
-  /**
-   * Some responses may contain a unique id to identify the request this response came from.
-   */
-  id?: string;
-
-  /**
-   * If relevant to the search strategy, return a total number
-   * that represents how progress is indicated.
-   */
-  total?: number;
-
-  /**
-   * If relevant to the search strategy, return a loaded number
-   * that represents how progress is indicated.
-   */
-  loaded?: number;
-
-  /**
-   * Indicates whether search is still in flight
-   */
-  isRunning?: boolean;
-
-  /**
-   * Indicates whether the results returned are complete or partial
-   */
-  isPartial?: boolean;
-
-  /**
-   * Indicates whether the results returned are from the async-search index
-   */
-  isRestored?: boolean;
-
-  /**
-   * Indicates whether the search has been saved to a search-session object and long keepAlive was set
-   */
-  isStored?: boolean;
-
-  /**
-   * Optional warnings returned from Elasticsearch (for example, deprecation warnings)
-   */
-  warning?: string;
-
-  /**
-   * The raw response returned by the internal search method (usually the raw ES response)
-   */
-  rawResponse: RawResponse;
-
-  /**
-   * HTTP request parameters from elasticsearch transport client t
-   */
-  requestParams?: SanitizedConnectionRequestParams;
-}
-
 export interface IEsErrorAttributes {
   error?: estypes.ErrorCause;
   rawResponse?: estypes.SearchResponseBody;
   requestParams?: SanitizedConnectionRequestParams;
-}
-
-export interface IKibanaSearchRequest<Params = any> {
-  /**
-   * An id can be used to uniquely identify this request.
-   */
-  id?: string;
-
-  params?: Params;
 }
 
 export interface ISearchOptions {
