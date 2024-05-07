@@ -23,7 +23,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
   const es = getService('es');
   const log = getService('log');
 
@@ -95,7 +95,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             start: withoutSummaryFieldStart,
             end: withoutSummaryFieldEnd,
             isLegacy: true,
-            synthtrace: synthtraceEsClient,
+            synthtrace: apmSynthtraceEsClient,
             logger: log,
           });
 
@@ -103,13 +103,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             start: withSummaryFieldStart,
             end: withSummaryFieldEnd,
             isLegacy: false,
-            synthtrace: synthtraceEsClient,
+            synthtrace: apmSynthtraceEsClient,
             logger: log,
           });
         });
 
         after(() => {
-          return synthtraceEsClient.clean();
+          return apmSynthtraceEsClient.clean();
         });
 
         describe('Values for hasDurationSummaryField for transaction metrics', () => {
@@ -155,7 +155,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       before(() => {
         const instance = apm.service('my-service', 'production', 'java').instance('instance');
 
-        return synthtraceEsClient.index(
+        return apmSynthtraceEsClient.index(
           timerange(moment(start).subtract(1, 'day'), end)
             .interval('1m')
             .rate(1)
@@ -166,7 +166,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       after(() => {
-        return synthtraceEsClient.clean();
+        return apmSynthtraceEsClient.clean();
       });
 
       describe('with default settings', () => {
@@ -508,7 +508,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       after(() => {
-        return synthtraceEsClient.clean();
+        return apmSynthtraceEsClient.clean();
       });
     }
   );

@@ -23,6 +23,7 @@ import {
 } from '../../../common/constants';
 import { SLODefinition } from '../../domain/models';
 import { GetHistogramIndicatorAggregation } from '../aggregations';
+import { getTimesliceTargetComparator } from './common';
 
 export class HistogramTransformGenerator extends TransformGenerator {
   public async getTransformParams(
@@ -106,7 +107,9 @@ export class HistogramTransformGenerator extends TransformGenerator {
               goodEvents: 'slo.numerator>value',
               totalEvents: 'slo.denominator>value',
             },
-            script: `params.goodEvents / params.totalEvents >= ${slo.objective.timesliceTarget} ? 1 : 0`,
+            script: `params.goodEvents / params.totalEvents ${getTimesliceTargetComparator(
+              slo.objective.timesliceTarget!
+            )} ${slo.objective.timesliceTarget} ? 1 : 0`,
           },
         },
       }),

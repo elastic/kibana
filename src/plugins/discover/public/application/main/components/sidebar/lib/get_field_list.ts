@@ -73,7 +73,7 @@ export function getTextBasedQueryFieldList(
         name: column.name,
         type: column.meta?.type ?? 'unknown',
         esTypes: column.meta?.esType ? [column.meta?.esType] : undefined,
-        searchable: false,
+        searchable: true,
         aggregatable: false,
         isNull: Boolean(column?.isNull),
       })

@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('dashboard', function () {
     loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./preserve_url'));
+    loadTestFile(require.resolve('./created_by'));
   });
 }

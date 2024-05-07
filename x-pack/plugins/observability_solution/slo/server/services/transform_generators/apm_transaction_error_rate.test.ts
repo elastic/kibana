@@ -6,6 +6,7 @@
  */
 
 import { ALL_VALUE } from '@kbn/slo-schema';
+import { twoMinute } from '../fixtures/duration';
 import {
   createAPMTransactionErrorRateIndicator,
   createSLO,
@@ -34,6 +35,21 @@ describe('APM Transaction Error Rate Transform Generator', () => {
       indicator: createAPMTransactionErrorRateIndicator(),
     });
     const transform = await generator.getTransformParams(slo, spaceId, dataViewsService);
+
+    expect(transform).toMatchSnapshot();
+  });
+
+  it('returns the expected transform params for timeslices slo using timesliceTarget = 0', async () => {
+    const slo = createSLOWithTimeslicesBudgetingMethod({
+      id: 'irrelevant',
+      indicator: createAPMTransactionErrorRateIndicator(),
+      objective: {
+        target: 0.98,
+        timesliceTarget: 0,
+        timesliceWindow: twoMinute(),
+      },
+    });
+    const transform = generator.getTransformParams(slo);
 
     expect(transform).toMatchSnapshot();
   });

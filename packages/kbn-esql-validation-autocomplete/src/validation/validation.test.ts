@@ -362,6 +362,10 @@ describe('validation logic', () => {
     type TestArgs = [string, string[], string[]?];
 
     // Make only and skip work with our custom wrapper
+    //
+    // DO NOT CHANGE THE NAME OF THIS FUNCTION WITHOUT ALSO CHANGING
+    // THE LINTER RULE IN packages/kbn-eslint-config/typescript.js
+    //
     const testErrorsAndWarnings = Object.assign(testErrorsAndWarningsFn, {
       skip: (...args: TestArgs) => {
         const warningArgs = [[]].slice(args.length - 2);
@@ -583,6 +587,7 @@ describe('validation logic', () => {
       }
 
       for (const { name, alias, signatures, ...defRest } of evalFunctionsDefinitions) {
+        if (name === 'date_diff') continue;
         for (const { params, ...signRest } of signatures) {
           const fieldMapping = getFieldMapping(params);
           const signatureStringCorrect = tweakSignatureForRowCommand(
@@ -617,7 +622,7 @@ describe('validation logic', () => {
           // the right error message
           if (
             params.every(({ type }) => type !== 'any') &&
-            !['to_version', 'mv_sort'].includes(name)
+            !['to_version', 'mv_sort', 'date_diff'].includes(name)
           ) {
             // now test nested functions
             const fieldMappingWithNestedFunctions = getFieldMapping(params, {
@@ -1284,6 +1289,7 @@ describe('validation logic', () => {
         );
       });
       for (const { name, signatures, ...rest } of numericOrStringFunctions) {
+        if (name === 'date_diff') continue; // date_diff is hard to test
         const supportedSignatures = signatures.filter(({ returnType }) =>
           // TODO — not sure why the tests have this limitation... seems like any type
           // that can be part of a boolean expression should be allowed in a where clause
@@ -1483,6 +1489,7 @@ describe('validation logic', () => {
       }
 
       for (const { name, alias, signatures, ...defRest } of evalFunctionsDefinitions) {
+        if (name === 'date_diff') continue; // date_diff is hard to test
         for (const { params, ...signRest } of signatures) {
           const fieldMapping = getFieldMapping(params);
           testErrorsAndWarnings(
@@ -1554,7 +1561,7 @@ describe('validation logic', () => {
           // the right error message
           if (
             params.every(({ type }) => type !== 'any') &&
-            !['to_version', 'mv_sort'].includes(name)
+            !['to_version', 'mv_sort', 'date_diff'].includes(name)
           ) {
             // now test nested functions
             const fieldMappingWithNestedFunctions = getFieldMapping(params, {
@@ -2244,7 +2251,7 @@ describe('validation logic', () => {
           // the right error message
           if (
             params.every(({ type }) => type !== 'any') &&
-            !['to_version', 'mv_sort'].includes(name)
+            !['to_version', 'mv_sort', 'date_diff'].includes(name)
           ) {
             // now test nested functions
             const fieldMappingWithNestedAggsFunctions = getFieldMapping(params, {
@@ -2455,6 +2462,58 @@ describe('validation logic', () => {
       }
       testErrorsAndWarnings(`row a = 1 | stats COUNT(*) | sort \`COUNT(*)\``, []);
       testErrorsAndWarnings(`ROW a = 1 | STATS couNt(*) | SORT \`couNt(*)\``, []);
+
+      describe('sorting by expressions', () => {
+        // SORT accepts complex expressions
+        testErrorsAndWarnings(
+          'from a_index | sort abs(numberField) - to_long(stringField) desc nulls first',
+          []
+        );
+
+        // SORT doesn't accept agg or grouping functions
+        for (const definition of [
+          ...statsAggregationFunctionDefinitions,
+          ...groupingFunctionDefinitions,
+        ]) {
+          const {
+            name,
+            signatures: [firstSignature],
+          } = definition;
+          const fieldMapping = getFieldMapping(firstSignature.params);
+          const printedInvocation = getFunctionSignatures(
+            { ...definition, signatures: [{ ...firstSignature, params: fieldMapping }] },
+            { withTypes: false }
+          )[0].declaration;
+
+          testErrorsAndWarnings(`from a_index | sort ${printedInvocation}`, [
+            `SORT does not support function ${name}`,
+          ]);
+        }
+
+        // But does accept eval functions
+        for (const definition of evalFunctionsDefinitions) {
+          const {
+            signatures: [firstSignature],
+          } = definition;
+          const fieldMapping = getFieldMapping(firstSignature.params);
+          const printedInvocation = getFunctionSignatures(
+            { ...definition, signatures: [{ ...firstSignature, params: fieldMapping }] },
+            { withTypes: false }
+          )[0].declaration;
+
+          testErrorsAndWarnings(`from a_index | sort ${printedInvocation}`, []);
+        }
+
+        // Expression parts are also validated
+        testErrorsAndWarnings('from a_index | sort sin(stringField)', [
+          'Argument of [sin] must be [number], found value [stringField] type [string]',
+        ]);
+
+        // Expression parts are also validated
+        testErrorsAndWarnings('from a_index | sort numberField + stringField', [
+          'Argument of [+] must be [number], found value [stringField] type [string]',
+        ]);
+      });
     });
 
     describe('enrich', () => {
@@ -2755,6 +2814,52 @@ describe('validation logic', () => {
         } catch {
           fail('Should not throw');
         }
+      });
+    });
+
+    describe('functions', () => {
+      // This section will expand in time, especially with https://github.com/elastic/kibana/issues/182390
+      describe('date_diff', () => {
+        testErrorsAndWarnings(
+          `row var = date_diff("month", "2023-12-02T11:00:00.000Z", "2023-12-02T11:00:00.000Z")`,
+          []
+        );
+
+        testErrorsAndWarnings(
+          `row var = date_diff("mm", "2023-12-02T11:00:00.000Z", "2023-12-02T11:00:00.000Z")`,
+          []
+        );
+
+        testErrorsAndWarnings(
+          `row var = date_diff("bogus", "2023-12-02T11:00:00.000Z", "2023-12-02T11:00:00.000Z")`,
+          [],
+          [
+            'Invalid option ["bogus"] for date_diff. Supported options: ["year", "years", "yy", "yyyy", "quarter", "quarters", "qq", "q", "month", "months", "mm", "m", "dayofyear", "dy", "y", "day", "days", "dd", "d", "week", "weeks", "wk", "ww", "weekday", "weekdays", "dw", "hour", "hours", "hh", "minute", "minutes", "mi", "n", "second", "seconds", "ss", "s", "millisecond", "milliseconds", "ms", "microsecond", "microseconds", "mcs", "nanosecond", "nanoseconds", "ns"].',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          `from a_index | eval date_diff(stringField, "2023-12-02T11:00:00.000Z", "2023-12-02T11:00:00.000Z")`,
+          []
+        );
+
+        testErrorsAndWarnings(
+          `from a_index | eval date_diff("month", dateField, "2023-12-02T11:00:00.000Z")`,
+          []
+        );
+
+        testErrorsAndWarnings(
+          `from a_index | eval date_diff("month", "2023-12-02T11:00:00.000Z", dateField)`,
+          []
+        );
+
+        testErrorsAndWarnings(`from a_index | eval date_diff("month", stringField, dateField)`, [
+          'Argument of [date_diff] must be [date], found value [stringField] type [string]',
+        ]);
+
+        testErrorsAndWarnings(`from a_index | eval date_diff("month", dateField, stringField)`, [
+          'Argument of [date_diff] must be [date], found value [stringField] type [string]',
+        ]);
       });
     });
   });

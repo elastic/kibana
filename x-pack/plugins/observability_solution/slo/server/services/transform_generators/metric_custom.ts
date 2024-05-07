@@ -19,6 +19,7 @@ import {
 } from '../../../common/constants';
 import { MetricCustomIndicator, SLODefinition } from '../../domain/models';
 import { GetCustomMetricIndicatorAggregation } from '../aggregations';
+import { getTimesliceTargetComparator } from './common';
 
 export const INVALID_EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!|\|]+/g;
 
@@ -110,7 +111,9 @@ export class MetricCustomTransformGenerator extends TransformGenerator {
               goodEvents: 'slo.numerator>value',
               totalEvents: 'slo.denominator>value',
             },
-            script: `params.goodEvents / params.totalEvents >= ${slo.objective.timesliceTarget} ? 1 : 0`,
+            script: `params.goodEvents / params.totalEvents ${getTimesliceTargetComparator(
+              slo.objective.timesliceTarget!
+            )} ${slo.objective.timesliceTarget} ? 1 : 0`,
           },
         },
       }),

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { twoMinute } from '../fixtures/duration';
 import {
   createHistogramIndicator,
   createSLO,
@@ -73,6 +74,21 @@ describe('Histogram Transform Generator', () => {
       indicator: createHistogramIndicator(),
     });
     const transform = await generator.getTransformParams(anSLO, spaceId, dataViewsService);
+
+    expect(transform).toMatchSnapshot();
+  });
+
+  it('returns the expected transform params for timeslices slo using timesliceTarget = 0', async () => {
+    const anSLO = createSLOWithTimeslicesBudgetingMethod({
+      id: 'irrelevant',
+      indicator: createHistogramIndicator(),
+      objective: {
+        target: 0.98,
+        timesliceTarget: 0,
+        timesliceWindow: twoMinute(),
+      },
+    });
+    const transform = generator.getTransformParams(anSLO);
 
     expect(transform).toMatchSnapshot();
   });

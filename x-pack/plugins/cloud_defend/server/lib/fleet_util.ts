@@ -89,9 +89,15 @@ async function addDataViewToAllSpaces(savedObjectsClient: SavedObjectsClientCont
     perPage: 100,
   });
 
-  cloudDefendDataViews.saved_objects.forEach((dataView) => {
-    savedObjectsClient.updateObjectsSpaces([{ id: dataView.id, type: 'index-pattern' }], ['*'], []);
-  });
+  await Promise.all(
+    cloudDefendDataViews.saved_objects.map((dataView) =>
+      savedObjectsClient.updateObjectsSpaces(
+        [{ id: dataView.id, type: 'index-pattern' }],
+        ['*'],
+        []
+      )
+    )
+  );
 }
 
 export const getCloudDefendAgentPolicies = async (

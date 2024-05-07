@@ -32,6 +32,7 @@ import {
   getPackageReleaseLabel,
   isPackagePrerelease,
   splitPkgKey,
+  packageToPackagePolicyInputs,
 } from '../../../../../../../common/services';
 import { HIDDEN_API_REFERENCE_PACKAGES } from '../../../../../../../common/constants';
 
@@ -82,7 +83,7 @@ import { OverviewPage } from './overview';
 import { PackagePoliciesPage } from './policies';
 import { SettingsPage } from './settings';
 import { CustomViewPage } from './custom';
-import { DocumentationPage } from './documentation';
+import { DocumentationPage, hasDocumentation } from './documentation';
 import { Configs } from './configs';
 
 import './index.scss';
@@ -265,6 +266,15 @@ export function Detail() {
 
   const showCustomTab =
     useUIExtension(packageInfoData?.item?.name ?? '', 'package-detail-custom') !== undefined;
+
+  // Only show config tab if package has `inputs`
+  const showConfigTab = packageInfo ? packageToPackagePolicyInputs(packageInfo).length > 0 : false;
+
+  // Only show API references tab if it is allowed & has documentation to show
+  const showDocumentationTab =
+    !HIDDEN_API_REFERENCE_PACKAGES.includes(pkgName) &&
+    packageInfo &&
+    hasDocumentation({ packageInfo, integration });
 
   // Track install status state
   useEffect(() => {
@@ -637,7 +647,7 @@ export function Detail() {
       });
     }
 
-    if (canReadPackageSettings) {
+    if (canReadPackageSettings && showConfigTab) {
       tabs.push({
         id: 'configs',
         name: (
@@ -673,7 +683,7 @@ export function Detail() {
       });
     }
 
-    if (!HIDDEN_API_REFERENCE_PACKAGES.includes(packageInfo.name)) {
+    if (showDocumentationTab) {
       tabs.push({
         id: 'api-reference',
         name: (
@@ -698,11 +708,13 @@ export function Detail() {
     getHref,
     integration,
     canReadIntegrationPolicies,
-    numOfDeferredInstallations,
     isInstalled,
     CustomAssets,
     canReadPackageSettings,
+    showConfigTab,
     showCustomTab,
+    showDocumentationTab,
+    numOfDeferredInstallations,
   ]);
 
   const securityCallout = missingSecurityConfiguration ? (
@@ -771,7 +783,7 @@ export function Detail() {
             />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_settings}>
-            <SettingsPage packageInfo={packageInfo} theme$={services.theme.theme$} />
+            <SettingsPage packageInfo={packageInfo} startServices={services} />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_assets}>
             <AssetsPage packageInfo={packageInfo} refetchPackageInfo={refetchPackageInfo} />

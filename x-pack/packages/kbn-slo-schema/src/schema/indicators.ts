@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { allOrAnyString, dateRangeSchema } from './common';
+import { allOrAnyString } from './common';
 
 const kqlQuerySchema = t.string;
 
@@ -279,12 +279,6 @@ const syntheticsAvailabilityIndicatorSchema = t.type({
   ]),
 });
 
-const indicatorDataSchema = t.type({
-  dateRange: dateRangeSchema,
-  good: t.number,
-  total: t.number,
-});
-
 const indicatorTypesSchema = t.union([
   apmTransactionDurationIndicatorTypeSchema,
   apmTransactionErrorRateIndicatorTypeSchema,
@@ -352,5 +346,4 @@ export {
   indicatorSchema,
   indicatorTypesArraySchema,
   indicatorTypesSchema,
-  indicatorDataSchema,
 };
