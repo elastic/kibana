@@ -37,6 +37,7 @@ import type {
   CommandOptionsDefinition,
   FunctionArgSignature,
   FunctionDefinition,
+  FunctionParameterType,
   SignatureArgType,
 } from '../definitions/types';
 import type { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
@@ -241,8 +242,8 @@ export function isArrayType(type: string) {
 /**
  * Given an array type for example `string[]` it will return `string`
  */
-export function extractSingularType(type: string) {
-  return type.replace(ARRAY_REGEXP, '');
+export function extractSingularType(type: FunctionParameterType) {
+  return type.replace(ARRAY_REGEXP, '') as FunctionParameterType; // TODO think about how to make this safe...
 }
 
 export function createMapFromList<T extends { name: string }>(arr: T[]): Map<string, T> {
@@ -274,8 +275,10 @@ export function printFunctionSignature(arg: ESQLFunction): string {
             ...fnDef?.signatures[0],
             params: arg.args.map((innerArg) =>
               Array.isArray(innerArg)
-                ? { name: `InnerArgument[]`, type: '' }
-                : { name: innerArg.text, type: innerArg.type }
+                ? { name: `InnerArgument[]`, type: 'any' as const }
+                : // this cast isn't actually correct, but we're abusing the
+                  // getFunctionSignatures API anyways
+                  { name: innerArg.text, type: innerArg.type as FunctionParameterType }
             ),
             returnType: '',
           },
