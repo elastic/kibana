@@ -24,7 +24,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
   const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
   const { common } = getPageObjects(['header', 'common']);
 
-  async function generateErrorData() {
+  async function createSynthtraceErrors() {
     const start = moment().subtract(5, 'minutes').valueOf();
     const end = moment().valueOf();
     const serviceName = 'opbeans-go';
@@ -108,18 +108,18 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       await Promise.all([
         deleteConnectors(), // cleanup previous connectors
         apmSynthtraceEsClient.clean(), // cleanup previous synthtrace data
-        ui.auth.login(), // login
       ]);
 
-      await generateErrorData();
+      await Promise.all([
+        createSynthtraceErrors(), // synthtrace data
+        ui.auth.login(), // login
+      ]);
     });
 
     describe('when there are no connectors', () => {
       it('should not show the contextual insight component', async () => {
         await navigateToError();
-        await retry.try(async () => {
-          await testSubjects.missingOrFail('obsAiAssistantInsightButton');
-        });
+        await testSubjects.missingOrFail(ui.pages.contextualInsights.button);
       });
     });
 
@@ -132,7 +132,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       it('should show the contextual insight component on the APM error details page', async () => {
         await navigateToError();
 
-        proxy
+        const waitForIntercept = proxy
           .intercept(
             'conversation',
             (body) => !isFunctionTitleRequest(body),
@@ -140,17 +140,22 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
           )
           .complete();
 
+        await testSubjects.click(ui.pages.contextualInsights.button);
+
         await retry.try(async () => {
-          await testSubjects.click('obsAiAssistantInsightButton');
-          const llmResponse = await testSubjects.getVisibleText('obsAiAssistantInsightResponse');
+          const llmResponse = await testSubjects.getVisibleText(ui.pages.contextualInsights.text);
           expect(llmResponse).to.contain('This error is nothing to worry about. Have a nice day!');
         });
 
-        await proxy.waitForAllInterceptorsSettled();
+        await waitForIntercept;
       });
 
       after(async () => {
-        await ui.auth.logout();
+        await Promise.all([
+          deleteConnectors(), // cleanup previous connectors
+          apmSynthtraceEsClient.clean(), // cleanup synthtrace data
+          ui.auth.logout(), // logout
+        ]);
         proxy.close();
       });
     });

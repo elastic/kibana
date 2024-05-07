@@ -44,6 +44,10 @@ const pages = {
     apiKeyInput: 'secrets.apiKey-input',
     saveButton: 'create-connector-flyout-save-btn',
   },
+  contextualInsights: {
+    button: 'obsAiAssistantInsightButton',
+    text: 'obsAiAssistantInsightResponse',
+  },
 };
 
 export async function ObservabilityAIAssistantUIProvider({
