@@ -112,7 +112,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           { name: 'field', type: 'number' as const },
           { name: 'decimals', type: 'number' as const, optional: true },
         ],
-        returnType: 'number',
+        returnType: 'number' as const,
         examples: [
           `from index | eval round_value = round(field)`,
           `from index | eval round_value = round(field, 2)`,
@@ -129,7 +129,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'number' as const }],
-        returnType: 'number',
+        returnType: 'number' as const,
         examples: [`from index | eval s = signum(field)`],
       },
     ],
@@ -142,7 +142,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'number' as const }],
-        returnType: 'number',
+        returnType: 'number' as const,
         examples: [`from index | eval abs_value = abs(field)`],
       },
     ],
@@ -155,7 +155,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'number' as const }],
-        returnType: 'number',
+        returnType: 'number' as const,
         examples: [`from index | eval ceil_value = ceil(field)`],
       },
     ],
@@ -168,7 +168,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'number' as const }],
-        returnType: 'number',
+        returnType: 'number' as const,
         examples: [`from index | eval log10_value = log10(field)`],
       },
     ],
@@ -186,7 +186,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           { name: 'baseOrField', type: 'number' as const },
           { name: 'field', type: 'number' as const, optional: true },
         ],
-        returnType: 'number',
+        returnType: 'number' as const,
         examples: [
           `from index | eval log2_value = log(2, field)`,
           `from index | eval loge_value = log(field)`,
@@ -207,7 +207,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           { name: 'field', type: 'number' as const },
           { name: 'exponent', type: 'number' as const },
         ],
-        returnType: 'number',
+        returnType: 'number' as const,
         examples: ['from index | eval s = POW(field, exponent)'],
       },
     ],
@@ -221,7 +221,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
       {
         params: [{ name: 'field', type: 'string' as const }],
         minParams: 2,
-        returnType: 'string',
+        returnType: 'string' as const,
         examples: ['from index | eval concatenated = concat(field1, "-", field2)'],
       },
     ],
@@ -239,7 +239,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           { name: 'regexp', type: 'string' as const },
           { name: 'replacement', type: 'string' as const },
         ],
-        returnType: 'string',
+        returnType: 'string' as const,
         examples: ['from index | eval newStr = replace(field, "Hello", "World")'],
       },
     ],
@@ -257,7 +257,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           { name: 'startIndex', type: 'number' as const },
           { name: 'endIndex', type: 'number' as const },
         ],
-        returnType: 'string',
+        returnType: 'string' as const,
         examples: ['from index | eval new_string = substring(field, 1, 3)'],
       },
     ],
@@ -270,7 +270,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'string' as const }],
-        returnType: 'string',
+        returnType: 'string' as const,
         examples: ['from index | eval to_lower(field1)'],
       },
     ],
@@ -283,7 +283,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'string' as const }],
-        returnType: 'string',
+        returnType: 'string' as const,
         examples: ['from index | eval to_upper(field1)'],
       },
     ],
@@ -296,7 +296,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'string' as const }],
-        returnType: 'string',
+        returnType: 'string' as const,
         examples: ['from index | eval new_string = trim(field)'],
       },
     ],
@@ -313,7 +313,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           { name: 'field', type: 'string' as const },
           { name: 'prefix', type: 'string' as const },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
         examples: ['from index | eval starts_with_a = starts_with(field, "a")'],
       },
     ],
@@ -330,7 +330,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           { name: 'field', type: 'string' as const },
           { name: 'prefix', type: 'string' as const },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
         examples: ['from index | eval ends_with_a = ends_with(field, "a")'],
       },
     ],
@@ -346,7 +346,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           { name: 'words', type: 'string' as const },
           { name: 'separator', type: 'string' as const },
         ],
-        returnType: 'string',
+        returnType: 'string' as const,
         examples: [`ROW words="foo;bar;baz;qux;quux;corge" | EVAL word = SPLIT(words, ";")`],
       },
     ],
@@ -360,7 +360,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'any' as const }],
-        returnType: 'string',
+        returnType: 'string' as const,
         examples: [`from index" | EVAL string = to_string(field)`],
       },
     ],
@@ -374,7 +374,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'any' as const }],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
         examples: [`from index" | EVAL bool = to_boolean(field)`],
       },
     ],
@@ -390,7 +390,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'any' as const }],
-        returnType: 'cartesian_point',
+        returnType: 'cartesian_point' as const,
         examples: [`from index | EVAL point = to_cartesianpoint(field)`],
       },
     ],
@@ -406,7 +406,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'any' as const }],
-        returnType: 'cartesian_shape',
+        returnType: 'cartesian_shape' as const,
         examples: [`from index | EVAL cartesianshape = to_cartesianshape(field)`],
       },
     ],
@@ -420,7 +420,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'any' as const }],
-        returnType: 'date',
+        returnType: 'date' as const,
         examples: [`from index" | EVAL datetime = to_datetime(field)`],
       },
     ],
@@ -433,7 +433,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'number' as const }],
-        returnType: 'number',
+        returnType: 'number' as const,
         examples: [`from index | eval degrees = to_degrees(field)`],
       },
     ],
@@ -447,7 +447,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'any' as const }],
-        returnType: 'number',
+        returnType: 'number' as const,
         examples: [`from index | EVAL double = to_double(field)`],
       },
     ],
@@ -460,7 +460,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'any' as const }],
-        returnType: 'geo_point',
+        returnType: 'geo_point' as const,
         examples: [`from index | EVAL geopoint = to_geopoint(field)`],
       },
     ],
@@ -473,7 +473,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'any' as const }],
-        returnType: 'geo_shape',
+        returnType: 'geo_shape' as const,
         examples: [`from index | EVAL geoshape = to_geoshape(field)`],
       },
     ],
@@ -487,7 +487,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'any' as const }],
-        returnType: 'number',
+        returnType: 'number' as const,
         examples: [`from index | EVAL integer = to_integer(field)`],
       },
     ],
@@ -500,7 +500,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'any' as const }],
-        returnType: 'number',
+        returnType: 'number' as const,
         examples: [`from index | EVAL long = to_long(field)`],
       },
     ],
@@ -513,7 +513,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'number' as const }],
-        returnType: 'number',
+        returnType: 'number' as const,
         examples: [`from index | eval radians = to_radians(field)`],
       },
     ],
@@ -530,7 +530,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'any' as const }],
-        returnType: 'number',
+        returnType: 'number' as const,
         examples: [`from index | EVAL unsigned_long = to_unsigned_long(field)`],
       },
     ],
@@ -543,7 +543,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'any' as const }],
-        returnType: 'ip',
+        returnType: 'ip' as const,
         examples: [`from index | EVAL ip = to_ip(field)`],
       },
     ],
@@ -557,7 +557,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'string' as const }],
-        returnType: 'string',
+        returnType: 'string' as const,
         examples: [`from index | EVAL version = to_version(stringField)`],
       },
     ],
@@ -579,7 +579,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           },
           { name: 'field', type: 'date' as const },
         ],
-        returnType: 'number',
+        returnType: 'number' as const,
         examples: [
           `ROW date = DATE_PARSE("yyyy-MM-dd", "2022-05-06") | EVAL year = DATE_EXTRACT("year", date)`,
         ],
@@ -603,7 +603,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           { name: 'startTimestamp', type: 'date' as const },
           { name: 'endTimestamp', type: 'date' as const },
         ],
-        returnType: 'number',
+        returnType: 'number' as const,
         examples: [],
       },
       {
@@ -617,7 +617,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           { name: 'startTimestamp', type: 'string' as const, constantOnly: true },
           { name: 'endTimestamp', type: 'date' as const },
         ],
-        returnType: 'number',
+        returnType: 'number' as const,
         examples: [],
       },
       {
@@ -631,7 +631,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           { name: 'startTimestamp', type: 'date' as const },
           { name: 'endTimestamp', type: 'string' as const, constantOnly: true },
         ],
-        returnType: 'number',
+        returnType: 'number' as const,
         examples: [],
       },
       {
@@ -645,7 +645,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           { name: 'startTimestamp', type: 'string' as const, constantOnly: true },
           { name: 'endTimestamp', type: 'string' as const, constantOnly: true },
         ],
-        returnType: 'number',
+        returnType: 'number' as const,
         examples: [],
       },
     ],
@@ -661,7 +661,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           { name: 'field', type: 'date' as const },
           { name: 'format_string', type: 'string' as const, optional: true },
         ],
-        returnType: 'string',
+        returnType: 'string' as const,
         examples: ['from index | eval hired = date_format("YYYY-MM-dd", hire_date)'],
       },
     ],
@@ -677,7 +677,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           { name: 'time', type: 'time_literal' as const },
           { name: 'field', type: 'date' as const },
         ],
-        returnType: 'date',
+        returnType: 'date' as const,
         examples: [`from index | eval year_hired = DATE_TRUNC(1 year, hire_date)`],
       },
     ],
@@ -693,7 +693,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           { name: 'field', type: 'string' as const },
           { name: 'format_string', type: 'string' as const },
         ],
-        returnType: 'date',
+        returnType: 'date' as const,
         examples: [
           `from index | eval year_hired = date_parse("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", hire_date)`,
         ],
@@ -713,7 +713,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           { name: 'value', type: 'any' as const },
         ],
         minParams: 2,
-        returnType: 'any',
+        returnType: 'any' as const,
         examples: [
           `from index | eval type = case(languages <= 1, "monolingual", languages <= 2, "bilingual", "polyglot")`,
         ],
@@ -728,7 +728,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'string' as const }],
-        returnType: 'number',
+        returnType: 'number' as const,
         examples: [`from index | eval fn_length = length(field)`],
       },
     ],
@@ -741,7 +741,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'number' as const }],
-        returnType: 'number',
+        returnType: 'number' as const,
         examples: [`from index | eval acos = acos(field)`],
       },
     ],
@@ -754,7 +754,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'number' as const }],
-        returnType: 'number',
+        returnType: 'number' as const,
         examples: [`from index | eval asin = asin(field)`],
       },
     ],
@@ -767,7 +767,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'number' as const }],
-        returnType: 'number',
+        returnType: 'number' as const,
         examples: [`from index | eval atan = atan(field)`],
       },
     ],
@@ -784,7 +784,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           { name: 'x', type: 'number' as const },
           { name: 'y', type: 'number' as const },
         ],
-        returnType: 'number',
+        returnType: 'number' as const,
         examples: [`from index | eval atan2 = atan2(x, y)`],
       },
     ],
@@ -798,7 +798,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
       {
         params: [{ name: 'field', type: 'any' as const }],
         minParams: 1,
-        returnType: 'any',
+        returnType: 'any' as const,
         examples: [`ROW a=null, b="b" | EVAL COALESCE(a, b)`],
       },
     ],
@@ -811,7 +811,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'number' as const }],
-        returnType: 'number',
+        returnType: 'number' as const,
         examples: [`from index | eval cos = cos(field)`],
       },
     ],
@@ -824,7 +824,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'number' as const }],
-        returnType: 'number',
+        returnType: 'number' as const,
         examples: [`from index | eval cosh = cosh(field)`],
       },
     ],
@@ -837,7 +837,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'number' as const }],
-        returnType: 'number',
+        returnType: 'number' as const,
         examples: [`from index | eval a = floor(field)`],
       },
     ],
@@ -851,7 +851,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
       {
         params: [{ name: 'field', type: 'any' as const }],
         minParams: 1,
-        returnType: 'any',
+        returnType: 'any' as const,
         examples: [`ROW a = 10, b = 20 | EVAL g = GREATEST(a, b)`],
       },
     ],
@@ -865,7 +865,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
       {
         params: [{ name: 'first', type: 'any' as const }],
         minParams: 1,
-        returnType: 'any',
+        returnType: 'any' as const,
         examples: ['from index | eval l = least(a, b)'],
       },
     ],
@@ -882,7 +882,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           { name: 'field', type: 'string' as const },
           { name: 'length', type: 'number' as const },
         ],
-        returnType: 'string',
+        returnType: 'string' as const,
         examples: [`from index | eval substr = left(field, 3)`],
       },
     ],
@@ -895,7 +895,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'string' as const }],
-        returnType: 'string',
+        returnType: 'string' as const,
         examples: [`ROW message = "   some text  "| EVAL message = LTRIM(message)`],
       },
     ],
@@ -908,7 +908,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [],
-        returnType: 'date',
+        returnType: 'date' as const,
         examples: [`ROW current_date = NOW()`],
       },
     ],
@@ -925,7 +925,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           { name: 'field', type: 'string' as const },
           { name: 'length', type: 'number' as const },
         ],
-        returnType: 'string',
+        returnType: 'string' as const,
         examples: [`from index | eval string = right(field, 3)`],
       },
     ],
@@ -938,7 +938,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'string' as const }],
-        returnType: 'string',
+        returnType: 'string' as const,
         examples: [`ROW message = "   some text  " | EVAL message = RTRIM(message)`],
       },
     ],
@@ -951,7 +951,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'number' as const }],
-        returnType: 'number',
+        returnType: 'number' as const,
         examples: [`ROW a=1.8 | EVAL sin=SIN(a)`],
       },
     ],
@@ -964,7 +964,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'number' as const }],
-        returnType: 'number',
+        returnType: 'number' as const,
         examples: [`ROW a=1.8 | EVAL sinh=SINH(a)`],
       },
     ],
@@ -977,7 +977,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'number' as const }],
-        returnType: 'number',
+        returnType: 'number' as const,
         examples: [`ROW d = 100.0 | EVAL s = SQRT(d)`],
       },
     ],
@@ -990,7 +990,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'number' as const }],
-        returnType: 'number',
+        returnType: 'number' as const,
         examples: [`ROW a=1.8 | EVAL tan=TAN(a)`],
       },
     ],
@@ -1003,7 +1003,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'number' as const }],
-        returnType: 'number',
+        returnType: 'number' as const,
         examples: [`ROW a=1.8 | EVAL tanh=TANH(a)`],
       },
     ],
@@ -1021,7 +1021,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           { name: 'ip', type: 'ip' as const },
           { name: 'cidr_block', type: 'string' as const },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
         examples: [
           'from index | where cidr_match(ip_field, "127.0.0.1/30")',
           'from index | eval cidr="10.0.0.0/8" | where cidr_match(ip_field, "127.0.0.1/30", cidr)',
@@ -1045,7 +1045,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
             literalOptions: ['asc', 'desc'],
           },
         ],
-        returnType: 'any',
+        returnType: 'any' as const,
         examples: [
           'row a = [4, 2, -3, 2] | eval sorted = mv_sort(a)',
           'row a = ["b", "c", "a"] | sorted = mv_sort(a, "DESC")',
@@ -1062,7 +1062,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'multivalue', type: 'number' as const }],
-        returnType: 'number',
+        returnType: 'number' as const,
         examples: ['row a = [1, 2, 3] | eval mv_avg(a)'],
       },
     ],
@@ -1079,7 +1079,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           { name: 'multivalue', type: 'string' as const },
           { name: 'delimeter', type: 'string' as const },
         ],
-        returnType: 'string',
+        returnType: 'string' as const,
         examples: ['row a = ["1", "2", "3"] | eval mv_concat(a, ", ")'],
       },
     ],
@@ -1093,7 +1093,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'multivalue', type: 'any' as const }],
-        returnType: 'number',
+        returnType: 'number' as const,
         examples: ['row a = [1, 2, 3] | eval mv_count(a)'],
       },
     ],
@@ -1106,7 +1106,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'multivalue', type: 'any' as const }],
-        returnType: 'any',
+        returnType: 'any' as const,
         examples: ['row a = [2, 2, 3] | eval mv_dedupe(a)'],
       },
     ],
@@ -1120,7 +1120,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'multivalue', type: 'any' as const }],
-        returnType: 'any',
+        returnType: 'any' as const,
         examples: ['row a = [1, 2, 3] | eval one = mv_first(a)'],
       },
     ],
@@ -1134,7 +1134,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'multivalue', type: 'any' as const }],
-        returnType: 'any',
+        returnType: 'any' as const,
         examples: ['row a = [1, 2, 3] | eval three = mv_last(a)'],
       },
     ],
@@ -1148,7 +1148,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'multivalue', type: 'any' as const }],
-        returnType: 'any',
+        returnType: 'any' as const,
         examples: ['row a = [1, 2, 3] | eval mv_max(a)'],
       },
     ],
@@ -1162,7 +1162,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'multivalue', type: 'any' as const }],
-        returnType: 'any',
+        returnType: 'any' as const,
         examples: ['row a = [1, 2, 3] | eval mv_min(a)'],
       },
     ],
@@ -1176,7 +1176,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'multivalue', type: 'number' as const }],
-        returnType: 'number',
+        returnType: 'number' as const,
         examples: ['row a = [1, 2, 3] | eval mv_median(a)'],
       },
     ],
@@ -1190,7 +1190,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'multivalue', type: 'number' as const }],
-        returnType: 'number',
+        returnType: 'number' as const,
         examples: ['row a = [1, 2, 3] | eval mv_sum(a)'],
       },
     ],
@@ -1208,7 +1208,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           { name: 'start', type: 'number' as const },
           { name: 'end', type: 'number' as const },
         ],
-        returnType: 'number',
+        returnType: 'number' as const,
         examples: ['row a = [1, 2, 2, 3] | eval a1 = mv_slice(a, 1), a2 = mv_slice(a, 2, 3)'],
       },
     ],
@@ -1226,7 +1226,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           { name: 'mvRight', type: 'string' as const },
           { name: 'delim', type: 'string' as const },
         ],
-        returnType: 'string',
+        returnType: 'string' as const,
         examples: [
           'ROW a = ["x", "y", "z"], b = ["1", "2"] \n| EVAL c = mv_zip(a, b, "-") \n| KEEP a, b, c',
         ],
@@ -1241,7 +1241,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [],
-        returnType: 'number',
+        returnType: 'number' as const,
         examples: ['row a = 1 | eval pi()'],
       },
     ],
@@ -1254,7 +1254,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [],
-        returnType: 'number',
+        returnType: 'number' as const,
         examples: ['row a = 1 | eval e()'],
       },
     ],
@@ -1267,7 +1267,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [],
-        returnType: 'number',
+        returnType: 'number' as const,
         examples: ['row a = 1 | eval tau()'],
       },
     ],
@@ -1290,7 +1290,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
             type: 'geo_point' as const,
           },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
         examples: ['from index | eval st_contains(geometryA, geometryB)'],
       },
       {
@@ -1304,7 +1304,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
             type: 'geo_shape' as const,
           },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
         examples: ['from index | eval st_contains(geometryA, geometryB)'],
       },
       {
@@ -1318,7 +1318,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
             type: 'geo_point' as const,
           },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
         examples: ['from index | eval st_contains(geometryA, geometryB)'],
       },
       {
@@ -1332,7 +1332,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
             type: 'geo_shape' as const,
           },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
         examples: ['from index | eval st_contains(geometryA, geometryB)'],
       },
       {
@@ -1346,7 +1346,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
             type: 'cartesian_point' as const,
           },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
         examples: ['from index | eval st_contains(geometryA, geometryB)'],
       },
       {
@@ -1360,7 +1360,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
             type: 'cartesian_shape' as const,
           },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
         examples: ['from index | eval st_contains(geometryA, geometryB)'],
       },
       {
@@ -1374,7 +1374,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
             type: 'cartesian_point' as const,
           },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
         examples: ['from index | eval st_contains(geometryA, geometryB)'],
       },
       {
@@ -1388,7 +1388,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
             type: 'cartesian_shape' as const,
           },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
         examples: ['from index | eval st_contains(geometryA, geometryB)'],
       },
     ],
@@ -1410,7 +1410,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
             type: 'geo_point' as const,
           },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
         examples: ['from index | eval st_within(geometryA, geometryB)'],
       },
       {
@@ -1424,7 +1424,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
             type: 'geo_shape' as const,
           },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
         examples: ['from index | eval st_within(geometryA, geometryB)'],
       },
       {
@@ -1438,7 +1438,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
             type: 'geo_point' as const,
           },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
         examples: ['from index | eval st_within(geometryA, geometryB)'],
       },
       {
@@ -1452,7 +1452,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
             type: 'geo_shape' as const,
           },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
         examples: ['from index | eval st_within(geometryA, geometryB)'],
       },
       {
@@ -1466,7 +1466,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
             type: 'cartesian_point' as const,
           },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
         examples: ['from index | eval st_within(geometryA, geometryB)'],
       },
       {
@@ -1480,7 +1480,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
             type: 'cartesian_shape' as const,
           },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
         examples: ['from index | eval st_within(geometryA, geometryB)'],
       },
       {
@@ -1494,7 +1494,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
             type: 'cartesian_point' as const,
           },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
         examples: ['from index | eval st_within(geometryA, geometryB)'],
       },
       {
@@ -1508,7 +1508,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
             type: 'cartesian_shape' as const,
           },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
         examples: ['from index | eval st_within(geometryA, geometryB)'],
       },
     ],
@@ -1530,7 +1530,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
             type: 'geo_point' as const,
           },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
         examples: ['from index | eval st_disjoint(geometryA, geometryB)'],
       },
       {
@@ -1544,7 +1544,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
             type: 'geo_shape' as const,
           },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
         examples: ['from index | eval st_disjoint(geometryA, geometryB)'],
       },
       {
@@ -1558,7 +1558,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
             type: 'geo_point' as const,
           },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
         examples: ['from index | eval st_disjoint(geometryA, geometryB)'],
       },
       {
@@ -1572,7 +1572,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
             type: 'geo_shape' as const,
           },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
         examples: ['from index | eval st_disjoint(geometryA, geometryB)'],
       },
       {
@@ -1586,7 +1586,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
             type: 'cartesian_point' as const,
           },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
         examples: ['from index | eval st_disjoint(geometryA, geometryB)'],
       },
       {
@@ -1600,7 +1600,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
             type: 'cartesian_shape' as const,
           },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
         examples: ['from index | eval st_disjoint(geometryA, geometryB)'],
       },
       {
@@ -1614,7 +1614,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
             type: 'cartesian_point' as const,
           },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
         examples: ['from index | eval st_disjoint(geometryA, geometryB)'],
       },
       {
@@ -1628,7 +1628,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
             type: 'cartesian_shape' as const,
           },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
         examples: ['from index | eval st_disjoint(geometryA, geometryB)'],
       },
     ],
@@ -1654,7 +1654,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
             type: 'geo_point' as const,
           },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
         examples: ['from index | eval st_intersects(geometryA, geometryB)'],
       },
       {
@@ -1668,7 +1668,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
             type: 'geo_shape' as const,
           },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
         examples: ['from index | eval st_intersects(geometryA, geometryB)'],
       },
       {
@@ -1682,7 +1682,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
             type: 'geo_point' as const,
           },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
         examples: ['from index | eval st_intersects(geometryA, geometryB)'],
       },
       {
@@ -1696,7 +1696,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
             type: 'geo_shape' as const,
           },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
         examples: ['from index | eval st_intersects(geometryA, geometryB)'],
       },
       {
@@ -1710,7 +1710,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
             type: 'cartesian_point' as const,
           },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
         examples: ['from index | eval st_intersects(geometryA, geometryB)'],
       },
       {
@@ -1724,7 +1724,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
             type: 'cartesian_shape' as const,
           },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
         examples: ['from index | eval st_intersects(geometryA, geometryB)'],
       },
       {
@@ -1738,7 +1738,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
             type: 'cartesian_point' as const,
           },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
         examples: ['from index | eval st_intersects(geometryA, geometryB)'],
       },
       {
@@ -1752,7 +1752,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
             type: 'cartesian_shape' as const,
           },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
         examples: ['from index | eval st_intersects(geometryA, geometryB)'],
       },
     ],
@@ -1771,7 +1771,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
             type: 'geo_point' as const,
           },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
         examples: ['from index | eval st_x(point)'],
       },
       {
@@ -1781,7 +1781,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
             type: 'cartesian_point' as const,
           },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
         examples: ['from index | eval st_x(point)'],
       },
     ],
@@ -1800,7 +1800,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
             type: 'geo_point' as const,
           },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
         examples: ['from index | eval st_y(point)'],
       },
       {
@@ -1810,7 +1810,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
             type: 'cartesian_point' as const,
           },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
         examples: ['from index | eval st_y(point)'],
       },
     ],

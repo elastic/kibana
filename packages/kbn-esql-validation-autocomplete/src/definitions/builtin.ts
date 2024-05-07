@@ -7,11 +7,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { FunctionDefinition, FunctionParameterType } from './types';
+import type { FunctionDefinition, FunctionParameterType, FunctionReturnType } from './types';
 
 function createMathDefinition(
   name: string,
-  types: Array<FunctionParameterType | FunctionParameterType[]>,
+  types: Array<
+    | (FunctionParameterType & FunctionReturnType)
+    | [FunctionParameterType, FunctionParameterType, FunctionReturnType]
+  >,
   description: string,
   validate?: FunctionDefinition['validate']
 ): FunctionDefinition {
@@ -28,7 +31,7 @@ function createMathDefinition(
             { name: 'left', type: type[0] },
             { name: 'right', type: type[1] },
           ],
-          returnType: /literal/.test(type[0]) ? type[1] : type[0],
+          returnType: type[2],
         };
       }
       return {
@@ -97,14 +100,14 @@ function createComparisonDefinition(
             { name: 'left', type },
             { name: 'right', type: 'string' as const, constantOnly: true },
           ],
-          returnType: 'boolean',
+          returnType: 'boolean' as const,
         },
         {
           params: [
             { name: 'right', type: 'string' as const, constantOnly: true },
             { name: 'right', type },
           ],
-          returnType: 'boolean',
+          returnType: 'boolean' as const,
         },
       ]),
       ...extraSignatures,
@@ -115,14 +118,14 @@ function createComparisonDefinition(
 export const mathFunctions: FunctionDefinition[] = [
   createMathDefinition(
     '+',
-    ['number', ['date', 'time_literal'], ['time_literal', 'date']],
+    ['number', ['date', 'time_literal', 'date'], ['time_literal', 'date', 'date']],
     i18n.translate('kbn-esql-validation-autocomplete.esql.definition.addDoc', {
       defaultMessage: 'Add (+)',
     })
   ),
   createMathDefinition(
     '-',
-    ['number', ['date', 'time_literal'], ['time_literal', 'date']],
+    ['number', ['date', 'time_literal', 'date'], ['time_literal', 'date', 'date']],
     i18n.translate('kbn-esql-validation-autocomplete.esql.definition.subtractDoc', {
       defaultMessage: 'Subtract (-)',
     })
@@ -214,7 +217,7 @@ const comparisonFunctions: FunctionDefinition[] = [
           { name: 'left', type: 'boolean' as const },
           { name: 'right', type: 'boolean' as const },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
       },
     ],
   },
@@ -229,7 +232,7 @@ const comparisonFunctions: FunctionDefinition[] = [
           { name: 'left', type: 'boolean' as const },
           { name: 'right', type: 'boolean' as const },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
       },
     ],
   },

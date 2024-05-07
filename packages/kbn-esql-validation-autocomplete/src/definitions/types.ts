@@ -27,6 +27,20 @@ export type FunctionParameterType =
   | 'boolean[]'
   | 'date[]';
 
+export type FunctionReturnType =
+  | 'number'
+  | 'date'
+  | 'any'
+  | 'boolean'
+  | 'string'
+  | 'cartesian_point'
+  | 'cartesian_shape'
+  | 'geo_point'
+  | 'geo_shape'
+  | 'ip'
+  | 'version'
+  | 'void';
+
 export interface FunctionDefinition {
   type: 'builtin' | 'agg' | 'eval' | 'grouping';
   ignoreAsSuggestion?: boolean;
@@ -71,7 +85,7 @@ export interface FunctionDefinition {
       literalSuggestions?: string[];
     }>;
     minParams?: number;
-    returnType: string;
+    returnType: FunctionReturnType;
     examples?: string[];
   }>;
   validate?: (fnDef: ESQLFunction) => ESQLMessage[];

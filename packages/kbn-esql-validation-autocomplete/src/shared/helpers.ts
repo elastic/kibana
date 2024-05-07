@@ -38,6 +38,7 @@ import type {
   FunctionArgSignature,
   FunctionDefinition,
   FunctionParameterType,
+  FunctionReturnType,
   SignatureArgType,
 } from '../definitions/types';
 import type { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
@@ -249,8 +250,8 @@ const arrayToSingularMap: Map<FunctionParameterType, FunctionParameterType> = ne
 /**
  * Given an array type for example `string[]` it will return `string`
  */
-export function extractSingularType(type: FunctionParameterType) {
-  return arrayToSingularMap.has(type) ? arrayToSingularMap.get(type) : type;
+export function extractSingularType(type: FunctionParameterType): FunctionParameterType {
+  return arrayToSingularMap.get(type) ?? type;
 }
 
 export function createMapFromList<T extends { name: string }>(arr: T[]): Map<string, T> {
@@ -287,7 +288,9 @@ export function printFunctionSignature(arg: ESQLFunction): string {
                   // getFunctionSignatures API anyways
                   { name: innerArg.text, type: innerArg.type as FunctionParameterType }
             ),
-            returnType: '',
+            // this cast isn't actually correct, but we're abusing the
+            // getFunctionSignatures API anyways
+            returnType: '' as FunctionReturnType,
           },
         ],
       },
