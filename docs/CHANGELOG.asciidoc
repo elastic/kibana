@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.13.4>>
 * <<release-notes-8.13.3>>
 * <<release-notes-8.13.2>>
 * <<release-notes-8.13.1>>
@@ -64,6 +65,19 @@ Review important information about the {kib} 8.x releases.
 * <<release-notes-8.0.0-alpha1>>
 
 --
+
+[[release-notes-8.13.4]]
+== {kib} 8.13.4
+
+The 8.13.4 release includes the following bug fixes.
+
+[float]
+[[fixes-v8.13.4]]
+=== Bug Fixes
+Lens & Visualizations::
+* Fixes table sorting when changing the interval on the time picker in *Lens* ({kibana-pull}182173[#182173]).
+Dashboards::
+* Fixes a bug with drilldowns where the control group on a source dashboard could be replaced by the control group from the destination dashboard ({kibana-pull}179485[#179485]).
 
 [[release-notes-8.13.3]]
 == {kib} 8.13.3
