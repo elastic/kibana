@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 import { ConfigSchema } from './config';
 
