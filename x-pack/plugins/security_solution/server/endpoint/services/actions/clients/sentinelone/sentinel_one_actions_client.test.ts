@@ -621,7 +621,7 @@ describe('SentinelOneActionsClient class', () => {
 
         applyEsClientSearchMock({
           esClientMock: classConstructorOptions.esClient,
-          index: SENTINEL_ONE_ACTIVITY_INDEX,
+          index: SENTINEL_ONE_ACTIVITY_INDEX_PATTERN,
           response: s1ActivitySearchResponse,
         });
       });
@@ -630,7 +630,7 @@ describe('SentinelOneActionsClient class', () => {
         await s1ActionsClient.processPendingActions(processPendingActionsOptions);
 
         expect(classConstructorOptions.esClient.search).toHaveBeenNthCalledWith(4, {
-          index: SENTINEL_ONE_ACTIVITY_INDEX,
+          index: SENTINEL_ONE_ACTIVITY_INDEX_PATTERN,
           size: ACTIONS_SEARCH_PAGE_SIZE,
           query: {
             bool: {
