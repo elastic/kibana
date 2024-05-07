@@ -606,48 +606,6 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
         returnType: 'number',
         examples: [],
       },
-      {
-        params: [
-          {
-            name: 'unit',
-            type: 'string',
-            literalOptions: dateDiffOptions,
-            literalSuggestions: dateDiffSuggestions,
-          },
-          { name: 'startTimestamp', type: 'string', constantOnly: true },
-          { name: 'endTimestamp', type: 'date' },
-        ],
-        returnType: 'number',
-        examples: [],
-      },
-      {
-        params: [
-          {
-            name: 'unit',
-            type: 'string',
-            literalOptions: dateDiffOptions,
-            literalSuggestions: dateDiffSuggestions,
-          },
-          { name: 'startTimestamp', type: 'date' },
-          { name: 'endTimestamp', type: 'string', constantOnly: true },
-        ],
-        returnType: 'number',
-        examples: [],
-      },
-      {
-        params: [
-          {
-            name: 'unit',
-            type: 'string',
-            literalOptions: dateDiffOptions,
-            literalSuggestions: dateDiffSuggestions,
-          },
-          { name: 'startTimestamp', type: 'string', constantOnly: true },
-          { name: 'endTimestamp', type: 'string', constantOnly: true },
-        ],
-        returnType: 'number',
-        examples: [],
-      },
     ],
   },
   {
