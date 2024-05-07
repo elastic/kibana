@@ -10,7 +10,7 @@ import { estypes } from '@elastic/elasticsearch';
 import { RegisterServicesParams } from '../register_services';
 import { getLogErrorRate, getLogRatePerMinute } from './utils';
 
-interface LogsRatesServiceParams {
+export interface LogsRatesServiceParams {
   esClient: ElasticsearchClient;
   serviceNames: string[];
   identifyingMetadata: string;
