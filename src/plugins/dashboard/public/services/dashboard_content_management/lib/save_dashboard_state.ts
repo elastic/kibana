@@ -186,20 +186,35 @@ export const saveDashboardState = async ({
    * Save the saved object using the content management
    */
   const idToSaveTo = saveOptions.saveAsCopy ? undefined : lastSavedId;
+
+  let newId: string | undefined;
   try {
-    const result = await contentManagement.client.create<
-      DashboardCrudTypes['CreateIn'],
-      DashboardCrudTypes['CreateOut']
-    >({
-      contentTypeId: DASHBOARD_CONTENT_ID,
-      data: attributes,
-      options: {
+    if (!idToSaveTo) {
+      const result = await contentManagement.client.create<
+        DashboardCrudTypes['CreateIn'],
+        DashboardCrudTypes['CreateOut']
+      >({
+        contentTypeId: DASHBOARD_CONTENT_ID,
+        data: attributes,
+        options: {
+          references: allReferences,
+        },
+      });
+      newId = result.item.id;
+    } else {
+      const result = await contentManagement.client.update<
+        DashboardCrudTypes['UpdateIn'],
+        DashboardCrudTypes['UpdateOut']
+      >({
         id: idToSaveTo,
-        references: allReferences,
-        overwrite: true,
-      },
-    });
-    const newId = result.item.id;
+        contentTypeId: DASHBOARD_CONTENT_ID,
+        data: attributes,
+        options: {
+          references: allReferences,
+        },
+      });
+      newId = result.item.id;
+    }
 
     if (newId) {
       toasts.addSuccess({
