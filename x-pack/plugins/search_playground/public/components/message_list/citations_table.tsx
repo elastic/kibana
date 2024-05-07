@@ -32,12 +32,12 @@ export const CitationsTable: React.FC<CitationsTableProps> = ({ citations }) => 
     if (itemIdToExpandedRowMapValues[citation.metadata._id]) {
       delete itemIdToExpandedRowMapValues[citation.metadata._id];
 
-      usageTracker.click(AnalyticsEvents.citationDetailsCollapsed);
+      usageTracker?.click(AnalyticsEvents.citationDetailsCollapsed);
     } else {
       itemIdToExpandedRowMapValues[citation.metadata._id] = (
         <EuiText size="s">{citation.content}</EuiText>
       );
-      usageTracker.click(AnalyticsEvents.citationDetailsExpanded);
+      usageTracker?.click(AnalyticsEvents.citationDetailsExpanded);
     }
 
     setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);

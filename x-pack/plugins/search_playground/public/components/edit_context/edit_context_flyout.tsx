@@ -67,22 +67,22 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
       ...tempSourceFields,
       [index]: f.filter(({ checked }) => checked === 'on').map(({ label }) => label),
     });
-    usageTracker.click(AnalyticsEvents.editContextFieldToggled);
+    usageTracker?.click(AnalyticsEvents.editContextFieldToggled);
   };
 
   const saveSourceFields = () => {
-    usageTracker.click(AnalyticsEvents.editContextSaved);
+    usageTracker?.click(AnalyticsEvents.editContextSaved);
     onChangeSourceFields(tempSourceFields);
     onChangeSize(docSize);
     onClose();
   };
   const handleDocSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    usageTracker.click(AnalyticsEvents.editContextDocSizeChanged);
+    usageTracker?.click(AnalyticsEvents.editContextDocSizeChanged);
     setDocSize(Number(e.target.value));
   };
 
   useEffect(() => {
-    usageTracker.load(AnalyticsEvents.editContextFlyoutOpened);
+    usageTracker?.load(AnalyticsEvents.editContextFlyoutOpened);
   }, [usageTracker]);
 
   return (
