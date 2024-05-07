@@ -6,18 +6,14 @@
  * Side Public License, v 1.
  */
 
-export const readdirMock = jest.fn();
-export const renameMock = jest.fn();
-export const accessMock = jest.fn();
+import type { getFileInfo } from './fs';
 
-jest.doMock('fs/promises', () => ({
-  readdir: readdirMock,
-  rename: renameMock,
-  access: accessMock,
-}));
+export const getFileInfoMock: jest.MockedFn<typeof getFileInfo> = jest.fn();
 
-export const clearAllMocks = () => {
-  readdirMock.mockClear();
-  renameMock.mockClear();
-  accessMock.mockClear();
-};
+jest.doMock('./fs', () => {
+  const actual = jest.requireActual('./fs');
+  return {
+    ...actual,
+    getFileInfo: getFileInfoMock,
+  };
+});

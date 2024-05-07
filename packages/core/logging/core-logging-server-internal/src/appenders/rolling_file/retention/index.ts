@@ -6,18 +6,5 @@
  * Side Public License, v 1.
  */
 
-export const readdirMock = jest.fn();
-export const renameMock = jest.fn();
-export const accessMock = jest.fn();
-
-jest.doMock('fs/promises', () => ({
-  readdir: readdirMock,
-  rename: renameMock,
-  access: accessMock,
-}));
-
-export const clearAllMocks = () => {
-  readdirMock.mockClear();
-  renameMock.mockClear();
-  accessMock.mockClear();
-};
+export { retentionPolicyConfigSchema, type RetentionPolicy } from './retention_policy';
+export { createRetentionPolicy, mergeRetentionPolicyConfig } from './create_retention_policy';
