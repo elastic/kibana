@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { DashboardPanelState } from '../../../../common';
+import { DashboardPanelState } from '../../../common';
 import { EmbeddableFactory, EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import { CONTACT_CARD_EMBEDDABLE } from '@kbn/embeddable-plugin/public/lib/test_samples';
-import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../../dashboard_constants';
+import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../dashboard_constants';
 
 import { placePanel } from './place_panel';
-import { IProvidesPanelPlacementSettings } from './types';
+import { IProvidesLegacyPanelPlacementSettings } from './types';
 
 interface TestInput extends EmbeddableInput {
   test: string;
@@ -92,8 +92,8 @@ test('adds a new panel state in the top most position when it is open', () => {
 });
 
 test('adds a new panel state at the very top of the Dashboard with default sizing', () => {
-  const embeddableFactoryStub: IProvidesPanelPlacementSettings = {
-    getPanelPlacementSettings: jest.fn().mockImplementation(() => {
+  const embeddableFactoryStub: IProvidesLegacyPanelPlacementSettings = {
+    getLegacyPanelPlacementSettings: jest.fn().mockImplementation(() => {
       return { strategy: 'placeAtTop' };
     }),
   };
@@ -111,15 +111,15 @@ test('adds a new panel state at the very top of the Dashboard with default sizin
   expect(panelState.gridData.h).toBe(DEFAULT_PANEL_HEIGHT);
   expect(panelState.gridData.w).toBe(DEFAULT_PANEL_WIDTH);
 
-  expect(embeddableFactoryStub.getPanelPlacementSettings).toHaveBeenCalledWith(
+  expect(embeddableFactoryStub.getLegacyPanelPlacementSettings).toHaveBeenCalledWith(
     { id: '9001', test: 'wowee' },
     undefined
   );
 });
 
 test('adds a new panel state at the very top of the Dashboard with custom sizing', () => {
-  const embeddableFactoryStub: IProvidesPanelPlacementSettings = {
-    getPanelPlacementSettings: jest.fn().mockImplementation(() => {
+  const embeddableFactoryStub: IProvidesLegacyPanelPlacementSettings = {
+    getLegacyPanelPlacementSettings: jest.fn().mockImplementation(() => {
       return { strategy: 'placeAtTop', width: 10, height: 5 };
     }),
   };
@@ -137,15 +137,15 @@ test('adds a new panel state at the very top of the Dashboard with custom sizing
   expect(panelState.gridData.h).toBe(5);
   expect(panelState.gridData.w).toBe(10);
 
-  expect(embeddableFactoryStub.getPanelPlacementSettings).toHaveBeenCalledWith(
+  expect(embeddableFactoryStub.getLegacyPanelPlacementSettings).toHaveBeenCalledWith(
     { id: '9002', test: 'woweee' },
     undefined
   );
 });
 
 test('passes through given attributes', () => {
-  const embeddableFactoryStub: IProvidesPanelPlacementSettings = {
-    getPanelPlacementSettings: jest.fn().mockImplementation(() => {
+  const embeddableFactoryStub: IProvidesLegacyPanelPlacementSettings = {
+    getLegacyPanelPlacementSettings: jest.fn().mockImplementation(() => {
       return { strategy: 'placeAtTop', width: 10, height: 5 };
     }),
   };
@@ -160,7 +160,7 @@ test('passes through given attributes', () => {
     { testAttr: 'hello' }
   );
 
-  expect(embeddableFactoryStub.getPanelPlacementSettings).toHaveBeenCalledWith(
+  expect(embeddableFactoryStub.getLegacyPanelPlacementSettings).toHaveBeenCalledWith(
     { id: '9004', test: 'wow' },
     { testAttr: 'hello' }
   );
