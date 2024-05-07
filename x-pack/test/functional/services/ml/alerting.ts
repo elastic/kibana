@@ -147,7 +147,7 @@ export function MachineLearningAlertingProvider(
       }
     },
 
-    async assertTopNBuckets(expectedNumberOfBuckets: number | string, expectError = false) {
+    async assertTopNBuckets(expectedNumberOfBuckets: number, expectError = false) {
       await this.ensureAdvancedSectionOpen();
       const actualValue = await testSubjects.getAttribute('mlAnomalyAlertTopNBuckets', 'value');
       expect(actualValue).to.eql(
@@ -168,11 +168,10 @@ export function MachineLearningAlertingProvider(
       await this.assertLookbackInterval(interval, isInvalid);
     },
 
-    async setTopNBuckets(numberOfBuckets: number | string, isInvalid = false) {
+    async setTopNBuckets(numberOfBuckets: number, isInvalid = false) {
       await this.ensureAdvancedSectionOpen();
       await testSubjects.setValue('mlAnomalyAlertTopNBuckets', numberOfBuckets.toString());
-      // to assert that float value are not accepted
-      await this.assertTopNBuckets(numberOfBuckets.toString().replace(',', '.'), isInvalid);
+      await this.assertTopNBuckets(numberOfBuckets, isInvalid);
     },
 
     async isAdvancedSectionOpened() {

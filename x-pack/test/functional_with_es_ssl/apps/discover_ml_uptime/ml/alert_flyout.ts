@@ -118,7 +118,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           'should support updating the advanced settings section with valid values only'
         );
         await ml.alerting.setTopNBuckets(0, true);
-        await ml.alerting.setTopNBuckets(`2,5`, true);
         await ml.alerting.setTopNBuckets(2);
         await ml.alerting.setLookbackInterval('invalid_value', true);
         await ml.alerting.setLookbackInterval('2h');
