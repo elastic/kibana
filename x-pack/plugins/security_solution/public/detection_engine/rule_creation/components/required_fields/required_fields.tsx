@@ -85,7 +85,7 @@ const RequiredFieldsList = ({
   const isAddNewFieldButtonDisabled = isIndexPatternLoading || isEmptyRowDisplayed;
 
   const nameWarnings = fieldValue
-    /* Not creating warning for empty "name" value */
+    /* Not creating a warning for empty "name" value */
     .filter(({ name }) => name !== '')
     .reduce<Record<string, string>>((warnings, { name }) => {
       if (!isIndexPatternLoading && !allFieldNames.includes(name)) {
