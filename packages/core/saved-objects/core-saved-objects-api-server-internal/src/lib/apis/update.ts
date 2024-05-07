@@ -81,6 +81,7 @@ export const executeUpdate = async <T>(
     preflight: preflightHelper,
     migration: migrationHelper,
     validation: validationHelper,
+    user: userHelper,
   } = helpers;
   const { securityExtension } = extensions;
   const typeDefinition = registry.getType(type)!;
@@ -151,6 +152,7 @@ export const executeUpdate = async <T>(
   // END ALL PRE_CLIENT CALL CHECKS && MIGRATE EXISTING DOC;
 
   const time = getCurrentTime();
+  const updatedBy = userHelper.getCurrentUserProfileUid();
   let updatedOrCreatedSavedObject: SavedObject<T>;
   // `upsert` option set and document was not found -> we need to perform an upsert operation
   const shouldPerformUpsert = upsert && docNotFound;
@@ -177,6 +179,7 @@ export const executeUpdate = async <T>(
         ...(await encryptionHelper.optionallyEncryptAttributes(type, id, namespace, upsert)),
       },
       updated_at: time,
+      ...(updatedBy && { updated_by: updatedBy }),
       ...(Array.isArray(references) && { references }),
     }) as SavedObjectSanitizedDoc<T>;
     validationHelper.validateObjectForCreate(type, migratedUpsert);
@@ -233,6 +236,7 @@ export const executeUpdate = async <T>(
       id,
       type,
       updated_at: time,
+      ...(updatedBy && { updated_by: updatedBy }),
       version: encodeHitVersion(createDocResponseBody),
       namespaces,
       ...(originId && { originId }),
@@ -267,6 +271,7 @@ export const executeUpdate = async <T>(
       namespaces: savedObjectNamespaces,
       attributes: updatedAttributes,
       updated_at: time,
+      ...(updatedBy && { updated_by: updatedBy }),
       ...(Array.isArray(references) && { references }),
     });
 
@@ -330,6 +335,7 @@ export const executeUpdate = async <T>(
       id,
       type,
       updated_at: time,
+      ...(updatedBy && { updated_by: updatedBy }),
       version: encodeHitVersion(indexDocResponseBody),
       namespaces,
       ...(originId && { originId }),
