@@ -64,7 +64,8 @@ describe(
       ]);
     });
 
-    it('can CRUD value list items', () => {
+    // FLAKEY - https://github.com/elastic/kibana/issues/182893
+    it('@skipInServerless can CRUD value list items', () => {
       openValueListItemsModal(KNOWN_VALUE_LIST_FILES.TEXT);
       const totalItems = 12;
       const perPage = 10;
