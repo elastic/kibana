@@ -24,7 +24,7 @@ import { visit } from '../../../../tasks/navigation';
 
 import { ruleDetailsUrl } from '../../../../urls/rule_details';
 
-describe('Detection ES|QL rules, details view', { tags: ['@ess'] }, () => {
+describe('Detection ES|QL rules, details view', { tags: ['@ess', '@serverless'] }, () => {
   const rule = getEsqlRule();
 
   beforeEach(() => {
