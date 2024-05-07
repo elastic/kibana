@@ -13,7 +13,7 @@ import {
   fetch$,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, Subject } from 'rxjs';
-import type { EmbeddableAPMAlertingVizProps } from '../types';
+import type { EmbeddableApmAlertingVizProps } from '../types';
 import type { EmbeddableDeps } from '../../types';
 import { ApmEmbeddableContext } from '../../embeddable_context';
 import { APMAlertingFailedTransactionsChart } from './chart';
@@ -23,12 +23,12 @@ export const APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE =
 
 export const getApmAlertingFailedTransactionsChartEmbeddableFactory = (deps: EmbeddableDeps) => {
   const factory: ReactEmbeddableFactory<
-    EmbeddableAPMAlertingVizProps,
-    DefaultEmbeddableApi<EmbeddableAPMAlertingVizProps>
+    EmbeddableApmAlertingVizProps,
+    DefaultEmbeddableApi<EmbeddableApmAlertingVizProps>
   > = {
     type: APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE,
     deserializeState: (state) => {
-      return state.rawState as EmbeddableAPMAlertingVizProps;
+      return state.rawState as EmbeddableApmAlertingVizProps;
     },
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);

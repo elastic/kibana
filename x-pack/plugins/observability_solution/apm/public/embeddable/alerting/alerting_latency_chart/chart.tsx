@@ -10,7 +10,7 @@ import LatencyChart from '../../../components/alerting/ui_components/alert_detai
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { useAlertingProps } from '../use_alerting_props';
 import { TimeRangeCallout } from '../time_range_callout';
-import type { EmbeddableAPMAlertingVizProps } from '../types';
+import type { EmbeddableApmAlertingLatencyVizProps } from '../types';
 import { ServiceNameCallout } from '../service_name_callout';
 
 export function APMAlertingLatencyChart({
@@ -25,7 +25,7 @@ export function APMAlertingLatencyChart({
   latencyThresholdInMicroseconds,
   kuery = '',
   filters,
-}: EmbeddableAPMAlertingVizProps & {
+}: EmbeddableApmAlertingLatencyVizProps & {
   latencyThresholdInMicroseconds?: number;
 }) {
   const {

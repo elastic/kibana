@@ -8,7 +8,7 @@
 import React from 'react';
 import { GetSLOResponse } from '@kbn/slo-schema';
 import { CustomKqlPanels } from './custom_kql/custom_kql_panels';
-import { BurnRateAlert, BurnRateRule } from '../../alert_details_app_section';
+import { BurnRateAlert, BurnRateRule } from '../../types';
 
 interface Props {
   alert: BurnRateAlert;

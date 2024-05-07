@@ -10,16 +10,19 @@ import type { TopAlert } from '@kbn/observability-plugin/public';
 import { SerializedTitles } from '@kbn/presentation-publishing';
 import type { BoolQuery } from '@kbn/es-query';
 
-export interface EmbeddableAPMAlertingVizProps extends SerializedTitles {
+export interface EmbeddableApmAlertingVizProps extends SerializedTitles {
   rule: Rule;
   alert: TopAlert;
   transactionName?: string;
   rangeFrom?: string;
   rangeTo?: string;
-  latencyThresholdInMicroseconds?: number;
   kuery?: string;
   filters?: BoolQuery;
   serviceName: string;
   environment?: string;
   transactionType?: string;
+}
+
+export interface EmbeddableApmAlertingLatencyVizProps extends EmbeddableApmAlertingVizProps {
+  latencyThresholdInMicroseconds?: number;
 }

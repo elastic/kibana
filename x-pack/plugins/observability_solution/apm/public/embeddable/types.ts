@@ -10,19 +10,6 @@ import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/pu
 import type { ApmPluginStartDeps, ApmPluginSetupDeps } from '../plugin';
 import type { ConfigSchema } from '..';
 import type { KibanaEnvContext } from '../context/kibana_environment_context/kibana_environment_context';
-import { APMThroughputChartEmbeddable } from './throughput_chart/embeddable';
-import { APMLatencyChartEmbeddable } from './latency_chart/embeddable';
-import { APMAlertingFailedTransactionsChartEmbeddable } from './alerting/alerting_failed_transactions_chart/embeddable';
-import { APMAlertingLatencyChartEmbeddable } from './alerting/alerting_latency_chart/embeddable';
-import { APMAlertingThroughputChartEmbeddable } from './alerting/alerting_throughput_chart/embeddable';
-
-export type APMEmbeddable =
-  | APMThroughputChartEmbeddable
-  | APMLatencyChartEmbeddable
-  | APMAlertingFailedTransactionsChartEmbeddable
-  | APMAlertingLatencyChartEmbeddable
-  | APMAlertingThroughputChartEmbeddable;
-
 export interface EmbeddableDeps {
   coreStart: CoreStart;
   pluginsStart: ApmPluginStartDeps;

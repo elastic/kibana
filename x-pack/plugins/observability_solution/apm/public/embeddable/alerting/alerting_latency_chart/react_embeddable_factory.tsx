@@ -13,7 +13,7 @@ import {
   fetch$,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, Subject } from 'rxjs';
-import type { EmbeddableAPMAlertingVizProps } from '../types';
+import type { EmbeddableApmAlertingLatencyVizProps } from '../types';
 import type { EmbeddableDeps } from '../../types';
 import { ApmEmbeddableContext } from '../../embeddable_context';
 import { APMAlertingLatencyChart } from './chart';
@@ -22,12 +22,12 @@ export const APM_ALERTING_LATENCY_CHART_EMBEDDABLE = 'APM_ALERTING_LATENCY_CHART
 
 export const getApmAlertingLatencyChartEmbeddableFactory = (deps: EmbeddableDeps) => {
   const factory: ReactEmbeddableFactory<
-    EmbeddableAPMAlertingVizProps,
-    DefaultEmbeddableApi<EmbeddableAPMAlertingVizProps>
+    EmbeddableApmAlertingLatencyVizProps,
+    DefaultEmbeddableApi<EmbeddableApmAlertingLatencyVizProps>
   > = {
     type: APM_ALERTING_LATENCY_CHART_EMBEDDABLE,
     deserializeState: (state) => {
-      return state.rawState as EmbeddableAPMAlertingVizProps;
+      return state.rawState as EmbeddableApmAlertingLatencyVizProps;
     },
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
@@ -35,6 +35,9 @@ export const getApmAlertingLatencyChartEmbeddableFactory = (deps: EmbeddableDeps
       const transactionType$ = new BehaviorSubject(state.transactionType);
       const transactionName$ = new BehaviorSubject(state.transactionName);
       const environment$ = new BehaviorSubject(state.environment);
+      const latencyThresholdInMicroseconds$ = new BehaviorSubject(
+        state.latencyThresholdInMicroseconds
+      );
       const rangeFrom$ = new BehaviorSubject(state.rangeFrom);
       const rangeTo$ = new BehaviorSubject(state.rangeTo);
       const rule$ = new BehaviorSubject(state.rule);
@@ -54,6 +57,7 @@ export const getApmAlertingLatencyChartEmbeddableFactory = (deps: EmbeddableDeps
                 transactionType: transactionType$.getValue(),
                 transactionName: transactionName$.getValue(),
                 environment: environment$.getValue(),
+                latencyThresholdInMicroseconds: latencyThresholdInMicroseconds$.getValue(),
                 rangeFrom: rangeFrom$.getValue(),
                 rangeTo: rangeTo$.getValue(),
                 rule: rule$.getValue(),
@@ -69,6 +73,10 @@ export const getApmAlertingLatencyChartEmbeddableFactory = (deps: EmbeddableDeps
           transactionType: [transactionType$, (value) => transactionType$.next(value)],
           transactionName: [transactionName$, (value) => transactionName$.next(value)],
           environment: [environment$, (value) => environment$.next(value)],
+          latencyThresholdInMicroseconds: [
+            latencyThresholdInMicroseconds$,
+            (value) => latencyThresholdInMicroseconds$.next(value),
+          ],
           rangeFrom: [rangeFrom$, (value) => rangeFrom$.next(value)],
           rangeTo: [rangeTo$, (value) => rangeTo$.next(value)],
           rule: [rule$, (value) => rule$.next(value)],
