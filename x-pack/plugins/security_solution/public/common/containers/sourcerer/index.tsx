@@ -445,8 +445,6 @@ export const useSourcererDataView = (
     }
   }, [missingPatterns, selectedDataView, selectedPatterns]);
 
-  const title = useMemo(() => selectedPatterns.join(','), [selectedPatterns]);
-
   const sourcererDataView = useMemo(() => {
     const _dv =
       selectedDataView == null || missingPatterns.length > 0 ? legacyDataView : selectedDataView;
@@ -455,10 +453,10 @@ export const useSourcererDataView = (
       ..._dv,
       dataView: {
         ..._dv.dataView,
-        title,
+        title: selectedPatterns.join(','),
       },
     };
-  }, [legacyDataView, missingPatterns.length, selectedDataView, title]);
+  }, [legacyDataView, missingPatterns.length, selectedDataView, selectedPatterns]);
 
   const indicesExist = useMemo(() => {
     if (loading || sourcererDataView.loading) {
@@ -495,8 +493,8 @@ export const useSourcererDataView = (
       dataViewId: sourcererDataView.id,
       indexPattern: {
         fields: sourcererDataView.indexFields,
-        title,
-        getName: () => title,
+        title: selectedPatterns.join(','),
+        getName: () => selectedPatterns.join(','),
       },
       indicesExist,
       loading: loading || sourcererDataView.loading,
@@ -516,7 +514,6 @@ export const useSourcererDataView = (
       indicesExist,
       loading,
       legacyPatterns.length,
-      title,
     ]
   );
 };
