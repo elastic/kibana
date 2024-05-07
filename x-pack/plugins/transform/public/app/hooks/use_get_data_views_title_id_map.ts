@@ -21,11 +21,7 @@ export const useGetDataViewsTitleIdMap = () => {
   return useQuery<DataViewListTitleIdMap, IHttpFetchError>(
     [TRANSFORM_REACT_QUERY_KEYS.GET_DATA_VIEW_IDS_WITH_TITLE],
     async () => {
-      // Since we let useQuery take care of caching,
-      // clear the cache to ensure we get the latest data view list.
-      data.dataViews.clearCache();
-
-      return (await data.dataViews.getIdsWithTitle()).reduce<Record<string, string>>(
+      return (await data.dataViews.getIdsWithTitle(true)).reduce<Record<string, string>>(
         (acc, { id, title }) => {
           acc[title] = id;
           return acc;
