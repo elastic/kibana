@@ -78,25 +78,4 @@ export const useChangeCspRuleState = () => {
       queryClient.invalidateQueries(getRuleStatesKey);
     },
   });
-
-  // return async (actionOnRule: 'mute' | 'unmute', ruleIds: RuleStateAttributesWithoutStates[]) => {
-  //   const query = {
-  //     action: actionOnRule,
-  //     rules: ruleIds,
-  //   };
-
-  //   const cspRuleBulkActionResponse = await http?.post<CspBenchmarkRulesBulkActionRequestSchema>(
-  //     CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH,
-  //     {
-  //       version: '1',
-  //       body: JSON.stringify(query),
-  //     }
-  //   );
-  //   queryClient.invalidateQueries(BENCHMARK_INTEGRATION_QUERY_KEY_V2); // causing rules counters refetch
-  //   queryClient.invalidateQueries(getCspmStatsKey); // causing cloud dashboard refetch
-  //   queryClient.invalidateQueries(getKspmStatsKey); // causing kubernetes dashboard refetch
-  //   queryClient.invalidateQueries(getRuleStatesKey); // the rule states are part of the findings query key, invalidating them will cause the latest findings to refetch only after the rules states were changed
-
-  //   return cspRuleBulkActionResponse;
-  // };
 };
