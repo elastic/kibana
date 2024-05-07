@@ -133,8 +133,8 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     );
 
     const tableRows = useMemo(
-      () => transformTimelineItemToUnifiedRows({ events, dataView }),
-      [events, dataView]
+      () => (isTextBasedQuery ? events : transformTimelineItemToUnifiedRows({ events, dataView })),
+      [events, dataView, isTextBasedQuery]
     );
 
     const handleOnEventDetailPanelOpened = useCallback(
@@ -376,7 +376,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             onUpdateRowsPerPage={onChangeItemsPerPage}
             onUpdateRowHeight={onUpdateRowHeight}
             onFieldEdited={onFieldEdited}
-            cellActionsTriggerId={SecurityCellActionsTrigger.DEFAULT}
+            cellActionsTriggerId={isTextBasedQuery ? undefined : SecurityCellActionsTrigger.DEFAULT}
             services={dataGridServices}
             visibleCellActions={3}
             externalCustomRenderers={customColumnRenderers}

@@ -28,6 +28,7 @@ import type {
   PinnedEvent,
 } from '../../../common/api/timeline';
 import type { ResolveTimelineConfig } from '../components/open_timeline/types';
+import type { ESQLOptions } from './types';
 
 export type KqlMode = 'filter' | 'search';
 
@@ -145,6 +146,8 @@ export interface TimelineModel {
   sampleSize: number;
   /** the note id pending deletion */
   confirmingNoteId?: string | null;
+  /** ESQL Options in timeline  */
+  esqlOptions: ESQLOptions;
 }
 
 export type SubsetTimelineModel = Readonly<

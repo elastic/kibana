@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AggregateQuery } from '@kbn/es-query';
 import type { ColumnHeaderOptions, SortColumnTimeline } from '../../../common/types';
 import type { RowRendererId } from '../../../common/api/timeline';
 
@@ -48,4 +49,8 @@ export interface TimelineModelSettings {
 
 export interface InitialyzeTimelineSettings extends Partial<TimelineModelSettings> {
   id: string;
+}
+
+export interface ESQLOptions {
+  query: AggregateQuery;
 }

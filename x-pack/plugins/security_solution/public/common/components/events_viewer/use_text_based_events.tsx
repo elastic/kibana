@@ -4,25 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Query, AggregateQuery, Filter } from '@kbn/es-query';
+import type { Query, AggregateQuery, Filter, TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ExpressionsStart, Datatable } from '@kbn/expressions-plugin/public';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { lastValueFrom, pluck } from 'rxjs';
 
 interface UseTextBasedEventsArgs {
   query: Query | AggregateQuery;
-  dataView: DataView;
+  dataView?: DataView;
   data: DataPublicPluginStart;
   expressions: ExpressionsStart;
   inspectorAdapters?: Adapters;
   abortSignal?: AbortSignal;
   filters?: Filter[];
   inputQuery?: Query;
+}
+
+interface ESQLRequest {
+  query: AggregateQuery;
+  dataView: DataView;
+  filters?: Filter[];
+  inputQuery?: Query;
+  time?: TimeRange;
 }
 
 interface TextBasedErrorResponse {
@@ -42,7 +50,10 @@ export const useTextBasedEvents = ({
   inputQuery,
 }: UseTextBasedEventsArgs) => {
   const timeRange = data.query.timefilter.timefilter.getTime();
+
   const abortController = useRef(new AbortController());
+  const [isLoading, setIsLoading] = useState(false);
+
   const convertQueryToAst = useCallback(() => {
     return textBasedQueryStateToAstWithValidation({
       query,
@@ -56,6 +67,7 @@ export const useTextBasedEvents = ({
   }, [query, dataView, filters, inputQuery, timeRange]);
 
   const fetchEvents = useCallback(async () => {
+    setIsLoading(true);
     const ast = await convertQueryToAst();
     if (!ast)
       return {
@@ -92,7 +104,11 @@ export const useTextBasedEvents = ({
             flattened: row,
           } as unknown as DataTableRecord;
         });
+
+        textBasedQueryColumns = table?.columns ?? [];
       }
+
+      setIsLoading(false);
     });
 
     if (error) {
@@ -110,5 +126,6 @@ export const useTextBasedEvents = ({
 
   return {
     fetch: fetchEvents,
+    isLoading,
   };
 };

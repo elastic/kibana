@@ -170,3 +170,18 @@ export const selectDataInTimeline = createSelector(
     return !isEmpty(dataProviders) || !isEmpty(get('filterQuery.kuery.expression', kqlQuery));
   }
 );
+
+export const selectTimelineDateRange = createSelector(
+  selectTimelineById,
+  (timeline) => timeline?.dateRange
+);
+
+export const selectTimelineESQLOptions = createSelector(
+  selectTimelineById,
+  (timeline) => timeline?.esqlOptions
+);
+
+export const selectTimelineESQLQuery = createSelector(
+  selectTimelineESQLOptions,
+  (esqlOptions) => esqlOptions?.query
+);

@@ -68,6 +68,7 @@ import { ErrorsWarningsCompactViewPopover } from './errors_warnings_popover';
 import { addQueriesToCache, updateCachedQueries } from './history_local_storage';
 
 import './overwrite.scss';
+import { isEqual } from 'lodash';
 
 export interface TextBasedLanguagesEditorProps {
   /** The aggregate type query */
@@ -439,13 +440,42 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     };
   }, [esqlCallbacks, queryString]);
 
+  // clientParserMessages, isLoading, isQueryLoading, parseMessages, queryString, timeZone
+
+  useEffect(() => {
+    console.log('changed : ', { clientParserMessages });
+  }, [clientParserMessages]);
+
+  useEffect(() => {
+    console.log('changed : ', { isLoading });
+  }, [isLoading]);
+
+  useEffect(() => {
+    console.log('changed : ', { isQueryLoading });
+  }, [isQueryLoading]);
+
+  useEffect(() => {
+    console.log('changed : ', { queryString });
+  }, [queryString]);
+
+  useEffect(() => {
+    console.log('changed : ', { timeZone });
+  }, [timeZone]);
+
+  useEffect(() => {
+    console.log('changed : ', { parseMessages });
+  }, [parseMessages]);
+
   useEffect(() => {
     const validateQuery = async () => {
       if (editorModel?.current) {
         const parserMessages = await parseMessages();
-        setClientParserMessages({
-          errors: parserMessages?.errors ?? [],
-          warnings: parserMessages?.warnings ?? [],
+        setClientParserMessages((prev) => {
+          const result = {
+            errors: parserMessages?.errors ?? [],
+            warnings: parserMessages?.warnings ?? [],
+          };
+          return isEqual(prev, result) ? prev : result;
         });
       }
     };
@@ -454,6 +484,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         queryString,
         timeZone,
       });
+
       validateQuery();
       setRefetchHistoryItems(false);
     } else {

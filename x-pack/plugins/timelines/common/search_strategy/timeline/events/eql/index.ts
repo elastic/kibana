@@ -8,6 +8,7 @@
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { EqlSearchStrategyResponse } from '@kbn/data-plugin/common';
 import type { RuntimeFieldSpec, RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
+import { AggregateQuery } from '@kbn/es-query';
 import { EqlSearchResponse, Inspect, Maybe, PaginationInputPaginated } from '../../..';
 import { TimelineEdges } from '../..';
 

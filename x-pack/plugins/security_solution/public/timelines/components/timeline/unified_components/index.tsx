@@ -9,7 +9,8 @@ import React, { useMemo, useCallback, useState, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { generateFilters } from '@kbn/data-plugin/public';
-import type { DataView, DataViewField } from '@kbn/data-plugin/common';
+import { DataViewField } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-plugin/common';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import type { DataLoadingState } from '@kbn/unified-data-table';
 import { useColumns } from '@kbn/unified-data-table';
@@ -25,7 +26,6 @@ import { UnifiedFieldListSidebarContainer } from '@kbn/unified-field-list';
 import type { EuiTheme } from '@kbn/react-kibana-context-styled';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { withDataView } from '../../../../common/components/with_data_view';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
 import type { ExpandedDetailTimeline } from '../../../../../common/types';
 import type { TimelineItem } from '../../../../../common/search_strategy';
@@ -344,6 +344,20 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
     onFieldEdited();
   }, [onFieldEdited]);
 
+  const sideBarFields = useMemo(() => {
+    if (!isTextBasedQuery) return dataView ? dataView.fields : [];
+    return columns.map(
+      (column) =>
+        new DataViewField({
+          name: column.id,
+          type: column.type ?? 'unknown',
+          esTypes: column.esTypes,
+          searchable: false,
+          aggregatable: false,
+        })
+    );
+  }, [columns, dataView, isTextBasedQuery]);
+
   return (
     <TimelineBodyContainer className="timelineBodyContainer" ref={setSidebarContainer}>
       <TimelineResizableLayout
@@ -361,7 +375,7 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
                   services={fieldListSidebarServices}
                   dataView={dataView}
                   fullWidth
-                  allFields={dataView.fields}
+                  allFields={sideBarFields}
                   workspaceSelectedFieldNames={columnIds}
                   onAddFieldToWorkspace={onAddFieldToWorkspace}
                   onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
@@ -430,6 +444,6 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   );
 };
 
-export const UnifiedTimeline = React.memo(withDataView<Props>(UnifiedTimelineComponent));
+export const UnifiedTimeline = React.memo(UnifiedTimelineComponent);
 // eslint-disable-next-line import/no-default-export
 export { UnifiedTimeline as default };

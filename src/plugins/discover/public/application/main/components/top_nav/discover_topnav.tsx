@@ -64,6 +64,7 @@ export const DiscoverTopNav = ({
   const query = useAppStateSelector((state) => state.query);
   const adHocDataViews = useInternalStateSelector((state) => state.adHocDataViews);
   const dataView = useInternalStateSelector((state) => state.dataView!);
+  console.log({ dataView });
   const savedDataViews = useInternalStateSelector((state) => state.savedDataViews);
   const savedSearch = useSavedSearchInitial();
   const showDatePicker = useMemo(() => {
@@ -236,6 +237,7 @@ export const DiscoverTopNav = ({
   const shouldHideDefaultDataviewPicker =
     !!searchBarCustomization?.CustomDataViewPicker || !!searchBarCustomization?.hideDataViewPicker;
 
+  console.log({ dataView });
   return (
     <SearchBar
       {...topNavProps}
