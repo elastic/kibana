@@ -115,6 +115,10 @@ export class ServiceAPIClient {
           this.logger.error(e);
         }
       }
+    } else {
+      this.logger.debug(
+        'Failed to fetch isAllowed status since no location has been fetched from manifest.'
+      );
     }
 
     return { allowed: false, signupUrl: null };
