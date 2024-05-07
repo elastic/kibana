@@ -126,7 +126,6 @@ const RowActionComponent = ({
         panel: 'right',
       });
     }
-
     // TODO remove when https://github.com/elastic/security-team/issues/7462 is merged
     // support of old flyout in cases page
     else if (tableId === TableId.alertsOnCasePage) {
@@ -148,7 +147,7 @@ const RowActionComponent = ({
         })
       );
     }
-  }, [eventId, indexName, showExpandableFlyout, tableId, openFlyout, telemetry, dispatch, tabType]);
+  }, [dispatch, eventId, indexName, openFlyout, tabType, tableId, showExpandableFlyout, telemetry]);
 
   const Action = controlColumn.rowCellRender;
 

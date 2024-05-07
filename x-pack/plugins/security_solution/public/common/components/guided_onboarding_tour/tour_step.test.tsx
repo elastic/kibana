@@ -12,6 +12,8 @@ import { AlertsCasesTourSteps, SecurityStepId } from './tour_config';
 import { useTourContext } from './tour';
 import { mockGlobalState, TestProviders, createMockStore } from '../../mock';
 import { TimelineId } from '../../../../common/types';
+import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
+import { useKibana } from '../../lib/kibana';
 
 jest.mock('./tour');
 const mockTourStep = jest
@@ -36,6 +38,7 @@ const defaultProps = {
 };
 
 const mockChildren = <h1 data-test-subj="h1">{'random child element'}</h1>;
+const casesServiceMock = casesPluginMock.createStartContract();
 
 describe('GuidedOnboardingTourStep', () => {
   const incrementStep = jest.fn();
@@ -55,6 +58,49 @@ describe('GuidedOnboardingTourStep', () => {
     const tourStep = getByTestId('tourStepMock');
     const header = getByTestId('h1');
     expect(tourStep).toBeInTheDocument();
+    expect(header).toBeInTheDocument();
+  });
+  it('hiddenWhenCasesModalFlyoutExpanded={true}, just render children', () => {
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        cases: casesServiceMock,
+      },
+    });
+
+    const { getByTestId, queryByTestId } = render(
+      <GuidedOnboardingTourStep {...defaultProps}>{mockChildren}</GuidedOnboardingTourStep>,
+      { wrapper: TestProviders }
+    );
+    const tourStep = queryByTestId('tourStepMock');
+    const header = getByTestId('h1');
+    expect(tourStep).not.toBeInTheDocument();
+    expect(header).toBeInTheDocument();
+  });
+  it('allStepsHidden={true}, just render children', () => {
+    (useTourContext as jest.Mock).mockReturnValue({
+      activeStep: 1,
+      allStepsHidden: true,
+      incrementStep,
+      isTourShown: () => true,
+    });
+    const { getByTestId, queryByTestId } = render(
+      <GuidedOnboardingTourStep {...defaultProps}>{mockChildren}</GuidedOnboardingTourStep>,
+      { wrapper: TestProviders }
+    );
+    const tourStep = queryByTestId('tourStepMock');
+    const header = getByTestId('h1');
+    expect(tourStep).not.toBeInTheDocument();
+    expect(header).toBeInTheDocument();
+  });
+  it('hidden={true}, just render children', () => {
+    const testProps = { ...defaultProps, hidden: true };
+    const { getByTestId, queryByTestId } = render(
+      <GuidedOnboardingTourStep {...testProps}>{mockChildren}</GuidedOnboardingTourStep>,
+      { wrapper: TestProviders }
+    );
+    const tourStep = queryByTestId('tourStepMock');
+    const header = getByTestId('h1');
+    expect(tourStep).not.toBeInTheDocument();
     expect(header).toBeInTheDocument();
   });
   it('isTourAnchor={false}, just render children', () => {
