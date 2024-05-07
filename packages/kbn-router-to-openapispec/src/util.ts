@@ -50,6 +50,7 @@ export const getVersionedHeaderParam = (
 ): OpenAPIV3.ParameterObject => ({
   in: 'header',
   name: 'elastic-api-version',
+  description: 'The version of the API to use',
   schema: {
     type: 'string',
     enum: versions,

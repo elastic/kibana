@@ -51,7 +51,7 @@ import { LanguageGrid } from './languages/language_grid';
 import './overview.scss';
 import { ApiKeyPanel } from './api_key/api_key';
 import { ConnectorIngestionPanel } from './connectors_ingestion';
-import { PipelineButtonOverview } from './pipeline_button_overview';
+import { PipelineOverviewButton } from './pipeline_overview_button';
 import { SelectClientCallouts } from './select_client_callouts';
 import { PipelineManageButton } from './pipeline_manage_button';
 import { OPTIONAL_LABEL } from '../../../common/i18n_string';
@@ -281,7 +281,7 @@ export const ElasticsearchOverview = () => {
           children={
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow={false}>
-                <PipelineButtonOverview />
+                <PipelineOverviewButton />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <PipelineManageButton />
