@@ -29,38 +29,34 @@ export const EqlTabHeader = memo(
     <>
       <EuiFlexItem grow={false}>
         <StyledEuiFlyoutHeader data-test-subj={`${activeTab}-tab-flyout-header`} hasBorder={false}>
-          <TabHeaderContainer data-test-subj="timelineHeader">
-            <EuiFlexGroup
-              className="euiScrollBar"
-              alignItems="flexStart"
-              gutterSize="s"
-              data-test-subj="timeline-date-picker-container"
-              responsive={false}
-            >
-              {timelineFullScreen && setTimelineFullScreen != null && (
-                <ExitFullScreen
-                  fullScreen={timelineFullScreen}
-                  setFullScreen={setTimelineFullScreen}
-                />
-              )}
-              <EuiFlexItem grow={false}>
-                {activeTab === TimelineTabs.eql && (
-                  <Sourcerer scope={SourcererScopeName.timeline} />
-                )}
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <SuperDatePicker width="auto" id={InputsModelId.timeline} timelineId={timelineId} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <TimelineDatePickerLock />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </TabHeaderContainer>
+          <EuiFlexGroup
+            className="euiScrollBar"
+            alignItems="flexStart"
+            gutterSize="s"
+            data-test-subj="timeline-date-picker-container"
+            responsive={false}
+          >
+            {timelineFullScreen && setTimelineFullScreen != null && (
+              <ExitFullScreen
+                fullScreen={timelineFullScreen}
+                setFullScreen={setTimelineFullScreen}
+              />
+            )}
+            <EuiFlexItem grow={false}>
+              {activeTab === TimelineTabs.eql && <Sourcerer scope={SourcererScopeName.timeline} />}
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <SuperDatePicker width="auto" id={InputsModelId.timeline} timelineId={timelineId} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <TimelineDatePickerLock />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </StyledEuiFlyoutHeader>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      <TabHeaderContainer data-test-subj="timelineHeader">
         <EqlQueryBarTimeline timelineId={timelineId} />
-      </EuiFlexItem>
+      </TabHeaderContainer>
     </>
   )
 );

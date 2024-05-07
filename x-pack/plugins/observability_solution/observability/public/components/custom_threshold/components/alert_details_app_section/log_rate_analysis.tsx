@@ -24,7 +24,7 @@ import { CustomThresholdRuleTypeParams } from '../../types';
 import { TopAlert } from '../../../..';
 import { Color, colorTransformer } from '../../../../../common/custom_threshold_rule/color_palette';
 import { getLogRateAnalysisEQQuery } from './helpers/log_rate_analysis_query';
-import { getInitialAnalysisStart } from './helpers/get_initial_analysis_start';
+import { getInitialAnalysisStart, getTimeRangeEnd } from './helpers/get_initial_analysis_start';
 
 export interface AlertDetailsLogRateAnalysisProps {
   alert: TopAlert<Record<string, any>>;
@@ -80,7 +80,7 @@ export function LogRateAnalysis({
 
   const timeRange = {
     min: alertStart.clone().subtract(15 * intervalFactor, 'minutes'),
-    max: alertEnd ? alertEnd.clone().add(1 * intervalFactor, 'minutes') : moment(new Date()),
+    max: getTimeRangeEnd({ alertStart, intervalFactor, alertEnd }),
   };
 
   const logRateAnalysisTitle = i18n.translate(
