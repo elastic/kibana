@@ -125,7 +125,7 @@ export const DiscoverMainContent = ({
             <DiscoverDocuments
               viewModeToggle={viewModeToggle}
               dataView={dataView}
-              onAddFilter={!isPlainRecord ? onAddFilter : undefined}
+              onAddFilter={onAddFilter}
               stateContainer={stateContainer}
               onFieldEdited={!isPlainRecord ? onFieldEdited : undefined}
             />
