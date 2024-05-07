@@ -204,7 +204,7 @@ export class TaskPool {
 
   private handleFailureOfMarkAsRunning(task: TaskRunner, err: Error) {
     this.tasksInPool.delete(task.taskExecutionId);
-    this.logger.error(`Failed to mark Task ${task.toString()} as running: ${err.message}`);
+    this.logger.error(`Failed to mark Task ${task.toString()} as running: ${err.message || err}`);
   }
 
   private cancelExpiredTasks() {
