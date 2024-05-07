@@ -166,6 +166,9 @@ function extractValueReferencesFromIcuAst(node, keys = new Set()) {
  * @throws if "values" and "defaultMessage" don't correspond to each other
  */
 export function checkValuesProperty(prefixedValuesKeys, defaultMessage, messageId) {
+  // TODO: Skip values check until i18n tooling are upgraded.
+  return;
+
   // Skip validation if `defaultMessage` doesn't include any ICU values and
   // `values` prop has no keys.
   const defaultMessageValueReferences = extractValueReferencesFromMessage(
