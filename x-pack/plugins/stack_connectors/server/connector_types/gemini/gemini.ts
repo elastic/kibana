@@ -187,16 +187,16 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon G
     // set model on per request basis
     const currentModel = reqModel ?? this.model;
     const path = `/v1/projects/${this.gcpProjectID}/locations/${this.gcpRegion}/publishers/google/models/${currentModel}:generateContent`;
-    const apiKey = this.secrets.accessToken;
+    const accessToken = this.secrets.accessToken;
     const data = JSON.stringify(JSON.parse(body)['messages']);
     // const path = `/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
-
+    
     const requestArgs = {
       url: `${this.url}${path}`,
       method: 'post' as Method,
       data: data,
       headers: { 
-        'Authorization': `Bearer ${apiKey}`,
+        'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'application/json'
       },
       // give up to 2 minutes for response
