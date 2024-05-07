@@ -25,6 +25,8 @@ const dateNow = new Date(to).valueOf();
 const mockDateNow = jest.fn().mockReturnValue(dateNow);
 Date.now = jest.fn(() => mockDateNow()) as unknown as DateConstructor['now'];
 
+jest.mock('../../../../common/lib/kibana');
+
 const defaultUseQueryAlertsReturn = {
   loading: false,
   data: null,
