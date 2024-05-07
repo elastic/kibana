@@ -46,7 +46,7 @@ const getMockAlert = (): ParsedTechnicalFields & { _index: string } => ({
   [SPACE_IDS]: ['fake-space-id'],
   [TIMESTAMP]: '2021-06-21T21:33:05.713Z',
   [VERSION]: '7.13.0',
-  ['_index']: 'fake-alert-index',
+  _index: 'fake-alert-index',
 });
 
 describe('getAlertByIdRoute', () => {
