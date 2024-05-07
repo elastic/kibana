@@ -18,11 +18,10 @@ import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useCallback, useEffect, useState } from 'react';
 import { paths } from '../../../../common/locators/paths';
-import { SloDeleteConfirmationModal } from '../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
+import { SloDeleteModal } from '../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { SloResetConfirmationModal } from '../../../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
 import { useCapabilities } from '../../../hooks/use_capabilities';
 import { useCloneSlo } from '../../../hooks/use_clone_slo';
-import { useDeleteSlo } from '../../../hooks/use_delete_slo';
 import { useFetchRulesForSlo } from '../../../hooks/use_fetch_rules_for_slo';
 import { useResetSlo } from '../../../hooks/use_reset_slo';
 import { useKibana } from '../../../utils/kibana_react';
@@ -56,7 +55,6 @@ export function HeaderControl({ isLoading, slo }: Props) {
   const [isDeleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false);
   const [isResetConfirmationModalOpen, setResetConfirmationModalOpen] = useState(false);
 
-  const { mutate: deleteSlo } = useDeleteSlo();
   const { mutateAsync: resetSlo, isLoading: isResetLoading } = useResetSlo();
 
   const { data: rulesBySlo, refetchRules } = useFetchRulesForSlo({
@@ -127,11 +125,10 @@ export function HeaderControl({ isLoading, slo }: Props) {
     setDeleteConfirmationModalOpen(false);
   };
 
-  const handleDeleteConfirm = () => {
-    if (slo) {
-      deleteSlo({ id: slo.id, name: slo.name });
-      navigate(basePath.prepend(paths.slos));
-    }
+  const handleDeleteConfirm = async () => {
+    removeDeleteQueryParam();
+    setDeleteConfirmationModalOpen(false);
+    navigate(basePath.prepend(paths.slos));
   };
 
   const handleReset = () => {
@@ -330,11 +327,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
       ) : null}
 
       {slo && isDeleteConfirmationModalOpen ? (
-        <SloDeleteConfirmationModal
-          slo={slo}
-          onCancel={handleDeleteCancel}
-          onConfirm={handleDeleteConfirm}
-        />
+        <SloDeleteModal slo={slo} onCancel={handleDeleteCancel} onSuccess={handleDeleteConfirm} />
       ) : null}
 
       {slo && isResetConfirmationModalOpen ? (

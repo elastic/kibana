@@ -31,7 +31,7 @@ import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { DiscoverError } from '../../components/common/error_alert';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { useAlertResultsToast } from './hooks/use_alert_results_toast';
-import { DiscoverMainProvider } from './services/discover_state_provider';
+import { DiscoverMainProvider } from './state_management/discover_state_provider';
 import {
   CustomizationCallback,
   DiscoverCustomizationContext,
@@ -40,7 +40,7 @@ import {
 } from '../../customizations';
 import { DiscoverTopNavInline } from './components/top_nav/discover_topnav_inline';
 import { isTextBasedQuery } from './utils/is_text_based_query';
-import { DiscoverStateContainer, LoadParams } from './services/discover_state';
+import { DiscoverStateContainer, LoadParams } from './state_management/discover_state';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
