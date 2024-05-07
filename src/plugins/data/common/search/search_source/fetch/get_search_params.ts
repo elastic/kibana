@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { ISearchRequestParams } from '@kbn/search-types';
 import { UI_SETTINGS } from '../../../constants';
 import { GetConfigFn } from '../../../types';
-import { ISearchRequestParams } from '../..';
 import type { SearchRequest } from './types';
 
 const sessionId = Date.now();
