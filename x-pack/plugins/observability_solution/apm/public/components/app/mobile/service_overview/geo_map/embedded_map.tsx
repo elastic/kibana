@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { LayerDescriptor } from '@kbn/maps-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { EuiText } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { ApmPluginStartDeps } from '../../../../../plugin';
 import { getLayerList } from './map_layers/get_layer_list';
@@ -31,43 +29,19 @@ function EmbeddedMapComponent({
   filters: Filter[];
   dataView?: DataView;
 }) {
-  const [error, setError] = useState<boolean>();
-
-  const [layerList, setLayerList] = useState<LayerDescriptor[]>([]);
-
   const { maps } = useKibana<ApmPluginStartDeps>().services;
 
-  useEffect(() => {
-    const updateLayers = async () => {
-      if (dataView?.id) {
-        try {
-          const layers = await getLayerList({
-            selectedMap,
-            maps,
-            dataViewId: dataView.id,
-          });
-          setLayerList(layers);
-        } catch (e) {
-          setError(true);
-        }
-      }
-    };
-
-    updateLayers();
-  }, [selectedMap, maps, dataView]);
+  const layerList = dataView?.id
+    ? getLayerList({
+        selectedMap,
+        maps,
+        dataViewId: dataView?.id,
+      })
+    : [];
 
   return (
     <>
-      {error && (
-        <EuiText size="s">
-          <p>
-            {i18n.translate('xpack.apm.serviceOverview.embeddedMap.error', {
-              defaultMessage: 'Could not load map',
-            })}
-          </p>
-        </EuiText>
-      )}
-      {!error && (
+      {
         <div
           data-test-subj="serviceOverviewEmbeddedMap"
           css={css`
@@ -99,7 +73,7 @@ function EmbeddedMapComponent({
               mapCenter: { lat: 20.43425, lon: 0, zoom: 1.25 },
             })}
         </div>
-      )}
+      }
     </>
   );
 }
