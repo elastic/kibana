@@ -354,11 +354,11 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   );
 
   const setHasWildcardWithWrongOperator = useCallback(
-    (warningExists: boolean): void => {
-      console.log('wildcard callback', warningExists);
+    (warningExists: boolean, actualwarning: string): void => {
+      console.log('warning is ', actualwarning === 'wrongoperator');
       dispatch({
         type: 'setWildcardWithWrongOperator',
-        warningExists,
+        warningExists: actualwarning === 'wrongoperator',
       });
     },
     [dispatch]
@@ -511,6 +511,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   const exceptionFlyoutTitleId = useGeneratedHtmlId({
     prefix: 'exceptionFlyoutTitle',
   });
+  console.log('wildcardwarningexists', wildcardWarningExists);
 
   return (
     <EuiFlyout

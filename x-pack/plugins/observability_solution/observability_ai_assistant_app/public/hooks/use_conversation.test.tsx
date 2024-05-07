@@ -85,7 +85,7 @@ describe('useConversation', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    wrapper = ({ children }: PropsWithChildren) => (
+    wrapper = ({ children }: PropsWithChildren<unknown>) => (
       <KibanaContextProvider services={useKibanaMockServices}>
         <ObservabilityAIAssistantAppServiceProvider value={mockService}>
           {children}

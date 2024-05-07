@@ -546,6 +546,7 @@ export const getEntryOnWildcardChange = (
 ): { index: number; updatedEntry: BuilderEntry } => {
   const { nested, parent, entryIndex, field, operator } = item;
 
+  console.log('do we go here');
   if (nested != null && parent != null) {
     const fieldName = field != null ? field.name.split('.').slice(-1)[0] : '';
 

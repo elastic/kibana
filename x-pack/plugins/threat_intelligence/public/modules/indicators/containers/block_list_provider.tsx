@@ -21,7 +21,7 @@ export interface BlockListContextValue {
 
 export const BlockListContext = createContext<BlockListContextValue | undefined>(undefined);
 
-export const BlockListProvider: FC<PropsWithChildren> = ({ children }) => {
+export const BlockListProvider: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const [blockListIndicatorValue, setBlockListIndicatorValue] = useState('');
 
   const context: BlockListContextValue = {

@@ -81,7 +81,7 @@ export interface EntryItemProps {
   onChange: (arg: BuilderEntry, i: number) => void;
   onlyShowListOperators?: boolean;
   setErrorsExist: (arg: EntryFieldError) => void;
-  setWarningsExist: (arg: boolean) => void;
+  setWarningsExist: (arg: boolean, arg2: string) => void;
   exceptionItemIndex: number;
   isDisabled?: boolean;
   operatorsList?: OperatorOption[];
@@ -119,8 +119,8 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
     [setErrorsExist, entry.id]
   );
   const handleWarning = useCallback(
-    (warn: boolean): void => {
-      setWarningsExist(warn);
+    (warn: boolean, warnString: string): void => {
+      setWarningsExist(warn, warnString);
     },
     [setWarningsExist]
   );
@@ -137,9 +137,10 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
     ([newOperator]: OperatorOption[]): void => {
       const { updatedEntry, index } = getEntryOnOperatorChange(entry, newOperator);
       handleError(false);
+      handleWarning(false);
       onChange(updatedEntry, index);
     },
-    [onChange, entry, handleError]
+    [onChange, entry, handleError, handleWarning]
   );
 
   const handleFieldMatchValueChange = useCallback(
@@ -421,6 +422,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
         const fieldMatchWarning = /[*?]/.test(value ?? '')
           ? getWildcardWithIsOperatorWarning()
           : undefined;
+        const warningobj = { message: fieldMatchWarning, code: 'wrongoperator' };
         return (
           <AutocompleteFieldMatchComponent
             autocompleteService={autocompleteService}
@@ -434,7 +436,8 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
             indexPattern={indexPattern}
             onError={handleError}
             onWarning={handleWarning}
-            warning={fieldMatchWarning}
+            warning={warningobj}
+            // warning={fieldMatchWarning}
             onChange={handleFieldMatchValueChange}
             isRequired
             data-test-subj="exceptionBuilderEntryFieldMatch"

@@ -39,7 +39,11 @@ const BOOLEAN_OPTIONS = [
 ];
 
 const SINGLE_SELECTION = { asPlainText: true };
-type Warning = string | React.ReactNode;
+interface Warning {
+  message: string | React.ReactNode;
+  code?: string;
+}
+// type Warning = string | React.ReactNode;
 
 interface AutocompleteFieldMatchProps {
   placeholder: string;
@@ -55,7 +59,7 @@ interface AutocompleteFieldMatchProps {
   autocompleteService: AutocompleteStart;
   onChange: (arg: string) => void;
   onError?: (arg: boolean) => void;
-  onWarning?: (arg: boolean) => void;
+  onWarning?: (arg: boolean, arg1: string) => void;
   warning?: Warning;
   'aria-label'?: string;
 }
@@ -130,7 +134,7 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
   const handleWarning = useCallback(
     (warn: Warning | undefined): void => {
       if (onWarning) {
-        onWarning(warn !== undefined);
+        onWarning(warn.message !== undefined, warn.code);
       }
     },
     [onWarning]
@@ -152,10 +156,10 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
 
       handleSpacesWarning(newValue);
       handleError(undefined);
-      handleWarning(undefined);
+      handleWarning(undefined, undefined);
       onChange(newValue ?? '');
     },
-    [handleError, handleSpacesWarning, labels, onChange, optionsMemo]
+    [handleError, handleWarning, handleSpacesWarning, labels, onChange, optionsMemo]
   );
 
   const handleSearchChange = useCallback(
@@ -256,7 +260,7 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
         isInvalid={selectedField != null && error != null}
         data-test-subj="valuesAutocompleteMatchLabel"
         fullWidth
-        helpText={warning || (showSpacesWarning && i18n.FIELD_SPACE_WARNING)}
+        helpText={(warning && warning.message) || (showSpacesWarning && i18n.FIELD_SPACE_WARNING)}
       >
         <EuiComboBox
           placeholder={inputPlaceholder}

@@ -65,6 +65,7 @@ const initialState: State = {
   errors: {},
   exceptions: [],
   exceptionsToDelete: [],
+  warning: '',
   warningExists: 0,
 };
 
@@ -73,6 +74,7 @@ export interface OnChangeProps {
   exceptionItems: ExceptionsBuilderReturnExceptionItem[];
   exceptionsToDelete: ExceptionListItemSchema[];
   warningExists: boolean;
+  warning: string;
 }
 
 export interface ExceptionBuilderProps {
@@ -137,6 +139,7 @@ export const ExceptionBuilderComponent = ({
     disableNested,
     disableOr,
     warningExists,
+    warning,
     exceptions,
     exceptionsToDelete,
   } = state;
@@ -154,13 +157,18 @@ export const ExceptionBuilderComponent = ({
   );
 
   const setWarningsExist = useCallback(
-    (hasWarnings: boolean): void => {
+    (hasWarnings: boolean, warningMessage: string): void => {
+      console.log('in exception item renderer', warning);
       dispatch({
         type: 'setWarningsExist',
         warningExists: hasWarnings,
       });
+      dispatch({
+        type: 'setWarning',
+        warning: warningMessage,
+      });
     },
-    [dispatch]
+    [dispatch, warning]
   );
 
   const setUpdateExceptions = useCallback(
@@ -372,13 +380,15 @@ export const ExceptionBuilderComponent = ({
 
   // Bubble up changes to parent
   useEffect(() => {
+    console.log('onchange warning', warning);
     onChange({
       errorExists: errorExists > 0,
       exceptionItems: memoExceptionItems,
       exceptionsToDelete,
+      warning,
       warningExists: warningExists > 0,
     });
-  }, [onChange, exceptionsToDelete, memoExceptionItems, errorExists, warningExists]);
+  }, [onChange, exceptionsToDelete, memoExceptionItems, errorExists, warning, warningExists]);
 
   // Defaults builder to never be sans entry, instead
   // always falls back to an empty entry if user deletes all

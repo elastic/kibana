@@ -34,6 +34,8 @@ import {
 
 import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
 
+import { WildCardWithWrongOperatorCallout } from '@kbn/securitysolution-exception-list-components';
+
 import type { Moment } from 'moment';
 import moment from 'moment';
 import {
@@ -125,6 +127,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       entryErrorExists,
       expireTime,
       expireErrorExists,
+      wildcardWarningExists,
     },
     dispatch,
   ] = useReducer(createExceptionItemsReducer(), {
@@ -138,6 +141,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     entryErrorExists: false,
     expireTime: itemToEdit.expire_time !== undefined ? moment(itemToEdit.expire_time) : undefined,
     expireErrorExists: false,
+    wildcardWarningExists: false,
   });
 
   const allowLargeValueLists = useMemo((): boolean => {
@@ -265,6 +269,17 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       dispatch({
         type: 'setExpireError',
         errorExists,
+      });
+    },
+    [dispatch]
+  );
+
+  const setHasWildcardWithWrongOperator = useCallback(
+    (warningExists: boolean, warning: string | undefined): void => {
+      console.log('warning', warning);
+      dispatch({
+        type: 'setWildcardWithWrongOperator',
+        warningExists,
       });
     },
     [dispatch]
@@ -401,8 +416,10 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
           isEdit
           onExceptionItemAdd={setExceptionItemsToAdd}
           onSetErrorExists={setConditionsValidationError}
+          onSetWarningExists={setHasWildcardWithWrongOperator}
           getExtendedFields={getExtendedFields}
         />
+        {wildcardWarningExists && <WildCardWithWrongOperatorCallout />}
         {!openedFromListDetailPage && listType === ExceptionListTypeEnum.DETECTION && (
           <>
             <EuiHorizontalRule />

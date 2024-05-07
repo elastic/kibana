@@ -8,6 +8,8 @@
 export { getExceptionBuilderComponentLazy } from './exceptions/components/builder';
 export type { OnChangeProps } from './exceptions/components/builder';
 
+export { WILDCARD_WITH_IS_OPERATOR_WARNING } from './exceptions/components/builder/translations';
+
 import type { PluginInitializerContext } from '@kbn/core/public';
 
 import { Plugin } from './plugin';
