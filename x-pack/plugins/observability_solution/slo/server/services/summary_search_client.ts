@@ -78,7 +78,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
         bool: {
           filter: [
             { term: { spaceId: this.spaceId } },
-            ...getSummaryOutdatedFilter(settings, kqlQuery),
+            ...excludeStaleSummaryFilter(settings, kqlQuery),
             getElasticsearchQueryOrThrow(kqlQuery),
             ...(parsedFilters.filter ?? []),
           ],
@@ -190,7 +190,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
   }
 }
 
-function getSummaryOutdatedFilter(settings: StoredSLOSettings, kqlFilter: string) {
+function excludeStaleSummaryFilter(settings: StoredSLOSettings, kqlFilter: string) {
   if (kqlFilter.includes('summaryUpdatedAt') || !settings.staleThresholdInHours) {
     return [];
   }

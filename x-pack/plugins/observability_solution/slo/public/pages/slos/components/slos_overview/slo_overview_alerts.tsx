@@ -9,9 +9,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle, EuiPanel } fro
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { GetOverviewResponse } from '@kbn/slo-schema/src/rest_specs/routes/get_overview';
-import rison from '@kbn/rison';
 import { rulesLocatorID, RulesParams } from '@kbn/observability-plugin/public';
-import { observabilityPaths } from '@kbn/observability-plugin/common';
+import { useAlertsUrl } from '../../../../hooks/use_alerts_url';
 import { useKibana } from '../../../../utils/kibana_react';
 import { OverViewItem } from './overview_item';
 
@@ -95,15 +94,3 @@ export function SLOOverviewAlerts({
     </EuiPanel>
   );
 }
-
-export const useAlertsUrl = () => {
-  const { basePath } = useKibana().services.http;
-
-  const kuery = 'alert.attributes.alertTypeId:("slo.rules.burnRate")';
-
-  return `${basePath.prepend(observabilityPaths.alerts)}?_a=${rison.encode({
-    kuery,
-    rangeFrom: 'now-24h',
-    rangeTo: 'now',
-  })}`;
-};
