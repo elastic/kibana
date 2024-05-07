@@ -113,13 +113,11 @@ export function MachineLearningJobExpandedDetailsProvider(
     },
 
     async openForecastTab(jobId: string) {
-      // const failFasterThanExistOrFail = { timeout: 10_000 };
       await retry.tryForTime(60_000, async () => {
         await jobTable.ensureDetailsOpen(jobId);
         await testSubjects.click(jobTable.detailsSelector(jobId, 'mlJobListTab-forecasts'), 3_000);
         await headerPage.awaitKibanaChrome();
         await headerPage.waitUntilLoadingHasFinished();
-        // await testSubjects.existOrFail('mlJobListForecastTable', failFasterThanExistOrFail);
         await this.assertJobDetailsTabOpen('mlJobListTab-forecasts');
       });
     },
