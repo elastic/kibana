@@ -136,7 +136,7 @@ export const commandDefinitions: CommandDefinition[] = [
         function checkAggExistence(arg: ESQLFunction): boolean {
           // TODO the grouping function check may not
           // hold true for all future cases
-          if (isAggFunction(arg) || isGroupingFunction(arg)) {
+          if (isAggFunction(arg)) {
             return true;
           }
           if (isOtherFunction(arg)) {
@@ -176,7 +176,7 @@ export const commandDefinitions: CommandDefinition[] = [
           function checkFunctionContent(arg: ESQLFunction) {
             // TODO the grouping function check may not
             // hold true for all future cases
-            if (isAggFunction(arg) || isGroupingFunction(arg)) {
+            if (isAggFunction(arg)) {
               return true;
             }
             return (arg as ESQLFunction).args.every(
