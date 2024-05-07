@@ -11,6 +11,7 @@ import { environmentQuery } from '../../../common/utils/environment_query';
 import { getConnectionStats } from '../../lib/connections/get_connection_stats';
 import { getConnectionStatsItemsWithRelativeImpact } from '../../lib/connections/get_connection_stats/get_connection_stats_items_with_relative_impact';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { RandomSampler } from '../../lib/helpers/get_random_sampler';
 
 interface Options {
   apmEventClient: APMEventClient;
@@ -20,6 +21,7 @@ interface Options {
   numBuckets: number;
   environment: string;
   offset?: string;
+  randomSampler: RandomSampler;
 }
 
 async function getServiceDependenciesForTimeRange({
@@ -30,6 +32,7 @@ async function getServiceDependenciesForTimeRange({
   numBuckets,
   environment,
   offset,
+  randomSampler,
 }: Options) {
   const statsItems = await getConnectionStats({
     apmEventClient,
@@ -39,6 +42,7 @@ async function getServiceDependenciesForTimeRange({
     filter: [{ term: { [SERVICE_NAME]: serviceName } }, ...environmentQuery(environment)],
     offset,
     collapseBy: 'downstream',
+    randomSampler,
   });
 
   return getConnectionStatsItemsWithRelativeImpact(statsItems);

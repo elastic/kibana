@@ -16,6 +16,7 @@ import { environmentQuery } from '../../../common/utils/environment_query';
 import { getConnectionStats } from '../../lib/connections/get_connection_stats';
 import { getConnectionStatsItemsWithRelativeImpact } from '../../lib/connections/get_connection_stats/get_connection_stats_items_with_relative_impact';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { RandomSampler } from '../../lib/helpers/get_random_sampler';
 
 interface Options {
   apmEventClient: APMEventClient;
@@ -25,6 +26,7 @@ interface Options {
   environment: string;
   offset?: string;
   kuery: string;
+  randomSampler: RandomSampler;
 }
 
 async function getTopDependenciesForTimeRange({
@@ -35,6 +37,7 @@ async function getTopDependenciesForTimeRange({
   environment,
   offset,
   kuery,
+  randomSampler,
 }: Options): Promise<ConnectionStatsItemWithImpact[]> {
   const statsItems = await getConnectionStats({
     apmEventClient,
@@ -44,6 +47,7 @@ async function getTopDependenciesForTimeRange({
     filter: [...environmentQuery(environment), ...kqlQuery(kuery)],
     offset,
     collapseBy: 'downstream',
+    randomSampler,
   });
 
   return getConnectionStatsItemsWithRelativeImpact(
