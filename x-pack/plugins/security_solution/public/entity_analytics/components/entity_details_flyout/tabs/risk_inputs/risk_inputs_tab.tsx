@@ -14,6 +14,7 @@ import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 
 import { get } from 'lodash/fp';
+import { formatRiskScore } from '../../../../common';
 import type {
   InputAlert,
   UseRiskContributingAlertsResult,
@@ -133,7 +134,7 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
         mobileOptions: { show: true },
         sortable: true,
         align: 'right',
-        render: (contribution: number) => contribution.toFixed(2),
+        render: formatContribution,
       },
     ],
     []
@@ -176,13 +177,12 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
       <EuiSpacer size="xs" />
       <RiskInputsUtilityBar riskInputs={selectedItems} />
       <EuiInMemoryTable
-        compressed={true}
+        compressed
         loading={loadingRiskScore || alerts.loading}
         items={alerts.data || []}
         columns={inputColumns}
         sorting
         selection={euiTableSelectionProps}
-        isSelectable
         itemId="_id"
       />
       <EuiSpacer size="s" />
@@ -243,6 +243,7 @@ const ContextsSection: React.FC<{
       <EuiInMemoryTable
         compressed={true}
         loading={loading}
+        data-test-subj="risk-input-contexts-table"
         columns={contextColumns}
         items={[
           {
@@ -258,7 +259,7 @@ const ContextsSection: React.FC<{
                 dataTestSubj="risk-inputs-asset-criticality-badge"
               />
             ),
-            contribution: (criticality.contribution || 0).toFixed(2),
+            contribution: formatContribution(criticality.contribution || 0),
           },
         ]}
       />
@@ -338,11 +339,26 @@ const ExtraAlertsMessage: React.FC<ExtraAlertsMessageProps> = ({ riskScore, aler
           defaultMessage="{count} more alerts contributed {score} to the calculated risk score"
           values={{
             count: totals.count - displayed.count,
-            score: (totals.score - displayed.score).toFixed(2),
+            score: formatContribution(totals.score - displayed.score),
           }}
         />
       }
       iconType="annotation"
     />
   );
+};
+
+const formatContribution = (value: number): string => {
+  const fixedValue = formatRiskScore(value);
+
+  // prevent +0.00 for values like 0.0001
+  if (fixedValue === '0.00') {
+    return fixedValue;
+  }
+
+  if (value > 0) {
+    return `+${fixedValue}`;
+  }
+
+  return fixedValue;
 };

@@ -16,21 +16,17 @@ function getAllowedOriginsRt() {
     'allowedOriginsRt',
     t.string.is,
     (input, context) => {
-      return either.chain(
-        t.string.validate(input, context),
-        (inputAsString) => {
-          return arrayRegex.test(inputAsString)
-            ? t.failure(
-                input,
-                context,
-                i18n.translate(
-                  'xpack.apm.fleet_integration.settings.rum.allowedHeadersValidation',
-                  { defaultMessage: 'Square brackets not allowed' }
-                )
-              )
-            : t.success(inputAsString);
-        }
-      );
+      return either.chain(t.string.validate(input, context), (inputAsString) => {
+        return arrayRegex.test(inputAsString)
+          ? t.failure(
+              input,
+              context,
+              i18n.translate('xpack.apm.fleet_integration.settings.rum.allowedHeadersValidation', {
+                defaultMessage: 'Square brackets not allowed',
+              })
+            )
+          : t.success(inputAsString);
+      });
     },
     t.identity
   );
@@ -42,10 +38,9 @@ export function getRUMSettings(): SettingsRow[] {
     {
       key: ENABLE_RUM_KEY,
       type: 'boolean',
-      rowTitle: i18n.translate(
-        'xpack.apm.fleet_integration.settings.rum.enableRumTitle',
-        { defaultMessage: 'Enable RUM' }
-      ),
+      rowTitle: i18n.translate('xpack.apm.fleet_integration.settings.rum.enableRumTitle', {
+        defaultMessage: 'Enable RUM',
+      }),
       rowDescription: i18n.translate(
         'xpack.apm.fleet_integration.settings.rum.enableRumDescription',
         { defaultMessage: 'Enable Real User Monitoring (RUM)' }
@@ -54,16 +49,14 @@ export function getRUMSettings(): SettingsRow[] {
         {
           key: 'rum_allow_origins',
           type: 'combo',
-          label: i18n.translate(
-            'xpack.apm.fleet_integration.settings.rum.rumAllowOriginsLabel',
-            { defaultMessage: 'Allowed Origins' }
-          ),
+          label: i18n.translate('xpack.apm.fleet_integration.settings.rum.rumAllowOriginsLabel', {
+            defaultMessage: 'Allowed Origins',
+          }),
           labelAppend: OPTIONAL_LABEL,
           helpText: i18n.translate(
             'xpack.apm.fleet_integration.settings.rum.rumAllowOriginsHelpText',
             {
-              defaultMessage:
-                'Allowed Origin headers to be sent by User Agents.',
+              defaultMessage: 'Allowed Origin headers to be sent by User Agents.',
             }
           ),
           validation: getAllowedOriginsRt(),
@@ -71,10 +64,9 @@ export function getRUMSettings(): SettingsRow[] {
         {
           key: 'rum_allow_headers',
           type: 'combo',
-          label: i18n.translate(
-            'xpack.apm.fleet_integration.settings.rum.rumAllowHeaderLabel',
-            { defaultMessage: 'Access-Control-Allow-Headers' }
-          ),
+          label: i18n.translate('xpack.apm.fleet_integration.settings.rum.rumAllowHeaderLabel', {
+            defaultMessage: 'Access-Control-Allow-Headers',
+          }),
           labelAppend: OPTIONAL_LABEL,
           helpText: i18n.translate(
             'xpack.apm.fleet_integration.settings.rum.rumAllowHeaderHelpText',
@@ -83,10 +75,9 @@ export function getRUMSettings(): SettingsRow[] {
                 'Supported Access-Control-Allow-Headers in addition to "Content-Type", "Content-Encoding" and "Accept".',
             }
           ),
-          rowTitle: i18n.translate(
-            'xpack.apm.fleet_integration.settings.rum.rumAllowHeaderTitle',
-            { defaultMessage: 'Custom headers' }
-          ),
+          rowTitle: i18n.translate('xpack.apm.fleet_integration.settings.rum.rumAllowHeaderTitle', {
+            defaultMessage: 'Custom headers',
+          }),
           rowDescription: i18n.translate(
             'xpack.apm.fleet_integration.settings.rum.rumAllowHeaderDescription',
             { defaultMessage: 'Configure authentication for the agent' }
@@ -103,8 +94,7 @@ export function getRUMSettings(): SettingsRow[] {
           helpText: i18n.translate(
             'xpack.apm.fleet_integration.settings.rum.rumResponseHeadersHelpText',
             {
-              defaultMessage:
-                'Added to RUM responses, e.g. for security policy compliance.',
+              defaultMessage: 'Added to RUM responses, e.g. for security policy compliance.',
             }
           ),
         },
@@ -150,12 +140,7 @@ export function getRUMSettings(): SettingsRow[] {
   ];
 }
 
-export function isRUMFormValid(
-  newVars: PackagePolicyVars,
-  rumSettings: SettingsRow[]
-) {
+export function isRUMFormValid(newVars: PackagePolicyVars, rumSettings: SettingsRow[]) {
   // only validates RUM when its flag is enabled
-  return (
-    !newVars[ENABLE_RUM_KEY].value || isSettingsFormValid(rumSettings, newVars)
-  );
+  return !newVars[ENABLE_RUM_KEY].value || isSettingsFormValid(rumSettings, newVars);
 }

@@ -10,6 +10,7 @@ import {
   combineLatest,
   debounceTime,
   distinctUntilChanged,
+  firstValueFrom,
   from,
   map,
   Observable,
@@ -31,7 +32,6 @@ import type {
 import { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import { definition as esDefinition } from '@kbn/solution-nav-es';
 import { definition as obltDefinition } from '@kbn/solution-nav-oblt';
-import { definition as analyticsDefinition } from '@kbn/solution-nav-analytics';
 import type { PanelContentProvider } from '@kbn/shared-ux-chrome-navigation';
 import { UserProfileData } from '@kbn/user-profile-components';
 import { ENABLE_SOLUTION_NAV_UI_SETTING_ID, SOLUTION_NAV_FEATURE_FLAG_NAME } from '../common';
@@ -140,9 +140,11 @@ export class NavigationPublicPlugin
       isSolutionNavExperiementEnabled$ =
         !onCloud || isServerless
           ? of(false)
-          : from(cloudExperiments.getVariation(SOLUTION_NAV_FEATURE_FLAG_NAME, false)).pipe(
-              shareReplay(1)
-            );
+          : from(
+              cloudExperiments
+                .getVariation(SOLUTION_NAV_FEATURE_FLAG_NAME, false)
+                .catch(() => false)
+            ).pipe(shareReplay(1));
 
       this.isSolutionNavEnabled$ = isSolutionNavExperiementEnabled$.pipe(
         switchMap((isFeatureEnabled) => {
@@ -172,21 +174,13 @@ export class NavigationPublicPlugin
       });
 
     // Initialize the solution navigation if it is enabled
-    isSolutionNavExperiementEnabled$.pipe(take(1)).subscribe((isFeatureEnabled) => {
-      if (!isFeatureEnabled) return;
+    isSolutionNavExperiementEnabled$.pipe(take(1)).subscribe((isEnabled) => {
+      if (!isEnabled) return;
 
       chrome.project.setCloudUrls(cloud!);
       this.addDefaultSolutionNavigation({ chrome });
       this.susbcribeToSolutionNavUiSettings({ core, security, defaultSolution });
     });
-
-    // Keep track of the solution navigation enabled state
-    let isSolutionNavEnabled = false;
-    isSolutionNavExperiementEnabled$
-      .pipe(takeUntil(this.stop$))
-      .subscribe((_isSolutionNavEnabled) => {
-        isSolutionNavEnabled = _isSolutionNavEnabled;
-      });
 
     return {
       ui: {
@@ -195,8 +189,10 @@ export class NavigationPublicPlugin
         createTopNavWithCustomContext: createCustomTopNav,
       },
       addSolutionNavigation: (solutionNavigation) => {
-        if (!isSolutionNavEnabled) return;
-        return this.addSolutionNavigation(solutionNavigation);
+        firstValueFrom(isSolutionNavExperiementEnabled$).then((isEnabled) => {
+          if (!isEnabled) return;
+          this.addSolutionNavigation(solutionNavigation);
+        });
       },
       isSolutionNavEnabled$: this.isSolutionNavEnabled$,
     };
@@ -235,7 +231,7 @@ export class NavigationPublicPlugin
           chrome.project.changeActiveSolutionNavigation(null);
           chrome.setChromeStyle('classic');
         } else {
-          chrome.project.changeActiveSolutionNavigation(defaultSolution, { onlyIfNotSet: true });
+          chrome.project.changeActiveSolutionNavigation(defaultSolution);
         }
       });
   }
@@ -282,10 +278,6 @@ export class NavigationPublicPlugin
       oblt: {
         ...obltDefinition,
         sideNavComponent: this.getSideNavComponent({ dataTestSubj: 'observabilitySideNav' }),
-      },
-      analytics: {
-        ...analyticsDefinition,
-        sideNavComponent: this.getSideNavComponent({ dataTestSubj: 'analyticsSideNav' }),
       },
     };
     chrome.project.updateSolutionNavigations(solutionNavs, true);

@@ -22,7 +22,6 @@ export function registerGetApmServicesListFunction({
   registerFunction(
     {
       name: 'get_apm_services_list',
-      contexts: ['apm'],
       description: `Gets a list of services`,
       descriptionForUser: i18n.translate(
         'xpack.apm.observabilityAiAssistant.functions.registerGetApmServicesList.descriptionForUser',
@@ -40,13 +39,11 @@ export function registerGetApmServicesListFunction({
           },
           start: {
             ...NON_EMPTY_STRING,
-            description:
-              'The start of the time range, in Elasticsearch date math, like `now`.',
+            description: 'The start of the time range, in Elasticsearch date math, like `now`.',
           },
           end: {
             ...NON_EMPTY_STRING,
-            description:
-              'The end of the time range, in Elasticsearch date math, like `now-24h`.',
+            description: 'The end of the time range, in Elasticsearch date math, like `now-24h`.',
           },
           healthStatus: {
             type: 'array',

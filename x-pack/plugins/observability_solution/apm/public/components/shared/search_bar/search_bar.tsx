@@ -4,12 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiFlexGroup,
-  EuiFlexGroupProps,
-  EuiFlexItem,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexGroupProps, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
@@ -47,11 +42,7 @@ export function SearchBar({
 
   return (
     <EuiFlexItem grow={false}>
-      <EuiFlexGroup
-        gutterSize="s"
-        responsive={false}
-        direction={searchBarDirection}
-      >
+      <EuiFlexGroup gutterSize="s" responsive={false} direction={searchBarDirection}>
         <EuiFlexItem>
           <EuiFlexGroup
             direction={isLarge ? 'columnReverse' : 'row'}

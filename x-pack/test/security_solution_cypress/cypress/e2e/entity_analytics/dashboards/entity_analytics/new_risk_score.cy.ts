@@ -41,8 +41,11 @@ import { getNewRule } from '../../../../objects/rule';
 import { clickOnFirstHostsAlerts, clickOnFirstUsersAlerts } from '../../../../tasks/risk_scores';
 import { OPTION_LIST_LABELS, OPTION_LIST_VALUES } from '../../../../screens/common/filter_group';
 import { kqlSearch } from '../../../../tasks/security_header';
-import { setEndDate, setStartDate, updateDates } from '../../../../tasks/date_picker';
-import { mockRiskEngineEnabled } from '../../../../tasks/entity_analytics';
+import { setEndDate, setStartDate } from '../../../../tasks/date_picker';
+import {
+  mockRiskEngineEnabled,
+  updateDashboardTimeRange,
+} from '../../../../tasks/entity_analytics';
 
 const TEST_USER_ALERTS = 1;
 const TEST_USER_NAME = 'test';
@@ -76,7 +79,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
     });
 
     // https://github.com/elastic/kibana/issues/179687
-    describe('When risk engine is enabled', { tags: ['@skipInServerless'] }, () => {
+    describe('When risk engine is enabled', { tags: ['@skipInServerlessMKI'] }, () => {
       beforeEach(() => {
         login();
         mockRiskEngineEnabled();
@@ -140,8 +143,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
           cy.get(HOSTS_TABLE_ROWS).should('have.length', 1);
         });
 
-        // FLAKY: https://github.com/elastic/kibana/issues/178838
-        describe.skip('With alerts data', () => {
+        describe('With alerts data', () => {
           before(() => {
             createRule(getNewRule());
           });
@@ -163,7 +165,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
 
           it('filters the alerts count with time range', () => {
             setEndDate(DATE_BEFORE_ALERT_CREATION);
-            updateDates();
+            updateDashboardTimeRange();
 
             cy.get(HOSTS_TABLE_ALERT_CELL).first().should('include.text', 0);
           });
@@ -171,13 +173,13 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
           it('filters risk scores with time range', () => {
             const now = moment().format(DATE_FORMAT);
             setStartDate(now);
-            updateDates();
+            updateDashboardTimeRange();
 
             cy.get(HOST_RISK_SCORE_NO_DATA_DETECTED).should('be.visible');
 
             // CLEAR DATES
             setStartDate(OLDEST_DATE);
-            updateDates();
+            updateDashboardTimeRange();
           });
 
           it('opens alerts page when alerts count is clicked', () => {
@@ -256,7 +258,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
 
           it('filters the alerts count with time range', () => {
             setEndDate(DATE_BEFORE_ALERT_CREATION);
-            updateDates();
+            updateDashboardTimeRange();
 
             cy.get(USERS_TABLE_ALERT_CELL).first().should('include.text', 0);
           });
@@ -264,13 +266,13 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
           it('filters risk scores with time range', () => {
             const now = moment().format(DATE_FORMAT);
             setStartDate(now);
-            updateDates();
+            updateDashboardTimeRange();
 
             cy.get(USER_RISK_SCORE_NO_DATA_DETECTED).should('be.visible');
 
             // CLEAR DATES
             setStartDate(OLDEST_DATE);
-            updateDates();
+            updateDashboardTimeRange();
           });
 
           it('opens alerts page when alerts count is clicked', () => {

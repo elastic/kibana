@@ -7,11 +7,7 @@
 
 import { AgentName } from '@kbn/apm-plugin/typings/es_schemas/ui/fields/agent';
 
-export const RUM_AGENT_NAMES: AgentName[] = [
-  'js-base',
-  'rum-js',
-  'opentelemetry/webjs',
-];
+export const RUM_AGENT_NAMES: AgentName[] = ['js-base', 'rum-js', 'opentelemetry/webjs'];
 
 export function isRumAgentName(
   agentName?: string

@@ -34,7 +34,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
 
-  describe('@ess @serverless query_signals_route and find_alerts_route', () => {
+  describe('@ess @serverless @serverlessQA query_signals_route and find_alerts_route', () => {
     describe('validation checks', () => {
       it('should not give errors when querying and the alerts index does exist and is empty', async () => {
         await createAlertsIndex(supertest, log);

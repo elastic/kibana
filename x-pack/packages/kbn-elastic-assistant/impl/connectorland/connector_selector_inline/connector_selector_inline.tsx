@@ -27,7 +27,6 @@ interface Props {
   isFlyoutMode: boolean;
   onConnectorIdSelected?: (connectorId: string) => void;
   onConnectorSelected?: (conversation: Conversation) => void;
-  showLabel?: boolean;
 }
 
 const inputContainerClassName = css`
@@ -57,9 +56,7 @@ const placeholderButtonClassName = css`
   text-overflow: ellipsis;
   max-width: 400px;
   font-weight: normal;
-  padding-bottom: 5px;
-  padding-left: 0;
-  padding-top: 2px;
+  padding: 0 14px 0 0;
 `;
 
 /**
@@ -71,7 +68,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
     selectedConnectorId,
     selectedConversation,
     isFlyoutMode,
-    showLabel = true,
+
     onConnectorIdSelected,
     onConnectorSelected,
   }) => {
@@ -139,13 +136,6 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
           justifyContent={'flexStart'}
           responsive={false}
         >
-          {!isFlyoutMode && (
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued">
-                {i18n.INLINE_CONNECTOR_LABEL}
-              </EuiText>
-            </EuiFlexItem>
-          )}
           <EuiFlexItem>
             <ConnectorSelector
               displayFancy={(displayText) => (
@@ -162,6 +152,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
               selectedConnectorId={selectedConnectorId}
               setIsOpen={setIsOpen}
               onConnectorSelectionChange={onChange}
+              isFlyoutMode={isFlyoutMode}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -177,18 +168,11 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
         justifyContent={'flexStart'}
         responsive={false}
       >
-        {showLabel && (
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued">
-              {i18n.INLINE_CONNECTOR_LABEL}
-            </EuiText>
-          </EuiFlexItem>
-        )}
         <EuiFlexItem>
           {isOpen ? (
             <ConnectorSelector
               displayFancy={(displayText) => (
-                <EuiText css={inputDisplayClassName} size="s">
+                <EuiText className={inputDisplayClassName} size="xs">
                   {displayText}
                 </EuiText>
               )}
@@ -197,12 +181,12 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
               selectedConnectorId={selectedConnectorId}
               setIsOpen={setIsOpen}
               onConnectorSelectionChange={onChange}
+              isFlyoutMode={isFlyoutMode}
             />
           ) : (
             <span>
               <EuiButtonEmpty
                 className={placeholderButtonClassName}
-                color={'text'}
                 data-test-subj="connectorSelectorPlaceholderButton"
                 iconSide={'right'}
                 iconType="arrowDown"

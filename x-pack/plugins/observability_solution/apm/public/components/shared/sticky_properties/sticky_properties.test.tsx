@@ -39,9 +39,7 @@ describe('StickyProperties', () => {
       },
     ];
 
-    const wrapper = shallow(
-      <StickyProperties stickyProperties={stickyProperties} />
-    );
+    const wrapper = shallow(<StickyProperties stickyProperties={stickyProperties} />);
 
     expect(wrapper).toMatchSnapshot();
   });
@@ -56,9 +54,7 @@ describe('StickyProperties', () => {
         },
       ];
 
-      const wrapper = shallow(
-        <StickyProperties stickyProperties={stickyProperties} />
-      )
+      const wrapper = shallow(<StickyProperties stickyProperties={stickyProperties} />)
         .find('PropertyValue')
         .dive()
         .text();
@@ -75,9 +71,7 @@ describe('StickyProperties', () => {
         },
       ];
 
-      const wrapper = shallow(
-        <StickyProperties stickyProperties={stickyProperties} />
-      )
+      const wrapper = shallow(<StickyProperties stickyProperties={stickyProperties} />)
         .find('PropertyValue')
         .html();
 

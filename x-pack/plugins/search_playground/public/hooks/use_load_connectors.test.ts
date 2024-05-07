@@ -66,6 +66,11 @@ describe('useLoadConnectors', () => {
         isMissingSecrets: false,
         config: { apiProvider: OpenAiProviderType.AzureAi },
       },
+      {
+        id: '4',
+        actionTypeId: '.bedrock',
+        isMissingSecrets: false,
+      },
     ];
     mockedLoadConnectors.mockResolvedValue(connectors);
 
@@ -93,6 +98,13 @@ describe('useLoadConnectors', () => {
           isMissingSecrets: false,
           title: 'OpenAI Azure',
           type: 'openai_azure',
+        },
+        {
+          actionTypeId: '.bedrock',
+          id: '4',
+          isMissingSecrets: false,
+          title: 'Bedrock',
+          type: 'bedrock',
         },
       ]);
     });

@@ -67,42 +67,39 @@ function getServiceMapDependencyNodeInfoForTimeRange({
       ...getOutcomeAggregation(ApmDocumentType.ServiceDestinationMetric),
     };
 
-    const response = await apmEventClient.search(
-      'get_service_map_dependency_node_stats',
-      {
-        apm: {
-          events: [ProcessorEvent.metric],
-        },
-        body: {
-          track_total_hits: false,
-          size: 0,
-          query: {
-            bool: {
-              filter: [
-                ...getDocumentTypeFilterForServiceDestinationStatistics(true),
-                {
-                  term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencyName },
-                },
-                ...rangeQuery(startWithOffset, endWithOffset),
-                ...environmentQuery(environment),
-              ],
-            },
-          },
-          aggs: {
-            ...subAggs,
-            timeseries: {
-              date_histogram: {
-                field: '@timestamp',
-                fixed_interval: intervalString,
-                min_doc_count: 0,
-                extended_bounds: { min: startWithOffset, max: endWithOffset },
+    const response = await apmEventClient.search('get_service_map_dependency_node_stats', {
+      apm: {
+        events: [ProcessorEvent.metric],
+      },
+      body: {
+        track_total_hits: false,
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              ...getDocumentTypeFilterForServiceDestinationStatistics(true),
+              {
+                term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencyName },
               },
-              aggs: subAggs,
-            },
+              ...rangeQuery(startWithOffset, endWithOffset),
+              ...environmentQuery(environment),
+            ],
           },
         },
-      }
-    );
+        aggs: {
+          ...subAggs,
+          timeseries: {
+            date_histogram: {
+              field: '@timestamp',
+              fixed_interval: intervalString,
+              min_doc_count: 0,
+              extended_bounds: { min: startWithOffset, max: endWithOffset },
+            },
+            aggs: subAggs,
+          },
+        },
+      },
+    });
 
     const count = response.aggregations?.count.value ?? 0;
 
@@ -133,35 +130,31 @@ function getServiceMapDependencyNodeInfoForTimeRange({
       failedTransactionsRate: {
         value: avgFailedTransactionsRate,
         timeseries: response.aggregations?.timeseries
-          ? getFailedTransactionRateTimeSeries(
-              response.aggregations.timeseries.buckets
-            ).map(({ x, y }) => ({ x: x + offsetInMs, y }))
+          ? getFailedTransactionRateTimeSeries(response.aggregations.timeseries.buckets).map(
+              ({ x, y }) => ({ x: x + offsetInMs, y })
+            )
           : undefined,
       },
       transactionStats: {
         throughput: {
           value: throughput,
-          timeseries: response.aggregations?.timeseries.buckets.map(
-            (bucket) => {
-              return {
-                x: bucket.key + offsetInMs,
-                y: calculateThroughputWithRange({
-                  start,
-                  end,
-                  value: bucket.doc_count ?? 0,
-                }),
-              };
-            }
-          ),
+          timeseries: response.aggregations?.timeseries.buckets.map((bucket) => {
+            return {
+              x: bucket.key + offsetInMs,
+              y: calculateThroughputWithRange({
+                start,
+                end,
+                value: bucket.doc_count ?? 0,
+              }),
+            };
+          }),
         },
         latency: {
           value: latency,
-          timeseries: response.aggregations?.timeseries.buckets.map(
-            (bucket) => ({
-              x: bucket.key + offsetInMs,
-              y: bucket.latency_sum.value,
-            })
-          ),
+          timeseries: response.aggregations?.timeseries.buckets.map((bucket) => ({
+            x: bucket.key + offsetInMs,
+            y: bucket.latency_sum.value,
+          })),
         },
       },
     };
@@ -191,9 +184,7 @@ export async function getServiceMapDependencyNodeInfo({
 
   const [currentPeriod, previousPeriod] = await Promise.all([
     getServiceMapDependencyNodeInfoForTimeRange(commonProps),
-    offset
-      ? getServiceMapDependencyNodeInfoForTimeRange({ ...commonProps, offset })
-      : undefined,
+    offset ? getServiceMapDependencyNodeInfoForTimeRange({ ...commonProps, offset }) : undefined,
   ]);
 
   return { currentPeriod, previousPeriod };
