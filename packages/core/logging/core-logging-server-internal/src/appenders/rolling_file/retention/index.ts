@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { placePanel } from './place_panel';
-
-export { placeClonePanel } from './place_clone_panel_strategy';
+export { retentionPolicyConfigSchema, type RetentionPolicy } from './retention_policy';
+export { createRetentionPolicy, mergeRetentionPolicyConfig } from './create_retention_policy';

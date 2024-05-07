@@ -7,9 +7,9 @@
  */
 
 import { EmbeddableInput } from '@kbn/embeddable-plugin/public';
-import { DashboardPanelState } from '../../../../common';
-import { GridData } from '../../../../common/content_management';
-import { PanelPlacementStrategy } from '../../../dashboard_constants';
+import { DashboardPanelState } from '../../../common';
+import { GridData } from '../../../common/content_management';
+import { PanelPlacementStrategy } from '../../dashboard_constants';
 
 export interface PanelPlacementSettings {
   strategy?: PanelPlacementStrategy;
@@ -28,12 +28,16 @@ export interface PanelPlacementProps {
   currentPanels: { [key: string]: DashboardPanelState };
 }
 
-export interface IProvidesPanelPlacementSettings<
+export interface IProvidesLegacyPanelPlacementSettings<
   InputType extends EmbeddableInput = EmbeddableInput,
   AttributesType = unknown
 > {
-  getPanelPlacementSettings: (
+  getLegacyPanelPlacementSettings: (
     input: InputType,
     attributes?: AttributesType
   ) => Partial<PanelPlacementSettings>;
 }
+
+export type GetPanelPlacementSettings<SerializedState extends object = object> = (
+  serializedState?: SerializedState
+) => PanelPlacementSettings;
