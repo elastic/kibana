@@ -120,7 +120,7 @@ export function updateSearchSource(
 
   searchSource.setField('size', isGroupAgg ? 0 : params.size);
 
-  const field = index.fields.find((f) => f.name === timeFieldName);
+  const field = index.getTimeField();
   const filters = [
     buildRangeFilter(
       field!,
