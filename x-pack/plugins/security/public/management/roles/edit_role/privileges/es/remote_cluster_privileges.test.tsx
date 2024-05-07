@@ -129,9 +129,9 @@ test('it renders fields as disabled when not editable', async () => {
 });
 
 test('it renders fields as disabled when `allowRemoteClusterPrivileges` is set to false', async () => {
-  const lisence = licenseMock.create();
+  const license = licenseMock.create();
 
-  lisence.getFeatures.mockReturnValue({
+  license.getFeatures.mockReturnValue({
     allowRemoteClusterPrivileges: false,
   } as SecurityLicenseFeatures);
 
