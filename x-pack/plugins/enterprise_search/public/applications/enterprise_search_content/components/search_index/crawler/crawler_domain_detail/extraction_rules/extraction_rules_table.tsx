@@ -124,10 +124,7 @@ export const ExtractionRulesTable: React.FC = () => {
         defaultMessage: 'Field rules',
       }),
       render: (rule: ExtractionRule) => (
-        <EuiButtonEmpty
-          data-test-subj="enterpriseSearchColumnsButton"
-          onClick={() => toggleExpandedItem(rule)}
-        >
+        <EuiButtonEmpty onClick={() => toggleExpandedItem(rule)}>
           {rule.rules.length}
         </EuiButtonEmpty>
       ),

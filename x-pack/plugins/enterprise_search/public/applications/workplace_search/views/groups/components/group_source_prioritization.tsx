@@ -84,7 +84,6 @@ export const GroupSourcePrioritization: React.FC = () => {
 
   const headerAction = (
     <EuiButton
-      data-test-subj="enterpriseSearchGroupSourcePrioritizationButton"
       disabled={groupPrioritiesUnchanged}
       color="primary"
       fill
@@ -117,14 +116,7 @@ export const GroupSourcePrioritization: React.FC = () => {
             )}
           </>
         }
-        actions={
-          <EuiButton
-            data-test-subj="enterpriseSearchGroupSourcePrioritizationButton"
-            onClick={showOrgSourcesModal}
-          >
-            {ZERO_STATE_BUTTON_TEXT}
-          </EuiButton>
-        }
+        actions={<EuiButton onClick={showOrgSourcesModal}>{ZERO_STATE_BUTTON_TEXT}</EuiButton>}
       />
       <EuiSpacer size="xxl" />
     </EuiPanel>

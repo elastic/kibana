@@ -20,7 +20,7 @@ const sloBurnRateDefaultActionMessage = i18n.translate(
 
 '{{rule.name}}' is active with the following conditions:
 
-- SLO: '{{context.sloName}}''
+- SLO: '{{context.sloName}}'
 - The burn rate over the last '{{context.longWindow.duration}}' is '{{context.longWindow.burnRate}}'
 - The burn rate over the last '{{context.shortWindow.duration}}' is '{{context.shortWindow.burnRate}}'
 - Threshold: '{{context.burnRateThreshold}}'
@@ -36,7 +36,7 @@ const sloBurnRateDefaultRecoveryMessage = i18n.translate(
 
 '{{rule.name}}' has recovered.
 
-- SLO: '{{context.sloName}}''
+- SLO: '{{context.sloName}}'
 - The burn rate over the last '{{context.longWindow.duration}}' is '{{context.longWindow.burnRate}}'
 - The burn rate over the last '{{context.shortWindow.duration}}' is '{{context.shortWindow.burnRate}}'
 - Threshold: '{{context.burnRateThreshold}}'

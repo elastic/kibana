@@ -97,12 +97,7 @@ const ErrorBody: React.FC = () => {
           defaultMessage="We can’t establish a connection to Enterprise Search at the host URL {enterpriseSearchUrl} due to the following error:"
           values={{
             enterpriseSearchUrl: (
-              <EuiLink
-                data-test-subj="enterpriseSearchErrorBodyLink"
-                target="_blank"
-                href={config.host}
-                css={{ overflowWrap: 'break-word' }}
-              >
+              <EuiLink target="_blank" href={config.host} css={{ overflowWrap: 'break-word' }}>
                 {config.host}
               </EuiLink>
             ),
@@ -124,11 +119,7 @@ const cloudError = (cloud: Partial<CloudSetup>) => {
         defaultMessage="Does your Cloud deployment have Enterprise Search nodes running? {deploymentSettingsLink}"
         values={{
           deploymentSettingsLink: (
-            <EuiLink
-              data-test-subj="enterpriseSearchCloudErrorCheckYourDeploymentSettingsLink"
-              target="_blank"
-              href={`${deploymentUrl}/edit`}
-            >
+            <EuiLink target="_blank" href={`${deploymentUrl}/edit`}>
               {i18n.translate(
                 'xpack.enterpriseSearch.errorConnectingState.cloudErrorMessageLinkText',
                 {

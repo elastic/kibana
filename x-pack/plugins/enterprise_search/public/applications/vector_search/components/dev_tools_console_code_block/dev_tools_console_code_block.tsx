@@ -60,13 +60,7 @@ export const DevToolsConsoleCodeBlock: React.FC<DevToolsConsoleCodeBlockProps> =
             <EuiFlexItem grow={false}>
               <EuiCopy textToCopy={children}>
                 {(copy) => (
-                  <EuiButtonEmpty
-                    data-test-subj="enterpriseSearchDevToolsConsoleCodeBlockCopyButton"
-                    color="text"
-                    iconType="copyClipboard"
-                    size="s"
-                    onClick={copy}
-                  >
+                  <EuiButtonEmpty color="text" iconType="copyClipboard" size="s" onClick={copy}>
                     <FormattedMessage
                       id="xpack.enterpriseSearch.component.devToolsConsoleCodeBlock.copy"
                       defaultMessage="Copy"

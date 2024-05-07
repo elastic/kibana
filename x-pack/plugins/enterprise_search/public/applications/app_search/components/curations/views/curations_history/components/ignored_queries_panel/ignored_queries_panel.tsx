@@ -84,12 +84,7 @@ export const IgnoredQueriesPanel: React.FC = () => {
             )}
           </EuiFlexItem>
           <EuiFlexItem component="span" grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="enterpriseSearchIgnoredQueriesPanelRefreshButton"
-              iconType="refresh"
-              size="xs"
-              onClick={() => loadIgnoredQueries()}
-            >
+            <EuiButtonEmpty iconType="refresh" size="xs" onClick={() => loadIgnoredQueries()}>
               {i18n.translate(
                 'xpack.enterpriseSearch.appSearch.curations.ignoredSuggestionsPanel.refresh',
                 {
