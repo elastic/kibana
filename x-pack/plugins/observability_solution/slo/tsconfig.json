@@ -93,5 +93,7 @@
     "@kbn/datemath",
     "@kbn/presentation-containers",
     "@kbn/dashboard-plugin",
+    "@kbn/monaco",
+    "@kbn/code-editor",
   ]
 }
