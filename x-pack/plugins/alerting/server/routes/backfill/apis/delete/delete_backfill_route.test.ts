@@ -65,6 +65,6 @@ describe('deleteBackfillRoute', () => {
     });
     const [, handler] = router.delete.mock.calls[0];
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: { id: 'abc' } });
-    expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
+    await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
   });
 });
