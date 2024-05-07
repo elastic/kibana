@@ -119,17 +119,19 @@ export class PluginServices {
       apm,
       configSettings: this.configSettings,
       savedObjectsTagging: savedObjectsTaggingOss.getTaggingApi(),
-      ...(params?.setHeaderActionMenu ? { setHeaderActionMenu: params.setHeaderActionMenu } : {}),
       storage: this.storage,
       sessionStorage: this.sessionStorage,
       security: startPlugins.security,
-      ...(params?.onAppLeave ? { onAppLeave: params.onAppLeave } : {}),
       securityLayout: { getPluginWrapper: () => SecuritySolutionTemplateWrapper },
       contentManagement: startPlugins.contentManagement,
       telemetry: this.telemetry.start(),
       customDataService,
       topValuesPopover: new TopValuesPopoverService(),
       timelineFilterManager: new FilterManager(coreStart.uiSettings),
+      ...(params && {
+        onAppLeave: params.onAppLeave,
+        setHeaderActionMenu: params.setHeaderActionMenu,
+      }),
     };
   }
 
