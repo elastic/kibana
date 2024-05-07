@@ -38,7 +38,7 @@ export async function getServiceAssets({
         assetType: 'service',
       });
 
-      const services = response.hits.hits.map((hit) => {
+      return response.hits.hits.map((hit) => {
         const serviceAsset = hit._source as ServiceAssetDocument;
 
         return {
@@ -52,7 +52,6 @@ export async function getServiceAssets({
           },
         };
       });
-      return services;
     } catch (error) {
       // If the index does not exist, handle it gracefully
       if (
@@ -66,6 +65,8 @@ export async function getServiceAssets({
           return [];
         }
       }
+
+      throw error;
     }
   });
 }

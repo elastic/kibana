@@ -57,7 +57,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when('Asset services when data is not loaded', { config: 'basic', archives: [] }, () => {
     it('handles the empty state', async () => {
-      const response = await callApi({ start, end, kuery: '' });
+      response = await callApi({ start, end, kuery: '' });
       expect(response.status).to.be(200);
       expect(response.body.services.length).to.be(0);
     });
@@ -218,25 +218,27 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     describe('when additional filters are applied', () => {
       it('returns no services when the time range is outside the data range', async () => {
-        const start = '2022-10-01T00:00:00.000Z';
-        const end = '2022-10-01T01:00:00.000Z';
-
-        const response = await callApi({ start, end, kuery: '' });
+        response = await callApi({
+          start: '2022-10-01T00:00:00.000Z',
+          end: '2022-10-01T01:00:00.000Z',
+          kuery: '',
+        });
         expect(response.status).to.be(200);
         expect(response.body.services.length).to.be(0);
       });
 
       it('returns services when the time range is within the data range', async () => {
-        const start = moment().subtract(2, 'days').valueOf();
-        const end = moment().add(1, 'days').valueOf();
-
-        const response = await callApi({ start, end, kuery: '' });
+        response = await callApi({
+          start: moment().subtract(2, 'days').valueOf(),
+          end: moment().add(1, 'days').valueOf(),
+          kuery: '',
+        });
         expect(response.status).to.be(200);
         expect(response.body.services.length).to.be(3);
       });
 
       it('returns services when filtering by service.name', async () => {
-        const response = await callApi({ start, end, kuery: 'service.name: "logs-only-*" ' });
+        response = await callApi({ start, end, kuery: 'service.name: "logs-only-*" ' });
         expect(response.status).to.be(200);
         const service = response.body.services[0];
         expect(service.service.name).to.be('logs-only-service');
@@ -244,7 +246,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns not services when filtering by a field that does not exist in assets', async () => {
-        const response = await callApi({
+        response = await callApi({
           start,
           end,
           kuery: 'transaction.name: "240rpm/75% 1000ms" ',
