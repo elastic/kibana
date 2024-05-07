@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import * as t from 'io-ts';
+import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import { createAssetsESClient } from '../../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
 import { getServiceAssets } from './get_service_assets';
 import { kueryRt, rangeRt } from '../../default_api_types';

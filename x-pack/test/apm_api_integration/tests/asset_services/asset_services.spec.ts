@@ -14,9 +14,13 @@ import {
   Instance,
   Serializable,
 } from '@kbn/apm-synthtrace-client';
+import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
 import expect from '@kbn/expect';
 import moment from 'moment';
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import {
+  APIReturnType,
+  APIClientRequestParamsOf,
+} from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -24,26 +28,23 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
   const assetsSynthtraceClient = getService('assetsSynthtraceEsClient');
 
-  const start = moment().subtract(10, 'minutes').valueOf();
-  const end = moment().valueOf();
+  const start = new Date(moment().subtract(10, 'minutes').valueOf()).toISOString();
+  const end = new Date(moment().valueOf()).toISOString();
   const range = timerange(start, end);
 
-  async function callApi({
-    start,
-    end,
-    kuery = '',
-  }: {
-    start: number | string;
-    end: number | string;
-    kuery: string;
-  }) {
+  async function getServiceAssets(
+    overrides?: RecursivePartial<
+      APIClientRequestParamsOf<'GET /internal/apm/assets/services'>['params']
+    >
+  ) {
     const response = await apmApiClient.readUser({
       endpoint: 'GET /internal/apm/assets/services',
       params: {
         query: {
-          start: new Date(start).toISOString(),
-          end: new Date(end).toISOString(),
-          kuery,
+          start,
+          end,
+          kuery: '',
+          ...overrides?.query,
         },
       },
     });
@@ -57,7 +58,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when('Asset services when data is not loaded', { config: 'basic', archives: [] }, () => {
     it('handles the empty state', async () => {
-      response = await callApi({ start, end, kuery: '' });
+      response = await getServiceAssets({ query: { start, end } });
       expect(response.status).to.be(200);
       expect(response.body.services.length).to.be(0);
     });
@@ -181,7 +182,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     describe('when no additional filters are applied', () => {
       before(async () => {
-        response = await callApi({ start, end, kuery: '' });
+        response = await getServiceAssets({ query: { start, end } });
       });
 
       it('returns a successful response', async () => {
@@ -218,27 +219,29 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     describe('when additional filters are applied', () => {
       it('returns no services when the time range is outside the data range', async () => {
-        response = await callApi({
-          start: '2022-10-01T00:00:00.000Z',
-          end: '2022-10-01T01:00:00.000Z',
-          kuery: '',
+        response = await getServiceAssets({
+          query: { start: '2022-10-01T00:00:00.000Z', end: '2022-10-01T01:00:00.000Z' },
         });
         expect(response.status).to.be(200);
         expect(response.body.services.length).to.be(0);
       });
 
       it('returns services when the time range is within the data range', async () => {
-        response = await callApi({
-          start: moment().subtract(2, 'days').valueOf(),
-          end: moment().add(1, 'days').valueOf(),
-          kuery: '',
+        response = await getServiceAssets({
+          query: {
+            start: new Date(moment().subtract(2, 'days').valueOf()).toISOString(),
+            end: new Date(moment().add(1, 'days').valueOf()).toISOString(),
+          },
         });
+
         expect(response.status).to.be(200);
         expect(response.body.services.length).to.be(3);
       });
 
       it('returns services when filtering by service.name', async () => {
-        response = await callApi({ start, end, kuery: 'service.name: "logs-only-*" ' });
+        response = await getServiceAssets({
+          query: { start, end, kuery: 'service.name: "logs-only-*" ' },
+        });
         expect(response.status).to.be(200);
         const service = response.body.services[0];
         expect(service.service.name).to.be('logs-only-service');
@@ -246,11 +249,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns not services when filtering by a field that does not exist in assets', async () => {
-        response = await callApi({
-          start,
-          end,
-          kuery: 'transaction.name: "240rpm/75% 1000ms" ',
+        response = await getServiceAssets({
+          query: { start, end, kuery: 'transaction.name: "240rpm/75% 1000ms" ' },
         });
+
         expect(response.status).to.be(200);
         expect(response.body.services.length).to.be(0);
       });

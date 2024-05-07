@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-type SignalTypes = {
+export interface SignalTypes {
   'asset.trace'?: boolean;
   'asset.logs'?: boolean;
-};
+}
 
-type ServiceItem = {
+interface ServiceItem {
   environment?: string;
   name: string;
-};
+}
 
-type AssetItem = {
+interface AssetItem {
   signalTypes: SignalTypes;
   identifyingMetadata: string[];
-};
+}
 
-export type ServiceAssetDocument = {
+export interface ServiceAssetDocument {
   asset: {
     signalTypes: SignalTypes;
     identifying_metadata: string[];
   };
   service: ServiceItem;
-};
+}
 
-export type AssetServicesResponse = {
+export interface AssetServicesResponse {
   services: Array<{ asset: AssetItem; service: ServiceItem }>;
-};
+}
