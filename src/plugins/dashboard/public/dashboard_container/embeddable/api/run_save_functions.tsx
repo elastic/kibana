@@ -114,7 +114,7 @@ export function runSaveAs(this: DashboardContainer) {
           title: newTitle,
           onTitleDuplicate,
           lastSavedTitle: currentState.title,
-          copyOnSave: newCopyOnSave,
+          copyOnSave: saveOptions.saveAsCopy,
           isTitleDuplicateConfirmed,
         }))
       ) {
