@@ -5,12 +5,12 @@
  * 2.0.
  */
 import React, { createContext, useMemo, useState } from 'react';
-import { ttfmpPerfomanceMarkers } from '../performance_markers';
+import { afterFrame } from '@elastic/apm-rum-core';
+import { perfomanceMarkers } from '../performance_markers';
 import { useLocation } from 'react-router-dom';
-import afterFrame from '../after_frame';
 
 function measureInteraction() {
-  performance.mark(ttfmpPerfomanceMarkers.startPageChange);
+  performance.mark(perfomanceMarkers.startPageChange);
   const trackedRoutes: string[] = [];
   return {
     /**
@@ -18,14 +18,13 @@ function measureInteraction() {
      * @param pathname - The pathname of the page.
      */
     pageReady(pathname: string) {
-      performance.mark(ttfmpPerfomanceMarkers.endPageReady);
+      performance.mark(perfomanceMarkers.endPageReady);
 
-      // Time To First Meaningful Paint (ttfmp)
       if (!trackedRoutes.includes(pathname)) {
         performance.measure(pathname, {
-          detail: { eventName: 'time_to_first_meaningful_paint' },
-          start: ttfmpPerfomanceMarkers.startPageChange,
-          end: ttfmpPerfomanceMarkers.endPageReady,
+          detail: { eventName: 'kibana:plugin_render_time', type: 'kibana:performance' },
+          start: perfomanceMarkers.startPageChange,
+          end: perfomanceMarkers.endPageReady,
         });
         trackedRoutes.push(pathname);
       }
@@ -40,28 +39,28 @@ interface PerformanceApi {
 export const PerformanceContext = createContext<PerformanceApi | undefined>(undefined);
 
 export function PerformanceContextProvider({ children }: { children: React.ReactElement }) {
-  const [isBrowserReady, setIsBrowserReady] = useState<Boolean>(false);
+  const [isRendered, setIsRendered] = useState<Boolean>(false);
   const location = useLocation();
   const interaction = measureInteraction();
 
   React.useEffect(() => {
     afterFrame(() => {
-      setIsBrowserReady(true);
+      setIsRendered(true);
     });
     return () => {
-      setIsBrowserReady(false);
+      setIsRendered(false);
     };
   }, [location.pathname]);
 
   const api = useMemo<PerformanceApi>(
     () => ({
       onPageReady() {
-        if (isBrowserReady) {
+        if (isRendered) {
           interaction.pageReady(location.pathname);
         }
       },
     }),
-    [isBrowserReady, location.pathname]
+    [isRendered, location.pathname]
   );
 
   return <PerformanceContext.Provider value={api}>{children}</PerformanceContext.Provider>;

@@ -14,8 +14,8 @@ export function trackPerformanceMeasureEntries(analytics: AnalyticsClient, isDev
     observer: PerformanceObserver,
     droppedEntriesCount: number
   ) {
-    list.getEntries().forEach((entry: PerformanceEntry) => {
-      if (entry.entryType === 'measure') {
+    list.getEntries().forEach((entry: any) => {
+      if (entry.entryType === 'measure' && entry.detail?.type === 'kibana:performance') {
         const target = entry?.name;
         const duration = entry.duration;
 
@@ -34,12 +34,14 @@ export function trackPerformanceMeasureEntries(analytics: AnalyticsClient, isDev
         }
 
         if (droppedEntriesCount > 0) {
-          console.warn(`${droppedEntriesCount} entries got dropped due to the buffer being full.`);
+          console.warn(
+            `${droppedEntriesCount} performance entries got dropped due to the buffer being full.`
+          );
         }
 
         try {
           reportPerformanceMetricEvent(analytics, {
-            eventName: entry.detail.eventName ?? 'time_to_render',
+            eventName: entry.detail.eventName,
             duration,
             meta: {
               target,
@@ -55,6 +57,6 @@ export function trackPerformanceMeasureEntries(analytics: AnalyticsClient, isDev
     });
   }
 
-  const observer = new PerformanceObserver(perfObserver);
+  const observer = new PerformanceObserver(perfObserver as PerformanceObserverCallback);
   observer.observe({ type: 'measure', buffered: true });
 }

@@ -6,11 +6,7 @@
  */
 
 // Time To First Meaningful Paint (ttfmp)
-export const ttfmpPerfomanceMarkers = {
+export const perfomanceMarkers = {
   startPageChange: 'start::pageChange',
   endPageReady: 'end::pageReady',
-  startMount: 'start::mount',
-  endMount: `end::mount`,
-  startOnUpdate: `start::Update`,
-  endOnUpdate: `end::Update`,
 };
