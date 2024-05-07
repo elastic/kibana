@@ -49,6 +49,7 @@ export function PerformanceContextProvider({ children }: { children: React.React
     });
     return () => {
       setIsRendered(false);
+      performance.clearMeasures(location.pathname);
     };
   }, [location.pathname]);
 
