@@ -39,6 +39,7 @@ describe('BasePathProxyServer', () => {
       shutdownTimeout: moment.duration(30, 'seconds'),
       keepaliveTimeout: 1000,
       socketTimeout: 1000,
+      payloadTimeout: 1000,
       cors: {
         enabled: false,
         allowCredentials: false,

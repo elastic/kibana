@@ -20,6 +20,8 @@ import {
   parseRawSecurityResponseHeadersConfig,
 } from './security_response_headers_config';
 
+const SECOND = 1000;
+
 const validBasePathRegex = /^\/.*[^\/]$/;
 export const uuidRegexp =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -97,10 +99,13 @@ const configSchema = schema.object(
     rewriteBasePath: schema.boolean({ defaultValue: false }),
     ssl: sslSchema,
     keepaliveTimeout: schema.number({
-      defaultValue: 120000,
+      defaultValue: 120 * SECOND,
     }),
     socketTimeout: schema.number({
-      defaultValue: 120000,
+      defaultValue: 120 * SECOND,
+    }),
+    payloadTimeout: schema.number({
+      defaultValue: 20 * SECOND,
     }),
     compression: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
@@ -188,6 +193,7 @@ export class HttpConfig implements IHttpConfig {
   public host: string;
   public keepaliveTimeout: number;
   public socketTimeout: number;
+  public payloadTimeout: number;
   public port: number;
   public cors: {
     enabled: boolean;
@@ -245,6 +251,7 @@ export class HttpConfig implements IHttpConfig {
     this.publicBaseUrl = rawHttpConfig.publicBaseUrl;
     this.keepaliveTimeout = rawHttpConfig.keepaliveTimeout;
     this.socketTimeout = rawHttpConfig.socketTimeout;
+    this.payloadTimeout = rawHttpConfig.payloadTimeout;
     this.rewriteBasePath = rawHttpConfig.rewriteBasePath;
     this.ssl = new SslConfig(rawHttpConfig.ssl || {});
     this.compression = rawHttpConfig.compression;

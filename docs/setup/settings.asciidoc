@@ -687,6 +687,11 @@ back end server. To allow remote users to connect, set the value to the IP addre
 The number of milliseconds to wait for additional data before restarting
 the <<server-socketTimeout, `server.socketTimeout`>> counter. *Default: `"120000"`*
 
+[[server-payloadTimeout]] `server.payloadTimeout`::
+Sets the maximum time allowed for the client to transmit the request payload (body) before giving up
+and responding with a Request Timeout (408) error response.
+*Default: `"20000"`*
+
 [[server-maxPayload]] `server.maxPayload`::
 The maximum payload size in bytes
 for incoming server requests. *Default: `1048576`*
