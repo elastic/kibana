@@ -52,7 +52,7 @@ For Elastic Serverless, {x} is available in your {es} project UI.
 
 To use {x}, you'll need the following:
 
-1. An Elastic Cloud (*v8.14.0+*) deployment or {es} *Serverless* project. (Start a https://cloud.elastic.co/registration[free trial]).
+1. An Elastic *v8.14.0+* deployment or {es} *Serverless* project. (Start a https://cloud.elastic.co/registration[free trial]).
 2. At least one *{es} index* with documents to search.
 ** See <<playground-getting-started-ingest, ingest data>> if you'd like to ingest sample data.
 3. An account with a *supported LLM provider*. {x} supports the following:
