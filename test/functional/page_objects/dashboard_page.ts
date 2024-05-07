@@ -232,6 +232,10 @@ export class DashboardPageObject extends FtrService {
   public async clickDuplicate() {
     this.log.debug('Clicking duplicate');
     await this.testSubjects.click('dashboardDuplication');
+    await this.clickSave();
+
+    // Confirm that the Dashboard has actually been saved
+    await this.testSubjects.existOrFail('saveDashboardSuccess');
   }
 
   /**
