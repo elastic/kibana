@@ -162,12 +162,14 @@ export async function ensurePreconfiguredPackagesAndPolicies(
       }
 
       if (
-        !cloudSetup?.isServerlessEnabled &&
+        (!cloudSetup?.isServerlessEnabled ||
+          !appContextService.getExperimentalFeatures().agentless) &&
         preconfiguredAgentPolicy?.supports_agentless !== undefined
       ) {
         throw new FleetError(
           i18n.translate('xpack.fleet.preconfiguration.support_agentless', {
-            defaultMessage: '`supports_agentless` is only allowed in serverless environments',
+            defaultMessage:
+              '`supports_agentless` is only allowed in serverless environments that support agentless feature',
           })
         );
       }

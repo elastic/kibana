@@ -1480,9 +1480,14 @@ class AgentPolicyService {
   }
   private checkAgentless(agentPolicy: Partial<NewAgentPolicy>) {
     const cloudSetup = appContextService.getCloud();
-
-    if (!cloudSetup?.isServerlessEnabled && agentPolicy?.supports_agentless !== undefined) {
-      throw new AgentPolicyInvalidError('supports_agentless is only allowed in serverless');
+    if (
+      (!cloudSetup?.isServerlessEnabled ||
+        !appContextService.getExperimentalFeatures().agentless) &&
+      agentPolicy?.supports_agentless !== undefined
+    ) {
+      throw new AgentPolicyInvalidError(
+        'supports_agentless is only allowed in serverless environments that support agentless feature'
+      );
     }
   }
 }
