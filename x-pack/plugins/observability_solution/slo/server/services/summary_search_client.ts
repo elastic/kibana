@@ -14,7 +14,7 @@ import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import { Groupings, SLODefinition, SLOId, StoredSLOSettings, Summary } from '../domain/models';
 import { toHighPrecision } from '../utils/number';
 import { createEsParams, typedSearch } from '../utils/queries';
-import { getListOfSummaryIndices } from './slo_settings';
+import { getListOfSummaryIndices, getSloSettings } from './slo_settings';
 import { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import { getElasticsearchQueryOrThrow } from './transform_generators';
 import { fromRemoteSummaryDocumentToSloDefinition } from './unsafe_federated/remote_summary_doc_to_slo';
@@ -69,8 +69,8 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
     } catch (e) {
       this.logger.error(`Failed to parse filters: ${e.message}`);
     }
-
-    const { indices, settings } = await getListOfSummaryIndices(this.soClient, this.esClient);
+    const settings = await getSloSettings(this.soClient);
+    const { indices } = await getListOfSummaryIndices(this.esClient, settings);
     const esParams = createEsParams({
       index: indices,
       track_total_hits: true,

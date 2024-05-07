@@ -55,10 +55,9 @@ export const storeSloSettings = async (
 };
 
 export const getListOfSummaryIndices = async (
-  soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient
+  esClient: ElasticsearchClient,
+  settings: StoredSLOSettings
 ) => {
-  const settings = await getSloSettings(soClient);
   const { useAllRemoteClusters, selectedRemoteClusters } = settings;
   if (!useAllRemoteClusters && selectedRemoteClusters.length === 0) {
     return { indices: [SLO_SUMMARY_DESTINATION_INDEX_PATTERN], settings };
@@ -71,5 +70,5 @@ export const getListOfSummaryIndices = async (
     isConnected: clustersByName[clusterName].connected,
   }));
 
-  return { indices: getListOfSloSummaryIndices(settings, clusterInfo), settings };
+  return { indices: getListOfSloSummaryIndices(settings, clusterInfo) };
 };

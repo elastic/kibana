@@ -8,7 +8,7 @@ import { FindSLOGroupsParams, FindSLOGroupsResponse, Pagination } from '@kbn/slo
 import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { findSLOGroupsResponseSchema } from '@kbn/slo-schema';
 import { Logger } from '@kbn/core/server';
-import { getListOfSummaryIndices } from './slo_settings';
+import { getListOfSummaryIndices, getSloSettings } from './slo_settings';
 import { typedSearch } from '../utils/queries';
 import { IllegalArgumentError } from '../errors';
 import { DEFAULT_SLO_GROUPS_PAGE_SIZE } from '../../common/constants';
@@ -58,8 +58,8 @@ export class FindSLOGroups {
     } catch (e) {
       this.logger.error(`Failed to parse filters: ${e.message}`);
     }
-
-    const { indices } = await getListOfSummaryIndices(this.soClient, this.esClient);
+    const settings = await getSloSettings(this.soClient);
+    const { indices } = await getListOfSummaryIndices(this.esClient, settings);
 
     const hasSelectedTags = groupBy === 'slo.tags' && groupsFilter.length > 0;
 

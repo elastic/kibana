@@ -18,7 +18,7 @@ import moment from 'moment';
 import { observabilityAlertFeatureIds } from '@kbn/observability-plugin/common';
 import { typedSearch } from '../utils/queries';
 import { getElasticsearchQueryOrThrow } from './transform_generators';
-import { getListOfSummaryIndices } from './slo_settings';
+import { getListOfSummaryIndices, getSloSettings } from './slo_settings';
 
 export class GetSLOsOverview {
   constructor(
@@ -31,7 +31,8 @@ export class GetSLOsOverview {
   ) {}
 
   public async execute(params: GetOverviewParams = {}): Promise<GetOverviewResponse> {
-    const { indices, settings } = await getListOfSummaryIndices(this.soClient, this.esClient);
+    const settings = await getSloSettings(this.soClient);
+    const { indices } = await getListOfSummaryIndices(this.esClient, settings);
 
     const kqlQuery = params.kqlQuery ?? '';
     const filters = params.filters ?? '';
