@@ -21,6 +21,7 @@ import { BaseParams, JobId, ManagementLinkFn, ReportApiJSON } from '@kbn/reporti
 import rison from '@kbn/rison';
 import moment from 'moment';
 import { stringify } from 'query-string';
+import { ReactElement } from 'react';
 import { Job } from '.';
 import { jobCompletionNotifications } from './job_completion_notifications';
 
@@ -41,7 +42,10 @@ interface IReportingAPI {
   // Helpers
   getReportURL(jobId: string): string;
   getReportingPublicJobPath<T>(exportType: string, jobParams: BaseParams & T): string; // Return a URL to queue a job, with the job params encoded in the query string of the URL. Used for copying POST URL
-  createReportingJob<T>(exportType: string, jobParams: BaseParams & T): Promise<Job | undefined>; // Sends a request to queue a job, with the job params in the POST body
+  createReportingJob<T>(
+    exportType: string,
+    jobParams: BaseParams & T
+  ): Promise<Job | undefined | ReactElement>; // Sends a request to queue a job, with the job params in the POST body
   getServerBasePath(): string; // Provides the raw server basePath to allow it to be stripped out from relativeUrls in job params
 
   // CRUD
@@ -190,7 +194,7 @@ export class ReportingAPIClient implements IReportingAPI {
         return new Job(resp.job);
       }
     } catch (err) {
-      throw new Error(`${err.body.message}`);
+      throw new Error(`${err.body?.message}`);
     }
   }
 

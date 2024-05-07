@@ -122,7 +122,7 @@ export const reportingCsvShareProvider = ({
               id: 'reporting.share.modalContent.notification.reportingErrorTitle',
               defaultMessage: 'Unable to create report',
             }),
-            toastMessage: error.body?.message,
+            toastMessage: error.toString(),
           });
         });
     };
