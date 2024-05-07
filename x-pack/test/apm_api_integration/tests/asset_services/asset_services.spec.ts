@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Readable } from 'stream';
 import {
   apm,
   timerange,
@@ -17,7 +18,6 @@ import expect from '@kbn/expect';
 import moment from 'moment';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { Readable } from 'stream';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -194,25 +194,25 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           (item) => item.service.name === 'multisignal-service'
         );
 
-        expect(multisignal.asset.signalTypes).to.eql({
+        expect(multisignal?.asset.signalTypes).to.eql({
           'asset.traces': true,
           'asset.logs': true,
         });
-        expect(multisignal.service.environment).to.be('testing');
+        expect(multisignal?.service.environment).to.be('testing');
 
         const apmOnly = response.body.services.find(
           (item) => item.service.name === 'apm-only-service'
         );
 
-        expect(apmOnly.asset.signalTypes).to.eql({ 'asset.traces': true });
-        expect(apmOnly.service.environment).to.be('testing');
+        expect(apmOnly?.asset.signalTypes).to.eql({ 'asset.traces': true });
+        expect(apmOnly?.service.environment).to.be('testing');
 
         const logsOnly = response.body.services.find(
           (item) => item.service.name === 'logs-only-service'
         );
 
-        expect(logsOnly.asset.signalTypes).to.eql({ 'asset.logs': true });
-        expect(logsOnly.service.environment).not.to.be('testing');
+        expect(logsOnly?.asset.signalTypes).to.eql({ 'asset.logs': true });
+        expect(logsOnly?.service.environment).not.to.be('testing');
       });
     });
 
