@@ -84,6 +84,6 @@ describe('isKibanaResponse', () => {
   });
 
   it('handles undefined inputs', () => {
-    expect(isKibanaResponse(undefined)).toEqual(true);
+    expect(isKibanaResponse(undefined)).toEqual(false);
   });
 });
