@@ -7,8 +7,8 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { DASHBOARD_GRID_COLUMN_COUNT, PanelPlacementStrategy } from '../../../dashboard_constants';
-import { panelPlacementStrings } from '../../_dashboard_container_strings';
+import { DASHBOARD_GRID_COLUMN_COUNT, PanelPlacementStrategy } from '../../dashboard_constants';
+import { panelPlacementStrings } from '../_dashboard_container_strings';
 import { PanelPlacementProps, PanelPlacementReturn } from './types';
 
 export const runPanelPlacementStrategy = (

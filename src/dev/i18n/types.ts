@@ -6,6 +6,11 @@
  * Side Public License, v 1.
  */
 
-export { placePanel } from './place_panel';
+import { I18nConfig } from './config';
+import { ErrorReporter } from './utils';
 
-export { placeClonePanel } from './place_clone_panel_strategy';
+export interface I18nCheckTaskContext {
+  config?: I18nConfig;
+  reporter: ErrorReporter;
+  messages: Map<string, { message: string }>;
+}
