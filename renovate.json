@@ -235,6 +235,24 @@
       "enabled": true
     },
     {
+      "groupName": "CLI tooling",
+      "matchPackageNames": [
+        "listr2"
+      ],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Operations",
+        "backport:all-open",
+        "release_note:skip"
+      ],
+      "enabled": true
+    },
+    {
       "groupName": "vega related modules",
       "matchPackageNames": [
         "vega",

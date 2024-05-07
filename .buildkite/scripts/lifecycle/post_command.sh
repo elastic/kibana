@@ -43,7 +43,10 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
   buildkite-agent artifact upload '.es/**/*.hprof'
   buildkite-agent artifact upload 'data/es_debug_*.tar.gz'
 
-  if [[ $BUILDKITE_COMMAND_EXIT_STATUS -ne 0 ]]; then
+  if [[ $BUILDKITE_COMMAND_EXIT_STATUS -ne 0 ]] && \
+      # Skip when triggered from elasticsearch's validation pipeline
+     [[ $BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG != 'elasticsearch-serverless-intake' ]]
+  then
     echo "--- Run Failed Test Reporter"
     node scripts/report_failed_tests --build-url="${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID}" 'target/junit/**/*.xml'
   fi
