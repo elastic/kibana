@@ -25,7 +25,12 @@ paths:
                 $ref: '#/components/schemas/RiskEngineStatusResponse'
 components:
   schemas:
-
+    RiskEngineStatus:
+      type: string
+      enum:
+        - 'NOT_INSTALLED'
+        - 'DISABLED'
+        - 'ENABLED'
     RiskEngineStatusResponse:
       type: object
       properties:
@@ -36,10 +41,4 @@ components:
         is_max_amount_of_risk_engines_reached:
           description: Indicates whether the maximum amount of risk engines has been reached
           type: boolean
-
-    RiskEngineStatus:
-      type: string
-      enum:
-        - 'NOT_INSTALLED'
-        - 'DISABLED'
-        - 'ENABLED'
+          

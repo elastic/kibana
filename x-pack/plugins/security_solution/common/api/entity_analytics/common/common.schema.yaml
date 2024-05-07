@@ -90,6 +90,18 @@ components:
           example: '2017-07-21T17:32:28Z'
           description: The @timestamp of the risk input document.
 
+    RiskWeightTypes:
+      type: string
+      enum:
+        - global_identifier
+        - risk_category
+
+    RiskScoreCategories:
+      type: string
+      enum:
+        - category_1
+
+
     RiskScore:
       type: object
       required:
@@ -144,47 +156,84 @@ components:
           items:
             $ref: '#/components/schemas/RiskScoreInput'
 
+    RiskScoreEntityIdentifierWeights:    
+      type: number
+      format: double
+      minimum: 0
+      maximum: 1   
+
+    RiskScoreWeightGlobalShared:
+            x-inline: true
+            type: object
+            required:
+                - type
+            properties:        
+              type:
+                type: string
+                enum:
+                  - global_identifier
+
     RiskScoreWeightGlobal:
-      type: object
-      required:
-        - type
-      properties:
-        type:
-          type: string
-          enum:
-            - global_identifier
-        host:
-              type: number
-              format: double
-              minimum: 0
-              maximum: 1
-        user:
-          type: number
-          format: double
-          minimum: 0
-          maximum: 1
-      
-    RiskScoreWeightCategory:
+        oneOf:
+          - allOf:
+            - $ref: '#/components/schemas/RiskScoreWeightGlobalShared'
+            - type: object
+              required:
+                - host
+              properties:             
+                host:
+                  $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
+                user:
+                  $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
+
+          - allOf:
+            - $ref: '#/components/schemas/RiskScoreWeightGlobalShared'
+            - type: object
+              required:
+                  - user
+              properties:             
+                host:
+                  $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
+                user:
+                  $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
+
+    RiskScoreWeightCategoryShared:
+      x-inline: true
       type: object
       required:
           - type
+          - value
       properties:        
         type:
           type: string
           enum:
             - risk_category
         value:
-          type: string
-        host:
-              type: number
-              format: double
-              minimum: 0
-              maximum: 1
-        user:
-          type: number
-          format: double
-          minimum: 0
-          maximum: 1
+          $ref: '#/components/schemas/RiskScoreCategories'    
+
+    RiskScoreWeightCategory:
+        oneOf:
+          - allOf:
+            - $ref: '#/components/schemas/RiskScoreWeightCategoryShared'
+            - type: object
+              required:
+                - host
+              properties:             
+                host:
+                  $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
+                user:
+                  $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
+
+          - allOf:
+            - $ref: '#/components/schemas/RiskScoreWeightCategoryShared'
+            - type: object
+              required:
+                  - user
+              properties:             
+                host:
+                  $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
+                user:
+                  $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
 
     RiskScoreWeight:
       description: "Configuration used to tune risk scoring. Weights can be used to change the score contribution of risk inputs for hosts and users at both a global level and also for Risk Input categories (e.g. 'category_1')."

@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { pipe } from 'fp-ts/lib/pipeable';
-import { left } from 'fp-ts/lib/Either';
-import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
-
-import { riskWeightSchema } from './schema';
 import { RiskCategories, RiskWeightTypes } from './types';
+import { RiskScoreWeight } from '../../../api/entity_analytics/common';
+import type { SafeParseError, SafeParseSuccess } from 'zod';
+import { stringifyZodError } from '@kbn/zod-helpers';
 
 describe('risk weight schema', () => {
   let type: string;
@@ -21,11 +19,10 @@ describe('risk weight schema', () => {
         type: RiskWeightTypes.global,
         host: 0.1,
       };
-      const decoded = riskWeightSchema.decode(payload);
-      const message = pipe(decoded, foldLeftRight);
+      const decoded = RiskScoreWeight.safeParse(payload) as SafeParseSuccess<object>;
 
-      expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual(payload);
+      expect(decoded.success).toBeTruthy();
+      expect(decoded.data).toEqual(payload);
     });
 
     it('allows the risk category weight type', () => {
@@ -33,11 +30,10 @@ describe('risk weight schema', () => {
         type: RiskWeightTypes.global,
         host: 0.1,
       };
-      const decoded = riskWeightSchema.decode(payload);
-      const message = pipe(decoded, foldLeftRight);
+      const decoded = RiskScoreWeight.safeParse(payload) as SafeParseSuccess<object>;
 
-      expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual(payload);
+      expect(decoded.success).toBeTruthy();
+      expect(decoded.data).toEqual(payload);
     });
 
     it('rejects an unknown weight type', () => {
@@ -45,11 +41,10 @@ describe('risk weight schema', () => {
         type: 'unknown',
         host: 0.1,
       };
-      const decoded = riskWeightSchema.decode(payload);
-      const message = pipe(decoded, foldLeftRight);
+      const decoded = RiskScoreWeight.safeParse(payload) as SafeParseError<object>;
 
-      expect(getPaths(left(message.errors)).length).toBeGreaterThan(0);
-      expect(message.schema).toEqual({});
+      expect(decoded.success).toBeFalsy();
+      expect(decoded.error.errors.length).toBeGreaterThan(0);
     });
   });
 
@@ -61,50 +56,46 @@ describe('risk weight schema', () => {
 
       it('rejects if neither host nor user weight are specified', () => {
         const payload = { type };
-        const decoded = riskWeightSchema.decode(payload);
-        const message = pipe(decoded, foldLeftRight);
+        const decoded = RiskScoreWeight.safeParse(payload) as SafeParseError<object>;
 
-        expect(getPaths(left(message.errors))).toEqual([
-          'Invalid value "undefined" supplied to "host"',
-          'Invalid value "undefined" supplied to "user"',
-        ]);
-        expect(message.schema).toEqual({});
+        expect(decoded.success).toBeFalsy();
+        expect(stringifyZodError(decoded.error)).toEqual(
+          'host: Required, user: Required, type: Invalid literal value, expected "risk_category", value: Invalid literal value, expected "category_1", host: Required, and 3 more'
+        );
       });
 
       it('allows a single host weight', () => {
         const payload = { type, host: 0.1 };
-        const decoded = riskWeightSchema.decode(payload);
-        const message = pipe(decoded, foldLeftRight);
+        const decoded = RiskScoreWeight.safeParse(payload) as SafeParseSuccess<object>;
 
-        expect(getPaths(left(message.errors))).toEqual([]);
-        expect(message.schema).toEqual(payload);
+        expect(decoded.success).toBeTruthy();
+        expect(decoded.data).toEqual(payload);
       });
 
       it('allows a single user weight', () => {
         const payload = { type, user: 0.1 };
-        const decoded = riskWeightSchema.decode(payload);
-        const message = pipe(decoded, foldLeftRight);
+        const decoded = RiskScoreWeight.safeParse(payload) as SafeParseSuccess<object>;
 
-        expect(getPaths(left(message.errors))).toEqual([]);
-        expect(message.schema).toEqual(payload);
+        expect(decoded.success).toBeTruthy();
+        expect(decoded.data).toEqual(payload);
       });
 
       it('allows both a host and user weight', () => {
         const payload = { type, host: 0.1, user: 0.5 };
-        const decoded = riskWeightSchema.decode(payload);
-        const message = pipe(decoded, foldLeftRight);
+        const decoded = RiskScoreWeight.safeParse(payload) as SafeParseSuccess<object>;
 
-        expect(getPaths(left(message.errors))).toEqual([]);
-        expect(message.schema).toEqual({ type, host: 0.1, user: 0.5 });
+        expect(decoded.success).toBeTruthy();
+        expect(decoded.data).toEqual({ type, host: 0.1, user: 0.5 });
       });
 
       it('rejects a weight outside of 0-1', () => {
         const payload = { type, user: 55 };
-        const decoded = riskWeightSchema.decode(payload);
-        const message = pipe(decoded, foldLeftRight);
+        const decoded = RiskScoreWeight.safeParse(payload) as SafeParseError<object>;
 
-        expect(getPaths(left(message.errors))).toContain('Invalid value "55" supplied to "user"');
-        expect(message.schema).toEqual({});
+        expect(decoded.success).toBeFalsy();
+        expect(stringifyZodError(decoded.error)).toContain(
+          `user: Number must be less than or equal to 1`
+        );
       });
 
       it('removes extra keys if specified', () => {
@@ -114,11 +105,10 @@ describe('risk weight schema', () => {
           value: 'superfluous',
           extra: 'even more',
         };
-        const decoded = riskWeightSchema.decode(payload);
-        const message = pipe(decoded, foldLeftRight);
+        const decoded = RiskScoreWeight.safeParse(payload) as SafeParseSuccess<object>;
 
-        expect(getPaths(left(message.errors))).toEqual([]);
-        expect(message.schema).toEqual({ type, host: 0.1 });
+        expect(decoded.success).toBeTruthy();
+        expect(decoded.data).toEqual({ type, host: 0.1 });
       });
     });
 
@@ -127,63 +117,81 @@ describe('risk weight schema', () => {
         type = RiskWeightTypes.riskCategory;
       });
 
+      // const globalRiskWeightSchema = t.intersection([
+      //   t.exact(
+      //     t.type({
+      //       type: t.literal(RiskWeightTypes.global),
+      //     })
+      //   ),
+      //   identifierWeights,
+      // ]);
+      // export type GlobalRiskWeight = t.TypeOf<typeof globalRiskWeightSchema>;
+
+      // const riskCategoryRiskWeightSchema = t.intersection([
+      //   t.exact(
+      //     t.type({
+      //       type: t.literal(RiskWeightTypes.riskCategory),
+      //       value: riskCategories,
+      //     })
+      //   ),
+      //   identifierWeights,
+      // ]);
+      // export type RiskCategoryRiskWeight = t.TypeOf<typeof riskCategoryRiskWeightSchema>;
+
+      // export const riskWeightSchema = t.union([globalRiskWeightSchema
+
       it('requires a value', () => {
         const payload = { type, user: 0.1 };
-        const decoded = riskWeightSchema.decode(payload);
-        const message = pipe(decoded, foldLeftRight);
+        const decoded = RiskScoreWeight.safeParse(payload) as SafeParseError<object>;
 
-        expect(getPaths(left(message.errors))).toEqual([
-          'Invalid value "undefined" supplied to "value"',
-        ]);
-        expect(message.schema).toEqual({});
+        expect(decoded.success).toBeFalsy();
+        expect(stringifyZodError(decoded.error)).toEqual(
+          'type: Invalid literal value, expected "global_identifier", host: Required, type: Invalid literal value, expected "global_identifier", value: Invalid literal value, expected "category_1", host: Required, and 1 more'
+        );
       });
 
       it('rejects if neither host nor user weight are specified', () => {
         const payload = { type, value: RiskCategories.category_1 };
-        const decoded = riskWeightSchema.decode(payload);
-        const message = pipe(decoded, foldLeftRight);
+        const decoded = RiskScoreWeight.safeParse(payload) as SafeParseError<object>;
 
-        expect(getPaths(left(message.errors))).toEqual([
-          'Invalid value "undefined" supplied to "host"',
-          'Invalid value "undefined" supplied to "user"',
-        ]);
-        expect(message.schema).toEqual({});
+        expect(decoded.success).toBeFalsy();
+        expect(stringifyZodError(decoded.error)).toEqual(
+          'type: Invalid literal value, expected "global_identifier", host: Required, type: Invalid literal value, expected "global_identifier", user: Required, host: Required, and 1 more'
+        );
       });
 
       it('allows a single host weight', () => {
         const payload = { type, value: RiskCategories.category_1, host: 0.1 };
-        const decoded = riskWeightSchema.decode(payload);
-        const message = pipe(decoded, foldLeftRight);
+        const decoded = RiskScoreWeight.safeParse(payload) as SafeParseSuccess<object>;
 
-        expect(getPaths(left(message.errors))).toEqual([]);
-        expect(message.schema).toEqual(payload);
+        expect(decoded.success).toBeTruthy();
+        expect(decoded.data).toEqual(payload);
       });
 
       it('allows a single user weight', () => {
         const payload = { type, value: RiskCategories.category_1, user: 0.1 };
-        const decoded = riskWeightSchema.decode(payload);
-        const message = pipe(decoded, foldLeftRight);
+        const decoded = RiskScoreWeight.safeParse(payload) as SafeParseSuccess<object>;
 
-        expect(getPaths(left(message.errors))).toEqual([]);
-        expect(message.schema).toEqual(payload);
+        expect(decoded.success).toBeTruthy();
+        expect(decoded.data).toEqual(payload);
       });
 
       it('allows both a host and user weight', () => {
         const payload = { type, value: RiskCategories.category_1, user: 0.1, host: 0.5 };
-        const decoded = riskWeightSchema.decode(payload);
-        const message = pipe(decoded, foldLeftRight);
+        const decoded = RiskScoreWeight.safeParse(payload) as SafeParseSuccess<object>;
 
-        expect(getPaths(left(message.errors))).toEqual([]);
-        expect(message.schema).toEqual(payload);
+        expect(decoded.success).toBeTruthy();
+        expect(decoded.data).toEqual(payload);
       });
 
       it('rejects a weight outside of 0-1', () => {
         const payload = { type, value: RiskCategories.category_1, host: -5 };
-        const decoded = riskWeightSchema.decode(payload);
-        const message = pipe(decoded, foldLeftRight);
+        const decoded = RiskScoreWeight.safeParse(payload) as SafeParseError<object>;
 
-        expect(getPaths(left(message.errors))).toContain('Invalid value "-5" supplied to "host"');
-        expect(message.schema).toEqual({});
+        expect(decoded.success).toBeFalsy();
+        expect(stringifyZodError(decoded.error)).toContain(
+          `host: Number must be greater than or equal to 0`
+        );
       });
 
       it('removes extra keys if specified', () => {
@@ -193,11 +201,10 @@ describe('risk weight schema', () => {
           host: 0.1,
           extra: 'even more',
         };
-        const decoded = riskWeightSchema.decode(payload);
-        const message = pipe(decoded, foldLeftRight);
+        const decoded = RiskScoreWeight.safeParse(payload) as SafeParseSuccess<object>;
 
-        expect(getPaths(left(message.errors))).toEqual([]);
-        expect(message.schema).toEqual({ type, value: RiskCategories.category_1, host: 0.1 });
+        expect(decoded.success).toBeTruthy();
+        expect(decoded.data).toEqual({ type, value: RiskCategories.category_1, host: 0.1 });
       });
 
       describe('allowed category values', () => {
@@ -207,11 +214,10 @@ describe('risk weight schema', () => {
             value: RiskCategories.category_1,
             host: 0.1,
           };
-          const decoded = riskWeightSchema.decode(payload);
-          const message = pipe(decoded, foldLeftRight);
+          const decoded = RiskScoreWeight.safeParse(payload) as SafeParseSuccess<object>;
 
-          expect(getPaths(left(message.errors))).toEqual([]);
-          expect(message.schema).toEqual(payload);
+          expect(decoded.success).toBeTruthy();
+          expect(decoded.data).toEqual(payload);
         });
 
         it('rejects an unknown category value', () => {
@@ -220,13 +226,12 @@ describe('risk weight schema', () => {
             value: 'unknown',
             host: 0.1,
           };
-          const decoded = riskWeightSchema.decode(payload);
-          const message = pipe(decoded, foldLeftRight);
+          const decoded = RiskScoreWeight.safeParse(payload) as SafeParseError<object>;
 
-          expect(getPaths(left(message.errors))).toContain(
-            'Invalid value "unknown" supplied to "value"'
+          expect(decoded.success).toBeFalsy();
+          expect(stringifyZodError(decoded.error)).toContain(
+            'type: Invalid literal value, expected "global_identifier", type: Invalid literal value, expected "global_identifier", user: Required, value: Invalid literal value, expected "category_1", value: Invalid literal value, expected "category_1", and 1 more'
           );
-          expect(message.schema).toEqual({});
         });
       });
     });

@@ -16,6 +16,11 @@ import { z } from 'zod';
  *   version: 1.0.0
  */
 
+export type RiskEngineStatus = z.infer<typeof RiskEngineStatus>;
+export const RiskEngineStatus = z.enum(['NOT_INSTALLED', 'DISABLED', 'ENABLED']);
+export type RiskEngineStatusEnum = typeof RiskEngineStatus.enum;
+export const RiskEngineStatusEnum = RiskEngineStatus.enum;
+
 export type RiskEngineStatusResponse = z.infer<typeof RiskEngineStatusResponse>;
 export const RiskEngineStatusResponse = z.object({
   legacy_risk_engine_status: RiskEngineStatus.optional(),
@@ -25,8 +30,3 @@ export const RiskEngineStatusResponse = z.object({
    */
   is_max_amount_of_risk_engines_reached: z.boolean().optional(),
 });
-
-export type RiskEngineStatus = z.infer<typeof RiskEngineStatus>;
-export const RiskEngineStatus = z.enum(['NOT_INSTALLED', 'DISABLED', 'ENABLED']);
-export type RiskEngineStatusEnum = typeof RiskEngineStatus.enum;
-export const RiskEngineStatusEnum = RiskEngineStatus.enum;
