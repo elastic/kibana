@@ -9,7 +9,6 @@ import * as i18n from './translations';
 
 export const ATTACK_DISCOVERY_TOUR_CONFIG_ANCHORS = {
   NAV_LINK: 'solutionSideNavItemLink-attack_discovery',
-  TIMELINE: 'timeline-bottom-bar-container',
 };
 
 export const attackDiscoveryTourStepOne = {

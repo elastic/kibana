@@ -31,10 +31,6 @@ const VideoComponent: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   }, [isIframeFocused, openVideoInNewTab]);
 
   useEffect(() => {
-    // Focus the page
-    window.focus();
-    // Add listener to check when page is not focussed
-    // (i.e. iframe is clicked into)
     window.addEventListener('blur', onIframeClick);
     return () => window.removeEventListener('blur', onIframeClick);
   }, [onIframeClick]);
@@ -47,7 +43,10 @@ const VideoComponent: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   return (
     <EuiPortal>
-      <div style={{ position: 'fixed', bottom: 16, right: 16, zIndex: 9999 }}>
+      <div
+        data-test-subj="attackDiscovery-tour-step-2"
+        style={{ position: 'fixed', bottom: 16, right: 16, zIndex: 9999 }}
+      >
         <EuiToast onClose={onClose} css={{ maxWidth: VIDEO_CONTENT_WIDTH }}>
           <div
             css={css`
@@ -55,6 +54,8 @@ const VideoComponent: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             `}
             onMouseOver={handleOnMouseOver}
             onMouseOut={handleOnMouseOut}
+            onFocus={handleOnMouseOver}
+            onBlur={handleOnMouseOut}
           >
             <iframe
               ref={ref}
