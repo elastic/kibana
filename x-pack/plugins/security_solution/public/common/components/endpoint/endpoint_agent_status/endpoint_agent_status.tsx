@@ -74,6 +74,9 @@ export interface EndpointAgentStatusProps {
  * TIP: if you only have the Endpoint's `agent.id`, then consider using `EndpointAgentStatusById`,
  * which will call the needed APIs to get the information necessary to display the status.
  */
+
+// TODO: used by `EndpointAgentStatusById`
+// remove usage/code when `agentStatusClientEnabled` FF is enabled
 export const EndpointAgentStatus = memo<EndpointAgentStatusProps>(
   ({ endpointHostInfo, autoRefresh = true, pendingActions, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);

@@ -8,16 +8,14 @@
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
+import { AgentResponseActionsStatus } from './agent_response_action_status';
+import type { EndpointPendingActions } from '../../../../common/endpoint/types';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { getAgentStatusText } from '../../../common/components/endpoint/agent_status_text';
 import { HOST_STATUS_TO_BADGE_COLOR } from '../../pages/endpoint_hosts/view/host_constants';
 import { useAgentStatusHook } from '../../hooks/agents/use_get_agent_status';
-import {
-  ISOLATED_LABEL,
-  ISOLATING_LABEL,
-  RELEASING_LABEL,
-} from '../../../common/components/endpoint/endpoint_agent_status';
 
 export enum SENTINEL_ONE_NETWORK_STATUS {
   CONNECTING = 'connecting',
@@ -42,6 +40,7 @@ export const AgentStatus = React.memo(
     agentType: ResponseActionAgentType;
     'data-test-subj'?: string;
   }) => {
+    const getTestId = useTestIdGenerator(dataTestSubj);
     const useAgentStatus = useAgentStatusHook();
 
     const sentinelOneManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
@@ -52,25 +51,18 @@ export const AgentStatus = React.memo(
       enabled: sentinelOneManualHostActionsEnabled,
     });
     const agentStatus = data?.[`${agentId}`];
+    const isCurrentlyIsolated = Boolean(agentStatus?.isolated);
+    const pendingActions = agentStatus?.pendingActions;
 
-    const label = useMemo(() => {
-      const currentNetworkStatus = agentStatus?.isolated;
-      const pendingActions = agentStatus?.pendingActions;
-
-      if (pendingActions) {
-        if (pendingActions.isolate > 0) {
-          return ISOLATING_LABEL;
-        }
-
-        if (pendingActions.unisolate > 0) {
-          return RELEASING_LABEL;
-        }
+    const [hasPendingActions, hostPendingActions] = useMemo<
+      [boolean, EndpointPendingActions['pending_actions']]
+    >(() => {
+      if (!pendingActions) {
+        return [false, {}];
       }
 
-      if (currentNetworkStatus) {
-        return ISOLATED_LABEL;
-      }
-    }, [agentStatus?.isolated, agentStatus?.pendingActions]);
+      return [Object.keys(pendingActions).length > 0, pendingActions];
+    }, [pendingActions]);
 
     return (
       <EuiFlexGroupStyled
@@ -84,6 +76,7 @@ export const AgentStatus = React.memo(
             <EuiBadge
               color={HOST_STATUS_TO_BADGE_COLOR[agentStatus.status]}
               className="eui-textTruncate"
+              data-test-subj={getTestId('agentStatus')}
             >
               {getAgentStatusText(agentStatus.status)}
             </EuiBadge>
@@ -91,11 +84,13 @@ export const AgentStatus = React.memo(
             '-'
           )}
         </EuiFlexItem>
-        {isFetched && !isLoading && label && (
+        {(isCurrentlyIsolated || hasPendingActions) && (
           <EuiFlexItem grow={false} className="eui-textTruncate isolation-status">
-            <EuiBadge color="hollow" data-test-subj={dataTestSubj}>
-              <>{label}</>
-            </EuiBadge>
+            <AgentResponseActionsStatus
+              data-test-subj={getTestId('actionStatuses')}
+              isIsolated={isCurrentlyIsolated}
+              pendingActions={hostPendingActions}
+            />
           </EuiFlexItem>
         )}
       </EuiFlexGroupStyled>
