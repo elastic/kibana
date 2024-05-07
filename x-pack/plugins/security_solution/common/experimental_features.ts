@@ -214,6 +214,11 @@ export const allowedExperimentalValues = Object.freeze({
   responseConsoleExecuteEnabled: false,
 
   /*
+   * Enables experimental JAMF integration data to be available in Analyzer
+   */
+  jamfDataInAnalyzerEnabled: false,
+
+  /**
    * Enables experimental "Updates" tab in the prebuilt rule upgrade flyout.
    * This tab shows the JSON diff between the installed prebuilt rule
    * version and the latest available version.
@@ -260,7 +265,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    *  Enables Security AI Assistant's Flyout mode
    */
-  aiAssistantFlyoutMode: false,
+  aiAssistantFlyoutMode: true,
 
   /**
    * Enables the new modal for the value list items
