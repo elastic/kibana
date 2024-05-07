@@ -39,7 +39,7 @@ export class NavigationServerPlugin
 
     if (isSolutionNavExperiementEnabled) {
       void core.getStartServices().then(([coreStart, deps]) => {
-        deps.cloudExperiments
+        return deps.cloudExperiments
           ?.getVariation(SOLUTION_NAV_FEATURE_FLAG_NAME, false)
           .then(async (enabled) => {
             if (enabled) {
