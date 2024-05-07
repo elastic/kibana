@@ -27,7 +27,7 @@ interface FetchActionResponsesOptions {
 }
 
 interface FetchActionResponsesResult {
-  data: Array<EndpointActionResponse | LogsEndpointActionResponse>;
+  data: Array<estypes.SearchHit<EndpointActionResponse | LogsEndpointActionResponse>>;
 }
 
 /** @private */
