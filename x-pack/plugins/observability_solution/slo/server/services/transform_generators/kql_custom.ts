@@ -17,9 +17,7 @@ import {
   SLO_DESTINATION_INDEX_NAME,
   SLO_INGEST_PIPELINE_NAME,
 } from '../../../common/constants';
-import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
 import { KQLCustomIndicator, SLODefinition } from '../../domain/models';
-import { InvalidTransformError } from '../../errors';
 import { getTimesliceTargetComparator } from './common';
 
 export class KQLCustomTransformGenerator extends TransformGenerator {

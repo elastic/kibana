@@ -146,7 +146,10 @@ export class SloPlugin implements Plugin<SloPluginSetup> {
           ...plugins,
           core,
         },
-        dataViews: pluginStart.dataViews,
+        getDataViewsStart: async () => {
+          const [, pluginStart] = await core.getStartServices();
+          return pluginStart.dataViews;
+        },
         getSpacesStart: async () => {
           const [, pluginStart] = await core.getStartServices();
           return pluginStart.spaces;

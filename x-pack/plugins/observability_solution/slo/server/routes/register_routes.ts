@@ -38,7 +38,7 @@ export interface RegisterRoutesDependencies {
   getSpacesStart: () => Promise<SpacesPluginStart | undefined>;
   ruleDataService: RuleDataPluginService;
   getRulesClientWithRequest: (request: KibanaRequest) => Promise<RulesClientApi>;
-  dataViews: DataViewsServerPluginStart;
+  getDataViewsStart: () => Promise<DataViewsServerPluginStart>;
 }
 
 export function registerRoutes({ config, repository, core, logger, dependencies }: RegisterRoutes) {

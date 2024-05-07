@@ -31,12 +31,12 @@ describe('APM Transaction Duration Transform Generator', () => {
       id: 'irrelevant',
       indicator: createAPMTransactionDurationIndicator(),
     });
-    const transform = await generator.getTransformParams(slo);
+    const transform = await generator.getTransformParams(slo, spaceId, dataViewsService);
 
     expect(transform).toMatchSnapshot();
   });
 
-  it('returns the expected transform params for timeslices slo using a timesliceTarget = 0', () => {
+  it('returns the expected transform params for timeslices slo using a timesliceTarget = 0', async () => {
     const slo = createSLOWithTimeslicesBudgetingMethod({
       id: 'irrelevant',
       indicator: createAPMTransactionDurationIndicator(),
@@ -46,7 +46,7 @@ describe('APM Transaction Duration Transform Generator', () => {
         timesliceWindow: twoMinute(),
       },
     });
-    const transform = await generator.getTransformParams(slo);
+    const transform = await generator.getTransformParams(slo, spaceId, dataViewsService);
 
     expect(transform).toMatchSnapshot();
   });
