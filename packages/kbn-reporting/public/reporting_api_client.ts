@@ -176,6 +176,20 @@ export class ReportingAPIClient implements IReportingAPI {
     return `${this.http.basePath.prepend(PUBLIC_ROUTES.GENERATE_PREFIX)}/${exportType}?${params}`;
   }
 
+  public async createReportingShareJob(exportType: string, jobParams: BaseParams) {
+    const jobParamsRison = rison.encode(jobParams);
+    const resp: { job?: ReportApiJSON } | undefined = await this.http.post(
+      `${INTERNAL_ROUTES.GENERATE_PREFIX}/${exportType}`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ jobParams: jobParamsRison }),
+      }
+    );
+    if (resp?.job) {
+      this.addPendingJobId(resp.job.id);
+      return new Job(resp.job);
+    }
+  }
   /**
    * Calls the internal API to generate a report job on-demand
    */
@@ -194,6 +208,8 @@ export class ReportingAPIClient implements IReportingAPI {
         return new Job(resp.job);
       }
     } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
       throw new Error(`${err.body?.message}`);
     }
   }
