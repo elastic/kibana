@@ -43,8 +43,7 @@ export default ({ getService }: FtrProviderContext) => {
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const path = dataPathBuilder.getPath('auditbeat/hosts');
 
-  // Failing: See https://github.com/elastic/kibana/issues/179704
-  describe.skip('@ess @serverless change alert status endpoints', () => {
+  describe('@ess @serverless @serverlessQA change alert status endpoints', () => {
     describe('validation checks', () => {
       describe('update by ids', () => {
         it('should not give errors when querying and the alerts index does not exist yet', async () => {
