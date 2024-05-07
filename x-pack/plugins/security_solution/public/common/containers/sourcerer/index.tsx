@@ -450,9 +450,9 @@ export const useSourcererDataView = (
   const sourcererDataView = useMemo(() => {
     const _dv =
       selectedDataView == null || missingPatterns.length > 0 ? legacyDataView : selectedDataView;
+    // Make sure the title is up to date, so that the correct index patterns are used everywhere
     return {
       ..._dv,
-      title,
       dataView: {
         ..._dv.dataView,
         title,
