@@ -1681,6 +1681,11 @@ x-pack/plugins/observability_solution/synthetics/server/saved_objects/saved_obje
 x-pack/plugins/observability_solution/synthetics/server/saved_objects/synthetics_monitor.ts @elastic/obs-ux-infra_services-team @elastic/kibana-security
 x-pack/plugins/observability_solution/synthetics/server/saved_objects/synthetics_param.ts @elastic/obs-ux-infra_services-team @elastic/kibana-security
 
+# Specialised GitHub workflows for the Observability robots
+/.github/workflows/deploy-my-kibana.yml   @elastic/observablt-robots @elastic/kibana-operations
+/.github/workflows/oblt-github-commands   @elastic/observablt-robots @elastic/kibana-operations
+/.github/workflows/undeploy-my-kibana.yml @elastic/observablt-robots @elastic/kibana-operations
+
 ####
 ## These rules are always last so they take ultimate priority over everything else
 ####
