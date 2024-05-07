@@ -420,7 +420,7 @@ describe('Actions Plugin', () => {
         expect(pluginStart.isActionTypeEnabled('.slack')).toBeFalsy();
       });
 
-      it('should set connector type enabled and check is enabled with plugin setup method', async () => {
+      it('should set connector type enabled and check isActionTypeEnabled with plugin setup method', async () => {
         setup(getConfig());
         // coreMock.createSetup doesn't support Plugin generics
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
