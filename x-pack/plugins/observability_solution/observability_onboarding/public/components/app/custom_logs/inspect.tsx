@@ -17,9 +17,7 @@ export function Inspect() {
   const { goBack, getState, getPath, getUsage } = useWizard();
   return (
     <StepPanel
-      title={i18n.translate('xpack.observability_onboarding.inspect.stepPanel.inspectWizardLabel', {
-        defaultMessage: 'Inspect wizard',
-      })}
+      title="Inspect wizard"
       panelFooter={<StepPanelFooter items={[<BackButton onBack={goBack} />]} />}
     >
       <StepPanelContent>

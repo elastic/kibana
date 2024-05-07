@@ -6,7 +6,6 @@
  */
 
 import React, { ReactElement, ReactNode } from 'react';
-import { i18n } from '@kbn/i18n';
 import { of } from 'rxjs';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import {
@@ -159,13 +158,7 @@ export const mockCore: () => Partial<CoreStart> = () => {
     exploratoryView: {
       createExploratoryViewUrl: jest.fn(),
       getAppDataView: jest.fn(),
-      ExploratoryViewEmbeddable: () => (
-        <div>
-          {i18n.translate('xpack.uptime.core.div.embeddableExploratoryViewLabel', {
-            defaultMessage: 'Embeddable exploratory view',
-          })}
-        </div>
-      ),
+      ExploratoryViewEmbeddable: () => <div>Embeddable exploratory view</div>,
     },
     unifiedSearch: unifiedSearchPluginMock.createStartContract(),
   };

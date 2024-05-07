@@ -500,18 +500,23 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     value: 1.7,
     description: i18n.translate('xpack.observability.profilingDatacenterPUEUiSettingDescription', {
-      defaultMessage: `Data center power usage effectiveness (PUE) measures how efficiently a data center uses energy. Defaults to 1.7, the average on-premise data center PUE according to the <a>Uptime Institute</a> survey
-      
+      defaultMessage: `Data center power usage effectiveness (PUE) measures how efficiently a data center uses energy. Defaults to 1.7, the average on-premise data center PUE according to the {uptimeLink} survey
+      </br></br>
       You can also use the PUE that corresponds with your cloud provider:
-      '<ul style="list-style-type: none;margin-left: 4px;">
+      <ul style="list-style-type: none;margin-left: 4px;">
         <li><strong>AWS:</strong> 1.135</li>
         <li><strong>GCP:</strong> 1.1</li>
         <li><strong>Azure:</strong> 1.185</li>
-      </ul>'
+      </ul>
       `,
       values: {
-        a: (chunks) =>
-          `<a href="https://ela.st/uptimeinstitute" target="_blank" rel="noopener noreferrer">${chunks}</a>`,
+        uptimeLink:
+          '<a href="https://ela.st/uptimeinstitute" target="_blank" rel="noopener noreferrer">' +
+          i18n.translate(
+            'xpack.observability.profilingDatacenterPUEUiSettingDescription.uptimeLink',
+            { defaultMessage: 'Uptime Institute' }
+          ) +
+          '</a>',
       },
     }),
     schema: schema.number({ min: 0 }),
