@@ -7,7 +7,7 @@
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
-export default function ({ loadTestFile, getService }: FtrProviderContext) {
+export default function ({ loadTestFile }: FtrProviderContext) {
   describe('@serverless SecuritySolution Explore Network', () => {
     loadTestFile(require.resolve('./network_details'));
     loadTestFile(require.resolve('./network_dns'));
