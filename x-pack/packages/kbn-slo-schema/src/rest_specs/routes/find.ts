@@ -23,6 +23,7 @@ const findSLOParamsSchema = t.partial({
     perPage: t.string,
     sortBy: sortBySchema,
     sortDirection: sortDirectionSchema,
+    hideStale: t.boolean,
   }),
 });
 

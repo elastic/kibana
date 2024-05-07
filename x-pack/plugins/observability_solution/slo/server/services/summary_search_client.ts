@@ -44,7 +44,8 @@ export interface SummarySearchClient {
     kqlQuery: string,
     filters: string,
     sort: Sort,
-    pagination: Pagination
+    pagination: Pagination,
+    hideStale?: boolean
   ): Promise<Paginated<SummaryResult>>;
 }
 
@@ -60,7 +61,8 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
     kqlQuery: string,
     filters: string,
     sort: Sort,
-    pagination: Pagination
+    pagination: Pagination,
+    hideStale?: boolean
   ): Promise<Paginated<SummaryResult>> {
     let parsedFilters: any = {};
 
@@ -78,7 +80,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
         bool: {
           filter: [
             { term: { spaceId: this.spaceId } },
-            ...excludeStaleSummaryFilter(settings, kqlQuery),
+            ...excludeStaleSummaryFilter(settings, kqlQuery, this.hideStale),
             getElasticsearchQueryOrThrow(kqlQuery),
             ...(parsedFilters.filter ?? []),
           ],
@@ -190,8 +192,12 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
   }
 }
 
-function excludeStaleSummaryFilter(settings: StoredSLOSettings, kqlFilter: string) {
-  if (kqlFilter.includes('summaryUpdatedAt') || !settings.staleThresholdInHours) {
+function excludeStaleSummaryFilter(
+  settings: StoredSLOSettings,
+  kqlFilter: string,
+  hideStale?: boolean
+) {
+  if (kqlFilter.includes('summaryUpdatedAt') || !settings.staleThresholdInHours || !hideStale) {
     return [];
   }
   return [
