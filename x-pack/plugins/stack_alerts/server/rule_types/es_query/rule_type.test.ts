@@ -633,6 +633,7 @@ describe('ruleType', () => {
       toSpec: () => {
         return { id: 'test-id', title: 'test-title', timeFieldName: 'timestamp', fields: [] };
       },
+      getTimeField: () => dataViewMock.fields[1],
     };
     const defaultParams: OnlySearchSourceRuleParams = {
       size: 100,
@@ -717,6 +718,7 @@ describe('ruleType', () => {
       (ruleServices.dataViews.create as jest.Mock).mockResolvedValueOnce({
         ...dataViewMock.toSpec(),
         toSpec: () => dataViewMock.toSpec(),
+        getTimeField: () => dataViewMock.fields[1],
         toMinimalSpec: () => dataViewMock.toSpec(),
       });
       (searchSourceInstanceMock.getField as jest.Mock).mockImplementation((name: string) => {
