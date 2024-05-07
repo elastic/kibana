@@ -16,8 +16,8 @@ import type {
   DataMsg,
   DataTotalHits$,
   SavedSearchData,
-} from '../services/discover_data_state_container';
-import { RecordRawType } from '../services/discover_data_state_container';
+} from '../state_management/discover_data_state_container';
+import { RecordRawType } from '../state_management/discover_data_state_container';
 
 /**
  * Sends COMPLETE message to the main$ observable with the information
@@ -115,7 +115,7 @@ export function sendLoadingMoreFinishedMsg(
 /**
  * Send ERROR message
  */
-export function sendErrorMsg(data$: DataMain$ | DataDocuments$ | DataTotalHits$, error: Error) {
+export function sendErrorMsg(data$: DataMain$ | DataDocuments$ | DataTotalHits$, error?: Error) {
   const recordRawType = data$.getValue().recordRawType;
   data$.next({
     fetchStatus: FetchStatus.ERROR,

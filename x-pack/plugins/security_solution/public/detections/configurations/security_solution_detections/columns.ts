@@ -9,6 +9,8 @@ import type { EuiDataGridColumn } from '@elastic/eui';
 import {
   ALERT_HOST_CRITICALITY,
   ALERT_USER_CRITICALITY,
+  ALERT_HOST_RISK_SCORE_CALCULATED_LEVEL,
+  ALERT_USER_RISK_SCORE_CALCULATED_LEVEL,
 } from '../../../../common/field_maps/field_names';
 import type { LicenseService } from '../../../../common/license';
 import type { ColumnHeaderOptions } from '../../../../common/types';
@@ -30,6 +32,18 @@ export const assigneesColumn: ColumnHeaderOptions = {
   displayAsText: i18n.ALERTS_HEADERS_ASSIGNEES,
   id: 'kibana.alert.workflow_assignee_ids',
   initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH,
+};
+
+export const hostRiskLevelColumn: ColumnHeaderOptions = {
+  columnHeaderType: defaultColumnHeaderType,
+  id: ALERT_HOST_RISK_SCORE_CALCULATED_LEVEL,
+  displayAsText: i18n.ALERTS_HEADERS_HOST_RISK_LEVEL,
+};
+
+export const userRiskLevelColumn: ColumnHeaderOptions = {
+  columnHeaderType: defaultColumnHeaderType,
+  id: ALERT_USER_RISK_SCORE_CALCULATED_LEVEL,
+  displayAsText: i18n.ALERTS_HEADERS_USER_RISK_LEVEL,
 };
 
 const getBaseColumns = (
@@ -61,32 +75,24 @@ const getBaseColumns = (
       columnHeaderType: defaultColumnHeaderType,
       id: 'host.name',
     },
-    isPlatinumPlus
-      ? {
-          columnHeaderType: defaultColumnHeaderType,
-          id: 'host.risk.calculated_level',
-        }
-      : null,
     {
       columnHeaderType: defaultColumnHeaderType,
       id: 'user.name',
     },
-    isPlatinumPlus
-      ? {
-          columnHeaderType: defaultColumnHeaderType,
-          id: 'user.risk.calculated_level',
-        }
-      : null,
+    isPlatinumPlus ? hostRiskLevelColumn : null,
+    isPlatinumPlus ? userRiskLevelColumn : null,
     isPlatinumPlus
       ? {
           columnHeaderType: defaultColumnHeaderType,
           id: ALERT_HOST_CRITICALITY,
+          displayAsText: i18n.ALERTS_HEADERS_HOST_CRITICALITY,
         }
       : null,
     isPlatinumPlus
       ? {
           columnHeaderType: defaultColumnHeaderType,
           id: ALERT_USER_CRITICALITY,
+          displayAsText: i18n.ALERTS_HEADERS_USER_CRITICALITY,
         }
       : null,
     {

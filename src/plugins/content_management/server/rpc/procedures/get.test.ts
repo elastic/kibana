@@ -9,14 +9,14 @@
 import { omit } from 'lodash';
 
 import { schema } from '@kbn/config-schema';
-import type { ContentManagementServiceDefinitionVersioned, Version } from '@kbn/object-versioning';
-import { validate } from '../../utils';
+import type { ContentManagementServiceDefinitionVersioned } from '@kbn/object-versioning';
+import { validate, disableTransformsCache } from '../../utils';
 import { ContentRegistry } from '../../core/registry';
 import { createMockedStorage } from '../../core/mocks';
 import { EventBus } from '../../core/event_bus';
-import { getServiceObjectTransformFactory } from '../services_transforms_factory';
 import { get } from './get';
 
+disableTransformsCache();
 const storageContextGetTransforms = jest.fn();
 const spy = () => storageContextGetTransforms;
 
@@ -157,8 +157,6 @@ describe('RPC -> get()', () => {
       const ctx: any = {
         contentRegistry,
         requestHandlerContext,
-        getTransformsFactory: (contentTypeId: string, version: Version) =>
-          getServiceObjectTransformFactory(contentTypeId, version, { cacheEnabled: false }),
       };
 
       return { ctx, storage };
@@ -217,16 +215,16 @@ describe('RPC -> get()', () => {
     });
 
     describe('validation', () => {
-      test('should validate that content type definition exist', () => {
+      test('should validate that content type definition exist', async () => {
         const { ctx } = setup();
-        expect(() => fn(ctx, { contentTypeId: 'unknown', id: '1234' })).rejects.toEqual(
+        await expect(() => fn(ctx, { contentTypeId: 'unknown', id: '1234' })).rejects.toEqual(
           new Error('Content [unknown] is not registered.')
         );
       });
 
-      test('should throw if the request version is higher than the registered version', () => {
+      test('should throw if the request version is higher than the registered version', async () => {
         const { ctx } = setup();
-        expect(() =>
+        await expect(() =>
           fn(ctx, {
             contentTypeId: FOO_CONTENT_ID,
             id: '1234',
@@ -237,9 +235,9 @@ describe('RPC -> get()', () => {
     });
 
     describe('object versioning', () => {
-      test('should expose a  utility to transform and validate services objects', () => {
+      test('should expose a  utility to transform and validate services objects', async () => {
         const { ctx, storage } = setup();
-        fn(ctx, { contentTypeId: FOO_CONTENT_ID, id: '1234', version: 1 });
+        await fn(ctx, { contentTypeId: FOO_CONTENT_ID, id: '1234', version: 1 });
         const [[storageContext]] = storage.get.mock.calls;
 
         // getTransforms() utils should be available from context

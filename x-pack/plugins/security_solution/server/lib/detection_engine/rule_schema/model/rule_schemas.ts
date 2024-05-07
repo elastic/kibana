@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as z from 'zod';
+import type { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
 import type {
   RuleActionArrayCamel,
   RuleActionNotifyWhen,
@@ -21,8 +21,7 @@ import type {
   SIGNALS_ID,
   THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
-
-import type { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
+import * as z from 'zod';
 import { RuleResponseAction } from '../../../../../common/api/detection_engine';
 import type {
   IsRuleEnabled,
@@ -32,58 +31,60 @@ import type {
 import {
   AlertsIndex,
   AlertsIndexNamespace,
+  AlertSuppressionCamel,
+  AnomalyThreshold,
   BuildingBlockType,
-  RuleIntervalFrom,
-  RuleIntervalTo,
+  ConcurrentSearches,
+  DataViewId,
+  EventCategoryOverride,
+  HistoryWindowStart,
+  IndexPatternArray,
   InvestigationFields,
   InvestigationGuide,
   IsRuleImmutable,
+  ItemsPerSearch,
+  KqlQueryLanguage,
   MaxSignals,
+  NewTermsFields,
   RelatedIntegrationArray,
   RequiredFieldArray,
+  RiskScore,
+  RiskScoreMapping,
   RuleAuthorArray,
   RuleDescription,
   RuleExceptionList,
   RuleFalsePositiveArray,
+  RuleFilterArray,
+  RuleIntervalFrom,
+  RuleIntervalTo,
   RuleLicense,
   RuleMetadata,
   RuleNameOverride,
+  RuleQuery,
   RuleReferenceArray,
   RuleSignatureId,
+  RuleSource,
   RuleVersion,
+  SavedQueryId,
   SetupGuide,
-  ThreatArray,
-  TimelineTemplateId,
-  TimelineTemplateTitle,
-  TimestampOverride,
-  TimestampOverrideFallbackDisabled,
-  RiskScore,
-  RiskScoreMapping,
   Severity,
   SeverityMapping,
-  ConcurrentSearches,
-  DataViewId,
-  EventCategoryOverride,
-  IndexPatternArray,
-  ItemsPerSearch,
-  KqlQueryLanguage,
-  RuleFilterArray,
-  RuleQuery,
-  SavedQueryId,
+  ThreatArray,
   ThreatIndex,
   ThreatIndicatorPath,
   ThreatMapping,
   ThreatQuery,
-  TiebreakerField,
-  TimestampField,
-  AlertSuppressionCamel,
   ThresholdAlertSuppression,
   ThresholdNormalized,
-  AnomalyThreshold,
-  HistoryWindowStart,
-  NewTermsFields,
+  TiebreakerField,
+  TimelineTemplateId,
+  TimelineTemplateTitle,
+  TimestampField,
+  TimestampOverride,
+  TimestampOverrideFallbackDisabled,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { SERVER_APP_ID } from '../../../../../common/constants';
+import { convertObjectKeysToCamelCase } from '../../../../utils/object_case_converters';
 
 // 8.10.x is mapped as an array of strings
 export type LegacyInvestigationFields = z.infer<typeof LegacyInvestigationFields>;
@@ -103,6 +104,9 @@ export const InvestigationFieldsCombined = z.union([
   LegacyInvestigationFields,
 ]);
 
+export type RuleSourceCamelCased = z.infer<typeof RuleSourceCamelCased>;
+export const RuleSourceCamelCased = RuleSource.transform(convertObjectKeysToCamelCase);
+
 // Conversion to an interface has to be disabled for the entire file; otherwise,
 // the resulting union would not be assignable to Alerting's RuleParams due to a
 // TypeScript bug: https://github.com/microsoft/TypeScript/issues/15300
@@ -119,6 +123,7 @@ export const BaseRuleParams = z.object({
   ruleId: RuleSignatureId,
   investigationFields: InvestigationFieldsCombined.optional(),
   immutable: IsRuleImmutable,
+  ruleSource: RuleSourceCamelCased.optional(),
   license: RuleLicense.optional(),
   outputIndex: AlertsIndex,
   timelineId: TimelineTemplateId.optional(),
@@ -153,6 +158,7 @@ export const EqlSpecificRuleParams = z.object({
   eventCategoryOverride: EventCategoryOverride.optional(),
   timestampField: TimestampField.optional(),
   tiebreakerField: TiebreakerField.optional(),
+  alertSuppression: AlertSuppressionCamel.optional(),
 });
 
 export type EqlRuleParams = BaseRuleParams & EqlSpecificRuleParams;
@@ -185,6 +191,7 @@ export const ThreatSpecificRuleParams = z.object({
   concurrentSearches: ConcurrentSearches.optional(),
   itemsPerSearch: ItemsPerSearch.optional(),
   dataViewId: DataViewId.optional(),
+  alertSuppression: AlertSuppressionCamel.optional(),
 });
 
 export type ThreatRuleParams = BaseRuleParams & ThreatSpecificRuleParams;
@@ -267,6 +274,7 @@ export const NewTermsSpecificRuleParams = z.object({
   filters: RuleFilterArray.optional(),
   language: KqlQueryLanguage,
   dataViewId: DataViewId.optional(),
+  alertSuppression: AlertSuppressionCamel.optional(),
 });
 
 export type NewTermsRuleParams = BaseRuleParams & NewTermsSpecificRuleParams;

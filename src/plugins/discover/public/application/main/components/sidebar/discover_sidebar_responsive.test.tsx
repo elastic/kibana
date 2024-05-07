@@ -24,11 +24,11 @@ import {
   AvailableFields$,
   DataDocuments$,
   RecordRawType,
-} from '../../services/discover_data_state_container';
+} from '../../state_management/discover_data_state_container';
 import { stubLogstashDataView } from '@kbn/data-plugin/common/stubs';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { DiscoverAppStateProvider } from '../../services/discover_app_state_container';
+import { DiscoverAppStateProvider } from '../../state_management/discover_app_state_container';
 import * as ExistingFieldsServiceApi from '@kbn/unified-field-list/src/services/field_existing/load_field_existing';
 import { resetExistingFieldsCache } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
@@ -36,13 +36,32 @@ import type { AggregateQuery, Query } from '@kbn/es-query';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
-import type { SearchBarCustomization } from '../../../../customizations';
+import { FieldListCustomization, SearchBarCustomization } from '../../../../customizations';
+import { DataViewField } from '@kbn/data-views-plugin/common';
 
 const mockSearchBarCustomization: SearchBarCustomization = {
   id: 'search_bar',
   CustomDataViewPicker: jest
     .fn(() => <div data-test-subj="custom-data-view-picker" />)
     .mockName('CustomDataViewPickerMock'),
+};
+
+const smartFields = [
+  new DataViewField({
+    name: 'mock_field',
+    type: 'mock_field',
+    searchable: false,
+    aggregatable: false,
+  }),
+];
+
+const additionalFieldGroups = {
+  smartFields,
+};
+
+const mockFieldListCustomisation: FieldListCustomization = {
+  id: 'field_list',
+  additionalFieldGroups,
 };
 
 let mockUseCustomizations = false;
@@ -57,6 +76,8 @@ jest.mock('../../../../customizations', () => ({
     switch (id) {
       case 'search_bar':
         return mockSearchBarCustomization;
+      case 'field_list':
+        return mockFieldListCustomisation;
       default:
         throw new Error(`Unknown customization id: ${id}`);
     }
@@ -123,14 +144,6 @@ const mockfieldCounts: Record<string, number> = {};
 const mockCalcFieldCounts = jest.fn(() => {
   return mockfieldCounts;
 });
-
-jest.mock('../../../../kibana_services', () => ({
-  getUiActions: jest.fn(() => {
-    return {
-      getTriggerCompatibleActions: jest.fn(() => []),
-    };
-  }),
-}));
 
 jest.mock('../../utils/calc_field_counts', () => ({
   calcFieldCounts: () => mockCalcFieldCounts(),
@@ -760,6 +773,20 @@ describe('discover responsive sidebar', function () {
       expect(findTestSubject(comp, 'fieldList').exists()).toBe(false);
       findTestSubject(comp, 'unifiedFieldListSidebar__toggle-expand').simulate('click');
       expect(findTestSubject(comp, 'fieldList').exists()).toBe(true);
+    });
+  });
+
+  describe('field list customization', () => {
+    it('should render Smart Fields', async () => {
+      mockUseCustomizations = true;
+      const comp = await mountComponent(props);
+
+      expect(findTestSubject(comp, 'fieldList').exists()).toBe(true);
+      expect(findTestSubject(comp, 'fieldListGroupedSmartFields').exists()).toBe(true);
+
+      const smartFieldsCount = findTestSubject(comp, 'fieldListGroupedSmartFields-count');
+
+      expect(smartFieldsCount.text()).toBe('1');
     });
   });
 });

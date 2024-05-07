@@ -38,4 +38,5 @@ export const DATAFEED_CONFIG: Datafeed = {
 export const ML_EMBEDDABLE_TYPES = {
   ANOMALY_SWIMLANE: 'ml_anomaly_swimlane',
   ANOMALY_CHARTS: 'ml_anomaly_charts',
+  ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE: 'ml_single_metric_viewer',
 } as const;

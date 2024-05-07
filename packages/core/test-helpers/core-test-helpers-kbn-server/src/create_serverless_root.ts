@@ -9,7 +9,7 @@
 import Path from 'path';
 import { defaultsDeep } from 'lodash';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
-import { Cluster } from '@kbn/es';
+import { Cluster, ServerlessProjectType } from '@kbn/es';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import { esTestConfig } from '@kbn/test';
@@ -27,6 +27,8 @@ export interface TestServerlessUtils {
 }
 
 const ES_BASE_PATH_DIR = Path.join(REPO_ROOT, '.es/es_test_serverless');
+
+const projectType: ServerlessProjectType = 'es';
 
 /**
  * See docs in {@link TestUtils}. This function provides the same utilities but
@@ -75,16 +77,21 @@ function createServerlessES() {
   });
   const es = new Cluster({ log });
   const esPort = esTestConfig.getPort();
+  const esServerlessImageParams = parseEsServerlessImageOverride(
+    esTestConfig.getESServerlessImage()
+  );
   return {
     es,
     start: async () => {
       await es.runServerless({
+        projectType,
         basePath: ES_BASE_PATH_DIR,
         port: esPort,
         background: true,
         clean: true,
         kill: true,
         waitForReady: true,
+        ...esServerlessImageParams,
         // security is enabled by default, if needed kibana requires serviceAccountToken
         esArgs: ['xpack.security.enabled=false'],
       });
@@ -151,4 +158,21 @@ function createServerlessKibana(settings = {}, cliArgs: Partial<CliArgs> = {}) {
     ...cliArgs,
     serverless: true,
   });
+}
+
+function parseEsServerlessImageOverride(dockerImageOrTag: string | undefined): {
+  image?: string;
+  tag?: string;
+} {
+  if (!dockerImageOrTag) {
+    return {};
+  } else if (dockerImageOrTag.includes(':')) {
+    return {
+      image: dockerImageOrTag,
+    };
+  } else {
+    return {
+      tag: dockerImageOrTag,
+    };
+  }
 }

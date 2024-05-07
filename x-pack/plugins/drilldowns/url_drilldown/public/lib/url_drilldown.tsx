@@ -7,17 +7,15 @@
 
 import React from 'react';
 import { IExternalUrl, ThemeServiceStart } from '@kbn/core/public';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import {
   ChartActionContext,
   CONTEXT_MENU_TRIGGER,
-  IEmbeddable,
-  EmbeddableInput,
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
 import { IMAGE_CLICK_TRIGGER } from '@kbn/image-embeddable-plugin/public';
 import { ActionExecutionContext, ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
-import type { Query, Filter, TimeRange } from '@kbn/es-query';
 import type { CollectConfigProps as CollectConfigPropsBase } from '@kbn/kibana-utils-plugin/public';
 import { UrlTemplateEditorVariable, KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
@@ -36,15 +34,6 @@ import { getEventVariableList, getEventScopeValues } from './variables/event_var
 import { getContextVariableList, getContextScopeValues } from './variables/context_variables';
 import { getGlobalVariableList } from './variables/global_variables';
 
-interface EmbeddableQueryInput extends EmbeddableInput {
-  query?: Query;
-  filters?: Filter[];
-  timeRange?: TimeRange;
-}
-
-/** @internal */
-export type EmbeddableWithQueryInput = IEmbeddable<EmbeddableQueryInput>;
-
 interface UrlDrilldownDeps {
   externalUrl: IExternalUrl;
   getGlobalScope: () => UrlDrilldownGlobalScope;
@@ -55,7 +44,6 @@ interface UrlDrilldownDeps {
   theme: () => ThemeServiceStart;
 }
 
-export type ActionContext = ChartActionContext<EmbeddableWithQueryInput>;
 export type Config = UrlDrilldownConfig;
 export type UrlTrigger =
   | typeof VALUE_CLICK_TRIGGER
@@ -64,14 +52,13 @@ export type UrlTrigger =
   | typeof CONTEXT_MENU_TRIGGER
   | typeof IMAGE_CLICK_TRIGGER;
 
-export interface ActionFactoryContext extends BaseActionFactoryContext {
-  embeddable?: EmbeddableWithQueryInput;
-}
+export type ActionFactoryContext = Partial<EmbeddableApiContext> & BaseActionFactoryContext;
+
 export type CollectConfigProps = CollectConfigPropsBase<Config, ActionFactoryContext>;
 
 const URL_DRILLDOWN = 'URL_DRILLDOWN';
 
-export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFactoryContext> {
+export class UrlDrilldown implements Drilldown<Config, ChartActionContext, ActionFactoryContext> {
   public readonly id = URL_DRILLDOWN;
 
   constructor(private readonly deps: UrlDrilldownDeps) {}
@@ -85,7 +72,7 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
 
   public readonly actionMenuItem: React.FC<{
     config: Omit<SerializedAction<UrlDrilldownConfig>, 'factoryId'>;
-    context: ActionContext | ActionExecutionContext<ActionContext>;
+    context: ChartActionContext | ActionExecutionContext<ChartActionContext>;
   }> = ({ config, context }) => {
     const [title, setTitle] = React.useState(config.name);
     React.useEffect(() => {
@@ -152,7 +139,7 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
     return !!config.url.template;
   };
 
-  public readonly isCompatible = async (config: Config, context: ActionContext) => {
+  public readonly isCompatible = async (config: Config, context: ChartActionContext) => {
     const scope = this.getRuntimeVariables(context);
     const { isValid, error } = await urlDrilldownValidateUrlTemplate(config.url, scope);
 
@@ -173,7 +160,7 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
     return true;
   };
 
-  private async buildUrl(config: Config, context: ActionContext): Promise<string> {
+  private async buildUrl(config: Config, context: ChartActionContext): Promise<string> {
     const doEncode = config.encodeUrl ?? true;
     const url = await urlDrilldownCompileUrl(
       config.url.template,
@@ -183,7 +170,10 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
     return url;
   }
 
-  public readonly getHref = async (config: Config, context: ActionContext): Promise<string> => {
+  public readonly getHref = async (
+    config: Config,
+    context: ChartActionContext
+  ): Promise<string> => {
     const url = await this.buildUrl(config, context);
     const validUrl = this.deps.externalUrl.validateUrl(url);
     if (!validUrl) {
@@ -195,7 +185,7 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
     return url;
   };
 
-  public readonly execute = async (config: Config, context: ActionContext) => {
+  public readonly execute = async (config: Config, context: ChartActionContext) => {
     const url = await this.getHref(config, context);
     if (config.openInNewTab) {
       window.open(url, '_blank', 'noopener');
@@ -204,7 +194,7 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
     }
   };
 
-  public readonly getRuntimeVariables = (context: ActionContext) => {
+  public readonly getRuntimeVariables = (context: ChartActionContext) => {
     return {
       event: getEventScopeValues(context),
       context: getContextScopeValues(context),

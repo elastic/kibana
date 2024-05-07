@@ -46,6 +46,7 @@ describe('Custom Query Alerts', () => {
     ruleExecutionLoggerFactory: () => Promise.resolve(ruleExecutionLogMock.forExecutors.create()),
     version: '8.3',
     publicBaseUrl,
+    alerting,
   });
   const eventsTelemetry = createMockTelemetryEventsSender(true);
 
@@ -144,6 +145,6 @@ describe('Custom Query Alerts', () => {
     await executor({ params });
 
     expect((await ruleDataClient.getWriter()).bulk).toHaveBeenCalled();
-    expect(eventsTelemetry.queueTelemetryEvents).toHaveBeenCalled();
+    expect(eventsTelemetry.sendAsync).toHaveBeenCalled();
   });
 });

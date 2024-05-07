@@ -34,40 +34,46 @@ interface AddToFavoritesButtonProps {
    * Id of the timeline to be displayed in the bottom bar and within the modal
    */
   timelineId: string;
+  /**
+   * Whether the button is a step in the timeline guided tour
+   */
+  isPartOfGuidedTour?: boolean;
 }
 
 /**
  * This component renders the add to favorites button for timeline.
  * It is used in the bottom bar as well as in the timeline modal's header.
  */
-export const AddToFavoritesButton = React.memo<AddToFavoritesButtonProps>(({ timelineId }) => {
-  const dispatch = useDispatch();
-  const { isFavorite, status } = useSelector((state: State) =>
-    selectTimelineById(state, timelineId)
-  );
+export const AddToFavoritesButton = React.memo<AddToFavoritesButtonProps>(
+  ({ timelineId, isPartOfGuidedTour = false }) => {
+    const dispatch = useDispatch();
+    const { isFavorite, status } = useSelector((state: State) =>
+      selectTimelineById(state, timelineId)
+    );
 
-  const isTimelineDraftOrImmutable = status !== TimelineStatus.active;
-  const label = isFavorite ? REMOVE_FROM_FAVORITES : ADD_TO_FAVORITES;
+    const isTimelineDraftOrImmutable = status !== TimelineStatus.active;
+    const label = isFavorite ? REMOVE_FROM_FAVORITES : ADD_TO_FAVORITES;
 
-  const handleClick = useCallback(
-    () => dispatch(timelineActions.updateIsFavorite({ id: timelineId, isFavorite: !isFavorite })),
-    [dispatch, timelineId, isFavorite]
-  );
+    const handleClick = useCallback(
+      () => dispatch(timelineActions.updateIsFavorite({ id: timelineId, isFavorite: !isFavorite })),
+      [dispatch, timelineId, isFavorite]
+    );
 
-  return (
-    <EuiButtonIcon
-      id={TIMELINE_TOUR_CONFIG_ANCHORS.ADD_TO_FAVORITES}
-      iconType={isFavorite ? 'starFilled' : 'starEmpty'}
-      isSelected={isFavorite}
-      disabled={isTimelineDraftOrImmutable}
-      aria-label={label}
-      title={label}
-      data-test-subj={`timeline-favorite-${isFavorite ? 'filled' : 'empty'}-star`}
-      onClick={handleClick}
-    >
-      {label}
-    </EuiButtonIcon>
-  );
-});
+    return (
+      <EuiButtonIcon
+        id={isPartOfGuidedTour ? TIMELINE_TOUR_CONFIG_ANCHORS.ADD_TO_FAVORITES : undefined}
+        iconType={isFavorite ? 'starFilled' : 'starEmpty'}
+        isSelected={isFavorite}
+        disabled={isTimelineDraftOrImmutable}
+        aria-label={label}
+        title={label}
+        data-test-subj={`timeline-favorite-${isFavorite ? 'filled' : 'empty'}-star`}
+        onClick={handleClick}
+      >
+        {label}
+      </EuiButtonIcon>
+    );
+  }
+);
 
 AddToFavoritesButton.displayName = 'AddToFavoritesButton';

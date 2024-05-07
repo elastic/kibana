@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React, { type FC, useCallback, useContext, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useLocation } from 'react-router-dom';
 import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { DataViewAndSavedSearch, getDataViewAndSavedSearchCallback } from '../../util/index_utils';
+import type { DataViewAndSavedSearch } from '../../util/index_utils';
+import { getDataViewAndSavedSearchCallback } from '../../util/index_utils';
 import { useMlKibana } from '../kibana';
 import { createSearchItems } from '../../jobs/new_job/utils/new_job_utils';
 
@@ -33,7 +35,7 @@ export const DataSourceContext = React.createContext<DataSourceContextValue>(
  * @param children
  * @constructor
  */
-export const DataSourceContextProvider: FC = ({ children }) => {
+export const DataSourceContextProvider: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const [value, setValue] = useState<DataSourceContextValue>();
   const [error, setError] = useState<Error>();
 

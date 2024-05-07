@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonGroup, EuiFormRow, type EuiButtonGroupOptionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ChangePointDetectionViewType } from '../../../common/constants';
+import type { ChangePointDetectionViewType } from '@kbn/aiops-change-point-detection/constants';
 
 const viewTypeOptions: EuiButtonGroupOptionProps[] = [
   {

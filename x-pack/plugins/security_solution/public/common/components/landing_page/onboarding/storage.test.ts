@@ -10,7 +10,8 @@ import {
   defaultExpandedCards,
   EXPANDED_CARDS_STORAGE_KEY,
   FINISHED_STEPS_STORAGE_KEY,
-  onboardingStorage,
+  getStorageKeyBySpace,
+  OnboardingStorage,
 } from './storage';
 import {
   AddIntegrationsSteps,
@@ -29,9 +30,9 @@ import { ProductLine } from './configs';
 
 jest.mock('../../../lib/local_storage');
 
-describe('useStorage', () => {
+describe.each([['test'], [undefined]])('useStorage - spaceId: %s', (spaceId) => {
   const mockStorage = storage as unknown as MockStorage;
-
+  const onboardingStorage = new OnboardingStorage(spaceId);
   const onboardingSteps = [
     CreateProjectSteps.createFirstProject,
     OverviewSteps.getToKnowElasticSecurity,
@@ -48,8 +49,9 @@ describe('useStorage', () => {
 
   it('should return the active products from storage', () => {
     expect(onboardingStorage.getActiveProductsFromStorage()).toEqual([]);
+    const activeProductsStorageKey = getStorageKeyBySpace(ACTIVE_PRODUCTS_STORAGE_KEY, spaceId);
 
-    mockStorage.set(ACTIVE_PRODUCTS_STORAGE_KEY, [ProductLine.security, ProductLine.endpoint]);
+    mockStorage.set(activeProductsStorageKey, [ProductLine.security, ProductLine.endpoint]);
     expect(onboardingStorage.getActiveProductsFromStorage()).toEqual([
       ProductLine.security,
       ProductLine.endpoint,
@@ -57,26 +59,28 @@ describe('useStorage', () => {
   });
 
   it('should toggle active products in storage', () => {
+    const activeProductsStorageKey = getStorageKeyBySpace(ACTIVE_PRODUCTS_STORAGE_KEY, spaceId);
+
     expect(onboardingStorage.toggleActiveProductsInStorage(ProductLine.security)).toEqual([
       ProductLine.security,
     ]);
-    expect(mockStorage.set).toHaveBeenCalledWith(ACTIVE_PRODUCTS_STORAGE_KEY, [
-      ProductLine.security,
-    ]);
+    expect(mockStorage.set).toHaveBeenCalledWith(activeProductsStorageKey, [ProductLine.security]);
 
-    mockStorage.set(ACTIVE_PRODUCTS_STORAGE_KEY, [ProductLine.security]);
+    mockStorage.set(activeProductsStorageKey, [ProductLine.security]);
     expect(onboardingStorage.toggleActiveProductsInStorage(ProductLine.security)).toEqual([]);
-    expect(mockStorage.set).toHaveBeenCalledWith(ACTIVE_PRODUCTS_STORAGE_KEY, []);
+    expect(mockStorage.set).toHaveBeenCalledWith(activeProductsStorageKey, []);
   });
 
   it('should return the finished steps from storage by card ID', () => {
+    const finishedStepsStorageKey = getStorageKeyBySpace(FINISHED_STEPS_STORAGE_KEY, spaceId);
+
     expect(
       onboardingStorage.getFinishedStepsFromStorageByCardId(
         QuickStartSectionCardsId.createFirstProject
       )
     ).toEqual([CreateProjectSteps.createFirstProject]);
 
-    mockStorage.set(FINISHED_STEPS_STORAGE_KEY, {
+    mockStorage.set(finishedStepsStorageKey, {
       [QuickStartSectionCardsId.createFirstProject]: [
         CreateProjectSteps.createFirstProject,
         'step2',
@@ -91,9 +95,11 @@ describe('useStorage', () => {
   });
 
   it('should return all finished steps from storage', () => {
+    const finishedStepsStorageKey = getStorageKeyBySpace(FINISHED_STEPS_STORAGE_KEY, spaceId);
+
     expect(onboardingStorage.getAllFinishedStepsFromStorage()).toEqual(DEFAULT_FINISHED_STEPS);
 
-    mockStorage.set(FINISHED_STEPS_STORAGE_KEY, {
+    mockStorage.set(finishedStepsStorageKey, {
       [QuickStartSectionCardsId.createFirstProject]: [
         CreateProjectSteps.createFirstProject,
         'step2',
@@ -110,22 +116,24 @@ describe('useStorage', () => {
   });
 
   it('should add a finished step to storage', () => {
+    const finishedStepsStorageKey = getStorageKeyBySpace(FINISHED_STEPS_STORAGE_KEY, spaceId);
+
     onboardingStorage.addFinishedStepToStorage(
       QuickStartSectionCardsId.createFirstProject,
       CreateProjectSteps.createFirstProject
     );
-    expect(mockStorage.set).toHaveBeenCalledWith(FINISHED_STEPS_STORAGE_KEY, {
+    expect(mockStorage.set).toHaveBeenCalledWith(finishedStepsStorageKey, {
       [QuickStartSectionCardsId.createFirstProject]: [CreateProjectSteps.createFirstProject],
     });
 
-    mockStorage.set(FINISHED_STEPS_STORAGE_KEY, {
+    mockStorage.set(finishedStepsStorageKey, {
       [QuickStartSectionCardsId.createFirstProject]: [CreateProjectSteps.createFirstProject],
     });
     onboardingStorage.addFinishedStepToStorage(
       QuickStartSectionCardsId.createFirstProject,
       'step2' as StepId
     );
-    expect(mockStorage.set).toHaveBeenCalledWith(FINISHED_STEPS_STORAGE_KEY, {
+    expect(mockStorage.set).toHaveBeenCalledWith(finishedStepsStorageKey, {
       [QuickStartSectionCardsId.createFirstProject]: [
         CreateProjectSteps.createFirstProject,
         'step2',
@@ -134,7 +142,9 @@ describe('useStorage', () => {
   });
 
   it('should get finished steps from storage by card ID', () => {
-    mockStorage.set(FINISHED_STEPS_STORAGE_KEY, {
+    const finishedStepsStorageKey = getStorageKeyBySpace(FINISHED_STEPS_STORAGE_KEY, spaceId);
+
+    mockStorage.set(finishedStepsStorageKey, {
       [QuickStartSectionCardsId.createFirstProject]: [
         CreateProjectSteps.createFirstProject,
         'step2',
@@ -156,7 +166,9 @@ describe('useStorage', () => {
   });
 
   it('should get all finished steps from storage', () => {
-    mockStorage.set(FINISHED_STEPS_STORAGE_KEY, {
+    const finishedStepsStorageKey = getStorageKeyBySpace(FINISHED_STEPS_STORAGE_KEY, spaceId);
+
+    mockStorage.set(finishedStepsStorageKey, {
       [QuickStartSectionCardsId.createFirstProject]: [
         CreateProjectSteps.createFirstProject,
         'step2',
@@ -174,23 +186,27 @@ describe('useStorage', () => {
       card3: ['step4'],
     });
 
-    mockStorage.set(FINISHED_STEPS_STORAGE_KEY, {});
+    mockStorage.set(finishedStepsStorageKey, {});
     expect(onboardingStorage.getAllFinishedStepsFromStorage()).toEqual(DEFAULT_FINISHED_STEPS);
   });
 
   it('should remove a finished step from storage', () => {
+    const finishedStepsStorageKey = getStorageKeyBySpace(FINISHED_STEPS_STORAGE_KEY, spaceId);
+
     onboardingStorage.removeFinishedStepFromStorage(
       QuickStartSectionCardsId.createFirstProject,
       'step2' as StepId,
       onboardingSteps
     );
-    expect(mockStorage.set).toHaveBeenCalledWith(FINISHED_STEPS_STORAGE_KEY, {
+    expect(mockStorage.set).toHaveBeenCalledWith(finishedStepsStorageKey, {
       [QuickStartSectionCardsId.createFirstProject]: [CreateProjectSteps.createFirstProject],
     });
   });
 
   it('should not remove a default finished step from storage', () => {
-    mockStorage.set(FINISHED_STEPS_STORAGE_KEY, {
+    const finishedStepsStorageKey = getStorageKeyBySpace(FINISHED_STEPS_STORAGE_KEY, spaceId);
+
+    mockStorage.set(finishedStepsStorageKey, {
       [QuickStartSectionCardsId.createFirstProject]: [
         CreateProjectSteps.createFirstProject,
         'step2',
@@ -202,7 +218,7 @@ describe('useStorage', () => {
       CreateProjectSteps.createFirstProject,
       onboardingSteps
     );
-    expect(mockStorage.get(FINISHED_STEPS_STORAGE_KEY)).toEqual({
+    expect(mockStorage.get(finishedStepsStorageKey)).toEqual({
       [QuickStartSectionCardsId.createFirstProject]: [
         CreateProjectSteps.createFirstProject,
         'step2',
@@ -211,6 +227,8 @@ describe('useStorage', () => {
   });
 
   it('should get all expanded card steps from storage', () => {
+    const expandedCardsStorageKey = getStorageKeyBySpace(EXPANDED_CARDS_STORAGE_KEY, spaceId);
+
     (mockStorage.get as jest.Mock).mockReturnValueOnce({
       [QuickStartSectionCardsId.createFirstProject]: {
         isExpanded: true,
@@ -218,7 +236,7 @@ describe('useStorage', () => {
       },
     });
     const result = onboardingStorage.getAllExpandedCardStepsFromStorage();
-    expect(mockStorage.get).toHaveBeenCalledWith(EXPANDED_CARDS_STORAGE_KEY);
+    expect(mockStorage.get).toHaveBeenCalledWith(expandedCardsStorageKey);
     expect(result).toEqual({
       [QuickStartSectionCardsId.createFirstProject]: {
         isExpanded: true,
@@ -228,13 +246,17 @@ describe('useStorage', () => {
   });
 
   it('should get default expanded card steps from storage', () => {
+    const expandedCardsStorageKey = getStorageKeyBySpace(EXPANDED_CARDS_STORAGE_KEY, spaceId);
+
     (mockStorage.get as jest.Mock).mockReturnValueOnce(null);
     const result = onboardingStorage.getAllExpandedCardStepsFromStorage();
-    expect(mockStorage.get).toHaveBeenCalledWith(EXPANDED_CARDS_STORAGE_KEY);
+    expect(mockStorage.get).toHaveBeenCalledWith(expandedCardsStorageKey);
     expect(result).toEqual(defaultExpandedCards);
   });
 
   it('should reset card steps in storage', () => {
+    const expandedCardsStorageKey = getStorageKeyBySpace(EXPANDED_CARDS_STORAGE_KEY, spaceId);
+
     (mockStorage.get as jest.Mock).mockReturnValueOnce({
       [QuickStartSectionCardsId.watchTheOverviewVideo]: {
         isExpanded: false,
@@ -242,7 +264,7 @@ describe('useStorage', () => {
       },
     });
     onboardingStorage.resetAllExpandedCardStepsToStorage();
-    expect(mockStorage.get(EXPANDED_CARDS_STORAGE_KEY)).toEqual({
+    expect(mockStorage.get(expandedCardsStorageKey)).toEqual({
       [QuickStartSectionCardsId.watchTheOverviewVideo]: {
         isExpanded: false,
         expandedSteps: [],
@@ -251,7 +273,9 @@ describe('useStorage', () => {
   });
 
   it('should add a step to expanded card steps in storage', () => {
-    mockStorage.set(EXPANDED_CARDS_STORAGE_KEY, {
+    const expandedCardsStorageKey = getStorageKeyBySpace(EXPANDED_CARDS_STORAGE_KEY, spaceId);
+
+    mockStorage.set(expandedCardsStorageKey, {
       [QuickStartSectionCardsId.createFirstProject]: {
         isExpanded: false,
         expandedSteps: [],
@@ -265,7 +289,7 @@ describe('useStorage', () => {
       QuickStartSectionCardsId.watchTheOverviewVideo,
       OverviewSteps.getToKnowElasticSecurity
     );
-    expect(mockStorage.get(EXPANDED_CARDS_STORAGE_KEY)).toEqual({
+    expect(mockStorage.get(expandedCardsStorageKey)).toEqual({
       [QuickStartSectionCardsId.createFirstProject]: {
         isExpanded: false,
         expandedSteps: [],
@@ -278,7 +302,9 @@ describe('useStorage', () => {
   });
 
   it('should remove a step from expanded card steps in storage', () => {
-    mockStorage.set(EXPANDED_CARDS_STORAGE_KEY, {
+    const expandedCardsStorageKey = getStorageKeyBySpace(EXPANDED_CARDS_STORAGE_KEY, spaceId);
+
+    mockStorage.set(expandedCardsStorageKey, {
       [QuickStartSectionCardsId.watchTheOverviewVideo]: {
         isExpanded: true,
         expandedSteps: [OverviewSteps.getToKnowElasticSecurity],
@@ -288,7 +314,7 @@ describe('useStorage', () => {
       QuickStartSectionCardsId.watchTheOverviewVideo,
       OverviewSteps.getToKnowElasticSecurity
     );
-    expect(mockStorage.get(EXPANDED_CARDS_STORAGE_KEY)).toEqual({
+    expect(mockStorage.get(expandedCardsStorageKey)).toEqual({
       [QuickStartSectionCardsId.watchTheOverviewVideo]: {
         isExpanded: false,
         expandedSteps: [],
@@ -297,6 +323,8 @@ describe('useStorage', () => {
   });
 
   it('should update a card from expanded card steps in storage', () => {
+    const expandedCardsStorageKey = getStorageKeyBySpace(EXPANDED_CARDS_STORAGE_KEY, spaceId);
+
     (mockStorage.get as jest.Mock).mockReturnValueOnce({
       [QuickStartSectionCardsId.createFirstProject]: {
         isExpanded: true,
@@ -306,7 +334,7 @@ describe('useStorage', () => {
     onboardingStorage.removeExpandedCardStepFromStorage(
       QuickStartSectionCardsId.createFirstProject
     );
-    expect(mockStorage.set).toHaveBeenCalledWith(EXPANDED_CARDS_STORAGE_KEY, {
+    expect(mockStorage.set).toHaveBeenCalledWith(expandedCardsStorageKey, {
       [QuickStartSectionCardsId.createFirstProject]: {
         isExpanded: false,
         expandedSteps: [CreateProjectSteps.createFirstProject],

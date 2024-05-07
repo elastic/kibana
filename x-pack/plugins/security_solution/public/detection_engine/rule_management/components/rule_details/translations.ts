@@ -28,6 +28,13 @@ export const UPDATES_TAB_LABEL = i18n.translate(
   }
 );
 
+export const JSON_VIEW_UPDATES_TAB_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.jsonViewUpdatesTabLabel',
+  {
+    defaultMessage: 'JSON view',
+  }
+);
+
 export const DISMISS_BUTTON_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.dismissButtonLabel',
   {
@@ -333,5 +340,12 @@ export const FROM_FIELD_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.fromFieldLabel',
   {
     defaultMessage: 'Additional look-back time',
+  }
+);
+
+export const MAX_SIGNALS_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.maxAlertsFieldLabel',
+  {
+    defaultMessage: 'Max alerts per run',
   }
 );

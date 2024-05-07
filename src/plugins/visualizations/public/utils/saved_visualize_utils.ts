@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import type { OverlayStart, SavedObjectAttributes, SavedObjectReference } from '@kbn/core/public';
+import type { SavedObjectAttributes, SavedObjectReference } from '@kbn/core/public';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import {
   extractSearchSourceReferences,
@@ -26,6 +26,7 @@ import type {
   ISavedVis,
   SaveVisOptions,
   GetVisOptions,
+  StartServices,
 } from '../types';
 import type { TypesStart, BaseVisType } from '../vis_types';
 // @ts-ignore
@@ -61,16 +62,19 @@ export function mapHitSource(
     id,
     references,
     updatedAt,
+    managed,
   }: {
     attributes: SavedObjectAttributes;
     id: string;
     references: SavedObjectReference[];
     updatedAt?: string;
+    managed?: boolean;
   }
 ) {
   const newAttributes: {
     id: string;
     references: SavedObjectReference[];
+    managed?: boolean;
     url: string;
     savedObjectType?: string;
     editor?: { editUrl?: string };
@@ -86,6 +90,7 @@ export function mapHitSource(
     references,
     url: urlFor(id),
     updatedAt,
+    managed,
     ...attributes,
   };
 
@@ -207,7 +212,7 @@ export async function findListItems(
 }
 
 export async function getSavedVisualization(
-  services: {
+  services: StartServices & {
     search: DataPublicPluginStart['search'];
     dataViews: DataPublicPluginStart['dataViews'];
     spaces?: SpacesPluginStart;
@@ -227,6 +232,7 @@ export async function getSavedVisualization(
     getEsType: () => SAVED_VIS_TYPE,
     getDisplayName: () => SAVED_VIS_TYPE,
     searchSource: opts.searchSource ? services.search.searchSource.createEmpty() : undefined,
+    managed: false,
   } as VisSavedObject;
   const defaultsProps = getDefaults(opts);
 
@@ -255,6 +261,7 @@ export async function getSavedVisualization(
 
   Object.assign(savedObject, attributes);
   savedObject.lastSavedTitle = savedObject.title;
+  savedObject.managed = Boolean(resp.managed);
 
   savedObject.sharingSavedObjectProps = {
     aliasTargetId,
@@ -299,7 +306,7 @@ export async function getSavedVisualization(
     savedObject.tags = services.savedObjectsTagging.ui.getTagIdsFromReferences(resp.references);
   }
 
-  savedObject.visState = await updateOldState(savedObject.visState);
+  savedObject.visState = updateOldState(savedObject.visState);
 
   return savedObject;
 }
@@ -312,8 +319,7 @@ export async function saveVisualization(
     onTitleDuplicate,
     copyOnSave = false,
   }: SaveVisOptions,
-  services: {
-    overlays: OverlayStart;
+  services: StartServices & {
     savedObjectsTagging?: SavedObjectsTaggingApi;
   }
 ) {

@@ -48,6 +48,9 @@ const mockGetPipeline2 = {
       {
         inference: {
           inference_config: { regression: {} },
+          field_map: {
+            title: 'text_field',
+          },
           model_id: 'trained-model-id-1',
         },
       },
@@ -59,6 +62,18 @@ const mockGetPipeline2 = {
       {
         inference: {
           inference_config: { regression: {} },
+          field_map: {
+            title: 'text_field',
+          },
+          model_id: 'trained-model-id-2',
+        },
+      },
+      {
+        inference: {
+          inference_config: { regression: {} },
+          field_map: {
+            body: 'text_field',
+          },
           model_id: 'trained-model-id-2',
         },
       },
@@ -251,6 +266,7 @@ const trainedModelDataObject: Record<string, InferencePipeline> = {
     pipelineName: 'ml-inference-pipeline-1',
     pipelineReferences: ['my-index@ml-inference'],
     types: ['pytorch', 'ner'],
+    sourceFields: [],
   },
   'trained-model-id-2': {
     modelId: 'trained-model-id-2',
@@ -258,6 +274,7 @@ const trainedModelDataObject: Record<string, InferencePipeline> = {
     pipelineName: 'ml-inference-pipeline-2',
     pipelineReferences: ['my-index@ml-inference'],
     types: ['pytorch', 'ner'],
+    sourceFields: [],
   },
   'ml-inference-pipeline-3': {
     modelId: 'trained-model-id-1',
@@ -265,6 +282,7 @@ const trainedModelDataObject: Record<string, InferencePipeline> = {
     pipelineName: 'ml-inference-pipeline-3',
     pipelineReferences: ['my-index@ml-inference'],
     types: ['pytorch', 'ner'],
+    sourceFields: [],
   },
 };
 
@@ -305,7 +323,7 @@ describe('fetchMlInferencePipelines lib function', () => {
     expect(response).toEqual({});
   });
 
-  it('should return an empty object when getPipeline throws an error ', async () => {
+  it('should return an empty object when getPipeline throws an error', async () => {
     mockClient.ingest.getPipeline.mockImplementation(() => Promise.reject(notFoundError));
 
     const response = await fetchMlInferencePipelines(mockClient as unknown as ElasticsearchClient);
@@ -365,6 +383,7 @@ describe('fetchPipelineProcessorInferenceData lib function', () => {
         pipelineReferences: ['my-index@ml-inference', 'other-index@ml-inference'],
         trainedModelName: 'trained-model-id-1',
         types: [],
+        sourceFields: ['title'],
       },
       {
         modelId: 'trained-model-id-2',
@@ -373,6 +392,7 @@ describe('fetchPipelineProcessorInferenceData lib function', () => {
         pipelineReferences: ['my-index@ml-inference'],
         trainedModelName: 'trained-model-id-2',
         types: [],
+        sourceFields: ['title', 'body'],
       },
     ];
 
@@ -389,6 +409,64 @@ describe('fetchPipelineProcessorInferenceData lib function', () => {
       id: 'ml-inference-pipeline-1,ml-inference-pipeline-2,non-ml-inference-pipeline',
     });
     expect(response).toEqual(expected);
+  });
+
+  it('should return an empty array for a pipeline without an inference processor', async () => {
+    mockClient.ingest.getPipeline.mockImplementation(() =>
+      Promise.resolve({
+        'ml-inference-pipeline-1': {
+          id: 'ml-inference-pipeline-1',
+          processors: [
+            {
+              set: {
+                field: 'foo-field',
+                value: 'foo',
+              },
+            },
+          ],
+        },
+      })
+    );
+
+    const response = await fetchPipelineProcessorInferenceData(
+      mockClient as unknown as ElasticsearchClient,
+      ['ml-inference-pipeline-1', 'ml-inference-pipeline-2', 'non-ml-inference-pipeline'],
+      {
+        'ml-inference-pipeline-1': ['my-index@ml-inference', 'other-index@ml-inference'],
+        'ml-inference-pipeline-2': ['my-index@ml-inference'],
+      }
+    );
+
+    expect(response).toEqual([]);
+  });
+
+  it('should handle inference processors with no field mapping', async () => {
+    mockClient.ingest.getPipeline.mockImplementation(() =>
+      Promise.resolve({
+        'ml-inference-pipeline-1': {
+          id: 'ml-inference-pipeline-1',
+          processors: [
+            {
+              inference: {
+                inference_config: { regression: {} },
+                model_id: 'trained-model-id-1',
+              },
+            },
+          ],
+        },
+      })
+    );
+
+    const response = await fetchPipelineProcessorInferenceData(
+      mockClient as unknown as ElasticsearchClient,
+      ['ml-inference-pipeline-1'],
+      {
+        'ml-inference-pipeline-1': ['my-index@ml-inference'],
+      }
+    );
+
+    expect(response).toHaveLength(1);
+    expect(response[0].sourceFields).toEqual([]);
   });
 });
 
@@ -426,6 +504,7 @@ describe('getMlModelConfigsForModelIds lib function', () => {
         pipelineReferences: [],
         trainedModelName: 'trained-model-id-1',
         types: ['pytorch', 'ner'],
+        sourceFields: [],
       },
       'trained-model-id-2': {
         modelId: 'trained-model-id-2',
@@ -434,6 +513,7 @@ describe('getMlModelConfigsForModelIds lib function', () => {
         pipelineReferences: [],
         trainedModelName: 'trained-model-id-2',
         types: ['pytorch', 'ner'],
+        sourceFields: [],
       },
     };
 
@@ -464,6 +544,7 @@ describe('getMlModelConfigsForModelIds lib function', () => {
         pipelineReferences: [],
         trainedModelName: 'trained-model-id-1',
         types: ['pytorch', 'ner'],
+        sourceFields: [],
       },
       'trained-model-id-2': {
         modelId: 'trained-model-id-2',
@@ -472,6 +553,7 @@ describe('getMlModelConfigsForModelIds lib function', () => {
         pipelineReferences: [],
         trainedModelName: 'trained-model-id-2',
         types: ['pytorch', 'ner'],
+        sourceFields: [],
       },
       'trained-model-id-3-in-other-space': {
         modelId: undefined, // Redacted
@@ -480,6 +562,7 @@ describe('getMlModelConfigsForModelIds lib function', () => {
         pipelineReferences: [],
         trainedModelName: 'trained-model-id-3-in-other-space',
         types: ['pytorch', 'ner'],
+        sourceFields: [],
       },
     };
 
@@ -537,6 +620,7 @@ describe('fetchAndAddTrainedModelData lib function', () => {
         pipelineReferences: [],
         trainedModelName: 'trained-model-id-1',
         types: [],
+        sourceFields: [],
       },
       {
         modelId: 'trained-model-id-2',
@@ -545,6 +629,7 @@ describe('fetchAndAddTrainedModelData lib function', () => {
         pipelineReferences: [],
         trainedModelName: 'trained-model-id-2',
         types: [],
+        sourceFields: [],
       },
       {
         modelId: 'trained-model-id-3',
@@ -553,6 +638,7 @@ describe('fetchAndAddTrainedModelData lib function', () => {
         pipelineReferences: [],
         trainedModelName: 'trained-model-id-3',
         types: [],
+        sourceFields: [],
       },
       {
         modelId: 'trained-model-id-4',
@@ -561,6 +647,7 @@ describe('fetchAndAddTrainedModelData lib function', () => {
         pipelineReferences: [],
         trainedModelName: 'trained-model-id-4',
         types: [],
+        sourceFields: [],
       },
     ];
 
@@ -572,6 +659,7 @@ describe('fetchAndAddTrainedModelData lib function', () => {
         pipelineReferences: [],
         trainedModelName: 'trained-model-id-1',
         types: ['pytorch', 'ner'],
+        sourceFields: [],
       },
       {
         modelId: 'trained-model-id-2',
@@ -580,6 +668,7 @@ describe('fetchAndAddTrainedModelData lib function', () => {
         pipelineReferences: [],
         trainedModelName: 'trained-model-id-2',
         types: ['pytorch', 'ner'],
+        sourceFields: [],
       },
       {
         modelId: 'trained-model-id-3',
@@ -589,6 +678,7 @@ describe('fetchAndAddTrainedModelData lib function', () => {
         pipelineReferences: [],
         trainedModelName: 'trained-model-id-3',
         types: ['pytorch', 'text_classification'],
+        sourceFields: [],
       },
       {
         modelId: 'trained-model-id-4',
@@ -597,6 +687,7 @@ describe('fetchAndAddTrainedModelData lib function', () => {
         pipelineReferences: [],
         trainedModelName: 'trained-model-id-4',
         types: ['pytorch', 'fill_mask'],
+        sourceFields: [],
       },
     ];
 
@@ -636,8 +727,8 @@ describe('fetchMlInferencePipelineProcessors lib function', () => {
   });
 
   describe('when Machine Learning is disabled in the current space', () => {
-    it('should throw an error', () => {
-      expect(() =>
+    it('should throw an error', async () => {
+      await expect(() =>
         fetchMlInferencePipelineProcessors(
           mockClient as unknown as ElasticsearchClient,
           undefined,
@@ -713,7 +804,12 @@ describe('fetchMlInferencePipelineProcessors lib function', () => {
         Promise.resolve(mockTrainedModelsInCurrentSpace)
       );
 
-      const expected = [trainedModelDataObject['trained-model-id-1']] as InferencePipeline[];
+      const expected = [
+        {
+          ...trainedModelDataObject['trained-model-id-1'],
+          sourceFields: ['title'],
+        },
+      ] as InferencePipeline[];
 
       const response = await fetchMlInferencePipelineProcessors(
         mockClient as unknown as ElasticsearchClient,

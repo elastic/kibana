@@ -17,6 +17,7 @@ import { css } from '@emotion/react';
 import { GroupPanelRenderer, RawBucket, StatRenderer } from '@kbn/securitysolution-grouping/src';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { FINDINGS_GROUPING_OPTIONS } from '../../../common/constants';
 import {
   NullGroup,
   LoadingGroup,
@@ -26,7 +27,7 @@ import { getAbbreviatedNumber } from '../../../common/utils/get_abbreviated_numb
 import { CISBenchmarkIcon } from '../../../components/cis_benchmark_icon';
 import { ComplianceScoreBar } from '../../../components/compliance_score_bar';
 import { FindingsGroupingAggregation } from './use_grouped_findings';
-import { GROUPING_OPTIONS, NULL_GROUPING_MESSAGES, NULL_GROUPING_UNIT } from './constants';
+import { NULL_GROUPING_MESSAGES, NULL_GROUPING_UNIT } from './constants';
 import { FINDINGS_GROUPING_COUNTER } from '../test_subjects';
 
 export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation> = (
@@ -45,7 +46,7 @@ export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation>
   );
 
   switch (selectedGroup) {
-    case GROUPING_OPTIONS.RESOURCE_NAME:
+    case FINDINGS_GROUPING_OPTIONS.RESOURCE_NAME:
       return nullGroupMessage ? (
         renderNullGroup(NULL_GROUPING_MESSAGES.RESOURCE_NAME)
       ) : (
@@ -78,7 +79,7 @@ export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation>
           </EuiFlexItem>
         </EuiFlexGroup>
       );
-    case GROUPING_OPTIONS.RULE_NAME:
+    case FINDINGS_GROUPING_OPTIONS.RULE_NAME:
       return nullGroupMessage ? (
         renderNullGroup(NULL_GROUPING_MESSAGES.RULE_NAME)
       ) : (
@@ -100,7 +101,7 @@ export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation>
           </EuiFlexItem>
         </EuiFlexGroup>
       );
-    case GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME:
+    case FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME:
       return nullGroupMessage ? (
         renderNullGroup(NULL_GROUPING_MESSAGES.CLOUD_ACCOUNT_NAME)
       ) : (
@@ -129,7 +130,7 @@ export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation>
           </EuiFlexItem>
         </EuiFlexGroup>
       );
-    case GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_NAME:
+    case FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_NAME:
       return nullGroupMessage ? (
         renderNullGroup(NULL_GROUPING_MESSAGES.ORCHESTRATOR_CLUSTER_NAME)
       ) : (

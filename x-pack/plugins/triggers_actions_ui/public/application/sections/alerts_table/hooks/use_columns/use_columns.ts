@@ -256,10 +256,9 @@ export const useColumns = ({
 
   const onResetColumns = useCallback(() => {
     const populatedDefaultColumns = populateColumns(defaultColumns, browserFields, defaultColumns);
-    setColumnsAndSave(
-      populatedDefaultColumns,
-      populatedDefaultColumns.map((pdc) => pdc.id)
-    );
+    const newVisibleColumns = populatedDefaultColumns.map((pdc) => pdc.id);
+    setVisibleColumns(newVisibleColumns);
+    setColumnsAndSave(populatedDefaultColumns, newVisibleColumns);
   }, [browserFields, defaultColumns, setColumnsAndSave]);
 
   const onColumnResize = useCallback(

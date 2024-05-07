@@ -13,6 +13,8 @@ import { InputControlVisDependencies } from './plugin';
 import { toExpressionAst } from './to_ast';
 import { InputControlVisParams } from './types';
 
+export const INPUT_CONTROL_VIS_TYPE = 'input_control_vis';
+
 export function createInputControlVisTypeDefinition(
   deps: InputControlVisDependencies,
   readOnly: boolean
@@ -20,7 +22,7 @@ export function createInputControlVisTypeDefinition(
   const ControlsTab = getControlsTab(deps);
 
   return {
-    name: 'input_control_vis',
+    name: INPUT_CONTROL_VIS_TYPE,
     title: i18n.translate('inputControl.register.controlsTitle', {
       defaultMessage: 'Input controls',
     }),

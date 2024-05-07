@@ -27,7 +27,7 @@ describe.skip('Serverless', () => {
     cy.loginAsElasticUser();
 
     cy.contains('Logs Explorer').click();
-    cy.url().should('include', '/app/observability-log-explorer');
+    cy.url().should('include', '/app/observability-logs-explorer');
 
     cy.contains('Dashboards').click();
     cy.url().should('include', '/app/dashboards');

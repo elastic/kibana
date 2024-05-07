@@ -71,6 +71,15 @@ jest.mock('../../../common/hooks/use_navigate_to_alerts_page_with_filters', () =
 
 jest.mock('../../../common/components/hover_actions', () => ({ HoverActions: () => null }));
 
+const mockOpenRightPanel = jest.fn();
+jest.mock('@kbn/expandable-flyout', () => {
+  return {
+    useExpandableFlyoutApi: () => ({
+      openRightPanel: mockOpenRightPanel,
+    }),
+  };
+});
+
 describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
   'EntityAnalyticsRiskScores entityType: %s',
   (riskEntity) => {
@@ -222,6 +231,55 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
             selectedOptions: [name],
           },
         ]);
+      });
+    });
+
+    // FLAKY: https://github.com/elastic/kibana/issues/179234
+    it.skip('opens the expandable flyout when entity name is clicked', async () => {
+      mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
+      mockUseRiskScoreKpi.mockReturnValue({
+        severityCount: mockSeverityCount,
+        loading: false,
+      });
+      const name = 'testName';
+      const data = [
+        {
+          '@timestamp': '1234567899',
+          [riskEntity]: {
+            name,
+            risk: {
+              rule_risks: [],
+              calculated_level: RiskSeverity.high,
+              calculated_score_norm: 75,
+              multipliers: [],
+            },
+          },
+          alertsCount: 0,
+        },
+      ];
+      mockUseRiskScore.mockReturnValue({ ...defaultProps, data });
+
+      const { getByTestId } = render(
+        <TestProviders>
+          <EntityAnalyticsRiskScores riskEntity={riskEntity} />
+        </TestProviders>
+      );
+
+      fireEvent.click(
+        getByTestId(
+          riskEntity === RiskScoreEntity.host ? `host-details-button` : `users-link-anchor`
+        )
+      );
+
+      await waitFor(() => {
+        expect(mockOpenRightPanel).toHaveBeenCalledWith({
+          id: `${riskEntity}-panel`,
+          params: {
+            [riskEntity === RiskScoreEntity.host ? `hostName` : `userName`]: 'testName',
+            contextID: 'entity-risk-score-table',
+            scopeId: 'entity-risk-score-table',
+          },
+        });
       });
     });
   }

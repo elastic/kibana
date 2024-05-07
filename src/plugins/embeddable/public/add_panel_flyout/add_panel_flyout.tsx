@@ -9,31 +9,46 @@
 import React, { useCallback, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { Toast } from '@kbn/core/public';
-import { METRIC_TYPE } from '@kbn/analytics';
 import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
-import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
+import { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import {
   SavedObjectFinder,
   SavedObjectFinderProps,
   type SavedObjectMetaData,
 } from '@kbn/saved-objects-finder-plugin/public';
 
+import { METRIC_TYPE } from '@kbn/analytics';
+import { apiHasType } from '@kbn/presentation-publishing';
+import { Toast } from '@kbn/core/public';
+import { PresentationContainer } from '@kbn/presentation-containers';
 import {
   core,
   embeddableStart,
-  usageCollection,
   savedObjectsTaggingOss,
   contentManagement,
+  usageCollection,
 } from '../kibana_services';
+import { savedObjectToPanel } from '../registry/saved_object_to_panel_methods';
 import {
-  IContainer,
+  ReactEmbeddableSavedObject,
   EmbeddableFactory,
-  SavedObjectEmbeddableInput,
   EmbeddableFactoryNotFoundError,
+  getReactEmbeddableSavedObjects,
+  PanelIncompatibleError,
 } from '../lib';
 
-type FactoryMap = { [key: string]: EmbeddableFactory };
+type LegacyFactoryMap = { [key: string]: EmbeddableFactory };
+type FactoryMap<TSavedObjectAttributes extends FinderAttributes = FinderAttributes> = {
+  [key: string]: ReactEmbeddableSavedObject<TSavedObjectAttributes> & { type: string };
+};
+
+type CanAddNewEmbeddable = {
+  addNewEmbeddable: (type: string, explicitInput: unknown, attributes: unknown) => { id: string };
+};
+
+const apiCanAddNewEmbeddable = (api: unknown): api is CanAddNewEmbeddable => {
+  return typeof (api as CanAddNewEmbeddable).addNewEmbeddable === 'function';
+};
 
 let lastToast: string | Toast;
 const showSuccessToast = (name: string) => {
@@ -51,42 +66,62 @@ const showSuccessToast = (name: string) => {
 };
 
 const runAddTelemetry = (
-  parentType: string,
-  factory: EmbeddableFactory,
-  savedObject: SavedObjectCommon
+  parent: unknown,
+  factoryType: string,
+  savedObject: SavedObjectCommon,
+  savedObjectMetaData?: SavedObjectMetaData
 ) => {
-  const type = factory.savedObjectMetaData?.getSavedObjectSubType
-    ? factory.savedObjectMetaData.getSavedObjectSubType(savedObject)
-    : factory.type;
+  if (!apiHasType(parent)) return;
+  const type = savedObjectMetaData?.getSavedObjectSubType
+    ? savedObjectMetaData.getSavedObjectSubType(savedObject)
+    : factoryType;
 
-  usageCollection?.reportUiCounter?.(parentType, METRIC_TYPE.CLICK, `${type}:add`);
+  usageCollection?.reportUiCounter?.(parent.type, METRIC_TYPE.CLICK, `${type}:add`);
 };
 
 export const AddPanelFlyout = ({
   container,
   onAddPanel,
 }: {
-  container: IContainer;
+  container: PresentationContainer;
   onAddPanel?: (id: string) => void;
 }) => {
-  const factoriesBySavedObjectType: FactoryMap = useMemo(() => {
+  const legacyFactoriesBySavedObjectType: LegacyFactoryMap = useMemo(() => {
     return [...embeddableStart.getEmbeddableFactories()]
-      .filter((embeddableFactory) => Boolean(embeddableFactory.savedObjectMetaData?.type))
+      .filter(
+        (embeddableFactory) =>
+          Boolean(embeddableFactory.savedObjectMetaData?.type) && !embeddableFactory.isContainerType
+      )
       .reduce((acc, factory) => {
         acc[factory.savedObjectMetaData!.type] = factory;
+        return acc;
+      }, {} as LegacyFactoryMap);
+  }, []);
+
+  const factoriesBySavedObjectType: FactoryMap = useMemo(() => {
+    return [...getReactEmbeddableSavedObjects()]
+      .filter(([type, embeddableFactory]) => {
+        return Boolean(embeddableFactory.savedObjectMetaData?.type);
+      })
+      .reduce((acc, [type, factory]) => {
+        acc[factory.savedObjectMetaData!.type] = {
+          ...factory,
+          type,
+        };
         return acc;
       }, {} as FactoryMap);
   }, []);
 
   const metaData = useMemo(
     () =>
-      Object.values(factoriesBySavedObjectType)
-        .filter(
-          (embeddableFactory) =>
-            Boolean(embeddableFactory.savedObjectMetaData) && !embeddableFactory.isContainerType
-        )
-        .map(({ savedObjectMetaData }) => savedObjectMetaData as SavedObjectMetaData),
-    [factoriesBySavedObjectType]
+      [
+        ...Object.values(factoriesBySavedObjectType),
+        ...Object.values(legacyFactoriesBySavedObjectType),
+      ]
+        .filter((embeddableFactory) => Boolean(embeddableFactory.savedObjectMetaData))
+        .map(({ savedObjectMetaData }) => savedObjectMetaData!)
+        .sort((a, b) => a.type.localeCompare(b.type)),
+    [factoriesBySavedObjectType, legacyFactoriesBySavedObjectType]
   );
 
   const onChoose: SavedObjectFinderProps['onChoose'] = useCallback(
@@ -96,22 +131,56 @@ export const AddPanelFlyout = ({
       name: string,
       savedObject: SavedObjectCommon
     ) => {
-      const factoryForSavedObjectType = factoriesBySavedObjectType[type];
-      if (!factoryForSavedObjectType) {
+      if (factoriesBySavedObjectType[type]) {
+        const factory = factoriesBySavedObjectType[type];
+        const { onAdd, savedObjectMetaData } = factory;
+
+        onAdd(container, savedObject);
+        runAddTelemetry(container, factory.type, savedObject, savedObjectMetaData);
+        return;
+      }
+
+      const legacyFactoryForSavedObjectType = legacyFactoriesBySavedObjectType[type];
+      if (!legacyFactoryForSavedObjectType) {
         throw new EmbeddableFactoryNotFoundError(type);
       }
 
-      const embeddable = await container.addNewEmbeddable<SavedObjectEmbeddableInput>(
-        factoryForSavedObjectType.type,
-        { savedObjectId: id },
-        savedObject.attributes
-      );
-      onAddPanel?.(embeddable.id);
+      // container.addNewEmbeddable is required for legacy embeddables to support
+      // panel placement strategies
+      if (!apiCanAddNewEmbeddable(container)) {
+        throw new PanelIncompatibleError();
+      }
+
+      let embeddableId: string;
+
+      if (savedObjectToPanel[type]) {
+        // this panel type has a custom method for converting saved objects to panels
+        const panel = savedObjectToPanel[type](savedObject);
+
+        const { id: _embeddableId } = await container.addNewEmbeddable(
+          legacyFactoryForSavedObjectType.type,
+          panel,
+          savedObject.attributes
+        );
+
+        embeddableId = _embeddableId;
+      } else {
+        const { id: _embeddableId } = await container.addNewEmbeddable(
+          legacyFactoryForSavedObjectType.type,
+          { savedObjectId: id },
+          savedObject.attributes
+        );
+
+        embeddableId = _embeddableId;
+      }
+
+      onAddPanel?.(embeddableId);
 
       showSuccessToast(name);
-      runAddTelemetry(container.type, factoryForSavedObjectType, savedObject);
+      const { savedObjectMetaData, type: factoryType } = legacyFactoryForSavedObjectType;
+      runAddTelemetry(container, factoryType, savedObject, savedObjectMetaData);
     },
-    [container, factoriesBySavedObjectType, onAddPanel]
+    [container, factoriesBySavedObjectType, legacyFactoriesBySavedObjectType, onAddPanel]
   );
 
   return (
@@ -136,6 +205,14 @@ export const AddPanelFlyout = ({
           noItemsMessage={i18n.translate('embeddableApi.addPanel.noMatchingObjectsMessage', {
             defaultMessage: 'No matching objects found.',
           })}
+          getTooltipText={(item) => {
+            return item.managed
+              ? i18n.translate('embeddableApi.addPanel.managedPanelTooltip', {
+                  defaultMessage:
+                    'Elastic manages this panel. Adding it to a dashboard unlinks it from the library.',
+                })
+              : undefined;
+          }}
         />
       </EuiFlyoutBody>
     </>

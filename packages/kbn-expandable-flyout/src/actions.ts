@@ -19,21 +19,103 @@ export enum ActionType {
   closePreviewPanel = 'close_preview_panel',
   previousPreviewPanel = 'previous_preview_panel',
   closeFlyout = 'close_flyout',
+  urlChanged = 'urlChanged',
 }
 
 export const openPanelsAction = createAction<{
+  /**
+   * Panel to render in the right section
+   */
   right?: FlyoutPanelProps;
+  /**
+   * Panel to render in the left section
+   */
   left?: FlyoutPanelProps;
+  /**
+   * Panels to render in the preview section
+   */
   preview?: FlyoutPanelProps;
+  /**
+   * Unique identifier for the flyout (either the urlKey or 'memory')
+   */
+  id: string;
 }>(ActionType.openFlyout);
 
-export const openRightPanelAction = createAction<FlyoutPanelProps>(ActionType.openRightPanel);
-export const openLeftPanelAction = createAction<FlyoutPanelProps>(ActionType.openLeftPanel);
-export const openPreviewPanelAction = createAction<FlyoutPanelProps>(ActionType.openPreviewPanel);
+export const openRightPanelAction = createAction<{
+  /**
+   * Panel to render in the right section
+   */
+  right: FlyoutPanelProps;
+  /**
+   * Unique identifier for the flyout (either the urlKey or 'memory')
+   */
+  id: string;
+}>(ActionType.openRightPanel);
+export const openLeftPanelAction = createAction<{
+  /**
+   * Panel to render in the left section
+   */
+  left: FlyoutPanelProps;
+  /**
+   * Unique identifier for the flyout (either the urlKey or 'memory')
+   */
+  id: string;
+}>(ActionType.openLeftPanel);
+export const openPreviewPanelAction = createAction<{
+  /**
+   * Panels to render in the preview section
+   */
+  preview: FlyoutPanelProps;
+  id: string;
+}>(ActionType.openPreviewPanel);
 
-export const closePanelsAction = createAction(ActionType.closeFlyout);
-export const closeRightPanelAction = createAction(ActionType.closeRightPanel);
-export const closeLeftPanelAction = createAction(ActionType.closeLeftPanel);
-export const closePreviewPanelAction = createAction(ActionType.closePreviewPanel);
+export const closePanelsAction = createAction<{
+  /**
+   * Unique identifier for the flyout (either the urlKey or 'memory')
+   */
+  id: string;
+}>(ActionType.closeFlyout);
+export const closeRightPanelAction = createAction<{
+  /**
+   * Unique identifier for the flyout (either the urlKey or 'memory')
+   */
+  id: string;
+}>(ActionType.closeRightPanel);
+export const closeLeftPanelAction = createAction<{
+  /**
+   * Unique identifier for the flyout (either the urlKey or 'memory')
+   */
+  id: string;
+}>(ActionType.closeLeftPanel);
+export const closePreviewPanelAction = createAction<{
+  /**
+   * Unique identifier for the flyout (either the urlKey or 'memory')
+   */
+  id: string;
+}>(ActionType.closePreviewPanel);
 
-export const previousPreviewPanelAction = createAction(ActionType.previousPreviewPanel);
+export const previousPreviewPanelAction = createAction<{
+  /**
+   * Unique identifier for the flyout (either the urlKey or 'memory')
+   */
+  id: string;
+}>(ActionType.previousPreviewPanel);
+
+export const urlChangedAction = createAction<{
+  /**
+   * Panel to render in the right section
+   */
+  right?: FlyoutPanelProps;
+  /**
+   * Panel to render in the left section
+   */
+  left?: FlyoutPanelProps;
+  /**
+   * Panels to render in the preview section
+   */
+  preview?: FlyoutPanelProps;
+  /**
+   * Unique identifier for the flyout (either the urlKey or 'memory')
+   */
+  id: string;
+}>(ActionType.urlChanged);

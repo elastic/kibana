@@ -8,7 +8,7 @@
 import { encode } from '@kbn/rison';
 import { recurse } from 'cypress-recurse';
 import { formatPageFilterSearchParam } from '@kbn/security-solution-plugin/common/utils/format_page_filter_search_param';
-import type { FilterItemObj } from '@kbn/security-solution-plugin/public/common/components/filter_group/types';
+import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 import {
   ADD_EXCEPTION_BTN,
   ALERT_CHECKBOX,
@@ -62,12 +62,9 @@ import {
   ENRICHMENT_QUERY_START_INPUT,
   THREAT_INTEL_TAB,
   CELL_EXPAND_VALUE,
-  CELL_EXPANSION_POPOVER,
-  USER_DETAILS_LINK,
 } from '../screens/alerts_details';
 import { FIELD_INPUT } from '../screens/exceptions';
 import {
-  CONTROL_FRAME_TITLE,
   DETECTION_PAGE_FILTERS_LOADING,
   DETECTION_PAGE_FILTER_GROUP_LOADING,
   DETECTION_PAGE_FILTER_GROUP_RESET_BUTTON,
@@ -76,7 +73,6 @@ import {
   OPTION_LIST_VALUES,
   OPTION_LIST_CLEAR_BTN,
   OPTION_SELECTABLE,
-  CONTROL_GROUP,
 } from '../screens/common/filter_group';
 import { LOADING_SPINNER } from '../screens/common/page';
 import { ALERTS_URL } from '../urls/navigation';
@@ -174,7 +170,7 @@ export const setEnrichmentDates = (from?: string, to?: string) => {
 
 export const refreshAlertPageFilter = () => {
   // Currently, system keeps the cache of option List for 1 minute so as to avoid
-  // lot of unncessary traffic. Cypress is too fast and we cannot wait for a minute
+  // lot of unnecessary traffic. Cypress is too fast and we cannot wait for a minute
   // to trigger a reload of Page Filters.
   // It is faster to refresh the page which will reload the Page Filter values
   // cy.reload();
@@ -200,15 +196,8 @@ export const closePageFilterPopover = (filterIndex: number) => {
 };
 
 export const clearAllSelections = (filterIndex: number) => {
-  cy.get(CONTROL_GROUP).scrollIntoView();
-  recurse(
-    () => {
-      cy.get(CONTROL_FRAME_TITLE).eq(filterIndex).realHover();
-      return cy.get(OPTION_LIST_CLEAR_BTN).eq(filterIndex);
-    },
-    ($el) => $el.is(':visible')
-  );
-  cy.get(OPTION_LIST_CLEAR_BTN).eq(filterIndex).should('be.visible').trigger('click');
+  cy.get(OPTION_LIST_VALUES(filterIndex)).realHover();
+  cy.get(OPTION_LIST_CLEAR_BTN).eq(filterIndex).click();
 };
 
 export const selectPageFilterValue = (filterIndex: number, ...values: string[]) => {
@@ -216,7 +205,7 @@ export const selectPageFilterValue = (filterIndex: number, ...values: string[]) 
   clearAllSelections(filterIndex);
   openPageFilterPopover(filterIndex);
   values.forEach((value) => {
-    cy.get(OPTION_SELECTABLE(filterIndex, value)).click({ force: true });
+    cy.get(OPTION_SELECTABLE(filterIndex, value)).click();
   });
   closePageFilterPopover(filterIndex);
   waitForAlerts();
@@ -321,8 +310,8 @@ export const openAlertsFieldBrowser = () => {
 export const selectNumberOfAlerts = (numberOfAlerts: number) => {
   for (let i = 0; i < numberOfAlerts; i++) {
     waitForAlerts();
-    cy.get(ALERT_CHECKBOX).eq(i).as('checkbox').click({ force: true });
-    cy.get('@checkbox').should('have.attr', 'checked');
+    cy.get(ALERT_CHECKBOX).eq(i).as('checkbox').check();
+    cy.get('@checkbox').should('be.checked');
   }
 };
 
@@ -421,10 +410,6 @@ export const scrollAlertTableColumnIntoView = (columnSelector: string) => {
   });
 };
 
-export const openUserDetailsFlyout = () => {
-  cy.get(CELL_EXPANSION_POPOVER).find(USER_DETAILS_LINK).click();
-};
-
 export const waitForPageFilters = () => {
   cy.log('Waiting for Page Filters');
   cy.url().then((urlString) => {
@@ -470,8 +455,9 @@ export const sumAlertCountFromAlertCountTable = (callback?: (sumOfEachRow: numbe
 };
 
 export const selectFirstPageAlerts = () => {
-  cy.get(SELECT_ALL_VISIBLE_ALERTS).first().scrollIntoView();
-  cy.get(SELECT_ALL_VISIBLE_ALERTS).first().click({ force: true });
+  const ALERTS_DATA_GRID = '[data-test-subj="alertsTable"]';
+  cy.get(ALERTS_DATA_GRID).find(SELECT_ALL_VISIBLE_ALERTS).scrollIntoView();
+  cy.get(ALERTS_DATA_GRID).find(SELECT_ALL_VISIBLE_ALERTS).click({ force: true });
 };
 
 export const selectAllAlerts = () => {
@@ -479,7 +465,7 @@ export const selectAllAlerts = () => {
   cy.get(SELECT_ALL_ALERTS).click();
 };
 
-export const visitAlertsPageWithCustomFilters = (pageFilters: FilterItemObj[]) => {
+export const visitAlertsPageWithCustomFilters = (pageFilters: FilterControlConfig[]) => {
   const pageFilterUrlVal = encode(formatPageFilterSearchParam(pageFilters));
   const newURL = `${ALERTS_URL}?pageFilters=${pageFilterUrlVal}`;
   visitWithTimeRange(newURL);

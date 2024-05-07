@@ -11,7 +11,6 @@ import { CONNECTORS_LABEL } from '../common/i18n_string';
 
 export const navigationTree: NavigationTreeDefinition = {
   body: [
-    { type: 'recentlyAccessed' },
     {
       type: 'navGroup',
       id: 'search_project_nav',
@@ -22,6 +21,14 @@ export const navigationTree: NavigationTreeDefinition = {
       breadcrumbStatus: 'hidden',
       children: [
         {
+          id: 'home',
+          title: i18n.translate('xpack.serverlessSearch.nav.home', {
+            defaultMessage: 'Home',
+          }),
+          link: 'serverlessElasticsearch',
+          spaceBefore: 'm',
+        },
+        {
           id: 'dev_tools',
           title: i18n.translate('xpack.serverlessSearch.nav.devTools', {
             defaultMessage: 'Dev Tools',
@@ -30,74 +37,66 @@ export const navigationTree: NavigationTreeDefinition = {
           getIsActive: ({ pathNameSerialized, prepend }) => {
             return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
           },
-          spaceBefore: 'l',
         },
         {
-          link: 'discover',
+          id: 'kibana',
+          title: i18n.translate('xpack.serverlessSearch.nav.kibana', {
+            defaultMessage: 'Kibana',
+          }),
           spaceBefore: 'm',
+          children: [
+            {
+              link: 'discover',
+            },
+            {
+              link: 'dashboards',
+              getIsActive: ({ pathNameSerialized, prepend }) => {
+                return pathNameSerialized.startsWith(prepend('/app/dashboards'));
+              },
+            },
+          ],
         },
         {
-          link: 'dashboards',
-          getIsActive: ({ pathNameSerialized, prepend }) => {
-            return pathNameSerialized.startsWith(prepend('/app/dashboards'));
-          },
-        },
-        {
-          link: 'visualize',
-          title: i18n.translate('xpack.serverlessSearch.nav.visualize', {
-            defaultMessage: 'Visualizations',
+          id: 'content',
+          title: i18n.translate('xpack.serverlessSearch.nav.content', {
+            defaultMessage: 'Content',
           }),
-          getIsActive: ({ pathNameSerialized, prepend }) => {
-            return (
-              pathNameSerialized.startsWith(prepend('/app/visualize')) ||
-              pathNameSerialized.startsWith(prepend('/app/lens')) ||
-              pathNameSerialized.startsWith(prepend('/app/maps'))
-            );
-          },
-        },
-        {
-          link: 'management:triggersActions',
-          title: i18n.translate('xpack.serverlessSearch.nav.alerts', {
-            defaultMessage: 'Alerts',
-          }),
-        },
-        {
-          title: i18n.translate('xpack.serverlessSearch.nav.content.indices', {
-            defaultMessage: 'Index Management',
-          }),
-          link: 'management:index_management',
-          breadcrumbStatus: 'hidden' /* management sub-pages set their breadcrumbs themselves */,
           spaceBefore: 'm',
+          children: [
+            {
+              title: i18n.translate('xpack.serverlessSearch.nav.content.indices', {
+                defaultMessage: 'Index Management',
+              }),
+              link: 'management:index_management',
+              breadcrumbStatus:
+                'hidden' /* management sub-pages set their breadcrumbs themselves */,
+            },
+            {
+              title: CONNECTORS_LABEL,
+              link: 'serverlessConnectors',
+            },
+          ],
         },
         {
-          title: i18n.translate('xpack.serverlessSearch.nav.content.pipelines', {
-            defaultMessage: 'Pipelines',
+          id: 'build',
+          title: i18n.translate('xpack.serverlessSearch.nav.build', {
+            defaultMessage: 'Build',
           }),
-          link: 'management:ingest_pipelines',
-          breadcrumbStatus: 'hidden' /* management sub-pages set their breadcrumbs themselves */,
-        },
-        {
-          title: CONNECTORS_LABEL,
-          link: 'serverlessConnectors',
-        },
-        {
-          link: 'management:api_keys',
-          breadcrumbStatus: 'hidden' /* management sub-pages set their breadcrumbs themselves */,
           spaceBefore: 'm',
+          children: [
+            {
+              id: 'searchPlayground',
+              title: i18n.translate('xpack.serverlessSearch.nav.build.searchPlayground', {
+                defaultMessage: 'Playground',
+              }),
+              link: 'searchPlayground',
+            },
+          ],
         },
       ],
     },
   ],
   footer: [
-    {
-      type: 'navItem',
-      id: 'search_getting_started',
-      title: i18n.translate('xpack.serverlessSearch.nav.gettingStarted', {
-        defaultMessage: 'Get started',
-      }),
-      icon: 'launch',
-      link: 'serverlessElasticsearch',
-    },
     {
       type: 'navGroup',
       id: 'project_settings_project_nav',

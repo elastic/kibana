@@ -8,7 +8,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { skip, take } from 'rxjs/operators';
+import { skip, take } from 'rxjs';
 import { Embeddable } from './embeddable';
 import { EmbeddableOutput, EmbeddableInput } from './i_embeddable';
 import { ViewMode } from '../types';

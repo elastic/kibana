@@ -7,6 +7,8 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+import { testHasEmbeddedConsole } from './embedded_console';
+
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects([
     'svlSearchLandingPage',
@@ -44,12 +46,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('has embedded dev console', async () => {
-      await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleControlBarExists();
-      await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleToBeClosed();
-      await pageObjects.svlCommonNavigation.devConsole.clickEmbeddedConsoleControlBar();
-      await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleToBeOpen();
-      await pageObjects.svlCommonNavigation.devConsole.clickEmbeddedConsoleControlBar();
-      await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleToBeClosed();
+      await testHasEmbeddedConsole(pageObjects);
     });
 
     describe('API Key creation', async () => {
@@ -95,10 +92,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('Pipeline creation', async () => {
+    describe('Pipelines', async () => {
+      beforeEach(async () => {
+        await svlSearchNavigation.navigateToLandingPage();
+      });
       it('can redirect to the pipeline creation index page', async () => {
-        await pageObjects.svlSearchLandingPage.pipeline.click();
+        await pageObjects.svlSearchLandingPage.pipeline.createPipeline();
         await pageObjects.svlSearchLandingPage.pipeline.expectNavigateToCreatePipelinePage();
+      });
+      it('can redirect to the manage pipelines page', async () => {
+        await pageObjects.svlSearchLandingPage.pipeline.managePipeline();
+        await pageObjects.svlSearchLandingPage.pipeline.expectNavigateToManagePipelinePage();
       });
     });
   });

@@ -16,7 +16,11 @@ import { getUserPrivilegesMockDefaultValue } from '../../../../../common/compone
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../common/components/user_privileges/endpoint/mocks';
 import { allFleetHttpMocks } from '../../../../mocks';
 import userEvent from '@testing-library/user-event';
-import { expectIsViewOnly, getPolicySettingsFormTestSubjects } from '../policy_settings_form/mocks';
+import {
+  expectIsViewOnly,
+  getPolicySettingsFormTestSubjects,
+  setMalwareMode,
+} from '../policy_settings_form/mocks';
 import { cloneDeep, set } from 'lodash';
 import { ProtectionModes } from '../../../../../../common/endpoint/types';
 import { waitFor, cleanup } from '@testing-library/react';
@@ -47,7 +51,9 @@ describe('When rendering PolicySettingsLayout', () => {
     apiMocks = allFleetHttpMocks(mockedContext.coreStart.http);
     policyData = new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy();
     render = () => {
-      renderResult = mockedContext.render(<PolicySettingsLayout policy={policyData} />);
+      renderResult = mockedContext.render(
+        <PolicySettingsLayout policy={policyData} setUnsavedChanges={jest.fn()} />
+      );
       return renderResult;
     };
   });
@@ -87,15 +93,7 @@ describe('When rendering PolicySettingsLayout', () => {
 
       // Turn off malware
       userEvent.click(getByTestId(testSubj.malware.enableDisableSwitch));
-      set(policySettings, 'windows.malware.mode', ProtectionModes.off);
-      set(policySettings, 'mac.malware.mode', ProtectionModes.off);
-      set(policySettings, 'linux.malware.mode', ProtectionModes.off);
-      set(policySettings, 'windows.malware.blocklist', false);
-      set(policySettings, 'mac.malware.blocklist', false);
-      set(policySettings, 'linux.malware.blocklist', false);
-      set(policySettings, 'windows.popup.malware.enabled', false);
-      set(policySettings, 'mac.popup.malware.enabled', false);
-      set(policySettings, 'linux.popup.malware.enabled', false);
+      setMalwareMode(policySettings, true);
 
       // Turn off Behaviour Protection
       userEvent.click(getByTestId(testSubj.behaviour.enableDisableSwitch));
@@ -117,9 +115,17 @@ describe('When rendering PolicySettingsLayout', () => {
       return expectedUpdates;
     };
 
-    it('should render layout with expected content', () => {
+    it('should render layout with expected content when no changes have been made', () => {
       const { getByTestId } = render();
 
+      expect(getByTestId('endpointPolicyForm'));
+      expect(getByTestId('policyDetailsCancelButton')).not.toBeDisabled();
+      expect(getByTestId('policyDetailsSaveButton')).toBeDisabled();
+    });
+
+    it('should render layout with expected content when changes have been made', () => {
+      const { getByTestId } = render();
+      makeUpdates();
       expect(getByTestId('endpointPolicyForm'));
       expect(getByTestId('policyDetailsCancelButton')).not.toBeDisabled();
       expect(getByTestId('policyDetailsSaveButton')).not.toBeDisabled();
@@ -141,6 +147,7 @@ describe('When rendering PolicySettingsLayout', () => {
       const deferred = getDeferred();
       apiMocks.responseProvider.updateEndpointPolicy.mockDelay.mockReturnValue(deferred.promise);
       const { getByTestId } = render();
+      makeUpdates();
       await clickSave(true, false);
 
       await waitFor(() => {
@@ -157,10 +164,11 @@ describe('When rendering PolicySettingsLayout', () => {
 
     it('should show success toast on update success', async () => {
       render();
+      makeUpdates();
       await clickSave();
 
       await waitFor(() => {
-        expect(renderResult.getByTestId('policyDetailsSaveButton')).not.toBeDisabled();
+        expect(renderResult.getByTestId('policyDetailsSaveButton')).toBeDisabled();
       });
 
       expect(toasts.addSuccess).toHaveBeenCalledWith({
@@ -175,6 +183,7 @@ describe('When rendering PolicySettingsLayout', () => {
         throw new Error('oh oh!');
       });
       render();
+      makeUpdates();
       await clickSave();
 
       await waitFor(() => {

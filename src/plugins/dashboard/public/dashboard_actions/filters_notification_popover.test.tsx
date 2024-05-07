@@ -63,8 +63,8 @@ describe('filters notification popover', () => {
         getAllDataViews: jest.fn(),
         getDashboardPanelFromId: jest.fn(),
       },
-      localFilters: filtersSubject,
-      localQuery: querySubject,
+      filters$: filtersSubject,
+      query$: querySubject,
     };
   });
 
@@ -90,7 +90,7 @@ describe('filters notification popover', () => {
   });
 
   it('renders the query section when given a query', async () => {
-    updateQuery({ sql: 'SELECT * FROM test_dataview' } as AggregateQuery);
+    updateQuery({ esql: 'FROM test_dataview' } as AggregateQuery);
     await renderAndOpenPopover();
     expect(await screen.findByTestId('filtersNotificationModal__query')).toBeInTheDocument();
   });
@@ -103,7 +103,7 @@ describe('filters notification popover', () => {
 
   it('does not render an edit button when the query is ESQL', async () => {
     updateFilters([getMockPhraseFilter('ay', 'oh')]);
-    updateQuery({ sql: 'SELECT * FROM test_dataview' } as AggregateQuery);
+    updateQuery({ esql: 'FROM test_dataview' } as AggregateQuery);
     updateFilters([getMockPhraseFilter('ay', 'oh')]);
     await renderAndOpenPopover();
     expect(

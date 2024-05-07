@@ -48,7 +48,10 @@ describe('Security Plugin', () => {
     });
 
     mockSetupDependencies = {
-      licensing: { license$: of({}), featureUsage: { register: jest.fn() } },
+      licensing: {
+        license$: of({ getUnavailableReason: jest.fn() }),
+        featureUsage: { register: jest.fn() },
+      },
       features: featuresPluginMock.createSetup(),
       taskManager: taskManagerMock.createSetup(),
     } as unknown as PluginSetupDependencies;
@@ -118,6 +121,7 @@ describe('Security Plugin', () => {
               },
             },
             "getFeatures": [Function],
+            "getUnavailableReason": [Function],
             "hasAtLeast": [Function],
             "isEnabled": [Function],
             "isLicenseAvailable": [Function],
@@ -127,6 +131,18 @@ describe('Security Plugin', () => {
           },
         }
       `);
+    });
+
+    it('calls core.security.registerSecurityDelegate', () => {
+      plugin.setup(mockCoreSetup, mockSetupDependencies);
+
+      expect(mockCoreSetup.security.registerSecurityDelegate).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls core.userProfile.registerUserProfileDelegate', () => {
+      plugin.setup(mockCoreSetup, mockSetupDependencies);
+
+      expect(mockCoreSetup.userProfile.registerUserProfileDelegate).toHaveBeenCalledTimes(1);
     });
   });
 

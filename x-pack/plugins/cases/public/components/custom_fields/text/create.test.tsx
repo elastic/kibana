@@ -21,19 +21,36 @@ describe('Create ', () => {
     jest.clearAllMocks();
   });
 
+  // required text custom field with a default value
   const customFieldConfiguration = customFieldsConfigurationMock[0];
 
-  it('renders correctly', async () => {
+  it('renders correctly with default values', async () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>
         <Create isLoading={false} customFieldConfiguration={customFieldConfiguration} />
       </FormTestComponent>
     );
 
-    expect(screen.getByText(customFieldConfiguration.label)).toBeInTheDocument();
+    expect(await screen.findByText(customFieldConfiguration.label)).toBeInTheDocument();
+
     expect(
-      screen.getByTestId(`${customFieldConfiguration.key}-text-create-custom-field`)
-    ).toBeInTheDocument();
+      await screen.findByTestId(`${customFieldConfiguration.key}-text-create-custom-field`)
+    ).toHaveValue(customFieldConfiguration.defaultValue as string);
+  });
+
+  it('renders correctly with optional fields', async () => {
+    const optionalField = customFieldsConfigurationMock[2]; // optional text custom field
+
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Create isLoading={false} customFieldConfiguration={optionalField} />
+      </FormTestComponent>
+    );
+
+    expect(await screen.findByText(optionalField.label)).toBeInTheDocument();
+    expect(await screen.findByTestId(`${optionalField.key}-text-create-custom-field`)).toHaveValue(
+      ''
+    );
   });
 
   it('renders loading state correctly', async () => {
@@ -43,7 +60,7 @@ describe('Create ', () => {
       </FormTestComponent>
     );
 
-    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    expect(await screen.findByRole('progressbar')).toBeInTheDocument();
   });
 
   it('disables the text when loading', async () => {
@@ -54,7 +71,7 @@ describe('Create ', () => {
     );
 
     expect(
-      screen.getByTestId(`${customFieldConfiguration.key}-text-create-custom-field`)
+      await screen.findByTestId(`${customFieldConfiguration.key}-text-create-custom-field`)
     ).toHaveAttribute('disabled');
   });
 
@@ -65,12 +82,13 @@ describe('Create ', () => {
       </FormTestComponent>
     );
 
-    userEvent.type(
-      screen.getByTestId(`${customFieldConfiguration.key}-text-create-custom-field`),
-      'this is a sample text!'
+    const textCustomField = await screen.findByTestId(
+      `${customFieldConfiguration.key}-text-create-custom-field`
     );
 
-    userEvent.click(screen.getByText('Submit'));
+    userEvent.clear(textCustomField);
+    userEvent.paste(textCustomField, 'this is a sample text!');
+    userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       // data, isValid
@@ -95,18 +113,19 @@ describe('Create ', () => {
     const sampleText = 'a'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1);
 
     userEvent.paste(
-      screen.getByTestId(`${customFieldConfiguration.key}-text-create-custom-field`),
+      await screen.findByTestId(`${customFieldConfiguration.key}-text-create-custom-field`),
       sampleText
     );
 
-    userEvent.click(screen.getByText('Submit'));
+    userEvent.click(await screen.findByText('Submit'));
+
+    expect(
+      await screen.findByText(
+        `The length of the ${customFieldConfiguration.label} is too long. The maximum length is ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH} characters.`
+      )
+    ).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(
-        screen.getByText(
-          `The length of the ${customFieldConfiguration.label} is too long. The maximum length is ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH} characters.`
-        )
-      ).toBeInTheDocument();
       expect(onSubmit).toHaveBeenCalledWith({}, false);
     });
   });
@@ -124,18 +143,18 @@ describe('Create ', () => {
     const sampleText = 'a'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1);
 
     userEvent.paste(
-      screen.getByTestId(`${customFieldConfiguration.key}-text-create-custom-field`),
+      await screen.findByTestId(`${customFieldConfiguration.key}-text-create-custom-field`),
       sampleText
     );
+    userEvent.click(await screen.findByText('Submit'));
 
-    userEvent.click(screen.getByText('Submit'));
+    expect(
+      await screen.findByText(
+        `The length of the ${customFieldConfiguration.label} is too long. The maximum length is ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH} characters.`
+      )
+    ).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(
-        screen.getByText(
-          `The length of the ${customFieldConfiguration.label} is too long. The maximum length is ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH} characters.`
-        )
-      ).toBeInTheDocument();
       expect(onSubmit).toHaveBeenCalledWith({}, false);
     });
   });
@@ -150,17 +169,16 @@ describe('Create ', () => {
       </FormTestComponent>
     );
 
-    userEvent.paste(
-      screen.getByTestId(`${customFieldConfiguration.key}-text-create-custom-field`),
-      ''
+    userEvent.clear(
+      await screen.findByTestId(`${customFieldConfiguration.key}-text-create-custom-field`)
     );
+    userEvent.click(await screen.findByText('Submit'));
 
-    userEvent.click(screen.getByText('Submit'));
+    expect(
+      await screen.findByText(`A ${customFieldConfiguration.label} is required.`)
+    ).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(
-        screen.getByText(`${customFieldConfiguration.label} is required.`)
-      ).toBeInTheDocument();
       expect(onSubmit).toHaveBeenCalledWith({}, false);
     });
   });
@@ -170,12 +188,17 @@ describe('Create ', () => {
       <FormTestComponent onSubmit={onSubmit}>
         <Create
           isLoading={false}
-          customFieldConfiguration={{ ...customFieldConfiguration, required: false }}
+          customFieldConfiguration={{
+            key: customFieldConfiguration.key,
+            type: customFieldConfiguration.type,
+            label: customFieldConfiguration.label,
+            required: false,
+          }}
         />
       </FormTestComponent>
     );
 
-    userEvent.click(screen.getByText('Submit'));
+    userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toHaveBeenCalledWith({}, true);

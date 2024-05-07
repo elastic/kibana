@@ -1,0 +1,9 @@
+type: object
+description: Indicates that an alert occurs only when the specified number of consecutive runs met the rule conditions.
+required:
+  - active
+properties:
+  active:
+    type: number
+    description: The number of consecutive runs that must meet the rule conditions.
+    example: 3

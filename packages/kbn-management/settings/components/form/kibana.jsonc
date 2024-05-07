@@ -1,5 +1,5 @@
 {
   "type": "shared-common",
   "id": "@kbn/management-settings-components-form",
-  "owner": "@elastic/platform-deployment-management"
+  "owner": "@elastic/kibana-management"
 }

@@ -6,122 +6,115 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
-import { EuiFlyout, EuiForm } from '@elastic/eui';
+import React, { FC, useState } from 'react';
+import { EuiFlyout, EuiForm, EuiPage, isColorDark } from '@elastic/eui';
 import { ComponentStory } from '@storybook/react';
+import { css } from '@emotion/react';
 import { CategoricalColorMapping, ColorMappingProps } from '../categorical_color_mapping';
-import { AVAILABLE_PALETTES } from '../palettes';
+import { AVAILABLE_PALETTES, getPalette, NeutralPalette } from '../palettes';
 import { DEFAULT_COLOR_MAPPING_CONFIG } from '../config/default_color_mapping';
+import { ColorMapping } from '../config';
+import { getColorFactory } from '../color/color_handling';
+import { ruleMatch } from '../color/rule_matching';
+import { getValidColor } from '../color/color_math';
 
 export default {
   title: 'Color Mapping',
   component: CategoricalColorMapping,
-  decorators: [
-    (story: Function) => (
-      <EuiFlyout style={{ width: 350, padding: '8px' }} onClose={() => {}} hideCloseButton>
-        <EuiForm>{story()}</EuiForm>
-      </EuiFlyout>
-    ),
-  ],
+  decorators: [(story: Function) => story()],
 };
 
-const Template: ComponentStory<FC<ColorMappingProps>> = (args) => (
-  <CategoricalColorMapping {...args} />
-);
+const Template: ComponentStory<FC<ColorMappingProps>> = (args) => {
+  const [updatedModel, setUpdateModel] = useState<ColorMapping.Config>(
+    DEFAULT_COLOR_MAPPING_CONFIG
+  );
 
+  const getPaletteFn = getPalette(AVAILABLE_PALETTES, NeutralPalette);
+
+  const colorFactory = getColorFactory(updatedModel, getPaletteFn, false, args.data);
+
+  return (
+    <EuiPage>
+      <ol>
+        {args.data.type === 'categories' &&
+          args.data.categories.map((c, i) => {
+            const match = updatedModel.assignments.some(({ rule }) => {
+              return ruleMatch(rule, c);
+            });
+            const color = colorFactory(c);
+            const isDark = isColorDark(...getValidColor(color).rgb());
+
+            return (
+              <li
+                key={i}
+                css={css`
+                  width: ${100 + 200 * Math.abs(Math.cos(i))}px;
+                  height: 30px;
+                  margin: 2px;
+                  padding: 5px;
+                  background: ${color};
+                  color: ${isDark ? 'white' : 'black'};
+                  border: ${match ? '2px solid black' : 'none'};
+                  font-weight: ${match ? 'bold' : 'normal'};
+                `}
+              >
+                {c}
+              </li>
+            );
+          })}
+      </ol>
+      <EuiFlyout
+        style={{ width: 350, minInlineSize: 366, padding: '8px', overflow: 'auto' }}
+        onClose={() => {}}
+        hideCloseButton
+        ownFocus={false}
+      >
+        <EuiForm>
+          <CategoricalColorMapping {...args} onModelUpdate={setUpdateModel} />
+        </EuiForm>
+      </EuiFlyout>
+    </EuiPage>
+  );
+};
 export const Default = Template.bind({});
 
 Default.args = {
   model: {
     ...DEFAULT_COLOR_MAPPING_CONFIG,
-    assignmentMode: 'manual',
+
     colorMode: {
-      type: 'gradient',
-      steps: [
-        {
-          type: 'categorical',
-          colorIndex: 0,
-          paletteId: DEFAULT_COLOR_MAPPING_CONFIG.paletteId,
-          touched: false,
-        },
-        {
-          type: 'categorical',
-          colorIndex: 1,
-          paletteId: DEFAULT_COLOR_MAPPING_CONFIG.paletteId,
-          touched: false,
-        },
-        {
-          type: 'categorical',
-          colorIndex: 2,
-          paletteId: DEFAULT_COLOR_MAPPING_CONFIG.paletteId,
-          touched: false,
-        },
-      ],
-      sort: 'asc',
+      type: 'categorical',
     },
-    assignments: [
+    specialAssignments: [
       {
         rule: {
-          type: 'matchExactly',
-          values: ['this is', 'a multi-line combobox that is very long and that will be truncated'],
+          type: 'other',
         },
         color: {
-          type: 'gradient',
-        },
-        touched: false,
-      },
-      {
-        rule: {
-          type: 'matchExactly',
-          values: ['b', ['double', 'value']],
-        },
-        color: {
-          type: 'gradient',
-        },
-        touched: false,
-      },
-      {
-        rule: {
-          type: 'matchExactly',
-          values: ['c'],
-        },
-        color: {
-          type: 'gradient',
-        },
-        touched: false,
-      },
-      {
-        rule: {
-          type: 'matchExactly',
-          values: [
-            'this is',
-            'a multi-line wrap',
-            'combo box',
-            'test combo',
-            '3 lines',
-            ['double', 'value'],
-          ],
-        },
-        color: {
-          type: 'gradient',
+          type: 'loop',
         },
         touched: false,
       },
     ],
+    assignments: [],
   },
   isDarkMode: false,
   data: {
     type: 'categories',
     categories: [
-      'a',
-      'b',
-      'c',
-      'd',
-      'this is',
-      'a multi-line wrap',
-      'combo box',
-      'test combo',
-      '3 lines',
+      'US',
+      'Mexico',
+      'Brasil',
+      'Canada',
+      'Italy',
+      'Germany',
+      'France',
+      'Spain',
+      'UK',
+      'Portugal',
+      'Greece',
+      'Sweden',
+      'Finland',
     ],
   },
 

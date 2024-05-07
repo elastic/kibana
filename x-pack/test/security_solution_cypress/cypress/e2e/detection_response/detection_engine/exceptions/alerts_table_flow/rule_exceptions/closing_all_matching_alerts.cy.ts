@@ -32,7 +32,7 @@ describe('Close matching Alerts ', { tags: ['@ess', '@serverless', '@skipInServe
   const ITEM_NAME = 'Sample Exception Item';
 
   beforeEach(() => {
-    cy.task('esArchiverUnload', 'exceptions');
+    cy.task('esArchiverUnload', { archiveName: 'exceptions' });
     deleteAlertsAndRules();
     cy.task('esArchiverLoad', { archiveName: 'exceptions' });
 
@@ -50,7 +50,7 @@ describe('Close matching Alerts ', { tags: ['@ess', '@serverless', '@skipInServe
     waitForAlertsToPopulate();
   });
   after(() => {
-    cy.task('esArchiverUnload', 'exceptions');
+    cy.task('esArchiverUnload', { archiveName: 'exceptions' });
   });
 
   // TODO: https://github.com/elastic/kibana/issues/161539

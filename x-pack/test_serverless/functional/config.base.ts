@@ -60,8 +60,8 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         observability: {
           pathname: '/app/observability',
         },
-        observabilityLogExplorer: {
-          pathname: '/app/observability-log-explorer',
+        observabilityLogsExplorer: {
+          pathname: '/app/observability-logs-explorer',
         },
         management: {
           pathname: '/app/management',
@@ -114,6 +114,9 @@ export function createTestConfig(options: CreateTestConfigOptions) {
       // choose where screenshots should be saved
       screenshots: {
         directory: resolve(__dirname, 'screenshots'),
+      },
+      failureDebugging: {
+        htmlDirectory: resolve(__dirname, 'failure_debug', 'html'),
       },
       junit: options.junit,
       suiteTags: options.suiteTags,

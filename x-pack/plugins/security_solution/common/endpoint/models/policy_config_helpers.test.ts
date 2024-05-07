@@ -6,7 +6,7 @@
  */
 
 import type { PolicyConfig } from '../types';
-import { PolicyOperatingSystem, ProtectionModes } from '../types';
+import { PolicyOperatingSystem, ProtectionModes, AntivirusRegistrationModes } from '../types';
 import { policyFactory } from './policy_config';
 import {
   disableProtections,
@@ -128,7 +128,12 @@ describe('Policy Config helpers', () => {
 
   describe('setPolicyToEventCollectionOnly()', () => {
     it('should set the policy to event collection only', () => {
-      expect(ensureOnlyEventCollectionIsAllowed(policyFactory())).toEqual(eventsOnlyPolicy());
+      const policyConfig = policyFactory();
+      policyConfig.windows.antivirus_registration = {
+        enabled: true,
+        mode: AntivirusRegistrationModes.enabled,
+      };
+      expect(ensureOnlyEventCollectionIsAllowed(policyConfig)).toEqual(eventsOnlyPolicy());
     });
   });
 
@@ -212,7 +217,7 @@ export const eventsOnlyPolicy = (): PolicyConfig => ({
       registry: true,
       security: true,
     },
-    malware: { mode: ProtectionModes.off, blocklist: false },
+    malware: { mode: ProtectionModes.off, blocklist: false, on_write_scan: false },
     ransomware: { mode: ProtectionModes.off, supported: true },
     memory_protection: { mode: ProtectionModes.off, supported: true },
     behavior_protection: { mode: ProtectionModes.off, supported: true, reputation_service: false },
@@ -223,12 +228,12 @@ export const eventsOnlyPolicy = (): PolicyConfig => ({
       behavior_protection: { message: '', enabled: false },
     },
     logging: { file: 'info' },
-    antivirus_registration: { enabled: false },
+    antivirus_registration: { enabled: false, mode: AntivirusRegistrationModes.disabled },
     attack_surface_reduction: { credential_hardening: { enabled: false } },
   },
   mac: {
     events: { process: true, file: true, network: true },
-    malware: { mode: ProtectionModes.off, blocklist: false },
+    malware: { mode: ProtectionModes.off, blocklist: false, on_write_scan: false },
     behavior_protection: { mode: ProtectionModes.off, supported: true, reputation_service: false },
     memory_protection: { mode: ProtectionModes.off, supported: true },
     popup: {
@@ -249,7 +254,7 @@ export const eventsOnlyPolicy = (): PolicyConfig => ({
       session_data: false,
       tty_io: false,
     },
-    malware: { mode: ProtectionModes.off, blocklist: false },
+    malware: { mode: ProtectionModes.off, blocklist: false, on_write_scan: false },
     behavior_protection: { mode: ProtectionModes.off, supported: true, reputation_service: false },
     memory_protection: { mode: ProtectionModes.off, supported: true },
     popup: {

@@ -146,6 +146,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
         },
         spaceId: 'spaceId',
         startedAt,
+        startedAtOverridden: false,
         state,
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange: () => {
@@ -253,6 +254,7 @@ describe('createLifecycleRuleTypeFactory', () => {
               "@timestamp": "2021-06-16T09:01:00.000Z",
               "event.action": "open",
               "event.kind": "signal",
+              "kibana.alert.consecutive_matches": 1,
               "kibana.alert.duration.us": 0,
               "kibana.alert.flapping": false,
               "kibana.alert.instance.id": "opbeans-java",
@@ -290,6 +292,7 @@ describe('createLifecycleRuleTypeFactory', () => {
               "@timestamp": "2021-06-16T09:01:00.000Z",
               "event.action": "open",
               "event.kind": "signal",
+              "kibana.alert.consecutive_matches": 1,
               "kibana.alert.duration.us": 0,
               "kibana.alert.flapping": false,
               "kibana.alert.instance.id": "opbeans-node",

@@ -6,17 +6,18 @@
  */
 
 import React from 'react';
-import { EuiBadge, SearchFilterConfig } from '@elastic/eui';
+import type { SearchFilterConfig } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 import type { Clause, Value } from '@elastic/eui/src/components/search_bar/query/ast';
 import { i18n } from '@kbn/i18n';
 import {
   TRANSFORM_FUNCTION,
   TRANSFORM_MODE,
   TRANSFORM_STATE,
-  TRANSFORM_HEALTH,
+  TRANSFORM_HEALTH_STATUS,
 } from '../../../../../../common/constants';
 import { isLatestTransform, isPivotTransform } from '../../../../../../common/types/transform';
-import { TransformListRow } from '../../../../common';
+import type { TransformListRow } from '../../../../common';
 import { TransformTaskStateBadge } from './transform_task_state_badge';
 import { TransformHealthColoredDot } from './transform_health_colored_dot';
 
@@ -52,7 +53,7 @@ export const transformFilters: SearchFilterConfig[] = [
     field: 'health',
     name: i18n.translate('xpack.transform.healthFilter', { defaultMessage: 'Health' }),
     multiSelect: false,
-    options: Object.values(TRANSFORM_HEALTH).map((val) => ({
+    options: Object.values(TRANSFORM_HEALTH_STATUS).map((val) => ({
       value: val,
       name: val,
       view: <TransformHealthColoredDot compact={true} showToolTip={false} healthStatus={val} />,

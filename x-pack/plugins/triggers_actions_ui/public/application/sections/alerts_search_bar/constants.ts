@@ -6,5 +6,9 @@
  */
 
 import { DataView } from '@kbn/data-views-plugin/common';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 
 export const NO_INDEX_PATTERNS: DataView[] = [];
+export const ALERTS_SEARCH_BAR_PARAMS_URL_STORAGE_KEY = 'searchBarParams';
+export const ALL_FEATURE_IDS = Object.values(AlertConsumers);
+export const NON_SIEM_FEATURE_IDS = ALL_FEATURE_IDS.filter((fid) => fid !== AlertConsumers.SIEM);

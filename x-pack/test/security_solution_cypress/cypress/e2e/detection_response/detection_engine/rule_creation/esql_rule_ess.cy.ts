@@ -7,14 +7,18 @@
 
 import { getEsqlRule } from '../../../../objects/rule';
 
-import { RULES_MANAGEMENT_TABLE, RULE_NAME } from '../../../../screens/alerts_detection_rules';
+import {
+  RULES_MANAGEMENT_TABLE,
+  RULE_NAME,
+  INVESTIGATION_FIELDS_VALUE_ITEM,
+} from '../../../../screens/alerts_detection_rules';
 import {
   RULE_NAME_HEADER,
   RULE_TYPE_DETAILS,
   RULE_NAME_OVERRIDE_DETAILS,
 } from '../../../../screens/rule_details';
 
-import { ESQL_TYPE, ESQL_QUERY_BAR } from '../../../../screens/create_new_rule';
+import { ESQL_QUERY_BAR } from '../../../../screens/create_new_rule';
 
 import { getDetails, goBackToRulesTable } from '../../../../tasks/rule_details';
 import { expectNumberOfRules } from '../../../../tasks/alerts_detection_rules';
@@ -29,6 +33,11 @@ import {
   fillEsqlQueryBar,
   fillAboutSpecificEsqlRuleAndContinue,
   createRuleWithoutEnabling,
+  expandAdvancedSettings,
+  fillCustomInvestigationFields,
+  fillRuleName,
+  fillDescription,
+  getAboutContinueButton,
 } from '../../../../tasks/create_new_rule';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
@@ -62,9 +71,6 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
 
       selectEsqlRuleType();
       expandEsqlQueryBar();
-
-      // ensures ES|QL rule in technical preview on create page
-      cy.get(ESQL_TYPE).contains('Technical Preview');
 
       fillDefineEsqlRuleAndContinue(rule);
       fillAboutRuleAndContinue(rule);
@@ -132,7 +138,7 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
       cy.get(ESQL_QUERY_BAR).should('not.be.visible');
     });
 
-    it('shows error when non-aggregating ES|QL query does not [metadata] operator', function () {
+    it('shows error when non-aggregating ES|QL query does not have metadata operator', function () {
       workaroundForResizeObserver();
 
       const invalidNonAggregatingQuery = 'from auditbeat* | limit 5';
@@ -142,7 +148,7 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
       getDefineContinueButton().click();
 
       cy.get(ESQL_QUERY_BAR).contains(
-        'must include the [metadata _id, _version, _index] operator after the source command'
+        'must include the "metadata _id, _version, _index" operator after the source command'
       );
     });
 
@@ -150,7 +156,7 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
       workaroundForResizeObserver();
 
       const invalidNonAggregatingQuery =
-        'from auditbeat* [metadata _id, _version, _index] | keep agent.* | limit 5';
+        'from auditbeat* metadata _id, _version, _index | keep agent.* | limit 5';
 
       selectEsqlRuleType();
       expandEsqlQueryBar();
@@ -158,14 +164,14 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
       getDefineContinueButton().click();
 
       cy.get(ESQL_QUERY_BAR).contains(
-        'must include the [metadata _id, _version, _index] operator after the source command'
+        'must include the "metadata _id, _version, _index" operator after the source command'
       );
     });
 
     it('shows error when ES|QL query is invalid', function () {
       workaroundForResizeObserver();
       const invalidEsqlQuery =
-        'from auditbeat* [metadata _id, _version, _index] | not_existing_operator';
+        'from auditbeat* metadata _id, _version, _index | not_existing_operator';
       visit(CREATE_RULE_URL);
 
       selectEsqlRuleType();
@@ -174,6 +180,40 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
       getDefineContinueButton().click();
 
       cy.get(ESQL_QUERY_BAR).contains('Error validating ES|QL');
+    });
+  });
+
+  describe('ES|QL investigation fields', () => {
+    beforeEach(() => {
+      login();
+      visit(CREATE_RULE_URL);
+    });
+    it('shows custom ES|QL field in investigation fields autocomplete and saves it in rule', function () {
+      const CUSTOM_ESQL_FIELD = '_custom_agent_name';
+      const queryWithCustomFields = [
+        `from auditbeat* metadata _id, _version, _index`,
+        `eval ${CUSTOM_ESQL_FIELD} = agent.name`,
+        `keep _id, _custom_agent_name`,
+        `limit 5`,
+      ].join(' | ');
+
+      workaroundForResizeObserver();
+
+      selectEsqlRuleType();
+      expandEsqlQueryBar();
+      fillEsqlQueryBar(queryWithCustomFields);
+      getDefineContinueButton().click();
+
+      expandAdvancedSettings();
+      fillRuleName();
+      fillDescription();
+      fillCustomInvestigationFields([CUSTOM_ESQL_FIELD]);
+      getAboutContinueButton().click();
+
+      fillScheduleRuleAndContinue(rule);
+      createRuleWithoutEnabling();
+
+      cy.get(INVESTIGATION_FIELDS_VALUE_ITEM).should('have.text', CUSTOM_ESQL_FIELD);
     });
   });
 });

@@ -10,7 +10,7 @@ import { resolve } from 'path';
 import Fs from 'fs';
 
 import * as Rx from 'rxjs';
-import { mergeMap, map, catchError, ignoreElements, takeWhile } from 'rxjs/operators';
+import { mergeMap, map, catchError, ignoreElements, takeWhile } from 'rxjs';
 import { Lifecycle } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
 import chromeDriver from 'chromedriver';
@@ -231,8 +231,8 @@ async function attemptToCreateCommand(
         firefoxOptions.setAcceptInsecureCerts(config.acceptInsecureCerts);
 
         if (headlessBrowser === '1') {
-          // See: https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode
-          firefoxOptions.headless();
+          // See: https://developer.mozilla.org/en-US/docs/Web/WebDriver/Capabilities/firefoxOptions
+          firefoxOptions.addArguments('-headless');
         }
 
         // Windows issue with stout socket https://github.com/elastic/kibana/issues/52053

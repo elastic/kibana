@@ -30,6 +30,10 @@ interface OptionsListAdditionalSettings {
   hideSort?: boolean;
 }
 
+interface RangeSliderAdditionalSettings {
+  step?: number;
+}
+
 export const OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS: { [key: string]: number } = {
   hiss: 5,
   ruff: 4,
@@ -61,7 +65,9 @@ export class DashboardPageControls extends FtrService {
   public async getAllControlIds() {
     const controlFrames = await this.testSubjects.findAll('control-frame');
     const ids = await Promise.all(
-      controlFrames.map(async (controlFrame) => await controlFrame.getAttribute('data-control-id'))
+      controlFrames.map(
+        async (controlFrame) => (await controlFrame.getAttribute('data-control-id')) ?? ''
+      )
     );
     this.log.debug('Got all control ids:', ids);
     return ids;
@@ -89,7 +95,7 @@ export class DashboardPageControls extends FtrService {
   public async clearAllControls() {
     const controlIds = await this.getAllControlIds();
     for (const controlId of controlIds) {
-      await this.removeExistingControl(controlId);
+      if (controlId) await this.removeExistingControl(controlId);
     }
   }
 
@@ -158,7 +164,8 @@ export class DashboardPageControls extends FtrService {
       false: 'NONE',
     };
 
-    const switchState = await this.testSubjects.getAttribute('control-group-chaining', 'checked');
+    const switchState =
+      (await this.testSubjects.getAttribute('control-group-chaining', 'checked')) ?? '';
     if (chainingSystem !== switchStateToChainingSystem[switchState]) {
       await this.testSubjects.click('control-group-chaining');
     }
@@ -197,6 +204,34 @@ export class DashboardPageControls extends FtrService {
     await this.openControlGroupSettingsFlyout();
     await this.setSwitchState(syncTimeRange, 'control-group-query-sync-time-range');
     await this.testSubjects.click('control-group-editor-save');
+  }
+
+  public async updateShowApplyButtonSetting(showApplyButton: boolean) {
+    this.log.debug(`Update show apply button setting to ${showApplyButton}`);
+    await this.openControlGroupSettingsFlyout();
+    // the "showApplyButton" toggle has in inverse relationship with the `showApplyButton` seting - so, negate `showApplyButton`
+    await this.setSwitchState(!showApplyButton, 'control-group-auto-apply-selections');
+    await this.testSubjects.click('control-group-editor-save');
+  }
+
+  public async clickApplyButton() {
+    this.log.debug('Clicking the apply button');
+    await this.verifyApplyButtonEnabled();
+
+    const applyButton = await this.testSubjects.find('controlGroup--applyFiltersButton');
+    await applyButton.click();
+
+    await this.verifyApplyButtonEnabled(false);
+  }
+
+  public async verifyApplyButtonEnabled(enabled: boolean = true) {
+    this.log.debug(
+      `Checking that control group apply button is ${enabled ? 'enabled' : 'not enabled'}`
+    );
+    const applyButton = await this.testSubjects.find('controlGroup--applyFiltersButton');
+    await this.retry.try(async () => {
+      expect(await applyButton.isEnabled()).to.be(enabled);
+    });
   }
 
   /* -----------------------------------------------------------
@@ -238,7 +273,7 @@ export class DashboardPageControls extends FtrService {
     width?: ControlWidth;
     dataViewTitle?: string;
     grow?: boolean;
-    additionalSettings?: OptionsListAdditionalSettings;
+    additionalSettings?: OptionsListAdditionalSettings | RangeSliderAdditionalSettings;
   }) {
     this.log.debug(`Creating ${controlType} control ${title ?? fieldName}`);
     await this.openCreateControlFlyout();
@@ -254,8 +289,13 @@ export class DashboardPageControls extends FtrService {
 
     if (additionalSettings) {
       if (controlType === OPTIONS_LIST_CONTROL) {
-        // only options lists currently have additional settings
-        await this.optionsListSetAdditionalSettings(additionalSettings);
+        await this.optionsListSetAdditionalSettings(
+          additionalSettings as OptionsListAdditionalSettings
+        );
+      } else if (controlType === RANGE_SLIDER_CONTROL) {
+        await this.rangeSliderSetAdditionalSettings(
+          additionalSettings as RangeSliderAdditionalSettings
+        );
       }
     }
 
@@ -395,7 +435,7 @@ export class DashboardPageControls extends FtrService {
     this.log.debug(`getting available options count from options list`);
     await this.optionsListPopoverWaitForLoading();
     const availableOptions = await this.testSubjects.find(`optionsList-control-available-options`);
-    return +(await availableOptions.getAttribute('data-option-count'));
+    return +((await availableOptions.getAttribute('data-option-count')) ?? '0');
   }
 
   public async optionsListPopoverGetAvailableOptions() {
@@ -627,6 +667,17 @@ export class DashboardPageControls extends FtrService {
     return dataViewName;
   }
 
+  // Range Slider editor functions
+  public async rangeSliderEditorSetStep(value: number) {
+    this.log.debug(`Setting range slider step to ${value}`);
+    await this.testSubjects.setValue('rangeSliderControl__stepAdditionalSetting', `${value}`);
+  }
+
+  public async rangeSliderSetAdditionalSettings({ step }: RangeSliderAdditionalSettings) {
+    this.log.debug(`Setting range slider step to ${step}`);
+    if (step) await this.rangeSliderEditorSetStep(step);
+  }
+
   // Range slider functions
   public async rangeSliderGetLowerBoundAttribute(controlId: string, attribute: string) {
     this.log.debug(`Getting range slider lower bound ${attribute} for ${controlId}`);
@@ -650,15 +701,24 @@ export class DashboardPageControls extends FtrService {
         `range-slider-control-${controlId} > rangeSlider__lowerBoundFieldNumber`,
         value
       );
+      await this.testSubjects.pressEnter(
+        // force the change without waiting for the debounce
+        `range-slider-control-${controlId} > rangeSlider__lowerBoundFieldNumber`
+      );
       expect(await this.rangeSliderGetLowerBoundAttribute(controlId, 'value')).to.be(value);
     });
   }
+
   public async rangeSliderSetUpperBound(controlId: string, value: string) {
     this.log.debug(`Setting range slider lower bound to ${value}`);
     await this.retry.try(async () => {
       await this.testSubjects.setValue(
         `range-slider-control-${controlId} > rangeSlider__upperBoundFieldNumber`,
         value
+      );
+      await this.testSubjects.pressEnter(
+        // force the change without waiting for the debounce
+        `range-slider-control-${controlId} > rangeSlider__upperBoundFieldNumber`
       );
       expect(await this.rangeSliderGetUpperBoundAttribute(controlId, 'value')).to.be(value);
     });

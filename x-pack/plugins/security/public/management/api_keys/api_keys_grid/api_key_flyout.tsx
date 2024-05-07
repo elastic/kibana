@@ -137,6 +137,29 @@ const defaultInitialValues: ApiKeyFormValues = {
   role_descriptors: '{}',
 };
 
+const READ_ONLY_BOILERPLATE = `{
+  "read-only-role": {
+    "cluster": [],
+    "indices": [
+      {
+        "names": ["*"],
+        "privileges": ["read"]
+      }
+    ]
+  }
+}`;
+const WRITE_ONLY_BOILERPLATE = `{
+  "write-only-role": {
+    "cluster": [],
+    "indices": [
+      {
+        "names": ["*"],
+        "privileges": ["write"]
+      }
+    ]
+  }
+}`;
+
 export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
   onSuccess,
   onCancel,
@@ -282,7 +305,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                       title={
                         <FormattedMessage
                           id="xpack.security.accountManagement.apiKeyFlyout.readonlyOwnedByOtherUserWarning"
-                          defaultMessage="You cannot update this API key, since it is owned by another user."
+                          defaultMessage="You can’t update this API key. It belongs to another user."
                         />
                       }
                     />
@@ -295,7 +318,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                       title={
                         <FormattedMessage
                           id="xpack.security.accountManagement.apiKeyFlyout.readonlyExpiredWarning"
-                          defaultMessage="You cannot update this API key, since it has already expired."
+                          defaultMessage="This API key has expired. You can no longer update it."
                         />
                       }
                     />
@@ -451,7 +474,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                                     <h2>
                                       <FormattedMessage
                                         id="xpack.security.accountManagement.apiKeyFlyout.restTypeLabel"
-                                        defaultMessage="Personal API key"
+                                        defaultMessage="User API key"
                                       />
                                     </h2>
                                   </EuiTitle>
@@ -477,7 +500,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                                     <h2>
                                       <FormattedMessage
                                         id="xpack.security.accountManagement.apiKeyFlyout.crossClusterTypeLabel"
-                                        defaultMessage="Cross-Cluster API key"
+                                        defaultMessage="Cross-cluster API key"
                                       />
                                     </h2>
                                   </EuiTitle>
@@ -485,7 +508,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                                   <EuiText size="s">
                                     <FormattedMessage
                                       id="xpack.security.accountManagement.apiKeyFlyout.crossClusterTypeDescription"
-                                      defaultMessage="Allow remote clusters to connect to your local cluster."
+                                      defaultMessage="Allow other clusters to connect to this cluster."
                                     />
                                   </EuiText>
                                 </>
@@ -704,6 +727,57 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                   {formik.values.customPrivileges && (
                     <>
                       <EuiSpacer />
+                      <EuiPanel hasShadow={false} color="subdued">
+                        <EuiFlexGroup
+                          gutterSize="none"
+                          justifyContent="flexEnd"
+                          alignItems="baseline"
+                        >
+                          <EuiFlexItem grow={false}>
+                            <EuiText size="xs">
+                              <h4>
+                                {i18n.translate(
+                                  'xpack.security.apiKey.privileges.boilerplate.label',
+                                  {
+                                    defaultMessage: 'Replace with boilerplate:',
+                                  }
+                                )}
+                              </h4>
+                            </EuiText>
+                          </EuiFlexItem>
+
+                          <EuiFlexItem grow={false}>
+                            <EuiButtonEmpty
+                              data-test-subj="apiKeysReadOnlyDescriptors"
+                              onClick={() =>
+                                formik.setFieldValue('role_descriptors', READ_ONLY_BOILERPLATE)
+                              }
+                            >
+                              {i18n.translate(
+                                'xpack.security.apiKeys.apiKeyFlyout.roleDescriptors.readOnlyLabel',
+                                {
+                                  defaultMessage: 'Read-only',
+                                }
+                              )}
+                            </EuiButtonEmpty>
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiButtonEmpty
+                              data-test-subj="apiKeysWriteOnlyDescriptors"
+                              onClick={() =>
+                                formik.setFieldValue('role_descriptors', WRITE_ONLY_BOILERPLATE)
+                              }
+                            >
+                              {i18n.translate(
+                                'xpack.security.management.apiKeys.apiKeyFlyout.roleDescriptors.writeOnlyLabel',
+                                {
+                                  defaultMessage: 'Write-only',
+                                }
+                              )}
+                            </EuiButtonEmpty>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiPanel>
                       <FormRow
                         helpText={
                           <DocLink

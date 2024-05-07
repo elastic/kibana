@@ -43,6 +43,7 @@ describe('<ComponentTemplateList />', () => {
       hasSettings: true,
       usedBy: [],
       isManaged: false,
+      isDeprecated: false,
     };
 
     const componentTemplate2: ComponentTemplateListItem = {
@@ -52,6 +53,7 @@ describe('<ComponentTemplateList />', () => {
       hasSettings: true,
       usedBy: ['test_index_template_1'],
       isManaged: false,
+      isDeprecated: false,
     };
 
     const componentTemplate3: ComponentTemplateListItem = {
@@ -61,6 +63,7 @@ describe('<ComponentTemplateList />', () => {
       hasSettings: true,
       usedBy: ['test_index_template_1', 'test_index_template_2'],
       isManaged: false,
+      isDeprecated: true,
     };
 
     const componentTemplates = [componentTemplate1, componentTemplate2, componentTemplate3];
@@ -89,7 +92,7 @@ describe('<ComponentTemplateList />', () => {
       const { tableCellsValues: ascTableCellsValues } =
         table.getMetaData('componentTemplatesTable');
       const ascUsageCountValues = ascTableCellsValues.map((row) => row[2]);
-      expect(ascUsageCountValues).toEqual(['Not in use', '1', '2']);
+      expect(ascUsageCountValues).toEqual(['Not in use', '1']);
 
       // Sort descending
       await actions.clickTableColumnSortButton(1);
@@ -97,7 +100,24 @@ describe('<ComponentTemplateList />', () => {
       const { tableCellsValues: descTableCellsValues } =
         table.getMetaData('componentTemplatesTable');
       const descUsageCountValues = descTableCellsValues.map((row) => row[2]);
-      expect(descUsageCountValues).toEqual(['2', '1', 'Not in use']);
+      expect(descUsageCountValues).toEqual(['1', 'Not in use']);
+    });
+
+    test('Hides deprecated component templates by default', async () => {
+      const { component, find } = testBed;
+
+      // Initially the switch is off so we should not see any deprecated component templates
+      let deprecatedList = find('deprecatedComponentTemplateBadge');
+      expect(deprecatedList.length).toBe(0);
+
+      testBed.find('componentTemplatesFiltersButton').simulate('click');
+      testBed.find('componentTemplates--deprecatedFilter').simulate('click');
+
+      component.update();
+
+      // Now we should see all deprecated component templates
+      deprecatedList = find('deprecatedComponentTemplateBadge');
+      expect(deprecatedList.length).toBe(1);
     });
 
     test('should reload the component templates data', async () => {
@@ -150,6 +170,24 @@ describe('<ComponentTemplateList />', () => {
         `${API_BASE_PATH}/component_templates/${componentTemplateName}`,
         expect.anything()
       );
+    });
+  });
+
+  describe('if filter is set, component templates are filtered', () => {
+    test('search value is set if url param is set', async () => {
+      const filter = 'usedBy=(test_index_template_1)';
+      await act(async () => {
+        testBed = await setup(httpSetup, { filter });
+      });
+
+      testBed.component.update();
+
+      const { table } = testBed;
+      const search = testBed.actions.getSearchValue();
+      expect(search).toBe(filter);
+
+      const { rows } = table.getMetaData('componentTemplatesTable');
+      expect(rows.length).toBe(1);
     });
   });
 

@@ -6,7 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { EcsError } from '@kbn/ecs';
+import type { EcsError } from '@elastic/ecs';
 import type { BaseFileMetadata, FileCompression, FileJSON } from '@kbn/files-plugin/common';
 import type { ResponseActionBodySchema, UploadActionApiRequestBody } from '../../api/endpoint';
 import type { ActionStatusRequestSchema } from '../../api/endpoint/actions/action_status_route';
@@ -120,7 +120,11 @@ interface ActionResponseFields {
  * An endpoint Action created in the Endpoint's `.logs-endpoint.actions-default` index.
  * @since v7.16
  */
-export interface LogsEndpointAction {
+export interface LogsEndpointAction<
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+  TMeta extends {} = {}
+> {
   '@timestamp': string;
   agent: {
     id: string | string[];
@@ -134,6 +138,8 @@ export interface LogsEndpointAction {
     id: string;
     name: string;
   };
+  /** Area to store any additional metadata  */
+  meta?: TMeta;
 }
 
 export interface LogsEndpointActionWithHosts extends LogsEndpointAction {
@@ -150,7 +156,8 @@ export interface LogsEndpointActionWithHosts extends LogsEndpointAction {
  * @since v7.16
  */
 export interface LogsEndpointActionResponse<
-  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+  TMeta extends {} = {}
 > {
   '@timestamp': string;
   agent: {
@@ -163,6 +170,8 @@ export interface LogsEndpointActionResponse<
     input_type: ResponseActionAgentType;
   };
   error?: EcsError;
+  /** Area to store any other metadata for the action response */
+  meta?: TMeta;
 }
 
 interface ResponseActionParametersWithPid {
@@ -205,6 +214,9 @@ export type EndpointActionResponseDataOutput =
   | SuspendProcessActionOutputContent
   | KillProcessActionOutputContent;
 
+/**
+ * The data stored with each Response Action under `EndpointActions.data` property
+ */
 export interface EndpointActionData<
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput

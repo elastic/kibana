@@ -288,92 +288,125 @@ describe('<JsonWatchEditPage /> create route', () => {
       });
 
       describe('results flyout', () => {
-        const actionModes = ['simulate', 'force_simulate', 'execute', 'force_execute', 'skip'];
-        const actionModeStatusesConditionMet = [
-          'simulated',
-          'simulated',
-          'executed',
-          'executed',
-          'throttled',
-        ];
-        const actionModeStatusesConditionNotMet = [
-          'not simulated',
-          'not simulated',
-          'not executed',
-          'not executed',
-          'throttled',
-        ];
-        const conditionMetStatuses = [true, false];
-        const ACTION_NAME = 'my-logging-action';
-        const ACTION_TYPE = 'logging';
-        const ACTION_STATE = 'OK';
+        describe('correctly displays execution results', () => {
+          const actionModes = ['simulate', 'force_simulate', 'execute', 'force_execute', 'skip'];
+          const actionModeStatusesConditionMet = [
+            'simulated',
+            'simulated',
+            'executed',
+            'executed',
+            'throttled',
+          ];
+          const actionModeStatusesConditionNotMet = [
+            'not simulated',
+            'not simulated',
+            'not executed',
+            'not executed',
+            'throttled',
+          ];
+          const conditionMetStatuses = [true, false];
+          const ACTION_NAME = 'my-logging-action';
+          const ACTION_TYPE = 'logging';
+          const ACTION_STATE = 'OK';
 
-        actionModes.forEach((actionMode, i) => {
-          conditionMetStatuses.forEach((conditionMet) => {
-            describe('for ' + actionMode + ' action mode', () => {
-              describe(
-                conditionMet ? 'when the condition is met' : 'when the condition is not met',
-                () => {
-                  beforeEach(async () => {
-                    const { actions, form } = testBed;
-                    form.setInputValue('actionModesSelect', actionMode);
+          actionModes.forEach((actionMode, i) => {
+            conditionMetStatuses.forEach((conditionMet) => {
+              describe('for ' + actionMode + ' action mode', () => {
+                describe(
+                  conditionMet ? 'when the condition is met' : 'when the condition is not met',
+                  () => {
+                    beforeEach(async () => {
+                      const { actions, form } = testBed;
+                      form.setInputValue('actionModesSelect', actionMode);
 
-                    httpRequestsMockHelpers.setLoadExecutionResultResponse({
-                      watchHistoryItem: {
-                        details: {
-                          result: {
-                            condition: {
-                              met: conditionMet,
+                      httpRequestsMockHelpers.setLoadExecutionResultResponse({
+                        watchHistoryItem: {
+                          details: {
+                            result: {
+                              condition: {
+                                met: conditionMet,
+                              },
+                              actions:
+                                (conditionMet && [
+                                  {
+                                    id: ACTION_NAME,
+                                    type: ACTION_TYPE,
+                                    status: conditionMet && actionModeStatusesConditionMet[i],
+                                  },
+                                ]) ||
+                                [],
                             },
-                            actions:
-                              (conditionMet && [
-                                {
-                                  id: ACTION_NAME,
-                                  type: ACTION_TYPE,
-                                  status: conditionMet && actionModeStatusesConditionMet[i],
-                                },
-                              ]) ||
-                              [],
+                          },
+                          watchStatus: {
+                            actionStatuses: [
+                              {
+                                id: ACTION_NAME,
+                                state: ACTION_STATE,
+                              },
+                            ],
                           },
                         },
-                        watchStatus: {
-                          actionStatuses: [
-                            {
-                              id: ACTION_NAME,
-                              state: ACTION_STATE,
-                            },
-                          ],
-                        },
-                      },
+                      });
+
+                      await actions.clickSimulateButton();
                     });
 
-                    await actions.clickSimulateButton();
-                  });
+                    test('should set the correct condition met status', () => {
+                      const { exists } = testBed;
+                      expect(exists('conditionMetStatus')).toBe(conditionMet);
+                      expect(exists('conditionNotMetStatus')).toBe(!conditionMet);
+                    });
 
-                  test('should set the correct condition met status', () => {
-                    const { exists } = testBed;
-                    expect(exists('conditionMetStatus')).toBe(conditionMet);
-                    expect(exists('conditionNotMetStatus')).toBe(!conditionMet);
-                  });
-
-                  test('should set the correct values in the table', () => {
-                    const { table } = testBed;
-                    const { tableCellsValues } = table.getMetaData('simulateResultsTable');
-                    const row = tableCellsValues[0];
-                    expect(row).toEqual([
-                      ACTION_NAME,
-                      ACTION_TYPE,
-                      actionMode,
-                      ACTION_STATE,
-                      '',
-                      conditionMet
-                        ? actionModeStatusesConditionMet[i]
-                        : actionModeStatusesConditionNotMet[i],
-                    ]);
-                  });
-                }
-              );
+                    test('should set the correct values in the table', () => {
+                      const { table } = testBed;
+                      const { tableCellsValues } = table.getMetaData('simulateResultsTable');
+                      const row = tableCellsValues[0];
+                      expect(row).toEqual([
+                        ACTION_NAME,
+                        ACTION_TYPE,
+                        actionMode,
+                        ACTION_STATE,
+                        '',
+                        conditionMet
+                          ? actionModeStatusesConditionMet[i]
+                          : actionModeStatusesConditionNotMet[i],
+                      ]);
+                    });
+                  }
+                );
+              });
             });
+          });
+        });
+
+        describe('when API returns no results', () => {
+          beforeEach(async () => {
+            const { actions } = testBed;
+
+            httpRequestsMockHelpers.setLoadExecutionResultResponse({
+              watchHistoryItem: {
+                details: {
+                  result: {},
+                },
+                watchStatus: {
+                  actionStatuses: [],
+                },
+              },
+            });
+
+            await actions.clickSimulateButton();
+          });
+
+          test('flyout renders', () => {
+            const { exists } = testBed;
+            expect(exists('simulateResultsFlyout')).toBe(true);
+            expect(exists('simulateResultsFlyoutTitle')).toBe(true);
+          });
+
+          test('condition status is not displayed', () => {
+            const { exists } = testBed;
+            expect(exists('conditionMetStatus')).toBe(false);
+            expect(exists('conditionNotMetStatus')).toBe(false);
           });
         });
       });

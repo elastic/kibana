@@ -99,7 +99,7 @@ export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   ): boolean;
 }
 
-export class DynamicStyleProperty<T>
+export class DynamicStyleProperty<T extends object>
   extends AbstractStyleProperty<T>
   implements IDynamicStyleProperty<T>
 {

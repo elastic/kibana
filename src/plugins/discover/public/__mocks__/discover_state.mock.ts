@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 import { createBrowserHistory } from 'history';
-import { getDiscoverStateContainer } from '../application/main/services/discover_state';
+import { getDiscoverStateContainer } from '../application/main/state_management/discover_state';
 import { savedSearchMockWithTimeField, savedSearchMock } from './saved_search';
 import { discoverServiceMock } from './services';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { mockCustomizationContext } from '../customizations/__mocks__/customization_context';
 
 export function getDiscoverStateMock({
   isTimeBased = true,
@@ -23,10 +24,7 @@ export function getDiscoverStateMock({
   const container = getDiscoverStateContainer({
     services: discoverServiceMock,
     history,
-    customizationContext: {
-      displayMode: 'standalone',
-      showLogExplorerTabs: false,
-    },
+    customizationContext: mockCustomizationContext,
   });
   container.savedSearchState.set(
     savedSearch ? savedSearch : isTimeBased ? savedSearchMockWithTimeField : savedSearchMock

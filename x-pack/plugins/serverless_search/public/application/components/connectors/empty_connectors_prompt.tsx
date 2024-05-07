@@ -25,7 +25,7 @@ import { useCreateConnector } from '../../hooks/api/use_create_connector';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 
 export const EmptyConnectorsPrompt: React.FC = () => {
-  const { data: connectorTypes } = useConnectorTypes();
+  const connectorTypes = useConnectorTypes();
   const { createConnector, isLoading } = useCreateConnector();
 
   const assetBasePath = useAssetBasePath();
@@ -191,7 +191,7 @@ export const EmptyConnectorsPrompt: React.FC = () => {
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="s">
-          {connectorTypes?.connectors.map((connectorType) => (
+          {connectorTypes.map((connectorType) => (
             <EuiFlexItem key={connectorType.name}>
               <EuiToolTip content={connectorType.name}>
                 <EuiIcon

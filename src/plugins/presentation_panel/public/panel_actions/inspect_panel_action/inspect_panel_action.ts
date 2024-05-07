@@ -11,6 +11,7 @@ import { apiHasInspectorAdapters, HasInspectorAdapters } from '@kbn/inspector-pl
 import { tracksOverlays } from '@kbn/presentation-containers';
 import {
   EmbeddableApiContext,
+  getPanelTitle,
   PublishesPanelTitle,
   HasParentApi,
 } from '@kbn/presentation-publishing';
@@ -56,7 +57,7 @@ export class InspectPanelAction implements Action<EmbeddableApiContext> {
     }
 
     const panelTitle =
-      embeddable.panelTitle?.value ??
+      getPanelTitle(embeddable) ||
       i18n.translate('presentationPanel.action.inspectPanel.untitledEmbeddableFilename', {
         defaultMessage: 'untitled',
       });

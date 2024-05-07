@@ -16,7 +16,7 @@ For example, assuming you have a custom state manager, setting up syncing state 
 ```ts
 // my_state_manager.ts
 import { Subject } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 
 export class MyStateManager {
   private count: number = 0;

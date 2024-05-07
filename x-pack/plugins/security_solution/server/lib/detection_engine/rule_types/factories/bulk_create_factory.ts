@@ -27,6 +27,7 @@ export interface GenericBulkCreateResponse<T extends BaseFieldsLatest> {
   createdItems: Array<AlertWithCommonFieldsLatest<T> & { _id: string; _index: string }>;
   errors: string[];
   alertsWereTruncated: boolean;
+  suppressedItemsCount?: number;
 }
 
 export const bulkCreateFactory =
@@ -34,7 +35,8 @@ export const bulkCreateFactory =
     alertWithPersistence: PersistenceAlertService,
     refreshForBulkCreate: RefreshTypes,
     ruleExecutionLogger: IRuleExecutionLogForExecutors,
-    experimentalFeatures?: ExperimentalFeatures
+    experimentalFeatures?: ExperimentalFeatures,
+    currentTimeOverride?: Date
   ) =>
   async <T extends BaseFieldsLatest>(
     wrappedDocs: Array<WrappedFieldsLatest<T>>,
@@ -85,7 +87,8 @@ export const bulkCreateFactory =
       })),
       refreshForBulkCreate,
       maxAlerts,
-      enrichAlertsWrapper
+      enrichAlertsWrapper,
+      currentTimeOverride
     );
 
     const end = performance.now();

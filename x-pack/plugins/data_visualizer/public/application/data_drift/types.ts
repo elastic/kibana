@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { Filter, Query } from '@kbn/es-query';
-import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '@kbn/ml-query-utils';
+import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
+import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import type { Histogram } from '@kbn/ml-chi2test';
 
 import { DATA_COMPARISON_TYPE } from './constants';

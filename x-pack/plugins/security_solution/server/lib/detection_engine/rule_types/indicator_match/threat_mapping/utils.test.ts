@@ -20,6 +20,7 @@ import {
   encodeThreatMatchNamedQuery,
   getMatchedFields,
   getSignalValueMap,
+  getMaxClauseCountErrorValue,
 } from './utils';
 
 describe('utils', () => {
@@ -327,6 +328,7 @@ describe('utils', () => {
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
         warningMessages: [],
+        suppressedAlertsCount: 0,
       };
       const combinedResults = combineConcurrentResults(existingResult, []);
       expect(combinedResults).toEqual(expectedResult);
@@ -368,6 +370,96 @@ describe('utils', () => {
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
         warningMessages: [],
+        suppressedAlertsCount: 0,
+      };
+
+      const combinedResults = combineConcurrentResults(existingResult, [newResult]);
+      expect(combinedResults).toEqual(expectedResult);
+    });
+
+    test('it should combine correctly suppressed alerts count when existing result does not have it', () => {
+      const existingResult: SearchAfterAndBulkCreateReturnType = {
+        success: true,
+        warning: false,
+        searchAfterTimes: [],
+        bulkCreateTimes: [],
+        enrichmentTimes: [],
+        lastLookBackDate: undefined,
+        createdSignalsCount: 3,
+        createdSignals: [],
+        errors: [],
+        warningMessages: [],
+      };
+      const newResult: SearchAfterAndBulkCreateReturnType = {
+        success: true,
+        warning: false,
+        searchAfterTimes: [],
+        bulkCreateTimes: [],
+        enrichmentTimes: [],
+        lastLookBackDate: undefined,
+        createdSignalsCount: 0,
+        createdSignals: [],
+        errors: [],
+        warningMessages: [],
+        suppressedAlertsCount: 10,
+      };
+      const expectedResult: SearchAfterAndBulkCreateReturnType = {
+        success: true,
+        warning: false,
+        searchAfterTimes: ['0'],
+        bulkCreateTimes: ['0'],
+        enrichmentTimes: ['0'],
+        lastLookBackDate: undefined,
+        createdSignalsCount: 3,
+        createdSignals: [],
+        errors: [],
+        warningMessages: [],
+        suppressedAlertsCount: 10,
+      };
+
+      const combinedResults = combineConcurrentResults(existingResult, [newResult]);
+      expect(combinedResults).toEqual(expectedResult);
+    });
+
+    test('it should combine correctly suppressed alerts count', () => {
+      const existingResult: SearchAfterAndBulkCreateReturnType = {
+        success: true,
+        warning: false,
+        searchAfterTimes: [],
+        bulkCreateTimes: [],
+        enrichmentTimes: [],
+        lastLookBackDate: undefined,
+        createdSignalsCount: 3,
+        createdSignals: [],
+        errors: [],
+        warningMessages: [],
+        suppressedAlertsCount: 11,
+      };
+      const newResult: SearchAfterAndBulkCreateReturnType = {
+        success: true,
+        warning: false,
+        searchAfterTimes: [],
+        bulkCreateTimes: [],
+        enrichmentTimes: [],
+        lastLookBackDate: undefined,
+        createdSignalsCount: 0,
+        createdSignals: [],
+        errors: [],
+        warningMessages: [],
+        suppressedAlertsCount: 10,
+      };
+      const expectedResult: SearchAfterAndBulkCreateReturnType = {
+        success: true,
+        warning: false,
+        searchAfterTimes: ['0'],
+        bulkCreateTimes: ['0'],
+        enrichmentTimes: ['0'],
+        lastLookBackDate: undefined,
+        createdSignalsCount: 3,
+        createdSignals: [],
+        errors: [],
+        warningMessages: [],
+        suppressedAlertsCount: 21,
       };
 
       const combinedResults = combineConcurrentResults(existingResult, [newResult]);
@@ -423,6 +515,7 @@ describe('utils', () => {
         createdSignals: Array(16).fill(sampleSignalHit()),
         errors: [],
         warningMessages: [],
+        suppressedAlertsCount: 0,
       };
 
       const combinedResults = combineConcurrentResults(existingResult, [newResult1, newResult2]);
@@ -478,6 +571,7 @@ describe('utils', () => {
         createdSignals: Array(16).fill(sampleSignalHit()),
         errors: [],
         warningMessages: [],
+        suppressedAlertsCount: 0,
       };
 
       const combinedResults = combineConcurrentResults(existingResult, [newResult2, newResult1]); // two array elements are flipped
@@ -533,6 +627,7 @@ describe('utils', () => {
         createdSignals: Array(16).fill(sampleSignalHit()),
         errors: [],
         warningMessages: [],
+        suppressedAlertsCount: 0,
       };
 
       const combinedResults = combineConcurrentResults(existingResult, [newResult1, newResult2]);
@@ -851,6 +946,138 @@ describe('utils', () => {
           'threat.indicator.url.full',
         ],
       });
+    });
+  });
+
+  describe('getMaxClauseCountErrorValue', () => {
+    test('should return Number.NEGATIVE_INFINITY when no max clause count error encountered', () => {
+      const searchesPerformed: SearchAfterAndBulkCreateReturnType[] = [
+        {
+          success: true,
+          warning: false,
+          searchAfterTimes: ['10', '20', '30'],
+          bulkCreateTimes: ['5', '15', '25'],
+          enrichmentTimes: ['1', '2', '3'],
+          lastLookBackDate: undefined,
+          createdSignalsCount: 3,
+          createdSignals: Array(3).fill(sampleSignalHit()),
+          errors: [],
+          warningMessages: [],
+        },
+      ];
+
+      const noMaxClauseCountErrorFound = getMaxClauseCountErrorValue(
+        searchesPerformed,
+        2,
+        10000,
+        undefined
+      );
+      expect(noMaxClauseCountErrorFound.maxClauseCountValue).toEqual(Number.NEGATIVE_INFINITY);
+    });
+
+    test('should return parsed max clause count when error message received is "failed to create query"', () => {
+      const threatEntries = 2;
+      const searchesPerformed: SearchAfterAndBulkCreateReturnType[] = [
+        {
+          success: false,
+          warning: false,
+          searchAfterTimes: ['10', '20', '30'],
+          bulkCreateTimes: ['5', '15', '25'],
+          enrichmentTimes: ['1', '2', '3'],
+          lastLookBackDate: undefined,
+          createdSignalsCount: 3,
+          createdSignals: Array(3).fill(sampleSignalHit()),
+          errors: [
+            'ResponseError: search_phase_execution_exception \
+          Root causes:\
+            query_shard_exception: failed to create query: maxClauseCount is set to 4096',
+          ],
+          warningMessages: [],
+        },
+      ];
+
+      const maxClauseCountErrorValueFound = getMaxClauseCountErrorValue(
+        searchesPerformed,
+        2,
+        10000,
+        undefined
+      );
+
+      const newPageSize = (4096 - 1) / (threatEntries + 1); // 1365
+      expect(maxClauseCountErrorValueFound.maxClauseCountValue).toEqual(newPageSize);
+    });
+
+    test('should return parsed max clause count when error message received is "Query contains too many nested clauses"', () => {
+      const threatEntries = 2;
+      const searchesPerformed: SearchAfterAndBulkCreateReturnType[] = [
+        {
+          success: false,
+          warning: false,
+          searchAfterTimes: ['10', '20', '30'],
+          bulkCreateTimes: ['5', '15', '25'],
+          enrichmentTimes: ['1', '2', '3'],
+          lastLookBackDate: undefined,
+          createdSignalsCount: 3,
+          createdSignals: Array(3).fill(sampleSignalHit()),
+          errors: [
+            'Searching events operation failed: ResponseError: search_phase_execution_exception\
+	Root causes:\
+		too_many_nested_clauses: too_many_nested_clauses: Query contains too many nested clauses; maxClauseCount is set to 9362',
+          ],
+          warningMessages: [],
+        },
+      ];
+
+      const maxClauseCountErrorValueFound = getMaxClauseCountErrorValue(
+        searchesPerformed,
+        2,
+        10000,
+        undefined
+      );
+
+      const newPageSize = Math.floor((9362 - 1) / (2 * (threatEntries + 1))); // 1560
+      expect(maxClauseCountErrorValueFound.maxClauseCountValue).toEqual(newPageSize);
+    });
+
+    test('should return parsed max clause count when error message received is "Query contains too many nested clauses" and previously calculated chunk size was not small enough', () => {
+      const threatEntries = 2;
+      const searchesPerformed: SearchAfterAndBulkCreateReturnType[] = [
+        {
+          success: false,
+          warning: false,
+          searchAfterTimes: ['10', '20', '30'],
+          bulkCreateTimes: ['5', '15', '25'],
+          enrichmentTimes: ['1', '2', '3'],
+          lastLookBackDate: undefined,
+          createdSignalsCount: 3,
+          createdSignals: Array(3).fill(sampleSignalHit()),
+          errors: [
+            'Searching events operation failed: ResponseError: search_phase_execution_exception\
+	Root causes:\
+		too_many_nested_clauses: too_many_nested_clauses: Query contains too many nested clauses; maxClauseCount is set to 9362',
+          ],
+          warningMessages: [],
+        },
+      ];
+
+      const maxClauseCountErrorValueFound = getMaxClauseCountErrorValue(
+        searchesPerformed,
+        2,
+        10000,
+        undefined
+      );
+
+      const newPageSize = Math.floor((9362 - 1) / (2 * (threatEntries + 1))); // 1560
+      expect(maxClauseCountErrorValueFound.maxClauseCountValue).toEqual(newPageSize);
+
+      const newMaxClouseCountErrorValue = getMaxClauseCountErrorValue(
+        searchesPerformed,
+        2,
+        maxClauseCountErrorValueFound.maxClauseCountValue,
+        undefined
+      );
+      const betterValue = Math.floor(maxClauseCountErrorValueFound.maxClauseCountValue / 2); // 780
+      expect(newMaxClouseCountErrorValue.maxClauseCountValue).toEqual(betterValue);
     });
   });
 

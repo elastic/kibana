@@ -7,6 +7,7 @@
  */
 
 import { normalizeSettings } from './normalize_settings';
+import { UiSettingsType } from '@kbn/core-ui-settings-common';
 
 describe('normalizeSettings', () => {
   describe('adds a missing type if there is a value', () => {
@@ -53,6 +54,34 @@ describe('normalizeSettings', () => {
 
       expect(normalizeSettings(settings)).toEqual({
         foo: { type: 'number', ...setting },
+      });
+    });
+  });
+
+  describe('correctly derives a value', () => {
+    describe('with a specified numeric type', () => {
+      const type: UiSettingsType = 'number';
+      it('provided value is a number or a numeric string', () => {
+        const numberSetting = { name: 'foo', type, value: 10 };
+        const numericStringSetting = { name: 'foo', type, value: '5' };
+        const settings = { foo: numberSetting, bar: numericStringSetting };
+
+        expect(normalizeSettings(settings)).toEqual({
+          foo: { ...numberSetting, value: 10 },
+          bar: { ...numericStringSetting, value: 5 },
+        });
+      });
+
+      it('provided value is non-numeric', () => {
+        const values = [undefined, '', 'test', false];
+        values.forEach((value) => {
+          const setting = { name: 'foo', type, value };
+          const settings = { foo: setting };
+
+          expect(normalizeSettings(settings)).toEqual({
+            foo: { ...setting, value: undefined },
+          });
+        });
       });
     });
   });

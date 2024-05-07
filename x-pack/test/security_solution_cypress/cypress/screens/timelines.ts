@@ -7,17 +7,7 @@
 
 export const BULK_ACTIONS = '[data-test-subj="utility-bar-action-button"]';
 
-export const EXPAND_NOTES_BTN = '[data-test-subj="expand-notes"]';
-
 export const EXPORT_TIMELINE_ACTION = '[data-test-subj="export-timeline-action"]';
-
-export const IMPORT_BTN = '.euiButton.euiButton--primary.euiButton--fill';
-
-export const IMPORT_TIMELINE_BTN = '[data-test-subj="open-import-data-modal-btn"]';
-
-export const INPUT_FILE = 'input[type=file]';
-
-export const NOTE = '[data-test-subj^="note-preview-"]';
 
 export const TIMELINE = (id: string | undefined) => {
   if (id == null) {
@@ -52,7 +42,7 @@ export const TIMELINES_USERNAME = '[data-test-subj="username"]';
 
 export const REFRESH_BUTTON = '[data-test-subj="refreshButton-linkIcon"]';
 
-const TIMELINES_OVERVIEW = '[data-test-subj="timelines-container"]';
+const TIMELINES_OVERVIEW = '[data-test-subj="timelines-page-container"]';
 
 export const TIMELINES_OVERVIEW_ONLY_FAVORITES = `${TIMELINES_OVERVIEW} [data-test-subj="only-favorites-toggle"]`;
 

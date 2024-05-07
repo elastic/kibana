@@ -42,6 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
               name: 'updated name',
               description: 'updated desc',
               color: '#123456',
+              managed: false,
             },
           });
         });
@@ -56,6 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
               name: 'updated name',
               description: 'updated desc',
               color: '#123456',
+              managed: false,
             },
           });
         });
@@ -89,6 +91,7 @@ export default function ({ getService }: FtrProviderContext) {
               name: 'tag-3',
               description: 'Last but not least',
               color: '#000000',
+              managed: false,
             },
           });
         });

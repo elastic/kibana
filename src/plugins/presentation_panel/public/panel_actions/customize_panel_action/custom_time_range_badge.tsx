@@ -13,10 +13,9 @@ import {
   IncompatibleActionError,
 } from '@kbn/ui-actions-plugin/public';
 import React from 'react';
-import { renderToString } from 'react-dom/server';
 
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { apiPublishesLocalUnifiedSearch, EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { apiPublishesTimeRange, EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { core } from '../../kibana_services';
 import { customizePanelAction } from '../panel_actions';
 
@@ -30,29 +29,42 @@ export class CustomTimeRangeBadge
   public order = 7;
 
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
-    if (!apiPublishesLocalUnifiedSearch(embeddable)) throw new IncompatibleActionError();
-    const timeRange = embeddable.localTimeRange.value;
-    if (!timeRange) return '';
-    return renderToString(
+    if (!apiPublishesTimeRange(embeddable)) throw new IncompatibleActionError();
+    /**
+     * WARNING!! We would not normally return an empty string here - but in order for i18n to be
+     * handled properly by the `PrettyDuration` component, we need it to handle the aria label.
+     */
+    return '';
+  }
+
+  public readonly MenuItem = ({ context }: { context: EmbeddableApiContext }) => {
+    const { embeddable } = context;
+    if (!apiPublishesTimeRange(embeddable)) throw new IncompatibleActionError();
+
+    const timeRange = embeddable.timeRange$.getValue();
+    if (!timeRange) {
+      throw new IncompatibleActionError();
+    }
+    return (
       <PrettyDuration
         timeTo={timeRange.to}
         timeFrom={timeRange.from}
         dateFormat={core.uiSettings.get<string>(UI_SETTINGS.DATE_FORMAT) ?? 'Browser'}
       />
     );
-  }
+  };
 
   public couldBecomeCompatible({ embeddable }: EmbeddableApiContext) {
-    return apiPublishesLocalUnifiedSearch(embeddable);
+    return apiPublishesTimeRange(embeddable);
   }
 
   public subscribeToCompatibilityChanges(
     { embeddable }: EmbeddableApiContext,
     onChange: (isCompatible: boolean, action: CustomTimeRangeBadge) => void
   ) {
-    if (!apiPublishesLocalUnifiedSearch(embeddable)) return;
-    return embeddable.localTimeRange.subscribe((localTimeRange) => {
-      onChange(Boolean(localTimeRange), this);
+    if (!apiPublishesTimeRange(embeddable)) return;
+    return embeddable.timeRange$.subscribe((timeRange) => {
+      onChange(Boolean(timeRange), this);
     });
   }
 
@@ -65,8 +77,8 @@ export class CustomTimeRangeBadge
   }
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
-    if (apiPublishesLocalUnifiedSearch(embeddable)) {
-      const timeRange = embeddable.localTimeRange.value;
+    if (apiPublishesTimeRange(embeddable)) {
+      const timeRange = embeddable.timeRange$.value;
       return Boolean(timeRange);
     }
     return false;

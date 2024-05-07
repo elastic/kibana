@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
-import { serviceApiKeyPrivileges } from '@kbn/synthetics-plugin/server/synthetics_service/get_api_key';
+import { getServiceApiKeyPrivileges } from '@kbn/synthetics-plugin/server/synthetics_service/get_api_key';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -116,7 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
               expiration: '12d',
               kibana_role_descriptors: {
                 uptime_save: {
-                  elasticsearch: serviceApiKeyPrivileges,
+                  elasticsearch: getServiceApiKeyPrivileges(false),
                   kibana: [
                     {
                       base: [],

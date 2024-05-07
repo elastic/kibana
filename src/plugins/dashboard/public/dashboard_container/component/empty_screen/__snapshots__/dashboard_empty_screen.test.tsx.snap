@@ -20,13 +20,13 @@ exports[`DashboardEmptyScreen renders correctly with edit mode 1`] = `
           class="emotion-euiPageSection__content-l-center"
         >
           <div
-            class="euiPanel euiPanel--transparent euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge dshEmptyWidgetContainer emotion-euiPanel-m-transparent"
+            class="euiPanel euiPanel--transparent euiEmptyPrompt dshEmptyWidgetContainer emotion-euiPanel-m-transparent-euiEmptyPrompt-vertical"
           >
             <div
-              class="euiEmptyPrompt__main"
+              class="euiEmptyPrompt__main emotion-euiEmptyPrompt__main-vertical-l"
             >
               <div
-                class="euiEmptyPrompt__icon"
+                class="euiEmptyPrompt__icon emotion-euiEmptyPrompt__icon-vertical"
               >
                 <figure
                   class="euiImageWrapper emotion-euiImageWrapper-fullWidth"
@@ -39,80 +39,76 @@ exports[`DashboardEmptyScreen renders correctly with edit mode 1`] = `
                 </figure>
               </div>
               <div
-                class="euiEmptyPrompt__content"
+                class="euiEmptyPrompt__content emotion-euiEmptyPrompt__content-vertical"
               >
-                <div
-                  class="euiEmptyPrompt__contentInner"
+                <h2
+                  class="euiTitle emotion-euiTitle-xs"
                 >
-                  <h2
-                    class="euiTitle emotion-euiTitle-xs"
-                  >
-                    This dashboard is empty. Let’s fill it up!
-                  </h2>
+                  This dashboard is empty. Let’s fill it up!
+                </h2>
+                <div
+                  class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+                />
+                <div
+                  class="euiText emotion-euiText-m-euiTextColor-subdued"
+                >
                   <div
-                    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-                  />
-                  <div
-                    class="euiText emotion-euiText-m-euiTextColor-subdued"
+                    class="euiText emotion-euiText-s-euiTextColor-subdued"
                   >
-                    <div
-                      class="euiText emotion-euiText-s-euiTextColor-subdued"
+                    <span>
+                      Create a visualization of your data, or add one from the library.
+                    </span>
+                  </div>
+                </div>
+                <div
+                  class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+                />
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <button
+                      class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
+                      type="button"
                     >
-                      <span>
-                        Create a visualization of your data, or add one from the library.
+                      <span
+                        class="emotion-euiButtonDisplayContent"
+                      >
+                        <span
+                          color="inherit"
+                          data-euiicon-type="lensApp"
+                        />
+                        <span
+                          class="eui-textTruncate"
+                        >
+                          Create visualization
+                        </span>
                       </span>
-                    </div>
+                    </button>
                   </div>
                   <div
-                    class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
-                  />
-                  <div
-                    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-center-row"
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
                   >
-                    <div
-                      class="euiFlexItem emotion-euiFlexItem-growZero"
+                    <button
+                      class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary-flush-left"
+                      type="button"
                     >
-                      <button
-                        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
-                        type="button"
+                      <span
+                        class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                       >
                         <span
-                          class="emotion-euiButtonDisplayContent"
-                        >
-                          <span
-                            color="inherit"
-                            data-euiicon-type="lensApp"
-                          />
-                          <span
-                            class="eui-textTruncate"
-                          >
-                            Create visualization
-                          </span>
-                        </span>
-                      </button>
-                    </div>
-                    <div
-                      class="euiFlexItem emotion-euiFlexItem-growZero"
-                    >
-                      <button
-                        class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary-flush-left"
-                        type="button"
-                      >
+                          color="inherit"
+                          data-euiicon-type="folderOpen"
+                        />
                         <span
-                          class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                          class="eui-textTruncate euiButtonEmpty__text"
                         >
-                          <span
-                            color="inherit"
-                            data-euiicon-type="folderOpen"
-                          />
-                          <span
-                            class="eui-textTruncate euiButtonEmpty__text"
-                          >
-                            Add from library
-                          </span>
+                          Add from library
                         </span>
-                      </button>
-                    </div>
+                      </span>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -145,13 +141,13 @@ exports[`DashboardEmptyScreen renders correctly with readonly and edit mode 1`] 
           class="emotion-euiPageSection__content-l-center"
         >
           <div
-            class="euiPanel euiPanel--transparent euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge dshEmptyWidgetContainer emotion-euiPanel-m-transparent"
+            class="euiPanel euiPanel--transparent euiEmptyPrompt dshEmptyWidgetContainer emotion-euiPanel-m-transparent-euiEmptyPrompt-vertical"
           >
             <div
-              class="euiEmptyPrompt__main"
+              class="euiEmptyPrompt__main emotion-euiEmptyPrompt__main-vertical-l"
             >
               <div
-                class="euiEmptyPrompt__icon"
+                class="euiEmptyPrompt__icon emotion-euiEmptyPrompt__icon-vertical"
               >
                 <figure
                   class="euiImageWrapper emotion-euiImageWrapper-fullWidth"
@@ -164,29 +160,25 @@ exports[`DashboardEmptyScreen renders correctly with readonly and edit mode 1`] 
                 </figure>
               </div>
               <div
-                class="euiEmptyPrompt__content"
+                class="euiEmptyPrompt__content emotion-euiEmptyPrompt__content-vertical"
               >
-                <div
-                  class="euiEmptyPrompt__contentInner"
+                <h2
+                  class="euiTitle emotion-euiTitle-xs"
                 >
-                  <h2
-                    class="euiTitle emotion-euiTitle-xs"
-                  >
-                    This dashboard is empty.
-                  </h2>
+                  This dashboard is empty.
+                </h2>
+                <div
+                  class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+                />
+                <div
+                  class="euiText emotion-euiText-m-euiTextColor-subdued"
+                >
                   <div
-                    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-                  />
-                  <div
-                    class="euiText emotion-euiText-m-euiTextColor-subdued"
+                    class="euiText emotion-euiText-s-euiTextColor-subdued"
                   >
-                    <div
-                      class="euiText emotion-euiText-s-euiTextColor-subdued"
-                    >
-                      <span>
-                        You need additional privileges to edit this dashboard.
-                      </span>
-                    </div>
+                    <span>
+                      You need additional privileges to edit this dashboard.
+                    </span>
                   </div>
                 </div>
               </div>
@@ -219,13 +211,13 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
           class="emotion-euiPageSection__content-l-center"
         >
           <div
-            class="euiPanel euiPanel--transparent euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge dshEmptyWidgetContainer emotion-euiPanel-m-transparent"
+            class="euiPanel euiPanel--transparent euiEmptyPrompt dshEmptyWidgetContainer emotion-euiPanel-m-transparent-euiEmptyPrompt-vertical"
           >
             <div
-              class="euiEmptyPrompt__main"
+              class="euiEmptyPrompt__main emotion-euiEmptyPrompt__main-vertical-l"
             >
               <div
-                class="euiEmptyPrompt__icon"
+                class="euiEmptyPrompt__icon emotion-euiEmptyPrompt__icon-vertical"
               >
                 <figure
                   class="euiImageWrapper emotion-euiImageWrapper-fullWidth"
@@ -238,29 +230,25 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
                 </figure>
               </div>
               <div
-                class="euiEmptyPrompt__content"
+                class="euiEmptyPrompt__content emotion-euiEmptyPrompt__content-vertical"
               >
-                <div
-                  class="euiEmptyPrompt__contentInner"
+                <h2
+                  class="euiTitle emotion-euiTitle-xs"
                 >
-                  <h2
-                    class="euiTitle emotion-euiTitle-xs"
-                  >
-                    This dashboard is empty.
-                  </h2>
+                  This dashboard is empty.
+                </h2>
+                <div
+                  class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+                />
+                <div
+                  class="euiText emotion-euiText-m-euiTextColor-subdued"
+                >
                   <div
-                    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-                  />
-                  <div
-                    class="euiText emotion-euiText-m-euiTextColor-subdued"
+                    class="euiText emotion-euiText-s-euiTextColor-subdued"
                   >
-                    <div
-                      class="euiText emotion-euiText-s-euiTextColor-subdued"
-                    >
-                      <span>
-                        You need additional privileges to edit this dashboard.
-                      </span>
-                    </div>
+                    <span>
+                      You need additional privileges to edit this dashboard.
+                    </span>
                   </div>
                 </div>
               </div>
@@ -293,13 +281,13 @@ exports[`DashboardEmptyScreen renders correctly with view mode 1`] = `
           class="emotion-euiPageSection__content-l-center"
         >
           <div
-            class="euiPanel euiPanel--transparent euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge dshEmptyWidgetContainer emotion-euiPanel-m-transparent"
+            class="euiPanel euiPanel--transparent euiEmptyPrompt dshEmptyWidgetContainer emotion-euiPanel-m-transparent-euiEmptyPrompt-vertical"
           >
             <div
-              class="euiEmptyPrompt__main"
+              class="euiEmptyPrompt__main emotion-euiEmptyPrompt__main-vertical-l"
             >
               <div
-                class="euiEmptyPrompt__icon"
+                class="euiEmptyPrompt__icon emotion-euiEmptyPrompt__icon-vertical"
               >
                 <figure
                   class="euiImageWrapper emotion-euiImageWrapper-fullWidth"
@@ -312,52 +300,48 @@ exports[`DashboardEmptyScreen renders correctly with view mode 1`] = `
                 </figure>
               </div>
               <div
-                class="euiEmptyPrompt__content"
+                class="euiEmptyPrompt__content emotion-euiEmptyPrompt__content-vertical"
               >
-                <div
-                  class="euiEmptyPrompt__contentInner"
+                <h2
+                  class="euiTitle emotion-euiTitle-xs"
                 >
-                  <h2
-                    class="euiTitle emotion-euiTitle-xs"
-                  >
-                    Add visualizations to your dashboard
-                  </h2>
+                  Add visualizations to your dashboard
+                </h2>
+                <div
+                  class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+                />
+                <div
+                  class="euiText emotion-euiText-m-euiTextColor-subdued"
+                >
                   <div
-                    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-                  />
-                  <div
-                    class="euiText emotion-euiText-m-euiTextColor-subdued"
+                    class="euiText emotion-euiText-s-euiTextColor-subdued"
                   >
-                    <div
-                      class="euiText emotion-euiText-s-euiTextColor-subdued"
-                    >
-                      <span>
-                        Enter edit mode, and then start adding your visualizations.
-                      </span>
-                    </div>
+                    <span>
+                      Enter edit mode, and then start adding your visualizations.
+                    </span>
                   </div>
-                  <div
-                    class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
-                  />
-                  <button
-                    class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
-                    type="button"
+                </div>
+                <div
+                  class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+                />
+                <button
+                  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
+                  type="button"
+                >
+                  <span
+                    class="emotion-euiButtonDisplayContent"
                   >
                     <span
-                      class="emotion-euiButtonDisplayContent"
+                      color="inherit"
+                      data-euiicon-type="pencil"
+                    />
+                    <span
+                      class="eui-textTruncate"
                     >
-                      <span
-                        color="inherit"
-                        data-euiicon-type="pencil"
-                      />
-                      <span
-                        class="eui-textTruncate"
-                      >
-                        Edit dashboard
-                      </span>
+                      Edit dashboard
                     </span>
-                  </button>
-                </div>
+                  </span>
+                </button>
               </div>
             </div>
           </div>

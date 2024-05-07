@@ -162,7 +162,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should open the palette panel to customize the palette look', async () => {
-      await PageObjects.lens.openPalettePanel('lnsDatatable');
+      await PageObjects.lens.openPalettePanel();
       await PageObjects.lens.waitForVisualization();
       await PageObjects.lens.changePaletteTo('temperature');
       await PageObjects.lens.waitForVisualization();

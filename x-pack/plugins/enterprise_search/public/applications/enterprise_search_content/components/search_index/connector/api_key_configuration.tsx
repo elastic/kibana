@@ -16,6 +16,7 @@ import {
   EuiButton,
   EuiSpacer,
   EuiConfirmModal,
+  EuiCallOut,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -61,10 +62,11 @@ const ConfirmModal: React.FC<{
   </EuiConfirmModal>
 );
 
-export const ApiKeyConfig: React.FC<{ hasApiKey: boolean; indexName: string }> = ({
-  hasApiKey,
-  indexName,
-}) => {
+export const ApiKeyConfig: React.FC<{
+  hasApiKey: boolean;
+  indexName: string;
+  isNative: boolean;
+}> = ({ hasApiKey, indexName, isNative }) => {
   const { makeRequest, apiReset } = useActions(GenerateConnectorApiKeyApiLogic);
   const { data, status } = useValues(GenerateConnectorApiKeyApiLogic);
   useEffect(() => {
@@ -76,7 +78,7 @@ export const ApiKeyConfig: React.FC<{ hasApiKey: boolean; indexName: string }> =
     if (hasApiKey || data) {
       setIsModalVisible(true);
     } else {
-      makeRequest({ indexName });
+      makeRequest({ indexName, isNative });
     }
   };
 
@@ -87,7 +89,7 @@ export const ApiKeyConfig: React.FC<{ hasApiKey: boolean; indexName: string }> =
   };
 
   const onConfirm = () => {
-    makeRequest({ indexName });
+    makeRequest({ indexName, isNative });
     setIsModalVisible(false);
   };
 
@@ -96,23 +98,66 @@ export const ApiKeyConfig: React.FC<{ hasApiKey: boolean; indexName: string }> =
       {isModalVisible && <ConfirmModal onCancel={onCancel} onConfirm={onConfirm} />}
       <EuiFlexItem>
         <EuiText size="s">
-          {i18n.translate(
-            'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.description',
-            {
-              defaultMessage:
-                'First, generate an Elasticsearch API key. This {apiKeyName} key will enable read and write permissions for the connector to index documents to the created {indexName} index. Save the key in a safe place, as you will need it to configure your connector.',
-              values: {
-                apiKeyName: `${indexName}-connector`,
-                indexName,
-              },
-            }
-          )}
+          {isNative
+            ? i18n.translate(
+                'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.apiKey.description',
+                {
+                  defaultMessage: `This native connector's API key {apiKeyName} is managed internally by Elasticsearch. The connector uses this API key to index documents into the {indexName} index. To refresh your API key, click "Generate API key".`,
+                  values: {
+                    apiKeyName: `${indexName}-connector`,
+                    indexName,
+                  },
+                }
+              )
+            : i18n.translate(
+                'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.description',
+                {
+                  defaultMessage:
+                    'First, generate an Elasticsearch API key. This {apiKeyName} key will enable read and write permissions for the connector to index documents to the created {indexName} index. Save the key in a safe place, as you will need it to configure your connector.',
+                  values: {
+                    apiKeyName: `${indexName}-connector`,
+                    indexName,
+                  },
+                }
+              )}
         </EuiText>
       </EuiFlexItem>
+      {!isNative || status === Status.LOADING ? (
+        <></>
+      ) : indexName === '' ? (
+        <EuiCallOut
+          iconType="iInCircle"
+          title={i18n.translate(
+            'xpack.enterpriseSearch.content.connector_detail.configurationConnector.nativeConnector.apiKey.waitingForAttachedIndex',
+            {
+              defaultMessage:
+                'An API key will be automatically generated when an index is attached to this connector.',
+            }
+          )}
+        />
+      ) : !hasApiKey ? (
+        <EuiCallOut
+          iconType="warning"
+          color="danger"
+          title={i18n.translate(
+            'xpack.enterpriseSearch.content.connector_detail.configurationConnector.nativeConnector.apiKey.missing',
+            {
+              defaultMessage: 'This connector is missing an API key.',
+            }
+          )}
+        />
+      ) : (
+        <></>
+      )}
       <EuiFlexItem>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={clickGenerateApiKey} isLoading={status === Status.LOADING}>
+            <EuiButton
+              onClick={clickGenerateApiKey}
+              isLoading={status === Status.LOADING}
+              isDisabled={indexName.length === 0}
+              data-telemetry-id="entSearch-content-connector-generateApiKeyButton"
+            >
               {i18n.translate(
                 'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.button.label',
                 {
@@ -124,11 +169,16 @@ export const ApiKeyConfig: React.FC<{ hasApiKey: boolean; indexName: string }> =
         </EuiFlexGroup>
       </EuiFlexItem>
 
-      {data && (
+      {data && !isNative && (
         <>
           <EuiSpacer />
           <EuiFlexItem>
-            <ApiKey apiKey={data?.encoded} label="API Key" />
+            <ApiKey
+              apiKey={data?.encoded}
+              label={i18n.translate('xpack.enterpriseSearch.apiKeyConfig.apiKey.apiKeyLabel', {
+                defaultMessage: 'API Key',
+              })}
+            />
           </EuiFlexItem>
         </>
       )}

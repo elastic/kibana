@@ -9,21 +9,26 @@
 import { defaults, keyBy, sortBy } from 'lodash';
 
 import { ExpandWildcard } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import { callFieldCapsApi } from '../es_api';
 import { readFieldCapsResponse } from './field_caps_response';
 import { mergeOverrides } from './overrides';
 import { FieldDescriptor } from '../../index_patterns_fetcher';
 import { QueryDslQueryContainer } from '../../../../common/types';
+import { DATA_VIEWS_FIELDS_EXCLUDED_TIERS } from '../../../../common/constants';
+import { getIndexFilterDsl } from '../../../utils';
 
 interface FieldCapabilitiesParams {
   callCluster: ElasticsearchClient;
+  uiSettingsClient?: IUiSettingsClient;
   indices: string | string[];
   metaFields: string[];
   fieldCapsOptions?: { allow_no_indices: boolean; include_unmapped?: boolean };
   indexFilter?: QueryDslQueryContainer;
   fields?: string[];
   expandWildcards?: ExpandWildcard;
+  fieldTypes?: string[];
+  includeEmptyFields?: boolean;
 }
 
 /**
@@ -39,20 +44,27 @@ interface FieldCapabilitiesParams {
 export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
   const {
     callCluster,
+    uiSettingsClient,
     indices = [],
     fieldCapsOptions,
     indexFilter,
     metaFields = [],
     fields,
     expandWildcards,
+    fieldTypes,
+    includeEmptyFields,
   } = params;
+
+  const excludedTiers = await uiSettingsClient?.get<string>(DATA_VIEWS_FIELDS_EXCLUDED_TIERS);
   const esFieldCaps = await callFieldCapsApi({
     callCluster,
     indices,
     fieldCapsOptions,
-    indexFilter,
+    indexFilter: getIndexFilterDsl({ indexFilter, excludedTiers }),
     fields,
     expandWildcards,
+    fieldTypes,
+    includeEmptyFields,
   });
   const fieldCapsArr = readFieldCapsResponse(esFieldCaps.body);
   const fieldsFromFieldCapsByName = keyBy(fieldCapsArr, 'name');

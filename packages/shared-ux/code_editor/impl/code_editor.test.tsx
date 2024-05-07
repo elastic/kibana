@@ -68,11 +68,6 @@ describe('<CodeEditor />', () => {
         dispatchEvent: jest.fn(),
       })),
     });
-    window.ResizeObserver = class ResizeObserver {
-      observe() {}
-      unobserve() {}
-      disconnect() {}
-    };
 
     monaco.languages.register({ id: 'loglang' });
     monaco.languages.setMonarchTokensProvider('loglang', simpleLogLang);

@@ -1,0 +1,138 @@
+{
+  "id": "@kbn/inference_integration_flyout",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/inference_integration_flyout",
+        "id": "def-common.ElandPythonClient",
+        "type": "Function",
+        "tags": [],
+        "label": "ElandPythonClient",
+        "description": [],
+        "signature": [
+          "({ supportedNlpModels, nlpImportModel }: React.PropsWithChildren<{ supportedNlpModels: string; nlpImportModel: string; }>) => JSX.Element"
+        ],
+        "path": "x-pack/packages/ml/inference_integration_flyout/components/eland_python_client.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference_integration_flyout",
+            "id": "def-common.ElandPythonClient.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ supportedNlpModels, nlpImportModel }",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<{ supportedNlpModels: string; nlpImportModel: string; }>"
+            ],
+            "path": "x-pack/packages/ml/inference_integration_flyout/components/eland_python_client.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference_integration_flyout",
+        "id": "def-common.InferenceFlyoutWrapper",
+        "type": "Function",
+        "tags": [],
+        "label": "InferenceFlyoutWrapper",
+        "description": [],
+        "signature": [
+          "({ onSaveInferenceEndpoint, onFlyoutClose, isInferenceFlyoutVisible, e5documentationUrl, elserv2documentationUrl, supportedNlpModels, nlpImportModel, errorCallout, trainedModels, isCreateInferenceApiLoading, onInferenceEndpointChange, inferenceEndpointError, setInferenceEndpointError, }: React.PropsWithChildren<",
+          "InferenceFlyoutProps",
+          ">) => JSX.Element"
+        ],
+        "path": "x-pack/packages/ml/inference_integration_flyout/components/inference_flyout_wrapper.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference_integration_flyout",
+            "id": "def-common.InferenceFlyoutWrapper.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  onSaveInferenceEndpoint,\n  onFlyoutClose,\n  isInferenceFlyoutVisible,\n  e5documentationUrl = '',\n  elserv2documentationUrl = '',\n  supportedNlpModels = '',\n  nlpImportModel = '',\n  errorCallout,\n  trainedModels = [],\n  isCreateInferenceApiLoading,\n  onInferenceEndpointChange,\n  inferenceEndpointError = undefined,\n  setInferenceEndpointError,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              "InferenceFlyoutProps",
+              ">"
+            ],
+            "path": "x-pack/packages/ml/inference_integration_flyout/components/inference_flyout_wrapper.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/inference_integration_flyout",
+        "id": "def-common.ModelConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "ModelConfig",
+        "description": [],
+        "path": "x-pack/packages/ml/inference_integration_flyout/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference_integration_flyout",
+            "id": "def-common.ModelConfig.service",
+            "type": "string",
+            "tags": [],
+            "label": "service",
+            "description": [],
+            "path": "x-pack/packages/ml/inference_integration_flyout/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference_integration_flyout",
+            "id": "def-common.ModelConfig.service_settings",
+            "type": "Any",
+            "tags": [],
+            "label": "service_settings",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/packages/ml/inference_integration_flyout/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

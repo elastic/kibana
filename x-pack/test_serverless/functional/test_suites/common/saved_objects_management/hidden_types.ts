@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.load(
         'test/functional/fixtures/es_archiver/saved_objects_management/hidden_types'
       );
-      await PageObjects.svlCommonPage.login();
+      await PageObjects.svlCommonPage.loginAsAdmin();
       await PageObjects.common.navigateToApp('management');
       await testSubjects.click('app-card-objects');
       await PageObjects.savedObjects.waitTableIsLoaded();
@@ -38,11 +38,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'test/functional/fixtures/es_archiver/saved_objects_management/hidden_types'
       );
       await kibanaServer.savedObjects.cleanStandardList();
-      await PageObjects.svlCommonPage.forceLogout();
     });
 
     beforeEach(async () => {
-      // await PageObjects.svlCommonPage.login();
       await PageObjects.common.navigateToApp('management');
       await testSubjects.click('app-card-objects');
       await PageObjects.savedObjects.waitTableIsLoaded();

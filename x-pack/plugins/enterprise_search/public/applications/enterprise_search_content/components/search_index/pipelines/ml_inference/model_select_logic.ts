@@ -8,17 +8,11 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { HttpError, Status } from '../../../../../../../common/types/api';
-import { MlModel } from '../../../../../../../common/types/ml';
 import { getErrorsFromHttpResponse } from '../../../../../shared/flash_messages/handle_api_errors';
-import {
-  CachedFetchModelsApiLogic,
-  CachedFetchModlesApiLogicActions,
-} from '../../../../api/ml_models/cached_fetch_models_api_logic';
 import {
   CreateModelApiLogic,
   CreateModelApiLogicActions,
 } from '../../../../api/ml_models/create_model_api_logic';
-import { FetchModelsApiResponse } from '../../../../api/ml_models/fetch_models_api_logic';
 import {
   StartModelApiLogic,
   StartModelApiLogicActions,
@@ -32,39 +26,29 @@ import {
 } from './ml_inference_logic';
 
 export interface ModelSelectActions {
-  clearModelPlaceholderFlagFromMLInferenceLogic: MLInferenceProcessorsActions['clearModelPlaceholderFlag'];
+  clearModelPlaceholderFlag: MLInferenceProcessorsActions['clearModelPlaceholderFlag'];
   createModel: (modelId: string) => { modelId: string };
   createModelError: CreateModelApiLogicActions['apiError'];
   createModelMakeRequest: CreateModelApiLogicActions['makeRequest'];
   createModelSuccess: CreateModelApiLogicActions['apiSuccess'];
-  fetchModels: () => void;
-  fetchModelsError: CachedFetchModlesApiLogicActions['apiError'];
-  fetchModelsMakeRequest: CachedFetchModlesApiLogicActions['makeRequest'];
-  fetchModelsSuccess: CachedFetchModlesApiLogicActions['apiSuccess'];
   setInferencePipelineConfiguration: MLInferenceProcessorsActions['setInferencePipelineConfiguration'];
-  setInferencePipelineConfigurationFromMLInferenceLogic: MLInferenceProcessorsActions['setInferencePipelineConfiguration'];
   startModel: (modelId: string) => { modelId: string };
   startModelError: CreateModelApiLogicActions['apiError'];
   startModelMakeRequest: StartModelApiLogicActions['makeRequest'];
   startModelSuccess: StartModelApiLogicActions['apiSuccess'];
-  startPollingModels: CachedFetchModlesApiLogicActions['startPolling'];
+  startPollingModels: MLInferenceProcessorsActions['startPollingModels'];
 }
 
 export interface ModelSelectValues {
   addInferencePipelineModal: MLInferenceProcessorsValues['addInferencePipelineModal'];
-  addInferencePipelineModalFromMLInferenceLogic: MLInferenceProcessorsValues['addInferencePipelineModal'];
   areActionButtonsDisabled: boolean;
   createModelError: HttpError | undefined;
   createModelStatus: Status;
   ingestionMethod: string;
-  ingestionMethodFromIndexViewLogic: string;
   isLoading: boolean;
-  isInitialLoading: boolean;
   modelStateChangeError: string | undefined;
-  modelsData: FetchModelsApiResponse | undefined;
-  modelsStatus: Status;
-  selectableModels: MlModel[];
-  selectedModel: MlModel | undefined;
+  selectableModels: MLInferenceProcessorsValues['selectableModels'];
+  selectedModel: MLInferenceProcessorsValues['selectedModel'];
   startModelError: HttpError | undefined;
   startModelStatus: Status;
 }
@@ -72,19 +56,10 @@ export interface ModelSelectValues {
 export const ModelSelectLogic = kea<MakeLogicType<ModelSelectValues, ModelSelectActions>>({
   actions: {
     createModel: (modelId: string) => ({ modelId }),
-    fetchModels: true,
-    setInferencePipelineConfiguration: (configuration) => ({ configuration }),
     startModel: (modelId: string) => ({ modelId }),
   },
   connect: {
     actions: [
-      CachedFetchModelsApiLogic,
-      [
-        'makeRequest as fetchModelsMakeRequest',
-        'apiSuccess as fetchModelsSuccess',
-        'apiError as fetchModelsError',
-        'startPolling as startPollingModels',
-      ],
       CreateModelApiLogic,
       [
         'makeRequest as createModelMakeRequest',
@@ -92,10 +67,7 @@ export const ModelSelectLogic = kea<MakeLogicType<ModelSelectValues, ModelSelect
         'apiError as createModelError',
       ],
       MLInferenceLogic,
-      [
-        'setInferencePipelineConfiguration as setInferencePipelineConfigurationFromMLInferenceLogic',
-        'clearModelPlaceholderFlag as clearModelPlaceholderFlagFromMLInferenceLogic',
-      ],
+      ['clearModelPlaceholderFlag', 'setInferencePipelineConfiguration', 'startPollingModels'],
       StartModelApiLogic,
       [
         'makeRequest as startModelMakeRequest',
@@ -104,23 +76,21 @@ export const ModelSelectLogic = kea<MakeLogicType<ModelSelectValues, ModelSelect
       ],
     ],
     values: [
-      CachedFetchModelsApiLogic,
-      ['modelsData', 'status as modelsStatus', 'isInitialLoading'],
       CreateModelApiLogic,
       ['status as createModelStatus', 'error as createModelError'],
       IndexViewLogic,
-      ['ingestionMethod as ingestionMethodFromIndexViewLogic'],
+      ['ingestionMethod'],
       MLInferenceLogic,
-      ['addInferencePipelineModal as addInferencePipelineModalFromMLInferenceLogic'],
+      [
+        'addInferencePipelineModal',
+        'isModelsInitialLoading as isLoading',
+        'selectableModels',
+        'selectedModel',
+      ],
       StartModelApiLogic,
       ['status as startModelStatus', 'error as startModelError'],
     ],
   },
-  events: ({ actions }) => ({
-    afterMount: () => {
-      actions.startPollingModels();
-    },
-  }),
   listeners: ({ actions }) => ({
     createModel: ({ modelId }) => {
       actions.createModelMakeRequest({ modelId });
@@ -128,13 +98,7 @@ export const ModelSelectLogic = kea<MakeLogicType<ModelSelectValues, ModelSelect
     createModelSuccess: (response) => {
       actions.startPollingModels();
       // The create action succeeded, so the model is no longer a placeholder
-      actions.clearModelPlaceholderFlagFromMLInferenceLogic(response.modelId);
-    },
-    fetchModels: () => {
-      actions.fetchModelsMakeRequest({});
-    },
-    setInferencePipelineConfiguration: ({ configuration }) => {
-      actions.setInferencePipelineConfigurationFromMLInferenceLogic(configuration);
+      actions.clearModelPlaceholderFlag(response.modelId);
     },
     startModel: ({ modelId }) => {
       actions.startModelMakeRequest({ modelId });
@@ -145,18 +109,10 @@ export const ModelSelectLogic = kea<MakeLogicType<ModelSelectValues, ModelSelect
   }),
   path: ['enterprise_search', 'content', 'model_select_logic'],
   selectors: ({ selectors }) => ({
-    addInferencePipelineModal: [
-      () => [selectors.addInferencePipelineModalFromMLInferenceLogic],
-      (modal) => modal, // Pass-through
-    ],
     areActionButtonsDisabled: [
       () => [selectors.createModelStatus, selectors.startModelStatus],
       (createModelStatus: Status, startModelStatus: Status) =>
         createModelStatus === Status.LOADING || startModelStatus === Status.LOADING,
-    ],
-    ingestionMethod: [
-      () => [selectors.ingestionMethodFromIndexViewLogic],
-      (ingestionMethod) => ingestionMethod, // Pass-through
     ],
     modelStateChangeError: [
       () => [selectors.createModelError, selectors.startModelError],
@@ -166,17 +122,5 @@ export const ModelSelectLogic = kea<MakeLogicType<ModelSelectValues, ModelSelect
         return getErrorsFromHttpResponse(createModelError ?? startModelError!)[0];
       },
     ],
-    selectableModels: [
-      () => [selectors.modelsData],
-      (response: FetchModelsApiResponse) => response ?? [],
-    ],
-    selectedModel: [
-      () => [selectors.selectableModels, selectors.addInferencePipelineModal],
-      (
-        models: MlModel[],
-        addInferencePipelineModal: MLInferenceProcessorsValues['addInferencePipelineModal']
-      ) => models.find((m) => m.modelId === addInferencePipelineModal.configuration.modelID),
-    ],
-    isLoading: [() => [selectors.isInitialLoading], (isInitialLoading) => isInitialLoading],
   }),
 });

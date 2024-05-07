@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { TestProviders } from '@kbn/timelines-plugin/public/mock';
 import { renderHook } from '@testing-library/react-hooks';
 import { mockObservedUser } from '../mocks';
+import { TestProviders } from '../../../../common/mock';
 import { useObservedUserItems } from './use_observed_user_items';
 
 describe('useManagedUserItems', () => {
@@ -28,14 +28,12 @@ describe('useManagedUserItems', () => {
         getValues: expect.any(Function),
       },
       {
-        field: '@timestamp',
         label: 'First seen',
-        getValues: expect.any(Function),
+        render: expect.any(Function),
       },
       {
-        field: '@timestamp',
         label: 'Last seen',
-        getValues: expect.any(Function),
+        render: expect.any(Function),
       },
       {
         field: 'host.os.name',
@@ -65,8 +63,8 @@ describe('useManagedUserItems', () => {
       [
         ['1234', '321'], // id
         ['test domain', 'another test domain'], // domain
-        ['2023-02-23T20:03:17.489Z'], // First seen
-        ['2023-02-23T20:03:17.489Z'], // Last seen
+        undefined, // First seen doesn't implement getValues
+        undefined, // Last seen doesn't implement getValues
         ['testOs'], // OS name
         ['testFamily'], // os family
         ['10.0.0.1', '127.0.0.1'], // IP addresses

@@ -8,7 +8,8 @@
 import { schema } from '@kbn/config-schema';
 import { CoreSetup, UiSettingsParams } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { PLUGIN_ID, UI_SETTINGS_CUSTOM_PDF_LOGO } from '@kbn/reporting-common';
+import { UI_SETTINGS_CUSTOM_PDF_LOGO } from '@kbn/reporting-common';
+import { PLUGIN_ID } from '@kbn/reporting-server';
 
 const kbToBase64Length = (kb: number) => Math.floor((kb * 1024 * 8) / 6);
 const maxLogoSizeInBase64 = kbToBase64Length(200);

@@ -67,7 +67,12 @@
     "@kbn/logging",
     "@kbn/content-management-table-list-view-common",
     "@kbn/chart-expressions-common",
-    "@kbn/shared-ux-utility"
+    "@kbn/shared-ux-utility",
+    "@kbn/managed-content-badge",
+    "@kbn/presentation-publishing",
+    "@kbn/shared-ux-markdown",
+    "@kbn/react-kibana-context-render",
+    "@kbn/react-kibana-mount"
   ],
   "exclude": [
     "target/**/*",

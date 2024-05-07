@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
-import { DeepReadonly } from '../../../../../../../common/types/common';
-import { FormMessage, State, SourceIndexMap } from './state';
+import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
+import type { DeepReadonly } from '../../../../../../../common/types/common';
+import type { FormMessage, State, SourceIndexMap } from './state';
 
 export enum ACTION {
   ADD_REQUEST_MESSAGE,

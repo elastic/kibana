@@ -12,19 +12,17 @@ import { requestContextMock } from '../../__mocks__/request_context';
 import type { LatestAggResponseBucket } from './get_results';
 import { getResultsRoute, getQuery } from './get_results';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
-import { resultBody, resultDocument } from './results.mock';
-import type {
-  SearchResponse,
-  SecurityHasPrivilegesResponse,
-} from '@elastic/elasticsearch/lib/api/types';
+import { resultDocument } from './results.mock';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ResultDocument } from '../../schemas/result';
+import type { CheckIndicesPrivilegesParam } from './privileges';
 
 const searchResponse = {
   aggregations: {
     latest: {
       buckets: [
         {
-          key: 'logs-*',
+          key: resultDocument.indexName,
           latest_doc: { hits: { hits: [{ _source: resultDocument }] } },
         },
       ],
@@ -35,8 +33,15 @@ const searchResponse = {
   Record<string, { buckets: LatestAggResponseBucket[] }>
 >;
 
-// TODO: https://github.com/elastic/kibana/pull/173185#issuecomment-1908034302
-describe.skip('getResultsRoute route', () => {
+const mockCheckIndicesPrivileges = jest.fn(({ indices }: CheckIndicesPrivilegesParam) =>
+  Promise.resolve(Object.fromEntries(indices.map((index) => [index, true])))
+);
+jest.mock('./privileges', () => ({
+  checkIndicesPrivileges: (params: CheckIndicesPrivilegesParam) =>
+    mockCheckIndicesPrivileges(params),
+}));
+
+describe('getResultsRoute route', () => {
   describe('querying', () => {
     let server: ReturnType<typeof serverMock.create>;
     let { context } = requestContextMock.createTools();
@@ -45,7 +50,7 @@ describe.skip('getResultsRoute route', () => {
     const req = requestMock.create({
       method: 'get',
       path: RESULTS_ROUTE_PATH,
-      query: { patterns: 'logs-*,alerts-*' },
+      query: { pattern: 'logs-*' },
     });
 
     beforeEach(() => {
@@ -56,9 +61,9 @@ describe.skip('getResultsRoute route', () => {
 
       ({ context } = requestContextMock.createTools());
 
-      context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges.mockResolvedValue({
-        index: { 'logs-*': { all: true }, 'alerts-*': { all: true } },
-      } as unknown as SecurityHasPrivilegesResponse);
+      context.core.elasticsearch.client.asInternalUser.indices.get.mockResolvedValue({
+        [resultDocument.indexName]: {},
+      });
 
       getResultsRoute(server.router, logger);
     });
@@ -68,10 +73,13 @@ describe.skip('getResultsRoute route', () => {
       mockSearch.mockResolvedValueOnce(searchResponse);
 
       const response = await server.inject(req, requestContextMock.convertContext(context));
-      expect(mockSearch).toHaveBeenCalled();
+      expect(mockSearch).toHaveBeenCalledWith({
+        index: expect.any(String),
+        ...getQuery([resultDocument.indexName]),
+      });
 
       expect(response.status).toEqual(200);
-      expect(response.body).toEqual([{ '@timestamp': expect.any(Number), ...resultBody }]);
+      expect(response.body).toEqual([resultDocument]);
     });
 
     it('handles results data stream error', async () => {
@@ -99,7 +107,7 @@ describe.skip('getResultsRoute route', () => {
     });
   });
 
-  describe('request pattern authorization', () => {
+  describe('request indices authorization', () => {
     let server: ReturnType<typeof serverMock.create>;
     let { context } = requestContextMock.createTools();
     let logger: MockedLogger;
@@ -107,7 +115,7 @@ describe.skip('getResultsRoute route', () => {
     const req = requestMock.create({
       method: 'get',
       path: RESULTS_ROUTE_PATH,
-      query: { patterns: 'logs-*,alerts-*' },
+      query: { pattern: 'logs-*' },
     });
 
     beforeEach(() => {
@@ -120,54 +128,69 @@ describe.skip('getResultsRoute route', () => {
 
       context.core.elasticsearch.client.asInternalUser.search.mockResolvedValue(searchResponse);
 
-      context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges.mockResolvedValue({
-        index: { 'logs-*': { all: true }, 'alerts-*': { all: true } },
-      } as unknown as SecurityHasPrivilegesResponse);
+      context.core.elasticsearch.client.asInternalUser.indices.get.mockResolvedValue({
+        [resultDocument.indexName]: {},
+      });
 
       getResultsRoute(server.router, logger);
     });
 
-    it('should authorize pattern', async () => {
-      const mockHasPrivileges =
-        context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges;
-      mockHasPrivileges.mockResolvedValueOnce({
-        index: { 'logs-*': { all: true }, 'alerts-*': { all: true } },
-      } as unknown as SecurityHasPrivilegesResponse);
+    it('should authorize indices from pattern', async () => {
+      const mockGetIndices = context.core.elasticsearch.client.asInternalUser.indices.get;
+      mockGetIndices.mockResolvedValueOnce({ [resultDocument.indexName]: {} });
 
       const response = await server.inject(req, requestContextMock.convertContext(context));
-      expect(mockHasPrivileges).toHaveBeenCalledWith({
-        index: [
-          { names: ['logs-*', 'alerts-*'], privileges: ['all', 'read', 'view_index_metadata'] },
-        ],
-      });
+      expect(mockGetIndices).toHaveBeenCalledWith({ index: 'logs-*', features: 'aliases' });
+      expect(mockCheckIndicesPrivileges).toHaveBeenCalledWith(
+        expect.objectContaining({ indices: [resultDocument.indexName] })
+      );
       expect(context.core.elasticsearch.client.asInternalUser.search).toHaveBeenCalled();
 
       expect(response.status).toEqual(200);
-      expect(response.body).toEqual([{ '@timestamp': expect.any(Number), ...resultBody }]);
+      expect(response.body).toEqual([resultDocument]);
     });
 
-    it('should search authorized patterns only', async () => {
-      const mockHasPrivileges =
-        context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges;
-      mockHasPrivileges.mockResolvedValueOnce({
-        index: { 'logs-*': { all: false }, 'alerts-*': { all: true } },
-      } as unknown as SecurityHasPrivilegesResponse);
+    it('should authorize data streams from pattern', async () => {
+      const dataStreamName = 'test_data_stream_name';
+      const resultIndexNameTwo = `${resultDocument.indexName}_2`;
+      const resultIndexNameThree = `${resultDocument.indexName}_3`;
+      const mockGetIndices = context.core.elasticsearch.client.asInternalUser.indices.get;
+      mockGetIndices.mockResolvedValueOnce({
+        [resultDocument.indexName]: {},
+        [resultIndexNameTwo]: { data_stream: dataStreamName },
+        [resultIndexNameThree]: { data_stream: dataStreamName },
+      });
 
       const response = await server.inject(req, requestContextMock.convertContext(context));
+
+      expect(mockGetIndices).toHaveBeenCalledWith({ index: 'logs-*', features: 'aliases' });
+      expect(mockCheckIndicesPrivileges).toHaveBeenCalledWith(
+        expect.objectContaining({ indices: [resultDocument.indexName, dataStreamName] })
+      );
       expect(context.core.elasticsearch.client.asInternalUser.search).toHaveBeenCalledWith({
         index: expect.any(String),
-        ...getQuery(['alerts-*']),
+        ...getQuery([resultDocument.indexName, resultIndexNameTwo, resultIndexNameThree]),
       });
 
       expect(response.status).toEqual(200);
+      expect(response.body).toEqual([resultDocument]);
     });
 
-    it('should not search unauthorized patterns', async () => {
-      const mockHasPrivileges =
-        context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges;
-      mockHasPrivileges.mockResolvedValueOnce({
-        index: { 'logs-*': { all: false }, 'alerts-*': { all: false } },
-      } as unknown as SecurityHasPrivilegesResponse);
+    it('should not search unknown indices', async () => {
+      const mockGetIndices = context.core.elasticsearch.client.asInternalUser.indices.get;
+      mockGetIndices.mockResolvedValueOnce({}); // empty object means no index is found
+
+      const response = await server.inject(req, requestContextMock.convertContext(context));
+
+      expect(mockCheckIndicesPrivileges).not.toHaveBeenCalled();
+      expect(context.core.elasticsearch.client.asInternalUser.search).not.toHaveBeenCalled();
+
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual([]);
+    });
+
+    it('should not search unauthorized indices', async () => {
+      mockCheckIndicesPrivileges.mockResolvedValueOnce({}); // empty object means no index is authorized
 
       const response = await server.inject(req, requestContextMock.convertContext(context));
       expect(context.core.elasticsearch.client.asInternalUser.search).not.toHaveBeenCalled();
@@ -176,11 +199,19 @@ describe.skip('getResultsRoute route', () => {
       expect(response.body).toEqual([]);
     });
 
-    it('handles pattern authorization error', async () => {
+    it('handles index discovery error', async () => {
       const errorMessage = 'Error!';
-      const mockHasPrivileges =
-        context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges;
-      mockHasPrivileges.mockRejectedValueOnce({ message: errorMessage });
+      const mockGetIndices = context.core.elasticsearch.client.asInternalUser.indices.get;
+      mockGetIndices.mockRejectedValueOnce({ message: errorMessage });
+
+      const response = await server.inject(req, requestContextMock.convertContext(context));
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({ message: errorMessage, status_code: 500 });
+    });
+
+    it('handles index authorization error', async () => {
+      const errorMessage = 'Error!';
+      mockCheckIndicesPrivileges.mockRejectedValueOnce({ message: errorMessage });
 
       const response = await server.inject(req, requestContextMock.convertContext(context));
       expect(response.status).toEqual(500);

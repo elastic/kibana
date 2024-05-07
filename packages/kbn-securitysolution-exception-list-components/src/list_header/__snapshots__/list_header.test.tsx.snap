@@ -26,7 +26,7 @@ Object {
                 >
                   <a
                     aria-current="false"
-                    class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
+                    class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast-isInteractive"
                     href=""
                     rel="noreferrer"
                     title="Shared Exception Lists"
@@ -234,8 +234,10 @@ Object {
         data-eui="EuiFocusTrap"
       >
         <div
+          aria-modal="true"
           class="euiModal emotion-euiModal-defaultMaxWidth"
           data-test-subj="EditModal"
+          role="dialog"
           tabindex="0"
         >
           <button
@@ -409,7 +411,7 @@ Object {
               >
                 <a
                   aria-current="false"
-                  class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
+                  class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast-isInteractive"
                   href=""
                   rel="noreferrer"
                   title="Shared Exception Lists"
@@ -688,7 +690,7 @@ Object {
                 >
                   <a
                     aria-current="false"
-                    class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
+                    class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast-isInteractive"
                     href=""
                     rel="noreferrer"
                     title="Shared Exception Lists"
@@ -910,7 +912,7 @@ Object {
               >
                 <a
                   aria-current="false"
-                  class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
+                  class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast-isInteractive"
                   href=""
                   rel="noreferrer"
                   title="Shared Exception Lists"
@@ -1189,7 +1191,7 @@ Object {
                 >
                   <a
                     aria-current="false"
-                    class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
+                    class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast-isInteractive"
                     href=""
                     rel="noreferrer"
                     title="Shared Exception Lists"
@@ -1384,7 +1386,7 @@ Object {
               >
                 <a
                   aria-current="false"
-                  class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
+                  class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast-isInteractive"
                   href=""
                   rel="noreferrer"
                   title="Shared Exception Lists"
@@ -1636,7 +1638,7 @@ Object {
                 >
                   <a
                     aria-current="false"
-                    class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
+                    class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast-isInteractive"
                     href=""
                     rel="noreferrer"
                     title="Shared Exception Lists"
@@ -1901,7 +1903,7 @@ Object {
               >
                 <a
                   aria-current="false"
-                  class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
+                  class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast-isInteractive"
                   href=""
                   rel="noreferrer"
                   title="Shared Exception Lists"

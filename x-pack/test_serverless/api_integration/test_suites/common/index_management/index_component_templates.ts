@@ -68,9 +68,6 @@ export default function ({ getService }: FtrProviderContext) {
             },
           },
           mappings: {
-            _source: {
-              enabled: false,
-            },
             properties: {
               host_name: {
                 type: 'keyword',
@@ -107,6 +104,7 @@ export default function ({ getService }: FtrProviderContext) {
             usedBy: [],
             isManaged: false,
             hasSettings: true,
+            isDeprecated: false,
             hasMappings: true,
             hasAliases: false,
           });
@@ -139,9 +137,6 @@ export default function ({ getService }: FtrProviderContext) {
             },
           },
           mappings: {
-            _source: {
-              enabled: false,
-            },
             properties: {
               host_name: {
                 type: 'keyword',
@@ -220,9 +215,6 @@ export default function ({ getService }: FtrProviderContext) {
             },
           },
           mappings: {
-            _source: {
-              enabled: false,
-            },
             properties: {
               host_name: {
                 type: 'keyword',
@@ -380,9 +372,6 @@ export default function ({ getService }: FtrProviderContext) {
             },
           },
           mappings: {
-            _source: {
-              enabled: false,
-            },
             properties: {
               host_name: {
                 type: 'keyword',

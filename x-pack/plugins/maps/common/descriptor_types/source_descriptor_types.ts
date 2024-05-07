@@ -39,15 +39,25 @@ export type EMSFileSourceDescriptor = AbstractSourceDescriptor & {
 };
 
 export type ESQLSourceDescriptor = AbstractSourceDescriptor & {
-  // id: UUID
+  /*
+   * Source UUID
+   */
   id: string;
   esql: string;
   columns: ESQLColumn[];
+  dataViewId: string;
   /*
    * Date field used to narrow ES|QL requests by global time range
    */
   dateField?: string;
+  /*
+   * Geo field used to narrow ES|QL requests by
+   * 1. by visible map area
+   * 2. spatial filters drawn on map
+   */
+  geoField?: string;
   narrowByGlobalSearch: boolean;
+  narrowByGlobalTime: boolean;
   narrowByMapBounds: boolean;
   applyForceRefresh: boolean;
 };

@@ -58,7 +58,7 @@ export const eqlValidator = async (
   const [{ value, formData }] = args;
   const { query: queryValue } = value as FieldValueQueryBar;
   const query = queryValue.query as string;
-  const { dataViewId, index, ruleType } = formData as DefineStepRule;
+  const { dataViewId, index, ruleType, eqlOptions } = formData as DefineStepRule;
 
   const needsValidation =
     (ruleType === undefined && !isEmpty(query)) || (isEqlRule(ruleType) && !isEmpty(query));
@@ -82,7 +82,14 @@ export const eqlValidator = async (
     }
 
     const signal = new AbortController().signal;
-    const response = await validateEql({ data, query, signal, dataViewTitle, runtimeMappings });
+    const response = await validateEql({
+      data,
+      query,
+      signal,
+      dataViewTitle,
+      runtimeMappings,
+      options: eqlOptions,
+    });
 
     if (response?.valid === false) {
       return {

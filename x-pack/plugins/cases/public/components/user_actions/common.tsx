@@ -17,6 +17,7 @@ import type { UserActionBuilder, UserActionBuilderArgs } from './types';
 import { UserActionCopyLink } from './copy_link';
 import { UserActionMoveToReference } from './move_to_reference';
 import { HoverableUserWithAvatarResolver } from '../user_profiles/hoverable_user_with_avatar_resolver';
+import { getUserActionAriaLabel } from './user_actions_aria_labels';
 
 interface Props {
   userAction: SnakeToCamelCase<ConnectorUserAction>;
@@ -74,6 +75,7 @@ export const createCommonUpdateUserActionBuilder = ({
         'data-test-subj': `${userAction.type}-${userAction.action}-action-${userAction.id}`,
         timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
         timelineAvatar: icon,
+        timelineAvatarAriaLabel: getUserActionAriaLabel(userAction.type),
         actions: (
           <EuiFlexGroup responsive={false}>
             <EuiFlexItem grow={false}>

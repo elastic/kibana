@@ -9,7 +9,7 @@
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { BehaviorSubject, combineLatest, merge, type Observable, of, ReplaySubject } from 'rxjs';
-import { mergeMap, map, takeUntil } from 'rxjs/operators';
+import { mergeMap, map, takeUntil, filter } from 'rxjs';
 import { parse } from 'url';
 import { EuiLink } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
@@ -34,7 +34,6 @@ import type {
   ChromeSetProjectBreadcrumbsParams,
   NavigationTreeDefinition,
   AppDeepLinkId,
-  CloudURLs,
 } from '@kbn/core-chrome-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import type {
@@ -200,7 +199,10 @@ export class ChromeService {
     const customNavLink$ = new BehaviorSubject<ChromeNavLink | undefined>(undefined);
     const helpSupportUrl$ = new BehaviorSubject<string>(docLinks.links.kibana.askElastic);
     const isNavDrawerLocked$ = new BehaviorSubject(localStorage.getItem(IS_LOCKED_KEY) === 'true');
-    const chromeStyle$ = new BehaviorSubject<ChromeStyle>('classic');
+    // ChromeStyle is set to undefined by default, which means that no header will be rendered until
+    // setChromeStyle(). This is to avoid a flickering between the "classic" and "project" header meanwhile
+    // we load the user profile to check if the user opted out of the new solution navigation.
+    const chromeStyleSubject$ = new BehaviorSubject<ChromeStyle | undefined>(undefined);
 
     const getKbnVersionClass = () => {
       // we assume that the version is valid and has the form 'X.X.X'
@@ -212,11 +214,20 @@ export class ChromeService {
       return `kbnVersion-${formattedVersionClass}`;
     };
 
+    const chromeStyle$ = chromeStyleSubject$.pipe(
+      filter((style): style is ChromeStyle => style !== undefined),
+      takeUntil(this.stop$)
+    );
+    const setChromeStyle = (style: ChromeStyle) => {
+      if (style === chromeStyleSubject$.getValue()) return;
+      chromeStyleSubject$.next(style);
+    };
+
     const headerBanner$ = new BehaviorSubject<ChromeUserBanner | undefined>(undefined);
     const bodyClasses$ = combineLatest([
       headerBanner$,
       this.isVisible$!,
-      chromeStyle$,
+      chromeStyleSubject$,
       application.currentActionMenu$,
     ]).pipe(
       map(([headerBanner, isVisible, chromeStyle, actionMenu]) => {
@@ -259,12 +270,8 @@ export class ChromeService {
 
     const getIsNavDrawerLocked$ = isNavDrawerLocked$.pipe(takeUntil(this.stop$));
 
-    const setChromeStyle = (style: ChromeStyle) => {
-      chromeStyle$.next(style);
-    };
-
     const validateChromeStyle = () => {
-      const chromeStyle = chromeStyle$.getValue();
+      const chromeStyle = chromeStyleSubject$.getValue();
       if (chromeStyle !== 'project') {
         // Helps ensure callers go through the serverless plugin to get here.
         throw new Error(
@@ -282,12 +289,9 @@ export class ChromeService {
       LinkId extends AppDeepLinkId = AppDeepLinkId,
       Id extends string = string,
       ChildrenId extends string = Id
-    >(
-      navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>,
-      deps: { cloudUrls: CloudURLs }
-    ) {
+    >(id: string, navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>) {
       validateChromeStyle();
-      projectNavigation.initNavigation(navigationTree$, deps);
+      projectNavigation.initNavigation(id, navigationTree$);
     }
 
     const setProjectBreadcrumbs = (
@@ -302,19 +306,9 @@ export class ChromeService {
       projectNavigation.setProjectHome(homeHref);
     };
 
-    const setProjectsUrl = (projectsUrl: string) => {
-      validateChromeStyle();
-      projectNavigation.setProjectsUrl(projectsUrl);
-    };
-
     const setProjectName = (projectName: string) => {
       validateChromeStyle();
       projectNavigation.setProjectName(projectName);
-    };
-
-    const setProjectUrl = (projectUrl: string) => {
-      validateChromeStyle();
-      projectNavigation.setProjectUrl(projectUrl);
     };
 
     const isIE = () => {
@@ -358,8 +352,11 @@ export class ChromeService {
     }
 
     const getHeaderComponent = () => {
+      const defaultChromeStyle = chromeStyleSubject$.getValue();
+
       const HeaderComponent = () => {
         const isVisible = useObservable(this.isVisible$);
+        const chromeStyle = useObservable(chromeStyle$, defaultChromeStyle);
 
         if (!isVisible) {
           return (
@@ -370,8 +367,10 @@ export class ChromeService {
           );
         }
 
+        if (chromeStyle === undefined) return null;
+
         // render header
-        if (chromeStyle$.getValue() === 'project') {
+        if (chromeStyle === 'project') {
           const projectNavigationComponent$ = projectNavigation.getProjectSideNavComponent$();
           const projectBreadcrumbs$ = projectNavigation
             .getProjectBreadcrumbs$()
@@ -535,18 +534,20 @@ export class ChromeService {
 
       getBodyClasses$: () => bodyClasses$.pipe(takeUntil(this.stop$)),
       setChromeStyle,
-      getChromeStyle$: () => chromeStyle$.pipe(takeUntil(this.stop$)),
+      getChromeStyle$: () => chromeStyle$,
       getIsSideNavCollapsed$: () => this.isSideNavCollapsed$.asObservable(),
+      getActiveSolutionNavId$: () => projectNavigation.getActiveSolutionNavId$(),
       project: {
         setHome: setProjectHome,
-        setProjectsUrl,
-        setProjectUrl,
+        setCloudUrls: projectNavigation.setCloudUrls.bind(projectNavigation),
         setProjectName,
         initNavigation: initProjectNavigation,
         getNavigationTreeUi$: () => projectNavigation.getNavigationTreeUi$(),
         setSideNavComponent: setProjectSideNavComponent,
         setBreadcrumbs: setProjectBreadcrumbs,
         getActiveNavigationNodes$: () => projectNavigation.getActiveNodes$(),
+        updateSolutionNavigations: projectNavigation.updateSolutionNavigations,
+        changeActiveSolutionNavigation: projectNavigation.changeActiveSolutionNavigation,
       },
     };
   }

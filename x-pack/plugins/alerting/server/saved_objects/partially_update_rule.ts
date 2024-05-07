@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { pick } from 'lodash';
+import { omit, pick } from 'lodash';
 import {
   SavedObjectsClient,
   SavedObjectsErrorHelpers,
@@ -14,13 +14,18 @@ import {
 import { RawRule } from '../types';
 
 import {
-  RuleAttributesExcludedFromAAD,
-  RuleAttributesExcludedFromAADType,
+  RuleAttributesToEncrypt,
+  RuleAttributesIncludedInAAD,
+  RuleAttributesNotPartiallyUpdatable,
   RULE_SAVED_OBJECT_TYPE,
 } from '.';
+import { RuleAttributes } from '../data/rule/types';
 
+// We have calling code that references both RawRule and RuleAttributes,
+// so we need to support both of these types (they are effectively the same)
 export type PartiallyUpdateableRuleAttributes = Partial<
-  Pick<RawRule, RuleAttributesExcludedFromAADType>
+  | Omit<RawRule, RuleAttributesNotPartiallyUpdatable>
+  | Omit<RuleAttributes, RuleAttributesNotPartiallyUpdatable>
 >;
 
 interface PartiallyUpdateRuleSavedObjectOptions {
@@ -41,9 +46,12 @@ export async function partiallyUpdateRule(
   attributes: PartiallyUpdateableRuleAttributes,
   options: PartiallyUpdateRuleSavedObjectOptions = {}
 ): Promise<void> {
-  // ensure we only have the valid attributes excluded from AAD
-  const attributeUpdates = pick(attributes, RuleAttributesExcludedFromAAD);
-  const updateOptions: SavedObjectsUpdateOptions<RawRule> = pick(
+  // ensure we only have the valid attributes that are not encrypted and are excluded from AAD
+  const attributeUpdates = omit(attributes, [
+    ...RuleAttributesToEncrypt,
+    ...RuleAttributesIncludedInAAD,
+  ]);
+  const updateOptions: SavedObjectsUpdateOptions<RuleAttributes> = pick(
     options,
     'namespace',
     'version',
@@ -51,12 +59,7 @@ export async function partiallyUpdateRule(
   );
 
   try {
-    await savedObjectsClient.update<RawRule>(
-      RULE_SAVED_OBJECT_TYPE,
-      id,
-      attributeUpdates,
-      updateOptions
-    );
+    await savedObjectsClient.update(RULE_SAVED_OBJECT_TYPE, id, attributeUpdates, updateOptions);
   } catch (err) {
     if (options?.ignore404 && SavedObjectsErrorHelpers.isNotFoundError(err)) {
       return;

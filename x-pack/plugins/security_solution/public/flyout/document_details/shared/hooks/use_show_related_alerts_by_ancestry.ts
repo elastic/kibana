@@ -6,14 +6,12 @@
  */
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { useMemo } from 'react';
-import { find } from 'lodash/fp';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { GetFieldsData } from '../../../../common/hooks/use_get_fields_data';
 import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useLicense } from '../../../../common/hooks/use_license';
-import { RULE_PARAMETERS_INDEX } from '../constants/field_names';
+import { ANCESTOR_ID } from '../constants/field_names';
+import { getField } from '../utils';
 
 export interface UseShowRelatedAlertsByAncestryParams {
   /**
@@ -25,9 +23,13 @@ export interface UseShowRelatedAlertsByAncestryParams {
    */
   dataAsNestedObject: Ecs;
   /**
-   * An array of field objects with category and value
+   * Id of the event document
    */
-  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[];
+  eventId: string;
+  /**
+   * Boolean indicating if the flyout is open in preview
+   */
+  isPreview: boolean;
 }
 
 export interface UseShowRelatedAlertsByAncestryResult {
@@ -36,9 +38,9 @@ export interface UseShowRelatedAlertsByAncestryResult {
    */
   show: boolean;
   /**
-   * Values of the kibana.alert.rule.parameters.index field
+   * Value of the document id for fetching ancestry alerts
    */
-  indices?: string[];
+  documentId: string;
 }
 
 /**
@@ -47,30 +49,24 @@ export interface UseShowRelatedAlertsByAncestryResult {
 export const useShowRelatedAlertsByAncestry = ({
   getFieldsData,
   dataAsNestedObject,
-  dataFormattedForFieldBrowser,
+  eventId,
+  isPreview,
 }: UseShowRelatedAlertsByAncestryParams): UseShowRelatedAlertsByAncestryResult => {
   const isRelatedAlertsByProcessAncestryEnabled = useIsExperimentalFeatureEnabled(
     'insightsRelatedAlertsByProcessAncestry'
   );
   const hasProcessEntityInfo = useIsInvestigateInResolverActionEnabled(dataAsNestedObject);
 
-  // can't use getFieldsData here as the kibana.alert.rule.parameters is different and can be nested
-  const originalDocumentIndex = useMemo(
-    () => find({ category: 'kibana', field: RULE_PARAMETERS_INDEX }, dataFormattedForFieldBrowser),
-    [dataFormattedForFieldBrowser]
-  );
+  const ancestorId = getField(getFieldsData(ANCESTOR_ID)) ?? '';
+  const documentId = isPreview ? ancestorId : eventId;
 
   const hasAtLeastPlatinum = useLicense().isPlatinumPlus();
 
   const show =
-    isRelatedAlertsByProcessAncestryEnabled &&
-    hasProcessEntityInfo &&
-    originalDocumentIndex != null &&
-    hasAtLeastPlatinum;
+    isRelatedAlertsByProcessAncestryEnabled && hasProcessEntityInfo && hasAtLeastPlatinum;
 
   return {
     show,
-    ...(originalDocumentIndex &&
-      originalDocumentIndex.values && { indices: originalDocumentIndex.values }),
+    documentId,
   };
 };

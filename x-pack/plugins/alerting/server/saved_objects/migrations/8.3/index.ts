@@ -61,8 +61,12 @@ function removeInternalTags(
   };
 }
 
+interface ConvertSnoozes extends RawRule {
+  snoozeEndTime?: string;
+}
+
 function convertSnoozes(
-  doc: SavedObjectUnsanitizedDoc<RawRule>
+  doc: SavedObjectUnsanitizedDoc<ConvertSnoozes>
 ): SavedObjectUnsanitizedDoc<RawRule> {
   const {
     attributes: { snoozeEndTime },

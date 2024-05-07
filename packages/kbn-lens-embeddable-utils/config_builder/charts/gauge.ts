@@ -63,7 +63,7 @@ function buildFormulaLayer(
   layer: LensGaugeConfig,
   i: number,
   dataView: DataView,
-  formulaAPI: FormulaPublicApi
+  formulaAPI?: FormulaPublicApi
 ): FormBasedPersistedState['layers'][0] {
   const layers = {
     [DEFAULT_LAYER_ID]: {
@@ -116,11 +116,9 @@ function getValueColumns(layer: LensGaugeConfig) {
   return [
     getValueColumn(ACCESSOR, layer.value),
     ...(layer.queryMaxValue ? [getValueColumn(getAccessorName('max'), layer.queryMaxValue)] : []),
-    ...(layer.queryMinValue
-      ? [getValueColumn(getAccessorName('secondary'), layer.queryMinValue)]
-      : []),
+    ...(layer.queryMinValue ? [getValueColumn(getAccessorName('min'), layer.queryMinValue)] : []),
     ...(layer.queryGoalValue
-      ? [getValueColumn(getAccessorName('secondary'), layer.queryGoalValue)]
+      ? [getValueColumn(getAccessorName('goal'), layer.queryGoalValue)]
       : []),
   ];
 }

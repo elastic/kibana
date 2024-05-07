@@ -13,9 +13,9 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 import { NO_INDEX_PATTERNS } from './constants';
 import { SEARCH_BAR_PLACEHOLDER } from './translations';
 import type { AlertsSearchBarProps, QueryLanguageType } from './types';
+import { useLoadRuleTypesQuery } from '../common/hooks/use_load_rule_types_query';
 import { useAlertDataView } from './hooks/use_alert_data_view';
 import { useRuleAADFields } from './hooks/use_rule_aad_fields';
-import { useLoadRuleTypesQuery } from './hooks/use_load_rule_types_query';
 
 const SA_ALERTS = { type: 'alerts', fields: {} } as SuggestionsAbstraction;
 

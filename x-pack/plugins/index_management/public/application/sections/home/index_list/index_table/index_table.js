@@ -334,6 +334,9 @@ export class IndexTable extends Component {
 
   areAllItemsSelected = () => {
     const { indices } = this.props;
+    if (indices.length <= 0) {
+      return false;
+    }
     const indexOfUnselectedItem = indices.findIndex((index) => !this.isItemSelected(index.name));
     return indexOfUnselectedItem === -1;
   };
@@ -371,24 +374,11 @@ export class IndexTable extends Component {
     return columnConfigs.map((columnConfig) => {
       const { name } = index;
       const { fieldName } = columnConfig;
-      if (fieldName === 'name') {
-        return (
-          <th
-            key={`${fieldName}-${name}`}
-            className="euiTableRowCell"
-            scope="row"
-            data-test-subj={`indexTableCell-${fieldName}`}
-          >
-            <div className={`euiTableCellContent indTable__cell--${fieldName}`}>
-              <span className="eui-textLeft">{this.buildRowCell(index, columnConfig)}</span>
-            </div>
-          </th>
-        );
-      }
       return (
         <EuiTableRowCell
           key={`${fieldName}-${name}`}
           truncateText={false}
+          setScopeRow={fieldName === 'name'}
           data-test-subj={`indexTableCell-${fieldName}`}
           className={'indTable__cell--' + fieldName}
           header={fieldName}
@@ -434,6 +424,7 @@ export class IndexTable extends Component {
           data-test-subj="indexTableRow"
           isSelected={this.isItemSelected(name)}
           isSelectable
+          hasSelection
           key={`${name}-row`}
         >
           <EuiTableRowCellCheckbox key={`checkbox-${name}`}>

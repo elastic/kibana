@@ -6,7 +6,7 @@
  */
 
 import { Subject } from 'rxjs';
-import { bufferTime, filter as rxFilter, concatMap } from 'rxjs/operators';
+import { bufferTime, filter as rxFilter, concatMap } from 'rxjs';
 import { reject, isUndefined, isNumber, pick } from 'lodash';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger, ElasticsearchClient } from '@kbn/core/server';

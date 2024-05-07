@@ -7,14 +7,10 @@
 
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
-import * as redux from 'react-redux';
-
-import '../../../../common/mock/match_media';
-import { TestProviders } from '../../../../common/mock';
+import { TestProviders, mockGlobalState, createMockStore } from '../../../../common/mock';
 
 import { EmbeddedMapComponent } from './embedded_map';
 import { createEmbeddable } from './create_embeddable';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { getLayerList } from './map_config';
 import { useIsFieldInIndexPattern } from '../../../containers/fields';
 import { buildTimeRangeFilter } from '../../../../detections/components/alerts_table/helpers';
@@ -55,17 +51,47 @@ jest.mock('@kbn/embeddable-plugin/public', () => ({
   EmbeddablePanel: jest.fn().mockReturnValue(<div data-test-subj="EmbeddablePanel" />),
 }));
 
-const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
 const mockCreateEmbeddable = createEmbeddable as jest.Mock;
 const mockUseIsFieldInIndexPattern = useIsFieldInIndexPattern as jest.Mock;
 const mockGetStorage = jest.fn();
 const mockSetStorage = jest.fn();
 const setQuery: jest.Mock = jest.fn();
-const filebeatDataView = { id: '6f1eeb50-023d-11eb-bcb6-6ba0578012a9', title: 'filebeat-*' };
-const packetbeatDataView = { id: '28995490-023d-11eb-bcb6-6ba0578012a9', title: 'packetbeat-*' };
-const mockSelector = {
-  kibanaDataViews: [filebeatDataView, packetbeatDataView],
+const filebeatDataView = {
+  id: '6f1eeb50-023d-11eb-bcb6-6ba0578012a9',
+  title: 'filebeat-*',
+  browserFields: {},
+  fields: {},
+  loading: false,
+  patternList: ['filebeat-*'],
+  dataView: {
+    id: '6f1eeb50-023d-11eb-bcb6-6ba0578012a9',
+    fields: {},
+  },
+  runtimeMappings: {},
+  indexFields: [],
 };
+const packetbeatDataView = {
+  id: '28995490-023d-11eb-bcb6-6ba0578012a9',
+  title: 'packetbeat-*',
+  browserFields: {},
+  fields: {},
+  loading: false,
+  patternList: ['packetbeat-*'],
+  dataView: {
+    id: '28995490-023d-11eb-bcb6-6ba0578012a9',
+    fields: {},
+  },
+  runtimeMappings: {},
+  indexFields: [],
+};
+const mockState = {
+  ...mockGlobalState,
+  sourcerer: {
+    ...mockGlobalState.sourcerer,
+    kibanaDataViews: [filebeatDataView, packetbeatDataView],
+  },
+};
+const defaultMockStore = createMockStore(mockState);
 const mockUpdateInput = jest.fn();
 const embeddableValue = {
   destroyed: false,
@@ -106,8 +132,6 @@ describe('EmbeddedMapComponent', () => {
   beforeEach(() => {
     setQuery.mockClear();
     mockGetStorage.mockReturnValue(true);
-    jest.spyOn(redux, 'useSelector').mockReturnValue(mockSelector);
-    mockUseSourcererDataView.mockReturnValue({ selectedPatterns: ['filebeat-*', 'auditbeat-*'] });
     mockCreateEmbeddable.mockResolvedValue(embeddableValue);
     mockUseIsFieldInIndexPattern.mockReturnValue(() => true);
 
@@ -121,7 +145,7 @@ describe('EmbeddedMapComponent', () => {
 
   test('renders', async () => {
     const { getByTestId } = render(
-      <TestProviders>
+      <TestProviders store={defaultMockStore}>
         <EmbeddedMapComponent {...testProps} />
       </TestProviders>
     );
@@ -132,7 +156,7 @@ describe('EmbeddedMapComponent', () => {
 
   test('calls updateInput with time range filter', async () => {
     render(
-      <TestProviders>
+      <TestProviders store={defaultMockStore}>
         <EmbeddedMapComponent {...testProps} />
       </TestProviders>
     );
@@ -146,7 +170,7 @@ describe('EmbeddedMapComponent', () => {
 
   test('renders EmbeddablePanel from embeddable plugin', async () => {
     const { getByTestId, queryByTestId } = render(
-      <TestProviders>
+      <TestProviders store={defaultMockStore}>
         <EmbeddedMapComponent {...testProps} />
       </TestProviders>
     );
@@ -159,13 +183,17 @@ describe('EmbeddedMapComponent', () => {
   });
 
   test('renders IndexPatternsMissingPrompt', async () => {
-    jest.spyOn(redux, 'useSelector').mockReturnValue({
-      ...mockSelector,
-      kibanaDataViews: [],
-    });
+    const state = {
+      ...mockGlobalState,
+      sourcerer: {
+        ...mockGlobalState.sourcerer,
+        kibanaDataViews: [],
+      },
+    };
+    const store = createMockStore(state);
 
     const { getByTestId, queryByTestId } = render(
-      <TestProviders>
+      <TestProviders store={store}>
         <EmbeddedMapComponent {...testProps} />
       </TestProviders>
     );
@@ -180,7 +208,7 @@ describe('EmbeddedMapComponent', () => {
     mockCreateEmbeddable.mockResolvedValue(null);
 
     const { getByTestId, queryByTestId } = render(
-      <TestProviders>
+      <TestProviders store={defaultMockStore}>
         <EmbeddedMapComponent {...testProps} />
       </TestProviders>
     );
@@ -194,7 +222,7 @@ describe('EmbeddedMapComponent', () => {
   test('map hidden on close', async () => {
     mockGetStorage.mockReturnValue(false);
     const { getByTestId, queryByTestId } = render(
-      <TestProviders>
+      <TestProviders store={defaultMockStore}>
         <EmbeddedMapComponent {...testProps} />
       </TestProviders>
     );
@@ -210,7 +238,7 @@ describe('EmbeddedMapComponent', () => {
 
   test('map visible on open', async () => {
     const { getByTestId, queryByTestId } = render(
-      <TestProviders>
+      <TestProviders store={defaultMockStore}>
         <EmbeddedMapComponent {...testProps} />
       </TestProviders>
     );
@@ -225,8 +253,16 @@ describe('EmbeddedMapComponent', () => {
   });
 
   test('On mount, selects existing Kibana data views that match any selected index pattern', async () => {
+    const state = {
+      ...mockGlobalState,
+      sourcerer: {
+        ...mockGlobalState.sourcerer,
+        kibanaDataViews: [filebeatDataView],
+      },
+    };
+    const store = createMockStore(state);
     render(
-      <TestProviders>
+      <TestProviders store={store}>
         <EmbeddedMapComponent {...testProps} />
       </TestProviders>
     );
@@ -237,11 +273,16 @@ describe('EmbeddedMapComponent', () => {
   });
 
   test('On rerender with new selected patterns, selects existing Kibana data views that match any selected index pattern', async () => {
-    mockUseSourcererDataView.mockReturnValue({
-      selectedPatterns: ['filebeat-*', 'auditbeat-*'],
-    });
+    const state = {
+      ...mockGlobalState,
+      sourcerer: {
+        ...mockGlobalState.sourcerer,
+        kibanaDataViews: [filebeatDataView],
+      },
+    };
+    const store = createMockStore(state);
     const { rerender } = render(
-      <TestProviders>
+      <TestProviders store={store}>
         <EmbeddedMapComponent {...testProps} />
       </TestProviders>
     );
@@ -249,11 +290,8 @@ describe('EmbeddedMapComponent', () => {
       const dataViewArg = (getLayerList as jest.Mock).mock.calls[0][0];
       expect(dataViewArg).toEqual([filebeatDataView]);
     });
-    mockUseSourcererDataView.mockReturnValue({
-      selectedPatterns: ['filebeat-*', 'packetbeat-*'],
-    });
     rerender(
-      <TestProviders>
+      <TestProviders store={defaultMockStore}>
         <EmbeddedMapComponent {...testProps} />
       </TestProviders>
     );

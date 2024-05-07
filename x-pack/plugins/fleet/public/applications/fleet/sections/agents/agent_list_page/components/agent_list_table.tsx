@@ -52,7 +52,7 @@ interface Props {
   sortField: keyof Agent;
   sortOrder: 'asc' | 'desc';
   onSelectionChange: (agents: Agent[]) => void;
-  tableRef?: React.Ref<any>;
+  selected: Agent[];
   showUpgradeable: boolean;
   totalAgents?: number;
   pagination: Pagination;
@@ -77,9 +77,9 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
     renderActions,
     sortField,
     sortOrder,
-    tableRef,
     onTableChange,
     onSelectionChange,
+    selected,
     totalAgents = 0,
     showUpgradeable,
     pagination,
@@ -90,7 +90,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
     isCurrentRequestIncremented,
   } = props;
 
-  const hasFleetAllPrivileges = useAuthz().fleet.all;
+  const authz = useAuthz();
   const { displayAgentMetrics } = ExperimentalFeaturesService.get();
 
   const { getHref } = useLink();
@@ -128,7 +128,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       />
     ) : (
       <EmptyPrompt
-        hasFleetAllPrivileges={hasFleetAllPrivileges}
+        hasFleetAddAgentsPrivileges={authz.fleet.addAgents}
         setEnrollmentFlyoutState={setEnrollmentFlyoutState}
       />
     );
@@ -318,11 +318,9 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
 
   return (
     <EuiBasicTable<Agent>
-      ref={tableRef}
       className="fleet__agentList__table"
       data-test-subj="fleetAgentListTable"
       loading={isLoading}
-      hasActions={true}
       noItemsMessage={noItemsMessage}
       items={
         totalAgents
@@ -339,21 +337,25 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
         totalItemCount: totalAgents,
         pageSizeOptions,
       }}
-      isSelectable={true}
-      selection={{
-        onSelectionChange,
-        selectable: isAgentSelectable,
-        selectableMessage: (selectable, agent) => {
-          if (selectable) return '';
-          if (!agent.active) {
-            return 'This agent is not active';
-          }
-          if (agent.policy_id && agentPoliciesIndexedById[agent.policy_id].is_managed) {
-            return 'This action is not available for agents enrolled in an externally managed agent policy';
-          }
-          return '';
-        },
-      }}
+      selection={
+        !authz.fleet.allAgents
+          ? undefined
+          : {
+              selected,
+              onSelectionChange,
+              selectable: isAgentSelectable,
+              selectableMessage: (selectable, agent) => {
+                if (selectable) return '';
+                if (!agent.active) {
+                  return 'This agent is not active';
+                }
+                if (agent.policy_id && agentPoliciesIndexedById[agent.policy_id].is_managed) {
+                  return 'This action is not available for agents enrolled in an externally managed agent policy';
+                }
+                return '';
+              },
+            }
+      }
       onChange={onTableChange}
       sorting={sorting}
     />

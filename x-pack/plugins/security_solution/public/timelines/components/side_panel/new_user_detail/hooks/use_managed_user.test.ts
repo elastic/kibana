@@ -6,31 +6,30 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import type { InstalledIntegration } from '../../../../../../common/api/detection_engine/fleet_integrations';
+import type { Integration } from '../../../../../../common/api/detection_engine/fleet_integrations';
 import { TestProviders } from '../../../../../common/mock';
 import { ENTRA_ID_PACKAGE_NAME } from '../constants';
 import { useManagedUser } from './use_managed_user';
 
-const makeInstalledIntegration = (
-  pkgName = 'testPkg',
-  isEnabled = false
-): InstalledIntegration => ({
+const makeIntegration = (pkgName = 'testPkg', isEnabled = false): Integration => ({
   package_name: pkgName,
   package_title: '',
-  package_version: '',
+  latest_package_version: '',
+  installed_package_version: '',
   integration_name: '',
   integration_title: '',
+  is_installed: true,
   is_enabled: isEnabled,
 });
 
-const mockUseInstalledIntegrations = jest.fn().mockReturnValue({
+const mockUseIntegrations = jest.fn().mockReturnValue({
   data: [],
 });
 
 jest.mock(
-  '../../../../../detections/components/rules/related_integrations/use_installed_integrations',
+  '../../../../../detections/components/rules/related_integrations/use_integrations',
   () => ({
-    useInstalledIntegrations: () => mockUseInstalledIntegrations(),
+    useIntegrations: () => mockUseIntegrations(),
   })
 );
 
@@ -38,18 +37,28 @@ jest.mock('../../../../../common/hooks/use_space_id', () => ({
   useSpaceId: () => 'test-space-id',
 }));
 
+const mockUseIsExperimentalFeatureEnabled = jest.fn().mockReturnValue(true);
+
+jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: () => mockUseIsExperimentalFeatureEnabled(),
+}));
+
 const mockSearch = jest.fn().mockReturnValue({
   data: [],
 });
 
+const useSearchStrategyDefaultResponse = {
+  loading: false,
+  result: { users: [] },
+  search: (...params: unknown[]) => mockSearch(...params),
+  refetch: () => {},
+  inspect: {},
+};
+
+const mockUseSearchStrategy = jest.fn().mockReturnValue(useSearchStrategyDefaultResponse);
+
 jest.mock('../../../../../common/containers/use_search_strategy', () => ({
-  useSearchStrategy: () => ({
-    loading: false,
-    result: { users: [] },
-    search: (...params: unknown[]) => mockSearch(...params),
-    refetch: () => {},
-    inspect: {},
-  }),
+  useSearchStrategy: () => mockUseSearchStrategy(),
 }));
 
 describe('useManagedUser', () => {
@@ -57,8 +66,8 @@ describe('useManagedUser', () => {
     mockSearch.mockClear();
   });
   it('returns isIntegrationEnabled:true when it finds an enabled integration with the given name', () => {
-    mockUseInstalledIntegrations.mockReturnValue({
-      data: [makeInstalledIntegration(ENTRA_ID_PACKAGE_NAME, true)],
+    mockUseIntegrations.mockReturnValue({
+      data: [makeIntegration(ENTRA_ID_PACKAGE_NAME, true)],
     });
 
     const { result } = renderHook(() => useManagedUser('test-userName', undefined, false), {
@@ -69,8 +78,8 @@ describe('useManagedUser', () => {
   });
 
   it('returns isIntegrationEnabled:false when it does not find an enabled integration with the given name', () => {
-    mockUseInstalledIntegrations.mockReturnValue({
-      data: [makeInstalledIntegration('fake-name', true)],
+    mockUseIntegrations.mockReturnValue({
+      data: [makeIntegration('fake-name', true)],
     });
 
     const { result } = renderHook(() => useManagedUser('test-userName', undefined, false), {
@@ -107,5 +116,29 @@ describe('useManagedUser', () => {
         userEmail: email,
       })
     );
+  });
+
+  it('should not search if the feature is disabled', () => {
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+    renderHook(() => useManagedUser('test-userName', undefined, false), {
+      wrapper: TestProviders,
+    });
+
+    expect(mockSearch).not.toHaveBeenCalled();
+  });
+
+  it('should return loading false when the feature is disabled', () => {
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+    mockUseIntegrations.mockReturnValue({
+      data: [],
+      isLoading: true,
+    });
+    mockUseSearchStrategy.mockReturnValue({ ...useSearchStrategyDefaultResponse, loading: true });
+
+    const { result } = renderHook(() => useManagedUser('test-userName', undefined, false), {
+      wrapper: TestProviders,
+    });
+
+    expect(result.current.isLoading).toBeFalsy();
   });
 });

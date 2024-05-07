@@ -237,10 +237,16 @@ export const getBulkAssetsHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetBulkAssetsRequestSchema.body>
 > = async (context, request, response) => {
+  const coreContext = await context.core;
   try {
     const { assetIds } = request.body;
-    const savedObjectsClient = (await context.fleet).internalSoClient;
-    const assets = await getBulkAssets(savedObjectsClient, assetIds as AssetSOObject[]);
+    const savedObjectsClient = coreContext.savedObjects.client;
+    const savedObjectsTypeRegistry = coreContext.savedObjects.typeRegistry;
+    const assets = await getBulkAssets(
+      savedObjectsClient,
+      savedObjectsTypeRegistry,
+      assetIds as AssetSOObject[]
+    );
 
     const body: GetBulkAssetsResponse = {
       items: assets,
@@ -412,6 +418,8 @@ export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
   const savedObjectsClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const spaceId = fleetContext.spaceId;
+  const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
+  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
 
   const bulkInstalledResponses = await bulkInstallPackages({
     savedObjectsClient,
@@ -420,6 +428,7 @@ export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
     spaceId,
     prerelease: request.query.prerelease,
     force: request.body.force,
+    authorizationHeader,
   });
   const payload = bulkInstalledResponses.map(bulkInstallServiceResponseToHttpEntry);
   const body: BulkInstallPackagesResponse = {
@@ -609,6 +618,7 @@ const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
       verification_key_id: attributes.verification_key_id,
       experimental_data_stream_features: attributes.experimental_data_stream_features,
       latest_install_failed_attempts: attributes.latest_install_failed_attempts,
+      latest_executed_state: attributes.latest_executed_state,
     };
 
     return {

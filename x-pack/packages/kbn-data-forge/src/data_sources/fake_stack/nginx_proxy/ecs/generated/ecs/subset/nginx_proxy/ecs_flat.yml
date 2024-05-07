@@ -30,6 +30,28 @@ host.name:
   normalize: []
   short: Name of the host.
   type: keyword
+http.response.bytes:
+  dashed_name: http-response-bytes
+  description: Total size in bytes of the response (body and headers).
+  example: 1437
+  flat_name: http.response.bytes
+  format: bytes
+  level: extended
+  name: response.bytes
+  normalize: []
+  short: Total size in bytes of the response (body and headers).
+  type: long
+http.response.status_code:
+  dashed_name: http-response-status-code
+  description: HTTP response status code.
+  example: 404
+  flat_name: http.response.status_code
+  format: string
+  level: extended
+  name: response.status_code
+  normalize: []
+  short: HTTP response status code.
+  type: long
 labels:
   dashed_name: labels
   description: 'Custom key/value pairs.
@@ -102,4 +124,21 @@ tags:
   normalize:
   - array
   short: List of keywords used to tag each event.
+  type: keyword
+url.domain:
+  dashed_name: url-domain
+  description: 'Domain of the url, such as "www.elastic.co".
+
+    In some cases a URL may refer to an IP and/or port directly, without a domain
+    name. In this case, the IP address would go to the `domain` field.
+
+    If the URL contains a literal IPv6 address enclosed by `[` and `]` (IETF RFC 2732),
+    the `[` and `]` characters should also be captured in the `domain` field.'
+  example: www.elastic.co
+  flat_name: url.domain
+  ignore_above: 1024
+  level: extended
+  name: domain
+  normalize: []
+  short: Domain of the url.
   type: keyword

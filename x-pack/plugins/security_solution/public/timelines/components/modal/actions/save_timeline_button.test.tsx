@@ -11,10 +11,10 @@ import { SaveTimelineButton } from './save_timeline_button';
 import { mockTimelineModel, TestProviders } from '../../../../common/mock';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { TimelineStatus } from '../../../../../common/api/timeline';
-import { useCreateTimeline } from '../../timeline/properties/use_create_timeline';
+import { useCreateTimeline } from '../../../hooks/use_create_timeline';
 
 jest.mock('../../../../common/components/user_privileges');
-jest.mock('../../timeline/properties/use_create_timeline');
+jest.mock('../../../hooks/use_create_timeline');
 
 const mockGetState = jest.fn();
 jest.mock('react-redux', () => {

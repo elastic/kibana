@@ -19,12 +19,14 @@ export interface UpdateRulesOptions {
   rulesClient: RulesClient;
   existingRule: RuleAlertType | null | undefined;
   ruleUpdate: RuleUpdateProps;
+  allowMissingConnectorSecrets?: boolean;
 }
 
 export const updateRules = async ({
   rulesClient,
   existingRule,
   ruleUpdate,
+  allowMissingConnectorSecrets,
 }: UpdateRulesOptions): Promise<PartialRule<RuleParams> | null> => {
   if (existingRule == null) {
     return null;
@@ -55,12 +57,12 @@ export const updateRules = async ({
       timelineTitle: ruleUpdate.timeline_title,
       meta: ruleUpdate.meta,
       maxSignals: ruleUpdate.max_signals ?? DEFAULT_MAX_SIGNALS,
-      relatedIntegrations: existingRule.params.relatedIntegrations,
+      relatedIntegrations: ruleUpdate.related_integrations ?? [],
       requiredFields: existingRule.params.requiredFields,
       riskScore: ruleUpdate.risk_score,
       riskScoreMapping: ruleUpdate.risk_score_mapping ?? [],
       ruleNameOverride: ruleUpdate.rule_name_override,
-      setup: existingRule.params.setup,
+      setup: ruleUpdate.setup,
       severity: ruleUpdate.severity,
       severityMapping: ruleUpdate.severity_mapping ?? [],
       threat: ruleUpdate.threat ?? [],
@@ -81,6 +83,7 @@ export const updateRules = async ({
   const update = await rulesClient.update({
     id: existingRule.id,
     data: newInternalRule,
+    allowMissingConnectorSecrets,
   });
 
   if (existingRule.enabled && enabled === false) {

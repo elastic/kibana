@@ -15,7 +15,7 @@ export const validateCustomFieldTypesInRequest = ({
   requestCustomFields,
   originalCustomFields,
 }: {
-  requestCustomFields?: Array<{ key: string; type: CustomFieldTypes }>;
+  requestCustomFields?: Array<{ key: string; type: CustomFieldTypes; label: string }>;
   originalCustomFields: Array<{ key: string; type: CustomFieldTypes }>;
 }) => {
   if (!Array.isArray(requestCustomFields) || !originalCustomFields.length) {
@@ -28,13 +28,13 @@ export const validateCustomFieldTypesInRequest = ({
     const originalField = originalCustomFields.find((item) => item.key === requestField.key);
 
     if (originalField && originalField.type !== requestField.type) {
-      invalidFields.push(requestField.key);
+      invalidFields.push(`"${requestField.label}"`);
     }
   });
 
   if (invalidFields.length > 0) {
     throw Boom.badRequest(
-      `Invalid custom field types in request for the following keys: ${invalidFields}`
+      `Invalid custom field types in request for the following labels: ${invalidFields.join(', ')}`
     );
   }
 };

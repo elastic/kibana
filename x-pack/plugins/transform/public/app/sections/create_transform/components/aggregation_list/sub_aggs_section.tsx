@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useContext, useMemo } from 'react';
-import { EuiComboBoxOptionOption, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import type { FC } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiSpacer, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AggListForm } from './list_form';
 import { DropDown } from '../aggregation_dropdown';
-import { PivotAggsConfig } from '../../../../common';
+import type { PivotAggsConfig } from '../../../../common';
 import { PivotConfigurationContext } from '../pivot_configuration/pivot_configuration';
 import { MAX_NESTING_SUB_AGGS } from '../../../../common/pivot_aggs';
 

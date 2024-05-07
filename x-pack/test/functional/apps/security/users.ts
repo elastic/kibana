@@ -159,11 +159,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('change password', () => {
         before(async () => {
-          await toasts.dismissAllToasts();
+          await toasts.dismissAll();
         });
         afterEach(async () => {
           await PageObjects.security.submitUpdateUserForm();
-          await toasts.dismissAllToasts();
+          await toasts.dismissAll();
         });
         after(async () => {
           await PageObjects.security.forceLogout();
@@ -177,10 +177,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await PageObjects.security.updateUserPassword(optionalUser);
           await retry.waitFor('', async () => {
-            const toastCount = await toasts.getToastCount();
+            const toastCount = await toasts.getCount();
             return toastCount >= 1;
           });
-          const successToast = await toasts.getToastElement(1);
+          const successToast = await toasts.getElementByIndex(1);
           expect(await successToast.getVisibleText()).to.be('Password successfully changed');
         });
 
@@ -196,10 +196,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await PageObjects.security.updateUserPassword(optionalUser, true);
           await retry.waitFor('', async () => {
-            const toastCount = await toasts.getToastCount();
+            const toastCount = await toasts.getCount();
             return toastCount >= 1;
           });
-          const successToast = await toasts.getToastElement(1);
+          const successToast = await toasts.getElementByIndex(1);
           expect(await successToast.getVisibleText()).to.be('Password successfully changed');
         });
       });

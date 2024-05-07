@@ -11,11 +11,8 @@ import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { RISK_SCORE_CALCULATION_URL } from '@kbn/security-solution-plugin/common/constants';
 import type { RiskScore } from '@kbn/security-solution-plugin/common/entity_analytics/risk_engine';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  deleteAllAlerts,
-  deleteAllRules,
-  dataGeneratorFactory,
-} from '../../../detections_response/utils';
+import { dataGeneratorFactory } from '../../../detections_response/utils';
+import { deleteAllAlerts, deleteAllRules } from '../../../../../common/utils/security_solution';
 import {
   buildDocument,
   createAndSyncRuleAndAlertsFactory,
@@ -29,6 +26,7 @@ import {
   getLatestRiskScoreIndexMapping,
   riskEngineRouteHelpersFactory,
   cleanRiskEngine,
+  enableAssetCriticalityAdvancedSetting,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -79,6 +77,10 @@ export default ({ getService }: FtrProviderContext): void => {
   };
 
   describe('@ess @serverless Risk Scoring Calculation API', () => {
+    before(async () => {
+      enableAssetCriticalityAdvancedSetting(kibanaServer, log);
+    });
+
     context('with auditbeat data', () => {
       const { indexListOfDocuments } = dataGeneratorFactory({
         es,
@@ -321,7 +323,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await assetCriticalityRoutes.upsert({
             id_field: 'host.name',
             id_value: 'host-1',
-            criticality_level: 'important',
+            criticality_level: 'high_impact',
           });
         });
 
@@ -347,7 +349,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const [score] = normalizeScores(scores);
           expect(score).to.eql({
-            criticality_level: 'important',
+            criticality_level: 'high_impact',
             criticality_modifier: 1.5,
             calculated_level: 'Unknown',
             calculated_score: 21,

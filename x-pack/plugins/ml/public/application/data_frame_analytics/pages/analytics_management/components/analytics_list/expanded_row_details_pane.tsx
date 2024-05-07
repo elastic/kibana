@@ -7,7 +7,8 @@
 
 import './expanded_row_details_pane.scss';
 
-import React, { FC, ReactElement } from 'react';
+import type { FC, ReactElement } from 'react';
+import React from 'react';
 
 import {
   EuiBasicTable,

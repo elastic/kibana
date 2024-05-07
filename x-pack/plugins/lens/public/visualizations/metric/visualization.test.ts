@@ -272,7 +272,7 @@ describe('metric visualization', () => {
     const maxPossibleNumValues = 7;
     let datasourceLayers: DatasourceLayers;
     beforeEach(() => {
-      const mockDatasource = createMockDatasource('testDatasource');
+      const mockDatasource = createMockDatasource();
       mockDatasource.publicAPIMock.getMaxPossibleNumValues.mockReturnValue(maxPossibleNumValues);
       mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         isStaticValue: false,

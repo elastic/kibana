@@ -77,3 +77,40 @@ export const internalManifestCreateSchema = t.intersection([
   ),
 ]);
 export type InternalManifestCreateSchema = t.TypeOf<typeof internalManifestCreateSchema>;
+
+/**
+ * Unified Manifest
+ */
+
+const internalUnifiedManifestBaseSchema = t.exact(
+  t.type({
+    artifactIds: t.array(identifier),
+    policyId: identifier,
+    semanticVersion,
+  })
+);
+export type InternalUnifiedManifestBaseSchema = t.TypeOf<typeof internalUnifiedManifestBaseSchema>;
+
+const internalUnifiedManifestUpdateSchema = t.intersection([
+  internalUnifiedManifestBaseSchema,
+  t.exact(
+    t.type({
+      id: identifier,
+    })
+  ),
+]);
+export type InternalUnifiedManifestUpdateSchema = t.TypeOf<
+  typeof internalUnifiedManifestUpdateSchema
+>;
+
+export const internalUnifiedManifestSchema = t.intersection([
+  internalUnifiedManifestBaseSchema,
+  t.exact(
+    t.type({
+      id: identifier,
+      created: t.union([t.string, t.undefined]),
+    })
+  ),
+]);
+
+export type InternalUnifiedManifestSchema = t.TypeOf<typeof internalUnifiedManifestSchema>;

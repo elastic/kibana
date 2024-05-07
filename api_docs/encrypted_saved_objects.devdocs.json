@@ -682,10 +682,10 @@
           },
           {
             "parentPluginId": "encryptedSavedObjects",
-            "id": "def-server.EncryptedSavedObjectTypeRegistration.attributesToExcludeFromAAD",
+            "id": "def-server.EncryptedSavedObjectTypeRegistration.attributesToIncludeInAAD",
             "type": "Object",
             "tags": [],
-            "label": "attributesToExcludeFromAAD",
+            "label": "attributesToIncludeInAAD",
             "description": [],
             "signature": [
               "ReadonlySet<string> | undefined"

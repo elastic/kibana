@@ -10,6 +10,13 @@ import type { PluginInitializer, Plugin } from '@kbn/core-plugins-server';
 import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
 import { MOCK_IDP_LOGIN_PATH, MOCK_IDP_LOGOUT_PATH, createSAMLResponse } from '@kbn/mock-idp-utils';
+import { SERVERLESS_ROLES_ROOT_PATH, readRolesFromResource } from '@kbn/es';
+import { resolve } from 'path';
+import { CloudSetup } from '@kbn/cloud-plugin/server';
+
+export interface PluginSetupDependencies {
+  cloud: CloudSetup;
+}
 
 const createSAMLResponseSchema = schema.object({
   username: schema.string(),
@@ -18,10 +25,30 @@ const createSAMLResponseSchema = schema.object({
   roles: schema.arrayOf(schema.string()),
 });
 
+const projectToAlias = new Map<string, string>([
+  ['observability', 'oblt'],
+  ['security', 'security'],
+  ['search', 'es'],
+]);
+
+const readServerlessRoles = (projectType: string) => {
+  if (projectToAlias.has(projectType)) {
+    const alias = projectToAlias.get(projectType)!;
+    const rolesResourcePath = resolve(SERVERLESS_ROLES_ROOT_PATH, alias, 'roles.yml');
+    return readRolesFromResource(rolesResourcePath);
+  } else {
+    throw new Error(`Unsupported projectType: ${projectType}`);
+  }
+};
+
 export type CreateSAMLResponseParams = TypeOf<typeof createSAMLResponseSchema>;
 
-export const plugin: PluginInitializer<void, void> = async (): Promise<Plugin> => ({
-  setup(core) {
+export const plugin: PluginInitializer<
+  void,
+  void,
+  PluginSetupDependencies
+> = async (): Promise<Plugin> => ({
+  setup(core, plugins: PluginSetupDependencies) {
     const router = core.http.createRouter();
 
     core.http.resources.register(
@@ -32,6 +59,36 @@ export const plugin: PluginInitializer<void, void> = async (): Promise<Plugin> =
       },
       async (context, request, response) => {
         return response.renderAnonymousCoreApp();
+      }
+    );
+
+    // caching roles on the first call
+    const roles: string[] = [];
+
+    router.get(
+      {
+        path: '/mock_idp/supported_roles',
+        validate: false,
+        options: { authRequired: false },
+      },
+      (context, request, response) => {
+        const projectType = plugins.cloud.serverless?.projectType;
+        if (!projectType) {
+          return response.customError({ statusCode: 500, body: 'projectType is not defined' });
+        } else {
+          try {
+            if (roles.length === 0) {
+              roles.push(...readServerlessRoles(projectType));
+            }
+            return response.ok({
+              body: {
+                roles,
+              },
+            });
+          } catch (err) {
+            return response.customError({ statusCode: 500, body: err.message });
+          }
+        }
       }
     );
 

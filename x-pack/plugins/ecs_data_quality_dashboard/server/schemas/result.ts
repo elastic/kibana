@@ -7,64 +7,37 @@
 
 import * as t from 'io-ts';
 
-export const ResultMeta = t.type({
+const ResultDocumentInterface = t.interface({
   batchId: t.string,
-  ecsVersion: t.string,
-  errorCount: t.number,
-  ilmPhase: t.string,
-  indexId: t.string,
   indexName: t.string,
   isCheckAll: t.boolean,
-  numberOfDocuments: t.number,
-  numberOfFields: t.number,
-  numberOfIncompatibleFields: t.number,
-  numberOfEcsFields: t.number,
-  numberOfCustomFields: t.number,
-  numberOfIndices: t.number,
-  numberOfIndicesChecked: t.number,
-  numberOfSameFamily: t.number,
+  checkedAt: t.number,
+  docsCount: t.number,
+  totalFieldCount: t.number,
+  ecsFieldCount: t.number,
+  customFieldCount: t.number,
+  incompatibleFieldCount: t.number,
+  sameFamilyFieldCount: t.number,
   sameFamilyFields: t.array(t.string),
-  sizeInBytes: t.number,
-  timeConsumedMs: t.number,
   unallowedMappingFields: t.array(t.string),
   unallowedValueFields: t.array(t.string),
-});
-export type ResultMeta = t.TypeOf<typeof ResultMeta>;
-
-export const ResultRollup = t.type({
-  docsCount: t.number,
-  error: t.union([t.string, t.null]),
-  indices: t.number,
-  pattern: t.string,
   sizeInBytes: t.number,
-  ilmExplainPhaseCounts: t.record(t.string, t.number),
-  ilmExplain: t.record(t.string, t.UnknownRecord),
-  stats: t.record(t.string, t.UnknownRecord),
-  results: t.record(t.string, t.UnknownRecord),
+  markdownComments: t.array(t.string),
+  ecsVersion: t.string,
+  error: t.union([t.string, t.null]),
 });
-export type ResultRollup = t.TypeOf<typeof ResultRollup>;
 
-export const Result = t.type({
-  meta: ResultMeta,
-  rollup: ResultRollup,
+const ResultDocumentOptional = t.partial({
+  indexPattern: t.string,
+  checkedBy: t.string,
+  indexId: t.string,
+  ilmPhase: t.string,
 });
-export type Result = t.TypeOf<typeof Result>;
 
-export type IndexArray = Array<{ _indexName: string } & Record<string, unknown>>;
-export type IndexObject = Record<string, Record<string, unknown>>;
+export const ResultDocument = t.intersection([ResultDocumentInterface, ResultDocumentOptional]);
+export type ResultDocument = t.TypeOf<typeof ResultDocument>;
 
-export type ResultDocument = Omit<Result, 'rollup'> & {
-  '@timestamp': number;
-  rollup: Omit<ResultRollup, 'stats' | 'results' | 'ilmExplain'> & {
-    stats: IndexArray;
-    results: IndexArray;
-    ilmExplain: IndexArray;
-  };
-};
+export const PostResultBody = ResultDocument;
 
-// Routes validation schemas
-
-export const GetResultQuery = t.type({ patterns: t.string });
+export const GetResultQuery = t.type({ pattern: t.string });
 export type GetResultQuery = t.TypeOf<typeof GetResultQuery>;
-
-export const PostResultBody = Result;

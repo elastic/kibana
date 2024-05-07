@@ -7,7 +7,11 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createTelemetryEndpointTaskConfig } from './endpoint';
-import { createMockTelemetryEventsSender, createMockTelemetryReceiver } from '../__mocks__';
+import {
+  createMockTelemetryEventsSender,
+  createMockTelemetryReceiver,
+  createMockTaskMetrics,
+} from '../__mocks__';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 
 const usageCountersServiceSetup = usageCountersServiceMock.createSetupContract();
@@ -33,17 +37,19 @@ describe('endpoint telemetry task test', () => {
       .mockReturnValue(telemetryUsageCounter);
     const mockTelemetryReceiver = createMockTelemetryReceiver();
     const telemetryEndpointTaskConfig = createTelemetryEndpointTaskConfig(1);
+    const mockTaskMetrics = createMockTaskMetrics();
 
     await telemetryEndpointTaskConfig.runTask(
       'test-id',
       logger,
       mockTelemetryReceiver,
       mockTelemetryEventsSender,
+      mockTaskMetrics,
       testTaskExecutionPeriod
     );
 
     expect(mockTelemetryReceiver.fetchFleetAgents).toHaveBeenCalled();
-    expect(mockTelemetryReceiver.fetchEndpointMetrics).toHaveBeenCalledWith(
+    expect(mockTelemetryReceiver.fetchEndpointMetricsAbstract).toHaveBeenCalledWith(
       testTaskExecutionPeriod.last,
       testTaskExecutionPeriod.current
     );
@@ -69,16 +75,19 @@ describe('endpoint telemetry task test', () => {
     const mockTelemetryReceiver = createMockTelemetryReceiver();
     mockTelemetryReceiver.fetchPolicyConfigs = jest.fn().mockRejectedValueOnce(new Error());
     const telemetryEndpointTaskConfig = createTelemetryEndpointTaskConfig(1);
+    const mockTaskMetrics = createMockTaskMetrics();
 
     await telemetryEndpointTaskConfig.runTask(
       'test-id',
       logger,
       mockTelemetryReceiver,
       mockTelemetryEventsSender,
+      mockTaskMetrics,
       testTaskExecutionPeriod
     );
 
     expect(mockTelemetryReceiver.fetchPolicyConfigs).toHaveBeenCalled();
-    expect(mockTelemetryEventsSender.sendOnDemand).toHaveBeenCalled();
+    expect(mockTaskMetrics.start).toBeCalledTimes(1);
+    expect(mockTaskMetrics.end).toBeCalledTimes(1);
   });
 });

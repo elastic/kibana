@@ -240,6 +240,7 @@ describe('execute', () => {
     };
     const variables = { injected: '*foo*' };
     const params = connectorType.renderParameterTemplates!(
+      mockedLogger,
       paramsWithTemplates,
       variables
     ) as PostMessageParams;
@@ -266,6 +267,7 @@ describe('execute', () => {
     };
     const variables = { name: '"Dwight"' };
     const params = connectorType.renderParameterTemplates!(
+      mockedLogger,
       paramsWithTemplates,
       variables
     ) as PostMessageParams;

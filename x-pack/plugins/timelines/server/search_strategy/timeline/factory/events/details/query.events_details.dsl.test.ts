@@ -22,7 +22,7 @@ describe('buildTimelineDetailsQuery', () => {
       Object {
         "allow_no_indices": true,
         "body": Object {
-          "_source": false,
+          "_source": true,
           "fields": Array [
             Object {
               "field": "*",

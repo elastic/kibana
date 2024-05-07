@@ -43,7 +43,8 @@ export const AllUsersQueryTabBody = ({
 
   const getUsersSelector = useMemo(() => usersSelectors.allUsersSelector(), []);
   const { activePage, limit, sort } = useDeepEqualSelector((state) => getUsersSelector(state));
-  const isNewRiskScoreModuleInstalled = useIsNewRiskScoreModuleInstalled();
+  const { installed: isNewRiskScoreModuleInstalled, isLoading: riskScoreStatusLoading } =
+    useIsNewRiskScoreModuleInstalled();
 
   const {
     loading,
@@ -67,7 +68,7 @@ export const AllUsersQueryTabBody = ({
   });
 
   useEffect(() => {
-    if (!querySkip) {
+    if (!querySkip && !riskScoreStatusLoading) {
       search({
         filterQuery,
         defaultIndex: indexNames,
@@ -92,6 +93,7 @@ export const AllUsersQueryTabBody = ({
     limit,
     sort,
     isNewRiskScoreModuleInstalled,
+    riskScoreStatusLoading,
   ]);
 
   return (

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, FC, PropsWithChildren } from 'react';
 
-import { useValues, useActions } from 'kea';
+import { useValues } from 'kea';
 
-import { EuiCallOut, EuiSpacer, EuiGlobalToastList } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 
-import { FLASH_MESSAGE_TYPES, DEFAULT_TOAST_TIMEOUT } from './constants';
+import { FLASH_MESSAGE_TYPES } from './constants';
 import { FlashMessagesLogic } from './flash_messages_logic';
 
-export const FlashMessages: React.FC = ({ children }) => {
+export const FlashMessages: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const { messages } = useValues(FlashMessagesLogic);
 
   return (
@@ -33,23 +33,5 @@ export const FlashMessages: React.FC = ({ children }) => {
       ))}
       {children}
     </div>
-  );
-};
-
-/*
- * NOTE: Toasts are rendered at the highest app level (@see public/applications/index.tsx)
- * so that they don't rerender/reset their timers when navigating between pages,
- * and also to prevent z-index issues with flyouts and modals
- */
-export const Toasts: React.FC = () => {
-  const { toastMessages } = useValues(FlashMessagesLogic);
-  const { dismissToastMessage } = useActions(FlashMessagesLogic);
-
-  return (
-    <EuiGlobalToastList
-      toasts={toastMessages}
-      dismissToast={dismissToastMessage}
-      toastLifeTimeMs={DEFAULT_TOAST_TIMEOUT}
-    />
   );
 };

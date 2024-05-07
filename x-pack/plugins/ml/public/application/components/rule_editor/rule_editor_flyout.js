@@ -55,7 +55,6 @@ import {
 import { getPartitioningFieldNames } from '../../../../common/util/job_utils';
 import { mlJobService } from '../../services/job_service';
 import { toastNotificationServiceProvider } from '../../services/toast_notification_service';
-import { ml } from '../../services/ml_api_service';
 
 class RuleEditorFlyoutUI extends Component {
   static propTypes = {
@@ -83,11 +82,13 @@ class RuleEditorFlyoutUI extends Component {
   }
 
   componentDidMount() {
-    this.toastNotificationService = toastNotificationServiceProvider(
-      this.props.kibana.services.notifications.toasts
-    );
-    if (typeof this.props.setShowFunction === 'function') {
-      this.props.setShowFunction(this.showFlyout);
+    if (this.props.kibana.services.notifications) {
+      this.toastNotificationService = toastNotificationServiceProvider(
+        this.props.kibana.services.notifications.toasts
+      );
+      if (typeof this.props.setShowFunction === 'function') {
+        this.props.setShowFunction(this.showFlyout);
+      }
     }
   }
 
@@ -147,7 +148,7 @@ class RuleEditorFlyoutUI extends Component {
 
     if (this.partitioningFieldNames.length > 0 && this.canGetFilters) {
       // Load the current list of filters. These are used for configuring rule scope.
-      ml.filters
+      this.props.kibana.services.mlServices.mlApiServices.filters
         .filters()
         .then((filters) => {
           const filterListIds = filters.map((filter) => filter.filter_id);
@@ -480,7 +481,7 @@ class RuleEditorFlyoutUI extends Component {
   };
 
   render() {
-    const docsUrl = this.props.kibana.services.docLinks.links.ml.customRules;
+    const docsUrl = this.props.kibana.services.docLinks?.links.ml.customRules;
     const {
       isFlyoutVisible,
       job,

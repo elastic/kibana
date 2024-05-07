@@ -4,9 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useState, FC, useCallback, useMemo, useRef } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { SearchFilterConfig, EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiSpacer,
@@ -14,8 +16,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
-  SearchFilterConfig,
-  EuiBasicTableColumn,
   EuiProgress,
 } from '@elastic/eui';
 

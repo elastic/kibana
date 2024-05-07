@@ -23,6 +23,7 @@ const normalizedFieldTypes: { [key: string]: string } = {
   float: 'number',
   half_float: 'number',
   scaled_float: 'number',
+  unsigned_long: 'number',
 };
 
 interface FieldItem {

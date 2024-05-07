@@ -27,13 +27,10 @@ import {
 
 import { isValidIndexName } from '../../../../../../../common/util/es_utils';
 
-import { Action, ACTION } from './actions';
-import {
-  getInitialState,
-  getFormStateFromJobConfig,
-  getJobConfigFromFormState,
-  State,
-} from './state';
+import type { Action } from './actions';
+import { ACTION } from './actions';
+import type { State } from './state';
+import { getInitialState, getFormStateFromJobConfig, getJobConfigFromFormState } from './state';
 import {
   isJobIdValid,
   validateModelMemoryLimitUnits,

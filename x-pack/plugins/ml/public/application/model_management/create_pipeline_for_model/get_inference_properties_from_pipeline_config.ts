@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
   IngestInferenceProcessor,
   IngestInferenceConfig,
 } from '@elastic/elasticsearch/lib/api/types';

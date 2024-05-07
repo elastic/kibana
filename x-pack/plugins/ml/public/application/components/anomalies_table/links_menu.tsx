@@ -8,8 +8,9 @@
 import { cloneDeep } from 'lodash';
 import moment from 'moment';
 import rison from '@kbn/rison';
-import React, { FC, useEffect, useMemo, useState } from 'react';
-import { APP_ID as MAPS_APP_ID } from '@kbn/maps-plugin/common';
+import type { FC } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+
 import {
   EuiButtonIcon,
   EuiContextMenuItem,
@@ -18,6 +19,9 @@ import {
   EuiProgress,
   EuiToolTip,
 } from '@elastic/eui';
+
+import type { SerializableRecord } from '@kbn/utility-types';
+import { APP_ID as MAPS_APP_ID } from '@kbn/maps-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
@@ -36,26 +40,32 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { CATEGORIZE_FIELD_TRIGGER } from '@kbn/ml-ui-actions';
 import { isDefined } from '@kbn/ml-is-defined';
 import { escapeQuotes } from '@kbn/es-query';
+import { isQuery } from '@kbn/data-plugin/public';
+
+import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import { PLUGIN_ID } from '../../../../common/constants/app';
-import { mlJobService } from '../../services/job_service';
-import { findMessageField, getDataViewIdFromName } from '../../util/index_utils';
+import { findMessageField } from '../../util/index_utils';
 import { getInitialAnomaliesLayers, getInitialSourceIndexFieldLayers } from '../../../maps/util';
 import { parseInterval } from '../../../../common/util/parse_interval';
+import { ML_APP_LOCATOR, ML_PAGES } from '../../../../common/constants/locator';
+import { getFiltersForDSLQuery } from '../../../../common/util/job_utils';
+
+import { mlJobService } from '../../services/job_service';
 import { ml } from '../../services/ml_api_service';
 import { escapeKueryForFieldValuePair, replaceStringTokens } from '../../util/string_utils';
 import { getUrlForRecord, openCustomUrlWindow } from '../../util/custom_url_utils';
-import { ML_APP_LOCATOR, ML_PAGES } from '../../../../common/constants/locator';
-import {
-  escapeDoubleQuotes,
-  getDateFormatTz,
-  SourceIndicesWithGeoFields,
-} from '../../explorer/explorer_utils';
+import type { SourceIndicesWithGeoFields } from '../../explorer/explorer_utils';
+import { escapeDoubleQuotes, getDateFormatTz } from '../../explorer/explorer_utils';
 import { usePermissionCheck } from '../../capabilities/check_capabilities';
-import type { TimeRangeBounds } from '../../util/time_buckets';
 import { useMlKibana } from '../../contexts/kibana';
 import { getFieldTypeFromMapping } from '../../services/mapping_service';
+import { useMlIndexUtils } from '../../util/index_service';
+
 import { getQueryStringForInfluencers } from './get_query_string_for_influencers';
-import { getFiltersForDSLQuery } from '../../../../common/util/job_utils';
+
+const LOG_RATE_ANALYSIS_MARGIN_FACTOR = 20;
+const LOG_RATE_ANALYSIS_BASELINE_FACTOR = 15;
+
 interface LinksMenuProps {
   anomaly: MlAnomaliesTableRecord;
   bounds: TimeRangeBounds;
@@ -71,6 +81,7 @@ interface LinksMenuProps {
 export const LinksMenuUI = (props: LinksMenuProps) => {
   const [openInDiscoverUrl, setOpenInDiscoverUrl] = useState<string | undefined>();
   const [discoverUrlError, setDiscoverUrlError] = useState<string | undefined>();
+  const [openInLogRateAnalysisUrl, setOpenInLogRateAnalysisUrl] = useState<string | undefined>();
 
   const [messageField, setMessageField] = useState<{
     dataView: DataView;
@@ -85,6 +96,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
   const {
     services: { data, share, application, uiActions },
   } = kibana;
+  const { getDataViewIdFromName } = useMlIndexUtils();
 
   const job = useMemo(() => {
     return mlJobService.getJob(props.anomaly.jobId);
@@ -239,20 +251,39 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       }
     })();
 
-    const generateDiscoverUrl = async () => {
+    // withWindowParameters is used to generate the url state
+    // for Log Rate Analysis to create a baseline and deviation
+    // selection based on the anomaly record timestamp and bucket span.
+    const generateRedirectUrlPageState = async (
+      withWindowParameters = false,
+      timeAttribute = 'timeRange'
+    ): Promise<SerializableRecord> => {
       const interval = props.interval;
 
       const dataViewId = await getDataViewId();
       const record = props.anomaly.source;
 
-      const earliestMoment = moment(record.timestamp).startOf(interval);
-      if (interval === 'hour') {
+      // Use the exact timestamp for Log Rate Analysis,
+      // in all other cases snap it to the provided interval.
+      const earliestMoment = withWindowParameters
+        ? moment(record.timestamp)
+        : moment(record.timestamp).startOf(interval);
+
+      // For Log Rate Analysis, look back further to
+      // provide enough room for the baseline time range.
+      // In all other cases look back 1 hour.
+      if (withWindowParameters) {
+        earliestMoment.subtract(record.bucket_span * LOG_RATE_ANALYSIS_MARGIN_FACTOR, 's');
+      } else if (interval === 'hour') {
         // Start from the previous hour.
         earliestMoment.subtract(1, 'h');
       }
 
       const latestMoment = moment(record.timestamp).add(record.bucket_span, 's');
-      if (props.isAggregatedData === true) {
+
+      if (withWindowParameters) {
+        latestMoment.add(record.bucket_span * LOG_RATE_ANALYSIS_MARGIN_FACTOR, 's');
+      } else if (props.isAggregatedData === true) {
         if (interval === 'hour') {
           // Show to the end of the next hour.
           latestMoment.add(1, 'h');
@@ -263,9 +294,16 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       const from = timeFormatter(earliestMoment.unix() * 1000); // e.g. 2016-02-08T16:00:00.000Z
       const to = timeFormatter(latestMoment.unix() * 1000); // e.g. 2016-02-08T18:59:59.000Z
 
+      // The window parameters for Log Rate Analysis.
+      // The deviation time range will span the current anomaly's bucket.
+      const dMin = record.timestamp;
+      const dMax = record.timestamp + record.bucket_span * 1000;
+      const bMax = dMin - record.bucket_span * 1000;
+      const bMin = bMax - record.bucket_span * 1000 * LOG_RATE_ANALYSIS_BASELINE_FACTOR;
+
       let kqlQuery = '';
 
-      if (record.influencers) {
+      if (record.influencers && !withWindowParameters) {
         kqlQuery = record.influencers
           .filter((influencer) => isDefined(influencer))
           .map((influencer) => {
@@ -283,9 +321,21 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
           .join(' AND ');
       }
 
-      const url = await discoverLocator.getRedirectUrl({
+      // For multi-metric or population jobs, we add the selected entity for links to
+      // Log Rate Analysis, so they can be restored as part of the search filter.
+      if (withWindowParameters && props.anomaly.entityName && props.anomaly.entityValue) {
+        if (kqlQuery !== '') {
+          kqlQuery += ' AND ';
+        }
+
+        kqlQuery = `"${escapeQuotes(props.anomaly.entityName)}":"${escapeQuotes(
+          props.anomaly.entityValue + ''
+        )}"`;
+      }
+
+      return {
         indexPatternId: dataViewId,
-        timeRange: {
+        [timeAttribute]: {
           from,
           to,
           mode: 'absolute',
@@ -298,15 +348,76 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
           dataViewId === null
             ? []
             : getFiltersForDSLQuery(job.datafeed_config.query, dataViewId, job.job_id),
-      });
+        ...(withWindowParameters
+          ? {
+              wp: { bMin, bMax, dMin, dMax },
+            }
+          : {}),
+      };
+    };
+
+    const generateDiscoverUrl = async () => {
+      const pageState = await generateRedirectUrlPageState();
+      const url = await discoverLocator.getRedirectUrl(pageState);
 
       if (!unmounted) {
         setOpenInDiscoverUrl(url);
       }
     };
 
+    const generateLogRateAnalysisUrl = async () => {
+      if (
+        props.anomaly.source.function_description !== 'count' ||
+        // Disable link for datafeeds that use aggregations
+        // and define a non-standard summary count field name
+        (job.analysis_config.summary_count_field_name !== undefined &&
+          job.analysis_config.summary_count_field_name !== 'doc_count')
+      ) {
+        if (!unmounted) {
+          setOpenInLogRateAnalysisUrl(undefined);
+        }
+        return;
+      }
+
+      const mlLocator = share.url.locators.get(ML_APP_LOCATOR);
+
+      if (!mlLocator) {
+        // eslint-disable-next-line no-console
+        console.error('Unable to detect locator for ML or bounds');
+        return;
+      }
+      const pageState = await generateRedirectUrlPageState(true, 'time');
+
+      const { indexPatternId, wp, query, filters, ...globalState } = pageState;
+
+      const url = await mlLocator.getRedirectUrl({
+        page: ML_PAGES.AIOPS_LOG_RATE_ANALYSIS,
+        pageState: {
+          index: indexPatternId,
+          globalState,
+          appState: {
+            logRateAnalysis: {
+              wp,
+              ...(isQuery(query)
+                ? {
+                    filters,
+                    searchString: query.query,
+                    searchQueryLanguage: query.language,
+                  }
+                : {}),
+            },
+          },
+        },
+      });
+
+      if (!unmounted) {
+        setOpenInLogRateAnalysisUrl(url);
+      }
+    };
+
     if (!isCategorizationAnomalyRecord) {
       generateDiscoverUrl();
+      generateLogRateAnalysisUrl();
     } else {
       getDataViewId();
     }
@@ -606,10 +717,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
 
           // Need to encode the _a parameter as it will contain characters such as '+' if using the regex.
           const { basePath } = kibana.services.http;
-          let path = basePath.get();
-          path += '/app/discover#/';
-          path += '?_g=' + _g;
-          path += '&_a=' + encodeURIComponent(_a);
+          const path = `${basePath.get()}/app/discover#/?_g=${_g}&_a=${encodeURIComponent(_a)}`;
           window.open(path, '_blank');
         })
         .catch((resp) => {
@@ -813,10 +921,26 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       );
     }
 
+    if (openInLogRateAnalysisUrl) {
+      items.push(
+        <EuiContextMenuItem
+          key="log_rate_analysis"
+          icon="machineLearningApp"
+          href={openInLogRateAnalysisUrl}
+          data-test-subj="mlAnomaliesListRowAction_runLogRateAnalysisButton"
+        >
+          <FormattedMessage
+            id="xpack.ml.anomaliesTable.linksMenu.runLogRateAnalysis"
+            defaultMessage="Run log rate analysis"
+          />
+        </EuiContextMenuItem>
+      );
+    }
+
     if (messageField !== null) {
       items.push(
         <EuiContextMenuItem
-          key="create_rule"
+          key="run_pattern_analysis"
           icon="machineLearningApp"
           onClick={() => {
             closePopover();

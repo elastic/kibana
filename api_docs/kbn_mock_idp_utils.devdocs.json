@@ -319,28 +319,13 @@
       },
       {
         "parentPluginId": "@kbn/mock-idp-utils",
-        "id": "def-common.MOCK_IDP_OBSERVABILITY_ROLE_NAMES",
-        "type": "Array",
-        "tags": [],
-        "label": "MOCK_IDP_OBSERVABILITY_ROLE_NAMES",
-        "description": [],
-        "signature": [
-          "string[]"
-        ],
-        "path": "packages/kbn-mock-idp-utils/src/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/mock-idp-utils",
         "id": "def-common.MOCK_IDP_REALM_NAME",
         "type": "string",
         "tags": [],
         "label": "MOCK_IDP_REALM_NAME",
         "description": [],
         "signature": [
-          "\"mock-idp\""
+          "\"cloud-saml-kibana\""
         ],
         "path": "packages/kbn-mock-idp-utils/src/constants.ts",
         "deprecated": false,
@@ -371,38 +356,6 @@
         "description": [],
         "signature": [
           "\"mock-idp-mapping\""
-        ],
-        "path": "packages/kbn-mock-idp-utils/src/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/mock-idp-utils",
-        "id": "def-common.MOCK_IDP_SEARCH_ROLE_NAMES",
-        "type": "Array",
-        "tags": [],
-        "label": "MOCK_IDP_SEARCH_ROLE_NAMES",
-        "description": [
-          "List of roles from `packages/kbn-es/src/serverless_resources/roles.yml`"
-        ],
-        "signature": [
-          "string[]"
-        ],
-        "path": "packages/kbn-mock-idp-utils/src/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/mock-idp-utils",
-        "id": "def-common.MOCK_IDP_SECURITY_ROLE_NAMES",
-        "type": "Array",
-        "tags": [],
-        "label": "MOCK_IDP_SECURITY_ROLE_NAMES",
-        "description": [],
-        "signature": [
-          "string[]"
         ],
         "path": "packages/kbn-mock-idp-utils/src/constants.ts",
         "deprecated": false,

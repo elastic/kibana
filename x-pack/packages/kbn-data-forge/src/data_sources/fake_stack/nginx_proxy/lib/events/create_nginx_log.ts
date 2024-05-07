@@ -37,6 +37,8 @@ export const createNginxLog = (
       )} - ${userId} ${domain} to: ${hostWithPort}: "${method} ${path} HTTP/1.1" ${statusCode} ${bytes} "${url}" "${userAgent}"`,
       log: { level: 'INFO', logger: NGINX_PROXY },
       host: { name: host },
+      http: { response: { status_code: statusCode, bytes } },
+      url: { domain },
     },
   ];
 };

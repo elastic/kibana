@@ -13,11 +13,12 @@ import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import { onSaveSearch } from './on_save_search';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
-import { getDiscoverStateContainer } from '../../services/discover_state';
+import { getDiscoverStateContainer } from '../../state_management/discover_state';
 import { ReactElement } from 'react';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { createBrowserHistory } from 'history';
+import { mockCustomizationContext } from '../../../../customizations/__mocks__/customization_context';
 
 function getStateContainer({ dataView }: { dataView?: DataView } = {}) {
   const savedSearch = savedSearchMock;
@@ -25,10 +26,7 @@ function getStateContainer({ dataView }: { dataView?: DataView } = {}) {
   const stateContainer = getDiscoverStateContainer({
     services: discoverServiceMock,
     history,
-    customizationContext: {
-      displayMode: 'standalone',
-      showLogExplorerTabs: false,
-    },
+    customizationContext: mockCustomizationContext,
   });
   stateContainer.savedSearchState.set(savedSearch);
   stateContainer.appState.getState = jest.fn(() => ({

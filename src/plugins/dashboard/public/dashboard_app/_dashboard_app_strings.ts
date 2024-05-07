@@ -28,7 +28,7 @@ export const dashboardReadonlyBadge = {
 export const dashboardManagedBadge = {
   getTooltip: () =>
     i18n.translate('dashboard.badge.managed.tooltip', {
-      defaultMessage: 'This dashboard is system managed. Clone this dashboard to make changes.',
+      defaultMessage: 'Elastic manages this dashboard. Clone it to make changes.',
     }),
 };
 
@@ -99,13 +99,17 @@ export const getNewDashboardTitle = () =>
     defaultMessage: 'New Dashboard',
   });
 
-export const getPanelAddedSuccessString = (savedObjectName: string) =>
-  i18n.translate('dashboard.addPanel.newEmbeddableAddedSuccessMessageTitle', {
-    defaultMessage: '{savedObjectName} was added',
-    values: {
-      savedObjectName,
-    },
-  });
+export const getPanelAddedSuccessString = (savedObjectName?: string) =>
+  savedObjectName
+    ? i18n.translate('dashboard.addPanel.newEmbeddableAddedSuccessMessageTitle', {
+        defaultMessage: '{savedObjectName} was added',
+        values: {
+          savedObjectName,
+        },
+      })
+    : i18n.translate('dashboard.addPanel.newEmbeddableWithNoTitleAddedSuccessMessageTitle', {
+        defaultMessage: 'A panel was added',
+      });
 
 export const getPanelTooOldErrorString = () =>
   i18n.translate('dashboard.loadURLError.PanelTooOld', {

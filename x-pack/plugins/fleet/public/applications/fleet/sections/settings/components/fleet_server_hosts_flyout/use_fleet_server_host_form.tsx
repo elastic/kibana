@@ -13,6 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   sendPostFleetServerHost,
   sendPutFleetServerHost,
+  useAuthz,
   useComboInput,
   useInput,
   useStartServices,
@@ -115,26 +116,35 @@ export function validateName(value: string) {
 
 export function useFleetServerHostsForm(
   fleetServerHost: FleetServerHost | undefined,
-  onSuccess: () => void
+  onSuccess: () => void,
+  defaultFleetServerHost?: FleetServerHost
 ) {
   const [isLoading, setIsLoading] = useState(false);
-  const { notifications } = useStartServices();
+  const { notifications, cloud } = useStartServices();
+  const authz = useAuthz();
   const { confirm } = useConfirmModal();
-  const isPreconfigured = fleetServerHost?.is_preconfigured ?? false;
+  const isEditDisabled = (fleetServerHost?.is_preconfigured || !authz.fleet.allSettings) ?? false;
 
-  const nameInput = useInput(fleetServerHost?.name ?? '', validateName, isPreconfigured);
+  const nameInput = useInput(fleetServerHost?.name ?? '', validateName, isEditDisabled);
   const isDefaultInput = useSwitchInput(
     fleetServerHost?.is_default ?? false,
-    isPreconfigured || fleetServerHost?.is_default
+    isEditDisabled || fleetServerHost?.is_default
   );
 
+  const isServerless = cloud?.isServerlessEnabled;
+  // Set the host URLs to default for new Fleet server host in serverless.
+  const hostUrlsDefaultValue =
+    isServerless && !fleetServerHost?.host_urls
+      ? defaultFleetServerHost?.host_urls || []
+      : fleetServerHost?.host_urls || [];
+  const hostUrlsDisabled = isEditDisabled || isServerless;
   const hostUrlsInput = useComboInput(
     'hostUrls',
-    fleetServerHost?.host_urls || [],
+    hostUrlsDefaultValue,
     validateFleetServerHosts,
-    isPreconfigured
+    hostUrlsDisabled
   );
-  const proxyIdInput = useInput(fleetServerHost?.proxy_id ?? '', () => undefined, isPreconfigured);
+  const proxyIdInput = useInput(fleetServerHost?.proxy_id ?? '', () => undefined, isEditDisabled);
 
   const inputs = useMemo(
     () => ({
@@ -202,6 +212,7 @@ export function useFleetServerHostsForm(
   ]);
 
   const isDisabled =
+    isEditDisabled ||
     isLoading ||
     (!hostUrlsInput.hasChanged &&
       !isDefaultInput.hasChanged &&

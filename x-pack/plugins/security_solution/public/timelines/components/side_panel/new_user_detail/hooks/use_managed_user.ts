@@ -9,7 +9,7 @@ import { useEffect, useMemo } from 'react';
 
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import type { ManagedUserHits } from '../../../../../../common/search_strategy/security_solution/users/managed_details';
-import { useInstalledIntegrations } from '../../../../../detections/components/rules/related_integrations/use_installed_integrations';
+import { useIntegrations } from '../../../../../detections/components/rules/related_integrations/use_integrations';
 import { UsersQueries } from '../../../../../../common/search_strategy';
 import { useSpaceId } from '../../../../../common/hooks/use_space_id';
 import { useSearchStrategy } from '../../../../../common/containers/use_search_strategy';
@@ -37,7 +37,7 @@ export const useManagedUser = (
   email: string[] | undefined,
   isLoading?: boolean
 ): ManagedUserData => {
-  const skip = useIsExperimentalFeatureEnabled('newUserDetailsFlyoutManagedUser');
+  const skip = !useIsExperimentalFeatureEnabled('newUserDetailsFlyoutManagedUser');
   const { to, from, isInitializing, deleteQuery, setQuery } = useGlobalTime();
   const spaceId = useSpaceId();
   const {
@@ -69,8 +69,7 @@ export const useManagedUser = (
     }
   }, [from, search, to, isInitializing, defaultIndex, userName, isLoading, email, skip]);
 
-  const { data: installedIntegrations, isLoading: loadingIntegrations } = useInstalledIntegrations({
-    packages,
+  const { data: integrations, isLoading: loadingIntegrations } = useIntegrations({
     skip,
   });
 
@@ -85,19 +84,19 @@ export const useManagedUser = (
 
   const isIntegrationEnabled = useMemo(
     () =>
-      !!installedIntegrations?.some(
+      !!integrations?.some(
         ({ package_name: packageName, is_enabled: isEnabled }) =>
           isEnabled && packages.includes(packageName)
       ),
-    [installedIntegrations]
+    [integrations]
   );
 
   return useMemo(
     () => ({
       data: managedUserData,
-      isLoading: loadingManagedUser || loadingIntegrations,
+      isLoading: skip ? false : loadingManagedUser || loadingIntegrations,
       isIntegrationEnabled,
     }),
-    [isIntegrationEnabled, loadingIntegrations, loadingManagedUser, managedUserData]
+    [isIntegrationEnabled, loadingIntegrations, loadingManagedUser, managedUserData, skip]
   );
 };

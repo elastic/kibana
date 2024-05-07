@@ -87,6 +87,7 @@ describe('Policy Mac Event Collection Card', () => {
             'Mac ' +
             '2 / 3 event collections enabled' +
             'Events' +
+            'File' +
             'Process' +
             'Network'
         )

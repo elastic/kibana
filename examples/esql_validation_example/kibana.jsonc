@@ -1,0 +1,17 @@
+{
+    "type": "plugin",
+    "id": "@kbn/esql-validation-example-plugin",
+    "owner": "@elastic/kibana-esql",
+    "plugin": {
+      "id": "esqlValidationExample",
+      "server": false,
+      "browser": true,
+      "configPath": [
+        "esql_validation_example"
+      ],
+      "requiredPlugins": [
+        "dataViews",
+        "developerExamples"
+      ]
+    }
+  }

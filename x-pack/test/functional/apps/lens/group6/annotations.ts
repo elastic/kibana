@@ -26,8 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const from = 'Sep 19, 2015 @ 06:31:44.000';
   const to = 'Sep 23, 2015 @ 18:31:44.000';
 
-  // FLAKY: https://github.com/elastic/kibana/issues/174653
-  describe.skip('lens annotations tests', () => {
+  describe('lens annotations tests', () => {
     before(async () => {
       await PageObjects.common.setTime({ from, to });
     });
@@ -156,7 +155,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await testSubjects.click('confirmSaveSavedObjectButton');
 
-        const toastContents = await toastsService.getToastContent(1);
+        const toastContents = await toastsService.getContentByIndex(1);
 
         expect(toastContents).to.be(
           `Saved "${ANNOTATION_GROUP_TITLE}"\nView or manage in the annotation library.`

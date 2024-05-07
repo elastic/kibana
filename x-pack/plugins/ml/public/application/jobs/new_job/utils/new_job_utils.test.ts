@@ -6,7 +6,7 @@
  */
 
 import type { IUiSettingsClient } from '@kbn/core/public';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { createSearchItems } from './new_job_utils';
 import { fromSavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import type { ISearchSource } from '@kbn/data-plugin/public';
@@ -44,7 +44,8 @@ describe('createSearchItems', () => {
       [],
       {
         getField: getFieldMock(searchSource),
-      } as unknown as ISearchSource
+      } as unknown as ISearchSource,
+      false
     );
 
   test('should match data view', () => {

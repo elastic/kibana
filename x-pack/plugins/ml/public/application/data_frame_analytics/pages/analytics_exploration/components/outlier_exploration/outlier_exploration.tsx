@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, FC } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import { EuiCallOut, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { isOutlierAnalysis, FEATURE_INFLUENCE } from '@kbn/ml-data-frame-analytics-utils';
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   useColorRange,
   COLOR_RANGE,
@@ -32,7 +33,7 @@ import { ExplorationQueryBar } from '../exploration_query_bar';
 import { getFeatureCount } from './common';
 import { useOutlierData } from './use_outlier_data';
 import { useExplorationUrlState } from '../../hooks/use_exploration_url_state';
-import { ExplorationQueryBarProps } from '../exploration_query_bar/exploration_query_bar';
+import type { ExplorationQueryBarProps } from '../exploration_query_bar/exploration_query_bar';
 import { DataViewPrompt } from '../data_view_prompt';
 
 export type TableItem = Record<string, any>;

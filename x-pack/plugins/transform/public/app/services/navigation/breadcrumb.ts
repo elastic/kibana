@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { textService } from '../text';
 
 type SetBreadcrumbs = ManagementAppMountParams['setBreadcrumbs'];

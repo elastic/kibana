@@ -9,6 +9,7 @@
 import { ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { RemovePanelAction, RemovePanelActionApi } from './remove_panel_action';
+import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
 
 describe('Remove panel action', () => {
   let action: RemovePanelAction;
@@ -20,11 +21,7 @@ describe('Remove panel action', () => {
       embeddable: {
         uuid: 'superId',
         viewMode: new BehaviorSubject<ViewMode>('edit'),
-        parentApi: {
-          removePanel: jest.fn(),
-          canRemovePanels: jest.fn().mockReturnValue(true),
-          replacePanel: jest.fn(),
-        },
+        parentApi: getMockPresentationContainer(),
       },
     };
   });

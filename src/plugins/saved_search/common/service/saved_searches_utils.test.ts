@@ -37,7 +37,8 @@ describe('saved_searches_utils', () => {
           ['tags-1', 'tags-2'],
           [],
           createSearchSourceMock(),
-          {}
+          {},
+          false
         )
       ).toMatchInlineSnapshot(`
         Object {
@@ -48,10 +49,12 @@ describe('saved_searches_utils', () => {
           ],
           "description": "foo",
           "grid": Object {},
+          "headerRowHeight": undefined,
           "hideAggregatedPreview": undefined,
           "hideChart": true,
           "id": "id",
           "isTextBasedQuery": false,
+          "managed": false,
           "references": Array [],
           "refreshInterval": undefined,
           "rowHeight": undefined,
@@ -88,6 +91,7 @@ describe('saved_searches_utils', () => {
           "title": "saved search",
           "usesAdHocDataView": false,
           "viewMode": undefined,
+          "visContext": undefined,
         }
       `);
     });
@@ -106,6 +110,7 @@ describe('saved_searches_utils', () => {
         hideChart: true,
         isTextBasedQuery: true,
         usesAdHocDataView: false,
+        managed: false,
       };
 
       expect(toSavedSearchAttributes(savedSearch, '{}')).toMatchInlineSnapshot(`
@@ -117,6 +122,7 @@ describe('saved_searches_utils', () => {
           ],
           "description": "description",
           "grid": Object {},
+          "headerRowHeight": undefined,
           "hideAggregatedPreview": undefined,
           "hideChart": true,
           "isTextBasedQuery": true,
@@ -138,6 +144,7 @@ describe('saved_searches_utils', () => {
           "title": "title",
           "usesAdHocDataView": false,
           "viewMode": undefined,
+          "visContext": undefined,
         }
       `);
     });

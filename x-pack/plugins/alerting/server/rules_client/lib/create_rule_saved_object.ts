@@ -108,7 +108,7 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
       } catch (err) {
         // Skip the cleanup error and throw the task manager error to avoid confusion
         context.logger.error(
-          `Failed to cleanup alert "${createdAlert.id}" after scheduling task failed. Error: ${err.message}`
+          `Failed to cleanup rule "${createdAlert.id}" after scheduling task failed. Error: ${err.message}`
         );
       }
       throw e;

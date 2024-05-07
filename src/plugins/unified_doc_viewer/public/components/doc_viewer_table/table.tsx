@@ -15,10 +15,12 @@ import {
   EuiSpacer,
   EuiTablePagination,
   EuiSelectableMessage,
-  EuiI18n,
   EuiDataGrid,
   EuiDataGridProps,
   EuiDataGridColumnCellActionProps,
+  EuiI18n,
+  useEuiTheme,
+  useResizeObserver,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
@@ -32,7 +34,11 @@ import {
   isNestedFieldParent,
   usePager,
 } from '@kbn/discover-utils';
-import { fieldNameWildcardMatcher, getFieldSearchMatchingHighlight } from '@kbn/field-utils';
+import {
+  fieldNameWildcardMatcher,
+  getFieldSearchMatchingHighlight,
+  getTextBasedColumnIconType,
+} from '@kbn/field-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { FieldName } from '@kbn/unified-doc-viewer';
 import { getUnifiedDocViewerServices } from '../../plugin';
@@ -99,13 +105,20 @@ const updateSearchText = debounce(
 
 export const DocViewerTable = ({
   columns,
-  columnTypes,
+  columnsMeta,
   hit,
   dataView,
   filter,
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) => {
+  const { euiTheme } = useEuiTheme();
+  const [ref, setRef] = useState<HTMLDivElement | HTMLSpanElement | null>(null);
+  const dimensions = useResizeObserver(ref);
+  const showActionsInsideTableCell = dimensions?.width
+    ? dimensions.width > euiTheme.breakpoint.m
+    : false;
+
   const { fieldFormats, storage, uiSettings } = getUnifiedDocViewerServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
   const currentDataViewId = dataView.id!;
@@ -157,8 +170,10 @@ export const DocViewerTable = ({
     (field: string): TableRow => {
       const fieldMapping = mapping(field);
       const displayName = fieldMapping?.displayName ?? field;
-      const fieldType = columnTypes
-        ? columnTypes[field] // for text-based results types come separately
+      const columnMeta = columnsMeta?.[field];
+      const columnIconType = getTextBasedColumnIconType(columnMeta);
+      const fieldType = columnIconType
+        ? columnIconType // for text-based results types come separately
         : isNestedFieldParent(field, dataView)
         ? 'nested'
         : fieldMapping
@@ -200,7 +215,8 @@ export const DocViewerTable = ({
       hit,
       onToggleColumn,
       filter,
-      columnTypes,
+      columns,
+      columnsMeta,
       flattened,
       pinnedFields,
       onTogglePinned,
@@ -318,7 +334,7 @@ export const DocViewerTable = ({
   const rows = [...pinnedItems, ...restItems.slice(startIndex, pageSize + startIndex)];
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
+    <EuiFlexGroup direction="column" gutterSize="none" responsive={false} ref={setRef}>
       <EuiFlexItem grow={false}>
         <EuiSpacer size="s" />
       </EuiFlexItem>

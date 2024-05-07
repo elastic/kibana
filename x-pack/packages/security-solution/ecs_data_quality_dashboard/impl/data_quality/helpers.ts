@@ -6,10 +6,7 @@
  */
 
 import type { HttpHandler } from '@kbn/core-http-browser';
-import type {
-  IlmExplainLifecycleLifecycleExplain,
-  IndicesStatsIndicesStats,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
 import { has, sortBy } from 'lodash/fp';
 import { IToasts } from '@kbn/core-notifications-browser';
 import { getIlmPhase } from './data_quality_panel/pattern/helpers';
@@ -23,6 +20,8 @@ import type {
   EcsMetadata,
   EnrichedFieldMetadata,
   ErrorSummary,
+  IlmPhase,
+  MeteringStatsIndex,
   PartitionedFieldMetadata,
   PartitionedFieldMetadataStats,
   PatternRollup,
@@ -41,7 +40,7 @@ export const getIndexNames = ({
   ilmExplain: Record<string, IlmExplainLifecycleLifecycleExplain> | null;
   ilmPhases: string[];
   isILMAvailable: boolean;
-  stats: Record<string, IndicesStatsIndicesStats> | null;
+  stats: Record<string, MeteringStatsIndex> | null;
 }): string[] => {
   if (((isILMAvailable && ilmExplain != null) || !isILMAvailable) && stats != null) {
     const allIndexNames = Object.keys(stats);
@@ -269,15 +268,15 @@ export const getDocsCount = ({
   stats,
 }: {
   indexName: string;
-  stats: Record<string, IndicesStatsIndicesStats> | null;
-}): number => (stats && stats[indexName]?.primaries?.docs?.count) ?? 0;
+  stats: Record<string, MeteringStatsIndex> | null;
+}): number => (stats && stats[indexName]?.num_docs) ?? 0;
 
 export const getIndexId = ({
   indexName,
   stats,
 }: {
   indexName: string;
-  stats: Record<string, IndicesStatsIndicesStats> | null;
+  stats: Record<string, MeteringStatsIndex> | null;
 }): string | null | undefined => stats && stats[indexName]?.uuid;
 
 export const getSizeInBytes = ({
@@ -285,15 +284,15 @@ export const getSizeInBytes = ({
   stats,
 }: {
   indexName: string;
-  stats: Record<string, IndicesStatsIndicesStats> | null;
-}): number => (stats && stats[indexName]?.primaries?.store?.total_data_set_size_in_bytes) ?? 0;
+  stats: Record<string, MeteringStatsIndex> | null;
+}): number | undefined => (stats && stats[indexName]?.size_in_bytes) ?? undefined;
 
 export const getTotalDocsCount = ({
   indexNames,
   stats,
 }: {
   indexNames: string[];
-  stats: Record<string, IndicesStatsIndicesStats> | null;
+  stats: Record<string, MeteringStatsIndex> | null;
 }): number =>
   indexNames.reduce(
     (acc: number, indexName: string) => acc + getDocsCount({ stats, indexName }),
@@ -305,12 +304,22 @@ export const getTotalSizeInBytes = ({
   stats,
 }: {
   indexNames: string[];
-  stats: Record<string, IndicesStatsIndicesStats> | null;
-}): number =>
-  indexNames.reduce(
-    (acc: number, indexName: string) => acc + getSizeInBytes({ stats, indexName }),
-    0
-  );
+  stats: Record<string, MeteringStatsIndex> | null;
+}): number | undefined => {
+  let sum;
+  for (let i = 0; i < indexNames.length; i++) {
+    const currentSizeInBytes = getSizeInBytes({ stats, indexName: indexNames[i] });
+    if (currentSizeInBytes != null) {
+      if (sum == null) {
+        sum = 0;
+      }
+      sum += currentSizeInBytes;
+    } else {
+      return undefined;
+    }
+  }
+  return sum;
+};
 
 export const EMPTY_STAT = '--';
 
@@ -449,51 +458,118 @@ export const getErrorSummaries = (
 
 export const RESULTS_API_ROUTE = '/internal/ecs_data_quality_dashboard/results';
 
-export interface ResultData {
-  meta: DataQualityIndexCheckedParams;
-  rollup: PatternRollup;
+export interface StorageResult {
+  batchId: string;
+  indexName: string;
+  indexPattern: string;
+  isCheckAll: boolean;
+  checkedAt: number;
+  docsCount: number;
+  totalFieldCount: number;
+  ecsFieldCount: number;
+  customFieldCount: number;
+  incompatibleFieldCount: number;
+  sameFamilyFieldCount: number;
+  sameFamilyFields: string[];
+  unallowedMappingFields: string[];
+  unallowedValueFields: string[];
+  sizeInBytes: number;
+  ilmPhase?: IlmPhase;
+  markdownComments: string[];
+  ecsVersion: string;
+  indexId: string;
+  error: string | null;
 }
 
-export async function postResult({
+export const formatStorageResult = ({
   result,
+  report,
+  partitionedFieldMetadata,
+}: {
+  result: DataQualityCheckResult;
+  report: DataQualityIndexCheckedParams;
+  partitionedFieldMetadata: PartitionedFieldMetadata;
+}): StorageResult => ({
+  batchId: report.batchId,
+  indexName: result.indexName,
+  indexPattern: result.pattern,
+  isCheckAll: report.isCheckAll,
+  checkedAt: result.checkedAt ?? Date.now(),
+  docsCount: result.docsCount ?? 0,
+  totalFieldCount: partitionedFieldMetadata.all.length,
+  ecsFieldCount: partitionedFieldMetadata.ecsCompliant.length,
+  customFieldCount: partitionedFieldMetadata.custom.length,
+  incompatibleFieldCount: partitionedFieldMetadata.incompatible.length,
+  sameFamilyFieldCount: partitionedFieldMetadata.sameFamily.length,
+  sameFamilyFields: report.sameFamilyFields ?? [],
+  unallowedMappingFields: report.unallowedMappingFields ?? [],
+  unallowedValueFields: report.unallowedValueFields ?? [],
+  sizeInBytes: report.sizeInBytes ?? 0,
+  ilmPhase: result.ilmPhase,
+  markdownComments: result.markdownComments,
+  ecsVersion: report.ecsVersion,
+  indexId: report.indexId ?? '', // ---> we don't have this field when isILMAvailable is false
+  error: result.error,
+});
+
+export const formatResultFromStorage = ({
+  storageResult,
+  pattern,
+}: {
+  storageResult: StorageResult;
+  pattern: string;
+}): DataQualityCheckResult => ({
+  docsCount: storageResult.docsCount,
+  error: storageResult.error,
+  ilmPhase: storageResult.ilmPhase,
+  incompatible: storageResult.incompatibleFieldCount,
+  indexName: storageResult.indexName,
+  markdownComments: storageResult.markdownComments,
+  sameFamily: storageResult.sameFamilyFieldCount,
+  checkedAt: storageResult.checkedAt,
+  pattern,
+});
+
+export async function postStorageResult({
+  storageResult,
   httpFetch,
   toasts,
-  abortController,
+  abortController = new AbortController(),
 }: {
-  result: ResultData;
+  storageResult: StorageResult;
   httpFetch: HttpHandler;
   toasts: IToasts;
-  abortController: AbortController;
+  abortController?: AbortController;
 }): Promise<void> {
   try {
     await httpFetch<void>(RESULTS_API_ROUTE, {
       method: 'POST',
       signal: abortController.signal,
       version: INTERNAL_API_VERSION,
-      body: JSON.stringify(result),
+      body: JSON.stringify(storageResult),
     });
   } catch (err) {
     toasts.addError(err, { title: i18n.POST_RESULT_ERROR_TITLE });
   }
 }
 
-export async function getResults({
-  patterns,
+export async function getStorageResults({
+  pattern,
   httpFetch,
   toasts,
   abortController,
 }: {
-  patterns: string[];
+  pattern: string;
   httpFetch: HttpHandler;
   toasts: IToasts;
   abortController: AbortController;
-}): Promise<ResultData[]> {
+}): Promise<StorageResult[]> {
   try {
-    const results = await httpFetch<ResultData[]>(RESULTS_API_ROUTE, {
+    const results = await httpFetch<StorageResult[]>(RESULTS_API_ROUTE, {
       method: 'GET',
       signal: abortController.signal,
       version: INTERNAL_API_VERSION,
-      query: { patterns: patterns.join(',') },
+      query: { pattern },
     });
     return results;
   } catch (err) {

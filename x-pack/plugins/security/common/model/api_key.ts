@@ -22,7 +22,7 @@ export interface RestApiKey extends BaseApiKey {
 }
 
 /**
- * Interface representing a Cross-Cluster API key the way it is returned by Elasticsearch GET endpoint.
+ * Interface representing a cross-cluster API key the way it is returned by Elasticsearch GET endpoint.
  *
  * TODO: Remove this type when `@elastic/elasticsearch` has been updated.
  */

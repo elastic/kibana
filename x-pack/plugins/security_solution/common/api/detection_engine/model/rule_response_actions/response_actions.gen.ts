@@ -81,22 +81,38 @@ export const RuleResponseOsqueryAction = z.object({
   params: OsqueryParamsCamelCase,
 });
 
-export type EndpointParams = z.infer<typeof EndpointParams>;
-export const EndpointParams = z.object({
+export type DefaultParams = z.infer<typeof DefaultParams>;
+export const DefaultParams = z.object({
   command: z.literal('isolate'),
   comment: z.string().optional(),
+});
+
+export type ProcessesParams = z.infer<typeof ProcessesParams>;
+export const ProcessesParams = z.object({
+  command: z.enum(['kill-process', 'suspend-process']),
+  comment: z.string().optional(),
+  config: z.object({
+    /**
+     * Field to use instead of process.pid
+     */
+    field: z.string(),
+    /**
+     * Whether to overwrite field with process.pid
+     */
+    overwrite: z.boolean().optional().default(true),
+  }),
 });
 
 export type EndpointResponseAction = z.infer<typeof EndpointResponseAction>;
 export const EndpointResponseAction = z.object({
   action_type_id: z.literal('.endpoint'),
-  params: EndpointParams,
+  params: z.union([DefaultParams, ProcessesParams]),
 });
 
 export type RuleResponseEndpointAction = z.infer<typeof RuleResponseEndpointAction>;
 export const RuleResponseEndpointAction = z.object({
   actionTypeId: z.literal('.endpoint'),
-  params: EndpointParams,
+  params: z.union([DefaultParams, ProcessesParams]),
 });
 
 export type ResponseAction = z.infer<typeof ResponseAction>;

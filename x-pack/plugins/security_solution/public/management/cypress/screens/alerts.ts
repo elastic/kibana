@@ -47,6 +47,13 @@ export const openAlertDetailsView = (rowIndex: number = 0): void => {
   cy.getByTestSubj('take-action-dropdown-btn').click();
 };
 
+export const openAlertDetailsViewFromTimeline = (rowIndex: number = 0): void => {
+  cy.getByTestSubj('timeline-container').within(() => {
+    cy.getByTestSubj('expand-event').eq(rowIndex).click();
+  });
+  cy.getByTestSubj('take-action-dropdown-btn').click();
+};
+
 export const openInvestigateInTimelineView = (): void => {
   cy.getByTestSubj('send-alert-to-timeline-button').first().click();
 };

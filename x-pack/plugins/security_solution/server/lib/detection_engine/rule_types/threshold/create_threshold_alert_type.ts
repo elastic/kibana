@@ -19,7 +19,7 @@ import { validateIndexPatterns } from '../utils';
 export const createThresholdAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<ThresholdRuleParams, ThresholdAlertState, {}, 'default'> => {
-  const { version, licensing } = createOptions;
+  const { version, licensing, experimentalFeatures } = createOptions;
   return {
     id: THRESHOLD_RULE_TYPE_ID,
     name: 'Threshold Rule',
@@ -40,6 +40,9 @@ export const createThresholdAlertType = (
           return mutatedRuleParams;
         },
       },
+    },
+    schemas: {
+      params: { type: 'zod', schema: ThresholdRuleParams },
     },
     actionGroups: [
       {
@@ -100,6 +103,7 @@ export const createThresholdAlertType = (
         spaceId,
         runOpts: execOptions.runOpts,
         licensing,
+        experimentalFeatures,
       });
       return result;
     },

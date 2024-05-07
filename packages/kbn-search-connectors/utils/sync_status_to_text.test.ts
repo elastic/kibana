@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SyncStatus } from '..';
-
 import { syncStatusToColor, syncStatusToText } from './sync_status_to_text';
+import { isSyncCancellable, SyncStatus } from '..';
 
 describe('syncStatusToText', () => {
   it('should return correct value for completed', () => {
@@ -55,5 +54,35 @@ describe('syncStatusToColor', () => {
   });
   it('should return correct value for suspended', () => {
     expect(syncStatusToColor(SyncStatus.SUSPENDED)).toEqual('warning');
+  });
+});
+
+describe('isSyncCancellable', () => {
+  it('should return true for in progress status', () => {
+    expect(isSyncCancellable(SyncStatus.IN_PROGRESS)).toBe(true);
+  });
+
+  it('should return true for pending status', () => {
+    expect(isSyncCancellable(SyncStatus.PENDING)).toBe(true);
+  });
+
+  it('should return true for suspended status', () => {
+    expect(isSyncCancellable(SyncStatus.SUSPENDED)).toBe(true);
+  });
+
+  it('should return false for canceling status', () => {
+    expect(isSyncCancellable(SyncStatus.CANCELING)).toBe(false);
+  });
+
+  it('should return false for completed status', () => {
+    expect(isSyncCancellable(SyncStatus.COMPLETED)).toBe(false);
+  });
+
+  it('should return false for error status', () => {
+    expect(isSyncCancellable(SyncStatus.ERROR)).toBe(false);
+  });
+
+  it('should return false for canceled status', () => {
+    expect(isSyncCancellable(SyncStatus.CANCELED)).toBe(false);
   });
 });

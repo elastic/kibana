@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  type QueryMode,
-  QUERY_MODE,
-} from '../../../../common/api/log_categorization/get_category_query';
+import { type QueryMode, QUERY_MODE } from '@kbn/aiops-log-pattern-analysis/get_category_query';
 import { useEuiTheme } from '../../../hooks/use_eui_theme';
-import { getLabels } from './labels';
+import type { getLabels } from './labels';
 
 interface Props {
   categoriesCount: number;

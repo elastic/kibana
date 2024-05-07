@@ -6,8 +6,8 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core/public';
+import type { ReportingPublicComponents } from '@kbn/reporting-public/share';
 import { ReportingPublicPlugin } from './plugin';
-import type { ReportingPublicComponents } from './shared/get_shared_components';
 
 /**
  * Setup contract for the Reporting plugin.
@@ -30,12 +30,6 @@ export interface ReportingSetup {
  * Start contract for the Reporting plugin.
  */
 export type ReportingStart = ReportingSetup;
-
-/**
- * Public interface needed for shared components
- */
-export type { ApplicationProps } from './shared';
-export type { ReportingPublicComponents };
 
 /**
  * @internal

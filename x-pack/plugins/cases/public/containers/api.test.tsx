@@ -40,6 +40,7 @@ import {
   getCaseUserActionsStats,
   deleteFileAttachments,
   getCategories,
+  replaceCustomField,
 } from './api';
 
 import {
@@ -64,6 +65,7 @@ import {
   basicPushSnake,
   getCaseUserActionsStatsResponse,
   basicFileMock,
+  customFieldsMock,
 } from './mock';
 
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './constants';
@@ -1150,6 +1152,42 @@ describe('Cases API', () => {
     it('should return correct response', async () => {
       const resp = await getCaseConnectors(basicCase.id, abortCtrl.signal);
       expect(resp).toEqual({ 'servicenow-1': connectorCamelCase });
+    });
+  });
+
+  describe('replaceCustomField', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(customFieldsMock[0]);
+    });
+
+    const data = {
+      caseId: basicCase.id,
+      customFieldId: customFieldsMock[0].key,
+      request: {
+        value: 'this is an updated custom field',
+        caseVersion: basicCase.version,
+      },
+    };
+
+    it('should be called with correct check url, method, signal', async () => {
+      await replaceCustomField({ ...data, signal: abortCtrl.signal });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${CASES_INTERNAL_URL}/${basicCase.id}/custom_fields/${customFieldsMock[0].key}`,
+        {
+          method: 'PUT',
+          body: JSON.stringify({
+            ...data.request,
+          }),
+          signal: abortCtrl.signal,
+        }
+      );
+    });
+
+    it('should return correct response', async () => {
+      const resp = await replaceCustomField({ ...data, signal: abortCtrl.signal });
+      expect(resp).toEqual(customFieldsMock[0]);
     });
   });
 });

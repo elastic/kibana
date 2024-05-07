@@ -7,7 +7,7 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-utils';
+import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -24,6 +24,7 @@ const LOG_RATE_ANALYSYS_DATA_GENERATOR = {
   ARTIFICIAL_LOGS_WITH_SPIKE_TEXTFIELD: 'artificial_logs_with_spike_textfield',
   ARTIFICIAL_LOGS_WITH_DIP: 'artificial_logs_with_dip',
   ARTIFICIAL_LOGS_WITH_DIP_TEXTFIELD: 'artificial_logs_with_dip_textfield',
+  LARGE_ARRAYS: 'large_arrays',
 } as const;
 export type LogRateAnalysisDataGenerator =
   typeof LOG_RATE_ANALYSYS_DATA_GENERATOR[keyof typeof LOG_RATE_ANALYSYS_DATA_GENERATOR];
@@ -46,7 +47,9 @@ const BASELINE_TS = DEVIATION_TS - DAY_MS * 1;
 
 function getTextFieldMessage(timestamp: number, user: string, url: string, responseCode: string) {
   const date = new Date(timestamp);
-  return `${user} [${date.toLocaleString('en-US')}] "GET /${url} HTTP/1.1" ${responseCode}`;
+  return `${user} [${date.toLocaleString('en-US', {
+    timeZone: 'UTC',
+  })}] "GET /${url} HTTP/1.1" ${responseCode}`;
 }
 
 function getArtificialLogsWithDeviation(
@@ -224,7 +227,9 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
     public async generateData(dataGenerator: LogRateAnalysisDataGenerator) {
       switch (dataGenerator) {
         case 'kibana_sample_data_logs':
-          // will be added via UI
+          await esArchiver.loadIfNeeded(
+            'test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb'
+          );
           break;
 
         case 'farequote_with_spike':
@@ -268,14 +273,10 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
         case 'artificial_logs_with_dip_zerodocsfallback':
         case 'artificial_logs_with_dip_textfield_zerodocsfallback':
           try {
-            const indexExists = await es.indices.exists({
+            await es.indices.delete({
               index: dataGenerator,
+              ignore_unavailable: true,
             });
-            if (indexExists) {
-              await es.indices.delete({
-                index: dataGenerator,
-              });
-            }
           } catch (e) {
             log.info(`Could not delete index '${dataGenerator}' in before() callback`);
           }
@@ -320,6 +321,10 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
           });
           break;
 
+        case 'large_arrays':
+          await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/large_arrays');
+          break;
+
         default:
           log.error(`Unsupported data generator '${dataGenerator}`);
       }
@@ -328,7 +333,9 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
     public async removeGeneratedData(dataGenerator: LogRateAnalysisDataGenerator) {
       switch (dataGenerator) {
         case 'kibana_sample_data_logs':
-          // do not remove
+          await esArchiver.unload(
+            'test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb'
+          );
           break;
 
         case 'farequote_with_spike':
@@ -350,6 +357,10 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
           } catch (e) {
             log.error(`Error deleting index '${dataGenerator}' in after() callback`);
           }
+          break;
+
+        case 'large_arrays':
+          await esArchiver.unload('x-pack/test/functional/es_archives/large_arrays');
           break;
 
         default:

@@ -7,7 +7,7 @@
  */
 import { AppUpdater } from '@kbn/core/public';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { coreMock } from '@kbn/core/public/mocks';
+import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { DiscoverSetupPlugins } from '../plugin';
 import { initializeKbnUrlTracking } from './initialize_kbn_url_tracking';
 
@@ -20,12 +20,13 @@ describe('initializeKbnUrlTracking', () => {
         },
       },
     } as DiscoverSetupPlugins;
-    const result = initializeKbnUrlTracking(
-      '',
-      coreMock.createSetup(),
-      new BehaviorSubject<AppUpdater>(() => ({})),
-      pluginsSetup
-    );
+    const result = initializeKbnUrlTracking({
+      baseUrl: '',
+      core: coreMock.createSetup(),
+      navLinkUpdater$: new BehaviorSubject<AppUpdater>(() => ({})),
+      plugins: pluginsSetup,
+      getScopedHistory: () => scopedHistoryMock.create(),
+    });
     expect(result).toMatchInlineSnapshot(`
       Object {
         "appMounted": [Function],

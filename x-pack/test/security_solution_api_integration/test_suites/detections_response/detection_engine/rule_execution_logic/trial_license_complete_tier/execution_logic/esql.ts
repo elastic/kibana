@@ -7,25 +7,27 @@
 
 import expect from 'expect';
 import { v4 as uuidv4 } from 'uuid';
-import { orderBy } from 'lodash';
 
 import { EsqlRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
 import { getCreateEsqlRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
 import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
+import { ENABLE_ASSET_CRITICALITY_SETTING } from '@kbn/security-solution-plugin/common/constants';
 import {
-  deleteAllRules,
-  deleteAllAlerts,
   getPreviewAlerts,
   previewRule,
-  createRule,
-  getOpenAlerts,
+  getAlerts,
   dataGeneratorFactory,
   previewRuleWithExceptionEntries,
   removeRandomValuedPropertiesFromAlert,
   patchRule,
 } from '../../../../utils';
+import {
+  deleteAllRules,
+  deleteAllAlerts,
+  createRule,
+} from '../../../../../../../common/utils/security_solution';
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
@@ -34,6 +36,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
+  const kibanaServer = getService('kibanaServer');
   const { indexEnhancedDocuments, indexListOfDocuments, indexGeneratedDocuments } =
     dataGeneratorFactory({
       es,
@@ -63,7 +66,7 @@ export default ({ getService }: FtrProviderContext) => {
       const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
       const doc1 = { agent: { name: 'test-1' } };
       const doc2 = { agent: { name: 'test-2' } };
-      const ruleQuery = `from ecs_compliant [metadata _id, _index, _version] ${internalIdPipe(
+      const ruleQuery = `from ecs_compliant metadata _id, _index, _version ${internalIdPipe(
         id
       )} | where agent.name=="test-1"`;
       const rule: EsqlRuleCreateProps = {
@@ -80,7 +83,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       const createdRule = await createRule(supertest, log, rule);
-      const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+      const alerts = await getAlerts(supertest, log, es, createdRule);
 
       expect(alerts.hits.hits.length).toBe(1);
       expect(removeRandomValuedPropertiesFromAlert(alerts.hits.hits[0]._source)).toEqual({
@@ -240,7 +243,7 @@ export default ({ getService }: FtrProviderContext) => {
         const rule: EsqlRuleCreateProps = {
           ...getCreateEsqlRulesSchemaMock('rule-1', true),
           // only _id and agent.name is projected at the end of query pipeline
-          query: `from ecs_compliant [metadata _id] ${internalIdPipe(id)} | keep _id, agent.name`,
+          query: `from ecs_compliant metadata _id ${internalIdPipe(id)} | keep _id, agent.name`,
           from: 'now-1h',
           interval: '1h',
         };
@@ -275,6 +278,44 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
 
+      it('should support deprecated [metadata _id] syntax', async () => {
+        const id = uuidv4();
+        const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
+        const doc1 = {
+          agent: { name: 'test-1', version: '2', type: 'auditbeat' },
+          host: { name: 'my-host' },
+          client: { ip: '127.0.0.1' },
+        };
+
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          // only _id and agent.name is projected at the end of query pipeline
+          query: `from ecs_compliant [metadata _id] ${internalIdPipe(id)} | keep _id, agent.name`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        await indexEnhancedDocuments({
+          documents: [doc1],
+          interval,
+          id,
+        });
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+        });
+
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          size: 10,
+        });
+
+        expect(previewAlerts.length).toBe(1);
+      });
+
       it('should deduplicate alerts correctly based on source document _id', async () => {
         const id = uuidv4();
         // document will fall into 2 rule execution windows
@@ -287,7 +328,7 @@ export default ({ getService }: FtrProviderContext) => {
         const rule: EsqlRuleCreateProps = {
           ...getCreateEsqlRulesSchemaMock('rule-1', true),
           // only _id and agent.name is projected at the end of query pipeline
-          query: `from ecs_compliant [metadata _id] ${internalIdPipe(id)} | keep _id, agent.name`,
+          query: `from ecs_compliant metadata _id ${internalIdPipe(id)} | keep _id, agent.name`,
           from: 'now-45m',
           interval: '30m',
         };
@@ -380,13 +421,11 @@ export default ({ getService }: FtrProviderContext) => {
           timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
         });
 
-        const previewAlerts = await getPreviewAlerts({ es, previewId });
-
-        const previewAlertsOrderedByAgentName = orderBy(
-          previewAlerts,
-          ['_source', 'agent.name'],
-          'asc'
-        );
+        const previewAlertsOrderedByAgentName = await getPreviewAlerts({
+          es,
+          previewId,
+          sort: ['agent.name'],
+        });
 
         expect(previewAlertsOrderedByAgentName.length).toBe(3);
         expect(previewAlertsOrderedByAgentName[0]._source).toEqual(
@@ -520,7 +559,11 @@ export default ({ getService }: FtrProviderContext) => {
           timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
         });
 
-        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          sort: ['event.ingested'],
+        });
 
         expect(previewAlerts.length).toBe(2);
         expect(previewAlerts[0]._source).toHaveProperty(['event.ingested'], expectedEventIngested);
@@ -720,7 +763,7 @@ export default ({ getService }: FtrProviderContext) => {
         const id = uuidv4();
         const rule: EsqlRuleCreateProps = {
           ...getCreateEsqlRulesSchemaMock(`rule-${id}`, true),
-          query: `from ecs_compliant [metadata _id] ${internalIdPipe(
+          query: `from ecs_compliant metadata _id ${internalIdPipe(
             id
           )} | keep _id, agent.name | sort agent.name`,
           from: '2020-10-28T05:15:00.000Z',
@@ -781,7 +824,7 @@ export default ({ getService }: FtrProviderContext) => {
         const createdRule = await createRule(supertest, log, rule);
 
         // first rule run should generate 100 alerts from first 3 batches of index documents
-        const alertsResponseFromFirstRuleExecution = await getOpenAlerts(
+        const alertsResponseFromFirstRuleExecution = await getAlerts(
           supertest,
           log,
           es,
@@ -806,7 +849,7 @@ export default ({ getService }: FtrProviderContext) => {
           enabled: true,
         });
 
-        const alertsResponse = await getOpenAlerts(
+        const alertsResponse = await getAlerts(
           supertest,
           log,
           es,
@@ -862,6 +905,9 @@ export default ({ getService }: FtrProviderContext) => {
     describe('with asset criticality', async () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
+        await kibanaServer.uiSettings.update({
+          [ENABLE_ASSET_CRITICALITY_SETTING]: true,
+        });
       });
 
       after(async () => {
@@ -892,9 +938,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(previewAlerts.length).toBe(1);
 
-        expect(previewAlerts[0]?._source?.['kibana.alert.host.criticality_level']).toBe(
-          'very_important'
-        );
+        expect(previewAlerts[0]?._source?.['host.asset.criticality']).toBe('extreme_impact');
       });
     });
 
@@ -907,7 +951,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const rule: EsqlRuleCreateProps = {
           ...getCreateEsqlRulesSchemaMock('rule-1', true),
-          query: `from ecs_compliant [metadata _id] ${internalIdPipe(
+          query: `from ecs_compliant metadata _id ${internalIdPipe(
             id
           )} | where agent.name=="test-1"`,
           from: 'now-1h',
@@ -950,7 +994,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const rule: EsqlRuleCreateProps = {
           ...getCreateEsqlRulesSchemaMock('rule-1', true),
-          query: `from ecs_compliant [metadata _id] ${internalIdPipe(
+          query: `from ecs_compliant metadata _id ${internalIdPipe(
             id
           )} | where agent.name=="test-1"`,
           from: 'now-1h',
@@ -1015,7 +1059,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           const rule: EsqlRuleCreateProps = {
             ...getCreateEsqlRulesSchemaMock('rule-1', true),
-            query: `from ecs_non_compliant [metadata _id] ${internalIdPipe(id)}`,
+            query: `from ecs_non_compliant metadata _id ${internalIdPipe(id)}`,
             from: 'now-1h',
             interval: '1h',
           };

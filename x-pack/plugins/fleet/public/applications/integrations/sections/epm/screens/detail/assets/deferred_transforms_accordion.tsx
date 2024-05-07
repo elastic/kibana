@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useCallback, useMemo, useState } from 'react';
+import React, { Fragment, useCallback, useState, useMemo } from 'react';
 import type { FunctionComponent, MouseEvent } from 'react';
 
 import {
@@ -42,6 +42,7 @@ interface Props {
   packageInfo: PackageInfo;
   type: ElasticsearchAssetType.transform;
   deferredInstallations: EsAssetReference[];
+  forceRefreshAssets?: () => void;
 }
 
 export const getDeferredAssetDescription = (
@@ -83,6 +84,7 @@ export const DeferredTransformAccordion: FunctionComponent<Props> = ({
   packageInfo,
   type,
   deferredInstallations,
+  forceRefreshAssets,
 }) => {
   const { notifications } = useStartServices();
   const [isLoading, setIsLoading] = useState(false);
@@ -159,6 +161,9 @@ export const DeferredTransformAccordion: FunctionComponent<Props> = ({
               ),
               { toastLifeTimeMs: 1000 }
             );
+            if (forceRefreshAssets) {
+              forceRefreshAssets();
+            }
           }
         }
       } catch (e) {
@@ -171,11 +176,14 @@ export const DeferredTransformAccordion: FunctionComponent<Props> = ({
               }
             ),
           });
+          if (forceRefreshAssets) {
+            forceRefreshAssets();
+          }
         }
       }
       setIsLoading(false);
     },
-    [notifications.toasts, packageInfo.name, packageInfo.version]
+    [notifications.toasts, packageInfo.name, packageInfo.version, forceRefreshAssets]
   );
   if (deferredTransforms.length === 0) return null;
   return (

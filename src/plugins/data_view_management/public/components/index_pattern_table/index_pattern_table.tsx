@@ -27,6 +27,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
 import { NoDataViewsPromptComponent } from '@kbn/shared-ux-prompt-no-data-views';
 import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
+import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { IndexPatternManagmentContext } from '../../types';
 import { getListBreadcrumbs } from '../breadcrumbs';
 import { type RemoveDataViewProps, removeDataView } from '../edit_index_pattern';
@@ -88,6 +89,7 @@ export const IndexPatternTable = ({
     overlays,
     docLinks,
     noDataPage,
+    ...startServices
   } = useKibana<IndexPatternManagmentContext>().services;
   const [query, setQuery] = useState('');
   const [showCreateDialog, setShowCreateDialog] = useState<boolean>(showCreateDialogProp);
@@ -127,6 +129,7 @@ export const IndexPatternTable = ({
         setSelectedItems([]);
         dataViewController.loadDataViews();
       },
+      startServices,
     });
     if (selectedItems.length === 0) {
       return;
@@ -169,7 +172,7 @@ export const IndexPatternTable = ({
   chrome.docTitle.change(title);
 
   const isRollup =
-    new URLSearchParams(useLocation().search).get('type') === 'rollup' &&
+    new URLSearchParams(useLocation().search).get('type') === DataViewType.ROLLUP &&
     dataViews.getRollupsEnabled();
 
   const ContextWrapper = useMemo(
@@ -182,6 +185,7 @@ export const IndexPatternTable = ({
     uiSettings,
     overlays,
     onDelete: () => dataViewController.loadDataViews(),
+    startServices,
   });
 
   const alertColumn = {
@@ -217,7 +221,7 @@ export const IndexPatternTable = ({
         defaultMessage: 'Name',
       }),
       width: spaces ? '70%' : '90%',
-      render: (name: string, dataView: IndexPatternTableItem) => (
+      render: (_name: string, dataView: IndexPatternTableItem) => (
         <div>
           <EuiLink
             {...reactRouterNavigate(history, `patterns/${dataView.id}`)}
@@ -260,7 +264,7 @@ export const IndexPatternTable = ({
         defaultMessage: 'Spaces',
       }),
       width: '20%',
-      render: (name: string, dataView: IndexPatternTableItem) => {
+      render: (_name: string, dataView: IndexPatternTableItem) => {
         return spaces ? (
           <SpacesList
             spacesApi={spaces}
@@ -339,7 +343,6 @@ export const IndexPatternTable = ({
         <EuiInMemoryTable
           allowNeutralSort={false}
           itemId="id"
-          isSelectable={dataViews.getCanSaveSync()}
           items={indexPatterns}
           columns={columns}
           pagination={pagination}

@@ -22,7 +22,8 @@ import type {
   TextBasedLayerColumn,
   TextBasedPersistedState,
 } from '@kbn/lens-plugin/public/datasources/text_based/types';
-import { AggregateQuery, getIndexPatternFromESQLQuery } from '@kbn/es-query';
+import type { AggregateQuery } from '@kbn/es-query';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import {
   FormulaValueConfig,
   LensAnnotationLayer,
@@ -87,7 +88,7 @@ export function buildReferences(dataviews: Record<string, DataView>) {
 const getAdhocDataView = (dataView: DataView): Record<string, DataViewSpec> => {
   return {
     [dataView.id ?? uuidv4()]: {
-      ...dataView.toSpec(),
+      ...dataView.toSpec(false),
     },
   };
 };

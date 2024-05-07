@@ -11,20 +11,33 @@ import { requestMock } from '../../__mocks__/request';
 import { requestContextMock } from '../../__mocks__/request_context';
 import { postResultsRoute } from './post_results';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
-import type {
-  SecurityHasPrivilegesResponse,
-  WriteResponseBase,
-} from '@elastic/elasticsearch/lib/api/types';
-import { resultBody, resultDocument } from './results.mock';
+import type { WriteResponseBase } from '@elastic/elasticsearch/lib/api/types';
+import { resultDocument } from './results.mock';
+import type { CheckIndicesPrivilegesParam } from './privileges';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
+import { API_CURRENT_USER_ERROR_MESSAGE } from '../../translations';
 
-// TODO: https://github.com/elastic/kibana/pull/173185#issuecomment-1908034302
-describe.skip('postResultsRoute route', () => {
+const mockCheckIndicesPrivileges = jest.fn(({ indices }: CheckIndicesPrivilegesParam) =>
+  Promise.resolve(Object.fromEntries(indices.map((index) => [index, true])))
+);
+jest.mock('./privileges', () => ({
+  checkIndicesPrivileges: (params: CheckIndicesPrivilegesParam) =>
+    mockCheckIndicesPrivileges(params),
+}));
+
+const USER_PROFILE_UID = 'mocked_profile_uid';
+
+describe('postResultsRoute route', () => {
   describe('indexation', () => {
     let server: ReturnType<typeof serverMock.create>;
     let { context } = requestContextMock.createTools();
     let logger: MockedLogger;
 
-    const req = requestMock.create({ method: 'post', path: RESULTS_ROUTE_PATH, body: resultBody });
+    const req = requestMock.create({
+      method: 'post',
+      path: RESULTS_ROUTE_PATH,
+      body: resultDocument,
+    });
 
     beforeEach(() => {
       jest.clearAllMocks();
@@ -34,10 +47,12 @@ describe.skip('postResultsRoute route', () => {
 
       ({ context } = requestContextMock.createTools());
 
-      context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges.mockResolvedValue({
-        has_all_requested: true,
-      } as unknown as SecurityHasPrivilegesResponse);
-
+      context.core.elasticsearch.client.asInternalUser.indices.get.mockResolvedValue({
+        [resultDocument.indexName]: {},
+      });
+      context.core.security.authc.getCurrentUser.mockReturnValue({
+        profile_uid: USER_PROFILE_UID,
+      } as AuthenticatedUser);
       postResultsRoute(server.router, logger);
     });
 
@@ -47,7 +62,7 @@ describe.skip('postResultsRoute route', () => {
 
       const response = await server.inject(req, requestContextMock.convertContext(context));
       expect(mockIndex).toHaveBeenCalledWith({
-        body: { ...resultDocument, '@timestamp': expect.any(Number) },
+        body: { ...resultDocument, '@timestamp': expect.any(Number), checkedBy: USER_PROFILE_UID },
         index: await context.dataQualityDashboard.getResultsIndexName(),
       });
 
@@ -78,14 +93,26 @@ describe.skip('postResultsRoute route', () => {
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({ message: errorMessage, status_code: 500 });
     });
+
+    it('handles current user retrieval error', async () => {
+      context.core.security.authc.getCurrentUser.mockReturnValueOnce(null);
+
+      const response = await server.inject(req, requestContextMock.convertContext(context));
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({ message: API_CURRENT_USER_ERROR_MESSAGE, status_code: 500 });
+    });
   });
 
-  describe('request pattern authorization', () => {
+  describe('request index authorization', () => {
     let server: ReturnType<typeof serverMock.create>;
     let { context } = requestContextMock.createTools();
     let logger: MockedLogger;
 
-    const req = requestMock.create({ method: 'post', path: RESULTS_ROUTE_PATH, body: resultBody });
+    const req = requestMock.create({
+      method: 'post',
+      path: RESULTS_ROUTE_PATH,
+      body: resultDocument,
+    });
 
     beforeEach(() => {
       jest.clearAllMocks();
@@ -95,6 +122,12 @@ describe.skip('postResultsRoute route', () => {
 
       ({ context } = requestContextMock.createTools());
 
+      context.core.security.authc.getCurrentUser.mockReturnValue({
+        profile_uid: USER_PROFILE_UID,
+      } as AuthenticatedUser);
+      context.core.elasticsearch.client.asInternalUser.indices.get.mockResolvedValue({
+        [resultDocument.indexName]: {},
+      });
       context.core.elasticsearch.client.asInternalUser.index.mockResolvedValueOnce({
         result: 'created',
       } as WriteResponseBase);
@@ -102,42 +135,41 @@ describe.skip('postResultsRoute route', () => {
       postResultsRoute(server.router, logger);
     });
 
-    it('should authorize pattern', async () => {
-      const mockHasPrivileges =
-        context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges;
-      mockHasPrivileges.mockResolvedValueOnce({
-        has_all_requested: true,
-      } as unknown as SecurityHasPrivilegesResponse);
-
+    it('should authorize index', async () => {
       const response = await server.inject(req, requestContextMock.convertContext(context));
-      expect(mockHasPrivileges).toHaveBeenCalledWith({
-        index: [
-          {
-            names: [resultBody.rollup.pattern],
-            privileges: ['all', 'read', 'view_index_metadata'],
-          },
-        ],
+      expect(mockCheckIndicesPrivileges).toHaveBeenCalledWith({
+        client: context.core.elasticsearch.client,
+        indices: [resultDocument.indexName],
       });
       expect(context.core.elasticsearch.client.asInternalUser.index).toHaveBeenCalled();
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({ result: 'created' });
     });
 
-    it('should not index unauthorized pattern', async () => {
-      const mockHasPrivileges =
-        context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges;
-      mockHasPrivileges.mockResolvedValueOnce({
-        has_all_requested: false,
-      } as unknown as SecurityHasPrivilegesResponse);
+    it('should authorize data stream', async () => {
+      const dataStreamName = 'test_data_stream_name';
+      context.core.elasticsearch.client.asInternalUser.indices.get.mockResolvedValue({
+        [resultDocument.indexName]: { data_stream: dataStreamName },
+      });
+      mockCheckIndicesPrivileges.mockResolvedValueOnce({ [dataStreamName]: true });
 
       const response = await server.inject(req, requestContextMock.convertContext(context));
-      expect(mockHasPrivileges).toHaveBeenCalledWith({
-        index: [
-          {
-            names: [resultBody.rollup.pattern],
-            privileges: ['all', 'read', 'view_index_metadata'],
-          },
-        ],
+      expect(mockCheckIndicesPrivileges).toHaveBeenCalledWith({
+        client: context.core.elasticsearch.client,
+        indices: [dataStreamName],
+      });
+      expect(context.core.elasticsearch.client.asInternalUser.index).toHaveBeenCalled();
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({ result: 'created' });
+    });
+
+    it('should not index unauthorized index', async () => {
+      mockCheckIndicesPrivileges.mockResolvedValueOnce({ [resultDocument.indexName]: false });
+
+      const response = await server.inject(req, requestContextMock.convertContext(context));
+      expect(mockCheckIndicesPrivileges).toHaveBeenCalledWith({
+        client: context.core.elasticsearch.client,
+        indices: [resultDocument.indexName],
       });
       expect(context.core.elasticsearch.client.asInternalUser.index).not.toHaveBeenCalled();
 
@@ -145,11 +177,9 @@ describe.skip('postResultsRoute route', () => {
       expect(response.body).toEqual({ result: 'noop' });
     });
 
-    it('handles pattern authorization error', async () => {
+    it('handles index authorization error', async () => {
       const errorMessage = 'Error!';
-      const mockHasPrivileges =
-        context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges;
-      mockHasPrivileges.mockRejectedValueOnce({ message: errorMessage });
+      mockCheckIndicesPrivileges.mockRejectedValueOnce(Error(errorMessage));
 
       const response = await server.inject(req, requestContextMock.convertContext(context));
       expect(response.status).toEqual(500);
@@ -170,7 +200,7 @@ describe.skip('postResultsRoute route', () => {
       const req = requestMock.create({
         method: 'post',
         path: RESULTS_ROUTE_PATH,
-        body: { rollup: resultBody.rollup },
+        body: { indexName: 'invalid body' },
       });
       const result = server.validate(req);
 

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import cytoscape from 'cytoscape';
+import type cytoscape from 'cytoscape';
 import { ANALYSIS_CONFIG_TYPE, JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-analytics-utils';
-import { EuiThemeType } from '../../../../components/color_range_legend';
+import type { EuiThemeType } from '../../../../components/color_range_legend';
 import classificationJobIcon from './icons/ml_classification_job.svg';
 import outlierDetectionJobIcon from './icons/ml_outlier_detection_job.svg';
 import regressionJobIcon from './icons/ml_regression_job.svg';

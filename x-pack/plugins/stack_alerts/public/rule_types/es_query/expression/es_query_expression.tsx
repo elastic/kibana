@@ -31,7 +31,7 @@ import { hasExpressionValidationErrors } from '../validation';
 import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_query';
 import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType } from '../types';
 import { IndexSelectPopover } from '../../components/index_select_popover';
-import { DEFAULT_VALUES } from '../constants';
+import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
 import { RuleCommonExpressions } from '../rule_common_expressions';
 import { convertRawRuntimeFieldtoFieldOption, useTriggerUiActionServices } from '../util';
 
@@ -40,6 +40,9 @@ const { useXJsonMode } = XJson;
 export const EsQueryExpression: React.FC<
   RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esQuery>, EsQueryRuleMetaData>
 > = ({ ruleParams, setRuleParams, setRuleProperty, errors, data }) => {
+  const services = useTriggerUiActionServices();
+  const { http, docLinks, isServerless } = services;
+
   const {
     index,
     timeField,
@@ -65,7 +68,7 @@ export const EsQueryExpression: React.FC<
       timeWindowUnit: timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
       threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
       thresholdComparator: thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
-      size: size ?? DEFAULT_VALUES.SIZE,
+      size: size ? size : isServerless ? SERVERLESS_DEFAULT_VALUES.SIZE : DEFAULT_VALUES.SIZE,
       esQuery: esQuery ?? DEFAULT_VALUES.QUERY,
       aggType: aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE,
       groupBy: groupBy ?? DEFAULT_VALUES.GROUP_BY,
@@ -87,9 +90,6 @@ export const EsQueryExpression: React.FC<
     },
     [setRuleParams]
   );
-
-  const services = useTriggerUiActionServices();
-  const { http, docLinks } = services;
 
   const [esFields, setEsFields] = useState<FieldOption[]>([]);
   const [runtimeFields, setRuntimeFields] = useState<FieldOption[]>([]);
@@ -134,7 +134,7 @@ export const EsQueryExpression: React.FC<
     const isGroupAgg = isGroupAggregation(termField);
     const isCountAgg = isCountAggregation(aggType);
     const window = `${timeWindowSize}${timeWindowUnit}`;
-    if (hasExpressionValidationErrors(currentRuleParams)) {
+    if (hasExpressionValidationErrors(currentRuleParams, isServerless)) {
       return {
         testResults: { results: [], truncated: false },
         isGrouped: isGroupAgg,
@@ -191,6 +191,7 @@ export const EsQueryExpression: React.FC<
     termSize,
     threshold,
     thresholdComparator,
+    isServerless,
   ]);
 
   return (
@@ -342,7 +343,7 @@ export const EsQueryExpression: React.FC<
           [setParam]
         )}
         errors={errors}
-        hasValidationErrors={hasExpressionValidationErrors(currentRuleParams)}
+        hasValidationErrors={hasExpressionValidationErrors(currentRuleParams, isServerless)}
         onTestFetch={onTestQuery}
         excludeHitsFromPreviousRun={excludeHitsFromPreviousRun}
         onChangeExcludeHitsFromPreviousRun={useCallback(

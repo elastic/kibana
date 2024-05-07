@@ -15,6 +15,7 @@ import { CanvasPageProvider } from './canvas_page';
 import { CopySavedObjectsToSpacePageProvider } from './copy_saved_objects_to_space_page';
 import { CrossClusterReplicationPageProvider } from './cross_cluster_replication_page';
 import { DetectionsPageObject } from '../../security_solution_ftr/page_objects/detections';
+import { EmbeddedConsoleProvider } from './embedded_console';
 import { GeoFileUploadPageObject } from './geo_file_upload';
 import { GisPageObject } from './gis_page';
 import { GraphPageObject } from './graph_page';
@@ -33,7 +34,8 @@ import { LogstashPageObject } from './logstash_page';
 import { MaintenanceWindowsPageProvider } from './maintenance_windows_page';
 import { MonitoringPageObject } from './monitoring_page';
 import { NavigationalSearchPageObject } from './navigational_search';
-import { ObservabilityLogExplorerPageObject } from './observability_log_explorer';
+import { ObservabilityLogsExplorerPageObject } from './observability_logs_explorer';
+import { DatasetQualityPageObject } from './dataset_quality';
 import { ObservabilityPageProvider } from './observability_page';
 import { RemoteClustersPageProvider } from './remote_clusters_page';
 import { ReportingPageObject } from './reporting_page';
@@ -64,6 +66,7 @@ export const pageObjects = {
   copySavedObjectsToSpace: CopySavedObjectsToSpacePageProvider,
   crossClusterReplication: CrossClusterReplicationPageProvider,
   detections: DetectionsPageObject,
+  embeddedConsole: EmbeddedConsoleProvider,
   geoFileUpload: GeoFileUploadPageObject,
   graph: GraphPageObject,
   grokDebugger: GrokDebuggerPageObject,
@@ -82,7 +85,8 @@ export const pageObjects = {
   maps: GisPageObject,
   monitoring: MonitoringPageObject,
   navigationalSearch: NavigationalSearchPageObject,
-  observabilityLogExplorer: ObservabilityLogExplorerPageObject,
+  observabilityLogsExplorer: ObservabilityLogsExplorerPageObject,
+  datasetQuality: DatasetQualityPageObject,
   observability: ObservabilityPageProvider,
   remoteClusters: RemoteClustersPageProvider,
   reporting: ReportingPageObject,

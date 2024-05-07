@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expandFirstAlertExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
+import { expandAlertAtIndexExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
 import {
   DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_TITLE,
   DOCUMENT_DETAILS_FLYOUT_CREATED_BY,
@@ -45,7 +45,7 @@ describe(
       createRule(rule);
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
-      expandFirstAlertExpandableFlyout();
+      expandAlertAtIndexExpandableFlyout();
       clickRuleSummaryButton();
     });
 

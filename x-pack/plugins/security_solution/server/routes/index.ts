@@ -58,24 +58,9 @@ import { registerTagsRoutes } from '../lib/tags/routes';
 import { setAlertTagsRoute } from '../lib/detection_engine/routes/signals/set_alert_tags_route';
 import { setAlertAssigneesRoute } from '../lib/detection_engine/routes/signals/set_alert_assignees_route';
 import { suggestUserProfilesRoute } from '../lib/detection_engine/routes/users/suggest_user_profiles_route';
-import {
-  riskEngineDisableRoute,
-  riskEngineInitRoute,
-  riskEngineEnableRoute,
-  riskEngineStatusRoute,
-  riskEnginePrivilegesRoute,
-  riskEngineSettingsRoute,
-} from '../lib/entity_analytics/risk_engine/routes';
 import { registerTimelineRoutes } from '../lib/timeline/routes';
-import { riskScoreCalculationRoute } from '../lib/entity_analytics/risk_score/routes/calculation';
-import { riskScorePreviewRoute } from '../lib/entity_analytics/risk_score/routes/preview';
-import {
-  assetCriticalityStatusRoute,
-  assetCriticalityUpsertRoute,
-  assetCriticalityGetRoute,
-  assetCriticalityDeleteRoute,
-  assetCriticalityPrivilegesRoute,
-} from '../lib/entity_analytics/asset_criticality/routes';
+import { getFleetManagedIndexTemplatesRoute } from '../lib/security_integrations/cribl/routes';
+import { registerEntityAnalyticsRoutes } from '../lib/entity_analytics/register_entity_analytics_routes';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -93,7 +78,7 @@ export const initRoutes = (
   previewRuleDataClient: IRuleDataClient,
   previewTelemetryReceiver: ITelemetryReceiver
 ) => {
-  registerFleetIntegrationsRoutes(router, logger);
+  registerFleetIntegrationsRoutes(router);
   registerLegacyRuleActionsRoutes(router, logger);
   registerPrebuiltRulesRoutes(router, security);
   registerRuleExceptionsRoutes(router);
@@ -159,23 +144,7 @@ export const initRoutes = (
     telemetryDetectionRulesPreviewRoute(router, logger, previewTelemetryReceiver, telemetrySender);
   }
 
-  if (config.experimentalFeatures.riskScoringRoutesEnabled) {
-    riskScorePreviewRoute(router, logger, config.experimentalFeatures);
-    riskScoreCalculationRoute(router, logger, config.experimentalFeatures);
-    riskEngineStatusRoute(router);
-    riskEngineInitRoute(router, getStartServices);
-    riskEngineEnableRoute(router, getStartServices);
-    riskEngineDisableRoute(router, getStartServices);
-    riskEngineSettingsRoute(router);
-    if (config.experimentalFeatures.riskEnginePrivilegesRouteEnabled) {
-      riskEnginePrivilegesRoute(router, getStartServices);
-    }
-  }
-  if (config.experimentalFeatures.entityAnalyticsAssetCriticalityEnabled) {
-    assetCriticalityStatusRoute(router, logger);
-    assetCriticalityUpsertRoute(router, logger);
-    assetCriticalityGetRoute(router, logger);
-    assetCriticalityDeleteRoute(router, logger);
-    assetCriticalityPrivilegesRoute(router, getStartServices, logger);
-  }
+  registerEntityAnalyticsRoutes({ router, config, getStartServices, logger });
+  // Security Integrations
+  getFleetManagedIndexTemplatesRoute(router);
 };

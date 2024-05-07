@@ -28,6 +28,7 @@ export type {
 export type { MapsSetupApi, MapsStartApi } from './api';
 
 export type { MapEmbeddable, MapEmbeddableInput, MapEmbeddableOutput } from './embeddable';
+export { type MapApi, isMapApi } from './embeddable/map_api';
 
 export type { EMSTermJoinConfig, SampleValuesConfig } from './ems_autosuggest';
 

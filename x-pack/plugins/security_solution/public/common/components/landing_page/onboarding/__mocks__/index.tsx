@@ -6,6 +6,6 @@
  */
 import React from 'react';
 
-export const getOnboardingComponent = jest
+export const Onboarding = jest
   .fn()
-  .mockReturnValue(() => <div data-test-subj="onboarding-with-settings" />);
+  .mockReturnValue(<div data-test-subj="onboarding-with-settings" />);

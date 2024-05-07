@@ -19,5 +19,5 @@ import { z } from 'zod';
 export type GetCapabilitiesResponse = z.infer<typeof GetCapabilitiesResponse>;
 export const GetCapabilitiesResponse = z.object({
   assistantModelEvaluation: z.boolean(),
-  assistantStreamingEnabled: z.boolean(),
+  attackDiscoveryEnabled: z.boolean(),
 });

@@ -13,18 +13,17 @@ import {
   ThresholdRuleCreateProps,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { ALERT_THRESHOLD_RESULT } from '@kbn/security-solution-plugin/common/field_maps/field_names';
+import { getEqlRuleForAlertTesting, getThresholdRuleForAlertTesting } from '../../../../utils';
 import {
   createRule,
   createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
-  getEqlRuleForAlertTesting,
   getRuleForAlertTesting,
   getAlertsById,
-  getThresholdRuleForAlertTesting,
   waitForRuleSuccess,
   waitForAlertsToBePresent,
-} from '../../../../utils';
+} from '../../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -51,7 +50,7 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteAllRules(supertest, log);
     });
 
-    describe('@ess @serverless "kql" rule type', () => {
+    describe('@ess @serverless @serverlessQA "kql" rule type', () => {
       it('should detect the "dataset_name_1" from "event.dataset"', async () => {
         const rule: QueryRuleCreateProps = {
           ...getRuleForAlertTesting(['keyword']),

@@ -11,10 +11,8 @@ import { ml } from '../../../../../services/ml_api_service';
 
 import { refreshAnalyticsList$, REFRESH_ANALYTICS_LIST_STATE } from '../../../../common';
 
-import {
-  isDataFrameAnalyticsFailed,
-  DataFrameAnalyticsListRow,
-} from '../../components/analytics_list/common';
+import type { DataFrameAnalyticsListRow } from '../../components/analytics_list/common';
+import { isDataFrameAnalyticsFailed } from '../../components/analytics_list/common';
 
 export const stopAnalytics = async (d: DataFrameAnalyticsListRow) => {
   const toastNotifications = getToastNotifications();

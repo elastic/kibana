@@ -38,7 +38,7 @@ const CoverageOverviewDashboardComponent = () => {
       <CoverageOverviewHeader />
       <CoverageOverviewFiltersPanel />
       <EuiSpacer />
-      <EuiFlexGroup gutterSize="m" className="eui-xScroll">
+      <EuiFlexGroup gutterSize="m" className="eui-xScroll" tabIndex={0}>
         {data?.mitreTactics.map((tactic) => (
           <EuiFlexGroup
             data-test-subj={`coverageOverviewTacticGroup-${tactic.id}`}

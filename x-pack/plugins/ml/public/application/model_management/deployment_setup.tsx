@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -27,7 +28,7 @@ import {
   EuiSelect,
   EuiSpacer,
 } from '@elastic/eui';
-import type { I18nStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
+import type { CoreStart, OverlayStart } from '@kbn/core/public';
 import { css } from '@emotion/react';
 import { numberValidator } from '@kbn/ml-agg-utils';
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -37,7 +38,7 @@ import {
   dictionaryValidator,
   requiredValidator,
 } from '../../../common/util/validators';
-import { ModelItem } from './models_list';
+import type { ModelItem } from './models_list';
 
 interface DeploymentSetupProps {
   config: ThreadingParams;
@@ -528,8 +529,7 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
 export const getUserInputModelDeploymentParamsProvider =
   (
     overlays: OverlayStart,
-    theme: ThemeServiceStart,
-    i18nStart: I18nStart,
+    startServices: Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>,
     startModelDeploymentDocUrl: string
   ) =>
   (
@@ -562,7 +562,7 @@ export const getUserInputModelDeploymentParamsProvider =
                 resolve();
               }}
             />,
-            { theme, i18n: i18nStart }
+            startServices
           )
         );
       } catch (e) {

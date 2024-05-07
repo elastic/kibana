@@ -52,6 +52,9 @@ export const createQueryAlertType = (
         },
       },
     },
+    schemas: {
+      params: { type: 'zod', schema: UnifiedQueryRuleParams },
+    },
     actionGroups: [
       {
         id: 'default',

@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import * as Rx from 'rxjs';
-import { timeout } from 'rxjs/operators';
+import { timeout } from 'rxjs';
 import { Writable } from 'stream';
 import { finished } from 'stream/promises';
 import { setTimeout } from 'timers/promises';
@@ -37,6 +37,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import { throwRetryableError } from '@kbn/task-manager-plugin/server';
 
+import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import {
   REPORTING_EXECUTE_TYPE,
   ReportTaskParams,
@@ -44,12 +45,13 @@ import {
   ReportingTaskStatus,
   TIME_BETWEEN_ATTEMPTS,
 } from '.';
-import { ExportTypesRegistry, getContentStream } from '..';
+import { getContentStream } from '..';
 import type { ReportingCore } from '../..';
 import {
   isExecutionError,
   mapToReportingError,
 } from '../../../common/errors/map_to_reporting_error';
+import { EventTracker } from '../../usage';
 import type { ReportingStore } from '../store';
 import { Report, SavedReport } from '../store';
 import type { ReportFailedFields, ReportProcessingFields } from '../store/store';
@@ -103,8 +105,9 @@ export class ExecuteReportTask implements ReportingTask {
   private taskManagerStart?: TaskManagerStartContract;
   private kibanaId?: string;
   private kibanaName?: string;
-  private store?: ReportingStore;
   private exportTypesRegistry: ExportTypesRegistry;
+  private store?: ReportingStore;
+  private eventTracker?: EventTracker;
 
   constructor(
     private reporting: ReportingCore,
@@ -146,12 +149,26 @@ export class ExecuteReportTask implements ReportingTask {
     return this.taskManagerStart;
   }
 
+  private getEventTracker(report: Report) {
+    if (this.eventTracker) {
+      return this.eventTracker;
+    }
+
+    const eventTracker = this.reporting.getEventTracker(
+      report._id,
+      report.jobtype,
+      report.payload.objectType
+    );
+    this.eventTracker = eventTracker;
+    return this.eventTracker;
+  }
+
   private getJobContentEncoding(jobType: string) {
     const exportType = this.exportTypesRegistry.getByJobType(jobType);
     return exportType.jobContentEncoding;
   }
 
-  public async _claimJob(task: ReportTaskParams): Promise<SavedReport> {
+  private async _claimJob(task: ReportTaskParams): Promise<SavedReport> {
     if (this.kibanaId == null) {
       throw new Error(`Kibana instance ID is undefined!`);
     }
@@ -218,6 +235,11 @@ export class ExecuteReportTask implements ReportingTask {
         `[process_expiration: ${expirationTime}]`
     );
 
+    // event tracking of claimed job
+    const eventTracker = this.getEventTracker(report);
+    const timeSinceCreation = Date.now() - new Date(report.created_at).valueOf();
+    eventTracker?.claimJob({ timeSinceCreation });
+
     const resp = await store.setReportClaimed(claimedReport, doc);
     claimedReport._seq_no = resp._seq_no;
     claimedReport._primary_term = resp._primary_term;
@@ -241,11 +263,20 @@ export class ExecuteReportTask implements ReportingTask {
 
     // update the report in the store
     const store = await this.getStore();
-    const completedTime = moment().toISOString();
+    const completedTime = moment();
     const doc: ReportFailedFields = {
-      completed_at: completedTime,
+      completed_at: completedTime.toISOString(),
       output: docOutput ?? null,
     };
+
+    // event tracking of failed job
+    const eventTracker = this.getEventTracker(report);
+    const timeSinceCreation = Date.now() - new Date(report.created_at).valueOf();
+    eventTracker?.failJob({
+      timeSinceCreation,
+      errorCode: docOutput?.error_code ?? 'unknown',
+      errorMessage: error?.message ?? 'unknown',
+    });
 
     return await store.setReportFailed(report, doc);
   }
@@ -293,7 +324,7 @@ export class ExecuteReportTask implements ReportingTask {
     return docOutput;
   }
 
-  public async _performJob(
+  private async _performJob(
     task: ReportTaskParams,
     taskInstanceFields: TaskInstanceFields,
     cancellationToken: CancellationToken,
@@ -314,7 +345,7 @@ export class ExecuteReportTask implements ReportingTask {
     );
   }
 
-  public async _completeJob(
+  private async _completeJob(
     report: SavedReport,
     output: CompletedReportOutput
   ): Promise<SavedReport> {
@@ -322,11 +353,11 @@ export class ExecuteReportTask implements ReportingTask {
 
     this.logger.debug(`Saving ${report.jobtype} to ${docId}.`);
 
-    const completedTime = moment().toISOString();
+    const completedTime = moment();
     const docOutput = this._formatOutput(output);
     const store = await this.getStore();
     const doc = {
-      completed_at: completedTime,
+      completed_at: completedTime.toISOString(),
       metrics: output.metrics,
       output: docOutput,
     };
@@ -337,12 +368,35 @@ export class ExecuteReportTask implements ReportingTask {
     this.logger.info(`Saved ${report.jobtype} job ${docId}`);
     report._seq_no = resp._seq_no;
     report._primary_term = resp._primary_term;
+
+    // event tracking of completed job
+    const eventTracker = this.getEventTracker(report);
+    const byteSize = docOutput.size;
+    const timeSinceCreation = completedTime.valueOf() - new Date(report.created_at).valueOf();
+
+    if (output.metrics?.csv != null) {
+      eventTracker?.completeJobCsv({
+        byteSize,
+        timeSinceCreation,
+        csvRows: output.metrics.csv.rows ?? -1,
+      });
+    } else if (output.metrics?.pdf != null || output.metrics?.png != null) {
+      const { width, height } = report.payload.layout?.dimensions ?? {};
+      eventTracker?.completeJobScreenshot({
+        byteSize,
+        timeSinceCreation,
+        screenshotLayout: report.payload.layout?.id ?? 'preserve_layout',
+        numPages: output.metrics.pdf?.pages ?? -1,
+        screenshotPixels: Math.round((width ?? 0) * (height ?? 0)),
+      });
+    }
+
     return report;
   }
 
   // Generic is used to let TS infer the return type at call site.
   private async throwIfKibanaShutsDown<T>(): Promise<T> {
-    await this.reporting.getKibanaShutdown$().toPromise();
+    await Rx.firstValueFrom(this.reporting.getKibanaShutdown$());
     throw new KibanaShuttingDownError();
   }
 

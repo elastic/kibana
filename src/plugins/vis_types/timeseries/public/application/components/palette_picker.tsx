@@ -8,6 +8,7 @@
 
 import React from 'react';
 import type { PaletteRegistry, PaletteOutput } from '@kbn/coloring';
+import { getActivePaletteName } from '@kbn/coloring';
 import { EuiColorPalettePicker } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { rainbowColors } from '../lib/rainbow_colors';
@@ -23,6 +24,7 @@ export interface PalettePickerProps {
 
 export function PalettePicker({ activePalette, palettes, setPalette, color }: PalettePickerProps) {
   const finalGradientColor = computeGradientFinalColor(color);
+  const paletteName = getActivePaletteName(activePalette?.name);
 
   return (
     <EuiColorPalettePicker
@@ -88,7 +90,7 @@ export function PalettePicker({ activePalette, palettes, setPalette, color }: Pa
           });
         }
       }}
-      valueOfSelected={activePalette?.name || 'default'}
+      valueOfSelected={paletteName}
       selectionDisplay={'palette'}
     />
   );

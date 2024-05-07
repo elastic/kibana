@@ -6,5 +6,9 @@
   },
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["target/**/*"],
-  "kbn_references": ["@kbn/presentation-publishing", "@kbn/core-mount-utils-browser"]
+  "kbn_references": [
+    "@kbn/presentation-publishing",
+    "@kbn/core-mount-utils-browser",
+    "@kbn/content-management-utils",
+  ]
 }

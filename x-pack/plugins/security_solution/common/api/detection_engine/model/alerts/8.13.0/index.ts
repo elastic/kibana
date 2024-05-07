@@ -7,8 +7,14 @@
 
 import type { AlertWithCommonFields800 } from '@kbn/rule-registry-plugin/common/schemas/8.0.0';
 import type {
+  LEGACY_ALERT_HOST_CRITICALITY,
+  LEGACY_ALERT_USER_CRITICALITY,
   ALERT_HOST_CRITICALITY,
   ALERT_USER_CRITICALITY,
+  ALERT_HOST_RISK_SCORE_CALCULATED_LEVEL,
+  ALERT_HOST_RISK_SCORE_CALCULATED_SCORE_NORM,
+  ALERT_USER_RISK_SCORE_CALCULATED_LEVEL,
+  ALERT_USER_RISK_SCORE_CALCULATED_SCORE_NORM,
 } from '../../../../../field_maps/field_names';
 import type {
   Ancestor8120,
@@ -29,8 +35,17 @@ new schemas to the union of all alert schemas, and re-export the new schemas as 
 export type { Ancestor8120 as Ancestor8130 };
 
 export interface BaseFields8130 extends BaseFields8120 {
+  [LEGACY_ALERT_HOST_CRITICALITY]: string | undefined;
+  [LEGACY_ALERT_USER_CRITICALITY]: string | undefined;
   [ALERT_HOST_CRITICALITY]: string | undefined;
   [ALERT_USER_CRITICALITY]: string | undefined;
+  /**
+   * Risk scores fields was added aroung 8.5.0, but the fields were not added to the alert schema
+   */
+  [ALERT_HOST_RISK_SCORE_CALCULATED_LEVEL]: string | undefined;
+  [ALERT_HOST_RISK_SCORE_CALCULATED_SCORE_NORM]: number | undefined;
+  [ALERT_USER_RISK_SCORE_CALCULATED_LEVEL]: string | undefined;
+  [ALERT_USER_RISK_SCORE_CALCULATED_SCORE_NORM]: number | undefined;
 }
 
 export interface WrappedFields8130<T extends BaseFields8130> {

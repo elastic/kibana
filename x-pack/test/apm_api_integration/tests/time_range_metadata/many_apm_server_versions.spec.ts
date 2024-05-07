@@ -26,7 +26,7 @@ import { ApmApiClient } from '../../common/config';
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtrace = getService('synthtraceEsClient');
+  const synthtrace = getService('apmSynthtraceEsClient');
   const es = getService('es');
 
   const baseTime = new Date('2023-10-01T00:00:00.000Z').getTime();
@@ -34,6 +34,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const start = moment(baseTime).add(5, 'minutes');
   const end = moment(baseTime).add(10, 'minutes');
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177534
   registry.when(
     'Time range metadata when there are multiple APM Server versions',
     { config: 'basic', archives: [] },

@@ -15,24 +15,26 @@ import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { LibraryNotificationPopover } from './library_notification_popover';
 import {
-  UnlinkFromLibraryAction,
-  UnlinkPanelFromLibraryActionApi,
-} from './unlink_from_library_action';
+  LegacyUnlinkFromLibraryAction,
+  LegacyUnlinkPanelFromLibraryActionApi,
+} from './legacy_unlink_from_library_action';
 
 const mockUnlinkFromLibraryAction = {
   execute: jest.fn(),
   isCompatible: jest.fn().mockResolvedValue(true),
   getDisplayName: jest.fn().mockReturnValue('Test Unlink'),
-} as unknown as UnlinkFromLibraryAction;
+} as unknown as LegacyUnlinkFromLibraryAction;
 
 describe('library notification popover', () => {
-  let api: UnlinkPanelFromLibraryActionApi;
+  let api: LegacyUnlinkPanelFromLibraryActionApi;
 
   beforeEach(async () => {
     api = {
       viewMode: new BehaviorSubject<ViewMode>('edit'),
       canUnlinkFromLibrary: jest.fn().mockResolvedValue(true),
       unlinkFromLibrary: jest.fn(),
+      canLinkToLibrary: jest.fn().mockResolvedValue(true),
+      linkToLibrary: jest.fn(),
     };
   });
 

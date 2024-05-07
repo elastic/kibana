@@ -34,10 +34,13 @@ const FilterForValueButton: React.FC<FilterForValueProps> = React.memo(
     size,
     showTooltip = false,
     value,
+    dataViewId,
   }) => {
     const filterForValueFn = useCallback(() => {
       const makeFilter = (currentVal: string | null | undefined) =>
-        currentVal?.length === 0 ? createFilter(field, undefined) : createFilter(field, currentVal);
+        currentVal?.length === 0
+          ? createFilter(field, undefined, false, dataViewId)
+          : createFilter(field, currentVal, false, dataViewId);
       const filters = Array.isArray(value)
         ? value.map((currentVal: string | null | undefined) => makeFilter(currentVal))
         : makeFilter(value);
@@ -54,7 +57,7 @@ const FilterForValueButton: React.FC<FilterForValueProps> = React.memo(
       if (onClick != null) {
         onClick();
       }
-    }, [field, filterManager, onClick, onFilterAdded, value]);
+    }, [dataViewId, field, filterManager, onClick, onFilterAdded, value]);
 
     useEffect(() => {
       if (!ownFocus) {

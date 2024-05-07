@@ -40,8 +40,8 @@ export default function ({ getService }: FtrProviderContext) {
   describe('API /infra/metadata', () => {
     describe('works', () => {
       describe('Host asset type', () => {
-        before(() => esArchiver.load(ARCHIVE_NAME));
-        after(() => esArchiver.unload(ARCHIVE_NAME));
+        before(async () => esArchiver.load(ARCHIVE_NAME));
+        after(async () => esArchiver.unload(ARCHIVE_NAME));
 
         it('with serverless existing host', async () => {
           const metadata = await fetchMetadata({

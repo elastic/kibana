@@ -12,15 +12,12 @@ import { TIMELINE_TOUR_CONFIG_ANCHORS } from './step_config';
 import { useIsElementMounted } from '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table/guided_onboarding/use_is_element_mounted';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import {
+  createMockStore,
   createSecuritySolutionStorageMock,
-  kibanaObservable,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
   TestProviders,
 } from '../../../../common/mock';
 import { TimelineTabs } from '../../../../../common/types';
 import { TimelineType } from '../../../../../common/api/timeline';
-import { createStore } from '../../../../common/store';
 import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
 import { useKibana } from '../../../../common/lib/kibana';
 
@@ -33,7 +30,7 @@ const mockedUseKibana = mockUseKibana();
 
 const switchTabMock = jest.fn();
 const { storage: storageMock } = createSecuritySolutionStorageMock();
-const mockStore = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storageMock);
+const mockStore = createMockStore(undefined, undefined, undefined, storageMock);
 
 const TestComponent = (props: Partial<TimelineTourProps> = {}) => {
   return (

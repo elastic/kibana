@@ -8,17 +8,12 @@
 import expect from '@kbn/expect';
 import { Rule } from '@kbn/alerting-plugin/common';
 import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
-import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 
 import {
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
   getSimpleRuleOutputWithoutRuleId,
   getSimpleRuleUpdate,
-  createRule,
   getSimpleRule,
   createLegacyRuleAction,
   getLegacyActionSO,
@@ -28,10 +23,17 @@ import {
   getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
   updateUsername,
 } from '../../../utils';
+import {
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+  createRule,
+} from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
+  const securitySolutionApi = getService('securitySolutionApi');
   const log = getService('log');
   const es = getService('es');
   // TODO: add a new service for pulling kibana username, similar to getService('es')
@@ -89,12 +91,7 @@ export default ({ getService }: FtrProviderContext) => {
         updatedRule.actions = [action1];
         delete updatedRule.id;
 
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send(updatedRule)
-          .expect(200);
+        const { body } = await securitySolutionApi.updateRule({ body: updatedRule }).expect(200);
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
 
@@ -158,12 +155,8 @@ export default ({ getService }: FtrProviderContext) => {
           investigation_fields: ['foo'],
         };
 
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send(updatedRule)
-          .expect(400);
+        // @ts-expect-error we are testing the invalid payload
+        const { body } = await securitySolutionApi.updateRule({ body: updatedRule }).expect(400);
 
         expect(body.message).to.eql(
           '[request body]: investigation_fields: Expected object, received array'
@@ -174,12 +167,7 @@ export default ({ getService }: FtrProviderContext) => {
         // rule_id of a rule with legacy investigation fields set
         const updatedRule = getSimpleRuleUpdate(ruleWithLegacyInvestigationField.params.ruleId);
 
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send(updatedRule)
-          .expect(200);
+        const { body } = await securitySolutionApi.updateRule({ body: updatedRule }).expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare.investigation_fields).to.eql(undefined);
@@ -200,12 +188,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         };
 
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send(updatedRule)
-          .expect(200);
+        const { body } = await securitySolutionApi.updateRule({ body: updatedRule }).expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare.investigation_fields).to.eql({

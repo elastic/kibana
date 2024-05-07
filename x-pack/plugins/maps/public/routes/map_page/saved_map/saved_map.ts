@@ -53,7 +53,7 @@ import { getBreadcrumbs } from './get_breadcrumbs';
 import { DEFAULT_IS_LAYER_TOC_OPEN } from '../../../reducers/ui';
 import { createBasemapLayerDescriptor } from '../../../classes/layers/create_basemap_layer_descriptor';
 import { whenLicenseInitialized } from '../../../licensed_features';
-import { SerializedMapState, SerializedUiState } from './types';
+import { ParsedMapStateJSON, ParsedUiStateJSON } from './types';
 import { setAutoOpenLayerWizardId } from '../../../actions/ui_actions';
 import { LayerStatsCollector, MapSettingsCollector } from '../../../../common/telemetry';
 import { getIndexPatternsFromIds } from '../../../index_pattern_util';
@@ -85,6 +85,7 @@ export class SavedMap {
   private readonly _store: MapStore;
   private _tags: string[] = [];
   private _defaultLayerWizard: string;
+  private _managed: boolean;
 
   constructor({
     defaultLayers = [],
@@ -114,6 +115,7 @@ export class SavedMap {
     this._stateTransfer = stateTransfer;
     this._store = createMapStore();
     this._defaultLayerWizard = defaultLayerWizard || '';
+    this._managed = false;
   }
 
   public getStore() {
@@ -137,6 +139,7 @@ export class SavedMap {
       if (metaInfo?.sharingSavedObjectProps) {
         this._sharingSavedObjectProps = metaInfo.sharingSavedObjectProps;
       }
+      this._managed = Boolean(metaInfo?.managed);
       const savedObjectsTagging = getSavedObjectsTagging();
       if (savedObjectsTagging && references && references.length) {
         this._tags = savedObjectsTagging.ui.getTagIdsFromReferences(references);
@@ -147,7 +150,7 @@ export class SavedMap {
 
     if (this._attributes?.mapStateJSON) {
       try {
-        const mapState = JSON.parse(this._attributes.mapStateJSON) as SerializedMapState;
+        const mapState = JSON.parse(this._attributes.mapStateJSON) as ParsedMapStateJSON;
         if (mapState.adHocDataViews && mapState.adHocDataViews.length > 0) {
           const dataViewService = getIndexPatternService();
           const promises = mapState.adHocDataViews.map((spec) => {
@@ -164,7 +167,7 @@ export class SavedMap {
       this._store.dispatch(setMapSettingsFromEncodedState(this._mapEmbeddableInput.mapSettings));
     } else if (this._attributes?.mapStateJSON) {
       try {
-        const mapState = JSON.parse(this._attributes.mapStateJSON) as SerializedMapState;
+        const mapState = JSON.parse(this._attributes.mapStateJSON) as ParsedMapStateJSON;
         if (mapState.settings) {
           this._store.dispatch(setMapSettingsFromEncodedState(mapState.settings));
         }
@@ -178,7 +181,7 @@ export class SavedMap {
       isLayerTOCOpen = this._mapEmbeddableInput.isLayerTOCOpen;
     } else if (this._attributes?.uiStateJSON) {
       try {
-        const uiState = JSON.parse(this._attributes.uiStateJSON) as SerializedUiState;
+        const uiState = JSON.parse(this._attributes.uiStateJSON) as ParsedUiStateJSON;
         if ('isLayerTOCOpen' in uiState) {
           isLayerTOCOpen = uiState.isLayerTOCOpen;
         }
@@ -193,7 +196,7 @@ export class SavedMap {
       openTOCDetails = this._mapEmbeddableInput.openTOCDetails;
     } else if (this._attributes?.uiStateJSON) {
       try {
-        const uiState = JSON.parse(this._attributes.uiStateJSON) as SerializedUiState;
+        const uiState = JSON.parse(this._attributes.uiStateJSON) as ParsedUiStateJSON;
         if ('openTOCDetails' in uiState) {
           openTOCDetails = uiState.openTOCDetails;
         }
@@ -213,7 +216,7 @@ export class SavedMap {
       );
     } else if (this._attributes?.mapStateJSON) {
       try {
-        const mapState = JSON.parse(this._attributes.mapStateJSON) as SerializedMapState;
+        const mapState = JSON.parse(this._attributes.mapStateJSON) as ParsedMapStateJSON;
         this._store.dispatch(
           setGotoWithCenter({
             lat: mapState.center.lat,
@@ -415,7 +418,7 @@ export class SavedMap {
     }
 
     try {
-      const mapState = JSON.parse(this._attributes.mapStateJSON) as SerializedMapState;
+      const mapState = JSON.parse(this._attributes.mapStateJSON) as ParsedMapStateJSON;
       if (mapState?.settings.autoFitToDataBounds !== undefined) {
         return mapState.settings.autoFitToDataBounds;
       }
@@ -428,6 +431,10 @@ export class SavedMap {
 
   public getSharingSavedObjectProps(): SharingSavedObjectProps | null {
     return this._sharingSavedObjectProps;
+  }
+
+  public isManaged(): boolean {
+    return this._managed;
   }
 
   public isByValue(): boolean {
@@ -573,12 +580,12 @@ export class SavedMap {
           return { ...icon, svg: Buffer.from(icon.svg).toString('base64') };
         }),
       },
-    } as SerializedMapState);
+    } as ParsedMapStateJSON);
 
     this._attributes!.uiStateJSON = JSON.stringify({
       isLayerTOCOpen: getIsLayerTOCOpen(state),
       openTOCDetails: getOpenTOCDetails(state),
-    } as SerializedUiState);
+    } as ParsedUiStateJSON);
   }
 
   private async _getAdHocDataViews() {

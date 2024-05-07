@@ -58,7 +58,13 @@ const ExceptionsAddToListsOptionsComponent: React.FC<ExceptionsAddToListsOptions
 
             <EuiFlexItem grow={false} data-test-subj="addToListsOption">
               <EuiPopover
-                button={<EuiButtonIcon iconType="iInCircle" onClick={onPopOverButtonClick} />}
+                button={
+                  <EuiButtonIcon
+                    iconType="iInCircle"
+                    onClick={onPopOverButtonClick}
+                    aria-label={i18n.ADD_TO_LISTS_OPTION_TOOLTIP_ARIA_LABEL}
+                  />
+                }
                 isOpen={isPopoverOpen}
                 closePopover={closePopover}
                 anchorPosition="upCenter"

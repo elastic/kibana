@@ -43,7 +43,7 @@ export function createEuiListItem({
   externalLink = false,
   iconProps,
 }: Props): EuiListGroupItemProps {
-  const { href, id, title, disabled, euiIconType, icon, tooltip, url } = link;
+  const { href, id, title, euiIconType, icon, tooltip, url } = link;
 
   return {
     label: tooltip ?? title,
@@ -64,7 +64,6 @@ export function createEuiListItem({
       }
     },
     isActive: !externalLink && appId === id,
-    isDisabled: disabled,
     'data-test-subj': dataTestSubj,
     ...(basePath && {
       iconType: euiIconType,
@@ -81,7 +80,7 @@ export function createEuiButtonItem({
   navigateToUrl,
   dataTestSubj,
 }: Omit<Props, 'appId' | 'basePath'>) {
-  const { href, disabled, url, id } = link;
+  const { href, url, id } = link;
 
   return {
     href,
@@ -93,7 +92,6 @@ export function createEuiButtonItem({
       event.preventDefault();
       navigateToUrl(url);
     },
-    isDisabled: disabled,
     'data-test-subj': dataTestSubj || `collapsibleNavAppButton-${id}`,
   };
 }

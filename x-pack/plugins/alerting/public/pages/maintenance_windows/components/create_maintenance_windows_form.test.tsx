@@ -14,11 +14,11 @@ import {
 } from './create_maintenance_windows_form';
 
 jest.mock('../../../utils/kibana_react');
-jest.mock('../../../services/alert_api', () => ({
+jest.mock('../../../services/rule_api', () => ({
   loadRuleTypes: jest.fn(),
 }));
 
-const { loadRuleTypes } = jest.requireMock('../../../services/alert_api');
+const { loadRuleTypes } = jest.requireMock('../../../services/rule_api');
 const { useKibana, useUiSetting } = jest.requireMock('../../../utils/kibana_react');
 
 const formProps: CreateMaintenanceWindowFormProps = {

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, ReactNode } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiBadge, EuiHorizontalRule } from '@elastic/eui';
 import { useCurrentThemeVars } from '../../../../contexts/kibana';
@@ -57,7 +58,7 @@ function insertHighlighting(result: FormattedQuestionAnsweringResult, inputText:
   );
 }
 
-const ResultBadge = ({ children }: { children: ReactNode }) => {
+const ResultBadge: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const { euiTheme } = useCurrentThemeVars();
   return (
     <EuiBadge

@@ -9,26 +9,28 @@ import expect from 'expect';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   deleteAllPrebuiltRuleAssets,
-  deleteAllRules,
   getPrebuiltRulesStatus,
-  createRule,
   getSimpleRule,
   createRuleAssetSavedObject,
   createPrebuiltRuleAssetSavedObjects,
   installPrebuiltRules,
-  deleteRule,
   upgradePrebuiltRules,
   createHistoricalPrebuiltRuleAssetSavedObjects,
   getPrebuiltRulesAndTimelinesStatus,
   installPrebuiltRulesAndTimelines,
 } from '../../../../utils';
+import {
+  deleteAllRules,
+  createRule,
+  deleteRule,
+} from '../../../../../../../common/utils/security_solution';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
   const log = getService('log');
 
-  describe('@ess @serverless @skipInQA Prebuilt Rules status', () => {
+  describe('@ess @serverless @skipInServerlessMKI Prebuilt Rules status', () => {
     describe('get_prebuilt_rules_status', () => {
       beforeEach(async () => {
         await deleteAllPrebuiltRuleAssets(es, log);

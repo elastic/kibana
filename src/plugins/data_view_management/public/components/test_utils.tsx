@@ -21,6 +21,7 @@ export function createComponentWithContext<Props = Record<string, any>>(
     services: PropTypes.object,
   };
 
+  // @ts-expect-error upgrade typescript v4.9.5
   return shallow(<MyComponent {...props} />, {
     context: {
       services: mockedContext,

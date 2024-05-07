@@ -8,22 +8,40 @@
 
 import { i18n } from '@kbn/i18n';
 import { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
+import { ENABLE_PERSISTENT_CONSOLE_UI_SETTING_ID } from '@kbn/dev-tools-plugin/public';
 
-import { renderEmbeddableConsole } from './application/containers/embeddable';
+import { EmbeddableConsole } from './application/containers/embeddable';
 import {
   AppSetupUIPluginDependencies,
   AppStartUIPluginDependencies,
   ClientConfigType,
   ConsolePluginSetup,
+  ConsolePluginStart,
   ConsoleUILocatorParams,
-  EmbeddableConsoleProps,
-  EmbeddableConsoleDependencies,
+  EmbeddedConsoleView,
 } from './types';
-import { AutocompleteInfo, setAutocompleteInfo } from './services';
+import {
+  AutocompleteInfo,
+  setAutocompleteInfo,
+  EmbeddableConsoleInfo,
+  createStorage,
+  setStorage,
+} from './services';
 
-export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDependencies> {
+export class ConsoleUIPlugin
+  implements Plugin<ConsolePluginSetup, ConsolePluginStart, AppSetupUIPluginDependencies>
+{
   private readonly autocompleteInfo = new AutocompleteInfo();
-  constructor(private ctx: PluginInitializerContext) {}
+  private _embeddableConsole: EmbeddableConsoleInfo;
+
+  constructor(private ctx: PluginInitializerContext) {
+    const storage = createStorage({
+      engine: window.localStorage,
+      prefix: 'sense:',
+    });
+    setStorage(storage);
+    this._embeddableConsole = new EmbeddableConsoleInfo(storage);
+  }
 
   public setup(
     { notifications, getStartServices, http }: CoreSetup,
@@ -31,6 +49,7 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
   ): ConsolePluginSetup {
     const {
       ui: { enabled: isConsoleUiEnabled },
+      dev: { enableMonaco: isMonacoEnabled },
     } = this.ctx.config.get<ClientConfigType>();
 
     this.autocompleteInfo.setup(http);
@@ -80,6 +99,7 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
             element,
             theme$,
             autocompleteInfo: this.autocompleteInfo,
+            isMonacoEnabled,
           });
         },
       });
@@ -101,22 +121,45 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
     return {};
   }
 
-  public start(core: CoreStart, deps: AppStartUIPluginDependencies) {
+  public start(core: CoreStart, deps: AppStartUIPluginDependencies): ConsolePluginStart {
     const {
-      ui: { enabled: isConsoleUiEnabled },
+      ui: { enabled: isConsoleUiEnabled, embeddedEnabled: isEmbeddedConsoleEnabled },
+      dev: { enableMonaco: isMonacoEnabled },
     } = this.ctx.config.get<ClientConfigType>();
 
-    if (isConsoleUiEnabled && core.application.capabilities?.dev_tools?.show === true) {
-      return {
-        renderEmbeddableConsole: (props: EmbeddableConsoleProps) => {
-          const consoleDeps: EmbeddableConsoleDependencies = {
-            core,
-            usageCollection: deps.usageCollection,
-          };
-          return renderEmbeddableConsole(props, consoleDeps);
-        },
+    const consoleStart: ConsolePluginStart = {};
+    const embeddedConsoleUiSetting = core.uiSettings.get<boolean>(
+      ENABLE_PERSISTENT_CONSOLE_UI_SETTING_ID
+    );
+    const embeddedConsoleAvailable =
+      isConsoleUiEnabled &&
+      isEmbeddedConsoleEnabled &&
+      core.application.capabilities?.dev_tools?.show === true &&
+      embeddedConsoleUiSetting;
+
+    if (embeddedConsoleAvailable) {
+      consoleStart.EmbeddableConsole = (_props: {}) => {
+        return EmbeddableConsole({
+          core,
+          usageCollection: deps.usageCollection,
+          setDispatch: (d) => {
+            this._embeddableConsole.setDispatch(d);
+          },
+          alternateView: this._embeddableConsole.alternateView,
+          isMonacoEnabled,
+          getConsoleHeight: this._embeddableConsole.getConsoleHeight.bind(this._embeddableConsole),
+          setConsoleHeight: this._embeddableConsole.setConsoleHeight.bind(this._embeddableConsole),
+        });
+      };
+      consoleStart.isEmbeddedConsoleAvailable = () =>
+        this._embeddableConsole.isEmbeddedConsoleAvailable();
+      consoleStart.openEmbeddedConsole = (content?: string) =>
+        this._embeddableConsole.openEmbeddedConsole(content);
+      consoleStart.registerEmbeddedConsoleAlternateView = (view: EmbeddedConsoleView | null) => {
+        this._embeddableConsole.registerAlternateView(view);
       };
     }
-    return {};
+
+    return consoleStart;
   }
 }

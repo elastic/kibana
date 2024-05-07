@@ -109,6 +109,38 @@ host:
   short: Fields describing the relevant computing instance.
   title: Host
   type: group
+http:
+  description: Fields related to HTTP activity. Use the `url` field set to store the
+    url of the request.
+  fields:
+    http.response.bytes:
+      dashed_name: http-response-bytes
+      description: Total size in bytes of the response (body and headers).
+      example: 1437
+      flat_name: http.response.bytes
+      format: bytes
+      level: extended
+      name: response.bytes
+      normalize: []
+      short: Total size in bytes of the response (body and headers).
+      type: long
+    http.response.status_code:
+      dashed_name: http-response-status-code
+      description: HTTP response status code.
+      example: 404
+      flat_name: http.response.status_code
+      format: string
+      level: extended
+      name: response.status_code
+      normalize: []
+      short: HTTP response status code.
+      type: long
+  group: 2
+  name: http
+  prefix: http.
+  short: Fields describing an HTTP request.
+  title: HTTP
+  type: group
 log:
   description: 'Details about the event''s logging mechanism or logging transport.
 
@@ -153,4 +185,42 @@ log:
   prefix: log.
   short: Details about the event's logging mechanism.
   title: Log
+  type: group
+url:
+  description: URL fields provide support for complete or partial URLs, and supports
+    the breaking down into scheme, domain, path, and so on.
+  fields:
+    url.domain:
+      dashed_name: url-domain
+      description: 'Domain of the url, such as "www.elastic.co".
+
+        In some cases a URL may refer to an IP and/or port directly, without a domain
+        name. In this case, the IP address would go to the `domain` field.
+
+        If the URL contains a literal IPv6 address enclosed by `[` and `]` (IETF RFC
+        2732), the `[` and `]` characters should also be captured in the `domain`
+        field.'
+      example: www.elastic.co
+      flat_name: url.domain
+      ignore_above: 1024
+      level: extended
+      name: domain
+      normalize: []
+      short: Domain of the url.
+      type: keyword
+  group: 2
+  name: url
+  prefix: url.
+  reusable:
+    expected:
+    - as: url
+      at: threat.indicator
+      full: threat.indicator.url
+    - as: url
+      at: threat.enrichments.indicator
+      beta: Reusing the `url` fields in this location is currently considered beta.
+      full: threat.enrichments.indicator.url
+    top_level: true
+  short: Fields that let you store URLs in various forms.
+  title: URL
   type: group

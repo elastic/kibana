@@ -17,6 +17,7 @@ export {
   verifyDockerInstalled,
   maybeCreateDockerNetwork,
   type ServerlessProjectType,
+  readRolesFromResource,
 } from './src/utils';
 export type { ArtifactLicense } from './src/artifact';
 export { SERVERLESS_ROLES_ROOT_PATH } from './src/paths';

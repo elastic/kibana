@@ -27,20 +27,16 @@ import {
 
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { GetEvaluateResponse, PostEvaluateResponse } from '@kbn/elastic-assistant-common';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../../assistant_context';
 import { useLoadConnectors } from '../../../connectorland/use_load_connectors';
 import { getActionTypeTitle, getGenAiConfig } from '../../../connectorland/helpers';
 import { PRECONFIGURED_CONNECTOR } from '../../../connectorland/translations';
-import { usePerformEvaluation } from './use_perform_evaluation';
+import { usePerformEvaluation } from '../../api/evaluate/use_perform_evaluation';
 import { getApmLink, getDiscoverLink } from './utils';
-import { PostEvaluationResponse } from '../../api';
+import { useEvaluationData } from '../../api/evaluate/use_evaluation_data';
 
-/**
- * See AGENT_EXECUTOR_MAP in `x-pack/plugins/elastic_assistant/server/routes/evaluate/post_evaluate.ts`
- * for the agent name -> executor mapping
- */
-const DEFAULT_AGENTS = ['DefaultAgentExecutor', 'OpenAIFunctionsExecutor'];
 const DEFAULT_EVAL_TYPES_OPTIONS = [
   { label: 'correctness' },
   { label: 'esql-validator', disabled: true },
@@ -56,7 +52,8 @@ interface Props {
  * Evaluation Settings -- development-only feature for evaluating models
  */
 export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSettingsChange }) => {
-  const { actionTypeRegistry, basePath, http } = useAssistantContext();
+  const { actionTypeRegistry, basePath, http, setTraceOptions, traceOptions } =
+    useAssistantContext();
   const { data: connectors } = useLoadConnectors({ http });
   const {
     data: evalResponse,
@@ -65,6 +62,11 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
   } = usePerformEvaluation({
     http,
   });
+  const { data: evalData } = useEvaluationData({ http });
+  const defaultAgents = useMemo(
+    () => (evalData as GetEvaluateResponse)?.agentExecutors ?? [],
+    [evalData]
+  );
 
   // Run Details
   // Project Name
@@ -91,7 +93,27 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
     },
     [setOutputIndex]
   );
-  // Dataset
+  /** Trace Options **/
+  const [showTraceOptions, setShowTraceOptions] = useState(false);
+  const onApmUrlChange = useCallback(
+    (e) => {
+      setTraceOptions({ ...traceOptions, apmUrl: e.target.value });
+    },
+    [setTraceOptions, traceOptions]
+  );
+  const onLangSmithProjectChange = useCallback(
+    (e) => {
+      setTraceOptions({ ...traceOptions, langSmithProject: e.target.value });
+    },
+    [setTraceOptions, traceOptions]
+  );
+  const onLangSmithApiKeyChange = useCallback(
+    (e) => {
+      setTraceOptions({ ...traceOptions, langSmithApiKey: e.target.value });
+    },
+    [setTraceOptions, traceOptions]
+  );
+  /** Dataset **/
   const [useLangSmithDataset, setUseLangSmithDataset] = useState(true);
   const datasetToggleButton = useMemo(() => {
     return (
@@ -195,8 +217,8 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
     [selectedAgentOptions]
   );
   const agentOptions = useMemo(() => {
-    return DEFAULT_AGENTS.map((label) => ({ label }));
-  }, []);
+    return defaultAgents.map((label) => ({ label }));
+  }, [defaultAgents]);
 
   // Evaluation
   // Evaluation Type
@@ -283,12 +305,12 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
   ]);
 
   const discoverLink = useMemo(
-    () => getDiscoverLink(basePath, (evalResponse as PostEvaluationResponse)?.evaluationId ?? ''),
+    () => getDiscoverLink(basePath, (evalResponse as PostEvaluateResponse)?.evaluationId ?? ''),
     [basePath, evalResponse]
   );
 
   const apmLink = useMemo(
-    () => getApmLink(basePath, (evalResponse as PostEvaluationResponse)?.evaluationId ?? ''),
+    () => getApmLink(basePath, (evalResponse as PostEvaluateResponse)?.evaluationId ?? ''),
     [basePath, evalResponse]
   );
 
@@ -422,6 +444,59 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
             aria-label="evaluation-output-index-textfield"
           />
         </EuiFormRow>
+        <EuiText
+          size={'xs'}
+          css={css`
+            margin-top: 16px;
+          `}
+        >
+          <EuiLink color={'primary'} onClick={() => setShowTraceOptions(!showTraceOptions)}>
+            {i18n.SHOW_TRACE_OPTIONS}
+          </EuiLink>
+        </EuiText>
+        {showTraceOptions && (
+          <>
+            <EuiFormRow
+              display="rowCompressed"
+              label={i18n.APM_URL_LABEL}
+              fullWidth
+              helpText={i18n.APM_URL_DESCRIPTION}
+              css={css`
+                margin-top: 16px;
+              `}
+            >
+              <EuiFieldText
+                value={traceOptions.apmUrl}
+                onChange={onApmUrlChange}
+                aria-label="apm-url-textfield"
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              display="rowCompressed"
+              label={i18n.LANGSMITH_PROJECT_LABEL}
+              fullWidth
+              helpText={i18n.LANGSMITH_PROJECT_DESCRIPTION}
+            >
+              <EuiFieldText
+                value={traceOptions.langSmithProject}
+                onChange={onLangSmithProjectChange}
+                aria-label="langsmith-project-textfield"
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              display="rowCompressed"
+              label={i18n.LANGSMITH_API_KEY_LABEL}
+              fullWidth
+              helpText={i18n.LANGSMITH_API_KEY_DESCRIPTION}
+            >
+              <EuiFieldText
+                value={traceOptions.langSmithApiKey}
+                onChange={onLangSmithApiKeyChange}
+                aria-label="langsmith-api-key-textfield"
+              />
+            </EuiFormRow>
+          </>
+        )}
       </EuiAccordion>
       <EuiHorizontalRule margin={'s'} />
       {/* Prediction Details*/}

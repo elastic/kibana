@@ -6,7 +6,8 @@
  */
 
 import { createSelector } from 'reselect';
-import { isEmpty } from 'lodash/fp';
+import { get, isEmpty } from 'lodash/fp';
+import type { Query } from '@kbn/es-query';
 import {
   UNTITLED_TEMPLATE,
   UNTITLED_TIMELINE,
@@ -14,7 +15,6 @@ import {
 import { timelineSelectors } from '.';
 import { TimelineTabs } from '../../../common/types';
 import type { State } from '../../common/store/types';
-
 import type { TimelineModel } from './model';
 import type { InsertTimeline, TimelineById } from './types';
 import { TimelineStatus, TimelineType } from '../../../common/api/timeline';
@@ -94,6 +94,14 @@ export const selectTimelineById = createSelector(
 );
 
 /**
+ * Selector that returns the timeline dataProviders.
+ */
+const selectTimelineDataProviders = createSelector(
+  selectTimelineById,
+  (timeline) => timeline?.dataProviders
+);
+
+/**
  * Selector that returns the timeline saved title.
  */
 const selectTimelineTitle = createSelector(selectTimelineById, (timeline) => timeline?.title);
@@ -101,9 +109,27 @@ const selectTimelineTitle = createSelector(selectTimelineById, (timeline) => tim
 /**
  * Selector that returns the timeline type.
  */
-const selectTimelineTimelineType = createSelector(
+const selectTimelineType = createSelector(selectTimelineById, (timeline) => timeline?.timelineType);
+
+/**
+ * Selector that returns the timeline kqlQuery.
+ */
+const selectTimelineKqlQuery = createSelector(selectTimelineById, (timeline) => timeline?.kqlQuery);
+
+/**
+ * Selector that returns the timeline esql saved search id.
+ */
+export const selectTimelineESQLSavedSearchId = createSelector(
   selectTimelineById,
-  (timeline) => timeline?.timelineType
+  (timeline) => timeline?.savedSearchId
+);
+
+/**
+ * Selector that returns the kqlQuery.filterQuery.kuery.expression of a timeline.
+ */
+export const selectKqlFilterQueryExpression = createSelector(
+  selectTimelineById,
+  (timeline) => timeline?.kqlQuery?.filterQuery?.kuery?.expression
 );
 
 /**
@@ -114,7 +140,7 @@ const selectTimelineTimelineType = createSelector(
  */
 export const selectTitleByTimelineById = createSelector(
   selectTimelineTitle,
-  selectTimelineTimelineType,
+  selectTimelineType,
   (savedTitle, timelineType): string => {
     if (!isEmpty(savedTitle)) {
       return savedTitle;
@@ -123,5 +149,32 @@ export const selectTitleByTimelineById = createSelector(
       return UNTITLED_TEMPLATE;
     }
     return UNTITLED_TIMELINE;
+  }
+);
+
+/**
+ * Selector that returns the timeline query in a {@link Query} format.
+ */
+export const selectKqlQuery = createSelector(
+  selectTimelineDataProviders,
+  selectKqlFilterQueryExpression,
+  selectTimelineType,
+  (dataProviders, kqlFilterQueryExpression, timelineType): Query => {
+    const kqlQueryExpression =
+      isEmpty(dataProviders) && isEmpty(kqlFilterQueryExpression) && timelineType === 'template'
+        ? ' '
+        : kqlFilterQueryExpression ?? '';
+    return { query: kqlQueryExpression, language: 'kuery' };
+  }
+);
+
+/**
+ * Selector that returns true if the timeline has data providers or a kqlQuery filterQuery expression.
+ */
+export const selectDataInTimeline = createSelector(
+  selectTimelineDataProviders,
+  selectTimelineKqlQuery,
+  (dataProviders, kqlQuery): boolean => {
+    return !isEmpty(dataProviders) || !isEmpty(get('filterQuery.kuery.expression', kqlQuery));
   }
 );

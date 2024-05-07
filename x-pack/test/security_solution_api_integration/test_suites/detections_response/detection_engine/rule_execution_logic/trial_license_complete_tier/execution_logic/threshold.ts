@@ -24,9 +24,10 @@ import {
   ALERT_THRESHOLD_RESULT,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
+import { ENABLE_ASSET_CRITICALITY_SETTING } from '@kbn/security-solution-plugin/common/constants';
+import { createRule } from '../../../../../../../common/utils/security_solution';
 import {
-  createRule,
-  getOpenAlerts,
+  getAlerts,
   getPreviewAlerts,
   getThresholdRuleForAlertTesting,
   previewRule,
@@ -39,13 +40,14 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
+  const kibanaServer = getService('kibanaServer');
   // TODO: add a new service for loading archiver files similar to "getService('es')"
   const config = getService('config');
   const isServerless = config.get('serverless');
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const path = dataPathBuilder.getPath('auditbeat/hosts');
 
-  describe('@ess @serverless Threshold type rules', () => {
+  describe('@ess @serverless @serverlessQA Threshold type rules', () => {
     before(async () => {
       await esArchiver.load(path);
     });
@@ -64,7 +66,7 @@ export default ({ getService }: FtrProviderContext) => {
         },
       };
       const createdRule = await createRule(supertest, log, rule);
-      const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+      const alerts = await getAlerts(supertest, log, es, createdRule);
       expect(alerts.hits.hits.length).toEqual(1);
       const fullAlert = alerts.hits.hits[0]._source;
       if (!fullAlert) {
@@ -330,7 +332,7 @@ export default ({ getService }: FtrProviderContext) => {
         },
       };
       const createdRule = await createRule(supertest, log, rule);
-      const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+      const alerts = await getAlerts(supertest, log, es, createdRule);
       expect(alerts.hits.hits.length).toEqual(1);
     });
 
@@ -434,6 +436,9 @@ export default ({ getService }: FtrProviderContext) => {
     describe('with asset criticality', async () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
+        await kibanaServer.uiSettings.update({
+          [ENABLE_ASSET_CRITICALITY_SETTING]: true,
+        });
       });
 
       after(async () => {
@@ -452,7 +457,7 @@ export default ({ getService }: FtrProviderContext) => {
         const previewAlerts = await getPreviewAlerts({ es, previewId, sort: ['host.name'] });
         const fullAlert = previewAlerts[0]?._source;
 
-        expect(fullAlert?.['kibana.alert.host.criticality_level']).toEqual('important');
+        expect(fullAlert?.['host.asset.criticality']).toEqual('high_impact');
       });
     });
   });

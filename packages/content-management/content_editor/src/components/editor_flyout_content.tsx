@@ -45,6 +45,7 @@ export interface Props {
   item: Item;
   entityName: string;
   isReadonly?: boolean;
+  readonlyReason?: string;
   services: Pick<Services, 'TagSelector' | 'TagList' | 'notifyError'>;
   onSave?: (args: {
     id: string;
@@ -62,6 +63,7 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
   item,
   entityName,
   isReadonly = true,
+  readonlyReason,
   services: { TagSelector, TagList, notifyError },
   onSave,
   onCancel,
@@ -136,6 +138,12 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
         <MetadataForm
           form={{ ...form, isSubmitted }}
           isReadonly={isReadonly}
+          readonlyReason={
+            readonlyReason ||
+            i18n.translate('contentManagement.contentEditor.metadataForm.readOnlyToolTip', {
+              defaultMessage: 'To edit these details, contact your administrator for access.',
+            })
+          }
           tagsReferences={item.tags}
           TagList={TagList}
           TagSelector={TagSelector}

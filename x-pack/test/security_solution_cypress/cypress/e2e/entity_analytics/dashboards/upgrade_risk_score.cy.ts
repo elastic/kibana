@@ -36,7 +36,7 @@ import { deleteRiskEngineConfiguration } from '../../../tasks/api_calls/risk_eng
 const spaceId = 'default';
 
 describe('Upgrade risk scores', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
+  beforeEach(() => {
     login();
     deleteRiskEngineConfiguration();
     createRule(getNewRule({ rule_id: 'rule1' }));
@@ -44,7 +44,6 @@ describe('Upgrade risk scores', { tags: ['@ess', '@serverless'] }, () => {
 
   describe('show upgrade risk button', () => {
     beforeEach(() => {
-      login();
       deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId });
       deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId });
       installLegacyRiskScoreModule(RiskScoreEntity.host, spaceId);
@@ -55,8 +54,8 @@ describe('Upgrade risk scores', { tags: ['@ess', '@serverless'] }, () => {
     afterEach(() => {
       deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId });
       deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId });
-      cy.task('esArchiverUnload', 'risk_hosts');
-      cy.task('esArchiverUnload', 'risk_users');
+      cy.task('esArchiverUnload', { archiveName: 'risk_hosts' });
+      cy.task('esArchiverUnload', { archiveName: 'risk_users' });
     });
 
     it('shows upgrade panel', () => {
@@ -78,8 +77,8 @@ describe('Upgrade risk scores', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     afterEach(() => {
-      cy.task('esArchiverUnload', 'risk_hosts');
-      cy.task('esArchiverUnload', 'risk_users');
+      cy.task('esArchiverUnload', { archiveName: 'risk_hosts' });
+      cy.task('esArchiverUnload', { archiveName: 'risk_users' });
       deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId });
       deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId });
       deleteRiskEngineConfiguration();

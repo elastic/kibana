@@ -6,64 +6,44 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { CriticalityLevel } from '../../../../common/entity_analytics/asset_criticality/types';
+import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 
 export const PICK_ASSET_CRITICALITY = i18n.translate(
   'xpack.securitySolution.entityAnalytics.assetCriticality.pickerText',
   {
-    defaultMessage: 'Pick asset criticality level',
+    defaultMessage: 'Change asset criticality',
   }
 );
 
-export const CRITICALITY_LEVEL_TITLE: Record<CriticalityLevel, string> = {
-  normal: i18n.translate(
-    'xpack.securitySolution.entityAnalytics.assetCriticality.levelTitle.normal',
+export const CRITICALITY_LEVEL_TITLE: Record<CriticalityLevelWithUnassigned, string> = {
+  unassigned: i18n.translate(
+    'xpack.securitySolution.entityAnalytics.assetCriticality.levelTitle.unassigned',
     {
-      defaultMessage: 'Normal',
+      defaultMessage: 'Unassigned',
     }
   ),
-  not_important: i18n.translate(
-    'xpack.securitySolution.entityAnalytics.assetCriticality.levelTitle.notImportant',
+  medium_impact: i18n.translate(
+    'xpack.securitySolution.entityAnalytics.assetCriticality.levelTitle.mediumImpact',
     {
-      defaultMessage: 'Not important',
+      defaultMessage: 'Medium Impact',
     }
   ),
-  important: i18n.translate(
-    'xpack.securitySolution.entityAnalytics.assetCriticality.levelTitle.important',
+  low_impact: i18n.translate(
+    'xpack.securitySolution.entityAnalytics.assetCriticality.levelTitle.lowImpact',
     {
-      defaultMessage: 'Important',
+      defaultMessage: 'Low Impact',
     }
   ),
-  very_important: i18n.translate(
-    'xpack.securitySolution.entityAnalytics.assetCriticality.levelTitle.veryImportant',
+  high_impact: i18n.translate(
+    'xpack.securitySolution.entityAnalytics.assetCriticality.levelTitle.highImpact',
     {
-      defaultMessage: 'Very important',
+      defaultMessage: 'High Impact',
     }
   ),
-};
-export const CRITICALITY_LEVEL_DESCRIPTION: Record<CriticalityLevel, string> = {
-  normal: i18n.translate(
-    'xpack.securitySolution.entityAnalytics.assetCriticality.levelDescription.normal',
+  extreme_impact: i18n.translate(
+    'xpack.securitySolution.entityAnalytics.assetCriticality.levelTitle.extremeImpact',
     {
-      defaultMessage: 'Entity risk score rises at normal speed',
-    }
-  ),
-  not_important: i18n.translate(
-    'xpack.securitySolution.entityAnalytics.assetCriticality.levelDescription.notImportant',
-    {
-      defaultMessage: 'Entity risk score rises slower',
-    }
-  ),
-  important: i18n.translate(
-    'xpack.securitySolution.entityAnalytics.assetCriticality.levelDescription.important',
-    {
-      defaultMessage: 'Entity risk score rises faster',
-    }
-  ),
-  very_important: i18n.translate(
-    'xpack.securitySolution.entityAnalytics.assetCriticality.levelDescription.veryImportant',
-    {
-      defaultMessage: 'Entity risk score rises much faster',
+      defaultMessage: 'Extreme Impact',
     }
   ),
 };

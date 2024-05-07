@@ -206,11 +206,10 @@ export const isThreatIntelligencePath = (pathname: string): boolean => {
 
 export const getSubPluginRoutesByCapabilities = (
   subPlugins: StartedSubPlugins,
-  capabilities: Capabilities,
   services: StartServices
 ): RouteProps[] => {
   return Object.entries(subPlugins).reduce<RouteProps[]>((acc, [key, value]) => {
-    if (isSubPluginAvailable(key, capabilities)) {
+    if (isSubPluginAvailable(key, services.application.capabilities)) {
       acc.push(...value.routes);
     } else {
       const docLinkSelector = (docLinks: DocLinks) => docLinks.siem.privileges;

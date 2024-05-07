@@ -12,28 +12,29 @@ import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 
 const ColumnHeaderTruncateContainer = ({
-  headerRowHeight = 1,
+  headerRowHeight,
   children,
 }: {
   headerRowHeight?: number;
   children: React.ReactNode;
 }) => {
-  return (
-    <EuiTextBlockTruncate
-      lines={headerRowHeight}
-      css={css`
-        overflow-wrap: anywhere;
-        white-space: normal;
-        word-break: break-all;
-        line-height: ${euiThemeVars.euiSize};
-        text-align: left;
-        .euiDataGridHeaderCell--numeric & {
-          float: right;
-        }
-      `}
-    >
+  const headerCss = css`
+    overflow-wrap: anywhere;
+    white-space: normal;
+    word-break: break-all;
+    line-height: ${euiThemeVars.euiSize};
+    text-align: left;
+    .euiDataGridHeaderCell--numeric & {
+      float: right;
+    }
+  `;
+
+  return headerRowHeight ? (
+    <EuiTextBlockTruncate lines={headerRowHeight} css={headerCss}>
       {children}
     </EuiTextBlockTruncate>
+  ) : (
+    <div css={headerCss}>{children}</div>
   );
 };
 

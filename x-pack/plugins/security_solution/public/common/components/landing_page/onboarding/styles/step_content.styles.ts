@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { useEuiShadow, useEuiTheme } from '@elastic/eui';
+import { useEuiShadow, useEuiTheme, useEuiFontSize } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { useMemo } from 'react';
 
 export const LEFT_CONTENT_PANEL_WIDTH = 486;
-export const RIGHT_CONTENT_PANEL_WIDTH = 510;
-export const RIGHT_CONTENT_HEIGHT = 320;
-export const RIGHT_CONTENT_WIDTH = 480;
+export const RIGHT_CONTENT_PANEL_WIDTH = 540;
+export const RIGHT_CONTENT_WIDTH = 513;
 
 export const useStepContentStyles = () => {
   const { euiTheme } = useEuiTheme();
   const imageShadow = useEuiShadow('s');
+  const descriptionHeader = useEuiFontSize('s');
 
   const customStyles = useMemo(
     () => ({
@@ -46,6 +46,11 @@ export const useStepContentStyles = () => {
           '.step-paragraph': {
             marginTop: euiTheme.size.xl,
           },
+
+          '.euiTitle': {
+            fontSize: `${descriptionHeader.fontSize}`,
+            lineHeight: `${descriptionHeader.lineHeight}`,
+          },
         },
       }),
       rightPanelStyles: css({
@@ -56,21 +61,19 @@ export const useStepContentStyles = () => {
       }),
       rightPanelContentStyles: css({
         '&.right-panel-wrapper': {
-          height: `${RIGHT_CONTENT_HEIGHT}px`,
           width: `${RIGHT_CONTENT_WIDTH}px`,
         },
       }),
       getRightContentStyles: ({ shadow }: { shadow: boolean }) =>
-        css({
-          '&.right-panel-content': {
-            height: '100%',
-            width: '100%',
-            position: 'relative',
-            overflow: 'hidden',
-            boxShadow: shadow ? imageShadow : '',
-            borderRadius: euiTheme.border.radius.medium,
-          },
-        }),
+        css(`
+          &.right-panel-content {
+            height: 100%;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+            border-radius: ${euiTheme.border.radius.medium};
+            ${shadow ? imageShadow : ''}
+        }`),
     }),
     [
       euiTheme.animation.normal,
@@ -80,6 +83,8 @@ export const useStepContentStyles = () => {
       euiTheme.size.s,
       euiTheme.size.xl,
       imageShadow,
+      descriptionHeader.fontSize,
+      descriptionHeader.lineHeight,
     ]
   );
 

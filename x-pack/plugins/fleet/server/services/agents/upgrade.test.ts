@@ -20,7 +20,7 @@ jest.mock('./versions', () => {
     getAvailableVersions: jest
       .fn()
       .mockResolvedValue(['8.4.0', '8.5.0', '8.6.0', '8.7.0', '8.8.0']),
-    getLatestAvailableVersion: jest.fn().mockResolvedValue('8.8.0'),
+    getLatestAvailableAgentVersion: jest.fn().mockResolvedValue('8.8.0'),
   };
 });
 

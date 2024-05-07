@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useState, useContext, useEffect, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useState, useContext, useEffect, useMemo } from 'react';
 import { EuiFieldText } from '@elastic/eui';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { Description } from './description';

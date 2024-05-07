@@ -124,6 +124,7 @@ export type ApmFields = Fields<{
     'error.grouping_name': string;
     'error.id': string;
     'error.type': string;
+    'error.culprit': string;
     'event.ingested': number;
     'event.name': string;
     'event.action': string;
@@ -210,6 +211,7 @@ export type ApmFields = Fields<{
       span: { id: string };
     }>;
     'url.original': string;
+    'url.domain': string;
   }> &
   ApmApplicationMetricFields &
   ExperimentalFields;
