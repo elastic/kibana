@@ -953,8 +953,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     synthetics: {
       featureRoles: isServerless
-        ? `${SERVERLESS_OBSERVABILITY_DOCS} synthetics-feature-roles`
-        : `${OBSERVABILITY_DOCS}monitor-uptime-synthetics.html`,
+        ? `${SERVERLESS_OBSERVABILITY_DOCS}synthetics-feature-roles`
+        : `${OBSERVABILITY_DOCS}synthetics-feature-roles.html`,
     },
     telemetry: {
       settings: `${KIBANA_DOCS}telemetry-settings-kbn.html`,
