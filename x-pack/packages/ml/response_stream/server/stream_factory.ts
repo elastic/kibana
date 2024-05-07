@@ -33,15 +33,16 @@ type StreamType<T extends StreamTypeUnion> = T extends string
   ? T
   : never;
 
-// Fallback to never is there for backwards compatibility.
-export interface StreamFactoryReturnType<T extends StreamTypeUnion = never> {
+export interface StreamResponseWithHeaders {
+  body: zlib.Gzip | UncompressedResponseStream;
+  headers?: ResponseHeaders;
+}
+
+export interface StreamFactoryReturnType<T extends StreamTypeUnion> {
   DELIMITER: string;
   end: () => void;
   push: (d: StreamType<T>, drain?: boolean) => void;
-  responseWithHeaders: {
-    body: zlib.Gzip | UncompressedResponseStream;
-    headers?: ResponseHeaders;
-  };
+  responseWithHeaders: StreamResponseWithHeaders;
 }
 
 /**
@@ -133,7 +134,7 @@ export function streamFactory<T extends StreamTypeUnion>(
         function repeat() {
           if (!tryToEnd) {
             if (responseSizeSinceLastKeepAlive < FLUSH_PAYLOAD_SIZE) {
-              push({ flushPayload, type: 'flushPayload' } as unknown as StreamType<T>);
+              push({ flushPayload, type: 'flushPayload' } as StreamType<T>);
             }
             responseSizeSinceLastKeepAlive = 0;
             setTimeout(repeat, FLUSH_KEEP_ALIVE_INTERVAL_MS);
@@ -211,7 +212,7 @@ export function streamFactory<T extends StreamTypeUnion>(
     }
   }
 
-  const responseWithHeaders: StreamFactoryReturnType<T>['responseWithHeaders'] = {
+  const responseWithHeaders: StreamResponseWithHeaders = {
     body: stream,
     headers: {
       ...(isCompressed ? { 'content-encoding': 'gzip' } : {}),
