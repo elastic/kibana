@@ -23,9 +23,9 @@ export class ConnectionDetailsService {
 
   constructor(public readonly opts: ConnectionDetailsOpts) {
     opts.apiKeys
-      ?.hasPermission() // doesn't return a boolean but the keys
+      ?.hasPermission()
       .then((hasAccess) => {
-        this.apiKeyHasAccess$.next(Boolean(hasAccess));
+        this.apiKeyHasAccess$.next(hasAccess);
       })
       .catch((error) => {
         // eslint-disable-next-line no-console
@@ -83,8 +83,4 @@ export class ConnectionDetailsService {
       this.apiKeyError$.next(error);
     });
   };
-
-  public async getValidPermissionsApiKeys() {
-    return await this.opts.apiKeys?.hasPermission();
-  }
 }

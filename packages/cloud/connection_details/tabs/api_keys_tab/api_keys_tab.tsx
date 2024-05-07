@@ -23,9 +23,5 @@ export const ApiKeysTab: React.FC = () => {
   if (hasAccess === false) return <MissingPermissionsPanel />;
   if (apiKey) return <SuccessForm />;
 
-  return (
-    <>
-      <ConfigurationForm />
-    </>
-  );
+  return <ConfigurationForm />;
 };
