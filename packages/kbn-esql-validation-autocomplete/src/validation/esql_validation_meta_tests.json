@@ -16242,6 +16242,11 @@
       "warning": []
     },
     {
+      "query": "from a_index | sort date_diff(\"year\", dateField, dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | sort date_extract(\"ALIGNED_DAY_OF_WEEK_IN_MONTH\", dateField)",
       "error": [],
       "warning": []
@@ -16951,6 +16956,52 @@
     {
       "query": "from a_index | eval round(numberField) + 1 | eval `round(numberField) + 1` + 1 | eval ```round(numberField) + 1`` + 1` + 1 | eval ```````round(numberField) + 1```` + 1`` + 1` + 1 | eval ```````````````round(numberField) + 1```````` + 1```` + 1`` + 1` + 1 | keep ```````````````````````````````round(numberField) + 1```````````````` + 1```````` + 1```` + 1`` + 1`",
       "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = date_diff(\"month\", \"2023-12-02T11:00:00.000Z\", \"2023-12-02T11:00:00.000Z\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = date_diff(\"mm\", \"2023-12-02T11:00:00.000Z\", \"2023-12-02T11:00:00.000Z\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = date_diff(\"bogus\", \"2023-12-02T11:00:00.000Z\", \"2023-12-02T11:00:00.000Z\")",
+      "error": [],
+      "warning": [
+        "Invalid option [\"bogus\"] for date_diff. Supported options: [\"year\", \"years\", \"yy\", \"yyyy\", \"quarter\", \"quarters\", \"qq\", \"q\", \"month\", \"months\", \"mm\", \"m\", \"dayofyear\", \"dy\", \"y\", \"day\", \"days\", \"dd\", \"d\", \"week\", \"weeks\", \"wk\", \"ww\", \"weekday\", \"weekdays\", \"dw\", \"hour\", \"hours\", \"hh\", \"minute\", \"minutes\", \"mi\", \"n\", \"second\", \"seconds\", \"ss\", \"s\", \"millisecond\", \"milliseconds\", \"ms\", \"microsecond\", \"microseconds\", \"mcs\", \"nanosecond\", \"nanoseconds\", \"ns\"]."
+      ]
+    },
+    {
+      "query": "from a_index | eval date_diff(stringField, \"2023-12-02T11:00:00.000Z\", \"2023-12-02T11:00:00.000Z\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_diff(\"month\", dateField, \"2023-12-02T11:00:00.000Z\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_diff(\"month\", \"2023-12-02T11:00:00.000Z\", dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_diff(\"month\", stringField, dateField)",
+      "error": [
+        "Argument of [date_diff] must be [date], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_diff(\"month\", dateField, stringField)",
+      "error": [
+        "Argument of [date_diff] must be [date], found value [stringField] type [string]"
+      ],
       "warning": []
     }
   ]
