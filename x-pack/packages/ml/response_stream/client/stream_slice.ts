@@ -58,7 +58,7 @@ export const startStream = createAsyncThunk(
   }
 );
 
-interface StreamState {
+export interface StreamState {
   errors: string[];
   isCancelled: boolean;
   isRunning: boolean;
