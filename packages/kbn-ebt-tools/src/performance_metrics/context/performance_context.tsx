@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { createContext, useMemo, useState } from 'react';
 import { afterFrame } from '@elastic/apm-rum-core';
-import { perfomanceMarkers } from '../performance_markers';
 import { useLocation } from 'react-router-dom';
+import { perfomanceMarkers } from '../performance_markers';
 
 function measureInteraction() {
   performance.mark(perfomanceMarkers.startPageChange);
@@ -39,7 +40,7 @@ interface PerformanceApi {
 export const PerformanceContext = createContext<PerformanceApi | undefined>(undefined);
 
 export function PerformanceContextProvider({ children }: { children: React.ReactElement }) {
-  const [isRendered, setIsRendered] = useState<Boolean>(false);
+  const [isRendered, setIsRendered] = useState(false);
   const location = useLocation();
   const interaction = measureInteraction();
 
@@ -61,7 +62,7 @@ export function PerformanceContextProvider({ children }: { children: React.React
         }
       },
     }),
-    [isRendered, location.pathname]
+    [isRendered, location.pathname, interaction]
   );
 
   return <PerformanceContext.Provider value={api}>{children}</PerformanceContext.Provider>;
