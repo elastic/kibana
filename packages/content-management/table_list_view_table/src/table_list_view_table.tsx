@@ -47,6 +47,8 @@ import type { SortColumnField } from './components';
 import { useTags } from './use_tags';
 import { useInRouterContext, useUrlState } from './use_url_state';
 import { RowActions, TableItemsRowActions } from './types';
+import { UserAvatarTip } from './components/user_avatar_tip';
+import { NoUsersTip } from './components/user_missing_tip';
 
 interface ContentEditorConfig
   extends Pick<OpenContentEditorParams, 'isReadonly' | 'onSave' | 'customValidators'> {
@@ -136,6 +138,7 @@ export interface State<T extends UserContentCommonSchema = UserContentCommonSche
   selectedIds: string[];
   totalItems: number;
   hasUpdatedAtMetadata: boolean;
+  hasCreatedByMetadata: boolean;
   pagination: Pagination;
   tableSort: {
     field: SortColumnField;
@@ -260,6 +263,10 @@ const tableColumnMetadata = {
     field: 'updatedAt',
     name: 'Last updated',
   },
+  createdBy: {
+    field: 'createdBy',
+    name: 'Creator',
+  },
 } as const;
 
 function TableListViewTableComp<T extends UserContentCommonSchema>({
@@ -357,6 +364,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       isDeletingItems: false,
       showDeleteModal: false,
       hasUpdatedAtMetadata: false,
+      hasCreatedByMetadata: false,
       selectedIds: [],
       searchQuery: { text: '', query: new Query(Ast.create([]), undefined, '') },
       pagination: {
@@ -390,6 +398,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     selectedIds,
     totalItems,
     hasUpdatedAtMetadata,
+    hasCreatedByMetadata,
     pagination,
     tableSort,
     tableFilter,
@@ -558,6 +567,26 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       columns.push(customTableColumn);
     }
 
+    if (hasCreatedByMetadata && createdByEnabled) {
+      columns.push({
+        field: tableColumnMetadata.createdBy.field,
+        name: (
+          <>
+            {i18n.translate('contentManagement.tableList.createdByColumnTitle', {
+              defaultMessage: 'Creator',
+            })}
+            <NoUsersTip />
+          </>
+        ),
+        render: (field: string, record: { createdBy?: string }) =>
+          record.createdBy ? <UserAvatarTip uid={record.createdBy} /> : null,
+        sortable:
+          false /* createdBy column is not sortable because it doesn't make sense to sort by id*/,
+        width: '100px',
+        align: 'center',
+      });
+    }
+
     if (hasUpdatedAtMetadata) {
       columns.push({
         field: tableColumnMetadata.updatedAt.field,
@@ -641,6 +670,8 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     titleColumnName,
     customTableColumn,
     hasUpdatedAtMetadata,
+    hasCreatedByMetadata,
+    createdByEnabled,
     editItem,
     contentEditor.enabled,
     listingId,
