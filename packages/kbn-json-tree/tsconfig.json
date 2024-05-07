@@ -8,9 +8,7 @@
       "@emotion/react/types/css-prop"
     ]
   },
-  "include": [
-    "**/*.ts", "src/index.tsx",
-  ],
+  "include": ["*.ts", "**/*.tsx", "src/**/*"],
   "exclude": [
     "target/**/*"
   ],
