@@ -1,0 +1,146 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { RawCrowdstrikeInfo } from './types';
+import { catchAndWrapError } from '../../../../utils';
+import { getPendingActionsSummary } from '../../..';
+import { type AgentStatusRecords, HostStatus } from '../../../../../../common/endpoint/types';
+import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
+import { AgentStatusClient } from '../lib/base_agent_status_client';
+import { AgentStatusClientError } from '../errors';
+
+const CROWDSTRIKE_AGENT_INDEX_PATTERN = `logs-crowdstrike.host-*`;
+
+enum CROWDSTRIKE_NETWORK_STATUS {
+  NORMAL = 'normal',
+  CONTAINED = 'contained',
+}
+
+enum CROWDSTRIKE_STATUS_RESPONSE {
+  ONLINE = 'online',
+  OFFLINE = 'offline',
+  UNKNOWN = 'unknown',
+}
+
+export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
+  protected readonly agentType: ResponseActionAgentType = 'crowdstrike';
+
+  async getAgentStatuses(agentIds: string[]): Promise<AgentStatusRecords> {
+    const esClient = this.options.esClient;
+    const metadataService = this.options.endpointService.getEndpointMetadataService();
+    const sortField = 'crowdstrike.host.last_seen';
+
+    const query = {
+      bool: {
+        must: [
+          {
+            bool: {
+              filter: [
+                {
+                  terms: {
+                    'crowdstrike.host.id': agentIds,
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
+
+    try {
+      const [searchResponse, allPendingActions] = await Promise.all([
+        esClient.search(
+          {
+            index: CROWDSTRIKE_AGENT_INDEX_PATTERN,
+            from: 0,
+            size: 10000,
+            query,
+            collapse: {
+              // TODO: check if we should use crowdstrike.cid instead
+              field: 'crowdstrike.host.id',
+              inner_hits: {
+                name: 'most_recent',
+                size: 1,
+                sort: [
+                  {
+                    [sortField]: {
+                      order: 'desc',
+                    },
+                  },
+                ],
+              },
+            },
+            sort: [
+              {
+                [sortField]: {
+                  order: 'desc',
+                },
+              },
+            ],
+            _source: false,
+          },
+          { ignore: [404] }
+        ),
+
+        getPendingActionsSummary(esClient, metadataService, this.log, agentIds),
+      ]).catch(catchAndWrapError);
+
+      const mostRecentAgentInfosByAgentId = searchResponse?.hits?.hits?.reduce<
+        Record<string, RawCrowdstrikeInfo>
+      >((acc, hit) => {
+        // TODO TC: check if we should use crowdstrike.cid instead
+        if (hit.fields?.['crowdstrike.host.id'][0]) {
+          acc[hit.fields?.['crowdstrike.host.id'][0]] =
+            hit.inner_hits?.most_recent.hits.hits[0]._source;
+        }
+
+        return acc;
+      }, {});
+
+      return agentIds.reduce<AgentStatusRecords>((acc, agentId) => {
+        const agentInfo = mostRecentAgentInfosByAgentId[agentId].crowdstrike;
+
+        const pendingActions = allPendingActions.find(
+          (agentPendingActions) => agentPendingActions.agent_id === agentId
+        );
+
+        // TODO TC: have to fetch from 'status api'
+        const statusApiResponse = {
+          state: CROWDSTRIKE_STATUS_RESPONSE.ONLINE,
+        };
+        acc[agentId] = {
+          agentId,
+          agentType: this.agentType,
+          // TODO: check if we should use crowdstrike.cid instead
+          found: agentInfo?.host.id === agentId,
+          isolated: agentInfo?.status === CROWDSTRIKE_NETWORK_STATUS.CONTAINED,
+          lastSeen: agentInfo?.host.last_seen || '',
+          status:
+            statusApiResponse.state === CROWDSTRIKE_STATUS_RESPONSE.ONLINE
+              ? HostStatus.HEALTHY
+              : // TODO TC: not sure what the UNKNOWN is - still to be figured
+              statusApiResponse.state === CROWDSTRIKE_STATUS_RESPONSE.UNKNOWN
+              ? HostStatus.UNENROLLED
+              : HostStatus.OFFLINE,
+
+          pendingActions: pendingActions?.pending_actions ?? {},
+        };
+
+        return acc;
+      }, {});
+    } catch (err) {
+      const error = new AgentStatusClientError(
+        `Failed to fetch crowdstrike agent status for agentIds: [${agentIds}], failed with: ${err.message}`,
+        500,
+        err
+      );
+      this.log.error(error);
+      throw error;
+    }
+  }
+}

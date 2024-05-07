@@ -13,7 +13,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   useAgentStatusHook,
   useGetAgentStatus,
-  useGetSentinelOneAgentStatus,
+  useGetExternalAgentStatus,
 } from './use_sentinelone_host_isolation';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
@@ -22,7 +22,7 @@ jest.mock('../../../common/hooks/use_experimental_features');
 
 type AgentType = 'endpoint' | 'sentinel_one' | 'crowdstrike';
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
-const useGetSentinelOneAgentStatusMock = useGetSentinelOneAgentStatus as jest.Mock;
+const useGetSentinelOneAgentStatusMock = useGetExternalAgentStatus as jest.Mock;
 const useGetAgentStatusMock = useGetAgentStatus as jest.Mock;
 const useAgentStatusHookMock = useAgentStatusHook as jest.Mock;
 

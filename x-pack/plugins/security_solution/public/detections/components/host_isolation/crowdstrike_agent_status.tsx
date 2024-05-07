@@ -8,7 +8,6 @@
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import { HostStatus } from '../../../../common/endpoint/types';
 import { getAgentStatusText } from '../../../common/components/endpoint/agent_status_text';
 import { HOST_STATUS_TO_BADGE_COLOR } from '../../../management/pages/endpoint_hosts/view/host_constants';
 // import { useGetCrowdstrikeAgentStatus } from './use_crowdstrike_host_isolation';
@@ -17,6 +16,8 @@ import {
   ISOLATING_LABEL,
   RELEASING_LABEL,
 } from '../../../common/components/endpoint/endpoint_agent_status';
+import { useAgentStatusHook } from './use_sentinelone_host_isolation';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 export enum CROWDSTRIKE_NETWORK_STATUS {
   NORMAL = 'normal',
@@ -32,13 +33,16 @@ const EuiFlexGroupStyled = styled(EuiFlexGroup)`
 // TODO TC: THIS IS JUST A PLACEHOLDER UNTIL THE ACTUAL CROWDSTRIKE STATUS IS AVAILABLE - waiting for https://github.com/elastic/kibana/pull/178625
 export const CrowdstrikeAgentStatus = React.memo(
   ({ agentId, 'data-test-subj': dataTestSubj }: { agentId: string; 'data-test-subj'?: string }) => {
-    // const { data, isLoading, isFetched } = useGetCrowdstrikeAgentStatus([agentId]);
-    const agentStatus = {
-      status: HostStatus.HEALTHY,
-      isolated: true,
-      pendingActions: { isolate: 1, unisolate: 0 },
-    };
-    // const agentStatus = data?.[`${agentId}`];
+    const useAgentStatus = useAgentStatusHook();
+
+    const crowdstrikeManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
+      'responseActionsCrowdstrikeManualHostIsolationEnabled'
+    );
+
+    const { data, isLoading, isFetched } = useAgentStatus([agentId], 'crowdstrike', {
+      enabled: crowdstrikeManualHostActionsEnabled,
+    });
+    const agentStatus = data?.[`${agentId}`];
 
     const label = useMemo(() => {
       const currentNetworkStatus = agentStatus?.isolated;
@@ -67,8 +71,7 @@ export const CrowdstrikeAgentStatus = React.memo(
         data-test-subj={dataTestSubj}
       >
         <EuiFlexItem grow={false}>
-          {agentStatus ? (
-            // {isFetched && !isLoading && agentStatus ? (
+          {isFetched && !isLoading && agentStatus ? (
             <EuiBadge
               color={HOST_STATUS_TO_BADGE_COLOR[agentStatus.status]}
               className="eui-textTruncate"
@@ -79,8 +82,7 @@ export const CrowdstrikeAgentStatus = React.memo(
             '-'
           )}
         </EuiFlexItem>
-        {label && (
-          // {isFetched && !isLoading && label && (
+        {isFetched && !isLoading && label && (
           <EuiFlexItem grow={false} className="eui-textTruncate isolation-status">
             <EuiBadge color="hollow" data-test-subj={dataTestSubj}>
               <>{label}</>
