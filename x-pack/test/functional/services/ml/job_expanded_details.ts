@@ -46,21 +46,11 @@ export function MachineLearningJobExpandedDetailsProvider(
     },
 
     async assertForecastElements(jobId: string): Promise<void> {
-      await jobTable.ensureDetailsClosed(jobId);
       await jobTable.ensureDetailsOpen(jobId);
-
-      await retry.tryForTime(15_000, async () => {
-        await this.openForecastTab(jobId);
-      });
-
-      // Wait for the data to be fetched and rendered
-      await testSubjects.existOrFail('mlJobListForecastTable', { timeout: 10_000 });
-
+      await this.openForecastTab(jobId);
       await testSubjects.existOrFail('mlJobListForecastTabOpenSingleMetricViewButton', {
         timeout: 5_000,
       });
-
-      await jobTable.ensureDetailsClosed(jobId);
     },
 
     async clearSearchButton() {
@@ -122,11 +112,13 @@ export function MachineLearningJobExpandedDetailsProvider(
     },
 
     async openForecastTab(jobId: string) {
-      await testSubjects.click(jobTable.detailsSelector(jobId, 'mlJobListTab-forecasts'), 3_000);
-      await retry.tryForTime(15_000, async function waitForRenderForecastTable() {
-        await testSubjects.existOrFail('mlJobListForecastTable');
+      const failFasterThanExistOrFail = { timeout: 10_000 };
+      await retry.tryForTime(60_000, async () => {
+        await jobTable.ensureDetailsOpen(jobId);
+        await testSubjects.click(jobTable.detailsSelector(jobId, 'mlJobListTab-forecasts'), 3_000);
+        await testSubjects.existOrFail('mlJobListForecastTable', failFasterThanExistOrFail);
+        await this.assertJobDetailsTabOpen('mlJobListTab-forecasts');
       });
-      await this.assertJobDetailsTabOpen('mlJobListTab-forecasts');
     },
 
     async assertJobDetailsTabOpen(tabSubj: string) {

@@ -64,8 +64,6 @@ export default function ({ getService }: FtrProviderContext) {
         job_ids: [jobId],
       });
 
-      await ml.securityUI.loginAsMlPowerUser();
-
       await ml.navigation.navigateToMl();
 
       await ml.navigation.navigateToJobManagement();
