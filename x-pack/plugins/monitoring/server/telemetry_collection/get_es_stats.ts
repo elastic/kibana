@@ -108,6 +108,7 @@ export interface ESClusterStats {
   elasticsearch?: {
     cluster: {
       id: string;
+      name: string;
       stats: {
         stack: object;
       };
@@ -127,5 +128,17 @@ export interface ESClusterStats {
 export function handleElasticsearchStats(response: estypes.SearchResponse<ESClusterStats>) {
   const clusters = response.hits?.hits || [];
 
-  return clusters.map((cluster) => cluster._source!);
+  return clusters.map((cluster) => {
+    const clusterStats = cluster._source!;
+
+    // tolerate metricbeat monitoring structure
+    if (clusterStats.elasticsearch) {
+      clusterStats.cluster_stats = clusterStats.elasticsearch.cluster.stats;
+      clusterStats.cluster_uuid = clusterStats.elasticsearch.cluster.id;
+      clusterStats.cluster_name = clusterStats.elasticsearch.cluster.name;
+      clusterStats.elasticsearch = undefined;
+    }
+
+    return clusterStats;
+  });
 }

@@ -83,10 +83,6 @@ export interface BasicStatsPayload {
   cluster_stats: object;
   collection?: string;
   stack_stats: object;
-  elasticsearch?: {
-    cluster?: { id: string };
-    stats?: object;
-  };
 }
 
 export interface UsageStatsPayload extends BasicStatsPayload {
