@@ -119,13 +119,6 @@ export default function (ctx: FtrProviderContext) {
         await globalNav.badgeMissingOrFail();
       });
 
-      it.skip('Permalinks shows create short-url button', async () => {
-        await PageObjects.share.openShareMenuItem('Permalinks');
-        await PageObjects.share.createShortUrlExistOrFail();
-        // close the menu
-        await PageObjects.share.clickShareTopNavButton();
-      });
-
       it('shows CSV reports', async () => {
         await PageObjects.share.clickShareTopNavButton();
         await PageObjects.share.clickTab('Export');
