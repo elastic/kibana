@@ -12,7 +12,6 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { getKibanaRoleSchema, elasticsearchRoleSchema } from '../../authorization';
 
 export interface APIKeys {
-  name: any;
   /**
    * Determines if API Keys are enabled in Elasticsearch.
    */
