@@ -151,10 +151,14 @@ export function useFetchStream<B extends object, R extends Reducer<any, any>>(
     setIsRunning(false);
   };
 
+  // This custom dispatch function allows us to update the `dataRef` value and will
+  // then trigger an update of `data` right away as we don't want to have the
+  // throttling in place for these types of updates.
   const dispatch = (action: ReducerAction<FetchStreamCustomReducer<R>['reducer']>) => {
     dataRef.current = reducerWithFallback.reducer(dataRef.current, action) as ReducerState<
       CustomReducer<R>
     >;
+    setData(dataRef.current);
   };
 
   const cancel = () => {
