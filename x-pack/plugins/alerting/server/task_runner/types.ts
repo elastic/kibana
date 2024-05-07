@@ -127,6 +127,7 @@ export type Executable<
   RecoveryActionGroupId extends string
 > = {
   action: RuleAction | RuleSystemAction;
+  isImproving?: boolean;
 } & (
   | {
       alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>;

@@ -34,6 +34,7 @@ interface CommandType<
     | 'setRuleActionFrequency'
     | 'setRuleActionAlertsFilter'
     | 'setAlertDelayProperty'
+    | 'setRuleActionDoRecover'
 > {
   type: T;
 }
@@ -108,6 +109,10 @@ export type RuleReducerAction =
   | {
       command: CommandType<'setAlertDelayProperty'>;
       payload: AlertDelayPayload<keyof AlertDelay>;
+    }
+  | {
+      command: CommandType<'setRuleActionDoRecover'>;
+      payload: Payload<string, boolean>;
     };
 
 export type InitialRuleReducer = Reducer<{ rule: InitialRule }, RuleReducerAction>;
@@ -311,6 +316,26 @@ export const getRuleReducer =
                 ...rule.alertDelay,
                 [key]: value,
               },
+            },
+          };
+        }
+      }
+      case 'setRuleActionDoRecover': {
+        const { key, value, index } = action.payload as Payload<string, boolean>;
+        if (index === undefined || rule.actions[index] == null) {
+          return state;
+        } else {
+          const oldAction = rule.actions.splice(index, 1)[0];
+          const updatedAction = {
+            ...oldAction,
+            [key]: value,
+          };
+          rule.actions.splice(index, 0, updatedAction);
+          return {
+            ...state,
+            rule: {
+              ...rule,
+              actions: [...rule.actions],
             },
           };
         }

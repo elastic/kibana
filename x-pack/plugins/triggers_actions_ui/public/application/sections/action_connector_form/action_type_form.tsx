@@ -84,6 +84,7 @@ export type ActionTypeFormProps = {
     value: RuleActionAlertsFilterProperty,
     index: number
   ) => void;
+  setActionDoRecoverProperty: (key: string, value: boolean, index: number) => void;
   actionTypesIndex: ActionTypeIndex;
   connectors: ActionConnector[];
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -129,6 +130,7 @@ export const ActionTypeForm = ({
   setActionParamsProperty,
   setActionFrequencyProperty,
   setActionAlertsFilterProperty,
+  setActionDoRecoverProperty,
   actionTypesIndex,
   connectors,
   defaultActionGroupId,
@@ -171,6 +173,7 @@ export const ActionTypeForm = ({
       ? getDurationNumberInItsUnit(actionItem.frequency.throttle)
       : null
   );
+  const [doRecover, setDoRecover] = useState<boolean>(Boolean(actionItem.doAutoRecover));
   const [actionThrottleUnit, setActionThrottleUnit] = useState<string>(
     actionItem.frequency?.throttle ? getDurationUnitValue(actionItem.frequency?.throttle) : 'h'
   );
@@ -263,6 +266,11 @@ export const ActionTypeForm = ({
       return [false, false];
     }
   }, [minimumActionThrottle, minimumActionThrottleUnit, actionThrottle, actionThrottleUnit]);
+
+  const toggleDoRecover = useCallback(
+    (value: boolean) => setActionDoRecoverProperty('doAutoRecover', value, index),
+    [index, setActionDoRecoverProperty]
+  );
 
   useEffect(() => {
     (async () => {
@@ -422,6 +430,9 @@ export const ActionTypeForm = ({
     connectors.filter((connector) => connector.isPreconfigured)
   );
 
+  const canAutoRecover =
+    actionTypesIndex[actionConnector.actionTypeId].canAutoRecover &&
+    !!selectedActionGroup?.severity;
   const showSelectActionGroup =
     actionGroups &&
     selectedActionGroup &&
@@ -584,6 +595,25 @@ export const ActionTypeForm = ({
             </EuiFlexGroup>
           </EuiErrorBoundary>
         ) : null}
+        {canAutoRecover && (
+          <>
+            <EuiSpacer size="xl" />
+            <EuiSwitch
+              label={i18n.translate(
+                'xpack.triggersActionsUI.sections.actionTypeForm.toggleAutoRecoverLabel',
+                {
+                  defaultMessage: 'Auto-recover',
+                }
+              )}
+              checked={doRecover}
+              onChange={(event) => {
+                setDoRecover(event.target.checked);
+                toggleDoRecover(event.target.checked);
+              }}
+              data-test-subj="autoRecoverToggle"
+            />
+          </>
+        )}
       </EuiSplitPanel.Inner>
     </>
   ) : (

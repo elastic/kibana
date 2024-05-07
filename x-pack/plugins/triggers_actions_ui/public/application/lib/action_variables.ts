@@ -75,6 +75,9 @@ export enum AlertProvidedActionVariables {
   alertActionGroupName = 'alert.actionGroupName',
   alertActionSubgroup = 'alert.actionSubgroup',
   alertFlapping = 'alert.flapping',
+  alertPreviousActionGroup = 'alert.previousActionGroup',
+  alertPreviousActionGroupName = 'alert.previousActionGroupName',
+  alertIsImproving = 'alert.isImproving',
   kibanaBaseUrl = 'kibanaBaseUrl',
   alertConsecutiveMatches = 'alert.consecutiveMatches',
 }
@@ -215,6 +218,36 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
           'The human readable name of the action group of the alert that scheduled actions for the rule.',
       }
     ),
+  });
+
+  result.push({
+    name: AlertProvidedActionVariables.alertPreviousActionGroup,
+    description: i18n.translate(
+      'xpack.triggersActionsUI.actionVariables.alertPreviousActionGroupLabel',
+      {
+        defaultMessage:
+          'The previous action group of the alert that scheduled actions for the rule.',
+      }
+    ),
+  });
+
+  result.push({
+    name: AlertProvidedActionVariables.alertPreviousActionGroupName,
+    description: i18n.translate(
+      'xpack.triggersActionsUI.actionVariables.alertPreviousActionGroupNameLabel',
+      {
+        defaultMessage:
+          'The human readable name of the previous action group of the alert that scheduled actions for the rule.',
+      }
+    ),
+  });
+
+  result.push({
+    name: AlertProvidedActionVariables.alertIsImproving,
+    description: i18n.translate('xpack.triggersActionsUI.actionVariables.alertIsImprovingLabel', {
+      defaultMessage:
+        'A flag on the alert that indicates whether the alert is improving in severity level.',
+    }),
   });
 
   result.push({

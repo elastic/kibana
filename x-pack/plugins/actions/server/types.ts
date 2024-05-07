@@ -155,6 +155,8 @@ export interface ActionType<
     connector?: (config: Config, secrets: Secrets) => string | null;
   };
   isSystemActionType?: boolean;
+  canAutoRecover?: boolean;
+  overrideParamsForAutoRecovery?: (params: Params, overrideMessage: string) => Params;
   /**
    * Additional Kibana privileges to be checked by the actions framework.
    * Use it if you want to perform extra authorization checks based on a Kibana feature.

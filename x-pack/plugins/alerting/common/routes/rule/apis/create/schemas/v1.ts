@@ -52,6 +52,7 @@ export const actionSchema = schema.object({
   uuid: schema.maybe(schema.string()),
   alerts_filter: schema.maybe(actionAlertsFilterSchema),
   use_alert_data_for_template: schema.maybe(schema.boolean()),
+  do_auto_recover: schema.maybe(schema.boolean()),
 });
 
 export const createBodySchema = schema.object({

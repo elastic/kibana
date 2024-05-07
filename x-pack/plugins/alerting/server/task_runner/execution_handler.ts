@@ -22,6 +22,7 @@ import {
 import { ActionsCompletion } from '@kbn/alerting-state-types';
 import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
 import { chunk } from 'lodash';
+import { ActionTypeParams } from '@kbn/actions-plugin/server/types';
 import { GetSummarizedAlertsParams, IAlertsClient } from '../alerts_client/types';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { AlertHit, parseDuration, CombinedSummarizedAlerts, ThrottledActions } from '../types';
@@ -103,6 +104,7 @@ interface RunActionArgs<
   alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>;
   ruleId: string;
   spaceId: string;
+  isImproving?: boolean;
   bulkActions: EnqueueExecutionOptions[];
 }
 
@@ -239,7 +241,7 @@ export class ExecutionHandler<
 
     this.ruleRunMetricsStore.incrementNumberOfGeneratedActions(executables.length);
 
-    for (const { action, alert, summarizedAlerts } of executables) {
+    for (const { action, alert, summarizedAlerts, isImproving } of executables) {
       const { actionTypeId } = action;
 
       ruleRunMetricsStore.incrementNumberOfGeneratedActionsByConnectorType(actionTypeId);
@@ -331,6 +333,7 @@ export class ExecutionHandler<
           alert,
           ruleId,
           bulkActions,
+          isImproving,
         });
 
         const actionGroup = defaultAction.group;
@@ -341,7 +344,7 @@ export class ExecutionHandler<
               generateActionHash(action),
               defaultAction.uuid
             );
-          } else {
+          } else if (!isImproving) {
             alert.updateLastScheduledActions(defaultAction.group as ActionGroupIds);
           }
           alert.unscheduleActions();
@@ -498,10 +501,25 @@ export class ExecutionHandler<
     alert,
     ruleId,
     bulkActions,
+    isImproving,
   }: RunActionArgs<State, Context, ActionGroupIds, RecoveryActionGroupId>): Promise<LogAction> {
+    console.log(`runAction ${JSON.stringify(action)}`);
     const ruleUrl = this.buildRuleUrl(spaceId);
     const executableAlert = alert!;
     const actionGroup = action.group as ActionGroupIds;
+    const previousActionGroup = executableAlert.getLastScheduledActions()?.group;
+    console.log(`actionGroup ${actionGroup}, previousActionGroup ${previousActionGroup}`);
+    const actionGroupDef = this.ruleType.actionGroups.find((ag) => ag.id === actionGroup);
+
+    let actionParams: ActionTypeParams = action.params;
+    if (isImproving && !!actionGroupDef?.severity?.defaultImprovingMessage) {
+      actionParams = this.actionsClient.replaceActionParams(
+        action.actionTypeId,
+        actionParams,
+        actionGroupDef?.severity?.defaultImprovingMessage
+      );
+    }
+
     const transformActionParamsOptions: TransformActionParamsOptions = {
       actionsPlugin: this.taskRunnerContext.actionsPlugin,
       alertId: ruleId,
@@ -519,9 +537,18 @@ export class ExecutionHandler<
       state: executableAlert.getState(),
       kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
       alertParams: this.rule.params,
-      actionParams: action.params,
+      actionParams,
       flapping: executableAlert.getFlapping(),
       ruleUrl: ruleUrl?.absoluteUrl,
+      ...(previousActionGroup
+        ? {
+            alertPreviousActionGroup: previousActionGroup,
+            alertPreviousActionGroupName: this.ruleTypeActionGroups!.get(
+              previousActionGroup as ActionGroupIds
+            )!,
+            alertIsImproving: isImproving,
+          }
+        : {}),
     };
 
     if (executableAlert.isAlertAsData()) {
@@ -536,6 +563,8 @@ export class ExecutionHandler<
         actionParams: transformActionParams(transformActionParamsOptions),
       }),
     };
+
+    console.log(`actionToRun ${JSON.stringify(actionToRun)}`);
 
     await this.actionRunOrAddToBulk({
       enqueueOptions: this.getEnqueueOptions(actionToRun),
@@ -600,6 +629,29 @@ export class ExecutionHandler<
     return actionGroup === this.ruleType.recoveryActionGroup.id;
   }
 
+  private alertIsImproving(
+    currentActionGroup: ActionGroupIds | RecoveryActionGroupId,
+    previousActionGroup: ActionGroupIds
+  ): boolean {
+    const currentActionGroupDef = this.ruleType.actionGroups.find(
+      (actionGroup) => actionGroup.id === currentActionGroup
+    );
+    const previousActionGroupDef = this.ruleType.actionGroups.find(
+      (actionGroup) => actionGroup.id === previousActionGroup
+    );
+
+    if (
+      currentActionGroupDef &&
+      previousActionGroupDef &&
+      currentActionGroupDef.severity &&
+      previousActionGroupDef.severity
+    ) {
+      return currentActionGroupDef.severity.level < previousActionGroupDef.severity.level;
+    }
+
+    return false;
+  }
+
   private isExecutableActiveAlert({
     alert,
     action,
@@ -617,7 +669,7 @@ export class ExecutionHandler<
         (this.skippedAlerts[alertId] &&
           this.skippedAlerts[alertId].reason !== Reasons.ACTION_GROUP_NOT_CHANGED)
       ) {
-        logger.debug(
+        logger.info(
           `skipping scheduling of actions for '${alertId}' in rule ${ruleLabel}: alert is active but action group has not changed`
         );
       }
@@ -771,6 +823,16 @@ export class ExecutionHandler<
         }
 
         const actionGroup = this.getActionGroup(alert);
+        const previousActionGroup = alert.getLastScheduledActions()?.group;
+        console.log(`alert action group ${actionGroup}`);
+        console.log(`previous action group ${previousActionGroup}`);
+
+        const isImproving = this.alertIsImproving(
+          actionGroup,
+          previousActionGroup as ActionGroupIds
+        );
+
+        console.log(`isImproving ${isImproving}`);
 
         if (!this.ruleTypeActionGroups!.has(actionGroup)) {
           this.logger.error(
@@ -802,7 +864,19 @@ export class ExecutionHandler<
             this.isRecoveredAlert(action.group) ||
             this.isExecutableActiveAlert({ alert, action })
           ) {
+            console.log('scheduling action');
             executables.push({ action, alert });
+
+            if (isImproving) {
+              console.log('should schedule recovery action for previous action group');
+              // get the action for the previous action group
+              const prevActionGroupAction = this.rule.actions.find(
+                (a) => a.group === previousActionGroup
+              );
+              if (!!prevActionGroupAction) {
+                executables.push({ action: prevActionGroupAction, alert, isImproving });
+              }
+            }
           }
         }
       }

@@ -55,6 +55,7 @@ export function getConnectorType(): ServerLogConnectorType {
     name: i18n.translate('xpack.stackConnectors.serverLog.title', {
       defaultMessage: 'Server log',
     }),
+    canAutoRecover: true,
     supportedFeatureIds: [AlertingConnectorFeatureId, UptimeConnectorFeatureId],
     validate: {
       config: { schema: schema.object({}, { defaultValue: {} }) },
@@ -63,6 +64,10 @@ export function getConnectorType(): ServerLogConnectorType {
         schema: ParamsSchema,
       },
     },
+    overrideParamsForAutoRecovery: (params: ActionParamsType, overrideMessage: string) => ({
+      ...params,
+      message: overrideMessage,
+    }),
     executor,
   };
 }

@@ -9,12 +9,33 @@ import { i18n } from '@kbn/i18n';
 
 export const INVALID_EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!|\|]+/g;
 
+const sloBurnRateDefaultActionMessage = i18n.translate(
+  'xpack.slo.rules.burnRate.defaultActionMessage',
+  {
+    defaultMessage: `I AM A CUSTOM DEFAULT MESSAGE \\{\\{context.reason\\}\\}
+
+\\{\\{rule.name\\}\\} is active with the following conditions:
+
+- SLO: \\{\\{context.sloName\\}\\}'
+- The burn rate over the last \\{\\{context.longWindow.duration\\}\\} is \\{\\{context.longWindow.burnRate\\}\\}
+- The burn rate over the last \\{\\{context.shortWindow.duration\\}\\} is \\{\\{context.shortWindow.burnRate\\}\\}
+- Threshold: \\{\\{context.burnRateThreshold\\}\\}
+
+[View alert details](\\{\\{context.alertDetailsUrl\\}\\})
+`,
+  }
+);
+
 export const ALERT_ACTION_ID = 'slo.burnRate.alert';
 export const ALERT_ACTION = {
   id: ALERT_ACTION_ID,
   name: i18n.translate('xpack.slo.alerting.burnRate.alertAction', {
     defaultMessage: 'Critical',
   }),
+  defaultMessage: sloBurnRateDefaultActionMessage,
+  severity: {
+    level: 3,
+  },
 };
 
 export const HIGH_PRIORITY_ACTION_ID = 'slo.burnRate.high';
@@ -23,6 +44,10 @@ export const HIGH_PRIORITY_ACTION = {
   name: i18n.translate('xpack.slo.alerting.burnRate.highPriorityAction', {
     defaultMessage: 'High',
   }),
+  defaultMessage: sloBurnRateDefaultActionMessage,
+  severity: {
+    level: 2,
+  },
 };
 
 export const MEDIUM_PRIORITY_ACTION_ID = 'slo.burnRate.medium';
@@ -31,6 +56,10 @@ export const MEDIUM_PRIORITY_ACTION = {
   name: i18n.translate('xpack.slo.alerting.burnRate.mediumPriorityAction', {
     defaultMessage: 'Medium',
   }),
+  defaultMessage: sloBurnRateDefaultActionMessage,
+  severity: {
+    level: 1,
+  },
 };
 
 export const LOW_PRIORITY_ACTION_ID = 'slo.burnRate.low';
@@ -39,6 +68,10 @@ export const LOW_PRIORITY_ACTION = {
   name: i18n.translate('xpack.slo.alerting.burnRate.lowPriorityAction', {
     defaultMessage: 'Low',
   }),
+  defaultMessage: sloBurnRateDefaultActionMessage,
+  severity: {
+    level: 0,
+  },
 };
 
 export const SUPPRESSED_PRIORITY_ACTION_ID = 'slo.burnRate.suppressed';

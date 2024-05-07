@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { ActionTypeParams } from '@kbn/actions-plugin/server/types';
 import { i18n } from '@kbn/i18n';
-import { RuleActionParams } from '../types';
 import { RuleUrl } from './execution_handler';
 
 export interface InjectActionParamsOpts {
   actionTypeId: string;
-  actionParams: RuleActionParams;
+  actionParams: ActionTypeParams;
   ruleUrl?: RuleUrl;
   ruleName?: string;
 }
