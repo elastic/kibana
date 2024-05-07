@@ -37,68 +37,6 @@ function EmbeddedMapComponent({
 
   const { maps } = useKibana<ApmPluginStartDeps>().services;
 
-  // useEffect(() => {
-  //   async function setupEmbeddable() {
-  //     const factory = embeddablePlugin?.getEmbeddableFactory<
-  //       MapEmbeddableInput,
-  //       MapEmbeddableOutput,
-  //       MapEmbeddable
-  //     >(MAP_SAVED_OBJECT_TYPE);
-
-  //     if (!factory) {
-  //       setError(true);
-  //       notifications?.toasts.addDanger({
-  //         title: i18n.translate('xpack.apm.serviceOverview.embeddedMap.error.toastTitle', {
-  //           defaultMessage: 'An error occurred when adding map embeddable',
-  //         }),
-  //         text: i18n.translate('xpack.apm.serviceOverview.embeddedMap.error.toastDescription', {
-  //           defaultMessage: `Embeddable factory with id "{embeddableFactoryId}" was not found.`,
-  //           values: {
-  //             embeddableFactoryId: MAP_SAVED_OBJECT_TYPE,
-  //           },
-  //         }),
-  //       });
-  //       return;
-  //     }
-
-  //     const input: MapEmbeddableInput = {
-  //       attributes: { title: '' },
-  //       id: uuidv4(),
-  //       title: i18n.translate('xpack.apm.serviceOverview.embeddedMap.input.title', {
-  //         defaultMessage: 'Latency by country',
-  //       }),
-  //       filters,
-  //       viewMode: ViewMode.VIEW,
-  //       mapCenter: { lat: 20.43425, lon: 0, zoom: 1.25 },
-  //       isLayerTOCOpen: false,
-  //       query: {
-  //         query: kuery,
-  //         language: 'kuery',
-  //       },
-  //       timeRange: {
-  //         from: start,
-  //         to: end,
-  //       },
-  //       hideFilterActions: true,
-  //     };
-
-  //     const embeddableObject = await factory.create(input);
-
-  //     setEmbeddable(embeddableObject);
-  //   }
-
-  //   setupEmbeddable();
-  //   // Set up exactly once after the component mounts
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
-
-  // We can only render after embeddable has already initialized
-  // useEffect(() => {
-  //   if (embeddableRoot.current && embeddable) {
-  //     embeddable.render(embeddableRoot.current);
-  //   }
-  // }, [embeddable, embeddableRoot]);
-
   useEffect(() => {
     const updateLayers = async () => {
       if (dataView?.id) {
@@ -117,22 +55,6 @@ function EmbeddedMapComponent({
 
     updateLayers();
   }, [selectedMap, maps, dataView]);
-
-  // useEffect(() => {
-  //   if (embeddable) {
-  //     embeddable.updateInput({
-  //       filters,
-  //       query: {
-  //         query: kuery,
-  //         language: 'kuery',
-  //       },
-  //       timeRange: {
-  //         from: start,
-  //         to: end,
-  //       },
-  //     });
-  //   }
-  // }, [start, end, kuery, filters, embeddable, selectedMap]);
 
   return (
     <>
@@ -159,7 +81,9 @@ function EmbeddedMapComponent({
         >
           {maps &&
             maps.Map({
-              layerList,
+              title: i18n.translate('xpack.apm.serviceOverview.embeddedMap.input.title', {
+                defaultMessage: 'Latency by country',
+              }),
               filters,
               query: {
                 query: kuery,
@@ -169,8 +93,9 @@ function EmbeddedMapComponent({
                 from: start,
                 to: end,
               },
-              isLayerTOCOpen: false,
+              layerList,
               hideFilterActions: true,
+              isLayerTOCOpen: false,
               mapCenter: { lat: 20.43425, lon: 0, zoom: 1.25 },
             })}
         </div>
