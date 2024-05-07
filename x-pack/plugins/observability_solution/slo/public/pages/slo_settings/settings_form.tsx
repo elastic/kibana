@@ -23,13 +23,16 @@ import React, { useEffect, useState } from 'react';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { isEqual } from 'lodash';
+import { DEFAULT_STALE_SLO_THRESHOLD_HOURS } from '../../../common/constants';
 import { useGetSettings } from './use_get_settings';
 import { usePutSloSettings } from './use_put_slo_settings';
 
 export function SettingsForm() {
   const [useAllRemoteClusters, setUseAllRemoteClusters] = useState(false);
   const [selectedRemoteClusters, setSelectedRemoteClusters] = useState<string[]>([]);
-  const [staleThresholdInHours, setStaleThresholdInHours] = useState(48);
+  const [staleThresholdInHours, setStaleThresholdInHours] = useState(
+    DEFAULT_STALE_SLO_THRESHOLD_HOURS
+  );
 
   const { http } = useKibana().services;
 
@@ -142,10 +145,9 @@ export function SettingsForm() {
         }
       >
         <EuiFormRow
-          label={i18n.translate(
-            'xpack.slo.settingsForm.euiFormRow.select.selectRemoteClustersLabel',
-            { defaultMessage: 'Select threshold' }
-          )}
+          label={i18n.translate('xpack.slo.settingsForm.euiFormRow.select.selectThresholdLabel', {
+            defaultMessage: 'Select threshold',
+          })}
         >
           <EuiFieldNumber
             data-test-subj="sloSettingsFormFieldNumber"
@@ -167,7 +169,9 @@ export function SettingsForm() {
               onClick={() => {
                 setUseAllRemoteClusters(currentSettings?.useAllRemoteClusters || false);
                 setSelectedRemoteClusters(currentSettings?.selectedRemoteClusters || []);
-                setStaleThresholdInHours(currentSettings?.staleThresholdInHours ?? 2);
+                setStaleThresholdInHours(
+                  currentSettings?.staleThresholdInHours ?? DEFAULT_STALE_SLO_THRESHOLD_HOURS
+                );
               }}
               isDisabled={isEqual(currentSettings, {
                 useAllRemoteClusters,

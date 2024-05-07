@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { DEFAULT_STALE_SLO_THRESHOLD_HOURS } from '../../../../../common/constants';
 import { SLOOverviewAlerts } from './slo_overview_alerts';
 import { useGetSettings } from '../../../slo_settings/use_get_settings';
 import { useFetchSLOsOverview } from '../../hooks/use_fetch_slos_overview';
@@ -103,12 +104,15 @@ export function SLOsOverview() {
               })}
               titleColor="subdued"
               isLoading={isLoading}
-              query={`summaryUpdatedAt < "now - ${currentSettings?.staleThresholdInHours ?? 48}h"`}
-              tooltip={i18n.translate('xpack.slo.sLOsOverview.euiStat.healthyLabel.tooltip', {
+              query={`summaryUpdatedAt < "now - ${
+                currentSettings?.staleThresholdInHours ?? DEFAULT_STALE_SLO_THRESHOLD_HOURS
+              }h"`}
+              tooltip={i18n.translate('xpack.slo.sLOsOverview.euiStat.staleLabel.tooltip', {
                 defaultMessage:
                   'Click to filter SLOs which have not been updated in last {value} hour. They are filtered out by default from the list. Threshold can be changed in SLO settings.',
                 values: {
-                  value: currentSettings?.staleThresholdInHours ?? 48,
+                  value:
+                    currentSettings?.staleThresholdInHours ?? DEFAULT_STALE_SLO_THRESHOLD_HOURS,
                 },
               })}
             />
