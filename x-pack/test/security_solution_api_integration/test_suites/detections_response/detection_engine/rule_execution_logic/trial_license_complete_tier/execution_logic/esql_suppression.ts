@@ -1766,7 +1766,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it.only('should not suppress more than limited number of alerts (max_signals)', async () => {
+      it('should not suppress more than limited number of alerts (max_signals)', async () => {
         const id = uuidv4();
 
         await indexGeneratedDocuments({
@@ -1818,7 +1818,6 @@ export default ({ getService }: FtrProviderContext) => {
               value: 'agent-a',
             },
           ],
-          // TODO: 99?
           [ALERT_SUPPRESSION_DOCS_COUNT]: 100,
         });
       });
