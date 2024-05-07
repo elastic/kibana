@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-
-export { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+export const ASSET_TYPE = 'asset.type';
+export const LAST_SEEN = 'asset.last_seen';
+export const FIRST_SEEN = 'asset.first_seen';
