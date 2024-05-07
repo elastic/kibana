@@ -31,6 +31,7 @@ jest.mock('@elastic/eui', () => {
     EuiTourStep: (props: any) => mockTourStep(props),
   };
 });
+jest.mock('../../lib/kibana');
 const defaultProps = {
   isTourAnchor: true,
   step: 1,
@@ -48,6 +49,14 @@ describe('GuidedOnboardingTourStep', () => {
       incrementStep,
       isTourShown: () => true,
     });
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        cases: {
+          ...casesServiceMock,
+          hooks: { ...casesServiceMock.hooks },
+        },
+      },
+    });
     jest.clearAllMocks();
   });
   it('renders as a tour step', () => {
@@ -63,7 +72,14 @@ describe('GuidedOnboardingTourStep', () => {
   it('hiddenWhenCasesModalFlyoutExpanded={true}, just render children', () => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
-        cases: casesServiceMock,
+        cases: {
+          ...casesServiceMock,
+          hooks: {
+            ...casesServiceMock.hooks,
+            useIsAddToNewCaseFlyoutOpen: jest.fn(() => true),
+            useIsAddToExistingCaseModalOpen: jest.fn(() => true),
+          },
+        },
       },
     });
 
@@ -79,7 +95,7 @@ describe('GuidedOnboardingTourStep', () => {
   it('allStepsHidden={true}, just render children', () => {
     (useTourContext as jest.Mock).mockReturnValue({
       activeStep: 1,
-      allStepsHidden: true,
+      hidden: true,
       incrementStep,
       isTourShown: () => true,
     });
