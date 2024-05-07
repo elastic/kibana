@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState, useEffect } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiButtonIcon,
   EuiComboBox,
@@ -16,8 +16,9 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { FIELD_TYPES, UseField } from '../../../../shared_imports';
+import { useNameField } from './use_name_field';
+import { useTypeField } from './use_type_field';
 import * as i18n from './translations';
 
 import type {
@@ -81,7 +82,7 @@ export const RequiredFieldRow = ({
       key={item.id}
       path={item.path}
       config={rowFieldConfig}
-      component={RequiredFieldRowInner}
+      component={RequiredFieldRowContent}
       readDefaultValueOnForm={!item.isNew}
       componentProps={{
         itemId: item.id,
@@ -106,7 +107,7 @@ interface RequiredFieldRowInnerProps {
   itemId: string;
 }
 
-const RequiredFieldRowInner = ({
+const RequiredFieldRowContent = ({
   field,
   typesByFieldName,
   onRemove,
@@ -114,82 +115,11 @@ const RequiredFieldRowInner = ({
   getWarnings,
   itemId,
 }: RequiredFieldRowInnerProps) => {
-  // Do not not add empty option to the list of selectable field names
-  const selectableNameOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(
-    () =>
-      (field.value.name ? [field.value.name] : []).concat(availableFieldNames).map((name) => ({
-        label: name,
-        value: name,
-      })),
-    [availableFieldNames, field.value.name]
-  );
+  const { selectableNameOptions, selectedNameOptions, handleNameChange, handleAddCustomName } =
+    useNameField(field, availableFieldNames, typesByFieldName);
 
-  const [selectedNameOptions, setSelectedNameOptions] = useState<
-    Array<EuiComboBoxOptionOption<string>>
-  >(() => {
-    const selectedNameOption = selectableNameOptions.find(
-      (option) => option.label === field.value.name
-    );
-
-    return selectedNameOption ? [selectedNameOption] : [];
-  });
-
-  useEffect(() => {
-    const selectedNameOption = selectableNameOptions.find(
-      (option) => option.label === field.value.name
-    );
-
-    setSelectedNameOptions(selectedNameOption ? [selectedNameOption] : []);
-  }, [field.value.name, selectableNameOptions]);
-
-  const selectableTypeOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(() => {
-    const typesAvailableForSelectedName = typesByFieldName[field.value.name];
-
-    let _selectableTypeOptions: Array<EuiComboBoxOptionOption<string>> = [];
-    if (typesAvailableForSelectedName) {
-      const isSelectedTypeAvailable = typesAvailableForSelectedName.includes(field.value.type);
-
-      _selectableTypeOptions = typesAvailableForSelectedName.map((type) => ({
-        label: type,
-        value: type,
-      }));
-
-      if (!isSelectedTypeAvailable) {
-        // case: field name exists, but such type is not among the list of field types
-        _selectableTypeOptions.push({ label: field.value.type, value: field.value.type });
-      }
-    } else {
-      if (field.value.type) {
-        // case: no such field name in index patterns
-        _selectableTypeOptions = [
-          {
-            label: field.value.type,
-            value: field.value.type,
-          },
-        ];
-      }
-    }
-
-    return _selectableTypeOptions;
-  }, [field.value.name, field.value.type, typesByFieldName]);
-
-  const [selectedTypeOptions, setSelectedTypeOptions] = useState<
-    Array<EuiComboBoxOptionOption<string>>
-  >(() => {
-    const selectedTypeOption = selectableTypeOptions.find(
-      (option) => option.value === field.value.type
-    );
-
-    return selectedTypeOption ? [selectedTypeOption] : [];
-  });
-
-  useEffect(() => {
-    const selectedTypeOption = selectableTypeOptions.find(
-      (option) => option.value === field.value.type
-    );
-
-    setSelectedTypeOptions(selectedTypeOption ? [selectedTypeOption] : []);
-  }, [field.value.type, selectableTypeOptions]);
+  const { selectableTypeOptions, selectedTypeOptions, handleTypeChange, handleAddCustomType } =
+    useTypeField(field, typesByFieldName);
 
   const { nameWarning, typeWarning } = getWarnings(field.value);
   const warningMessage = nameWarning || typeWarning;
@@ -202,74 +132,6 @@ const RequiredFieldRowInner = ({
   }, [field.path, field.errors]);
   const hasError = Boolean(nameError) || Boolean(typeError);
   const errorMessage = nameError?.message || typeError?.message;
-
-  const handleNameChange = useCallback(
-    (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
-      const newlySelectedOption: EuiComboBoxOptionOption<string> | undefined = selectedOptions[0];
-
-      if (!newlySelectedOption) {
-        setSelectedNameOptions([]);
-        return;
-      }
-
-      const updatedName = newlySelectedOption?.value || '';
-
-      const updatedType = pickTypeForName(updatedName, field.value.type, typesByFieldName);
-
-      const updatedFieldValue: RequiredFieldInput = {
-        name: updatedName,
-        type: updatedType,
-      };
-
-      field.setValue(updatedFieldValue);
-    },
-    [field, typesByFieldName]
-  );
-
-  const handleTypeChange = useCallback(
-    (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
-      const newlySelectedOption: EuiComboBoxOptionOption<string> | undefined = selectedOptions[0];
-
-      if (!newlySelectedOption) {
-        setSelectedTypeOptions([]);
-        return;
-      }
-
-      const updatedType = newlySelectedOption?.value || '';
-
-      const updatedFieldValue: RequiredFieldInput = {
-        name: field.value.name,
-        type: updatedType,
-      };
-
-      field.setValue(updatedFieldValue);
-    },
-    [field]
-  );
-
-  const handleAddCustomName = useCallback(
-    (newName: string) => {
-      const updatedFieldValue: RequiredFieldInput = {
-        name: newName,
-        type: pickTypeForName(newName, field.value.type, typesByFieldName),
-      };
-
-      field.setValue(updatedFieldValue);
-    },
-    [field, typesByFieldName]
-  );
-
-  const handleAddCustomType = useCallback(
-    (newType: string) => {
-      const updatedFieldValue: RequiredFieldInput = {
-        name: field.value.name,
-        type: newType,
-      };
-
-      field.setValue(updatedFieldValue);
-    },
-    [field]
-  );
 
   return (
     <EuiFormRow
@@ -397,22 +259,4 @@ function makeValidateRequiredField(parentFieldPath: string) {
       };
     }
   };
-}
-
-function pickTypeForName(
-  currentName: string,
-  currentType: string,
-  typesByFieldName: Record<string, string[] | undefined>
-) {
-  const typesAvailableForNewName = typesByFieldName[currentName] || [];
-  const isCurrentTypeAvailableForNewName = typesAvailableForNewName.includes(currentType);
-
-  let updatedType = currentType;
-  if (isCurrentTypeAvailableForNewName) {
-    updatedType = currentType;
-  } else if (typesAvailableForNewName.length > 0) {
-    updatedType = typesAvailableForNewName[0];
-  }
-
-  return updatedType;
 }
