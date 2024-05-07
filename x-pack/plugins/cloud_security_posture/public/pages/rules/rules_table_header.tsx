@@ -249,7 +249,8 @@ const CurrentPageOfTotal = ({
     setIsPopoverOpen((e) => !e);
   };
 
-  const { data: rulesData } = useFetchDetectionRulesByTags(
+  const { mutate: mutateRulesStates } = useChangeCspRuleState();
+  const { data: detectionRulesForSelectedRules } = useFetchDetectionRulesByTags(
     getFindingsDetectionRuleSearchTagsFromArrayOfRules(selectedRules.map((rule) => rule.metadata)),
     { match: 'any' }
   );
@@ -257,7 +258,6 @@ const CurrentPageOfTotal = ({
   const { notifications, analytics, i18n: i18nStart, theme } = useKibana().services;
   const startServices = { notifications, analytics, i18n: i18nStart, theme };
 
-  const postRequestChangeRulesState = useChangeCspRuleState();
   const changeRulesState = async (state: 'mute' | 'unmute') => {
     const bulkSelectedRules: RuleStateAttributesWithoutStates[] = selectedRules.map(
       (e: CspBenchmarkRulesWithStates) => ({
@@ -269,12 +269,15 @@ const CurrentPageOfTotal = ({
     );
     // Only do the API Call IF there are no undefined value for rule number in the selected rules
     if (!bulkSelectedRules.some((rule) => rule.rule_number === undefined)) {
-      await postRequestChangeRulesState(state, bulkSelectedRules);
-      refetchRulesStates();
+      mutateRulesStates({
+        newState: state,
+        ruleIds: bulkSelectedRules,
+      });
       setIsPopoverOpen(false);
+      // await refetchRulesStates();
       showChangeBenchmarkRuleStatesSuccessToast(startServices, state !== 'mute', {
         numberOfRules: bulkSelectedRules.length,
-        numberOfDetectionRules: rulesData?.total || 0,
+        numberOfDetectionRules: detectionRulesForSelectedRules?.total || 0,
       });
     }
   };

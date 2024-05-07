@@ -27,7 +27,7 @@ import { getFindingsDetectionRuleSearchTags } from '../../../common/utils/detect
 import { ColumnNameWithTooltip } from '../../components/column_name_with_tooltip';
 import type { CspBenchmarkRulesWithStates, RulesState } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
-import { RuleStateAttributesWithoutStates, useChangeCspRuleState } from './change_csp_rule_state';
+import { RuleStateUpdateRequest, useChangeCspRuleState } from './change_csp_rule_state';
 import { showChangeBenchmarkRuleStatesSuccessToast } from '../../components/take_action';
 import { fetchDetectionRulesByTags } from '../../common/api/use_fetch_detection_rules_by_tags';
 
@@ -51,10 +51,7 @@ type GetColumnProps = Pick<
   RulesTableProps,
   'onRuleClick' | 'refetchRulesStates' | 'selectedRules' | 'setSelectedRules'
 > & {
-  postRequestChangeRulesStates: (
-    actionOnRule: 'mute' | 'unmute',
-    ruleIds: RuleStateAttributesWithoutStates[]
-  ) => void;
+  mutateRulesStates: (ruleStateUpdateRequest: RuleStateUpdateRequest) => void;
   items: CspBenchmarkRulesWithStates[];
   setIsAllRulesSelectedThisPage: (isAllRulesSelected: boolean) => void;
   isAllRulesSelectedThisPage: boolean;
@@ -116,7 +113,7 @@ export const RulesTable = ({
 
   const [isAllRulesSelectedThisPage, setIsAllRulesSelectedThisPage] = useState<boolean>(false);
 
-  const { mutate: postRequestChangeRulesStates } = useChangeCspRuleState();
+  const { mutate: mutateRulesStates } = useChangeCspRuleState();
 
   const isCurrentPageRulesASubset = (
     currentPageRulesArray: CspBenchmarkRulesWithStates[],
@@ -144,7 +141,7 @@ export const RulesTable = ({
     const startServices = { notifications, analytics, i18n: i18nStart, theme };
     return getColumns({
       refetchRulesStates,
-      postRequestChangeRulesStates,
+      mutateRulesStates,
       selectedRules,
       setSelectedRules,
       items,
@@ -157,7 +154,7 @@ export const RulesTable = ({
     });
   }, [
     refetchRulesStates,
-    postRequestChangeRulesStates,
+    mutateRulesStates,
     selectedRules,
     setSelectedRules,
     items,
@@ -190,7 +187,7 @@ export const RulesTable = ({
 
 const getColumns = ({
   refetchRulesStates,
-  postRequestChangeRulesStates,
+  mutateRulesStates,
   selectedRules,
   setSelectedRules,
   items,
@@ -316,21 +313,22 @@ const getColumns = ({
       const changeCspRuleStateFn = async () => {
         if (rule?.metadata.benchmark.rule_number) {
           // Calling this function this way to make sure it didn't get called on every single row render, its only being called when user click on the switch button
-          const detectionRuleCount = (
+          const detectionRulesForSelectedRule = (
             await fetchDetectionRulesByTags(
               getFindingsDetectionRuleSearchTags(rule.metadata),
               { match: 'all' },
               http
             )
           ).total;
-          postRequestChangeRulesStates({
-            actionOnRule: nextRuleState,
+
+          mutateRulesStates({
+            newState: nextRuleState,
             ruleIds: [rulesObjectRequest],
           });
-          refetchRulesStates();
+
           showChangeBenchmarkRuleStatesSuccessToast(startServices, isRuleMuted, {
             numberOfRules: 1,
-            numberOfDetectionRules: detectionRuleCount || 0,
+            numberOfDetectionRules: detectionRulesForSelectedRule || 0,
           });
         }
       };

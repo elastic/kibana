@@ -10,13 +10,13 @@ import { CspBenchmarkRulesStates } from '../../../common/types/latest';
 import { CSP_GET_BENCHMARK_RULES_STATE_ROUTE_PATH } from '../../../common/constants';
 import { useKibana } from '../../common/hooks/use_kibana';
 
-const QUERY_KEY_V1 = 'csp_rules_states_v1';
+export const RULE_STATE_QUERY_KEY = ['csp_rules_states_v1'];
 
 export const useCspGetRulesStates = () => {
   const { http } = useKibana().services;
 
   return useQuery(
-    [QUERY_KEY_V1],
+    RULE_STATE_QUERY_KEY,
     () =>
       http.get<CspBenchmarkRulesStates>(CSP_GET_BENCHMARK_RULES_STATE_ROUTE_PATH, {
         version: '1',

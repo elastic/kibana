@@ -7,8 +7,8 @@
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
-import { getRuleStatesKey } from '../configurations/latest_findings/use_get_benchmark_rules_state_api';
-import { getCspmStatsKey, getKspmStatsKey } from '../../common/api';
+import { RULE_STATE_QUERY_KEY } from './use_csp_rules_state';
+import { CSPM_STATS_QUERY_KEY, KSPM_STATS_QUERY_KEY } from '../../common/api';
 import { BENCHMARK_INTEGRATION_QUERY_KEY_V2 } from '../benchmarks/use_csp_benchmark_integrations';
 import {
   CspBenchmarkRulesBulkActionRequestSchema,
@@ -17,8 +17,8 @@ import {
 import { CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH } from '../../../common/constants';
 
 export type RuleStateAttributesWithoutStates = Omit<RuleStateAttributes, 'muted'>;
-export interface UseChangeCspRuleStateOptions {
-  actionOnRule: 'mute' | 'unmute';
+export interface RuleStateUpdateRequest {
+  newState: 'mute' | 'unmute';
   ruleIds: RuleStateAttributesWithoutStates[];
 }
 
@@ -27,44 +27,45 @@ export const useChangeCspRuleState = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (options: UseChangeCspRuleStateOptions) => {
-      const query = {
-        action: options.actionOnRule,
-        rules: options.ruleIds,
-      };
-
+    mutationFn: async (ruleStateUpdateRequest: RuleStateUpdateRequest) => {
       await http?.post<CspBenchmarkRulesBulkActionRequestSchema>(
         CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH,
         {
           version: '1',
-          body: JSON.stringify(query),
+          body: JSON.stringify({
+            action: ruleStateUpdateRequest.newState,
+            rules: ruleStateUpdateRequest.ruleIds,
+          }),
         }
       );
     },
-    onMutate: async (options: UseChangeCspRuleStateOptions) => {
+    onMutate: async (ruleStateUpdateRequest: RuleStateUpdateRequest) => {
       // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
-      await queryClient.cancelQueries(['csp_rules_states_v1']);
+      await queryClient.cancelQueries(RULE_STATE_QUERY_KEY);
 
       // Snapshot the previous value
-      const previousCspRules = queryClient.getQueryData(['csp_rules_states_v1']);
+      const previousCspRules = queryClient.getQueryData(RULE_STATE_QUERY_KEY);
 
       // Optimistically update to the new value
-      queryClient.setQueryData(['csp_rules_states_v1'], (old: any) => {
-        const updateRules: Record<string, RuleStateAttributes> = {};
-        options.ruleIds.forEach((ruleId) => {
-          const oldRuleKey = Object.keys(old).find((key) => old[key].rule_id === ruleId.rule_id);
-          if (oldRuleKey) {
+      queryClient.setQueryData(['csp_rules_states_v1'], (currentRuleStates: any) => {
+        const updateRuleStates: Record<string, RuleStateAttributes> = {};
+
+        ruleStateUpdateRequest.ruleIds.forEach((ruleId) => {
+          const matchingRuleKey = Object.keys(currentRuleStates).find(
+            (key) => currentRuleStates[key].rule_id === ruleId.rule_id
+          );
+          if (matchingRuleKey) {
             const updatedRule = {
-              ...old[oldRuleKey],
-              muted: options.actionOnRule === 'mute',
+              ...currentRuleStates[matchingRuleKey],
+              muted: ruleStateUpdateRequest.newState === 'mute',
             };
 
-            updateRules[oldRuleKey] = updatedRule;
+            updateRuleStates[matchingRuleKey] = updatedRule;
           }
         });
         return {
-          ...old,
-          ...updateRules,
+          ...currentRuleStates,
+          ...updateRuleStates,
         };
       });
 
@@ -73,9 +74,9 @@ export const useChangeCspRuleState = () => {
     },
     onSettled: () => {
       queryClient.invalidateQueries(BENCHMARK_INTEGRATION_QUERY_KEY_V2);
-      queryClient.invalidateQueries(getCspmStatsKey);
-      queryClient.invalidateQueries(getKspmStatsKey);
-      queryClient.invalidateQueries(getRuleStatesKey);
+      queryClient.invalidateQueries(CSPM_STATS_QUERY_KEY);
+      queryClient.invalidateQueries(KSPM_STATS_QUERY_KEY);
+      queryClient.invalidateQueries(RULE_STATE_QUERY_KEY);
     },
   });
 };

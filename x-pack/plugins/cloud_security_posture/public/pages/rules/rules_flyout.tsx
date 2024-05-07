@@ -67,7 +67,7 @@ type RuleTab = typeof tabs[number]['id'];
 
 export const RuleFlyout = ({ onClose, rule, refetchRulesStates }: RuleFlyoutProps) => {
   const [tab, setTab] = useState<RuleTab>('overview');
-  const postRequestChangeRulesStates = useChangeCspRuleState();
+  const { mutate: mutateRuleState } = useChangeCspRuleState();
   const { data: rulesData } = useFetchDetectionRulesByTags(
     getFindingsDetectionRuleSearchTags(rule.metadata)
   );
@@ -84,8 +84,11 @@ export const RuleFlyout = ({ onClose, rule, refetchRulesStates }: RuleFlyoutProp
         rule_id: rule.metadata.id,
       };
       const nextRuleStates = isRuleMuted ? 'unmute' : 'mute';
-      await postRequestChangeRulesStates(nextRuleStates, [rulesObjectRequest]);
-      refetchRulesStates();
+      await mutateRuleState({
+        newState: nextRuleStates,
+        ruleIds: [rulesObjectRequest],
+      });
+      // refetchRulesStates();
       showChangeBenchmarkRuleStatesSuccessToast(startServices, isRuleMuted, {
         numberOfRules: 1,
         numberOfDetectionRules: rulesData?.total || 0,
