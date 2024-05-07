@@ -676,9 +676,95 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboard",
+        "id": "def-public.IProvidesLegacyPanelPlacementSettings",
+        "type": "Interface",
+        "tags": [],
+        "label": "IProvidesLegacyPanelPlacementSettings",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "dashboard",
+            "scope": "public",
+            "docId": "kibDashboardPluginApi",
+            "section": "def-public.IProvidesLegacyPanelPlacementSettings",
+            "text": "IProvidesLegacyPanelPlacementSettings"
+          },
+          "<InputType, AttributesType>"
+        ],
+        "path": "src/plugins/dashboard/public/dashboard_container/panel_placement/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.IProvidesLegacyPanelPlacementSettings.getLegacyPanelPlacementSettings",
+            "type": "Function",
+            "tags": [],
+            "label": "getLegacyPanelPlacementSettings",
+            "description": [],
+            "signature": [
+              "(input: InputType, attributes?: AttributesType | undefined) => Partial<",
+              "PanelPlacementSettings",
+              ">"
+            ],
+            "path": "src/plugins/dashboard/public/dashboard_container/panel_placement/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dashboard",
+                "id": "def-public.IProvidesLegacyPanelPlacementSettings.getLegacyPanelPlacementSettings.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "input",
+                "description": [],
+                "signature": [
+                  "InputType"
+                ],
+                "path": "src/plugins/dashboard/public/dashboard_container/panel_placement/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "dashboard",
+                "id": "def-public.IProvidesLegacyPanelPlacementSettings.getLegacyPanelPlacementSettings.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "attributes",
+                "description": [],
+                "signature": [
+                  "AttributesType | undefined"
+                ],
+                "path": "src/plugins/dashboard/public/dashboard_container/panel_placement/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "dashboard",
+        "id": "def-public.PanelPlacementStrategy",
+        "type": "Enum",
+        "tags": [],
+        "label": "PanelPlacementStrategy",
+        "description": [],
+        "path": "src/plugins/dashboard/public/dashboard_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
       {
         "parentPluginId": "dashboard",
@@ -1027,6 +1113,56 @@
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "dashboard",
+          "id": "def-public.DashboardStart.registerDashboardPanelPlacementSetting",
+          "type": "Function",
+          "tags": [],
+          "label": "registerDashboardPanelPlacementSetting",
+          "description": [],
+          "signature": [
+            "(embeddableType: string, getPanelPlacementSettings: ",
+            "GetPanelPlacementSettings",
+            "<object>) => void"
+          ],
+          "path": "src/plugins/dashboard/public/plugin.tsx",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "dashboard",
+              "id": "def-public.DashboardStart.registerDashboardPanelPlacementSetting.$1",
+              "type": "string",
+              "tags": [],
+              "label": "embeddableType",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "path": "src/plugins/dashboard/public/plugin.tsx",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "dashboard",
+              "id": "def-public.DashboardStart.registerDashboardPanelPlacementSetting.$2",
+              "type": "Function",
+              "tags": [],
+              "label": "getPanelPlacementSettings",
+              "description": [],
+              "signature": [
+                "GetPanelPlacementSettings",
+                "<object>"
+              ],
+              "path": "src/plugins/dashboard/public/plugin.tsx",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
           "returnComment": []
         }
       ],
