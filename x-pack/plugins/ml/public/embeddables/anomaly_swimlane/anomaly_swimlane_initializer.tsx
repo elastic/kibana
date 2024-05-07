@@ -24,6 +24,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import useMountedState from 'react-use/lib/useMountedState';
+import { useMlLink } from '../../application/contexts/kibana';
+import { ML_PAGES } from '../../../common/constants/locator';
 import type { MlApiServices } from '../../application/services/ml_api_service';
 import { extractInfluencers } from '../../../common/util/job_utils';
 import { JobSelectorControl } from '../../alerting/job_selector';
@@ -137,6 +139,8 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
     ...(viewBySwimlaneFieldName ? { viewBy: viewBySwimlaneFieldName } : {}),
   };
 
+  const newJobUrl = useMlLink({ page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB });
+
   return (
     <>
       <EuiFlyoutHeader>
@@ -153,6 +157,7 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
       <EuiFlyoutBody>
         <EuiForm>
           <JobSelectorControl
+            createJobUrl={newJobUrl}
             multiSelect
             jobsAndGroupIds={jobIds}
             adJobsApiService={adJobsApiService}

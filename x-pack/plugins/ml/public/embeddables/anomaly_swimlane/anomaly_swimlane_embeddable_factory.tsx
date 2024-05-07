@@ -150,10 +150,13 @@ export const getAnomalySwimLaneEmbeddableFactory = (
                 './anomaly_swimlane_setup_flyout'
               );
 
-              const result = await resolveAnomalySwimlaneUserInput(coreStartServices, {
-                ...serializeTitles(),
-                ...serializeSwimLaneState(),
-              });
+              const result = await resolveAnomalySwimlaneUserInput(
+                { ...coreStartServices, ...pluginsStartServices },
+                {
+                  ...serializeTitles(),
+                  ...serializeSwimLaneState(),
+                }
+              );
 
               swimLaneControlsApi.updateUserInput(result);
             } catch (e) {
