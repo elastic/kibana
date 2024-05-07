@@ -25,6 +25,7 @@ import type {
   RuleName,
   RuleReferenceArray,
   RuleTagArray,
+  MaxSignals,
   SetupGuide,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
@@ -45,6 +46,7 @@ interface RuleFields {
   threat: Threat;
   threatSubtechnique: ThreatSubtechnique;
   threatTechnique: ThreatTechnique;
+  maxSignals: MaxSignals;
   setup: SetupGuide;
 }
 
@@ -93,4 +95,5 @@ export const ruleFields: RuleFields = {
     name: 'OS Credential Dumping',
     reference: 'https://attack.mitre.org/techniques/T1003',
   },
+  maxSignals: 100,
 };
