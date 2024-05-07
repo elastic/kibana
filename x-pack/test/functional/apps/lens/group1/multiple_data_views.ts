@@ -49,7 +49,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     ).to.eql(expectedData);
   }
 
-  describe.only('lens with multiple data views', () => {
+  describe('lens with multiple data views', () => {
     before(async () => {
       await esArchiver.load('test/functional/fixtures/es_archiver/kibana_sample_data_flights');
       await kibanaServer.importExport.load(

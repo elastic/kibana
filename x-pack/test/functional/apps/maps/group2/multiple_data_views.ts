@@ -15,7 +15,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['maps']);
 
-  describe.only('maps with multiple data views', () => {
+  describe('maps with multiple data views', () => {
     before(async () => {
       await security.testUser.setRoles(['global_maps_all', 'test_logstash_reader'], {
         skipBrowserRefresh: true,
