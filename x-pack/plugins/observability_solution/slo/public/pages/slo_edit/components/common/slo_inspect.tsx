@@ -5,18 +5,13 @@
  * 2.0.
  */
 import {
-  EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiCodeBlock,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiLoadingSpinner,
   EuiSpacer,
   EuiTitle,
   EuiToolTip,
@@ -29,7 +24,7 @@ import {
 } from '@kbn/ingest-pipelines-plugin/public';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { GetSLOResponse } from '@kbn/slo-schema';
-import React, { ReactNode, useState } from 'react';
+import React, { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
 import { useKibana } from '../../../../utils/kibana_react';
@@ -37,6 +32,9 @@ import { useFetchSloInspect } from '../../../../hooks/use_fetch_slo_inspect';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { transformCreateSLOFormToCreateSLOInput } from '../../helpers/process_slo_form_values';
 import { CreateSLOForm } from '../../types';
+import { CodeBlockAccordion } from './slo_inspect/code_block_accordion';
+import { LoadingState } from './slo_inspect/loading_state';
+import { RequestCodeViewer } from './slo_inspect/req_code_viewer';
 
 interface Props {
   slo?: GetSLOResponse;
@@ -62,7 +60,11 @@ function SLOInspect({ slo, disabled }: Props) {
   const [isFormValid, setFormValid] = useState(false);
 
   const sloFormValues = transformCreateSLOFormToCreateSLOInput(getValues());
-  const { data: inspectSloData, isLoading } = useFetchSloInspect(
+  const {
+    data: inspectSloData,
+    transformQueryString,
+    isLoading,
+  } = useFetchSloInspect(
     { ...sloFormValues, id: slo?.id, revision: slo?.revision },
     isFlyoutVisible && isFormValid
   );
@@ -180,6 +182,17 @@ function SLOInspect({ slo, disabled }: Props) {
                 )}
                 json={inspectSloData.temporaryDoc}
               />
+              <EuiSpacer size="s" />
+
+              <CodeBlockAccordion
+                id="transformQuery"
+                label={i18n.translate(
+                  'xpack.slo.sLOInspect.codeBlockAccordion.transformQueryLabel',
+                  { defaultMessage: 'Rollup Transform query' }
+                )}
+              >
+                <RequestCodeViewer value={transformQueryString} />
+              </CodeBlockAccordion>
             </>
           )}
         </EuiFlyoutBody>
@@ -228,43 +241,5 @@ function SLOInspect({ slo, disabled }: Props) {
 
       {flyout}
     </>
-  );
-}
-
-function CodeBlockAccordion({
-  id,
-  label,
-  json,
-  extraAction,
-}: {
-  id: string;
-  label: string;
-  json: any;
-  extraAction?: ReactNode;
-}) {
-  return (
-    <EuiAccordion
-      id={id}
-      extraAction={extraAction}
-      buttonContent={
-        <EuiTitle size="xs">
-          <h3>{label}</h3>
-        </EuiTitle>
-      }
-    >
-      <EuiCodeBlock language="json" fontSize="m" paddingSize="m" isCopyable={true}>
-        {JSON.stringify(json, null, 2)}
-      </EuiCodeBlock>
-    </EuiAccordion>
-  );
-}
-
-export function LoadingState() {
-  return (
-    <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: '100%' }}>
-      <EuiFlexItem grow={false}>
-        <EuiLoadingSpinner size="xl" />
-      </EuiFlexItem>
-    </EuiFlexGroup>
   );
 }

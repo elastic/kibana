@@ -5,24 +5,21 @@
  * 2.0.
  */
 
-import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  AggregationsCompositeAggregationSource,
+  TransformPutTransformRequest,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { CreateSLOInput, SLODefinitionResponse } from '@kbn/slo-schema';
 import { useQuery } from '@tanstack/react-query';
+import { createEsParams } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '../utils/kibana_react';
 
 interface SLOInspectResponse {
   slo: SLODefinitionResponse;
   pipeline: Record<string, any>;
-  rollUpTransform: TransformPutTransformRequest;
+  rollUpTransform: TransformPutTransformRequest['body'];
   summaryTransform: TransformPutTransformRequest;
   temporaryDoc: Record<string, any>;
-}
-
-export interface UseInspectSLOResponse {
-  data: SLOInspectResponse | undefined;
-  isLoading: boolean;
-  isSuccess: boolean;
-  isError: boolean;
 }
 
 export function useFetchSloInspect(slo: CreateSLOInput, shouldInspect: boolean) {
@@ -51,8 +48,40 @@ export function useFetchSloInspect(slo: CreateSLOInput, shouldInspect: boolean) 
     keepPreviousData: true,
   });
 
+  let transformQueryString: string = '';
+
+  const rollupTransform = data?.rollUpTransform;
+
+  if (rollupTransform) {
+    const pivotGroupBy = rollupTransform.pivot?.group_by ?? {};
+    const transformQuery = createEsParams({
+      body: {
+        size: 0,
+        query: rollupTransform.source.query,
+        runtime_mappings: rollupTransform.source.runtime_mappings,
+        aggs: {
+          groupBy: {
+            composite: {
+              sources: Object.keys(pivotGroupBy).map((key) => ({
+                [key]: pivotGroupBy[key] as AggregationsCompositeAggregationSource,
+              })),
+            },
+            aggs: rollupTransform?.pivot?.aggregations,
+          },
+        },
+      },
+    });
+
+    transformQueryString = `POST ${rollupTransform.source.index}/_search\n${JSON.stringify(
+      transformQuery.body,
+      null,
+      2
+    )}`;
+  }
+
   return {
     data,
+    transformQueryString,
     isLoading,
     isSuccess,
     isError,
