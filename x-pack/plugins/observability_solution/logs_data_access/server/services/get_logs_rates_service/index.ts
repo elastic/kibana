@@ -81,22 +81,24 @@ export function createGetLogsRatesService(params: RegisterServicesParams) {
       },
     });
     const aggregations = esResponse.aggregations as LogRateQueryAggregation | undefined;
-    const buckets = aggregations?.services.buckets as LogErrorsAggregation[];
+    const buckets = aggregations?.services.buckets as LogErrorsAggregation[] | undefined;
 
-    return buckets.reduce<LogsRatesServiceReturnType>((acc, bucket) => {
-      const logCount = bucket.doc_count;
-      const logErrorBuckets = bucket.logErrors
-        .buckets as estypes.AggregationsStringRareTermsBucketKeys[];
+    return buckets
+      ? buckets.reduce<LogsRatesServiceReturnType>((acc, bucket) => {
+          const logCount = bucket.doc_count;
+          const logErrorBuckets = bucket.logErrors
+            .buckets as estypes.AggregationsStringRareTermsBucketKeys[];
 
-      const logErrorCount = logErrorBuckets[0]?.doc_count;
+          const logErrorCount = logErrorBuckets[0]?.doc_count;
 
-      return {
-        ...acc,
-        [bucket.key]: {
-          logRatePerMinute: getLogRatePerMinute({ logCount, timeFrom, timeTo }),
-          logErrorRate: logErrorCount ? getLogErrorRate({ logCount, logErrorCount }) : null,
-        },
-      };
-    }, {});
+          return {
+            ...acc,
+            [bucket.key]: {
+              logRatePerMinute: getLogRatePerMinute({ logCount, timeFrom, timeTo }),
+              logErrorRate: logErrorCount ? getLogErrorRate({ logCount, logErrorCount }) : null,
+            },
+          };
+        }, {})
+      : {};
   };
 }
