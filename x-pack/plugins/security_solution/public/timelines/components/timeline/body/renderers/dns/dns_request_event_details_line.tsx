@@ -31,6 +31,7 @@ interface Props {
   userDomain: string | null | undefined;
   userName: string | null | undefined;
   winlogEventId: string | null | undefined;
+  scopeId: string;
 }
 
 export const DnsRequestEventDetailsLine = React.memo<Props>(
@@ -50,6 +51,7 @@ export const DnsRequestEventDetailsLine = React.memo<Props>(
     userDomain,
     userName,
     winlogEventId,
+    scopeId,
   }) => {
     return (
       <>
@@ -62,6 +64,7 @@ export const DnsRequestEventDetailsLine = React.memo<Props>(
             userDomain={userDomain}
             userName={userName}
             workingDirectory={undefined}
+            scopeId={scopeId}
           />
 
           {!isNillEmptyOrNotFinite(dnsQuestionName) && (
@@ -78,6 +81,7 @@ export const DnsRequestEventDetailsLine = React.memo<Props>(
                   value={dnsQuestionName}
                   isAggregatable={true}
                   fieldType="keyword"
+                  scopeId={scopeId}
                 />
               </TokensFlexItem>
             </>
@@ -97,6 +101,7 @@ export const DnsRequestEventDetailsLine = React.memo<Props>(
                   value={dnsQuestionType}
                   isAggregatable={true}
                   fieldType="keyword"
+                  scopeId={scopeId}
                 />
               </TokensFlexItem>
             </>
@@ -116,6 +121,7 @@ export const DnsRequestEventDetailsLine = React.memo<Props>(
                   value={dnsResolvedIp}
                   isAggregatable={true}
                   fieldType="ip"
+                  scopeId={scopeId}
                 />
               </TokensFlexItem>
             </>
@@ -138,6 +144,7 @@ export const DnsRequestEventDetailsLine = React.memo<Props>(
                   value={dnsResponseCode}
                   isAggregatable={true}
                   fieldType="keyword"
+                  scopeId={scopeId}
                 />
               </TokensFlexItem>
               <TokensFlexItem component="span" grow={false}>
@@ -160,6 +167,7 @@ export const DnsRequestEventDetailsLine = React.memo<Props>(
               processPid={processPid}
               processName={processName}
               processExecutable={processExecutable}
+              scopeId={scopeId}
             />
           </TokensFlexItem>
 
@@ -175,6 +183,7 @@ export const DnsRequestEventDetailsLine = React.memo<Props>(
                     value={eventCode}
                     isAggregatable={true}
                     fieldType="number"
+                    scopeId={scopeId}
                   />
                 </TokensFlexItem>
               ) : (
@@ -188,6 +197,7 @@ export const DnsRequestEventDetailsLine = React.memo<Props>(
                     value={winlogEventId}
                     isAggregatable={true}
                     fieldType="keyword"
+                    scopeId={scopeId}
                   />
                 </TokensFlexItem>
               )}

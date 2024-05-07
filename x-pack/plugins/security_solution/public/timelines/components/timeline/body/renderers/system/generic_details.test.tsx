@@ -34,7 +34,7 @@ describe('SystemGenericDetails', () => {
           contextId="[contextid-123]"
           text="[generic-text-123]"
           data={mockTimelineData[28].ecs}
-          timelineId="test"
+          scopeId="test"
         />
       );
       expect(wrapper).toMatchSnapshot();
@@ -47,7 +47,7 @@ describe('SystemGenericDetails', () => {
             contextId="[contextid-123]"
             text="[generic-text-123]"
             data={mockTimelineData[28].ecs}
-            timelineId="test"
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -80,6 +80,7 @@ describe('SystemGenericDetails', () => {
               userDomain="[userDomain-123]"
               userName="[username-123]"
               workingDirectory="[working-directory-123]"
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -111,6 +112,7 @@ describe('SystemGenericDetails', () => {
               userDomain={null}
               userName={null}
               workingDirectory={null}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -140,6 +142,7 @@ describe('SystemGenericDetails', () => {
               userDomain={null}
               userName={null}
               workingDirectory={null}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -169,6 +172,7 @@ describe('SystemGenericDetails', () => {
               userDomain={null}
               userName={null}
               workingDirectory={null}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -198,6 +202,7 @@ describe('SystemGenericDetails', () => {
               userDomain={null}
               userName={null}
               workingDirectory={null}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -227,6 +232,7 @@ describe('SystemGenericDetails', () => {
               userDomain={null}
               userName={null}
               workingDirectory={null}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -258,6 +264,7 @@ describe('SystemGenericDetails', () => {
               userDomain={null}
               userName={null}
               workingDirectory={null}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -289,6 +296,7 @@ describe('SystemGenericDetails', () => {
               userDomain={null}
               userName={null}
               workingDirectory={null}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -320,6 +328,7 @@ describe('SystemGenericDetails', () => {
               userDomain={null}
               userName={null}
               workingDirectory={null}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -351,6 +360,7 @@ describe('SystemGenericDetails', () => {
               userDomain={null}
               userName={null}
               workingDirectory={null}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -382,6 +392,7 @@ describe('SystemGenericDetails', () => {
               userDomain={null}
               userName={null}
               workingDirectory={null}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -413,6 +424,7 @@ describe('SystemGenericDetails', () => {
               userDomain={null}
               userName={null}
               workingDirectory={null}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -444,6 +456,7 @@ describe('SystemGenericDetails', () => {
               userDomain={null}
               userName={null}
               workingDirectory={null}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -475,6 +488,7 @@ describe('SystemGenericDetails', () => {
               userDomain={null}
               userName={null}
               workingDirectory={null}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -506,6 +520,7 @@ describe('SystemGenericDetails', () => {
               userDomain="[userDomain-123]"
               userName="[username-123]"
               workingDirectory={null}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -537,6 +552,7 @@ describe('SystemGenericDetails', () => {
               userDomain="[userDomain-123]"
               userName="[username-123]"
               workingDirectory="[working-directory-123]"
+              scopeId="test"
             />
           </div>
         </TestProviders>

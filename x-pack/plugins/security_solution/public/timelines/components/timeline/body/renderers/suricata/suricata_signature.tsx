@@ -62,7 +62,8 @@ export const DraggableSignatureId = React.memo<{
   id: string;
   isDraggable?: boolean;
   signatureId: number;
-}>(({ id, isDraggable, signatureId }) => {
+  scopeId: string;
+}>(({ id, isDraggable, signatureId, scopeId }) => {
   const dataProviderProp = useMemo(
     () => ({
       and: [],
@@ -107,6 +108,7 @@ export const DraggableSignatureId = React.memo<{
         render={render}
         isAggregatable={true}
         fieldType={'keyword'}
+        scopeId={scopeId}
       />
     </SignatureFlexItem>
   );
@@ -120,7 +122,8 @@ export const SuricataSignature = React.memo<{
   isDraggable?: boolean;
   signature: string;
   signatureId: number;
-}>(({ contextId, id, isDraggable, signature, signatureId }) => {
+  scopeId: string;
+}>(({ contextId, id, isDraggable, signature, signatureId, scopeId }) => {
   const tokens = getBeginningTokens(signature);
   return (
     <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
@@ -128,6 +131,7 @@ export const SuricataSignature = React.memo<{
         id={`draggable-signature-id-${contextId}-${id}`}
         isDraggable={isDraggable}
         signatureId={signatureId}
+        scopeId={scopeId}
       />
       <Tokens tokens={tokens} />
       <LinkFlexItem grow={false}>
@@ -138,6 +142,7 @@ export const SuricataSignature = React.memo<{
           isDraggable={isDraggable}
           value={signature}
           tooltipPosition="bottom"
+          scopeId={scopeId}
         >
           <div>
             <GoogleLink link={signature}>

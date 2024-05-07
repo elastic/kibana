@@ -22,10 +22,11 @@ interface Props {
   eventId: string;
   isDraggable?: boolean;
   processHashSha256: string | null | undefined;
+  scopeId: string;
 }
 
 export const ProcessHash = React.memo<Props>(
-  ({ contextId, eventId, isDraggable, processHashSha256 }) => {
+  ({ contextId, eventId, isDraggable, processHashSha256, scopeId }) => {
     if (isNillEmptyOrNotFinite(processHashSha256)) {
       return null;
     }
@@ -42,6 +43,7 @@ export const ProcessHash = React.memo<Props>(
             value={processHashSha256}
             fieldType="keyword"
             isAggregatable={true}
+            scopeId={scopeId}
           />
         </TokensFlexItem>
       </HashFlexGroup>

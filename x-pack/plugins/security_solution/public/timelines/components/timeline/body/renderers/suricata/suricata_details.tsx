@@ -25,8 +25,8 @@ Details.displayName = 'Details';
 export const SuricataDetails = React.memo<{
   data: Ecs;
   isDraggable?: boolean;
-  timelineId: string;
-}>(({ data, isDraggable, timelineId }) => {
+  scopeId: string;
+}>(({ data, isDraggable, scopeId }) => {
   const signature: string | null | undefined = get('suricata.eve.alert.signature[0]', data);
   const signatureId: number | null | undefined = get('suricata.eve.alert.signature_id[0]', data);
 
@@ -34,15 +34,16 @@ export const SuricataDetails = React.memo<{
     return (
       <Details>
         <SuricataSignature
-          contextId={`suricata-signature-${timelineId}-${data._id}`}
+          contextId={`suricata-signature-${scopeId}-${data._id}`}
           id={data._id}
           isDraggable={isDraggable}
           signature={signature}
           signatureId={signatureId}
+          scopeId={scopeId}
         />
         <SuricataRefs signatureId={signatureId} />
         <EuiSpacer size="s" />
-        <NetflowRenderer data={data} isDraggable={isDraggable} timelineId={timelineId} />
+        <NetflowRenderer data={data} isDraggable={isDraggable} scopeId={scopeId} />
       </Details>
     );
   } else {

@@ -34,6 +34,7 @@ describe('ExitCodeDraggable', () => {
           eventId="1"
           processExitCode={-1}
           text="with exit code"
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -49,6 +50,7 @@ describe('ExitCodeDraggable', () => {
           eventId="1"
           processExitCode={undefined}
           text="with exit code"
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -64,6 +66,7 @@ describe('ExitCodeDraggable', () => {
           eventId="1"
           processExitCode={null}
           text="with exit code"
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -79,6 +82,7 @@ describe('ExitCodeDraggable', () => {
           eventId="1"
           processExitCode={undefined}
           text="with exit code"
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -94,6 +98,7 @@ describe('ExitCodeDraggable', () => {
           eventId="1"
           processExitCode={undefined}
           text={undefined}
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -109,6 +114,7 @@ describe('ExitCodeDraggable', () => {
           eventId="1"
           processExitCode={-1}
           text={undefined}
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -124,6 +130,7 @@ describe('ExitCodeDraggable', () => {
           eventId="1"
           processExitCode={undefined}
           text={null}
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -139,6 +146,7 @@ describe('ExitCodeDraggable', () => {
           eventId="1"
           processExitCode={-1}
           text={null}
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -154,6 +162,7 @@ describe('ExitCodeDraggable', () => {
           eventId="1"
           processExitCode={undefined}
           text=""
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -169,6 +178,7 @@ describe('ExitCodeDraggable', () => {
           eventId="1"
           processExitCode={-1}
           text=""
+          scopeId="test"
         />
       </TestProviders>
     );

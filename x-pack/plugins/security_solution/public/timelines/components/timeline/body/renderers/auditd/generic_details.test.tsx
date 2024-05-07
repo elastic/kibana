@@ -32,7 +32,7 @@ describe('GenericDetails', () => {
           contextId="contextid-123"
           text="generic-text-123"
           data={mockTimelineData[21].ecs}
-          timelineId="test"
+          scopeId="test"
         />
       );
       expect(wrapper).toMatchSnapshot();
@@ -45,7 +45,7 @@ describe('GenericDetails', () => {
             contextId="contextid-123"
             text="generic-text-123"
             data={mockTimelineData[19].ecs}
-            timelineId="test"
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -60,7 +60,7 @@ describe('GenericDetails', () => {
           contextId="contextid-123"
           text="generic-text-123"
           data={mockTimelineData[0].ecs}
-          timelineId="test"
+          scopeId="test"
         />
       );
       expect(wrapper.isEmptyRender()).toBeTruthy();
@@ -87,6 +87,7 @@ describe('GenericDetails', () => {
             workingDirectory="working-directory-1"
             args={['arg1', 'arg2', 'arg3']}
             result="success"
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -114,6 +115,7 @@ describe('GenericDetails', () => {
             workingDirectory="working-directory-1"
             args={['arg1', 'arg2', 'arg3']}
             result="success"
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -141,6 +143,7 @@ describe('GenericDetails', () => {
             workingDirectory="working-directory-1"
             args={['arg1', 'arg2', 'arg3']}
             result="success"
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -168,6 +171,7 @@ describe('GenericDetails', () => {
             workingDirectory="working-directory-1"
             args={['arg1', 'arg2', 'arg3']}
             result="success"
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -195,6 +199,7 @@ describe('GenericDetails', () => {
             workingDirectory="working-directory-1"
             args={['arg1', 'arg2', 'arg3']}
             result="success"
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -222,6 +227,7 @@ describe('GenericDetails', () => {
             workingDirectory="working-directory-1"
             args={['arg1', 'arg2', 'arg3']}
             result="success"
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -249,6 +255,7 @@ describe('GenericDetails', () => {
             workingDirectory="working-directory-1"
             args={['arg1', 'arg2', 'arg3']}
             result="success"
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -276,6 +283,7 @@ describe('GenericDetails', () => {
             workingDirectory="working-directory-1"
             args={['arg1', 'arg2', 'arg3']}
             result="success"
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -303,6 +311,7 @@ describe('GenericDetails', () => {
             workingDirectory="working-directory-1"
             args={['arg1', 'arg2', 'arg3']}
             result="success"
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -330,6 +339,7 @@ describe('GenericDetails', () => {
             workingDirectory={undefined}
             args={undefined}
             result={undefined}
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -355,6 +365,7 @@ describe('GenericDetails', () => {
             workingDirectory={undefined}
             args={undefined}
             result={undefined}
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -380,6 +391,7 @@ describe('GenericDetails', () => {
             workingDirectory={undefined}
             args={undefined}
             result={undefined}
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -405,6 +417,7 @@ describe('GenericDetails', () => {
             workingDirectory={undefined}
             args={undefined}
             result={undefined}
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -430,6 +443,7 @@ describe('GenericDetails', () => {
             workingDirectory={undefined}
             args={undefined}
             result={undefined}
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -455,6 +469,7 @@ describe('GenericDetails', () => {
             processTitle={undefined}
             args={undefined}
             result={undefined}
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -480,6 +495,7 @@ describe('GenericDetails', () => {
             processTitle={undefined}
             workingDirectory={undefined}
             result={undefined}
+            scopeId="test"
           />
         </TestProviders>
       );

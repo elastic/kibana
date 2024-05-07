@@ -16,9 +16,17 @@ interface Props {
   eventId: string;
   processTitle: string | null | undefined;
   isDraggable?: boolean;
+  scopeId: string;
 }
 
-export const ArgsComponent = ({ args, contextId, eventId, processTitle, isDraggable }: Props) => {
+export const ArgsComponent = ({
+  args,
+  contextId,
+  eventId,
+  processTitle,
+  isDraggable,
+  scopeId,
+}: Props) => {
   if (isNillEmptyOrNotFinite(args) && isNillEmptyOrNotFinite(processTitle)) {
     return null;
   }
@@ -36,6 +44,7 @@ export const ArgsComponent = ({ args, contextId, eventId, processTitle, isDragga
               value={arg}
               fieldType="keyword"
               isAggregatable={true}
+              scopeId={scopeId}
             />
           </TokensFlexItem>
         ))}
@@ -50,6 +59,7 @@ export const ArgsComponent = ({ args, contextId, eventId, processTitle, isDragga
             value={processTitle}
             fieldType="keyword"
             isAggregatable={true}
+            scopeId={scopeId}
           />
         </TokensFlexItem>
       )}

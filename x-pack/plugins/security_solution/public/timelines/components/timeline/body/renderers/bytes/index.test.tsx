@@ -29,6 +29,7 @@ describe('Bytes', () => {
           isAggregatable={true}
           isDraggable={true}
           value={`1234567`}
+          scopeId="test"
         />
       </TestProviders>
     );

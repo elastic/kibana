@@ -42,7 +42,8 @@ export const CertificateFingerprint = React.memo<{
   fieldName: string;
   isDraggable?: boolean;
   value?: string | null;
-}>(({ eventId, certificateType, contextId, fieldName, isDraggable, value }) => {
+  scopeId: string;
+}>(({ eventId, certificateType, contextId, fieldName, isDraggable, value, scopeId }) => {
   return (
     <DraggableBadge
       contextId={contextId}
@@ -59,6 +60,7 @@ export const CertificateFingerprint = React.memo<{
       value={value}
       isAggregatable={true}
       fieldType="keyword"
+      scopeId={scopeId}
     >
       <FingerprintLabel>
         {certificateType === 'client' ? i18n.CLIENT_CERT : i18n.SERVER_CERT}

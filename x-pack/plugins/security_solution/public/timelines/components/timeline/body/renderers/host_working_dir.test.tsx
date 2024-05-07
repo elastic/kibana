@@ -32,6 +32,7 @@ describe('HostWorkingDir', () => {
         contextId="test"
         hostName="[hostname-123]"
         workingDirectory="[working-directory-123]"
+        scopeId="test"
       />
     );
     expect(wrapper).toMatchSnapshot();
@@ -46,6 +47,7 @@ describe('HostWorkingDir', () => {
             contextId="test"
             hostName="[hostname-123]"
             workingDirectory={undefined}
+            scopeId="test"
           />
         </div>
       </TestProviders>
@@ -63,6 +65,7 @@ describe('HostWorkingDir', () => {
             contextId="test"
             hostName="[hostname-123]"
             workingDirectory={null}
+            scopeId="test"
           />
         </div>
       </TestProviders>
@@ -80,6 +83,7 @@ describe('HostWorkingDir', () => {
             contextId="test"
             hostName={undefined}
             workingDirectory="[working-directory-123]"
+            scopeId="test"
           />
         </div>
       </TestProviders>
@@ -97,6 +101,7 @@ describe('HostWorkingDir', () => {
             contextId="test"
             hostName={null}
             workingDirectory="[working-directory-123]"
+            scopeId="test"
           />
         </div>
       </TestProviders>

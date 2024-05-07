@@ -35,6 +35,7 @@ interface Props {
   processExecutable: string | null | undefined;
   processPid: number | null | undefined;
   processName: string | null | undefined;
+  scopeId: string;
   sshMethod: string | null | undefined;
   sshSignature: string | null | undefined;
   text: string | null | undefined;
@@ -57,6 +58,7 @@ export const SystemGenericLine = React.memo<Props>(
     processPid,
     processName,
     processExecutable,
+    scopeId,
     sshSignature,
     sshMethod,
     text,
@@ -74,6 +76,7 @@ export const SystemGenericLine = React.memo<Props>(
           userDomain={userDomain}
           userName={userName}
           workingDirectory={workingDirectory}
+          scopeId={scopeId}
         />
         <TokensFlexItem grow={false} component="span">
           {text}
@@ -88,6 +91,7 @@ export const SystemGenericLine = React.memo<Props>(
             processPid={processPid}
             processName={processName}
             processExecutable={processExecutable}
+            scopeId={scopeId}
           />
         </TokensFlexItem>
         {outcome != null && (
@@ -105,6 +109,7 @@ export const SystemGenericLine = React.memo<Props>(
             value={outcome}
             isAggregatable={true}
             fieldType="keyword"
+            scopeId={scopeId}
           />
         </TokensFlexItem>
         <AuthSsh
@@ -113,6 +118,7 @@ export const SystemGenericLine = React.memo<Props>(
           isDraggable={isDraggable}
           sshSignature={sshSignature}
           sshMethod={sshMethod}
+          scopeId={scopeId}
         />
         <Package
           contextId={contextId}
@@ -121,6 +127,7 @@ export const SystemGenericLine = React.memo<Props>(
           packageName={packageName}
           packageSummary={packageSummary}
           packageVersion={packageVersion}
+          scopeId={scopeId}
         />
       </EuiFlexGroup>
       {message != null && (
@@ -146,11 +153,11 @@ interface GenericDetailsProps {
   data: Ecs;
   isDraggable?: boolean;
   text: string;
-  timelineId: string;
+  scopeId: string;
 }
 
 export const SystemGenericDetails = React.memo<GenericDetailsProps>(
-  ({ contextId, data, isDraggable, text, timelineId }) => {
+  ({ contextId, data, isDraggable, text, scopeId }) => {
     const id = data._id;
     const message: string | null = data.message != null ? data.message[0] : null;
     const hostName: string | null | undefined = get('host.name[0]', data);
@@ -188,9 +195,10 @@ export const SystemGenericDetails = React.memo<GenericDetailsProps>(
           userDomain={userDomain}
           userName={userName}
           workingDirectory={workingDirectory}
+          scopeId={scopeId}
         />
         <EuiSpacer size="s" />
-        <NetflowRenderer data={data} isDraggable={isDraggable} timelineId={timelineId} />
+        <NetflowRenderer data={data} isDraggable={isDraggable} scopeId={scopeId} />
       </Details>
     );
   }

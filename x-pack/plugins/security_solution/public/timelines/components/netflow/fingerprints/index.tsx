@@ -24,6 +24,7 @@ export const Fingerprints = React.memo<{
   contextId: string;
   eventId: string;
   isDraggable?: boolean;
+  scopeId: string;
   tlsClientCertificateFingerprintSha1?: string[] | null;
   tlsFingerprintsJa3Hash?: string[] | null;
   tlsServerCertificateFingerprintSha1?: string[] | null;
@@ -32,6 +33,7 @@ export const Fingerprints = React.memo<{
     contextId,
     eventId,
     isDraggable,
+    scopeId,
     tlsClientCertificateFingerprintSha1,
     tlsFingerprintsJa3Hash,
     tlsServerCertificateFingerprintSha1,
@@ -52,6 +54,7 @@ export const Fingerprints = React.memo<{
                 contextId={contextId}
                 isDraggable={isDraggable}
                 value={ja3}
+                scopeId={scopeId}
               />
             </EuiFlexItem>
           ))
@@ -66,6 +69,7 @@ export const Fingerprints = React.memo<{
                 fieldName={TLS_CLIENT_CERTIFICATE_FINGERPRINT_SHA1_FIELD_NAME}
                 isDraggable={isDraggable}
                 value={clientCert}
+                scopeId={scopeId}
               />
             </EuiFlexItem>
           ))
@@ -80,6 +84,7 @@ export const Fingerprints = React.memo<{
                 fieldName={TLS_SERVER_CERTIFICATE_FINGERPRINT_SHA1_FIELD_NAME}
                 isDraggable={isDraggable}
                 value={serverCert}
+                scopeId={scopeId}
               />
             </EuiFlexItem>
           ))

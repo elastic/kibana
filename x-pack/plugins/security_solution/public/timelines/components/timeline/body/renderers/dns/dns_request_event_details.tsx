@@ -19,11 +19,11 @@ interface Props {
   contextId: string;
   data: Ecs;
   isDraggable?: boolean;
-  timelineId: string;
+  scopeId: string;
 }
 
 export const DnsRequestEventDetails = React.memo<Props>(
-  ({ data, contextId, isDraggable, timelineId }) => {
+  ({ data, contextId, isDraggable, scopeId }) => {
     const dnsQuestionName: string | null | undefined = get('dns.question.name[0]', data);
     const dnsQuestionType: string | null | undefined = get('dns.question.type[0]', data);
     const dnsResolvedIp: string | null | undefined = get('dns.resolved_ip[0]', data);
@@ -56,9 +56,10 @@ export const DnsRequestEventDetails = React.memo<Props>(
           userDomain={userDomain}
           userName={userName}
           winlogEventId={winlogEventId}
+          scopeId={scopeId}
         />
         <EuiSpacer size="s" />
-        <NetflowRenderer data={data} isDraggable={isDraggable} timelineId={timelineId} />
+        <NetflowRenderer data={data} isDraggable={isDraggable} scopeId={scopeId} />
       </Details>
     );
   }

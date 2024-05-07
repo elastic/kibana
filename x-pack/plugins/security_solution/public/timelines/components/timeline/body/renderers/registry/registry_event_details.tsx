@@ -18,9 +18,16 @@ interface Props {
   data: Ecs;
   isDraggable?: boolean;
   text: string;
+  scopeId: string;
 }
 
-const RegistryEventDetailsComponent: React.FC<Props> = ({ contextId, data, isDraggable, text }) => {
+const RegistryEventDetailsComponent: React.FC<Props> = ({
+  contextId,
+  data,
+  isDraggable,
+  text,
+  scopeId,
+}) => {
   const hostName: string | null | undefined = get('host.name[0]', data);
   const id = data._id;
   const processName: string | null | undefined = get('process.name[0]', data);
@@ -48,6 +55,7 @@ const RegistryEventDetailsComponent: React.FC<Props> = ({ contextId, data, isDra
         text={text}
         userDomain={userDomain}
         userName={userName}
+        scopeId={scopeId}
       />
     </Details>
   );

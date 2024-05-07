@@ -22,6 +22,7 @@ export interface GeoFieldsProps {
   sourceGeoRegionName?: string[] | null;
   sourceGeoCityName?: string[] | null;
   type: SourceDestinationType;
+  scopeId: string;
 }
 
 export interface SourceDestinationProps {
@@ -53,6 +54,7 @@ export interface SourceDestinationProps {
   sourcePackets?: string[] | null;
   sourcePort?: string[] | null;
   transport?: string[] | null;
+  scopeId: string;
 }
 
 export interface SourceDestinationIpProps {
@@ -74,6 +76,7 @@ export interface SourceDestinationIpProps {
   sourceIp?: string[] | null;
   sourcePort?: Array<number | string | null> | null;
   type: SourceDestinationType;
+  scopeId: string;
 }
 
 export interface SourceDestinationWithArrowsProps {
@@ -98,4 +101,5 @@ export interface SourceDestinationWithArrowsProps {
   sourceIp?: string[] | null;
   sourcePackets?: string[] | null;
   sourcePort?: string[] | null;
+  scopeId: string;
 }

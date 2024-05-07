@@ -75,7 +75,8 @@ const GeoFieldValues = React.memo<{
   fieldName: string;
   isDraggable?: boolean;
   values?: string[] | null;
-}>(({ contextId, eventId, fieldName, isDraggable, values }) =>
+  scopeId: string;
+}>(({ contextId, eventId, fieldName, isDraggable, values, scopeId }) =>
   values != null ? (
     <>
       {uniq(values).map((value) => (
@@ -96,6 +97,7 @@ const GeoFieldValues = React.memo<{
                 isDraggable={isDraggable}
                 tooltipContent={fieldName}
                 value={value}
+                scopeId={scopeId}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -116,7 +118,7 @@ GeoFieldValues.displayName = 'GeoFieldValues';
  * - `source|destination.geo.city_name`
  */
 export const GeoFields = React.memo<GeoFieldsProps>((props) => {
-  const { contextId, eventId, isDraggable, type } = props;
+  const { contextId, eventId, isDraggable, type, scopeId } = props;
 
   const propNameToFieldName = getGeoFieldPropNameToFieldNameMap(type);
   return (
@@ -129,6 +131,7 @@ export const GeoFields = React.memo<GeoFieldsProps>((props) => {
           isDraggable={isDraggable}
           key={geo.fieldName}
           values={get(geo.prop, props)}
+          scopeId={scopeId}
         />
       ))}
     </EuiFlexGroup>

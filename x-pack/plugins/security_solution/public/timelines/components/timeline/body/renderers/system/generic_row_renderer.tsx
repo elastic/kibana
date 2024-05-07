@@ -46,7 +46,7 @@ export const createGenericSystemRowRenderer = ({
         data={data}
         isDraggable={isDraggable}
         text={text}
-        timelineId={scopeId}
+        scopeId={scopeId}
       />
     </RowRendererContainer>
   ),
@@ -78,7 +78,7 @@ export const createEndgameProcessRowRenderer = ({
         isDraggable={isDraggable}
         showMessage={false}
         text={text}
-        timelineId={scopeId}
+        scopeId={scopeId}
       />
     </RowRendererContainer>
   ),
@@ -109,7 +109,7 @@ export const createFimRowRenderer = ({
         isDraggable={isDraggable}
         showMessage={false}
         text={text}
-        timelineId={scopeId}
+        scopeId={scopeId}
       />
     </RowRendererContainer>
   ),
@@ -160,7 +160,7 @@ export const createEndpointAlertsRowRenderer = ({
         skipRedundantFileDetails={skipRedundantFileDetails}
         skipRedundantProcessDetails={skipRedundantProcessDetails}
         text={text}
-        timelineId={scopeId}
+        scopeId={scopeId}
       />
     </RowRendererContainer>
   ),
@@ -189,7 +189,7 @@ export const createEndpointLibraryRowRenderer = ({
         isDraggable={isDraggable}
         showMessage={false}
         text={text}
-        timelineId={scopeId}
+        scopeId={scopeId}
       />
     </RowRendererContainer>
   ),
@@ -220,7 +220,7 @@ export const createGenericFileRowRenderer = ({
         data={data}
         isDraggable={isDraggable}
         text={text}
-        timelineId={scopeId}
+        scopeId={scopeId}
       />
     </RowRendererContainer>
   ),
@@ -245,7 +245,7 @@ export const createSocketRowRenderer = ({
         data={data}
         isDraggable={isDraggable}
         text={text}
-        timelineId={scopeId}
+        scopeId={scopeId}
       />
     </RowRendererContainer>
   ),
@@ -273,7 +273,7 @@ export const createSecurityEventRowRenderer = ({
         contextId={`authentication-${actionName}-${scopeId}`}
         data={data}
         isDraggable={isDraggable}
-        timelineId={scopeId}
+        scopeId={scopeId}
       />
     </RowRendererContainer>
   ),
@@ -292,7 +292,7 @@ export const createDnsRowRenderer = (): RowRenderer => ({
         contextId={`dns-request-${scopeId}`}
         data={data}
         isDraggable={isDraggable}
-        timelineId={scopeId}
+        scopeId={scopeId}
       />
     </RowRendererContainer>
   ),
@@ -321,6 +321,7 @@ export const createEndpointRegistryRowRenderer = ({
         data={data}
         isDraggable={isDraggable}
         text={text}
+        scopeId={scopeId}
       />
     </RowRendererContainer>
   ),

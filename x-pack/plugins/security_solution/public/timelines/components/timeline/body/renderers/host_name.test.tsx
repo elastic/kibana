@@ -92,6 +92,7 @@ describe('HostName', () => {
     fieldType: 'keyword',
     isAggregatable: true,
     value: 'Mock Host',
+    scopeId: 'test',
   };
 
   test('should render host name', () => {

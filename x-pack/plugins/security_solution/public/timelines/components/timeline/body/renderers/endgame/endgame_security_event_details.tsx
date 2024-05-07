@@ -19,11 +19,11 @@ interface Props {
   contextId: string;
   data: Ecs;
   isDraggable?: boolean;
-  timelineId: string;
+  scopeId: string;
 }
 
 export const EndgameSecurityEventDetails = React.memo<Props>(
-  ({ data, contextId, isDraggable, timelineId }) => {
+  ({ data, contextId, isDraggable, scopeId }) => {
     const endgameLogonType: number | null | undefined = get('endgame.logon_type[0]', data);
     const endgameSubjectDomainName: string | null | undefined = get(
       'endgame.subject_domain_name[0]',
@@ -81,9 +81,10 @@ export const EndgameSecurityEventDetails = React.memo<Props>(
           userDomain={userDomain}
           userName={userName}
           winlogEventId={winlogEventId}
+          scopeId={scopeId}
         />
         <EuiSpacer size="s" />
-        <NetflowRenderer data={data} timelineId={timelineId} />
+        <NetflowRenderer data={data} scopeId={scopeId} />
       </Details>
     );
   }

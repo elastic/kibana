@@ -61,7 +61,8 @@ export const DirectionBadge = React.memo<{
   direction?: string | null;
   eventId: string;
   isDraggable?: boolean;
-}>(({ contextId, eventId, direction, isDraggable }) => (
+  scopeId: string;
+}>(({ contextId, eventId, direction, isDraggable, scopeId }) => (
   <DraggableBadge
     contextId={contextId}
     eventId={eventId}
@@ -71,6 +72,7 @@ export const DirectionBadge = React.memo<{
     value={direction}
     isAggregatable={true}
     fieldType="keyword"
+    scopeId={scopeId}
   />
 ));
 

@@ -25,6 +25,7 @@ interface IndicatorDetailsProps {
   indicatorReference: string | undefined;
   indicatorType: string | undefined;
   isDraggable?: boolean;
+  scopeId: string;
 }
 
 export const IndicatorDetails: React.FC<IndicatorDetailsProps> = ({
@@ -34,6 +35,7 @@ export const IndicatorDetails: React.FC<IndicatorDetailsProps> = ({
   indicatorReference,
   indicatorType,
   isDraggable,
+  scopeId,
 }) => (
   <EuiFlexGroup
     alignItems="flexStart"
@@ -54,6 +56,7 @@ export const IndicatorDetails: React.FC<IndicatorDetailsProps> = ({
           value={indicatorType}
           isAggregatable={true}
           fieldType={'keyword'}
+          scopeId={scopeId}
         />
       </EuiFlexItem>
     )}
@@ -77,6 +80,7 @@ export const IndicatorDetails: React.FC<IndicatorDetailsProps> = ({
             value={feedName}
             isAggregatable={true}
             fieldType={'keyword'}
+            scopeId={scopeId}
           />
         </EuiFlexItem>
       </>

@@ -27,6 +27,7 @@ export interface NetflowProps {
   networkPackets?: string[] | null;
   networkProtocol?: string[] | null;
   processName?: string[] | null;
+  scopeId: string;
   sourceBytes?: string[] | null;
   sourceGeoContinentName?: string[] | null;
   sourceGeoCountryName?: string[] | null;

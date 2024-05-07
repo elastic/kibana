@@ -45,7 +45,7 @@ describe('SystemGenericFileDetails', () => {
           contextId="[contextid-123]"
           text="[generic-text-123]"
           data={mockTimelineData[29].ecs}
-          timelineId="test"
+          scopeId="test"
         />
       );
       expect(wrapper).toMatchSnapshot();
@@ -58,7 +58,7 @@ describe('SystemGenericFileDetails', () => {
             contextId="[contextid-123]"
             text="[generic-text-123]"
             data={mockTimelineData[29].ecs}
-            timelineId="test"
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -74,7 +74,7 @@ describe('SystemGenericFileDetails', () => {
             contextId="[contextid-123]"
             text="[generic-text-123]"
             data={mockEndgameCreationEvent}
-            timelineId="test"
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -126,6 +126,7 @@ describe('SystemGenericFileDetails', () => {
               userDomain="[userDomain-123]"
               userName="[username-123]"
               workingDirectory="[working-directory-123]"
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -176,6 +177,7 @@ describe('SystemGenericFileDetails', () => {
               userDomain={null}
               userName={null}
               workingDirectory={null}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -224,6 +226,7 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory={null}
               processTitle={null}
               args={null}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -272,6 +275,7 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory={null}
               processTitle={null}
               args={null}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -320,6 +324,7 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory={null}
               processTitle={null}
               args={null}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -370,6 +375,7 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory={null}
               processTitle={null}
               args={null}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -420,6 +426,7 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory={null}
               processTitle={null}
               args={null}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -470,6 +477,7 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory={null}
               processTitle={null}
               args={null}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -520,6 +528,7 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory={null}
               processTitle={null}
               args={null}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -570,6 +579,7 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory={null}
               processTitle={null}
               args={null}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -620,6 +630,7 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory={null}
               processTitle={null}
               args={null}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -670,6 +681,7 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory={null}
               processTitle={null}
               args={null}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -720,6 +732,7 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory={null}
               processTitle={null}
               args={null}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -770,6 +783,7 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory={null}
               processTitle={null}
               args={null}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -820,6 +834,7 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory={null}
               processTitle={null}
               args={null}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -870,6 +885,7 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory={null}
               processTitle={null}
               args={null}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -920,6 +936,7 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory={null}
               processTitle={null}
               args={null}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -970,6 +987,7 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory={null}
               processTitle={null}
               args={null}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -1020,6 +1038,7 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory={null}
               processTitle={null}
               args={null}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -1070,6 +1089,7 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory={null}
               processTitle={null}
               args={null}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -1120,6 +1140,7 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory="[working-directory-123]"
               processTitle={null}
               args={null}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -1170,6 +1191,7 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory="[working-directory-123]"
               processTitle="[process-title-123]"
               args={null}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -1220,6 +1242,7 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory="[working-directory-123]"
               processTitle="[process-title-123]"
               args={['[arg-1]', '[arg-2]', '[arg-3]']}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -1270,6 +1293,7 @@ describe('SystemGenericFileDetails', () => {
               userDomain={undefined}
               userName={undefined}
               workingDirectory={undefined}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -1318,6 +1342,7 @@ describe('SystemGenericFileDetails', () => {
               userDomain={undefined}
               userName={undefined}
               workingDirectory={undefined}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -1368,6 +1393,7 @@ describe('SystemGenericFileDetails', () => {
                 userDomain={undefined}
                 userName={undefined}
                 workingDirectory={undefined}
+                scopeId="test"
               />
             </div>
           </TestProviders>
@@ -1420,6 +1446,7 @@ describe('SystemGenericFileDetails', () => {
               userDomain={undefined}
               userName={undefined}
               workingDirectory={undefined}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -1471,6 +1498,7 @@ describe('SystemGenericFileDetails', () => {
               userDomain={undefined}
               userName={undefined}
               workingDirectory={undefined}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -1524,6 +1552,7 @@ describe('SystemGenericFileDetails', () => {
               userDomain={undefined}
               userName={undefined}
               workingDirectory={undefined}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -1575,6 +1604,7 @@ describe('SystemGenericFileDetails', () => {
               userDomain={undefined}
               userName={undefined}
               workingDirectory={undefined}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -1624,6 +1654,7 @@ describe('SystemGenericFileDetails', () => {
               userDomain={undefined}
               userName={undefined}
               workingDirectory={undefined}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -1673,6 +1704,7 @@ describe('SystemGenericFileDetails', () => {
               userDomain={undefined}
               userName={undefined}
               workingDirectory={undefined}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -1722,6 +1754,7 @@ describe('SystemGenericFileDetails', () => {
               userDomain={undefined}
               userName={undefined}
               workingDirectory={undefined}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -1771,6 +1804,7 @@ describe('SystemGenericFileDetails', () => {
               userDomain={undefined}
               userName={undefined}
               workingDirectory={undefined}
+              scopeId="test"
             />
           </div>
         </TestProviders>

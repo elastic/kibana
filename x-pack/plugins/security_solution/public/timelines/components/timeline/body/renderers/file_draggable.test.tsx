@@ -36,6 +36,7 @@ describe('FileDraggable', () => {
           fileExtOriginalPath="[fileExtOriginalPath]"
           fileName="[fileName]"
           filePath="[filePath]"
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -55,6 +56,7 @@ describe('FileDraggable', () => {
           fileExtOriginalPath={undefined}
           fileName={undefined}
           filePath={undefined}
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -72,6 +74,7 @@ describe('FileDraggable', () => {
           fileExtOriginalPath={undefined}
           fileName={undefined}
           filePath={undefined}
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -89,6 +92,7 @@ describe('FileDraggable', () => {
           fileExtOriginalPath={undefined}
           fileName={undefined}
           filePath={undefined}
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -106,6 +110,7 @@ describe('FileDraggable', () => {
           fileExtOriginalPath={undefined}
           fileName="[fileName]"
           filePath={undefined}
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -123,6 +128,7 @@ describe('FileDraggable', () => {
           fileExtOriginalPath={undefined}
           fileName={undefined}
           filePath="[filePath]"
+          scopeId="test"
         />
       </TestProviders>
     );

@@ -39,6 +39,7 @@ describe('SessionUserHostWorkingDir', () => {
             primary="primary-123"
             secondary="secondary-123"
             workingDirectory="workingdir-123"
+            scopeId="test"
           />
         </EuiFlexItem>
       );
@@ -58,6 +59,7 @@ describe('SessionUserHostWorkingDir', () => {
               primary={undefined}
               secondary={undefined}
               workingDirectory={undefined}
+              scopeId="test"
             />
           </EuiFlexItem>
         </TestProviders>
@@ -78,6 +80,7 @@ describe('SessionUserHostWorkingDir', () => {
               primary={undefined}
               secondary={undefined}
               workingDirectory={undefined}
+              scopeId="test"
             />
           </EuiFlexItem>
         </TestProviders>
@@ -98,6 +101,7 @@ describe('SessionUserHostWorkingDir', () => {
               primary={undefined}
               secondary={undefined}
               workingDirectory={undefined}
+              scopeId="test"
             />
           </EuiFlexItem>
         </TestProviders>
@@ -118,6 +122,7 @@ describe('SessionUserHostWorkingDir', () => {
               primary={undefined}
               secondary={undefined}
               workingDirectory={undefined}
+              scopeId="test"
             />
           </EuiFlexItem>
         </TestProviders>
@@ -138,6 +143,7 @@ describe('SessionUserHostWorkingDir', () => {
               primary="primary-123"
               secondary={undefined}
               workingDirectory={undefined}
+              scopeId="test"
             />
           </EuiFlexItem>
         </TestProviders>
@@ -158,6 +164,7 @@ describe('SessionUserHostWorkingDir', () => {
               primary="primary-123"
               secondary="secondary-123"
               workingDirectory={undefined}
+              scopeId="test"
             />
           </EuiFlexItem>
         </TestProviders>
@@ -178,6 +185,7 @@ describe('SessionUserHostWorkingDir', () => {
               primary="primary-123"
               secondary="secondary-123"
               workingDirectory="workingdirectory-123"
+              scopeId="test"
             />
           </EuiFlexItem>
         </TestProviders>

@@ -37,7 +37,7 @@ describe('EndgameSecurityEventDetails', () => {
         <EndgameSecurityEventDetails
           contextId="test-context"
           data={mockEndgameUserLogon}
-          timelineId="timeline-id-test"
+          scopeId="scope-id-test"
         />
       </TestProviders>
     );
@@ -52,7 +52,7 @@ describe('EndgameSecurityEventDetails', () => {
         <EndgameSecurityEventDetails
           contextId="test-context"
           data={mockEndgameAdminLogon}
-          timelineId="timeline-id-test"
+          scopeId="scope-id-test"
         />
       </TestProviders>
     );
@@ -67,7 +67,7 @@ describe('EndgameSecurityEventDetails', () => {
         <EndgameSecurityEventDetails
           contextId="test-context"
           data={mockEndgameExplicitUserLogon}
-          timelineId="timeline-id-test"
+          scopeId="scope-id-test"
         />
       </TestProviders>
     );
@@ -82,7 +82,7 @@ describe('EndgameSecurityEventDetails', () => {
         <EndgameSecurityEventDetails
           contextId="test-context"
           data={mockEndgameUserLogoff}
-          timelineId="timeline-id-test"
+          scopeId="scope-id-test"
         />
       </TestProviders>
     );

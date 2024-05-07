@@ -34,6 +34,7 @@ describe('UserPrimarySecondary', () => {
           userName="user-name-1"
           primary="primary-1"
           secondary="secondary-1"
+          scopeId="test"
         />
       );
       expect(wrapper).toMatchSnapshot();
@@ -48,6 +49,7 @@ describe('UserPrimarySecondary', () => {
             userName="user-name-1"
             primary={undefined}
             secondary={undefined}
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -63,6 +65,7 @@ describe('UserPrimarySecondary', () => {
             userName="user-name-1"
             primary="unset"
             secondary="unset"
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -78,6 +81,7 @@ describe('UserPrimarySecondary', () => {
             primary="primary-1"
             userName={undefined}
             secondary={undefined}
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -93,6 +97,7 @@ describe('UserPrimarySecondary', () => {
             primary="primary-1"
             userName="unset"
             secondary="unset"
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -108,6 +113,7 @@ describe('UserPrimarySecondary', () => {
             userName={undefined}
             primary={undefined}
             secondary="secondary-1"
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -123,6 +129,7 @@ describe('UserPrimarySecondary', () => {
             secondary="secondary-1"
             primary="unset"
             userName="unset"
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -138,6 +145,7 @@ describe('UserPrimarySecondary', () => {
             userName="username-1"
             primary="username-1"
             secondary="username-1"
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -153,6 +161,7 @@ describe('UserPrimarySecondary', () => {
             userName="[username]"
             primary="[primary]"
             secondary="[secondary]"
+            scopeId="test"
           />
         </TestProviders>
       );

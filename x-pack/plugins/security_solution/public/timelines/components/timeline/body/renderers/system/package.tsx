@@ -17,10 +17,11 @@ interface Props {
   packageName: string | null | undefined;
   packageSummary: string | null | undefined;
   packageVersion: string | null | undefined;
+  scopeId: string;
 }
 
 export const Package = React.memo<Props>(
-  ({ contextId, eventId, isDraggable, packageName, packageSummary, packageVersion }) => {
+  ({ contextId, eventId, isDraggable, packageName, packageSummary, packageVersion, scopeId }) => {
     if (packageName != null || packageSummary != null || packageVersion != null) {
       return (
         <>
@@ -34,6 +35,7 @@ export const Package = React.memo<Props>(
               iconType="document"
               isAggregatable={true}
               fieldType="keyword"
+              scopeId={scopeId}
             />
           </TokensFlexItem>
           <TokensFlexItem grow={false} component="span">
@@ -46,6 +48,7 @@ export const Package = React.memo<Props>(
               iconType="document"
               isAggregatable={true}
               fieldType="keyword"
+              scopeId={scopeId}
             />
           </TokensFlexItem>
           <TokensFlexItem grow={false} component="span">
@@ -57,6 +60,7 @@ export const Package = React.memo<Props>(
               value={packageSummary}
               isAggregatable={true}
               fieldType="keyword"
+              scopeId={scopeId}
             />
           </TokensFlexItem>
         </>

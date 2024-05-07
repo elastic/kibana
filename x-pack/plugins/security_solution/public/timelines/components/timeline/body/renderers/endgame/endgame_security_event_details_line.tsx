@@ -45,6 +45,7 @@ interface Props {
   userDomain: string | null | undefined;
   userName: string | null | undefined;
   winlogEventId: string | null | undefined;
+  scopeId: string;
 }
 
 export const EndgameSecurityEventDetailsLine = React.memo<Props>(
@@ -69,6 +70,7 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
     userDomain,
     userName,
     winlogEventId,
+    scopeId,
   }) => {
     const domain = getTargetUserAndTargetDomain(eventAction) ? endgameTargetDomainName : userDomain;
     const eventDetails = getEventDetails({ eventAction, eventOutcome });
@@ -103,6 +105,7 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
             userName={user}
             userNameField={userNameField}
             workingDirectory={undefined}
+            scopeId={scopeId}
           />
 
           <TokensFlexItem component="span" data-test-subj="event-details" grow={false}>
@@ -124,6 +127,7 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
                   value={`${endgameLogonType} - ${getHumanReadableLogonType(endgameLogonType)}`}
                   isAggregatable={true}
                   fieldType="keyword"
+                  scopeId={scopeId}
                 />
               </TokensFlexItem>
             </>
@@ -146,6 +150,7 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
                   value={endgameTargetLogonId}
                   isAggregatable={true}
                   fieldType="keyword"
+                  scopeId={scopeId}
                 />
               </TokensFlexItem>
               <TokensFlexItem component="span" grow={false}>
@@ -168,6 +173,7 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
               processPid={processPid}
               processName={processName}
               processExecutable={processExecutable}
+              scopeId={scopeId}
             />
           </TokensFlexItem>
 
@@ -191,6 +197,7 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
                   value={endgameSubjectUserName}
                   isAggregatable={true}
                   fieldType="keyword"
+                  scopeId={scopeId}
                 />
               </TokensFlexItem>
             </>
@@ -214,6 +221,7 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
                   value={endgameSubjectDomainName}
                   isAggregatable={true}
                   fieldType="keyword"
+                  scopeId={scopeId}
                 />
               </TokensFlexItem>
             </>
@@ -236,6 +244,7 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
                   value={endgameSubjectLogonId}
                   isAggregatable={true}
                   fieldType="keyword"
+                  scopeId={scopeId}
                 />
               </TokensFlexItem>
               <TokensFlexItem component="span" grow={false}>
@@ -252,9 +261,11 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
                     contextId={contextId}
                     eventId={id}
                     field="event.code"
+                    isDraggable={isDraggable}
                     value={eventCode}
                     isAggregatable={true}
                     fieldType="keyword"
+                    scopeId={scopeId}
                   />
                 </TokensFlexItem>
               ) : (
@@ -264,9 +275,11 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
                     eventId={id}
                     iconType="logoWindows"
                     field="winlog.event_id"
+                    isDraggable={isDraggable}
                     value={winlogEventId}
                     isAggregatable={true}
                     fieldType="keyword"
+                    scopeId={scopeId}
                   />
                 </TokensFlexItem>
               )}
