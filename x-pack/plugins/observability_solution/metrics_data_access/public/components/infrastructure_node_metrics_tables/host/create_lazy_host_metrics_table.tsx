@@ -19,7 +19,6 @@ export function createLazyHostMetricsTable(core: CoreStart, metricsClient: Metri
         <LazyIntegratedHostMetricsTable
           core={core}
           metricsClient={metricsClient}
-          theme$={core.theme.theme$}
           sourceId={sourceId || 'default'}
           timerange={timerange}
           filterClauseDsl={filterClauseDsl}

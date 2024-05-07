@@ -9,7 +9,7 @@ import React from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { QueryClient } from '@tanstack/react-query';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RecursivePartial } from '@kbn/utility-types';
@@ -23,6 +23,7 @@ import { SloAddFormFlyout } from './slo_form';
 export const getCreateSLOFlyoutLazy = ({
   core,
   plugins,
+  getAppMountParameters,
   observabilityRuleTypeRegistry,
   ObservabilityPageTemplate,
   isDev,
@@ -32,6 +33,7 @@ export const getCreateSLOFlyoutLazy = ({
 }: {
   core: CoreStart;
   plugins: SloPublicPluginsStart;
+  getAppMountParameters: () => Promise<AppMountParameters>;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   ObservabilityPageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
   isDev?: boolean;
@@ -39,7 +41,7 @@ export const getCreateSLOFlyoutLazy = ({
   isServerless?: boolean;
   experimentalFeatures: ExperimentalFeatures;
 }) => {
-  return ({
+  return async ({
     onClose,
     initialValues,
   }: {
@@ -47,6 +49,7 @@ export const getCreateSLOFlyoutLazy = ({
     initialValues?: RecursivePartial<CreateSLOForm>;
   }) => {
     const queryClient = new QueryClient();
+    const appMountParameters = await getAppMountParameters();
     return (
       <KibanaContextProvider
         services={{
@@ -64,6 +67,7 @@ export const getCreateSLOFlyoutLazy = ({
             observabilityRuleTypeRegistry,
             ObservabilityPageTemplate,
             experimentalFeatures,
+            appMountParameters,
           }}
         >
           <QueryClientProvider client={queryClient}>
