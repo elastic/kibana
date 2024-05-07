@@ -43,7 +43,11 @@ If you don't yet have a chunking strategy, start by chunking your documents into
 
 Otherwise, consider updating your chunking strategy, for example, from sentence based to paragraph based chunking.
 
-Refer to https://www.elastic.co/search-labs/blog/chunking-via-ingest-pipelines[Chunking large documents via ingest pipelines (blog post)] for inspiration.
+Refer to the following Python notebooks for examples of how to chunk your documents:
+
+* https://github.com/elastic/elasticsearch-labs/tree/main/notebooks/ingestion-and-chunking/json-chunking-ingest.ipynb[JSON documents]
+* https://github.com/elastic/elasticsearch-labs/tree/main/notebooks/ingestion-and-chunking/pdf-chunking-ingest.ipynb[PDF document]
+* https://github.com/elastic/elasticsearch-labs/tree/main/notebooks/ingestion-and-chunking/website-chunking-ingest.ipynb[Website content]
 
 [float]
 [[playground-context-balance]]
