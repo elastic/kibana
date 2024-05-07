@@ -127,6 +127,11 @@ describe('get_all_stats', () => {
                   logstash: {
                     version: '2.3.4-beta2',
                   },
+                  pipelines: [
+                    {
+                      ephemeral_id: 'abcd1234-1234-1234-1234-abcd1234abcd',
+                    },
+                  ],
                 },
               },
             },
