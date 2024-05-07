@@ -61,7 +61,7 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
 }) => {
   const isMounted = useMountedState();
 
-  const titleManuallyChanged = useRef(false);
+  const titleManuallyChanged = useRef(!!initialInput?.title);
 
   const [jobIds, setJobIds] = useState(initialInput?.jobIds ?? []);
 
@@ -83,20 +83,20 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
     [adJobsApiService, isMounted, jobIds]
   );
 
+  const [panelTitle, setPanelTitle] = useState(initialInput?.title ?? '');
+  const [swimlaneType, setSwimlaneType] = useState<SwimlaneType>(
+    initialInput?.swimlaneType ?? SWIMLANE_TYPE.OVERALL
+  );
+  const [viewBySwimlaneFieldName, setViewBySwimlaneFieldName] = useState(initialInput?.viewBy);
+
   useEffect(
     function updateDefaultTitle() {
       if (!titleManuallyChanged.current) {
         setPanelTitle(getDefaultSwimlanePanelTitle(jobIds));
       }
     },
-    [jobIds]
+    [initialInput?.title, jobIds]
   );
-
-  const [panelTitle, setPanelTitle] = useState(initialInput?.title ?? '');
-  const [swimlaneType, setSwimlaneType] = useState<SwimlaneType>(
-    initialInput?.swimlaneType ?? SWIMLANE_TYPE.OVERALL
-  );
-  const [viewBySwimlaneFieldName, setViewBySwimlaneFieldName] = useState(initialInput?.viewBy);
 
   const swimlaneTypeOptions = [
     {
