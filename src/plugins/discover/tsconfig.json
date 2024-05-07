@@ -87,7 +87,8 @@
     "@kbn/aiops-log-pattern-analysis",
     "@kbn/field-types",
     "@kbn/observability-ai-assistant-plugin",
-    "@kbn/search-types"
+    "@kbn/search-types",
+    "@kbn/aiops-plugin"
   ],
   "exclude": ["target/**/*"]
 }
