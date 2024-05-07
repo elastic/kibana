@@ -27,7 +27,8 @@ describe('createFailureIssue()', () => {
         likelyIrrelevant: false,
       },
       api,
-      'main'
+      'main',
+      'kibana-on-merge'
     );
 
     expect(api.createIssue).toMatchInlineSnapshot(`
@@ -41,7 +42,7 @@ describe('createFailureIssue()', () => {
       this is the failure text
       \`\`\`
 
-      First failure: [CI Build - main](https://build-url)
+      First failure: [kibana-on-merge - main](https://build-url)
 
       <!-- kibanaCiData = {\\"failed-test\\":{\\"test.class\\":\\"some.classname\\",\\"test.name\\":\\"test name\\",\\"test.failCount\\":1}} -->",
             Array [
@@ -81,7 +82,8 @@ describe('updateFailureIssue()', () => {
         },
       },
       api,
-      'main'
+      'main',
+      'kibana-on-merge'
     );
 
     expect(api.editIssueBodyAndEnsureOpen).toMatchInlineSnapshot(`
@@ -107,7 +109,7 @@ describe('updateFailureIssue()', () => {
         "calls": Array [
           Array [
             1234,
-            "New failure: [CI Build - main](https://build-url)",
+            "New failure: [kibana-on-merge - main](https://build-url)",
           ],
         ],
         "results": Array [

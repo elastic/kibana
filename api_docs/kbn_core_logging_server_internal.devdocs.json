@@ -143,7 +143,7 @@
             "section": "def-common.ByteSizeValue",
             "text": "ByteSizeValue"
           },
-          "; }> | Readonly<{} & { type: \"time-interval\"; interval: moment.Duration; modulate: boolean; }>; strategy: ",
+          "; }> | Readonly<{} & { type: \"time-interval\"; interval: moment.Duration; modulate: boolean; }>; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ pattern?: string | undefined; highlight?: boolean | undefined; } & { type: \"pattern\"; }>; fileName: string; strategy: ",
           {
             "pluginId": "@kbn/core-logging-server",
             "scope": "common",
@@ -151,7 +151,7 @@
             "section": "def-common.NumericRollingStrategyConfig",
             "text": "NumericRollingStrategyConfig"
           },
-          "; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ pattern?: string | undefined; highlight?: boolean | undefined; } & { type: \"pattern\"; }>; fileName: string; }>>"
+          "; }>>"
         ],
         "path": "packages/core/logging/core-logging-server-internal/src/appenders/appenders.ts",
         "deprecated": false,

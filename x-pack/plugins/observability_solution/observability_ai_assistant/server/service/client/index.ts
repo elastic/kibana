@@ -164,6 +164,7 @@ export class ObservabilityAIAssistantClient {
     kibanaPublicUrl?: string;
     instructions?: Array<string | UserInstruction>;
     simulateFunctionCalling?: boolean;
+    disableFunctions?: boolean;
   }): Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>> => {
     const {
       functionClient,
@@ -178,6 +179,7 @@ export class ObservabilityAIAssistantClient {
       isPublic,
       title: predefinedTitle,
       conversationId: predefinedConversationId,
+      disableFunctions = false,
     } = params;
 
     if (responseLanguage) {
@@ -282,6 +284,8 @@ export class ObservabilityAIAssistantClient {
             knowledgeBaseInstructions,
             requestInstructions,
             signal,
+            logger: this.dependencies.logger,
+            disableFunctions,
           })
         );
       }),
