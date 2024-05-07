@@ -179,19 +179,21 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon G
    * @param body The stringified request body to be sent in the POST request.
    * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
    */
-  public async runApi({ body, model: reqModel }: RunActionParams): Promise<RunActionResponse> {
+   public async runApi({ body, model: reqModel }: RunActionParams): Promise<RunActionResponse> {
     // set model on per request basis
     // const currentModel = reqModel ?? this.model;
-    const apiKey = this.secrets.apiKey
+    const apiKey = this.secrets.apiKey;
     const data = JSON.stringify(JSON.parse(body)['messages']);
-    console.log('Data', data);
-    const path = `/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
+    const url = "https://us-central1-aiplatform.googleapis.com/v1/projects/river-runner-343016/locations/us-central1/publishers/google/models/gemini-1.0-pro:generateContent";
+    // const path = `/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
 
     const requestArgs = {
-      url: `${this.url}${path}`,
+      // url: `${this.url}${path}`,
+      url: url,
       method: 'post' as Method,
       data: data,
       headers: { 
+        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json'
       },
       // give up to 2 minutes for response

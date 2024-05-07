@@ -25,3 +25,4 @@ export enum SUB_ACTION {
 export const DEFAULT_TOKEN_LIMIT = 30720;
 export const DEFAULT_GEMINI_MODEL = 'gemini-1.0-pro-001';
 export const DEFAULT_GEMINI_URL = `https://generativelanguage.googleapis.com` as const;
+

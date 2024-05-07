@@ -49,7 +49,8 @@ export const StreamActionParamsSchema = schema.object({
 
 export const RunApiLatestResponseSchema = schema.object(
   {
-    candidates: schema.any()
+    candidates: schema.any(),
+    usageMetadata: schema.any(),
   }
 );
 

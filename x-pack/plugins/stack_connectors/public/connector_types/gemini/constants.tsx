@@ -16,8 +16,7 @@ import {
 } from '../../../common/gemini/constants';
 import * as i18n from './translations';
 
-const generationConfig = {
-  stopSequences: 'Title',
+const generation_config = {
   temperature: 0,
   maxOutputTokens: DEFAULT_TOKEN_LIMIT,
 }
@@ -28,7 +27,7 @@ const messageBody = {
       parts:[{
        text: 'Write the first line of a story about a magic backpack.'}]}
   ],
-  generationConfig,
+  generation_config,
 }
 
 export const DEFAULT_BODY = JSON.stringify({
