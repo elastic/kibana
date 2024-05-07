@@ -72,7 +72,7 @@ export const esqlValidator = async (
     }
 
     const columns = await securitySolutionQueryClient.fetchQuery(
-      getEsqlQueryConfig({ esqlQuery: query, data: services.data })
+      getEsqlQueryConfig({ esqlQuery: query, search: services.data.search.search })
     );
 
     if (columns && 'error' in columns) {

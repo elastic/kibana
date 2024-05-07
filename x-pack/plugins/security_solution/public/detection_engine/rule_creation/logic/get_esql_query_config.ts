@@ -6,7 +6,7 @@
  */
 
 import { getESQLQueryColumns } from '@kbn/esql-utils';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { ISearchGeneric } from '@kbn/search-types';
 
 /**
  * react-query configuration to be used to fetch ES|QL fields
@@ -14,10 +14,10 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
  */
 export const getEsqlQueryConfig = ({
   esqlQuery,
-  data,
+  search,
 }: {
   esqlQuery: string | undefined;
-  data: DataPublicPluginStart;
+  search: ISearchGeneric;
 }) => {
   return {
     queryKey: [(esqlQuery ?? '').trim()],
@@ -28,7 +28,7 @@ export const getEsqlQueryConfig = ({
       try {
         const res = await getESQLQueryColumns({
           esqlQuery,
-          search: data.search.search,
+          search,
         });
         return res;
       } catch (e) {

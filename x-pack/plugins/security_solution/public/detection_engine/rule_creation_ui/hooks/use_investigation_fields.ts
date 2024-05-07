@@ -46,7 +46,7 @@ const useEsqlFields: UseEsqlFields = (esqlQuery) => {
 
   const { data: dataService } = kibana.services;
 
-  const queryConfig = getEsqlQueryConfig({ esqlQuery, data: dataService });
+  const queryConfig = getEsqlQueryConfig({ esqlQuery, search: dataService?.search?.search });
   const { data, isLoading } = useQuery(queryConfig);
 
   const fields = useMemo(() => {
