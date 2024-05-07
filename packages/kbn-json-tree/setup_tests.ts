@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
+// eslint-disable-next-line import/no-extraneous-dependencies
 import '@testing-library/jest-dom';
