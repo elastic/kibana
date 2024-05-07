@@ -66,7 +66,7 @@ export function RequestCodeViewer({ value }: RequestCodeViewerProps) {
       gutterSize="s"
       wrap={false}
       responsive={false}
-      css={{ height: 400 }}
+      css={{ height: 800 }}
     >
       <EuiFlexItem grow={false}>
         <EuiSpacer size="s" />
