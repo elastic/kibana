@@ -93,6 +93,39 @@ describe('GenericRetentionPolicy', () => {
     });
   });
 
+  it('supports all directives at the same time', async () => {
+    config = retentionPolicyConfigSchema.validate({
+      maxFiles: 3,
+      removeOlderThan: '30d',
+      maxAccumulatedFileSize: '50b',
+    });
+    context.getOrderedRolledFiles.mockResolvedValue(['file-1', 'file-2', 'file-3', 'file-4']);
+
+    listFilesOlderThanMock.mockResolvedValue(['file-2']);
+    listFilesExceedingSizeMock.mockResolvedValue(['file-3']);
+
+    const policy = new GenericRetentionPolicy(config, context);
+
+    await policy.apply();
+
+    expect(listFilesExceedingSizeMock).toHaveBeenCalledTimes(1);
+    expect(listFilesExceedingSizeMock).toHaveBeenCalledWith({
+      orderedFiles: ['file-1', 'file-2', 'file-3', 'file-4'],
+      maxSizeInBytes: config.maxAccumulatedFileSize!.getValueInBytes(),
+    });
+
+    expect(listFilesOlderThanMock).toHaveBeenCalledTimes(1);
+    expect(listFilesOlderThanMock).toHaveBeenCalledWith({
+      orderedFiles: ['file-1', 'file-2', 'file-3', 'file-4'],
+      duration: config.removeOlderThan!,
+    });
+
+    expect(deleteFilesMock).toHaveBeenCalledTimes(1);
+    expect(deleteFilesMock).toHaveBeenCalledWith({
+      filesToDelete: ['file-4', 'file-3', 'file-2'],
+    });
+  });
+
   it('do not call deleteFiles if no file should be deleted', async () => {
     config = retentionPolicyConfigSchema.validate({
       maxFiles: 5,

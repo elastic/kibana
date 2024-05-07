@@ -357,9 +357,10 @@ logging:
 
 Retention policy based on the size on disk used by the rolled files. Size count will be
 performed from the most recent file to the oldest one, and will delete all files
-(including the one breaching the threshold) over the limit.
+(including the one breaching the threshold) over the limit. Only the size from the rolled files is taken into 
+account (the active file is ignored).
 
-Note that only the size from the rolled files is taken into account (the active file is ignored).
+*Note:* The field supports the following optional suffixes: `b`, `kb`, `mb`, `gb` and `tb` (case-insensitive). The default suffix is `b`
 
 **Example**: Appender configured to keep 5GB of rolled logs at maximum:
 ```yaml
@@ -382,6 +383,8 @@ logging:
 
 Retention policy based on the time (modification date - `mtime`) the files were rolled, and that will delete all files
 that are older than the specified duration.
+
+*Note:* The field supports the following optional suffixes: `ms`, `s`, `m`, `h`, `d`, `w`, `M` and `Y`. The default suffix is `ms`.
 
 **Example**: Appender configured to delete rolled files after 30 days:
 ```yaml
