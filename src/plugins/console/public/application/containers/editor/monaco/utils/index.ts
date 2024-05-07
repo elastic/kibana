@@ -22,3 +22,4 @@ export {
   getUrlParamsCompletionItems,
   getBodyCompletionItems,
 } from './autocomplete_utils';
+export { getLineTokens, containsUrlParams } from './tokens_utils';

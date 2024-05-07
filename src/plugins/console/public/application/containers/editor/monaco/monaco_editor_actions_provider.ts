@@ -12,7 +12,6 @@ import { ConsoleParsedRequestsProvider, getParsedRequestsProvider, monaco } from
 import { IToasts } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
 import type { HttpSetup } from '@kbn/core-http-browser';
-import { containsUrlParams, getLineTokens } from './utils/token_path_utils';
 import { DEFAULT_VARIABLES } from '../../../../../common/constants';
 import { getStorage, StorageKeys } from '../../../../services';
 import { sendRequest } from '../../../hooks';
@@ -21,9 +20,11 @@ import { Actions } from '../../../stores/request';
 
 import {
   AutocompleteType,
+  containsUrlParams,
   getBodyCompletionItems,
   getCurlRequest,
   getDocumentationLinkFromAutocomplete,
+  getLineTokens,
   getMethodCompletionItems,
   getRequestEndLineNumber,
   getRequestStartLineNumber,
