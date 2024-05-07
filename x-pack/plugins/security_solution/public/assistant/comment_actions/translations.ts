@@ -20,6 +20,12 @@ export const VIEW_APM_TRACE = i18n.translate(
     defaultMessage: 'View APM Trace for this message',
   }
 );
+export const ADD_TO_DATASET = i18n.translate(
+  'xpack.securitySolution.assistant.commentActions.addToDatasetLabel',
+  {
+    defaultMessage: 'Add message to dataset',
+  }
+);
 
 export const ADD_MESSAGE_CONTENT_AS_TIMELINE_NOTE = i18n.translate(
   'xpack.securitySolution.assistant.commentActions.addMessageContentAsTimelineNoteAriaLabel',

@@ -27,7 +27,11 @@ import {
 
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { GetEvaluateResponse, PostEvaluateResponse } from '@kbn/elastic-assistant-common';
+import type {
+  GetDatasetsResponse,
+  GetEvaluateResponse,
+  PostEvaluateResponse,
+} from '@kbn/elastic-assistant-common';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../../assistant_context';
 import { useLoadConnectors } from '../../../connectorland/use_load_connectors';
@@ -36,6 +40,7 @@ import { PRECONFIGURED_CONNECTOR } from '../../../connectorland/translations';
 import { usePerformEvaluation } from '../../api/evaluate/use_perform_evaluation';
 import { getApmLink, getDiscoverLink } from './utils';
 import { useEvaluationData } from '../../api/evaluate/use_evaluation_data';
+import { useDatasets } from '../../api/datasets/use_datasets';
 
 const DEFAULT_EVAL_TYPES_OPTIONS = [
   { label: 'correctness' },
@@ -66,6 +71,12 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
   const defaultAgents = useMemo(
     () => (evalData as GetEvaluateResponse)?.agentExecutors ?? [],
     [evalData]
+  );
+  // Remote Datasets
+  const { data: datasetsData } = useDatasets({ http });
+  const datasets = useMemo(
+    () => (datasetsData as GetDatasetsResponse)?.datasets ?? [],
+    [datasetsData]
   );
 
   // Run Details
@@ -142,12 +153,17 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
       </EuiText>
     );
   }, [useLangSmithDataset]);
-  const [datasetName, setDatasetName] = useState<string>();
-  const onDatasetNameChange = useCallback(
-    (e) => {
-      setDatasetName(e.target.value);
+  const [selectedDatasetOptions, setSelectedDatasetOptions] = useState<
+    Array<EuiComboBoxOptionOption<string>>
+  >([]);
+  const datasetOptions = useMemo(() => {
+    return datasets.map((label) => ({ label }));
+  }, [datasets]);
+  const onDatasetOptionsChange = useCallback(
+    (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
+      setSelectedDatasetOptions(selectedOptions);
     },
-    [setDatasetName]
+    [setSelectedDatasetOptions]
   );
   const sampleDataset = [
     {
@@ -280,7 +296,7 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
       models: selectedModelOptions.flatMap((option) => option.key ?? []),
       agents: selectedAgentOptions.map((option) => option.label),
       dataset: useLangSmithDataset ? undefined : datasetText,
-      datasetName: useLangSmithDataset ? datasetName : undefined,
+      datasetName: useLangSmithDataset ? selectedDatasetOptions[0]?.label : undefined,
       evalModel: selectedEvaluatorModelOptions.flatMap((option) => option.key ?? []),
       evalPrompt,
       evaluationType: selectedEvaluationType.map((option) => option.label),
@@ -290,7 +306,7 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
     };
     performEvaluation(evalParams);
   }, [
-    datasetName,
+    selectedDatasetOptions,
     datasetText,
     evalPrompt,
     outputIndex,
@@ -412,12 +428,14 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
           }
         >
           {useLangSmithDataset ? (
-            <EuiFieldText
-              aria-label="dataset-name-textfield"
-              compressed
-              onChange={onDatasetNameChange}
-              placeholder={i18n.LANGSMITH_DATASET_PLACEHOLDER}
-              value={datasetName}
+            <EuiComboBox
+              aria-label={'dataset-name-combobox'}
+              placeholder={'Select dataset..'}
+              singleSelection={{ asPlainText: true }}
+              options={datasetOptions}
+              selectedOptions={selectedDatasetOptions}
+              onChange={onDatasetOptionsChange}
+              compressed={true}
             />
           ) : (
             <EuiTextArea

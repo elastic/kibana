@@ -144,6 +144,7 @@ const AssistantComponent: React.FC<Props> = ({
     deleteConversation,
     setApiConfig,
     createConversation,
+    selectMessage,
   } = useConversation();
 
   const [selectedPromptContexts, setSelectedPromptContexts] = useState<
@@ -571,6 +572,7 @@ const AssistantComponent: React.FC<Props> = ({
             setIsStreaming,
             currentUserAvatar,
             isFlyoutMode,
+            selectMessage,
           })}
           {...(!isFlyoutMode
             ? {
@@ -638,6 +640,7 @@ const AssistantComponent: React.FC<Props> = ({
       promptTextPreview,
       handleOnSystemPromptSelectionChange,
       selectedPromptContexts,
+      selectMessage,
     ]
   );
 

@@ -20,6 +20,8 @@ export const KNOWLEDGE_BASE = `${BASE_PATH}/knowledge_base/{resource?}`;
 
 // Model Evaluation
 export const EVALUATE = `${BASE_PATH}/evaluate`;
+// Datasets
+export const DATASETS = `${BASE_PATH}/datasets`;
 
 export const MAX_CONVERSATIONS_TO_UPDATE_IN_PARALLEL = 50;
 export const CONVERSATIONS_TABLE_MAX_PAGE_SIZE = 100;

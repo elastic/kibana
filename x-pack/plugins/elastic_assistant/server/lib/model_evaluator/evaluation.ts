@@ -78,6 +78,8 @@ export const performEvaluation = async ({
   const startTime = new Date().getTime();
   const evaluationResults: EvaluationResult[] = [];
 
+  // console.log('dataset', JSON.stringify(dataset, null, 2));
+
   const predictionRequests = dataset.flatMap(({ input, reference, id: exampleId }) =>
     agentExecutorEvaluators.map(
       ({ agentEvaluator: agent, metadata: { connectorName, runName: agentRunName } }) => ({
@@ -160,6 +162,7 @@ export const performEvaluation = async ({
     });
 
     for (const result of evaluationResults) {
+      // console.log('result', JSON.stringify(result, null, 2));
       const { input, inputExampleId: exampleId, prediction, reference } = result;
       // Create an eval tracer so eval traces end up in the right project (runName in this instance as to correlate
       // with the test run), don't supply `exampleID` as that results in a new Dataset `Test` run being created and

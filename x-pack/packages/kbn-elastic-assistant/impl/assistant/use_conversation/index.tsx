@@ -45,6 +45,18 @@ interface UpdateConversationTitleProps {
   updatedTitle: string;
 }
 
+interface SelectMessageProps {
+  conversationId: string;
+  isSelected?: boolean;
+  messageIndex: number;
+}
+
+export type SelectMessage = (props: SelectMessageProps) => void;
+
+interface ClearMessageSelectionProps {
+  conversationId: string;
+}
+
 interface UseConversation {
   clearConversation: (conversation: Conversation) => Promise<Conversation | undefined>;
   getDefaultConversation: ({ cTitle, messages }: CreateConversationProps) => Conversation;
@@ -60,6 +72,8 @@ interface UseConversation {
     conversationId,
     updatedTitle,
   }: UpdateConversationTitleProps) => Promise<Conversation>;
+  selectMessage: ({ conversationId, messageIndex, isSelected }: SelectMessageProps) => void;
+  clearMessageSelection: ({ conversationId }: ClearMessageSelectionProps) => void;
 }
 
 export const useConversation = (): UseConversation => {
@@ -202,6 +216,59 @@ export const useConversation = (): UseConversation => {
     [http]
   );
 
+  /**
+   * Select a message within a conversation
+   */
+  const selectMessage = useCallback(
+    async ({
+      conversationId,
+      isSelected = true,
+      messageIndex,
+    }: SelectMessageProps): Promise<void> => {
+      let messages: ClientMessage[] = [];
+      const prevConversation = await getConversationById({ http, id: conversationId, toasts });
+      if (prevConversation != null) {
+        messages = prevConversation.messages.map((message, index) => {
+          if (index === messageIndex) {
+            return {
+              ...message,
+              isSelected,
+            };
+          }
+          return message;
+        });
+        await updateConversation({
+          http,
+          conversationId,
+          messages,
+        });
+      }
+    },
+    [http, toasts]
+  );
+
+  /**
+   * Clears selection of all messages within a conversation
+   */
+  const clearMessageSelection = useCallback(
+    async ({ conversationId }: ClearMessageSelectionProps): Promise<void> => {
+      let messages: ClientMessage[] = [];
+      const prevConversation = await getConversationById({ http, id: conversationId, toasts });
+      if (prevConversation != null) {
+        messages = prevConversation.messages.map((message, index) => ({
+          ...message,
+          isSelected: false,
+        }));
+        await updateConversation({
+          http,
+          conversationId,
+          messages,
+        });
+      }
+    },
+    [http, toasts]
+  );
+
   return {
     clearConversation,
     getDefaultConversation,
@@ -211,5 +278,7 @@ export const useConversation = (): UseConversation => {
     updateConversationTitle,
     createConversation,
     getConversation,
+    selectMessage,
+    clearMessageSelection,
   };
 };

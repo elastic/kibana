@@ -41,6 +41,7 @@ import { CONVERSATIONS_TAB, SettingsTabs } from '../assistant/settings/assistant
 import { AssistantAvailability, AssistantTelemetry } from './types';
 import { useCapabilities } from '../assistant/api/capabilities/use_capabilities';
 import { WELCOME_CONVERSATION_TITLE } from '../assistant/use_conversation/translations';
+import { SelectMessage } from '../assistant/use_conversation';
 
 export interface ShowAssistantOverlayProps {
   showOverlay: boolean;
@@ -79,6 +80,7 @@ export interface AssistantProviderProps {
     setIsStreaming: (isStreaming: boolean) => void;
     currentUserAvatar?: UserAvatar;
     isFlyoutMode: boolean;
+    selectMessage: SelectMessage;
   }) => EuiCommentProps[];
   http: HttpSetup;
   baseConversations: Record<string, Conversation>;
@@ -122,6 +124,7 @@ export interface UseAssistantContext {
     currentUserAvatar?: UserAvatar;
     setIsStreaming: (isStreaming: boolean) => void;
     isFlyoutMode: boolean;
+    selectMessage: SelectMessage;
   }) => EuiCommentProps[];
   http: HttpSetup;
   knowledgeBase: KnowledgeBaseConfig;

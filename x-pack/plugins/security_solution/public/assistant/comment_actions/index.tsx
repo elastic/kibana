@@ -5,13 +5,21 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiCopy,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiToolTip,
+} from '@elastic/eui';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { ClientMessage } from '@kbn/elastic-assistant';
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { useAssistantContext } from '@kbn/elastic-assistant/impl/assistant_context';
+import { css } from '@emotion/react';
 import { useKibana, useToasts } from '../../common/lib/kibana';
 import type { Note } from '../../common/lib/note';
 import { appActions } from '../../common/store/actions';
@@ -24,9 +32,10 @@ import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experime
 interface Props {
   message: ClientMessage;
   isFlyoutMode: boolean;
+  selectMessage: () => void;
 }
 
-const CommentActionsComponent: React.FC<Props> = ({ message, isFlyoutMode }) => {
+const CommentActionsComponent: React.FC<Props> = ({ message, isFlyoutMode, selectMessage }) => {
   const toasts = useToasts();
   const { cases } = useKibana().services;
   const dispatch = useDispatch();
@@ -97,20 +106,44 @@ const CommentActionsComponent: React.FC<Props> = ({ message, isFlyoutMode }) => 
   //         : undefined;
 
   return (
-    // APM Trace support is currently behind the Model Evaluation feature flag until wider testing is performed
+    // Additional actions like `View APM trace` and `Add to dataset` available behind Model Evaluation feature flag
     <EuiFlexGroup alignItems="center" gutterSize="none">
-      {isModelEvaluationEnabled && apmTraceLink != null && (
-        <EuiFlexItem grow={false}>
-          <EuiToolTip position="top" content={i18n.VIEW_APM_TRACE}>
-            <EuiButtonIcon
-              aria-label={i18n.VIEW_APM_TRACE}
-              color="primary"
-              iconType="apmTrace"
-              href={apmTraceLink}
-              target={'_blank'}
+      {isModelEvaluationEnabled && (
+        <>
+          {apmTraceLink != null && (
+            <EuiFlexItem grow={false}>
+              <EuiToolTip position="top" content={i18n.VIEW_APM_TRACE}>
+                <EuiButtonIcon
+                  aria-label={i18n.VIEW_APM_TRACE}
+                  color="primary"
+                  iconType="apmTrace"
+                  href={apmTraceLink}
+                  target={'_blank'}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false}>
+            <EuiToolTip position="top" content={i18n.ADD_TO_DATASET}>
+              <EuiButtonIcon
+                aria-label={i18n.ADD_TO_DATASET}
+                color="primary"
+                iconType="listAdd"
+                onClick={selectMessage}
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiIcon
+              type={'minus'}
+              color={'subdued'}
+              css={css`
+                transform: rotate(90deg);
+              `}
             />
-          </EuiToolTip>
-        </EuiFlexItem>
+          </EuiFlexItem>
+        </>
       )}
 
       <EuiFlexItem grow={false}>

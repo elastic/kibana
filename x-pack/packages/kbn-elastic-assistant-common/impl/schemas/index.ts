@@ -39,3 +39,14 @@ export * from './actions_connector/post_actions_connector_execute_route.gen';
 
 // KB Schemas
 export * from './knowledge_base/crud_kb_route.gen';
+
+// Dataset Schemas
+export * from './datasets/get_datasets_route.gen';
+export {
+  DatasetItem as PostDatasetItem,
+  Dataset as PostDataset,
+  PostDatasetsResponse,
+  PostDatasetsRequestBody,
+  PostDatasetsBody,
+  PostDatasetsRequestQuery,
+} from './datasets/post_datasets_route.gen';

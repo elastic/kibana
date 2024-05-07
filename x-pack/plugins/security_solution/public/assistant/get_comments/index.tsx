@@ -15,6 +15,7 @@ import type { Replacements } from '@kbn/elastic-assistant-common';
 import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 import styled from '@emotion/styled';
 import type { UserAvatar } from '@kbn/elastic-assistant/impl/assistant_context';
+import type { SelectMessage } from '@kbn/elastic-assistant/impl/assistant/use_conversation';
 import { StreamComment } from './stream';
 import { CommentActions } from '../comment_actions';
 import * as i18n from './translations';
@@ -63,6 +64,7 @@ export const getComments = ({
   isFlyoutMode,
   currentUserAvatar,
   setIsStreaming,
+  selectMessage,
 }: {
   abortStream: () => void;
   currentConversation?: Conversation;
@@ -74,6 +76,7 @@ export const getComments = ({
   isFlyoutMode: boolean;
   currentUserAvatar?: UserAvatar;
   setIsStreaming: (isStreaming: boolean) => void;
+  selectMessage: SelectMessage;
 }): EuiCommentProps[] => {
   if (!currentConversation) return [];
 
@@ -147,7 +150,7 @@ export const getComments = ({
             : new Date(message.timestamp).toLocaleString()
         ),
         username: isUser ? i18n.YOU : i18n.ASSISTANT,
-        eventColor: message.isError ? 'danger' : undefined,
+        eventColor: message.isSelected ? 'primary' : message.isError ? 'danger' : undefined,
       };
 
       const isControlsEnabled = isLastComment && !isUser;
@@ -185,9 +188,24 @@ export const getComments = ({
       // transform message here so we can send correct message to CommentActions
       const transformedMessage = transformMessage(message.content ?? '');
 
+      // Wrap
+      const handleSelectMessage = () => {
+        selectMessage({
+          conversationId: currentConversation.id,
+          isSelected: !message.isSelected,
+          messageIndex: index,
+        });
+      };
+
       return {
         ...messageProps,
-        actions: <CommentActions message={transformedMessage} isFlyoutMode={isFlyoutMode} />,
+        actions: (
+          <CommentActions
+            message={transformedMessage}
+            isFlyoutMode={isFlyoutMode}
+            selectMessage={handleSelectMessage}
+          />
+        ),
         children: (
           <StreamComment
             actionTypeId={actionTypeId}

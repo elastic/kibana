@@ -32,6 +32,8 @@ import { bulkPromptsRoute } from './prompts/bulk_actions_route';
 import { findPromptsRoute } from './prompts/find_route';
 import { bulkActionAnonymizationFieldsRoute } from './anonymization_fields/bulk_actions_route';
 import { findAnonymizationFieldsRoute } from './anonymization_fields/find_route';
+import { getDatasetsRoute } from './datasets/get_datasets';
+import { postDatasetsRoute } from './datasets/post_datasets';
 
 export const registerRoutes = (
   router: ElasticAssistantPluginRouter,
@@ -71,6 +73,10 @@ export const registerRoutes = (
   // Evaluate
   getEvaluateRoute(router);
   postEvaluateRoute(router, getElserId);
+
+  // Datasets
+  getDatasetsRoute(router);
+  postDatasetsRoute(router);
 
   // Prompts
   bulkPromptsRoute(router, logger);

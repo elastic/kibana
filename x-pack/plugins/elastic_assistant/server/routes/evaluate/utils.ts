@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { Client } from 'langsmith';
+import { Client, Dataset as LangSmithDataset } from 'langsmith';
 import type { ActionResult } from '@kbn/actions-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import type { Run } from 'langsmith/schemas';
 import { ToolingLog } from '@kbn/tooling-log';
 import { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import { Dataset } from '@kbn/elastic-assistant-common';
+import { PostDataset } from '@kbn/elastic-assistant-common/impl/schemas';
 
 /**
  * Return connector name for the given connectorId/connectors
@@ -48,12 +49,13 @@ export const fetchLangSmithDataset = async (
       examples.push(example);
     }
 
+    logger.debug(`examples:\n ${JSON.stringify(examples, null, 2)}`);
     // Convert to internal Dataset type -- TODO: add generic support for the different LangSmith test dataset formats
     const dataset: Dataset = examples.map((example) => ({
       id: example.id,
-      input: example.inputs.input as string,
-      reference: (example.outputs?.output as string) ?? '',
-      tags: [], // TODO: Consider adding tags from example data, e.g.: `datasetId:${example.dataset_id}`, `exampleName:${example.name}`
+      input: (example.inputs.input ?? example.inputs.question) as string,
+      reference: ((example.outputs?.output ?? example.outputs?.answer) as string) ?? '',
+      tags: [example.dataset_id], // TODO: Consider adding tags from example data, e.g.: `datasetId:${example.dataset_id}`, `exampleName:${example.name}`
       prediction: undefined,
     }));
 
@@ -61,6 +63,88 @@ export const fetchLangSmithDataset = async (
   } catch (e) {
     logger.error(`Error fetching dataset from LangSmith: ${e.message}`);
     return [];
+  }
+};
+
+/**
+ * Fetches a list of LangSmith datasets
+ *
+ * @param logger
+ */
+export const getLangSmithDatasets = async ({
+  logger,
+}: {
+  logger: Logger | ToolingLog;
+}): Promise<string[]> => {
+  try {
+    const client = new Client();
+    const asyncIterable = await client.listDatasets();
+    const datasets: LangSmithDataset[] = [];
+
+    for await (const item of asyncIterable) {
+      datasets.push(item);
+    }
+
+    return datasets.map((d) => d.name);
+  } catch (e) {
+    logger.error(`Error fetching datasets from LangSmith: ${e.message}`);
+    return [];
+  }
+};
+
+/**
+ * Adds messages to LangSmith dataset. Creates dataset if it doesn't already exist.
+ * Note that `client` will use env vars
+ *
+ * @param datasetId
+ * @param messages
+ * @param logger
+ */
+export const addToLangSmithDataset = async ({
+  dataset,
+  datasetId,
+  logger,
+}: {
+  dataset: PostDataset;
+  datasetId: string;
+  logger: Logger;
+}): Promise<string | undefined> => {
+  if (!isLangSmithEnabled()) {
+    throw new Error('LangSmith  not enabled');
+  }
+
+  try {
+    const client = new Client();
+
+    let lsDataset: LangSmithDataset | undefined;
+    const lsDatasets = [];
+    for await (const d of client.listDatasets({ datasetName: datasetId })) {
+      lsDatasets.push(d);
+    }
+
+    if (lsDatasets.length > 0) {
+      lsDataset = lsDatasets[0];
+    } else {
+      lsDataset = await client.createDataset(datasetId);
+    }
+
+    logger.debug(`lsDatasets:\n ${JSON.stringify(lsDatasets, null, 2)}`);
+    logger.debug(`lsDataset:\n ${JSON.stringify(lsDataset, null, 2)}`);
+
+    for (const { input, reference } of dataset) {
+      await client.createExample(
+        { question: input.replace(/^\s*/g, '') },
+        { answer: reference },
+        {
+          datasetId: lsDataset.id,
+        }
+      );
+    }
+
+    return lsDataset?.id;
+  } catch (e) {
+    logger.error(`Error adding to LangSmith dataset: ${e.message}`);
+    return undefined;
   }
 };
 
@@ -76,6 +160,10 @@ export const writeLangSmithFeedback = async (
   evaluationId: string,
   logger: Logger | ToolingLog
 ): Promise<string> => {
+  logger.debug('writeLangSmithFeedback');
+  logger.debug(`run:\n ${JSON.stringify(run, null, 2)}`);
+  logger.debug(`evaluationId: ${evaluationId}`);
+
   try {
     const client = new Client();
     const feedback = {
@@ -89,8 +177,10 @@ export const writeLangSmithFeedback = async (
       feedbackId: run.feedback_stats?.feedbackId,
       eager: run.feedback_stats?.eager,
     };
-    await client.createFeedback(run.id, evaluationId, feedback);
-    const runUrl = await client.getRunUrl({ run });
+    const feedbackResponse = await client.createFeedback(run.id, evaluationId, feedback);
+    logger.debug(`feedback:\n ${JSON.stringify(feedback, null, 2)}`);
+    logger.debug(`feedbackResponse:\n ${JSON.stringify(feedbackResponse, null, 2)}`);
+    const runUrl = await client.getRunUrl({ runId: run.id });
     return runUrl;
   } catch (e) {
     logger.error(`Error writing feedback to LangSmith: ${e.message}`);
@@ -123,6 +213,10 @@ export const getLangSmithTracer = ({
     if (!isLangSmithEnabled() && apiKey == null) {
       return [];
     }
+    logger.debug('getLangSmithTracer');
+    logger.debug(`projectName: ${projectName}`);
+    logger.debug(`exampleId: ${exampleId}`);
+
     const lcTracer = new LangChainTracer({
       projectName, // Shows as the 'test' run's 'name' in langsmith ui
       exampleId,

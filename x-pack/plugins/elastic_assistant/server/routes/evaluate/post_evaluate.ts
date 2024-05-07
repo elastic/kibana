@@ -9,6 +9,7 @@ import { type IKibanaResponse, IRouter, KibanaRequest } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { v4 as uuidv4 } from 'uuid';
 
+import { Client } from 'langsmith';
 import {
   API_VERSIONS,
   INTERNAL_API_ACCESS,
@@ -157,6 +158,8 @@ export const postEvaluateRoute = (
             },
           };
 
+          const pSettings: string[] = [];
+
           // Create an array of executor functions to call in batches
           // One for each connector/model + agent combination
           // Hoist `langChainMessages` so they can be batched by dataset.input in the evaluator
@@ -166,7 +169,9 @@ export const postEvaluateRoute = (
               logger.info(`Creating agent: ${connectorId} + ${agentName}`);
               const connectorName =
                 getConnectorName(connectorId, connectors) ?? '[unknown connector]';
-              const detailedRunName = `${runName} - ${connectorName} + ${agentName}`;
+              const detailedRunName = `${projectName} / ${runName} / ${connectorName} / ${agentName}`;
+              pSettings.push(detailedRunName);
+
               agents.push({
                 agentEvaluator: async (langChainMessages, exampleId) => {
                   const evalResult = await AGENT_EXECUTOR_MAP[agentName]({
@@ -212,6 +217,25 @@ export const postEvaluateRoute = (
           });
           logger.info(`Agents created: ${agents.length}`);
 
+          try {
+            logger.debug('creating project first');
+            logger.debug(`pSettings: ${pSettings}`);
+            logger.debug(`dataset: ${dataset}`);
+            const pNames = Array.from(new Set(pSettings));
+            const referenceDatasetId = dataset[0]?.tags?.[0] ?? '';
+            const client = new Client();
+            for await (const p of pNames) {
+              const projectResp = await client.createProject({
+                projectName: p,
+                referenceDatasetId,
+              });
+              logger.debug(`projectResp: ${projectResp}`);
+            }
+          } catch (e) {
+            logger.error(`Error creating LangSmith project!: ${e.message}`);
+          }
+          logger.debug(`datasetId: ${dataset[0]?.tags}`);
+
           // Evaluator Model is optional to support just running predictions
           const evaluatorModel =
             evalModel == null || evalModel === ''
@@ -223,6 +247,23 @@ export const postEvaluateRoute = (
                   logger,
                   model: skeletonRequest.body.model,
                 });
+
+          // Testing New LC TestRunner
+          // const predictResult = async ({ question }: { question: string }) => {
+          //   const output = await agents[0].agentEvaluator([new HumanMessage(question)]);
+          //   return { output: getFormattedMessageContent(output.data) };
+          // };
+          // const runResp = await runOnDataset(predictResult, datasetName!, {
+          //   // You can manually specify a project name
+          //   // or let the system generate one for you
+          //   maxConcurrency: 1,
+          //   projectName: `${[projectName]} | ${runName}`,
+          //   projectMetadata: {
+          //     // Experiment metadata can be specified here
+          //     version: '1.2.3',
+          //   },
+          // });
+          // logger.debug(`runResp:\n ${JSON.stringify(runResp, null, 2)}`);
 
           const { evaluationResults, evaluationSummary } = await performEvaluation({
             agentExecutorEvaluators: agents,

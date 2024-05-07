@@ -259,6 +259,12 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     );
   });
 
+  // console.log('hello there');
+  // console.log(apmTracer.lastRunId);
+  // const client = new Client();
+  // const runUrl = await client.getRunUrl({ runId: apmTracer.lastRunId });
+  // console.log(runUrl);
+
   const langChainOutput = langChainResponse.output;
   if (onLlmResponse) {
     await onLlmResponse(langChainOutput, traceData);

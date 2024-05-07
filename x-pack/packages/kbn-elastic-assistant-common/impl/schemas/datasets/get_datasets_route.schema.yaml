@@ -1,0 +1,40 @@
+openapi: 3.0.0
+info:
+  title: Get Datasets API endpoint
+  version: '1'
+paths:
+  /internal/elastic_assistant/datasets:
+    get:
+      operationId: GetDatasets
+      x-codegen-enabled: true
+      description: Get list of available datasets for testing
+      summary: Get list of available datasets for testing
+      tags:
+        - Datasets API
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  datasets:
+                    type: array
+                    items:
+                      type: string
+                required:
+                  - datasets
+        '400':
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string

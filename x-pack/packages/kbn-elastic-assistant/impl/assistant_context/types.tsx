@@ -17,6 +17,7 @@ export interface MessagePresentation {
 export interface ClientMessage extends Omit<Message, 'content' | 'reader'> {
   reader?: ReadableStreamDefaultReader<Uint8Array>;
   content?: string;
+  isSelected?: boolean;
   presentation?: MessagePresentation;
 }
 
