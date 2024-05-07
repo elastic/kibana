@@ -99,9 +99,12 @@ export const LinkContent = ({
   const copyUrlHelper = useCallback(async () => {
     let urlToCopy = url;
 
-    if (!urlToCopy) {
-      urlToCopy =
-        delegatedShareUrlHandler?.() || allowShortUrl ? await createShortUrl() : getSnapshotUrl();
+    if (!urlToCopy || delegatedShareUrlHandler) {
+      urlToCopy = delegatedShareUrlHandler
+        ? delegatedShareUrlHandler?.()
+        : allowShortUrl
+        ? await createShortUrl()
+        : getSnapshotUrl();
     }
 
     copyToClipboard(urlToCopy);
