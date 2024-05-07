@@ -8,19 +8,19 @@
 
 import { PanelState, EmbeddableInput, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 
-import { DashboardPanelState } from '../../../../common';
-import { IProvidesPanelPlacementSettings } from './types';
+import { DashboardPanelState } from '../../../common';
+import { IProvidesLegacyPanelPlacementSettings } from './types';
 import { runPanelPlacementStrategy } from './place_new_panel_strategies';
 import {
   DEFAULT_PANEL_HEIGHT,
   DEFAULT_PANEL_WIDTH,
   PanelPlacementStrategy,
-} from '../../../dashboard_constants';
+} from '../../dashboard_constants';
 
-export const providesPanelPlacementSettings = (
+export const providesLegacyPanelPlacementSettings = (
   value: unknown
-): value is IProvidesPanelPlacementSettings => {
-  return Boolean((value as IProvidesPanelPlacementSettings).getPanelPlacementSettings);
+): value is IProvidesLegacyPanelPlacementSettings => {
+  return Boolean((value as IProvidesLegacyPanelPlacementSettings).getLegacyPanelPlacementSettings);
 };
 
 export function placePanel<TEmbeddableInput extends EmbeddableInput>(
@@ -37,10 +37,10 @@ export function placePanel<TEmbeddableInput extends EmbeddableInput>(
     height: DEFAULT_PANEL_HEIGHT,
     strategy: PanelPlacementStrategy.findTopLeftMostOpenSpace,
   };
-  if (providesPanelPlacementSettings(factory)) {
+  if (providesLegacyPanelPlacementSettings(factory)) {
     placementSettings = {
       ...placementSettings,
-      ...factory.getPanelPlacementSettings(newPanel.explicitInput, attributes),
+      ...factory.getLegacyPanelPlacementSettings(newPanel.explicitInput, attributes),
     };
   }
   const { width, height, strategy } = placementSettings;
