@@ -55,8 +55,8 @@ describe('Valid API Keys route', () => {
       httpServerMock.createKibanaRequest(),
       kibanaResponseFactory
     );
-    expect(response.status).toBe(200);
-    expect(response.payload.apiKeys).toContainEqual({ id: '123', name: '123' });
+
+    expect(response).toBe(true);
   });
 
   it('should not show valid keys without own api key permission', async () => {
@@ -75,55 +75,6 @@ describe('Valid API Keys route', () => {
       httpServerMock.createKibanaRequest(),
       kibanaResponseFactory
     );
-    expect(response.status).toBe(200);
-    expect(response.payload.apiKeys).toContainEqual(undefined);
-  });
-  it('should return response from cache', async () => {
-    esClientMock.asCurrentUser.security.hasPrivileges.mockResponse({
-      cluster: {
-        manage_own_api_key: true,
-      },
-    } as any);
-
-    esClientMock.asCurrentUser.security.getApiKey.mockResponse({
-      api_keys: [{ id: '456' }],
-    } as any);
-
-    const response = await routeHandler(
-      mockContext,
-      httpServerMock.createKibanaRequest({
-        headers: {
-          foo: 'bar',
-        },
-      }),
-      kibanaResponseFactory
-    );
-
-    // Do the request once
-    expect(response.status).toBe(200);
-    expect(response.payload.apiKeys).toContainEqual({ id: '456', name: '456' });
-
-    esClientMock.asCurrentUser.security.hasPrivileges.mockResponse({
-      cluster: {
-        manage_own_api_key: true,
-      },
-    } as any);
-
-    esClientMock.asCurrentUser.security.getApiKey.mockResponse({
-      api_keys: [{ id: '456' }],
-    } as any);
-
-    const response1 = await routeHandler(
-      mockContext,
-      httpServerMock.createKibanaRequest({
-        headers: {
-          foo: 'bar',
-        },
-      }),
-      kibanaResponseFactory
-    );
-
-    // same headers expect the same keys
-    expect(response1.payload.apiKeys).toContainEqual({ id: '456', name: '456' });
+    expect(response).toBe(false);
   });
 });

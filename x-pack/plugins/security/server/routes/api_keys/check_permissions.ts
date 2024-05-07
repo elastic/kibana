@@ -58,16 +58,9 @@ export function defineValidPermissionRoutes({
           owner: !clusterPrivileges.manage_api_key && !clusterPrivileges.read_security,
         });
 
-        const validKeys = apiResponse.api_keys
-          .filter(({ invalidated }) => !invalidated)
-          .map((key) => {
-            if (!key.name) {
-              key.name = key.id;
-            }
-            if (clusterPrivileges.manage_own_api_key) {
-              return key;
-            }
-          });
+        const validKeys = clusterPrivileges.manage_own_api_key
+          ? apiResponse.api_keys.filter(({ invalidated }) => !invalidated)
+          : [];
 
         return validKeys.length > 0;
       } catch (error) {
