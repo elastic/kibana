@@ -10,6 +10,7 @@ import { EuiButtonEmpty, EuiCallOut, EuiFormRow, EuiSpacer, EuiText } from '@ela
 import type { DataViewFieldBase } from '@kbn/es-query';
 import type { RequiredFieldInput } from '../../../../../common/api/detection_engine';
 import { UseArray, useFormData } from '../../../../shared_imports';
+import type { ArrayItem } from '../../../../shared_imports';
 import { RequiredFieldRow } from './required_fields_row';
 import * as ruleDetailsI18n from '../../../rule_management/components/rule_details/translations';
 import * as i18n from './translations';
@@ -24,122 +25,145 @@ export const RequiredFields = ({
   path,
   indexPatternFields = [],
   isIndexPatternLoading = false,
-}: RequiredFieldsProps) => {
+}: RequiredFieldsProps) => (
+  <UseArray path={path} initialNumberOfItems={0}>
+    {({ items, addItem, removeItem }) => (
+      <RequiredFieldsList
+        items={items}
+        addItem={addItem}
+        removeItem={removeItem}
+        indexPatternFields={indexPatternFields}
+        isIndexPatternLoading={isIndexPatternLoading}
+        path={path}
+      />
+    )}
+  </UseArray>
+);
+
+interface RequiredFieldsListProps {
+  items: ArrayItem[];
+  addItem: () => void;
+  removeItem: (id: number) => void;
+  indexPatternFields: DataViewFieldBase[];
+  isIndexPatternLoading: boolean;
+  path: string;
+}
+
+const RequiredFieldsList = ({
+  items,
+  addItem,
+  removeItem,
+  indexPatternFields,
+  isIndexPatternLoading,
+  path,
+}: RequiredFieldsListProps) => {
   const useFormDataResult = useFormData();
+  const [formData] = useFormDataResult;
+  const fieldValue: RequiredFieldInput[] = formData[path] ?? [];
+
+  const selectedFieldNames = fieldValue.map(({ name }) => name);
+
+  const fieldsWithTypes = indexPatternFields.filter(
+    (indexPatternField) => indexPatternField.esTypes && indexPatternField.esTypes.length > 0
+  );
+
+  const allFieldNames = fieldsWithTypes.map(({ name }) => name);
+  const availableFieldNames = allFieldNames.filter((name) => !selectedFieldNames.includes(name));
+
+  const typesByFieldName: Record<string, string[]> = fieldsWithTypes.reduce(
+    (accumulator, browserField) => {
+      if (browserField.esTypes) {
+        accumulator[browserField.name] = browserField.esTypes;
+      }
+      return accumulator;
+    },
+    {} as Record<string, string[]>
+  );
+
+  const isEmptyRowDisplayed = !!fieldValue.find(({ name }) => name === '');
+
+  const isAddNewFieldButtonDisabled = isIndexPatternLoading || isEmptyRowDisplayed;
+
+  const nameWarnings = fieldValue
+    /* Not creating warning for empty "name" value */
+    .filter(({ name }) => name !== '')
+    .reduce<Record<string, string>>((warnings, { name }) => {
+      if (!isIndexPatternLoading && !allFieldNames.includes(name)) {
+        warnings[name] = i18n.FIELD_NAME_NOT_FOUND_WARNING(name);
+      }
+      return warnings;
+    }, {});
+
+  const typeWarnings = fieldValue
+    /* Not creating a warning for "type" if there's no "name" value */
+    .filter(({ name }) => name !== '')
+    .reduce<Record<string, string>>((warnings, { name, type }) => {
+      if (
+        !isIndexPatternLoading &&
+        typesByFieldName[name] &&
+        !typesByFieldName[name].includes(type)
+      ) {
+        warnings[`${name}-${type}`] = i18n.FIELD_TYPE_NOT_FOUND_WARNING(name, type);
+      }
+      return warnings;
+    }, {});
+
+  const getWarnings = ({ name, type }: { name: string; type: string }) => ({
+    nameWarning: nameWarnings[name] || '',
+    typeWarning: typeWarnings[`${name}-${type}`] || '',
+  });
+
+  const hasWarnings = Object.keys(nameWarnings).length > 0 || Object.keys(typeWarnings).length > 0;
 
   return (
-    <UseArray path={path} initialNumberOfItems={0}>
-      {({ items, addItem, removeItem, form, error }) => {
-        const [formData] = useFormDataResult;
-        const fieldValue: RequiredFieldInput[] = formData[path] ?? [];
+    <>
+      {hasWarnings && (
+        <EuiCallOut
+          title={i18n.REQUIRED_FIELDS_GENERAL_WARNING_TITLE}
+          color="warning"
+          iconType="help"
+        >
+          <p>{i18n.REQUIRED_FIELDS_GENERAL_WARNING_DESCRIPTION}</p>
+        </EuiCallOut>
+      )}
+      <EuiSpacer size="m" />
+      <EuiFormRow
+        fullWidth
+        label={ruleDetailsI18n.REQUIRED_FIELDS_FIELD_LABEL}
+        labelAppend={
+          <EuiText color="subdued" size="xs">
+            {i18n.OPTIONAL}
+          </EuiText>
+        }
+        helpText={i18n.REQUIRED_FIELDS_HELP_TEXT}
+        hasChildLabel={false}
+        labelType="legend"
+      >
+        <>
+          {items.map((item) => (
+            <RequiredFieldRow
+              key={item.id}
+              item={item}
+              removeItem={removeItem}
+              getWarnings={getWarnings}
+              typesByFieldName={typesByFieldName}
+              availableFieldNames={availableFieldNames}
+              parentFieldPath={path}
+            />
+          ))}
 
-        const selectedFieldNames = fieldValue.map(({ name }) => name);
-
-        const fieldsWithTypes = indexPatternFields.filter(
-          (indexPatternField) => indexPatternField.esTypes && indexPatternField.esTypes.length > 0
-        );
-
-        const allFieldNames = fieldsWithTypes.map(({ name }) => name);
-        const availableFieldNames = allFieldNames.filter(
-          (name) => !selectedFieldNames.includes(name)
-        );
-
-        const typesByFieldName: Record<string, string[]> = fieldsWithTypes.reduce(
-          (accumulator, browserField) => {
-            if (browserField.esTypes) {
-              accumulator[browserField.name] = browserField.esTypes;
-            }
-            return accumulator;
-          },
-          {} as Record<string, string[]>
-        );
-
-        const isEmptyRowDisplayed = !!fieldValue.find(({ name }) => name === '');
-
-        const isAddNewFieldButtonDisabled = isIndexPatternLoading || isEmptyRowDisplayed;
-
-        const nameWarnings = fieldValue
-          .filter(({ name }) => name !== '')
-          .reduce<Record<string, string>>((warnings, { name }) => {
-            if (!isIndexPatternLoading && !allFieldNames.includes(name)) {
-              warnings[name] = i18n.FIELD_NAME_NOT_FOUND_WARNING(name);
-            }
-            return warnings;
-          }, {});
-
-        const typeWarnings = fieldValue
-          .filter(({ name }) => name !== '')
-          .reduce<Record<string, string>>((warnings, { name, type }) => {
-            if (
-              !isIndexPatternLoading &&
-              typesByFieldName[name] &&
-              !typesByFieldName[name].includes(type)
-            ) {
-              warnings[`${name}-${type}`] = i18n.FIELD_TYPE_NOT_FOUND_WARNING(name, type);
-            }
-            return warnings;
-          }, {});
-
-        const getWarnings = ({ name, type }: { name: string; type: string }) => ({
-          nameWarning: nameWarnings[name] || '',
-          typeWarning: typeWarnings[`${name}-${type}`] || '',
-        });
-
-        const hasWarnings =
-          Object.keys(nameWarnings).length > 0 || Object.keys(typeWarnings).length > 0;
-
-        return (
-          <>
-            {hasWarnings && (
-              <EuiCallOut
-                title={i18n.REQUIRED_FIELDS_GENERAL_WARNING_TITLE}
-                color="warning"
-                iconType="help"
-              >
-                <p>{i18n.REQUIRED_FIELDS_GENERAL_WARNING_DESCRIPTION}</p>
-              </EuiCallOut>
-            )}
-            <EuiSpacer size="m" />
-            <EuiFormRow
-              fullWidth
-              label={ruleDetailsI18n.REQUIRED_FIELDS_FIELD_LABEL}
-              labelAppend={
-                <EuiText color="subdued" size="xs">
-                  {i18n.OPTIONAL}
-                </EuiText>
-              }
-              helpText={i18n.REQUIRED_FIELDS_HELP_TEXT}
-              hasChildLabel={false}
-              labelType="legend"
-            >
-              <>
-                {items.map((item) => (
-                  <RequiredFieldRow
-                    key={item.id}
-                    item={item}
-                    removeItem={removeItem}
-                    getWarnings={getWarnings}
-                    typesByFieldName={typesByFieldName}
-                    availableFieldNames={availableFieldNames}
-                    parentFieldPath={path}
-                  />
-                ))}
-
-                <EuiSpacer size="s" />
-                <EuiButtonEmpty
-                  size="xs"
-                  iconType="plusInCircle"
-                  onClick={addItem}
-                  isDisabled={isAddNewFieldButtonDisabled}
-                  data-test-subj="addRequiredFieldButton"
-                >
-                  {i18n.ADD_REQUIRED_FIELD}
-                </EuiButtonEmpty>
-              </>
-            </EuiFormRow>
-          </>
-        );
-      }}
-    </UseArray>
+          <EuiSpacer size="s" />
+          <EuiButtonEmpty
+            size="xs"
+            iconType="plusInCircle"
+            onClick={addItem}
+            isDisabled={isAddNewFieldButtonDisabled}
+            data-test-subj="addRequiredFieldButton"
+          >
+            {i18n.ADD_REQUIRED_FIELD}
+          </EuiButtonEmpty>
+        </>
+      </EuiFormRow>
+    </>
   );
 };
