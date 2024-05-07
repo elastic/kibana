@@ -8,6 +8,7 @@
 
 import { ControlGroupApi } from '@kbn/controls-plugin/public/control_group/types';
 import { DefaultControlApi } from '@kbn/controls-plugin/public/types';
+import { DataViewField } from '@kbn/data-views-plugin/common';
 import { StateComparators } from '@kbn/presentation-publishing';
 
 export type ControlApiRegistration = Omit<
@@ -15,12 +16,16 @@ export type ControlApiRegistration = Omit<
   'uuid' | 'parent' | 'type' | 'unsavedChanges' | 'resetUnsavedChanges'
 >;
 
-export interface ControlFactory<State extends object = object> {
+export interface ControlFactory<
+  State extends object = object,
+  InternalApi extends unknown = unknown
+> {
   type: string;
   getIconType: () => string;
   getDisplayName: () => string;
-  getSupportedFieldTypes: () => string[];
-  // isFieldCompatible: (field: DataViewField) => boolean;
+  // getSupportedFieldTypes: () => string[];
+  isFieldCompatible: (field: DataViewField) => boolean;
+  CustomOptionsComponent: React.FC<{ internalApi?: InternalApi }>; // manages state
   buildControl: (
     initialState: State,
     buildApi: (

@@ -63,7 +63,7 @@ import { getDataControlFieldRegistry } from './data_control_editor_tools';
 import { CONTROL_WIDTH_OPTIONS } from './editor_constants';
 
 export interface EditControlProps {
-  embeddable?: ControlEmbeddable<DataControlInput>;
+  embeddable?: EditControlActionApi;
   isCreate: boolean;
   width: ControlWidth;
   onSave: (changes: DataControlEditorChanges, type?: string) => void;

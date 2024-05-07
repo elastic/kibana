@@ -27,16 +27,18 @@ import {
   PublishesDataLoading,
   PublishesDisabledActionIds,
   PublishesFilter,
-  PublishesPanelTitle,
   PublishesTimeslice,
   PublishesUnsavedChanges,
+  PublishesWritablePanelTitle,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import { PublishesDataView } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
+import { PublishesWritableSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
 import { ControlInput, ControlWidth, DataControlInput } from '../common/types';
+import { EditControlActionApi } from './control_group/actions/edit_control_action';
 import { ControlGroupApi, ControlGroupFilterOutput } from './control_group/types';
 import { ControlsServiceType } from './services/controls/types';
 
@@ -50,7 +52,7 @@ export type DefaultControlApi = PublishesDataLoading &
   PublishesBlockingError &
   PublishesUnsavedChanges &
   PublishesDisabledActionIds &
-  PublishesPanelTitle &
+  PublishesWritablePanelTitle &
   PublishesDataView &
   Partial<PublishesFilter & PublishesTimeslice> & // can publish either filters or timeslice
   HasType &
@@ -63,7 +65,6 @@ export type DefaultControlInternalApi = PublishesControlDisplaySettings & {
   setGrow: (grow: boolean) => void;
   setWidth: (width: ControlWidth) => void;
   fieldName$: BehaviorSubject<string | undefined>;
-  // dataViewId$: BehaviorSubject<string>;
 };
 
 export type CommonControlOutput = ControlGroupFilterOutput & {
@@ -107,7 +108,7 @@ export interface IEditableControlFactory<T extends ControlInput = ControlInput>
   controlEditorOptionsComponent?: (props: ControlEditorProps<T>) => JSX.Element;
   presaveTransformFunction?: (
     newState: Partial<T>,
-    embeddable?: ControlEmbeddable<T>
+    embeddable?: EditControlActionApi
   ) => Partial<T>;
   isFieldCompatible?: (field: DataViewField) => boolean;
 }

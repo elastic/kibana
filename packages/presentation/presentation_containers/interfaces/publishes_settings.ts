@@ -8,8 +8,13 @@
 
 import { PublishingSubject } from '@kbn/presentation-publishing';
 
-export interface PublishesSettings {
-  settings: Record<string, PublishingSubject<boolean | undefined>>;
+export type PublishesWritableSettings<SettingsType = boolean | undefined> =
+  PublishesSettings<SettingsType> & {
+    setSetting: (key: string, value: SettingsType) => void;
+  };
+
+export interface PublishesSettings<SettingsType = boolean | undefined> {
+  settings: Record<string, PublishingSubject<SettingsType>>;
 }
 
 export const apiPublishesSettings = (

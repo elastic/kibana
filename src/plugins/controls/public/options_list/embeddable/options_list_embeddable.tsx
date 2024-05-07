@@ -47,7 +47,7 @@ import {
   OptionsListEmbeddableInput,
   OPTIONS_LIST_CONTROL,
 } from '../..';
-import { ControlFilterOutput, ControlGroupApi } from '../../control_group/types';
+import { ControlFilterOutput } from '../../control_group/types';
 import { pluginServices } from '../../services';
 import { ControlsDataViewsService } from '../../services/data_views/types';
 import { ControlsOptionsListService } from '../../services/options_list/types';
@@ -93,6 +93,7 @@ const legacyControlToApi = (
     width$,
     dataView,
     fieldName$,
+    settings: 
     setGrow: (grow) => {
       grow$.next(grow);
       (embeddable.parent as ControlGroupContainer)?.dispatch.setControlGrow({
@@ -165,8 +166,8 @@ export class OptionsListEmbeddable
   public unsavedChanges = new BehaviorSubject<object | undefined>(undefined);
   public resetUnsavedChanges = () => {};
   public serializeState = () => ({ rawState: {} });
-  public grow$: BehaviorSubject<boolean | undefined>;
-  public width$: BehaviorSubject<ControlWidth | undefined>;
+  public grow$: PublishingSubject<boolean | undefined>;
+  public width$: PublishingSubject<ControlWidth | undefined>;
   public setGrow: (grow: boolean) => void;
   public setWidth: (width: ControlWidth) => void;
   public fieldName$: BehaviorSubject<string | undefined>;
@@ -213,6 +214,9 @@ export class OptionsListEmbeddable
     } = legacyControlToApi(this));
 
     this.parentApi = this.parentApi as ControlGroupContainer;
+
+    console.log('panmel title', this.panelTitle.getValue());
+
     /** TODO */
     // this.subscriptions.add(
     //   this.getInput$()

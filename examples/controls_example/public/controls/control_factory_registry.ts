@@ -11,7 +11,7 @@ import { ControlFactory } from './types';
 
 const registry: { [key: string]: () => Promise<ControlFactory<any>> } = {};
 
-export const registerControlFactory = <State extends object>(
+export const registerControlFactory = <State extends object = object>(
   type: string,
   getFactory: () => Promise<ControlFactory<State>>
 ) => {
@@ -22,7 +22,6 @@ export const registerControlFactory = <State extends object>(
         values: { key: type },
       })
     );
-
   registry[type] = getFactory;
 };
 

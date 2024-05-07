@@ -72,6 +72,14 @@ export const ControlRenderer = <StateType extends object = object>({
               });
           }
 
+          const snapshotRuntimeState = () => {
+            const comparatorKeys = Object.keys(embeddable.comparators) as Array<keyof RuntimeState>;
+            return comparatorKeys.reduce((acc, key) => {
+              acc[key] = comparators[key][0].value as RuntimeState[typeof key];
+              return acc;
+            }, {} as RuntimeState);
+          };
+
           const fullApi: DefaultControlApi<StateType> = {
             ...apiRegistration,
             uuid,

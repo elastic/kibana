@@ -27,8 +27,9 @@ import {
   HasParentApi,
   HasType,
   HasUniqueId,
-  PublishesPanelTitle,
+  PublishesWritablePanelTitle,
 } from '@kbn/presentation-publishing';
+import { PublishesDataView } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
 import { ACTION_EDIT_CONTROL, ControlGroupContainer, CONTROL_GROUP_TYPE } from '..';
 import { pluginServices } from '../../services';
 import { DefaultControlInternalApi, PublishesControlDisplaySettings } from '../../types';
@@ -39,9 +40,10 @@ import { EditControlFlyout } from './edit_control_flyout';
 
 export type EditControlActionApi = HasType &
   HasUniqueId &
-  PublishesPanelTitle &
+  PublishesWritablePanelTitle &
   HasEditCapabilities &
   PublishesControlDisplaySettings &
+  PublishesDataView &
   DefaultControlInternalApi &
   HasParentApi<PresentationContainer & HasType>;
 
