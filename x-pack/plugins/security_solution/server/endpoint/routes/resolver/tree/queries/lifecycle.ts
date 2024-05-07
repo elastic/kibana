@@ -58,10 +58,10 @@ export class LifecycleQuery extends BaseResolverQuery {
               },
             },
             {
-              term: { 'event.category': 'process' },
+              terms: { 'event.category': ['process'] },
             },
             {
-              term: { 'event.kind': 'event' },
+              terms: { 'event.kind': ['event', 'alert'] },
             },
           ],
         },

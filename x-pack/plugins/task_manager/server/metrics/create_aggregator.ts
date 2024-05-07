@@ -30,13 +30,31 @@ export function createAggregator<T extends JsonValue>({
   metricsAggregator,
 }: CreateMetricsAggregatorOpts<T>): AggregatedStatProvider<T> {
   if (reset$) {
+    let lastResetTime: Date = new Date();
     // Resets the aggregators either when the reset interval has passed or
     // a reset$ event is received
     merge(
-      interval(config.metrics_reset_interval).pipe(map(() => true)),
-      reset$.pipe(map(() => true))
-    ).subscribe(() => {
-      metricsAggregator.reset();
+      interval(config.metrics_reset_interval).pipe(
+        map(() => {
+          if (intervalHasPassedSince(lastResetTime, config.metrics_reset_interval)) {
+            lastResetTime = new Date();
+            return true;
+          }
+
+          return false;
+        })
+      ),
+      reset$.pipe(
+        map((value: boolean) => {
+          // keep track of the last time we reset due to collection
+          lastResetTime = new Date();
+          return true;
+        })
+      )
+    ).subscribe((shouldReset: boolean) => {
+      if (shouldReset) {
+        metricsAggregator.reset();
+      }
     });
   }
 
@@ -56,4 +74,9 @@ export function createAggregator<T extends JsonValue>({
       } as AggregatedStat<T>;
     })
   );
+}
+
+function intervalHasPassedSince(date: Date, intervalInMs: number) {
+  const now = new Date().valueOf();
+  return now - date.valueOf() > intervalInMs;
 }
