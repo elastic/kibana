@@ -44,10 +44,6 @@ export class Root {
     new Promise(function (resolve, reject) {
       // eslint-disable-next-line no-console
       console.error('environment_service.ts # Scheduled unhandledRejection in 30 seconds . . .');
-      // eslint-disable-next-line no-console
-      console.error('environment_service.ts # Scheduled unhandledRejection in 30 seconds . . .');
-      // eslint-disable-next-line no-console
-      console.error('environment_service.ts # Scheduled unhandledRejection in 30 seconds . . .');
       return setTimeout(function () {
         return reject('INJECTED UNHANDLED PROMISE REJECTION!');
       }, 30000);
