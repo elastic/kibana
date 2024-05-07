@@ -114,9 +114,15 @@ export const buildAggregation = ({
     // if not count add an order
     if (!isCountAgg) {
       const sortOrder = aggType === 'min' ? 'asc' : 'desc';
-      aggParent.aggs.groupAgg.terms!.order = {
-        [getAggName()]: sortOrder,
-      };
+      if (isMultiTerms && aggParent.aggs.groupAgg.multi_terms) {
+        aggParent.aggs.groupAgg.multi_terms.order = {
+          [getAggName()]: sortOrder,
+        };
+      } else if (aggParent.aggs.groupAgg.terms) {
+        aggParent.aggs.groupAgg.terms.order = {
+          [getAggName()]: sortOrder,
+        };
+      }
     } else if (includeConditionInQuery) {
       aggParent.aggs.groupAgg.aggs = {
         conditionSelector: {
