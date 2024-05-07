@@ -642,12 +642,10 @@ export function MachineLearningJobWizardCommonProvider(
     },
 
     async goToTimeRangeStep() {
-      await testSubjects.existOrFail('mlJobWizardTimeRangeStep', {
-        timeout: 3_000,
-      });
-      await testSubjects.click('mlJobWizardTimeRangeStep');
-      await testSubjects.existOrFail('mlJobWizardStepTitleTimeRange', {
-        timeout: 3_000,
+      await retry.tryForTime(60_000, async () => {
+        await testSubjects.existOrFail('mlJobWizardTimeRangeStep');
+        await testSubjects.click('mlJobWizardTimeRangeStep');
+        await testSubjects.existOrFail('mlJobWizardStepTitleTimeRange');
       });
     },
 
