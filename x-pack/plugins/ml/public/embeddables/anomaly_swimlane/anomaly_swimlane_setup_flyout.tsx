@@ -9,6 +9,7 @@ import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { distinctUntilChanged, from, skip, takeUntil } from 'rxjs';
 import { jobsApiProvider } from '../../application/services/ml_api_service/jobs';
 import { AnomalySwimlaneInitializer } from './anomaly_swimlane_initializer';
 import { HttpService } from '../../application/services/http_service';
@@ -18,7 +19,12 @@ export async function resolveAnomalySwimlaneUserInput(
   coreStart: CoreStart,
   input?: Partial<AnomalySwimLaneEmbeddableState>
 ): Promise<AnomalySwimlaneEmbeddableUserInput> {
-  const { http, overlays, ...startServices } = coreStart;
+  const {
+    http,
+    overlays,
+    application: { currentAppId$ },
+    ...startServices
+  } = coreStart;
 
   return new Promise(async (resolve, reject) => {
     try {
@@ -52,6 +58,13 @@ export async function resolveAnomalySwimlaneUserInput(
           },
         }
       );
+
+      // Close the flyout when user navigates out of the current plugin
+      currentAppId$
+        .pipe(skip(1), takeUntil(from(flyoutSession.onClose)), distinctUntilChanged())
+        .subscribe(() => {
+          flyoutSession.close();
+        });
     } catch (error) {
       reject(error);
     }
