@@ -70,7 +70,9 @@ export function handleAllStats(
 ) {
   return clusters.map((cluster) => {
     const clusterUuid: string =
-      cluster.cluster_uuid !== undefined ? cluster.cluster_uuid : cluster.elasticsearch?.cluster.id;
+      cluster.cluster_uuid !== undefined
+        ? cluster.cluster_uuid
+        : cluster.elasticsearch?.cluster.id || '';
 
     const clusterStats =
       cluster.cluster_stats !== undefined

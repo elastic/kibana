@@ -129,7 +129,7 @@ describe('Get Logstash Stats', () => {
       await fetchLogstashState(callCluster, clusterUuid, ephemeralIds, start, end, {} as any, true);
       const { args } = searchMock.firstCall;
       const [{ body }] = args;
-      expect(body.size).toEqual(10);
+      expect(body.size).toEqual(ephemeralIds.length);
     });
   });
 
@@ -148,8 +148,8 @@ describe('Get Logstash Stats', () => {
               },
             },
             {
-              terms: {
-                cluster_uuid: ['aCluster', 'bCluster', 'cCluster'], // cluster_uuid is an alias works for both mertricbeat and legacy structure
+              term: {
+                cluster_uuid: clusterUuids[0], // cluster_uuid is an alias works for both mertricbeat and legacy structure
               },
             },
             {
@@ -164,7 +164,7 @@ describe('Get Logstash Stats', () => {
         },
       };
 
-      await fetchLogstashStats(callCluster, clusterUuids, start, end, {} as any, true);
+      await fetchLogstashStats(callCluster, clusterUuids[0], start, end, {} as any, true);
       const { args } = searchMock.firstCall;
       const [{ body }] = args;
 

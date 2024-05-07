@@ -325,7 +325,7 @@ export function processLogstashStateResults(
 
 export async function fetchLogstashStats(
   callCluster: ElasticsearchClient,
-  clusterUuids: string[],
+  clusterUuid: string,
   start: string,
   end: string,
   { page = 0, ...options }: { page?: number } & LogstashProcessOptions,
@@ -354,7 +354,7 @@ export async function fetchLogstashStats(
         start,
         end,
         filters: [
-          { terms: { cluster_uuid: clusterUuids } },
+          { term: { cluster_uuid: clusterUuid } },
           {
             bool: {
               should: [
@@ -411,7 +411,7 @@ export async function fetchLogstashState(
     filter_path: filterPath,
     body: {
       query: createQuery({
-        // intentionally not using start and end periods as we need recent node state info to fill plugin usages
+        // intentionally not using start and end periods as we need node state info to fill plugin usages
         // especially with metricbeat monitoring
         filters: [
           { terms: { [`${stateField}.pipeline.ephemeral_id`]: ephemeralIds } },
@@ -429,7 +429,7 @@ export async function fetchLogstashState(
         field: `${stateField}.pipeline.ephemeral_id`,
       },
       sort: [{ ['timestamp']: { order: 'desc', unmapped_type: 'long' } }],
-      size: 10, // we need recent
+      size: ephemeralIds.length,
     },
   };
 
@@ -474,7 +474,7 @@ export async function getLogstashStats(
   for (const clusterUuid of clusterUuids) {
     const isSelfMonitoring: boolean = await isLogstashSelfMonitoring(callCluster, clusterUuid);
 
-    await fetchLogstashStats(callCluster, clusterUuids, start, end, options, isSelfMonitoring);
+    await fetchLogstashStats(callCluster, clusterUuid, start, end, options, isSelfMonitoring);
 
     if (options.clusters[clusterUuid] !== undefined) {
       await fetchLogstashState(
