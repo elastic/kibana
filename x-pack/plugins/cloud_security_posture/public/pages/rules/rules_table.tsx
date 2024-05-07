@@ -116,7 +116,7 @@ export const RulesTable = ({
 
   const [isAllRulesSelectedThisPage, setIsAllRulesSelectedThisPage] = useState<boolean>(false);
 
-  const postRequestChangeRulesStates = useChangeCspRuleState();
+  const { mutate: postRequestChangeRulesStates } = useChangeCspRuleState();
 
   const isCurrentPageRulesASubset = (
     currentPageRulesArray: CspBenchmarkRulesWithStates[],
@@ -323,7 +323,10 @@ const getColumns = ({
               http
             )
           ).total;
-          postRequestChangeRulesStates(nextRuleState, [rulesObjectRequest]);
+          postRequestChangeRulesStates({
+            actionOnRule: nextRuleState,
+            ruleIds: [rulesObjectRequest],
+          });
           refetchRulesStates();
           showChangeBenchmarkRuleStatesSuccessToast(startServices, isRuleMuted, {
             numberOfRules: 1,
