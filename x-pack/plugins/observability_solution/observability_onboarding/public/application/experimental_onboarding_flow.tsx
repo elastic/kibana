@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { useNavigate, useLocation } from 'react-router-dom-v5-compat';
 import { EuiButtonEmpty, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
@@ -22,6 +22,13 @@ import { CustomLogsPanel } from './quickstart_flows/custom_logs';
 const queryClient = new QueryClient();
 
 export function ExperimentalOnboardingFlow() {
+  const mainContentRef = useRef<HTMLDivElement | null>(null);
+  const location = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [location.pathname]);
+
   return (
     <QueryClientProvider client={queryClient}>
       <EuiPageTemplate.Section
@@ -40,19 +47,21 @@ export function ExperimentalOnboardingFlow() {
         <Header />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section paddingSize="xl" color="subdued" restrictWidth>
-        <Routes>
-          <Route path="/systemLogs">
-            <BackButton />
-            <SystemLogsPanel />
-          </Route>
-          <Route path="/customLogs">
-            <BackButton />
-            <CustomLogsPanel />
-          </Route>
-          <Route>
-            <OnboardingFlowForm />
-          </Route>
-        </Routes>
+        <div ref={mainContentRef}>
+          <Routes>
+            <Route path="/systemLogs">
+              <BackButton />
+              <SystemLogsPanel />
+            </Route>
+            <Route path="/customLogs">
+              <BackButton />
+              <CustomLogsPanel />
+            </Route>
+            <Route>
+              <OnboardingFlowForm />
+            </Route>
+          </Routes>
+        </div>
         <EuiSpacer size="xl" />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section paddingSize="xl" grow={false} restrictWidth>
