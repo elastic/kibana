@@ -70,11 +70,11 @@ export const ViewCodeFlyout: React.FC<ViewCodeFlyoutProps> = ({ onClose }) => {
   };
 
   useEffect(() => {
-    usageTracker.load(AnalyticsEvents.viewCodeFlyoutOpened);
+    usageTracker?.load(AnalyticsEvents.viewCodeFlyoutOpened);
   }, [usageTracker]);
 
   useEffect(() => {
-    usageTracker.click(`${AnalyticsEvents.viewCodeLanguageChange}_${selectedLanguage}`);
+    usageTracker?.click(`${AnalyticsEvents.viewCodeLanguageChange}_${selectedLanguage}`);
   }, [usageTracker, selectedLanguage]);
 
   return (
