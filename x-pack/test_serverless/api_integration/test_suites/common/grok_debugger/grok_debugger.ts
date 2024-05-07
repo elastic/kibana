@@ -15,7 +15,6 @@ export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  let internalRequestHeader: Record<string, string>;
   let roleAuthc: RoleCredentials;
 
   describe('Grok Debugger Routes', function () {
