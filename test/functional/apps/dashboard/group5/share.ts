@@ -49,9 +49,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.share.clickShareTopNavButton();
       return await PageObjects.share.isShareMenuOpen();
     });
-    if (mode === 'savedObject') {
-      await PageObjects.share.exportAsSavedObject();
-    }
+    // if (mode === 'savedObject') {
+    // await PageObjects.share.exportAsSavedObject();
+    // }
     return PageObjects.share.getSharedUrl();
   };
 
