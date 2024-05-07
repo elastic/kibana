@@ -29,7 +29,7 @@ export function ApmEmbeddableContext({
   deps,
   children,
 }: ApmEmbeddableContextProps) {
-  const services: ApmPluginContextValue = {
+  const services = {
     config: deps.config,
     core: deps.coreStart,
     plugins: deps.pluginsSetup,
@@ -44,9 +44,8 @@ export function ApmEmbeddableContext({
     observabilityAIAssistant: deps.pluginsStart.observabilityAIAssistant,
     share: deps.pluginsSetup.share,
     kibanaEnvironment: deps.kibanaEnvironment,
-    // appMountParameters: deps.appMountParameters,
     observabilityRuleTypeRegistry: deps.observabilityRuleTypeRegistry,
-  };
+  } as ApmPluginContextValue;
 
   createCallApmApi(deps.coreStart);
 

@@ -8,7 +8,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { GetSLOResponse, APMTransactionDurationIndicator } from '@kbn/slo-schema';
 import { APMEmbeddableRoot } from './embeddable_root';
-import type { BurnRateRule, BurnRateAlert, TimeRange } from '../../types';
+import type { BurnRateRule, BurnRateAlert, TimeRange } from '../../../types';
 
 interface APMAlertDetailsProps {
   slo: APMTransactionDurationSLOResponse;

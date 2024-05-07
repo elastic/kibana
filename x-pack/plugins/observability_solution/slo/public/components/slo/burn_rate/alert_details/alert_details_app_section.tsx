@@ -12,7 +12,7 @@ import { useKibana } from '../../../../utils/kibana_react';
 import { useFetchSloDetails } from '../../../../hooks/use_fetch_slo_details';
 import { AlertsHistoryPanel } from './components/alerts_history/alerts_history_panel';
 import { ErrorRatePanel } from './components/error_rate/error_rate_panel';
-import { CustomAlertDetailsPanel } from './components/custom_panels/custom_panel';
+import { CustomAlertDetailsPanel } from './components/custom_panels/custom_panels';
 import { BurnRateAlert, BurnRateRule } from './types';
 
 interface AppSectionProps {

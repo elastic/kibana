@@ -24,7 +24,7 @@ import type { ConfigSchema } from '../..';
 import type { KibanaEnvContext } from '../kibana_environment_context/kibana_environment_context';
 
 export interface ApmPluginContextValue {
-  appMountParameters?: AppMountParameters;
+  appMountParameters: AppMountParameters;
   config: ConfigSchema;
   core: CoreStart;
   inspector: InspectorPluginStart;
