@@ -8,7 +8,7 @@
 
 import { once, debounce } from 'lodash';
 import type { CoreSetup, Logger } from '@kbn/core/server';
-import type { IEsSearchResponse, ISearchOptions } from '../../../../common';
+import { ISearchOptions, IEsSearchResponse } from '@kbn/search-types';
 import { isRunningResponse } from '../../../../common';
 import { CollectedUsage } from './register';
 

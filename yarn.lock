@@ -5594,6 +5594,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/react-hooks@link:packages/kbn-react-hooks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/react-kibana-context-common@link:packages/react/kibana_context/common":
   version "0.0.0"
   uid ""
@@ -5863,6 +5867,10 @@
   uid ""
 
 "@kbn/search-response-warnings@link:packages/kbn-search-response-warnings":
+  version "0.0.0"
+  uid ""
+
+"@kbn/search-types@link:packages/kbn-search-types":
   version "0.0.0"
   uid ""
 
