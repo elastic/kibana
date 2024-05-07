@@ -7,19 +7,42 @@
 
 import { EuiButton, EuiIcon, EuiToast, EuiPortal, EuiText, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import * as i18n from './translations';
 
 const VIDEO_CONTENT_HEIGHT = 160;
 const VIDEO_CONTENT_WIDTH = 250;
-const VIDEO_SOURCE = '//play.vidyard.com/BrDaDBAAvdygvemFKNAkBW.html?';
+const VIDEO_ID = 'BrDaDBAAvdygvemFKNAkBW';
+const VIDEO_SOURCE = `//play.vidyard.com/${VIDEO_ID}.html`;
+const VIDEO_PAGE = `https://videos.elastic.co/watch/${VIDEO_ID}`;
 
 const VideoComponent: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const ref = React.useRef<HTMLIFrameElement>(null);
-  const [isVideoPlaying, setIsVideoPlaying] = React.useState(false);
+  const [isIframeFocused, setIsIframeFocused] = React.useState(false);
 
-  const onVideoClicked = useCallback(() => {
-    setIsVideoPlaying(true);
+  const openVideoInNewTab = useCallback(() => {
+    window.open(VIDEO_PAGE, '_blank');
+  }, []);
+
+  const onIframeClick = useCallback(() => {
+    if (isIframeFocused) {
+      openVideoInNewTab();
+    }
+  }, [isIframeFocused, openVideoInNewTab]);
+
+  useEffect(() => {
+    // Focus the page
+    window.focus();
+    // Add listener to check when page is not focussed
+    // (i.e. iframe is clicked into)
+    window.addEventListener('blur', onIframeClick);
+    return () => window.removeEventListener('blur', onIframeClick);
+  }, [onIframeClick]);
+  const handleOnMouseOver = useCallback(() => {
+    setIsIframeFocused(true);
+  }, []);
+  const handleOnMouseOut = useCallback(() => {
+    setIsIframeFocused(false);
   }, []);
 
   return (
@@ -30,6 +53,8 @@ const VideoComponent: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             css={css`
               height: ${VIDEO_CONTENT_HEIGHT}px;
             `}
+            onMouseOver={handleOnMouseOver}
+            onMouseOut={handleOnMouseOut}
           >
             <iframe
               ref={ref}
@@ -41,8 +66,10 @@ const VideoComponent: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               referrerPolicy="no-referrer"
               sandbox="allow-scripts allow-same-origin"
               scrolling="no"
-              allow={isVideoPlaying ? 'autoplay; fullscreen' : 'fullscreen'}
-              src={`${VIDEO_SOURCE}${isVideoPlaying ? '?autoplay=1' : ''}`}
+              // since we cannot go fullscreen, we are autoplaying and removing the controls
+              // onClick, the video will open in a new tab
+              allow={'autoplay'}
+              src={`${VIDEO_SOURCE}?autoplay=1&controls=0`}
               title={i18n.WATCH_OVERVIEW_VIDEO}
             />
           </div>
@@ -53,7 +80,7 @@ const VideoComponent: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             <p>{i18n.ATTACK_DISCOVERY_TOUR_VIDEO_STEP_DESC}</p>
           </EuiText>
           <EuiSpacer size="m" />
-          <EuiButton color="success" onClick={onVideoClicked} fullWidth>
+          <EuiButton color="success" onClick={openVideoInNewTab} fullWidth>
             {i18n.WATCH_OVERVIEW_VIDEO}
           </EuiButton>
         </EuiToast>

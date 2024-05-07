@@ -10,14 +10,14 @@
  *
  * */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiTourStep } from '@elastic/eui';
 import { useRouteSpy } from '../../common/utils/route/use_route_spy';
 import { VideoToast } from './video_toast';
 import { useIsElementMounted } from '../../detection_engine/rule_management_ui/components/rules_table/rules_table/guided_onboarding/use_is_element_mounted';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS, SecurityPageName } from '../../../common/constants';
 import { useKibana, useNavigation } from '../../common/lib/kibana';
-import { attackDiscoveryTourSteps, tourConfig } from './step_config';
+import { attackDiscoveryTourStepOne, tourConfig } from './step_config';
 import * as i18n from './translations';
 
 interface TourState {
@@ -36,20 +36,24 @@ const AttackDiscoveryTourComp = () => {
     storage.get(NEW_FEATURES_TOUR_STORAGE_KEYS.ATTACK_DISCOVERY) ?? tourConfig
   );
 
+  const advanceToVideoStep = useCallback(() => {
+    setTourState((prev) => {
+      storage.set(NEW_FEATURES_TOUR_STORAGE_KEYS.ATTACK_DISCOVERY, {
+        ...prev,
+        currentTourStep: 2,
+      });
+      return {
+        ...prev,
+        currentTourStep: 2,
+      };
+    });
+  }, [storage]);
+
   useEffect(() => {
     if (tourState.isTourActive && pageName === SecurityPageName.attackDiscovery) {
-      setTourState((prev) => {
-        storage.set(NEW_FEATURES_TOUR_STORAGE_KEYS.ATTACK_DISCOVERY, {
-          ...prev,
-          currentTourStep: 2,
-        });
-        return {
-          ...prev,
-          currentTourStep: 2,
-        };
-      });
+      advanceToVideoStep();
     }
-  }, [pageName, storage, tourState.isTourActive]);
+  }, [advanceToVideoStep, pageName, tourState.isTourActive]);
 
   const finishTour = useCallback(() => {
     setTourState((prev) => {
@@ -71,68 +75,54 @@ const AttackDiscoveryTourComp = () => {
   }, [navigateTo]);
 
   const nextStep = useCallback(() => {
-    setTourState((prev) => {
-      if (prev.currentTourStep === 1) {
-        navigateToAttackDiscovery();
-      }
-      storage.set(NEW_FEATURES_TOUR_STORAGE_KEYS.ATTACK_DISCOVERY, {
-        ...prev,
-        currentTourStep: prev.currentTourStep + 1,
-      });
-      return {
-        ...prev,
-        currentTourStep: prev.currentTourStep + 1,
-      };
-    });
-  }, [navigateToAttackDiscovery, storage]);
+    if (tourState.currentTourStep === 1) {
+      navigateToAttackDiscovery();
+      advanceToVideoStep();
+    }
+  }, [tourState.currentTourStep, navigateToAttackDiscovery, advanceToVideoStep]);
 
-  const getFooterAction = useCallback(() => {
-    // if it's the last step, we don't want to show the next button
-    return [
-      <EuiButtonEmpty size="s" color="text" onClick={finishTour}>
+  const footerAction = useMemo(
+    () => [
+      // if exit, set tour to the video step without navigating to the page
+      <EuiButtonEmpty size="s" color="text" onClick={advanceToVideoStep}>
         {i18n.ATTACK_DISCOVERY_TOUR_EXIT}
       </EuiButtonEmpty>,
+      // if next, set tour to the video step and navigate to the page
       <EuiButton color="success" size="s" onClick={nextStep}>
         {i18n.ATTACK_DISCOVERY_TRY_IT}
       </EuiButton>,
-    ];
-  }, [finishTour, nextStep]);
+    ],
+    [advanceToVideoStep, nextStep]
+  );
 
-  const nextEl = attackDiscoveryTourSteps[tourState.currentTourStep - 1]?.anchor;
-  const isElementAtCurrentStepMounted = useIsElementMounted(nextEl);
+  const isElementAtCurrentStepMounted = useIsElementMounted(attackDiscoveryTourStepOne?.anchor);
 
-  if (!tourState.isTourActive || !isElementAtCurrentStepMounted) {
+  if (
+    !tourState.isTourActive ||
+    (tourState.currentTourStep === 1 && !isElementAtCurrentStepMounted)
+  ) {
     return null;
   }
-  return (
-    <>
-      {attackDiscoveryTourSteps.map((steps, idx) => {
-        const stepCount = idx + 1;
-        if (tourState.currentTourStep !== stepCount) return null;
-        const panelProps = {
-          'data-test-subj': `attackDiscovery-tour-step-${stepCount}`,
-        };
-        return tourState.currentTourStep === 1 ? (
-          <EuiTourStep
-            anchor={`#${steps.anchor}`}
-            content={steps.content}
-            footerAction={getFooterAction()}
-            isStepOpen={tourState.isTourActive && tourState.currentTourStep === stepCount}
-            key={idx}
-            maxWidth={450}
-            onFinish={finishTour}
-            panelProps={panelProps}
-            repositionOnScroll
-            step={stepCount}
-            stepsTotal={1}
-            title={steps.title}
-          />
-        ) : (
-          pageName === SecurityPageName.attackDiscovery && <VideoToast onClose={finishTour} />
-        );
-      })}
-    </>
-  );
+
+  return tourState.currentTourStep === 1 ? (
+    <EuiTourStep
+      anchor={`#${attackDiscoveryTourStepOne.anchor}`}
+      content={attackDiscoveryTourStepOne.content}
+      footerAction={footerAction}
+      isStepOpen
+      maxWidth={450}
+      onFinish={advanceToVideoStep}
+      panelProps={{
+        'data-test-subj': `attackDiscovery-tour-step-1`,
+      }}
+      repositionOnScroll
+      step={1}
+      stepsTotal={1}
+      title={attackDiscoveryTourStepOne.title}
+    />
+  ) : pageName === SecurityPageName.attackDiscovery ? (
+    <VideoToast onClose={finishTour} />
+  ) : null;
 };
 
 export const AttackDiscoveryTour = React.memo(AttackDiscoveryTourComp);
