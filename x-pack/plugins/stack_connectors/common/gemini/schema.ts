@@ -13,10 +13,12 @@ import { DEFAULT_GEMINI_MODEL } from './constants';
 export const ConfigSchema = schema.object({
   apiUrl: schema.string(),
   defaultModel: schema.string({ defaultValue: DEFAULT_GEMINI_MODEL }),
+  gcpRegion: schema.string(),
+  gcpProjectID: schema.string(),
 });
 
 export const SecretsSchema = schema.object({
-  apiKey: schema.string(),
+  accessToken: schema.string(),
 });
 
 export const RunActionParamsSchema = schema.object({

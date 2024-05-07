@@ -13,6 +13,7 @@ import {
   DEFAULT_GEMINI_MODEL,
   DEFAULT_GEMINI_URL,
   DEFAULT_TOKEN_LIMIT,
+  DEFAULT_GCP_REGION,
 } from '../../../common/gemini/constants';
 import * as i18n from './translations';
 
@@ -31,7 +32,7 @@ const messageBody = {
 }
 
 export const DEFAULT_BODY = JSON.stringify({
-  gemini_version: 'gemini-1.0-pro-001',
+  gemini_version: 'gemini-1.0-pro',
   messages: messageBody,
 });
 
@@ -50,6 +51,52 @@ export const geminiConfig: ConfigFieldSchema[] = [
             <EuiLink
               data-test-subj="gemini-api-doc"
               href="https://ai.google.dev/docs"
+              target="_blank"
+            >
+              {`${i18n.gemini} ${i18n.DOCUMENTATION}`}
+            </EuiLink>
+          ),
+        }}
+      />
+    ),
+  },
+  {
+    id: 'gcpRegion',
+    label: i18n.GCP_REGION,
+    isUrlField: false,
+    defaultValue: DEFAULT_GCP_REGION,
+    helpText: (
+      <FormattedMessage
+        defaultMessage="Please provide the GCP region where the Vertex AI API(s) is enabled. For more information, refer to the {geminiVertexAIDocs}."
+        id="xpack.stackConnectors.components.gemini.geminiDocumentation"
+        values={{
+          geminiVertexAIDocs: (
+            <EuiLink
+              data-test-subj="gemini-vertexai-api-doc"
+              href="https://cloud.google.com/vertex-ai/docs/reference/rest#rest_endpoints"
+              target="_blank"
+            >
+              {`${i18n.gemini} ${i18n.DOCUMENTATION}`}
+            </EuiLink>
+          ),
+        }}
+      />
+    ),
+  },
+  {
+    id: 'gcpProjectID',
+    label: i18n.GCP_PROJECT_ID,
+    isUrlField: false,
+    // defaultValue: DEFAULT_GEMINI_URL,
+    helpText: (
+      <FormattedMessage
+        defaultMessage="The GCP Project ID which has Vertex AI API(s) enabled . For more information on the URL, refer to the {geminiVertexAIDocs}."
+        id="xpack.stackConnectors.components.gemini.geminiDocumentation"
+        values={{
+          geminiVertexAIDocs: (
+            <EuiLink
+              data-test-subj="gemini-api-doc"
+              href="https://cloud.google.com/vertex-ai/docs/start/cloud-environment"
               target="_blank"
             >
               {`${i18n.gemini} ${i18n.DOCUMENTATION}`}
@@ -85,19 +132,18 @@ export const geminiConfig: ConfigFieldSchema[] = [
 
 export const geminiSecrets: SecretsFieldSchema[] = [
   {
-    id: 'apiKey',
+    id: 'accessToken',
     label: i18n.API_KEY,
     isPasswordField: true,
     helpText: (
       <FormattedMessage
-        defaultMessage="To use the Gemini API, you'll need an API key. If you don't already have one, create a key in Google AI Studio.
-        {geminiAPIKeyDocs}.."
+        defaultMessage="To authenticate to Gemini API please provide the Bearer Token. You can get it my running `gcloud auth application-default print-access-token`. For more information, refer to the {geminiAuthDocs}."
         id="xpack.stackConnectors.components.gemini.geminiSecretDocumentation"
         values={{
-          geminiAPIKeyDocs: (
+          geminiAuthDocs: (
             <EuiLink
               data-test-subj="aws-api-keys-doc"
-              href="https://aistudio.google.com/app/apikey"
+              href="https://cloud.google.com/iam/docs/create-short-lived-credentials-direct"
               target="_blank"
             >
               {`${i18n.gemini} ${i18n.DOCUMENTATION}`}

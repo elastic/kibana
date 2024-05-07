@@ -14,6 +14,20 @@ export const API_URL_LABEL = i18n.translate(
   }
 );
 
+export const GCP_REGION = i18n.translate(
+  'xpack.stackConnectors.components.gemini.gcpRegion',
+  {
+    defaultMessage: 'GCP Region',
+  }
+);
+
+export const GCP_PROJECT_ID = i18n.translate(
+  'xpack.stackConnectors.components.gemini.gcpRegion',
+  {
+    defaultMessage: 'GCP Project ID',
+  }
+);
+
 export const ACCESS_KEY_LABEL = i18n.translate(
   'xpack.stackConnectors.components.gemini.accessKeySecret',
   {
@@ -32,7 +46,7 @@ export const SECRET = i18n.translate('xpack.stackConnectors.components.gemini.se
 });
 
 export const API_KEY = i18n.translate('xpack.stackConnectors.components.gemini.apiKey', {
-  defaultMessage: 'API Key',
+  defaultMessage: 'Access Token',
 });
 
 export const gemini = i18n.translate('xpack.stackConnectors.components.gemini.title', {

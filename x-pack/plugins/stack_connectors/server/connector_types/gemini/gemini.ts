@@ -62,12 +62,16 @@ interface Data {
 export class GeminiConnector extends SubActionConnector<Config, Secrets> {
   private url;
   private model;
+  private gcpRegion;
+  private gcpProjectID;
 
   constructor(params: ServiceParams<Config, Secrets>) {
     super(params);
 
     this.url = this.config.apiUrl;
     this.model = this.config.defaultModel;
+    this.gcpRegion = this.config.gcpRegion;
+    this.gcpProjectID = this.config.gcpProjectID;
 
     this.registerSubActions();
   }
@@ -181,15 +185,14 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon G
    */
    public async runApi({ body, model: reqModel }: RunActionParams): Promise<RunActionResponse> {
     // set model on per request basis
-    // const currentModel = reqModel ?? this.model;
-    const apiKey = this.secrets.apiKey;
+    const currentModel = reqModel ?? this.model;
+    const path = `/v1/projects/${this.gcpProjectID}/locations/${this.gcpRegion}/publishers/google/models/${currentModel}:generateContent`;
+    const apiKey = this.secrets.accessToken;
     const data = JSON.stringify(JSON.parse(body)['messages']);
-    const url = "https://us-central1-aiplatform.googleapis.com/v1/projects/river-runner-343016/locations/us-central1/publishers/google/models/gemini-1.0-pro:generateContent";
     // const path = `/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
 
     const requestArgs = {
-      // url: `${this.url}${path}`,
-      url: url,
+      url: `${this.url}${path}`,
       method: 'post' as Method,
       data: data,
       headers: { 
@@ -206,8 +209,6 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon G
   public async invokeAI({
     messages,
     model,
-    // stopSequences,
-    // system,
     // temperature,
   }: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
     const res = await this.runApi({
