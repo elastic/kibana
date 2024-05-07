@@ -31,9 +31,10 @@ export const DraggableCellActions = React.memo<PropsWithChildren<DraggableCellAc
     const { timelineId: timelineIdFind } = useContext(TimelineContext);
     const { tableId: tableIdFind } = useContext(TableContext);
 
-    const sourcererScopeId = useMemo(() => {
-      return getSourcererScopeId(scopeId ?? timelineIdFind ?? tableIdFind);
-    }, [scopeId, tableIdFind, timelineIdFind]);
+    const sourcererScopeId = useMemo(
+      () => getSourcererScopeId(scopeId ?? timelineIdFind ?? tableIdFind),
+      [scopeId, tableIdFind, timelineIdFind]
+    );
 
     const disabledActionTypes = useMemo(
       () => (hideTopN ? [SecurityCellActionType.SHOW_TOP_N] : []),

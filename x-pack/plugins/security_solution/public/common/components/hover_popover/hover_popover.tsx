@@ -17,7 +17,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 const HOVER_INTENT_DELAY = 100; // ms
 
 interface Props {
-  hoverContent: JSX.Element;
+  hoverContent: React.ReactNode;
   anchorPosition?: PopoverAnchorPosition;
 }
 
