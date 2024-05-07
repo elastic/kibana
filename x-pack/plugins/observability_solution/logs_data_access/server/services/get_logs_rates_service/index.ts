@@ -8,8 +8,9 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 import { estypes } from '@elastic/elasticsearch';
 import { RegisterServicesParams } from '../register_services';
+import { getLogErrorRate, getLogRatePerMinute } from './utils';
 
-export interface Params {
+interface LogsRatesServiceParams {
   esClient: ElasticsearchClient;
   serviceNames: string[];
   identifyingMetadata: string;
@@ -25,19 +26,27 @@ interface LogRateQueryAggregation {
   services: estypes.AggregationsTermsAggregateBase<LogErrorsAggregation>;
 }
 
+export interface LogsRatesServiceReturnType {
+  [serviceName: string]: {
+    logRatePerMinute: number;
+    logErrorRate: null | number;
+  };
+}
+
 export function createGetLogsRatesService(params: RegisterServicesParams) {
-  return async ({ esClient, identifyingMetadata, serviceNames, timeFrom, timeTo }: Params) => {
+  return async ({
+    esClient,
+    identifyingMetadata,
+    serviceNames,
+    timeFrom,
+    timeTo,
+  }: LogsRatesServiceParams): Promise<LogsRatesServiceReturnType> => {
     const esResponse = await esClient.search({
       index: 'logs-*-*',
       size: 0,
       query: {
         bool: {
           filter: [
-            {
-              exists: {
-                field: 'log.level',
-              },
-            },
             {
               terms: {
                 [identifyingMetadata]: serviceNames,
@@ -64,30 +73,28 @@ export function createGetLogsRatesService(params: RegisterServicesParams) {
             logErrors: {
               terms: {
                 field: 'log.level',
-                include: 'error',
+                include: ['error', 'ERROR'],
               },
             },
           },
         },
       },
     });
-    const durationAsMinutes = (timeTo - timeFrom) / 1000 / 60;
     const aggregations = esResponse.aggregations as LogRateQueryAggregation | undefined;
     const buckets = aggregations?.services.buckets as LogErrorsAggregation[];
 
-    return buckets.reduce((acc, bucket) => {
-      const logRate = bucket.doc_count / durationAsMinutes;
+    return buckets.reduce<LogsRatesServiceReturnType>((acc, bucket) => {
+      const logCount = bucket.doc_count;
       const logErrorBuckets = bucket.logErrors
         .buckets as estypes.AggregationsStringRareTermsBucketKeys[];
 
       const logErrorCount = logErrorBuckets[0]?.doc_count;
-      const logErrorRate = (logErrorCount ?? 0) / bucket.doc_count;
 
       return {
         ...acc,
         [bucket.key]: {
-          logRate,
-          logErrorRate: logErrorCount ? logErrorRate : null,
+          logRatePerMinute: getLogRatePerMinute({ logCount, timeFrom, timeTo }),
+          logErrorRate: logErrorCount ? getLogErrorRate({ logCount, logErrorCount }) : null,
         },
       };
     }, {});
