@@ -18,7 +18,7 @@ describe('autoCheckPrebuildRuleStepCompleted', () => {
   it('should return true if there are enabled rules', async () => {
     (fetchRuleManagementFilters as jest.Mock).mockResolvedValue({ total: 1 });
     const result = await autoCheckPrebuildRuleStepCompleted({
-      abortSignal: { current: mockAbortController },
+      abortSignal: mockAbortController,
       kibanaServicesHttp: mockHttp,
     });
     expect(result).toBe(true);
@@ -30,7 +30,7 @@ describe('autoCheckPrebuildRuleStepCompleted', () => {
     const mockOnError = jest.fn();
 
     const result = await autoCheckPrebuildRuleStepCompleted({
-      abortSignal: { current: mockAbortController },
+      abortSignal: mockAbortController,
       kibanaServicesHttp: mockHttp,
       onError: mockOnError,
     });
@@ -46,7 +46,7 @@ describe('autoCheckPrebuildRuleStepCompleted', () => {
     mockAbortController.abort();
 
     const result = await autoCheckPrebuildRuleStepCompleted({
-      abortSignal: { current: mockAbortController },
+      abortSignal: mockAbortController,
       kibanaServicesHttp: mockHttp,
       onError: mockOnError,
     });
