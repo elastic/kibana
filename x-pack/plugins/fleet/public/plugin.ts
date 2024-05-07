@@ -194,7 +194,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
           ...startDepsServices,
           storage: this.storage,
           cloud,
-          authz: await fleetStart.authz,
+          authz: fleetStart.authz,
         };
         const { renderApp, teardownIntegrations } = await import('./applications/integrations');
 
@@ -237,7 +237,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
           ...startDepsServices,
           storage: this.storage,
           cloud,
-          authz: await fleetStart.authz,
+          authz: fleetStart.authz,
         };
         const { renderApp, teardownFleet } = await import('./applications/fleet');
         const unmount = renderApp(startServices, params, config, kibanaVersion, extensions);

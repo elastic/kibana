@@ -45,9 +45,7 @@ export function MLHeader({ hasValidMlLicense, mlJobId }: Props) {
   const hasKuery = !isEmpty(kuery);
   const icon = hasKuery ? (
     <EuiIconTip
-      aria-label={i18n.translate('xpack.apm.mLHeader.euiIconTip.warningLabel', {
-        defaultMessage: 'Warning',
-      })}
+      aria-label="Warning"
       type="warning"
       color="warning"
       content={i18n.translate(

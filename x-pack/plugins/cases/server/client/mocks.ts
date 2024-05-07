@@ -9,12 +9,20 @@ import type { PublicContract, PublicMethodsOf } from '@kbn/utility-types';
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
 
-import { createFileServiceMock } from '@kbn/files-plugin/server/mocks';
+import {
+  createFileServiceFactoryMock,
+  createFileServiceMock,
+} from '@kbn/files-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
 import { serializerMock } from '@kbn/core-saved-objects-base-server-mocks';
-
+import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
+import { notificationsMock } from '@kbn/notifications-plugin/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import type { CasesSearchRequest } from '../../common/types/api';
 import type { CasesClient, CasesClientInternal } from '.';
 import type { AttachmentsSubClient } from './attachments/client';
@@ -211,6 +219,30 @@ export const createCasesClientMockArgs = () => {
     ),
     savedObjectsSerializer: createSavedObjectsSerializerMock(),
     fileService: createFileServiceMock(),
+  };
+};
+
+export const createCasesClientFactoryMockArgs = () => {
+  return {
+    securityPluginSetup: securityMock.createSetup(),
+    securityPluginStart: securityMock.createStart(),
+    spacesPluginStart: spacesMock.createStart(),
+    featuresPluginStart: featuresPluginMock.createSetup(),
+    actionsPluginStart: actionsMock.createStart(),
+    licensingPluginStart: licensingMock.createStart(),
+    notifications: notificationsMock.createStart(),
+    ruleRegistry: { getRacClientWithRequest: jest.fn(), alerting: alertsMock.createStart() },
+    filesPluginStart: { fileServiceFactory: createFileServiceFactoryMock() },
+    publicBaseUrl: 'https//example.com',
+    lensEmbeddableFactory: jest.fn().mockReturnValue(
+      makeLensEmbeddableFactory(
+        () => ({}),
+        () => ({}),
+        {}
+      )
+    ),
+    externalReferenceAttachmentTypeRegistry: createExternalReferenceAttachmentTypeRegistryMock(),
+    persistableStateAttachmentTypeRegistry: createPersistableStateAttachmentTypeRegistryMock(),
   };
 };
 

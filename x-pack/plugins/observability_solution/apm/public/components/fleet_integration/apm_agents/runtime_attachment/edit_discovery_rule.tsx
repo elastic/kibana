@@ -152,9 +152,7 @@ export function EditDiscoveryRule({
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty data-test-subj="apmEditDiscoveryRuleCancelButton" onClick={onCancel}>
-            {i18n.translate('xpack.apm.editDiscoveryRule.cancelButtonEmptyLabel', {
-              defaultMessage: 'Cancel',
-            })}
+            Cancel
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

@@ -37,10 +37,7 @@ export const createFlaskAgentInstructions = (commonOptions: AgentInstructions): 
           </EuiMarkdownFormat>
           <EuiSpacer />
           <EuiCodeBlock language="bash" isCopyable={true}>
-            {i18n.translate(
-              'xpack.apm.createFlaskAgentInstructions.PipInstallElasticapmflaskCodeBlockLabel',
-              { defaultMessage: '$ pip install elastic-apm[flask]' }
-            )}
+            $ pip install elastic-apm[flask]
           </EuiCodeBlock>
         </>
       ),

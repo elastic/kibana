@@ -50,10 +50,7 @@ func main() {
           </EuiMarkdownFormat>
           <EuiSpacer />
           <EuiCodeBlock language="bash" isCopyable={true}>
-            {i18n.translate(
-              'xpack.apm.createGoAgentInstructions.goGetGoelasticcoapmCodeBlockLabel',
-              { defaultMessage: 'go get go.elastic.co/apm' }
-            )}
+            go get go.elastic.co/apm
           </EuiCodeBlock>
         </>
       ),

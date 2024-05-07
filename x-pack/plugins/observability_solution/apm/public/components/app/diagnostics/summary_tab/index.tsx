@@ -8,8 +8,6 @@
 import React from 'react';
 import { EuiFlexGroup, EuiCallOut, EuiDescriptionList, EuiSpacer } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { ApmIntegrationPackageStatus } from './apm_integration_package_status';
 import { IndexTemplatesStatus } from './index_templates_status';
@@ -52,19 +50,9 @@ export function DiagnosticsSummary() {
 
 function CrossClusterSearchCallout() {
   return (
-    <EuiCallOut
-      title={i18n.translate(
-        'xpack.apm.crossClusterSearchCallout.euiCallOut.crossClusterSearchNotLabel',
-        { defaultMessage: 'Cross cluster search not supported' }
-      )}
-      color="warning"
-    >
-      <FormattedMessage
-        id="xpack.apm.diagnosticsSummaryTab.CrossClusterSearchCalloutText"
-        defaultMessage={
-          'The APM index settings is targetting remote clusters. Please note that this is not currently supported by the Diagnostics Tool and functionality will therefore be limited.'
-        }
-      />
+    <EuiCallOut title="Cross cluster search not supported" color="warning">
+      The APM index settings is targetting remote clusters. Please note that this is not currently
+      supported by the Diagnostics Tool and functionality will therefore be limited.
     </EuiCallOut>
   );
 }
@@ -80,15 +68,8 @@ function PrivilegesCallout({ diagnosticsBundle }: { diagnosticsBundle: Diagnosti
 
   return (
     <>
-      <EuiCallOut
-        title={i18n.translate('xpack.apm.privilegesCallout.euiCallOut.insufficientAccessLabel', {
-          defaultMessage: 'Insufficient access',
-        })}
-        color="warning"
-      >
-        {i18n.translate('xpack.apm.privilegesCallout.notAllFeaturesAreCallOutLabel', {
-          defaultMessage: 'Not all features are available due to missing privileges.',
-        })}
+      <EuiCallOut title="Insufficient access" color="warning">
+        Not all features are available due to missing privileges.
         <br />
         <br />
         <EuiDescriptionList
@@ -96,12 +77,7 @@ function PrivilegesCallout({ diagnosticsBundle }: { diagnosticsBundle: Diagnosti
             ...(missingClusterPrivileges.length > 0
               ? [
                   {
-                    title: i18n.translate(
-                      'xpack.apm.diagnosticsSummaryTab.missingClusterPrivilegesTitle',
-                      {
-                        defaultMessage: 'Missing cluster privileges',
-                      }
-                    ),
+                    title: 'Missing cluster privileges',
                     description: missingClusterPrivileges.join(', '),
                   },
                 ]
@@ -110,12 +86,7 @@ function PrivilegesCallout({ diagnosticsBundle }: { diagnosticsBundle: Diagnosti
             ...(missingIndexPrivileges.length > 0
               ? [
                   {
-                    title: i18n.translate(
-                      'xpack.apm.diagnosticsSummaryTab.missingIndexPrivilegesTitle',
-                      {
-                        defaultMessage: 'Missing index privileges',
-                      }
-                    ),
+                    title: 'Missing index privileges',
                     description: missingIndexPrivileges.join(', '),
                   },
                 ]

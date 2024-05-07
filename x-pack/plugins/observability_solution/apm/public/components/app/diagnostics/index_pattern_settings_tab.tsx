@@ -8,8 +8,6 @@
 import { EuiLink, EuiLoadingElastic } from '@elastic/eui';
 import { EuiBadge, EuiSpacer, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
@@ -28,13 +26,7 @@ export function DiagnosticsIndexPatternSettings() {
   const indexTemplatesByIndexPattern = diagnosticsBundle?.indexTemplatesByIndexPattern;
 
   if (!indexTemplatesByIndexPattern || indexTemplatesByIndexPattern?.length === 0) {
-    return (
-      <EuiText>
-        {i18n.translate('xpack.apm.diagnosticsIndexPatternSettings.noSettingsToDisplayTextLabel', {
-          defaultMessage: 'No settings to display',
-        })}
-      </EuiText>
-    );
+    return <EuiText>No settings to display</EuiText>;
   }
 
   const elms = indexTemplatesByIndexPattern.map(({ indexPattern, indexTemplates }) => {
@@ -44,14 +36,7 @@ export function DiagnosticsIndexPatternSettings() {
           <h4>{indexPattern}</h4>
         </EuiTitle>
 
-        {!indexTemplates?.length && (
-          <em>
-            {i18n.translate(
-              'xpack.apm.diagnosticsIndexPatternSettings.noMatchingIndexTemplatesLabel',
-              { defaultMessage: 'No matching index templates' }
-            )}
-          </em>
-        )}
+        {!indexTemplates?.length && <em>No matching index templates</em>}
 
         {indexTemplates?.map(({ templateName, templateIndexPatterns, priority, isNonStandard }) => {
           const text = priority
@@ -79,20 +64,15 @@ export function DiagnosticsIndexPatternSettings() {
   return (
     <>
       <EuiText>
-        <FormattedMessage
-          id="xpack.apm.diagnosticsIndexPatternSettings.ApmIndexSettingsIndexPatternsText"
-          defaultMessage={`This section lists the index patterns specified in <link>APM Index Settings</link> and which index templates they match. The priority and index pattern of each index template can be seen by hovering over the item.`}
-          values={{
-            link: (chunks) => (
-              <EuiLink
-                data-test-subj="apmMatchingIndexTemplatesSeeDetailsLink"
-                href={router.link('/settings/apm-indices')}
-              >
-                {chunks}
-              </EuiLink>
-            ),
-          }}
-        />
+        This section lists the index patterns specified in{' '}
+        <EuiLink
+          data-test-subj="apmMatchingIndexTemplatesSeeDetailsLink"
+          href={router.link('/settings/apm-indices')}
+        >
+          APM Index Settings
+        </EuiLink>{' '}
+        and which index templates they match. The priority and index pattern of each index template
+        can be seen by hovering over the item.
       </EuiText>
       <EuiSpacer />
       {elms}

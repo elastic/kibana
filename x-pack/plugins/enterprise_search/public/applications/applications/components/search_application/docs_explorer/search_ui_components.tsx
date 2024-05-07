@@ -163,13 +163,12 @@ export const SearchBar: React.FC<InputProps> = ({ additionalInputProps }) => (
 );
 export const PagingInfoView: React.FC<PagingInfoViewProps> = ({ start, end, totalResults }) => (
   <EuiText size="s">
-    <p>
-      <FormattedMessage
-        id="xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.pagingInfo.text"
-        defaultMessage="Showing <strong>{start}-{end}</strong> of {totalResults}"
-        values={{ end, start, totalResults }}
-      />
-    </p>
+    <FormattedMessage
+      id="xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.pagingInfo.text"
+      defaultMessage="Showing <strong>{start}-{end}</strong> of {totalResults}"
+      values={{ end, start, totalResults }}
+      tagName="p"
+    />
   </EuiText>
 );
 

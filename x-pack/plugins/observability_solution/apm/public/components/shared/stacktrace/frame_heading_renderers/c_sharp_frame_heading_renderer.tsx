@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { FrameHeadingRendererProps } from '.';
 import { DefaultFrameHeadingRenderer } from './default_frame_heading_renderer';
 
@@ -28,12 +27,7 @@ export function CSharpFrameHeadingRenderer({
         {lineNumber > 0 && (
           <>
             {' at '}
-            <FileDetail>
-              {i18n.translate('xpack.apm.cSharpFrameHeadingRenderer.fileDetail.lineLabel', {
-                defaultMessage: 'line',
-              })}
-              {lineNumber}
-            </FileDetail>
+            <FileDetail>line {lineNumber}</FileDetail>
           </>
         )}
       </>

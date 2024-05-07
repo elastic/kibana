@@ -7,7 +7,6 @@
 
 import { EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { Redirect } from 'react-router-dom';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
@@ -63,16 +62,7 @@ export function TraceLink() {
 
   return (
     <CentralizedContainer>
-      <EuiEmptyPrompt
-        iconType="apmTrace"
-        title={
-          <h2>
-            {i18n.translate('xpack.apm.traceLink.h2.fetchingTraceLabel', {
-              defaultMessage: 'Fetching trace...',
-            })}
-          </h2>
-        }
-      />
+      <EuiEmptyPrompt iconType="apmTrace" title={<h2>Fetching trace...</h2>} />
     </CentralizedContainer>
   );
 }

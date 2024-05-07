@@ -11,7 +11,6 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 import {
   CountIndexPatternColumn,
   PersistedIndexPatternLayer,
-  PieVisualizationState,
   TermsIndexPatternColumn,
   TypedLensByValueInput,
 } from '@kbn/lens-plugin/public';
@@ -104,7 +103,7 @@ export function VisitorBreakdownChart({
   );
 }
 
-const visConfig: PieVisualizationState = {
+const visConfig = {
   layers: [
     {
       layerId: 'layer1',
@@ -113,7 +112,7 @@ const visConfig: PieVisualizationState = {
       categoryDisplay: 'default',
       legendDisplay: 'hide',
       numberDisplay: 'percent',
-      showValuesInLegend: true,
+      legendStats: ['value'],
       nestedLegend: false,
       layerType: 'data',
     },

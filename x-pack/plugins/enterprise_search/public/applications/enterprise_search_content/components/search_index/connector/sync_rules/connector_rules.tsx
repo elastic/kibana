@@ -26,6 +26,7 @@ import { i18n } from '@kbn/i18n';
 
 import { docLinks } from '../../../../../shared/doc_links';
 
+import { isAdvancedSyncRuleSnippetEmpty } from '../../../../utils/sync_rules_helpers';
 import { ConnectorViewLogic } from '../../../connector_detail/connector_view_logic';
 import { FilteringRulesTable } from '../../../shared/filtering_rules_table/filtering_rules_table';
 
@@ -40,6 +41,8 @@ export const ConnectorSyncRules: React.FC = () => {
     useActions(ConnectorFilteringLogic);
   const { advancedSnippet, draftErrors, draftState, filteringRules, hasDraft, isEditing } =
     useValues(ConnectorFilteringLogic);
+
+  const isAdvancedSnippetEmpty = isAdvancedSyncRuleSnippetEmpty(advancedSnippet);
 
   return (
     <>
@@ -93,7 +96,8 @@ export const ConnectorSyncRules: React.FC = () => {
                 </p>
                 <p>
                   <EuiLink
-                    data-test-subj="enterpriseSearchConnectorSyncRulesLearnMoreAboutSyncRulesLink"
+                    data-test-subj="entSearchContent-connector-syncRules-learnMoreLink"
+                    data-telemetry-id="entSearchContent-connector-syncRules-learnMoreLink"
                     href={docLinks.syncRules}
                     external
                     target="_blank"
@@ -165,7 +169,7 @@ export const ConnectorSyncRules: React.FC = () => {
             </EuiPanel>
           </EuiFlexItem>
         )}
-        {hasAdvancedFilteringFeature && !!advancedSnippet && (
+        {hasAdvancedFilteringFeature && !isAdvancedSnippetEmpty && (
           <EuiFlexItem>
             <EuiPanel color="plain" hasShadow={false} hasBorder>
               <EuiFlexGroup direction="column">
@@ -193,7 +197,8 @@ export const ConnectorSyncRules: React.FC = () => {
                     </p>
                     <p>
                       <EuiLink
-                        data-test-subj="enterpriseSearchConnectorSyncRulesLearnMoreAboutAdvancedSyncRulesLink"
+                        data-test-subj="entSearchContent-connector-syncRules-learnMoreLink"
+                        data-telemetry-id="entSearchContent-connector-syncRules-learnMoreLink"
                         external
                         href={docLinks.syncRulesAdvanced}
                         target="_blank"

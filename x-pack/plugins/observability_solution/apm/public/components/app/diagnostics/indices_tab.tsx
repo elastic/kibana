@@ -16,7 +16,6 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { type IndiciesItem } from '../../../../server/routes/diagnostics/route';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useDiagnosticsContext } from './context/use_diagnostics';
@@ -107,22 +106,14 @@ export function DiagnosticsIndices() {
   return (
     <>
       <EuiText>
-        <FormattedMessage
-          id="xpack.apm.diagnosticsIndicesTab.ConcreteIndicesDescriptionText"
-          defaultMessage={
-            'This section shows the concrete indices backing the data streams, and highlights mapping issues and missing ingest pipelines.'
-          }
-        />
+        This section shows the concrete indices backing the data streams, and highlights mapping
+        issues and missing ingest pipelines.
       </EuiText>
 
       <EuiSpacer />
 
       <EuiTitle size="s">
-        <FormattedMessage
-          id="xpack.apm.diagnosticsIndicesTab.ConcreteIndicesWithIssuesTtitle"
-          defaultMessage={'Indices with problems'}
-          tagName="h3"
-        />
+        <h3>Indices with problems</h3>
       </EuiTitle>
       <EuiBasicTable
         data-test-subj="indicedWithProblems"
@@ -134,11 +125,7 @@ export function DiagnosticsIndices() {
       <EuiSpacer />
 
       <EuiTitle size="s">
-        <FormattedMessage
-          id="xpack.apm.diagnosticsIndicesTab.ConcreteIndicesWithoutIssuesTitle"
-          defaultMessage={'Indices without problems'}
-          tagName="h3"
-        />
+        <h3>Indices without problems</h3>
       </EuiTitle>
       <EuiBasicTable
         data-test-subj="indicedWithoutProblems"

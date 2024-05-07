@@ -63,7 +63,6 @@ export const createRackAgentInstructions = (commonOptions: AgentInstructions): E
             })}
           </EuiMarkdownFormat>
           <EuiSpacer />
-          {/* eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n */}
           <EuiCodeBlock language="bash" isCopyable={true}>
             gem &apos;elastic-apm&apos;
           </EuiCodeBlock>

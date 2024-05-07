@@ -8,7 +8,6 @@
 import { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
 import { EuiBadge, EuiBasicTable, EuiBasicTableColumn, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { useDiagnosticsContext } from './context/use_diagnostics';
 
@@ -20,10 +19,7 @@ export function DiagnosticsDataStreams() {
   return (
     <>
       <EuiText>
-        {i18n.translate('xpack.apm.diagnosticsDataStreams.thisSectionShowsTheTextLabel', {
-          defaultMessage:
-            'This section shows the APM data streams and their underlying index template.',
-        })}
+        This section shows the APM data streams and their underlying index template.
       </EuiText>
       <EuiSpacer />
       <DataStreamsTable data={diagnosticsBundle} />
@@ -46,18 +42,12 @@ function DataStreamsTable({ data }: { data?: DiagnosticsBundle }) {
         return indexTemplate?.exists && !indexTemplate?.isNonStandard ? (
           <>
             {templateName}&nbsp;
-            <EuiBadge color="green">
-              {i18n.translate('xpack.apm.columns.okBadgeLabel', { defaultMessage: 'OK' })}
-            </EuiBadge>
+            <EuiBadge color="green">OK</EuiBadge>
           </>
         ) : (
           <>
             {templateName}&nbsp;
-            <EuiBadge color="warning">
-              {i18n.translate('xpack.apm.columns.nonstandardBadgeLabel', {
-                defaultMessage: 'Non-standard',
-              })}
-            </EuiBadge>
+            <EuiBadge color="warning">Non-standard</EuiBadge>
           </>
         );
       },

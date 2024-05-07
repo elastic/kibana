@@ -38,10 +38,7 @@ export const createNodeAgentInstructions = (commonOptions: AgentInstructions): E
           </EuiMarkdownFormat>
           <EuiSpacer />
           <EuiCodeBlock language="bash" isCopyable={true}>
-            {i18n.translate(
-              'xpack.apm.createNodeAgentInstructions.npmInstallElasticapmnodesaveCodeBlockLabel',
-              { defaultMessage: 'npm install elastic-apm-node --save' }
-            )}
+            npm install elastic-apm-node --save
           </EuiCodeBlock>
         </>
       ),

@@ -53,10 +53,7 @@ export const createPhpAgentInstructions = (commonOptions: AgentInstructions): Eu
           </EuiMarkdownFormat>
           <EuiSpacer />
           <EuiCodeBlock language="bash" isCopyable={true}>
-            {i18n.translate(
-              'xpack.apm.createPhpAgentInstructions.apkAddallowuntrustedpackagefileapkCodeBlockLabel',
-              { defaultMessage: 'apk add --allow-untrusted <package-file>.apk' }
-            )}
+            apk add --allow-untrusted &lt;package-file&gt;.apk
           </EuiCodeBlock>
           <EuiSpacer />
           <EuiMarkdownFormat>

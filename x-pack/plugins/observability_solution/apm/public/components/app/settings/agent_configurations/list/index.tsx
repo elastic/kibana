@@ -177,9 +177,7 @@ export function AgentConfigurationList({ status, configurations, refetch }: Prop
             render: (config: Config) => (
               <EuiButtonIcon
                 data-test-subj="apmColumnsButton"
-                aria-label={i18n.translate('xpack.apm.columns.euiButtonIcon.editLabel', {
-                  defaultMessage: 'Edit',
-                })}
+                aria-label="Edit"
                 iconType="pencil"
                 href={apmRouter.link('/settings/agent-configuration/edit', {
                   query: {
@@ -196,9 +194,7 @@ export function AgentConfigurationList({ status, configurations, refetch }: Prop
             render: (config: Config) => (
               <EuiButtonIcon
                 data-test-subj="apmColumnsButton"
-                aria-label={i18n.translate('xpack.apm.columns.euiButtonIcon.deleteLabel', {
-                  defaultMessage: 'Delete',
-                })}
+                aria-label="Delete"
                 iconType="trash"
                 onClick={() => setConfigToBeDeleted(config)}
               />

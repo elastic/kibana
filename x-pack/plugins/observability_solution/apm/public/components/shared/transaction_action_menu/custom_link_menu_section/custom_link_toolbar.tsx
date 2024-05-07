@@ -34,14 +34,7 @@ export function CustomLinkToolbar({
               })}
             >
               <LegacyAPMLink path={`/settings/custom-links`}>
-                <EuiIcon
-                  type="gear"
-                  color="text"
-                  aria-label={i18n.translate(
-                    'xpack.apm.customLinkToolbar.euiIcon.customLinksSettingsPageLabel',
-                    { defaultMessage: 'Custom links settings page' }
-                  )}
-                />
+                <EuiIcon type="gear" color="text" aria-label="Custom links settings page" />
               </LegacyAPMLink>
             </EuiToolTip>
           </EuiFlexItem>

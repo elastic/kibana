@@ -258,7 +258,14 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
               data-test-subj="dashboardPanelTitlesCheckbox"
             />
           </EuiFormRow>
-          <EuiFormRow label="Sync across panels">
+          <EuiFormRow
+            label={i18n.translate(
+              'dashboard.embeddableApi.showSettings.flyout.formRow.syncAcrossPanelsLabel',
+              {
+                defaultMessage: 'Sync across panels',
+              }
+            )}
+          >
             <>
               <EuiFormRow>
                 <EuiSwitch

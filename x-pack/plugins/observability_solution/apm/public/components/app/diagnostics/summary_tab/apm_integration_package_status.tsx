@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 
 import { EuiLink } from '@elastic/eui';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -36,9 +35,7 @@ export function ApmIntegrationPackageStatus() {
           data-test-subj="apmApmIntegrationPackageStatusGoToApmIntegrationLink"
           href={basePath.prepend('/app/integrations/detail/apm/overview')}
         >
-          {i18n.translate('xpack.apm.apmIntegrationPackageStatus.goToAPMIntegrationLinkLabel', {
-            defaultMessage: 'Go to APM Integration',
-          })}
+          Go to APM Integration
         </EuiLink>
       ) : null}
     </TabStatus>

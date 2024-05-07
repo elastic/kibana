@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { i18n } from '@kbn/i18n';
 import { IntlProvider } from 'react-intl';
 
@@ -15,11 +15,10 @@ import { IntlProvider } from 'react-intl';
  * of components. This component is used to setup the i18n context for a tree.
  * IntlProvider should wrap react app's root component (inside each react render method).
  */
-export const I18nProvider = ({
-  children,
-}: {
-  children: IntlProvider['props']['children'] | React.ReactElement;
-}) => {
+
+export const I18nProvider: FC<
+  PropsWithChildren<IntlProvider['props']['children'] | React.ReactElement>
+> = ({ children }) => {
   const isInitialized = i18n.getIsInitialized();
   if (!isInitialized) {
     throw new Error('kbn-i18n must be initialized before using <I18nProvider />');

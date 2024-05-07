@@ -134,9 +134,7 @@ export function SpanLinksTable({ items }: Props) {
             button={
               <EuiButtonIcon
                 data-test-subj="apmColumnsButton"
-                aria-label={i18n.translate('xpack.apm.columns.euiButtonIcon.editLabel', {
-                  defaultMessage: 'Edit',
-                })}
+                aria-label="Edit"
                 iconType="boxesHorizontal"
                 onClick={() => {
                   setIdActionMenuOpen(id);

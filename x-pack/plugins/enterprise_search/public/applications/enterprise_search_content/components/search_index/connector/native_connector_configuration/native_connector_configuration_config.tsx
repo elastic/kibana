@@ -27,6 +27,7 @@ import { HttpLogic } from '../../../../../shared/http';
 import { LicensingLogic } from '../../../../../shared/licensing';
 
 import { ConnectorConfigurationApiLogic } from '../../../../api/connector/update_connector_configuration_api_logic';
+import { isAdvancedSyncRuleSnippetEmpty } from '../../../../utils/sync_rules_helpers';
 import { ConnectorViewLogic } from '../../../connector_detail/connector_view_logic';
 import { ConnectorFilteringLogic } from '../sync_rules/connector_filtering_logic';
 
@@ -45,6 +46,8 @@ export const NativeConnectorConfigurationConfig: React.FC<
   const { hasAdvancedFilteringFeature } = useValues(ConnectorViewLogic);
   const { advancedSnippet } = useValues(ConnectorFilteringLogic);
   const { http } = useValues(HttpLogic);
+  const isAdvancedSnippetEmpty = isAdvancedSyncRuleSnippetEmpty(advancedSnippet);
+
   return (
     <ConnectorConfigurationComponent
       connector={connector}
@@ -72,7 +75,8 @@ export const NativeConnectorConfigurationConfig: React.FC<
       <EuiFlexGroup direction="row">
         <EuiFlexItem grow={false}>
           <EuiLink
-            data-test-subj="enterpriseSearchNativeConnectorConfigurationConfigLearnMoreAboutElasticsearchSecurityLink"
+            data-test-subj="entSearchContent-connector-nativeConnector-learnMoreAboutSecurityLink"
+            data-telemetry-id="entSearchContent-connector-nativeConnector-learnMoreAboutSecurityLink"
             href={docLinks.elasticsearchSecureCluster}
             target="_blank"
           >
@@ -87,7 +91,8 @@ export const NativeConnectorConfigurationConfig: React.FC<
         {nativeConnector.externalAuthDocsUrl && (
           <EuiFlexItem grow={false}>
             <EuiLink
-              data-test-subj="enterpriseSearchNativeConnectorConfigurationConfigNameAuthenticationLink"
+              data-test-subj="entSearchContent-connector-nativeConnector-configNameAuthenticationLink"
+              data-telemetry-id="entSearchContent-connector-nativeConnector-configNameAuthenticationLink"
               href={nativeConnector.externalAuthDocsUrl}
               target="_blank"
             >
@@ -122,7 +127,7 @@ export const NativeConnectorConfigurationConfig: React.FC<
         </>
       )}
 
-      {connector.status && hasAdvancedFilteringFeature && !!advancedSnippet && (
+      {connector.status && hasAdvancedFilteringFeature && !isAdvancedSnippetEmpty && (
         <>
           <EuiSpacer size="l" />
           <EuiCallOut
@@ -139,7 +144,8 @@ export const NativeConnectorConfigurationConfig: React.FC<
               values={{
                 advancedSyncRulesDocs: (
                   <EuiLink
-                    data-test-subj="enterpriseSearchNativeConnectorConfigurationConfigAdvancedSyncRulesLink"
+                    data-test-subj="entSearchContent-connector-nativeConnector-advancedSyncRulesDocsLink"
+                    data-telemetry-id="entSearchContent-connector-nativeConnector-advancedSyncRulesDocsLink"
                     href={docLinks.syncRules}
                     target="_blank"
                   >

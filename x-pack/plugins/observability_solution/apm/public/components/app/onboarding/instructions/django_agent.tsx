@@ -37,10 +37,7 @@ export const createDjangoAgentInstructions = (commonOptions: AgentInstructions):
           </EuiMarkdownFormat>
           <EuiSpacer />
           <EuiCodeBlock language="bash" isCopyable={true}>
-            {i18n.translate(
-              'xpack.apm.createDjangoAgentInstructions.PipInstallElasticapmCodeBlockLabel',
-              { defaultMessage: '$ pip install elastic-apm' }
-            )}
+            $ pip install elastic-apm
           </EuiCodeBlock>
         </>
       ),

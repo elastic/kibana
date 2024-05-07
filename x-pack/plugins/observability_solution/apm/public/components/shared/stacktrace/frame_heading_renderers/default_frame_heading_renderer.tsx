@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { FrameHeadingRendererProps } from '.';
 
 export function DefaultFrameHeadingRenderer({
@@ -19,18 +18,11 @@ export function DefaultFrameHeadingRenderer({
 
   return (
     <>
-      <FileDetail>{name}</FileDetail>{' '}
-      {i18n.translate('xpack.apm.defaultFrameHeadingRenderer.inLabel', { defaultMessage: 'in' })}
-      <FileDetail>{stackframe.function}</FileDetail>
+      <FileDetail>{name}</FileDetail> in <FileDetail>{stackframe.function}</FileDetail>
       {lineNumber > 0 && (
         <>
           {' at '}
-          <FileDetail>
-            {i18n.translate('xpack.apm.defaultFrameHeadingRenderer.fileDetail.lineLabel', {
-              defaultMessage: 'line',
-            })}
-            {lineNumber}
-          </FileDetail>
+          <FileDetail>line {lineNumber}</FileDetail>
         </>
       )}
     </>
