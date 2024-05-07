@@ -26,13 +26,27 @@ export interface Params {
   };
 }
 
+export enum TimeRangeExtendingStatus {
+  initial = 'initial',
+  loading = 'loading',
+  succeedWithResults = 'succeedWithResults',
+  succeedWithoutResults = 'succeedWithoutResults',
+  failed = 'failed',
+  timedOut = 'timedOut',
+}
+
 export interface OccurrencesRange {
   from: string;
   to: string;
 }
 
+interface OccurrencesRangeFetchResult {
+  status: TimeRangeExtendingStatus;
+  range?: OccurrencesRange;
+}
+
 export interface Result {
-  fetch: () => Promise<OccurrencesRange | null | undefined>;
+  fetch: () => Promise<OccurrencesRangeFetchResult>;
 }
 
 export const useFetchOccurrencesRange = (params: Params): Result => {
@@ -43,7 +57,7 @@ export const useFetchOccurrencesRange = (params: Params): Result => {
 
   const fetchOccurrences = useCallback(
     async (dataView?: DataView, query?: Query | AggregateQuery, filters?: Filter[]) => {
-      let occurrencesRange = null;
+      let occurrencesRangeResult = { status: TimeRangeExtendingStatus.failed };
 
       if (dataView?.isTimeBased() && query && mountedRef.current) {
         abortControllerRef.current?.abort();
@@ -56,7 +70,7 @@ export const useFetchOccurrencesRange = (params: Params): Result => {
             filters ?? [],
             getEsQueryConfig(uiSettings)
           );
-          occurrencesRange = await fetchDocumentsTimeRange({
+          occurrencesRangeResult = await fetchDocumentsTimeRange({
             data,
             dataView,
             dslQuery,
@@ -70,7 +84,7 @@ export const useFetchOccurrencesRange = (params: Params): Result => {
         }
       }
 
-      return occurrencesRange;
+      return occurrencesRangeResult;
     },
     [abortControllerRef, mountedRef, data, uiSettings]
   );
@@ -97,9 +111,9 @@ async function fetchDocumentsTimeRange({
   dataView: DataView;
   dslQuery?: object;
   abortSignal?: AbortSignal;
-}): Promise<OccurrencesRange | null> {
+}): Promise<OccurrencesRangeFetchResult> {
   if (!dataView?.timeFieldName) {
-    return null;
+    return { status: TimeRangeExtendingStatus.failed };
   }
 
   const result = await lastValueFrom(
@@ -136,14 +150,14 @@ async function fetchDocumentsTimeRange({
   );
 
   if (result.rawResponse?.timed_out) {
-    return null;
+    return { status: TimeRangeExtendingStatus.timedOut };
   }
 
   if (
     result.rawResponse?._clusters?.total !== result.rawResponse?._clusters?.successful ||
     result.rawResponse?._shards?.total !== result.rawResponse?._shards?.successful
   ) {
-    return null;
+    return { status: TimeRangeExtendingStatus.failed };
   }
 
   const earliestTimestamp = (
@@ -154,6 +168,9 @@ async function fetchDocumentsTimeRange({
   )?.value_as_string;
 
   return earliestTimestamp && latestTimestamp
-    ? { from: earliestTimestamp, to: latestTimestamp }
-    : null;
+    ? {
+        status: TimeRangeExtendingStatus.succeedWithResults,
+        range: { from: earliestTimestamp, to: latestTimestamp },
+      }
+    : { status: TimeRangeExtendingStatus.succeedWithoutResults };
 }

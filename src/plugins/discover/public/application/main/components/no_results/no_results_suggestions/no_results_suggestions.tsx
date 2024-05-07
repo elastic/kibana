@@ -8,7 +8,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { css } from '@emotion/react';
-import { EuiEmptyPrompt, EuiButton, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiButton, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import {
   isOfQueryType,
@@ -18,6 +18,7 @@ import {
   type Filter,
 } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { isTextBasedQuery } from '../../../utils/is_text_based_query';
 import { NoResultsSuggestionDefault } from './no_results_suggestion_default';
 import {
@@ -28,15 +29,8 @@ import { NoResultsSuggestionWhenQuery } from './no_results_suggestion_when_query
 import { NoResultsSuggestionWhenTimeRange } from './no_results_suggestion_when_time_range';
 import { hasActiveFilter } from '../../layout/utils';
 import { useDiscoverServices } from '../../../../../hooks/use_discover_services';
-import { useFetchOccurrencesRange } from './use_fetch_occurances_range';
+import { useFetchOccurrencesRange, TimeRangeExtendingStatus } from './use_fetch_occurances_range';
 import { NoResultsIllustration } from './assets/no_results_illustration';
-
-enum TimeRangeExtendingStatus {
-  initial = 'initial',
-  loading = 'loading',
-  success = 'success',
-  notFound = 'notFound',
-}
 
 interface NoResultsSuggestionProps {
   dataView: DataView;
@@ -55,7 +49,7 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const services = useDiscoverServices();
-  const { data, uiSettings, timefilter } = services;
+  const { data, uiSettings, timefilter, toastNotifications } = services;
   const hasQuery =
     (isOfQueryType(query) && !!query?.query) || (!!query && isOfAggregateQueryType(query));
   const hasFilters = hasActiveFilter(filters);
@@ -74,20 +68,34 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = ({
 
   const extendTimeRange = useCallback(async () => {
     setTimeRangeExtendingStatus(TimeRangeExtendingStatus.loading);
-    const range = await fetch();
-    if (range?.from && range?.to) {
+    const { status, range } = await fetch();
+
+    if (status === TimeRangeExtendingStatus.succeedWithResults && range?.from && range?.to) {
       timefilter.setTime({
         from: range.from,
         to: range.to,
       });
-    } else {
-      setTimeRangeExtendingStatus(TimeRangeExtendingStatus.notFound);
+      return;
     }
-  }, [fetch, setTimeRangeExtendingStatus, timefilter]);
 
-  const canExpandTimeRange =
-    isTimeBased && timeRangeExtendingStatus !== TimeRangeExtendingStatus.notFound;
-  const canAdjustSearchCriteria = canExpandTimeRange || hasFilters || hasQuery;
+    setTimeRangeExtendingStatus(status);
+
+    if (status === TimeRangeExtendingStatus.failed) {
+      toastNotifications.addDanger(
+        i18n.translate('discover.noResults.suggestion.expandTimeRangeFailedNotification', {
+          defaultMessage: 'Request failed when searching the full time range of documents',
+        })
+      );
+    } else if (status === TimeRangeExtendingStatus.timedOut) {
+      toastNotifications.addDanger(
+        i18n.translate('discover.noResults.suggestion.expandTimeRangeTimedOutNotification', {
+          defaultMessage: 'Request timed out when searching the full time range of documents',
+        })
+      );
+    }
+  }, [fetch, setTimeRangeExtendingStatus, timefilter, toastNotifications]);
+
+  const canAdjustSearchCriteria = isTimeBased || hasFilters || hasQuery;
 
   const body = canAdjustSearchCriteria ? (
     <>
@@ -101,9 +109,9 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = ({
           display: inline-block;
         `}
       >
-        {canExpandTimeRange && (
+        {isTimeBased && (
           <li>
-            <NoResultsSuggestionWhenTimeRange />
+            <NoResultsSuggestionWhenTimeRange timeRangeExtendingStatus={timeRangeExtendingStatus} />
           </li>
         )}
         {hasQuery && (
@@ -120,9 +128,9 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = ({
         )}
       </ul>
     </>
-  ) : timeRangeExtendingStatus !== TimeRangeExtendingStatus.notFound ? (
+  ) : (
     <NoResultsSuggestionDefault dataView={dataView} />
-  ) : null;
+  );
 
   return (
     <EuiEmptyPrompt
@@ -140,33 +148,32 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = ({
       }
       body={body}
       actions={
-        !isTextBasedQuery(query) && isTimeBased ? (
+        !isTextBasedQuery(query) &&
+        isTimeBased &&
+        [
+          TimeRangeExtendingStatus.initial,
+          TimeRangeExtendingStatus.loading,
+          TimeRangeExtendingStatus.timedOut,
+          TimeRangeExtendingStatus.failed,
+        ].includes(timeRangeExtendingStatus) ? (
           <div
             css={css`
               min-block-size: ${euiTheme.size.xxl};
             `}
           >
-            {timeRangeExtendingStatus === TimeRangeExtendingStatus.notFound ? (
-              <EuiText color="subdued" data-test-subj="discoverSearchAllMatchesGivesNoResults">
-                <FormattedMessage
-                  id="discover.noResults.suggestion.searchAllMatchesButtonGivesNoResultsText"
-                  defaultMessage="Expanding the time range gives no results too."
-                />
-              </EuiText>
-            ) : (
-              <EuiButton
-                color="primary"
-                fill
-                onClick={extendTimeRange}
-                isLoading={timeRangeExtendingStatus === TimeRangeExtendingStatus.loading}
-                data-test-subj="discoverNoResultsViewAllMatches"
-              >
-                <FormattedMessage
-                  id="discover.noResults.suggestion.searchAllMatchesButtonText"
-                  defaultMessage="Search entire time range"
-                />
-              </EuiButton>
-            )}
+            <EuiButton
+              color="primary"
+              fill
+              onClick={extendTimeRange}
+              disabled={timeRangeExtendingStatus === TimeRangeExtendingStatus.loading}
+              isLoading={timeRangeExtendingStatus === TimeRangeExtendingStatus.loading}
+              data-test-subj="discoverNoResultsViewAllMatches"
+            >
+              <FormattedMessage
+                id="discover.noResults.suggestion.searchAllMatchesButtonText"
+                defaultMessage="Search full time range"
+              />
+            </EuiButton>
           </div>
         ) : undefined
       }
