@@ -273,7 +273,8 @@ export const getBodyCompletionItems = (
         // map autocomplete items to completion items
         .map((item) => {
           const suggestion = {
-            label: item.name!,
+            // convert name to a string
+            label: item.name + '',
             insertText: getInsertText(item, bodyContent),
             detail: i18nTexts.api,
             // the kind is only used to configure the icon
@@ -294,12 +295,12 @@ const getInsertText = (
 ): string => {
   let insertText = bodyContent.endsWith('"') ? '' : '"';
   if (insertValue && insertValue !== '{' && insertValue !== '[') {
-    insertText = `${insertValue}"`;
+    insertText += `${insertValue}"`;
   } else {
-    insertText = `${name}"`;
+    insertText += `${name}"`;
   }
   // check if there is template to add
-  if (template) {
+  if (template !== undefined) {
     let templateLines;
     const { __raw, value: templateValue } = template;
     if (__raw && templateValue) {

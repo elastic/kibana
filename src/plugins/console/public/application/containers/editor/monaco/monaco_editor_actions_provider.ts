@@ -284,7 +284,11 @@ export class MonacoEditorActionsProvider {
     return AutocompleteType.BODY;
   }
 
-  private async getSuggestions(model: monaco.editor.ITextModel, position: monaco.Position) {
+  private async getSuggestions(
+    model: monaco.editor.ITextModel,
+    position: monaco.Position,
+    context: monaco.languages.CompletionContext
+  ) {
     // determine autocomplete type
     const autocompleteType = await this.getAutocompleteType(model, position);
     if (!autocompleteType) {
@@ -311,14 +315,19 @@ export class MonacoEditorActionsProvider {
     }
 
     if (autocompleteType === AutocompleteType.BODY) {
+      // suggestions only when triggered by " or keyboard
+      if (context.triggerCharacter && context.triggerCharacter !== '"') {
+        return { suggestions: [] };
+      }
       const requests = await this.getRequestsBetweenLines(
         model,
         position.lineNumber,
         position.lineNumber
       );
       const requestStartLineNumber = requests[0].startLineNumber;
+      const suggestions = getBodyCompletionItems(model, position, requestStartLineNumber);
       return {
-        suggestions: getBodyCompletionItems(model, position, requestStartLineNumber),
+        suggestions,
       };
     }
 
@@ -332,6 +341,6 @@ export class MonacoEditorActionsProvider {
     context: monaco.languages.CompletionContext,
     token: monaco.CancellationToken
   ): monaco.languages.ProviderResult<monaco.languages.CompletionList> {
-    return this.getSuggestions(model, position);
+    return this.getSuggestions(model, position, context);
   }
 }

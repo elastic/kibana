@@ -95,6 +95,10 @@ describe('tokens_utils', () => {
         tokens: ['{'],
       },
       {
+        value: '{"property1":["nested1", []],"',
+        tokens: ['{'],
+      },
+      {
         value: '{"property1":"value1","property2":',
         tokens: ['{', 'property2'],
       },
@@ -104,7 +108,15 @@ describe('tokens_utils', () => {
       },
       {
         value: '{"property1":[123,"test"]',
-        tokens: ['{', 'property1'],
+        tokens: ['{'],
+      },
+      {
+        value: '{"property1":{"nested1":"value"},"',
+        tokens: ['{'],
+      },
+      {
+        value: '{"property1":{"nested1":"value","nested2":{}},"',
+        tokens: ['{'],
       },
     ];
     for (const testCase of testCases) {
