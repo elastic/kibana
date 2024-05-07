@@ -37,6 +37,9 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const log = getService('log');
   const kibanaServer = getService('kibanaServer');
+  const config = getService('config');
+  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
+
   const { indexEnhancedDocuments, indexListOfDocuments, indexGeneratedDocuments } =
     dataGeneratorFactory({
       es,
@@ -134,7 +137,7 @@ export default ({ getService }: FtrProviderContext) => {
         'kibana.alert.risk_score': 55,
         'kibana.alert.rule.actions': [],
         'kibana.alert.rule.author': [],
-        'kibana.alert.rule.created_by': 'elastic',
+        'kibana.alert.rule.created_by': ELASTICSEARCH_USERNAME,
         'kibana.alert.rule.description': 'Detecting root and admin users',
         'kibana.alert.rule.enabled': true,
         'kibana.alert.rule.exceptions_list': [],
@@ -151,7 +154,7 @@ export default ({ getService }: FtrProviderContext) => {
         'kibana.alert.rule.threat': [],
         'kibana.alert.rule.to': 'now',
         'kibana.alert.rule.type': 'esql',
-        'kibana.alert.rule.updated_by': 'elastic',
+        'kibana.alert.rule.updated_by': ELASTICSEARCH_USERNAME,
         'kibana.alert.rule.version': 1,
         'kibana.alert.workflow_tags': [],
         'kibana.alert.workflow_assignee_ids': [],
