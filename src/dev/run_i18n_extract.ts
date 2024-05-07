@@ -7,13 +7,14 @@
  */
 
 import chalk from 'chalk';
-import Listr from 'listr';
+import { Listr } from 'listr2';
 import { resolve } from 'path';
 
 import { createFailError } from '@kbn/dev-cli-errors';
 import { run } from '@kbn/dev-cli-runner';
 import { ErrorReporter, serializeToJson, serializeToJson5, writeFileAsync } from './i18n';
 import { extractDefaultMessages, mergeConfigs } from './i18n/tasks';
+import { I18nCheckTaskContext } from './i18n/types';
 
 run(
   async ({
@@ -38,22 +39,23 @@ run(
     }
     const srcPaths = Array().concat(path || ['./src', './packages', './x-pack']);
 
-    const list = new Listr(
+    const list = new Listr<I18nCheckTaskContext>(
       [
         {
           title: 'Merging .i18nrc.json files',
-          task: () => new Listr(mergeConfigs(includeConfig), { exitOnError: true }),
+          task: (context, task) =>
+            task.newListr(mergeConfigs(includeConfig), { exitOnError: true }),
         },
         {
           title: 'Extracting Default Messages',
-          task: ({ config }) =>
-            new Listr(extractDefaultMessages(config, srcPaths), { exitOnError: true }),
+          task: (context, task) =>
+            task.newListr(extractDefaultMessages(context.config!, srcPaths), { exitOnError: true }),
         },
         {
           title: 'Writing to file',
-          enabled: (ctx) => outputDir && ctx.messages.size,
-          task: async (ctx) => {
-            const sortedMessages = [...ctx.messages].sort(([key1], [key2]) =>
+          enabled: (ctx) => Boolean(outputDir && ctx.messages.size > 0),
+          task: async (context) => {
+            const sortedMessages = [...context.messages].sort(([key1], [key2]) =>
               key1.localeCompare(key2)
             );
             await writeFileAsync(
@@ -66,7 +68,7 @@ run(
         },
       ],
       {
-        renderer: process.env.CI ? 'verbose' : 'default',
+        renderer: process.env.CI ? 'verbose' : ('default' as any),
       }
     );
 

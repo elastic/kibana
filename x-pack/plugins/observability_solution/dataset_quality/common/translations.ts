@@ -193,7 +193,7 @@ export const summaryPanelDatasetsActivityText = i18n.translate(
 export const summaryPanelDatasetsActivityTooltipText = i18n.translate(
   'xpack.datasetQuality.summaryPanelDatasetsActivityTooltipText',
   {
-    defaultMessage: 'The number of datasets with activity in the last 24 hours.',
+    defaultMessage: 'The number of datasets with activity in the selected time range.',
   }
 );
 
