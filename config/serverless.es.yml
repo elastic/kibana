@@ -12,6 +12,7 @@ xpack.serverless.observability.enabled: false
 enterpriseSearch.enabled: false
 xpack.fleet.enabled: false
 xpack.observabilityAIAssistant.enabled: false
+xpack.osquery.enabled: false
 
 ## Fine-tune the search solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
 xpack.features.overrides:
