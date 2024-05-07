@@ -9,7 +9,7 @@
 import type { ESQLCommand, ESQLCommandOption, ESQLFunction, ESQLMessage } from '@kbn/esql-ast';
 
 export interface FunctionDefinition {
-  type: 'builtin' | 'agg' | 'eval' | 'grouping';
+  type: 'builtin' | 'agg' | 'eval';
   ignoreAsSuggestion?: boolean;
   name: string;
   alias?: string[];
