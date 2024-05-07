@@ -123,12 +123,12 @@ export async function fetchEsQuery({
         ...(isGroupAgg ? { topHitsSize: params.size } : {}),
       }),
       // For testing purposes
-      delay: {
-        shard_delay: {
-          value: '1s',
-        },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any,
+      // delay: {
+      //   shard_delay: {
+      //     value: '1s',
+      //   },
+      //   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // } as any,
     },
   });
 
