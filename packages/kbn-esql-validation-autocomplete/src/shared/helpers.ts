@@ -239,11 +239,18 @@ export function isArrayType(type: string) {
   return ARRAY_REGEXP.test(type);
 }
 
+const arrayToSingularMap: Map<FunctionParameterType, FunctionParameterType> = new Map([
+  ['number[]', 'number'],
+  ['date[]', 'date'],
+  ['boolean[]', 'boolean'],
+  ['string[]', 'string'],
+]);
+
 /**
  * Given an array type for example `string[]` it will return `string`
  */
 export function extractSingularType(type: FunctionParameterType) {
-  return type.replace(ARRAY_REGEXP, '') as FunctionParameterType; // TODO think about how to make this safe...
+  return arrayToSingularMap.has(type) ? arrayToSingularMap.get(type) : type;
 }
 
 export function createMapFromList<T extends { name: string }>(arr: T[]): Map<string, T> {
