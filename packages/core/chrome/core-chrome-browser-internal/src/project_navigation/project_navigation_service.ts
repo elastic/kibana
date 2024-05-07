@@ -349,12 +349,11 @@ export class ProjectNavigationService {
    * we need to find the correct solution navigation based on the current location and switch to it.
    */
   private findSolutionForCurrentLocation(): string | null {
+    if (Object.keys(this.solutionNavDefinitions$.getValue()).length === 0) return null;
+
     let idFound: string | null = null;
 
-    combineLatest([
-      this.solutionNavDefinitions$.pipe(skipWhile((v) => Object.keys(v).length === 0)),
-      this.location$,
-    ])
+    combineLatest([this.solutionNavDefinitions$, this.location$])
       .pipe(take(1))
       .subscribe(([definitions, location]) => {
         Object.entries(definitions).forEach(([id, definition]) => {
