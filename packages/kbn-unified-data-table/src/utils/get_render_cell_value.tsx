@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import {
@@ -36,6 +36,9 @@ export const getRenderCellValueFn = ({
   maxEntries,
   externalCustomRenderers,
   isPlainRecord,
+  rowHeightLines,
+  autoHeightRows,
+  toggleRowHeight,
 }: {
   dataView: DataView;
   rows: DataTableRecord[] | undefined;
@@ -46,6 +49,9 @@ export const getRenderCellValueFn = ({
   maxEntries: number;
   externalCustomRenderers?: CustomCellRenderer;
   isPlainRecord?: boolean;
+  rowHeightLines?: number;
+  autoHeightRows: number[];
+  toggleRowHeight: (rowIndex: number) => void;
 }) => {
   return ({
     rowIndex,
@@ -122,6 +128,13 @@ export const getRenderCellValueFn = ({
     }
 
     if (field?.type === '_source' || useTopLevelObjectColumns) {
+      const onTreeExpand = useCallback(() => {
+        // expand row {rowIndex}
+        toggleRowHeight(rowIndex);
+      }, [rowIndex]);
+
+      const isSingleRow = autoHeightRows.includes(rowIndex) ? false : rowHeightLines === 0;
+      // console.log(isSingleRow);
       return (
         <SourceDocument
           useTopLevelObjectColumns={useTopLevelObjectColumns}
@@ -133,6 +146,8 @@ export const getRenderCellValueFn = ({
           maxEntries={maxEntries}
           isPlainRecord={isPlainRecord}
           isDarkMode={ctx.isDarkMode}
+          isSingleRow={isSingleRow}
+          onTreeExpand={onTreeExpand}
         />
       );
     }

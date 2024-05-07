@@ -39,6 +39,8 @@ export function SourceDocument({
   dataTestSubj = 'discoverCellDescriptionList',
   className,
   isDarkMode,
+  isSingleRow,
+  onTreeExpand,
 }: {
   useTopLevelObjectColumns: boolean;
   row: DataTableRecord;
@@ -51,6 +53,8 @@ export function SourceDocument({
   dataTestSubj?: string;
   className?: string;
   isDarkMode: boolean;
+  isSingleRow: boolean;
+  onTreeExpand: () => void;
 }) {
   const pairs: FormattedHit = useTopLevelObjectColumns
     ? getTopLevelObjectPairs(row.raw, columnId, dataView, shouldShowFieldHandler).slice(
@@ -62,7 +66,12 @@ export function SourceDocument({
   // return a different view in case of ES|QL (JSON tree view)
   if (isPlainRecord) {
     return (
-      <JSONTree data={row.raw as unknown as Record<string, unknown>} isDarkMode={isDarkMode} />
+      <JSONTree
+        data={row.raw as unknown as Record<string, unknown>}
+        isDarkMode={isDarkMode}
+        isSingleRow={isSingleRow}
+        onTreeExpand={onTreeExpand}
+      />
     );
   }
 

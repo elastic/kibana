@@ -45,18 +45,25 @@ export const TreeChild = ({
   isDarkMode,
   isRootElement,
   parent,
+  isSingleRow,
+  onTreeExpand,
 }: {
   node: Record<string, unknown>;
   i: number;
   isDarkMode: boolean;
   isRootElement?: boolean;
   parent?: unknown;
+  isSingleRow?: boolean;
+  onTreeExpand?: () => void;
 }) => {
-  const [expanded, setExpanded] = useState(isRootElement);
+  const [expanded, setExpanded] = useState(isRootElement && !isSingleRow);
 
   const handleExpandElement = useCallback(() => {
     setExpanded(!expanded);
-  }, [expanded]);
+    if (isSingleRow && onTreeExpand) {
+      onTreeExpand();
+    }
+  }, [expanded, isSingleRow, onTreeExpand]);
 
   const itemLabelProps = {
     node,
@@ -88,6 +95,7 @@ export const TreeChild = ({
           css={css`
             font-family: ${euiTheme.font.familyCode};
             margin-right: ${euiTheme.size.s};
+            margin-top: 3px;
             inline-size: ${euiTheme.size.base};
             block-size: ${euiTheme.size.base};
           `}

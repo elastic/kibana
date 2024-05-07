@@ -14,14 +14,25 @@ const TreeChildMemoized = React.memo(TreeChild);
 export const JSONTree = ({
   data,
   isDarkMode,
+  isSingleRow,
+  onTreeExpand,
 }: {
   data: Record<string, unknown>;
   isDarkMode: boolean;
+  isSingleRow: boolean;
+  onTreeExpand: () => void;
 }) => {
   return (
     <>
       {Object.keys(data).length !== 0 && (
-        <TreeChildMemoized node={data} i={0} isDarkMode={isDarkMode} isRootElement />
+        <TreeChildMemoized
+          node={data}
+          i={0}
+          isDarkMode={isDarkMode}
+          isRootElement
+          isSingleRow={isSingleRow}
+          onTreeExpand={onTreeExpand}
+        />
       )}
     </>
   );
