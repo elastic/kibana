@@ -11,7 +11,6 @@ import { isTextBasedQuery } from './is_text_based_query';
 describe('isTextBasedQuery', () => {
   it('should work correctly', () => {
     expect(isTextBasedQuery({ query: '', language: 'lucene' })).toEqual(false);
-    expect(isTextBasedQuery({ sql: 'SELECT * from foo' })).toEqual(true);
     expect(isTextBasedQuery({ esql: 'from foo' })).toEqual(true);
     expect(isTextBasedQuery()).toEqual(false);
   });
