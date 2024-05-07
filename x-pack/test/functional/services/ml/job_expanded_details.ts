@@ -12,12 +12,13 @@ import { MlADJobTable } from './job_table';
 import { MlJobAnnotations } from './job_annotations_table';
 
 export function MachineLearningJobExpandedDetailsProvider(
-  { getService }: FtrProviderContext,
+  { getService, getPageObject }: FtrProviderContext,
   jobTable: MlADJobTable,
   jobAnnotationsTable: MlJobAnnotations
 ) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const headerPage = getPageObject('header');
 
   return {
     async clickEditAnnotationAction(jobId: string, annotationId: string) {
@@ -116,6 +117,8 @@ export function MachineLearningJobExpandedDetailsProvider(
       await retry.tryForTime(60_000, async () => {
         await jobTable.ensureDetailsOpen(jobId);
         await testSubjects.click(jobTable.detailsSelector(jobId, 'mlJobListTab-forecasts'), 3_000);
+        await headerPage.awaitKibanaChrome();
+        await headerPage.waitUntilLoadingHasFinished();
         await testSubjects.existOrFail('mlJobListForecastTable', failFasterThanExistOrFail);
         await this.assertJobDetailsTabOpen('mlJobListTab-forecasts');
       });
