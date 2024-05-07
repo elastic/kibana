@@ -947,7 +947,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(previewAlerts[0]._source).not.toHaveProperty(ALERT_ORIGINAL_TIME);
     });
 
-    it('should suppress alerts ES|QL custom created in query field', async () => {
+    it('should suppress alerts by custom field, created in ES|QL query', async () => {
       const id = uuidv4();
       const firstTimestamp = '2020-10-28T05:45:00.000Z';
       const secondTimestamp = '2020-10-28T06:10:00.000Z';
@@ -1045,7 +1045,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    it('should suppress alerts ES|QL custom created in query field when do not suppress missing fields configured', async () => {
+    it('should suppress alerts by custom field, created in ES|QL query, when do not suppress missing fields configured', async () => {
       const id = uuidv4();
       const firstTimestamp = '2020-10-28T05:45:00.000Z';
       const secondTimestamp = '2020-10-28T06:10:00.000Z';
@@ -1143,7 +1143,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    it('should suppress by field dropped in ES|QL query but returned from source index', async () => {
+    it('should suppress by field, dropped in ES|QL query, but returned from source index', async () => {
       const id = uuidv4();
       const firstTimestamp = '2020-10-28T05:45:00.000Z';
       const secondTimestamp = '2020-10-28T06:10:00.000Z';
@@ -1208,8 +1208,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    // even when field is dropped in ES"QL query it is returned from source document
-    it('should not suppress field dropped in ES|QL alerts with missing fields if configured so', async () => {
+    // even when field is dropped in ES|QL query it is returned from source document
+    it('should not suppress alerts by field, dropped in ES|QL query, when do not suppress missing fields configured', async () => {
       const id = uuidv4();
       const firstTimestamp = '2020-10-28T05:45:00.000Z';
       const secondTimestamp = '2020-10-28T06:10:00.000Z';
