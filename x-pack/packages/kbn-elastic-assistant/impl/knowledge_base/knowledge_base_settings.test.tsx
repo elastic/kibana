@@ -13,9 +13,11 @@ import { KnowledgeBaseSettings } from './knowledge_base_settings';
 import { TestProviders } from '../mock/test_providers/test_providers';
 import { useKnowledgeBaseStatus } from './use_knowledge_base_status';
 import { mockSystemPrompts } from '../mock/system_prompt';
+import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 
 const mockUseAssistantContext = {
   allSystemPrompts: mockSystemPrompts,
+  assistantFeatures: jest.fn(() => defaultAssistantFeatures),
   conversations: {},
   http: {
     basePath: {
