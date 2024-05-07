@@ -53,6 +53,7 @@ export const rewriteBodyRequest: RewriteResponseCase<RuleUpdatesBody> = ({
         ? { use_alert_data_for_template: action.useAlertDataForTemplate }
         : {}),
       ...(uuid && { uuid }),
+      ...('doAutoRecover' in action ? { do_auto_recover: action.doAutoRecover } : {}),
     };
   }),
   ...(alertDelay ? { alert_delay: alertDelay } : {}),

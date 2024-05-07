@@ -154,6 +154,7 @@ export const ActionTypeForm = ({
   hasFieldsForAAD,
   disableErrorMessages,
 }: ActionTypeFormProps) => {
+  console.log(actionItem);
   const {
     application: { capabilities },
     http,
