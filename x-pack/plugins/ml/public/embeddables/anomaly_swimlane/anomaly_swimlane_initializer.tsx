@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, useEffect, useState, useRef } from 'react';
+import React, { type FC, useEffect, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -42,6 +42,16 @@ export interface AnomalySwimlaneInitializerProps {
   onCancel: () => void;
   adJobsApiService: MlApiServices['jobs'];
 }
+
+const getJobSelectionErrors = (jobIds: string[]) => {
+  if (jobIds.length === 0) {
+    return [
+      i18n.translate('xpack.ml.swimlaneEmbeddable.setupModal.jobSelectionRequiredError', {
+        defaultMessage: 'Job selection is required',
+      }),
+    ];
+  }
+};
 
 export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = ({
   onCreate,
@@ -112,8 +122,11 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
 
   const isPanelTitleValid = panelTitle.length > 0;
 
+  const jobIdsErrors = getJobSelectionErrors(jobIds);
+
   const isFormValid =
     isPanelTitleValid &&
+    !jobIdsErrors &&
     (swimlaneType === SWIMLANE_TYPE.OVERALL ||
       (swimlaneType === SWIMLANE_TYPE.VIEW_BY && !!viewBySwimlaneFieldName));
 
@@ -146,6 +159,7 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
             onChange={(update) => {
               setJobIds([...(update?.jobIds ?? []), ...(update?.groupIds ?? [])]);
             }}
+            errors={jobIdsErrors}
           />
 
           <EuiFormRow
