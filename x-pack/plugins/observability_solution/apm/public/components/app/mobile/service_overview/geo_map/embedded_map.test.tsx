@@ -16,7 +16,7 @@ import { MapTypes } from '../../../../../../common/mobile/constants';
 
 describe('Embedded Map', () => {
   it('it renders', async () => {
-    const mockMapsApi = {
+    const mockMapsStartService = {
       Map: jest.fn().mockImplementation(() => <div data-test-subj="mockMap" />),
     };
 
@@ -40,7 +40,7 @@ describe('Embedded Map', () => {
         initialEntries={['/mobile-services/{serviceName}/overview?rangeFrom=now-15m&rangeTo=now&']}
       >
         <MockApmPluginContextWrapper>
-          <KibanaContextProvider services={{ maps: mockMapsApi, spaces: mockSpaces }}>
+          <KibanaContextProvider services={{ maps: mockMapsStartService, spaces: mockSpaces }}>
             <EmbeddedMap
               selectedMap={MapTypes.Http}
               filters={[]}
