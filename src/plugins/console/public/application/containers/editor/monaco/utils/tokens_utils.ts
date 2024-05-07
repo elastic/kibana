@@ -285,7 +285,7 @@ export const parseBody = (value: string): string[] => {
       ) {
         skipWhitespace();
         skipComments();
-        // inspect the current char: expecting a property name or a closing }
+        // inspect the current char
         if (isDoubleQuote(char)) {
           // property name: parse the string and add to tokens
           const propertyName = parsePropertyName();
@@ -304,18 +304,17 @@ export const parseBody = (value: string): string[] => {
           tokens.pop();
           currentToken = tokens[tokens.length - 1];
           next();
+
           skipWhitespace();
           // check if the empty object was used as a property value
           if (isPropertyName(currentToken)) {
-            // expecting a comma, otherwise the parser fails
-            if (!isComma(char)) {
-              throw new Error('Not able to parse');
-            }
-            // after finding the comma, the property value is parsed, the property name can be removed from scope
+            // the empty object was the value for this property name, remove it from tokens
             tokens.pop();
             currentToken = tokens[tokens.length - 1];
-            next();
           }
+        } else if (isComma(char)) {
+          // ignore the comma
+          next();
         } else {
           throw new Error('Not able to parse');
         }
@@ -326,24 +325,23 @@ export const parseBody = (value: string): string[] => {
         skipWhitespace();
         skipComments();
 
-        // inspect the current char: expect a closing ] or a valid value
+        // inspect the current char
         if (char === ']') {
           // an empty array
           tokens.pop();
           currentToken = tokens[tokens.length - 1];
           next();
+
           skipWhitespace();
           // check if empty array was used as a property value
           if (isPropertyName(currentToken)) {
-            // expecting a comma, otherwise the parser fails
-            if (!isComma(char)) {
-              throw new Error('Not able to parse');
-            }
-            // after finding the comma, the property value is parsed, the property name can be removed from scope
+            // the empty array was the value for this property name, remove it from tokens
             tokens.pop();
             currentToken = tokens[tokens.length - 1];
-            next();
           }
+        } else if (isComma(char)) {
+          // ignore the comma
+          next();
         } else {
           // parsing array items
 
@@ -363,35 +361,16 @@ export const parseBody = (value: string): string[] => {
             } else {
               throw new Error('Not able to parse');
             }
-            // after parsing a simple value, expect a comma or a closing ]
-            if (isComma(char)) {
-              next();
-            } else if (char === ']') {
-              tokens.pop();
-              currentToken = tokens[tokens.length - 1];
-              next();
-              skipWhitespace();
-              // check if empty array was used as a property value
-              if (isPropertyName(currentToken)) {
-                // expecting a comma, otherwise the parser fails
-                if (!isComma(char)) {
-                  throw new Error('Not able to parse');
-                }
-                // after finding the comma, the property value is parsed, the property name can be removed from scope
-                tokens.pop();
-                currentToken = tokens[tokens.length - 1];
-                next();
-              }
-            }
           }
         }
       } else if (
-        // parsing property value
+        // parsing property value after a property name was found
         isPropertyName(currentToken)
       ) {
         skipWhitespace();
         skipComments();
         if (char === '{' || char === '[') {
+          // nested object or array
           tokens.push(char);
           currentToken = char;
           next();
@@ -406,14 +385,9 @@ export const parseBody = (value: string): string[] => {
           } else {
             throw new Error('Not able to parse');
           }
-          // after parsing a simple value, expect a comma
-          if (!isComma(char)) {
-            throw new Error('Not able to parse');
-          }
-          // after comma, this property name is parsed and can be removed from tokens
+          // after parsing a simple value, this property name is parsed and can be removed from tokens
           tokens.pop();
           currentToken = tokens[tokens.length - 1];
-          next();
         }
       } else {
         throw new Error('Not able to parse');
