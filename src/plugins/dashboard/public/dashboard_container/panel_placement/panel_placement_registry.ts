@@ -6,12 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { PanelPlacementSettings } from '../component/panel_placement/types';
+import { GetPanelPlacementSettings } from './types';
 import { panelPlacementStrings } from '../_dashboard_container_strings';
-
-type GetPanelPlacementSettings<SerializedState extends object = object> = (
-  serializedState?: SerializedState
-) => PanelPlacementSettings;
 
 const registry = new Map<string, GetPanelPlacementSettings<object>>();
 

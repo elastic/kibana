@@ -15,7 +15,6 @@ import {
   DashboardStart,
   DASHBOARD_GRID_COLUMN_COUNT,
   PanelPlacementStrategy,
-  registerDashboardPanelPlacementSetting,
 } from '@kbn/dashboard-plugin/public';
 import {
   EmbeddableSetup,
@@ -122,7 +121,7 @@ export class LinksPlugin
         getIconForSavedObject: () => APP_ICON,
       });
 
-      registerDashboardPanelPlacementSetting(
+      plugins.dashboard.registerDashboardPanelPlacementSetting(
         CONTENT_ID,
         (serializedState: LinksSerializedState | undefined) => {
           if (!serializedState) return {};
