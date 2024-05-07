@@ -7,7 +7,6 @@
  */
 
 import * as React from 'react';
-import ReactDOM from 'react-dom';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import * as conn from '..';
 
@@ -21,8 +20,8 @@ export interface OpenConnectionDetailsParams {
 }
 
 export const openConnectionDetails = async ({ props, start }: OpenConnectionDetailsParams) => {
-  const mount = (element: HTMLElement) => {
-    const reactElement = (
+  const flyoutRef = start.core.overlays.renderFlyout(
+    () => (
       <conn.KibanaConnectionDetailsProvider
         {...props}
         onNavigation={() => {
@@ -31,12 +30,9 @@ export const openConnectionDetails = async ({ props, start }: OpenConnectionDeta
       >
         <conn.ConnectionDetailsFlyoutContent />
       </conn.KibanaConnectionDetailsProvider>
-    );
-    ReactDOM.render(reactElement, element);
-
-    return () => ReactDOM.unmountComponentAtNode(element);
-  };
-  const flyoutRef = start.core.overlays.openFlyout(mount, { size: 's' });
+    ),
+    { size: 's' }
+  );
 
   return flyoutRef;
 };
