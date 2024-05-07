@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+/* eslint-disable no-console */
 
 import { firstValueFrom, of } from 'rxjs';
 import { PathConfigType, config as pathConfigDef } from '@kbn/utils';
@@ -65,10 +66,21 @@ export class EnvironmentService {
 
     // Log unhandled rejections so that we can fix them in preparation for https://github.com/elastic/kibana/issues/77469
     process.on('unhandledRejection', (reason) => {
-      const message = (reason as Error)?.stack ?? JSON.stringify(reason);
-      // eslint-disable-next-line no-console
-      console.error('environment_service.ts # unhandledRejection', reason);
-      this.log.warn(`Detected an unhandled Promise rejection: ${message}`);
+      const cause = (reason as Error)?.stack ?? JSON.stringify(reason);
+      const message = `Detected an unhandled Promise rejection: ${cause}`;
+      console.error(message);
+      this.log.warn(message);
+    });
+
+    process.on('uncaughtException', (err) => {
+      const message = `Detected an uncaught exception: ${err?.message || JSON.stringify(err)}`;
+      console.error(message);
+      this.log.error(message);
+
+      if (err.stack) {
+        console.error(err.stack);
+        this.log.error(err.stack);
+      }
     });
 
     await createDataFolder({ pathConfig, logger: this.log });
