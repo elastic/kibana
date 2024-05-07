@@ -28,11 +28,13 @@ import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import type { MlApiServices } from '../../application/services/ml_api_service';
 import type { SingleMetricViewerEmbeddableInput } from '..';
+import { ML_PAGES } from '../../../common/constants/locator';
 import { SeriesControls } from '../../application/timeseriesexplorer/components/series_controls';
 import {
   APP_STATE_ACTION,
   type TimeseriesexplorerActionType,
 } from '../../application/timeseriesexplorer/timeseriesexplorer_constants';
+import { useMlLink } from '../../application/contexts/kibana';
 import { JobSelectorControl } from '../../alerting/job_selector';
 import type { SingleMetricViewerEmbeddableUserInput, MlEntity } from '..';
 import { getDefaultSingleMetricViewerPanelTitle } from './get_default_panel_title';
@@ -53,22 +55,30 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
   mlApiServices,
 }) => {
   const isMounted = useMountedState();
-  const titleManuallyChanged = useRef(false);
-
+  const newJobUrl = useMlLink({ page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB });
   const [jobIds, setJobIds] = useState(initialInput?.jobIds ?? []);
+
+  const initialValuesRef = useRef({
+    titleManuallyChanged: !!initialInput?.title,
+    isNewJob:
+      initialInput?.jobIds !== undefined && jobIds.length && initialInput?.jobIds[0] !== jobIds[0],
+  });
+
   const [job, setJob] = useState<MlJob | undefined>();
-  const isNewJob =
-    initialInput?.jobIds !== undefined && jobIds.length && initialInput?.jobIds[0] !== jobIds[0];
   const [panelTitle, setPanelTitle] = useState<string>(initialInput?.title ?? '');
   const [functionDescription, setFunctionDescription] = useState<string | undefined>(
     initialInput?.functionDescription
   );
   // Reset detector index and entities if the job has changed
   const [selectedDetectorIndex, setSelectedDetectorIndex] = useState<number>(
-    !isNewJob && initialInput?.selectedDetectorIndex ? initialInput.selectedDetectorIndex : 0
+    !initialValuesRef.current.isNewJob && initialInput?.selectedDetectorIndex
+      ? initialInput.selectedDetectorIndex
+      : 0
   );
   const [selectedEntities, setSelectedEntities] = useState<MlEntity | undefined>(
-    !isNewJob && initialInput?.selectedEntities ? initialInput.selectedEntities : undefined
+    !initialValuesRef.current.isNewJob && initialInput?.selectedEntities
+      ? initialInput.selectedEntities
+      : undefined
   );
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
   const isPanelTitleValid = panelTitle.length > 0;
@@ -78,17 +88,25 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
       if (isMounted()) {
         async function fetchJob() {
           const { jobs } = await mlApiServices.getJobs({ jobId: jobIds.join(',') });
+
           if (jobs.length > 0) {
+            // Reset values if the job has changed
+            if (initialValuesRef.current.isNewJob) {
+              setSelectedDetectorIndex(0);
+              setSelectedEntities(undefined);
+              setFunctionDescription(undefined);
+            }
+
             setJob(jobs[0]);
             setErrorMessage(undefined);
           }
         }
 
         if (jobIds.length === 1) {
-          if (!titleManuallyChanged.current) {
+          if (!initialValuesRef.current.titleManuallyChanged) {
             setPanelTitle(getDefaultSingleMetricViewerPanelTitle(jobIds[0]));
           }
-          if (mlApiServices) {
+          if (mlApiServices && jobIds.length === 1 && jobIds[0] !== job?.job_id) {
             fetchJob().catch((error) => {
               const errorMsg = extractErrorMessage(error);
               setErrorMessage(errorMsg);
@@ -97,7 +115,7 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
         }
       }
     },
-    [isMounted, jobIds, mlApiServices]
+    [isMounted, jobIds, mlApiServices, panelTitle, initialValuesRef.current.isNewJob, job?.job_id]
   );
 
   const handleStateUpdate = (
@@ -135,12 +153,15 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
       <EuiFlyoutBody>
         <EuiForm>
           <JobSelectorControl
-            errors={errorMessage ? [errorMessage] : []}
-            jobsAndGroupIds={jobIds}
             adJobsApiService={mlApiServices.jobs}
+            createJobUrl={newJobUrl}
+            jobsAndGroupIds={jobIds}
             onChange={(update) => {
+              initialValuesRef.current.isNewJob =
+                update?.jobIds !== undefined && update.jobIds[0] !== jobIds[0];
               setJobIds([...(update?.jobIds ?? []), ...(update?.groupIds ?? [])]);
             }}
+            {...(errorMessage && { errors: [errorMessage] })}
           />
           <EuiFormRow
             label={
@@ -158,7 +179,7 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
               name="panelTitle"
               value={panelTitle}
               onChange={(e) => {
-                titleManuallyChanged.current = true;
+                initialValuesRef.current.titleManuallyChanged = true;
                 setPanelTitle(e.target.value);
               }}
               isInvalid={!isPanelTitleValid}
@@ -166,7 +187,7 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
             />
           </EuiFormRow>
           <EuiSpacer />
-          {job && jobIds.length ? (
+          {job && job.job_id && jobIds.length && jobIds[0] === job.job_id ? (
             <SeriesControls
               selectedJobId={jobIds[0]}
               job={job}
@@ -196,7 +217,7 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              isDisabled={!isPanelTitleValid}
+              isDisabled={!isPanelTitleValid || errorMessage !== undefined || !jobIds.length}
               onClick={onCreate.bind(null, {
                 jobIds,
                 functionDescription,

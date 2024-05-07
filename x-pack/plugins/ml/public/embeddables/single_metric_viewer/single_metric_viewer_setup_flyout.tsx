@@ -6,21 +6,29 @@
  */
 
 import React from 'react';
+import { distinctUntilChanged, from, skip, takeUntil } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SingleMetricViewerEmbeddableUserInput, SingleMetricViewerEmbeddableInput } from '..';
 import { SingleMetricViewerInitializer } from './single_metric_viewer_initializer';
 import type { MlApiServices } from '../../application/services/ml_api_service';
 
 export async function resolveEmbeddableSingleMetricViewerUserInput(
   coreStart: CoreStart,
-  data: DataPublicPluginStart,
+  services: { data: DataPublicPluginStart; share?: SharePluginStart },
   mlApiServices: MlApiServices,
   input?: Partial<SingleMetricViewerEmbeddableInput>
 ): Promise<SingleMetricViewerEmbeddableUserInput> {
-  const { http, overlays, ...startServices } = coreStart;
+  const {
+    http,
+    overlays,
+    application: { currentAppId$ },
+    ...startServices
+  } = coreStart;
+  const { data, share } = services;
   const timefilter = data.query.timefilter.timefilter;
 
   return new Promise(async (resolve, reject) => {
@@ -30,6 +38,8 @@ export async function resolveEmbeddableSingleMetricViewerUserInput(
           <KibanaContextProvider
             services={{
               mlServices: { mlApiServices },
+              data,
+              share,
               ...coreStart,
             }}
           >
@@ -60,6 +70,12 @@ export async function resolveEmbeddableSingleMetricViewerUserInput(
           },
         }
       );
+      // Close the flyout when user navigates out of the current plugin
+      currentAppId$
+        .pipe(skip(1), takeUntil(from(flyoutSession.onClose)), distinctUntilChanged())
+        .subscribe(() => {
+          flyoutSession.close();
+        });
     } catch (error) {
       reject(error);
     }

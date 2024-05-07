@@ -98,11 +98,15 @@ export const getSingleMetricViewerEmbeddableFactory = (
               const { resolveEmbeddableSingleMetricViewerUserInput } = await import(
                 './single_metric_viewer_setup_flyout'
               );
-              const [coreStart, { data }, { mlApiServices }] = services;
+              const [coreStart, { data, share }, { mlApiServices }] = services;
               const result = await resolveEmbeddableSingleMetricViewerUserInput(
                 coreStart,
-                data,
-                mlApiServices
+                { data, share },
+                mlApiServices,
+                {
+                  ...serializeTitles(),
+                  ...serializeSingleMetricViewerState(),
+                }
               );
 
               singleMetricViewerControlsApi.updateUserInput(result);
