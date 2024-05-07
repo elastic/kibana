@@ -134,7 +134,6 @@ export const getRenderCellValueFn = ({
       }, [rowIndex]);
 
       const isSingleRow = autoHeightRows.includes(rowIndex) ? false : rowHeightLines === 0;
-      // console.log(isSingleRow);
       return (
         <SourceDocument
           useTopLevelObjectColumns={useTopLevelObjectColumns}
