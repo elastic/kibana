@@ -385,8 +385,7 @@ export class SavedMap {
 
   public hasSaveAndReturnConfig() {
     const hasOriginatingApp = this.hasOriginatingApp();
-    const isNewMap = !this.getSavedObjectId();
-    return !isNewMap && hasOriginatingApp;
+    return hasOriginatingApp;
   }
 
   public getTitle(): string {
