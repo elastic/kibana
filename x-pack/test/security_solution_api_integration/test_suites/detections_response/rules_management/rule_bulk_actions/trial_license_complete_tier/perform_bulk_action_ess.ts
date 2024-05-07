@@ -38,7 +38,6 @@ export default ({ getService }: FtrProviderContext): void => {
   const securitySolutionApi = getService('securitySolutionApi');
   const es = getService('es');
   const log = getService('log');
-  const esArchiver = getService('esArchiver');
 
   const createConnector = async (payload: Record<string, unknown>) =>
     (await supertest.post('/api/actions/action').set('kbn-xsrf', 'true').send(payload).expect(200))
@@ -48,14 +47,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
   // Failing: See https://github.com/elastic/kibana/issues/173804
   describe('@ess perform_bulk_action - ESS specific logic', () => {
-    before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
-    });
-
-    after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
-    });
-
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
     });
@@ -115,7 +106,7 @@ export default ({ getService }: FtrProviderContext): void => {
               webhookUrl: 'http://localhost:1234',
             },
           }),
-        createRule(supertest, log, getSimpleRule(ruleId, false)),
+        createRule(supertest, log, { ...getSimpleRule(ruleId, false), index: ['*'] }),
       ]);
       await createLegacyRuleAction(supertest, rule1.id, connector.body.id);
 
