@@ -124,7 +124,6 @@ export const getApmAlertingFailedTransactionsChartEmbeddableFactory = (deps: Emb
               <APMAlertingFailedTransactionsChart
                 rule={rule}
                 alert={alert}
-                // timeZone={undefined}
                 serviceName={serviceName}
                 transactionType={transactionType}
                 environment={environment}

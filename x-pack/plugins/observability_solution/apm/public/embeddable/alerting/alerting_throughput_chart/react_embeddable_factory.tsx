@@ -123,7 +123,6 @@ export const getApmAlertingThroughputChartEmbeddableFactory = (deps: EmbeddableD
               <APMAlertingThroughputChart
                 rule={rule}
                 alert={alert}
-                // timeZone={undefined}
                 serviceName={serviceName}
                 transactionType={transactionType}
                 environment={environment}

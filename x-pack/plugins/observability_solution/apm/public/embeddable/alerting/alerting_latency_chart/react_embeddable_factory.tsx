@@ -101,6 +101,7 @@ export const getApmAlertingLatencyChartEmbeddableFactory = (deps: EmbeddableDeps
             transactionType,
             transactionName,
             environment,
+            latencyThresholdInMicroseconds,
             rangeFrom,
             rangeTo,
             rule,
@@ -112,6 +113,7 @@ export const getApmAlertingLatencyChartEmbeddableFactory = (deps: EmbeddableDeps
             transactionType$,
             transactionName$,
             environment$,
+            latencyThresholdInMicroseconds$,
             rangeFrom$,
             rangeTo$,
             rule$,
@@ -131,7 +133,7 @@ export const getApmAlertingLatencyChartEmbeddableFactory = (deps: EmbeddableDeps
               <APMAlertingLatencyChart
                 rule={rule}
                 alert={alert}
-                // timeZone={undefined}
+                latencyThresholdInMicroseconds={latencyThresholdInMicroseconds}
                 serviceName={serviceName}
                 transactionType={transactionType}
                 environment={environment}
