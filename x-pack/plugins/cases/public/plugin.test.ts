@@ -142,6 +142,8 @@ describe('Cases Ui Plugin', () => {
         hooks: {
           useCasesAddToExistingCaseModal: expect.any(Function),
           useCasesAddToNewCaseFlyout: expect.any(Function),
+          useIsAddToNewCaseFlyoutOpen: expect.any(Function),
+          useIsAddToExistingCaseModalOpen: expect.any(Function),
         },
         ui: {
           getAllCasesSelectorModal: expect.any(Function),

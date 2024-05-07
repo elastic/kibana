@@ -7,7 +7,7 @@
 
 import { act, render, screen } from '@testing-library/react';
 import React from 'react';
-
+import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 import { TestProviders } from '../../../mock';
 import { useKibana as mockUseKibana } from '../../../lib/kibana/__mocks__';
 import { RelatedCases } from './related_cases';
@@ -15,6 +15,7 @@ import { noCasesPermissions, readCasesPermissions } from '../../../../cases_test
 import { CASES_LOADING, CASES_COUNT } from './translations';
 import { useTourContext } from '../../guided_onboarding_tour';
 import { AlertsCasesTourSteps } from '../../guided_onboarding_tour/tour_config';
+import { useKibana } from '../../../lib/kibana';
 
 const mockedUseKibana = mockUseKibana();
 const mockGetRelatedCases = jest.fn();
@@ -27,24 +28,20 @@ jest.mock('../../../lib/kibana', () => {
   return {
     ...original,
     useToasts: jest.fn().mockReturnValue({ addWarning: jest.fn() }),
-    useKibana: () => ({
-      ...mockedUseKibana,
-      services: {
-        ...mockedUseKibana.services,
-        cases: {
-          api: {
-            getRelatedCases: mockGetRelatedCases,
-          },
-          helpers: { canUseCases: mockCanUseCases },
-        },
-      },
-    }),
+    useKibana: jest.fn(),
   };
 });
+jest.mock('../../guided_onboarding_tour', () => ({
+  useTourContext: jest.fn().mockReturnValue({
+    activeStep: 7,
+    isTourShown: jest.fn(() => true),
+  }),
+}));
 
 const eventId = '1c84d9bff4884dabe6aa1bb15f08433463b848d9269e587078dc56669550d27a';
 const scrollToMock = jest.fn();
 window.HTMLElement.prototype.scrollIntoView = scrollToMock;
+const useKibanaMock = useKibana as jest.Mock;
 
 describe('Related Cases', () => {
   beforeEach(() => {
@@ -54,6 +51,19 @@ describe('Related Cases', () => {
       incrementStep: () => null,
       endTourStep: () => null,
       isTourShown: () => false,
+    });
+    useKibanaMock.mockReturnValue({
+      ...mockedUseKibana,
+      services: {
+        ...mockedUseKibana.services,
+        cases: {
+          ...casesPluginMock.createStartContract(),
+          api: {
+            getRelatedCases: mockGetRelatedCases,
+          },
+          helpers: { canUseCases: mockCanUseCases },
+        },
+      },
     });
     jest.clearAllMocks();
   });
