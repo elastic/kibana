@@ -7,6 +7,7 @@
  */
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { ExpressionRendererParams } from '@kbn/expressions-plugin/public';
 import { toExpressionAst } from '../embeddable/to_ast';
 import { getExecutionContext, getTimeFilter } from '../services';
 import type { VisParams } from '../types';
@@ -30,7 +31,10 @@ interface GetExpressionRendererPropsParams {
   vis: Vis<VisParams>;
 }
 
-export const getExpressionRendererProps = async ({
+export const getExpressionRendererProps: (params: GetExpressionRendererPropsParams) => Promise<{
+  abortController: AbortController;
+  params: ExpressionRendererParams | null;
+}> = async ({
   unifiedSearch: { timeRange, query, filters },
   settings: { syncColors = true, syncCursor = true, syncTooltips = false },
   disableTriggers = false,
@@ -38,7 +42,7 @@ export const getExpressionRendererProps = async ({
   searchSessionId,
   vis,
   abortController,
-}: GetExpressionRendererPropsParams) => {
+}) => {
   const parentContext = parentExecutionContext ?? getExecutionContext().get();
   const childContext: KibanaExecutionContext = {
     type: 'agg_based',
@@ -93,10 +97,13 @@ export const getExpressionRendererProps = async ({
       abortSignal: newAbortController.signal,
     });
     if (!newAbortController.signal.aborted) {
-      return { params: { expression, ...loaderParams }, abortController: newAbortController };
+      return {
+        params: { expression, ...loaderParams } as ExpressionRendererParams,
+        abortController: newAbortController,
+      };
     }
   } catch (e) {
     // this.onContainerError(e);
-    return { params: {}, abortController: newAbortController };
   }
+  return { params: null, abortController: newAbortController };
 };

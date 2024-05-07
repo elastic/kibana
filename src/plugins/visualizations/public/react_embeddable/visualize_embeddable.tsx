@@ -7,59 +7,44 @@
  */
 
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { Filter, Query, TimeRange } from '@kbn/es-query';
-import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
-import { useExpressionRenderer } from '@kbn/expressions-plugin/public';
+import { ExpressionRendererParams, useExpressionRenderer } from '@kbn/expressions-plugin/public';
 import {
+  apiHasDisableTriggers,
   apiHasExecutionContext,
+  apiPublishesSettings,
   apiPublishesUnifiedSearch,
   fetch$,
   initializeTitles,
   useStateFromPublishingSubject,
-  apiPublishesSettings,
-  apiHasDisableTriggers,
 } from '@kbn/presentation-publishing';
 import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
+import { isEqual } from 'lodash';
 import React, { useRef } from 'react';
-import { BehaviorSubject, merge } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../../common/constants';
+import type { Vis } from '../vis';
 import { createVisAsync } from '../vis_async';
 import { getExpressionRendererProps } from './get_expression_renderer_props';
-import { MarkdownEditorApi, MarkdownEditorSerializedState } from './types';
+import type { VisualizeApi, VisualizeSerializedState } from './types';
 
 export const visualizeEmbeddableFactory: ReactEmbeddableFactory<
-  MarkdownEditorSerializedState,
-  MarkdownEditorApi
+  VisualizeSerializedState,
+  VisualizeApi
 > = {
   type: VISUALIZE_EMBEDDABLE_TYPE,
   deserializeState: (state) => {
-    /**
-     * Here we can run clientside migrations and inject references.
-     */
-    return state.rawState as MarkdownEditorSerializedState;
+    return state.rawState as VisualizeSerializedState;
   },
-  /**
-   * The buildEmbeddable function is async so you can async import the component or load a saved
-   * object here. The loading will be handed gracefully by the Presentation Container.
-   */
   buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
-    /**
-     * initialize state (source of truth)
-     */
     const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
-    const visFromState = state.savedVis ?? {
-      ...state.vis,
-      type: state.vis.type.name,
-    };
-    const vis = await createVisAsync(visFromState.type, visFromState);
+    const vis = await createVisAsync(state.savedVis.type, state.savedVis);
 
-    const vis$ = new BehaviorSubject(vis);
-    const expressionParams$ = new BehaviorSubject<
-      | {
-          expression: ExpressionAstExpression;
-        }
-      | {}
-    >({});
+    const id$ = new BehaviorSubject<string>(state.id);
+    const vis$ = new BehaviorSubject<Vis>(vis);
+    const savedVis$ = new BehaviorSubject(state.savedVis);
+    const expressionParams$ = new BehaviorSubject<ExpressionRendererParams>({
+      expression: '',
+    });
     const expressionAbortController$ = new BehaviorSubject<AbortController>(new AbortController());
     const executionContext = apiHasExecutionContext(parentApi)
       ? parentApi.executionContext
@@ -68,11 +53,6 @@ export const visualizeEmbeddableFactory: ReactEmbeddableFactory<
       ? parentApi.disableTriggers
       : undefined;
 
-    /**
-     * Register the API for this embeddable. This API will be published into the imperative handle
-     * of the React component. Methods on this API will be exposed to siblings, to registered actions
-     * and to the parent api.
-     */
     const api = buildApi(
       {
         ...titlesApi,
@@ -80,28 +60,23 @@ export const visualizeEmbeddableFactory: ReactEmbeddableFactory<
           return {
             rawState: {
               ...serializeTitles(),
-              vis: vis$.getValue(),
+              id: id$.getValue(),
+              savedVis: vis$.getValue().serialize(),
             },
           };
         },
       },
-
-      /**
-       * Provide state comparators. Each comparator is 3 element tuple:
-       * 1) current value (publishing subject)
-       * 2) setter, allowing parent to reset value
-       * 3) optional comparator which provides logic to diff lasted stored value and current value
-       */
       {
-        vis: [
-          vis$,
-          (value) =>
-            vis$.next({
-              ...value,
-              title: value.title || state.title || value.type.name,
-            }),
-        ],
         ...titleComparators,
+        id: [id$, (value) => id$.next(value)],
+        savedVis: [
+          savedVis$,
+          async (value) => {
+            savedVis$.next(value);
+            vis$.next(await createVisAsync(value.type, value));
+          },
+          (a, b) => isEqual(a, b),
+        ],
       }
     );
     fetch$(api).subscribe(async (data) => {
@@ -113,7 +88,6 @@ export const visualizeEmbeddableFactory: ReactEmbeddableFactory<
           }
         : {};
       const searchSessionId = apiPublishesSearchSession(parentApi) ? data.searchSessionId : '';
-      const currentVis = vis$.getValue();
       const settings = apiPublishesSettings(parentApi)
         ? {
             syncColors: parentApi.settings.syncColors$.getValue(),
@@ -122,24 +96,22 @@ export const visualizeEmbeddableFactory: ReactEmbeddableFactory<
           }
         : {};
 
-      if (!currentVis) return;
       const { params, abortController } = await getExpressionRendererProps({
         unifiedSearch,
-        vis: currentVis,
+        vis: vis$.getValue(),
         settings,
         disableTriggers,
         searchSessionId,
         parentExecutionContext: executionContext,
         abortController: expressionAbortController$.getValue(),
       });
-      expressionParams$.next(params);
+      if (params) expressionParams$.next(params);
       expressionAbortController$.next(abortController);
     });
 
     return {
       api,
       Component: () => {
-        // get state for rendering
         const expressionParams = useStateFromPublishingSubject(expressionParams$);
         const domNode = useRef<HTMLDivElement>(null);
         useExpressionRenderer(domNode, expressionParams);

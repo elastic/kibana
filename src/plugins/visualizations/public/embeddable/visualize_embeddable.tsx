@@ -433,7 +433,6 @@ export class VisualizeEmbeddable
    */
   public async render(domNode: HTMLElement) {
     this.timeRange = _.cloneDeep(this.input.timeRange);
-    console.log('timerange', this.timeRange);
 
     this.transferCustomizationsToUiState();
 

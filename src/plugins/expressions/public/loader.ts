@@ -126,7 +126,7 @@ export class ExpressionLoader {
     if (expression) {
       this.loadData(expression, this.params);
     } else if (this.data) {
-\      this.render(this.data);
+      this.render(this.data);
     }
   }
 
@@ -160,7 +160,6 @@ export class ExpressionLoader {
   };
 
   private render(data: Data): void {
-    console.log('Expression loader: render', data, this.params.uiState);
     this.renderHandler.render(data as SerializableRecord, this.params.uiState);
   }
 
