@@ -26,6 +26,7 @@ import type {
 } from './types';
 import { ReportingRequestHandlerContext } from './types';
 import { registerReportingEventTypes, registerReportingUsageCollector } from './usage';
+import { registerFeatures } from './features';
 
 /*
  * @internal
@@ -79,9 +80,12 @@ export class ReportingPlugin
 
     // async background setup
     (async () => {
-      // Feature registration relies on config, so it cannot be setup before here.
-      reportingCore.registerFeatures({
+      // Feature registration relies on config, depending on whether deprecated roles are enabled, so it cannot be setup before here.
+      registerFeatures({
+        features: plugins.features,
+        deprecatedRoles: reportingCore.getDeprecatedAllowedRoles(),
         isServerless: this.initContext.env.packageInfo.buildFlavor === 'serverless',
+        logger: this.logger,
       });
       this.logger.debug('Setup complete');
     })().catch((e) => {

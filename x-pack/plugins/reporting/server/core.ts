@@ -11,7 +11,6 @@ import { map, take } from 'rxjs';
 import {
   AnalyticsServiceStart,
   CoreSetup,
-  DEFAULT_APP_CATEGORIES,
   DocLinksServiceSetup,
   IBasePath,
   IClusterClient,
@@ -50,7 +49,6 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { checkLicense } from '@kbn/reporting-server/check_license';
 import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
-import { i18n } from '@kbn/i18n';
 import type { ReportingSetup } from '.';
 import { createConfig } from './config';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
@@ -237,61 +235,6 @@ export class ReportingCore {
     }
 
     return exportTypes;
-  }
-
-  /**
-   * If xpack.reporting.roles.enabled === true, register Reporting as a feature
-   * that is controlled by user role names. Also, for Serverless register a
-   * 'shell' Reporting Kibana feature.
-   */
-  public registerFeatures({ isServerless }: { isServerless: boolean }) {
-    const { features } = this.getPluginSetupDeps();
-    const deprecatedRoles = this.getDeprecatedAllowedRoles();
-
-    // Register a 'shell' feature specifically for Serverless. If granted, it will automatically provide access to
-    // reporting capabilities in other features, such as Discover, Dashboards, and Visualizations. On its own, this
-    // feature doesn't grant any additional privileges.
-    if (isServerless) {
-      features.registerKibanaFeature({
-        id: 'reporting',
-        name: i18n.translate('xpack.reporting.features.reportingFeatureName', {
-          defaultMessage: 'Reporting',
-        }),
-        category: DEFAULT_APP_CATEGORIES.management,
-        app: [],
-        privileges: {
-          all: { savedObject: { all: [], read: [] }, ui: [] },
-          // No read-only mode currently supported
-          read: { disabled: true, savedObject: { all: [], read: [] }, ui: [] },
-        },
-      });
-    }
-
-    if (deprecatedRoles !== false) {
-      // refer to roles.allow configuration (deprecated path)
-      const allowedRoles = ['superuser', ...(deprecatedRoles ?? [])];
-      const privileges = allowedRoles.map((role) => ({
-        requiredClusterPrivileges: [],
-        requiredRoles: [role],
-        ui: [],
-      }));
-
-      // self-register as an elasticsearch feature (deprecated)
-      features.registerElasticsearchFeature({
-        id: 'reporting',
-        catalogue: ['reporting'],
-        management: {
-          insightsAndAlerting: ['reporting'],
-        },
-        privileges,
-      });
-    } else {
-      this.logger.debug(
-        `Reporting roles configuration is disabled. Please assign access to Reporting use Kibana feature controls for applications.`
-      );
-      // trigger application to register Reporting as a subfeature
-      features.enableReportingUiCapabilities();
-    }
   }
 
   /*
