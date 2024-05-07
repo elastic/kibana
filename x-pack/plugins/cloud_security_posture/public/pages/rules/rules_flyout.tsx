@@ -43,7 +43,6 @@ export const RULES_FLYOUT_SWITCH_BUTTON = 'rule-flyout-switch-button';
 interface RuleFlyoutProps {
   onClose(): void;
   rule: CspBenchmarkRulesWithStates;
-  refetchRulesStates: () => void;
 }
 
 const tabs = [
@@ -65,7 +64,7 @@ const tabs = [
 
 type RuleTab = typeof tabs[number]['id'];
 
-export const RuleFlyout = ({ onClose, rule, refetchRulesStates }: RuleFlyoutProps) => {
+export const RuleFlyout = ({ onClose, rule }: RuleFlyoutProps) => {
   const [tab, setTab] = useState<RuleTab>('overview');
   const { mutate: mutateRuleState } = useChangeCspRuleState();
   const { data: rulesData } = useFetchDetectionRulesByTags(

@@ -7,7 +7,7 @@
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
-import { RULE_STATE_QUERY_KEY as RULES_STATE_QUERY_KEY } from './use_csp_rules_state';
+import { CSP_RULES_STATES_QUERY_KEY } from './use_csp_rules_state';
 import { CSPM_STATS_QUERY_KEY, KSPM_STATS_QUERY_KEY } from '../../common/api';
 import { BENCHMARK_INTEGRATION_QUERY_KEY_V2 } from '../benchmarks/use_csp_benchmark_integrations';
 import {
@@ -41,12 +41,12 @@ export const useChangeCspRuleState = () => {
     },
     onMutate: async (ruleStateUpdateRequest: RuleStateUpdateRequest) => {
       // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
-      await queryClient.cancelQueries(RULES_STATE_QUERY_KEY);
+      await queryClient.cancelQueries(CSP_RULES_STATES_QUERY_KEY);
 
-      // Snapshot the previous value
-      const previousCspRules = queryClient.getQueryData(RULES_STATE_QUERY_KEY);
+      // Snapshot the previous rules
+      const previousCspRules = queryClient.getQueryData(CSP_RULES_STATES_QUERY_KEY);
 
-      // Optimistically update to the new value
+      // Optimistically update to the rules that have state changes
       queryClient.setQueryData(['csp_rules_states_v1'], (currentRuleStates: any) => {
         return createRulesWithUpdatedState(ruleStateUpdateRequest, currentRuleStates);
       });
@@ -58,7 +58,7 @@ export const useChangeCspRuleState = () => {
       queryClient.invalidateQueries(BENCHMARK_INTEGRATION_QUERY_KEY_V2);
       queryClient.invalidateQueries(CSPM_STATS_QUERY_KEY);
       queryClient.invalidateQueries(KSPM_STATS_QUERY_KEY);
-      queryClient.invalidateQueries(RULES_STATE_QUERY_KEY);
+      queryClient.invalidateQueries(CSP_RULES_STATES_QUERY_KEY);
     },
   });
 };

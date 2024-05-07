@@ -41,7 +41,6 @@ type RulesTableProps = Pick<
   setPagination(pagination: Pick<RulesState, 'perPage' | 'page'>): void;
   onRuleClick: (ruleID: string) => void;
   selectedRuleId?: string;
-  refetchRulesStates: () => void;
   selectedRules: CspBenchmarkRulesWithStates[];
   setSelectedRules: (rules: CspBenchmarkRulesWithStates[]) => void;
   onSortChange: (value: 'asc' | 'desc') => void;
@@ -49,7 +48,7 @@ type RulesTableProps = Pick<
 
 type GetColumnProps = Pick<
   RulesTableProps,
-  'onRuleClick' | 'refetchRulesStates' | 'selectedRules' | 'setSelectedRules'
+  'onRuleClick' | 'selectedRules' | 'setSelectedRules'
 > & {
   mutateRulesStates: (ruleStateUpdateRequest: RuleStateUpdateRequest) => void;
   items: CspBenchmarkRulesWithStates[];
@@ -72,7 +71,6 @@ export const RulesTable = ({
   loading,
   error,
   selectedRuleId,
-  refetchRulesStates,
   selectedRules,
   setSelectedRules,
   onRuleClick,
@@ -140,7 +138,6 @@ export const RulesTable = ({
   const columns = useMemo(() => {
     const startServices = { notifications, analytics, i18n: i18nStart, theme };
     return getColumns({
-      refetchRulesStates,
       mutateRulesStates,
       selectedRules,
       setSelectedRules,
@@ -153,7 +150,6 @@ export const RulesTable = ({
       startServices,
     });
   }, [
-    refetchRulesStates,
     mutateRulesStates,
     selectedRules,
     setSelectedRules,
@@ -186,7 +182,6 @@ export const RulesTable = ({
 };
 
 const getColumns = ({
-  refetchRulesStates,
   mutateRulesStates,
   selectedRules,
   setSelectedRules,

@@ -56,7 +56,6 @@ interface RulesTableToolbarProps {
   isSearching: boolean;
   pageSize: number;
   selectedRules: CspBenchmarkRulesWithStates[];
-  refetchRulesStates: () => void;
   setEnabledDisabledItemsFilter: (filterState: string) => void;
   enabledDisabledItemsFilterState: string;
   setSelectAllRules: () => void;
@@ -67,7 +66,6 @@ interface RuleTableCount {
   pageSize: number;
   total: number;
   selectedRules: CspBenchmarkRulesWithStates[];
-  refetchRulesStates: () => void;
   setSelectAllRules: () => void;
   setSelectedRules: (rules: CspBenchmarkRulesWithStates[]) => void;
 }
@@ -83,7 +81,6 @@ export const RulesTableHeader = ({
   sectionSelectOptions,
   ruleNumberSelectOptions,
   selectedRules,
-  refetchRulesStates,
   setEnabledDisabledItemsFilter,
   enabledDisabledItemsFilterState,
   setSelectAllRules,
@@ -201,7 +198,6 @@ export const RulesTableHeader = ({
           pageSize={pageSize}
           total={totalRulesCount}
           selectedRules={selectedRules}
-          refetchRulesStates={refetchRulesStates}
           setSelectAllRules={setSelectAllRules}
           setSelectedRules={setSelectedRules}
         />
@@ -243,7 +239,6 @@ const CurrentPageOfTotal = ({
   pageSize,
   total,
   selectedRules,
-  refetchRulesStates,
   setSelectAllRules,
   setSelectedRules,
 }: RuleTableCount) => {
