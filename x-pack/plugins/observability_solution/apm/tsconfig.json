@@ -115,6 +115,8 @@
     "@kbn/shared-ux-markdown",
     "@kbn/core-http-request-handler-context-server",
     "@kbn/search-types",
+    "@kbn/react-kibana-context-render",
+    "@kbn/react-kibana-context-theme",
   ],
   "exclude": ["target/**/*"]
 }
