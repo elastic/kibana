@@ -31,15 +31,16 @@ import { SLI_OPTIONS } from '../../../slo_edit/constants';
 import { useSloFormattedSLIValue } from '../../hooks/use_slo_summary';
 import { SlosView } from '../slos_view';
 import { SLOView } from '../toggle_slo_view';
-import type { SortDirection } from '../../hooks/use_url_search_state';
+import type { SortDirection, SortField } from '../../hooks/use_url_search_state';
+import { GroupByField } from '../slo_list_group_by';
 
 interface Props {
   group: string;
   kqlQuery?: string;
   sloView: SLOView;
-  sort?: string;
+  sort?: SortField;
   direction?: SortDirection;
-  groupBy: string;
+  groupBy: GroupByField;
   summary?: GroupSummary;
   filters?: Filter[];
 }
@@ -155,46 +156,48 @@ export function GroupListView({
                     })}
                   </EuiBadge>
                 </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiToolTip
-                    content={
-                      <>
-                        <EuiText size="s">
-                          {i18n.translate('xpack.slo.group.totalSloViolatedTooltip', {
-                            defaultMessage: 'SLO: {name}',
-                            values: {
-                              name: summary?.worst.slo?.name,
-                            },
-                          })}
-                        </EuiText>
-                        <EuiText size="s">
-                          {i18n.translate('xpack.slo.group.totalSloViolatedTooltip.instance', {
-                            defaultMessage: 'Instance: {instance}',
-                            values: {
-                              instance: summary?.worst.slo?.instanceId,
-                            },
-                          })}
-                        </EuiText>
-                      </>
-                    }
-                  >
-                    <EuiLink
-                      data-test-subj="o11yGroupListViewLink"
-                      href={basePath.prepend(
-                        paths.sloDetails(summary!.worst.slo?.id, summary!.worst.slo?.instanceId)
-                      )}
+                {group !== 'NO_DATA' && (
+                  <EuiFlexItem>
+                    <EuiToolTip
+                      content={
+                        <>
+                          <EuiText size="s">
+                            {i18n.translate('xpack.slo.group.totalSloViolatedTooltip', {
+                              defaultMessage: 'SLO: {name}',
+                              values: {
+                                name: summary?.worst.slo?.name,
+                              },
+                            })}
+                          </EuiText>
+                          <EuiText size="s">
+                            {i18n.translate('xpack.slo.group.totalSloViolatedTooltip.instance', {
+                              defaultMessage: 'Instance: {instance}',
+                              values: {
+                                instance: summary?.worst.slo?.instanceId,
+                              },
+                            })}
+                          </EuiText>
+                        </>
+                      }
                     >
-                      {i18n.translate('xpack.slo.group.worstPerforming', {
-                        defaultMessage: 'Worst performing: ',
-                      })}
-                      <EuiTextColor
-                        color={summary?.worst.status !== 'HEALTHY' ? 'danger' : undefined}
+                      <EuiLink
+                        data-test-subj="o11yGroupListViewLink"
+                        href={basePath.prepend(
+                          paths.sloDetails(summary!.worst.slo?.id, summary!.worst.slo?.instanceId)
+                        )}
                       >
-                        <strong>{worstSLI}</strong>
-                      </EuiTextColor>
-                    </EuiLink>
-                  </EuiToolTip>
-                </EuiFlexItem>
+                        {i18n.translate('xpack.slo.group.worstPerforming', {
+                          defaultMessage: 'Worst performing: ',
+                        })}
+                        <EuiTextColor
+                          color={summary?.worst.status !== 'HEALTHY' ? 'danger' : undefined}
+                        >
+                          <strong>{worstSLI}</strong>
+                        </EuiTextColor>
+                      </EuiLink>
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                )}
               </EuiFlexGroup>
             }
             id={group}
