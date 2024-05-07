@@ -190,9 +190,7 @@ export class ReportingAPIClient implements IReportingAPI {
         return new Job(resp.job);
       }
     } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error(err);
-      throw new Error('invalid response!');
+      throw new Error(`${err.body.message}`);
     }
   }
 
