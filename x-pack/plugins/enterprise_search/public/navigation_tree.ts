@@ -22,49 +22,39 @@ const navTree: NavigationTreeDefinition = {
   body: [
     { type: 'recentlyAccessed' },
     {
-      type: 'navGroup',
-      id: 'search_project_nav',
-      title,
-      icon,
-      defaultIsCollapsed: false,
-      isCollapsible: false,
       breadcrumbStatus: 'hidden',
       children: [
         {
           link: 'enterpriseSearch',
         },
         {
-          id: 'dev_tools',
-          title: i18n.translate('navigation.searchNav.devTools', {
-            defaultMessage: 'Dev Tools',
-          }),
-          link: 'dev_tools:console',
           getIsActive: ({ pathNameSerialized, prepend }) => {
             return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
           },
+          id: 'dev_tools',
+          link: 'dev_tools:console',
+          title: i18n.translate('navigation.searchNav.devTools', {
+            defaultMessage: 'Dev Tools',
+          }),
         },
         {
-          id: 'kibana',
-          title: i18n.translate('navigation.searchNav.kibana', {
-            defaultMessage: 'Kibana',
-          }),
           children: [
             {
               link: 'discover',
             },
             {
-              link: 'dashboards',
               getIsActive: ({ pathNameSerialized, prepend }) => {
                 return pathNameSerialized.startsWith(prepend('/app/dashboards'));
               },
+              link: 'dashboards',
             },
           ],
+          id: 'kibana',
+          title: i18n.translate('navigation.searchNav.kibana', {
+            defaultMessage: 'Kibana',
+          }),
         },
         {
-          id: 'content',
-          title: i18n.translate('navigation.searchNav.content', {
-            defaultMessage: 'Content',
-          }),
           children: [
             {
               link: 'enterpriseSearchContent:searchIndices',
@@ -115,21 +105,17 @@ const navTree: NavigationTreeDefinition = {
             { link: 'enterpriseSearchContent:connectors' },
             { link: 'enterpriseSearchContent:webCrawlers' },
           ],
+          id: 'content',
+          title: i18n.translate('navigation.searchNav.content', {
+            defaultMessage: 'Content',
+          }),
         },
         {
-          id: 'build',
-          title: i18n.translate('navigation.searchNav.build', {
-            defaultMessage: 'Build',
-          }),
           children: [
             {
               link: 'enterpriseSearchApplications:playground',
             },
             {
-              title: i18n.translate('navigation.searchNav.build.searchApplications', {
-                defaultMessage: 'Search applications',
-              }),
-              link: 'enterpriseSearchApplications:searchApplications',
               // TODO: Build the children dynamically
               // https://github.com/elastic/kibana/issues/179751
               // renderAs: 'accordion',
@@ -156,65 +142,66 @@ const navTree: NavigationTreeDefinition = {
               //     link: 'home',
               //   },
               // ],
+              link: 'enterpriseSearchApplications:searchApplications',
+              title: i18n.translate('navigation.searchNav.build.searchApplications', {
+                defaultMessage: 'Search applications',
+              }),
             },
             {
               link: 'enterpriseSearchAnalytics',
             },
           ],
+          id: 'build',
+          title: i18n.translate('navigation.searchNav.build', {
+            defaultMessage: 'Build',
+          }),
         },
         {
-          id: 'entsearch',
-          title: i18n.translate('navigation.searchNav.entsearch', {
-            defaultMessage: 'Enterprise Search',
-          }),
           children: [
             {
-              title: i18n.translate('navigation.searchNav.entsearch.appSearch', {
-                defaultMessage: 'App Search',
-              }),
-              link: 'appSearch:engines',
               getIsActive: ({ pathNameSerialized, prepend }) => {
                 return pathNameSerialized.startsWith(prepend('/app/enterprise_search/app_search'));
               },
+              link: 'appSearch:engines',
+              title: i18n.translate('navigation.searchNav.entsearch.appSearch', {
+                defaultMessage: 'App Search',
+              }),
             },
             {
               link: 'workplaceSearch',
             },
           ],
+          id: 'entsearch',
+          title: i18n.translate('navigation.searchNav.entsearch', {
+            defaultMessage: 'Enterprise Search',
+          }),
         },
       ],
+      defaultIsCollapsed: false,
+      icon,
+      id: 'search_project_nav',
+      isCollapsible: false,
+      title,
+      type: 'navGroup',
     },
   ],
   footer: [
     {
-      type: 'navGroup',
-      id: 'project_settings_project_nav',
-      title: i18n.translate('navigation.searchNav.management', {
-        defaultMessage: 'Management',
-      }),
-      icon: 'gear',
       breadcrumbStatus: 'hidden',
       children: [
         {
+          link: 'ml:modelManagement',
           title: i18n.translate('navigation.searchNav.management.trainedModels', {
             defaultMessage: 'Trained models',
           }),
-          link: 'ml:modelManagement',
         },
         {
-          link: 'management',
-          title: i18n.translate('navigation.searchNav.mngt', {
-            defaultMessage: 'Stack Management',
-          }),
-          spaceBefore: null,
-          renderAs: 'panelOpener',
           children: [
             {
-              title: 'Ingest',
               children: [{ link: 'management:ingest_pipelines' }, { link: 'management:pipelines' }],
+              title: 'Ingest',
             },
             {
-              title: 'Data',
               children: [
                 { link: 'management:index_management' },
                 { link: 'management:index_lifecycle_management' },
@@ -225,9 +212,9 @@ const navTree: NavigationTreeDefinition = {
                 { link: 'management:remote_clusters' },
                 { link: 'management:migrate_data' },
               ],
+              title: 'Data',
             },
             {
-              title: 'Alerts and Insights',
               children: [
                 { link: 'management:triggersActions' },
                 { link: 'management:cases' },
@@ -237,18 +224,18 @@ const navTree: NavigationTreeDefinition = {
                 { link: 'management:watcher' },
                 { link: 'management:maintenanceWindows' },
               ],
+              title: 'Alerts and Insights',
             },
             {
-              title: 'Security',
               children: [
                 { link: 'management:users' },
                 { link: 'management:roles' },
                 { link: 'management:api_keys' },
                 { link: 'management:role_mappings' },
               ],
+              title: 'Security',
             },
             {
-              title: 'Kibana',
               children: [
                 { link: 'management:dataViews' },
                 { link: 'management:filesManagement' },
@@ -259,25 +246,38 @@ const navTree: NavigationTreeDefinition = {
                 { link: 'management:spaces' },
                 { link: 'management:settings' },
               ],
+              title: 'Kibana',
             },
             {
-              title: 'Stack',
               children: [
                 { link: 'management:license_management' },
                 { link: 'management:upgrade_assistant' },
               ],
+              title: 'Stack',
             },
           ],
+          link: 'management',
+          renderAs: 'panelOpener',
+          spaceBefore: null,
+          title: i18n.translate('navigation.searchNav.mngt', {
+            defaultMessage: 'Stack Management',
+          }),
         },
       ],
+      icon: 'gear',
+      id: 'project_settings_project_nav',
+      title: i18n.translate('navigation.searchNav.management', {
+        defaultMessage: 'Management',
+      }),
+      type: 'navGroup',
     },
   ],
 };
 
 export const definition: SolutionNavigationDefinition = {
-  id: 'es',
-  title,
-  icon,
   homePage: 'enterpriseSearch',
+  icon,
+  id: 'es',
   navigationTree$: of(navTree),
+  title,
 };
