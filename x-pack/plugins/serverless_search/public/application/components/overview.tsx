@@ -308,7 +308,7 @@ export const ElasticsearchOverview = () => {
             codeSnippetArguments
           )}
           ingestPipelineData={data}
-          consoleRequest={getConsoleRequest('ingestDataWithPipeline', codeSnippetArguments)}
+          consoleRequest={getConsoleRequest('ingestData', codeSnippetArguments)}
           languages={languageDefinitions}
           selectedLanguage={selectedLanguage}
           setSelectedLanguage={setSelectedLanguage}

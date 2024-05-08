@@ -37,7 +37,6 @@ export interface LanguageDefinition {
   configureClient?: CodeSnippet;
   ingestData?: CodeSnippet;
   ingestDataIndex?: CodeSnippet;
-  ingestDataWithPipeline?: CodeSnippet;
   installClient?: string;
   buildSearchQuery?: CodeSnippet;
   testConnection?: CodeSnippet;

@@ -9,9 +9,11 @@
     "public/**/*.ts",
     "public/**/*.tsx",
     "server/**/*.ts",
-    "../../../typings/**/*"
+    "../../../typings/**/*",
   ],
-  "exclude": ["target/**/*"],
+  "exclude": [
+    "target/**/*"
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/config-schema",
@@ -47,6 +49,6 @@
     "@kbn/search-connectors-plugin",
     "@kbn/index-management",
     "@kbn/react-kibana-context-render",
-    "@kbn/search-playground"
+    "@kbn/search-playground",
   ]
 }
