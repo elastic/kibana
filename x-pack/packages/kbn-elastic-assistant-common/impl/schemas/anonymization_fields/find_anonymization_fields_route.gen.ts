@@ -22,8 +22,9 @@ import { AnonymizationFieldResponse } from './bulk_crud_anonymization_fields_rou
 export type FindAnonymizationFieldsSortField = z.infer<typeof FindAnonymizationFieldsSortField>;
 export const FindAnonymizationFieldsSortField = z.enum([
   'created_at',
-  'is_default',
-  'title',
+  'anonymized',
+  'allowed',
+  'field',
   'updated_at',
 ]);
 export type FindAnonymizationFieldsSortFieldEnum = typeof FindAnonymizationFieldsSortField.enum;

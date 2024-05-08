@@ -28,6 +28,7 @@ import { omit } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { withTheme, EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { loadAllActions, loadActionTypes, deleteActions } from '../../../lib/action_connector_api';
 import {
   hasDeleteActionsCapability,
@@ -54,6 +55,13 @@ import { CreateConnectorFlyout } from '../../action_connector_form/create_connec
 import { EditConnectorFlyout } from '../../action_connector_form/edit_connector_flyout';
 import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
+import { routeToConnectors } from '../../../constants';
+
+interface EditConnectorProps {
+  initialConnector?: ActionConnector;
+  tab?: EditConnectorTabs;
+  isFix?: boolean;
+}
 
 const ConnectorIconTipWithSpacing = withTheme(({ theme }: { theme: EuiTheme }) => {
   return (
@@ -89,6 +97,9 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
     chrome,
     docLinks,
   } = useKibana().services;
+  const { connectorId } = useParams<{ connectorId?: string }>();
+  const history = useHistory();
+  const location = useLocation();
   const canDelete = hasDeleteActionsCapability(capabilities);
   const canSave = hasSaveActionsCapability(capabilities);
 
@@ -97,13 +108,9 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
   const [pageIndex, setPageIndex] = useState<number>(0);
   const [selectedItems, setSelectedItems] = useState<ActionConnectorTableItem[]>([]);
   const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);
-  const [isLoadingActions, setIsLoadingActions] = useState<boolean>(false);
+  const [isLoadingActions, setIsLoadingActions] = useState<boolean>(true);
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
-  const [editConnectorProps, setEditConnectorProps] = useState<{
-    initialConnector?: ActionConnector;
-    tab?: EditConnectorTabs;
-    isFix?: boolean;
-  }>({});
+  const [editConnectorProps, setEditConnectorProps] = useState<EditConnectorProps>({});
   const [connectorsToDelete, setConnectorsToDelete] = useState<string[]>([]);
   useEffect(() => {
     loadActions();
@@ -164,6 +171,19 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
         .sort((a, b) => a.name.localeCompare(b.name))
     : [];
 
+  useEffect(() => {
+    if (connectorId && !isLoadingActions) {
+      const connector = actions.find((action) => action.id === connectorId);
+      if (connector) {
+        editItem(connector, EditConnectorTabs.Configuration);
+      }
+
+      const linkToConnectors = history.createHref({ pathname: routeToConnectors });
+
+      window.history.replaceState(null, '', linkToConnectors);
+    }
+  }, [actions, connectorId, history, isLoadingActions, location]);
+
   function setDeleteConnectorWarning(connectors: string[]) {
     const show = connectors.some((c) => {
       const action = actions.find((a) => a.id === c);
@@ -197,11 +217,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
     }
   }
 
-  async function editItem(
-    actionConnector: ActionConnector,
-    tab: EditConnectorTabs,
-    isFix?: boolean
-  ) {
+  function editItem(actionConnector: ActionConnector, tab: EditConnectorTabs, isFix?: boolean) {
     setEditConnectorProps({ initialConnector: actionConnector, tab, isFix: isFix ?? false });
   }
 

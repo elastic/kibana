@@ -9,7 +9,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import type { RuleSnooze } from '@kbn/alerting-plugin/common';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
 import {
   EuiLoadingSpinner,
@@ -65,6 +65,8 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
 
   const {
     notifications: { toasts },
+    i18n: i18nStart,
+    theme,
   } = useKibana().services;
 
   useEffect(() => {
@@ -92,12 +94,13 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
       title: message.summary,
       ...(message.details && {
         text: toMountPoint(
-          <ToastWithCircuitBreakerContent>{message.details}</ToastWithCircuitBreakerContent>
+          <ToastWithCircuitBreakerContent>{message.details}</ToastWithCircuitBreakerContent>,
+          { i18n: i18nStart, theme }
         ),
       }),
     });
     throw new Error();
-  }, [enableRule, toasts]);
+  }, [i18nStart, theme, enableRule, toasts]);
 
   const onEnable = useCallback(async () => {
     setIsUpdating(true);

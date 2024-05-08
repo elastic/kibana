@@ -151,7 +151,7 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
         title={
           <FormattedMessage
             id="xpack.ml.anomalyChartsEmbeddable.errorMessage"
-            defaultMessage="Unable to load the ML anomaly explorer data"
+            defaultMessage="Unable to load the data for the anomaly charts"
           />
         }
         color="danger"

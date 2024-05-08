@@ -17,7 +17,7 @@
     "@kbn/core-http-request-handler-context-server",
     "@kbn/core-http-server",
     "@kbn/core-lifecycle-server",
-    "@kbn/logging"
+    "@kbn/logging",
   ],
   "exclude": [
     "target/**/*",

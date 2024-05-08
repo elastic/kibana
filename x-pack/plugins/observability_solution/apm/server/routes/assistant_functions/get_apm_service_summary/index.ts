@@ -6,10 +6,7 @@
  */
 import datemath from '@elastic/datemath';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import {
-  rangeQuery,
-  ScopedAnnotationsClient,
-} from '@kbn/observability-plugin/server';
+import { rangeQuery, ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
 import {
   ALERT_RULE_PRODUCER,
   ALERT_STATUS,
@@ -49,17 +46,21 @@ export interface ServiceSummary {
   'language.name'?: string;
   'service.framework'?: string;
   instances: number;
-  anomalies: Array<{
-    '@timestamp': string;
-    metricName: string;
-    'service.name': string;
-    'service.environment': Environment;
-    'transaction.type': string;
-    anomalyScore: string | number | null;
-    actualValue: number;
-    expectedBoundsLower: number;
-    expectedBoundsUpper: number;
-  }>;
+  anomalies:
+    | Array<{
+        '@timestamp': string;
+        metricName: string;
+        'service.name': string;
+        'service.environment': Environment;
+        'transaction.type': string;
+        anomalyScore: string | number | null;
+        actualValue: number;
+        expectedBoundsLower: number;
+        expectedBoundsUpper: number;
+      }>
+    | {
+        error: unknown;
+      };
   alerts: Array<{ type?: string; started: string }>;
   deployments: Array<{ '@timestamp': string }>;
 }
@@ -88,63 +89,66 @@ export async function getApmServiceSummary({
   const environment = args['service.environment'] || ENVIRONMENT_ALL.value;
   const transactionType = args['transaction.type'];
 
-  const [environments, metadataDetails, anomalies, annotations, alerts] =
-    await Promise.all([
-      environment === ENVIRONMENT_ALL.value
-        ? getEnvironments({
-            apmEventClient,
-            start,
-            end,
-            size: 10,
-            serviceName,
-            searchAggregatedTransactions: true,
-          })
-        : Promise.resolve([environment]),
-      getServiceMetadataDetails({
-        apmEventClient,
-        start,
-        end,
-        serviceName,
-        environment,
-      }),
-      getAnomalies({
-        serviceName,
-        start,
-        end,
-        environment: args['service.environment'],
-        mlClient,
-        logger,
-        transactionType,
-      }),
-      getServiceAnnotations({
-        apmEventClient,
-        start,
-        end,
-        searchAggregatedTransactions: true,
-        client: esClient,
-        annotationsClient,
-        environment,
-        logger,
-        serviceName,
-      }),
-      apmAlertsClient.search({
-        size: 100,
-        track_total_hits: false,
-        body: {
-          query: {
-            bool: {
-              filter: [
-                ...termQuery(ALERT_RULE_PRODUCER, 'apm'),
-                ...termQuery(ALERT_STATUS, ALERT_STATUS_ACTIVE),
-                ...rangeQuery(start, end),
-                ...termQuery(SERVICE_NAME, serviceName),
-                ...environmentQuery(environment),
-              ],
-            },
-          },
+  const [environments, metadataDetails, anomalies, annotations, alerts] = await Promise.all([
+    environment === ENVIRONMENT_ALL.value
+      ? getEnvironments({
+          apmEventClient,
+          start,
+          end,
+          size: 10,
+          serviceName,
+          searchAggregatedTransactions: true,
+        })
+      : Promise.resolve([environment]),
+    getServiceMetadataDetails({
+      apmEventClient,
+      start,
+      end,
+      serviceName,
+      environment,
+    }),
+    getAnomalies({
+      serviceName,
+      start,
+      end,
+      environment: args['service.environment'],
+      mlClient,
+      logger,
+      transactionType,
+    }).catch((error) => {
+      logger.error('Failed to get anomalies');
+      logger.error(error);
+      return {
+        error,
+      };
+    }),
+    getServiceAnnotations({
+      apmEventClient,
+      start,
+      end,
+      searchAggregatedTransactions: true,
+      client: esClient,
+      annotationsClient,
+      environment,
+      logger,
+      serviceName,
+    }),
+    apmAlertsClient.search({
+      size: 100,
+      track_total_hits: false,
+      query: {
+        bool: {
+          filter: [
+            ...termQuery(ALERT_RULE_PRODUCER, 'apm'),
+            ...termQuery(ALERT_STATUS, ALERT_STATUS_ACTIVE),
+            ...rangeQuery(start, end),
+            ...termQuery(SERVICE_NAME, serviceName),
+            ...environmentQuery(environment),
+          ],
         },
-      }),
-    ]);
+      },
+    }),
+  ]);
 
   return {
     'service.name': serviceName,

@@ -6,12 +6,12 @@
   "include": ["public/**/*", "server/**/*", "common/**/*", "../../../typings/**/*"],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/kibana-react-plugin",
     "@kbn/screenshot-mode-plugin",
     "@kbn/licensing-plugin",
     "@kbn/config-schema",
     "@kbn/i18n",
     "@kbn/shared-ux-markdown",
+    "@kbn/react-kibana-mount",
   ],
   "exclude": [
     "target/**/*",

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { EuiPageTemplate, EuiPageSection, EuiPageHeader } from '@elastic/eui';
 
 export interface PageProps {
@@ -14,7 +14,11 @@ export interface PageProps {
   sidebar?: React.ReactNode;
 }
 
-export const Page: React.FC<PageProps> = ({ title = 'Untitled', sidebar, children }) => {
+export const Page: FC<PropsWithChildren<PageProps>> = ({
+  title = 'Untitled',
+  sidebar,
+  children,
+}) => {
   return (
     <EuiPageTemplate offset={0} grow={true}>
       <EuiPageTemplate.Sidebar>{sidebar}</EuiPageTemplate.Sidebar>

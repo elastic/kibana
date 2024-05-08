@@ -46,10 +46,7 @@ export function PageLoadDistribution() {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <PageLoadDistChart
-        onPercentileChange={onPercentileChange}
-        breakdown={breakdown}
-      />
+      <PageLoadDistChart onPercentileChange={onPercentileChange} breakdown={breakdown} />
     </div>
   );
 }

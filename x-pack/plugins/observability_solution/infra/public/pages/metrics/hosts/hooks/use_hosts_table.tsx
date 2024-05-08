@@ -203,7 +203,7 @@ export const useHostsTable = () => {
     return items.sort(sortTableData(sorting)).slice(startIndex, endIndex);
   }, [items, pagination, sorting]);
 
-  const metricColumnsWidth = displayAlerts ? '11%' : '15%';
+  const metricColumnsWidth = displayAlerts ? '12%' : '16%';
 
   const columns: Array<EuiBasicTableColumn<HostNodeRow>> = useMemo(
     () => [
@@ -349,7 +349,7 @@ export const useHostsTable = () => {
         field: 'diskSpaceUsage',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-diskSpaceUsage',
-        render: (avg: number) => formatMetric('diskSpaceUsage', avg),
+        render: (max: number) => formatMetric('diskSpaceUsage', max),
         align: 'right',
       },
       {
@@ -360,7 +360,7 @@ export const useHostsTable = () => {
             formula={formulas?.rx.value}
           />
         ),
-        width: '10%',
+        width: '12%',
         field: 'rx',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-rx',
@@ -375,7 +375,7 @@ export const useHostsTable = () => {
             formula={formulas?.tx.value}
           />
         ),
-        width: '10%',
+        width: '12%',
         field: 'tx',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-tx',

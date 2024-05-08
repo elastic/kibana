@@ -5,18 +5,15 @@
  * 2.0.
  */
 import { EuiLoadingSpinner } from '@elastic/eui';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
-import {
-  FETCH_STATUS,
-  isPending,
-  useFetcher,
-} from '../../../../hooks/use_fetcher';
+import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { ErrorSampleDetails } from './error_sample_detail';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 interface Props {
   errorSampleIds: string[];
@@ -24,11 +21,7 @@ interface Props {
   occurrencesCount: number;
 }
 
-export function ErrorSampler({
-  errorSampleIds,
-  errorSamplesFetchStatus,
-  occurrencesCount,
-}: Props) {
+export function ErrorSampler({ errorSampleIds, errorSamplesFetchStatus, occurrencesCount }: Props) {
   const history = useHistory();
 
   const { serviceName } = useApmServiceContext();
@@ -41,6 +34,8 @@ export function ErrorSampler({
     '/mobile-services/{serviceName}/errors-and-crashes/errors/{groupId}',
     '/mobile-services/{serviceName}/errors-and-crashes/crashes/{groupId}'
   );
+
+  const { observabilityAIAssistant } = useApmPluginContext();
 
   const { rangeFrom, rangeTo, environment, kuery, errorId } = query;
 
@@ -81,6 +76,21 @@ export function ErrorSampler({
     });
   };
   const loadingErrorSamplesData = isPending(errorSamplesFetchStatus);
+
+  useEffect(() => {
+    if (!errorData || !observabilityAIAssistant) {
+      return;
+    }
+    return observabilityAIAssistant.service.setScreenContext({
+      data: [
+        {
+          name: 'error_sample',
+          description: 'The error document currently displayed',
+          value: errorData,
+        },
+      ],
+    });
+  }, [observabilityAIAssistant, errorData]);
 
   if (loadingErrorSamplesData || !errorData) {
     return (

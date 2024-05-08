@@ -18,17 +18,11 @@ import { FetchOptions } from '../../../common/fetch_options';
 import { CallApi, callApi } from './call_api';
 import type { APMServerRouteRepository, APIEndpoint } from '../../../server';
 
-export type APMClientOptions = Omit<
-  FetchOptions,
-  'query' | 'body' | 'pathname' | 'signal'
-> & {
+export type APMClientOptions = Omit<FetchOptions, 'query' | 'body' | 'pathname' | 'signal'> & {
   signal: AbortSignal | null;
 };
 
-export type APMClient = RouteRepositoryClient<
-  APMServerRouteRepository,
-  APMClientOptions
->;
+export type APMClient = RouteRepositoryClient<APMServerRouteRepository, APMClientOptions>;
 
 export type AutoAbortedAPMClient = RouteRepositoryClient<
   APMServerRouteRepository,
@@ -42,20 +36,17 @@ export type APIReturnType<TEndpoint extends APIEndpoint> = ReturnOf<
   _inspect?: InspectResponse;
 };
 
-export type APIClientRequestParamsOf<TEndpoint extends APIEndpoint> =
-  ClientRequestParamsOf<APMServerRouteRepository, TEndpoint>;
+export type APIClientRequestParamsOf<TEndpoint extends APIEndpoint> = ClientRequestParamsOf<
+  APMServerRouteRepository,
+  TEndpoint
+>;
 
 export type AbstractAPMRepository = ServerRouteRepository;
 
-export type AbstractAPMClient = RouteRepositoryClient<
-  AbstractAPMRepository,
-  APMClientOptions
->;
+export type AbstractAPMClient = RouteRepositoryClient<AbstractAPMRepository, APMClientOptions>;
 
 export let callApmApi: APMClient = () => {
-  throw new Error(
-    'callApmApi has to be initialized before used. Call createCallApmApi first.'
-  );
+  throw new Error('callApmApi has to be initialized before used. Call createCallApmApi first.');
 };
 
 export function createCallApmApi(core: CoreStart | CoreSetup) {

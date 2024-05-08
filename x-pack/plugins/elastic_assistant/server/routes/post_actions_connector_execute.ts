@@ -12,20 +12,21 @@ import { StreamFactoryReturnType } from '@kbn/ml-response-stream/server';
 
 import { schema } from '@kbn/config-schema';
 import {
-  ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+  API_VERSIONS,
   ExecuteConnectorRequestBody,
   Message,
   Replacements,
   replaceAnonymizedValuesWithOriginalValues,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+import { i18n } from '@kbn/i18n';
 import { getLlmType } from './utils';
 import { StaticReturnType } from '../lib/langchain/executors/types';
 import {
   INVOKE_ASSISTANT_ERROR_EVENT,
   INVOKE_ASSISTANT_SUCCESS_EVENT,
 } from '../lib/telemetry/event_based_telemetry';
-import { executeAction } from '../lib/executor';
+import { executeAction, StaticResponse } from '../lib/executor';
 import { POST_ACTIONS_CONNECTOR_EXECUTE } from '../../common/constants';
 import { getLangChainMessages } from '../lib/langchain/helpers';
 import { buildResponse } from '../lib/build_response';
@@ -38,6 +39,8 @@ import {
   getPluginNameFromRequest,
 } from './helpers';
 import { getLangSmithTracer } from './evaluate/utils';
+import { EsAnonymizationFieldsSchema } from '../ai_assistant_data_clients/anonymization_fields/types';
+import { transformESSearchToAnonymizationFields } from '../ai_assistant_data_clients/anonymization_fields/helpers';
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
@@ -53,7 +56,7 @@ export const postActionsConnectorExecuteRoute = (
     })
     .addVersion(
       {
-        version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+        version: API_VERSIONS.internal.v1,
         validate: {
           request: {
             body: buildRouteValidationWithZod(ExecuteConnectorRequestBody),
@@ -70,6 +73,7 @@ export const postActionsConnectorExecuteRoute = (
         const assistantContext = await context.elasticAssistant;
         const logger: Logger = assistantContext.logger;
         const telemetry = assistantContext.telemetry;
+        let onLlmResponse;
 
         try {
           const authenticatedUser = assistantContext.getCurrentUser();
@@ -78,14 +82,17 @@ export const postActionsConnectorExecuteRoute = (
               body: `Authenticated user not found`,
             });
           }
-          const dataClient = await assistantContext.getAIAssistantConversationsDataClient();
+          const conversationsDataClient =
+            await assistantContext.getAIAssistantConversationsDataClient();
+
+          const anonymizationFieldsDataClient =
+            await assistantContext.getAIAssistantAnonymizationFieldsDataClient();
 
           let latestReplacements: Replacements = request.body.replacements;
           const onNewReplacements = (newReplacements: Replacements) => {
             latestReplacements = { ...latestReplacements, ...newReplacements };
           };
 
-          let onLlmResponse;
           let prevMessages;
           let newMessage: Pick<Message, 'content' | 'role'> | undefined;
           const conversationId = request.body.conversationId;
@@ -101,8 +108,13 @@ export const postActionsConnectorExecuteRoute = (
             };
           }
 
+          const connectorId = decodeURIComponent(request.params.connectorId);
+
+          // get the actions plugin start contract from the request context:
+          const actions = (await context.elasticAssistant).actions;
+
           if (conversationId) {
-            const conversation = await dataClient?.getConversation({
+            const conversation = await conversationsDataClient?.getConversation({
               id: conversationId,
               authenticatedUser,
             });
@@ -112,14 +124,14 @@ export const postActionsConnectorExecuteRoute = (
               });
             }
 
-            // messages are anonymized by dataClient
+            // messages are anonymized by conversationsDataClient
             prevMessages = conversation?.messages?.map((c) => ({
               role: c.role,
               content: c.content,
             }));
 
             if (request.body.message) {
-              const res = await dataClient?.appendConversationMessages({
+              const res = await conversationsDataClient?.appendConversationMessages({
                 existingConversation: conversation,
                 messages: [
                   {
@@ -141,7 +153,7 @@ export const postActionsConnectorExecuteRoute = (
                 });
               }
             }
-            const updatedConversation = await dataClient?.getConversation({
+            const updatedConversation = await conversationsDataClient?.getConversation({
               id: conversationId,
               authenticatedUser,
             });
@@ -152,12 +164,73 @@ export const postActionsConnectorExecuteRoute = (
               });
             }
 
+            const NEW_CHAT = i18n.translate('xpack.elasticAssistantPlugin.server.newChat', {
+              defaultMessage: 'New chat',
+            });
+            if (conversation?.title === NEW_CHAT && prevMessages) {
+              try {
+                const autoTitle = (await executeAction({
+                  actions,
+                  request,
+                  connectorId,
+                  actionTypeId,
+                  params: {
+                    subAction: 'invokeAI',
+                    subActionParams: {
+                      model: request.body.model,
+                      messages: [
+                        {
+                          role: 'assistant',
+                          content: i18n.translate(
+                            'xpack.elasticAssistantPlugin.server.autoTitlePromptDescription',
+                            {
+                              defaultMessage:
+                                'You are a helpful assistant for Elastic Security. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you.',
+                            }
+                          ),
+                        },
+                        newMessage ?? prevMessages?.[0],
+                      ],
+                      ...(actionTypeId === '.gen-ai'
+                        ? { n: 1, stop: null, temperature: 0.2 }
+                        : { temperature: 0, stopSequences: [] }),
+                    },
+                  },
+                  logger,
+                })) as unknown as StaticResponse; // TODO: Use function overloads in executeAction to avoid this cast when sending subAction: 'invokeAI',
+                if (autoTitle.status === 'ok') {
+                  try {
+                    // This regular expression captures a string enclosed in single or double quotes.
+                    // It extracts the string content without the quotes.
+                    // Example matches:
+                    // - "Hello, World!" => Captures: Hello, World!
+                    // - 'Another Example' => Captures: Another Example
+                    // - JustTextWithoutQuotes => Captures: JustTextWithoutQuotes
+                    const match = autoTitle.data.match(/^["']?([^"']+)["']?$/);
+                    const title = match ? match[1] : autoTitle.data;
+
+                    await conversationsDataClient?.updateConversation({
+                      conversationUpdateProps: {
+                        id: conversationId,
+                        title,
+                      },
+                    });
+                  } catch (e) {
+                    logger.warn(`Failed to update conversation with generated title: ${e.message}`);
+                  }
+                }
+              } catch (e) {
+                /* empty */
+              }
+            }
+
             onLlmResponse = async (
               content: string,
-              traceData: Message['traceData'] = {}
+              traceData: Message['traceData'] = {},
+              isError = false
             ): Promise<void> => {
               if (updatedConversation) {
-                await dataClient?.appendConversationMessages({
+                await conversationsDataClient?.appendConversationMessages({
                   existingConversation: updatedConversation,
                   messages: [
                     getMessageFromRawResponse({
@@ -166,12 +239,13 @@ export const postActionsConnectorExecuteRoute = (
                         replacements: latestReplacements,
                       }),
                       traceData,
+                      isError,
                     }),
                   ],
                 });
               }
               if (Object.keys(latestReplacements).length > 0) {
-                await dataClient?.updateConversation({
+                await conversationsDataClient?.updateConversation({
                   conversationUpdateProps: {
                     id: conversationId,
                     replacements: latestReplacements,
@@ -180,11 +254,6 @@ export const postActionsConnectorExecuteRoute = (
               }
             };
           }
-
-          const connectorId = decodeURIComponent(request.params.connectorId);
-
-          // get the actions plugin start contract from the request context:
-          const actions = (await context.elasticAssistant).actions;
 
           // if not langchain, call execute action directly and return the response:
           if (!request.body.isEnabledKnowledgeBase && !request.body.isEnabledRAGAlerts) {
@@ -211,8 +280,11 @@ export const postActionsConnectorExecuteRoute = (
             });
 
             telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
+              actionTypeId,
               isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
               isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,
+              model: request.body.model,
+              assistantStreamingEnabled: request.body.subAction !== 'invokeAI',
             });
             return response.ok({
               body: result,
@@ -230,7 +302,9 @@ export const postActionsConnectorExecuteRoute = (
             defaultPluginName: DEFAULT_PLUGIN_NAME,
             logger,
           });
-          const assistantTools = (await context.elasticAssistant).getRegisteredTools(pluginName);
+          const assistantTools = (await context.elasticAssistant)
+            .getRegisteredTools(pluginName)
+            .filter((x) => x.id !== 'attack-discovery'); // We don't (yet) support asking the assistant for NEW attack discoveries from a conversation
 
           // get a scoped esClient for assistant memory
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
@@ -243,12 +317,19 @@ export const postActionsConnectorExecuteRoute = (
 
           const elserId = await getElser(request, (await context.core).savedObjects.getClient());
 
+          const anonymizationFieldsRes =
+            await anonymizationFieldsDataClient?.findDocuments<EsAnonymizationFieldsSchema>({
+              perPage: 1000,
+              page: 1,
+            });
+
           const result: StreamFactoryReturnType['responseWithHeaders'] | StaticReturnType =
             await callAgentExecutor({
               abortSignal,
               alertsIndexPattern: request.body.alertsIndexPattern,
-              allow: request.body.allow,
-              allowReplacement: request.body.allowReplacement,
+              anonymizationFields: anonymizationFieldsRes
+                ? transformESSearchToAnonymizationFields(anonymizationFieldsRes.data)
+                : undefined,
               actions,
               isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase ?? false,
               assistantTools,
@@ -280,8 +361,14 @@ export const postActionsConnectorExecuteRoute = (
             });
 
           telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
+            actionTypeId,
             isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
             isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,
+            model: request.body.model,
+            // TODO rm actionTypeId check when llmClass for bedrock streaming is implemented
+            // tracked here: https://github.com/elastic/security-team/issues/7363
+            assistantStreamingEnabled:
+              request.body.subAction !== 'invokeAI' && actionTypeId === '.gen-ai',
           });
 
           return response.ok<
@@ -290,10 +377,16 @@ export const postActionsConnectorExecuteRoute = (
         } catch (err) {
           logger.error(err);
           const error = transformError(err);
+          if (onLlmResponse) {
+            await onLlmResponse(error.message, {}, true);
+          }
           telemetry.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
+            actionTypeId: request.body.actionTypeId,
             isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
             isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,
+            model: request.body.model,
             errorMessage: error.message,
+            assistantStreamingEnabled: request.body.subAction !== 'invokeAI',
           });
 
           return resp.error({

@@ -531,7 +531,6 @@ export const AnomaliesTable = ({
           items={results}
           sorting={{ sort: sorting }}
           onChange={onTableChange}
-          hasActions={true}
           loading={isLoading}
           noItemsMessage={
             isLoading ? (

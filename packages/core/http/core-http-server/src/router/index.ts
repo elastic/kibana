@@ -42,6 +42,7 @@ export type {
   ErrorHttpResponseOptions,
   FileHttpResponseOptions,
 } from './response';
+export { isKibanaResponse } from './response';
 export type {
   RouteConfigOptions,
   RouteMethod,
@@ -62,6 +63,7 @@ export type {
   RouteValidatorOptions,
   RouteValidator,
   RouteValidatorRequestAndResponses,
+  LazyValidator,
 } from './route_validator';
 export { RouteValidationError } from './route_validator';
 export type { IRouter, RouteRegistrar, RouterRoute } from './router';
@@ -75,4 +77,4 @@ export type {
   LifecycleResponseFactory,
 } from './response_factory';
 export type { RawRequest, FakeRawRequest } from './raw_request';
-export { getRequestValidation, isFullValidatorContainer } from './utils';
+export { getRequestValidation, getResponseValidation, isFullValidatorContainer } from './utils';

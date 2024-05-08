@@ -167,9 +167,7 @@ describe('Stacktrace', () => {
     });
 
     it('should handle one stackframe', () => {
-      const result = getGroupedStackframes([
-        stacktracesMock[0],
-      ] as Stackframe[]);
+      const result = getGroupedStackframes([stacktracesMock[0]] as Stackframe[]);
       expect(result).toHaveLength(1);
       expect(result[0].stackframes).toHaveLength(1);
     });

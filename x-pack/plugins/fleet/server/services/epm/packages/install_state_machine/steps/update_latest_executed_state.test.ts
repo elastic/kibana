@@ -52,7 +52,7 @@ describe('updateLatestExecutedState', () => {
     soClient.update.mockReset();
   });
 
-  it('Updates the SO after each transition', async () => {
+  it('Should update the SO if there was an error on latest step', async () => {
     await updateLatestExecutedState({
       savedObjectsClient: soClient,
       // @ts-ignore
@@ -78,6 +78,7 @@ describe('updateLatestExecutedState', () => {
       latestExecutedState: {
         name: INSTALL_STATES.SAVE_ARCHIVE_ENTRIES,
         started_at: new Date(Date.now() - MAX_TIME_COMPLETE_INSTALL * 2).toISOString(),
+        error: `Some error`,
       },
       installType: 'install',
       installSource: 'registry',
@@ -92,6 +93,7 @@ describe('updateLatestExecutedState', () => {
           {
             latest_executed_state: {
               name: 'save_archive_entries_from_assets_map',
+              error: 'Some error',
               started_at: expect.anything(),
             },
           },
@@ -105,7 +107,7 @@ describe('updateLatestExecutedState', () => {
     });
   });
 
-  it('Should not update the SO if the context contains concurrent installation error', async () => {
+  it('Should not update the SO if the latest error was of type concurrent installation', async () => {
     await updateLatestExecutedState({
       savedObjectsClient: soClient,
       // @ts-ignore
@@ -142,7 +144,43 @@ describe('updateLatestExecutedState', () => {
     expect(mockedAuditLoggingService.writeCustomSoAuditLog).not.toHaveBeenCalled();
   });
 
-  it('Should log error if the update failed', async () => {
+  it('Should not update the SO if there was no error', async () => {
+    await updateLatestExecutedState({
+      savedObjectsClient: soClient,
+      // @ts-ignore
+      savedObjectsImporter: jest.fn(),
+      esClient,
+      logger,
+      packageInstallContext: {
+        assetsMap: new Map(),
+        paths: [],
+        packageInfo: {
+          title: 'title',
+          name: 'xyz',
+          version: '4.5.6',
+          description: 'test',
+          type: 'integration',
+          categories: ['cloud', 'custom'],
+          format_version: 'string',
+          release: 'experimental',
+          conditions: { kibana: { version: 'x.y.z' } },
+          owner: { github: 'elastic/fleet' },
+        },
+      },
+      latestExecutedState: {
+        name: INSTALL_STATES.SAVE_ARCHIVE_ENTRIES,
+        started_at: new Date(Date.now() - MAX_TIME_COMPLETE_INSTALL * 2).toISOString(),
+      },
+      installType: 'install',
+      installSource: 'registry',
+      spaceId: DEFAULT_SPACE_ID,
+    });
+
+    expect(soClient.update.mock.calls).toEqual([]);
+    expect(mockedAuditLoggingService.writeCustomSoAuditLog).not.toHaveBeenCalled();
+  });
+
+  it('Should log error if the SO update failed', async () => {
     soClient.update.mockImplementation(
       async (
         _type: string,
@@ -177,6 +215,7 @@ describe('updateLatestExecutedState', () => {
       latestExecutedState: {
         name: INSTALL_STATES.SAVE_ARCHIVE_ENTRIES,
         started_at: new Date(Date.now() - MAX_TIME_COMPLETE_INSTALL * 2).toISOString(),
+        error: `Some error`,
       },
       installType: 'install',
       installSource: 'registry',

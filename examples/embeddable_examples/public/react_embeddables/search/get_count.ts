@@ -16,7 +16,9 @@ export async function getCount(
   dataService: DataPublicPluginStart,
   filters: Filter[],
   query: Query | AggregateQuery | undefined,
-  timeRange: TimeRange | undefined
+  timeRange: TimeRange | undefined,
+  abortSignal: AbortSignal,
+  sessionId?: string
 ) {
   const searchSource = await dataService.search.searchSource.create();
   searchSource.setField('index', dataView);
@@ -38,7 +40,9 @@ export async function getCount(
 
   const { rawResponse: resp } = await lastValueFrom(
     searchSource.fetch$({
+      abortSignal,
       legacyHitsTotal: false,
+      sessionId,
     })
   );
   // eslint-disable-next-line no-console

@@ -300,6 +300,22 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
         ),
         type: 'error',
       };
+    case 'unsupportedLiteralOption':
+      return {
+        message: i18n.translate(
+          'kbn-esql-validation-autocomplete.esql.validation.unsupportedLiteralOption',
+          {
+            defaultMessage:
+              'Invalid option [{value}] for {name}. Supported options: [{supportedOptions}].',
+            values: {
+              name: out.name,
+              value: out.value,
+              supportedOptions: out.supportedOptions,
+            },
+          }
+        ),
+        type: 'warning',
+      };
     case 'expectedConstant':
       return {
         message: i18n.translate(

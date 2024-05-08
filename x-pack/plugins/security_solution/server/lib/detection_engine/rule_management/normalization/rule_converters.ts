@@ -84,6 +84,7 @@ import {
 } from '../utils/utils';
 import { createRuleExecutionSummary } from '../../rule_monitoring';
 import type { PrebuiltRuleAsset } from '../../prebuilt_rules';
+import { convertObjectKeysToSnakeCase } from '../../../../utils/object_case_converters';
 
 const DEFAULT_FROM = 'now-6m' as const;
 const DEFAULT_TO = 'now' as const;
@@ -112,6 +113,7 @@ export const typeSpecificSnakeToCamel = (
         timestampField: params.timestamp_field,
         eventCategoryOverride: params.event_category_override,
         tiebreakerField: params.tiebreaker_field,
+        alertSuppression: convertAlertSuppressionToCamel(params.alert_suppression),
       };
     }
     case 'esql': {
@@ -222,6 +224,8 @@ const patchEqlParams = (
     timestampField: params.timestamp_field ?? existingRule.timestampField,
     eventCategoryOverride: params.event_category_override ?? existingRule.eventCategoryOverride,
     tiebreakerField: params.tiebreaker_field ?? existingRule.tiebreakerField,
+    alertSuppression:
+      convertAlertSuppressionToCamel(params.alert_suppression) ?? existingRule.alertSuppression,
   };
 };
 
@@ -559,6 +563,7 @@ export const typeSpecificCamelToSnake = (
         timestamp_field: params.timestampField,
         event_category_override: params.eventCategoryOverride,
         tiebreaker_field: params.tiebreakerField,
+        alert_suppression: convertAlertSuppressionToSnake(params.alertSuppression),
       };
     }
     case 'esql': {
@@ -687,6 +692,7 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
     version: params.version,
     exceptions_list: params.exceptionsList,
     immutable: params.immutable,
+    rule_source: convertObjectKeysToSnakeCase(params.ruleSource),
     related_integrations: params.relatedIntegrations ?? [],
     required_fields: params.requiredFields ?? [],
     setup: params.setup ?? '',

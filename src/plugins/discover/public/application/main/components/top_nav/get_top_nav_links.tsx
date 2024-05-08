@@ -15,7 +15,7 @@ import { showOpenSearchPanel } from './show_open_search_panel';
 import { getSharingData, showPublicUrlSwitch } from '../../../../utils/get_sharing_data';
 import { DiscoverServices } from '../../../../build_services';
 import { onSaveSearch } from './on_save_search';
-import { DiscoverStateContainer } from '../../services/discover_state';
+import { DiscoverStateContainer } from '../../state_management/discover_state';
 import { openAlertsPopover } from './open_alerts_popover';
 import type { TopNavCustomization } from '../../../../customizations';
 
@@ -129,7 +129,7 @@ export const getTopNavLinks = ({
         isTextBased
       );
 
-      const { locator } = services;
+      const { locator, notifications } = services;
       const appState = state.appState.getState();
       const { timefilter } = services.data.query.timefilter;
       const timeRange = timefilter.getTime();
@@ -198,6 +198,7 @@ export const getTopNavLinks = ({
         onClose: () => {
           anchorElement?.focus();
         },
+        toasts: notifications.toasts,
       });
     },
   };

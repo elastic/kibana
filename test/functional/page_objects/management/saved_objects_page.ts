@@ -283,7 +283,7 @@ export class SavedObjectsPageObject extends FtrService {
         let copySaveObjectsElement = null;
         const actions = await row.findByClassName('euiTableRowCell--hasActions');
         // getting the innerHTML and checking if it 'includes' a string is faster than a timeout looking for each element
-        const actionsHTML = await actions.getAttribute('innerHTML');
+        const actionsHTML = (await actions.getAttribute('innerHTML')) ?? '';
         if (actionsHTML.includes('euiCollapsedItemActionsButton')) {
           menuElement = await row.findByTestSubject('euiCollapsedItemActionsButton');
         }

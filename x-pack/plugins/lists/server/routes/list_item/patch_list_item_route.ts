@@ -35,7 +35,8 @@ export const patchListItemRoute = (router: ListsPluginRouter): void => {
       async (context, request, response) => {
         const siemResponse = buildSiemResponse(response);
         try {
-          const { value, id, meta, _version } = request.body;
+          const { value, id, meta, _version, refresh } = request.body;
+          const shouldRefresh = refresh === 'true' ? true : false;
           const lists = await getListClient(context);
 
           const dataStreamExists = await lists.getListItemDataStreamExists();
@@ -51,6 +52,7 @@ export const patchListItemRoute = (router: ListsPluginRouter): void => {
             _version,
             id,
             meta,
+            refresh: shouldRefresh,
             value,
           });
           if (listItem == null) {

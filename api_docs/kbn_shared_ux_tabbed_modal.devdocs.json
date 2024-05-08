@@ -157,7 +157,7 @@
             "label": "modalActionBtn",
             "description": [],
             "signature": [
-              "IModalTabActionBtn<S>"
+              "IModalTabActionBtn<S> | undefined"
             ],
             "path": "packages/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
             "deprecated": false,

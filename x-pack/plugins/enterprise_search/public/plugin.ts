@@ -25,7 +25,7 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { IndexManagementPluginStart } from '@kbn/index-management-plugin/public';
+import type { IndexManagementPluginStart } from '@kbn/index-management';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
@@ -55,12 +55,11 @@ import {
 import { ClientConfigType, InitialAppData } from '../common/types';
 
 import { ENGINES_PATH } from './applications/app_search/routes';
-import { SEARCH_APPLICATIONS_PATH } from './applications/applications/routes';
+import { SEARCH_APPLICATIONS_PATH, PLAYGROUND_PATH } from './applications/applications/routes';
 import {
   CONNECTORS_PATH,
   SEARCH_INDICES_PATH,
   CRAWLERS_PATH,
-  PLAYGROUND_PATH,
 } from './applications/enterprise_search_content/routes';
 
 import { docLinks } from './applications/shared/doc_links';
@@ -76,24 +75,24 @@ export type EnterpriseSearchPublicStart = ReturnType<EnterpriseSearchPlugin['sta
 interface PluginsSetup {
   cloud?: CloudSetup;
   home?: HomePublicPluginSetup;
-  security: SecurityPluginSetup;
-  share: SharePluginSetup;
+  security?: SecurityPluginSetup;
+  share?: SharePluginSetup;
 }
 
 export interface PluginsStart {
-  charts: ChartsPluginStart;
+  charts?: ChartsPluginStart;
   cloud?: CloudSetup & CloudStart;
   console?: ConsolePluginStart;
-  data: DataPublicPluginStart;
-  guidedOnboarding: GuidedOnboardingPluginStart;
-  indexManagement: IndexManagementPluginStart;
-  lens: LensPublicStart;
-  licensing: LicensingPluginStart;
-  ml: MlPluginStart;
-  searchConnectors: SearchConnectorsPluginStart;
-  searchPlayground: SearchPlaygroundPluginStart;
-  security: SecurityPluginStart;
-  share: SharePluginStart;
+  data?: DataPublicPluginStart;
+  guidedOnboarding?: GuidedOnboardingPluginStart;
+  indexManagement?: IndexManagementPluginStart;
+  lens?: LensPublicStart;
+  licensing?: LicensingPluginStart;
+  ml?: MlPluginStart;
+  searchConnectors?: SearchConnectorsPluginStart;
+  searchPlayground?: SearchPlaygroundPluginStart;
+  security?: SecurityPluginStart;
+  share?: SharePluginStart;
 }
 
 export interface ESConfig {
@@ -122,16 +121,17 @@ const contentLinks: AppDeepLink[] = [
       defaultMessage: 'Web crawlers',
     }),
   },
+];
+
+const applicationsLinks: AppDeepLink[] = [
   {
     id: 'playground',
     path: `/${PLAYGROUND_PATH}`,
     title: i18n.translate('xpack.enterpriseSearch.navigation.contentPlaygroundLinkLabel', {
       defaultMessage: 'Playground',
     }),
+    visibleIn: ['sideNav', 'globalSearch'],
   },
-];
-
-const applicationsLinks: AppDeepLink[] = [
   {
     id: 'searchApplications',
     path: `/${SEARCH_APPLICATIONS_PATH}`,
@@ -141,6 +141,7 @@ const applicationsLinks: AppDeepLink[] = [
         defaultMessage: 'Search Applications',
       }
     ),
+    visibleIn: ['globalSearch'],
   },
 ];
 
@@ -359,6 +360,7 @@ export class EnterpriseSearchPlugin implements Plugin {
         return renderApp(Applications, kibanaDeps, pluginData);
       },
       title: APPLICATIONS_PLUGIN.NAV_TITLE,
+      visibleIn: [],
     });
 
     core.application.register({
@@ -404,7 +406,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       visibleIn: [],
     });
 
-    share.url.locators.create<CreatIndexLocatorParams>(new CreatIndexLocatorDefinition());
+    share?.url.locators.create<CreatIndexLocatorParams>(new CreatIndexLocatorDefinition());
 
     if (config.canDeployEntSearch) {
       core.application.register({

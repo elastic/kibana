@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { HttpStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
+import type { CoreStart, HttpStart, OverlayStart } from '@kbn/core/public';
 import type { TelemetryService } from '../telemetry_service';
 import type { TelemetryConstants } from '../..';
 import { renderOptInStatusNoticeBanner } from './render_opt_in_status_notice_banner';
 
-interface TelemetryNotificationsConstructor {
+interface TelemetryNotificationsConstructor
+  extends Pick<CoreStart, 'analytics' | 'i18n' | 'theme'> {
   http: HttpStart;
   overlays: OverlayStart;
-  theme: ThemeServiceStart;
   telemetryService: TelemetryService;
   telemetryConstants: TelemetryConstants;
 }
@@ -25,7 +25,7 @@ interface TelemetryNotificationsConstructor {
 export class TelemetryNotifications {
   private readonly http: HttpStart;
   private readonly overlays: OverlayStart;
-  private readonly theme: ThemeServiceStart;
+  private readonly startServices: Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
   private readonly telemetryConstants: TelemetryConstants;
   private readonly telemetryService: TelemetryService;
   private optInStatusNoticeBannerId?: string;
@@ -33,14 +33,14 @@ export class TelemetryNotifications {
   constructor({
     http,
     overlays,
-    theme,
     telemetryService,
     telemetryConstants,
+    ...startServices
   }: TelemetryNotificationsConstructor) {
     this.telemetryService = telemetryService;
     this.http = http;
     this.overlays = overlays;
-    this.theme = theme;
+    this.startServices = startServices;
     this.telemetryConstants = telemetryConstants;
   }
 
@@ -61,9 +61,9 @@ export class TelemetryNotifications {
       http: this.http,
       onSeen: this.setOptInStatusNoticeSeen,
       overlays: this.overlays,
-      theme: this.theme,
       telemetryConstants: this.telemetryConstants,
       telemetryService: this.telemetryService,
+      ...this.startServices,
     });
 
     this.optInStatusNoticeBannerId = bannerId;

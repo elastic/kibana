@@ -58,24 +58,16 @@ export function ErrorSampleContextualInsight({
           : ''
       }`,
     });
-  }, [
-    error,
-    transaction,
-    logStacktrace,
-    exceptionStacktrace,
-    observabilityAIAssistant,
-  ]);
+  }, [error, transaction, logStacktrace, exceptionStacktrace, observabilityAIAssistant]);
 
-  return observabilityAIAssistant?.ObservabilityAIAssistantContextualInsight &&
-    messages ? (
+  return observabilityAIAssistant?.ObservabilityAIAssistantContextualInsight && messages ? (
     <>
       <EuiFlexItem>
         <observabilityAIAssistant.ObservabilityAIAssistantContextualInsight
           messages={messages}
-          title={i18n.translate(
-            'xpack.apm.errorGroupContextualInsight.explainErrorTitle',
-            { defaultMessage: "What's this error?" }
-          )}
+          title={i18n.translate('xpack.apm.errorGroupContextualInsight.explainErrorTitle', {
+            defaultMessage: "What's this error?",
+          })}
         />
       </EuiFlexItem>
       <EuiSpacer size="s" />
@@ -86,10 +78,7 @@ export function ErrorSampleContextualInsight({
         style={{ display: 'none' }}
       >
         {error.error.log?.message && (
-          <ErrorSampleDetailTabContent
-            error={error}
-            currentTab={logStacktraceTab}
-          />
+          <ErrorSampleDetailTabContent error={error} currentTab={logStacktraceTab} />
         )}
       </div>
       <div
@@ -99,10 +88,7 @@ export function ErrorSampleContextualInsight({
         style={{ display: 'none' }}
       >
         {error.error.exception?.length && (
-          <ErrorSampleDetailTabContent
-            error={error}
-            currentTab={exceptionStacktraceTab}
-          />
+          <ErrorSampleDetailTabContent error={error} currentTab={exceptionStacktraceTab} />
         )}
       </div>
     </>

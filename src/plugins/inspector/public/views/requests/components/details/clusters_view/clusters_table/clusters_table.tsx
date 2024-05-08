@@ -75,6 +75,7 @@ export function ClustersTable({ clusters }: Props) {
         return (
           <>
             <EuiButtonIcon
+              data-test-subj={`inspectorRequestToggleClusterDetails${name}`}
               onClick={() => toggleDetails(name)}
               aria-label={
                 name in expandedRows
@@ -137,7 +138,6 @@ export function ClustersTable({ clusters }: Props) {
           ? items.sort(Comparators.property(sortField, Comparators.default(sortDirection)))
           : items
       }
-      isExpandable={true}
       itemIdToExpandedRowMap={expandedRows}
       itemId="name"
       columns={columns}

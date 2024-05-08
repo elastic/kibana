@@ -7,27 +7,51 @@
 
 import { IndicesQuerySourceFields, QuerySourceFields } from '../types';
 
-type IndexFields = Record<string, string[]>;
+export type IndexFields = Record<string, string[]>;
 
 // These fields are used to suggest the fields to use for the query
 // If the field is not found in the suggested fields,
 // we will use the first field for BM25 and all fields for vectors
-const SUGGESTED_SPARSE_FIELDS = [
+export const SUGGESTED_SPARSE_FIELDS = [
   'vector.tokens', // LangChain field
 ];
 
-const SUGGESTED_BM25_FIELDS = ['title', 'body_content', 'text', 'content'];
+export const SUGGESTED_BM25_FIELDS = [
+  'title',
+  'body_content',
+  'page_content_text',
+  'text',
+  'content',
+  `text_field`,
+];
 
-const SUGGESTED_DENSE_VECTOR_FIELDS = ['content_vector.tokens'];
+export const SUGGESTED_DENSE_VECTOR_FIELDS = ['content_vector.tokens'];
 
-const SUGGESTED_SOURCE_FIELDS = ['body_content', 'content', 'text'];
+const SUGGESTED_SOURCE_FIELDS = [
+  'body_content',
+  'content',
+  'text',
+  'page_content_text',
+  'text_field',
+];
 
 interface Matches {
   queryMatches: any[];
   knnMatches: any[];
 }
 
-export function createQuery(fields: IndexFields, fieldDescriptors: IndicesQuerySourceFields) {
+interface ReRankOptions {
+  rrf: boolean;
+}
+
+export function createQuery(
+  fields: IndexFields,
+  fieldDescriptors: IndicesQuerySourceFields,
+  rerankOptions: ReRankOptions = {
+    rrf: true,
+  }
+) {
+  const indices = Object.keys(fieldDescriptors);
   const boolMatches = Object.keys(fields).reduce<Matches>(
     (acc, index) => {
       const indexFields: string[] = fields[index];
@@ -86,14 +110,22 @@ export function createQuery(fields: IndexFields, fieldDescriptors: IndicesQueryS
 
           // not supporting nested fields for now
           if (denseVectorField && !denseVectorField.nested) {
+            // when the knn field isn't found in all indices, we need a filter to ensure we only use the field from the correct index
+            const filter =
+              denseVectorField.indices.length < indices.length
+                ? { filter: { terms: { _index: denseVectorField.indices } } }
+                : {};
+
             return {
-              field: denseVectorField.field,
-              k: 10,
-              num_candidates: 100,
-              query_vector_builder: {
-                text_embedding: {
-                  model_id: denseVectorField.model_id,
-                  model_text: '{query}',
+              knn: {
+                field: denseVectorField.field,
+                num_candidates: 100,
+                ...filter,
+                query_vector_builder: {
+                  text_embedding: {
+                    model_id: denseVectorField.model_id,
+                    model_text: '{query}',
+                  },
                 },
               },
             };
@@ -115,18 +147,73 @@ export function createQuery(fields: IndexFields, fieldDescriptors: IndicesQueryS
     }
   );
 
-  return {
-    ...(boolMatches.queryMatches.length > 0
-      ? {
+  // for single Elser support to make it easy to read - skips bool query
+  if (boolMatches.queryMatches.length === 1 && boolMatches.knnMatches.length === 0) {
+    return {
+      retriever: {
+        standard: {
+          query: boolMatches.queryMatches[0],
+        },
+      },
+    };
+  }
+
+  // for single Dense vector support to make it easy to read - skips bool query
+  if (boolMatches.queryMatches.length === 0 && boolMatches.knnMatches.length === 1) {
+    return {
+      retriever: {
+        standard: {
+          query: boolMatches.knnMatches[0],
+        },
+      },
+    };
+  }
+
+  const matches = [...boolMatches.queryMatches, ...boolMatches.knnMatches];
+
+  if (matches.length === 0) {
+    return {
+      retriever: {
+        standard: {
           query: {
-            bool: {
-              should: boolMatches.queryMatches,
-              minimum_should_match: 1,
-            },
+            match_all: {},
           },
-        }
-      : {}),
-    ...(boolMatches.knnMatches.length > 0 ? { knn: boolMatches.knnMatches } : {}),
+        },
+      },
+    };
+  }
+
+  // determine if we need to use a rrf query
+  if (rerankOptions.rrf) {
+    const retrievers = matches.map((clause) => {
+      return {
+        standard: {
+          query: clause,
+        },
+      };
+    });
+
+    return {
+      retriever: {
+        rrf: {
+          retrievers,
+        },
+      },
+    };
+  }
+
+  // No RRF - add all the matches (DENSE + BM25 + SPARSE) to the bool query
+  return {
+    retriever: {
+      standard: {
+        query: {
+          bool: {
+            should: matches,
+            minimum_should_match: 1,
+          },
+        },
+      },
+    },
   };
 }
 
@@ -135,13 +222,23 @@ export function getDefaultSourceFields(fieldDescriptors: IndicesQuerySourceField
     (acc: IndexFields, index: string) => {
       const indexFieldDescriptors = fieldDescriptors[index];
 
+      // if there are no source fields, we don't need to suggest anything
+      if (indexFieldDescriptors.source_fields.length === 0) {
+        return {
+          ...acc,
+          [index]: [],
+        };
+      }
+
       const suggested = indexFieldDescriptors.source_fields.filter((x) =>
         SUGGESTED_SOURCE_FIELDS.includes(x)
       );
 
+      const fields = suggested.length === 0 ? [indexFieldDescriptors.source_fields[0]] : suggested;
+
       return {
         ...acc,
-        [index]: suggested,
+        [index]: fields,
       };
     },
     {}

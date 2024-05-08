@@ -19,10 +19,11 @@ import {
   EuiTitle,
   EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { AllConditionEntryFields, EntryTypes } from '@kbn/securitysolution-utils';
 import {
   hasSimpleExecutableName,
-  hasWildcardAndInvalidOperator,
+  validateHasWildcardWithWrongOperator,
   isPathValid,
   ConditionEntryField,
   OperatingSystem,
@@ -58,9 +59,8 @@ import {
   NAME_LABEL,
   POLICY_SELECT_DESCRIPTION,
   SELECT_OS_LABEL,
-  CONFIRM_WARNING_MODAL_LABELS,
 } from '../translations';
-import { OS_TITLES } from '../../../../common/translations';
+import { OS_TITLES, CONFIRM_WARNING_MODAL_LABELS } from '../../../../common/translations';
 import type { LogicalConditionBuilderProps } from './logical_condition';
 import { LogicalConditionBuilder } from './logical_condition';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
@@ -166,7 +166,7 @@ const validateValues = (values: ArtifactFormComponentProps['item']): ValidationR
       });
 
       if (
-        hasWildcardAndInvalidOperator({
+        validateHasWildcardWithWrongOperator({
           operator: entry.type as EntryTypes,
           value: (entry as TrustedAppConditionEntry).value,
         })
@@ -296,7 +296,11 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           item: updatedFormValues,
           isValid: updatedValidationResult.isValid,
           confirmModalLabels: updatedValidationResult.extraWarning
-            ? CONFIRM_WARNING_MODAL_LABELS
+            ? CONFIRM_WARNING_MODAL_LABELS(
+                i18n.translate('xpack.securitySolution.trustedApps.flyoutForm.confirmModal.name', {
+                  defaultMessage: 'trusted application',
+                })
+              )
             : undefined,
         });
       },

@@ -270,10 +270,13 @@ export const useESQLDataVisualizerData = (
     documentCountStats,
     totalCount,
     overallStats,
+    totalFields,
     overallStatsProgress,
     columns,
     cancelOverallStatsRequest,
     timeFieldName,
+    queryHistoryStatus,
+    exampleDocs,
   } = useESQLOverallStatsData(fieldStatsRequest);
 
   const [metricConfigs, setMetricConfigs] = useState(defaults.metricConfigs);
@@ -497,13 +500,7 @@ export const useESQLDataVisualizerData = (
     if (!overallStats) return;
 
     let _visibleFieldsCount = 0;
-    let _totalFieldsCount = 0;
-    Object.keys(overallStats).forEach((key) => {
-      const fieldsGroup = overallStats[key as keyof typeof overallStats];
-      if (Array.isArray(fieldsGroup) && fieldsGroup.length > 0) {
-        _totalFieldsCount += fieldsGroup.length;
-      }
-    });
+    const _totalFieldsCount = totalFields ?? 0;
 
     if (showEmptyFields === true) {
       _visibleFieldsCount = _totalFieldsCount;
@@ -513,7 +510,7 @@ export const useESQLDataVisualizerData = (
         overallStats.nonAggregatableExistsFields.length;
     }
     return { visibleFieldsCount: _visibleFieldsCount, totalFieldsCount: _totalFieldsCount };
-  }, [overallStats, showEmptyFields]);
+  }, [overallStats, showEmptyFields, totalFields]);
 
   useEffect(
     () => {
@@ -533,9 +530,14 @@ export const useESQLDataVisualizerData = (
         visibleFieldTypes
       ).filteredFields;
 
+      const examples = exampleDocs?.reduce((map, exampleDoc) => {
+        map.set(exampleDoc.fieldName, exampleDoc);
+        return map;
+      }, new Map());
+
       if (fieldStatsProgress.loaded === 100 && fieldStats) {
         combinedConfigs = combinedConfigs.map((c) => {
-          const loadedFullStats = fieldStats.get(c.fieldName) ?? {};
+          const loadedFullStats = fieldStats.get(c.fieldName) ?? examples?.get(c.fieldName) ?? {};
           return loadedFullStats
             ? {
                 ...c,
@@ -555,6 +557,7 @@ export const useESQLDataVisualizerData = (
       fieldStatsProgress.loaded,
       dataVisualizerListState.pageIndex,
       dataVisualizerListState.pageSize,
+      exampleDocs,
     ]
   );
 
@@ -570,13 +573,14 @@ export const useESQLDataVisualizerData = (
               esql={query.esql}
               totalDocuments={totalCount}
               typeAccessor="secondaryType"
+              timeFieldName={timeFieldName}
             />
           );
         }
         return map;
       }, {} as ItemIdToExpandedRowMap);
     },
-    [currentDataView, totalCount, query.esql]
+    [currentDataView, totalCount, query.esql, timeFieldName]
   );
 
   const combinedProgress = useMemo(
@@ -587,23 +591,26 @@ export const useESQLDataVisualizerData = (
     [totalCount, overallStatsProgress.loaded, fieldStatsProgress.loaded]
   );
 
-  const onQueryUpdate = async (q?: AggregateQuery) => {
-    // When user submits a new query
-    // resets all current requests and other data
-    if (cancelOverallStatsRequest) {
-      cancelOverallStatsRequest();
-    }
-    if (cancelFieldStatsRequest) {
-      cancelFieldStatsRequest();
-    }
-    // Reset field stats to fetch state
-    setFieldStatFieldsToFetch(undefined);
-    setMetricConfigs(defaults.metricConfigs);
-    setNonMetricConfigs(defaults.nonMetricConfigs);
-    if (isESQLQuery(q) && setQuery) {
-      setQuery(q);
-    }
-  };
+  const onQueryUpdate = useCallback(
+    async (q?: AggregateQuery) => {
+      // When user submits a new query
+      // resets all current requests and other data
+      if (cancelOverallStatsRequest) {
+        cancelOverallStatsRequest();
+      }
+      if (cancelFieldStatsRequest) {
+        cancelFieldStatsRequest();
+      }
+      // Reset field stats to fetch state
+      setFieldStatFieldsToFetch(undefined);
+      setMetricConfigs(defaults.metricConfigs);
+      setNonMetricConfigs(defaults.nonMetricConfigs);
+      if (isESQLQuery(q) && setQuery) {
+        setQuery(q);
+      }
+    },
+    [cancelFieldStatsRequest, cancelOverallStatsRequest, setQuery]
+  );
 
   return {
     totalCount,
@@ -626,5 +633,6 @@ export const useESQLDataVisualizerData = (
     showEmptyFields,
     fieldsCountStats,
     timeFieldName,
+    queryHistoryStatus,
   };
 };
