@@ -184,18 +184,17 @@ export class MonacoEditorActionsProvider {
     return stringifiedRequests.map((request) => replaceRequestVariables(request, variables));
   }
 
-  private getSelectedTextLines(): string[] {
+  private getSelectedTextLines(selectionRange: monaco.IRange): string[] {
     const model = this.editor.getModel();
-    const selection = this.editor.getSelection();
-    if (!model || !selection) {
+    if (!model || !selectionRange) {
       return [];
     }
-    const { startLineNumber, selectionStartColumn, endLineNumber, positionColumn } = selection;
+    const { startLineNumber, startColumn, endLineNumber, endColumn } = selectionRange;
     const value = model.getValueInRange({
       startLineNumber,
-      startColumn: selectionStartColumn - 1,
+      startColumn,
       endLineNumber,
-      endColumn: positionColumn,
+      endColumn,
     });
     return value.split(`\n`);
   }
@@ -293,7 +292,7 @@ export class MonacoEditorActionsProvider {
       return;
     }
 
-    const textLines = this.getSelectedTextLines();
+    const textLines = this.getSelectedTextLines(range);
 
     const autoIndentedText = getAutoIndentedRequests(requests, textLines);
 

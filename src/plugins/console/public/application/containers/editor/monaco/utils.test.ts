@@ -55,6 +55,7 @@ describe('monaco editor utils', () => {
       endOffset: 11,
       method: 'get',
       url: '_search some_text',
+      text: 'get _search some_text',
     };
     it('calls the "removeTrailingWhitespaces" on the url', () => {
       const stringifiedRequest = stringifyRequest(request);
@@ -94,6 +95,7 @@ describe('monaco editor utils', () => {
         method: 'GET',
         url: '${variable1}',
         data: [],
+        text: 'GET ${variable1}',
       };
       it('when there is no other text', () => {
         const result = replaceRequestVariables(request, variables);
@@ -120,6 +122,7 @@ describe('monaco editor utils', () => {
         method: 'GET',
         url: '${variable1}',
         data: [JSON.stringify({ '${variable1}': '${variable2}' }, null, 2)],
+        text: '',
       };
       it('works with several variables', () => {
         const result = replaceRequestVariables(request, variables);
@@ -130,7 +133,7 @@ describe('monaco editor utils', () => {
 
   describe('getCurlRequest', () => {
     it('works without a request body', () => {
-      const request = { method: 'GET', url: '_search', data: [] };
+      const request = { method: 'GET', url: '_search', data: [], text: '' };
       const result = getCurlRequest(request, 'http://test.com');
       expect(result).toBe('curl -XGET "http://test.com/_search" -H "kbn-xsrf: reporting"');
     });
@@ -139,6 +142,7 @@ describe('monaco editor utils', () => {
         method: 'GET',
         url: '_search',
         data: [JSON.stringify(dataObjects[0], null, 2)],
+        text: '',
       };
       const result = getCurlRequest(request, 'http://test.com');
       expect(result).toBe(
@@ -155,6 +159,7 @@ describe('monaco editor utils', () => {
         method: 'GET',
         url: '_search',
         data: [JSON.stringify(dataObjects[0], null, 2), JSON.stringify(dataObjects[1], null, 2)],
+        text: '',
       };
       const result = getCurlRequest(request, 'http://test.com');
       expect(result).toBe(
@@ -174,8 +179,8 @@ describe('monaco editor utils', () => {
   describe('trackSentRequests', () => {
     it('tracks each request correctly', () => {
       const requests = [
-        { method: 'GET', url: '_search', data: [] },
-        { method: 'POST', url: '_test', data: [] },
+        { method: 'GET', url: '_search', data: [], text: '' },
+        { method: 'POST', url: '_test', data: [], text: '' },
       ];
       const mockMetricsTracker: jest.Mocked<MetricsTracker> = { count: jest.fn(), load: jest.fn() };
       trackSentRequests(requests, mockMetricsTracker);
@@ -228,55 +233,89 @@ describe('monaco editor utils', () => {
   });
 
   describe('isStartOfRequest', () => {
-    it('correctly matches empty lines and whitespaces', () => {
-      expect(isStartOfRequest('')).toBe(true);
-      expect(isStartOfRequest('     ')).toBe(true);
+    it('correctly matches first lines of requests', () => {
+      expect(isStartOfRequest('GET _all')).toBe(true);
+      expect(isStartOfRequest('  get   _search   ')).toBe(true);
+      expect(isStartOfRequest('POST _all')).toBe(true);
+      expect(isStartOfRequest('  post   _search   ')).toBe(true);
+      expect(isStartOfRequest('PUT _all')).toBe(true);
+      expect(isStartOfRequest('  put   _search   ')).toBe(true);
+      expect(isStartOfRequest('DELETE _all')).toBe(true);
+      expect(isStartOfRequest('  delete   _search   ')).toBe(true);
+      expect(isStartOfRequest('HEAD _all')).toBe(true);
+      expect(isStartOfRequest('  head   _search   ')).toBe(true);
+      expect(isStartOfRequest('PATCH _all')).toBe(true);
+      expect(isStartOfRequest('  patch   _search   ')).toBe(true);
     });
 
-    it('correctly matches lines with comments', () => {
-      expect(isStartOfRequest('// test')).toBe(true);
-      expect(isStartOfRequest('  // test ')).toBe(true);
-      expect(isStartOfRequest('/* test')).toBe(true);
-      expect(isStartOfRequest('  /* test  ')).toBe(true);
-      expect(isStartOfRequest('test */')).toBe(true);
-      expect(isStartOfRequest('   test  */')).toBe(true);
+    it('does not match any other lines', () => {
+      expect(isStartOfRequest('// comment')).toBe(false);
+      expect(isStartOfRequest('/*')).toBe(false);
+      expect(isStartOfRequest(' { ')).toBe(false);
+      expect(isStartOfRequest('"jdks": 4')).toBe(false);
+      expect(isStartOfRequest('   ')).toBe(false);
+      expect(isStartOfRequest('')).toBe(false);
+      expect(isStartOfRequest(' }')).toBe(false);
     });
   });
 
-  describe.skip('getAutoIndentedRequests', () => {
+  describe('getAutoIndentedRequests', () => {
     const TEST_REQUEST_1 = {
       method: 'GET',
       url: '_search',
       data: ['{\n  "query": {\n    "match_all": {}\n  }\n}'],
+      // Non-formatted text
+      text: 'GET    _search   \n{    \n  "query":     {\n    "match_all":    {   }\n    }\n}',
     };
 
     const TEST_REQUEST_2 = {
       method: 'GET',
       url: '_all',
       data: [],
+      // Non-formatted text
+      text: '  GET  _all ',
     };
 
     const TEST_REQUEST_3 = {
       method: 'POST',
       url: '/_bulk',
       data: ['{\n  "index": {\n    "_index": "books"\n  }\n}', '{\n  "name": "1984"\n}'],
+      // Non-formatted text
+      text: 'POST   /_bulk\n{\n"index":{\n"_index":"books"\n}\n}\n{\n"name":"1984"\n}',
+    };
+
+    const TEST_REQUEST_4 = {
+      method: 'GET',
+      url: '_search',
+      data: ['{\n  "query": {\n    "match_all": {}\n  }\n}'],
+      // Non-formatted text with comments
+      text: 'GET    _search  // test \n{    \n  "query":     {\n    "match_all":    {   } // some comment\n    }\n}',
     };
 
     it('correctly auto-indents a single request with data', () => {
-      const formattedData = getAutoIndentedRequests([TEST_REQUEST_1], []);
+      const formattedData = getAutoIndentedRequests(
+        [TEST_REQUEST_1],
+        [...TEST_REQUEST_1.text.split('\n')]
+      );
       const expectedResult = 'GET _search\n{\n  "query": {\n    "match_all": {}\n  }\n}';
       expect(formattedData).toBe(expectedResult);
     });
 
     it('correctly auto-indents a single request with no data', () => {
-      const formattedData = getAutoIndentedRequests([TEST_REQUEST_2], []);
+      const formattedData = getAutoIndentedRequests(
+        [TEST_REQUEST_2],
+        [...TEST_REQUEST_2.text.split('\n')]
+      );
       const expectedResult = 'GET _all';
 
       expect(formattedData).toBe(expectedResult);
     });
 
     it('correctly auto-indents a single request with multiple data', () => {
-      const formattedData = getAutoIndentedRequests([TEST_REQUEST_3], []);
+      const formattedData = getAutoIndentedRequests(
+        [TEST_REQUEST_3],
+        [...TEST_REQUEST_3.text.split('\n')]
+      );
       const expectedResult =
         'POST /_bulk\n{\n  "index": {\n    "_index": "books"\n  }\n}\n{\n  "name": "1984"\n}';
 
@@ -286,11 +325,47 @@ describe('monaco editor utils', () => {
     it('correctly auto-indents multiple request', () => {
       const formattedData = getAutoIndentedRequests(
         [TEST_REQUEST_1, TEST_REQUEST_2, TEST_REQUEST_3],
-        []
+        [
+          ...TEST_REQUEST_1.text.split('\n'),
+          '',
+          ...TEST_REQUEST_2.text.split('\n'),
+          '',
+          ...TEST_REQUEST_3.text.split('\n'),
+        ]
       );
       const expectedResult =
         'GET _search\n{\n  "query": {\n    "match_all": {}\n  }\n}\n\nGET _all\n\nPOST /_bulk\n{\n  "index": {\n    "_index": "books"\n  }\n}\n{\n  "name": "1984"\n}';
 
+      expect(formattedData).toBe(expectedResult);
+    });
+
+    it('auto-indents multiple request with comments in between', () => {
+      const formattedData = getAutoIndentedRequests(
+        [TEST_REQUEST_1, TEST_REQUEST_2, TEST_REQUEST_3],
+        [
+          ...TEST_REQUEST_1.text.split('\n'),
+          '',
+          '// test comment',
+          ...TEST_REQUEST_2.text.split('\n'),
+          '',
+          '/*',
+          ' some comment',
+          '*/',
+          ...TEST_REQUEST_3.text.split('\n'),
+        ]
+      );
+      const expectedResult =
+        'GET _search\n{\n  "query": {\n    "match_all": {}\n  }\n}\n\n// test comment\nGET _all\n\n/*\n some comment\n*/\nPOST /_bulk\n{\n  "index": {\n    "_index": "books"\n  }\n}\n{\n  "name": "1984"\n}';
+
+      expect(formattedData).toBe(expectedResult);
+    });
+
+    it('does not auto-indent a request with comments', () => {
+      const formattedData = getAutoIndentedRequests(
+        [TEST_REQUEST_4],
+        [...TEST_REQUEST_4.text.split('\n')]
+      );
+      const expectedResult = TEST_REQUEST_4.text;
       expect(formattedData).toBe(expectedResult);
     });
   });
