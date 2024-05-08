@@ -58,32 +58,30 @@ export const useNodeDetailsRedirect = () => {
       search,
     }: NodeDetailsRedirectParams<T>): RouterLinkProps => {
       const { from, to, ...additionalParams } = search;
-      const assetDetails =
-        Object.keys(additionalParams).length > 0
-          ? {
-              ...additionalParams,
-              dateRange: {
-                from: from ? new Date(parseFloat(from)).toISOString() : undefined,
-                to: to ? new Date(parseFloat(to)).toISOString() : undefined,
-              },
-            }
-          : {};
-
-      const _a = {
-        time: {
-          ...(from
-            ? { [REDIRECT_NODE_DETAILS_FROM_KEY]: new Date(parseFloat(from)).toISOString() }
-            : undefined),
-          interval: '>=1m', // need to pass the interval to consider the time valid
-          ...(to
-            ? { [REDIRECT_NODE_DETAILS_TO_KEY]: new Date(parseFloat(to)).toISOString() }
-            : undefined),
+      const queryParams = {
+        assetDetails:
+          Object.keys(additionalParams).length > 0
+            ? {
+                ...additionalParams,
+                dateRange: {
+                  from: from ? new Date(from).toISOString() : undefined,
+                  to: to ? new Date(to).toISOString() : undefined,
+                },
+              }
+            : {},
+        _a: {
+          time: {
+            ...(from
+              ? { [REDIRECT_NODE_DETAILS_FROM_KEY]: new Date(from).toISOString() }
+              : undefined),
+            interval: '>=1m', // need to pass the interval to consider the time valid
+            ...(to ? { [REDIRECT_NODE_DETAILS_TO_KEY]: new Date(to).toISOString() } : undefined),
+          },
         },
       };
 
       const nodeDetailsLocatorParams = {
-        assetDetails,
-        _a,
+        ...queryParams,
         assetType,
         assetId,
         state: {

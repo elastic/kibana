@@ -64,16 +64,16 @@ export const RedirectToHostDetailViaIP = ({
     );
   }
 
-  if (name) {
-    return null;
+  if (!name) {
+    return (
+      <LoadingPage
+        message={i18n.translate('xpack.infra.linkTo.hostWithIp.loading', {
+          defaultMessage: 'Loading host with IP address "{hostIp}".',
+          values: { hostIp },
+        })}
+      />
+    );
   }
 
-  return (
-    <LoadingPage
-      message={i18n.translate('xpack.infra.linkTo.hostWithIp.loading', {
-        defaultMessage: 'Loading host with IP address "{hostIp}".',
-        values: { hostIp },
-      })}
-    />
-  );
+  return null;
 };
