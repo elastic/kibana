@@ -20,7 +20,6 @@ import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { tableDefaults, dataTableSelectors, TableId } from '@kbn/securitysolution-data-table';
-import type { Refetch } from '../../../../common/types';
 import { useCalculateEntityRiskScore } from '../../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
 import {
   useAssetCriticalityData,
@@ -80,6 +79,7 @@ import { AlertCountByRuleByStatus } from '../../../../common/components/alert_co
 import { useLicense } from '../../../../common/hooks/use_license';
 import { ResponderActionButton } from '../../../../detections/components/endpoint_responder/responder_action_button';
 import { useHasSecurityCapability } from '../../../../helper_hooks';
+import { useRefetchOverviewPageRiskScore } from '../../../hooks/use_refetch_overview_page_risk_score';
 
 const ES_HOST_FIELD = 'host.name';
 const HostOverviewManage = manageQuery(HostOverview);
@@ -188,25 +188,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
   const entity = useMemo(() => ({ type: 'host' as const, name: detailName }), [detailName]);
   const privileges = useAssetCriticalityPrivileges(entity.name);
 
-  const getGlobalQuery = useMemo(() => inputsSelectors.globalQueryByIdSelector(), []);
-  const { refetch: refetchOverviewRiskScore } = useDeepEqualSelector((state) =>
-    getGlobalQuery(state, HOST_OVERVIEW_RISK_SCORE_QUERY_ID)
-  );
-
-  const { refetch: refetchAlertsRiskInputs } = useDeepEqualSelector((state) =>
-    getGlobalQuery(state, TableId.alertsRiskInputs)
-  );
-
-  const refetchRiskScore = useCallback(() => {
-    if (refetchOverviewRiskScore) {
-      (refetchOverviewRiskScore as Refetch)();
-    }
-
-    if (refetchAlertsRiskInputs) {
-      (refetchAlertsRiskInputs as Refetch)();
-    }
-  }, [refetchAlertsRiskInputs, refetchOverviewRiskScore]);
-
+  const refetchRiskScore = useRefetchOverviewPageRiskScore(HOST_OVERVIEW_RISK_SCORE_QUERY_ID);
   const { calculateEntityRiskScore } = useCalculateEntityRiskScore(
     RiskScoreEntity.host,
     detailName,

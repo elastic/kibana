@@ -77,7 +77,7 @@ import { hasMlUserPermissions } from '../../../../../common/machine_learning/has
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { EmptyPrompt } from '../../../../common/components/empty_prompt';
 import { useHasSecurityCapability } from '../../../../helper_hooks';
-import type { Refetch } from '../../../../common/types';
+import { useRefetchOverviewPageRiskScore } from '../../../hooks/use_refetch_overview_page_risk_score';
 
 const QUERY_ID = 'UsersDetailsQueryId';
 const ES_USER_FIELD = 'user.name';
@@ -186,25 +186,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   const entity = useMemo(() => ({ type: 'user' as const, name: detailName }), [detailName]);
   const privileges = useAssetCriticalityPrivileges(entity.name);
 
-  const getGlobalQuery = useMemo(() => inputsSelectors.globalQueryByIdSelector(), []);
-  const { refetch: refetchOverviewRiskScore } = useDeepEqualSelector((state) =>
-    getGlobalQuery(state, USER_OVERVIEW_RISK_SCORE_QUERY_ID)
-  );
-
-  const { refetch: refetchAlertsRiskInputs } = useDeepEqualSelector((state) =>
-    getGlobalQuery(state, TableId.alertsRiskInputs)
-  );
-
-  const refetchRiskScore = useCallback(() => {
-    if (refetchOverviewRiskScore) {
-      (refetchOverviewRiskScore as Refetch)();
-    }
-
-    if (refetchAlertsRiskInputs) {
-      (refetchAlertsRiskInputs as Refetch)();
-    }
-  }, [refetchAlertsRiskInputs, refetchOverviewRiskScore]);
-
+  const refetchRiskScore = useRefetchOverviewPageRiskScore(USER_OVERVIEW_RISK_SCORE_QUERY_ID);
   const { calculateEntityRiskScore } = useCalculateEntityRiskScore(
     RiskScoreEntity.user,
     detailName,
