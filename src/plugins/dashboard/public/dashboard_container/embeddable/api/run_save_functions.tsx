@@ -187,6 +187,7 @@ export function runSaveAs(this: DashboardContainer) {
         showCopyOnSave={false}
         onSave={onSave}
         customModalTitle={customModalTitle}
+        showStoreTimeOnSave={!lastSavedId}
       />
     );
     this.clearOverlays();

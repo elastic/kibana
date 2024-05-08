@@ -16,11 +16,11 @@ import type { DashboardSaveOptions } from '../../../types';
 import { pluginServices } from '../../../../services/plugin_services';
 
 /**
- * TODO: Portable Dashboard followup, convert this to a functional component & use redux for the state.
+ * TODO: Portable Dashboard followup, use redux for the state.
  * https://github.com/elastic/kibana/issues/147490
  */
 
-interface Props {
+interface DashboardSaveModalProps {
   onSave: ({
     newTitle,
     newDescription,
@@ -36,66 +36,61 @@ interface Props {
   tags?: string[];
   timeRestore: boolean;
   showCopyOnSave: boolean;
+  showStoreTimeOnSave?: boolean;
   customModalTitle?: string;
 }
 
-interface State {
-  tags: string[];
-  timeRestore: boolean;
-}
+type SaveDashboardHandler = (args: {
+  newTitle: string;
+  newDescription: string;
+  newCopyOnSave: boolean;
+  isTitleDuplicateConfirmed: boolean;
+  onTitleDuplicate: () => void;
+}) => ReturnType<DashboardSaveModalProps['onSave']>;
 
-export class DashboardSaveModal extends React.Component<Props, State> {
-  state: State = {
-    timeRestore: this.props.timeRestore,
-    tags: this.props.tags ?? [],
-  };
+export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
+  customModalTitle,
+  description,
+  onClose,
+  onSave,
+  showCopyOnSave,
+  showStoreTimeOnSave = true,
+  tags,
+  title,
+  timeRestore,
+}) => {
+  const [selectedTags, setSelectedTags] = React.useState<string[]>(tags ?? []);
+  const [persistSelectedTimeInterval, setPersistSelectedTimeInterval] = React.useState(timeRestore);
 
-  constructor(props: Props) {
-    super(props);
-  }
+  const saveDashboard = React.useCallback<SaveDashboardHandler>(
+    ({ newTitle, newDescription, newCopyOnSave, isTitleDuplicateConfirmed, onTitleDuplicate }) => {
+      onSave({
+        newTitle,
+        newDescription,
+        newCopyOnSave,
+        newTimeRestore: persistSelectedTimeInterval,
+        isTitleDuplicateConfirmed,
+        onTitleDuplicate,
+        newTags: selectedTags,
+      });
+    },
+    [onSave, persistSelectedTimeInterval, selectedTags]
+  );
 
-  saveDashboard = ({
-    newTitle,
-    newDescription,
-    newCopyOnSave,
-    isTitleDuplicateConfirmed,
-    onTitleDuplicate,
-  }: {
-    newTitle: string;
-    newDescription: string;
-    newCopyOnSave: boolean;
-    isTitleDuplicateConfirmed: boolean;
-    onTitleDuplicate: () => void;
-  }) => {
-    this.props.onSave({
-      newTitle,
-      newDescription,
-      newCopyOnSave,
-      newTimeRestore: this.state.timeRestore,
-      isTitleDuplicateConfirmed,
-      onTitleDuplicate,
-      newTags: this.state.tags,
-    });
-  };
+  const onTimeRestoreChange = React.useCallback((event: any) => {
+    setPersistSelectedTimeInterval(event.target.checked);
+  }, []);
 
-  onTimeRestoreChange = (event: any) => {
-    this.setState({
-      timeRestore: event.target.checked,
-    });
-  };
-
-  renderDashboardSaveOptions() {
+  const renderDashboardSaveOptions = React.useCallback(() => {
     const {
       savedObjectsTagging: { components },
     } = pluginServices.getServices();
 
     const tagSelector = components ? (
       <components.SavedObjectSaveModalTagSelector
-        initialSelection={this.state.tags}
-        onTagsSelected={(tags) => {
-          this.setState({
-            tags,
-          });
+        initialSelection={selectedTags}
+        onTagsSelected={(selectedTagIds) => {
+          setSelectedTags(selectedTagIds);
         }}
         markOptional
       />
@@ -104,9 +99,7 @@ export class DashboardSaveModal extends React.Component<Props, State> {
     return (
       <Fragment>
         {tagSelector}
-
-        {/* we are guaranteed that we'd only ever not have a title when it's a newly created dashboard */}
-        {!Boolean(this.props.title) ? (
+        {showStoreTimeOnSave ? (
           <EuiFormRow
             helpText={
               <FormattedMessage
@@ -117,8 +110,8 @@ export class DashboardSaveModal extends React.Component<Props, State> {
           >
             <EuiSwitch
               data-test-subj="storeTimeWithDashboard"
-              checked={this.state.timeRestore}
-              onChange={this.onTimeRestoreChange}
+              checked={persistSelectedTimeInterval}
+              onChange={onTimeRestoreChange}
               label={
                 <FormattedMessage
                   id="dashboard.topNav.saveModal.storeTimeWithDashboardFormRowLabel"
@@ -130,24 +123,22 @@ export class DashboardSaveModal extends React.Component<Props, State> {
         ) : null}
       </Fragment>
     );
-  }
+  }, [onTimeRestoreChange, persistSelectedTimeInterval, selectedTags, showStoreTimeOnSave]);
 
-  render() {
-    return (
-      <SavedObjectSaveModal
-        onSave={this.saveDashboard}
-        onClose={this.props.onClose}
-        title={this.props.title}
-        description={this.props.description}
-        showDescription
-        showCopyOnSave={this.props.showCopyOnSave}
-        initialCopyOnSave={this.props.showCopyOnSave}
-        objectType={i18n.translate('dashboard.topNav.saveModal.objectType', {
-          defaultMessage: 'dashboard',
-        })}
-        customModalTitle={this.props.customModalTitle}
-        options={this.renderDashboardSaveOptions()}
-      />
-    );
-  }
-}
+  return (
+    <SavedObjectSaveModal
+      onSave={saveDashboard}
+      onClose={onClose}
+      title={title}
+      description={description}
+      showDescription
+      showCopyOnSave={showCopyOnSave}
+      initialCopyOnSave={showCopyOnSave}
+      objectType={i18n.translate('dashboard.topNav.saveModal.objectType', {
+        defaultMessage: 'dashboard',
+      })}
+      customModalTitle={customModalTitle}
+      options={renderDashboardSaveOptions()}
+    />
+  );
+};
