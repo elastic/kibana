@@ -32,6 +32,7 @@ export const testSchema = schema.object({
     scheme: ['prototest'],
     defaultValue: () => 'prototest://something',
   }),
+  any: schema.any({ meta: { description: 'any type' } }),
 });
 
 type RouterMeta = ReturnType<Router['getRoutes']>[number];
@@ -52,19 +53,27 @@ const getRouterDefaults = () => ({
   isVersioned: false,
   path: '/foo/{id}',
   method: 'get',
+  options: {
+    tags: ['foo'],
+    description: 'route',
+  },
   validationSchemas: {
     request: {
-      params: schema.object({ id: schema.string({ maxLength: 36 }) }),
-      query: schema.object({ page: schema.number({ max: 999, min: 1, defaultValue: 1 }) }),
+      params: schema.object({
+        id: schema.string({ maxLength: 36, meta: { description: 'id' } }),
+      }),
+      query: schema.object({
+        page: schema.number({ max: 999, min: 1, defaultValue: 1, meta: { description: 'page' } }),
+      }),
       body: testSchema,
     },
     response: {
       200: {
-        body: schema.string({ maxLength: 10, minLength: 1 }),
+        body: () => schema.string({ maxLength: 10, minLength: 1 }),
       },
+      unsafe: { body: true },
     },
   },
-  options: { tags: ['foo'] },
   handler: jest.fn(),
 });
 
@@ -72,6 +81,7 @@ const getVersionedRouterDefaults = () => ({
   method: 'get',
   path: '/bar',
   options: {
+    description: 'versioned route',
     access: 'public',
   },
   handlers: [
@@ -79,9 +89,22 @@ const getVersionedRouterDefaults = () => ({
       fn: jest.fn(),
       options: {
         validate: {
-          request: { body: schema.object({ foo: schema.string() }) },
+          request: {
+            body: schema.object({
+              foo: schema.string(),
+              deprecatedFoo: schema.maybe(
+                schema.string({ meta: { description: 'deprecated foo', deprecated: true } })
+              ),
+            }),
+          },
           response: {
-            [200]: { body: schema.object({ fooResponse: schema.string() }) },
+            [200]: {
+              body: () =>
+                schema.object(
+                  { fooResponseWithDescription: schema.string() },
+                  { meta: { description: 'fooResponse' } }
+                ),
+            },
           },
         },
         version: 'oas-test-version-1',
@@ -93,7 +116,11 @@ const getVersionedRouterDefaults = () => ({
         validate: {
           request: { body: schema.object({ foo: schema.string() }) },
           response: {
-            [200]: { body: schema.object({ fooResponse: schema.string() }) },
+            [200]: {
+              body: () => schema.stream({ meta: { description: 'stream response' } }),
+              bodyContentType: 'application/octet-stream',
+            },
+            unsafe: { body: true },
           },
         },
         version: 'oas-test-version-2',

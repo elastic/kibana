@@ -7,6 +7,8 @@
 
 import {
   ApplicationStart,
+  ChromeStart,
+  DocLinksStart,
   HttpStart,
   PluginInitializer,
   PluginInitializerContext,
@@ -30,6 +32,8 @@ export interface ObservabilityOnboardingAppServices {
   application: ApplicationStart;
   http: HttpStart;
   config: ConfigSchema;
+  docLinks: DocLinksStart;
+  chrome: ChromeStart;
 }
 
 export const plugin: PluginInitializer<

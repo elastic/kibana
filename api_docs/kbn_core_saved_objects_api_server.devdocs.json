@@ -8070,7 +8070,7 @@
             "section": "def-common.SavedObject",
             "text": "SavedObject"
           },
-          "<T>, \"references\" | \"attributes\">"
+          "<T>, \"attributes\" | \"references\">"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/update.ts",
         "deprecated": false,
@@ -8228,9 +8228,11 @@
           "\nOptions for the create point-in-time finder operation\n"
         ],
         "signature": [
-          "{ type: string | string[]; search?: string | undefined; filter?: any; aggs?: Record<string, ",
+          "{ type: string | string[]; filter?: any; aggs?: Record<string, ",
           "AggregationsAggregationContainer",
-          "> | undefined; namespaces?: string[] | undefined; perPage?: number | undefined; fields?: string[] | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; hasReference?: ",
+          "> | undefined; search?: string | undefined; namespaces?: string[] | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; sortField?: string | undefined; sortOrder?: ",
+          "SortOrder",
+          " | undefined; hasReference?: ",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
             "scope": "common",
@@ -8246,9 +8248,7 @@
             "section": "def-common.SavedObjectsFindOptionsReference",
             "text": "SavedObjectsFindOptionsReference"
           },
-          "[] | undefined; sortField?: string | undefined; preference?: string | undefined; sortOrder?: ",
-          "SortOrder",
-          " | undefined; rootSearchFields?: string[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; hasNoReference?: ",
+          "[] | undefined; fields?: string[] | undefined; preference?: string | undefined; rootSearchFields?: string[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; hasNoReference?: ",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
             "scope": "common",

@@ -36,6 +36,69 @@ const validateLogFunctions = (fnDef: ESQLFunction) => {
   return messages;
 };
 
+const dateDiffSuggestions = [
+  'year',
+  'quarter',
+  'month',
+  'week',
+  'day',
+  'hour',
+  'minute',
+  'second',
+  'millisecond',
+  'microsecond',
+  'nanosecond',
+];
+
+const dateDiffOptions = [
+  'year',
+  'years',
+  'yy',
+  'yyyy',
+  'quarter',
+  'quarters',
+  'qq',
+  'q',
+  'month',
+  'months',
+  'mm',
+  'm',
+  'dayofyear',
+  'dy',
+  'y',
+  'day',
+  'days',
+  'dd',
+  'd',
+  'week',
+  'weeks',
+  'wk',
+  'ww',
+  'weekday',
+  'weekdays',
+  'dw',
+  'hour',
+  'hours',
+  'hh',
+  'minute',
+  'minutes',
+  'mi',
+  'n',
+  'second',
+  'seconds',
+  'ss',
+  's',
+  'millisecond',
+  'milliseconds',
+  'ms',
+  'microsecond',
+  'microseconds',
+  'mcs',
+  'nanosecond',
+  'nanoseconds',
+  'ns',
+];
+
 export const evalFunctionsDefinitions: FunctionDefinition[] = [
   {
     name: 'round',
@@ -524,6 +587,28 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     ],
   },
   {
+    name: 'date_diff',
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.dateDiffDoc', {
+      defaultMessage: `Subtracts the startTimestamp from the endTimestamp and returns the difference in multiples of unit. If startTimestamp is later than the endTimestamp, negative values are returned.`,
+    }),
+    signatures: [
+      {
+        params: [
+          {
+            name: 'unit',
+            type: 'string',
+            literalOptions: dateDiffOptions,
+            literalSuggestions: dateDiffSuggestions,
+          },
+          { name: 'startTimestamp', type: 'date' },
+          { name: 'endTimestamp', type: 'date' },
+        ],
+        returnType: 'number',
+        examples: [],
+      },
+    ],
+  },
+  {
     name: 'date_format',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.dateFormatDoc', {
       defaultMessage: `Returns a string representation of a date in the provided format. If no format is specified, the "yyyy-MM-dd'T'HH:mm:ss.SSSZ" format is used.`,
@@ -570,72 +655,6 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
         examples: [
           `from index | eval year_hired = date_parse("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", hire_date)`,
         ],
-      },
-    ],
-  },
-  {
-    name: 'bucket',
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.autoBucketDoc', {
-      defaultMessage: `Automatically bucket dates based on a given range and bucket target.`,
-    }),
-    signatures: [
-      {
-        params: [
-          { name: 'field', type: 'date' },
-          { name: 'buckets', type: 'number', constantOnly: true },
-          { name: 'startDate', type: 'string', constantOnly: true },
-          { name: 'endDate', type: 'string', constantOnly: true },
-        ],
-        returnType: 'date',
-        examples: [
-          'from index | eval hd = bucket(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")',
-        ],
-      },
-      {
-        params: [
-          { name: 'field', type: 'date' },
-          { name: 'buckets', type: 'number', constantOnly: true },
-          { name: 'startDate', type: 'date', constantOnly: true },
-          { name: 'endDate', type: 'date', constantOnly: true },
-        ],
-        returnType: 'date',
-        examples: [
-          'from index | eval hd = bucket(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")',
-        ],
-      },
-      {
-        params: [
-          { name: 'field', type: 'date' },
-          { name: 'buckets', type: 'number', constantOnly: true },
-          { name: 'startDate', type: 'string', constantOnly: true },
-          { name: 'endDate', type: 'date', constantOnly: true },
-        ],
-        returnType: 'date',
-        examples: [
-          'from index | eval hd = bucket(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")',
-        ],
-      },
-      {
-        params: [
-          { name: 'field', type: 'date' },
-          { name: 'buckets', type: 'number', constantOnly: true },
-          { name: 'startDate', type: 'date', constantOnly: true },
-          { name: 'endDate', type: 'string', constantOnly: true },
-        ],
-        returnType: 'date',
-        examples: [
-          'from index | eval hd = bucket(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")',
-        ],
-      },
-      {
-        params: [
-          { name: 'field', type: 'number' },
-          { name: 'buckets', type: 'number', constantOnly: true },
-          { name: 'startValue', type: 'number', constantOnly: true },
-          { name: 'endValue', type: 'number', constantOnly: true },
-        ],
-        returnType: 'number',
-        examples: ['from index | eval bs = bucket(salary, 20, 25324, 74999)'],
       },
     ],
   },
@@ -1758,7 +1777,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   .sort(({ name: a }, { name: b }) => a.localeCompare(b))
   .map((def) => ({
     ...def,
-    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
     supportedOptions: ['by'],
     type: 'eval',
   }));

@@ -11,15 +11,5 @@ import { AggregateQuery } from '@kbn/es-query';
 const TRANSFORMATIONAL_COMMANDS = ['stats', 'keep'];
 
 export const shouldDisplayHistogram = (query: AggregateQuery) => {
-  let queryHasTransformationalCommands = false;
-  if ('esql' in query) {
-    TRANSFORMATIONAL_COMMANDS.forEach((command: string) => {
-      if (query.esql.toLowerCase().includes(command)) {
-        queryHasTransformationalCommands = true;
-        return;
-      }
-    });
-  }
-
-  return !queryHasTransformationalCommands;
+  return !TRANSFORMATIONAL_COMMANDS.some((command) => query.esql.toLowerCase().includes(command));
 };
