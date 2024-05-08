@@ -171,7 +171,7 @@ export function SloGroupFilters({ selectedFilters, onSelected }: Props) {
       >
         <EuiSelect
           fullWidth
-          data-test-subj="o11ySloGroupConfigurationSelect"
+          data-test-subj="sloGroupOverviewConfigurationGroupBy"
           options={groupByOptions}
           value={selectedGroupBy}
           onChange={(e) => {
@@ -207,7 +207,7 @@ export function SloGroupFilters({ selectedFilters, onSelected }: Props) {
             defaultMessage: 'Select a {selectedGroupByLabel}',
             values: { selectedGroupByLabel },
           })}
-          data-test-subj="sloGroup"
+          data-test-subj="sloGroupOverviewConfigurationGroup"
           options={groupOptions}
           selectedOptions={selectedGroupOptions}
           async
@@ -233,6 +233,7 @@ export function SloGroupFilters({ selectedFilters, onSelected }: Props) {
         }
       >
         <SearchBar
+          dataTestSubj="sloGroupOverviewConfigurationKqlBar"
           appName={sloAppId}
           placeholder={PLACEHOLDER}
           indexPatterns={dataView ? [dataView] : []}
