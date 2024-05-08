@@ -20,7 +20,6 @@
     "@kbn/config-schema",
     "@kbn/i18n",
     "@kbn/ml-runtime-field-utils",
-    "@kbn/embeddable-plugin",
     "@kbn/es-query",
     "@kbn/saved-search-plugin",
     "@kbn/data-views-plugin",
