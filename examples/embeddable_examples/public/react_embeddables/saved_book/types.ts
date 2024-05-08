@@ -9,6 +9,7 @@
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import {
   HasEditCapabilities,
+  HasInPlaceLibraryTransforms,
   SerializedTitles,
   StateComparators,
 } from '@kbn/presentation-publishing';
@@ -44,4 +45,6 @@ export interface BookRuntimeState
     Partial<BookByReferenceSerializedState>,
     SerializedTitles {}
 
-export type BookApi = DefaultEmbeddableApi<BookSerializedState> & HasEditCapabilities;
+export type BookApi = DefaultEmbeddableApi<BookSerializedState> &
+  HasEditCapabilities &
+  HasInPlaceLibraryTransforms;

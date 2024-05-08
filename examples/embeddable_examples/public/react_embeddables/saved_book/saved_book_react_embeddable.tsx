@@ -107,6 +107,22 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
             );
             return { rawState: bookByReferenceState };
           },
+
+          // in place library transforms
+          libraryId$: savedBookId$,
+          saveToLibrary: async (newTitle: string) => {
+            bookAttributesManager.bookTitle.next(newTitle);
+            const newId = await saveBookAttributes(
+              undefined,
+              serializeBookAttributes(bookAttributesManager)
+            );
+            savedBookId$.next(newId);
+            return newId;
+          },
+          checkForDuplicateTitle: async (title) => {},
+          unlinkFromLibrary: () => {
+            savedBookId$.next(undefined);
+          },
         },
         {
           savedBookId: [savedBookId$, (val) => savedBookId$.next(val)],

@@ -57,6 +57,8 @@ export {
 export {
   apiHasLegacyLibraryTransforms,
   apiHasLibraryTransforms,
+  apiHasInPlaceLibraryTransforms,
+  type HasInPlaceLibraryTransforms,
   type HasLegacyLibraryTransforms,
   type HasLibraryTransforms,
 } from './interfaces/has_library_transforms';

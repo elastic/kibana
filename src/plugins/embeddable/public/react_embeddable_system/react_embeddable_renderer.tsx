@@ -88,7 +88,15 @@ export const ReactEmbeddableRenderer = <
               .pipe(
                 skip(1),
                 debounceTime(ON_STATE_CHANGE_DEBOUNCE),
-                switchMap(() => apiRegistration.serializeState())
+                switchMap(() => {
+                  const isAsync =
+                    apiRegistration.serializeState.prototype?.name === 'AsyncFunction';
+                  return isAsync
+                    ? (apiRegistration.serializeState() as Promise<
+                        SerializedPanelState<SerializedState>
+                      >)
+                    : Promise.resolve(apiRegistration.serializeState());
+                })
               )
               .subscribe((serializedState) => {
                 onAnyStateChange(serializedState);
