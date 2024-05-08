@@ -173,6 +173,8 @@ export interface SavedObjectUpdateOptions<Attributes = unknown> {
    * Defaults to `0` when `version` is provided, `3` otherwise.
    */
   retryOnConflict?: number;
+
+  fullUpdate?: boolean;
 }
 
 /** Return value for Saved Object get, T is item returned */

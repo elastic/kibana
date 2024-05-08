@@ -34,6 +34,8 @@ export interface SavedObjectsUpdateOptions<Attributes = unknown> extends SavedOb
   retryOnConflict?: number;
   /** {@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility} */
   migrationVersionCompatibility?: 'compatible' | 'raw';
+
+  fullUpdate?: boolean;
 }
 
 /**

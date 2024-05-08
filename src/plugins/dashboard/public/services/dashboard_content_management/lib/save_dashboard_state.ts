@@ -211,6 +211,7 @@ export const saveDashboardState = async ({
         data: attributes,
         options: {
           references: allReferences,
+          fullUpdate: true,
         },
       });
       newId = result.item.id;

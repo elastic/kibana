@@ -247,9 +247,11 @@ export const executeUpdate = async <T>(
     // therefor we can safely process with the "standard" update sequence.
 
     const updatedAttributes = mergeForUpdate({
-      targetAttributes: {
-        ...(migrated!.attributes as Record<string, unknown>),
-      },
+      targetAttributes: options.fullUpdate
+        ? {}
+        : {
+            ...(migrated!.attributes as Record<string, unknown>),
+          },
       updatedAttributes: await encryptionHelper.optionallyEncryptAttributes(
         type,
         id,
