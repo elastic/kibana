@@ -419,25 +419,8 @@ export async function create(
 
     if (validatedConfigurationRequest.templates && validatedConfigurationRequest.templates.length) {
       const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
-      const hasCustomFieldsInConfiguration =
-        validatedConfigurationRequest.customFields &&
-        validatedConfigurationRequest.customFields.length > 0;
 
       validatedConfigurationRequest.templates.forEach((template, index) => {
-        if (!hasCustomFieldsInConfiguration && template.caseFields?.customFields?.length) {
-          throw Boom.badRequest(
-            'Cannot create template with custom fields as there are no custom fields in configuration'
-          );
-        }
-
-        /**
-         * validate template's custom fields keys
-         */
-        validateDuplicatedKeysInRequest({
-          requestFields: template?.caseFields?.customFields,
-          fieldName: `templates[${index}]'s customFields`,
-        });
-
         /**
          * Assign users to a template is only available to Platinum+
          */
