@@ -19,23 +19,20 @@ import { writeYamlDocument } from './utils/write_yaml_document';
 import { createBlankOpenApiDocument } from './bundler/merge_documents/create_blank_oas_document';
 
 export interface BundlerConfig {
-  rootDir: string;
   sourceGlob: string;
   outputFilePath: string;
   specInfo?: Omit<Partial<OpenAPIV3.InfoObject>, 'version'>;
 }
 
 export const bundle = async ({
-  rootDir,
   sourceGlob,
   outputFilePath = 'bundled-{version}.schema.yaml',
   specInfo,
 }: BundlerConfig) => {
   logger.debug(chalk.bold(`Bundling API route schemas`));
-  logger.debug(chalk.bold(`Working directory: ${chalk.underline(rootDir)}`));
-  logger.debug(`👀  Searching for source files`);
+  logger.debug(`👀  Searching for source files in ${chalk.underline(sourceGlob)}`);
 
-  const sourceFilesGlob = resolve(rootDir, sourceGlob);
+  const sourceFilesGlob = resolve(sourceGlob);
   const schemaFilePaths = await globby([sourceFilesGlob]);
 
   logger.info(`🕵️‍♀️  Found ${schemaFilePaths.length} schemas`);

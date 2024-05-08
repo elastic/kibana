@@ -73,8 +73,7 @@ export async function bundleFolder(
   bundledFilePathTemplate: string
 ): Promise<void> {
   await bundle({
-    rootDir: folderToBundlePath,
-    sourceGlob: '*.schema.yaml',
+    sourceGlob: join(folderToBundlePath, '*.schema.yaml'),
     outputFilePath: bundledFilePathTemplate,
   });
 }
