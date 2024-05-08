@@ -46,7 +46,7 @@ export const buildAggregation = ({
   condition,
   topHitsSize,
 }: BuildAggregationOpts): Record<string, AggregationsAggregationContainer> => {
-  const aggContainer = {
+  const aggContainer: AggregationsAggregationContainer = {
     aggs: {},
   };
   const isCountAgg = isCountAggregation(aggType);
@@ -78,7 +78,7 @@ export const buildAggregation = ({
         : terms
       : terms;
 
-  let aggParent: any = aggContainer;
+  let aggParent: AggregationsAggregationContainer = aggContainer;
 
   const getAggName = () => (isDateAgg ? 'sortValueAgg' : 'metricAgg');
 
@@ -199,7 +199,7 @@ export const buildAggregation = ({
   }
 
   if (timeSeries && dateRangeInfo) {
-    aggParent = aggParent.aggs.dateAgg;
+    aggParent = aggParent?.aggs?.dateAgg ?? {};
 
     // finally, the metric aggregation, if requested
     if (!isCountAgg) {
@@ -213,5 +213,5 @@ export const buildAggregation = ({
     }
   }
 
-  return aggContainer.aggs;
+  return aggContainer.aggs ?? { aggs: {} };
 };
