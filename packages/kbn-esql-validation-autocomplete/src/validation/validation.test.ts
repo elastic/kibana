@@ -1743,8 +1743,8 @@ describe('validation logic', () => {
             : [`Argument of [${op}] must be [string], found value [booleanField] type [boolean]`]
         );
 
-        // testErrorsAndWarnings(`from a_index | eval ipField ${op} "136.36.3.205"`, []);
-        // testErrorsAndWarnings(`from a_index | eval "136.36.3.205" ${op} ipField`, []);
+        testErrorsAndWarnings(`from a_index | eval ipField ${op} "136.36.3.205"`, []);
+        testErrorsAndWarnings(`from a_index | eval "136.36.3.205" ${op} ipField`, []);
       }
 
       // // casting for IN for version, date, boolean, ip

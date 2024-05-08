@@ -11764,6 +11764,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval ipField > \"136.36.3.205\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval \"136.36.3.205\" > ipField",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | eval numberField >= 0",
       "error": [],
       "warning": []
@@ -11897,6 +11907,16 @@
       "error": [
         "Argument of [>=] must be [string], found value [booleanField] type [boolean]"
       ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval ipField >= \"136.36.3.205\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval \"136.36.3.205\" >= ipField",
+      "error": [],
       "warning": []
     },
     {
@@ -12036,6 +12056,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval ipField < \"136.36.3.205\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval \"136.36.3.205\" < ipField",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | eval numberField <= 0",
       "error": [],
       "warning": []
@@ -12172,6 +12202,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval ipField <= \"136.36.3.205\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval \"136.36.3.205\" <= ipField",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | eval numberField == 0",
       "error": [],
       "warning": []
@@ -12301,6 +12341,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval ipField == \"136.36.3.205\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval \"136.36.3.205\" == ipField",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | eval numberField != 0",
       "error": [],
       "warning": []
@@ -12426,6 +12476,16 @@
     },
     {
       "query": "from a_index | eval \"true\" != booleanField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval ipField != \"136.36.3.205\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval \"136.36.3.205\" != ipField",
       "error": [],
       "warning": []
     },

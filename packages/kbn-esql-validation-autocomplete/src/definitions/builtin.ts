@@ -99,8 +99,14 @@ function createComparisonDefinition(
         returnType: 'boolean',
       },
       // constant strings okay because of implicit casting for
-      // string to version
-      ...['version'].flatMap((type) => [
+      // string to version and ip
+      //
+      // boolean casting is handled on the specific comparison function
+      // that support booleans
+      //
+      // date casting is handled in the validation routine since it's a
+      // general rule. Look in compareLiteralType()
+      ...['ip', 'version'].flatMap((type) => [
         {
           params: [
             { name: 'left', type },
