@@ -49,7 +49,7 @@ describe('APM Transaction Error Rate Transform Generator', () => {
         timesliceWindow: twoMinute(),
       },
     });
-    const transform = generator.getTransformParams(slo);
+    const transform = await generator.getTransformParams(slo);
 
     expect(transform).toMatchSnapshot();
   });
