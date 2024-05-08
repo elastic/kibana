@@ -64,7 +64,8 @@ export default ({ getService }: FtrProviderContext) => {
   const getNonAggRuleQueryWithMetadata = (id: string) =>
     `from ecs_compliant metadata _id, _index, _version ${internalIdPipe(id)}`;
 
-  describe('@ess @serverless ES|QL rule type, alert suppression', () => {
+  // skipped in MKI as it depends on feature flag alertSuppressionForEsqlRuleEnabled
+  describe('@ess @serverless @skipInServerlessMKI ES|QL rule type, alert suppression', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
     });
@@ -1783,13 +1784,16 @@ export default ({ getService }: FtrProviderContext) => {
 
         const rule: EsqlRuleCreateProps = {
           ...getCreateEsqlRulesSchemaMock('rule-1', true),
-          query: getNonAggRuleQueryWithMetadata(id),
+          query: `from ecs_compliant metadata _id, _index, _version ${internalIdPipe(
+            id
+          )} | sort @timestamp asc`,
           alert_suppression: {
             group_by: ['agent.name'],
             missing_fields_strategy: 'suppress',
           },
           from: 'now-35m',
           interval: '30m',
+          max_signals: 200,
         };
 
         const { previewId, logs } = await previewRule({
@@ -1818,7 +1822,7 @@ export default ({ getService }: FtrProviderContext) => {
               value: 'agent-a',
             },
           ],
-          [ALERT_SUPPRESSION_DOCS_COUNT]: 100,
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 200,
         });
       });
 
