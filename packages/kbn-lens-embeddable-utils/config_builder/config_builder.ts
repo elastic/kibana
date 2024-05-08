@@ -72,6 +72,6 @@ export class LensConfigBuilder {
       } as LensEmbeddableInput;
     }
 
-    return chartState;
+    return chartState as LensAttributes;
   }
 }
