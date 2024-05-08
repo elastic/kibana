@@ -89,3 +89,9 @@ components:
           type: number
           format: integer
           description: The number of risk scores persisted to elasticsearch.
+        # scores:
+        #   type: array
+        #   description: A list of risk scores calculated during the request.
+        #   items:
+        #     $ref: '../common/common.schema.yaml#/components/schemas/RiskScore'
+# todo add scores here? I think we do.

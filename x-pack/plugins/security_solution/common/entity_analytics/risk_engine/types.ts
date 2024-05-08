@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { CriticalityLevel } from '../asset_criticality/types';
-import type { RiskCategories } from './risk_weights/types';
+import type { EntityRiskScore, RiskScoreInput } from '../../api/entity_analytics/common';
 
 export enum RiskScoreEntity {
   host = 'host',
@@ -26,50 +25,19 @@ export interface InitRiskEngineResult {
   riskEngineEnabled: boolean;
   errors: string[];
 }
-
-export interface EntityRiskInput {
-  id: string;
-  index: string;
-  category: RiskCategories;
-  description: string;
-  risk_score: string | number | undefined;
-  timestamp: string | undefined;
-  contribution_score?: number;
-}
-
 export interface EcsRiskScore {
   '@timestamp': string;
   host?: {
     name: string;
-    risk: Omit<RiskScore, '@timestamp'>;
+    risk: Omit<EntityRiskScore, '@timestamp'>;
   };
   user?: {
     name: string;
-    risk: Omit<RiskScore, '@timestamp'>;
+    risk: Omit<EntityRiskScore, '@timestamp'>;
   };
 }
 
-export type RiskInputs = EntityRiskInput[];
-
-/**
- * The API response object representing a risk score
- */
-export interface RiskScore {
-  '@timestamp': string;
-  id_field: string;
-  id_value: string;
-  criticality_level?: CriticalityLevel;
-  criticality_modifier?: number | undefined;
-  calculated_level: RiskLevels;
-  calculated_score: number;
-  calculated_score_norm: number;
-  category_1_score: number;
-  category_1_count: number;
-  category_2_score?: number;
-  category_2_count?: number;
-  notes: string[];
-  inputs: RiskInputs;
-}
+export type RiskInputs = RiskScoreInput[];
 
 export enum RiskLevels {
   unknown = 'Unknown',

@@ -40,13 +40,12 @@ components:
       required:
         - data_view_id
       properties:
-        after_keys:
-          description: Used to retrieve a specific "page" of risk scores. If unspecified, the first "page" of scores is returned. See also the `after_keys` key in a risk scores response.
-          allOf:
-            - $ref: '../common/common.schema.yaml#/components/schemas/AfterKeys'
         data_view_id:
           $ref: '../common/common.schema.yaml#/components/schemas/DataViewId'
           description: The identifier of the Kibana data view to be used when generating risk scores. If a data view is not found, the provided ID will be used as the query's index pattern instead.
+        after_keys:
+          description: Used to retrieve a specific "page" of risk scores. If unspecified, the first "page" of scores is returned. See also the `after_keys` key in a risk scores response.
+          $ref: '../common/common.schema.yaml#/components/schemas/AfterKeys'
         debug:
           description: If set to `true`, a `debug` key is added to the response, containing both the internal request and response with elasticsearch.
           type: boolean
@@ -57,8 +56,7 @@ components:
           $ref: '../common/common.schema.yaml#/components/schemas/PageSize'
         identifier_type:
           description: Used to restrict the type of risk scores involved. If unspecified, both `host` and `user` scores will be returned.
-          allOf:
-            - $ref: '../common/common.schema.yaml#/components/schemas/IdentifierType'
+          $ref: '../common/common.schema.yaml#/components/schemas/IdentifierType'
         range:
           $ref: '../common/common.schema.yaml#/components/schemas/DateRange'
           description: Defines the time period over which scores will be evaluated. If unspecified, a range of `[now, now-30d]` will be used.
@@ -83,8 +81,22 @@ components:
               type: string
             response:
               type: string
+        # scores:
+        #   type: array
+        #   description: A list of risk scores
+        #   items:
+        #     $ref: '../common/common.schema.yaml#/components/schemas/EntityRiskScore'
         scores:
-          type: array
-          description: A list of risk scores
-          items:
-            $ref: '../common/common.schema.yaml#/components/schemas/RiskScore'
+          type: object
+          properties:
+            host:
+              type: array
+              items:
+                $ref: '../common/common.schema.yaml#/components/schemas/EntityRiskScore'
+              description: A list of host risk scores
+            user:
+              type: array
+              items:
+                $ref: '../common/common.schema.yaml#/components/schemas/EntityRiskScore'
+              description: A list of user risk scores
+

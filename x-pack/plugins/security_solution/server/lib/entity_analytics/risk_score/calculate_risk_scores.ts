@@ -18,11 +18,14 @@ import {
   ALERT_WORKFLOW_STATUS,
   EVENT_KIND,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import type { RiskScoresPreviewResponse } from '../../../../common/api/entity_analytics/risk_engine/preview_route.gen';
+import type {
+  AfterKeys,
+  EntityRiskScore,
+  RiskScoreWeights,
+} from '../../../../common/api/entity_analytics/common';
 import {
-  type AfterKeys,
   type IdentifierType,
-  type RiskWeights,
-  type RiskScore,
   getRiskLevel,
   RiskCategories,
 } from '../../../../common/entity_analytics/risk_engine';
@@ -42,12 +45,7 @@ import {
   buildWeightingOfScoreByCategory,
   getGlobalWeightForIdentifierType,
 } from './risk_weights';
-import type {
-  CalculateRiskScoreAggregations,
-  CalculateScoresParams,
-  CalculateScoresResponse,
-  RiskScoreBucket,
-} from '../types';
+import type { CalculateRiskScoreAggregations, RiskScoreBucket } from '../types';
 import {
   MAX_INPUTS_COUNT,
   RISK_SCORING_INPUTS_COUNT_MAX,
@@ -67,7 +65,7 @@ const formatForResponse = ({
   now: string;
   identifierField: string;
   includeNewFields: boolean;
-}): RiskScore => {
+}): EntityRiskScore => {
   const riskDetails = bucket.top_inputs.risk_details;
 
   const criticalityModifier = getCriticalityModifier(criticality?.criticality_level);
@@ -173,7 +171,7 @@ const buildIdentifierTypeAggregation = ({
   afterKeys: AfterKeys;
   identifierType: IdentifierType;
   pageSize: number;
-  weights?: RiskWeights;
+  weights?: RiskScoreWeights;
   alertSampleSizePerShard: number;
 }): AggregationsAggregationContainer => {
   const globalIdentifierTypeWeight = getGlobalWeightForIdentifierType({ identifierType, weights });
@@ -249,7 +247,7 @@ const processScores = async ({
   identifierField: string;
   logger: Logger;
   now: string;
-}): Promise<RiskScore[]> => {
+}): Promise<EntityRiskScore[]> => {
   if (buckets.length === 0) {
     return [];
   }
@@ -302,7 +300,7 @@ export const calculateRiskScores = async ({
   assetCriticalityService: AssetCriticalityService;
   esClient: ElasticsearchClient;
   logger: Logger;
-} & CalculateScoresParams): Promise<CalculateScoresResponse> =>
+} & CalculateScoresParams): Promise<RiskScoresPreviewResponse> =>
   withSecuritySpan('calculateRiskScores', async () => {
     const now = new Date().toISOString();
     const filter = [

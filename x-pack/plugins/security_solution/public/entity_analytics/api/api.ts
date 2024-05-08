@@ -6,9 +6,15 @@
  */
 
 import { useMemo } from 'react';
-import type { RiskScoresPreviewRequest } from '../../../common/api/entity_analytics/risk_engine/preview_route.gen';
+import type {
+  RiskScoresPreviewRequest,
+  RiskScoresPreviewResponse,
+} from '../../../common/api/entity_analytics/risk_engine/preview_route.gen';
 import type { AssetCriticalityCsvUploadResponse } from '../../../common/entity_analytics/asset_criticality/types';
-import type { AssetCriticalityRecord } from '../../../common/api/entity_analytics/asset_criticality';
+import type {
+  AssetCriticalityRecord,
+  EntityAnalyticsPrivileges,
+} from '../../../common/api/entity_analytics/asset_criticality';
 import type { RiskScoreEntity } from '../../../common/search_strategy';
 import {
   RISK_ENGINE_STATUS_URL,
@@ -25,7 +31,6 @@ import {
 } from '../../../common/constants';
 
 import type {
-  CalculateScoresResponse,
   EnableRiskEngineResponse,
   GetRiskEngineStatusResponse,
   InitRiskEngineResponse,
@@ -52,7 +57,7 @@ export const useEntityAnalyticsRoutes = () => {
       signal?: AbortSignal;
       params: RiskScoresPreviewRequest;
     }) =>
-      http.fetch<CalculateScoresResponse>(RISK_SCORE_PREVIEW_URL, {
+      http.fetch<RiskScoresPreviewResponse>(RISK_SCORE_PREVIEW_URL, {
         version: '1',
         method: 'POST',
         body: JSON.stringify(params),

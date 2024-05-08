@@ -6,10 +6,10 @@
  */
 
 import type { RiskScoreService } from './risk_score_service';
-import type { RiskScore } from '../../../../common/entity_analytics/risk_engine';
 import { RiskLevels } from '../../../../common/entity_analytics/risk_engine';
+import type { EntityRiskScore } from '../../../../common/api/entity_analytics/common';
 
-const createRiskScoreMock = (overrides: Partial<RiskScore> = {}): RiskScore => ({
+const createRiskScoreMock = (overrides: Partial<EntityRiskScore> = {}): EntityRiskScore => ({
   '@timestamp': '2023-02-15T00:15:19.231Z',
   id_field: 'host.name',
   id_value: 'hostname',

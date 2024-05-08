@@ -63,4 +63,4 @@ components:
           success: 
             type: boolean
           score:
-            $ref: '../common/common.schema.yaml#/components/schemas/RiskScore'
+            $ref: '../common/common.schema.yaml#/components/schemas/EntityRiskScore'

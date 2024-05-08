@@ -7,8 +7,8 @@
 
 import type { IEsSearchResponse } from '@kbn/search-types';
 
+import type { EntityRiskScore } from '../../../../api/entity_analytics/common';
 import type { Inspect, Maybe, SortField } from '../../../common';
-import type { RiskScore } from '../../../../entity_analytics/risk_engine';
 import { RiskLevels as RiskSeverity } from '../../../../entity_analytics/risk_engine';
 
 export interface HostsRiskScoreStrategyResponse extends IEsSearchResponse {
@@ -23,7 +23,7 @@ export interface UsersRiskScoreStrategyResponse extends IEsSearchResponse {
   data: UserRiskScore[] | undefined;
 }
 
-export interface RiskStats extends RiskScore {
+export interface RiskStats extends EntityRiskScore {
   rule_risks: RuleRisk[];
   multipliers: string[];
 }

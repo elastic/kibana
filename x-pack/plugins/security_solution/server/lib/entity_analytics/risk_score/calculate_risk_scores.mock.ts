@@ -6,12 +6,9 @@
  */
 
 import { RiskCategories, RiskLevels } from '../../../../common/entity_analytics/risk_engine';
-import type { RiskScore } from '../../../../common/entity_analytics/risk_engine';
-import type {
-  CalculateRiskScoreAggregations,
-  CalculateScoresResponse,
-  RiskScoreBucket,
-} from '../types';
+import type { CalculateRiskScoreAggregations, RiskScoreBucket } from '../types';
+import type { RiskScoresCalculationResponse } from '../../../../common/api/entity_analytics/risk_engine/calculation_route.gen';
+import type { EntityRiskScore } from '../../../../common/api/entity_analytics/common';
 
 const buildRiskScoreBucketMock = (overrides: Partial<RiskScoreBucket> = {}): RiskScoreBucket => ({
   key: { 'user.name': 'username' },
@@ -60,8 +57,8 @@ const buildAggregationResponseMock = (
 });
 
 const buildResponseMock = (
-  overrides: Partial<CalculateScoresResponse> = {}
-): CalculateScoresResponse => ({
+  overrides: Partial<RiskScoresCalculationResponse> = {}
+): RiskScoresCalculationResponse => ({
   after_keys: { host: { 'host.name': 'hostname' } },
   scores: {
     host: [
@@ -98,7 +95,7 @@ const buildResponseMock = (
 });
 
 const buildResponseWithOneScoreMock = () =>
-  buildResponseMock({ scores: { host: [{} as RiskScore] } });
+  buildResponseMock({ scores: { host: [{} as EntityRiskScore] } });
 
 export const calculateRiskScoresMock = {
   buildResponse: buildResponseMock,

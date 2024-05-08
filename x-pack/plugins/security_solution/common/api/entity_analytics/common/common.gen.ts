@@ -16,10 +16,15 @@ import { z } from 'zod';
  *   version: 1.0.0
  */
 
+import { AssetCriticalityLevel } from '../asset_criticality/common.gen';
+
+export type EntityAfterKey = z.infer<typeof EntityAfterKey>;
+export const EntityAfterKey = z.object({}).catchall(z.string());
+
 export type AfterKeys = z.infer<typeof AfterKeys>;
 export const AfterKeys = z.object({
-  host: z.object({}).catchall(z.string()).optional(),
-  user: z.object({}).catchall(z.string()).optional(),
+  host: EntityAfterKey.optional(),
+  user: EntityAfterKey.optional(),
 });
 
 /**
@@ -86,18 +91,14 @@ export const RiskScoreInput = z.object({
    * The @timestamp of the risk input document.
    */
   timestamp: z.string().optional(),
+  contribution_score: z.number().optional(),
 });
-
-export type RiskWeightTypes = z.infer<typeof RiskWeightTypes>;
-export const RiskWeightTypes = z.enum(['global_identifier', 'risk_category']);
-export type RiskWeightTypesEnum = typeof RiskWeightTypes.enum;
-export const RiskWeightTypesEnum = RiskWeightTypes.enum;
 
 export type RiskScoreCategories = z.infer<typeof RiskScoreCategories>;
 export const RiskScoreCategories = z.literal('category_1');
 
-export type RiskScore = z.infer<typeof RiskScore>;
-export const RiskScore = z.object({
+export type EntityRiskScore = z.infer<typeof EntityRiskScore>;
+export const EntityRiskScore = z.object({
   /**
    * The time at which the risk score was calculated.
    */
@@ -134,6 +135,11 @@ export const RiskScore = z.object({
    * A list of the highest-risk documents contributing to this risk score. Useful for investigative purposes.
    */
   inputs: z.array(RiskScoreInput),
+  category_2_score: z.number().optional(),
+  category_2_count: z.number().optional(),
+  notes: z.array(z.string()),
+  criticality_modifier: z.number().optional(),
+  criticality_level: AssetCriticalityLevel.optional(),
 });
 
 export type RiskScoreEntityIdentifierWeights = z.infer<typeof RiskScoreEntityIdentifierWeights>;

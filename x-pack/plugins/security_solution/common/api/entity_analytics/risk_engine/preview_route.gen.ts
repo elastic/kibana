@@ -17,26 +17,26 @@ import { z } from 'zod';
  */
 
 import {
-  AfterKeys,
   DataViewId,
+  AfterKeys,
   Filter,
   PageSize,
   IdentifierType,
   DateRange,
   RiskScoreWeights,
-  RiskScore,
+  EntityRiskScore,
 } from '../common/common.gen';
 
 export type RiskScoresPreviewRequest = z.infer<typeof RiskScoresPreviewRequest>;
 export const RiskScoresPreviewRequest = z.object({
   /**
-   * Used to retrieve a specific "page" of risk scores. If unspecified, the first "page" of scores is returned. See also the `after_keys` key in a risk scores response.
-   */
-  after_keys: AfterKeys,
-  /**
    * The identifier of the Kibana data view to be used when generating risk scores. If a data view is not found, the provided ID will be used as the query's index pattern instead.
    */
   data_view_id: DataViewId,
+  /**
+   * Used to retrieve a specific "page" of risk scores. If unspecified, the first "page" of scores is returned. See also the `after_keys` key in a risk scores response.
+   */
+  after_keys: AfterKeys.optional(),
   /**
    * If set to `true`, a `debug` key is added to the response, containing both the internal request and response with elasticsearch.
    */
@@ -49,7 +49,7 @@ export const RiskScoresPreviewRequest = z.object({
   /**
    * Used to restrict the type of risk scores involved. If unspecified, both `host` and `user` scores will be returned.
    */
-  identifier_type: IdentifierType,
+  identifier_type: IdentifierType.optional(),
   /**
    * Defines the time period over which scores will be evaluated. If unspecified, a range of `[now, now-30d]` will be used.
    */
@@ -72,8 +72,14 @@ export const RiskScoresPreviewResponse = z.object({
       response: z.string().optional(),
     })
     .optional(),
-  /**
-   * A list of risk scores
-   */
-  scores: z.array(RiskScore),
+  scores: z.object({
+    /**
+     * A list of host risk scores
+     */
+    host: z.array(EntityRiskScore).optional(),
+    /**
+     * A list of user risk scores
+     */
+    user: z.array(EntityRiskScore).optional(),
+  }),
 });

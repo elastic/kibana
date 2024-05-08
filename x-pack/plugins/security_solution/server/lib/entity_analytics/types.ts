@@ -5,17 +5,10 @@
  * 2.0.
  */
 
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, StartServicesAccessor } from '@kbn/core/server';
-import type {
-  AfterKey,
-  AfterKeys,
-  IdentifierType,
-  RiskWeights,
-  Range,
-  RiskEngineStatus,
-  RiskScore,
-} from '../../../common/entity_analytics/risk_engine';
+import type { RiskEngineInitResponse } from '../../../common/api/entity_analytics/risk_engine/engine_init_route.gen';
+import type { EntityAfterKey } from '../../../common/api/entity_analytics/common';
+import type { IdentifierType, Range } from '../../../common/entity_analytics/risk_engine';
 import type { ConfigType } from '../../config';
 import type { StartPlugins } from '../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../types';
@@ -27,102 +20,20 @@ export interface EntityAnalyticsRoutesDeps {
   config: ConfigType;
   getStartServices: StartServicesAccessor<StartPlugins>;
 }
-export interface CalculateScoresParams {
-  afterKeys: AfterKeys;
-  debug?: boolean;
-  index: string;
-  filter?: unknown;
-  identifierType?: IdentifierType;
-  pageSize: number;
-  range: { start: string; end: string };
-  runtimeMappings: MappingRuntimeFields;
-  weights?: RiskWeights;
-  alertSampleSizePerShard?: number;
-}
-
-export interface CalculateAndPersistScoresParams {
-  afterKeys: AfterKeys;
-  debug?: boolean;
-  index: string;
-  filter?: unknown;
-  identifierType: IdentifierType;
-  pageSize: number;
-  range: Range;
-  runtimeMappings: MappingRuntimeFields;
-  weights?: RiskWeights;
-  alertSampleSizePerShard?: number;
-  returnScores?: boolean;
-}
-
-export interface CalculateAndPersistScoresResponse {
-  after_keys: AfterKeys;
-  errors: string[];
-  scores_written: number;
-  scores?: {
-    host?: RiskScore[];
-    user?: RiskScore[];
-  };
-}
-
-export interface CalculateScoresResponse {
-  debug?: {
-    request: unknown;
-    response: unknown;
-  };
-  after_keys: AfterKeys;
-  scores: {
-    host?: RiskScore[];
-    user?: RiskScore[];
-  };
-}
-
-export interface GetRiskEngineStatusResponse {
-  legacy_risk_engine_status: RiskEngineStatus;
-  risk_engine_status: RiskEngineStatus;
-  is_max_amount_of_risk_engines_reached: boolean;
-}
-
-export interface InitRiskEngineResultResponse {
-  risk_engine_enabled: boolean;
-  risk_engine_resources_installed: boolean;
-  risk_engine_configuration_created: boolean;
-  legacy_risk_engine_disabled: boolean;
-  errors: string[];
-}
-
-export interface InitRiskEngineResponse {
-  result: InitRiskEngineResultResponse;
-}
-
 export interface InitRiskEngineError {
   body: {
     message: string;
-    full_error: InitRiskEngineResultResponse | undefined;
+    full_error: RiskEngineInitResponse | undefined;
   };
-}
-
-export interface EnableDisableRiskEngineErrorResponse {
-  body: {
-    message: string;
-    full_error: string;
-  };
-}
-
-export interface EnableRiskEngineResponse {
-  success: boolean;
-}
-
-export interface DisableRiskEngineResponse {
-  success: boolean;
 }
 
 export interface CalculateRiskScoreAggregations {
   user?: {
-    after_key: AfterKey;
+    after_key: EntityAfterKey;
     buckets: RiskScoreBucket[];
   };
   host?: {
-    after_key: AfterKey;
+    after_key: EntityAfterKey;
     buckets: RiskScoreBucket[];
   };
 }
@@ -164,3 +75,16 @@ export interface RiskEngineConfiguration {
   range: Range;
   alertSampleSizePerShard?: number;
 }
+
+// TODO params for calculateRiskScores calculateandPersistRiskScores
+// export interface CalculateScoresParams {
+
+// export interface CalculateAndPersistScoresResponse {
+//   after_keys: AfterKeys;
+//   errors: string[];
+//   scores_written: number;
+//   scores?: { // TODO was this added recently or I am missing something?
+//     host?: RiskScore[];
+//     user?: RiskScore[];
+//   };
+// }

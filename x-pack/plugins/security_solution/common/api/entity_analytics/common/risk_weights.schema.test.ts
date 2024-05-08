@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { RiskCategories, RiskWeightTypes } from './types';
-import { RiskScoreWeight } from '../../../api/entity_analytics/common';
+import { RiskScoreWeight } from '.';
 import type { SafeParseError, SafeParseSuccess } from 'zod';
 import { stringifyZodError } from '@kbn/zod-helpers';
+import { RiskCategories, RiskWeightTypes } from '../../../entity_analytics/risk_engine';
 
 describe('risk weight schema', () => {
   let type: string;
@@ -116,29 +116,6 @@ describe('risk weight schema', () => {
       beforeEach(() => {
         type = RiskWeightTypes.riskCategory;
       });
-
-      // const globalRiskWeightSchema = t.intersection([
-      //   t.exact(
-      //     t.type({
-      //       type: t.literal(RiskWeightTypes.global),
-      //     })
-      //   ),
-      //   identifierWeights,
-      // ]);
-      // export type GlobalRiskWeight = t.TypeOf<typeof globalRiskWeightSchema>;
-
-      // const riskCategoryRiskWeightSchema = t.intersection([
-      //   t.exact(
-      //     t.type({
-      //       type: t.literal(RiskWeightTypes.riskCategory),
-      //       value: riskCategories,
-      //     })
-      //   ),
-      //   identifierWeights,
-      // ]);
-      // export type RiskCategoryRiskWeight = t.TypeOf<typeof riskCategoryRiskWeightSchema>;
-
-      // export const riskWeightSchema = t.union([globalRiskWeightSchema
 
       it('requires a value', () => {
         const payload = { type, user: 0.1 };

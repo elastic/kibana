@@ -6,17 +6,18 @@ info:
 paths: {}
 components:
   schemas:
+    EntityAfterKey:
+      type: object
+      additionalProperties:
+        type: string
+
     AfterKeys:
       type: object
       properties:
         host:
-          type: object
-          additionalProperties:
-            type: string
+          $ref: '#/components/schemas/EntityAfterKey'
         user:
-          type: object
-          additionalProperties:
-            type: string
+          $ref: '#/components/schemas/EntityAfterKey'
       example:
         host:
           'host.name': 'example.host'
@@ -89,20 +90,16 @@ components:
           type: string
           example: '2017-07-21T17:32:28Z'
           description: The @timestamp of the risk input document.
-
-    RiskWeightTypes:
-      type: string
-      enum:
-        - global_identifier
-        - risk_category
+        contribution_score:
+          type: number
+          format: double
 
     RiskScoreCategories:
       type: string
       enum:
         - category_1
 
-
-    RiskScore:
+    EntityRiskScore:
       type: object
       required:
         - '@timestamp'
@@ -114,6 +111,7 @@ components:
         - category_1_score
         - category_1_count
         - inputs
+        - notes
       properties:
         '@timestamp':
           type: string
@@ -155,7 +153,22 @@ components:
           description: A list of the highest-risk documents contributing to this risk score. Useful for investigative purposes.
           items:
             $ref: '#/components/schemas/RiskScoreInput'
-
+        category_2_score:
+          type: number
+          format: double
+        category_2_count:
+          type: number
+          format: integer
+        notes:
+          type: array
+          items:
+            type: string
+        criticality_modifier:
+          type: number
+          format: double
+        criticality_level:
+          $ref: '../asset_criticality/common.schema.yaml#/components/schemas/AssetCriticalityLevel'
+    
     RiskScoreEntityIdentifierWeights:    
       type: number
       format: double
