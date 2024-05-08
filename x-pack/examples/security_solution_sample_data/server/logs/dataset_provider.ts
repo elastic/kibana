@@ -16,7 +16,7 @@ export const logsDatasetProvider = ({ staticAssets }) => {
   return {
     id: 'security-solution-logs',
     name: 'Security solution logs data',
-    description: 'Security solution development easy button',
+    description: `Install data to drive security solution. To enable usage in security solution, add 'kibana_sample_data_security-solution-logs' to advanced setting 'securitySolution:defaultIndex'`,
     previewImagePath: staticAssets.getPluginAssetHref(
       '/sample_data_resources/flights/dashboard.webp'
     ),
