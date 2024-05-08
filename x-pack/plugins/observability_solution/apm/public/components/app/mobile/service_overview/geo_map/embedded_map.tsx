@@ -8,12 +8,12 @@
 import React from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
 import { ApmPluginStartDeps } from '../../../../../plugin';
 import { getLayerList } from './map_layers/get_layer_list';
 import { MapTypes } from '../../../../../../common/mobile/constants';
+
 function EmbeddedMapComponent({
   selectedMap,
   start,
@@ -40,41 +40,30 @@ function EmbeddedMapComponent({
     : [];
 
   return (
-    <>
-      {
-        <div
-          data-test-subj="serviceOverviewEmbeddedMap"
-          css={css`
-            width: 100%;
-            height: 500px;
-            display: flex;
-            flex: 1 1 100%;
-            z-index: 1;
-            min-height: 0;
-          `}
-        >
-          {maps &&
-            maps.Map({
-              title: i18n.translate('xpack.apm.serviceOverview.embeddedMap.input.title', {
-                defaultMessage: 'Latency by country',
-              }),
-              filters,
-              query: {
-                query: kuery,
-                language: 'kuery',
-              },
-              timeRange: {
-                from: start,
-                to: end,
-              },
-              layerList,
-              hideFilterActions: true,
-              isLayerTOCOpen: false,
-              mapCenter: { lat: 20.43425, lon: 0, zoom: 1.25 },
-            })}
-        </div>
-      }
-    </>
+    <div
+      data-test-subj="serviceOverviewEmbeddedMap"
+      style={{ width: '100%', height: '500px', display: 'flex', flex: '1 1 100%', zIndex: 1 }}
+    >
+      {maps &&
+        maps.Map({
+          title: i18n.translate('xpack.apm.serviceOverview.embeddedMap.input.title', {
+            defaultMessage: 'Latency by country',
+          }),
+          filters,
+          query: {
+            query: kuery,
+            language: 'kuery',
+          },
+          timeRange: {
+            from: start,
+            to: end,
+          },
+          layerList,
+          hideFilterActions: true,
+          isLayerTOCOpen: false,
+          mapCenter: { lat: 20.43425, lon: 0, zoom: 1.25 },
+        })}
+    </div>
   );
 }
 
