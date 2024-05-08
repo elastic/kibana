@@ -19,11 +19,6 @@ import {
 import { useAgentStatusHook } from './use_sentinelone_host_isolation';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
-export enum CROWDSTRIKE_NETWORK_STATUS {
-  NORMAL = 'normal',
-  CONTAINED = 'contained',
-}
-
 const EuiFlexGroupStyled = styled(EuiFlexGroup)`
   .isolation-status {
     margin-left: ${({ theme }) => theme.eui.euiSizeS};

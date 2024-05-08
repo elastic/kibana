@@ -10,12 +10,12 @@ import {
   CrowdstrikeBaseApiResponseSchema,
   CrowdstrikeConfigSchema,
   CrowdstrikeGetAgentsParamsSchema,
-  CrowdstrikeGetAgentsResponseSchema,
+  CrowdstrikeGetAgentOnlineStatusResponseSchema,
   CrowdstrikeHostActionsParamsSchema,
   CrowdstrikeSecretsSchema,
   CrowdstrikeActionParamsSchema,
   CrowdstrikeGetTokenResponseSchema,
-  CrowdstrikeGetAgentStatusResponseSchema,
+  CrowdstrikeGetAgentsResponseSchema,
 } from './schema';
 
 export type CrowdstrikeConfig = TypeOf<typeof CrowdstrikeConfigSchema>;
@@ -25,8 +25,8 @@ export type CrowdstrikeBaseApiResponse = TypeOf<typeof CrowdstrikeBaseApiRespons
 
 export type CrowdstrikeGetAgentsParams = Partial<TypeOf<typeof CrowdstrikeGetAgentsParamsSchema>>;
 export type CrowdstrikeGetAgentsResponse = TypeOf<typeof CrowdstrikeGetAgentsResponseSchema>;
-export type CrowdstrikeGetAgentStatusResponse = TypeOf<
-  typeof CrowdstrikeGetAgentStatusResponseSchema
+export type CrowdstrikeGetAgentOnlineStatusResponse = TypeOf<
+  typeof CrowdstrikeGetAgentOnlineStatusResponseSchema
 >;
 export type CrowdstrikeGetTokenResponse = TypeOf<typeof CrowdstrikeGetTokenResponseSchema>;
 

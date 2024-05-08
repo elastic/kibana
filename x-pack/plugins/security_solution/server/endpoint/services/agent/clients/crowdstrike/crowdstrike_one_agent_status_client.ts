@@ -11,10 +11,8 @@ import {
 } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
-import type {
-  CrowdstrikeGetAgentsResponse,
-  CrowdstrikeGetAgentStatusResponse,
-} from '@kbn/stack-connectors-plugin/common/crowdstrike/types';
+import type { CrowdstrikeGetAgentOnlineStatusResponse } from '@kbn/stack-connectors-plugin/common/crowdstrike/types';
+import { keyBy } from 'lodash';
 import type { RawCrowdstrikeInfo } from './types';
 import { catchAndWrapError } from '../../../../utils';
 import { getPendingActionsSummary } from '../../..';
@@ -26,14 +24,14 @@ import { CustomHttpRequestError } from '../../../../../utils/custom_http_request
 
 const CROWDSTRIKE_AGENT_INDEX_PATTERN = `logs-crowdstrike.host-*`;
 
-enum CROWDSTRIKE_NETWORK_STATUS {
+export enum CROWDSTRIKE_NETWORK_STATUS {
   NORMAL = 'normal',
   CONTAINED = 'contained',
   LIFT_CONTAINMENT_PENDING = 'lift_containment_pending',
   CONTAINMENT_PENDING = 'containment_pending',
 }
 
-enum CROWDSTRIKE_STATUS_RESPONSE {
+export enum CROWDSTRIKE_STATUS_RESPONSE {
   ONLINE = 'online',
   OFFLINE = 'offline',
   UNKNOWN = 'unknown',
@@ -68,21 +66,14 @@ export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
     const agentStatusResponse = (await connectorActionsClient.execute({
       actionId: connector.id,
       params: {
-        subAction: SUB_ACTION.GET_AGENT_STATUS,
+        subAction: SUB_ACTION.GET_AGENT_ONLINE_STATUS,
         subActionParams: {
           ids: agentIds,
         },
       },
-    })) as ActionTypeExecutorResult<CrowdstrikeGetAgentStatusResponse>;
+    })) as ActionTypeExecutorResult<CrowdstrikeGetAgentOnlineStatusResponse>;
 
-    return (
-      agentStatusResponse.data?.resources.reduce(
-        (acc: Record<string, CrowdstrikeGetAgentStatusResponse['resources'][0]>, agent) => {
-          return { ...acc, [String(agent.id)]: agent };
-        },
-        {}
-      ) || {}
-    );
+    return keyBy(agentStatusResponse.data?.resources, 'id');
   }
   async getAgentStatuses(agentIds: string[]): Promise<AgentStatusRecords> {
     const esClient = this.options.esClient;
