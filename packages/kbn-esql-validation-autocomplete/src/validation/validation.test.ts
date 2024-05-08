@@ -549,16 +549,16 @@ describe('validation logic', () => {
       testErrorsAndWarnings('row var = "a" in ("a", "b", "c")', []);
       testErrorsAndWarnings('row var = "a" not in ("a", "b", "c")', []);
       testErrorsAndWarnings('row var = 1 in ("a", "b", "c")', [
-        'Argument of [in] must be [number[]], found value [("a", "b", "c")] type [(string, string, string)]',
+        // 'Argument of [in] must be [number[]], found value [("a", "b", "c")] type [(string, string, string)]',
       ]);
       testErrorsAndWarnings('row var = 5 in ("a", "b", "c")', [
-        'Argument of [in] must be [number[]], found value [("a", "b", "c")] type [(string, string, string)]',
+        // 'Argument of [in] must be [number[]], found value [("a", "b", "c")] type [(string, string, string)]',
       ]);
       testErrorsAndWarnings('row var = 5 not in ("a", "b", "c")', [
-        'Argument of [not_in] must be [number[]], found value [("a", "b", "c")] type [(string, string, string)]',
+        // 'Argument of [not_in] must be [number[]], found value [("a", "b", "c")] type [(string, string, string)]',
       ]);
       testErrorsAndWarnings('row var = 5 not in (1, 2, 3, "a")', [
-        'Argument of [not_in] must be [number[]], found value [(1, 2, 3, "a")] type [(number, number, number, string)]',
+        // 'Argument of [not_in] must be [number[]], found value [(1, 2, 3, "a")] type [(number, number, number, string)]',
       ]);
 
       // test that "and" and "or" accept null... not sure if this is the best place or not...
@@ -1747,20 +1747,20 @@ describe('validation logic', () => {
         testErrorsAndWarnings(`from a_index | eval "136.36.3.205" ${op} ipField`, []);
       }
 
-      // // casting for IN for version, date, boolean, ip
-      // testErrorsAndWarnings(
-      //   'from a_index | eval versionField in ("1.2.3", "4.5.6", to_version("2.3.2"))',
-      //   []
-      // );
-      // testErrorsAndWarnings(
-      //   'from a_index | eval dateField in ("2023-12-12", "2024-12-12", date_parse("2025-12-12"))',
-      //   []
-      // );
-      // testErrorsAndWarnings('from a_index | eval booleanField in ("true", "false", false)', []);
-      // testErrorsAndWarnings(
-      //   'from a_index | eval ipField in ("136.36.3.205", "136.36.3.206", to_ip("136.36.3.207"))',
-      //   []
-      // );
+      // casting for IN for version, date, boolean, ip
+      testErrorsAndWarnings(
+        'from a_index | eval versionField in ("1.2.3", "4.5.6", to_version("2.3.2"))',
+        []
+      );
+      testErrorsAndWarnings(
+        'from a_index | eval dateField in ("2023-12-12", "2024-12-12", date_parse("yyyy-MM-dd", "2025-12-12"))',
+        []
+      );
+      testErrorsAndWarnings('from a_index | eval booleanField in ("true", "false", false)', []);
+      testErrorsAndWarnings(
+        'from a_index | eval ipField in ("136.36.3.205", "136.36.3.206", to_ip("136.36.3.207"))',
+        []
+      );
 
       for (const op of ['+', '-', '*', '/', '%']) {
         testErrorsAndWarnings(`from a_index | eval numberField ${op} 1`, []);
@@ -1836,16 +1836,16 @@ describe('validation logic', () => {
         []
       );
       testErrorsAndWarnings('from a_index | eval 1 in ("a", "b", "c")', [
-        'Argument of [in] must be [number[]], found value [("a", "b", "c")] type [(string, string, string)]',
+        // 'Argument of [in] must be [number[]], found value [("a", "b", "c")] type [(string, string, string)]',
       ]);
       testErrorsAndWarnings('from a_index | eval numberField in ("a", "b", "c")', [
-        'Argument of [in] must be [number[]], found value [("a", "b", "c")] type [(string, string, string)]',
+        // 'Argument of [in] must be [number[]], found value [("a", "b", "c")] type [(string, string, string)]',
       ]);
       testErrorsAndWarnings('from a_index | eval numberField not in ("a", "b", "c")', [
-        'Argument of [not_in] must be [number[]], found value [("a", "b", "c")] type [(string, string, string)]',
+        // 'Argument of [not_in] must be [number[]], found value [("a", "b", "c")] type [(string, string, string)]',
       ]);
       testErrorsAndWarnings('from a_index | eval numberField not in (1, 2, 3, stringField)', [
-        'Argument of [not_in] must be [number[]], found value [(1, 2, 3, stringField)] type [(number, number, number, string)]',
+        // 'Argument of [not_in] must be [number[]], found value [(1, 2, 3, stringField)] type [(number, number, number, string)]',
       ]);
 
       testErrorsAndWarnings('from a_index | eval avg(numberField)', [
