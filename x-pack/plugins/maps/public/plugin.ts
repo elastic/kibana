@@ -10,7 +10,6 @@ import type { Setup as InspectorSetupContract } from '@kbn/inspector-plugin/publ
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
-import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type {
@@ -125,7 +124,6 @@ export interface MapsPluginStartDependencies {
   uiActions: UiActionsStart;
   share: SharePluginStart;
   visualizations: VisualizationsStart;
-  dashboard: DashboardStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   presentationUtil: PresentationUtilPluginStart;
   security?: SecurityPluginStart;
