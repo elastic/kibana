@@ -63,7 +63,7 @@ export function initGetSpaceContentSummaryApi(deps: InternalRouteDeps) {
         const data = await client.find<unknown, TypesAggregation>({
           type: searchTypeNames,
           perPage: 0,
-          namespaces: ['*', spaceId],
+          namespaces: [spaceId],
           aggs: {
             typesAggregation: {
               terms: {

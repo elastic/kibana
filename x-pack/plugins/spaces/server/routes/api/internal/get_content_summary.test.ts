@@ -225,7 +225,7 @@ describe('GET /internal/spaces/{spaceId}/content_summary', () => {
 
     expect(findMock).toBeCalledWith({
       type: ['dashboard', 'query'],
-      namespaces: ['*', 'a-space'],
+      namespaces: ['a-space'],
       perPage: 0,
       aggs: {
         typesAggregation: {
@@ -297,7 +297,7 @@ describe('GET /internal/spaces/{spaceId}/content_summary', () => {
 
     expect(findMock).toBeCalledWith({
       type: ['dashboard', 'query'],
-      namespaces: ['*', 'a-space'],
+      namespaces: ['a-space'],
       perPage: 0,
       aggs: {
         typesAggregation: {
@@ -390,7 +390,7 @@ describe('GET /internal/spaces/{spaceId}/content_summary', () => {
 
     expect(findMock).toBeCalledWith({
       type: ['dashboard', 'query', 'search'],
-      namespaces: ['*', 'a-space'],
+      namespaces: ['a-space'],
       perPage: 0,
       aggs: {
         typesAggregation: {
