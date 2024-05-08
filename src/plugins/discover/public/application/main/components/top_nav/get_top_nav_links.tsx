@@ -200,9 +200,6 @@ export const getTopNavLinks = ({
         },
         isDirty: !savedSearch.id || state.appState.hasChanged(),
         showPublicUrlSwitch,
-        onClose: () => {
-          anchorElement?.focus();
-        },
         toasts: notifications.toasts,
       });
     },

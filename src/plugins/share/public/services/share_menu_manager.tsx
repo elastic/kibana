@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { CoreStart, OverlayStart, ThemeServiceStart, ToastsSetup } from '@kbn/core/public';
 import { ShareMenuItem, ShowShareMenuOptions } from '../types';
@@ -36,8 +35,7 @@ export class ShareMenuManager {
        */
       toggleShareContextMenu: (options: ShowShareMenuOptions) => {
         const onClose = () => {
-          this.onClose();
-          options.onClose?.();
+          return options.onClose ? options.onClose?.() : (this.isOpen = false);
         };
         const menuItems = shareRegistry.getShareMenuItems({ ...options, onClose });
         const anonymousAccess = anonymousAccessServiceProvider?.();
@@ -57,10 +55,10 @@ export class ShareMenuManager {
     };
   }
 
-  private onClose = () => {
-    ReactDOM.unmountComponentAtNode(this.container);
-    this.isOpen = false;
-  };
+  // private onClose = () => {
+  //   ReactDOM.unmountComponentAtNode(this.container);
+  //   this.isOpen = false;
+  // };
 
   private toggleShareContextMenu({
     anchorElement,
@@ -100,6 +98,7 @@ export class ShareMenuManager {
   }) {
     if (this.isOpen) {
       onClose();
+      anchorElement.focus();
       return;
     }
 
@@ -110,6 +109,7 @@ export class ShareMenuManager {
         toMountPoint(
           <ShareMenu
             shareContext={{
+              anchorElement,
               allowEmbed,
               allowShortUrl,
               objectId,
@@ -130,8 +130,9 @@ export class ShareMenuManager {
               shareMenuItems: menuItems,
               toasts,
               onClose: () => {
-                onClose();
                 session.close();
+                onClose();
+                anchorElement.focus();
               },
               theme,
               i18n,
@@ -144,7 +145,7 @@ export class ShareMenuManager {
     };
 
     // @ts-ignore openModal() returns void
-    anchorElement.onclick!(openModal());
+    anchorElement.onclick(openModal());
   }
 }
 
