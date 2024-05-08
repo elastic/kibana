@@ -26,6 +26,7 @@ export function MachineLearningJobWizardCommonProvider(
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const headerPage = getPageObject('header');
+  const browser = getService('browser');
 
   function advancedSectionSelector(subSelector?: string) {
     const subj = 'mlJobWizardAdvancedSection';
@@ -649,16 +650,18 @@ export function MachineLearningJobWizardCommonProvider(
       });
     },
 
-    async setTimeRange(shortDurationEndDate: string) {
-      // set the new end date
-      await testSubjects.setValue('mlJobWizardDatePickerRangeEndDate', shortDurationEndDate, {
+    async setTimeRange({ startTime, endTime }: { startTime?: string; endTime?: string }) {
+      const opts = {
         clearWithKeyboard: true,
         typeCharByChar: true,
-      });
+      };
 
-      // click away from time popover
-  // escape popover
-  await browser.pressKeys(browser.keys.ESCAPE);
+      if (startTime)
+        await testSubjects.setValue('mlJobWizardDatePickerRangeStartDate', startTime, opts);
+      if (endTime) await testSubjects.setValue('mlJobWizardDatePickerRangeEndDate', endTime, opts);
+
+      // escape popover
+      await browser.pressKeys(browser.keys.ESCAPE);
     },
 
     async goToJobDetailsStep() {
