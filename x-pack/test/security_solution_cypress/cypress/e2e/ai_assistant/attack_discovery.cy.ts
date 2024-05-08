@@ -16,7 +16,7 @@ import kibanaDevConfig from '../../../../../../config/kibana.dev.yml';
 describe(
   'Attack discovery',
   {
-    tags: ['@ess'],
+    tags: [],
     env: {
       devConfig: true,
       ftrConfig: {
