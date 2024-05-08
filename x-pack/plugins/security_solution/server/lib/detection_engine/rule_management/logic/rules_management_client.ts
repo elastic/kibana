@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 /**
  * EXISTING METHODS:
  * - createRules: FILEPATH: detection_engine/rule_management/logic/crud/create_rules.ts
@@ -55,13 +62,39 @@
  *
  */
 
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { SanitizedRule } from '@kbn/alerting-plugin/common';
+import type { RuleCreateProps } from '../../../../../common/api/detection_engine';
+import { convertCreateAPIToInternalSchema } from '..';
+import type { RuleParams } from '../../rule_schema';
+
+interface CreateCustomRuleProps {
+  rulesClient: RulesClient;
+  params: RuleCreateProps;
+}
+
 export const RulesManagementClient = () => {
   return {
-    // Create a custom rule
-    /**
-     *
-     */
-    createCustomRule: () => {},
+    // 1.  CREATE CUSTOM RULE
+    createCustomRule: async (
+      createCustomRulePayload: CreateCustomRuleProps
+    ): Promise<SanitizedRule<RuleParams>> => {
+      const { rulesClient, params } = createCustomRulePayload;
+
+      const internalRule = convertCreateAPIToInternalSchema(params, false);
+      const rule = await rulesClient.create<RuleParams>({
+        data: internalRule,
+      });
+
+      return rule;
+    },
+
+    // 2.  BULK CREATE CUSTOM RULES
+    bulkCreateCustomRules: () => {
+      // API handler loops over istances of createCustomRule
+    },
+
+    // 3. UPDATE RULE
+
   };
 };
-
