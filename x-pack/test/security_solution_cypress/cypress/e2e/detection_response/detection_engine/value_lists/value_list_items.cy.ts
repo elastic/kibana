@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { login } from '../../../../tasks/login';
+import { login, getDefaultUserName } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { TOASTER_BODY } from '../../../../screens/alerts_detection_rules';
 import { closeErrorToast } from '../../../../tasks/alerts_detection_rules';
@@ -72,7 +72,7 @@ describe(
       // check modal title and info
       cy.get(VALUE_LIST_ITEMS_MODAL_TITLE).should('have.text', KNOWN_VALUE_LIST_FILES.TEXT);
       cy.get(VALUE_LIST_ITEMS_MODAL_INFO).contains('Type: keyword');
-      cy.get(VALUE_LIST_ITEMS_MODAL_INFO).contains('Updated by: system_indices_superuse');
+      cy.get(VALUE_LIST_ITEMS_MODAL_INFO).contains(`Updated by: ${getDefaultUserName()}`);
       checkTotalItems(totalItems);
 
       // search working
