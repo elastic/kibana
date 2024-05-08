@@ -18,10 +18,10 @@ import { isEsqlRule } from '../../../../common/detection_engine/utils';
  * parses ES|QL query and returns memoized array of indices
  * @param query - ES|QL query to retrieve indices from
  * @param ruleType - rule type value
- * @returns string[] - array of indices
+ * @returns string[] - array of indices. Array is empty if query is invalid or ruleType is not 'esql'.
  */
 export const useEsqlIndex = (query: Query['query'], ruleType: Type): string[] => {
-  const [debouncedQuery, setDebouncedQuery] = useState<Query['query']>('');
+  const [debouncedQuery, setDebouncedQuery] = useState<Query['query']>(query);
 
   useDebounce(
     () => {
