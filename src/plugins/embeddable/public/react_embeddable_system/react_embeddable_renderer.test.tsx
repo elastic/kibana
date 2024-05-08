@@ -93,7 +93,7 @@ describe('react embeddable renderer', () => {
         { bork: 'blorp?' },
         expect.any(Function),
         expect.any(String),
-        undefined
+        expect.any(Object)
       );
     });
   });
@@ -118,27 +118,22 @@ describe('react embeddable renderer', () => {
         { bork: 'blorp?' },
         expect.any(Function),
         '12345',
-        undefined
+        expect.any(Object)
       );
     });
   });
 
   it('builds the embeddable, providing a parent', async () => {
     const buildEmbeddableSpy = jest.spyOn(testEmbeddableFactory, 'buildEmbeddable');
-    const parentApi = getMockPresentationContainer();
-    render(
-      <ReactEmbeddableRenderer
-        type={'test'}
-        getParentApi={() => ({
-          ...parentApi,
-          getSerializedStateForChild: () => ({
-            rawState: {
-              bork: 'blorp?',
-            },
-          }),
-        })}
-      />
-    );
+    const parentApi = {
+      ...getMockPresentationContainer(),
+      getSerializedStateForChild: () => ({
+        rawState: {
+          bork: 'blorp?',
+        },
+      }),
+    };
+    render(<ReactEmbeddableRenderer type={'test'} getParentApi={() => parentApi} />);
     await waitFor(() => {
       expect(buildEmbeddableSpy).toHaveBeenCalledWith(
         { bork: 'blorp?' },
@@ -185,10 +180,11 @@ describe('react embeddable renderer', () => {
       expect(onApiAvailable).toHaveBeenCalledWith({
         type: 'test',
         uuid: '12345',
-        parentApi: undefined,
+        parentApi: expect.any(Object),
         unsavedChanges: expect.any(Object),
         serializeState: expect.any(Function),
         resetUnsavedChanges: expect.any(Function),
+        snapshotRuntimeState: expect.any(Function),
       })
     );
   });
