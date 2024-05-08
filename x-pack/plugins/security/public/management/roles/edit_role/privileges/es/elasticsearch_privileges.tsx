@@ -25,6 +25,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { ClusterPrivileges } from './cluster_privileges';
 import { IndexPrivileges } from './index_privileges';
+import { RemoteClusterPrivileges } from './remote_cluster_privileges';
 import type { BuiltinESPrivileges, Role, SecurityLicense } from '../../../../../../common';
 import type { IndicesAPIClient } from '../../../indices_api_client';
 import { CollapsiblePanel } from '../../collapsible_panel';
@@ -43,6 +44,7 @@ interface Props {
   indexPatterns: string[];
   remoteClusters?: Cluster[];
   canUseRemoteIndices?: boolean;
+  canUseRemoteClusters?: boolean;
   isDarkMode?: boolean;
   buildFlavor: BuildFlavor;
 }
@@ -69,6 +71,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
       license,
       builtinESPrivileges,
       canUseRemoteIndices,
+      canUseRemoteClusters,
       buildFlavor,
     } = this.props;
 
@@ -216,6 +219,40 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
               availableIndexPrivileges={builtinESPrivileges.index}
               editable={editable}
               isDarkMode={this.props.isDarkMode}
+            />
+          </>
+        )}
+        {buildFlavor === 'traditional' && canUseRemoteClusters && (
+          <>
+            <EuiSpacer />
+            <EuiSpacer />
+
+            <EuiTitle size="xs">
+              <h3>
+                <FormattedMessage
+                  id="xpack.security.management.editRole.elasticSearchPrivileges.remoteClusterPrivilegesTitle"
+                  defaultMessage="Remote cluster privileges"
+                />
+              </h3>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiText size="s" color="subdued">
+              <p>
+                <FormattedMessage
+                  id="xpack.security.management.editRole.elasticSearchPrivileges.controlAccessToRemoteClusterDataDescription"
+                  defaultMessage="Control access to the data in remote clusters. "
+                />
+                {this.learnMore(docLinks.links.security.clusterPrivileges)}
+              </p>
+            </EuiText>
+            <RemoteClusterPrivileges
+              remoteClusters={remoteClusters}
+              role={role}
+              validator={validator}
+              license={license}
+              onChange={onChange}
+              availableRemoteClusterPrivileges={builtinESPrivileges.remote_cluster ?? []}
+              editable={editable}
             />
           </>
         )}
