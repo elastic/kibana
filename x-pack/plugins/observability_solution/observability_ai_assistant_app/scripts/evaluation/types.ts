@@ -6,8 +6,10 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import type { Message } from '@kbn/observability-ai-assistant-plugin/public';
-import { ChatCompletionErrorEvent } from '@kbn/observability-ai-assistant-plugin/common';
+import {
+  type Message,
+  ChatCompletionErrorEvent,
+} from '@kbn/observability-ai-assistant-plugin/common';
 import { KibanaClient } from './kibana_client';
 import { SynthtraceEsClients } from './setup_synthtrace';
 
