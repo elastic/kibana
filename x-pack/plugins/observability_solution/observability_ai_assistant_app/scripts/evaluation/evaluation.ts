@@ -19,7 +19,7 @@ import * as table from 'table';
 import { TableUserConfig } from 'table';
 import { format, parse } from 'url';
 import { ToolingLog } from '@kbn/tooling-log';
-import { MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
+import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { EvaluateWith, options } from './cli';
 import { getServiceUrls } from './get_service_urls';
 import { KibanaClient } from './kibana_client';
