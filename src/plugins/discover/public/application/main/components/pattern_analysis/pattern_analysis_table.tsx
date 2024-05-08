@@ -11,7 +11,7 @@ import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { type EmbeddablePatternAnalysisProps } from '@kbn/aiops-log-pattern-analysis/embeddable';
 import { pick } from 'lodash';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import type { DiscoverStateContainer } from '../../services/discover_state';
+import { DiscoverStateContainer } from '../../state_management/discover_state';
 import { PATTERN_ANALYSIS_LOADED } from './constants';
 
 export type PatternAnalysisTableProps = EmbeddablePatternAnalysisProps & {
