@@ -13,7 +13,7 @@ import type { InternalRouteDeps } from '.';
 import { wrapError } from '../../../lib/errors';
 import { createLicensedRouteHandler } from '../../lib';
 
-interface TypeMetaInfo {
+interface SpaceContentTypeMetaInfo {
   displayName: string;
   icon?: string;
 }
@@ -22,6 +22,13 @@ interface TypesAggregation {
   typesAggregation: {
     buckets: Array<{ doc_count: number; key: string }>;
   };
+}
+
+type SpaceContentTypesMetaData = Record<string, SpaceContentTypeMetaInfo>;
+
+export interface SpaceContentTypeSummaryItem extends SpaceContentTypeMetaInfo {
+  count: number;
+  type: string;
 }
 
 export function initGetSpaceContentSummaryApi(deps: InternalRouteDeps) {
@@ -56,7 +63,7 @@ export function initGetSpaceContentSummaryApi(deps: InternalRouteDeps) {
         const data = await client.find<unknown, TypesAggregation>({
           type: searchTypeNames,
           perPage: 0,
-          namespaces: [spaceId],
+          namespaces: ['*', spaceId],
           aggs: {
             typesAggregation: {
               terms: {
@@ -67,7 +74,7 @@ export function initGetSpaceContentSummaryApi(deps: InternalRouteDeps) {
           },
         });
 
-        const typesMetaInfo = types.reduce<Record<string, TypeMetaInfo>>((acc, currentType) => {
+        const typesMetaInfo = types.reduce<SpaceContentTypesMetaData>((acc, currentType) => {
           acc[currentType.name] = {
             displayName: currentType.management?.displayName ?? capitalize(currentType.name),
             icon: currentType.management?.icon,
@@ -77,12 +84,12 @@ export function initGetSpaceContentSummaryApi(deps: InternalRouteDeps) {
         }, {});
 
         const summary = sortBy(
-          data.aggregations?.typesAggregation.buckets.map((item) => ({
+          data.aggregations?.typesAggregation.buckets.map<SpaceContentTypeSummaryItem>((item) => ({
             count: item.doc_count,
             type: item.key,
             ...typesMetaInfo[item.key],
           })),
-          ['displayName']
+          (item) => item.displayName.toLowerCase()
         );
 
         return response.ok({ body: { summary, total: data.total } });
