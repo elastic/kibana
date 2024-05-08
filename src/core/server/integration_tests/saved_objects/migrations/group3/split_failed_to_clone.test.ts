@@ -59,98 +59,91 @@ const RELOCATE_TYPES: Record<string, string> = {
 
 export const logFilePath = Path.join(__dirname, 'split_failed_to_clone.test.log');
 
-describe.each(new Array(20).fill(true))(
-  'when splitting .kibana into multiple indices and one clone fails',
-  () => {
-    let esServer: TestElasticsearchUtils['es'];
-    let typeRegistry: ISavedObjectTypeRegistry;
-    let migratorTestKitFactory: () => Promise<KibanaMigratorTestKit>;
+describe('when splitting .kibana into multiple indices and one clone fails', () => {
+  let esServer: TestElasticsearchUtils['es'];
+  let typeRegistry: ISavedObjectTypeRegistry;
+  let migratorTestKitFactory: () => Promise<KibanaMigratorTestKit>;
 
-    beforeAll(async () => {
-      typeRegistry = await getCurrentVersionTypeRegistry({ oss: false });
-      await clearLog(logFilePath);
-      esServer = await startElasticsearch({
-        dataArchive: Path.join(
-          __dirname,
-          '..',
-          'archives',
-          '7.14.0_xpack_sample_saved_objects.zip'
-        ),
-        timeout: 60000,
-      });
+  beforeAll(async () => {
+    typeRegistry = await getCurrentVersionTypeRegistry({ oss: false });
+    await clearLog(logFilePath);
+    esServer = await startElasticsearch({
+      dataArchive: Path.join(__dirname, '..', 'archives', '7.14.0_xpack_sample_saved_objects.zip'),
+      timeout: 60000,
     });
+  });
 
-    afterAll(async () => {
-      await esServer?.stop();
-      await delay(2);
-    });
+  afterAll(async () => {
+    await esServer?.stop();
+    await delay(2);
+  });
 
-    it('after resolving the problem and retrying the migration completes successfully', async () => {
-      const updatedTypeRegistry = overrideTypeRegistry(
-        typeRegistry,
-        (type: SavedObjectsType<any>) => {
-          return {
-            ...type,
-            indexPattern: RELOCATE_TYPES[type.name] ?? MAIN_SAVED_OBJECT_INDEX,
-          };
-        }
-      );
+  it('after resolving the problem and retrying the migration completes successfully', async () => {
+    const updatedTypeRegistry = overrideTypeRegistry(
+      typeRegistry,
+      (type: SavedObjectsType<any>) => {
+        return {
+          ...type,
+          indexPattern: RELOCATE_TYPES[type.name] ?? MAIN_SAVED_OBJECT_INDEX,
+        };
+      }
+    );
 
-      migratorTestKitFactory = () =>
-        getKibanaMigratorTestKit({
-          types: updatedTypeRegistry.getAllTypes(),
-          kibanaIndex: '.kibana',
-          logFilePath,
-          defaultIndexTypesMap: DEFAULT_INDEX_TYPES_MAP,
-        });
-
-      const { runMigrations: runMigrationsWhichFailsWhenCloning, client } =
-        await migratorTestKitFactory();
-
-      // count of types in the legacy index
-      expect(await getAggregatedTypesCount(client, '.kibana')).toEqual({
-        'apm-telemetry': 1,
-        application_usage_daily: 4,
-        'canvas-workpad': 3,
-        'canvas-workpad-template': 5,
-        config: 1,
-        'core-usage-stats': 1,
-        dashboard: 19,
-        'epm-packages': 3,
-        'epm-packages-assets': 293,
-        event_loop_delays_daily: 1,
-        'graph-workspace': 3,
-        'index-pattern': 5,
-        'ingest-agent-policies': 2,
-        'ingest-outputs': 1,
-        'ingest-package-policies': 2,
-        ingest_manager_settings: 1,
-        map: 3,
-        'osquery-usage-metric': 1,
-        'sample-data-telemetry': 3,
-        search: 14,
-        space: 1,
-        'spaces-usage-stats': 1,
-        telemetry: 1,
-        'ui-metric': 5,
-        'usage-counters': 4,
-        visualization: 173,
+    migratorTestKitFactory = () =>
+      getKibanaMigratorTestKit({
+        types: updatedTypeRegistry.getAllTypes(),
+        kibanaIndex: '.kibana',
+        logFilePath,
+        defaultIndexTypesMap: DEFAULT_INDEX_TYPES_MAP,
       });
 
-      // cause a failure when cloning .kibana_slow_clone_* indices
-      await client.cluster.putSettings({ persistent: { 'cluster.max_shards_per_node': 15 } });
+    const { runMigrations: runMigrationsWhichFailsWhenCloning, client } =
+      await migratorTestKitFactory();
 
-      await expect(runMigrationsWhichFailsWhenCloning()).rejects.toThrowError(
-        /cluster_shard_limit_exceeded/
-      );
+    // count of types in the legacy index
+    expect(await getAggregatedTypesCount(client, '.kibana')).toEqual({
+      'apm-telemetry': 1,
+      application_usage_daily: 4,
+      'canvas-workpad': 3,
+      'canvas-workpad-template': 5,
+      config: 1,
+      'core-usage-stats': 1,
+      dashboard: 19,
+      'epm-packages': 3,
+      'epm-packages-assets': 293,
+      event_loop_delays_daily: 1,
+      'graph-workspace': 3,
+      'index-pattern': 5,
+      'ingest-agent-policies': 2,
+      'ingest-outputs': 1,
+      'ingest-package-policies': 2,
+      ingest_manager_settings: 1,
+      map: 3,
+      'osquery-usage-metric': 1,
+      'sample-data-telemetry': 3,
+      search: 14,
+      space: 1,
+      'spaces-usage-stats': 1,
+      telemetry: 1,
+      'ui-metric': 5,
+      'usage-counters': 4,
+      visualization: 173,
+    });
 
-      // remove the failure
-      await client.cluster.putSettings({ persistent: { 'cluster.max_shards_per_node': 20 } });
+    // cause a failure when cloning .kibana_slow_clone_* indices
+    await client.cluster.putSettings({ persistent: { 'cluster.max_shards_per_node': 15 } });
 
-      const { runMigrations: runMigrations2ndTime } = await migratorTestKitFactory();
-      await runMigrations2ndTime();
+    await expect(runMigrationsWhichFailsWhenCloning()).rejects.toThrowError(
+      /cluster_shard_limit_exceeded/
+    );
 
-      expect(await getAggregatedTypesCount(client, '.kibana')).toMatchInlineSnapshot(`
+    // remove the failure
+    await client.cluster.putSettings({ persistent: { 'cluster.max_shards_per_node': 20 } });
+
+    const { runMigrations: runMigrations2ndTime } = await migratorTestKitFactory();
+    await runMigrations2ndTime();
+
+    expect(await getAggregatedTypesCount(client, '.kibana')).toMatchInlineSnapshot(`
       Object {
         "apm-telemetry": 1,
         "application_usage_daily": 4,
@@ -174,7 +167,7 @@ describe.each(new Array(20).fill(true))(
         "usage-counters": 4,
       }
     `);
-      expect(await getAggregatedTypesCount(client, '.kibana_slow_clone_1')).toMatchInlineSnapshot(`
+    expect(await getAggregatedTypesCount(client, '.kibana_slow_clone_1')).toMatchInlineSnapshot(`
       Object {
         "canvas-workpad": 3,
         "dashboard": 19,
@@ -182,15 +175,14 @@ describe.each(new Array(20).fill(true))(
         "visualization": 173,
       }
     `);
-      expect(await getAggregatedTypesCount(client, '.kibana_slow_clone_2')).toMatchInlineSnapshot(`
+    expect(await getAggregatedTypesCount(client, '.kibana_slow_clone_2')).toMatchInlineSnapshot(`
       Object {
         "search": 14,
       }
     `);
 
-      // If we run a third time, we should not get any errors
-      const { runMigrations: runMigrations3rdTime } = await migratorTestKitFactory();
-      await runMigrations3rdTime();
-    });
-  }
-);
+    // If we run a third time, we should not get any errors
+    const { runMigrations: runMigrations3rdTime } = await migratorTestKitFactory();
+    await runMigrations3rdTime();
+  });
+});
