@@ -12,6 +12,7 @@ import { css } from '@emotion/react';
 import { CodeEditor } from '@kbn/code-editor';
 import { CONSOLE_LANG_ID, CONSOLE_THEME_ID, monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
+import { useSetInputEditor } from '../../../hooks';
 import { ConsoleMenu } from '../../../components';
 import {
   useServicesContext,
@@ -26,23 +27,18 @@ import {
 } from './hooks';
 import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
 import { getSuggestionProvider } from './monaco_editor_suggestion_provider';
+import { SenseEditor } from '../../../models';
 
 export interface EditorProps {
   initialTextValue: string;
 }
 
 export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
+  const context = useServicesContext();
   const {
-    services: {
-      notifications,
-      esHostService,
-      trackUiMetric,
-      http,
-      settings: settingsService,
-      autocompleteInfo,
-    },
+    services: { notifications, esHostService, settings: settingsService, autocompleteInfo },
     docLinkVersion,
-  } = useServicesContext();
+  } = context;
   const { toasts } = notifications;
   const { settings } = useEditorReadContext();
 
@@ -53,12 +49,14 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
   const actionsProvider = useRef<MonacoEditorActionsProvider | null>(null);
   const [editorActionsCss, setEditorActionsCss] = useState<CSSProperties>({});
 
+  const setInputEditor = useSetInputEditor();
   const editorDidMountCallback = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
       actionsProvider.current = new MonacoEditorActionsProvider(editor, setEditorActionsCss);
       setupResizeChecker(divRef.current!, editor);
+      setInputEditor({} as unknown as SenseEditor);
     },
-    [setupResizeChecker]
+    [setInputEditor, setupResizeChecker]
   );
 
   const editorWillUnmountCallback = useCallback(() => {
@@ -75,8 +73,8 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
   }, [docLinkVersion]);
 
   const sendRequestsCallback = useCallback(async () => {
-    await actionsProvider.current?.sendRequests(toasts, dispatch, trackUiMetric, http);
-  }, [dispatch, http, toasts, trackUiMetric]);
+    await actionsProvider.current?.sendRequests(dispatch, context);
+  }, [dispatch, context]);
 
   const suggestionProvider = useMemo(() => {
     return getSuggestionProvider(actionsProvider);

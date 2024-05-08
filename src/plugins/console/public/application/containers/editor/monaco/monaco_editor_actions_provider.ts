@@ -9,13 +9,12 @@
 import { CSSProperties, Dispatch } from 'react';
 import { debounce } from 'lodash';
 import { ConsoleParsedRequestsProvider, getParsedRequestsProvider, monaco } from '@kbn/monaco';
-import { IToasts } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
-import type { HttpSetup } from '@kbn/core-http-browser';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { isQuotaExceededError } from '../../../../services/history';
 import { DEFAULT_VARIABLES } from '../../../../../common/constants';
 import { getStorage, StorageKeys } from '../../../../services';
 import { sendRequest } from '../../../hooks';
-import { MetricsTracker } from '../../../../types';
 import { Actions } from '../../../stores/request';
 
 import {
@@ -37,6 +36,8 @@ import {
 } from './utils';
 
 import type { AdjustedParsedRequest } from './types';
+import { StorageQuotaError } from '../../../components/storage_quota_error';
+import { ContextValue } from '../../../contexts';
 
 export class MonacoEditorActionsProvider {
   private parsedRequestsProvider: ConsoleParsedRequestsProvider;
@@ -177,12 +178,12 @@ export class MonacoEditorActionsProvider {
     return curlRequests.join('\n');
   }
 
-  public async sendRequests(
-    toasts: IToasts,
-    dispatch: Dispatch<Actions>,
-    trackUiMetric: MetricsTracker,
-    http: HttpSetup
-  ): Promise<void> {
+  public async sendRequests(dispatch: Dispatch<Actions>, context: ContextValue): Promise<void> {
+    const {
+      services: { notifications, trackUiMetric, http, settings, history, autocompleteInfo },
+      startServices,
+    } = context;
+    const { toasts } = notifications;
     try {
       const requests = await this.getRequests();
       if (!requests.length) {
@@ -202,8 +203,63 @@ export class MonacoEditorActionsProvider {
 
       const results = await sendRequest({ http, requests });
 
-      // TODO save to history
-      // TODO restart autocomplete polling
+      let saveToHistoryError: undefined | Error;
+      const isHistoryEnabled = settings.getIsHistoryEnabled();
+
+      if (isHistoryEnabled) {
+        results.forEach(({ request: { path, method, data } }) => {
+          try {
+            history.addToHistory(path, method, data);
+          } catch (e) {
+            // Grab only the first error
+            if (!saveToHistoryError) {
+              saveToHistoryError = e;
+            }
+          }
+        });
+
+        if (saveToHistoryError) {
+          const errorTitle = i18n.translate('console.notification.error.couldNotSaveRequestTitle', {
+            defaultMessage: 'Could not save request to Console history.',
+          });
+          if (isQuotaExceededError(saveToHistoryError)) {
+            const toast = notifications.toasts.addWarning({
+              title: i18n.translate('console.notification.error.historyQuotaReachedMessage', {
+                defaultMessage:
+                  'Request history is full. Clear the console history or disable saving new requests.',
+              }),
+              text: toMountPoint(
+                StorageQuotaError({
+                  onClearHistory: () => {
+                    history.clearHistory();
+                    notifications.toasts.remove(toast);
+                  },
+                  onDisableSavingToHistory: () => {
+                    settings.setIsHistoryEnabled(false);
+                    notifications.toasts.remove(toast);
+                  },
+                }),
+                startServices
+              ),
+            });
+          } else {
+            // Best effort, but still notify the user.
+            notifications.toasts.addError(saveToHistoryError, {
+              title: errorTitle,
+            });
+          }
+        }
+      }
+
+      const polling = settings.getPolling();
+      if (polling) {
+        // If the user has submitted a request against ES, something in the fields, indices, aliases,
+        // or templates may have changed, so we'll need to update this data. Assume that if
+        // the user disables polling they're trying to optimize performance or otherwise
+        // preserve resources, so they won't want this request sent either.
+        autocompleteInfo.retrieve(settings, settings.getAutocomplete());
+      }
+
       dispatch({
         type: 'requestSuccess',
         payload: {
