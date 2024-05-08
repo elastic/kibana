@@ -56,7 +56,7 @@ export default ({ getService }: FtrProviderContext) => {
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const auditbeatArchivePath = dataPathBuilder.getPath('auditbeat/hosts');
 
-  const { indexListOfDocuments, indexGeneratedDocuments } = dataGeneratorFactory({
+  const { indexListOfDocuments } = dataGeneratorFactory({
     es,
     index: '.ml-anomalies-custom-v3_linux_anomalous_network_activity',
     log,
