@@ -91,22 +91,22 @@ function createComparisonDefinition(
         ],
         returnType: 'boolean',
       },
-      ...['date', 'number'].flatMap((type) => [
-        {
-          params: [
-            { name: 'left', type },
-            { name: 'right', type: 'string', constantOnly: true },
-          ],
-          returnType: 'boolean',
-        },
-        {
-          params: [
-            { name: 'right', type: 'string', constantOnly: true },
-            { name: 'right', type },
-          ],
-          returnType: 'boolean',
-        },
-      ]),
+      // ...['date', 'number'].flatMap((type) => [
+      //   {
+      //     params: [
+      //       { name: 'left', type },
+      //       { name: 'right', type: 'string', constantOnly: true },
+      //     ],
+      //     returnType: 'boolean',
+      //   },
+      //   {
+      //     params: [
+      //       { name: 'right', type: 'string', constantOnly: true },
+      //       { name: 'right', type },
+      //     ],
+      //     returnType: 'boolean',
+      //   },
+      // ]),
       ...extraSignatures,
     ],
   };

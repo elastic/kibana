@@ -688,10 +688,7 @@ describe('validation logic', () => {
                 `Argument of [${op}] must be [number], found value [false] type [boolean]`,
               ]
         );
-        for (const [valueTypeA, valueTypeB] of [
-          ['now()', '"2022"'],
-          ['42', '"2022"'],
-        ]) {
+        for (const [valueTypeA, valueTypeB] of [['now()', '"2022"']]) {
           testErrorsAndWarnings(`row var = ${valueTypeA} ${op} ${valueTypeB}`, []);
           testErrorsAndWarnings(`row var = ${valueTypeB} ${op} ${valueTypeA}`, []);
         }
@@ -1122,31 +1119,6 @@ describe('validation logic', () => {
                 ]
           );
         }
-
-        // Implicit casting of literal values tests
-        testErrorsAndWarnings(`from a_index | where numberField ${op} stringField`, [
-          `Argument of [${op}] must be [number], found value [stringField] type [string]`,
-        ]);
-        testErrorsAndWarnings(`from a_index | where stringField ${op} numberField`, [
-          `Argument of [${op}] must be [number], found value [stringField] type [string]`,
-        ]);
-        testErrorsAndWarnings(`from a_index | where numberField ${op} "2022"`, []);
-
-        testErrorsAndWarnings(`from a_index | where dateField ${op} stringField`, [
-          `Argument of [${op}] must be [string], found value [dateField] type [date]`,
-        ]);
-        testErrorsAndWarnings(`from a_index | where stringField ${op} dateField`, [
-          `Argument of [${op}] must be [string], found value [dateField] type [date]`,
-        ]);
-        testErrorsAndWarnings(`from a_index | where dateField ${op} "2022"`, []);
-
-        // Check that the implicit cast doesn't apply for fields
-        testErrorsAndWarnings(`from a_index | where stringField ${op} 0`, [
-          `Argument of [${op}] must be [number], found value [stringField] type [string]`,
-        ]);
-        testErrorsAndWarnings(`from a_index | where stringField ${op} now()`, [
-          `Argument of [${op}] must be [string], found value [now()] type [date]`,
-        ]);
       }
 
       for (const nesting of NESTED_DEPTHS) {
@@ -1732,7 +1704,9 @@ describe('validation logic', () => {
         testErrorsAndWarnings(`from a_index | eval stringField ${op} numberField`, [
           `Argument of [${op}] must be [number], found value [stringField] type [string]`,
         ]);
-        testErrorsAndWarnings(`from a_index | eval numberField ${op} "2022"`, []);
+        testErrorsAndWarnings(`from a_index | eval numberField ${op} "2022"`, [
+          `Argument of [${op}] must be [number], found value ["2022"] type [string]`,
+        ]);
 
         testErrorsAndWarnings(`from a_index | eval dateField ${op} stringField`, [
           `Argument of [${op}] must be [string], found value [dateField] type [date]`,
@@ -1763,6 +1737,13 @@ describe('validation logic', () => {
                 `Argument of [${op}] must be [number], found value [now()] type [date]`,
               ]
         );
+
+        testErrorsAndWarnings(`from a_index | eval 1 ${op} "1"`, [
+          `Argument of [${op}] must be [number], found value [\"1\"] type [string]`,
+        ]);
+        testErrorsAndWarnings(`from a_index | eval "1" ${op} 1`, [
+          `Argument of [${op}] must be [number], found value [\"1\"] type [string]`,
+        ]);
       }
       for (const divideByZeroExpr of ['1/0', 'var = 1/0', '1 + 1/0']) {
         testErrorsAndWarnings(
