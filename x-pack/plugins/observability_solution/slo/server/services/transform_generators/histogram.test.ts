@@ -88,7 +88,7 @@ describe('Histogram Transform Generator', () => {
         timesliceWindow: twoMinute(),
       },
     });
-    const transform = await generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO, spaceId, dataViewsService);
 
     expect(transform).toMatchSnapshot();
   });
