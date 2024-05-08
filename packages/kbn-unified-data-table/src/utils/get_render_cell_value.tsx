@@ -66,6 +66,11 @@ export const getRenderCellValueFn = ({
     const field = dataView.fields.getByName(columnId);
     const ctx = useContext(UnifiedDataTableContext);
 
+    const onTreeExpand = useCallback(() => {
+      // expand row {rowIndex}
+      toggleRowHeight?.(rowIndex);
+    }, [rowIndex]);
+
     useEffect(() => {
       if (row?.isAnchor) {
         setCellProps({
@@ -128,12 +133,7 @@ export const getRenderCellValueFn = ({
     }
 
     if (field?.type === '_source' || useTopLevelObjectColumns) {
-      const onTreeExpand = useCallback(() => {
-        // expand row {rowIndex}
-        toggleRowHeight(rowIndex);
-      }, [rowIndex]);
-
-      const isSingleRow = autoHeightRows.includes(rowIndex) ? false : rowHeightLines === 0;
+      const isSingleRow = autoHeightRows?.includes(rowIndex) ? false : rowHeightLines === 0;
       return (
         <SourceDocument
           useTopLevelObjectColumns={useTopLevelObjectColumns}
