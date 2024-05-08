@@ -123,17 +123,13 @@ export async function getTranslationsByLocale(locale: string): Promise<Translati
     return { locale, messages: {} };
   }
 
-  return files.reduce(
-    (translation: TranslationInput, file) => ({
-      locale: loadedFiles[file].locale || translation.locale,
-      formats: loadedFiles[file].formats || translation.formats,
-      messages: {
-        ...loadedFiles[file].messages,
-        ...translation.messages,
-      },
-    }),
-    { locale, messages: {} } as TranslationInput
-  );
+  const fileTrasnlationDetails = files.map((file) => loadedFiles[file]);
+
+  return fileTrasnlationDetails.reduce((translation, acc) => ({
+    locale: acc.locale || translation.locale,
+    formats: acc.formats || translation.formats,
+    messages: Object.assign(acc.messages, translation.messages),
+  }));
 }
 
 /**
