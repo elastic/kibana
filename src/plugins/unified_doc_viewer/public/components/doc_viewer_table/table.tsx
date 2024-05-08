@@ -19,8 +19,6 @@ import {
   EuiDataGridProps,
   EuiDataGridColumnCellActionProps,
   EuiI18n,
-  useEuiTheme,
-  useResizeObserver,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
@@ -112,13 +110,6 @@ export const DocViewerTable = ({
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) => {
-  const { euiTheme } = useEuiTheme();
-  const [ref, setRef] = useState<HTMLDivElement | HTMLSpanElement | null>(null);
-  const dimensions = useResizeObserver(ref);
-  const showActionsInsideTableCell = dimensions?.width
-    ? dimensions.width > euiTheme.breakpoint.m
-    : false;
-
   const { fieldFormats, storage, uiSettings } = getUnifiedDocViewerServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
   const currentDataViewId = dataView.id!;
@@ -215,7 +206,6 @@ export const DocViewerTable = ({
       hit,
       onToggleColumn,
       filter,
-      columns,
       columnsMeta,
       flattened,
       pinnedFields,
@@ -271,6 +261,7 @@ export const DocViewerTable = ({
       }
     );
 
+  // TODO: use EuiDataGrid pagination instead
   const { curPageIndex, pageSize, totalPages, startIndex, changePageIndex, changePageSize } =
     usePager({
       initialPageSize: getPageSize(storage),
@@ -292,7 +283,7 @@ export const DocViewerTable = ({
       displayAsText: i18n.translate('unifiedDocViewer.fieldChooser.discoverField.name', {
         defaultMessage: 'Field',
       }),
-      initialWidth: 270,
+      initialWidth: 270, // TODO: what should be the default width?
       actions: false,
       visibleCellActions: 3,
       cellActions: [
@@ -334,7 +325,7 @@ export const DocViewerTable = ({
   const rows = [...pinnedItems, ...restItems.slice(startIndex, pageSize + startIndex)];
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none" responsive={false} ref={setRef}>
+    <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiSpacer size="s" />
       </EuiFlexItem>
@@ -364,7 +355,7 @@ export const DocViewerTable = ({
           <EuiFlexItem grow={false}>
             <EuiSpacer size="s" />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow>
             {/* Transform props into useMemo/useCallback */}
             <EuiDataGrid
               aria-label={i18n.translate('unifiedDocViewer.fieldsTable.ariaLabel', {
