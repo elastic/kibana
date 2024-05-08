@@ -119,7 +119,7 @@ export const CrowdstrikeGetAgentsResponseSchema = schema.object(
                     settings_hash: schema.maybe(schema.string()),
                     assigned_date: schema.maybe(schema.string()),
                     applied_date: schema.maybe(schema.string()),
-                    rule_groups: schema.any(),
+                    rule_groups: schema.maybe(schema.any()),
                   },
                   { unknowns: 'allow' }
                 ),
