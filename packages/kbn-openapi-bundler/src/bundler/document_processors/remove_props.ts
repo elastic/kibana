@@ -14,13 +14,13 @@ import { DocumentNodeProcessor } from '../types';
  */
 export function createRemovePropsProcessor(propNames: string[]): DocumentNodeProcessor {
   return {
-    leave(node) {
+    onNodeLeave(node) {
       if (!isPlainObjectType(node)) {
         return;
       }
 
       for (const propName of propNames) {
-        if (!node[propName]) {
+        if (!Object.hasOwn(node, propName)) {
           continue;
         }
 
