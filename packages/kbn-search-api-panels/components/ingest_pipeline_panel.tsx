@@ -53,19 +53,40 @@ export const IngestPipelinePanel: React.FC<IngestPipelinePanelProps> = ({
                 >
                   <EuiFlexItem grow={false}>
                     <EuiText size="s" color="subdued">
-                      <p>{`${item.processors.length} ${
-                        item.processors.length > 1 ? 'processors' : 'processor'
-                      }`}</p>
+                      <p>
+                        {i18n.translate(
+                          'searchApiPanels.welcomeBanner.ingestPipelinePanel.processorCount',
+                          {
+                            defaultMessage:
+                              '{count} {count, plural, one {processor} other {processors}}',
+                            values: { count: item.processors.length },
+                          }
+                        )}
+                      </p>
                     </EuiText>
                   </EuiFlexItem>
                   {item.isManaged && (
                     <EuiFlexItem grow={false}>
-                      <EuiBadge>Managed</EuiBadge>
+                      <EuiBadge>
+                        {i18n.translate(
+                          'searchApiPanels.welcomeBanner.ingestPipelinePanel.managedBadge',
+                          {
+                            defaultMessage: 'Managed',
+                          }
+                        )}
+                      </EuiBadge>
                     </EuiFlexItem>
                   )}
                   {item.name === DEFAULT_INGESTION_PIPELINE && (
                     <EuiFlexItem grow={false}>
-                      <EuiBadge color="primary">Recommended</EuiBadge>
+                      <EuiBadge color="primary">
+                        {i18n.translate(
+                          'searchApiPanels.welcomeBanner.ingestPipelinePanel.recommendedBadge',
+                          {
+                            defaultMessage: 'Recommended',
+                          }
+                        )}
+                      </EuiBadge>
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>
@@ -89,36 +110,39 @@ export const IngestPipelinePanel: React.FC<IngestPipelinePanelProps> = ({
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <strong>
-              {i18n.translate(
-                'xpack.serverlessSearch.indexManagement.indexDetails.pipelinePanel.title',
-                {
-                  defaultMessage: 'Preprocess your data',
-                }
-              )}
+              {i18n.translate('searchApiPanels.welcomeBanner.ingestPipelinePanel.title', {
+                defaultMessage: 'Preprocess your data',
+              })}
             </strong>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiBadge>Optional</EuiBadge>
+          <EuiBadge>
+            {i18n.translate('searchApiPanels.welcomeBanner.ingestPipelinePanel.optionalBadge', {
+              defaultMessage: 'Optional',
+            })}
+          </EuiBadge>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="xs" />
       <EuiText data-test-subj="ingestPipelinePanelBody">
         <p>
-          {i18n.translate(
-            'xpack.serverlessSearch.indexManagement.indexDetails.pipelinePanel.description',
-            {
-              defaultMessage:
-                'You can use ingest pipelines to preprocess data before indexing into Elasticsearch.',
-            }
-          )}
+          {i18n.translate('searchApiPanels.welcomeBanner.ingestPipelinePanel.description', {
+            defaultMessage:
+              'You can use ingest pipelines to preprocess data before indexing into Elasticsearch.',
+          })}
         </p>
       </EuiText>
       <EuiSpacer size="m" />
       <EuiSuperSelect
         options={options}
         valueOfSelected={selected}
-        placeholder="Select a pipeline"
+        placeholder={i18n.translate(
+          'searchApiPanels.welcomeBanner.ingestPipelinePanel.selectPipelinePlaceholder',
+          {
+            defaultMessage: 'Select a pipeline',
+          }
+        )}
         onChange={(value) => onChange(value)}
         itemLayoutAlign="top"
         hasDividers
