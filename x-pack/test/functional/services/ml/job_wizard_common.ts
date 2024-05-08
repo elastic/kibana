@@ -657,7 +657,8 @@ export function MachineLearningJobWizardCommonProvider(
       });
 
       // click away from time popover
-      await this.goToTimeRangeStep();
+  // escape popover
+  await browser.pressKeys(browser.keys.ESCAPE);
     },
 
     async goToJobDetailsStep() {
