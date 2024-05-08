@@ -29,10 +29,10 @@ export type DataViewId = z.infer<typeof DataViewId>;
 export const DataViewId = z.string();
 
 /**
- * An elasticsearch DSL filter object. Used to filter the risk inputs involved, which implicitly filters the risk scores themselves.
+ * An elasticsearch DSL filter object. Used to filter the risk inputs involved, which implicitly filters the risk scores themselves. See https://cloud.elastic.co/api/v1/api-docs/spec.json#/definitions/QueryContainer
  */
 export type Filter = z.infer<typeof Filter>;
-export const Filter = z.unknown();
+export const Filter = z.object({});
 
 /**
  * Specifies how many scores will be involved in a given calculation. Note that this value is per `identifier_type`, i.e. a value of 10 will calculate 10 host scores and 10 user scores, if available. To avoid missed data, keep this value consistent while paginating through scores.

@@ -9,16 +9,28 @@
 import {
   getAutoIndentedRequests,
   getCurlRequest,
-  getDocumentationLinkFromAutocompleteContext,
+  getDocumentationLink,
   removeTrailingWhitespaces,
   replaceRequestVariables,
   stringifyRequest,
-  tokenizeRequestUrl,
   trackSentRequests,
   isStartOfRequest,
 } from './utils';
 import { MetricsTracker } from '../../../../types';
 import { AutoCompleteContext } from '../../../../lib/autocomplete/types';
+
+/*
+ * Mock the function "populateContext" that accesses the autocomplete definitions
+ */
+const mockPopulateContext = jest.fn();
+
+jest.mock('../../../../lib/autocomplete/engine', () => {
+  return {
+    populateContext: (...args: any) => {
+      mockPopulateContext(args);
+    },
+  };
+});
 
 describe('monaco editor utils', () => {
   const dataObjects = [
@@ -190,28 +202,21 @@ describe('monaco editor utils', () => {
     });
   });
 
-  describe('tokenizeRequestUrl', () => {
-    it('returns the url if it has only 1 part', () => {
-      const url = '_search';
-      const urlTokens = tokenizeRequestUrl(url);
-      expect(urlTokens).toEqual(['_search', '__url_path_end__']);
-    });
-
-    it('returns correct url tokens', () => {
-      const url = '_search/test';
-      const urlTokens = tokenizeRequestUrl(url);
-      expect(urlTokens).toEqual(['_search', 'test', '__url_path_end__']);
-    });
-  });
-
-  describe('getDocumentationLinkFromAutocompleteContext', () => {
+  describe('getDocumentationLink', () => {
+    const mockRequest = { method: 'GET', url: '_search', data: [], text: '' };
     const version = '8.13';
     const expectedLink = 'http://elastic.co/8.13/_search';
+
     it('correctly replaces {branch} with the version', () => {
       const endpoint = {
         documentation: 'http://elastic.co/{branch}/_search',
       } as AutoCompleteContext['endpoint'];
-      const link = getDocumentationLinkFromAutocompleteContext({ endpoint }, version);
+      // mock the populateContext function that finds the correct autocomplete endpoint object and puts it into the context object
+      mockPopulateContext.mockImplementation((...args) => {
+        const context = args[0][1];
+        context.endpoint = endpoint;
+      });
+      const link = getDocumentationLink(mockRequest, version);
       expect(link).toBe(expectedLink);
     });
 
@@ -219,7 +224,12 @@ describe('monaco editor utils', () => {
       const endpoint = {
         documentation: 'http://elastic.co/master/_search',
       } as AutoCompleteContext['endpoint'];
-      const link = getDocumentationLinkFromAutocompleteContext({ endpoint }, version);
+      // mock the populateContext function that finds the correct autocomplete endpoint object and puts it into the context object
+      mockPopulateContext.mockImplementation((...args) => {
+        const context = args[0][1];
+        context.endpoint = endpoint;
+      });
+      const link = getDocumentationLink(mockRequest, version);
       expect(link).toBe(expectedLink);
     });
 
@@ -227,7 +237,12 @@ describe('monaco editor utils', () => {
       const endpoint = {
         documentation: 'http://elastic.co/current/_search',
       } as AutoCompleteContext['endpoint'];
-      const link = getDocumentationLinkFromAutocompleteContext({ endpoint }, version);
+      // mock the populateContext function that finds the correct autocomplete endpoint object and puts it into the context object
+      mockPopulateContext.mockImplementation((...args) => {
+        const context = args[0][1];
+        context.endpoint = endpoint;
+      });
+      const link = getDocumentationLink(mockRequest, version);
       expect(link).toBe(expectedLink);
     });
   });
