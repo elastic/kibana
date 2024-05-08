@@ -28,7 +28,7 @@ export const getFTRConfig = ({
   fleetServerPort: number;
   ftrConfigFilePath: string;
   specFilePath: string;
-  specFileFTRConfig: ReturnType<typeof parseTestFileConfig>;
+  specFileFTRConfig: ReturnType<typeof parseTestFileConfig>['ftrConfig'];
   isOpen: boolean;
 }) =>
   readConfigFile(

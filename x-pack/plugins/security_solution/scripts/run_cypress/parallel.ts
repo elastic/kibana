@@ -7,7 +7,7 @@
 
 import { run } from '@kbn/dev-cli-runner';
 import yargs from 'yargs';
-import _ from 'lodash';
+import _, { xor } from 'lodash';
 import globby from 'globby';
 import pMap from 'p-map';
 import { withProcRunner } from '@kbn/dev-proc-runner';
@@ -237,7 +237,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                 fleetServerPort,
                 ftrConfigFilePath,
                 specFilePath: filePath,
-                specFileFTRConfig,
+                specFileFTRConfig: specFileFTRConfig.ftrConfig,
                 isOpen,
               });
 
@@ -323,8 +323,14 @@ ${JSON.stringify(
                 installDir: options?.installDir,
                 extraKbnOpts:
                   options?.installDir || options?.ci || !isOpen
-                    ? []
-                    : ['--dev', '--no-dev-config', '--no-dev-credentials'],
+                    ? specFileFTRConfig.devConfig
+                      ? ['--dev']
+                      : []
+                    : // if test spec file contains devConfig: true
+                      xor(
+                        ['--dev', '--no-dev-config', '--no-dev-credentials'],
+                        specFileFTRConfig.devConfig ? ['--no-dev-config'] : []
+                      ),
                 onEarlyExit,
                 inspect: argv.inspect,
               });

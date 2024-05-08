@@ -8,6 +8,8 @@
 import { defineCypressConfig } from '@kbn/cypress-config';
 import { esArchiver } from './support/es_archiver';
 import { samlAuthentication } from './support/saml_auth';
+import { getVideosForFailedSpecs } from './support/filter_videos';
+import { aiAssistantDataLoaders } from './tasks/ai_assistant/data_loaders';
 
 // eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
@@ -17,7 +19,7 @@ export default defineCypressConfig({
   responseTimeout: 60000,
   screenshotsFolder: '../../../target/kibana-security-solution/cypress/screenshots',
   trashAssetsBeforeRuns: false,
-  video: false,
+  video: true,
   videosFolder: '../../../target/kibana-security-solution/cypress/videos',
   viewportHeight: 946,
   viewportWidth: 1680,
@@ -32,9 +34,15 @@ export default defineCypressConfig({
     experimentalMemoryManagement: true,
     setupNodeEvents(on, config) {
       esArchiver(on, config);
+
+      aiAssistantDataLoaders(on, config);
       samlAuthentication(on, config);
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('@cypress/grep/src/plugin')(config);
+
+      on('after:spec', (_, results) => {
+        getVideosForFailedSpecs(results);
+      });
       return config;
     },
   },
