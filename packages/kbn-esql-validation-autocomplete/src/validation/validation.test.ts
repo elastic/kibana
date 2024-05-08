@@ -1782,13 +1782,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings(`from a_index | eval "1" ${op} 1`, [
           `Argument of [${op}] must be [number], found value [\"1\"] type [string]`,
         ]);
-        // check implicit casting for version, boolean, ip
-        // testErrorsAndWarnings(`from a_index | eval versionField ${op} "1.2.3"`, []);
-        // testErrorsAndWarnings(`from a_index | eval "1.2.3" ${op} versionField`, []);
-        // testErrorsAndWarnings(`from a_index | eval booleanField ${op} "true"`, []);
-        // testErrorsAndWarnings(`from a_index | eval "true" ${op} booleanField`, []);
-        // testErrorsAndWarnings(`from a_index | eval ipField ${op} "136.36.3.205"`, []);
-        // testErrorsAndWarnings(`from a_index | eval "136.36.3.205" ${op} ipField`, []);
+        // TODO: enable when https://github.com/elastic/elasticsearch/issues/108432 is complete
+        // testErrorsAndWarnings(`from a_index | eval "2022" ${op} 1 day`, []);
       }
       for (const divideByZeroExpr of ['1/0', 'var = 1/0', '1 + 1/0']) {
         testErrorsAndWarnings(
