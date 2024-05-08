@@ -76,7 +76,7 @@ export function getGeneratedTitle({
       concatenateChatCompletionChunks(),
       last(),
       map((concatenatedMessage) => {
-        let title: string =
+        const title: string =
           (concatenatedMessage.message.function_call.name
             ? JSON.parse(concatenatedMessage.message.function_call.arguments).title
             : concatenatedMessage.message?.content) || '';
@@ -87,13 +87,8 @@ export function getGeneratedTitle({
         // - "Hello, World!" => Captures: Hello, World!
         // - 'Another Example' => Captures: Another Example
         // - JustTextWithoutQuotes => Captures: JustTextWithoutQuotes
-        if (
-          (title.startsWith(`"`) && title.endsWith(`"`)) ||
-          (title.startsWith(`'`) && title.endsWith(`'`))
-        ) {
-          title = title.substring(1, title.length - 1);
-        }
-        return title;
+
+        return title.replace(/^"(.*)"$/g, '$1').replace(/^'(.*)'$/g, '$1');
       }),
       tap((event) => {
         if (typeof event === 'string') {
