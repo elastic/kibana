@@ -36,7 +36,6 @@ interface SetupParams {
 
 describe('GET /internal/spaces/{spaceId}/content_summary', () => {
   const spacesSavedObjects = createSpaces();
-  // const spaces = spacesSavedObjects.map((s) => ({ id: s.id, ...s.attributes }));
 
   const setup = async (params?: SetupParams) => {
     const httpService = httpServiceMock.createSetupContract();
