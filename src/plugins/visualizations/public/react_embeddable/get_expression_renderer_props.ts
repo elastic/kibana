@@ -49,7 +49,6 @@ export const getExpressionRendererProps: (params: GetExpressionRendererPropsPara
     name: vis.type.name,
     id: vis.id ?? 'new',
     description: vis.title,
-    url: '', // this.output.editUrl,
   };
 
   const executionContext = {
@@ -90,20 +89,17 @@ export const getExpressionRendererProps: (params: GetExpressionRendererPropsPara
 
   const newAbortController = new AbortController();
 
-  try {
-    const expression = await toExpressionAst(vis, {
-      timefilter,
-      timeRange,
-      abortSignal: newAbortController.signal,
-    });
-    if (!newAbortController.signal.aborted) {
-      return {
-        params: { expression, ...loaderParams } as ExpressionRendererParams,
-        abortController: newAbortController,
-      };
-    }
-  } catch (e) {
-    // this.onContainerError(e);
+  const expression = await toExpressionAst(vis, {
+    timefilter,
+    timeRange,
+    abortSignal: newAbortController.signal,
+  });
+  if (!newAbortController.signal.aborted) {
+    return {
+      params: { expression, ...loaderParams } as ExpressionRendererParams,
+      abortController: newAbortController,
+    };
   }
+
   return { params: null, abortController: newAbortController };
 };

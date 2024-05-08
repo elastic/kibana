@@ -116,7 +116,6 @@ import {
   setSavedObjectsManagement,
   setContentManagement,
   setSavedSearch,
-  setDataViews,
 } from './services';
 import { VisualizeConstants } from '../common/constants';
 import { EditInLensAction } from './actions/edit_in_lens_action';
@@ -403,10 +402,6 @@ export class VisualizationsPlugin
     uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', editInLensAction);
     // const embeddableFactory = new VisualizeEmbeddableFactory({ start });
     // embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
-    registerReactEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, async () => {
-      const { visualizeEmbeddableFactory } = await import('./react_embeddable');
-      return visualizeEmbeddableFactory;
-    });
 
     contentManagement.registry.register({
       id: CONTENT_ID,
@@ -495,6 +490,11 @@ export class VisualizationsPlugin
     setSavedObjectsManagement(savedObjectsManagement);
     setContentManagement(contentManagement);
     setSavedSearch(savedSearch);
+
+    registerReactEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, async () => {
+      const { getVisualizeEmbeddableFactory } = await import('./react_embeddable');
+      return getVisualizeEmbeddableFactory(embeddable);
+    });
 
     if (spaces) {
       setSpaces(spaces);

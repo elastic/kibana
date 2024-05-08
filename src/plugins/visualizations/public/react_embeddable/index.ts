@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { visualizeEmbeddableFactory } from './visualize_embeddable';
+export { getVisualizeEmbeddableFactory } from './visualize_embeddable';

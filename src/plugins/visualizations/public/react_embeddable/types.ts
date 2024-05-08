@@ -7,7 +7,8 @@
  */
 
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { SerializedTitles } from '@kbn/presentation-publishing';
+import { HasEditCapabilities, SerializedTitles } from '@kbn/presentation-publishing';
+import { HasVisualizeConfig } from '../embeddable';
 import type { VisParams } from '../types';
 import type { SerializedVis } from '../vis';
 
@@ -15,4 +16,6 @@ export type VisualizeSerializedState = SerializedTitles & {
   id: string;
   savedVis: SerializedVis<VisParams>;
 };
-export type VisualizeApi = DefaultEmbeddableApi<VisualizeSerializedState>;
+export type VisualizeApi = HasEditCapabilities &
+  HasVisualizeConfig &
+  DefaultEmbeddableApi<VisualizeSerializedState>;
