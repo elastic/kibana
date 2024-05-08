@@ -137,7 +137,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     if (!index) return;
     if (!latestState || combinedDiscoverSavedSearchStateRef.current === latestState) return;
     if (isEqualWith(latestState, savedSearchById, savedSearchComparator)) return;
-    updateSavedSearch(latestState, timelineId, () => {
+    updateSavedSearch(latestState, timelineId, function onUpdate() {
       combinedDiscoverSavedSearchStateRef.current = latestState;
     });
   }, [
