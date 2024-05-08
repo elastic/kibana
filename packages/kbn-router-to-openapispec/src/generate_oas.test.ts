@@ -8,7 +8,7 @@
 
 import { generateOpenApiDocument } from './generate_oas';
 import { schema } from '@kbn/config-schema';
-import { createTestRouters, createRouter } from './generate_oas.test.util';
+import { createTestRouters, createRouter, createVersionedRouter } from './generate_oas.test.util';
 
 describe('generateOpenApiDocument', () => {
   describe('@kbn/config-schema', () => {
@@ -61,6 +61,69 @@ describe('generateOpenApiDocument', () => {
               }),
             ],
             versionedRouters: [],
+          },
+          {
+            title: 'test',
+            baseUrl: 'https://test.oas',
+            version: '99.99.99',
+          }
+        )
+      ).toMatchSnapshot();
+    });
+  });
+
+  describe('unknown schema/validation', () => {
+    it('produces the expected output', () => {
+      expect(
+        generateOpenApiDocument(
+          {
+            routers: [
+              createRouter({
+                routes: [
+                  {
+                    isVersioned: false,
+                    path: '/foo/{id}',
+                    method: 'get',
+                    validationSchemas: {
+                      request: {
+                        params: () => ({ value: {} }), // custom validation fn
+                        body: () => ({ value: {} }),
+                      },
+                      response: {
+                        [200]: {
+                          body: () => undefined as any, // unknown schema
+                        },
+                      },
+                    },
+                    options: { tags: ['foo'] },
+                    handler: jest.fn(),
+                  },
+                ],
+              }),
+            ],
+            versionedRouters: [
+              createVersionedRouter({
+                routes: [
+                  {
+                    method: 'get',
+                    path: '/test',
+                    options: { access: 'public' },
+                    handlers: [
+                      {
+                        fn: jest.fn(),
+                        options: {
+                          validate: {
+                            request: { body: () => ({ value: {} }) },
+                            response: { 200: { body: (() => {}) as any } },
+                          },
+                          version: '123',
+                        },
+                      },
+                    ],
+                  },
+                ],
+              }),
+            ],
           },
           {
             title: 'test',
