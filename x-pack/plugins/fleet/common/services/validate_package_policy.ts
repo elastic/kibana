@@ -48,10 +48,9 @@ export type PackagePolicyValidationResults = {
   inputs: Record<PackagePolicyInput['type'], PackagePolicyInputValidationResults> | null;
 } & PackagePolicyConfigValidationResults;
 
-export const DATASET_REGEX = /^(?![_\-\.])[a-z0-9_\-\.]+$/;
+export const DATASET_REGEX = /^(?![_\.])[a-z0-9_\.]+$/;
 export const REGEX_ERROR = i18n.translate('xpack.fleet.datasetValidation.invalidDatasetError', {
-  defaultMessage:
-    'Dataset name must contain only lowercase letters, numbers, dots, hyphens and underscores',
+  defaultMessage: 'Dataset name must contain only lowercase letters, numbers, dots and underscores',
 });
 
 /*

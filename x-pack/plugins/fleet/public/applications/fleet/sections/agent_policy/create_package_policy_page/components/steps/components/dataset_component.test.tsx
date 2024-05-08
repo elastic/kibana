@@ -43,7 +43,7 @@ describe('DatasetComponent', () => {
     fireEvent.keyDown(inputEl, { key: 'Enter', code: 'Enter' });
 
     utils.getByText(
-      'Dataset name must contain only lowercase letters, numbers, dots, hyphens and underscores'
+      'Dataset name must contain only lowercase letters, numbers, dots and underscores'
     );
   });
 
@@ -56,26 +56,26 @@ describe('DatasetComponent', () => {
 
     expect(
       utils.queryByText(
-        'Dataset name must contain only lowercase letters, numbers, dots, hyphens and underscores'
+        'Dataset name must contain only lowercase letters, numbers, dots and underscores'
       )
     ).toBeNull();
   });
 
   it('should not show validation error if valid dataset selected from select', () => {
     const { utils, mockOnChange } = render(undefined, [
-      { dataset: 'fleet_server.test-ds', package: 'log' },
+      { dataset: 'fleet_server.test_ds', package: 'log' },
     ]);
 
     const inputEl = utils.getByTestId('comboBoxSearchInput');
     fireEvent.click(inputEl);
-    const option = utils.getByText('fleet_server.test-ds');
+    const option = utils.getByText('fleet_server.test_ds');
     fireEvent.click(option);
 
     expect(
       utils.queryByText(
-        'Dataset name must contain only lowercase letters, numbers, dots, hyphens and underscores'
+        'Dataset name must contain only lowercase letters, numbers, dots and underscores'
       )
     ).toBeNull();
-    expect(mockOnChange).toHaveBeenCalledWith({ dataset: 'fleet_server.test-ds', package: 'log' });
+    expect(mockOnChange).toHaveBeenCalledWith({ dataset: 'fleet_server.test_ds', package: 'log' });
   });
 });

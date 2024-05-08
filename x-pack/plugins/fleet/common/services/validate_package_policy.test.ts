@@ -1082,7 +1082,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
 
   describe('Dataset', () => {
     const datasetError =
-      'Dataset name must contain only lowercase letters, numbers, dots, hyphens and underscores';
+      'Dataset name must contain only lowercase letters, numbers, dots and underscores';
 
     const validateDataset = (dataset: string) => {
       return validatePackagePolicyConfig(
@@ -1112,12 +1112,6 @@ describe('Fleet - validatePackagePolicyConfig', () => {
       expect(res).toEqual([datasetError]);
     });
 
-    it('should return an error message if the value has - in the beginning', () => {
-      const res = validateDataset('-test');
-
-      expect(res).toEqual([datasetError]);
-    });
-
     it('should return an error message if the value has _ in the beginning', () => {
       const res = validateDataset('_test');
 
@@ -1131,7 +1125,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
     });
 
     it('should not return an error message if the value is valid', () => {
-      const res = validateDataset('fleet_server.test-dataset');
+      const res = validateDataset('fleet_server.test_dataset');
 
       expect(res).toEqual(null);
     });
