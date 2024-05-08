@@ -472,29 +472,36 @@ export async function getLogstashStats(
   // filter_path and collapse fields in the queries differ on metricbeat vs. self-monitoring
   // note: agent driven LS monitoring indices pattern differ ".ds-metrics-logstash*"
   for (const clusterUuid of clusterUuids) {
-    const isSelfMonitoring: boolean = await isLogstashSelfMonitoring(callCluster, clusterUuid);
+    const logstashMonitoringIndex: string = await getLogstashMonitoringIndex(
+      callCluster,
+      clusterUuid
+    );
 
-    await fetchLogstashStats(callCluster, clusterUuid, start, end, options, isSelfMonitoring);
+    // no need to proceed if we don't have monitoring metrics
+    if (logstashMonitoringIndex !== '') {
+      const isSelfMonitoring: boolean = logstashMonitoringIndex.indexOf('-mb') === -1;
+      await fetchLogstashStats(callCluster, clusterUuid, start, end, options, isSelfMonitoring);
 
-    if (options.clusters[clusterUuid] !== undefined) {
-      await fetchLogstashState(
-        callCluster,
-        clusterUuid,
-        options.allEphemeralIds[clusterUuid],
-        start,
-        end,
-        options,
-        isSelfMonitoring
-      );
+      if (options.clusters[clusterUuid] !== undefined) {
+        await fetchLogstashState(
+          callCluster,
+          clusterUuid,
+          options.allEphemeralIds[clusterUuid],
+          start,
+          end,
+          options,
+          isSelfMonitoring
+        );
+      }
     }
   }
   return options.clusters;
 }
 
-export async function isLogstashSelfMonitoring(
+export async function getLogstashMonitoringIndex(
   callCluster: ElasticsearchClient,
   clusterUuid: string
-): Promise<boolean> {
+): Promise<string> {
   const params: estypes.SearchRequest = {
     index: INDEX_PATTERN_LOGSTASH,
     ignore_unavailable: true,
@@ -515,7 +522,7 @@ export async function isLogstashSelfMonitoring(
   const hitsLength = results?.hits?.hits.length || 0;
   if (hitsLength > 0) {
     const [firstDocument] = results.hits.hits;
-    return Promise.resolve(firstDocument._index.indexOf('-mb') === -1); // index will be shape of '.monitoring-8-mb' if metricbeat is used
+    return Promise.resolve(firstDocument._index);
   }
-  return Promise.resolve(false);
+  return Promise.resolve('');
 }

@@ -111,6 +111,9 @@ export interface ESClusterStats {
       name: string;
       stats: {
         stack: object;
+        nodes: {
+          versions: string[];
+        };
       };
     };
   };
@@ -136,6 +139,9 @@ export function handleElasticsearchStats(response: estypes.SearchResponse<ESClus
       clusterStats.cluster_stats = clusterStats.elasticsearch.cluster.stats;
       clusterStats.cluster_uuid = clusterStats.elasticsearch.cluster.id;
       clusterStats.cluster_name = clusterStats.elasticsearch.cluster.name;
+      if (clusterStats.elasticsearch.cluster.stats.nodes.versions.length > 0) {
+        clusterStats.version = clusterStats.elasticsearch.cluster.stats.nodes.versions[0] || '';
+      }
       clusterStats.elasticsearch = undefined;
     }
 
