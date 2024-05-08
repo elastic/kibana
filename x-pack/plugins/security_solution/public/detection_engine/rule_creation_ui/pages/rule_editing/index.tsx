@@ -414,7 +414,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
           rule?.exceptions_list
         ),
         ...(ruleId ? { id: ruleId } : {}),
-        ...(rule != null ? { max_signals: rule.max_signals } : {}),
       });
 
       displaySuccessToast(i18n.SUCCESSFULLY_SAVED_RULE(rule?.name ?? ''), dispatchToaster);
