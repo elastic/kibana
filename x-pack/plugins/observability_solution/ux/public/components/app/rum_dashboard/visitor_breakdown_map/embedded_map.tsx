@@ -84,7 +84,7 @@ export function EmbeddedMapComponent() {
             }),
             hideFilterActions: true,
             layerList,
-            renderTooltipContent,
+            getTooltipRenderer: () => renderTooltipContent,
           })}
       </div>
     </EmbeddedPanel>

@@ -26,7 +26,7 @@ export interface Props {
   isLayerTOCOpen?: boolean;
   mapCenter?: MapCenterAndZoom;
   onInitialRenderComplete?: () => void;
-  renderTooltipContent?: RenderToolTipContent;
+  getTooltipRenderer?: () => RenderToolTipContent;
   /*
    * Set to false to exclude sharing attributes 'data-*'.
    */
@@ -67,8 +67,8 @@ export class MapComponent extends Component<Props> {
       timeRange: this.props.timeRange,
     });
 
-    if (this.props.renderTooltipContent) {
-      this._mapEmbeddable.setRenderTooltipContent(this.props.renderTooltipContent);
+    if (this.props.getTooltipRenderer) {
+      this._mapEmbeddable.setRenderTooltipContent(this.props.getTooltipRenderer());
     }
 
     if (this.props.onInitialRenderComplete) {

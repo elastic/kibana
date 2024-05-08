@@ -25,13 +25,13 @@ describe('Embedded Map', () => {
   });
 });
 
-const mockMapsApi = {
+const mockMapsStartService = {
   Map: jest.fn().mockImplementation(() => <div data-test-subj="mockMap" />),
 };
 
 const mockCore: () => any[] = () => {
   const core = {
-    maps: mockMapsApi,
+    maps: mockMapsStartService,
   };
 
   return [core];
