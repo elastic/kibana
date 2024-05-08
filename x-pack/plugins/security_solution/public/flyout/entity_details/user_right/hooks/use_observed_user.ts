@@ -16,7 +16,7 @@ import { Direction, NOT_EVENT_KIND_ASSET_FILTER } from '../../../../../common/se
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
-import { isActiveTimeline } from '../../../../helpers';
+import { getSourcererScopeId, isActiveTimeline } from '../../../../helpers';
 
 export const useObservedUser = (
   userName: string,
@@ -30,7 +30,7 @@ export const useObservedUser = (
   const { to, from } = isActiveTimelines ? timelineTime : globalTime;
   const { isInitializing, setQuery, deleteQuery } = globalTime;
 
-  const { selectedPatterns } = useSourcererDataView();
+  const { selectedPatterns } = useSourcererDataView(getSourcererScopeId(scopeId));
 
   const [loadingObservedUser, { userDetails: observedUserDetails, inspect, refetch, id: queryId }] =
     useObservedUserDetails({

@@ -17,7 +17,7 @@ import { Direction, NOT_EVENT_KIND_ASSET_FILTER } from '../../../../../common/se
 import { HOST_PANEL_OBSERVED_HOST_QUERY_ID, HOST_PANEL_RISK_SCORE_QUERY_ID } from '..';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
-import { isActiveTimeline } from '../../../../helpers';
+import { getSourcererScopeId, isActiveTimeline } from '../../../../helpers';
 
 export const useObservedHost = (
   hostName: string,
@@ -31,7 +31,7 @@ export const useObservedHost = (
   const { to, from } = isActiveTimelines ? timelineTime : globalTime;
   const { isInitializing, setQuery, deleteQuery } = globalTime;
 
-  const { selectedPatterns } = useSourcererDataView();
+  const { selectedPatterns } = useSourcererDataView(getSourcererScopeId(scopeId));
 
   const [isLoading, { hostDetails, inspect: inspectObservedHost }, refetch] = useHostDetails({
     endDate: to,
