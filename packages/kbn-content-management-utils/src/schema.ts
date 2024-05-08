@@ -72,6 +72,7 @@ export const createOptionsSchemas = {
   id: schema.maybe(schema.string()),
   references: schema.maybe(referencesSchema),
   overwrite: schema.maybe(schema.boolean()),
+  overwritePreserveMeta: schema.maybe(schema.boolean()),
   version: schema.maybe(schema.string()),
   refresh: schema.maybe(schema.boolean()),
   initialNamespaces: schema.maybe(schema.arrayOf(schema.string())),

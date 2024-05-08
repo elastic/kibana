@@ -54,6 +54,8 @@ export interface SavedObjectCreateOptions {
   id?: string;
   /** Overwrite existing documents (defaults to false) */
   overwrite?: boolean;
+  /** When overwriting existing documents try to preserve meta fields like created_at and created_by (defaults to false) */
+  overwritePreserveMeta?: boolean;
   /**
    * An opaque version number which changes on each successful write operation.
    * Can be used in conjunction with `overwrite` for implementing optimistic concurrency control.

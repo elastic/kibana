@@ -73,6 +73,7 @@ const searchOptionsSchema = schema.maybe(
 const createOptionsSchema = schema.object({
   id: schema.maybe(createOptionsSchemas.id),
   overwrite: schema.maybe(createOptionsSchemas.overwrite),
+  overwritePreserveMeta: schema.maybe(createOptionsSchemas.overwritePreserveMeta),
   references: schema.maybe(createOptionsSchemas.references),
 });
 

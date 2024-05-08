@@ -19,6 +19,7 @@ import { DEFAULT_REFRESH_SETTING } from '../constants';
 import type { PreflightCheckForCreateResult } from './internals/preflight_check_for_create';
 import { getSavedObjectNamespaces, getCurrentTime, normalizeNamespace, setManaged } from './utils';
 import { ApiExecutionContext } from './types';
+import { performGet } from './get';
 
 export interface PerformCreateParams<T = unknown> {
   type: string;
@@ -28,16 +29,16 @@ export interface PerformCreateParams<T = unknown> {
 
 export const performCreate = async <T>(
   { type, attributes, options }: PerformCreateParams<T>,
-  {
+  apiExecutionContext: ApiExecutionContext
+): Promise<SavedObject<T>> => {
+  const {
     registry,
     helpers,
     allowedTypes,
     client,
     serializer,
-    migrator,
     extensions = {},
-  }: ApiExecutionContext
-): Promise<SavedObject<T>> => {
+  } = apiExecutionContext;
   const {
     common: commonHelper,
     validation: validationHelper,
@@ -70,33 +71,45 @@ export const performCreate = async <T>(
   validationHelper.validateOriginId(type, options);
 
   const time = getCurrentTime();
-  const createdBy = userHelper.getCurrentUserProfileUid();
+  let createdAt: string | undefined = time;
+  let createdBy = userHelper.getCurrentUserProfileUid();
+
   let savedObjectNamespace: string | undefined;
   let savedObjectNamespaces: string[] | undefined;
   let existingOriginId: string | undefined;
   const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
 
   let preflightResult: PreflightCheckForCreateResult | undefined;
+  const doPreflightCheck = async () => {
+    if (preflightResult) return;
+    preflightResult = (
+      await preflightHelper.preflightCheckForCreate([
+        {
+          type,
+          id,
+          overwrite,
+          namespaces: initialNamespaces ?? [namespaceString],
+        },
+      ])
+    )[0];
+  };
   if (registry.isSingleNamespace(type)) {
     savedObjectNamespace = initialNamespaces ? normalizeNamespace(initialNamespaces[0]) : namespace;
   } else if (registry.isMultiNamespace(type)) {
     if (options.id) {
       // we will overwrite a multi-namespace saved object if it exists; if that happens, ensure we preserve its included namespaces
       // note: this check throws an error if the object is found but does not exist in this namespace
-      preflightResult = (
-        await preflightHelper.preflightCheckForCreate([
-          {
-            type,
-            id,
-            overwrite,
-            namespaces: initialNamespaces ?? [namespaceString],
-          },
-        ])
-      )[0];
+      await doPreflightCheck();
     }
     savedObjectNamespaces =
       initialNamespaces || getSavedObjectNamespaces(namespace, preflightResult?.existingDocument);
     existingOriginId = preflightResult?.existingDocument?._source?.originId;
+  }
+
+  if (overwrite && options.overwritePreserveMeta && options.id) {
+    const prevObject = await performGet({ type, options, id }, apiExecutionContext);
+    createdAt = prevObject.created_at;
+    createdBy = prevObject.created_by;
   }
 
   const authorizationResult = await securityExtension?.authorizeCreate({
@@ -133,7 +146,7 @@ export const performCreate = async <T>(
     coreMigrationVersion,
     typeMigrationVersion,
     managed: setManaged({ optionsManaged: managed }),
-    created_at: time,
+    created_at: createdAt,
     updated_at: time,
     ...(createdBy && { created_by: createdBy }),
     ...(Array.isArray(references) && { references }),

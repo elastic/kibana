@@ -31,7 +31,7 @@ export type DashboardAttributes = Omit<DashboardAttributesV1, 'controlGroupInput
 export type DashboardCrudTypes = ContentManagementCrudTypes<
   DashboardContentType,
   DashboardAttributes,
-  Pick<SavedObjectCreateOptions, 'id' | 'references' | 'overwrite'>,
+  Pick<SavedObjectCreateOptions, 'id' | 'references' | 'overwrite' | 'overwritePreserveMeta'>,
   Pick<SavedObjectUpdateOptions, 'references'>,
   {
     /** Flag to indicate to only search the text on the "title" field */

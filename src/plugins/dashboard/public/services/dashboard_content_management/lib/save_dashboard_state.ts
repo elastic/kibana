@@ -197,6 +197,7 @@ export const saveDashboardState = async ({
         id: idToSaveTo,
         references: allReferences,
         overwrite: true,
+        overwritePreserveMeta: true,
       },
     });
     const newId = result.item.id;

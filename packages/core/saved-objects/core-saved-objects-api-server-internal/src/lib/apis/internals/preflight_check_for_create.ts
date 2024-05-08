@@ -260,7 +260,7 @@ async function bulkGetObjectsAndAliases(
     docsToBulkGet.push({
       _id: serializer.generateRawId(undefined, type, id), // namespace is intentionally undefined because multi-namespace objects don't have a namespace in their raw ID
       _index: getIndexForType(type),
-      _source: ['type', 'namespaces', 'originId'],
+      _source: ['type', 'namespaces', 'originId', 'created_at', 'created_by'],
     });
     if (checkAliases) {
       for (const space of spaces) {
