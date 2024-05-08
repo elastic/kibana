@@ -19,6 +19,8 @@ import type {
   RegistryVarsEntry,
 } from '../types';
 
+import { DATASET_VAR_NAME } from '../constants';
+
 import {
   isValidNamespace,
   doesPackageHaveIntegrations,
@@ -45,6 +47,12 @@ export type PackagePolicyValidationResults = {
   namespace: Errors;
   inputs: Record<PackagePolicyInput['type'], PackagePolicyInputValidationResults> | null;
 } & PackagePolicyConfigValidationResults;
+
+export const DATASET_REGEX = /^(?![_\-\.])[a-z0-9_\-\.]+$/;
+export const REGEX_ERROR = i18n.translate('xpack.fleet.datasetValidation.invalidDatasetError', {
+  defaultMessage:
+    'Dataset name must contain only lowercase letters, numbers, dots, hyphens and underscores',
+});
 
 /*
  * Returns validation information for a given package policy and package info
@@ -173,7 +181,13 @@ export const validatePackagePolicy = (
 
             results[name] =
               input.enabled && stream.enabled
-                ? validatePackagePolicyConfig(configEntry, streamVarDefs[name], name, safeLoadYaml)
+                ? validatePackagePolicyConfig(
+                    configEntry,
+                    streamVarDefs[name],
+                    name,
+                    safeLoadYaml,
+                    packageInfo.type
+                  )
                 : null;
 
             return results;
@@ -202,7 +216,8 @@ export const validatePackagePolicyConfig = (
   configEntry: PackagePolicyConfigRecordEntry | undefined,
   varDef: RegistryVarsEntry,
   varName: string,
-  safeLoadYaml: (yaml: string) => any
+  safeLoadYaml: (yaml: string) => any,
+  packageType?: string
 ): string[] | null => {
   const errors = [];
 
@@ -354,6 +369,16 @@ export const validatePackagePolicyConfig = (
           defaultMessage: 'Invalid value for select type',
         })
       );
+    }
+  }
+
+  if (
+    varName === DATASET_VAR_NAME &&
+    packageType === 'input' &&
+    parsedValue?.dataset !== undefined
+  ) {
+    if (!parsedValue.dataset?.match(DATASET_REGEX)) {
+      errors.push(REGEX_ERROR);
     }
   }
 
