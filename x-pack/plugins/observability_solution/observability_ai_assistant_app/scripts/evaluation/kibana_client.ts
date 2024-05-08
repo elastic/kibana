@@ -30,7 +30,7 @@ import {
 import { streamIntoObservable } from '@kbn/observability-ai-assistant-plugin/server';
 import { ToolingLog } from '@kbn/tooling-log';
 import axios, { AxiosInstance, AxiosResponse, isAxiosError } from 'axios';
-import { isArray, pick, remove } from 'lodash';
+import { isArray, omit, pick, remove } from 'lodash';
 import pRetry from 'p-retry';
 import {
   concatMap,
@@ -44,6 +44,9 @@ import {
   switchMap,
   timer,
   toArray,
+  catchError,
+  Observable,
+  throwError,
 } from 'rxjs';
 import { format, parse, UrlObject } from 'url';
 import { inspect } from 'util';
@@ -63,16 +66,20 @@ type CompleteFunction = (
   ...args:
     | [StringOrMessageList]
     | [StringOrMessageList, Options]
-    | [string, StringOrMessageList]
-    | [string, StringOrMessageList, Options]
-) => Promise<{ conversationId?: string; messages: InnerMessage[] }>;
+    | [string | undefined, StringOrMessageList]
+    | [string | undefined, StringOrMessageList, Options]
+) => Promise<{
+  conversationId?: string;
+  messages: InnerMessage[];
+  errors: ChatCompletionErrorEvent[];
+}>;
 
 export interface ChatClient {
   chat: (message: StringOrMessageList) => Promise<InnerMessage>;
   complete: CompleteFunction;
 
   evaluate: (
-    {}: { conversationId?: string; messages: InnerMessage[] },
+    {}: { conversationId?: string; messages: InnerMessage[]; errors: ChatCompletionErrorEvent[] },
     criteria: string[]
   ) => Promise<EvaluationResult>;
   getResults: () => EvaluationResult[];
@@ -125,6 +132,21 @@ export class KibanaClient {
         'kbn-xsrf': 'true',
         'x-elastic-internal-origin': 'foo',
       },
+    }).catch((error) => {
+      if (isAxiosError(error)) {
+        const interestingPartsOfError = {
+          ...omit(error, 'request', 'response', 'config'),
+          ...pick(
+            error,
+            'response.data',
+            'response.headers',
+            'response.status',
+            'response.statusText'
+          ),
+        };
+        this.log.error(inspect(interestingPartsOfError, { depth: 10 }));
+      }
+      throw error;
     });
   }
 
@@ -236,7 +258,15 @@ export class KibanaClient {
           retry({
             count: 1,
             delay: (error) => {
-              that.log.error('Error in stream');
+              if (
+                isChatCompletionError(error) &&
+                error.code !== ChatCompletionErrorCode.InternalError
+              ) {
+                that.log.info(`Not retrying error ${error.code}`);
+                return throwError(() => error);
+              }
+
+              that.log.info('Caught retryable error');
 
               if (isAxiosError(error)) {
                 that.log.error(
@@ -253,12 +283,10 @@ export class KibanaClient {
                 that.log.error(inspect(error, { depth: 10 }));
               }
 
-              if (
-                isChatCompletionError(error) &&
-                error.code !== ChatCompletionErrorCode.InternalError
-              ) {
-                that.log.info(`Not retrying error ${error.code}`);
-                return of();
+              if (error.message.includes('Status code: 429')) {
+                that.log.info(`429, backing off 20s`);
+
+                return timer(20000);
               }
               that.log.info(`Retrying in 5s`);
               return timer(5000);
@@ -338,7 +366,7 @@ export class KibanaClient {
       },
       complete: async (...args) => {
         that.log.info(`Complete`);
-        let messagesArg: StringOrMessageList;
+        let messagesArg: StringOrMessageList | undefined;
         let conversationId: string | undefined;
         let options: Options = {};
 
@@ -355,7 +383,11 @@ export class KibanaClient {
         } else if (args.length === 2 && !isMessageList(args[1])) {
           messagesArg = args[0];
           options = args[1];
-        } else if (args.length === 2 && typeof args[0] === 'string' && isMessageList(args[1])) {
+        } else if (
+          args.length === 2 &&
+          (typeof args[0] === 'string' || typeof args[0] === 'undefined') &&
+          isMessageList(args[1])
+        ) {
           conversationId = args[0];
           messagesArg = args[1];
         } else if (args.length === 3) {
@@ -394,27 +426,52 @@ export class KibanaClient {
             return streamIntoObservable(response.data);
           }),
           serializeAndHandleRetryableErrors(),
+          catchError((error): Observable<ChatCompletionErrorEvent> => {
+            const errorEvent: ChatCompletionErrorEvent = {
+              error: {
+                message: error.message,
+                stack: error.stack,
+                code: isChatCompletionError(error) ? error.code : undefined,
+                meta: error.meta,
+              },
+              type: StreamingChatResponseEventType.ChatCompletionError,
+            };
+
+            this.log.error('Error in stream');
+            this.log.error(JSON.stringify(error));
+
+            return of(errorEvent);
+          }),
           filter(
-            (event): event is MessageAddEvent | ConversationCreateEvent =>
+            (
+              event
+            ): event is MessageAddEvent | ConversationCreateEvent | ChatCompletionErrorEvent =>
               event.type === StreamingChatResponseEventType.MessageAdd ||
-              event.type === StreamingChatResponseEventType.ConversationCreate
+              event.type === StreamingChatResponseEventType.ConversationCreate ||
+              event.type === StreamingChatResponseEventType.ChatCompletionError
           ),
           toArray()
         );
 
         const events = await lastValueFrom(stream$);
 
+        const messagesWithAdded = messages
+          .map((msg) => msg.message)
+          .concat(
+            events
+              .filter(
+                (event): event is MessageAddEvent =>
+                  event.type === StreamingChatResponseEventType.MessageAdd
+              )
+              .map((event) => event.message.message)
+          );
+
         return {
-          messages: messages
-            .map((msg) => msg.message)
-            .concat(
-              events
-                .filter(
-                  (event): event is MessageAddEvent =>
-                    event.type === StreamingChatResponseEventType.MessageAdd
-                )
-                .map((event) => event.message.message)
-            ),
+          errors: events.filter(
+            (event): event is ChatCompletionErrorEvent =>
+              event.type === StreamingChatResponseEventType.ChatCompletionError
+          ),
+          messages: messagesWithAdded,
           conversationId:
             conversationId ||
             events.find(
@@ -423,7 +480,7 @@ export class KibanaClient {
             )?.conversation.id,
         };
       },
-      evaluate: async ({ messages, conversationId }, criteria) => {
+      evaluate: async ({ messages, conversationId, errors }, criteria) => {
         const message = await chat('evaluate', {
           connectorIdOverride: evaluationConnectorId,
           messages: [
@@ -444,7 +501,7 @@ export class KibanaClient {
               '@timestamp': new Date().toString(),
               message: {
                 role: MessageRole.User,
-                content: `Evaluate the conversation according to the following criteria:
+                content: `Evaluate the conversation according to the following criteria, using the "scores" tool:
                 
                 ${criteria.map((criterion, index) => {
                   return `${index}: ${criterion}`;
@@ -453,7 +510,9 @@ export class KibanaClient {
                 This is the conversation:
                 
                 ${JSON.stringify(
-                  messages.map((msg) => pick(msg, 'content', 'name', 'function_call', 'role'))
+                  messages
+                    .filter((msg) => msg.role !== MessageRole.System)
+                    .map((msg) => omit(msg, 'data'))
                 )}`,
               },
             },
@@ -502,18 +561,29 @@ export class KibanaClient {
           }
         ).criteria;
 
-        const result: EvaluationResult = {
-          name: currentTitle,
-          conversationId,
-          messages,
-          passed: scoredCriteria.every(({ score }) => score >= 1),
-          scores: scoredCriteria.map(({ index, score, reasoning }) => {
+        const scores = scoredCriteria
+          .map(({ index, score, reasoning }) => {
             return {
               criterion: criteria[index],
               score,
               reasoning,
             };
-          }),
+          })
+          .concat({
+            score: errors.length === 0 ? 1 : 0,
+            criterion: 'The conversation encountered errors',
+            reasoning: errors.length
+              ? `The following errors occurred: ${errors.map((error) => error.error.message)}`
+              : 'No errors occurred',
+          });
+
+        const result: EvaluationResult = {
+          name: currentTitle,
+          conversationId,
+          messages,
+          errors,
+          passed: scores.every(({ score }) => score >= 1),
+          scores,
         };
 
         results.push(result);

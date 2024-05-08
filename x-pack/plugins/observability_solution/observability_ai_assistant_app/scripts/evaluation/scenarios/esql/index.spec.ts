@@ -181,7 +181,7 @@ describe('ES|QL query generation', () => {
     it('logs avg cpu', async () => {
       await evaluateEsqlQuery({
         question:
-          'My metrics data is in `metrics-*`. I want to see what a query would look like that gets the average CPU per service, limit it to the top 10 results, in 1m buckets, and only include the last 15m.',
+          'Assume my metrics data is in `metrics-*`. I want to see what a query would look like that gets the average CPU per service, limit it to the top 10 results, in 1m buckets, and only include the last 15m.',
         expected: `FROM .ds-metrics-apm*
         | WHERE @timestamp >= NOW() - 15 minutes
         | EVAL bucket = DATE_TRUNC(1 minute, @timestamp)

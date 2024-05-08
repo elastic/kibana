@@ -31,6 +31,7 @@ describe('alert function', () => {
     ruleIds.push(responseApmRule.data.id);
 
     logger.info('Creating dataview');
+
     await kibanaClient.callKibana(
       'post',
       { pathname: '/api/content_management/rpc/create' },
@@ -75,13 +76,32 @@ describe('alert function', () => {
             .outcome('success'),
         ])
     );
+
+    logger.debug('Triggering a rule run');
+
+    await Promise.all(
+      ruleIds.map((ruleId) =>
+        kibanaClient.callKibana<void>('post', {
+          pathname: `/internal/alerting/rule/${ruleId}/_run_soon`,
+        })
+      )
+    );
+
+    logger.debug('Waiting 2.5s to make sure all indices are refreshed');
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 2500);
+    });
   });
 
   it('summary of active alerts', async () => {
-    const conversation = await chatClient.complete('Are there any active alerts?');
+    const conversation = await chatClient.complete(
+      'Are there any active alerts over the last 4 hours?'
+    );
 
     const result = await chatClient.evaluate(conversation, [
-      'Uses alerts function to retrieve active alerts',
+      'Correctly uses the `alerts` function to fetch data for the current time range',
+      'Retrieves 2 alerts',
       'Responds with a summary of the current active alerts',
     ]);
 
@@ -90,7 +110,7 @@ describe('alert function', () => {
 
   it('filtered alerts', async () => {
     let conversation = await chatClient.complete(
-      'Do I have any active alerts related to "Threshold surpassed in AI Assistant eval"?'
+      'Do I have any active threshold alerts related to the AI Assistant?'
     );
 
     conversation = await chatClient.complete(
@@ -102,10 +122,11 @@ describe('alert function', () => {
     );
 
     const result = await chatClient.evaluate(conversation, [
-      'Uses alerts function to retrieve active alerts for "Threshold surpassed in AI Assistant eval", uses "filter": "Threshold surpassed in AI Assistant eval" in the alert function',
-      'Returns one or more alerts related to "Threshold surpassed in AI Assistant eval", does not return no active alerts related to "Threshold surpassed in AI Assistant eval"',
-      'Uses alerts function to filtering on service.name my-service to retrieve active alerts for that service',
-      'Returns one or more alerts related to my-service',
+      'Uses the get_alerts_dataset_info function',
+      'Correctly uses the alerts function without a filter',
+      'Returns two alerts related to "Threshold surpassed in AI Assistant eval"',
+      'After the second question, uses alerts function to filtering on service.name my-service to retrieve active alerts for that service. The filter should be `service.name:"my-service"` or `service.name:my-service`.',
+      'Summarizes the active alerts for the `my-service` service',
     ]);
 
     expect(result.passed).to.be(true);
