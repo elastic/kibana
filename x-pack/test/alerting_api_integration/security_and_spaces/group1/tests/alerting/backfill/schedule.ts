@@ -619,6 +619,19 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
               { rule_id: 'abc', start: moment().utc().startOf('day').add(1, 'days').toISOString() },
             ]);
 
+          // end time is in the future
+          const response7 = await supertestWithoutAuth
+            .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/backfill/_schedule`)
+            .set('kbn-xsrf', 'foo')
+            .auth(apiOptions.username, apiOptions.password)
+            .send([
+              {
+                rule_id: 'abc',
+                start: moment().utc().startOf('day').subtract(1, 'days').toISOString(),
+                end: moment().utc().startOf('day').add(1, 'days').toISOString(),
+              },
+            ]);
+
           // These should all be the same 400 response because it is
           // testing validation at the API level, which occurs before any
           // alerting RBAC checks
@@ -674,6 +687,13 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
 
               expect(response6.statusCode).to.eql(400);
               expect(response6.body).to.eql({
+                statusCode: 400,
+                error: 'Bad Request',
+                message: '[request body.0]: Backfill cannot be scheduled for the future',
+              });
+
+              expect(response7.statusCode).to.eql(400);
+              expect(response7.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
                 message: '[request body.0]: Backfill cannot be scheduled for the future',

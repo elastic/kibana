@@ -37,6 +37,10 @@ export function validateBackfillSchedule(start: string, end?: string): string | 
       if (endMs <= startMs) {
         return `Backfill end must be greater than backfill start`;
       }
+
+      if (now < parsedEnd) {
+        return `Backfill cannot be scheduled for the future`;
+      }
     }
   } catch (err) {
     return `Error validating backfill schedule - ${err.message}`;

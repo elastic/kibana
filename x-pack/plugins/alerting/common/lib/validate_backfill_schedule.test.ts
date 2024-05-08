@@ -56,4 +56,10 @@ describe('validateBackfillSchedule', () => {
       `"Backfill cannot be scheduled for the future"`
     );
   });
+
+  test('returns error if end date is greater than current date', () => {
+    expect(
+      validateBackfillSchedule('2023-10-16T08:00:00.000Z', '2023-11-16T08:00:00.001Z')
+    ).toMatchInlineSnapshot(`"Backfill cannot be scheduled for the future"`);
+  });
 });
