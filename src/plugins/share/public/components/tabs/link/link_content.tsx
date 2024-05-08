@@ -9,7 +9,6 @@
 import {
   copyToClipboard,
   EuiButton,
-  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
@@ -43,7 +42,6 @@ interface UrlParams {
 
 export const LinkContent = ({
   objectType,
-  objectId,
   isDirty,
   shareableUrl,
   shareableUrlForSavedObject,
@@ -54,11 +52,7 @@ export const LinkContent = ({
   const [url, setUrl] = useState<string>('');
   const [urlParams] = useState<UrlParams | undefined>(undefined);
   const [isTextCopied, setTextCopied] = useState(false);
-  const [shortUrlCache, setShortUrlCache] = useState<string | undefined>(undefined);
-
-  const isNotSaved = useCallback(() => {
-    return isDirty;
-  }, [isDirty]);
+  const [, setShortUrlCache] = useState<string | undefined>(undefined);
 
   const getUrlParamExtensions = useCallback(
     (tempUrl: string): string => {
@@ -104,7 +98,7 @@ export const LinkContent = ({
   );
 
   const getSavedObjectUrl = useCallback(() => {
-    if (isNotSaved()) {
+    if (isDirty) {
       return;
     }
 
@@ -133,7 +127,7 @@ export const LinkContent = ({
       }),
     });
     return updateUrlParams(formattedUrl);
-  }, [getSnapshotUrl, isNotSaved, updateUrlParams]);
+  }, [getSnapshotUrl, isDirty, updateUrlParams]);
 
   const createShortUrl = useCallback(async () => {
     if (shareableUrlLocatorParams) {
@@ -152,7 +146,6 @@ export const LinkContent = ({
 
   const copyUrlHelper = useCallback(async () => {
     let urlToCopy = url;
-
     if (!urlToCopy) {
       let tempUrl = '';
 
@@ -163,35 +156,14 @@ export const LinkContent = ({
       }
 
       urlToCopy = allowShortUrl ? await createShortUrl() : tempUrl;
+      setUrl(urlToCopy);
     }
 
-    setUrl(() => {
-      copyToClipboard(urlToCopy);
-      setTextCopied(true);
-      return urlToCopy;
-    });
+    copyToClipboard(urlToCopy);
+    setUrl(urlToCopy);
+    setTextCopied(true);
   }, [allowShortUrl, createShortUrl, getSavedObjectUrl, getSnapshotUrl, objectType, setUrl, url]);
 
-  const renderSaveState =
-    objectType === 'lens' && isNotSaved() ? (
-      <FormattedMessage
-        id="share.link.lens.saveUrlBox"
-        defaultMessage="There are unsaved changes. Before you generate a link, save the {objectType}."
-        values={{ objectType }}
-      />
-    ) : objectType === 'lens' ? (
-      shortUrlCache ?? shareableUrl
-    ) : (
-      shareableUrl ?? shortUrlCache ?? ''
-    );
-
-  const lensOnClick = () => {
-    if (objectType === 'lens' && !isDirty) {
-      return copyUrlHelper();
-    } else {
-      return copyUrlHelper();
-    }
-  };
   return (
     <>
       <EuiForm>
@@ -204,12 +176,6 @@ export const LinkContent = ({
           />
         </EuiText>
         <EuiSpacer size="l" />
-        {objectType !== 'dashboard' && (
-          <EuiCodeBlock whiteSpace="pre" css={{ paddingRight: '30px' }}>
-            {renderSaveState}
-          </EuiCodeBlock>
-        )}
-        <EuiSpacer />
       </EuiForm>
       <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
         <EuiFlexItem grow={false}>
@@ -233,7 +199,7 @@ export const LinkContent = ({
               data-test-subj="copyShareUrlButton"
               data-share-url={url}
               onBlur={() => (objectType === 'lens' && isDirty ? null : setTextCopied(false))}
-              onClick={lensOnClick}
+              onClick={copyUrlHelper}
               disabled={objectType === 'lens' && isDirty}
             >
               <FormattedMessage id="share.link.copyLinkButton" defaultMessage="Copy link" />

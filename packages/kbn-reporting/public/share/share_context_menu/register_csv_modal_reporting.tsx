@@ -154,7 +154,7 @@ export const reportingCsvShareProvider = ({
         helpText: (
           <FormattedMessage
             id="reporting.share.csv.reporting.helpTextCSV"
-            defaultMessage="Export a CSV of this {objectType}"
+            defaultMessage="Export a CSV of this {objectType}."
             values={{ objectType }}
           />
         ),
@@ -165,14 +165,14 @@ export const reportingCsvShareProvider = ({
           dataTestSubj: 'shareReportingCopyURL',
           label: 'Post URL',
         },
-        generateReportButton: (
+        generateExportButton: (
           <FormattedMessage
             id="reporting.share.generateButtonLabelCSV"
             data-test-subj="generateReportButton"
             defaultMessage="Generate CSV"
           />
         ),
-        generateReport: generateReportingJobCSV,
+        generateExport: generateReportingJobCSV,
         generateCopyUrl: reportingUrl,
         absoluteUrl,
         renderCopyURLButton: true,

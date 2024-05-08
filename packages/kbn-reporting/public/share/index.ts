@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { getSharedComponents } from './shared';
 export { reportingExportModalProvider } from './share_context_menu/register_pdf_png_modal_reporting';
-export { reportingScreenshotShareProvider } from './share_context_menu/register_pdf_png_reporting';
-export { reportingCsvShareProvider } from './share_context_menu/register_csv_reporting';
 export { reportingCsvShareProvider as reportingCsvShareModalProvider } from './share_context_menu/register_csv_modal_reporting';
-export type { ReportingPublicComponents } from './shared/get_shared_components';
 export type { JobParamsProviderOptions, StartServices } from './share_context_menu';
+export { getSharedComponents } from './shared';
+export type { ReportingPublicComponents } from './shared';

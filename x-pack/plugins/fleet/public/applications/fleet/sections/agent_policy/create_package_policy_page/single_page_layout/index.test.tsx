@@ -101,8 +101,9 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 
-import { CreatePackagePolicySinglePage } from '.';
 import { AGENTLESS_POLICY_ID } from '../../../../../../../common/constants';
+
+import { CreatePackagePolicySinglePage } from '.';
 
 // mock console.debug to prevent noisy logs from console.debugs in ./index.tsx
 let consoleDebugMock: any;

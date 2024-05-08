@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import expect from '@kbn/expect';
-import { decompressFromBase64 } from 'lz-string';
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -22,6 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const toasts = getService('toasts');
   const deployment = getService('deployment');
 
+  // defaults to short urls
   describe('shared links', function describeIndexTests() {
     let baseUrl: string;
 
@@ -52,87 +51,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       };
     }
 
-    describe('shared links with state in query', async () => {
-      let teardown: () => Promise<void>;
-      before(async function () {
-        teardown = await setup({ storeStateInSessionStorage: false });
-      });
-
-      after(async function () {
-        await teardown();
-      });
-
-      describe('permalink', function () {
-        it('should allow for copying the snapshot URL', async function () {
-          const actualUrl = await PageObjects.share.getSharedUrl();
-          expect(actualUrl).to.contain(`?l=${DISCOVER_APP_LOCATOR}`);
-          const urlSearchParams = new URLSearchParams(actualUrl);
-          expect(JSON.parse(decompressFromBase64(urlSearchParams.get('lz')!)!)).to.eql({
-            query: {
-              language: 'kuery',
-              query: '',
-            },
-            sort: [['@timestamp', 'desc']],
-            columns: [],
-            index: 'logstash-*',
-            interval: 'auto',
-            filters: [],
-            dataViewId: 'logstash-*',
-            timeRange: {
-              from: '2015-09-19T06:31:44.000Z',
-              to: '2015-09-23T18:31:44.000Z',
-            },
-            refreshInterval: {
-              value: 60000,
-              pause: true,
-            },
-          });
-        });
-
-        it('should allow for copying the snapshot URL as a short URL', async function () {
-          const re = new RegExp(baseUrl + '/app/r/s/.+$');
-          await PageObjects.share.checkShortenUrl();
-          await retry.try(async () => {
-            const actualUrl = await PageObjects.share.getSharedUrl();
-            expect(actualUrl).to.match(re);
-          });
-        });
-
-        it('should allow for copying the saved object URL', async function () {
-          const expectedUrl =
-            baseUrl + '/app/discover#' + '/view/ab12e3c0-f231-11e6-9486-733b1ac9221a' + '?_g=()';
-          await PageObjects.discover.loadSavedSearch('A Saved Search');
-          await PageObjects.share.clickShareTopNavButton();
-          await PageObjects.share.exportAsSavedObject();
-          const actualUrl = await PageObjects.share.getSharedUrl();
-          expect(actualUrl).to.be(expectedUrl);
-        });
-
-        it('should load snapshot URL with empty sort param correctly', async function () {
-          const expectedUrl =
-            baseUrl +
-            '/app/discover?_t=1453775307251#' +
-            '/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time' +
-            ":(from:'2015-09-19T06:31:44.000Z',to:'2015-09" +
-            "-23T18:31:44.000Z'))&_a=(columns:!(),filters:!(),index:'logstash-" +
-            "*',interval:auto,query:(language:kuery,query:'')" +
-            ',sort:!())';
-          await browser.navigateTo(expectedUrl);
-          await PageObjects.discover.waitUntilSearchingHasFinished();
-          await retry.waitFor('url to contain default sorting', async () => {
-            // url fallback default sort should have been pushed to URL
-            const url = await browser.getCurrentUrl();
-            return url.includes('sort:!(!(%27@timestamp%27,desc))');
-          });
-
-          await retry.waitFor('document table to contain the right timestamp', async () => {
-            const firstRowText = await PageObjects.discover.getDocTableIndex(1);
-            return firstRowText.includes('Sep 22, 2015 @ 23:50:13.253');
-          });
-        });
-      });
-    });
-
     describe('shared links with state in sessionStorage', async () => {
       let teardown: () => Promise<void>;
       before(async function () {
@@ -141,29 +59,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       after(async function () {
         await teardown();
-      });
-
-      it('should allow for copying the snapshot URL as a short URL and should open it', async function () {
-        const re = new RegExp(baseUrl + '/app/r/s/.+$');
-        await PageObjects.share.checkShortenUrl();
-        let actualUrl: string = '';
-        await retry.try(async () => {
-          actualUrl = await PageObjects.share.getSharedUrl();
-          expect(actualUrl).to.match(re);
-        });
-
-        const actualTime = await PageObjects.timePicker.getTimeConfig();
-
-        await browser.clearSessionStorage();
-        await browser.get(actualUrl, false);
-        await retry.try(async () => {
-          const resolvedUrl = await browser.getCurrentUrl();
-          expect(resolvedUrl).to.match(/discover/);
-          const resolvedTime = await PageObjects.timePicker.getTimeConfig();
-          expect(resolvedTime.start).to.equal(actualTime.start);
-          expect(resolvedTime.end).to.equal(actualTime.end);
-        });
-        await toasts.dismissAll();
       });
 
       it("sharing hashed url shouldn't crash the app", async () => {

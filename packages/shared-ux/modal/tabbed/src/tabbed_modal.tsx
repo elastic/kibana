@@ -91,6 +91,7 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWid
           disabled={tab.disabled}
           prepend={tab.prepend}
           append={tab.append}
+          data-test-subj={tab.id}
         >
           {tab.name}
         </EuiTab>
@@ -103,6 +104,7 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWid
       onClose={onClose}
       style={{ ...(modalWidth ? { width: modalWidth } : {}) }}
       maxWidth={true}
+      data-test-subj="shareContextModal"
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle>{modalTitle}</EuiModalHeaderTitle>
