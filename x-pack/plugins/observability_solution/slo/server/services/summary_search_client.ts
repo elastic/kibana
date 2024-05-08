@@ -80,7 +80,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
         bool: {
           filter: [
             { term: { spaceId: this.spaceId } },
-            ...excludeStaleSummaryFilter(settings, kqlQuery, this.hideStale),
+            ...excludeStaleSummaryFilter(settings, kqlQuery, hideStale),
             getElasticsearchQueryOrThrow(kqlQuery),
             ...(parsedFilters.filter ?? []),
           ],
