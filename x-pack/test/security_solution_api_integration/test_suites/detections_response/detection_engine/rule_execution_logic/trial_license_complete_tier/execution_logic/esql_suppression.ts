@@ -1828,24 +1828,19 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should generate up to max_signals alerts', async () => {
         const id = uuidv4();
-        const firstTimestamp = '2020-10-28T06:05:00.000Z';
-        const secondTimestamp = '2020-10-28T06:10:00.000Z';
+        const timestamp = '2020-10-28T06:05:00.000Z';
 
-        await Promise.all(
-          [firstTimestamp, secondTimestamp].map((t) =>
-            indexGeneratedDocuments({
-              docsCount: 20000,
-              seed: (index) => ({
-                id,
-                '@timestamp': t,
-                host: {
-                  name: `host-${index}`,
-                },
-                'agent.name': `agent-${index % 10000}`,
-              }),
-            })
-          )
-        );
+        await indexGeneratedDocuments({
+          docsCount: 20000,
+          seed: (index) => ({
+            id,
+            '@timestamp': timestamp,
+            host: {
+              name: `host-${index}`,
+            },
+            'agent.name': `agent-${index}`,
+          }),
+        });
 
         const rule: EsqlRuleCreateProps = {
           ...getCreateEsqlRulesSchemaMock('rule-1', true),
@@ -1860,6 +1855,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
           from: 'now-35m',
           interval: '30m',
+          max_signals: 150,
         };
 
         const { previewId, logs } = await previewRule({
@@ -1878,7 +1874,7 @@ export default ({ getService }: FtrProviderContext) => {
           size: 1000,
           sort: ['agent.name', ALERT_ORIGINAL_TIME],
         });
-        expect(previewAlerts.length).toEqual(100);
+        expect(previewAlerts.length).toEqual(150);
       });
     });
 
