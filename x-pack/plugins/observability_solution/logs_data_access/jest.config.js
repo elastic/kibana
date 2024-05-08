@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export { MlEmbeddedMapComponent } from './ml_embedded_map';
+const path = require('path');
+
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: path.resolve(__dirname, '../../../..'),
+  roots: ['<rootDir>/x-pack/plugins/observability_solution/logs_data_access'],
+};
