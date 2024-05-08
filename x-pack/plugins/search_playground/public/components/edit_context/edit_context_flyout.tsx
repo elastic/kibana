@@ -18,11 +18,9 @@ import {
   EuiLink,
   EuiSpacer,
   EuiText,
-  EuiPanel,
-  EuiAccordion,
-  EuiSelectable,
   EuiSelect,
-  EuiSelectableOption,
+  EuiSuperSelect,
+  EuiFormRow,
 } from '@elastic/eui';
 import { useController, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
@@ -62,27 +60,28 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
 
   const [tempSourceFields, setTempSourceFields] = useState(sourceFields);
 
-  const toggleSourceField = (index: string, f: EuiSelectableOption[]) => {
+  const updateSourceField = (index: string, field: string) => {
     setTempSourceFields({
       ...tempSourceFields,
-      [index]: f.filter(({ checked }) => checked === 'on').map(({ label }) => label),
+      [index]: [field],
     });
-    usageTracker.click(AnalyticsEvents.editContextFieldToggled);
+    usageTracker?.click(AnalyticsEvents.editContextFieldToggled);
   };
 
   const saveSourceFields = () => {
-    usageTracker.click(AnalyticsEvents.editContextSaved);
+    usageTracker?.click(AnalyticsEvents.editContextSaved);
     onChangeSourceFields(tempSourceFields);
     onChangeSize(docSize);
     onClose();
   };
+
   const handleDocSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    usageTracker.click(AnalyticsEvents.editContextDocSizeChanged);
+    usageTracker?.click(AnalyticsEvents.editContextDocSizeChanged);
     setDocSize(Number(e.target.value));
   };
 
   useEffect(() => {
-    usageTracker.load(AnalyticsEvents.editContextFlyoutOpened);
+    usageTracker?.load(AnalyticsEvents.editContextFlyoutOpened);
   }, [usageTracker]);
 
   return (
@@ -119,71 +118,69 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
       <EuiFlyoutBody>
         <EuiFlexGroup>
           <EuiFlexItem grow={3}>
-            <EuiFlexGroup direction="column">
+            <EuiFlexGroup direction="column" gutterSize="l">
               <EuiFlexItem grow={false}>
-                <EuiSelect
-                  prepend={i18n.translate(
+                <EuiFormRow
+                  label={i18n.translate(
                     'xpack.searchPlayground.editContext.flyout.docsRetrievedCount',
                     {
-                      defaultMessage: 'Retrieved documents',
+                      defaultMessage: 'Number of documents to retrieve',
                     }
                   )}
-                  options={[
-                    {
-                      value: 3,
-                      text: '3',
-                    },
-                    {
-                      value: 5,
-                      text: '5',
-                    },
-                    {
-                      value: 10,
-                      text: '10',
-                    },
-                  ]}
-                  value={docSize}
-                  onChange={handleDocSizeChange}
-                />
-              </EuiFlexItem>
-              <EuiText>
-                <h5>
-                  <FormattedMessage
-                    id="xpack.searchPlayground.editContext.flyout.table.title"
-                    defaultMessage="Selected fields"
+                >
+                  <EuiSelect
+                    options={[
+                      {
+                        value: 1,
+                        text: '1',
+                      },
+                      {
+                        value: 3,
+                        text: '3',
+                      },
+                      {
+                        value: 5,
+                        text: '5',
+                      },
+                      {
+                        value: 10,
+                        text: '10',
+                      },
+                    ]}
+                    value={docSize}
+                    onChange={handleDocSizeChange}
                   />
-                </h5>
-              </EuiText>
-              {Object.entries(fields).map(([index, group], i) => (
-                <EuiFlexItem grow={false} key={index}>
-                  <EuiPanel grow={false} hasShadow={false} hasBorder>
-                    <EuiAccordion
-                      initialIsOpen={i === 0}
-                      id={index}
-                      buttonContent={
-                        <EuiText>
-                          <h5>{index}</h5>
-                        </EuiText>
-                      }
-                    >
-                      <EuiSpacer size="s" />
-                      <EuiSelectable
-                        aria-label="Select context fields"
-                        data-test-subj="contextFieldsSelectable"
-                        options={group.source_fields.map((field) => ({
-                          label: field,
-                          checked: tempSourceFields[index]?.includes(field) ? 'on' : undefined,
-                        }))}
-                        onChange={(newOptions) => toggleSourceField(index, newOptions)}
-                        listProps={{ bordered: false }}
-                        singleSelection="always"
-                      >
-                        {(list) => list}
-                      </EuiSelectable>
-                    </EuiAccordion>
-                  </EuiPanel>
-                </EuiFlexItem>
-              ))}
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFlexGroup direction="column" gutterSize="m">
+                  <EuiFlexItem>
+                    <EuiText>
+                      <h5>
+                        <FormattedMessage
+                          id="xpack.searchPlayground.editContext.flyout.table.title"
+                          defaultMessage="Select fields"
+                        />
+                      </h5>
+                    </EuiText>
+                  </EuiFlexItem>
+                  {Object.entries(fields).map(([index, group]) => (
+                    <EuiFlexItem grow={false} key={index}>
+                      <EuiFormRow label={index}>
+                        <EuiSuperSelect
+                          data-test-subj={`contextFieldsSelectable_${index}`}
+                          options={group.source_fields.map((field) => ({
+                            value: field,
+                            inputDisplay: field,
+                          }))}
+                          valueOfSelected={tempSourceFields[index]?.[0]}
+                          onChange={(value) => updateSourceField(index, value)}
+                        />
+                      </EuiFormRow>
+                    </EuiFlexItem>
+                  ))}
+                </EuiFlexGroup>
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
