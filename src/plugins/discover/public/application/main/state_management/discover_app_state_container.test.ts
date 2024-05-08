@@ -224,10 +224,24 @@ describe('Test discover app state container', () => {
         expect(isEqualState(initialState, { ...initialState, ...param })).toBeFalsy();
       });
     });
+
     test('allows to exclude variables from comparison', () => {
       expect(
         isEqualState(initialState, { ...initialState, dataSource: undefined }, ['dataSource'])
       ).toBeTruthy();
     });
+  });
+
+  test('should automatically set ES|QL data source when query is ES|QL', () => {
+    state.update({
+      dataSource: createDataViewDataSource({ dataViewId: 'test' }),
+    });
+    expect(state.get().dataSource?.type).toBe('dataView');
+    state.update({
+      query: {
+        esql: 'from test',
+      },
+    });
+    expect(state.get().dataSource?.type).toBe('esql');
   });
 });

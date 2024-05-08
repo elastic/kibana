@@ -131,4 +131,26 @@ describe('getStateDefaults', () => {
       savedSearchMock.searchSource.getField('index')?.id
     );
   });
+
+  test('should return expected dataSource', () => {
+    const actualForTextBased = getStateDefaults({
+      services: discoverServiceMock,
+      savedSearch: savedSearchMockWithESQL,
+    });
+    expect(actualForTextBased.dataSource).toMatchInlineSnapshot(`
+      Object {
+        "type": "esql",
+      }
+    `);
+    const actualForDataView = getStateDefaults({
+      services: discoverServiceMock,
+      savedSearch: savedSearchMock,
+    });
+    expect(actualForDataView.dataSource).toMatchInlineSnapshot(`
+      Object {
+        "dataViewId": "the-data-view-id",
+        "type": "dataView",
+      }
+    `);
+  });
 });
