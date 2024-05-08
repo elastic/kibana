@@ -774,7 +774,7 @@ export const continueFromDefineStep = () => {
   getDefineContinueButton().should('exist').click({ force: true });
 };
 
-export const fillDefineMachineLearningRuleAndContinue = (rule: MachineLearningRuleCreateProps) => {
+export const fillDefineMachineLearningRule = (rule: MachineLearningRuleCreateProps) => {
   const jobsAsArray = isArray(rule.machine_learning_job_id)
     ? rule.machine_learning_job_id
     : [rule.machine_learning_job_id];
@@ -789,6 +789,10 @@ export const fillDefineMachineLearningRuleAndContinue = (rule: MachineLearningRu
   cy.get(ANOMALY_THRESHOLD_INPUT).type(`{selectall}${rule.anomaly_threshold}`, {
     force: true,
   });
+};
+
+export const fillDefineMachineLearningRuleAndContinue = (rule: MachineLearningRuleCreateProps) => {
+  fillDefineMachineLearningRule(rule);
   getDefineContinueButton().should('exist').click({ force: true });
 };
 
