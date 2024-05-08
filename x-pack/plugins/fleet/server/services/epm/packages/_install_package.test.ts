@@ -325,7 +325,7 @@ describe('_installPackage', () => {
     describe('timeout not reached', () => {
       describe('force flag not provided', () => {
         it('throws concurrent installation error if force flag is not provided', async () => {
-          expect(
+          await expect(
             _installPackage({
               savedObjectsClient: soClient,
               // @ts-ignore
@@ -386,7 +386,7 @@ describe('_installPackage', () => {
     });
   });
 
-  it('surfaces saved object conflicts error', () => {
+  it('surfaces saved object conflicts error', async () => {
     appContextService.start(
       createAppContextStartContractMock({
         internal: {
@@ -407,7 +407,7 @@ describe('_installPackage', () => {
       new PackageSavedObjectConflictError('test')
     );
 
-    expect(
+    await expect(
       _installPackage({
         savedObjectsClient: soClient,
         // @ts-ignore

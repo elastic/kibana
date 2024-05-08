@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import type { EndpointCapabilities } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { useWithShowResponder } from '../../../../hooks';
 import { APP_UI_ID } from '../../../../../../common/constants';
@@ -42,7 +43,9 @@ export const useEndpointActionItems = (
     canIsolateHost,
     canUnIsolateHost,
     canAccessEndpointActionsLogManagement,
-    canAccessFleet,
+    canReadFleetAgentPolicies,
+    canWriteFleetAgents,
+    canReadFleetAgents,
   } = useUserPrivileges().endpointPrivileges;
 
   return useMemo<ContextMenuItemNavByRouterProps[]>(() => {
@@ -130,7 +133,8 @@ export const useEndpointActionItems = (
                 showEndpointResponseActionsConsole({
                   agentId: endpointMetadata.agent.id,
                   agentType: 'endpoint',
-                  capabilities: endpointMetadata.Endpoint.capabilities ?? [],
+                  capabilities:
+                    (endpointMetadata.Endpoint.capabilities as EndpointCapabilities[]) ?? [],
                   hostName: endpointMetadata.host.name,
                 });
               },
@@ -175,7 +179,7 @@ export const useEndpointActionItems = (
           />
         ),
       },
-      ...(canAccessFleet
+      ...(canReadFleetAgentPolicies
         ? [
             {
               icon: 'gear',
@@ -202,6 +206,10 @@ export const useEndpointActionItems = (
                 />
               ),
             },
+          ]
+        : []),
+      ...(canReadFleetAgents
+        ? [
             {
               icon: 'gear',
               key: 'agentDetailsLink',
@@ -226,6 +234,10 @@ export const useEndpointActionItems = (
                 />
               ),
             },
+          ]
+        : []),
+      ...(canWriteFleetAgents
+        ? [
             {
               icon: 'gear',
               key: 'agentPolicyReassignLink',
@@ -270,6 +282,8 @@ export const useEndpointActionItems = (
     options?.isEndpointList,
     canIsolateHost,
     canUnIsolateHost,
-    canAccessFleet,
+    canReadFleetAgentPolicies,
+    canReadFleetAgents,
+    canWriteFleetAgents,
   ]);
 };

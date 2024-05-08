@@ -137,7 +137,7 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
           <EuiCodeBlock
             language="csv"
             css={css`
-              background-color: ${euiTheme.colors.ghost};
+              background-color: ${euiTheme.colors.emptyShade};
             `}
             paddingSize="s"
             lineNumbers

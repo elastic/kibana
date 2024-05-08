@@ -18,11 +18,7 @@ import {
   isTokenLimitReachedError,
   StreamingChatResponseEventType,
 } from '../../common';
-import {
-  getAssistantSystemMessage,
-  type ObservabilityAIAssistantChatService,
-  type ObservabilityAIAssistantService,
-} from '..';
+import type { ObservabilityAIAssistantChatService, ObservabilityAIAssistantService } from '..';
 import { useKibana } from './use_kibana';
 import { useOnce } from './use_once';
 import { useUserPreferredLanguage } from './use_user_preferred_language';
@@ -57,6 +53,7 @@ interface UseChatPropsWithoutContext {
   chatService: ObservabilityAIAssistantChatService;
   connectorId?: string;
   persist: boolean;
+  disableFunctions?: boolean;
   onConversationUpdate?: (event: ConversationCreateEvent | ConversationUpdateEvent) => void;
   onChatComplete?: (messages: Message[]) => void;
 }
@@ -73,15 +70,14 @@ function useChatWithoutContext({
   onConversationUpdate,
   onChatComplete,
   persist,
+  disableFunctions,
 }: UseChatPropsWithoutContext): UseChatResult {
   const [chatState, setChatState] = useState(ChatState.Ready);
-
   const systemMessage = useMemo(() => {
-    return getAssistantSystemMessage({ contexts: chatService.getContexts() });
+    return chatService.getSystemMessage();
   }, [chatService]);
 
   useOnce(initialMessages);
-
   useOnce(initialConversationId);
 
   const [conversationId, setConversationId] = useState(initialConversationId);
@@ -165,6 +161,7 @@ function useChatWithoutContext({
         connectorId,
         messages: getWithSystemMessage(nextMessages, systemMessage),
         persist,
+        disableFunctions: disableFunctions ?? false,
         signal: abortControllerRef.current.signal,
         conversationId,
         responseLanguage: getPreferredLanguage(),
@@ -263,6 +260,7 @@ function useChatWithoutContext({
       handleError,
       handleSignalAbort,
       persist,
+      disableFunctions,
       service,
       systemMessage,
       getPreferredLanguage,

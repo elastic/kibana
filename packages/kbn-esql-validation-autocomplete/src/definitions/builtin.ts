@@ -19,7 +19,7 @@ function createMathDefinition(
     type: 'builtin',
     name,
     description,
-    supportedCommands: ['eval', 'where', 'row', 'stats'],
+    supportedCommands: ['eval', 'where', 'row', 'stats', 'sort'],
     supportedOptions: ['by'],
     signatures: types.map((type) => {
       if (Array.isArray(type)) {
@@ -59,7 +59,7 @@ function createComparisonDefinition(
     type: 'builtin' as const,
     name,
     description,
-    supportedCommands: ['eval', 'where', 'row'],
+    supportedCommands: ['eval', 'where', 'row', 'sort'],
     supportedOptions: ['by'],
     validate,
     signatures: [
@@ -91,6 +91,22 @@ function createComparisonDefinition(
         ],
         returnType: 'boolean',
       },
+      ...['date', 'number'].flatMap((type) => [
+        {
+          params: [
+            { name: 'left', type },
+            { name: 'right', type: 'string', constantOnly: true },
+          ],
+          returnType: 'boolean',
+        },
+        {
+          params: [
+            { name: 'right', type: 'string', constantOnly: true },
+            { name: 'right', type },
+          ],
+          returnType: 'boolean',
+        },
+      ]),
       ...extraSignatures,
     ],
   };
@@ -99,14 +115,14 @@ function createComparisonDefinition(
 export const builtinFunctions: FunctionDefinition[] = [
   createMathDefinition(
     '+',
-    ['number', 'date', ['date', 'time_literal'], ['time_literal', 'date']],
+    ['number', ['date', 'time_literal'], ['time_literal', 'date']],
     i18n.translate('kbn-esql-validation-autocomplete.esql.definition.addDoc', {
       defaultMessage: 'Add (+)',
     })
   ),
   createMathDefinition(
     '-',
-    ['number', 'date', ['date', 'time_literal'], ['time_literal', 'date']],
+    ['number', ['date', 'time_literal'], ['time_literal', 'date']],
     i18n.translate('kbn-esql-validation-autocomplete.esql.definition.subtractDoc', {
       defaultMessage: 'Subtract (-)',
     })
@@ -280,7 +296,7 @@ export const builtinFunctions: FunctionDefinition[] = [
     ignoreAsSuggestion: /not/.test(name),
     name,
     description,
-    supportedCommands: ['eval', 'where', 'row'],
+    supportedCommands: ['eval', 'where', 'row', 'sort'],
     supportedOptions: ['by'],
     signatures: [
       {
@@ -306,7 +322,7 @@ export const builtinFunctions: FunctionDefinition[] = [
     ignoreAsSuggestion: /not/.test(name),
     name,
     description,
-    supportedCommands: ['eval', 'where', 'row'],
+    supportedCommands: ['eval', 'where', 'row', 'sort'],
     signatures: [
       {
         params: [
@@ -355,7 +371,7 @@ export const builtinFunctions: FunctionDefinition[] = [
     type: 'builtin' as const,
     name,
     description,
-    supportedCommands: ['eval', 'where', 'row'],
+    supportedCommands: ['eval', 'where', 'row', 'sort'],
     supportedOptions: ['by'],
     signatures: [
       {
@@ -394,7 +410,7 @@ export const builtinFunctions: FunctionDefinition[] = [
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.notDoc', {
       defaultMessage: 'Not',
     }),
-    supportedCommands: ['eval', 'where', 'row'],
+    supportedCommands: ['eval', 'where', 'row', 'sort'],
     supportedOptions: ['by'],
     signatures: [
       {
@@ -420,7 +436,7 @@ export const builtinFunctions: FunctionDefinition[] = [
     type: 'builtin',
     name,
     description,
-    supportedCommands: ['eval', 'where', 'row'],
+    supportedCommands: ['eval', 'where', 'row', 'sort'],
     signatures: [
       {
         params: [{ name: 'left', type: 'any' }],

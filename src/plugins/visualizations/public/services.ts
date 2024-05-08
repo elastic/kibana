@@ -12,15 +12,16 @@ import type {
   Capabilities,
   ChromeStart,
   DocLinksStart,
-  ExecutionContextSetup,
   HttpStart,
   IUiSettingsClient,
   OverlayStart,
   SavedObjectsStart,
   ThemeServiceStart,
+  ExecutionContextSetup,
+  AnalyticsServiceStart,
+  I18nStart,
 } from '@kbn/core/public';
 import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -35,6 +36,8 @@ import type { TypesStart } from './vis_types';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 
+export const [getAnalytics, setAnalytics] = createGetterSetter<AnalyticsServiceStart>('Analytics');
+export const [getI18n, setI18n] = createGetterSetter<I18nStart>('I18n');
 export const [getTheme, setTheme] = createGetterSetter<ThemeServiceStart>('Theme');
 
 export const [getCapabilities, setCapabilities] = createGetterSetter<Capabilities>('Capabilities');

@@ -59,6 +59,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
   spaceId: string
 ): Promise<PreconfigurationResult> {
   const logger = appContextService.getLogger();
+  const cloudSetup = appContextService.getCloud();
 
   // Validate configured packages to ensure there are no version conflicts
   const packageNames = groupBy(packages, (pkg) => pkg.name);
@@ -160,6 +161,19 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         );
       }
 
+      if (
+        (!cloudSetup?.isServerlessEnabled ||
+          !appContextService.getExperimentalFeatures().agentless) &&
+        preconfiguredAgentPolicy?.supports_agentless !== undefined
+      ) {
+        throw new FleetError(
+          i18n.translate('xpack.fleet.preconfiguration.support_agentless', {
+            defaultMessage:
+              '`supports_agentless` is only allowed in serverless environments that support the agentless feature',
+          })
+        );
+      }
+
       const { created, policy } = await agentPolicyService.ensurePreconfiguredAgentPolicy(
         soClient,
         esClient,
@@ -167,7 +181,8 @@ export async function ensurePreconfiguredPackagesAndPolicies(
       );
 
       if (!created) {
-        if (!policy?.is_managed) return { created, policy };
+        if (!policy) return { created, policy };
+        if (!policy.is_managed && !preconfiguredAgentPolicy.is_managed) return { created, policy };
         const { hasChanged, fields } = comparePreconfiguredPolicyToCurrent(
           preconfiguredAgentPolicy,
           policy
@@ -371,9 +386,7 @@ async function addPreconfiguredPolicyPackages(
       await addPackageToAgentPolicy(
         soClient,
         esClient,
-        installedPackage,
         agentPolicy,
-        defaultOutput,
         packageInfo,
         name,
         id,

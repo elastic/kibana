@@ -42,8 +42,13 @@ import { useLoadInferenceModels } from '../../../../../services/api';
 interface Props {
   onChange(value: string): void;
   'data-test-subj'?: string;
+  setValue: (value: string) => void;
 }
-export const SelectInferenceId = ({ onChange, 'data-test-subj': dataTestSubj }: Props) => {
+export const SelectInferenceId = ({
+  onChange,
+  'data-test-subj': dataTestSubj,
+  setValue,
+}: Props) => {
   const {
     core: { application },
     docLinks,
@@ -107,7 +112,14 @@ export const SelectInferenceId = ({ onChange, 'data-test-subj': dataTestSubj }: 
   }, [models]);
 
   useEffect(() => {
-    setOptions([...defaultInferenceIds, ...inferenceIdOptionsFromModels]);
+    const mergedOptions = {
+      ...inferenceIdOptionsFromModels.reduce(
+        (acc, option) => ({ ...acc, [option.label]: option }),
+        {}
+      ),
+      ...defaultInferenceIds.reduce((acc, option) => ({ ...acc, [option.label]: option }), {}),
+    };
+    setOptions(Object.values(mergedOptions));
   }, [inferenceIdOptionsFromModels, defaultInferenceIds]);
   const [isCreateInferenceApiLoading, setIsCreateInferenceApiLoading] = useState(false);
 
@@ -141,7 +153,10 @@ export const SelectInferenceId = ({ onChange, 'data-test-subj': dataTestSubj }: 
 
     return subscription.unsubscribe;
   }, [subscribe, onChange]);
-  const selectedOptions = options.filter((option) => option.checked).find((k) => k.label);
+  const selectedOptionLabel = options.find((option) => option.checked)?.label;
+  useEffect(() => {
+    setValue(selectedOptionLabel ?? 'elser_model_2');
+  }, [selectedOptionLabel, setValue]);
   const [isInferencePopoverVisible, setIsInferencePopoverVisible] = useState<boolean>(false);
   const [inferenceEndpointError, setInferenceEndpointError] = useState<string | undefined>(
     undefined
@@ -176,15 +191,18 @@ export const SelectInferenceId = ({ onChange, 'data-test-subj': dataTestSubj }: 
                     iconType="arrowDown"
                     iconSide="right"
                     color="text"
+                    data-test-subj="inferenceIdButton"
                     onClick={() => {
                       setIsInferencePopoverVisible(!isInferencePopoverVisible);
                     }}
                   >
-                    <FormattedMessage
-                      id="xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.button"
-                      defaultMessage="{defaultValue}"
-                      values={{ defaultValue: selectedOptions?.label }}
-                    />
+                    {selectedOptionLabel ||
+                      i18n.translate(
+                        'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.defaultLabel',
+                        {
+                          defaultMessage: 'No model selected',
+                        }
+                      )}
                   </EuiButton>
                 </>
               )}
@@ -288,7 +306,7 @@ export const SelectInferenceId = ({ onChange, 'data-test-subj': dataTestSubj }: 
   };
   return (
     <Form form={form}>
-      <EuiFlexGroup>
+      <EuiFlexGroup data-test-subj="selectInferenceId">
         <EuiFlexItem grow={false}>
           {inferencePopover()}
           {isInferenceFlyoutVisible && (
