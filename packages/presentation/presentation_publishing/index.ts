@@ -109,6 +109,7 @@ export {
 export {
   apiPublishesPanelDescription,
   apiPublishesWritablePanelDescription,
+  getPanelDescription,
   type PublishesPanelDescription,
   type PublishesWritablePanelDescription,
 } from './interfaces/titles/publishes_panel_description';

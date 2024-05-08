@@ -34,6 +34,7 @@ import {
   apiPublishesTimeRange,
   apiPublishesUnifiedSearch,
   getInheritedViewMode,
+  getPanelDescription,
   getPanelTitle,
   PublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
@@ -63,10 +64,8 @@ export const CustomizePanelEditor = ({
    */
   const editMode = getInheritedViewMode(api) === 'edit';
   const [hideTitle, setHideTitle] = useState(api.hidePanelTitle?.value);
-  const [panelDescription, setPanelDescription] = useState(
-    api.panelDescription?.value ?? api.defaultPanelDescription?.value
-  );
   const [panelTitle, setPanelTitle] = useState(getPanelTitle(api));
+  const [panelDescription, setPanelDescription] = useState(getPanelDescription(api));
   const [timeRange, setTimeRange] = useState(
     api.timeRange$?.value ?? api.parentApi?.timeRange$?.value
   );
