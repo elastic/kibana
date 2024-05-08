@@ -11,12 +11,12 @@ import {
   useAssistantContext,
   useLoadConnectors,
 } from '@kbn/elastic-assistant';
-import type { AttackDiscoveryPostRequestBody, Replacements } from '@kbn/elastic-assistant-common';
+import type { Replacements } from '@kbn/elastic-assistant-common';
 import {
   AttackDiscoveryPostResponse,
   ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
 } from '@kbn/elastic-assistant-common';
-import { isEmpty, uniq } from 'lodash/fp';
+import { uniq } from 'lodash/fp';
 import moment from 'moment';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useLocalStorage, useSessionStorage } from 'react-use';
@@ -41,11 +41,12 @@ import {
 } from '../pages/session_storage';
 import { ERROR_GENERATING_ATTACK_DISCOVERIES } from '../pages/translations';
 import type { AttackDiscovery, GenerationInterval } from '../types';
-import { getGenAiConfig } from './helpers';
+import { getGenAiConfig, getRequestBody } from './helpers';
 
 const MAX_GENERATION_INTERVALS = 5;
 
 export interface UseAttackDiscovery {
+  alertsContextCount: number | null;
   approximateFutureTime: Date | null;
   attackDiscoveries: AttackDiscovery[];
   cachedAttackDiscoveries: Record<string, CachedAttackDiscoveries>;
@@ -128,26 +129,22 @@ export const useAttackDiscovery = ({
     cachedAttackDiscoveries[connectorId ?? '']?.updated ?? null
   );
 
+  // number of alerts sent as context to the LLM:
+  const [alertsContextCount, setAlertsContextCount] = useState<number | null>(null);
+
   /** The callback when users click the Generate button */
   const fetchAttackDiscoveries = useCallback(async () => {
     const selectedConnector = aiConnectors?.find((connector) => connector.id === connectorId);
     const actionTypeId = getFallbackActionTypeId(selectedConnector?.actionTypeId);
 
-    const body: AttackDiscoveryPostRequestBody = {
+    const body = getRequestBody({
       actionTypeId,
-      alertsIndexPattern: alertsIndexPattern ?? '',
-      anonymizationFields: anonymizationFields?.data ?? [],
-      connectorId: connectorId ?? '',
-      langSmithProject: isEmpty(traceOptions?.langSmithProject)
-        ? undefined
-        : traceOptions?.langSmithProject,
-      langSmithApiKey: isEmpty(traceOptions?.langSmithApiKey)
-        ? undefined
-        : traceOptions?.langSmithApiKey,
-      size: knowledgeBase.latestAlerts,
-      replacements: {}, // no need to re-use replacements in the current implementation
-      subAction: 'invokeAI', // non-streaming
-    };
+      alertsIndexPattern,
+      anonymizationFields,
+      connectorId,
+      knowledgeBase,
+      traceOptions,
+    });
 
     try {
       setLoadingConnectorId?.(connectorId ?? null);
@@ -224,8 +221,14 @@ export const useAttackDiscovery = ({
         [connectorId ?? '']: newConnectorIntervals,
       };
 
-      setGenerationIntervals(newGenerationIntervals);
-      setLocalStorageGenerationIntervals(newGenerationIntervals);
+      const newAlertsContextCount = parsedResponse.data.alertsContextCount ?? null;
+      setAlertsContextCount(newAlertsContextCount);
+
+      // only update the generation intervals if alerts were sent as context to the LLM:
+      if (newAlertsContextCount != null && newAlertsContextCount > 0) {
+        setGenerationIntervals(newGenerationIntervals);
+        setLocalStorageGenerationIntervals(newGenerationIntervals);
+      }
 
       setReplacements(newReplacements);
       setAttackDiscoveries(newAttackDiscoveries);
@@ -235,6 +238,7 @@ export const useAttackDiscovery = ({
       reportAttackDiscoveriesGenerated({
         actionTypeId,
         durationMs,
+        alertsContextCount: newAlertsContextCount ?? 0,
         alertsCount: uniq(
           newAttackDiscoveries.flatMap((attackDiscovery) => attackDiscovery.alertIds)
         ).length,
@@ -255,13 +259,13 @@ export const useAttackDiscovery = ({
   }, [
     aiConnectors,
     alertsIndexPattern,
-    anonymizationFields?.data,
+    anonymizationFields,
     cachedAttackDiscoveries,
     connectorId,
     connectorIntervals,
     generationIntervals,
     http,
-    knowledgeBase.latestAlerts,
+    knowledgeBase,
     replacements,
     reportAttackDiscoveriesGenerated,
     setConnectorId,
@@ -269,11 +273,11 @@ export const useAttackDiscovery = ({
     setLocalStorageGenerationIntervals,
     setSessionStorageCachedAttackDiscoveries,
     toasts,
-    traceOptions?.langSmithApiKey,
-    traceOptions?.langSmithProject,
+    traceOptions,
   ]);
 
   return {
+    alertsContextCount,
     approximateFutureTime,
     attackDiscoveries,
     cachedAttackDiscoveries,

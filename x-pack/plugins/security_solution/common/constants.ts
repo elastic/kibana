@@ -428,6 +428,7 @@ export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
   TIMELINES: 'securitySolution.security.timelineFlyoutHeader.saveTimelineTour',
   TIMELINE: 'securitySolution.timeline.newFeaturesTour.v8.12',
   FLYOUT: 'securitySolution.documentDetails.newFeaturesTour.v8.14',
+  ATTACK_DISCOVERY: 'securitySolution.attackDiscovery.newFeaturesTour.v8.14',
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
