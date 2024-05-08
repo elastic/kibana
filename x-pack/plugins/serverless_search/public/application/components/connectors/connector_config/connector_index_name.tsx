@@ -21,6 +21,7 @@ import { Connector, ConnectorStatus } from '@kbn/search-connectors';
 import React, { useState } from 'react';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { DEFAULT_INGESTION_PIPELINE } from '@kbn/search-api-panels/constants';
 import { isValidIndexName } from '../../../../utils/validate_index_name';
 import { SAVE_LABEL } from '../../../../../common/i18n_string';
 import { useConnector } from '../../../hooks/api/use_connector';
@@ -29,7 +30,6 @@ import { ApiKeyPanel } from './api_key_panel';
 import { ConnectorIndexNameForm } from './connector_index_name_form';
 import { SyncScheduledCallOut } from './sync_scheduled_callout';
 import { docLinks } from '../../../../../common/doc_links';
-import { DEFAULT_INGESTION_PIPELINE } from '../../../constants';
 interface ConnectorIndexNameProps {
   connector: Connector;
 }

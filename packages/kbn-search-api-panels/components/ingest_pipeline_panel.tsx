@@ -20,6 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import type { Pipeline } from '@kbn/ingest-pipelines-plugin/public';
+import { DEFAULT_INGESTION_PIPELINE } from '../constants';
 
 interface OptionItem {
   value: string;
@@ -31,8 +32,6 @@ interface IngestPipelinePanelProps {
   setSelectedPipeline: (pipeline: string) => void;
   ingestPipelineData?: Pipeline[] | null;
 }
-
-const RECOMMENDED_INGEST_PIPELINE = 'search-default-ingestion';
 
 export const IngestPipelinePanel: React.FC<IngestPipelinePanelProps> = ({
   setSelectedPipeline,
@@ -64,7 +63,7 @@ export const IngestPipelinePanel: React.FC<IngestPipelinePanelProps> = ({
                       <EuiBadge>Managed</EuiBadge>
                     </EuiFlexItem>
                   )}
-                  {item.name === RECOMMENDED_INGEST_PIPELINE && (
+                  {item.name === DEFAULT_INGESTION_PIPELINE && (
                     <EuiFlexItem grow={false}>
                       <EuiBadge color="primary">Recommended</EuiBadge>
                     </EuiFlexItem>
