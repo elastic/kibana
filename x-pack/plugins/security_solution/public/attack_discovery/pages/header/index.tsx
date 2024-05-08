@@ -16,6 +16,7 @@ import * as i18n from './translations';
 
 interface Props {
   connectorId: string | undefined;
+  connectorsAreConfigured: boolean;
   isLoading: boolean;
   onGenerate: () => void;
   onConnectorIdSelected: (connectorId: string) => void;
@@ -23,6 +24,7 @@ interface Props {
 
 const HeaderComponent: React.FC<Props> = ({
   connectorId,
+  connectorsAreConfigured,
   isLoading,
   onGenerate,
   onConnectorIdSelected,
@@ -41,13 +43,16 @@ const HeaderComponent: React.FC<Props> = ({
       data-test-subj="header"
       gutterSize="none"
     >
-      <EuiFlexItem grow={false}>
-        <ConnectorSelectorInline
-          onConnectorSelected={noop}
-          onConnectorIdSelected={onConnectorIdSelected}
-          selectedConnectorId={connectorId}
-        />
-      </EuiFlexItem>
+      {connectorsAreConfigured && (
+        <EuiFlexItem grow={false}>
+          <ConnectorSelectorInline
+            onConnectorSelected={noop}
+            onConnectorIdSelected={onConnectorIdSelected}
+            selectedConnectorId={connectorId}
+          />
+        </EuiFlexItem>
+      )}
+
       <EuiFlexItem grow={false}>
         <EuiToolTip
           content={connectorId == null ? i18n.SELECT_A_CONNECTOR : null}
