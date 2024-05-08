@@ -180,6 +180,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
         <HeaderPage border title={pageTitle}>
           <Header
             connectorId={connectorId}
+            connectorsAreConfigured={aiConnectors != null && aiConnectors.length > 0}
             isLoading={isLoading}
             onConnectorIdSelected={onConnectorIdSelected}
             onGenerate={onGenerate}
