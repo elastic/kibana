@@ -133,7 +133,7 @@ export const ConnectorConfiguration: React.FC = () => {
                           <EuiText size="s">
                             <FormattedMessage
                               id="xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.description.thirdParagraph"
-                              defaultMessage="In this step, you will need to clone or fork the elastic/connectors repository, and copy the API key and connector ID values to the config.yml file. Here's an {exampleLink}."
+                              defaultMessage="In this step, you will need the API key and connector ID values for your config.yml file. Here's an {exampleLink}."
                               values={{
                                 exampleLink: (
                                   <EuiLink
