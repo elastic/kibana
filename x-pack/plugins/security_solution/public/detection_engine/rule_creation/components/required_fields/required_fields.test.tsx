@@ -16,7 +16,7 @@ import type { RequiredFieldInput } from '../../../../../common/api/detection_eng
 
 describe('RequiredFields form part', () => {
   it('displays the required fields label', () => {
-    render(<TestForm initialState={[]} />);
+    render(<TestForm />);
 
     expect(screen.getByText('Required fields'));
   });
@@ -41,7 +41,7 @@ describe('RequiredFields form part', () => {
       createIndexPatternField({ name: 'field1', esTypes: ['string'] }),
     ];
 
-    render(<TestForm initialState={[]} indexPatternFields={indexPatternFields} />);
+    render(<TestForm indexPatternFields={indexPatternFields} />);
 
     await addRequiredFieldRow();
     await selectFirstEuiComboBoxOption({
@@ -77,7 +77,7 @@ describe('RequiredFields form part', () => {
       createIndexPatternField({ name: 'field2', esTypes: ['keyword'] }),
     ];
 
-    render(<TestForm initialState={[]} indexPatternFields={indexPatternFields} />);
+    render(<TestForm indexPatternFields={indexPatternFields} />);
 
     await addRequiredFieldRow();
 
@@ -101,7 +101,7 @@ describe('RequiredFields form part', () => {
   });
 
   it('user can add his own custom field name and type', async () => {
-    render(<TestForm initialState={[]} indexPatternFields={[]} />);
+    render(<TestForm indexPatternFields={[]} />);
 
     await addRequiredFieldRow();
 
@@ -179,9 +179,7 @@ describe('RequiredFields form part', () => {
   });
 
   it('adding a new required field is disabled when index patterns are loading', async () => {
-    render(
-      <TestForm initialState={[]} indexPatternFields={undefined} isIndexPatternLoading={true} />
-    );
+    render(<TestForm indexPatternFields={undefined} isIndexPatternLoading={true} />);
 
     expect(screen.getByTestId('addRequiredFieldButton')).toBeDisabled();
   });
@@ -191,7 +189,7 @@ describe('RequiredFields form part', () => {
       createIndexPatternField({ name: 'field1', esTypes: ['string'] }),
     ];
 
-    render(<TestForm initialState={[]} indexPatternFields={indexPatternFields} />);
+    render(<TestForm indexPatternFields={indexPatternFields} />);
 
     expect(screen.getByTestId('addRequiredFieldButton')).toBeEnabled();
 
@@ -313,7 +311,7 @@ describe('RequiredFields form part', () => {
         createIndexPatternField({ name: 'field1', esTypes: ['string'] }),
       ];
 
-      render(<TestForm initialState={[]} indexPatternFields={indexPatternFields} />);
+      render(<TestForm indexPatternFields={indexPatternFields} />);
 
       await addRequiredFieldRow();
 
@@ -323,7 +321,7 @@ describe('RequiredFields form part', () => {
     });
 
     it(`doesn't display a warning when field is invalid`, async () => {
-      render(<TestForm initialState={[]} />);
+      render(<TestForm />);
 
       await addRequiredFieldRow();
 
@@ -340,7 +338,7 @@ describe('RequiredFields form part', () => {
 
   describe('validation', () => {
     it('form is invalid when only field name is empty', async () => {
-      render(<TestForm initialState={[]} />);
+      render(<TestForm />);
 
       await addRequiredFieldRow();
 
@@ -360,7 +358,7 @@ describe('RequiredFields form part', () => {
     });
 
     it('form is invalid when only field type is empty', async () => {
-      render(<TestForm initialState={[]} />);
+      render(<TestForm />);
 
       await addRequiredFieldRow();
 
@@ -409,7 +407,7 @@ describe('RequiredFields form part', () => {
     it('form is valid when both field name and type are empty', async () => {
       const handleSubmit = jest.fn();
 
-      render(<TestForm initialState={[]} onSubmit={handleSubmit} />);
+      render(<TestForm onSubmit={handleSubmit} />);
 
       await addRequiredFieldRow();
 
@@ -426,7 +424,7 @@ describe('RequiredFields form part', () => {
     it('submits undefined when no required fields are selected', async () => {
       const handleSubmit = jest.fn();
 
-      render(<TestForm initialState={[]} onSubmit={handleSubmit} />);
+      render(<TestForm onSubmit={handleSubmit} />);
 
       await submitForm();
 
@@ -482,13 +480,7 @@ describe('RequiredFields form part', () => {
 
       const handleSubmit = jest.fn();
 
-      render(
-        <TestForm
-          initialState={[]}
-          indexPatternFields={indexPatternFields}
-          onSubmit={handleSubmit}
-        />
-      );
+      render(<TestForm indexPatternFields={indexPatternFields} onSubmit={handleSubmit} />);
 
       await addRequiredFieldRow();
 
@@ -733,7 +725,7 @@ interface TestFormProps {
 
 function TestForm({
   indexPatternFields,
-  initialState,
+  initialState = [],
   isIndexPatternLoading,
   onSubmit,
 }: TestFormProps): JSX.Element {
