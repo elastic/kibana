@@ -68,6 +68,8 @@ export interface APIKeys {
    * @param params The params to invalidate the API keys.
    */
   invalidateAsInternalUser(params: InvalidateAPIKeysParams): Promise<InvalidateAPIKeyResult | null>;
+
+  checkPermissions(request: KibanaRequest): Promise<boolean>;
 }
 
 export type CreateAPIKeyParams =

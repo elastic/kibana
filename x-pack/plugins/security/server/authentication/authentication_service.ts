@@ -76,6 +76,7 @@ export interface InternalAuthenticationServiceStart extends AuthenticationServic
     | 'validate'
     | 'grantAsInternalUser'
     | 'invalidateAsInternalUser'
+    | 'checkPermissions'
   >;
   login: (request: KibanaRequest, attempt: ProviderLoginAttempt) => Promise<AuthenticationResult>;
   logout: (request: KibanaRequest) => Promise<DeauthenticationResult>;
@@ -363,6 +364,9 @@ export class AuthenticationService {
     const getCurrentUser = (request: KibanaRequest) =>
       http.auth.get<AuthenticatedUser>(request).state ?? null;
 
+    const checkPermissions = (request: KibanaRequest) =>
+      http.auth.get<Promise<boolean>>(request).state;
+
     this.session = session;
     const authenticator = (this.authenticator = new Authenticator({
       audit,
@@ -381,6 +385,7 @@ export class AuthenticationService {
       session,
       isElasticCloudDeployment,
       customLogoutURL,
+      checkPermissions,
     }));
 
     return {
@@ -393,6 +398,7 @@ export class AuthenticationService {
         invalidate: apiKeys.invalidate.bind(apiKeys),
         validate: apiKeys.validate.bind(apiKeys),
         invalidateAsInternalUser: apiKeys.invalidateAsInternalUser.bind(apiKeys),
+        checkPermissions: apiKeys.checkPermissions.bind(apiKeys),
       },
 
       login: async (request: KibanaRequest, attempt: ProviderLoginAttempt) => {

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ApiKey } from './tabs/api_keys_tab/views/success_form/types';
 
 export interface ConnectionDetailsOpts {
@@ -29,5 +30,5 @@ export interface ConnectionDetailsOptsApiKeys {
   createKey: (params: { name: string }) => Promise<{
     apiKey: ApiKey;
   }>;
-  hasPermission: () => Promise<boolean>;
+  hasPermission: (params: { request: KibanaRequest }) => Promise<boolean>;
 }

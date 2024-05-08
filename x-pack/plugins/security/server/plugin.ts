@@ -329,7 +329,9 @@ export class SecurityPlugin
 
     return Object.freeze<SecurityPluginSetup>({
       audit: this.auditSetup,
-      authc: { getCurrentUser: (request) => this.getAuthentication().getCurrentUser(request) },
+      authc: {
+        getCurrentUser: (request) => this.getAuthentication().getCurrentUser(request),
+      },
       authz: {
         actions: this.authorizationSetup.actions,
         checkPrivilegesWithRequest: this.authorizationSetup.checkPrivilegesWithRequest,

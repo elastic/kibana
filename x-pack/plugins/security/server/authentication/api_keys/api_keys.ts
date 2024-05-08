@@ -488,6 +488,13 @@ export class APIKeys implements APIKeysType {
 
     return roleDescriptors;
   }
+
+  async checkPermissions(): Promise<boolean> {
+    return await this.clusterClient.asInternalUser.transport.request({
+      method: 'GET',
+      path: `/internal/security/api_key/check_permissions`,
+    });
+  }
 }
 
 export class CreateApiKeyValidationError extends Error {
