@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { parse } from '@kbn/tinymath';
 import { monaco } from '@kbn/monaco';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { tinymathFunctions } from '@kbn/lens-formula-docs';
+import { TimefilterContract } from '@kbn/data-plugin/public';
 import { createMockedIndexPattern } from '../../../../mocks';
 import { GenericOperationDefinition } from '../..';
 import type { OperationMetadata, IndexPatternField } from '../../../../../../types';
@@ -210,8 +212,6 @@ The total number of documents. When you provide a field, the total number of fie
   });
 
   describe('autocomplete', () => {
-    const dateRange = { fromDate: '2022-11-01T00:00:00.000Z', toDate: '2022-11-03T00:00:00.000Z' };
-
     function getSuggestionArgs({
       expression,
       zeroIndexedOffset,
@@ -232,7 +232,13 @@ The total number of documents. When you provide a field, the total number of fie
         operationDefinitionMap,
         unifiedSearch: unifiedSearchPluginMock.createStartContract(),
         dataViews: dataViewPluginMocks.createStartContract(),
-        dateRange,
+        timefilter: {
+          getTime: () => ({ from: '2022-11-01T00:00:00.000Z', to: '2022-11-03T00:00:00.000Z' }),
+          calculateBounds: () => ({
+            min: moment('2022-11-01T00:00:00.000Z'),
+            max: moment('2022-11-03T00:00:00.000Z'),
+          }),
+        } as unknown as TimefilterContract,
       };
     }
     it('should list all valid functions at the top level (fake test)', async () => {
