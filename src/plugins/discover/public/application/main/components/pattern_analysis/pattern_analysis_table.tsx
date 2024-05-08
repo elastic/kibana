@@ -62,6 +62,7 @@ export const PatternAnalysisTable = (props: PatternAnalysisTableProps) => {
     'fieldFormats',
     'application',
     'charts',
+    'uiActions',
   ]);
 
   const input = pick(props, ['dataView', 'savedSearch', 'query', 'filters', 'onAddFilter']);

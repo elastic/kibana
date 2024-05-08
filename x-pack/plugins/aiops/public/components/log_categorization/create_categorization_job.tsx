@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React from 'react';
 
 import moment from 'moment';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
@@ -26,6 +26,7 @@ interface Props {
   query: QueryDslQueryContainer;
   earliest: number | undefined;
   latest: number | undefined;
+  iconOnly?: boolean;
 }
 
 export const CreateCategorizationJobButton: FC<Props> = ({
@@ -34,6 +35,7 @@ export const CreateCategorizationJobButton: FC<Props> = ({
   query,
   earliest,
   latest,
+  iconOnly = false,
 }) => {
   const {
     uiActions,
@@ -56,6 +58,19 @@ export const CreateCategorizationJobButton: FC<Props> = ({
 
   if (uiActions === undefined || capabilities.ml.canCreateJob === false) {
     return null;
+  }
+
+  if (iconOnly) {
+    return (
+      <EuiButtonIcon
+        data-test-subj="aiopsEmbeddableMenuOptionsButton"
+        size="s"
+        iconType="machineLearningApp"
+        onClick={createADJob}
+        // @ts-ignore - subdued does work
+        color="subdued"
+      />
+    );
   }
 
   return (

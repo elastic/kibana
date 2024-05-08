@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiSuperSelect, useEuiPaddingSize } from '@elastic/eui';
+import { EuiSuperSelect } from '@elastic/eui';
 import { EuiFormRow } from '@elastic/eui';
 import {
-  EuiButtonEmpty,
+  EuiButtonIcon,
   EuiPanel,
   EuiPopover,
   EuiSpacer,
@@ -54,7 +54,6 @@ export const EmbeddableMenu: FC<Props> = ({
 }) => {
   const [showMenu, setShowMenu] = useState(false);
   const togglePopover = () => setShowMenu(!showMenu);
-  const xs = useEuiPaddingSize('xs');
 
   const fieldOptions = useMemo(
     () => fields.map((field) => ({ inputDisplay: field.name, value: field })),
@@ -62,16 +61,14 @@ export const EmbeddableMenu: FC<Props> = ({
   );
 
   const button = (
-    <EuiButtonEmpty
+    <EuiButtonIcon
       data-test-subj="aiopsEmbeddableMenuOptionsButton"
       size="s"
-      iconType="arrowDown"
-      iconSide="right"
+      iconType="controlsHorizontal"
       onClick={() => togglePopover()}
-      css={{ marginRight: xs }}
-    >
-      Options
-    </EuiButtonEmpty>
+      // @ts-ignore - subdued does work
+      color="subdued"
+    />
   );
 
   return (
@@ -81,7 +78,7 @@ export const EmbeddableMenu: FC<Props> = ({
       isOpen={showMenu}
       closePopover={() => togglePopover()}
       panelPaddingSize="s"
-      anchorPosition="downLeft"
+      anchorPosition="downRight"
     >
       <EuiPanel color="transparent" paddingSize="s" css={{ maxWidth: '400px' }}>
         <EuiTitle size="xxxs">

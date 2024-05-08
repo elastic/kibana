@@ -22,6 +22,7 @@ import { getLabels } from './labels';
 export interface OpenInDiscover {
   openFunction: (mode: QueryMode, category?: Category) => void;
   labels: ReturnType<typeof getLabels>;
+  count: number;
 }
 
 export function useOpenInDiscover(
@@ -95,5 +96,5 @@ export function useOpenInDiscover(
     return getLabels(isFlyout && navigateToDiscover === false);
   }, [navigateToDiscover, onAddFilter, onClose]);
 
-  return { openFunction, labels };
+  return { openFunction, labels, count: selectedCategories.length };
 }

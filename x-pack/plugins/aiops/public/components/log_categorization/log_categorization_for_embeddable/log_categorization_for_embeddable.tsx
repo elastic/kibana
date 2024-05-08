@@ -411,6 +411,10 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
         setMinimumTimeRangeOption={setMinimumTimeRangeOption}
         setSelectedField={setSelectedField}
         viewModeToggle={viewModeToggle}
+        dataview={dataView}
+        earliest={earliest}
+        latest={latest}
+        query={searchQuery}
       />
 
       <EuiFlexItem css={style}>
