@@ -340,7 +340,7 @@ components:
           description: Name of an Elasticsearch field
         type:
           $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
-          description: Type of the Elasticsearch field
+          description: Type of an Elasticsearch field
       required:
         - name
         - type
