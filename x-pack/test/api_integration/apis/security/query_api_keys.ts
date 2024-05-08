@@ -179,6 +179,9 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(keys.apiKeys.length).to.be(10);
+      keys.apiKeys.forEach((key: any) => {
+        expect(key.type).to.be('rest');
+      });
     });
   });
 }
