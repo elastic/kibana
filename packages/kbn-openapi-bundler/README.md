@@ -1,15 +1,15 @@
 # OpenAPI Specs Bundler for Kibana
 
-`@kbn/openapi-bundler` is a tool for transforming multiple OpenAPI specification files (source specs) into a single bundled specification file (target spec).
-This can be used for API docs generation purposes. This approach allows you to:
+`@kbn/openapi-bundler` is a tool for transforming multiple OpenAPI specification files (source specs) into a bundled specification file(s) (target spec). The number of resulting bundles depends on a number of versions
+used in the OpenAPI specification files. The package can be used for API documentation generation purposes. This approach allows you to:
 
-- Abstract away the knowledge of where you keep your OpenAPI specs, how many specs there are, and how to find them. The Docs team should only know where a single file is located - the bundle.
+- Abstract away the knowledge of where you keep your OpenAPI specs, how many specs are there, and how to find them. Consumer should only know where result files are located - the bundles.
 - Omit internal API endpoints from the bundle.
 - Omit API endpoints that are hidden behind a feature flag and haven't been released yet.
 - Omit parts of schemas that are hidden behind a feature flag (e.g. a new property added to an existing response schema).
 - Omit custom OpenAPI attributes from the bundle, such as `x-codegen-enabled`, `x-internal`, and `x-modify` (see below).
 - Transform the target schema according to the custom OpenAPI attributes, such as `x-modify`.
-- Resolve references and inline some of them for better readability. The bundled file contains only local references and paths.
+- Resolve references, inline some of them and merge allOf object schemas for better readability. The bundled file contains only local references and paths.
 
 ## Getting started
 
@@ -22,16 +22,22 @@ Currently package supports only programmatic API. As the next step you need to c
 ```ts
 require('../../../../../src/setup_node_env');
 const { bundle } = require('@kbn/openapi-bundler');
-const { resolve } = require('path');
+const { join, resolve } = require('path');
 
 // define ROOT as `my-plugin` instead of `my-plugin/scripts/openapi`
 // pay attention to this constant when your script's location is different
 const ROOT = resolve(__dirname, '../..');
 
 bundle({
-  rootDir: ROOT, // Root path e.g. plugin root directory
-  sourceGlob: './**/*.schema.yaml', // Glob pattern to find OpenAPI specification files
-  outputFilePath: './target/openapi/my-plugin.bundled.schema.yaml', //
+  // Root path e.g. plugin root directory
+  rootDir: ROOT,
+  // Glob pattern to find OpenAPI specification files, relative to `rootDir`
+  sourceGlob: './**/*.schema.yaml',
+  // Output file path. Absolute or related to the node.js working directory.
+  // It may contain `{version}` placeholder which is optional. `{version}` placeholder
+  // will be replaced with the bundled specs version or filename will be prepended with
+  // version when placeholder is omitted, e.g. `2023-10-31-my-plugin.bundled.schema.yaml`.
+  outputFilePath: join(ROOT, 'target/openapi/my-plugin-{version}.bundled.schema.yaml'),
 });
 ```
 
