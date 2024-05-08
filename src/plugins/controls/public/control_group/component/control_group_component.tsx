@@ -264,7 +264,7 @@ export const ControlGroup = () => {
             {tourStep}
             <EuiFlexItem>
               <DndContext
-                onDragStart={({ active }) => active.id && setDraggingId(`${active.id}`)}
+                onDragStart={({ active }) => setDraggingId(`${active.id}`)}
                 onDragEnd={onDragEnd}
                 onDragCancel={() => setDraggingId(null)}
                 sensors={sensors}
