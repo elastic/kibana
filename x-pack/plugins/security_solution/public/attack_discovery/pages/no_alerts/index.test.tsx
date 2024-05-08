@@ -44,7 +44,7 @@ describe('NoAlerts', () => {
     it('links to the documentation', () => {
       expect(learnMoreLink).toHaveAttribute(
         'href',
-        'https://www.elastic.co/guide/en/security/master/attack-discovery.html'
+        'https://www.elastic.co/guide/en/security/current/attack-discovery.html'
       );
     });
 

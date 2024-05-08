@@ -77,7 +77,7 @@ const NoAlertsComponent: React.FC = () => {
         <EuiLink
           external={true}
           data-test-subj="learnMoreLink"
-          href="https://www.elastic.co/guide/en/security/master/attack-discovery.html"
+          href="https://www.elastic.co/guide/en/security/current/attack-discovery.html"
           target="_blank"
         >
           {i18n.LEARN_MORE}
