@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -31,13 +31,15 @@ function EmbeddedMapComponent({
 }) {
   const { maps } = useKibana<ApmPluginStartDeps>().services;
 
-  const layerList = dataView?.id
-    ? getLayerList({
-        selectedMap,
-        maps,
-        dataViewId: dataView?.id,
-      })
-    : [];
+  const layerList = useMemo(() => {
+    return dataView?.id
+      ? getLayerList({
+          selectedMap,
+          maps,
+          dataViewId: dataView?.id,
+        })
+      : [];
+  }, [selectedMap, maps, dataView?.id]);
 
   return (
     <div
