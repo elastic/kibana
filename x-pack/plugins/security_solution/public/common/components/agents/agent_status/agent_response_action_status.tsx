@@ -14,8 +14,6 @@ import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../
 import { ISOLATING_LABEL, RELEASING_LABEL, ISOLATED_LABEL } from './endpoint/endpoint_agent_status';
 import { useTestIdGenerator } from '../../../../management/hooks/use_test_id_generator';
 
-// TODO: remove original EndpointHostResponseActionsStatus usage/code when `agentStatusClientEnabled` FF is enabled
-
 const TOOLTIP_CONTENT_STYLES: React.CSSProperties = Object.freeze({ width: 150 });
 
 interface AgentResponseActionsStatusProps {
