@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { EndpointAgentStatus } from '../../../../../common/components/endpoint/endpoint_agent_status';
 import { isPolicyOutOfDate } from '../../utils';
 import type { HostInfo } from '../../../../../../common/endpoint/types';
@@ -32,6 +33,7 @@ import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/end
 import { getEndpointDetailsPath } from '../../../../common/routing';
 import { EndpointPolicyLink } from '../../../../components/endpoint_policy_link';
 import { OutOfDate } from '../components/out_of_date';
+import { AgentStatus } from '../../../../components/agent_status/agent_status';
 
 const EndpointDetailsContentStyled = styled.div`
   .policyLineText {
@@ -54,6 +56,7 @@ interface EndpointDetailsContentProps {
 
 export const EndpointDetailsContent = memo<EndpointDetailsContentProps>(
   ({ hostInfo, policyInfo }) => {
+    const agentStatusClientEnabled = useIsExperimentalFeatureEnabled('agentStatusClientEnabled');
     const queryParams = useEndpointSelector(uiQueryParams);
     const policyStatus = useMemo(
       () => hostInfo.metadata.Endpoint.policy.applied.status,
@@ -95,7 +98,10 @@ export const EndpointDetailsContent = memo<EndpointDetailsContentProps>(
               />
             </ColumnTitle>
           ),
-          description: (
+          // TODO: 8.15 remove `EndpointAgentStatus` when `agentStatusClientEnabled` FF is enabled
+          description: agentStatusClientEnabled ? (
+            <AgentStatus agentId={hostInfo.metadata.agent.id} agentType="endpoint" />
+          ) : (
             <EndpointAgentStatus
               pendingActions={getHostPendingActions(hostInfo.metadata.agent.id)}
               endpointHostInfo={hostInfo}
@@ -219,6 +225,7 @@ export const EndpointDetailsContent = memo<EndpointDetailsContentProps>(
         },
       ];
     }, [
+      agentStatusClientEnabled,
       hostInfo,
       getHostPendingActions,
       missingPolicies,
