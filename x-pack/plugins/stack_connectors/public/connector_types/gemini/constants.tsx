@@ -32,7 +32,7 @@ const messageBody = {
 }
 
 export const DEFAULT_BODY = JSON.stringify({
-  gemini_version: 'gemini-1.0-pro',
+  gemini_version: 'gemini-1.5-pro-preview-0409',
   messages: messageBody,
 });
 

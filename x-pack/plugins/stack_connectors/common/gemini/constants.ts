@@ -22,9 +22,9 @@ export enum SUB_ACTION {
   TEST = 'test',
 }
 
-export const DEFAULT_TOKEN_LIMIT = 30720;
+export const DEFAULT_TOKEN_LIMIT = 8192;
 export const DEFAULT_GCP_REGION = 'us-central1';
-export const DEFAULT_GEMINI_MODEL = 'gemini-1.0-pro';
+export const DEFAULT_GEMINI_MODEL = 'gemini-1.5-pro-preview-0409';
 // export const DEFAULT_GEMINI_URL = `https://generativelanguage.googleapis.com` as const;
 export const DEFAULT_GEMINI_URL = `https://us-central1-aiplatform.googleapis.com` as const;
 
