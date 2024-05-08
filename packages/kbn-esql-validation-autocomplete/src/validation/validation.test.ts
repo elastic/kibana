@@ -622,7 +622,17 @@ describe('validation logic', () => {
           // the right error message
           if (
             params.every(({ type }) => type !== 'any') &&
-            !['to_version', 'mv_sort', 'date_diff'].includes(name)
+            ![
+              'to_version',
+              'mv_sort',
+              // skip the date functions because the row tests always throw in
+              // a string literal and expect it to be invalid for the date functions
+              // but it's always valid because ES will parse it as a date
+              'date_diff',
+              'date_extract',
+              'date_format',
+              'date_trunc',
+            ].includes(name)
           ) {
             // now test nested functions
             const fieldMappingWithNestedFunctions = getFieldMapping(params, {
@@ -1289,7 +1299,6 @@ describe('validation logic', () => {
         );
       });
       for (const { name, signatures, ...rest } of numericOrStringFunctions) {
-        if (name === 'date_diff') continue; // date_diff is hard to test
         const supportedSignatures = signatures.filter(({ returnType }) =>
           // TODO — not sure why the tests have this limitation... seems like any type
           // that can be part of a boolean expression should be allowed in a where clause
@@ -1489,7 +1498,6 @@ describe('validation logic', () => {
       }
 
       for (const { name, alias, signatures, ...defRest } of evalFunctionsDefinitions) {
-        if (name === 'date_diff') continue; // date_diff is hard to test
         for (const { params, ...signRest } of signatures) {
           const fieldMapping = getFieldMapping(params);
           testErrorsAndWarnings(
@@ -1561,7 +1569,7 @@ describe('validation logic', () => {
           // the right error message
           if (
             params.every(({ type }) => type !== 'any') &&
-            !['to_version', 'mv_sort', 'date_diff'].includes(name)
+            !['to_version', 'mv_sort'].includes(name)
           ) {
             // now test nested functions
             const fieldMappingWithNestedFunctions = getFieldMapping(params, {
@@ -2251,7 +2259,7 @@ describe('validation logic', () => {
           // the right error message
           if (
             params.every(({ type }) => type !== 'any') &&
-            !['to_version', 'mv_sort', 'date_diff'].includes(name)
+            !['to_version', 'mv_sort'].includes(name)
           ) {
             // now test nested functions
             const fieldMappingWithNestedAggsFunctions = getFieldMapping(params, {

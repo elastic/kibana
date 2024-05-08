@@ -8,6 +8,7 @@
 
 import React, { useCallback, useContext, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
+import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
 import { FieldIcon } from '@kbn/react-field';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
@@ -54,6 +55,7 @@ export function FieldInput({ field, dataView, onHandleField }: FieldInputProps) 
       }
       return {
         label,
+        name: dataViewField.name,
         value: dataViewField.type as KBN_FIELD_TYPES,
         prepend: <FieldIcon type={dataViewField.type} fill="none" className="eui-alignMiddle" />,
       };
@@ -82,6 +84,7 @@ export function FieldInput({ field, dataView, onHandleField }: FieldInputProps) 
       inputRef={(ref) => {
         inputRef.current = ref;
       }}
+      optionMatcher={comboBoxFieldOptionMatcher}
       options={euiOptions}
       selectedOptions={selectedEuiOptions}
       onChange={onComboBoxChange}
