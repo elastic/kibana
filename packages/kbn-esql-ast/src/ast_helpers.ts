@@ -238,11 +238,13 @@ function safeBackticksRemoval(text: string | undefined) {
 }
 
 export function sanitizeIdentifierString(ctx: ParserRuleContext) {
-  return (
+  const result =
     getUnquotedText(ctx)?.getText() ||
     safeBackticksRemoval(getQuotedText(ctx)?.getText()) ||
-    safeBackticksRemoval(ctx.getText()) // for some reason some quoted text is not detected correctly by the parser
-  );
+    safeBackticksRemoval(ctx.getText()); // for some reason some quoted text is not detected correctly by the parser
+
+  // TODO - understand why <missing null> is now returned as the match text for the FROM command
+  return result === '<missing null>' ? '' : result;
 }
 
 export function wrapIdentifierAsArray<T extends ParserRuleContext>(identifierCtx: T | T[]): T[] {
