@@ -774,8 +774,7 @@ export default ({ getService }: FtrProviderContext) => {
           );
         });
 
-        // TODO is this behavior expected?
-        it('suppresses beyond the specified suppression interval if alerts fall within the same rule execution window', async () => {
+        it('suppresses alerts that would be _created_ within the suppression duration window, even if the original anomalies were outside that suppression duration window', async () => {
           const rule = {
             ...ruleProps,
             interval: '30m',
@@ -1024,7 +1023,7 @@ export default ({ getService }: FtrProviderContext) => {
             await deleteAllExceptions(supertest, log);
           });
 
-          it.only('applies exceptions before suppression', async () => {
+          it('applies exceptions before suppression', async () => {
             const timestamp = new Date().toISOString();
             const anomaly = {
               ...baseAnomaly,
