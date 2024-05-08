@@ -13,6 +13,7 @@ servers:
 
 paths:
   /engine/settings:
+    x-internal: true
     get:
       operationId: RiskEngineSettingsGet
       summary: Get the settings of the Risk Engine
@@ -23,7 +24,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RiskEngineSettingsResponse'
-                
+
 components:
   schemas:
     RiskEngineSettingsResponse:
