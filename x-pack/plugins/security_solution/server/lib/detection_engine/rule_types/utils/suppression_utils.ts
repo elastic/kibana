@@ -17,7 +17,8 @@ import {
   ALERT_SUPPRESSION_END,
 } from '@kbn/rule-data-utils';
 import type { AlertSuppressionCamel } from '../../../../../common/api/detection_engine/model/rule_schema';
-interface SuppressionTerm {
+
+export interface SuppressionTerm {
   field: string;
   value: string[] | number[] | null;
 }
