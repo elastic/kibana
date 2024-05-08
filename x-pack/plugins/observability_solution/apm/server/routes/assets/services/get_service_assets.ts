@@ -4,13 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Logger } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/server';
 import { WrappedElasticsearchClientError } from '@kbn/observability-plugin/server';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { AssetsESClient } from '../../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
 import { withApmSpan } from '../../../utils/with_apm_span';
-import { ServiceAssetDocument } from './types';
 import { getAssets } from '../get_assets';
+import { getServicesTransactionStats } from './get_services_transaction_stats';
+import { ServiceAssetDocument } from './types';
 
 export const MAX_NUMBER_OF_SERVICES = 1_000;
 
@@ -20,12 +23,18 @@ export async function getServiceAssets({
   end,
   kuery,
   logger,
+  apmEventClient,
+  logsDataAccessStart,
+  esClient,
 }: {
   assetsESClient: AssetsESClient;
   start: number;
   end: number;
   kuery: string;
   logger: Logger;
+  apmEventClient: APMEventClient;
+  logsDataAccessStart: LogsDataAccessPluginStart;
+  esClient: ElasticsearchClient;
 }) {
   return withApmSpan('get_service_assets', async () => {
     try {
@@ -38,7 +47,7 @@ export async function getServiceAssets({
         assetType: 'service',
       });
 
-      return response.hits.hits.map((hit) => {
+      const services = response.hits.hits.map((hit) => {
         const serviceAsset = hit._source as ServiceAssetDocument;
 
         return {
@@ -52,6 +61,35 @@ export async function getServiceAssets({
           },
         };
       });
+
+      const tracesServiceNames = services
+        .filter(({ asset }) => asset.signalTypes['asset.traces'])
+        .map(({ service }) => service.name);
+      const logsServiceNames = services
+        .filter(({ asset }) => asset.signalTypes['asset.logs'])
+        .map(({ service }) => service.name);
+
+      const [apmMetrics, logsMetrics] = await Promise.all([
+        getServicesTransactionStats({
+          apmEventClient,
+          start,
+          end,
+          kuery,
+          serviceNames: tracesServiceNames,
+        }),
+        logsDataAccessStart.services.getLogsRatesService({
+          esClient,
+          identifyingMetadata: 'service.name',
+          timeFrom: start,
+          timeTo: end,
+          serviceNames: logsServiceNames,
+        }),
+      ]);
+
+      return services.map((item) => ({
+        ...item,
+        metrics: { ...apmMetrics[item.service.name], ...logsMetrics[item.service.name] },
+      }));
     } catch (error) {
       // If the index does not exist, handle it gracefully
       if (

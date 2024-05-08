@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import { LogsRatesMetrics } from '@kbn/logs-data-access-plugin/server';
+import { TracesMetrics } from './get_services_transaction_stats';
+
 export interface SignalTypes {
-  'asset.trace'?: boolean;
+  'asset.traces'?: boolean;
   'asset.logs'?: boolean;
 }
 
@@ -29,5 +32,9 @@ export interface ServiceAssetDocument {
 }
 
 export interface AssetServicesResponse {
-  services: Array<{ asset: AssetItem; service: ServiceItem }>;
+  services: Array<{
+    asset: AssetItem;
+    service: ServiceItem;
+    metrics: TracesMetrics & LogsRatesMetrics;
+  }>;
 }

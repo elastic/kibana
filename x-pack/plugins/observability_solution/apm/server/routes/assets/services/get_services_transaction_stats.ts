@@ -8,7 +8,9 @@
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ApmDocumentType } from '../../../../common/document_type';
-import { SERVICE_NAME } from '../../../../common/es_fields/apm';
+import { SERVICE_NAME, TRANSACTION_TYPE } from '../../../../common/es_fields/apm';
+import { isDefaultTransactionType } from '../../../../common/transaction_types';
+import { maybe } from '../../../../common/utils/maybe';
 import { calculateThroughputWithRange } from '../../../lib/helpers/calculate_throughput';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getDurationFieldForTransactions } from '../../../lib/helpers/transactions';
@@ -17,6 +19,16 @@ import {
   getOutcomeAggregation,
 } from '../../../lib/helpers/transaction_error_rate';
 import { MAX_NUMBER_OF_SERVICES } from './get_service_assets';
+
+export interface TracesMetrics {
+  latency: number | null;
+  throughput: number | null;
+  transactionErrorRate: number | null;
+}
+
+interface TraceServicesMetrics {
+  [serviceName: string]: TracesMetrics;
+}
 
 export async function getServicesTransactionStats({
   apmEventClient,
@@ -30,8 +42,8 @@ export async function getServicesTransactionStats({
   end: number;
   kuery: string;
   serviceNames: string[];
-}) {
-  const response = await apmEventClient.search('get_service_transaction_stats', {
+}): Promise<TraceServicesMetrics> {
+  const response = await apmEventClient.search('get_services_transaction_stats', {
     apm: {
       events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
@@ -54,25 +66,49 @@ export async function getServicesTransactionStats({
             size: MAX_NUMBER_OF_SERVICES,
           },
           aggs: {
-            avg_duration: {
-              avg: {
-                field: getDurationFieldForTransactions(ApmDocumentType.TransactionEvent, false),
+            transactionType: {
+              terms: {
+                field: TRANSACTION_TYPE,
+              },
+              aggs: {
+                avg_duration: {
+                  avg: {
+                    field: getDurationFieldForTransactions(ApmDocumentType.TransactionEvent, false),
+                  },
+                },
+                ...getOutcomeAggregation(ApmDocumentType.TransactionEvent),
               },
             },
-            ...getOutcomeAggregation(ApmDocumentType.TransactionEvent),
           },
         },
       },
     },
   });
 
-  return response.aggregations?.services.buckets.map((bucket) => {
-    const serviceName = bucket.key as string;
-    return {
-      serviceName,
-      latency: bucket.avg_duration.value,
-      throughput: calculateThroughputWithRange({ start, end, value: bucket.doc_count }),
-      transactionErrorRate: calculateFailedTransactionRate(bucket),
-    };
-  });
+  return (
+    response.aggregations?.services.buckets.reduce<TraceServicesMetrics>((acc, bucket) => {
+      const serviceName = bucket.key as string;
+      const topTransactionTypeBucket = maybe(
+        bucket.transactionType.buckets.find(({ key }) => isDefaultTransactionType(key as string)) ??
+          bucket.transactionType.buckets[0]
+      );
+
+      return {
+        ...acc,
+        [serviceName]: {
+          latency: topTransactionTypeBucket?.avg_duration.value || null,
+          throughput: topTransactionTypeBucket
+            ? calculateThroughputWithRange({
+                start,
+                end,
+                value: topTransactionTypeBucket.doc_count,
+              })
+            : null,
+          transactionErrorRate: topTransactionTypeBucket
+            ? calculateFailedTransactionRate(topTransactionTypeBucket)
+            : null,
+        },
+      };
+    }, {}) || {}
+  );
 }

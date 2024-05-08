@@ -26,11 +26,13 @@ interface LogRateQueryAggregation {
   services: estypes.AggregationsTermsAggregateBase<LogErrorsAggregation>;
 }
 
+export interface LogsRatesMetrics {
+  logRatePerMinute: number;
+  logErrorRate: null | number;
+}
+
 export interface LogsRatesServiceReturnType {
-  [serviceName: string]: {
-    logRatePerMinute: number;
-    logErrorRate: null | number;
-  };
+  [serviceName: string]: LogsRatesMetrics;
 }
 
 export function createGetLogsRatesService(params: RegisterServicesParams) {
