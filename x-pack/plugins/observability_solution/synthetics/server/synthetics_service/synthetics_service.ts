@@ -673,7 +673,7 @@ export class SyntheticsService {
       const syncInterval = Number((this.config.syncInterval ?? '5m').split('m')[0]);
       if (diff > syncInterval) {
         const message = `Synthetics monitor sync task has missed its schedule, it last ran ${diff} ago.`;
-        this.logger.info(message);
+        this.logger.warn(message);
         sendErrorTelemetryEvents(this.logger, this.server.telemetry, {
           message,
           reason: 'Failed to run synthetics sync task on schedule',
