@@ -14,61 +14,33 @@ import {
   EuiText,
   EuiSpacer,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import * as i18n from './translations';
-import theGif from './1.gif';
+import theGif from './overview.gif';
 
-const VIDEO_CONTENT_HEIGHT = 160;
 const VIDEO_CONTENT_WIDTH = 250;
-const VIDEO_ID = 'BrDaDBAAvdygvemFKNAkBW';
-const VIDEO_SOURCE = `//play.vidyard.com/${VIDEO_ID}.html`;
-const VIDEO_PAGE = `https://videos.elastic.co/watch/${VIDEO_ID}`;
+const VIDEO_PAGE = `https://videos.elastic.co/watch/BrDaDBAAvdygvemFKNAkBW`;
 
 const VideoComponent: React.FC<{ onClose: () => void }> = ({ onClose }) => {
-  const ref = React.useRef<HTMLIFrameElement>(null);
-  const [isIframeFocused, setIsIframeFocused] = React.useState(false);
-
   const openVideoInNewTab = useCallback(() => {
     window.open(VIDEO_PAGE, '_blank');
-  }, []);
-
-  const onIframeClick = useCallback(() => {
-    if (isIframeFocused) {
-      openVideoInNewTab();
-    }
-  }, [isIframeFocused, openVideoInNewTab]);
-
-  useEffect(() => {
-    window.addEventListener('blur', onIframeClick);
-    return () => window.removeEventListener('blur', onIframeClick);
-  }, [onIframeClick]);
-  const handleOnMouseOver = useCallback(() => {
-    setIsIframeFocused(true);
-  }, []);
-  const handleOnMouseOut = useCallback(() => {
-    setIsIframeFocused(false);
   }, []);
 
   return (
     <EuiPortal>
       <div
         data-test-subj="attackDiscovery-tour-step-2"
-        style={{ position: 'fixed', bottom: 16, right: 16, zIndex: 9999 }}
+        css={{ position: 'fixed', bottom: 16, right: 16, zIndex: 9999 }}
       >
         <EuiToast onClose={onClose} css={{ maxWidth: VIDEO_CONTENT_WIDTH }}>
-          <div
-            css={css`
-              height: ${VIDEO_CONTENT_HEIGHT}px;
-            `}
-            onMouseOver={handleOnMouseOver}
-            onMouseOut={handleOnMouseOut}
-            onFocus={handleOnMouseOver}
-            onBlur={handleOnMouseOut}
-          >
-            <EuiImage size="m" src={theGif} alt="" />
-          </div>
-          <EuiText size="s" grow={false}>
+          <EuiImage
+            onClick={openVideoInNewTab}
+            css={{ marginTop: 20, '&:hover': { cursor: 'pointer' } }}
+            src={theGif}
+            data-test-subj="video-gif"
+            alt={i18n.WATCH_OVERVIEW_VIDEO}
+          />
+          <EuiText size="s" grow={false} css={{ marginTop: 20 }}>
             <h4>
               <EuiIcon type="cheer" color="success" /> {i18n.ATTACK_DISCOVERY_TOUR_VIDEO_STEP_TITLE}
             </h4>

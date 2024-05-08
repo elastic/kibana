@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { VideoToast } from './video_toast';
 
@@ -24,16 +24,14 @@ describe('VideoToast', () => {
     expect(videoToast).toBeInTheDocument();
   });
 
-  it('should render the video iframe', () => {
-    const videoIframe = screen.getByTitle('Watch overview video');
-    expect(videoIframe).toBeInTheDocument();
+  it('should render the video gif', () => {
+    const videoGif = screen.getByTestId('video-gif');
+    expect(videoGif).toBeInTheDocument();
   });
 
-  // WIP, still working on this test. will unskip before merge
-  it.skip('should open the video in a new tab when the iframe is clicked', () => {
-    const videoIframe = screen.getByTitle('Watch overview video');
-    fireEvent.mouseOver(videoIframe);
-    fireEvent.blur(videoIframe);
+  it('should open the video in a new tab when the gif is clicked', () => {
+    const videoGif = screen.getByTestId('video-gif');
+    userEvent.click(videoGif);
     expect(window.open).toHaveBeenCalledWith(
       'https://videos.elastic.co/watch/BrDaDBAAvdygvemFKNAkBW',
       '_blank'
