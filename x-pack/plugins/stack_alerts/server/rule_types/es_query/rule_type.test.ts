@@ -702,12 +702,12 @@ describe('ruleType', () => {
 
       (searchSourceInstanceMock.getField as jest.Mock).mockImplementationOnce((name: string) => {
         if (name === 'index') {
-          return { dataViewMock, timeFieldName: undefined };
+          return { dataViewMock, getTimeField: () => undefined, id: 1234 };
         }
       });
 
       await expect(invokeExecutor({ params, ruleServices })).rejects.toThrow(
-        'Invalid data view without timeFieldName.'
+        'Data view with ID 1234 no longer contains a time field.'
       );
     });
 
