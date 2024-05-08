@@ -38,7 +38,7 @@ describe('IngestPipelinePanel', () => {
     const setup = registerTestBed(IngestPipelinePanel, {
       defaultProps: {
         setSelectedPipeline: setSelectedPipelineMock,
-        ingestPipelineData: mockPipelineData,
+        ingestPipelinesData: mockPipelineData,
       },
       memoryRouter: { wrapComponent: false },
     });

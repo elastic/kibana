@@ -18,8 +18,8 @@ import {
   EuiSuperSelect,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { IngestGetPipelineResponse } from '@elastic/elasticsearch/lib/api/types';
 
-import type { Pipeline } from '@kbn/ingest-pipelines-plugin/public';
 import { DEFAULT_INGESTION_PIPELINE } from '../constants';
 
 interface OptionItem {
@@ -30,22 +30,23 @@ interface OptionItem {
 
 interface IngestPipelinePanelProps {
   setSelectedPipeline: (pipeline: string) => void;
-  ingestPipelineData?: Pipeline[] | null;
+  ingestPipelinesData?: IngestGetPipelineResponse;
 }
 
 export const IngestPipelinePanel: React.FC<IngestPipelinePanelProps> = ({
   setSelectedPipeline,
-  ingestPipelineData,
+  ingestPipelinesData,
 }) => {
   const options = useMemo(() => {
-    return ingestPipelineData
-      ? ingestPipelineData.map(
-          (item): OptionItem => ({
-            value: item.name,
-            inputDisplay: item.name,
+    return ingestPipelinesData
+      ? Object.keys(ingestPipelinesData).map((pipelineName: string): OptionItem => {
+          const item = ingestPipelinesData[pipelineName];
+          return {
+            value: pipelineName,
+            inputDisplay: pipelineName,
             dropdownDisplay: (
               <Fragment>
-                <strong>{item.name}</strong>
+                <strong>{pipelineName}</strong>
                 <EuiFlexGroup
                   gutterSize="s"
                   alignItems="center"
@@ -59,13 +60,13 @@ export const IngestPipelinePanel: React.FC<IngestPipelinePanelProps> = ({
                           {
                             defaultMessage:
                               '{count} {count, plural, one {processor} other {processors}}',
-                            values: { count: item.processors.length },
+                            values: { count: item.processors?.length },
                           }
                         )}
                       </p>
                     </EuiText>
                   </EuiFlexItem>
-                  {item.isManaged && (
+                  {item._meta?.managed && (
                     <EuiFlexItem grow={false}>
                       <EuiBadge>
                         {i18n.translate(
@@ -77,7 +78,7 @@ export const IngestPipelinePanel: React.FC<IngestPipelinePanelProps> = ({
                       </EuiBadge>
                     </EuiFlexItem>
                   )}
-                  {item.name === DEFAULT_INGESTION_PIPELINE && (
+                  {pipelineName === DEFAULT_INGESTION_PIPELINE && (
                     <EuiFlexItem grow={false}>
                       <EuiBadge color="primary">
                         {i18n.translate(
@@ -92,10 +93,10 @@ export const IngestPipelinePanel: React.FC<IngestPipelinePanelProps> = ({
                 </EuiFlexGroup>
               </Fragment>
             ),
-          })
-        )
+          };
+        })
       : [];
-  }, [ingestPipelineData]);
+  }, [ingestPipelinesData]);
 
   const [selected, setSelected] = useState<string>();
 

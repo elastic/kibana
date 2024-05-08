@@ -37,7 +37,6 @@ import type {
 } from '@kbn/search-api-panels';
 import { useLocation } from 'react-router-dom';
 import { CloudDetailsPanel } from '@kbn/search-api-panels';
-import { apiService } from '@kbn/ingest-pipelines-plugin/public';
 import { docLinks } from '../../../common/doc_links';
 import { useKibanaServices } from '../hooks/use_kibana';
 import { useAssetBasePath } from '../hooks/use_asset_base_path';
@@ -56,6 +55,7 @@ import { PipelineOverviewButton } from './pipeline_overview_button';
 import { SelectClientCallouts } from './select_client_callouts';
 import { PipelineManageButton } from './pipeline_manage_button';
 import { OPTIONAL_LABEL } from '../../../common/i18n_string';
+import { useIngestPipelines } from '../hooks/api/use_ingest_pipelines';
 
 export const ElasticsearchOverview = () => {
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageDefinition>(javaDefinition);
@@ -92,7 +92,7 @@ export const ElasticsearchOverview = () => {
     ingestPipeline: selectedPipeline,
   };
 
-  const { data } = apiService.useLoadPipelines();
+  const { data: pipelineData } = useIngestPipelines();
 
   return (
     <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchOverviewPage">
@@ -307,7 +307,7 @@ export const ElasticsearchOverview = () => {
             'ingestData',
             codeSnippetArguments
           )}
-          ingestPipelineData={data}
+          ingestPipelineData={pipelineData}
           consoleRequest={getConsoleRequest('ingestData', codeSnippetArguments)}
           languages={languageDefinitions}
           selectedLanguage={selectedLanguage}

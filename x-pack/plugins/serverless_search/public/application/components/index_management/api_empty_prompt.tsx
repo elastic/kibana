@@ -26,12 +26,11 @@ import {
   CodeBox,
   getConsoleRequest,
   getLanguageDefinitionCodeSnippet,
-  LanguageDefinition,
   IngestPipelinePanel,
+  LanguageDefinition,
   LanguageDefinitionSnippetArguments,
 } from '@kbn/search-api-panels';
 
-import { apiService } from '@kbn/ingest-pipelines-plugin/public';
 import { BACK_LABEL } from '../../../../common/i18n_string';
 
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
@@ -39,6 +38,9 @@ import { useKibanaServices } from '../../hooks/use_kibana';
 import { javaDefinition } from '../languages/java';
 import { languageDefinitions } from '../languages/languages';
 import { LanguageGrid } from '../languages/language_grid';
+
+import { useIngestPipelines } from '../../hooks/api/use_ingest_pipelines';
+
 import {
   API_KEY_PLACEHOLDER,
   CLOUD_ID_PLACEHOLDER,
@@ -74,7 +76,8 @@ export const APIIndexEmptyPrompt = ({ indexName, onBackClick }: APIIndexEmptyPro
     ingestPipeline: selectedPipeline,
   };
 
-  const { data } = apiService.useLoadPipelines();
+  const { data: pipelineData } = useIngestPipelines();
+
   const apiIngestSteps: EuiContainedStepProps[] = [
     {
       title: i18n.translate(
@@ -94,7 +97,7 @@ export const APIIndexEmptyPrompt = ({ indexName, onBackClick }: APIIndexEmptyPro
           <EuiFlexItem>
             <IngestPipelinePanel
               setSelectedPipeline={setSelectedPipeline}
-              ingestPipelineData={data}
+              ingestPipelinesData={pipelineData?.pipelines}
             />
           </EuiFlexItem>
           <EuiFlexItem>
