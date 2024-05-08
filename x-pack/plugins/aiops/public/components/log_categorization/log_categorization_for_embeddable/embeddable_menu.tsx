@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSuperSelect } from '@elastic/eui';
+import { EuiSuperSelect, EuiToolTip } from '@elastic/eui';
 import { EuiFormRow } from '@elastic/eui';
 import {
   EuiButtonIcon,
@@ -61,14 +61,20 @@ export const EmbeddableMenu: FC<Props> = ({
   );
 
   const button = (
-    <EuiButtonIcon
-      data-test-subj="aiopsEmbeddableMenuOptionsButton"
-      size="s"
-      iconType="controlsHorizontal"
-      onClick={() => togglePopover()}
-      // @ts-ignore - subdued does work
-      color="subdued"
-    />
+    <EuiToolTip
+      content={i18n.translate('xpack.aiops.logCategorization.embeddableMenu.tooltip', {
+        defaultMessage: 'Options',
+      })}
+    >
+      <EuiButtonIcon
+        data-test-subj="aiopsEmbeddableMenuOptionsButton"
+        size="s"
+        iconType="controlsHorizontal"
+        onClick={() => togglePopover()}
+        // @ts-ignore - subdued does work
+        color="subdued"
+      />
+    </EuiToolTip>
   );
 
   return (

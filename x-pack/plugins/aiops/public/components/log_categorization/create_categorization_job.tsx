@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React from 'react';
 
 import moment from 'moment';
-import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
@@ -18,6 +18,7 @@ import {
 } from '@kbn/ml-ui-actions';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { i18n } from '@kbn/i18n';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 interface Props {
@@ -62,31 +63,35 @@ export const CreateCategorizationJobButton: FC<Props> = ({
 
   if (iconOnly) {
     return (
-      <EuiButtonIcon
-        data-test-subj="aiopsEmbeddableMenuOptionsButton"
-        size="s"
-        iconType="machineLearningApp"
-        onClick={createADJob}
-        // @ts-ignore - subdued does work
-        color="subdued"
-      />
+      <EuiToolTip
+        content={i18n.translate('xpack.aiops.categorizeFlyout.findAnomalies.tooltip', {
+          defaultMessage: 'Create Anomaly Detection job to find anomalies in patterns',
+        })}
+      >
+        <EuiButtonIcon
+          data-test-subj="aiopsEmbeddableMenuOptionsButton"
+          size="s"
+          iconType="machineLearningApp"
+          onClick={createADJob}
+          // @ts-ignore - subdued does work
+          color="subdued"
+        />
+      </EuiToolTip>
     );
   }
 
   return (
-    <>
-      <EuiButtonEmpty
-        data-test-subj="aiopsLogCategorizationFlyoutAdJobButton"
-        onClick={createADJob}
-        flush="left"
-        iconSide="left"
-        iconType={'machineLearningApp'}
-      >
-        <FormattedMessage
-          id="xpack.aiops.categorizeFlyout.findAnomalies"
-          defaultMessage="Find anomalies in patterns"
-        />
-      </EuiButtonEmpty>
-    </>
+    <EuiButtonEmpty
+      data-test-subj="aiopsLogCategorizationFlyoutAdJobButton"
+      onClick={createADJob}
+      flush="left"
+      iconSide="left"
+      iconType={'machineLearningApp'}
+    >
+      <FormattedMessage
+        id="xpack.aiops.categorizeFlyout.findAnomalies"
+        defaultMessage="Find anomalies in patterns"
+      />
+    </EuiButtonEmpty>
   );
 };
