@@ -24,6 +24,7 @@ const fieldTypes = [
   'number',
   'date',
   'boolean',
+  'version',
   'ip',
   'string',
   'cartesian_point',
@@ -1726,8 +1727,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings(`from a_index | eval dateField ${op} "2022"`, []);
         testErrorsAndWarnings(`from a_index | eval "2022" ${op} dateField`, []);
 
-        // testErrorsAndWarnings(`from a_index | eval versionField ${op} "1.2.3"`, []);
-        // testErrorsAndWarnings(`from a_index | eval "1.2.3" ${op} versionField`, []);
+        testErrorsAndWarnings(`from a_index | eval versionField ${op} "1.2.3"`, []);
+        testErrorsAndWarnings(`from a_index | eval "1.2.3" ${op} versionField`, []);
 
         testErrorsAndWarnings(
           `from a_index | eval booleanField ${op} "true"`,

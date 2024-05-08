@@ -21,6 +21,10 @@
       "type": "boolean"
     },
     {
+      "name": "versionField",
+      "type": "version"
+    },
+    {
       "name": "ipField",
       "type": "ip"
     },
@@ -6179,6 +6183,46 @@
       "warning": []
     },
     {
+      "query": "from a_index | where versionField IS NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where versionField IS null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where versionField is null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where versionField is NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where versionField IS NOT NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where versionField IS NOT null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where versionField IS not NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where versionField Is nOt NuLL",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | where ipField IS NULL",
       "error": [],
       "warning": []
@@ -7066,18 +7110,6 @@
       "warning": []
     },
     {
-      "query": "from a_index | where length(to_version(stringField)) > 0",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where length(to_version(numberField)) > 0",
-      "error": [
-        "Argument of [to_version] must be [string], found value [numberField] type [number]"
-      ],
-      "warning": []
-    },
-    {
       "query": "from a_index | where length(trim(stringField)) > 0",
       "error": [],
       "warning": []
@@ -7317,6 +7349,41 @@
     },
     {
       "query": "from a_index | eval booleanField IS not NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval versionField IS NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval versionField IS null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval versionField is null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval versionField is NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval versionField IS NOT NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval versionField IS NOT null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval versionField IS not NULL",
       "error": [],
       "warning": []
     },
@@ -11673,6 +11740,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval versionField > \"1.2.3\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval \"1.2.3\" > versionField",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | eval booleanField > \"true\"",
       "error": [
         "Argument of [>] must be [string], found value [booleanField] type [boolean]"
@@ -11795,6 +11872,16 @@
     },
     {
       "query": "from a_index | eval \"2022\" >= dateField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval versionField >= \"1.2.3\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval \"1.2.3\" >= versionField",
       "error": [],
       "warning": []
     },
@@ -11925,6 +12012,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval versionField < \"1.2.3\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval \"1.2.3\" < versionField",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | eval booleanField < \"true\"",
       "error": [
         "Argument of [<] must be [string], found value [booleanField] type [boolean]"
@@ -12047,6 +12144,16 @@
     },
     {
       "query": "from a_index | eval \"2022\" <= dateField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval versionField <= \"1.2.3\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval \"1.2.3\" <= versionField",
       "error": [],
       "warning": []
     },
@@ -12174,6 +12281,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval versionField == \"1.2.3\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval \"1.2.3\" == versionField",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | eval booleanField == \"true\"",
       "error": [],
       "warning": []
@@ -12289,6 +12406,16 @@
     },
     {
       "query": "from a_index | eval \"2022\" != dateField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval versionField != \"1.2.3\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval \"1.2.3\" != versionField",
       "error": [],
       "warning": []
     },

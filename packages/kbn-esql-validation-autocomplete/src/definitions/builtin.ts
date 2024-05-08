@@ -91,7 +91,16 @@ function createComparisonDefinition(
         ],
         returnType: 'boolean',
       },
-      ...[].flatMap((type) => [
+      {
+        params: [
+          { name: 'left', type: 'version' },
+          { name: 'right', type: 'version' },
+        ],
+        returnType: 'boolean',
+      },
+      // constant strings okay because of implicit casting for
+      // string to version
+      ...['version'].flatMap((type) => [
         {
           params: [
             { name: 'left', type },
