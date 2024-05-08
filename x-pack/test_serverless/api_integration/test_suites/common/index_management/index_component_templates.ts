@@ -16,6 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
   const indexManagementService = getService('indexManagement');
 
   // Failing: See https://github.com/elastic/kibana/issues/182792
+  // Failing: See https://github.com/elastic/kibana/issues/182797
   describe.skip('component templates', () => {
     // Api methods
     let getAllComponentTemplates: typeof indexManagementService['componentTemplates']['api']['getAllComponentTemplates'];
