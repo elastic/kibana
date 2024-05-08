@@ -7,7 +7,6 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { useLocalStorageListener } from '@kbn/ml-local-storage';
 import { type DataView, DataViewType } from '@kbn/data-views-plugin/public';
 import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
@@ -71,16 +70,6 @@ export const DiscoverTopNav = ({
 
   const closeFieldEditor = useRef<() => void | undefined>();
   const closeDataViewEditor = useRef<() => void | undefined>();
-
-  const [lsIndex, saveLsIndex] = useLocalStorageListener('obs-ai-assistant-index', null);
-  const [lsDataViewId, saveLsDataViewId] = useLocalStorageListener(
-    'obs-ai-assistant-data-view-id',
-    null
-  );
-  const [lsIndexTimeField, saveLsIndexTimeField] = useLocalStorageListener(
-    'obs-ai-assistant-index-time-field',
-    null
-  );
 
   useEffect(() => {
     return () => {
@@ -191,19 +180,6 @@ export const DiscoverTopNav = ({
     topNavBadges,
     topNavMenu,
   ]);
-
-  useEffect(() => {
-    saveLsIndex(dataView?.getIndexPattern() || null);
-    saveLsIndexTimeField(dataView?.getTimeField()?.spec.name || null);
-    saveLsDataViewId(dataView?.id);
-
-    return () => {
-      saveLsIndex(null);
-      saveLsIndexTimeField(null);
-      saveLsDataViewId(null);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataView]);
 
   const savedSearchId = useSavedSearch().id;
   const savedSearchHasChanged = useSavedSearchHasChanged();
