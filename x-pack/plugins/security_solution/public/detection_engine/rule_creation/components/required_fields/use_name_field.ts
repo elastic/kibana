@@ -109,18 +109,16 @@ function pickTypeForName(
   const typesAvailableForNewName = typesByFieldName[currentName] || [];
   const isCurrentTypeAvailableForNewName = typesAvailableForNewName.includes(currentType);
 
-  let updatedType = currentType;
-
   /* First try to keep the current type if it's available for the new name */
   if (isCurrentTypeAvailableForNewName) {
-    return updatedType;
+    return currentType;
   }
 
   /* If it's not available, pick the first available type */
   if (typesAvailableForNewName.length > 0) {
-    updatedType = typesAvailableForNewName[0];
+    return typesAvailableForNewName[0];
   }
 
   /* Otherwise use currently selected type */
-  return updatedType;
+  return currentType;
 }
