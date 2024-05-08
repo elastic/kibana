@@ -7,4 +7,3 @@
 
 export { useEsqlIndex } from './use_esql_index';
 export { useEsqlQueryForAboutStep } from './use_esql_query_for_about_step';
-export { useIsValidEsqlQuery } from './use_is_valid_esql_query';

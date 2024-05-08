@@ -68,7 +68,7 @@ import { useStartTransaction } from '../../../../common/lib/apm/use_start_transa
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
 import { useRuleForms, useRuleIndexPattern } from '../form';
-import { useEsqlIndex, useEsqlQueryForAboutStep, useIsValidEsqlQuery } from '../../hooks';
+import { useEsqlIndex, useEsqlQueryForAboutStep } from '../../hooks';
 import { CustomHeaderPageMemo } from '..';
 
 const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
@@ -151,17 +151,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
 
   const esqlQueryForAboutStep = useEsqlQueryForAboutStep({ defineStepData, activeStep });
 
-  const isValidEsqlQuery = useIsValidEsqlQuery(
-    defineStepData.queryBar.query.query,
-    defineStepData.ruleType,
-    defineStepForm.validateFields
-  );
-
-  const esqlIndex = useEsqlIndex(
-    defineStepData.queryBar.query.query,
-    defineStepData.ruleType,
-    isValidEsqlQuery
-  );
+  const esqlIndex = useEsqlIndex(defineStepData.queryBar.query.query, defineStepData.ruleType);
 
   const memoizedIndex = useMemo(
     () => (isEsqlRule(defineStepData.ruleType) ? esqlIndex : defineStepData.index),

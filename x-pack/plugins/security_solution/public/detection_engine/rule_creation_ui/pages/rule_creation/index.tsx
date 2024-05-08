@@ -59,7 +59,7 @@ import {
 import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import { RuleStep } from '../../../../detections/pages/detection_engine/rules/types';
 import { formatRule } from './helpers';
-import { useEsqlIndex, useEsqlQueryForAboutStep, useIsValidEsqlQuery } from '../../hooks';
+import { useEsqlIndex, useEsqlQueryForAboutStep } from '../../hooks';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../../app/types';
 import {
@@ -211,13 +211,7 @@ const CreateRulePageComponent: React.FC = () => {
 
   const esqlQueryForAboutStep = useEsqlQueryForAboutStep({ defineStepData, activeStep });
 
-  const isValidEsqlQuery = useIsValidEsqlQuery(
-    defineStepData.queryBar.query.query,
-    ruleType,
-    defineStepForm.validateFields
-  );
-
-  const esqlIndex = useEsqlIndex(defineStepData.queryBar.query.query, ruleType, isValidEsqlQuery);
+  const esqlIndex = useEsqlIndex(defineStepData.queryBar.query.query, ruleType);
 
   const memoizedIndex = useMemo(
     () => (isEsqlRuleValue ? esqlIndex : defineStepData.index),
