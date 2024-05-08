@@ -8,24 +8,52 @@
 import { OnRefreshChangeProps } from '@elastic/eui';
 import { useSelector } from '@xstate/react';
 import { useCallback, useMemo } from 'react';
+import { QualityIndicators } from '../../common/types';
+import { Integration } from '../../common/data_streams_stats/integration';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import { IntegrationItem } from '../components/dataset_quality/filters/integrations_selector';
 import { NamespaceItem } from '../components/dataset_quality/filters/namespaces_selector';
+import { QualityItem } from '../components/dataset_quality/filters/qualities_selector';
 
 export const useDatasetQualityFilters = () => {
   const { service } = useDatasetQualityContext();
 
-  const isLoading = useSelector(service, (state) => state.matches('datasets.fetching'));
+  const isLoading = useSelector(
+    service,
+    (state) =>
+      state.matches('integrations.fetching') &&
+      (state.matches('datasets.fetching') || state.matches('degradedDocs.fetching'))
+  );
+
   const {
     timeRange,
     integrations: selectedIntegrations,
     namespaces: selectedNamespaces,
+    qualities: selectedQualities,
     query: selectedQuery,
   } = useSelector(service, (state) => state.context.filters);
-  const integrations = useSelector(service, (state) => state.context.integrations);
 
-  const namespaces = useSelector(service, (state) => state.context.datasets).map(
-    (dataset) => dataset.namespace
+  interface Filters {
+    namespaces: string[];
+    qualities: QualityIndicators[];
+    filteredIntegrations: string[];
+  }
+
+  const datasets = useSelector(service, (state) => state.context.datasets);
+  const integrations = useSelector(service, (state) => state.context.integrations);
+  const { namespaces, qualities, filteredIntegrations } = useMemo(
+    () =>
+      datasets.reduce(
+        (acc: Filters, dataset) => ({
+          namespaces: [...new Set([...acc.namespaces, dataset.namespace])],
+          qualities: [...new Set([...acc.qualities, dataset.degradedDocs.quality])],
+          filteredIntegrations: [
+            ...new Set([...acc.filteredIntegrations, dataset.integration?.name ?? 'none']),
+          ],
+        }),
+        { namespaces: [], qualities: [], filteredIntegrations: [] }
+      ),
+    [datasets]
   );
 
   const onTimeChange = useCallback(
@@ -68,15 +96,24 @@ export const useDatasetQualityFilters = () => {
     [service, timeRange]
   );
 
-  const integrationItems: IntegrationItem[] = useMemo(
-    () =>
-      integrations.map((integration) => ({
-        ...integration,
-        label: integration.title,
-        checked: selectedIntegrations.includes(integration.name) ? 'on' : undefined,
-      })),
-    [integrations, selectedIntegrations]
-  );
+  const integrationItems: IntegrationItem[] = useMemo(() => {
+    const integrationsMap =
+      integrations?.reduce(
+        (acc, integration) => ({
+          ...acc,
+          [integration.name]: integration,
+        }),
+        {} as { [key: string]: Integration }
+      ) ?? {};
+
+    integrationsMap.none = Integration.create({ name: 'none', title: 'None' });
+
+    return filteredIntegrations.map((name) => ({
+      ...integrationsMap[name],
+      label: integrationsMap[name]?.title,
+      checked: selectedIntegrations.includes(name) ? 'on' : undefined,
+    }));
+  }, [integrations, filteredIntegrations, selectedIntegrations]);
 
   const onIntegrationsChange = useCallback(
     (newIntegrationItems: IntegrationItem[]) => {
@@ -111,6 +148,27 @@ export const useDatasetQualityFilters = () => {
     [service]
   );
 
+  const qualityItems: QualityItem[] = useMemo(() => {
+    const uniqueQualities = [...new Set(qualities)];
+
+    return uniqueQualities.map((quality) => ({
+      label: quality,
+      checked: selectedQualities.includes(quality) ? 'on' : undefined,
+    }));
+  }, [qualities, selectedQualities]);
+
+  const onQualitiesChange = useCallback(
+    (newQualityItems: QualityItem[]) => {
+      service.send({
+        type: 'UPDATE_QUALITIES',
+        qualities: newQualityItems
+          .filter((quality) => quality.checked === 'on')
+          .map((quality) => quality.label),
+      });
+    },
+    [service]
+  );
+
   const onQueryChange = useCallback(
     (query: string) => {
       service.send({
@@ -128,8 +186,10 @@ export const useDatasetQualityFilters = () => {
     onRefreshChange,
     integrations: integrationItems,
     namespaces: namespaceItems,
+    qualities: qualityItems,
     onIntegrationsChange,
     onNamespacesChange,
+    onQualitiesChange,
     isLoading,
     selectedQuery,
     onQueryChange,

@@ -114,7 +114,6 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   dataViewPickerComponentProps?: DataViewPickerProps;
   textBasedLanguageModeErrors?: Error[];
   textBasedLanguageModeWarning?: string;
-  hideTextBasedRunQueryLabel?: boolean;
   onTextBasedSavedAndExit?: ({ onSave }: OnSaveTextLanguageQueryProps) => void;
   showSubmitButton?: boolean;
   submitButtonStyle?: QueryBarTopRowProps['submitButtonStyle'];
@@ -414,13 +413,16 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
       },
       () => {
         if (this.props.onQuerySubmit) {
-          this.props.onQuerySubmit({
-            query: query as QT,
-            dateRange: {
-              from: this.state.dateRangeFrom,
-              to: this.state.dateRangeTo,
+          this.props.onQuerySubmit(
+            {
+              query: query as QT,
+              dateRange: {
+                from: this.state.dateRangeFrom,
+                to: this.state.dateRangeTo,
+              },
             },
-          });
+            this.isDirty()
+          );
         }
       }
     );
@@ -438,13 +440,16 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
       },
       () => {
         if (this.props.onQuerySubmit) {
-          this.props.onQuerySubmit({
-            query: this.state.query,
-            dateRange: {
-              from: this.state.dateRangeFrom,
-              to: this.state.dateRangeTo,
+          this.props.onQuerySubmit(
+            {
+              query: this.state.query,
+              dateRange: {
+                from: this.state.dateRangeFrom,
+                to: this.state.dateRangeTo,
+              },
             },
-          });
+            this.isDirty()
+          );
         }
         this.services.usageCollection?.reportUiCounter(
           this.services.appName,
@@ -635,7 +640,6 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           dataViewPickerComponentProps={this.props.dataViewPickerComponentProps}
           textBasedLanguageModeErrors={this.props.textBasedLanguageModeErrors}
           textBasedLanguageModeWarning={this.props.textBasedLanguageModeWarning}
-          hideTextBasedRunQueryLabel={this.props.hideTextBasedRunQueryLabel}
           onTextBasedSavedAndExit={this.props.onTextBasedSavedAndExit}
           showDatePickerAsBadge={this.shouldShowDatePickerAsBadge()}
           filterBar={filterBar}

@@ -48,12 +48,7 @@ export function registerRoutes({
     const { endpoint, options, handler, params } = route;
     const { pathname, method } = parseEndpoint(endpoint);
 
-    (
-      router[method] as RouteRegistrar<
-        typeof method,
-        ObservabilityOnboardingRequestHandlerContext
-      >
-    )(
+    (router[method] as RouteRegistrar<typeof method, ObservabilityOnboardingRequestHandlerContext>)(
       {
         path: pathname,
         validate: routeValidationObject,

@@ -9,7 +9,7 @@
 import { useMemo } from 'react';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
-import type { DiscoverStateContainer } from '../../services/discover_state';
+import type { DiscoverStateContainer } from '../../state_management/discover_state';
 
 /**
  * Params for the hook

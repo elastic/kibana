@@ -6,7 +6,7 @@
  */
 
 import { from, of } from 'rxjs';
-import { take, map, takeUntil, mergeMap, shareReplay } from 'rxjs/operators';
+import { take, map, takeUntil, mergeMap, shareReplay } from 'rxjs';
 import { ApplicationStart } from '@kbn/core/public';
 import { GlobalSearchResultProvider } from '@kbn/global-search-plugin/public';
 import { getAppResults } from './get_app_results';

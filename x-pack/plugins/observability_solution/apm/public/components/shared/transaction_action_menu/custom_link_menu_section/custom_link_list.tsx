@@ -6,10 +6,7 @@
  */
 
 import React from 'react';
-import {
-  SectionLink,
-  SectionLinks,
-} from '@kbn/observability-shared-plugin/public';
+import { SectionLink, SectionLinks } from '@kbn/observability-shared-plugin/public';
 import { CustomLink } from '../../../../../common/custom_link/custom_link_types';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { unit } from '../../../../utils/style';
@@ -26,14 +23,7 @@ export function CustomLinkList({
     <SectionLinks style={{ maxHeight: unit * 10, overflowY: 'auto' }}>
       {customLinks.map((link) => {
         const href = getEncodedCustomLinkUrl(link.url, transaction);
-        return (
-          <SectionLink
-            key={link.id}
-            label={link.label}
-            href={href}
-            target="_blank"
-          />
-        );
+        return <SectionLink key={link.id} label={link.label} href={href} target="_blank" />;
       })}
     </SectionLinks>
   );

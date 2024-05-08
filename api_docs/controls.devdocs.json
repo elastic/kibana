@@ -560,7 +560,7 @@
                 "section": "def-common.PersistableControlGroupInput",
                 "text": "PersistableControlGroupInput"
               },
-              ") => void"
+              " | undefined) => void"
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
@@ -580,12 +580,13 @@
                     "docId": "kibControlsPluginApi",
                     "section": "def-common.PersistableControlGroupInput",
                     "text": "PersistableControlGroupInput"
-                  }
+                  },
+                  " | undefined"
                 ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []

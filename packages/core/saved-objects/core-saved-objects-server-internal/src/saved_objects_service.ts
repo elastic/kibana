@@ -7,7 +7,7 @@
  */
 
 import { Subject, Observable, firstValueFrom, of } from 'rxjs';
-import { filter, switchMap } from 'rxjs/operators';
+import { filter, switchMap } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import { stripVersionQualifier } from '@kbn/std';
 import type { ServiceStatus } from '@kbn/core-status-common';
@@ -65,6 +65,7 @@ import { registerCoreObjectTypes } from './object_types';
 import { getSavedObjectsDeprecationsProvider } from './deprecations';
 import { applyTypeDefaults } from './apply_type_defaults';
 import { getAllIndices } from './utils';
+import { MIGRATION_CLIENT_OPTIONS } from './constants';
 
 /**
  * @internal
@@ -75,7 +76,21 @@ export interface InternalSavedObjectsServiceSetup extends SavedObjectsServiceSet
   getTypeRegistry: () => ISavedObjectTypeRegistry;
 }
 
-export type InternalSavedObjectsServiceStart = SavedObjectsServiceStart;
+/**
+ * @internal
+ */
+export interface InternalSavedObjectsServiceStart extends SavedObjectsServiceStart {
+  metrics: {
+    /**
+     * The number of milliseconds it took to run the SO migrator.
+     *
+     * Note: it's the time spent in the `migrator.runMigrations` call.
+     * The value will be recorded even if a migration wasn't strictly performed,
+     * and in that case it will just be the time spent checking if a migration was required.
+     */
+    migrationDuration: number;
+  };
+}
 
 /** @internal */
 export interface SavedObjectsSetupDeps {
@@ -224,7 +239,8 @@ export class SavedObjectsService
     const waitForMigrationCompletion = node.roles.backgroundTasks && !node.roles.ui;
     const migrator = this.createMigrator(
       this.config.migration,
-      elasticsearch.client.asInternalUser,
+      // override the default Client settings
+      client.asInternalUser.child(MIGRATION_CLIENT_OPTIONS),
       docLinks,
       waitForMigrationCompletion,
       node,
@@ -254,10 +270,13 @@ export class SavedObjectsService
      */
     migrator.prepareMigrations();
 
+    let migrationDuration: number;
+
     if (skipMigrations) {
       this.logger.warn(
         'Skipping Saved Object migrations on startup. Note: Individual documents will still be migrated when read or written.'
       );
+      migrationDuration = 0;
     } else {
       this.logger.info(
         'Waiting until all Elasticsearch nodes are compatible with Kibana before starting saved objects migrations...'
@@ -281,7 +300,9 @@ export class SavedObjectsService
       }
 
       this.logger.info('Starting saved objects migrations');
+      const migrationStartTime = performance.now();
       await migrator.runMigrations();
+      migrationDuration = Math.round(performance.now() - migrationStartTime);
     }
 
     const createRepository = (
@@ -370,6 +391,9 @@ export class SavedObjectsService
         return [...indices];
       },
       getAllIndices: () => [...allIndices],
+      metrics: {
+        migrationDuration,
+      },
     };
   }
 

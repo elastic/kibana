@@ -15,11 +15,7 @@ export const ChartPointerEventContext = createContext<{
   updatePointerEvent: (pointerEvent: PointerEvent) => void;
 } | null>(null);
 
-export function ChartPointerEventContextProvider({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export function ChartPointerEventContextProvider({ children }: { children: ReactNode }) {
   const pointerEventTargetRef = useRef(new EventTarget());
   const updatePointerEventRef = useRef((pointerEvent: PointerEvent) => {
     pointerEventTargetRef.current.dispatchEvent(

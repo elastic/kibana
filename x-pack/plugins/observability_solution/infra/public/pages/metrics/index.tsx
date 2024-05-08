@@ -103,7 +103,9 @@ export const InfrastructurePage = () => {
                         <MetricsAlertDropdown />
                       )}
                       <EuiHeaderLink
-                        href={kibana.services?.application?.getUrlForApp('/integrations/browse')}
+                        href={kibana.services?.application?.getUrlForApp(
+                          '/observabilityOnboarding'
+                        )}
                         color="primary"
                         iconType="indexOpen"
                       >
@@ -144,7 +146,15 @@ export const InfrastructurePage = () => {
               <RedirectWithQueryParams from="/metrics-explorer" exact to="/explorer" />
               <RedirectWithQueryParams from="/" exact to="/inventory" />
 
-              <Route render={() => <NotFoundPage title="Infrastructure" />} />
+              <Route
+                render={() => (
+                  <NotFoundPage
+                    title={i18n.translate('xpack.infra.header.infrastructureLabel', {
+                      defaultMessage: 'Infrastructure',
+                    })}
+                  />
+                )}
+              />
             </Routes>
           </InfraMLCapabilitiesProvider>
         </AlertPrefillProvider>

@@ -38,34 +38,25 @@ function amountAndUnitToBytes({
 }
 
 export function getStorageSizeRt({ min, max }: { min?: string; max?: string }) {
-  const minAsBytes =
-    amountAndUnitToBytes({ value: min, decimalUnitBase: true }) ?? -Infinity;
-  const maxAsBytes =
-    amountAndUnitToBytes({ value: max, decimalUnitBase: true }) ?? Infinity;
+  const minAsBytes = amountAndUnitToBytes({ value: min, decimalUnitBase: true }) ?? -Infinity;
+  const maxAsBytes = amountAndUnitToBytes({ value: max, decimalUnitBase: true }) ?? Infinity;
   const message = getRangeTypeMessage(min, max);
 
   return new t.Type<string, string, unknown>(
     'storageSizeRt',
     t.string.is,
     (input, context) => {
-      return either.chain(
-        t.string.validate(input, context),
-        (inputAsString) => {
-          const inputAsBytes = amountAndUnitToBytes({
-            value: inputAsString,
-            decimalUnitBase: true,
-          });
+      return either.chain(t.string.validate(input, context), (inputAsString) => {
+        const inputAsBytes = amountAndUnitToBytes({
+          value: inputAsString,
+          decimalUnitBase: true,
+        });
 
-          const isValidAmount =
-            inputAsBytes !== undefined &&
-            inputAsBytes >= minAsBytes &&
-            inputAsBytes <= maxAsBytes;
+        const isValidAmount =
+          inputAsBytes !== undefined && inputAsBytes >= minAsBytes && inputAsBytes <= maxAsBytes;
 
-          return isValidAmount
-            ? t.success(inputAsString)
-            : t.failure(input, context, message);
-        }
-      );
+        return isValidAmount ? t.success(inputAsString) : t.failure(input, context, message);
+      });
     },
     t.identity
   );

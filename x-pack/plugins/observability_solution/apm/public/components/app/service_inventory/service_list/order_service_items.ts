@@ -22,19 +22,14 @@ const SERVICE_HEALTH_STATUS_ORDER = [
 
 const sorts: Record<ServiceInventoryFieldName, SortValueGetter> = {
   [ServiceInventoryFieldName.HealthStatus]: (item) =>
-    item.healthStatus
-      ? SERVICE_HEALTH_STATUS_ORDER.indexOf(item.healthStatus)
-      : -1,
-  [ServiceInventoryFieldName.ServiceName]: (item) =>
-    item.serviceName.toLowerCase(),
+    item.healthStatus ? SERVICE_HEALTH_STATUS_ORDER.indexOf(item.healthStatus) : -1,
+  [ServiceInventoryFieldName.ServiceName]: (item) => item.serviceName.toLowerCase(),
   [ServiceInventoryFieldName.Environments]: (item) =>
     item.environments?.join(', ').toLowerCase() ?? '',
-  [ServiceInventoryFieldName.TransactionType]: (item) =>
-    item.transactionType ?? '',
+  [ServiceInventoryFieldName.TransactionType]: (item) => item.transactionType ?? '',
   [ServiceInventoryFieldName.Latency]: (item) => item.latency ?? -1,
   [ServiceInventoryFieldName.Throughput]: (item) => item.throughput ?? -1,
-  [ServiceInventoryFieldName.TransactionErrorRate]: (item) =>
-    item.transactionErrorRate ?? -1,
+  [ServiceInventoryFieldName.TransactionErrorRate]: (item) => item.transactionErrorRate ?? -1,
   [ServiceInventoryFieldName.AlertsCount]: (item) => item.alertsCount ?? -1,
 };
 
@@ -65,11 +60,7 @@ export function orderServiceItems({
 
     const tiebreakerSortFn = sorts[tiebreakerField];
 
-    return orderBy(
-      items,
-      [sortFn, tiebreakerSortFn],
-      [sortDirection, tiebreakerSortDirection]
-    );
+    return orderBy(items, [sortFn, tiebreakerSortFn], [sortDirection, tiebreakerSortDirection]);
   }
   return orderBy(items, [sortFn], [sortDirection]);
 }

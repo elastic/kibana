@@ -93,6 +93,14 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<
     this.renderComplete.dispatchComplete();
   }
 
+  public getSloAlertsConfig() {
+    return this.getInput();
+  }
+
+  public updateSloAlertsConfig(next: SloAlertsEmbeddableInput) {
+    this.updateInput(next);
+  }
+
   setTitle(title: string) {
     this.updateInput({ title });
   }

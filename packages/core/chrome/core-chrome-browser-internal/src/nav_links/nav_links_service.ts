@@ -8,7 +8,7 @@
 
 import { sortBy } from 'lodash';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
+import { map, takeUntil } from 'rxjs';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import type { PublicAppDeepLinkInfo, PublicAppInfo } from '@kbn/core-application-browser';

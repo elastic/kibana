@@ -3,4 +3,7 @@ steps:
     label: Purge old cloud deployments
     timeout_in_minutes: 10
     agents:
-      queue: kibana-default
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-qa
+      provider: gcp
+      machineType: n2-standard-2

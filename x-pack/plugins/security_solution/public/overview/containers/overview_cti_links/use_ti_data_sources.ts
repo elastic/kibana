@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { Observable } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { filter } from 'rxjs';
 import { useEffect, useState } from 'react';
 import { useObservable, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';

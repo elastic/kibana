@@ -32,10 +32,7 @@ const observabilityOverviewHasDataRoute = createApmServerRoute({
 const observabilityOverviewRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/observability_overview',
   params: t.type({
-    query: t.intersection([
-      rangeRt,
-      t.type({ bucketSize: toNumberRt, intervalString: t.string }),
-    ]),
+    query: t.intersection([rangeRt, t.type({ bucketSize: toNumberRt, intervalString: t.string })]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources): Promise<ObservabilityOverviewResponse> => {

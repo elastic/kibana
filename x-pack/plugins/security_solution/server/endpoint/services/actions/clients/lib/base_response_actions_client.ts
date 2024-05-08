@@ -111,19 +111,24 @@ export interface ResponseActionsClientUpdateCasesOptions {
   actionId: string;
 }
 
-export type ResponseActionsClientWriteActionRequestToEndpointIndexOptions =
-  ResponseActionsRequestBody &
-    Pick<CommonResponseActionMethodOptions, 'ruleName' | 'ruleId' | 'hosts' | 'error'> & {
-      command: ResponseActionsApiCommandNames;
-      actionId?: string;
-    };
+export type ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+  TMeta extends {} = {}
+> = ResponseActionsRequestBody &
+  Pick<CommonResponseActionMethodOptions, 'ruleName' | 'ruleId' | 'hosts' | 'error'> &
+  Pick<LogsEndpointAction<TParameters, TOutputContent, TMeta>, 'meta'> & {
+    command: ResponseActionsApiCommandNames;
+    actionId?: string;
+  };
 
 export type ResponseActionsClientWriteActionResponseToEndpointIndexOptions<
-  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+  TMeta extends {} = {}
 > = {
   agentId: LogsEndpointActionResponse['agent']['id'];
   actionId: string;
-} & Pick<LogsEndpointActionResponse, 'error'> &
+} & Pick<LogsEndpointActionResponse<TOutputContent, TMeta>, 'error' | 'meta'> &
   Pick<LogsEndpointActionResponse<TOutputContent>['EndpointActions'], 'data'>;
 
 export type ResponseActionsClientValidateRequestResponse =
@@ -327,9 +332,17 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
    * Creates a Response Action request document in the Endpoint index (`.logs-endpoint.actions-default`)
    * @protected
    */
-  protected async writeActionRequestToEndpointIndex(
-    actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions
-  ): Promise<LogsEndpointAction> {
+  protected async writeActionRequestToEndpointIndex<
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+    TMeta extends {} = {}
+  >(
+    actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+      TParameters,
+      TOutputContent,
+      TMeta
+    >
+  ): Promise<LogsEndpointAction<TParameters, TOutputContent, TMeta>> {
     let errorMsg = String(actionRequest.error ?? '').trim();
 
     if (!errorMsg) {
@@ -346,7 +359,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
 
     this.notifyUsage(actionRequest.command);
 
-    const doc: LogsEndpointAction = {
+    const doc: LogsEndpointAction<TParameters, TOutputContent, TMeta> = {
       '@timestamp': new Date().toISOString(),
       agent: {
         id: actionRequest.endpoint_ids,
@@ -367,6 +380,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       user: {
         id: this.options.username,
       },
+      meta: actionRequest.meta,
       ...(errorMsg ? { error: { message: errorMsg } } : {}),
       ...(actionRequest.ruleId && actionRequest.ruleName
         ? { rule: { id: actionRequest.ruleId, name: actionRequest.ruleName } }
@@ -407,15 +421,20 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
 
   protected buildActionResponseEsDoc<
     // Default type purposely set to empty object in order to ensure proper types are used when calling the method
-    TOutputContent extends EndpointActionResponseDataOutput = Record<string, never>
+    TOutputContent extends EndpointActionResponseDataOutput = Record<string, never>,
+    TMeta extends {} = {}
   >({
     actionId,
     error,
     agentId,
     data,
-  }: ResponseActionsClientWriteActionResponseToEndpointIndexOptions<TOutputContent>): LogsEndpointActionResponse<TOutputContent> {
+    meta,
+  }: ResponseActionsClientWriteActionResponseToEndpointIndexOptions<
+    TOutputContent,
+    TMeta
+  >): LogsEndpointActionResponse<TOutputContent, TMeta> {
     const timestamp = new Date().toISOString();
-    const doc: LogsEndpointActionResponse<TOutputContent> = {
+    const doc: LogsEndpointActionResponse<TOutputContent, TMeta> = {
       '@timestamp': timestamp,
       agent: {
         id: agentId,
@@ -428,6 +447,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
         data,
       },
       error,
+      meta,
     };
 
     return doc;

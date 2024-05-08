@@ -167,15 +167,13 @@ export function TooltipSection({ currentConfig, setConfig, dataView }: FieldInpu
             >
               <FieldPicker
                 compressed
-                selectedOptions={
+                activeField={
                   field.name
-                    ? [
-                        {
-                          label: field.name,
-                          value: { type: 'field', field: field.name },
-                        },
-                      ]
-                    : []
+                    ? {
+                        label: field.name,
+                        value: { type: 'field', field: field.name },
+                      }
+                    : undefined
                 }
                 options={options}
                 onChoose={(choice) => {

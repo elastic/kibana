@@ -7,7 +7,7 @@
 
 import React from 'react';
 import _ from 'lodash';
-import { finalize, switchMap, tap } from 'rxjs/operators';
+import { finalize, switchMap, tap } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import {
   AppLeaveAction,
@@ -62,7 +62,7 @@ import {
   unsavedChangesWarning,
 } from '../saved_map';
 import { waitUntilTimeLayersLoad$ } from './wait_until_time_layers_load';
-import { RefreshConfig as MapRefreshConfig, SerializedMapState } from '../saved_map';
+import { RefreshConfig as MapRefreshConfig, ParsedMapStateJSON } from '../saved_map';
 
 export interface Props {
   savedMap: SavedMap;
@@ -310,24 +310,24 @@ export class MapApp extends React.Component<Props, State> {
     this._updateGlobalState(updatedGlobalState);
   };
 
-  _getInitialTime(serializedMapState?: SerializedMapState) {
+  _getInitialTime(mapState?: ParsedMapStateJSON) {
     if (this._initialTimeFromUrl) {
       return this._initialTimeFromUrl;
     }
 
-    return !this.props.savedMap.hasSaveAndReturnConfig() && serializedMapState?.timeFilters
-      ? serializedMapState.timeFilters
+    return !this.props.savedMap.hasSaveAndReturnConfig() && mapState?.timeFilters
+      ? mapState.timeFilters
       : getTimeFilter().getTime();
   }
 
-  _initMapAndLayerSettings(serializedMapState?: SerializedMapState) {
+  _initMapAndLayerSettings(mapState?: ParsedMapStateJSON) {
     const globalState = this._getGlobalState();
 
-    const savedObjectFilters = serializedMapState?.filters ? serializedMapState.filters : [];
+    const savedObjectFilters = mapState?.filters ? mapState.filters : [];
     const appFilters = this._appStateManager.getFilters() || [];
 
     const query = getInitialQuery({
-      serializedMapState,
+      mapState,
       appState: this._appStateManager.getAppState(),
     });
     if (query) {
@@ -337,12 +337,12 @@ export class MapApp extends React.Component<Props, State> {
     this._onQueryChange({
       filters: [..._.get(globalState, 'filters', []), ...appFilters, ...savedObjectFilters],
       query,
-      time: this._getInitialTime(serializedMapState),
+      time: this._getInitialTime(mapState),
     });
 
     this._onRefreshConfigChange(
       getInitialRefreshConfig({
-        serializedMapState,
+        mapState,
         globalState,
       })
     );
@@ -453,16 +453,16 @@ export class MapApp extends React.Component<Props, State> {
       );
     }
 
-    let serializedMapState: SerializedMapState | undefined;
+    let mapState: ParsedMapStateJSON | undefined;
     try {
       const attributes = this.props.savedMap.getAttributes();
       if (attributes.mapStateJSON) {
-        serializedMapState = JSON.parse(attributes.mapStateJSON);
+        mapState = JSON.parse(attributes.mapStateJSON);
       }
     } catch (e) {
       // ignore malformed mapStateJSON, not a critical error for viewing map - map will just use defaults
     }
-    this._initMapAndLayerSettings(serializedMapState);
+    this._initMapAndLayerSettings(mapState);
 
     this.setState({ initialized: true });
   }

@@ -42,6 +42,24 @@ describe('SecretFormRow', () => {
     expect(queryByText(initialValue)).not.toBeInTheDocument();
   });
 
+  it('should not enable the replace button if the row is disabled', () => {
+    const { getByText } = render(
+      <SecretFormRow
+        title={title}
+        initialValue={initialValue}
+        clear={clear}
+        useSecretsStorage={useSecretsStorage}
+        onToggleSecretStorage={onToggleSecretStorage}
+        cancelEdit={cancelEdit}
+        disabled={true}
+      >
+        <input id="myinput" type="text" value={initialValue} />
+      </SecretFormRow>
+    );
+
+    expect(getByText('Replace Test Secret').closest('button')).toBeDisabled();
+  });
+
   it('should call the cancelEdit function when the cancel button is clicked', () => {
     const { getByText } = render(
       <SecretFormRow
@@ -114,5 +132,28 @@ describe('SecretFormRow', () => {
     fireEvent.click(getByText('Click to use secret storage instead'));
 
     expect(onToggleSecretStorage).toHaveBeenCalledWith(true);
+  });
+
+  it('should display input normally and display a callout when the field is converted to secret storage', () => {
+    const { getByText, queryByText } = render(
+      <SecretFormRow
+        title={title}
+        initialValue={initialValue}
+        clear={clear}
+        useSecretsStorage={useSecretsStorage}
+        onToggleSecretStorage={onToggleSecretStorage}
+        cancelEdit={cancelEdit}
+        isConvertedToSecret={true}
+      >
+        <input type="text" value={initialValue} />
+      </SecretFormRow>
+    );
+
+    expect(queryByText('Replace Test Secret')).not.toBeInTheDocument();
+    expect(
+      getByText('This field will be re-saved using secret storage from plain text storage.', {
+        exact: false,
+      })
+    ).toBeInTheDocument();
   });
 });

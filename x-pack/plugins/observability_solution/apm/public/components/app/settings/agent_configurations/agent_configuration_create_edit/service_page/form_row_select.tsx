@@ -41,19 +41,13 @@ export function FormRowSelect({
     return optionFound ? [optionFound] : undefined;
   }, [options, value]);
 
-  const handleOnChange = (
-    nextSelectedOptions: Array<EuiComboBoxOptionOption<string>>
-  ) => {
+  const handleOnChange = (nextSelectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
     const [selectedOption] = nextSelectedOptions;
     onChange(selectedOption.value);
   };
 
   return (
-    <EuiDescribedFormGroup
-      fullWidth
-      title={<h3>{title}</h3>}
-      description={description}
-    >
+    <EuiDescribedFormGroup fullWidth title={<h3>{title}</h3>} description={description}>
       <EuiFormRow label={fieldLabel}>
         <EuiComboBox
           isClearable={false}
@@ -63,10 +57,9 @@ export function FormRowSelect({
           isDisabled={isDisabled}
           selectedOptions={selectedOptions}
           onChange={handleOnChange}
-          placeholder={i18n.translate(
-            'xpack.apm.agentConfig.servicePage.environment.placeholder',
-            { defaultMessage: 'Select Option' }
-          )}
+          placeholder={i18n.translate('xpack.apm.agentConfig.servicePage.environment.placeholder', {
+            defaultMessage: 'Select Option',
+          })}
           data-test-subj={dataTestSubj}
         />
       </EuiFormRow>

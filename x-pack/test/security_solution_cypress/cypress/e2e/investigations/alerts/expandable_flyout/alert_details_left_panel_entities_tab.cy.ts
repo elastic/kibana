@@ -18,7 +18,7 @@ import { DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB } from '../../../../screens/expand
 import { openEntitiesTab } from '../../../../tasks/expandable_flyout/alert_details_left_panel_entities_tab';
 import { openInsightsTab } from '../../../../tasks/expandable_flyout/alert_details_left_panel';
 import { expandDocumentDetailsExpandableFlyoutLeftSection } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
-import { expandFirstAlertExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
+import { expandAlertAtIndexExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
@@ -37,7 +37,7 @@ describe(
       createRule(getNewRule());
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
-      expandFirstAlertExpandableFlyout();
+      expandAlertAtIndexExpandableFlyout();
       expandDocumentDetailsExpandableFlyoutLeftSection();
       openInsightsTab();
       openEntitiesTab();

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { MappingRuntimeFields, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { Logger, StartServicesAccessor } from '@kbn/core/server';
 import type {
   AfterKey,
   AfterKeys,
@@ -16,8 +17,16 @@ import type {
   RiskScore,
 } from '../../../common/entity_analytics/risk_engine';
 import type { ConfigType } from '../../config';
+import type { StartPlugins } from '../../plugin';
+import type { SecuritySolutionPluginRouter } from '../../types';
 export type EntityAnalyticsConfig = ConfigType['entityAnalytics'];
 
+export interface EntityAnalyticsRoutesDeps {
+  router: SecuritySolutionPluginRouter;
+  logger: Logger;
+  config: ConfigType;
+  getStartServices: StartServicesAccessor<StartPlugins>;
+}
 export interface CalculateScoresParams {
   afterKeys: AfterKeys;
   debug?: boolean;
@@ -42,12 +51,18 @@ export interface CalculateAndPersistScoresParams {
   runtimeMappings: MappingRuntimeFields;
   weights?: RiskWeights;
   alertSampleSizePerShard?: number;
+  returnScores?: boolean;
+  refresh?: 'wait_for';
 }
 
 export interface CalculateAndPersistScoresResponse {
   after_keys: AfterKeys;
   errors: string[];
   scores_written: number;
+  scores?: {
+    host?: RiskScore[];
+    user?: RiskScore[];
+  };
 }
 
 export interface CalculateScoresResponse {
@@ -113,6 +128,15 @@ export interface CalculateRiskScoreAggregations {
   };
 }
 
+export interface SearchHitRiskInput {
+  id: string;
+  index: string;
+  rule_name?: string;
+  time?: string;
+  score?: number;
+  contribution?: number;
+}
+
 export interface RiskScoreBucket {
   key: { [identifierField: string]: string };
   doc_count: number;
@@ -125,9 +149,9 @@ export interface RiskScoreBucket {
         notes: string[];
         category_1_score: number;
         category_1_count: number;
+        risk_inputs: SearchHitRiskInput[];
       };
     };
-    inputs: SearchResponse;
   };
 }
 

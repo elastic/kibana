@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { first } from 'rxjs/operators';
+import { first } from 'rxjs';
 import type { EuiMarkdownEditorUiPlugin, EuiMarkdownAstNodePosition } from '@elastic/eui';
 import {
   EuiCodeBlock,

@@ -68,7 +68,7 @@ export interface ExploratoryViewPublicPluginsStart {
   usageCollection: UsageCollectionSetup;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   home?: HomePublicPluginStart;
-  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
 }
 
 export type ExploratoryViewPublicSetup = ReturnType<Plugin['setup']>;

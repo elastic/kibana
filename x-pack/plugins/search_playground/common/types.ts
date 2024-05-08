@@ -11,6 +11,7 @@ interface ModelFields {
   field: string;
   model_id: string;
   nested: boolean;
+  indices: string[];
 }
 
 export interface QuerySourceFields {
@@ -18,10 +19,35 @@ export interface QuerySourceFields {
   dense_vector_query_fields: ModelFields[];
   bm25_query_fields: string[];
   source_fields: string[];
+  skipped_fields: number;
 }
 
 export enum APIRoutes {
   POST_API_KEY = '/internal/search_playground/api_key',
   POST_CHAT_MESSAGE = '/internal/search_playground/chat',
   POST_QUERY_SOURCE_FIELDS = '/internal/search_playground/query_source_fields',
+  GET_INDICES = '/internal/search_playground/indices',
+}
+
+export enum LLMs {
+  openai = 'openai',
+  openai_azure = 'openai_azure',
+  bedrock = 'bedrock',
+}
+
+export interface ChatRequestData {
+  connector_id: string;
+  prompt: string;
+  indices: string;
+  citations: boolean;
+  elasticsearch_query: string;
+  summarization_model?: string;
+  source_fields: string;
+  doc_size: number;
+}
+
+export interface SearchPlaygroundConfigType {
+  ui: {
+    enabled: boolean;
+  };
 }

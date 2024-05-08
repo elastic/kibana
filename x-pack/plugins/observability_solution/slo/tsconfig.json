@@ -43,7 +43,6 @@
     "@kbn/charts-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/serverless",
-    "@kbn/dashboard-plugin",
     "@kbn/data-views-plugin",
     "@kbn/rule-registry-plugin",
     "@kbn/licensing-plugin",
@@ -84,6 +83,15 @@
     "@kbn/data-view-field-editor-plugin",
     "@kbn/discover-plugin",
     "@kbn/field-formats-plugin",
-    "@kbn/core-http-server"
+    "@kbn/core-http-server",
+    "@kbn/aiops-plugin",
+    "@kbn/presentation-publishing",
+    "@kbn/aiops-log-rate-analysis",
+    "@kbn/data-view-field-editor-plugin",
+    "@kbn/securitysolution-io-ts-utils",
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/datemath",
+    "@kbn/presentation-containers",
+    "@kbn/dashboard-plugin",
   ]
 }

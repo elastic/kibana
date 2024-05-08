@@ -127,6 +127,10 @@ export function getFieldTypeName(type?: string) {
       return i18n.translate('fieldUtils.fieldNameIcons.sparseVectorFieldAriaLabel', {
         defaultMessage: 'Sparse vector',
       });
+    case KNOWN_FIELD_TYPES.SEMANTIC_TEXT:
+      return i18n.translate('fieldUtils.fieldNameIcons.semanticTextFieldAriaLabel', {
+        defaultMessage: 'Semantic text',
+      });
     case KNOWN_FIELD_TYPES.STRING:
       return i18n.translate('fieldUtils.fieldNameIcons.stringFieldAriaLabel', {
         defaultMessage: 'String',

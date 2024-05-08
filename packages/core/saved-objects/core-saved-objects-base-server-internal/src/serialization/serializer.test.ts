@@ -309,6 +309,18 @@ describe('#rawToSavedObject', () => {
     expect(actual).toHaveProperty('created_at', now);
   });
 
+  test('if specified it copies the _source.created_by property to created_by', () => {
+    const createdBy = 'elastic';
+    const actual = singleNamespaceSerializer.rawToSavedObject({
+      _id: 'foo:bar',
+      _source: {
+        type: 'foo',
+        created_by: createdBy,
+      },
+    });
+    expect(actual).toHaveProperty('created_by', createdBy);
+  });
+
   test(`if _source.updated_at is unspecified it doesn't set updated_at`, () => {
     const actual = singleNamespaceSerializer.rawToSavedObject({
       _id: 'foo:bar',

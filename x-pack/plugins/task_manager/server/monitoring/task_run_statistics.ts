@@ -6,7 +6,7 @@
  */
 
 import { combineLatest, Observable } from 'rxjs';
-import { filter, startWith, map } from 'rxjs/operators';
+import { filter, startWith, map } from 'rxjs';
 import { JsonObject, JsonValue } from '@kbn/utility-types';
 import { isNumber, mapValues } from 'lodash';
 import { Logger } from '@kbn/core/server';

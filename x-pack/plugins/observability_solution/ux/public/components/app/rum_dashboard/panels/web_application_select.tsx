@@ -33,10 +33,5 @@ export function WebApplicationSelect() {
   const rumServiceNames =
     data?.aggregations?.services?.buckets.map(({ key }) => key as string) ?? [];
 
-  return (
-    <ServiceNameFilter
-      loading={loading ?? true}
-      serviceNames={rumServiceNames}
-    />
-  );
+  return <ServiceNameFilter loading={loading ?? true} serviceNames={rumServiceNames} />;
 }

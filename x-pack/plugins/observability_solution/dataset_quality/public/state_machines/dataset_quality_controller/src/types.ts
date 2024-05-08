@@ -7,15 +7,20 @@
 
 import { DoneInvokeEvent } from 'xstate';
 import { RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
+import { QualityIndicators } from '../../../../common/types';
 import { Integration } from '../../../../common/data_streams_stats/integration';
 import { Direction, SortField } from '../../../hooks';
 import { DegradedDocsStat } from '../../../../common/data_streams_stats/malformed_docs_stat';
 import {
+  DashboardType,
   DataStreamDegradedDocsStatServiceResponse,
+  DataStreamSettings,
   DataStreamDetails,
   DataStreamStatServiceResponse,
+  IntegrationsResponse,
+  DataStreamStat,
+  DataStreamStatType,
 } from '../../../../common/data_streams_stats';
-import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
 
 export type FlyoutDataset = Omit<
   DataStreamStat,
@@ -41,6 +46,7 @@ interface FiltersCriteria {
   timeRange: TimeRangeConfig;
   integrations: string[];
   namespaces: string[];
+  qualities: QualityIndicators[];
   query?: string;
 }
 
@@ -51,8 +57,10 @@ export interface WithTableOptions {
 export interface WithFlyoutOptions {
   flyout: {
     dataset?: FlyoutDataset;
+    datasetSettings?: DataStreamSettings;
     datasetDetails?: DataStreamDetails;
     insightsTimeRange?: TimeRangeConfig;
+    breakdownField?: string;
   };
 }
 
@@ -61,7 +69,7 @@ export interface WithFilters {
 }
 
 export interface WithDataStreamStats {
-  dataStreamStats: DataStreamStat[];
+  dataStreamStats: DataStreamStatType[];
 }
 
 export interface WithDegradedDocs {
@@ -82,7 +90,7 @@ export type DefaultDatasetQualityControllerState = { type: string } & WithTableO
   WithFlyoutOptions &
   WithDatasets &
   WithFilters &
-  WithIntegrations;
+  Partial<WithIntegrations>;
 
 type DefaultDatasetQualityStateContext = DefaultDatasetQualityControllerState &
   Partial<WithFlyoutOptions>;
@@ -101,19 +109,27 @@ export type DatasetQualityControllerTypeState =
       context: DefaultDatasetQualityStateContext;
     }
   | {
-      value: 'datasets.loaded.flyoutOpen.fetching';
-      context: DefaultDatasetQualityStateContext;
-    }
-  | {
-      value: 'datasets.loaded.flyoutOpen';
-      context: DefaultDatasetQualityStateContext;
-    }
-  | {
       value: 'degradedDocs.fetching';
       context: DefaultDatasetQualityStateContext;
     }
   | {
       value: 'datasets.loaded';
+      context: DefaultDatasetQualityStateContext;
+    }
+  | {
+      value: 'integrations.fetching';
+      context: DefaultDatasetQualityStateContext;
+    }
+  | {
+      value: 'flyout.initializing.dataStreamSettings.fetching';
+      context: DefaultDatasetQualityStateContext;
+    }
+  | {
+      value: 'flyout.initializing.dataStreamDetails.fetching';
+      context: DefaultDatasetQualityStateContext;
+    }
+  | {
+      value: 'flyout.initializing.integrationDashboards.fetching';
       context: DefaultDatasetQualityStateContext;
     };
 
@@ -135,6 +151,10 @@ export type DatasetQualityControllerEvent =
   | {
       type: 'UPDATE_INSIGHTS_TIME_RANGE';
       timeRange: TimeRangeConfig;
+    }
+  | {
+      type: 'BREAKDOWN_FIELD_CHANGE';
+      breakdownField: string | null;
     }
   | {
       type: 'CLOSE_FLYOUT';
@@ -161,9 +181,17 @@ export type DatasetQualityControllerEvent =
       namespaces: string[];
     }
   | {
+      type: 'UPDATE_QUALITIES';
+      qualities: QualityIndicators[];
+    }
+  | {
       type: 'UPDATE_QUERY';
       query: string;
     }
   | DoneInvokeEvent<DataStreamDegradedDocsStatServiceResponse>
+  | DoneInvokeEvent<DashboardType>
+  | DoneInvokeEvent<DataStreamDetails>
+  | DoneInvokeEvent<DataStreamSettings>
   | DoneInvokeEvent<DataStreamStatServiceResponse>
+  | DoneInvokeEvent<IntegrationsResponse>
   | DoneInvokeEvent<Error>;

@@ -27,11 +27,10 @@ import { SavedObjectNoteRuntimeType } from '../../../../../common/types/timeline
 import type { SavedObjectNoteWithoutExternalRefs } from '../../../../../common/types/timeline/note/saved_object';
 import type { FrameworkRequest } from '../../../framework';
 import { noteSavedObjectType } from '../../saved_object_mappings/notes';
-import { createTimeline } from '../timelines';
 import { timelineSavedObjectType } from '../../saved_object_mappings';
 import { noteFieldsMigrator } from './field_migrator';
 
-export const deleteNoteByTimelineId = async (request: FrameworkRequest, timelineId: string) => {
+export const deleteNotesByTimelineId = async (request: FrameworkRequest, timelineId: string) => {
   const options: SavedObjectsFindOptions = {
     type: noteSavedObjectType,
     hasReference: { type: timelineSavedObjectType, id: timelineId },
@@ -106,7 +105,6 @@ export const persistNote = async ({
         noteId: uuidv1(),
         version: '',
         timelineId: '',
-        timelineVersion: '',
       };
       return {
         code: 403,
@@ -132,24 +130,7 @@ const createNote = async ({
   const savedObjectsClient = (await request.context.core).savedObjects.client;
   const userInfo = request.user;
 
-  const shallowCopyOfNote = { ...note };
-  let timelineVersion: string | undefined;
-
-  if (note.timelineId == null) {
-    const { timeline: timelineResult } = await createTimeline({
-      timelineId: null,
-      timeline: {},
-      savedObjectsClient,
-      userInfo,
-    });
-
-    shallowCopyOfNote.timelineId = timelineResult.savedObjectId;
-    timelineVersion = timelineResult.version;
-  }
-
-  const noteWithCreator = overrideOwner
-    ? pickSavedNote(noteId, shallowCopyOfNote, userInfo)
-    : shallowCopyOfNote;
+  const noteWithCreator = overrideOwner ? pickSavedNote(noteId, { ...note }, userInfo) : note;
 
   const { transformedFields: migratedAttributes, references } =
     noteFieldsMigrator.extractFieldsToReferences<BareNoteWithoutExternalRefs>({
@@ -175,7 +156,7 @@ const createNote = async ({
 
   const repopulatedSavedObject = noteFieldsMigrator.populateFieldsFromReferences(createdNote);
 
-  const convertedNote = convertSavedObjectToSavedNote(repopulatedSavedObject, timelineVersion);
+  const convertedNote = convertSavedObjectToSavedNote(repopulatedSavedObject);
 
   // Create new note
   return {
@@ -266,17 +247,13 @@ const getAllSavedNote = async (request: FrameworkRequest, options: SavedObjectsF
   };
 };
 
-export const convertSavedObjectToSavedNote = (
-  savedObject: unknown,
-  timelineVersion?: string | undefined | null
-): Note =>
+export const convertSavedObjectToSavedNote = (savedObject: unknown): Note =>
   pipe(
     SavedObjectNoteRuntimeType.decode(savedObject),
     map((savedNote) => {
       return {
         noteId: savedNote.id,
         version: savedNote.version,
-        timelineVersion,
         timelineId: savedNote.attributes.timelineId,
         eventId: savedNote.attributes.eventId,
         note: savedNote.attributes.note,

@@ -17,28 +17,18 @@ import { ErrorCountRuleParams } from '../rule_types/error_count_rule_type';
 import { ApmRuleUnifiedSearchBar } from './apm_rule_unified_search_bar';
 
 interface Props {
-  ruleParams:
-    | TransactionDurationRuleParams
-    | ErrorRateRuleParams
-    | ErrorCountRuleParams;
+  ruleParams: TransactionDurationRuleParams | ErrorRateRuleParams | ErrorCountRuleParams;
   setRuleParams: (key: string, value: any) => void;
   onToggleKqlFilter: (e: EuiSwitchEvent) => void;
 }
 
-export function ApmRuleKqlFilter({
-  ruleParams,
-  setRuleParams,
-  onToggleKqlFilter,
-}: Props) {
+export function ApmRuleKqlFilter({ ruleParams, setRuleParams, onToggleKqlFilter }: Props) {
   const kqlFilterToggle = (
     <>
       <EuiSwitch
-        label={i18n.translate(
-          'xpack.apm.rules.transactionDuration.kqlFilterToggle',
-          {
-            defaultMessage: 'Use KQL Filter',
-          }
-        )}
+        label={i18n.translate('xpack.apm.rules.transactionDuration.kqlFilterToggle', {
+          defaultMessage: 'Use KQL Filter',
+        })}
         checked={ruleParams.useKqlFilter ?? false}
         onChange={onToggleKqlFilter}
       />
@@ -53,16 +43,12 @@ export function ApmRuleKqlFilter({
           defaultMessage: 'Filter',
         })}
         helpText={i18n.translate('xpack.apm.rules.ruleFlyout.filterHelpText', {
-          defaultMessage:
-            'Use a KQL expression to limit the scope of your alert trigger.',
+          defaultMessage: 'Use a KQL expression to limit the scope of your alert trigger.',
         })}
         fullWidth
         display="rowCompressed"
       >
-        <ApmRuleUnifiedSearchBar
-          ruleParams={ruleParams}
-          setRuleParams={setRuleParams}
-        />
+        <ApmRuleUnifiedSearchBar ruleParams={ruleParams} setRuleParams={setRuleParams} />
       </EuiFormRow>
       <EuiSpacer size={'m'} />
     </>

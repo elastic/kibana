@@ -7,7 +7,6 @@
 
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import {
   ALERT_GROUP_FIELD,
   ALERT_GROUP_VALUE,
@@ -22,6 +21,7 @@ import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type {
   CustomMetricExpressionParams,
   CustomThresholdExpressionMetric,
+  CustomThresholdSearchSourceFields,
   SearchConfigurationWithExtractedReferenceType,
 } from '../../common/custom_threshold_rule/types';
 import type { MetricExpression } from '../components/custom_threshold/types';
@@ -66,7 +66,7 @@ export const registerObservabilityRuleTypes = async (
     searchConfiguration,
   }: {
     criteria: CustomMetricExpressionParams[];
-    searchConfiguration: SerializedSearchSourceFields;
+    searchConfiguration: CustomThresholdSearchSourceFields;
   }) => validateCustomThreshold({ criteria, searchConfiguration, uiSettings });
   observabilityRuleTypeRegistry.register({
     id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,

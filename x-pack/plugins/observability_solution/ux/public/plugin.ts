@@ -6,7 +6,7 @@
  */
 
 import { from } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import {
   FetchDataParams,
@@ -22,10 +22,7 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import {
-  DataPublicPluginSetup,
-  DataPublicPluginStart,
-} from '@kbn/data-plugin/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 
 import { FeaturesPluginSetup } from '@kbn/features-plugin/public';
@@ -47,6 +44,8 @@ import {
   ObservabilityAIAssistantPublicSetup,
   ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import { OBLT_UX_APP_ID } from '@kbn/deeplinks-observability';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
 export type UxPluginSetup = void;
 export type UxPluginStart = void;
@@ -59,7 +58,7 @@ export interface ApmPluginSetupDeps {
   licensing: LicensingPluginSetup;
   observability: ObservabilityPublicSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
-  observabilityAIAssistant: ObservabilityAIAssistantPublicSetup;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
 }
 
 export interface ApmPluginStartDeps {
@@ -71,10 +70,11 @@ export interface ApmPluginStartDeps {
   inspector: InspectorPluginStart;
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
-  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   exploratoryView: ExploratoryViewPublicStart;
   dataViews: DataViewsPublicPluginStart;
   lens: LensPublicStart;
+  spaces?: SpacesPluginStart;
 }
 
 async function getDataStartPlugin(core: CoreSetup) {
@@ -89,8 +89,9 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
     const pluginSetupDeps = plugins;
     if (plugins.observability) {
       const getUxDataHelper = async () => {
-        const { fetchUxOverviewDate, hasRumData, createCallApmApi } =
-          await import('./components/app/rum_dashboard/ux_overview_fetchers');
+        const { fetchUxOverviewDate, hasRumData, createCallApmApi } = await import(
+          './components/app/rum_dashboard/ux_overview_fetchers'
+        );
         // have to do this here as well in case app isn't mounted yet
         createCallApmApi(core);
 
@@ -98,7 +99,7 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
       };
 
       plugins.observability.dashboard.register({
-        appName: 'ux',
+        appName: OBLT_UX_APP_ID,
         hasData: async (params?: HasDataParams) => {
           const dataHelper = await getUxDataHelper();
           const dataStartPlugin = await getDataStartPlugin(core);
@@ -118,7 +119,7 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
       });
 
       plugins.exploratoryView.register({
-        appName: 'ux',
+        appName: OBLT_UX_APP_ID,
         hasData: async (params?: HasDataParams) => {
           const dataHelper = await getUxDataHelper();
           const dataStartPlugin = await getDataStartPlugin(core);
@@ -155,7 +156,7 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
                     label: i18n.translate('xpack.ux.overview.heading', {
                       defaultMessage: 'Dashboard',
                     }),
-                    app: 'ux',
+                    app: OBLT_UX_APP_ID,
                     path: '/',
                     matchFullPath: true,
                     ignoreTrailingSlash: true,
@@ -173,7 +174,7 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
     const isDev = this.initContext.env.mode.dev;
 
     core.application.register({
-      id: 'ux',
+      id: OBLT_UX_APP_ID,
       title: 'User Experience',
       order: 8500,
       euiIconType: 'logoObservability',
@@ -201,12 +202,15 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
           core.getStartServices(),
         ]);
 
+        const activeSpace = await (corePlugins as ApmPluginStartDeps).spaces?.getActiveSpace();
+
         return renderApp({
           isDev,
           core: coreStart,
           deps: pluginSetupDeps,
           appMountParameters,
           corePlugins: corePlugins as ApmPluginStartDeps,
+          spaceId: activeSpace?.id || 'default',
         });
       },
     });

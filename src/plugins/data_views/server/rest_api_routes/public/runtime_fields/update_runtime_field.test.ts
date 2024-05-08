@@ -9,13 +9,13 @@
 import { updateRuntimeField } from './update_runtime_field';
 import { dataViewsService } from '../../../mocks';
 import { getUsageCollection } from '../test_utils';
-import { DataView } from '../../../../common';
+import { DataViewLazy } from '../../../../common';
 
 describe('update runtime field', () => {
-  it('call usageCollection', () => {
+  it('call usageCollection', async () => {
     const usageCollection = getUsageCollection();
 
-    dataViewsService.get.mockImplementation(
+    dataViewsService.getDataViewLazy.mockImplementation(
       async (id: string) =>
         ({
           removeRuntimeField: jest.fn(),
@@ -26,10 +26,10 @@ describe('update runtime field', () => {
               runtimeField: {},
             }),
           },
-        } as unknown as DataView)
+        } as unknown as DataViewLazy)
     );
 
-    updateRuntimeField({
+    await updateRuntimeField({
       dataViewsService,
       counterName: 'POST /path',
       usageCollection,

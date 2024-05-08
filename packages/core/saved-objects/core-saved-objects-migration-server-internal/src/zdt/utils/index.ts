@@ -24,3 +24,4 @@ export {
   checkIndexCurrentAlgorithm,
   type CheckCurrentAlgorithmResult,
 } from './check_index_algorithm';
+export { getCreationAliases } from './get_creation_aliases';

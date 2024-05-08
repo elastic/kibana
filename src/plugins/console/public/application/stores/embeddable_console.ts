@@ -10,11 +10,15 @@ import { Reducer } from 'react';
 import { produce } from 'immer';
 import { identity } from 'fp-ts/lib/function';
 
-import { EmbeddedConsoleAction, EmbeddedConsoleStore } from '../../types/embeddable_console';
+import {
+  EmbeddableConsoleView,
+  EmbeddedConsoleAction,
+  EmbeddedConsoleStore,
+} from '../../types/embeddable_console';
 
 export const initialValue: EmbeddedConsoleStore = produce<EmbeddedConsoleStore>(
   {
-    isOpen: false,
+    view: EmbeddableConsoleView.Closed,
   },
   identity
 );
@@ -23,19 +27,22 @@ export const reducer: Reducer<EmbeddedConsoleStore, EmbeddedConsoleAction> = (st
   produce<EmbeddedConsoleStore>(state, (draft) => {
     switch (action.type) {
       case 'open':
-        if (!state.isOpen) {
-          draft.isOpen = true;
+        const newView = action.payload?.alternateView
+          ? EmbeddableConsoleView.Alternate
+          : EmbeddableConsoleView.Console;
+        if (state.view !== newView) {
+          draft.view = newView;
           draft.loadFromContent = action.payload?.content;
-          return;
+          return draft;
         }
         break;
       case 'close':
-        if (state.isOpen) {
-          draft.isOpen = false;
+        if (state.view !== EmbeddableConsoleView.Closed) {
+          draft.view = EmbeddableConsoleView.Closed;
           draft.loadFromContent = undefined;
-          return;
+          return draft;
         }
         break;
     }
-    return draft;
+    return state;
   });

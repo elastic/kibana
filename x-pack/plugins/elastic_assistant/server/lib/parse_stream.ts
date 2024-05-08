@@ -10,23 +10,28 @@ import { finished } from 'stream/promises';
 import { handleBedrockChunk } from '@kbn/elastic-assistant-common';
 import { Logger } from '@kbn/core/server';
 
-type StreamParser = (responseStream: Readable, logger: Logger) => Promise<string>;
+type StreamParser = (
+  responseStream: Readable,
+  logger: Logger,
+  abortSignal?: AbortSignal
+) => Promise<string>;
 
 export const handleStreamStorage = async ({
+  abortSignal,
   responseStream,
-  llmType,
+  actionTypeId,
   onMessageSent,
   logger,
 }: {
+  abortSignal?: AbortSignal;
   responseStream: Readable;
-  llmType: string;
+  actionTypeId: string;
   onMessageSent?: (content: string) => void;
   logger: Logger;
 }): Promise<void> => {
   try {
-    const parser = llmType === '.bedrock' ? parseBedrockStream : parseOpenAIStream;
-    // TODO @steph add abort signal
-    const parsedResponse = await parser(responseStream, logger);
+    const parser = actionTypeId === '.bedrock' ? parseBedrockStream : parseOpenAIStream;
+    const parsedResponse = await parser(responseStream, logger, abortSignal);
     if (onMessageSent) {
       onMessageSent(parsedResponse);
     }
@@ -37,7 +42,7 @@ export const handleStreamStorage = async ({
   }
 };
 
-const parseOpenAIStream: StreamParser = async (stream) => {
+const parseOpenAIStream: StreamParser = async (stream, logger, abortSignal) => {
   let responseBody = '';
   stream.on('data', (chunk) => {
     responseBody += chunk.toString();
@@ -49,6 +54,12 @@ const parseOpenAIStream: StreamParser = async (stream) => {
     stream.on('error', (err) => {
       reject(err);
     });
+    if (abortSignal) {
+      abortSignal.addEventListener('abort', () => {
+        stream.destroy();
+        resolve(parseOpenAIResponse(responseBody));
+      });
+    }
   });
 };
 
@@ -77,13 +88,26 @@ const parseOpenAIResponse = (responseBody: string) =>
       return prev + (msg.content || '');
     }, '');
 
-const parseBedrockStream: StreamParser = async (responseStream, logger: Logger) => {
+const parseBedrockStream: StreamParser = async (responseStream, logger, abortSignal) => {
   const responseBuffer: Uint8Array[] = [];
+  if (abortSignal) {
+    abortSignal.addEventListener('abort', () => {
+      responseStream.destroy(new Error('Aborted'));
+      return parseBedrockBuffer(responseBuffer, logger);
+    });
+  }
   responseStream.on('data', (chunk) => {
     // special encoding for bedrock, do not attempt to convert to string
     responseBuffer.push(chunk);
   });
-  await finished(responseStream);
+
+  await finished(responseStream).catch((err) => {
+    if (abortSignal?.aborted) {
+      logger.info('Bedrock stream parsing was aborted.');
+    } else {
+      throw err;
+    }
+  });
 
   return parseBedrockBuffer(responseBuffer, logger);
 };

@@ -44,7 +44,7 @@ export const getEcsAllowedValueDescription = (fieldName: FieldName, value: strin
   return (
     allowedValues?.find((item) => item.name === value)?.description ??
     i18n.translate('xpack.securitySolution.flyout.right.about.noEventKindDescriptionMessage', {
-      defaultMessage: 'This field is not an ecs field, description is not available.',
+      defaultMessage: "This field doesn't have a description because it's not part of ECS.",
     })
   );
 };

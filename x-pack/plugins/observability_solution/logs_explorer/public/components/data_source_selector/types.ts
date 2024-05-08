@@ -26,6 +26,7 @@ import {
   UNCATEGORIZED_TAB_ID,
 } from './constants';
 import {
+  FilterDataViews,
   IsDataViewAllowed,
   IsDataViewAvailable,
   LoadDataViews,
@@ -33,6 +34,7 @@ import {
   SearchDataViews,
 } from '../../hooks/use_data_views';
 import { DiscoverEsqlUrlProps } from '../../hooks/use_esql';
+import { DataViewsFilterParams } from '../../state_machines/data_views';
 
 export interface DataSourceSelectorProps {
   /* The generic data stream list */
@@ -43,6 +45,8 @@ export interface DataSourceSelectorProps {
   dataSourceSelection: DataSourceSelection;
   /* The available data views list */
   dataViews: DataViewDescriptor[] | null;
+  /* The total number of data views */
+  dataViewCount: number;
   /* Any error occurred to show when the user preview the data views */
   dataViewsError: Error | null;
   /* url props to navigate to discover ES|QL */
@@ -71,6 +75,7 @@ export interface DataSourceSelectorProps {
   /* Triggered when the user reload the list after an error */
   onIntegrationsReload: ReloadIntegrations;
   /* Triggered when a search or sorting is performed */
+  onDataViewsFilter: FilterDataViews;
   onDataViewsSearch: SearchDataViews;
   onDataViewsSort: SearchDataViews;
   onIntegrationsSearch: SearchIntegrations;
@@ -109,3 +114,5 @@ export type ChangePanelHandler = ({ panelId }: { panelId: EuiContextMenuPanelId 
 export type DatasetSelectionHandler = (dataset: Dataset) => void;
 
 export type DataViewSelectionHandler = (dataView: DataViewDescriptor) => void;
+
+export type DataViewFilterHandler = (params: DataViewsFilterParams) => void;

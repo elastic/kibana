@@ -11,21 +11,11 @@
       "enterpriseSearch"
     ],
     "requiredPlugins": [
-      "features",
-      "security",
-      "licensing",
       "data",
-      "discover",
-      "charts",
+      "features",
+      "licensing",
       "logsShared",
-      "cloud",
       "esUiShared",
-      "lens",
-      "embeddable",
-      "share",
-      "console",
-      "searchConnectors",
-      "searchPlayground"
     ],
     "optionalPlugins": [
       "customIntegrations",
@@ -33,9 +23,19 @@
       "home",
       "indexManagement",
       "ml",
+      "security",
       "spaces",
       "usageCollection",
       "guidedOnboarding",
+      "console",
+      "searchConnectors",
+      "searchPlayground",
+      "embeddable",
+      "discover",
+      "charts",
+      "cloud",
+      "lens",
+      "share",
     ],
     "requiredBundles": [
       "kibanaReact"

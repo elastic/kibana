@@ -11,11 +11,7 @@ import styled from 'styled-components';
 
 import { MapEmbeddable, MapEmbeddableInput } from '@kbn/maps-plugin/public';
 import { MAP_SAVED_OBJECT_TYPE } from '@kbn/maps-plugin/common';
-import {
-  ErrorEmbeddable,
-  ViewMode,
-  isErrorEmbeddable,
-} from '@kbn/embeddable-plugin/public';
+import { ErrorEmbeddable, ViewMode, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { RenderTooltipContentParams } from '@kbn/maps-plugin/public';
 import { useLayerList } from './use_layer_list';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
@@ -50,12 +46,9 @@ export function EmbeddedMapComponent() {
 
   const layerList = useLayerList();
 
-  const [embeddable, setEmbeddable] = useState<
-    MapEmbeddable | ErrorEmbeddable | undefined
-  >();
+  const [embeddable, setEmbeddable] = useState<MapEmbeddable | ErrorEmbeddable | undefined>();
 
-  const embeddableRoot: React.RefObject<HTMLDivElement> =
-    useRef<HTMLDivElement>(null);
+  const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
 
   const { embeddable: embeddablePlugin, maps } = useKibanaServices();
 

@@ -21,7 +21,7 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 
-import type { WindowParameters } from '@kbn/aiops-utils';
+import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
 import type { Filter, Query } from '@kbn/es-query';
 import { useUrlState, usePageUrlState } from '@kbn/ml-url-state';
 import type { DataSeriesDatum } from '@elastic/charts/dist/chart_types/xy_chart/utils/series';

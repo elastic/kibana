@@ -11,7 +11,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const svlMl = getService('svlMl');
   const PageObjects = getPageObjects(['svlCommonPage']);
 
-  describe('Trained models list', () => {
+  describe('Trained models list', function () {
     before(async () => {
       await PageObjects.svlCommonPage.login();
       await ml.api.syncSavedObjects();
@@ -28,10 +28,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await svlMl.navigation.security.navigateToTrainedModels();
 
         await ml.testExecution.logTestStep(
-          'should display the stats bar and the analytics table with no trained models'
+          'should display the stats bar and the analytics table with one trained model'
         );
-        await ml.trainedModels.assertStats(0);
-        await ml.trainedModelsTable.assertTableIsNotPopulated();
+        await ml.trainedModels.assertStats(1);
+        await ml.trainedModelsTable.assertTableIsPopulated();
       });
     });
   });

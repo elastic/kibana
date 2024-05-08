@@ -24,6 +24,7 @@ export const enableInfrastructureAssetCustomDashboards =
 export const enableAwsLambdaMetrics = 'observability:enableAwsLambdaMetrics';
 export const enableAgentExplorerView = 'observability:apmAgentExplorerView';
 export const apmEnableTableSearchBar = 'observability:apmEnableTableSearchBar';
+export const apmEnableMultiSignal = 'observability:apmEnableMultiSignal';
 export const apmEnableServiceInventoryTableSearchBar =
   'observability:apmEnableServiceInventoryTableSearchBar';
 export const apmAWSLambdaPriceFactor = 'observability:apmAWSLambdaPriceFactor';
@@ -43,3 +44,5 @@ export const profilingAWSCostDiscountRate = 'observability:profilingAWSCostDisco
 export const profilingCostPervCPUPerHour = 'observability:profilingCostPervCPUPerHour';
 export const profilingAzureCostDiscountRate = 'observability:profilingAzureCostDiscountRate';
 export const apmEnableTransactionProfiling = 'observability:apmEnableTransactionProfiling';
+export const profilingFetchTopNFunctionsFromStacktraces =
+  'observability:profilingFetchTopNFunctionsFromStacktraces';
