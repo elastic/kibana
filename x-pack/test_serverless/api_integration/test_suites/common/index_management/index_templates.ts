@@ -27,6 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   let getRandomString: () => string;
   // Failing: See https://github.com/elastic/kibana/issues/182963
+  // Failing: See https://github.com/elastic/kibana/issues/182964
   describe.skip('Index templates', function () {
     before(async () => {
       ({
