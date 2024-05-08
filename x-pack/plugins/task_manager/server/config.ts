@@ -9,7 +9,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { getTaskClaimer } from './task_claimers';
 
 export const MAX_WORKERS_LIMIT = 100;
-export const DEFAULT_MAX_WORKERS = 50;
+export const DEFAULT_MAX_WORKERS = 100;
 export const DEFAULT_POLL_INTERVAL = 500;
 export const DEFAULT_VERSION_CONFLICT_THRESHOLD = 80;
 export const DEFAULT_MAX_EPHEMERAL_REQUEST_CAPACITY = MAX_WORKERS_LIMIT;
