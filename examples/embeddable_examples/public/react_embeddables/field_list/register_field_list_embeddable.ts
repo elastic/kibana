@@ -6,10 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  registerDashboardPanelPlacementSetting,
-  PanelPlacementStrategy,
-} from '@kbn/dashboard-plugin/public';
+import { DashboardStart, PanelPlacementStrategy } from '@kbn/dashboard-plugin/public';
 import { FIELD_LIST_ID } from './constants';
 import { FieldListSerializedStateState } from './types';
 
@@ -22,6 +19,6 @@ const getPanelPlacementSetting = (serializedState?: FieldListSerializedStateStat
   };
 };
 
-export function registerFieldListPanelPlacementSetting() {
-  registerDashboardPanelPlacementSetting(FIELD_LIST_ID, getPanelPlacementSetting);
+export function registerFieldListPanelPlacementSetting(dashboard: DashboardStart) {
+  dashboard.registerDashboardPanelPlacementSetting(FIELD_LIST_ID, getPanelPlacementSetting);
 }
