@@ -8,7 +8,6 @@
 
 import React, { memo, type FC } from 'react';
 import { useQuerySubscriber } from '@kbn/unified-field-list/src/hooks/use_query_subscriber';
-// import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useSavedSearch } from '../../state_management/discover_state_provider';
 import { PatternAnalysisTable, type PatternAnalysisTableProps } from './pattern_analysis_table';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -22,18 +21,16 @@ export const PatternAnalysisTab: FC<Omit<PatternAnalysisTableProps, 'query' | 'f
     const savedSearch = useSavedSearch();
 
     return (
-      <>
-        <PatternAnalysisTable
-          dataView={props.dataView}
-          filters={querySubscriberResult.filters}
-          query={querySubscriberResult.query}
-          onAddFilter={props.onAddFilter}
-          savedSearch={savedSearch}
-          stateContainer={props.stateContainer}
-          trackUiMetric={props.trackUiMetric}
-          viewModeToggle={props.viewModeToggle}
-        />
-      </>
+      <PatternAnalysisTable
+        dataView={props.dataView}
+        filters={querySubscriberResult.filters}
+        query={querySubscriberResult.query}
+        onAddFilter={props.onAddFilter}
+        savedSearch={savedSearch}
+        stateContainer={props.stateContainer}
+        trackUiMetric={props.trackUiMetric}
+        viewModeToggle={props.viewModeToggle}
+      />
     );
   }
 );

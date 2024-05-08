@@ -65,7 +65,7 @@ export class AiopsPlugin
         core,
         plugins
       ),
-      LogCategorizationWrapper: dynamic(
+      PatternAnalysisComponent: dynamic(
         async () =>
           import(
             './components/log_categorization/log_categorization_for_embeddable/log_categorization_wrapper'

@@ -20,7 +20,7 @@ import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 
 import type { CategorizationAdditionalFilter } from '@kbn/aiops-log-pattern-analysis/create_category_request';
 import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
-import type { EmbeddablePatternAnalysisProps } from '@kbn/aiops-log-pattern-analysis/embeddable';
+import type { EmbeddablePatternAnalysisInput } from '@kbn/aiops-log-pattern-analysis/embeddable';
 import { css } from '@emotion/react';
 import {
   type LogCategorizationPageUrlState,
@@ -44,18 +44,14 @@ import { createAdditionalConfigHash, createDocumentStatsHash, getMessageField } 
 import { useOpenInDiscover } from '../category_table/use_open_in_discover';
 import { DiscoverTabs } from './discover_tabs';
 
-export interface LogCategorizationPageProps {
-  onClose: () => void;
-  embeddingOrigin: string;
-  input: Readonly<EmbeddablePatternAnalysisProps>;
+export interface LogCategorizationEmbeddableProps {
+  input: Readonly<EmbeddablePatternAnalysisInput>;
   viewModeToggle: (patternCount?: number) => React.ReactElement;
 }
 
 const BAR_TARGET = 20;
 
-export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
-  onClose,
-  embeddingOrigin,
+export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> = ({
   input,
   viewModeToggle,
 }) => {
@@ -65,6 +61,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
       query: { getState, filterManager },
     },
     uiSettings,
+    embeddingOrigin,
   } = useAiopsAppContext();
   const { dataView, savedSearch } = input;
 

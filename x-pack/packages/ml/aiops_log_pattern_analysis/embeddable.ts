@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { EmbeddableInput, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
 import type { Query, AggregateQuery, Filter } from '@kbn/es-query';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
-export interface EmbeddablePatternAnalysisProps<T = Query | AggregateQuery> {
+export interface EmbeddablePatternAnalysisInput<T = Query | AggregateQuery> {
   dataView: DataView;
   savedSearch?: SavedSearch | null;
   query?: T;
@@ -22,11 +21,3 @@ export interface EmbeddablePatternAnalysisProps<T = Query | AggregateQuery> {
   onAddFilter?: () => void;
   lastReloadRequestTime?: number;
 }
-
-export type EmbeddablePatternAnalysisInput = EmbeddableInput & EmbeddablePatternAnalysisProps;
-
-export type EmbeddablePatternAnalysisOutput = EmbeddableOutput & { indexPatterns?: DataView[] };
-
-export const EMBEDDABLE_PATTERN_ANALYSIS_TYPE = 'aiopsPatternAnalysis' as const;
-
-export type EmbeddablePatternAnalysisType = typeof EMBEDDABLE_PATTERN_ANALYSIS_TYPE;

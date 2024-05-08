@@ -8,18 +8,13 @@
 
 import React, { useEffect, useState } from 'react';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
-import { type EmbeddablePatternAnalysisProps } from '@kbn/aiops-log-pattern-analysis/embeddable';
+import { type EmbeddablePatternAnalysisInput } from '@kbn/aiops-log-pattern-analysis/embeddable';
 import { pick } from 'lodash';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverStateContainer } from '../../state_management/discover_state';
 import { PATTERN_ANALYSIS_LOADED } from './constants';
 
-export type PatternAnalysisTableProps = EmbeddablePatternAnalysisProps & {
-  searchDescription?: string;
-
-  /**
-   * State container with persisted settings
-   */
+export type PatternAnalysisTableProps = EmbeddablePatternAnalysisInput & {
   stateContainer?: DiscoverStateContainer;
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   viewModeToggle: (patternCount?: number) => React.ReactElement;
@@ -65,20 +60,20 @@ export const PatternAnalysisTable = (props: PatternAnalysisTableProps) => {
     'uiActions',
   ]);
 
-  const input = pick(props, ['dataView', 'savedSearch', 'query', 'filters', 'onAddFilter']);
+  const input: EmbeddablePatternAnalysisInput = Object.assign(
+    {},
+    pick(props, ['dataView', 'savedSearch', 'query', 'filters', 'onAddFilter']),
+    lastReloadRequestTime
+  );
 
   return (
-    <aiopsService.LogCategorizationWrapper
+    <aiopsService.PatternAnalysisComponent
       props={{
-        input: {
-          ...input,
-          lastReloadRequestTime,
-        },
+        input,
         viewModeToggle: props.viewModeToggle,
-        onClose: () => {},
-        embeddingOrigin: 'discover-embedded',
       }}
       deps={deps}
+      embeddingOrigin="discover-embedded"
     />
   );
 };
