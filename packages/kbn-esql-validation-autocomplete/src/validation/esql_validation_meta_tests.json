@@ -953,19 +953,6 @@
       "warning": []
     },
     {
-      "query": "row var = date_extract(\"ALIGNED_DAY_OF_WEEK_IN_MONTH\", to_datetime(\"a\"))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = date_extract(\"a\", \"a\")",
-      "error": [
-        "Argument of [date_extract] must be [chrono_literal], found value [\"a\"] type [string]",
-        "Argument of [date_extract] must be [date], found value [\"a\"] type [string]"
-      ],
-      "warning": []
-    },
-    {
       "query": "row var = date_format(now(), \"a\")",
       "error": [],
       "warning": []
@@ -973,19 +960,6 @@
     {
       "query": "row date_format(now(), \"a\")",
       "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = date_format(to_datetime(\"a\"), to_string(\"a\"))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = date_format(\"a\", 5)",
-      "error": [
-        "Argument of [date_format] must be [date], found value [\"a\"] type [string]",
-        "Argument of [date_format] must be [string], found value [5] type [number]"
-      ],
       "warning": []
     },
     {
@@ -1019,19 +993,6 @@
     {
       "query": "row date_trunc(1 year, now())",
       "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = date_trunc(1 year, to_datetime(\"a\"))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = date_trunc(\"a\", \"a\")",
-      "error": [
-        "Argument of [date_trunc] must be [time_literal], found value [\"a\"] type [string]",
-        "Argument of [date_trunc] must be [date], found value [\"a\"] type [string]"
-      ],
       "warning": []
     },
     {
@@ -9118,6 +9079,37 @@
       "query": "from a_index | eval var = cosh(*)",
       "error": [
         "Using wildcards (*) in cosh is not allowed"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = date_diff(\"year\", dateField, dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_diff(\"year\", dateField, dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = date_diff(\"year\", to_datetime(stringField), to_datetime(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_diff(numberField, stringField, stringField)",
+      "error": [
+        "Argument of [date_diff] must be [string], found value [numberField] type [number]",
+        "Argument of [date_diff] must be [date], found value [stringField] type [string]",
+        "Argument of [date_diff] must be [date], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_diff(\"year\", dateField, dateField, extraArg)",
+      "error": [
+        "Error: [date_diff] function expects exactly 3 arguments, got 4."
       ],
       "warning": []
     },
