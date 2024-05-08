@@ -9,7 +9,10 @@ import React from 'react';
 import { EuiText, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CONTAINER_METRICS_DOC_HREF } from '../../../common/visualizations/constants';
+import {
+  CONTAINER_METRICS_DOC_HREF,
+  HOST_METRICS_DOTTED_LINES_DOC_HREF,
+} from '../../../common/visualizations/constants';
 
 export const ContainerMetricsExplanationContent = () => {
   return (
@@ -29,6 +32,19 @@ export const ContainerMetricsExplanationContent = () => {
           >
             {i18n.translate('xpack.infra.containerViewPage.tooltip.whatAreTheseMetricsLink', {
               defaultMessage: 'What are these metrics?',
+            })}
+          </EuiLink>
+        </EuiText>
+      </p>
+      <p>
+        <EuiText size="xs">
+          <EuiLink
+            data-test-subj="containerViewMetricsDocumentationLink"
+            href={HOST_METRICS_DOTTED_LINES_DOC_HREF}
+            target="_blank"
+          >
+            {i18n.translate('xpack.infra.hostsViewPage.tooltip.whyAmISeeingDottedLines', {
+              defaultMessage: 'Why am I seeing dotted lines?',
             })}
           </EuiLink>
         </EuiText>

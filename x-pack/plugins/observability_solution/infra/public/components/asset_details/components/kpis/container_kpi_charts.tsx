@@ -10,7 +10,10 @@ import { EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { Kpi } from './kpi';
-import { useContainerK8sKpiCharts, useContainerKpiCharts } from '../../hooks/use_metrics_charts';
+import {
+  useK8sContainerKpiCharts,
+  useDockerContainerKpiCharts,
+} from '../../hooks/use_container_metrics_charts';
 import { useIntegrationCheck } from '../../hooks/use_integration_check';
 import { INTEGRATIONS } from '../../constants';
 
@@ -70,7 +73,7 @@ const DockerKpiCharts = ({
   loading = false,
 }: ContainerKpiChartsProps) => {
   const { euiTheme } = useEuiTheme();
-  const charts = useContainerKpiCharts({
+  const charts = useDockerContainerKpiCharts({
     dataViewId: dataView?.id,
     options: {
       getSubtitle: options?.getSubtitle,
@@ -106,7 +109,7 @@ const KubernetesKpiCharts = ({
   loading = false,
 }: ContainerKpiChartsProps) => {
   const { euiTheme } = useEuiTheme();
-  const charts = useContainerK8sKpiCharts({
+  const charts = useK8sContainerKpiCharts({
     dataViewId: dataView?.id,
     options: {
       getSubtitle: options?.getSubtitle,

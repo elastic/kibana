@@ -15,7 +15,7 @@ import {
 import { LensConfigWithId } from '../../../types';
 import { formulas } from '../formulas';
 
-const containerCpuUsageXY: LensConfigWithId = {
+const dockerContainerCpuUsageXY: LensConfigWithId = {
   id: 'cpuUsage',
   chartType: 'xy',
   title: CPU_USAGE_LABEL,
@@ -33,7 +33,7 @@ const containerCpuUsageXY: LensConfigWithId = {
   ...DEFAULT_XY_YBOUNDS,
 };
 
-const containerK8sCpuUsageXY: LensConfigWithId = {
+const k8sContainerCpuUsageXY: LensConfigWithId = {
   id: 'k8sCpuUsage',
   chartType: 'xy',
   title: CPU_USAGE_LABEL,
@@ -51,7 +51,7 @@ const containerK8sCpuUsageXY: LensConfigWithId = {
   ...DEFAULT_XY_YBOUNDS,
 };
 
-const containerCpuUsageMetric: LensConfigWithId = {
+const dockerContainerCpuUsageMetric: LensConfigWithId = {
   id: 'cpuUsage',
   chartType: 'metric',
   title: CPU_USAGE_LABEL,
@@ -68,9 +68,12 @@ const containerK8sCpuUsageMetric: LensConfigWithId = {
 };
 
 export const cpu = {
-  xy: { containerCpuUsage: containerCpuUsageXY, containerK8sCpuUsage: containerK8sCpuUsageXY },
+  xy: {
+    dockerContainerCpuUsage: dockerContainerCpuUsageXY,
+    k8sContainerCpuUsage: k8sContainerCpuUsageXY,
+  },
   metric: {
-    containerCpuUsage: containerCpuUsageMetric,
-    containerK8sCpuUsage: containerK8sCpuUsageMetric,
+    dockerContainerCpuUsage: dockerContainerCpuUsageMetric,
+    k8sContainerCpuUsage: containerK8sCpuUsageMetric,
   },
 } as const;

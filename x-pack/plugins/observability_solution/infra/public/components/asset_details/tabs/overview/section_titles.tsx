@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { HostMetricsExplanationContent } from '../../../lens';
 import { TitleWithTooltip } from '../../components/section_title';
 import { AlertsTooltipContent } from '../../components/alerts_tooltip_content';
@@ -21,13 +21,7 @@ export const MetricsSectionTitle = ({ assetType }: { assetType: InventoryItemTyp
       })}
       data-test-subj="infraAssetDetailsMetricsTitle"
       tooltipTestSubj="infraAssetDetailsMetricsPopoverButton"
-      tooltipContent={
-        assetType === 'host' ? (
-          <HostMetricsExplanationContent />
-        ) : (
-          <ContainerMetricsExplanationContent />
-        )
-      }
+      tooltipContent={getTooltipContent(assetType)}
     />
   );
 };
@@ -55,3 +49,12 @@ export const ServicesSectionTitle = () => (
     tooltipContent={<ServicesTooltipContent />}
   />
 );
+
+function getTooltipContent(assetType: InventoryItemType) {
+  switch (assetType) {
+    case 'host':
+      return <HostMetricsExplanationContent />;
+    default:
+      return <ContainerMetricsExplanationContent />;
+  }
+}

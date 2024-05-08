@@ -6,12 +6,8 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import {
-  useHostKpiCharts,
-  useHostCharts,
-  useKubernetesCharts,
-  type HostMetricTypes,
-} from './use_metrics_charts';
+import { HostMetricTypes } from '../charts/types';
+import { useHostKpiCharts, useHostCharts, useKubernetesCharts } from './use_host_metrics_charts';
 
 const dataViewId = 'metricsDataViewId';
 const getHostChartsExpectedOrder = (metric: HostMetricTypes, overview: boolean): string[] => {

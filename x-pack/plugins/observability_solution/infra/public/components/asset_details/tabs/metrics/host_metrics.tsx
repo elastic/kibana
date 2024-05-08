@@ -6,7 +6,7 @@
  */
 
 import React, { useRef } from 'react';
-import { HostMetricTypes } from '../../hooks/use_metrics_charts';
+import { HostMetricTypes } from '../../hooks/use_host_metrics_charts';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useDataViewsContext } from '../../hooks/use_data_views';

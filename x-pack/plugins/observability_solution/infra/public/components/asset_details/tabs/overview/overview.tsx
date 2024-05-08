@@ -54,7 +54,7 @@ export const Overview = () => {
           dateRange={state.dateRange}
           dataView={metrics.dataView}
         />
-        <CpuProfilingPrompt />
+        {asset.type === 'host' ? <CpuProfilingPrompt /> : null}
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>

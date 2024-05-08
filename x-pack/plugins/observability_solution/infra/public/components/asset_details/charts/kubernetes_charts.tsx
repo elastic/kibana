@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
-import { useKubernetesCharts } from '../hooks/use_metrics_charts';
+import { useKubernetesCharts } from '../hooks/use_host_metrics_charts';
 import { Section } from '../components/section';
 import { SectionTitle } from '../components/section_title';
 import { HOST_METRIC_GROUP_TITLES } from '../translations';

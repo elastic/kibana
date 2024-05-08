@@ -6,17 +6,14 @@
  */
 
 import React from 'react';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import type { TimeRange } from '@kbn/es-query';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css, cx } from '@emotion/css';
 import { EuiText, EuiLink } from '@elastic/eui';
 import {
-  ContainerMetricTypes,
-  useContainerK8sPageViewMetricsCharts,
-  useContainerPageViewMetricsCharts,
-} from '../hooks/use_metrics_charts';
+  useK8sContainerPageViewMetricsCharts,
+  useDockerContainerPageViewMetricsCharts,
+} from '../hooks/use_container_metrics_charts';
 import { Section } from '../components/section';
 import { ChartsGrid } from '../charts_grid/charts_grid';
 import { Chart } from './chart';
@@ -25,21 +22,17 @@ import { TitleWithTooltip } from '../components/section_title';
 import { CONTAINER_METRIC_GROUP_TITLES } from '../translations';
 import { CONTAINER_METRICS_DOC_HREF } from '../../../common/visualizations/constants';
 import { INTEGRATIONS } from '../constants';
+import { MetricsChartsFields, ContainerMetricTypes } from './types';
 
-interface Props {
-  assetId: string;
-  dateRange: TimeRange;
-  dataView?: DataView;
-  overview?: boolean;
+interface Props extends MetricsChartsFields {
   metric: ContainerMetricTypes;
-  onShowAll?: (metric: string) => void;
 }
 
 const FRAGMENT_BASE = 'key-metrics';
 
 export const DockerCharts = React.forwardRef<HTMLDivElement, Props>(
   ({ assetId, dataView, dateRange, metric }, ref) => {
-    const { charts } = useContainerPageViewMetricsCharts({
+    const { charts } = useDockerContainerPageViewMetricsCharts({
       metric,
       metricsDataViewId: dataView?.id,
     });
@@ -100,7 +93,7 @@ export const DockerCharts = React.forwardRef<HTMLDivElement, Props>(
 
 export const KubernetesCharts = React.forwardRef<HTMLDivElement, Props>(
   ({ assetId, dataView, dateRange, metric }, ref) => {
-    const { charts } = useContainerK8sPageViewMetricsCharts({
+    const { charts } = useK8sContainerPageViewMetricsCharts({
       metric,
       metricsDataViewId: dataView?.id,
     });

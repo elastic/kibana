@@ -15,7 +15,7 @@ import {
 } from '../../../shared/charts/constants';
 import { formulas } from '../formulas';
 
-const containerMemoryUsageXY: LensConfigWithId = {
+const dockerContainerMemoryUsageXY: LensConfigWithId = {
   id: 'memoryUsage',
   chartType: 'xy',
   title: MEMORY_USAGE_LABEL,
@@ -33,7 +33,7 @@ const containerMemoryUsageXY: LensConfigWithId = {
   ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
 };
 
-const containerK8sMemoryUsageXY: LensConfigWithId = {
+const k8sContainerMemoryUsageXY: LensConfigWithId = {
   id: 'k8sMemoryUsage',
   chartType: 'xy',
   title: MEMORY_USAGE_LABEL,
@@ -51,7 +51,7 @@ const containerK8sMemoryUsageXY: LensConfigWithId = {
   ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
 };
 
-const containerMemoryUsageMetric: LensConfigWithId = {
+const dockerContainerMemoryUsageMetric: LensConfigWithId = {
   id: 'memoryUsage',
   chartType: 'metric',
   title: MEMORY_USAGE_LABEL,
@@ -59,7 +59,7 @@ const containerMemoryUsageMetric: LensConfigWithId = {
   ...formulas.containerMemoryUsage,
 };
 
-const containerK8sMemoryUsageMetric: LensConfigWithId = {
+const k8sContainerMemoryUsageMetric: LensConfigWithId = {
   id: 'k8sMemoryUsage',
   chartType: 'metric',
   title: MEMORY_USAGE_LABEL,
@@ -69,11 +69,11 @@ const containerK8sMemoryUsageMetric: LensConfigWithId = {
 
 export const memory = {
   xy: {
-    containerMemoryUsage: containerMemoryUsageXY,
-    containerK8sMemoryUsage: containerK8sMemoryUsageXY,
+    dockerContainerMemoryUsage: dockerContainerMemoryUsageXY,
+    k8sContainerMemoryUsage: k8sContainerMemoryUsageXY,
   },
   metric: {
-    containerMemoryUsage: containerMemoryUsageMetric,
-    containerK8sMemoryUsage: containerK8sMemoryUsageMetric,
+    dockerContainerMemoryUsage: dockerContainerMemoryUsageMetric,
+    k8sContainerMemoryUsage: k8sContainerMemoryUsageMetric,
   },
 };

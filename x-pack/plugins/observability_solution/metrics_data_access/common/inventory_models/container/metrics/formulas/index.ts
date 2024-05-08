@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { containerCpuUsage, containerK8sCpuUsage } from './cpu';
-import { containerMemoryUsage, containerK8sMemoryUsage } from './memory';
+import { dockerContainerCpuUsage, k8sContainerCpuUsage } from './cpu';
+import { dockerContainerMemoryUsage, k8sContainerMemoryUsage } from './memory';
 
 export const formulas = {
-  containerCpuUsage,
-  containerMemoryUsage,
-  containerK8sCpuUsage,
-  containerK8sMemoryUsage,
+  containerCpuUsage: dockerContainerCpuUsage,
+  containerMemoryUsage: dockerContainerMemoryUsage,
+  containerK8sCpuUsage: k8sContainerCpuUsage,
+  containerK8sMemoryUsage: k8sContainerMemoryUsage,
 } as const;
 
 export type ContainerFormulas = typeof formulas;

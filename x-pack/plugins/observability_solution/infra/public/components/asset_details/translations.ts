@@ -39,4 +39,10 @@ export const CONTAINER_METRIC_GROUP_TITLES = {
   memory: i18n.translate('xpack.infra.metricsGroup.containerMemory', {
     defaultMessage: 'Memory',
   }),
+  network: i18n.translate('xpack.infra.metricsGroup.containerNetwork', {
+    defaultMessage: 'Network',
+  }),
+  disk: i18n.translate('xpack.infra.metricsGroup.containerDisk', {
+    defaultMessage: 'Disk',
+  }),
 };

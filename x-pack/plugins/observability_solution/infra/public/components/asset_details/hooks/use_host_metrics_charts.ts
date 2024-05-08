@@ -8,9 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import useAsync from 'react-use/lib/useAsync';
+import { HostMetricTypes } from '../charts/types';
 
-export type HostMetricTypes = 'cpu' | 'memory' | 'network' | 'disk' | 'log' | 'kpi';
-export type ContainerMetricTypes = 'cpu' | 'memory';
 interface UseChartsOptions {
   overview?: boolean;
 }
@@ -102,9 +101,7 @@ export const useHostKpiCharts = ({
       ...chart,
       seriesColor: options?.seriesColor,
       decimals: 1,
-      subtitle: options?.getSubtitle
-        ? options?.getSubtitle(chart.value)
-        : getSubtitleFromFormula(chart.value),
+      subtitle: getSubtitle(options, chart),
       ...(dataViewId && {
         dataset: {
           index: dataViewId,
@@ -153,140 +150,11 @@ const getHostsCharts = async ({
   }
 };
 
-export const useContainerPageViewMetricsCharts = ({
-  metric,
-  metricsDataViewId,
-}: {
-  metric: ContainerMetricTypes;
-  metricsDataViewId?: string;
-}) => {
-  const { value: charts = [], error } = useAsync(async () => {
-    const containerCharts = await getContainerCharts(metric);
-
-    return containerCharts.map((chart) => {
-      return {
-        ...chart,
-        ...(metricsDataViewId && {
-          dataset: {
-            index: metricsDataViewId,
-          },
-        }),
-      };
-    });
-  }, [metricsDataViewId]);
-
-  return { charts, error };
-};
-
-const getContainerCharts = async (metric: ContainerMetricTypes) => {
-  const model = findInventoryModel('container');
-  const { cpu, memory } = await model.metrics.getCharts();
-
-  switch (metric) {
-    case 'cpu':
-      return [cpu.xy.containerCpuUsage];
-    case 'memory':
-      return [memory.xy.containerMemoryUsage];
-    default:
-      return [];
-  }
-};
-
-export const useContainerK8sPageViewMetricsCharts = ({
-  metric,
-  metricsDataViewId,
-}: {
-  metric: ContainerMetricTypes;
-  metricsDataViewId?: string;
-}) => {
-  const { value: charts = [], error } = useAsync(async () => {
-    const containerK8sCharts = await getContainerK8sCharts(metric);
-
-    return containerK8sCharts.map((chart) => {
-      return {
-        ...chart,
-        ...(metricsDataViewId && {
-          dataset: {
-            index: metricsDataViewId,
-          },
-        }),
-      };
-    });
-  }, [metricsDataViewId]);
-
-  return { charts, error };
-};
-
-const getContainerK8sCharts = async (metric: ContainerMetricTypes) => {
-  const model = findInventoryModel('container');
-  const { cpu, memory } = await model.metrics.getCharts();
-
-  switch (metric) {
-    case 'cpu':
-      return [cpu.xy.containerK8sCpuUsage];
-    case 'memory':
-      return [memory.xy.containerK8sMemoryUsage];
-    default:
-      return [];
-  }
-};
-
-export const useContainerKpiCharts = ({
-  dataViewId,
-  options,
-}: {
-  dataViewId?: string;
-  options?: { seriesColor: string; getSubtitle?: (formulaValue: string) => string };
-}) => {
-  const { value: charts = [] } = useAsync(async () => {
-    const model = findInventoryModel('container');
-    const { cpu, memory } = await model.metrics.getCharts();
-
-    return [cpu.metric.containerCpuUsage, memory.metric.containerMemoryUsage].map((chart) => ({
-      ...chart,
-      seriesColor: options?.seriesColor,
-      decimals: 1,
-      subtitle: options?.getSubtitle
-        ? options?.getSubtitle(chart.value)
-        : getSubtitleFromFormula(chart.value),
-      ...(dataViewId && {
-        dataset: {
-          index: dataViewId,
-        },
-      }),
-    }));
-  }, [dataViewId, options?.seriesColor, options?.getSubtitle]);
-
-  return charts;
-};
-
-export const useContainerK8sKpiCharts = ({
-  dataViewId,
-  options,
-}: {
-  dataViewId?: string;
-  options?: { seriesColor: string; getSubtitle?: (formulaValue: string) => string };
-}) => {
-  const { value: charts = [] } = useAsync(async () => {
-    const model = findInventoryModel('container');
-    const { cpu, memory } = await model.metrics.getCharts();
-
-    return [cpu.metric.containerK8sCpuUsage, memory.metric.containerK8sMemoryUsage].map(
-      (chart) => ({
-        ...chart,
-        seriesColor: options?.seriesColor,
-        decimals: 1,
-        subtitle: options?.getSubtitle
-          ? options?.getSubtitle(chart.value)
-          : getSubtitleFromFormula(chart.value),
-        ...(dataViewId && {
-          dataset: {
-            index: dataViewId,
-          },
-        }),
-      })
-    );
-  }, [dataViewId, options?.seriesColor, options?.getSubtitle]);
-
-  return charts;
-};
+function getSubtitle(
+  options: { getSubtitle?: ((formulaValue: string) => string) | undefined } | undefined,
+  chart: { value: string }
+) {
+  return options?.getSubtitle
+    ? options?.getSubtitle(chart.value)
+    : getSubtitleFromFormula(chart.value);
+}
