@@ -20,7 +20,6 @@ export type {
   UpdateCrossClusterAPIKeyParams,
   UpdateRestAPIKeyWithKibanaPrivilegesParams,
 } from './update';
-export type { QueryApiKeyResult } from './query';
 
 export function defineApiKeysRoutes(params: RouteDefinitionParams) {
   defineEnabledApiKeysRoutes(params);
