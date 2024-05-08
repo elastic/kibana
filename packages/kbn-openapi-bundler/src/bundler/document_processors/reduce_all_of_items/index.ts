@@ -6,11 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { DocumentNode, ResolvedRef } from '../../types';
-import { InlinableRefNode } from '../types';
-
-export function inlineRef(node: DocumentNode, resolvedRef: ResolvedRef): void {
-  Object.assign(node, resolvedRef.refNode);
-
-  delete (node as InlinableRefNode).$ref;
-}
+export * from './flatten_folded_all_of_items';
+export * from './merge_non_conflicting_all_of_items';
+export * from './unfold_single_all_of_item';
