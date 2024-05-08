@@ -793,6 +793,51 @@ describe('buildAgg', () => {
       });
     });
 
+    it('should create correct aggregation when condition params are defined and multi terms selected', async () => {
+      expect(
+        buildAggregation({
+          aggType: 'sum',
+          aggField: 'avg-field',
+          termField: ['the-term', 'second-term'],
+          termSize: 100,
+          condition: {
+            resultLimit: 1000,
+            conditionScript: `params.compareValue <= 0`,
+          },
+        })
+      ).toEqual({
+        groupAgg: {
+          multi_terms: {
+            size: 100,
+            terms: [{ field: 'the-term' }, { field: 'second-term' }],
+            order: {
+              metricAgg: 'desc',
+            },
+          },
+          aggs: {
+            conditionSelector: {
+              bucket_selector: {
+                buckets_path: {
+                  compareValue: 'metricAgg',
+                },
+                script: `params.compareValue <= 0`,
+              },
+            },
+            metricAgg: {
+              sum: {
+                field: 'avg-field',
+              },
+            },
+          },
+        },
+        groupAggCount: {
+          stats_bucket: {
+            buckets_path: 'groupAgg._count',
+          },
+        },
+      });
+    });
+
     it('should add topHitsAgg if topHitsSize is defined', () => {
       expect(
         buildAggregation({

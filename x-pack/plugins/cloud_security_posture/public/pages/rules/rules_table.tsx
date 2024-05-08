@@ -20,8 +20,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
-import { CoreStart, HttpSetup, NotificationsStart } from '@kbn/core/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { HttpSetup } from '@kbn/core/public';
+import { CloudSecurityPostureStartServices } from '../../types';
+import { useKibana } from '../../common/hooks/use_kibana';
 import { getFindingsDetectionRuleSearchTags } from '../../../common/utils/detection_rules';
 import { ColumnNameWithTooltip } from '../../components/column_name_with_tooltip';
 import type { CspBenchmarkRulesWithStates, RulesState } from './rules_container';
@@ -61,8 +62,8 @@ type GetColumnProps = Pick<
     currentPageRulesArray: CspBenchmarkRulesWithStates[],
     selectedRulesArray: CspBenchmarkRulesWithStates[]
   ) => boolean;
-  notifications: NotificationsStart;
   http: HttpSetup;
+  startServices: CloudSecurityPostureStartServices;
 };
 
 export const RulesTable = ({
@@ -132,40 +133,42 @@ export const RulesTable = ({
     return true;
   };
 
-  const { http, notifications } = useKibana<CoreStart>().services;
+  const { http, notifications, analytics, i18n: i18nStart, theme } = useKibana().services;
   useEffect(() => {
     if (selectedRules.length >= items.length && items.length > 0 && selectedRules.length > 0)
       setIsAllRulesSelectedThisPage(true);
     else setIsAllRulesSelectedThisPage(false);
   }, [items.length, selectedRules.length]);
 
-  const columns = useMemo(
-    () =>
-      getColumns({
-        refetchRulesStates,
-        postRequestChangeRulesStates,
-        selectedRules,
-        setSelectedRules,
-        items,
-        setIsAllRulesSelectedThisPage,
-        isAllRulesSelectedThisPage,
-        isCurrentPageRulesASubset,
-        onRuleClick,
-        notifications,
-        http,
-      }),
-    [
+  const columns = useMemo(() => {
+    const startServices = { notifications, analytics, i18n: i18nStart, theme };
+    return getColumns({
       refetchRulesStates,
       postRequestChangeRulesStates,
       selectedRules,
       setSelectedRules,
       items,
+      setIsAllRulesSelectedThisPage,
       isAllRulesSelectedThisPage,
+      isCurrentPageRulesASubset,
       onRuleClick,
-      notifications,
       http,
-    ]
-  );
+      startServices,
+    });
+  }, [
+    refetchRulesStates,
+    postRequestChangeRulesStates,
+    selectedRules,
+    setSelectedRules,
+    items,
+    isAllRulesSelectedThisPage,
+    onRuleClick,
+    notifications,
+    http,
+    analytics,
+    i18nStart,
+    theme,
+  ]);
 
   return (
     <>
@@ -194,8 +197,8 @@ const getColumns = ({
   isAllRulesSelectedThisPage,
   isCurrentPageRulesASubset,
   onRuleClick,
-  notifications,
   http,
+  startServices,
 }: GetColumnProps): Array<EuiTableFieldDataColumnType<CspBenchmarkRulesWithStates>> => [
   {
     field: 'action',
@@ -203,7 +206,7 @@ const getColumns = ({
       <EuiCheckbox
         id={RULES_ROW_SELECT_ALL_CURRENT_PAGE}
         checked={isCurrentPageRulesASubset(items, selectedRules) && isAllRulesSelectedThisPage}
-        onChange={(e) => {
+        onChange={() => {
           const uniqueSelectedRules = uniqBy([...selectedRules, ...items], 'metadata.id');
           const onChangeSelectAllThisPageFn = () => {
             setSelectedRules(uniqueSelectedRules);
@@ -227,7 +230,7 @@ const getColumns = ({
     ),
     width: '40px',
     sortable: false,
-    render: (rules, item: CspBenchmarkRulesWithStates) => {
+    render: (_rules, item: CspBenchmarkRulesWithStates) => {
       return (
         <EuiCheckbox
           checked={selectedRules.some(
@@ -300,7 +303,7 @@ const getColumns = ({
     align: 'right',
     width: '100px',
     truncateText: true,
-    render: (name, rule: CspBenchmarkRulesWithStates) => {
+    render: (_name, rule: CspBenchmarkRulesWithStates) => {
       const rulesObjectRequest = {
         benchmark_id: rule?.metadata.benchmark.id,
         benchmark_version: rule?.metadata.benchmark.version,
@@ -320,9 +323,9 @@ const getColumns = ({
               http
             )
           ).total;
-          await postRequestChangeRulesStates(nextRuleState, [rulesObjectRequest]);
-          await refetchRulesStates();
-          await showChangeBenchmarkRuleStatesSuccessToast(notifications, isRuleMuted, {
+          postRequestChangeRulesStates(nextRuleState, [rulesObjectRequest]);
+          refetchRulesStates();
+          showChangeBenchmarkRuleStatesSuccessToast(startServices, isRuleMuted, {
             numberOfRules: 1,
             numberOfDetectionRules: detectionRuleCount || 0,
           });
