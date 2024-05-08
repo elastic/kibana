@@ -11,22 +11,20 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiListGroupProps,
   EuiPanel,
+  EuiFlexGroupProps,
 } from '@elastic/eui';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import { DiscoverEsqlUrlProps } from '../../../hooks/use_esql';
 import { createAllLogsItem } from '../utils';
 import { showAllLogsLabel, tryEsql } from '../constants';
 
-type SelectorFooterProps = EuiListGroupProps;
-
 interface ShowAllLogsProps {
   isSelected: boolean;
   onClick(): void;
 }
 
-export const SelectorFooter = (props: SelectorFooterProps) => {
+export const SelectorFooter = (props: EuiFlexGroupProps) => {
   return (
     <EuiPanel paddingSize="s" hasShadow={false} data-test-subj="dataSourceSelectorSearchFooter">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" {...props} />
