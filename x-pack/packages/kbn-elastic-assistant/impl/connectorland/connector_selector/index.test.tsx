@@ -18,7 +18,6 @@ const defaultProps = {
   onConnectorSelectionChange,
   selectedConnectorId: 'connectorId',
   setIsOpen,
-  isFlyoutMode: false,
 };
 
 const connectorTwo = mockConnectors[1];

@@ -16,7 +16,6 @@ const testProps = {
   isLoading: false,
   onChatCleared,
   onSendMessage,
-  isFlyoutMode: false,
   promptValue: 'prompt',
 };
 

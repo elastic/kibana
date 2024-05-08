@@ -50,7 +50,6 @@ export interface ConversationSettingsProps {
     React.SetStateAction<ConversationsBulkActions>
   >;
   isDisabled?: boolean;
-  isFlyoutMode: boolean;
 }
 
 /**
@@ -66,7 +65,6 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
     conversationSettings,
     http,
     isDisabled = false,
-    isFlyoutMode,
     setAssistantStreamingEnabled,
     setConversationSettings,
     conversationsSettingsBulkActions,
@@ -393,14 +391,12 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
             allSystemPrompts={allSystemPrompts}
             compressed
             conversation={selectedConversation}
-            isEditing={true}
             isDisabled={isDisabled}
             onSystemPromptSelectionChange={handleOnSystemPromptSelectionChange}
             selectedPrompt={selectedSystemPrompt}
             showTitles={true}
             isSettingsModalVisible={true}
             setIsSettingsModalVisible={noop} // noop, already in settings
-            isFlyoutMode={isFlyoutMode}
           />
         </EuiFormRow>
 
@@ -425,7 +421,6 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
             isDisabled={isDisabled}
             onConnectorSelectionChange={handleOnConnectorSelectionChange}
             selectedConnectorId={selectedConnector?.id}
-            isFlyoutMode={isFlyoutMode}
           />
         </EuiFormRow>
 

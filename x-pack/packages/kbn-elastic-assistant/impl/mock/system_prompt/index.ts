@@ -12,7 +12,6 @@ export const mockSystemPrompt: Prompt = {
   content: 'You are a helpful, expert assistant who answers questions about Elastic Security.',
   name: 'Mock system prompt',
   promptType: 'system',
-  isFlyoutMode: false,
 };
 
 export const mockSuperheroSystemPrompt: Prompt = {

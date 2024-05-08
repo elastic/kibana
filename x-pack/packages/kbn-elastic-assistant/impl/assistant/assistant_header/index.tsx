@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,7 +15,6 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { isEmpty } from 'lodash';
 import { AIConnector } from '../../connectorland/connector_selector';
 import { Conversation } from '../../..';
@@ -27,7 +26,6 @@ import * as i18n from './translations';
 interface OwnProps {
   currentConversation?: Conversation;
   defaultConnector?: AIConnector;
-  docLinks: Omit<DocLinksStart, 'links'>;
   isDisabled: boolean;
   isSettingsModalVisible: boolean;
   onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
@@ -50,7 +48,6 @@ type Props = OwnProps;
 export const AssistantHeader: React.FC<Props> = ({
   currentConversation,
   defaultConnector,
-  docLinks,
   isDisabled,
   isSettingsModalVisible,
   onConversationSelected,
@@ -70,15 +67,7 @@ export const AssistantHeader: React.FC<Props> = ({
       showAnonymizedValues,
     [currentConversation?.replacements, showAnonymizedValues]
   );
-  const onConversationChange = useCallback(
-    (updatedConversation) => {
-      onConversationSelected({
-        cId: updatedConversation.id,
-        cTitle: updatedConversation.title,
-      });
-    },
-    [onConversationSelected]
-  );
+
   const selectedConversationId = useMemo(
     () =>
       !isEmpty(currentConversation?.id) ? currentConversation?.id : currentConversation?.title,
@@ -96,12 +85,8 @@ export const AssistantHeader: React.FC<Props> = ({
       >
         <EuiFlexItem grow={false}>
           <AssistantTitle
-            isDisabled={isDisabled}
-            docLinks={docLinks}
             selectedConversation={currentConversation}
-            onChange={onConversationChange}
             title={title}
-            isFlyoutMode={false}
             refetchConversationsState={refetchConversationsState}
           />
         </EuiFlexItem>
@@ -152,7 +137,6 @@ export const AssistantHeader: React.FC<Props> = ({
                   onConversationSelected={onConversationSelected}
                   conversations={conversations}
                   refetchConversationsState={refetchConversationsState}
-                  isFlyoutMode={false}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

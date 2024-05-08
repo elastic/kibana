@@ -11,7 +11,6 @@ import { ConnectorSelectorInline } from '@kbn/elastic-assistant';
 import { noop } from 'lodash/fp';
 import React from 'react';
 
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';
 import * as i18n from './translations';
 
@@ -28,7 +27,6 @@ const HeaderComponent: React.FC<Props> = ({
   onGenerate,
   onConnectorIdSelected,
 }) => {
-  const isFlyoutMode = useIsExperimentalFeatureEnabled('aiAssistantFlyoutMode');
   const { hasAssistantPrivilege } = useAssistantAvailability();
   const { euiTheme } = useEuiTheme();
   const disabled = !hasAssistantPrivilege || isLoading || connectorId == null;
@@ -45,7 +43,6 @@ const HeaderComponent: React.FC<Props> = ({
     >
       <EuiFlexItem grow={false}>
         <ConnectorSelectorInline
-          isFlyoutMode={isFlyoutMode}
           onConnectorSelected={noop}
           onConnectorIdSelected={onConnectorIdSelected}
           selectedConnectorId={connectorId}

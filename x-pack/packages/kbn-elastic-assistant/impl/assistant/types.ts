@@ -14,7 +14,6 @@ export interface Prompt {
   promptType: PromptType;
   isDefault?: boolean; // TODO: Should be renamed to isImmutable as this flag is used to prevent users from deleting prompts
   isNewConversationDefault?: boolean;
-  isFlyoutMode?: boolean;
 }
 
 export interface KnowledgeBaseConfig {

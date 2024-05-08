@@ -24,12 +24,10 @@ import { QUICK_PROMPTS_TAB } from '../settings/assistant_settings';
 
 export const KNOWLEDGE_BASE_CATEGORY = 'knowledge-base';
 
-const COUNT_BEFORE_OVERFLOW = 5;
 interface QuickPromptsProps {
   setInput: (input: string) => void;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   trackPrompt: (prompt: string) => void;
-  isFlyoutMode: boolean;
 }
 
 /**
@@ -38,7 +36,7 @@ interface QuickPromptsProps {
  * and localstorage for storing new and edited prompts.
  */
 export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
-  ({ setInput, setIsSettingsModalVisible, trackPrompt, isFlyoutMode }) => {
+  ({ setInput, setIsSettingsModalVisible, trackPrompt }) => {
     const [quickPromptsContainerRef, { width }] = useMeasure();
 
     const { allQuickPrompts, knowledgeBase, promptContexts, setSelectedSettingsTab } =
@@ -96,25 +94,15 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
     }, [setIsSettingsModalVisible, setSelectedSettingsTab]);
 
     const quickPrompts = useMemo(() => {
-      const visibleCount = isFlyoutMode ? Math.floor(width / 120) : COUNT_BEFORE_OVERFLOW;
+      const visibleCount = Math.floor(width / 120);
       const visibleItems = contextFilteredQuickPrompts.slice(0, visibleCount);
       const overflowItems = contextFilteredQuickPrompts.slice(visibleCount);
 
       return { visible: visibleItems, overflow: overflowItems };
-    }, [contextFilteredQuickPrompts, isFlyoutMode, width]);
+    }, [contextFilteredQuickPrompts, width]);
 
     return (
-      <EuiFlexGroup
-        gutterSize="s"
-        alignItems="center"
-        justifyContent={isFlyoutMode ? 'spaceBetween' : 'flexStart'}
-        css={
-          !isFlyoutMode &&
-          css`
-            margin: 16px;
-          `
-        }
-      >
+      <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent={'spaceBetween'}>
         <EuiFlexItem
           css={css`
             overflow: hidden;
@@ -147,20 +135,11 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
               <EuiFlexItem grow={false}>
                 <EuiPopover
                   button={
-                    isFlyoutMode ? (
-                      <EuiButtonIcon
-                        color={'primary'}
-                        iconType={'boxesHorizontal'}
-                        onClick={toggleOverflowPopover}
-                      />
-                    ) : (
-                      <EuiBadge
-                        color={'hollow'}
-                        iconType={'boxesHorizontal'}
-                        onClick={toggleOverflowPopover}
-                        onClickAriaLabel={i18n.QUICK_PROMPT_OVERFLOW_ARIA}
-                      />
-                    )
+                    <EuiButtonIcon
+                      color={'primary'}
+                      iconType={'boxesHorizontal'}
+                      onClick={toggleOverflowPopover}
+                    />
                   }
                   isOpen={isOverflowPopoverOpen}
                   closePopover={closeOverflowPopover}

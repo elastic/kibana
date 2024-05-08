@@ -45,7 +45,6 @@ describe('DataAnonymizationEditor', () => {
           selectedPromptContext={mockSelectedPromptContext}
           setSelectedPromptContexts={jest.fn()}
           currentReplacements={{}}
-          isFlyoutMode={false}
         />
       </TestProviders>
     );
@@ -61,7 +60,6 @@ describe('DataAnonymizationEditor', () => {
             selectedPromptContext={mockSelectedPromptContext}
             setSelectedPromptContexts={jest.fn()}
             currentReplacements={{}}
-            isFlyoutMode={false}
           />
         </TestProviders>
       );
@@ -76,7 +74,6 @@ describe('DataAnonymizationEditor', () => {
             selectedPromptContext={mockSelectedPromptContext}
             setSelectedPromptContexts={jest.fn()}
             currentReplacements={{}}
-            isFlyoutMode={false}
           />
         </TestProviders>
       );
@@ -105,7 +102,6 @@ describe('DataAnonymizationEditor', () => {
             selectedPromptContext={selectedPromptContextWithAnonymized}
             setSelectedPromptContexts={setSelectedPromptContexts}
             currentReplacements={{}}
-            isFlyoutMode={false}
           />
         </TestProviders>
       );

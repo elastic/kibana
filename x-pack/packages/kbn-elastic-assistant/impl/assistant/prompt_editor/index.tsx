@@ -30,7 +30,6 @@ export interface Props {
   setSelectedPromptContexts: React.Dispatch<
     React.SetStateAction<Record<string, SelectedPromptContext>>
   >;
-  isFlyoutMode: boolean;
 }
 
 const PreviewText = styled(EuiText)`
@@ -48,7 +47,6 @@ const PromptEditorComponent: React.FC<Props> = ({
   selectedPromptContexts,
   setIsSettingsModalVisible,
   setSelectedPromptContexts,
-  isFlyoutMode,
 }) => {
   const commentBody = useMemo(
     () => (
@@ -60,17 +58,14 @@ const PromptEditorComponent: React.FC<Props> = ({
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
             isSettingsModalVisible={isSettingsModalVisible}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
-            isFlyoutMode={isFlyoutMode}
           />
         )}
 
         <SelectedPromptContexts
-          isNewConversation={isNewConversation}
           promptContexts={promptContexts}
           selectedPromptContexts={selectedPromptContexts}
           setSelectedPromptContexts={setSelectedPromptContexts}
           currentReplacements={conversation?.replacements}
-          isFlyoutMode={isFlyoutMode}
         />
 
         <PreviewText color="subdued" data-test-subj="previewText">
@@ -89,7 +84,6 @@ const PromptEditorComponent: React.FC<Props> = ({
       selectedPromptContexts,
       setIsSettingsModalVisible,
       setSelectedPromptContexts,
-      isFlyoutMode,
     ]
   );
 

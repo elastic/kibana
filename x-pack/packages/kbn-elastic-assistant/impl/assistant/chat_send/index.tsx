@@ -18,7 +18,6 @@ export interface Props extends Omit<UseChatSend, 'abortStream'> {
   isDisabled: boolean;
   shouldRefocusPrompt: boolean;
   userPrompt: string | null;
-  isFlyoutMode: boolean;
 }
 
 /**
@@ -31,7 +30,6 @@ export const ChatSend: React.FC<Props> = ({
   handleSendMessage,
   isDisabled,
   isLoading,
-  isFlyoutMode,
   shouldRefocusPrompt,
   userPrompt,
 }) => {
@@ -58,7 +56,7 @@ export const ChatSend: React.FC<Props> = ({
   return (
     <EuiFlexGroup
       gutterSize="none"
-      alignItems={isFlyoutMode ? 'flexEnd' : 'flexStart'}
+      alignItems={'flexEnd'}
       css={css`
         position: relative;
       `}
@@ -74,24 +72,15 @@ export const ChatSend: React.FC<Props> = ({
           handlePromptChange={handlePromptChange}
           value={promptValue}
           isDisabled={isDisabled}
-          isFlyoutMode={isFlyoutMode}
         />
       </EuiFlexItem>
       <EuiFlexItem
-        css={
-          isFlyoutMode
-            ? css`
-                right: 0;
-                position: absolute;
-                margin-right: ${euiThemeVars.euiSizeS};
-                margin-bottom: ${euiThemeVars.euiSizeS};
-              `
-            : css`
-                left: -34px;
-                position: relative;
-                top: 11px;
-              `
-        }
+        css={css`
+          right: 0;
+          position: absolute;
+          margin-right: ${euiThemeVars.euiSizeS};
+          margin-bottom: ${euiThemeVars.euiSizeS};
+        `}
         grow={false}
       >
         <ChatActions
@@ -99,7 +88,6 @@ export const ChatSend: React.FC<Props> = ({
           isDisabled={isDisabled}
           isLoading={isLoading}
           onSendMessage={onSendMessage}
-          isFlyoutMode={isFlyoutMode}
           promptValue={promptValue}
         />
       </EuiFlexItem>

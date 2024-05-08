@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable complexity */
-
 import React, {
   Dispatch,
   SetStateAction,
@@ -26,9 +24,6 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFlyoutBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalBody,
   EuiText,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -41,8 +36,6 @@ import { find, isEmpty, uniqBy } from 'lodash';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useChatSend } from './chat_send/use_chat_send';
 import { ChatSend } from './chat_send';
-import { BlockBotCallToAction } from './block_bot/cta';
-import { AssistantHeader } from './assistant_header';
 import { WELCOME_CONVERSATION_TITLE } from './use_conversation/translations';
 import {
   getDefaultConnector,
@@ -56,7 +49,6 @@ import { getNewSelectedPromptContext } from '../data_anonymization/get_new_selec
 import type { PromptContext, SelectedPromptContext } from './prompt_context/types';
 import { useConversation } from './use_conversation';
 import { CodeBlockDetails, getDefaultSystemPrompt } from './use_conversation/helpers';
-import { PromptEditor } from './prompt_editor';
 import { QuickPrompts } from './quick_prompts/quick_prompts';
 import { useLoadConnectors } from '../connectorland/use_load_connectors';
 import { useConnectorSetup } from '../connectorland/connector_setup';
@@ -74,10 +66,6 @@ const CommentContainer = styled('span')`
   display: flex;
   flex: 1;
   overflow: hidden;
-`;
-
-const ModalPromptEditorWrapper = styled.div`
-  margin-right: 24px;
 `;
 
 import {
@@ -99,7 +87,6 @@ export interface Props {
   showTitle?: boolean;
   setConversationTitle?: Dispatch<SetStateAction<string>>;
   onCloseFlyout?: () => void;
-  isFlyoutMode?: boolean;
   chatHistoryVisible?: boolean;
   setChatHistoryVisible?: Dispatch<SetStateAction<boolean>>;
   currentUserAvatar?: UserAvatar;
@@ -117,7 +104,6 @@ const AssistantComponent: React.FC<Props> = ({
   showTitle = true,
   setConversationTitle,
   onCloseFlyout,
-  isFlyoutMode = false,
   chatHistoryVisible,
   setChatHistoryVisible,
   currentUserAvatar,
@@ -133,7 +119,6 @@ const AssistantComponent: React.FC<Props> = ({
     promptContexts,
     setLastConversationId,
     getLastConversationId,
-    title,
     allSystemPrompts,
     baseConversations,
   } = useAssistantContext();
@@ -236,7 +221,7 @@ const AssistantComponent: React.FC<Props> = ({
               nextConversation?.id !== '' ? nextConversation?.id : nextConversation?.title
             ]) ??
           conversations[WELCOME_CONVERSATION_TITLE] ??
-          getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE, isFlyoutMode })
+          getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE })
         );
       });
     }
@@ -249,7 +234,6 @@ const AssistantComponent: React.FC<Props> = ({
     currentConversation?.id,
     currentConversationId,
     isAssistantEnabled,
-    isFlyoutMode,
   ]);
 
   // Welcome setup state
@@ -266,10 +250,8 @@ const AssistantComponent: React.FC<Props> = ({
   // Welcome conversation is a special 'setup' case when no connector exists, mostly extracted to `ConnectorSetup` component,
   // but currently a bit of state is littered throughout the assistant component. TODO: clean up/isolate this state
   const blockBotConversation = useMemo(
-    () =>
-      currentConversation &&
-      getBlockBotConversation(currentConversation, isAssistantEnabled, isFlyoutMode),
-    [currentConversation, isAssistantEnabled, isFlyoutMode]
+    () => currentConversation && getBlockBotConversation(currentConversation, isAssistantEnabled),
+    [currentConversation, isAssistantEnabled]
   );
 
   // Settings modal state (so it isn't shared between assistant instances like Timeline)
@@ -296,7 +278,6 @@ const AssistantComponent: React.FC<Props> = ({
     setLastConversationId,
   ]);
 
-  const [promptTextPreview, setPromptTextPreview] = useState<string>('');
   const [autoPopulatedOnce, setAutoPopulatedOnce] = useState<boolean>(false);
   const [userPrompt, setUserPrompt] = useState<string | null>(null);
 
@@ -363,16 +344,10 @@ const AssistantComponent: React.FC<Props> = ({
     // when scrollHeight changes, parent is scrolled to bottom
     parent.scrollTop = parent.scrollHeight;
 
-    if (isFlyoutMode) {
-      (
-        commentsContainerRef.current?.childNodes[0].childNodes[0] as HTMLElement
-      ).lastElementChild?.scrollIntoView();
-    }
+    (
+      commentsContainerRef.current?.childNodes[0].childNodes[0] as HTMLElement
+    ).lastElementChild?.scrollIntoView();
   });
-
-  const getWrapper = (children: React.ReactNode, isCommentContainer: boolean) =>
-    isCommentContainer ? <span ref={commentsContainerRef}>{children}</span> : <>{children}</>;
-
   //  End Scrolling
 
   const selectedSystemPrompt = useMemo(
@@ -406,8 +381,7 @@ const AssistantComponent: React.FC<Props> = ({
     [allSystemPrompts, refetchCurrentConversation, refetchResults]
   );
 
-  const { comments: connectorComments, prompt: connectorPrompt } = useConnectorSetup({
-    isFlyoutMode,
+  const { prompt: connectorPrompt } = useConnectorSetup({
     conversation: blockBotConversation,
     onConversationUpdate: handleOnConversationSelected,
     onSetupComplete: () => {
@@ -438,11 +412,6 @@ const AssistantComponent: React.FC<Props> = ({
   const onToggleShowAnonymizedValues = useCallback(() => {
     setShowAnonymizedValues((prevValue) => !prevValue);
   }, [setShowAnonymizedValues]);
-
-  const isNewConversation = useMemo(
-    () => currentConversation?.messages.length === 0,
-    [currentConversation?.messages.length]
-  );
 
   useEffect(() => {
     // Adding `conversationTitle !== selectedConversationTitle` to prevent auto-run still executing after changing selected conversation
@@ -536,7 +505,6 @@ const AssistantComponent: React.FC<Props> = ({
   } = useChatSend({
     allSystemPrompts,
     currentConversation,
-    setPromptTextPreview,
     setUserPrompt,
     editingSystemPromptId,
     http,
@@ -556,7 +524,7 @@ const AssistantComponent: React.FC<Props> = ({
     [currentConversation, handleSendMessage, refetchResults]
   );
 
-  const chatbotComments = useMemo(
+  const comments = useMemo(
     () => (
       <>
         <EuiCommentList
@@ -570,59 +538,26 @@ const AssistantComponent: React.FC<Props> = ({
             isFetchingResponse: isLoadingChatSend,
             setIsStreaming,
             currentUserAvatar,
-            isFlyoutMode,
           })}
-          {...(!isFlyoutMode
-            ? {
-                css: css`
-                  margin-right: ${euiThemeVars.euiSizeL};
+          // Avoid comments going off the flyout
+          css={css`
+            padding-bottom: ${euiThemeVars.euiSizeL};
 
-                  > li > div:nth-child(2) {
-                    overflow: hidden;
-                  }
-                `,
-              }
-            : {
-                // Avoid comments going off the flyout
-                css: css`
-                  padding-bottom: ${euiThemeVars.euiSizeL};
-
-                  > li > div:nth-child(2) {
-                    overflow: hidden;
-                  }
-                `,
-              })}
+            > li > div:nth-child(2) {
+              overflow: hidden;
+            }
+          `}
         />
 
         {currentConversation?.messages.length !== 0 && selectedPromptContextsCount > 0 && (
           <EuiSpacer size={'m'} />
         )}
-
-        {!isFlyoutMode &&
-          (currentConversation?.messages.length === 0 || selectedPromptContextsCount > 0) && (
-            <ModalPromptEditorWrapper>
-              <PromptEditor
-                conversation={currentConversation}
-                editingSystemPromptId={editingSystemPromptId}
-                isNewConversation={isNewConversation}
-                isSettingsModalVisible={isSettingsModalVisible}
-                promptContexts={promptContexts}
-                promptTextPreview={promptTextPreview}
-                onSystemPromptSelectionChange={handleOnSystemPromptSelectionChange}
-                selectedPromptContexts={selectedPromptContexts}
-                setIsSettingsModalVisible={setIsSettingsModalVisible}
-                setSelectedPromptContexts={setSelectedPromptContexts}
-                isFlyoutMode={isFlyoutMode}
-              />
-            </ModalPromptEditorWrapper>
-          )}
       </>
     ),
     [
       abortStream,
       refetchCurrentConversation,
       currentConversation,
-      editingSystemPromptId,
       getComments,
       showAnonymizedValues,
       handleRegenerateResponse,
@@ -630,31 +565,9 @@ const AssistantComponent: React.FC<Props> = ({
       isEnabledRAGAlerts,
       isLoadingChatSend,
       currentUserAvatar,
-      isFlyoutMode,
       selectedPromptContextsCount,
-      isNewConversation,
-      isSettingsModalVisible,
-      promptContexts,
-      promptTextPreview,
-      handleOnSystemPromptSelectionChange,
-      selectedPromptContexts,
     ]
   );
-
-  const comments = useMemo(() => {
-    if (isDisabled && !isFlyoutMode) {
-      return (
-        <EuiCommentList
-          comments={connectorComments}
-          css={css`
-            margin-right: 20px;
-          `}
-        />
-      );
-    }
-
-    return chatbotComments;
-  }, [isDisabled, isFlyoutMode, chatbotComments, connectorComments]);
 
   const trackPrompt = useCallback(
     (promptTitle: string) => {
@@ -822,7 +735,6 @@ const AssistantComponent: React.FC<Props> = ({
                     onSystemPromptSelectionChange={handleOnSystemPromptSelectionChange}
                     isSettingsModalVisible={isSettingsModalVisible}
                     setIsSettingsModalVisible={setIsSettingsModalVisible}
-                    isFlyoutMode
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -852,299 +764,189 @@ const AssistantComponent: React.FC<Props> = ({
     isWelcomeSetup,
   ]);
 
-  if (isFlyoutMode) {
-    return (
-      <EuiFlexGroup direction={'row'} wrap={false} gutterSize="none">
-        {chatHistoryVisible && (
-          <EuiFlexItem
-            grow={false}
-            css={css`
-              inline-size: ${CONVERSATION_SIDE_PANEL_WIDTH}px;
-              border-right: 1px solid ${euiThemeVars.euiColorLightShade};
-            `}
-          >
-            <ConversationSidePanel
-              currentConversation={currentConversation}
-              onConversationSelected={handleOnConversationSelected}
-              conversations={conversations}
-              onConversationDeleted={handleOnConversationDeleted}
-              onConversationCreate={handleCreateConversation}
-              refetchConversationsState={refetchConversationsState}
-            />
-          </EuiFlexItem>
-        )}
+  return (
+    <EuiFlexGroup direction={'row'} wrap={false} gutterSize="none">
+      {chatHistoryVisible && (
         <EuiFlexItem
+          grow={false}
           css={css`
-            overflow: hidden;
+            inline-size: ${CONVERSATION_SIDE_PANEL_WIDTH}px;
+            border-right: 1px solid ${euiThemeVars.euiColorLightShade};
           `}
         >
-          <CommentContainer>
-            <EuiFlexGroup
+          <ConversationSidePanel
+            currentConversation={currentConversation}
+            onConversationSelected={handleOnConversationSelected}
+            conversations={conversations}
+            onConversationDeleted={handleOnConversationDeleted}
+            onConversationCreate={handleCreateConversation}
+            refetchConversationsState={refetchConversationsState}
+          />
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem
+        css={css`
+          overflow: hidden;
+        `}
+      >
+        <CommentContainer>
+          <EuiFlexGroup
+            css={css`
+              overflow: hidden;
+            `}
+          >
+            <EuiFlexItem
               css={css`
-                overflow: hidden;
+                max-width: 100%;
               `}
             >
-              <EuiFlexItem
+              <EuiFlyoutHeader hasBorder>
+                <AssistantHeaderFlyout
+                  selectedConversation={currentConversation}
+                  defaultConnector={defaultConnector}
+                  docLinks={docLinks}
+                  isDisabled={isDisabled || isLoadingChatSend}
+                  isSettingsModalVisible={isSettingsModalVisible}
+                  onToggleShowAnonymizedValues={onToggleShowAnonymizedValues}
+                  setIsSettingsModalVisible={setIsSettingsModalVisible}
+                  showAnonymizedValues={showAnonymizedValues}
+                  onCloseFlyout={onCloseFlyout}
+                  onChatCleared={handleOnChatCleared}
+                  chatHistoryVisible={chatHistoryVisible}
+                  setChatHistoryVisible={setChatHistoryVisible}
+                  onConversationSelected={handleOnConversationSelected}
+                  conversations={conversations}
+                  refetchConversationsState={refetchConversationsState}
+                  onConversationCreate={handleCreateConversation}
+                />
+
+                {/* Create portals for each EuiCodeBlock to add the `Investigate in Timeline` action */}
+                {createCodeBlockPortals()}
+              </EuiFlyoutHeader>
+              <EuiFlyoutBody
                 css={css`
-                  max-width: 100%;
-                `}
-              >
-                <EuiFlyoutHeader hasBorder>
-                  <AssistantHeaderFlyout
-                    selectedConversation={currentConversation}
-                    defaultConnector={defaultConnector}
-                    docLinks={docLinks}
-                    isDisabled={isDisabled || isLoadingChatSend}
-                    isSettingsModalVisible={isSettingsModalVisible}
-                    onToggleShowAnonymizedValues={onToggleShowAnonymizedValues}
-                    setIsSettingsModalVisible={setIsSettingsModalVisible}
-                    showAnonymizedValues={showAnonymizedValues}
-                    onCloseFlyout={onCloseFlyout}
-                    onChatCleared={handleOnChatCleared}
-                    chatHistoryVisible={chatHistoryVisible}
-                    setChatHistoryVisible={setChatHistoryVisible}
-                    onConversationSelected={handleOnConversationSelected}
-                    conversations={conversations}
-                    refetchConversationsState={refetchConversationsState}
-                    onConversationCreate={handleCreateConversation}
-                  />
+                  min-height: 100px;
+                  flex: 1;
 
-                  {/* Create portals for each EuiCodeBlock to add the `Investigate in Timeline` action */}
-                  {createCodeBlockPortals()}
-                </EuiFlyoutHeader>
-                <EuiFlyoutBody
-                  css={css`
-                    min-height: 100px;
-                    flex: 1;
+                  > div {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: stretch;
 
-                    > div {
-                      display: flex;
-                      flex-direction: column;
-                      align-items: stretch;
-
-                      > .euiFlyoutBody__banner {
-                        overflow-x: unset;
-                      }
-
-                      > .euiFlyoutBody__overflowContent {
-                        display: flex;
-                        flex: 1;
-                        overflow: auto;
-                      }
+                    > .euiFlyoutBody__banner {
+                      overflow-x: unset;
                     }
-                  `}
-                  banner={
-                    !isDisabled &&
-                    showMissingConnectorCallout &&
-                    areConnectorsFetched && (
-                      <ConnectorMissingCallout
-                        isConnectorConfigured={(connectors?.length ?? 0) > 0}
-                        isSettingsModalVisible={isSettingsModalVisible}
-                        setIsSettingsModalVisible={setIsSettingsModalVisible}
-                        isFlyoutMode={isFlyoutMode}
-                      />
-                    )
+
+                    > .euiFlyoutBody__overflowContent {
+                      display: flex;
+                      flex: 1;
+                      overflow: auto;
+                    }
                   }
-                >
-                  {flyoutBodyContent}
-                  {/* <BlockBotCallToAction
+                `}
+                banner={
+                  !isDisabled &&
+                  showMissingConnectorCallout &&
+                  areConnectorsFetched && (
+                    <ConnectorMissingCallout
+                      isConnectorConfigured={(connectors?.length ?? 0) > 0}
+                      isSettingsModalVisible={isSettingsModalVisible}
+                      setIsSettingsModalVisible={setIsSettingsModalVisible}
+                    />
+                  )
+                }
+              >
+                {flyoutBodyContent}
+                {/* <BlockBotCallToAction
                     connectorPrompt={connectorPrompt}
                     http={http}
                     isAssistantEnabled={isAssistantEnabled}
                     isWelcomeSetup={isWelcomeSetup}
                   /> */}
-                </EuiFlyoutBody>
-                <EuiFlyoutFooter
+              </EuiFlyoutBody>
+              <EuiFlyoutFooter
+                css={css`
+                  background: none;
+                  border-top: 1px solid ${euiThemeVars.euiColorLightShade};
+                  overflow: hidden;
+                  max-height: 60%;
+                  display: flex;
+                  flex-direction: column;
+                `}
+              >
+                <EuiPanel
+                  paddingSize="m"
+                  hasShadow={false}
                   css={css`
-                    background: none;
-                    border-top: 1px solid ${euiThemeVars.euiColorLightShade};
-                    overflow: hidden;
-                    max-height: 60%;
-                    display: flex;
-                    flex-direction: column;
+                    overflow: auto;
                   `}
                 >
-                  <EuiPanel
-                    paddingSize="m"
-                    hasShadow={false}
-                    css={css`
-                      overflow: auto;
-                    `}
-                  >
-                    {!isDisabled &&
-                      Object.keys(promptContexts).length !== selectedPromptContextsCount && (
-                        <EuiFlexGroup>
-                          <EuiFlexItem>
-                            <>
-                              <ContextPills
-                                anonymizationFields={anonymizationFields}
-                                promptContexts={promptContexts}
-                                selectedPromptContexts={selectedPromptContexts}
-                                setSelectedPromptContexts={setSelectedPromptContexts}
-                                isFlyoutMode={isFlyoutMode}
-                              />
-                              {Object.keys(promptContexts).length > 0 && <EuiSpacer size={'s'} />}
-                            </>
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                      )}
-
-                    <EuiFlexGroup direction="column" gutterSize="s">
-                      {Object.keys(selectedPromptContexts).length ? (
-                        <EuiFlexItem grow={false}>
-                          <SelectedPromptContexts
-                            isNewConversation={isNewConversation}
-                            promptContexts={promptContexts}
-                            selectedPromptContexts={selectedPromptContexts}
-                            setSelectedPromptContexts={setSelectedPromptContexts}
-                            currentReplacements={currentConversation?.replacements}
-                            isFlyoutMode={isFlyoutMode}
-                          />
+                  {!isDisabled &&
+                    Object.keys(promptContexts).length !== selectedPromptContextsCount && (
+                      <EuiFlexGroup>
+                        <EuiFlexItem>
+                          <>
+                            <ContextPills
+                              anonymizationFields={anonymizationFields}
+                              promptContexts={promptContexts}
+                              selectedPromptContexts={selectedPromptContexts}
+                              setSelectedPromptContexts={setSelectedPromptContexts}
+                            />
+                            {Object.keys(promptContexts).length > 0 && <EuiSpacer size={'s'} />}
+                          </>
                         </EuiFlexItem>
-                      ) : null}
+                      </EuiFlexGroup>
+                    )}
 
+                  <EuiFlexGroup direction="column" gutterSize="s">
+                    {Object.keys(selectedPromptContexts).length ? (
                       <EuiFlexItem grow={false}>
-                        <ChatSend
-                          isDisabled={isSendingDisabled}
-                          shouldRefocusPrompt={shouldRefocusPrompt}
-                          userPrompt={userPrompt}
-                          handleOnChatCleared={handleOnChatCleared}
-                          handlePromptChange={handlePromptChange}
-                          handleSendMessage={handleChatSend}
-                          handleRegenerateResponse={handleRegenerateResponse}
-                          isLoading={isLoadingChatSend}
-                          isFlyoutMode={isFlyoutMode}
+                        <SelectedPromptContexts
+                          promptContexts={promptContexts}
+                          selectedPromptContexts={selectedPromptContexts}
+                          setSelectedPromptContexts={setSelectedPromptContexts}
+                          currentReplacements={currentConversation?.replacements}
                         />
                       </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiPanel>
+                    ) : null}
 
-                  {!isDisabled && (
-                    <EuiPanel
-                      css={css`
-                        background: ${euiThemeVars.euiColorLightestShade};
-                      `}
-                      hasShadow={false}
-                      paddingSize="m"
-                      borderRadius="none"
-                    >
-                      <QuickPrompts
-                        setInput={setUserPrompt}
-                        setIsSettingsModalVisible={setIsSettingsModalVisible}
-                        trackPrompt={trackPrompt}
-                        isFlyoutMode={isFlyoutMode}
+                    <EuiFlexItem grow={false}>
+                      <ChatSend
+                        isDisabled={isSendingDisabled}
+                        shouldRefocusPrompt={shouldRefocusPrompt}
+                        userPrompt={userPrompt}
+                        handleOnChatCleared={handleOnChatCleared}
+                        handlePromptChange={handlePromptChange}
+                        handleSendMessage={handleChatSend}
+                        handleRegenerateResponse={handleRegenerateResponse}
+                        isLoading={isLoadingChatSend}
                       />
-                    </EuiPanel>
-                  )}
-                </EuiFlyoutFooter>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </CommentContainer>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiPanel>
 
-  return getWrapper(
-    <>
-      <EuiModalHeader
-        css={css`
-          align-items: flex-start;
-          flex-direction: column;
-        `}
-      >
-        {showTitle && (
-          <AssistantHeader
-            currentConversation={currentConversation}
-            defaultConnector={defaultConnector}
-            docLinks={docLinks}
-            isDisabled={isDisabled}
-            isSettingsModalVisible={isSettingsModalVisible}
-            onConversationSelected={handleOnConversationSelected}
-            onToggleShowAnonymizedValues={onToggleShowAnonymizedValues}
-            setIsSettingsModalVisible={setIsSettingsModalVisible}
-            showAnonymizedValues={showAnonymizedValues}
-            title={title}
-            conversations={conversations}
-            onConversationDeleted={handleOnConversationDeleted}
-            refetchConversationsState={refetchConversationsState}
-          />
-        )}
-
-        {/* Create portals for each EuiCodeBlock to add the `Investigate in Timeline` action */}
-        {createCodeBlockPortals()}
-
-        {!isDisabled && !isLoadingAnonymizationFields && !isErrorAnonymizationFields && (
-          <>
-            <ContextPills
-              anonymizationFields={anonymizationFields}
-              promptContexts={promptContexts}
-              selectedPromptContexts={selectedPromptContexts}
-              setSelectedPromptContexts={setSelectedPromptContexts}
-              isFlyoutMode={isFlyoutMode}
-            />
-            {Object.keys(promptContexts).length > 0 && <EuiSpacer size={'s'} />}
-          </>
-        )}
-      </EuiModalHeader>
-      <EuiModalBody>
-        {getWrapper(
-          <>
-            {comments}
-
-            {!isDisabled && showMissingConnectorCallout && areConnectorsFetched && (
-              <>
-                <EuiSpacer />
-                <EuiFlexGroup justifyContent="spaceAround">
-                  <EuiFlexItem grow={false}>
-                    <ConnectorMissingCallout
-                      isConnectorConfigured={(connectors?.length ?? 0) > 0}
-                      isSettingsModalVisible={isSettingsModalVisible}
+                {!isDisabled && (
+                  <EuiPanel
+                    css={css`
+                      background: ${euiThemeVars.euiColorLightestShade};
+                    `}
+                    hasShadow={false}
+                    paddingSize="m"
+                    borderRadius="none"
+                  >
+                    <QuickPrompts
+                      setInput={setUserPrompt}
                       setIsSettingsModalVisible={setIsSettingsModalVisible}
-                      isFlyoutMode={isFlyoutMode}
+                      trackPrompt={trackPrompt}
                     />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </>
-            )}
-          </>,
-          !embeddedLayout
-        )}
-      </EuiModalBody>
-      <EuiModalFooter
-        css={css`
-          align-items: stretch;
-          flex-direction: column;
-        `}
-      >
-        <BlockBotCallToAction
-          connectorPrompt={connectorPrompt}
-          http={http}
-          isAssistantEnabled={isAssistantEnabled}
-          isWelcomeSetup={isWelcomeSetup}
-        />
-        <ChatSend
-          isDisabled={isSendingDisabled}
-          shouldRefocusPrompt={shouldRefocusPrompt}
-          userPrompt={userPrompt}
-          handleOnChatCleared={handleOnChatCleared}
-          handlePromptChange={handlePromptChange}
-          handleSendMessage={handleChatSend}
-          handleRegenerateResponse={handleRegenerateResponse}
-          isLoading={isLoadingChatSend}
-          isFlyoutMode={isFlyoutMode}
-        />
-        {!isDisabled && (
-          <QuickPrompts
-            setInput={setUserPrompt}
-            setIsSettingsModalVisible={setIsSettingsModalVisible}
-            trackPrompt={trackPrompt}
-            isFlyoutMode={isFlyoutMode}
-          />
-        )}
-      </EuiModalFooter>
-    </>,
-    embeddedLayout
+                  </EuiPanel>
+                )}
+              </EuiFlyoutFooter>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </CommentContainer>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 

@@ -15,7 +15,6 @@ import type { SelectedPromptContext } from '../../prompt_context/types';
 import { Props, SelectedPromptContexts } from '.';
 
 const defaultProps: Props = {
-  isNewConversation: false,
   promptContexts: {
     [mockAlertPromptContext.id]: mockAlertPromptContext,
     [mockEventPromptContext.id]: mockEventPromptContext,
@@ -23,7 +22,6 @@ const defaultProps: Props = {
   selectedPromptContexts: {},
   setSelectedPromptContexts: jest.fn(),
   currentReplacements: {},
-  isFlyoutMode: false,
 };
 
 const mockSelectedAlertPromptContext: SelectedPromptContext = {
@@ -58,7 +56,6 @@ describe('SelectedPromptContexts', () => {
       <TestProviders>
         <SelectedPromptContexts
           {...defaultProps}
-          isNewConversation={false} // <--
           selectedPromptContexts={{
             [mockAlertPromptContext.id]: mockSelectedAlertPromptContext,
           }} // <-- length 1
@@ -76,7 +73,6 @@ describe('SelectedPromptContexts', () => {
       <TestProviders>
         <SelectedPromptContexts
           {...defaultProps}
-          isNewConversation={true} // <--
           selectedPromptContexts={{
             [mockAlertPromptContext.id]: mockSelectedAlertPromptContext,
           }} // <-- length 1
@@ -94,7 +90,6 @@ describe('SelectedPromptContexts', () => {
       <TestProviders>
         <SelectedPromptContexts
           {...defaultProps}
-          isNewConversation={false} // <--
           selectedPromptContexts={{
             [mockAlertPromptContext.id]: mockSelectedAlertPromptContext,
             [mockEventPromptContext.id]: mockSelectedEventPromptContext,

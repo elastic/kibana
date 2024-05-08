@@ -78,7 +78,6 @@ export interface AssistantProviderProps {
     showAnonymizedValues: boolean;
     setIsStreaming: (isStreaming: boolean) => void;
     currentUserAvatar?: UserAvatar;
-    isFlyoutMode: boolean;
   }) => EuiCommentProps[];
   http: HttpSetup;
   baseConversations: Record<string, Conversation>;
@@ -121,7 +120,6 @@ export interface UseAssistantContext {
     showAnonymizedValues: boolean;
     currentUserAvatar?: UserAvatar;
     setIsStreaming: (isStreaming: boolean) => void;
-    isFlyoutMode: boolean;
   }) => EuiCommentProps[];
   http: HttpSetup;
   knowledgeBase: KnowledgeBaseConfig;

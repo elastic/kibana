@@ -156,7 +156,6 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
               onConversationSelected={onConversationSelected}
               conversations={conversations}
               refetchConversationsState={refetchConversationsState}
-              isFlyoutMode={true}
             />
           </EuiFlexItem>
 
@@ -188,11 +187,8 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
             `}
           >
             <AssistantTitle
-              docLinks={docLinks}
               title={selectedConversation?.title}
               selectedConversation={selectedConversation}
-              onChange={onConversationChange}
-              isFlyoutMode={true}
               refetchConversationsState={refetchConversationsState}
             />
           </EuiFlexItem>
@@ -204,7 +200,6 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
                   isDisabled={isDisabled || selectedConversation === undefined}
                   selectedConnectorId={selectedConnectorId}
                   selectedConversation={selectedConversation}
-                  isFlyoutMode={true}
                   onConnectorSelected={onConversationChange}
                 />
               </EuiFlexItem>

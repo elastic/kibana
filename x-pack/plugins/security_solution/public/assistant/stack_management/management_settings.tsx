@@ -16,11 +16,8 @@ import {
 } from '@kbn/elastic-assistant';
 import { useConversation } from '@kbn/elastic-assistant/impl/assistant/use_conversation';
 import type { FetchConversationsResponse } from '@kbn/elastic-assistant/impl/assistant/api';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 export const ManagementSettings = React.memo(() => {
-  const isFlyoutMode = useIsExperimentalFeatureEnabled('aiAssistantFlyoutMode');
-
   const {
     baseConversations,
     http,
@@ -47,8 +44,8 @@ export const ManagementSettings = React.memo(() => {
   const currentConversation = useMemo(
     () =>
       conversations?.[selectedConversationId] ??
-      getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE, isFlyoutMode }),
-    [conversations, getDefaultConversation, selectedConversationId, isFlyoutMode]
+      getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE }),
+    [conversations, getDefaultConversation, selectedConversationId]
   );
 
   if (conversations) {
@@ -57,7 +54,6 @@ export const ManagementSettings = React.memo(() => {
         selectedConversation={currentConversation}
         setSelectedConversationId={setSelectedConversationId}
         conversations={conversations}
-        isFlyoutMode={isFlyoutMode}
       />
     );
   }

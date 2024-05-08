@@ -51,7 +51,7 @@ describe('helpers', () => {
       const prompts = [mockSystemPrompt, mockSuperheroSystemPrompt];
       const promptIds = prompts.map(({ id }) => id);
 
-      const options = getOptions({ prompts, isFlyoutMode: false });
+      const options = getOptions({ prompts });
       const optionValues = options.map(({ value }) => value);
 
       expect(optionValues).toEqual(promptIds);

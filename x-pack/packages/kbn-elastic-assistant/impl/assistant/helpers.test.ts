@@ -22,12 +22,11 @@ const defaultConversation = {
   replacements: {},
   title: 'conversation_id',
 };
-const isFlyoutMode = false;
 describe('helpers', () => {
   describe('isAssistantEnabled = false', () => {
     const isAssistantEnabled = false;
     it('When no conversation history, return only enterprise messaging', () => {
-      const result = getBlockBotConversation(defaultConversation, isAssistantEnabled, isFlyoutMode);
+      const result = getBlockBotConversation(defaultConversation, isAssistantEnabled);
       expect(result.messages).toEqual(enterpriseMessaging);
       expect(result.messages.length).toEqual(1);
     });
@@ -47,7 +46,7 @@ describe('helpers', () => {
           },
         ],
       };
-      const result = getBlockBotConversation(conversation, isAssistantEnabled, isFlyoutMode);
+      const result = getBlockBotConversation(conversation, isAssistantEnabled);
       expect(result.messages.length).toEqual(2);
     });
 
@@ -56,7 +55,7 @@ describe('helpers', () => {
         ...defaultConversation,
         messages: enterpriseMessaging,
       };
-      const result = getBlockBotConversation(conversation, isAssistantEnabled, isFlyoutMode);
+      const result = getBlockBotConversation(conversation, isAssistantEnabled);
       expect(result.messages.length).toEqual(1);
       expect(result.messages).toEqual(enterpriseMessaging);
     });
@@ -77,7 +76,7 @@ describe('helpers', () => {
           },
         ],
       };
-      const result = getBlockBotConversation(conversation, isAssistantEnabled, isFlyoutMode);
+      const result = getBlockBotConversation(conversation, isAssistantEnabled);
       expect(result.messages.length).toEqual(3);
     });
   });
@@ -85,7 +84,7 @@ describe('helpers', () => {
   describe('isAssistantEnabled = true', () => {
     const isAssistantEnabled = true;
     it('when no conversation history, returns the welcome conversation', () => {
-      const result = getBlockBotConversation(defaultConversation, isAssistantEnabled, isFlyoutMode);
+      const result = getBlockBotConversation(defaultConversation, isAssistantEnabled);
       expect(result.messages.length).toEqual(3);
     });
     it('returns a conversation history with the welcome conversation appended', () => {
@@ -103,7 +102,7 @@ describe('helpers', () => {
           },
         ],
       };
-      const result = getBlockBotConversation(conversation, isAssistantEnabled, isFlyoutMode);
+      const result = getBlockBotConversation(conversation, isAssistantEnabled);
       expect(result.messages.length).toEqual(4);
     });
   });
