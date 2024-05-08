@@ -354,7 +354,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
     const fleetFiles = await this.options.endpointService.getFleetFromHostFilesClient();
     const file = await fleetFiles.get(fileId);
 
-    if (file.id !== fileId) {
+    if (file.actionId !== actionId) {
       throw new CustomHttpRequestError(`Invalid file id [${fileId}] for action [${actionId}]`, 400);
     }
 
