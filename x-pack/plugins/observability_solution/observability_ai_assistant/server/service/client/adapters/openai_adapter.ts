@@ -6,16 +6,17 @@
  */
 
 import { encode } from 'gpt-tokenizer';
-import { compact, isEmpty, merge, omit, pick } from 'lodash';
+import { merge, pick } from 'lodash';
 import OpenAI from 'openai';
 import { identity } from 'rxjs';
-import { CompatibleJSONSchema } from '../../../../common/functions/types';
+import { v4 } from 'uuid';
 import { Message, MessageRole } from '../../../../common';
-import { processOpenAiStream } from './process_openai_stream';
+import { CompatibleJSONSchema } from '../../../../common/functions/types';
 import { eventsourceStreamIntoObservable } from '../../util/eventsource_stream_into_observable';
-import { LlmApiAdapterFactory } from './types';
-import { parseInlineFunctionCalls } from './simulate_function_calling/parse_inline_function_calls';
+import { processOpenAiStream } from './process_openai_stream';
 import { getMessagesWithSimulatedFunctionCalling } from './simulate_function_calling/get_messages_with_simulated_function_calling';
+import { parseInlineFunctionCalls } from './simulate_function_calling/parse_inline_function_calls';
+import { LlmApiAdapterFactory } from './types';
 
 function getOpenAIPromptTokenCount({
   messages,
@@ -57,24 +58,73 @@ function getOpenAIPromptTokenCount({
   return tokensFromMessages + tokensFromFunctions;
 }
 
-function messagesToOpenAI(messages: Message[]): OpenAI.ChatCompletionMessageParam[] {
-  return compact(
-    messages
-      .filter((message) => message.message.content || message.message.function_call?.name)
-      .map((message) => {
-        const role =
-          message.message.role === MessageRole.Elastic ? MessageRole.User : message.message.role;
+function getOpenAiMessage(
+  message: Message,
+  previousOpenAIMessage?: OpenAI.ChatCompletionMessageParam
+): OpenAI.ChatCompletionMessageParam {
+  if (message.message.role === MessageRole.System) {
+    return {
+      role: 'system',
+      content: message.message.content || '',
+    };
+  }
 
-        return {
-          role,
-          content: message.message.content,
-          function_call: isEmpty(message.message.function_call?.name)
-            ? undefined
-            : omit(message.message.function_call, 'trigger'),
-          name: message.message.name,
-        } as OpenAI.ChatCompletionMessageParam;
-      })
+  if (message.message.role === MessageRole.Assistant) {
+    return {
+      role: 'assistant',
+      content: message.message.content,
+      ...(message.message.function_call?.name
+        ? {
+            tool_calls: [
+              {
+                id: v4().substr(0, 6),
+                type: 'function',
+                function: {
+                  name: message.message.function_call!.name,
+                  arguments: message.message.function_call!.arguments || '',
+                },
+              },
+            ],
+          }
+        : {}),
+    };
+  }
+
+  if (message.message.name) {
+    if (
+      !previousOpenAIMessage ||
+      !('tool_calls' in previousOpenAIMessage) ||
+      !previousOpenAIMessage.tool_calls?.[0].id
+    ) {
+      throw new Error('Could not find tool call id in previous message for function response');
+    }
+
+    const prevToolCallId = previousOpenAIMessage.tool_calls[0].id;
+    return {
+      role: 'tool',
+      content: message.message.content || '',
+      tool_call_id: prevToolCallId,
+    };
+  }
+
+  return {
+    role: 'user',
+    content: message.message.content || '',
+  };
+}
+
+function messagesToOpenAI(messages: Message[]): OpenAI.ChatCompletionMessageParam[] {
+  const messagesWithSomething = messages.filter(
+    (message) => message.message.content || message.message.function_call?.name
   );
+
+  const messagesForOpenAI: OpenAI.ChatCompletionMessageParam[] = [];
+
+  messagesWithSomething.forEach((message, index) => {
+    messagesForOpenAI.push(getOpenAiMessage(message, messagesForOpenAI[index - 1]));
+  });
+
+  return messagesForOpenAI;
 }
 
 export const createOpenAiAdapter: LlmApiAdapterFactory = ({

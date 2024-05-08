@@ -23,13 +23,14 @@ export function getSystemMessageInstructions({
         : ''
     }
 
+    If you call a tool, you must use the folowing approach:
     DO NOT call a tool when it is not listed.
     ONLY define input that is defined in the tool properties.
+    ONLY call a single tool. Multiple tool calls will be ignored.
+    ONLY call the tool, provide no or minimal additional context.
     If a tool does not have properties, leave them out.
 
     It is EXTREMELY important that you generate valid JSON between the \`\`\`json and \`\`\` delimiters.
-    
-    You may call them like this.
 
     Given the following tool:
 
@@ -46,7 +47,7 @@ export function getSystemMessageInstructions({
       },
     })}
 
-    Use it the following way:
+    Use it the following way, and provide no or minimal context:
 
     ${TOOL_USE_START}
     \`\`\`json
@@ -60,7 +61,8 @@ export function getSystemMessageInstructions({
       description: 'A tool to call without parameters',
     })}
 
-    Use it the following way: 
+    Use it the following way, and provide no or minimal context: 
+    
     ${TOOL_USE_START}
     \`\`\`json
     ${JSON.stringify({ name: 'my_tool_without_parameters', input: {} })}

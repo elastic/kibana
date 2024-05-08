@@ -75,7 +75,7 @@ export function getMessagesWithSimulatedFunctionCalling({
     if (index === messages.length - 1 && functionCall) {
       content += `
       
-      Remember, use the ${functionCall} tool to answer this question.`;
+      Remember, you MUST use the ${functionCall} tool to answer this question. Anything else will result in an error.`;
     }
 
     return {

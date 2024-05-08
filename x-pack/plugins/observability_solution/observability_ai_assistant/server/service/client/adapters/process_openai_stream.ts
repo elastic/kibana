@@ -81,7 +81,9 @@ export function processOpenAiStream({
         }),
         filter(
           (line): line is CreateChatCompletionResponseChunk =>
-            'object' in line && line.object === 'chat.completion.chunk'
+            'object' in line &&
+            line.object === 'chat.completion.chunk' &&
+            Boolean(line.choices?.length)
         ),
         map((chunk): ChatCompletionChunkEvent => {
           const delta = chunk.choices[0].delta;

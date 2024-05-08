@@ -79,6 +79,7 @@ import {
   LangtraceServiceProvider,
   withLangtraceChatCompleteSpan,
 } from './operators/with_langtrace_chat_complete_span';
+import { guaranteeMultiTurnMessages } from './adapters/guarantee_multi_turn_messages';
 
 const MAX_FUNCTION_CALLS = 8;
 
@@ -489,10 +490,12 @@ export class ObservabilityAIAssistantClient {
 
         let adapter: LlmApiAdapter;
 
+        const messagesWithGuaranteedMultiTurn = guaranteeMultiTurnMessages(messages);
+
         switch (connector.actionTypeId) {
           case ObservabilityAIAssistantConnectorType.OpenAI:
             adapter = createOpenAiAdapter({
-              messages,
+              messages: messagesWithGuaranteedMultiTurn,
               functions,
               functionCall,
               logger: this.dependencies.logger,
@@ -502,7 +505,7 @@ export class ObservabilityAIAssistantClient {
 
           case ObservabilityAIAssistantConnectorType.Bedrock:
             adapter = createBedrockClaudeAdapter({
-              messages,
+              messages: messagesWithGuaranteedMultiTurn,
               functions,
               functionCall,
               logger: this.dependencies.logger,
