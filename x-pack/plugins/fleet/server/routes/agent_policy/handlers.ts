@@ -62,13 +62,21 @@ export async function populateAssignedAgentsCount(
 ) {
   await pMap(
     agentPolicies,
-    (agentPolicy: GetAgentPoliciesResponseItem) =>
-      getAgentsByKuery(esClient, soClient, {
+    (agentPolicy: GetAgentPoliciesResponseItem) => {
+      const totalAgents = getAgentsByKuery(esClient, soClient, {
         showInactive: false,
         perPage: 0,
         page: 1,
         kuery: `${AGENTS_PREFIX}.policy_id:${agentPolicy.id}`,
-      }).then(({ total: agentTotal }) => (agentPolicy.agents = agentTotal)),
+      }).then(({ total }) => (agentPolicy.agents = total));
+      const unprivilegedAgents = getAgentsByKuery(esClient, soClient, {
+        showInactive: false,
+        perPage: 0,
+        page: 1,
+        kuery: `${AGENTS_PREFIX}.policy_id:${agentPolicy.id} and local_metadata.elastic.agent.unprivileged : true`,
+      }).then(({ total }) => (agentPolicy.unprivileged_agents = total));
+      return Promise.all([totalAgents, unprivilegedAgents]);
+    },
     { concurrency: 10 }
   );
 }

@@ -54,6 +54,7 @@ export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   updated_by: string;
   revision: number;
   agents?: number;
+  unprivileged_agents?: number;
   is_protected: boolean;
 }
 
