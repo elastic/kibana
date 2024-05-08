@@ -238,17 +238,18 @@ export const getDiscoverAppStateContainer = ({
     addLog('[appState] initialize state and sync with URL', currentSavedSearch);
 
     const { data } = services;
-    const dataView = currentSavedSearch.searchSource.getField('index');
+    const savedSearchDataView = currentSavedSearch.searchSource.getField('index');
     const appState = enhancedAppContainer.getState();
+    const setDataViewFromSavedSearch =
+      !appState.dataSource ||
+      (isDataSourceType(appState.dataSource, DataSourceType.DataView) &&
+        appState.dataSource.dataViewId !== savedSearchDataView?.id);
 
-    if (
-      isDataSourceType(appState.dataSource, DataSourceType.DataView) &&
-      appState.dataSource.dataViewId !== dataView?.id
-    ) {
+    if (setDataViewFromSavedSearch) {
       // used data view is different from the given by url/state which is invalid
       setState(enhancedAppContainer, {
-        dataSource: dataView?.id
-          ? createDataViewDataSource({ dataViewId: dataView.id })
+        dataSource: savedSearchDataView?.id
+          ? createDataViewDataSource({ dataViewId: savedSearchDataView.id })
           : undefined,
       });
     }
