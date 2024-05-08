@@ -114,11 +114,9 @@ function pickTypeForName(
     return currentType;
   }
 
-  /* If it's not available, pick the first available type */
-  if (typesAvailableForNewName.length > 0) {
-    return typesAvailableForNewName[0];
-  }
-
-  /* Otherwise use currently selected type */
-  return currentType;
+  /*
+    If current type is not available, pick the first available type.
+    If no type is available, use the currently selected type.
+  */
+  return typesAvailableForNewName?.[0] ?? currentType;
 }
