@@ -2,9 +2,11 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
+    "jsx": "react",
     "types": [
       "jest",
       "node",
+      "react",
       "@emotion/react/types/css-prop"
     ]
   },
