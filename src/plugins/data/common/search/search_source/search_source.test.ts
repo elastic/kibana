@@ -1271,7 +1271,7 @@ describe('SearchSource', () => {
         expect(typesRegistry.get('avg')!.postFlightRequest).toHaveBeenCalledTimes(0);
       });
 
-      test('calls post flight requests, fires 1 extra response, returns last response', async () => {
+      test('doesnt fire postFlightRequest if other bucket is not enabled', async () => {
         const typesRegistry = mockAggTypesRegistry();
         typesRegistry.get('avg')!.postFlightRequest = jest.fn().mockResolvedValue({
           other: 5,
@@ -1311,6 +1311,57 @@ describe('SearchSource', () => {
         const resp = await lastValueFrom(fetch$);
 
         expect(searchSourceDependencies.onResponse).toBeCalledTimes(1);
+        expect(fetchSub.next).toHaveBeenCalledTimes(2);
+        expect(fetchSub.complete).toHaveBeenCalledTimes(1);
+        expect(fetchSub.error).toHaveBeenCalledTimes(0);
+        expect(resp.rawResponse).toStrictEqual({ test: 2 });
+        expect(typesRegistry.get('avg')!.postFlightRequest).toHaveBeenCalledTimes(0);
+      });
+
+      test('calls post flight requests, fires 1 extra response, returns last response', async () => {
+        const typesRegistry = mockAggTypesRegistry();
+        typesRegistry.get('avg')!.postFlightRequest = jest.fn().mockResolvedValue({
+          other: 5,
+        });
+
+        const allac = new AggConfigs(
+          indexPattern3,
+          [
+            {
+              type: 'avg',
+              enabled: true,
+              params: { field: 'field1' },
+            },
+            {
+              type: 'avg',
+              enabled: true,
+              params: { field: 'field2' },
+            },
+            {
+              type: 'avg',
+              enabled: true,
+              params: { field: 'foo-bar' },
+            },
+          ],
+          {
+            typesRegistry,
+          },
+          jest.fn()
+        );
+
+        allac.aggs.forEach((agg) => {
+          agg.params.otherBucket = 'other';
+        });
+
+        searchSource = new SearchSource({}, searchSourceDependencies);
+        searchSource.setField('index', indexPattern);
+        searchSource.setField('aggs', allac);
+        const fetch$ = searchSource.fetch$({});
+        fetch$.subscribe(fetchSub);
+
+        const resp = await lastValueFrom(fetch$);
+
+        expect(searchSourceDependencies.onResponse).toBeCalledTimes(1);
         expect(fetchSub.next).toHaveBeenCalledTimes(3);
         expect(fetchSub.complete).toHaveBeenCalledTimes(1);
         expect(fetchSub.error).toHaveBeenCalledTimes(0);
@@ -1339,6 +1390,10 @@ describe('SearchSource', () => {
           jest.fn()
         );
 
+        allac.aggs.forEach((agg) => {
+          agg.params.otherBucket = 'other';
+        });
+
         searchSource = new SearchSource({}, searchSourceDependencies);
         searchSource.setField('index', indexPattern);
         searchSource.setField('aggs', allac);
@@ -1363,6 +1418,7 @@ describe('SearchSource', () => {
         const typesRegistry = mockAggTypesRegistry();
         typesRegistry.get('avg')!.postFlightRequest = jest.fn().mockRejectedValue(undefined);
         const ac = getAggConfigs(typesRegistry, true);
+        ac.aggs[0].params.otherBucket = 'other';
 
         searchSource = new SearchSource({}, searchSourceDependencies);
         searchSource.setField('index', indexPattern);
