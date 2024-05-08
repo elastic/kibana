@@ -21,6 +21,7 @@ import {
   EuiI18n,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { debounce } from 'lodash';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { getFieldIconType } from '@kbn/field-utils/src/utils/get_field_icon_type';
@@ -107,6 +108,7 @@ export const DocViewerTable = ({
   hit,
   dataView,
   filter,
+  availableHeight,
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) => {
@@ -325,7 +327,21 @@ export const DocViewerTable = ({
   const rows = [...pinnedItems, ...restItems.slice(startIndex, pageSize + startIndex)];
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="none"
+      responsive={false}
+      css={
+        // TODO: clean up
+        availableHeight
+          ? css`
+              height: ${availableHeight - 2 * 16 - 32}px; // vertical paddings and tabs height
+            `
+          : css`
+              min-height: 500px;
+            `
+      }
+    >
       <EuiFlexItem grow={false}>
         <EuiSpacer size="s" />
       </EuiFlexItem>

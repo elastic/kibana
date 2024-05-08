@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -26,6 +26,7 @@ import {
   EuiButtonEmpty,
   useEuiTheme,
   useIsWithinMinBreakpoint,
+  useResizeObserver,
 } from '@elastic/eui';
 import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
@@ -89,6 +90,9 @@ export function DiscoverGridFlyout({
   const [flyoutWidth, setFlyoutWidth] = useLocalStorage(FLYOUT_WIDTH_KEY, defaultWidth);
   const minWidth = euiTheme.base * 24;
   const maxWidth = euiTheme.breakpoint.xl;
+
+  const [flyoutBodyRef, setFlyoutBodyRef] = useState<HTMLDivElement | HTMLSpanElement | null>(null);
+  const flyoutBodyDimensions = useResizeObserver(flyoutBodyRef);
 
   const isPlainRecord = isTextBasedQuery(query);
   // Get actual hit with updated highlighted searches
@@ -175,6 +179,7 @@ export function DiscoverGridFlyout({
         onRemoveColumn={removeColumn}
         textBasedHits={isPlainRecord ? hits : undefined}
         docViewsRegistry={flyoutCustomization?.docViewsRegistry}
+        availableHeight={flyoutBodyDimensions?.height}
       />
     ),
     [
@@ -188,6 +193,7 @@ export function DiscoverGridFlyout({
       onFilter,
       removeColumn,
       flyoutCustomization?.docViewsRegistry,
+      flyoutBodyDimensions?.height,
     ]
   );
 
@@ -279,7 +285,16 @@ export function DiscoverGridFlyout({
             </>
           )}
         </EuiFlyoutHeader>
-        <EuiFlyoutBody>{bodyContent}</EuiFlyoutBody>
+        <div
+          ref={setFlyoutBodyRef}
+          css={css`
+            // TODO: clean up
+            height: 100%;
+            overflow-y: hidden;
+          `}
+        >
+          <EuiFlyoutBody>{bodyContent}</EuiFlyoutBody>
+        </div>
         <EuiFlyoutFooter>
           <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
             {i18n.translate('discover.grid.flyout.close', {
