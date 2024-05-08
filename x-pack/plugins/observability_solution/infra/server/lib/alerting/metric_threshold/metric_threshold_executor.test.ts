@@ -54,6 +54,7 @@ const STARTED_AT_MOCK_DATE = new Date();
 const mockOptions = {
   executionId: '',
   startedAt: mockNow,
+  startedAtOverridden: false,
   previousStartedAt: null,
   state: {},
   spaceId: '',
