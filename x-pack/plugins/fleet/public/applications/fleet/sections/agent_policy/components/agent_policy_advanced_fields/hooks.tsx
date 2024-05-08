@@ -140,6 +140,12 @@ export function useOutputOptions(agentPolicy: Partial<NewAgentPolicy | AgentPoli
           value: item.id,
           inputDisplay: item.name,
           disabled: !isPolicyPerOutputAllowed || isInternalOutput,
+          helpText: isPolicyPerOutputAllowed ? undefined : (
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.outputOptionDisabledPolicyPerOutput"
+              defaultMessage="The current license does not allow defining output per policy."
+            />
+          )
         };
       }),
     ];
