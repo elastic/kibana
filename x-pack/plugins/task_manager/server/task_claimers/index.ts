@@ -13,7 +13,8 @@ import { TaskTypeDictionary } from '../task_type_dictionary';
 import { TaskClaimingBatches } from '../queries/task_claiming';
 import { ConcreteTaskInstance } from '../task';
 import { claimAvailableTasksDefault } from './strategy_default';
-import { CLAIM_STRATEGY_DEFAULT } from '../config';
+import { claimAvailableTasksMget } from './strategy_mget';
+import { CLAIM_STRATEGY_DEFAULT, CLAIM_STRATEGY_MGET } from '../config';
 import { TaskPartitioner } from '../lib/task_partitioner';
 
 export interface TaskClaimerOpts {
@@ -45,6 +46,8 @@ export function getTaskClaimer(strategy: string): TaskClaimerFn {
   switch (strategy) {
     case CLAIM_STRATEGY_DEFAULT:
       return claimAvailableTasksDefault;
+    case CLAIM_STRATEGY_MGET:
+      return claimAvailableTasksMget;
   }
   throw new Error(`Unknown task claiming strategy (${strategy})`);
 }

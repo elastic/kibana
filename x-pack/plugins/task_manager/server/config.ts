@@ -26,7 +26,8 @@ export const DEFAULT_METRICS_RESET_INTERVAL = 30 * 1000; // 30 seconds
 // At the default poll interval of 3sec, this averages over the last 15sec.
 export const DEFAULT_WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW = 5;
 
-export const CLAIM_STRATEGY_DEFAULT = 'default';
+export const CLAIM_STRATEGY_DEFAULT = 'mget';
+export const CLAIM_STRATEGY_MGET = 'mget';
 
 export const taskExecutionFailureThresholdSchema = schema.object(
   {

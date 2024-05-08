@@ -35,6 +35,7 @@ import {
   TaskLifecycle,
   TaskLifecycleResult,
   SerializedConcreteTaskInstance,
+  ConcreteTaskInstanceVersion,
 } from './task';
 
 import { TaskTypeDictionary } from './task_type_dictionary';
@@ -80,6 +81,7 @@ export interface UpdateByQueryOpts extends SearchOpts {
 
 export interface FetchResult {
   docs: ConcreteTaskInstance[];
+  versionMap: Map<string, ConcreteTaskInstanceVersion>;
 }
 
 export type BulkUpdateResult = Result<
@@ -433,6 +435,43 @@ export class TaskStore {
   }
 
   /**
+   * Gets task version info by ids
+   *
+   * @param {Array<string>} esIds
+   * @returns {Promise<ConcreteTaskInstance[]>}
+   */
+  public async bulkGetVersions(ids: string[]): Promise<ConcreteTaskInstanceVersion[]> {
+    const taskVersions = await this.esClientWithoutRetries.mget<never>({
+      index: this.index,
+      _source: false,
+      body: {
+        ids,
+      },
+    });
+
+    const result = taskVersions.docs.map((taskVersion) => {
+      if (isMGetSuccess(taskVersion)) {
+        return {
+          esId: taskVersion._id,
+          seqNo: taskVersion._seq_no,
+          primaryTerm: taskVersion._primary_term,
+        };
+      }
+
+      const errorTaskVersion = taskVersion as estypes.MgetMultiGetError;
+      const error = errorTaskVersion.error
+        ? `${taskVersion.error.type}: ${taskVersion.error.reason}`
+        : `unknown error performing bulk for ${taskVersion._id}`;
+      return {
+        esId: taskVersion._id,
+        error,
+      };
+    });
+
+    return result;
+  }
+
+  /**
    * Gets task lifecycle step by id
    *
    * @param {string} id
@@ -454,9 +493,7 @@ export class TaskStore {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
 
     try {
-      const {
-        hits: { hits: tasks },
-      } = await this.esClientWithoutRetries.search<SavedObjectsRawDoc['_source']>({
+      const result = await this.esClientWithoutRetries.search<SavedObjectsRawDoc['_source']>({
         index: this.index,
         ignore_unavailable: true,
         // ...(opts.routing ? { routing: opts.routing.join(',') } : {}),
@@ -466,7 +503,24 @@ export class TaskStore {
         },
       });
 
+      const {
+        hits: { hits: tasks },
+      } = result;
+
+      const versionMap = new Map<string, ConcreteTaskInstanceVersion>();
+      for (const task of tasks) {
+        if (task._seq_no == null || task._primary_term == null) continue;
+
+        const esId = task._id.startsWith('task:') ? task._id.slice(5) : task._id;
+        versionMap.set(esId, {
+          esId: task._id,
+          seqNo: task._seq_no,
+          primaryTerm: task._primary_term,
+        });
+      }
+
       return {
+        versionMap,
         docs: tasks
           // @ts-expect-error @elastic/elasticsearch _source is optional
           .filter((doc) => this.serializer.isRawSavedObject(doc))
@@ -550,6 +604,15 @@ export class TaskStore {
       this.errors$.next(e);
       throw e;
     }
+  }
+
+  public async getDocVersions(esIds: string[]): Promise<Map<string, ConcreteTaskInstanceVersion>> {
+    const versions = await this.bulkGetVersions(esIds);
+    const result = new Map<string, ConcreteTaskInstanceVersion>();
+    for (const version of versions) {
+      result.set(version.esId, version);
+    }
+    return result;
   }
 }
 
@@ -637,4 +700,8 @@ function ensureAggregationOnlyReturnsEnabledTaskObjects(opts: AggregationOpts): 
     ...opts,
     query,
   };
+}
+
+function isMGetSuccess(doc: estypes.MgetResponseItem<unknown>): doc is estypes.GetGetResult {
+  return (doc as estypes.GetGetResult).found !== undefined;
 }
