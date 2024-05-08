@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-// draggable_cell_actions.test.tsx
-
 import React from 'react';
 import { render } from '@testing-library/react';
 import { DraggableCellActions } from './draggable_cell_actions';

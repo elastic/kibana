@@ -108,7 +108,7 @@ describe('createFilterInCellActionFactory', () => {
       it('should execute using generic filterManager', async () => {
         await filterInAction.execute(dataTableContext);
         expect(mockGlobalFilterManager.addFilters).toHaveBeenCalled();
-        expect(services.timelineFilterManager.addFilters).not.toHaveBeenCalled();
+        expect(services.timelineDataService.query.filterManager.addFilters).not.toHaveBeenCalled();
       });
 
       it('should show warning if value type is unsupported', async () => {
@@ -122,7 +122,7 @@ describe('createFilterInCellActionFactory', () => {
           ],
         });
         expect(mockGlobalFilterManager.addFilters).not.toHaveBeenCalled();
-        expect(services.timelineFilterManager.addFilters).not.toHaveBeenCalled();
+        expect(services.timelineDataService.query.filterManager.addFilters).not.toHaveBeenCalled();
         expect(mockWarningToast).toHaveBeenCalled();
       });
     });
@@ -135,7 +135,7 @@ describe('createFilterInCellActionFactory', () => {
 
       it('should execute using timeline filterManager', async () => {
         await filterInAction.execute(timelineContext);
-        expect(services.timelineFilterManager.addFilters).toHaveBeenCalled();
+        expect(services.timelineDataService.query.filterManager.addFilters).toHaveBeenCalled();
         expect(mockGlobalFilterManager.addFilters).not.toHaveBeenCalled();
       });
     });
