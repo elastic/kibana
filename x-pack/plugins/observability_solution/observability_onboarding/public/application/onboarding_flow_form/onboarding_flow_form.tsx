@@ -145,7 +145,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
   );
   const virtualSearchResults = useVirtualSearchResults();
 
-  let isCategoryKeyDown: boolean = false;
+  let isSelectingCategoryWithKeyboard: boolean = false;
 
   return (
     <EuiPanel hasBorder paddingSize="xl" panelRef={formRef}>
@@ -180,19 +180,19 @@ export const OnboardingFlowForm: FunctionComponent = () => {
               }
               checked={option.id === searchParams.get('category')}
               /**
-               * onKeyDown and onKeyUp handlers disables
+               * onKeyDown and onKeyUp handlers disable
                * scrolling to the category items when user
                * changes the selected category using keyboard,
                * which prevents our custom scroll behavior
                * from conflicting with browser's native one to
-               * put focused item into the view.
+               * put keyboard-focused item into the view.
                */
-              onKeyDown={() => (isCategoryKeyDown = true)}
-              onKeyUp={() => (isCategoryKeyDown = false)}
+              onKeyDown={() => (isSelectingCategoryWithKeyboard = true)}
+              onKeyUp={() => (isSelectingCategoryWithKeyboard = false)}
               onChange={() => {
                 setIntegrationSearch('');
                 setSearchParams({ category: option.id }, { replace: true });
-                if (!isCategoryKeyDown) {
+                if (!isSelectingCategoryWithKeyboard) {
                   setScrollToCategory(option.id);
                 }
               }}
