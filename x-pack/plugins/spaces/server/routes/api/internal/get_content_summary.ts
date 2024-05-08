@@ -11,6 +11,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import type { InternalRouteDeps } from '.';
 import { wrapError } from '../../../lib/errors';
+import { SPACE_ID_REGEX } from '../../../lib/space_schema';
 import { createLicensedRouteHandler } from '../../lib';
 
 interface SpaceContentTypeMetaInfo {
@@ -41,7 +42,16 @@ export function initGetSpaceContentSummaryApi(deps: InternalRouteDeps) {
         tags: ['access:manageSpaces'],
       },
       validate: {
-        params: schema.object({ spaceId: schema.string({ minLength: 1 }) }),
+        params: schema.object({
+          spaceId: schema.string({
+            validate: (value) => {
+              if (!SPACE_ID_REGEX.test(value)) {
+                return `lower case, a-z, 0-9, "_", and "-" are allowed.`;
+              }
+            },
+            minLength: 1,
+          }),
+        }),
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {

@@ -127,6 +127,9 @@ describe('GET /internal/spaces/{spaceId}/content_summary', () => {
     expect(() => paramsSchema.validate({ spaceId: '' })).toThrowErrorMatchingInlineSnapshot(
       `"[spaceId]: value has length [0] but it must have a minimum length of [1]."`
     );
+    expect(() => paramsSchema.validate({ spaceId: '@' })).toThrowErrorMatchingInlineSnapshot(
+      `"[spaceId]: lower case, a-z, 0-9, \\"_\\", and \\"-\\" are allowed."`
+    );
   });
 
   it('returns http/403 when the license is invalid.', async () => {
