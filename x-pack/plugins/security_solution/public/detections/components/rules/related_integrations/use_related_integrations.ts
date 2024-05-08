@@ -10,7 +10,7 @@ import { useMemo } from 'react';
 import type { RelatedIntegrationArray } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { IntegrationDetails } from './integration_details';
 import { calculateIntegrationDetails } from './integration_details';
-import { useInstalledIntegrations } from './use_installed_integrations';
+import { useIntegrations } from './use_integrations';
 
 export interface UseRelatedIntegrationsResult {
   integrations: IntegrationDetails[];
@@ -20,17 +20,14 @@ export interface UseRelatedIntegrationsResult {
 export const useRelatedIntegrations = (
   relatedIntegrations: RelatedIntegrationArray
 ): UseRelatedIntegrationsResult => {
-  const { data: installedIntegrations } = useInstalledIntegrations({ packages: [] });
+  const { data: integrations } = useIntegrations();
 
   return useMemo(() => {
-    const integrationDetails = calculateIntegrationDetails(
-      relatedIntegrations,
-      installedIntegrations
-    );
+    const integrationDetails = calculateIntegrationDetails(relatedIntegrations, integrations);
 
     return {
       integrations: integrationDetails,
-      isLoaded: installedIntegrations != null,
+      isLoaded: integrations != null,
     };
-  }, [relatedIntegrations, installedIntegrations]);
+  }, [relatedIntegrations, integrations]);
 };

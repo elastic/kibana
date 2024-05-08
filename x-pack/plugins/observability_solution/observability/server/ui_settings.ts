@@ -21,6 +21,7 @@ import {
   apmLabsButton,
   enableAgentExplorerView,
   apmEnableTableSearchBar,
+  apmEnableMultiSignal,
   enableAwsLambdaMetrics,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
@@ -323,6 +324,23 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     schema: schema.boolean(),
     value: true,
+    requiresPageReload: true,
+    type: 'boolean',
+  },
+  [apmEnableMultiSignal]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmEnableMultiSignal', {
+      defaultMessage: 'Multi signal APM',
+    }),
+    description: i18n.translate('xpack.observability.apmEnableMultiSignalDescription', {
+      defaultMessage:
+        '{technicalPreviewLabel} Enable the multi-signal feature in APM, which allows you to monitor services from logs and traces.',
+      values: {
+        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
+      },
+    }),
+    schema: schema.boolean(),
+    value: false,
     requiresPageReload: true,
     type: 'boolean',
   },

@@ -22,12 +22,16 @@ import {
   EuiSelectableOption,
   EuiText,
   EuiTitle,
+  EuiCheckbox,
+  EuiLink,
+  EuiIcon,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useController } from 'react-hook-form';
 import { AnalyticsEvents } from '../../analytics/constants';
+import { docLinks } from '../../../common/doc_links';
 import { useIndicesFields } from '../../hooks/use_indices_fields';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { ChatForm, ChatFormFields, IndicesQuerySourceFields } from '../../types';
@@ -102,7 +106,7 @@ export const ViewQueryFlyout: React.FC<ViewQueryFlyoutProps> = ({ onClose }) => 
       ...tempQueryFields,
       [index]: newFields,
     });
-    usageTracker.count(AnalyticsEvents.viewQueryFieldsUpdated, newFields.length);
+    usageTracker?.count(AnalyticsEvents.viewQueryFieldsUpdated, newFields.length);
   };
 
   const saveQuery = () => {
@@ -113,12 +117,12 @@ export const ViewQueryFlyout: React.FC<ViewQueryFlyoutProps> = ({ onClose }) => 
     const groupedQueryFields = groupTypeQueryFields(fields, tempQueryFields);
 
     groupedQueryFields.forEach((typeQueryFields) =>
-      usageTracker.click(`${AnalyticsEvents.viewQuerySaved}_${typeQueryFields}`)
+      usageTracker?.click(`${AnalyticsEvents.viewQuerySaved}_${typeQueryFields}`)
     );
   };
 
   useEffect(() => {
-    usageTracker.load(AnalyticsEvents.viewQueryFlyoutOpened);
+    usageTracker?.load(AnalyticsEvents.viewQueryFlyoutOpened);
   }, [usageTracker]);
 
   return (
@@ -157,7 +161,7 @@ export const ViewQueryFlyout: React.FC<ViewQueryFlyoutProps> = ({ onClose }) => 
             </EuiCodeBlock>
           </EuiFlexItem>
           <EuiFlexItem grow={3}>
-            <EuiFlexGroup direction="column">
+            <EuiFlexGroup direction="column" gutterSize="s">
               <EuiText>
                 <h5>
                   <FormattedMessage
@@ -166,12 +170,12 @@ export const ViewQueryFlyout: React.FC<ViewQueryFlyoutProps> = ({ onClose }) => 
                   />
                 </h5>
               </EuiText>
-              {Object.entries(fields).map(([index, group], i) => (
+              {Object.entries(fields).map(([index, group]) => (
                 <EuiFlexItem grow={false} key={index}>
                   <EuiPanel grow={false} hasShadow={false} hasBorder>
                     <EuiAccordion
                       id={index}
-                      initialIsOpen={i === 0}
+                      initialIsOpen
                       buttonContent={
                         <EuiText>
                           <h5>{index}</h5>
@@ -181,24 +185,70 @@ export const ViewQueryFlyout: React.FC<ViewQueryFlyoutProps> = ({ onClose }) => 
                       <EuiSpacer size="s" />
                       <EuiSelectable
                         aria-label="Select query fields"
+                        data-test-subj={`queryFieldsSelectable_${index}`}
                         options={[
                           ...group.elser_query_fields,
                           ...group.dense_vector_query_fields,
                           ...group.bm25_query_fields,
-                        ].map((field) => ({
-                          label: typeof field === 'string' ? field : field.field,
-                          checked: isQueryFieldSelected(
+                        ].map((field, idx) => {
+                          const checked = isQueryFieldSelected(
                             index,
                             typeof field === 'string' ? field : field.field
-                          )
-                            ? 'on'
-                            : undefined,
-                        }))}
+                          );
+                          return {
+                            label: typeof field === 'string' ? field : field.field,
+                            prepend: (
+                              <EuiCheckbox
+                                id={`checkbox_${idx}`}
+                                checked={checked}
+                                onChange={() => {}}
+                              />
+                            ),
+                            checked: checked ? 'on' : undefined,
+                          };
+                        })}
+                        listProps={{
+                          bordered: false,
+                          showIcons: false,
+                        }}
                         onChange={(newOptions) => updateFields(index, newOptions)}
-                        listProps={{ bordered: false }}
                       >
                         {(list) => list}
                       </EuiSelectable>
+                      {group.skipped_fields > 0 && (
+                        <>
+                          <EuiSpacer size="m" />
+                          <EuiFlexGroup>
+                            <EuiFlexItem>
+                              <EuiText
+                                size="s"
+                                color="subdued"
+                                data-test-subj={`skipped_fields_${index}`}
+                              >
+                                <EuiIcon type="eyeClosed" />
+                                {` `}
+                                <FormattedMessage
+                                  id="xpack.searchPlayground.viewQuery.flyout.hiddenFields"
+                                  defaultMessage="{skippedFields} fields are hidden."
+                                  values={{ skippedFields: group.skipped_fields }}
+                                />
+                              </EuiText>
+                            </EuiFlexItem>
+                            <EuiFlexItem grow={false}>
+                              <EuiLink
+                                href={docLinks.chatPlayground}
+                                target="_blank"
+                                data-test-subj="context-optimization-documentation-link"
+                              >
+                                <FormattedMessage
+                                  id="xpack.searchPlayground.viewQuery.flyout.learnMoreLink"
+                                  defaultMessage="Learn more."
+                                />
+                              </EuiLink>
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
+                        </>
+                      )}
                     </EuiAccordion>
                   </EuiPanel>
                 </EuiFlexItem>

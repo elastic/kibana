@@ -5,12 +5,12 @@
  * 2.0.
  */
 import { Theme } from '@elastic/charts';
-import { RecursivePartial } from '@elastic/eui';
+import { RecursivePartial, transparentize } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { EuiFlexItem, EuiPanel, EuiFlexGroup, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getDurationFormatter } from '@kbn/observability-plugin/common';
-import { ALERT_RULE_TYPE_ID, ALERT_EVALUATION_THRESHOLD } from '@kbn/rule-data-utils';
+import { ALERT_RULE_TYPE_ID, ALERT_EVALUATION_THRESHOLD, ALERT_END } from '@kbn/rule-data-utils';
 import type { TopAlert } from '@kbn/observability-plugin/public';
 import {
   AlertActiveTimeRangeAnnotation,
@@ -21,6 +21,8 @@ import {
 import { useEuiTheme } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import moment from 'moment';
+import chroma from 'chroma-js';
 import { filterNil } from '../../../shared/charts/latency_chart';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
 import {
@@ -112,6 +114,9 @@ function LatencyChart({
       preferred,
     ]
   );
+
+  const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]).valueOf() : undefined;
+
   const alertEvalThreshold = alert.fields[ALERT_EVALUATION_THRESHOLD];
 
   const alertEvalThresholdChartData = alertEvalThreshold
@@ -120,7 +125,6 @@ function LatencyChart({
           key={'alertThresholdRect'}
           id={'alertThresholdRect'}
           threshold={alertEvalThreshold}
-          alertStarted={alert.start}
           color={euiTheme.colors.danger}
         />,
         <AlertThresholdAnnotation
@@ -137,7 +141,8 @@ function LatencyChart({
       return [
         <AlertActiveTimeRangeAnnotation
           alertStart={alert.start}
-          color={euiTheme.colors.danger}
+          alertEnd={alertEnd}
+          color={chroma(transparentize('#F04E981A', 0.2)).hex().toUpperCase()}
           id={'alertActiveRect'}
           key={'alertActiveRect'}
         />,
