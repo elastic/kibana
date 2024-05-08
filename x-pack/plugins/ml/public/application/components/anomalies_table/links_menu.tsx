@@ -618,6 +618,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
 
     const categorizationFieldName = job.analysis_config.categorization_field_name;
     const datafeedIndices = job.datafeed_config.indices;
+    const indexPattern = datafeedIndices.join(',');
 
     if (!categorizationFieldName) {
       return;
@@ -717,20 +718,23 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     // Uses the first matching field found in the list of indices in the datafeed_config.
     let fieldType;
 
-    for (const index of datafeedIndices) {
-      const dataView = (await data.dataViews.find(index)).find(
-        (dv) => dv.getIndexPattern() === index
-      );
+    let dataView = (await data.dataViews.find(indexPattern)).find(
+      (dv) => dv.getIndexPattern() === indexPattern
+    );
 
-      if (!dataView) {
-        continue;
-      }
+    if (!dataView) {
+      // create a temporary data view if we can't find one matching the index pattern
+      dataView = await data.dataViews.create({
+        id: undefined,
+        name: indexPattern,
+        title: indexPattern,
+        timeFieldName: job.data_description.time_field!,
+      });
+    }
 
-      const field = dataView?.getFieldByName(categorizationFieldName);
-      if (field && Array.isArray(field.esTypes) && field.esTypes.length > 0) {
-        fieldType = field.esTypes[0];
-        break;
-      }
+    const field = dataView?.getFieldByName(categorizationFieldName);
+    if (field && Array.isArray(field.esTypes) && field.esTypes.length > 0) {
+      fieldType = field.esTypes[0];
     }
 
     if (fieldType) {
