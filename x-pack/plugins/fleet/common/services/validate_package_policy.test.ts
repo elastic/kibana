@@ -1079,4 +1079,115 @@ describe('Fleet - validatePackagePolicyConfig', () => {
       expect(res).toEqual(['Secret reference is invalid, id must be a string']);
     });
   });
+
+  describe('Dataset', () => {
+    const datasetError =
+      'Dataset name must contain only lowercase letters, numbers, dots, hyphens and underscores';
+
+    const validateDataset = (dataset: string) => {
+      return validatePackagePolicyConfig(
+        {
+          type: 'text',
+          value: { dataset, package: 'log' },
+        },
+        {
+          name: 'data_stream.dataset',
+          type: 'text',
+        },
+        'data_stream.dataset',
+        safeLoad,
+        'input'
+      );
+    };
+
+    it('should return an error message if the value has *', () => {
+      const res = validateDataset('test*');
+
+      expect(res).toEqual([datasetError]);
+    });
+
+    it('should return an error message if the value has uppercase letter', () => {
+      const res = validateDataset('Test');
+
+      expect(res).toEqual([datasetError]);
+    });
+
+    it('should return an error message if the value has - in the beginning', () => {
+      const res = validateDataset('-test');
+
+      expect(res).toEqual([datasetError]);
+    });
+
+    it('should return an error message if the value has _ in the beginning', () => {
+      const res = validateDataset('_test');
+
+      expect(res).toEqual([datasetError]);
+    });
+
+    it('should return an error message if the value has . in the beginning', () => {
+      const res = validateDataset('.test');
+
+      expect(res).toEqual([datasetError]);
+    });
+
+    it('should not return an error message if the value is valid', () => {
+      const res = validateDataset('fleet_server.test-dataset');
+
+      expect(res).toEqual(null);
+    });
+
+    it('should not return an error message if the value is undefined', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'text',
+          value: undefined,
+        },
+        {
+          name: 'data_stream.dataset',
+          type: 'text',
+        },
+        'data_stream.dataset',
+        safeLoad,
+        'input'
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should not return an error message if the package is not input type', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'text',
+          value: { dataset: 'Test', package: 'log' },
+        },
+        {
+          name: 'data_stream.dataset',
+          type: 'text',
+        },
+        'data_stream.dataset',
+        safeLoad,
+        'integration'
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should not return an error message if the var is not dataset', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'text',
+          value: { dataset: 'Test', package: 'log' },
+        },
+        {
+          name: 'test_field',
+          type: 'text',
+        },
+        'test_field',
+        safeLoad,
+        'input'
+      );
+
+      expect(res).toEqual(null);
+    });
+  });
 });
