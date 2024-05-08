@@ -50,6 +50,10 @@ components:
         identifier_type:
           description: Used to define the type of entity.
           $ref: './common.schema.yaml#/components/schemas/IdentifierType'
+        refresh:
+            type: string
+            enum: [wait_for]
+            description: If 'wait_for' the request will wait for the index refresh.
 
     RiskScoresEntityCalculationResponse:
         type: object
