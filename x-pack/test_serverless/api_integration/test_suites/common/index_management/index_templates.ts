@@ -26,7 +26,8 @@ export default function ({ getService }: FtrProviderContext) {
   let cleanUpTemplates: typeof indexManagementService['templates']['api']['cleanUpTemplates'];
 
   let getRandomString: () => string;
-  describe('Index templates', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/182963
+  describe.skip('Index templates', function () {
     before(async () => {
       ({
         templates: {
