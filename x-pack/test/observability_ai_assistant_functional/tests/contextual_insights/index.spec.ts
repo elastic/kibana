@@ -92,7 +92,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
     await testSubjects.click('errorGroupId');
   }
 
-  describe.only('Contextual insights for APM errors', () => {
+  describe('Contextual insights for APM errors', () => {
     before(async () => {
       await Promise.all([
         deleteConnectors(), // cleanup previous connectors
