@@ -10,7 +10,6 @@ import './table.scss';
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiFlexGroup,
-  EuiFlexItem,
   EuiFieldSearch,
   EuiSpacer,
   EuiTablePagination,
@@ -325,21 +324,17 @@ export const DocViewerTable = ({
   const rows = [...pinnedItems, ...restItems.slice(startIndex, pageSize + startIndex)];
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiSpacer size="s" />
-      </EuiFlexItem>
+    <div>
+      <EuiSpacer size="s" />
 
-      <EuiFlexItem grow={false}>
-        <EuiFieldSearch
-          aria-label={searchPlaceholder}
-          fullWidth
-          onChange={handleOnChange}
-          placeholder={searchPlaceholder}
-          value={searchText}
-          data-test-subj="unifiedDocViewerFieldsSearchInput"
-        />
-      </EuiFlexItem>
+      <EuiFieldSearch
+        aria-label={searchPlaceholder}
+        fullWidth
+        onChange={handleOnChange}
+        placeholder={searchPlaceholder}
+        value={searchText}
+        data-test-subj="unifiedDocViewerFieldsSearchInput"
+      />
 
       {rows.length === 0 ? (
         <EuiSelectableMessage style={{ minHeight: 300 }}>
@@ -352,94 +347,87 @@ export const DocViewerTable = ({
         </EuiSelectableMessage>
       ) : (
         <>
-          <EuiFlexItem grow={false}>
-            <EuiSpacer size="s" />
-          </EuiFlexItem>
-          <EuiFlexItem grow>
-            {/* Transform props into useMemo/useCallback */}
-            <EuiDataGrid
-              aria-label={i18n.translate('unifiedDocViewer.fieldsTable.ariaLabel', {
-                defaultMessage: 'Field values',
-              })}
-              className="kbnDocViewer__fieldsGrid"
-              columns={gridColumns}
-              columnVisibility={{
-                visibleColumns: ['name', 'value'],
-                setVisibleColumns: () => null,
-              }}
-              rowHeightsOptions={{ defaultHeight: 'auto' }}
-              toolbarVisibility={false}
-              gridStyle={{
-                border: 'horizontal',
-                stripes: true,
-                rowHover: 'highlight',
-                header: 'underline',
-                cellPadding: 's',
-                fontSize: 's',
-              }}
-              rowCount={rows.length}
-              renderCellValue={({ rowIndex, columnId }) => {
-                const row = rows[rowIndex];
-                const {
-                  action: { flattenedField },
-                  field: { field, fieldMapping, fieldType, scripted },
-                  value: { formattedValue, ignored },
-                } = row;
+          <EuiSpacer size="s" />
+          {/* Transform props into useMemo/useCallback */}
+          <EuiDataGrid
+            aria-label={i18n.translate('unifiedDocViewer.fieldsTable.ariaLabel', {
+              defaultMessage: 'Field values',
+            })}
+            height="auto"
+            className="kbnDocViewer__fieldsGrid"
+            columns={gridColumns}
+            columnVisibility={{
+              visibleColumns: ['name', 'value'],
+              setVisibleColumns: () => null,
+            }}
+            rowHeightsOptions={{ defaultHeight: 'auto' }}
+            toolbarVisibility={false}
+            gridStyle={{
+              border: 'horizontal',
+              stripes: true,
+              rowHover: 'highlight',
+              header: 'underline',
+              cellPadding: 's',
+              fontSize: 's',
+            }}
+            rowCount={rows.length}
+            renderCellValue={({ rowIndex, columnId }) => {
+              const row = rows[rowIndex];
+              const {
+                action: { flattenedField },
+                field: { field, fieldMapping, fieldType, scripted },
+                value: { formattedValue, ignored },
+              } = row;
 
-                if (columnId === 'name') {
-                  return (
-                    <EuiFlexGroup responsive={false} gutterSize="s">
-                      <FieldName
-                        fieldName={field}
-                        fieldType={fieldType}
-                        fieldMapping={fieldMapping}
-                        scripted={scripted}
-                        highlight={getFieldSearchMatchingHighlight(
-                          fieldMapping?.displayName ?? field,
-                          searchText
-                        )}
-                      />
-                      {/* TODO: how to highlight pinned fields? */}
-                    </EuiFlexGroup>
-                  );
-                }
-
-                if (columnId === 'value') {
-                  return (
-                    <TableFieldValue
-                      field={field}
-                      formattedValue={formattedValue}
-                      rawValue={flattenedField}
-                      ignoreReason={ignored}
+              if (columnId === 'name') {
+                return (
+                  <EuiFlexGroup responsive={false} gutterSize="s">
+                    <FieldName
+                      fieldName={field}
+                      fieldType={fieldType}
+                      fieldMapping={fieldMapping}
+                      scripted={scripted}
+                      highlight={getFieldSearchMatchingHighlight(
+                        fieldMapping?.displayName ?? field,
+                        searchText
+                      )}
                     />
-                  );
-                }
+                    {/* TODO: how to highlight pinned fields? */}
+                  </EuiFlexGroup>
+                );
+              }
 
-                return null;
-              }}
-            />
-          </EuiFlexItem>
+              if (columnId === 'value') {
+                return (
+                  <TableFieldValue
+                    field={field}
+                    formattedValue={formattedValue}
+                    rawValue={flattenedField}
+                    ignoreReason={ignored}
+                  />
+                );
+              }
+
+              return null;
+            }}
+          />
         </>
       )}
 
-      <EuiFlexItem grow={false}>
-        <EuiSpacer size="m" />
-      </EuiFlexItem>
+      <EuiSpacer size="m" />
 
       {/* TODO: what pagination should we use? */}
 
       {showPagination && (
-        <EuiFlexItem grow={false}>
-          <EuiTablePagination
-            activePage={curPageIndex}
-            itemsPerPage={pageSize}
-            itemsPerPageOptions={PAGE_SIZE_OPTIONS}
-            pageCount={totalPages}
-            onChangeItemsPerPage={onChangePageSize}
-            onChangePage={changePageIndex}
-          />
-        </EuiFlexItem>
+        <EuiTablePagination
+          activePage={curPageIndex}
+          itemsPerPage={pageSize}
+          itemsPerPageOptions={PAGE_SIZE_OPTIONS}
+          pageCount={totalPages}
+          onChangeItemsPerPage={onChangePageSize}
+          onChangePage={changePageIndex}
+        />
       )}
-    </EuiFlexGroup>
+    </div>
   );
 };
