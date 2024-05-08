@@ -677,7 +677,7 @@ export class SyntheticsService {
         sendErrorTelemetryEvents(this.logger, this.server.telemetry, {
           message,
           reason: 'Failed to run synthetics sync task on schedule',
-          type: 'syncTaskScheduleMissing',
+          type: 'syncTaskMissedSchedule',
           stackVersion: this.server.stackVersion,
         });
       } else {
