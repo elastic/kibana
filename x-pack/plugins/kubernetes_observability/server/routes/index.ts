@@ -9,7 +9,9 @@ import { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/serve
 import { registerPodsRoute } from './pods';
 import { registerDeploymentsRoute } from './deployments';
 import { registerDaemonsetsRoute } from './daemonsets';
-
+import { registerPodsCpuRoute } from './pods_cpu';
+import { registerPodsMemoryRoute } from './pods_memory';
+import { registerDeploymentsCpuRoute } from './deployments_cpu';
 
 export const registerRoutes = (
   router: IRouter,
@@ -19,4 +21,7 @@ export const registerRoutes = (
   registerPodsRoute(router, logger);
   registerDeploymentsRoute(router, logger);
   registerDaemonsetsRoute(router, logger);
+  registerPodsCpuRoute(router, logger);
+  registerPodsMemoryRoute(router, logger);
+  registerDeploymentsCpuRoute(router, logger)
 };

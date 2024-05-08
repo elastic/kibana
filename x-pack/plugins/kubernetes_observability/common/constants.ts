@@ -6,6 +6,13 @@
  */
 
 
+//Status
 export const POD_STATUS_ROUTE = '/api/kubernetes/pods/status';
 export const DEPLOYMENT_STATUS_ROUTE = '/api/kubernetes/deployments/status';
 export const DAEMONSET_STATUS_ROUTE = '/api/kubernetes/daemonsets/status';
+//CPU
+export const POD_CPU_ROUTE = '/api/kubernetes/pods/cpu';
+export const DEPLOYMENT_CPU_ROUTE = '/api/kubernetes/deployments/cpu';
+export const DAEMONSET_CPU_ROUTE = '/api/kubernetes/daemonsets/cpu';
+//MEMORY
+export const POD_MEMORY_ROUTE = '/api/kubernetes/pods/memory';
