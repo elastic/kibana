@@ -16,6 +16,7 @@ import type {
   CrowdstrikeBaseApiResponse,
   CrowdstrikeHostActionsParams,
   CrowdstrikeGetTokenResponse,
+  CrowdstrikeGetAgentOnlineStatusResponse,
 } from '../../../common/crowdstrike/types';
 import {
   CrowdstrikeGetAgentsResponseSchema,
@@ -23,6 +24,7 @@ import {
   CrowdstrikeGetAgentsParamsSchema,
   CrowdstrikeGetTokenResponseSchema,
   CrowdstrikeHostActionsResponseSchema,
+  CrowdstrikeGetAgentOnlineStatusResponseSchema,
 } from '../../../common/crowdstrike/schema';
 import { SUB_ACTION } from '../../../common/crowdstrike/constants';
 import { CrowdstrikeError } from './error';
@@ -52,6 +54,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
     getToken: string;
     agents: string;
     hostAction: string;
+    agentStatus: string;
   };
 
   constructor(params: ServiceParams<CrowdstrikeConfig, CrowdstrikeSecrets>) {
@@ -60,6 +63,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
       getToken: `${this.config.url}/oauth2/token`,
       hostAction: `${this.config.url}/devices/entities/devices-actions/v2`,
       agents: `${this.config.url}/devices/entities/devices/v2`,
+      agentStatus: `${this.config.url}/devices/entities/online-state/v1`,
     };
 
     if (!CrowdstrikeConnector.base64encodedToken) {
@@ -82,6 +86,12 @@ export class CrowdstrikeConnector extends SubActionConnector<
       name: SUB_ACTION.HOST_ACTIONS,
       method: 'executeHostActions',
       schema: CrowdstrikeHostActionsParamsSchema,
+    });
+
+    this.registerSubAction({
+      name: SUB_ACTION.GET_AGENT_ONLINE_STATUS,
+      method: 'getAgentOnlineStatus',
+      schema: CrowdstrikeGetAgentsParamsSchema,
     });
   }
 
@@ -119,6 +129,20 @@ export class CrowdstrikeConnector extends SubActionConnector<
       },
       paramsSerializer,
       responseSchema: CrowdstrikeGetAgentsResponseSchema,
+    });
+  }
+
+  public async getAgentOnlineStatus(
+    payload: CrowdstrikeGetAgentsParams
+  ): Promise<CrowdstrikeGetAgentOnlineStatusResponse> {
+    return this.crowdstrikeApiRequest({
+      url: this.urls.agentStatus,
+      method: 'GET',
+      params: {
+        ids: payload.ids,
+      },
+      paramsSerializer,
+      responseSchema: CrowdstrikeGetAgentOnlineStatusResponseSchema,
     });
   }
 
