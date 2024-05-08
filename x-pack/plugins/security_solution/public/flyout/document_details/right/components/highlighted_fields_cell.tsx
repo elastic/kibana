@@ -88,29 +88,32 @@ export const HighlightedFieldsCell: VFC<HighlightedFieldsCellProps> = ({
 }) => {
   const agentStatusClientEnabled = useIsExperimentalFeatureEnabled('agentStatusClientEnabled');
 
-  const getAgentStatus = (value?: string) => {
-    if (field === AGENT_STATUS_FIELD_NAME) {
-      const isSentinelOneAgentIdField = originalField === SENTINEL_ONE_AGENT_ID_FIELD;
-      if (isSentinelOneAgentIdField || agentStatusClientEnabled) {
-        return (
-          <AgentStatus
-            agentId={String(value ?? '')}
-            agentType={isSentinelOneAgentIdField ? 'sentinel_one' : 'endpoint'}
-            data-test-subj={HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID}
-          />
-        );
-      } else {
-        // TODO: remove usage of `EndpointAgentStatusById` when `agentStatusClientEnabled` FF is enabled
-        return (
-          <EndpointAgentStatusById
-            endpointAgentId={String(value ?? '')}
-            data-test-subj={HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID}
-          />
-        );
+  const getAgentStatus = useCallback(
+    (value?: string) => {
+      if (field === AGENT_STATUS_FIELD_NAME) {
+        const isSentinelOneAgentIdField = originalField === SENTINEL_ONE_AGENT_ID_FIELD;
+        if (isSentinelOneAgentIdField || agentStatusClientEnabled) {
+          return (
+            <AgentStatus
+              agentId={String(value ?? '')}
+              agentType={isSentinelOneAgentIdField ? 'sentinel_one' : 'endpoint'}
+              data-test-subj={HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID}
+            />
+          );
+        } else {
+          // TODO: remove usage of `EndpointAgentStatusById` when `agentStatusClientEnabled` FF is enabled
+          return (
+            <EndpointAgentStatusById
+              endpointAgentId={String(value ?? '')}
+              data-test-subj={HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID}
+            />
+          );
+        }
       }
-    }
-    return <span data-test-subj={HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID}>{value}</span>;
-  };
+      return <span data-test-subj={HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID}>{value}</span>;
+    },
+    [field, originalField, agentStatusClientEnabled]
+  );
 
   return (
     <>
