@@ -41,6 +41,7 @@ export interface EditorRequest {
   method: string;
   url: string;
   data: string[];
+  text: string;
 }
 
 export class MonacoEditorActionsProvider {
@@ -183,6 +184,22 @@ export class MonacoEditorActionsProvider {
     return stringifiedRequests.map((request) => replaceRequestVariables(request, variables));
   }
 
+  private getSelectedTextLines(): string[] {
+    const model = this.editor.getModel();
+    const selection = this.editor.getSelection();
+    if (!model || !selection) {
+      return [];
+    }
+    const { startLineNumber, selectionStartColumn, endLineNumber, positionColumn } = selection;
+    const value = model.getValueInRange({
+      startLineNumber,
+      startColumn: selectionStartColumn - 1,
+      endLineNumber,
+      endColumn: positionColumn,
+    });
+    return value.split(`\n`);
+  }
+
   public async getCurl(elasticsearchBaseUrl: string): Promise<string> {
     const requests = await this.getRequests();
     const curlRequests = requests.map((request) => getCurlRequest(request, elasticsearchBaseUrl));
@@ -276,12 +293,14 @@ export class MonacoEditorActionsProvider {
       return;
     }
 
-    const autoIndentedRequests = getAutoIndentedRequests(requests);
+    const textLines = this.getSelectedTextLines();
+
+    const autoIndentedText = getAutoIndentedRequests(requests, textLines);
 
     this.editor.executeEdits('', [
       {
         range,
-        text: autoIndentedRequests,
+        text: autoIndentedText,
       },
     ]);
   }

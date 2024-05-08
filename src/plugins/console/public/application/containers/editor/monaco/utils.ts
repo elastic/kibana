@@ -27,7 +27,7 @@ export const stringifyRequest = (parsedRequest: ParsedRequest): EditorRequest =>
   const url = removeTrailingWhitespaces(parsedRequest.url);
   const method = parsedRequest.method.toUpperCase();
   const data = parsedRequest.data?.map((parsedData) => JSON.stringify(parsedData, null, 2));
-  return { url, method, data: data ?? [] };
+  return { url, method, data: data ?? [], text: parsedRequest.text };
 };
 
 const variableTemplateRegex = /\${(\w+)}/g;
@@ -42,13 +42,14 @@ const replaceVariables = (text: string, variables: DevToolsVariable[]): string =
   return text;
 };
 export const replaceRequestVariables = (
-  { method, url, data }: EditorRequest,
+  { method, url, data, text }: EditorRequest,
   variables: DevToolsVariable[]
 ): EditorRequest => {
   return {
     method,
     url: replaceVariables(url, variables),
     data: data.map((dataObject) => replaceVariables(dataObject, variables)),
+    text,
   };
 };
 
@@ -106,18 +107,55 @@ export const getDocumentationLinkFromAutocompleteContext = (
   return null;
 };
 
-export const getAutoIndentedRequests = (requests: EditorRequest[]): string => {
-  const formattedRequestsText: string[] = [];
+export const isStartOfRequest = (line: string) => {
+  const regex = /\s*(GET|POST|PUT|DELETE|HEAD|PATCH|get|post|put|delete|head|patch)\s+.*/g;
+  return regex.test(line);
+};
 
-  requests.forEach((request, index) => {
-    const firstLine = (index > 0 ? '\n' : '') + request.method + ' ' + request.url;
-    formattedRequestsText.push(firstLine);
+const containsComments = (text: string) => {
+  return text.indexOf('//') >= 0 || text.indexOf('/*') >= 0;
+};
 
-    if (request.data && request.data.length > 0) {
-      // The request data is already parsed as JSON
-      formattedRequestsText.push(...request.data);
+export const getAutoIndentedRequests = (requests: EditorRequest[], textLines: string[]): string => {
+  const formattedText: string[] = [];
+
+  if (requests.length < 1) {
+    return textLines.join(`\n`);
+  }
+
+  let currentLineIndex = 0;
+  let currentRequestIndex = 0;
+
+  while (currentLineIndex < textLines.length) {
+    if (isStartOfRequest(textLines[currentLineIndex])) {
+      // Start of a request
+      const request = requests[currentRequestIndex];
+      const requestText = request.text;
+      const requestLines = requestText.split('\n');
+
+      if (containsComments(requestText)) {
+        // If request has comments, add it as it is - without formatting
+        // TODO: Format requests with comments
+        formattedText.push(...requestLines);
+      } else {
+        // If no comments, add parsed request - it is already formatted as it is JSON-parsed
+        const firstLine = request.method + ' ' + request.url;
+        formattedText.push(firstLine);
+
+        if (request.data && request.data.length > 0) {
+          formattedText.push(...request.data);
+        }
+      }
+
+      currentLineIndex = currentLineIndex + requestLines.length;
+      currentRequestIndex++;
+    } else {
+      // Current line is a comment or whitespaces
+      // Add it to the formatted text as it is
+      formattedText.push(textLines[currentLineIndex]);
+      currentLineIndex++;
     }
-  });
+  }
 
-  return formattedRequestsText.join('\n');
+  return formattedText.join('\n');
 };
