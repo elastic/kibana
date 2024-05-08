@@ -5,10 +5,19 @@
  * 2.0.
  */
 
-import { EuiButton, EuiIcon, EuiToast, EuiPortal, EuiText, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiIcon,
+  EuiImage,
+  EuiToast,
+  EuiPortal,
+  EuiText,
+  EuiSpacer,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect } from 'react';
 import * as i18n from './translations';
+import theGif from './1.gif';
 
 const VIDEO_CONTENT_HEIGHT = 160;
 const VIDEO_CONTENT_WIDTH = 250;
@@ -57,22 +66,7 @@ const VideoComponent: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             onFocus={handleOnMouseOver}
             onBlur={handleOnMouseOut}
           >
-            <iframe
-              ref={ref}
-              allowFullScreen
-              className="vidyard_iframe"
-              frameBorder="0"
-              height="100%"
-              width="100%"
-              referrerPolicy="no-referrer"
-              sandbox="allow-scripts allow-same-origin"
-              scrolling="no"
-              // since we cannot go fullscreen, we are autoplaying and removing the controls
-              // onClick, the video will open in a new tab
-              allow={'autoplay'}
-              src={`${VIDEO_SOURCE}?autoplay=1&controls=0`}
-              title={i18n.WATCH_OVERVIEW_VIDEO}
-            />
+            <EuiImage size="m" src={theGif} alt="" />
           </div>
           <EuiText size="s" grow={false}>
             <h4>
