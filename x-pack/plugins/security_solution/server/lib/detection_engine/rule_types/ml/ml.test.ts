@@ -9,6 +9,7 @@ import dateMath from '@kbn/datemath';
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { mlExecutor } from './ml';
+import type { ExperimentalFeatures } from '../../../../../common';
 import { getCompleteRuleMock, getMlRuleParams } from '../../rule_schema/mocks';
 import { getListClientMock } from '@kbn/lists-plugin/server/services/lists/list_client.mock';
 import { findMlSignals } from './find_ml_signals';
@@ -21,6 +22,7 @@ jest.mock('./find_ml_signals');
 jest.mock('./bulk_create_ml_signals');
 
 describe('ml_executor', () => {
+  let mockExperimentalFeatures: jest.Mocked<ExperimentalFeatures>;
   let jobsSummaryMock: jest.Mock;
   let forceStartDatafeedsMock: jest.Mock;
   let stopDatafeedsMock: jest.Mock;
@@ -37,6 +39,7 @@ describe('ml_executor', () => {
   const listClient = getListClientMock();
 
   beforeEach(() => {
+    mockExperimentalFeatures = {} as jest.Mocked<ExperimentalFeatures>;
     jobsSummaryMock = jest.fn();
     mlMock = mlPluginServerMock.createSetupContract();
     mlMock.jobServiceProvider.mockReturnValue({
@@ -80,6 +83,11 @@ describe('ml_executor', () => {
         wrapHits: jest.fn(),
         exceptionFilter: undefined,
         unprocessedExceptions: [],
+        wrapSuppressedHits: jest.fn(),
+        alertTimestampOverride: undefined,
+        alertWithSuppression: jest.fn(),
+        isAlertSuppressionActive: true,
+        experimentalFeatures: mockExperimentalFeatures,
       })
     ).rejects.toThrow('ML plugin unavailable during rule execution');
   });
@@ -97,6 +105,11 @@ describe('ml_executor', () => {
       wrapHits: jest.fn(),
       exceptionFilter: undefined,
       unprocessedExceptions: [],
+      wrapSuppressedHits: jest.fn(),
+      alertTimestampOverride: undefined,
+      alertWithSuppression: jest.fn(),
+      isAlertSuppressionActive: true,
+      experimentalFeatures: mockExperimentalFeatures,
     });
     expect(ruleExecutionLogger.warn).toHaveBeenCalled();
     expect(ruleExecutionLogger.warn.mock.calls[0][0]).toContain(
@@ -125,6 +138,11 @@ describe('ml_executor', () => {
       wrapHits: jest.fn(),
       exceptionFilter: undefined,
       unprocessedExceptions: [],
+      wrapSuppressedHits: jest.fn(),
+      alertTimestampOverride: undefined,
+      alertWithSuppression: jest.fn(),
+      isAlertSuppressionActive: true,
+      experimentalFeatures: mockExperimentalFeatures,
     });
     expect(ruleExecutionLogger.warn).toHaveBeenCalled();
     expect(ruleExecutionLogger.warn.mock.calls[0][0]).toContain(
@@ -149,6 +167,11 @@ describe('ml_executor', () => {
       wrapHits: jest.fn(),
       exceptionFilter: undefined,
       unprocessedExceptions: [],
+      wrapSuppressedHits: jest.fn(),
+      alertTimestampOverride: undefined,
+      alertWithSuppression: jest.fn(),
+      isAlertSuppressionActive: true,
+      experimentalFeatures: mockExperimentalFeatures,
     });
     expect(result.userError).toEqual(true);
     expect(result.success).toEqual(false);
