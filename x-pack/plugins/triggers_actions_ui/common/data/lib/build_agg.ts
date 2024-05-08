@@ -213,5 +213,5 @@ export const buildAggregation = ({
     }
   }
 
-  return aggContainer.aggs ?? { aggs: {} };
+  return aggContainer.aggs ?? {};
 };
