@@ -24,7 +24,7 @@ const dockerContainerMemoryUsageXY: LensConfigWithId = {
       seriesType: 'line',
       type: 'series',
       xAxis: '@timestamp',
-      yAxis: [formulas.containerMemoryUsage],
+      yAxis: [formulas.dockerContainerMemoryUsage],
     },
   ],
   ...DEFAULT_XY_FITTING_FUNCTION,
@@ -42,7 +42,7 @@ const k8sContainerMemoryUsageXY: LensConfigWithId = {
       seriesType: 'line',
       type: 'series',
       xAxis: '@timestamp',
-      yAxis: [formulas.containerK8sMemoryUsage],
+      yAxis: [formulas.k8sContainerMemoryUsage],
     },
   ],
   ...DEFAULT_XY_FITTING_FUNCTION,
@@ -56,7 +56,7 @@ const dockerContainerMemoryUsageMetric: LensConfigWithId = {
   chartType: 'metric',
   title: MEMORY_USAGE_LABEL,
   trendLine: true,
-  ...formulas.containerMemoryUsage,
+  ...formulas.dockerContainerMemoryUsage,
 };
 
 const k8sContainerMemoryUsageMetric: LensConfigWithId = {
@@ -64,7 +64,7 @@ const k8sContainerMemoryUsageMetric: LensConfigWithId = {
   chartType: 'metric',
   title: MEMORY_USAGE_LABEL,
   trendLine: true,
-  ...formulas.containerK8sMemoryUsage,
+  ...formulas.k8sContainerMemoryUsage,
 };
 
 export const memory = {

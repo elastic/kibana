@@ -9,10 +9,10 @@ import { dockerContainerCpuUsage, k8sContainerCpuUsage } from './cpu';
 import { dockerContainerMemoryUsage, k8sContainerMemoryUsage } from './memory';
 
 export const formulas = {
-  containerCpuUsage: dockerContainerCpuUsage,
-  containerMemoryUsage: dockerContainerMemoryUsage,
-  containerK8sCpuUsage: k8sContainerCpuUsage,
-  containerK8sMemoryUsage: k8sContainerMemoryUsage,
+  dockerContainerCpuUsage,
+  dockerContainerMemoryUsage,
+  k8sContainerCpuUsage,
+  k8sContainerMemoryUsage,
 } as const;
 
 export type ContainerFormulas = typeof formulas;

@@ -24,7 +24,7 @@ const dockerContainerCpuUsageXY: LensConfigWithId = {
       seriesType: 'line',
       type: 'series',
       xAxis: '@timestamp',
-      yAxis: [formulas.containerCpuUsage],
+      yAxis: [formulas.dockerContainerCpuUsage],
     },
   ],
   ...DEFAULT_XY_FITTING_FUNCTION,
@@ -42,7 +42,7 @@ const k8sContainerCpuUsageXY: LensConfigWithId = {
       seriesType: 'line',
       type: 'series',
       xAxis: '@timestamp',
-      yAxis: [formulas.containerK8sCpuUsage],
+      yAxis: [formulas.k8sContainerCpuUsage],
     },
   ],
   ...DEFAULT_XY_FITTING_FUNCTION,
@@ -56,7 +56,7 @@ const dockerContainerCpuUsageMetric: LensConfigWithId = {
   chartType: 'metric',
   title: CPU_USAGE_LABEL,
   trendLine: true,
-  ...formulas.containerCpuUsage,
+  ...formulas.dockerContainerCpuUsage,
 };
 
 const containerK8sCpuUsageMetric: LensConfigWithId = {
@@ -64,7 +64,7 @@ const containerK8sCpuUsageMetric: LensConfigWithId = {
   chartType: 'metric',
   title: CPU_USAGE_LABEL,
   trendLine: true,
-  ...formulas.containerK8sCpuUsage,
+  ...formulas.k8sContainerCpuUsage,
 };
 
 export const cpu = {
