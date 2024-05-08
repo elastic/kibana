@@ -9,33 +9,20 @@ import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { createIndexConnector, createEsQueryRule } from './helpers/alerting_api_helper';
 import {
-  createIndexConnector,
-  createEsQueryRule,
-  disableRule,
-  updateEsQueryRule,
-  runRule,
-  muteRule,
-  enableRule,
-  muteAlert,
-  unmuteRule,
-  createSlackConnector,
-} from './helpers/alerting_api_helper';
-import {
-  createIndex,
-  getDocumentsInIndex,
-  waitForAllTasks,
-  waitForAllTasksIdle,
-  waitForDisabled,
   waitForDocumentInIndex,
   waitForExecutionEventLog,
-  waitForNumRuleRuns,
 } from './helpers/alerting_wait_for_helpers';
+import { RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
   const esClient = getService('es');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
+  const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  let roleAuthc: RoleCredentials;
 
   describe('Alerting rules', function () {
     // Timeout of 360000ms exceeded
@@ -45,35 +32,54 @@ export default function ({ getService }: FtrProviderContext) {
     let connectorId: string;
     let ruleId: string;
 
+    before(async () => {
+      roleAuthc = await svlUserManager.createApiKeyForDefaultRole();
+    });
+
     afterEach(async () => {
-      await supertest
+      await supertestWithoutAuth
         .delete(`/api/actions/connector/${connectorId}`)
         .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo');
-      await supertest
+        .set('x-elastic-internal-origin', 'foo')
+        .set(svlCommonApi.getInternalRequestHeader())
+        .set(roleAuthc.apiKeyHeader);
+
+      await supertestWithoutAuth
         .delete(`/api/alerting/rule/${ruleId}`)
         .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo');
+        .set('x-elastic-internal-origin', 'foo')
+        .set(svlCommonApi.getInternalRequestHeader())
+        .set(roleAuthc.apiKeyHeader);
+
       await esClient.deleteByQuery({
         index: '.kibana-event-log-*',
         conflicts: 'proceed',
         query: { term: { 'kibana.alert.rule.consumer': 'alerts' } },
       });
+
       await esDeleteAllIndices([ALERT_ACTION_INDEX]);
+    });
+
+    after(async () => {
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
     it('should schedule task, run rule and schedule actions when appropriate', async () => {
       const testStart = new Date();
 
       const createdConnector = await createIndexConnector({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc,
+        internalReqHeader: svlCommonApi.getInternalRequestHeader(),
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
       connectorId = createdConnector.id;
 
       const createdRule = await createEsQueryRule({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc,
+        internalReqHeader: svlCommonApi.getInternalRequestHeader(),
         consumer: 'alerts',
         name: 'always fire',
         ruleTypeId: RULE_TYPE_ID,
