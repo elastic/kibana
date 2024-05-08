@@ -14,10 +14,10 @@ import {
   useAgentStatusHook,
   useGetAgentStatus,
   useGetExternalAgentStatus,
-} from './use_sentinelone_host_isolation';
+} from './use_external_host_isolation';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
-jest.mock('./use_sentinelone_host_isolation');
+jest.mock('./use_external_host_isolation');
 jest.mock('../../../common/hooks/use_experimental_features');
 
 type AgentType = 'endpoint' | 'sentinel_one' | 'crowdstrike';

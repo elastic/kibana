@@ -10,13 +10,12 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { getAgentStatusText } from '../../../common/components/endpoint/agent_status_text';
 import { HOST_STATUS_TO_BADGE_COLOR } from '../../../management/pages/endpoint_hosts/view/host_constants';
-// import { useGetCrowdstrikeAgentStatus } from './use_crowdstrike_host_isolation';
 import {
   ISOLATED_LABEL,
   ISOLATING_LABEL,
   RELEASING_LABEL,
 } from '../../../common/components/endpoint/endpoint_agent_status';
-import { useAgentStatusHook } from './use_sentinelone_host_isolation';
+import { useAgentStatusHook } from './use_external_host_isolation';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 const EuiFlexGroupStyled = styled(EuiFlexGroup)`
@@ -25,7 +24,6 @@ const EuiFlexGroupStyled = styled(EuiFlexGroup)`
   }
 `;
 
-// TODO TC: THIS IS JUST A PLACEHOLDER UNTIL THE ACTUAL CROWDSTRIKE STATUS IS AVAILABLE - waiting for https://github.com/elastic/kibana/pull/178625
 export const CrowdstrikeAgentStatus = React.memo(
   ({ agentId, 'data-test-subj': dataTestSubj }: { agentId: string; 'data-test-subj'?: string }) => {
     const useAgentStatus = useAgentStatusHook();

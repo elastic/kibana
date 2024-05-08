@@ -11,7 +11,7 @@ import styled from 'styled-components';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { getAgentStatusText } from '../../../common/components/endpoint/agent_status_text';
 import { HOST_STATUS_TO_BADGE_COLOR } from '../../../management/pages/endpoint_hosts/view/host_constants';
-import { useAgentStatusHook } from './use_sentinelone_host_isolation';
+import { useAgentStatusHook } from './use_external_host_isolation';
 import {
   ISOLATED_LABEL,
   ISOLATING_LABEL,

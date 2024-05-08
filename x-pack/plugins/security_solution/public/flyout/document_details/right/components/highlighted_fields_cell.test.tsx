@@ -23,11 +23,11 @@ import {
   useAgentStatusHook,
   useGetAgentStatus,
   useGetSentinelOneAgentStatus,
-} from '../../../../detections/components/host_isolation/use_sentinelone_host_isolation';
+} from '../../../../detections/components/host_isolation/use_external_host_isolation';
 import { type ExpandableFlyoutApi, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 jest.mock('../../../../management/hooks');
-jest.mock('../../../../detections/components/host_isolation/use_sentinelone_host_isolation');
+jest.mock('../../../../detections/components/host_isolation/use_external_host_isolation');
 
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: jest.fn(),

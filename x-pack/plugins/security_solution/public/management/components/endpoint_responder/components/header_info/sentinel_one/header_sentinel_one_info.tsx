@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
-import { useAgentStatusHook } from '../../../../../../detections/components/host_isolation/use_sentinelone_host_isolation';
+import { useAgentStatusHook } from '../../../../../../detections/components/host_isolation/use_external_host_isolation';
 import { SentinelOneAgentStatus } from '../../../../../../detections/components/host_isolation/sentinel_one_agent_status';
 import type { ThirdPartyAgentInfo } from '../../../../../../../common/types';
 import { HeaderAgentInfo } from '../header_agent_info';
