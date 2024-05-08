@@ -22,7 +22,6 @@ import {
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { GroupSummary } from '@kbn/slo-schema';
 import React, { memo, useState } from 'react';
 import { paths } from '../../../../../common/locators/paths';
