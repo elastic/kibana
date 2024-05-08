@@ -10,7 +10,7 @@ import type { DataView } from '@kbn/data-plugin/common';
 import {
   getESQLAdHocDataview,
   getIndexPatternFromESQLQuery,
-  getESQLQueryColumns,
+  getESQLQueryColumnsRaw,
 } from '@kbn/esql-utils';
 import type { ESQLColumn } from '@kbn/es-types';
 import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
@@ -58,7 +58,10 @@ export async function getESQLMeta(esql: string) {
     getIndexPatternService()
   );
   return {
-    columns: await getColumns(esql),
+    columns: await getESQLQueryColumnsRaw({
+      esqlQuery: esql,
+      search: getData().search.search,
+    }),
     adhocDataViewId: adhocDataView.id!,
     ...getFields(adhocDataView),
   };
@@ -84,21 +87,6 @@ export function getFieldType(column: ESQLColumn) {
     default:
       return undefined;
   }
-}
-
-async function getColumns(esql: string) {
-  const columns = await getESQLQueryColumns({
-    esqlQuery: esql,
-    search: getData().search.search,
-  });
-  return columns.map((col) => {
-    {
-      return {
-        name: col.name,
-        type: col.meta.esType ?? col.meta.type,
-      };
-    }
-  });
 }
 
 export function getFields(dataView: DataView) {
