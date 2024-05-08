@@ -32,12 +32,14 @@ import type {
   AgentPolicyDetailsDeployAgentAction,
   CreatePackagePolicyRouteState,
 } from '@kbn/fleet-plugin/public';
-import { AgentStatus } from '../../../components/agent_status/agent_status';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { TransformFailedCallout } from './components/transform_failed_callout';
 import type { EndpointIndexUIQueryParams } from '../types';
 import { EndpointListNavLink } from './components/endpoint_list_nav_link';
-import { EndpointAgentStatus } from '../../../../common/components/endpoint/endpoint_agent_status';
+import {
+  AgentStatus,
+  EndpointAgentStatus,
+} from '../../../../common/components/agents/agent_status';
 import { EndpointDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
 import { getEndpointPendingActionsCallback } from '../store/selectors';

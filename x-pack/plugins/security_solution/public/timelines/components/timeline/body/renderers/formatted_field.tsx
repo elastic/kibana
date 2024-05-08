@@ -20,8 +20,10 @@ import {
   ALERT_USER_CRITICALITY,
 } from '../../../../../../common/field_maps/field_names';
 import { SENTINEL_ONE_AGENT_ID_FIELD } from '../../../../../common/utils/sentinelone_alert_check';
-import { AgentStatus } from '../../../../../management/components/agent_status/agent_status';
-import { EndpointAgentStatusById } from '../../../../../common/components/endpoint/endpoint_agent_status';
+import {
+  AgentStatus,
+  EndpointAgentStatusById,
+} from '../../../../../common/components/agents/agent_status';
 import { INDICATOR_REFERENCE } from '../../../../../../common/cti/constants';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { Bytes, BYTES_FORMAT } from './bytes';

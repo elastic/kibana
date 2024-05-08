@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { AgentStatus } from '../../../../agent_status/agent_status';
+import { AgentStatus } from '../../../../../../common/components/agents/agent_status';
 import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
 import { useAgentStatusHook } from '../../../../../hooks/agents/use_get_agent_status';
 import type { ThirdPartyAgentInfo } from '../../../../../../../common/types';

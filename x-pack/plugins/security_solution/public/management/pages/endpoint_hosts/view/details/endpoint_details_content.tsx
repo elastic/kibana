@@ -18,7 +18,10 @@ import {
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { EndpointAgentStatus } from '../../../../../common/components/endpoint/endpoint_agent_status';
+import {
+  AgentStatus,
+  EndpointAgentStatus,
+} from '../../../../../common/components/agents/agent_status';
 import { isPolicyOutOfDate } from '../../utils';
 import type { HostInfo } from '../../../../../../common/endpoint/types';
 import { useEndpointSelector } from '../hooks';
@@ -33,7 +36,6 @@ import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/end
 import { getEndpointDetailsPath } from '../../../../common/routing';
 import { EndpointPolicyLink } from '../../../../components/endpoint_policy_link';
 import { OutOfDate } from '../components/out_of_date';
-import { AgentStatus } from '../../../../components/agent_status/agent_status';
 
 const EndpointDetailsContentStyled = styled.div`
   .policyLineText {

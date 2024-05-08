@@ -9,9 +9,11 @@ import { EuiHealth } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 
-import { AgentStatus } from '../../../../management/components/agent_status/agent_status';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { EndpointAgentStatus } from '../../../../common/components/endpoint/endpoint_agent_status';
+import {
+  AgentStatus,
+  EndpointAgentStatus,
+} from '../../../../common/components/agents/agent_status';
 import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
 import type { DescriptionList } from '../../../../../common/utility_types';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';

@@ -10,9 +10,11 @@ import React, { useCallback } from 'react';
 import { EuiFlexItem, EuiLink } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { AgentStatus } from '../../../../management/components/agent_status/agent_status';
 import { SENTINEL_ONE_AGENT_ID_FIELD } from '../../../../common/utils/sentinelone_alert_check';
-import { EndpointAgentStatusById } from '../../../../common/components/endpoint/endpoint_agent_status';
+import {
+  AgentStatus,
+  EndpointAgentStatusById,
+} from '../../../../common/components/agents/agent_status';
 import { useRightPanelContext } from '../context';
 import {
   AGENT_STATUS_FIELD_NAME,
