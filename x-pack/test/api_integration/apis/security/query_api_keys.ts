@@ -142,18 +142,21 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
+      expect(aggregationResponse.aggregations).to.have.property('usernames');
+      expect(aggregationResponse.aggregations.usernames.buckets.length).to.be(1);
+
+      expect(aggregationResponse.aggregations).to.have.property('managed');
+      expect(aggregationResponse.aggregations.managed.buckets.metadataBased.doc_count).to.eql(5);
+
       if (!isBasicLicense) {
         expect(aggregationResponse.total).to.be(25);
         expect(aggregationResponse.aggregations).to.have.property('types');
         expect(aggregationResponse.aggregations.types.buckets.length).to.be(2);
-
-        expect(aggregationResponse.aggregations).to.have.property('usernames');
-        expect(aggregationResponse.aggregations.usernames.buckets.length).to.be(1);
-
-        expect(aggregationResponse.aggregations).to.have.property('managed');
-        expect(aggregationResponse.aggregations.managed.buckets.metadataBased.doc_count).to.eql(5);
       } else {
         expect(aggregationResponse.total).to.be(15);
+
+        expect(aggregationResponse.aggregations).to.have.property('types');
+        expect(aggregationResponse.aggregations.types.buckets.length).to.be(1);
       }
     });
 

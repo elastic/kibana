@@ -99,10 +99,13 @@ interface SuccessQueryApiKeyResult extends BaseQueryApiKeyResult {
   apiKeys: ApiKey[];
   count: number;
   total: number;
+  queryError: undefined;
 }
 
 interface ErrorQueryApiKeyResult extends BaseQueryApiKeyResult {
   queryError: { name: string; message: string };
+  apiKeys: [];
+  total: 0;
 }
 
 interface BaseQueryApiKeyResult {
