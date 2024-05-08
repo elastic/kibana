@@ -161,6 +161,7 @@ export interface UsageStats {
   'observability:apmTraceExplorerTab': boolean;
   'observability:apmEnableCriticalPath': boolean;
   'observability:apmEnableProfilingIntegration': boolean;
+  'observability:apmEnableMultiSignal': boolean;
   'observability:profilingShowErrorFrames': boolean;
   'securitySolution:enableGroupedNav': boolean;
   'securitySolution:showRelatedIntegrations': boolean;
