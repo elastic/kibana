@@ -491,7 +491,7 @@ export default ({ getService }: FtrProviderContext): void => {
         );
       });
 
-      it('should not create a configuration with templates with custom fields', async () => {
+      it("should not create a configuration with templates with custom fields that don't exist in the configuration", async () => {
         await createConfiguration(
           supertest,
           getConfigurationRequest({

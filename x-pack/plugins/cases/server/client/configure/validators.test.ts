@@ -121,39 +121,6 @@ describe('validators', () => {
       ).not.toThrow();
     });
 
-    it('does not throw if no custom fields are in request', () => {
-      expect(() =>
-        validateTemplateKeysAgainstConfiguration({
-          requestTemplateFields: undefined,
-          templatesConfiguration: [
-            {
-              key: 'template_key_1',
-              name: 'first template',
-              description: 'this is a first template value',
-              caseFields: {
-                tags: ['first-template'],
-              },
-            },
-            {
-              key: 'template_key_2',
-              name: 'second template',
-              description: 'this is a second template value',
-              caseFields: null,
-            },
-          ],
-        })
-      ).not.toThrow();
-    });
-
-    it('does not throw if no configuration found but no custom fields are in request', () => {
-      expect(() =>
-        validateTemplateKeysAgainstConfiguration({
-          requestTemplateFields: undefined,
-          templatesConfiguration: [],
-        })
-      ).not.toThrow();
-    });
-
     it('throws if there are invalid template keys', () => {
       expect(() =>
         validateTemplateKeysAgainstConfiguration({
@@ -261,21 +228,33 @@ describe('validators', () => {
 
     it('does not throw if no custom fields are in request', () => {
       expect(() =>
-        validateTemplatesCustomFieldsInRequest({
-          customFieldsConfiguration: [
+        validateTemplateKeysAgainstConfiguration({
+          requestTemplateFields: undefined,
+          templatesConfiguration: [
             {
-              key: 'first_key',
-              type: CustomFieldTypes.TEXT,
-              label: 'foo',
-              required: false,
+              key: 'template_key_1',
+              name: 'first template',
+              description: 'this is a first template value',
+              caseFields: {
+                tags: ['first-template'],
+              },
             },
             {
-              key: 'second_key',
-              type: CustomFieldTypes.TOGGLE,
-              label: 'foo',
-              required: false,
+              key: 'template_key_2',
+              name: 'second template',
+              description: 'this is a second template value',
+              caseFields: null,
             },
           ],
+        })
+      ).not.toThrow();
+    });
+
+    it('does not throw if no configuration found but no templates are in request', () => {
+      expect(() =>
+        validateTemplateKeysAgainstConfiguration({
+          requestTemplateFields: undefined,
+          templatesConfiguration: [],
         })
       ).not.toThrow();
     });

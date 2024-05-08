@@ -18,6 +18,7 @@ import {
   MAX_TEMPLATES_LENGTH,
 } from '../../../common/constants';
 import { ConnectorTypes } from '../../../common';
+import type { TemplatesConfiguration } from '../../../common/types/domain';
 import { CustomFieldTypes } from '../../../common/types/domain';
 import type { ConfigurationRequest } from '../../../common/types/api';
 
@@ -349,6 +350,156 @@ describe('client', () => {
     });
 
     describe('templates', () => {
+      it(`does not throw error when trying to update templates`, async () => {
+        clientArgs.services.caseConfigureService.get.mockResolvedValue({
+          // @ts-ignore: these are all the attributes needed for the test
+          attributes: {
+            customFields: [],
+            connector: {
+              id: 'none',
+              name: 'none',
+              type: ConnectorTypes.none,
+              fields: null,
+            },
+            closure_type: 'close-by-user',
+            owner: 'cases',
+            templates: [],
+          },
+          version: 'test-version',
+        });
+
+        clientArgs.services.caseConfigureService.patch.mockResolvedValue({
+          id: 'test-id',
+          type: 'cases-configure',
+          version: 'test-version',
+          namespaces: ['default'],
+          references: [],
+          attributes: {
+            templates: [
+              {
+                key: 'template_1',
+                name: 'template 1',
+                description: 'test',
+                caseFields: {
+                  title: 'Case title',
+                  description: 'This is test desc',
+                  tags: ['sample-1'],
+                  assignees: [],
+                  customFields: [],
+                  category: null,
+                },
+              },
+            ],
+            created_at: '2019-11-25T21:54:48.952Z',
+            created_by: {
+              full_name: 'elastic',
+              email: 'testemail@elastic.co',
+              username: 'elastic',
+            },
+            updated_at: '2019-11-25T21:54:48.952Z',
+            updated_by: {
+              full_name: 'elastic',
+              email: 'testemail@elastic.co',
+              username: 'elastic',
+            },
+          },
+        });
+
+        await expect(
+          update(
+            'test-id',
+            {
+              version: 'test-version',
+              templates: [
+                {
+                  key: 'template_1',
+                  name: 'template 1',
+                  description: 'test',
+                  caseFields: {
+                    title: 'Case title',
+                    description: 'This is test desc',
+                    tags: ['sample-1'],
+                    assignees: [],
+                    customFields: [],
+                    category: null,
+                  },
+                },
+              ],
+            },
+            clientArgs,
+            casesClientInternal
+          )
+        ).resolves.not.toThrow();
+      });
+
+      it(`does not throw error when trying to update to empty templates`, async () => {
+        clientArgs.services.caseConfigureService.get.mockResolvedValue({
+          // @ts-ignore: these are all the attributes needed for the test
+          attributes: {
+            customFields: [],
+            connector: {
+              id: 'none',
+              name: 'none',
+              type: ConnectorTypes.none,
+              fields: null,
+            },
+            closure_type: 'close-by-user',
+            owner: 'cases',
+            templates: [
+              {
+                key: 'template_1',
+                name: 'template 1',
+                description: 'test',
+                caseFields: {
+                  title: 'Case title',
+                  description: 'This is test desc',
+                  tags: ['sample-1'],
+                  assignees: [],
+                  customFields: [],
+                  category: null,
+                },
+              },
+            ],
+          },
+          version: 'test-version',
+        });
+
+        clientArgs.services.caseConfigureService.patch.mockResolvedValue({
+          id: 'test-id',
+          type: 'cases-configure',
+          version: 'test-version',
+          namespaces: ['default'],
+          references: [],
+          attributes: {
+            templates: [],
+            created_at: '2019-11-25T21:54:48.952Z',
+            created_by: {
+              full_name: 'elastic',
+              email: 'testemail@elastic.co',
+              username: 'elastic',
+            },
+            updated_at: '2019-11-25T21:54:48.952Z',
+            updated_by: {
+              full_name: 'elastic',
+              email: 'testemail@elastic.co',
+              username: 'elastic',
+            },
+          },
+        });
+
+        await expect(
+          update(
+            'test-id',
+            {
+              version: 'test-version',
+              templates: [],
+            },
+            clientArgs,
+            casesClientInternal
+          )
+        ).resolves.not.toThrow();
+      });
+
       it(`throws when trying to update more than ${MAX_TEMPLATES_LENGTH} templates`, async () => {
         await expect(
           update(
@@ -829,6 +980,96 @@ describe('client', () => {
       });
 
       describe('customFields', () => {
+        it('does not throw error when creating template with correct custom fields', async () => {
+          const customFields = [
+            {
+              key: 'custom_field_key_1',
+              type: CustomFieldTypes.TEXT,
+              label: 'custom field 1',
+              required: true,
+            },
+          ];
+          const templates: TemplatesConfiguration = [
+            {
+              key: 'template_1',
+              name: 'template 1',
+              description: 'test',
+              caseFields: {
+                customFields: [
+                  {
+                    key: 'custom_field_key_1',
+                    type: CustomFieldTypes.TEXT,
+                    value: 'custom field value 1',
+                  },
+                ],
+              },
+            },
+          ];
+
+          clientArgs.services.caseConfigureService.find.mockResolvedValueOnce({
+            page: 1,
+            per_page: 20,
+            total: 1,
+            saved_objects: [
+              {
+                id: 'test-id',
+                type: 'cases-configure',
+                version: 'test-version',
+                namespaces: ['default'],
+                references: [],
+                attributes: {
+                  ...baseRequest,
+                  customFields,
+                  templates,
+                  created_at: '2019-11-25T21:54:48.952Z',
+                  created_by: {
+                    full_name: 'elastic',
+                    email: 'testemail@elastic.co',
+                    username: 'elastic',
+                  },
+                  updated_at: null,
+                  updated_by: null,
+                },
+                score: 0,
+              },
+            ],
+            pit_id: undefined,
+          });
+
+          clientArgs.services.caseConfigureService.post.mockResolvedValue({
+            id: 'test-id',
+            type: 'cases-configure',
+            version: 'test-version',
+            namespaces: ['default'],
+            references: [],
+            attributes: {
+              ...baseRequest,
+              customFields,
+              templates,
+              created_at: '2019-11-25T21:54:48.952Z',
+              created_by: {
+                full_name: 'elastic',
+                email: 'testemail@elastic.co',
+                username: 'elastic',
+              },
+              updated_at: null,
+              updated_by: null,
+            },
+          });
+
+          await expect(
+            create(
+              {
+                ...baseRequest,
+                customFields,
+                templates,
+              },
+              clientArgs,
+              casesClientInternal
+            )
+          ).resolves.not.toThrow();
+        });
+
         it('throws when there are no customFields in configure and template has customField in the request', async () => {
           await expect(
             create(
@@ -855,7 +1096,7 @@ describe('client', () => {
               casesClientInternal
             )
           ).rejects.toThrow(
-            'Failed to create case configuration: Error: Cannot create template with custom fields as there are no custom fields in configuration'
+            'Failed to create case configuration: Error: No custom fields configured.'
           );
         });
 

@@ -541,6 +541,12 @@ describe('configure', () => {
       ).toContain('The length of the key is too long. The maximum length is 36.');
     });
 
+    it('return error if key is empty', () => {
+      expect(
+        PathReporter.report(TemplateConfigurationRt.decode({ ...defaultRequest, key: '' }))
+      ).toContain('The key field cannot be an empty string.');
+    });
+
     it('returns an error if they key is not in the expected format', () => {
       const key = 'Not a proper key';
 
