@@ -53,41 +53,41 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should render esql view correctly', async function () {
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
-        expect(await testSubjects.existOrFail('showQueryBarMenu'));
-        expect(await testSubjects.existOrFail('superDatePickerToggleQuickMenuButton'));
-        expect(await testSubjects.existOrFail('addFilter'));
-        expect(await testSubjects.existOrFail('dscViewModeDocumentButton'));
-        expect(await testSubjects.existOrFail('unifiedHistogramChart'));
-        expect(await testSubjects.existOrFail('discoverQueryHits'));
-        expect(await testSubjects.existOrFail('discoverAlertsButton'));
-        expect(await testSubjects.existOrFail('shareTopNavButton'));
-        expect(await testSubjects.existOrFail('docTableExpandToggleColumn'));
-        expect(await testSubjects.existOrFail('dataGridColumnSortingButton'));
-        expect(await testSubjects.existOrFail('fieldListFiltersFieldSearch'));
-        expect(await testSubjects.existOrFail('fieldListFiltersFieldTypeFilterToggle'));
+        await testSubjects.existOrFail('showQueryBarMenu');
+        await testSubjects.existOrFail('superDatePickerToggleQuickMenuButton');
+        await testSubjects.existOrFail('addFilter');
+        await testSubjects.existOrFail('dscViewModeDocumentButton');
+        await testSubjects.existOrFail('unifiedHistogramChart');
+        await testSubjects.existOrFail('discoverQueryHits');
+        await testSubjects.existOrFail('discoverAlertsButton');
+        await testSubjects.existOrFail('shareTopNavButton');
+        await testSubjects.existOrFail('docTableExpandToggleColumn');
+        await testSubjects.existOrFail('dataGridColumnSortingButton');
+        await testSubjects.existOrFail('fieldListFiltersFieldSearch');
+        await testSubjects.existOrFail('fieldListFiltersFieldTypeFilterToggle');
         await testSubjects.click('field-@message-showDetails');
-        expect(await testSubjects.existOrFail('discoverFieldListPanelEdit-@message'));
+        await testSubjects.existOrFail('discoverFieldListPanelEdit-@message');
 
         await PageObjects.discover.selectTextBaseLang();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
-        expect(await testSubjects.existOrFail('fieldListFiltersFieldSearch'));
-        expect(await testSubjects.existOrFail('TextBasedLangEditor'));
-        expect(await testSubjects.existOrFail('superDatePickerToggleQuickMenuButton'));
+        await testSubjects.existOrFail('fieldListFiltersFieldSearch');
+        await testSubjects.existOrFail('TextBasedLangEditor');
+        await testSubjects.existOrFail('superDatePickerToggleQuickMenuButton');
 
-        expect(await testSubjects.missingOrFail('showQueryBarMenu'));
-        expect(await testSubjects.missingOrFail('addFilter'));
-        expect(await testSubjects.missingOrFail('dscViewModeDocumentButton'));
+        await testSubjects.missingOrFail('showQueryBarMenu');
+        await testSubjects.missingOrFail('addFilter');
+        await testSubjects.missingOrFail('dscViewModeDocumentButton');
         // when Lens suggests a table, we render an ESQL based histogram
-        expect(await testSubjects.existOrFail('unifiedHistogramChart'));
-        expect(await testSubjects.existOrFail('discoverQueryHits'));
-        expect(await testSubjects.existOrFail('discoverAlertsButton'));
-        expect(await testSubjects.existOrFail('shareTopNavButton'));
-        expect(await testSubjects.existOrFail('dataGridColumnSortingButton'));
-        expect(await testSubjects.existOrFail('docTableExpandToggleColumn'));
-        expect(await testSubjects.existOrFail('fieldListFiltersFieldTypeFilterToggle'));
+        await testSubjects.existOrFail('unifiedHistogramChart');
+        await testSubjects.existOrFail('discoverQueryHits');
+        await testSubjects.existOrFail('discoverAlertsButton');
+        await testSubjects.existOrFail('shareTopNavButton');
+        await testSubjects.existOrFail('dataGridColumnSortingButton');
+        await testSubjects.existOrFail('docTableExpandToggleColumn');
+        await testSubjects.existOrFail('fieldListFiltersFieldTypeFilterToggle');
         await testSubjects.click('field-@message-showDetails');
-        expect(await testSubjects.missingOrFail('discoverFieldListPanelEditItem'));
+        await testSubjects.missingOrFail('discoverFieldListPanelEditItem');
       });
 
       it('should perform test query correctly', async function () {
@@ -99,8 +99,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         // here Lens suggests a XY so it is rendered
-        expect(await testSubjects.existOrFail('unifiedHistogramChart'));
-        expect(await testSubjects.existOrFail('xyVisChart'));
+        await testSubjects.existOrFail('unifiedHistogramChart');
+        await testSubjects.existOrFail('xyVisChart');
         const cell = await dataGrid.getCellElement(0, 2);
         expect(await cell.getVisibleText()).to.be('1');
       });
@@ -120,7 +120,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        expect(await testSubjects.existOrFail('discoverNoResults'));
+        await testSubjects.existOrFail('discoverNoResults');
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
