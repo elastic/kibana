@@ -15778,17 +15778,19 @@
       "warning": []
     },
     {
-      "query": "from a_index | stats by bucket(numberField, 1 year)",
+      "query": "from a_index | stats by bucket(numberField, 5)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | stats by bucket(numberField, 1 year)",
-      "error": [],
+      "query": "from a_index | stats by bucket(numberField, numberField)",
+      "error": [
+        "Argument of [bucket] must be a constant, received [numberField]"
+      ],
       "warning": []
     },
     {
-      "query": "from a_index | stats by bin(numberField, 1 year)",
+      "query": "from a_index | stats by bin(numberField, 5)",
       "error": [],
       "warning": []
     },
