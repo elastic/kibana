@@ -89,6 +89,7 @@
     "@kbn/apm-data-view",
     "@kbn/shared-ux-utility",
     "@kbn/react-kibana-context-render",
+    "@kbn/field-utils"
   ],
   "exclude": [
     "target/**/*",
