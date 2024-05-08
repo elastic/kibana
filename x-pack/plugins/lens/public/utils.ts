@@ -18,6 +18,8 @@ import { emptyTitleText } from '@kbn/visualization-ui-components';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { ISearchStart } from '@kbn/data-plugin/public';
 import type { DraggingIdentifier, DropType } from '@kbn/dom-drag-drop';
+import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
+import { DateRange } from '../common/types';
 import type { Document } from './persistence/saved_object_store';
 import {
   Datasource,
@@ -57,6 +59,21 @@ export const getAbsoluteDateRange = function (timefilter: TimefilterContract) {
     to,
   });
   return { fromDate: min?.toISOString() || from, toDate: max?.toISOString() || to };
+};
+
+export const convertToAbsoluteDateRange = function (dateRange: DateRange, now: Date) {
+  const absRange = getAbsoluteTimeRange(
+    {
+      from: dateRange.fromDate as string,
+      to: dateRange.toDate as string,
+    },
+    { forceNow: now }
+  );
+
+  return {
+    fromDate: absRange.from,
+    toDate: absRange.to,
+  };
 };
 
 export function containsDynamicMath(dateMathString: string) {
