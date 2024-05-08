@@ -47,7 +47,13 @@ describe('useHostIsolationAction', () => {
             detailsData:
               agentTypeAlert === 'sentinel_one'
                 ? [
-                    { category: 'kibana', field: 'kibana.alert.rule.uuid' },
+                    {
+                      category: 'kibana',
+                      field: 'kibana.alert.rule.uuid',
+                      isObjectArray: false,
+                      values: ['ruleId'],
+                      originalValue: ['ruleId'],
+                    },
                     {
                       category: 'event',
                       field: 'event.module',
@@ -65,7 +71,13 @@ describe('useHostIsolationAction', () => {
                   ]
                 : agentTypeAlert === 'crowdstrike'
                 ? [
-                    { category: 'kibana', field: 'kibana.alert.rule.uuid' },
+                    {
+                      category: 'kibana',
+                      field: 'kibana.alert.rule.uuid',
+                      isObjectArray: false,
+                      values: ['ruleId'],
+                      originalValue: ['ruleId'],
+                    },
                     {
                       category: 'event',
                       field: 'event.module',
