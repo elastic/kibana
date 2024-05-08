@@ -68,7 +68,7 @@ export const useChangeCspRuleState = () => {
   });
 };
 
-function createRulesWithUpdatedState(
+export function createRulesWithUpdatedState(
   ruleStateUpdateRequest: RuleStateUpdateRequest,
   currentRuleStates: Record<string, RuleStateAttributes>
 ) {
