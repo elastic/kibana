@@ -91,22 +91,22 @@ function createComparisonDefinition(
         ],
         returnType: 'boolean',
       },
-      // ...['date', 'number'].flatMap((type) => [
-      //   {
-      //     params: [
-      //       { name: 'left', type },
-      //       { name: 'right', type: 'string', constantOnly: true },
-      //     ],
-      //     returnType: 'boolean',
-      //   },
-      //   {
-      //     params: [
-      //       { name: 'right', type: 'string', constantOnly: true },
-      //       { name: 'right', type },
-      //     ],
-      //     returnType: 'boolean',
-      //   },
-      // ]),
+      ...[].flatMap((type) => [
+        {
+          params: [
+            { name: 'left', type },
+            { name: 'right', type: 'string', constantOnly: true },
+          ],
+          returnType: 'boolean',
+        },
+        {
+          params: [
+            { name: 'right', type: 'string', constantOnly: true },
+            { name: 'right', type },
+          ],
+          returnType: 'boolean',
+        },
+      ]),
       ...extraSignatures,
     ],
   };
@@ -214,6 +214,21 @@ export const builtinFunctions: FunctionDefinition[] = [
           ],
           returnType: 'boolean',
         },
+        // constant strings okay because of implicit casting
+        {
+          params: [
+            { name: 'left', type: 'boolean' },
+            { name: 'right', type: 'string', constantOnly: true },
+          ],
+          returnType: 'boolean',
+        },
+        {
+          params: [
+            { name: 'right', type: 'string', constantOnly: true },
+            { name: 'right', type: 'boolean' },
+          ],
+          returnType: 'boolean',
+        },
       ],
     },
     {
@@ -228,6 +243,21 @@ export const builtinFunctions: FunctionDefinition[] = [
         {
           params: [
             { name: 'left', type: 'boolean' },
+            { name: 'right', type: 'boolean' },
+          ],
+          returnType: 'boolean',
+        },
+        // constant strings okay because of implicit casting
+        {
+          params: [
+            { name: 'left', type: 'boolean' },
+            { name: 'right', type: 'string', constantOnly: true },
+          ],
+          returnType: 'boolean',
+        },
+        {
+          params: [
+            { name: 'right', type: 'string', constantOnly: true },
             { name: 'right', type: 'boolean' },
           ],
           returnType: 'boolean',

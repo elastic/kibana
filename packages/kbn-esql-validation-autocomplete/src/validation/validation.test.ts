@@ -1680,7 +1680,7 @@ describe('validation logic', () => {
           'Log of a negative number results in null: -20',
         ]
       );
-      for (const op of ['>', '>=', '<', '<=', '==']) {
+      for (const op of ['>', '>=', '<', '<=', '==', '!=']) {
         testErrorsAndWarnings(`from a_index | eval numberField ${op} 0`, []);
         testErrorsAndWarnings(`from a_index | eval NOT numberField ${op} 0`, []);
         testErrorsAndWarnings(`from a_index | eval (numberField ${op} 0)`, []);
@@ -1714,7 +1714,6 @@ describe('validation logic', () => {
         testErrorsAndWarnings(`from a_index | eval stringField ${op} dateField`, [
           `Argument of [${op}] must be [string], found value [dateField] type [date]`,
         ]);
-        testErrorsAndWarnings(`from a_index | eval dateField ${op} "2022"`, []);
 
         // Check that the implicit cast doesn't apply for fields
         testErrorsAndWarnings(`from a_index | eval stringField ${op} 0`, [
@@ -1723,7 +1722,45 @@ describe('validation logic', () => {
         testErrorsAndWarnings(`from a_index | eval stringField ${op} now()`, [
           `Argument of [${op}] must be [string], found value [now()] type [date]`,
         ]);
+
+        testErrorsAndWarnings(`from a_index | eval dateField ${op} "2022"`, []);
+        testErrorsAndWarnings(`from a_index | eval "2022" ${op} dateField`, []);
+
+        // testErrorsAndWarnings(`from a_index | eval versionField ${op} "1.2.3"`, []);
+        // testErrorsAndWarnings(`from a_index | eval "1.2.3" ${op} versionField`, []);
+
+        testErrorsAndWarnings(
+          `from a_index | eval booleanField ${op} "true"`,
+          ['==', '!='].includes(op)
+            ? []
+            : [`Argument of [${op}] must be [string], found value [booleanField] type [boolean]`]
+        );
+        testErrorsAndWarnings(
+          `from a_index | eval "true" ${op} booleanField`,
+          ['==', '!='].includes(op)
+            ? []
+            : [`Argument of [${op}] must be [string], found value [booleanField] type [boolean]`]
+        );
+
+        // testErrorsAndWarnings(`from a_index | eval ipField ${op} "136.36.3.205"`, []);
+        // testErrorsAndWarnings(`from a_index | eval "136.36.3.205" ${op} ipField`, []);
       }
+
+      // // casting for IN for version, date, boolean, ip
+      // testErrorsAndWarnings(
+      //   'from a_index | eval versionField in ("1.2.3", "4.5.6", to_version("2.3.2"))',
+      //   []
+      // );
+      // testErrorsAndWarnings(
+      //   'from a_index | eval dateField in ("2023-12-12", "2024-12-12", date_parse("2025-12-12"))',
+      //   []
+      // );
+      // testErrorsAndWarnings('from a_index | eval booleanField in ("true", "false", false)', []);
+      // testErrorsAndWarnings(
+      //   'from a_index | eval ipField in ("136.36.3.205", "136.36.3.206", to_ip("136.36.3.207"))',
+      //   []
+      // );
+
       for (const op of ['+', '-', '*', '/', '%']) {
         testErrorsAndWarnings(`from a_index | eval numberField ${op} 1`, []);
         testErrorsAndWarnings(`from a_index | eval (numberField ${op} 1)`, []);
@@ -1744,6 +1781,13 @@ describe('validation logic', () => {
         testErrorsAndWarnings(`from a_index | eval "1" ${op} 1`, [
           `Argument of [${op}] must be [number], found value [\"1\"] type [string]`,
         ]);
+        // check implicit casting for version, boolean, ip
+        // testErrorsAndWarnings(`from a_index | eval versionField ${op} "1.2.3"`, []);
+        // testErrorsAndWarnings(`from a_index | eval "1.2.3" ${op} versionField`, []);
+        // testErrorsAndWarnings(`from a_index | eval booleanField ${op} "true"`, []);
+        // testErrorsAndWarnings(`from a_index | eval "true" ${op} booleanField`, []);
+        // testErrorsAndWarnings(`from a_index | eval ipField ${op} "136.36.3.205"`, []);
+        // testErrorsAndWarnings(`from a_index | eval "136.36.3.205" ${op} ipField`, []);
       }
       for (const divideByZeroExpr of ['1/0', 'var = 1/0', '1 + 1/0']) {
         testErrorsAndWarnings(
