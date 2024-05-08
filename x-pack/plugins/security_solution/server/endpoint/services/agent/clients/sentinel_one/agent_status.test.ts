@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { GetAgentStatusOptions } from './agent_status';
+import type { GetAgentStatusOptions } from '../lib/types';
 import { getSentinelOneAgentStatus, SENTINEL_ONE_NETWORK_STATUS } from './agent_status';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { sentinelOneMock } from '../../../actions/clients/sentinelone/mocks';
