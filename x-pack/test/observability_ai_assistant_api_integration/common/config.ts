@@ -8,6 +8,9 @@
 import { Config, FtrConfigProviderContext } from '@kbn/test';
 import supertest from 'supertest';
 import { format, UrlObject } from 'url';
+import https from 'https';
+import fs from 'fs';
+import path from 'path';
 import { ObservabilityAIAssistantFtrConfigName } from '../configs';
 import { InheritedServices } from './ftr_provider_context';
 import {
@@ -45,7 +48,47 @@ export interface CreateTest {
   kbnTestServer: any;
 }
 
-export function createObservabilityAIAssistantAPIConfig({
+function downloadFile(url: string, filePath: string): Promise<void> {
+  return new Promise((resolve) => {
+    const file = fs.createWriteStream(filePath);
+    https.get(url, (response) => {
+      response.pipe(file);
+      file.on('finish', () => {
+        file.close();
+        resolve();
+      });
+    });
+  });
+}
+
+async function downloadElserModel(): Promise<string> {
+  const elserModelDir = path.join('.es', 'cluster-ftr', 'config', 'models');
+  fs.mkdirSync(elserModelDir, { recursive: true });
+  await downloadFile(
+    'https://ml-models.elastic.co/elser_model_2.metadata.json',
+    path.join(elserModelDir, 'elser_model_2.metadata.json')
+  );
+  await downloadFile(
+    'https://ml-models.elastic.co/elser_model_2.pt',
+    path.join(elserModelDir, 'elser_model_2.pt')
+  );
+  await downloadFile(
+    'https://ml-models.elastic.co/elser_model_2.vocab.json',
+    path.join(elserModelDir, 'elser_model_2.vocab.json')
+  );
+  // TODO: Remove again - This is just to show that the file is actually present on the file system
+  // eslint-disable-next-line no-console
+  console.log('Files in elserModelDir:', fs.readdirSync(elserModelDir));
+  // eslint-disable-next-line no-console
+  console.log(
+    'Contents of elser_model_2.metadata.json:',
+    fs.readFileSync(path.join(elserModelDir, 'elser_model_2.metadata.json'), 'utf8')
+  );
+  // TODO: Remove again - end
+  return path.resolve(elserModelDir);
+}
+
+export async function createObservabilityAIAssistantAPIConfig({
   config,
   license,
   name,
@@ -55,11 +98,11 @@ export function createObservabilityAIAssistantAPIConfig({
   license: 'basic' | 'trial';
   name: string;
   kibanaConfig?: Record<string, any>;
-}): Omit<CreateTest, 'testFiles'> {
+}): Promise<Omit<CreateTest, 'testFiles'>> {
   const services = config.get('services') as InheritedServices;
   const servers = config.get('servers');
   const kibanaServer = servers.kibana as UrlObject;
-
+  const elserModelPath = await downloadElserModel();
   const createTest: Omit<CreateTest, 'testFiles'> = {
     ...config.getAll(),
     servers,
@@ -82,6 +125,10 @@ export function createObservabilityAIAssistantAPIConfig({
     esTestCluster: {
       ...config.get('esTestCluster'),
       license,
+      serverArgs: [
+        ...config.get('esTestCluster.serverArgs'),
+        `xpack.ml.model_repository=file://${elserModelPath}`,
+      ],
     },
     kbnTestServer: {
       ...config.get('kbnTestServer'),
@@ -110,12 +157,12 @@ export function createTestConfig(
     );
 
     return {
-      ...createObservabilityAIAssistantAPIConfig({
+      ...(await createObservabilityAIAssistantAPIConfig({
         config: xPackAPITestsConfig,
         name,
         license,
         kibanaConfig,
-      }),
+      })),
       testFiles: [require.resolve('../tests')],
     };
   };
