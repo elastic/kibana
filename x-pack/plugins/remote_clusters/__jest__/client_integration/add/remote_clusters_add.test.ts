@@ -41,11 +41,11 @@ describe('Create Remote cluster', () => {
       expect(actions.skipUnavailableSwitch.exists()).toBe(true);
 
       // By default it should be set to "false"
-      expect(actions.skipUnavailableSwitch.isChecked()).toBe(false);
+      expect(actions.skipUnavailableSwitch.isChecked()).toBe(true);
 
       actions.skipUnavailableSwitch.toggle();
 
-      expect(actions.skipUnavailableSwitch.isChecked()).toBe(true);
+      expect(actions.skipUnavailableSwitch.isChecked()).toBe(false);
     });
 
     describe('on prem', () => {
