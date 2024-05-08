@@ -9,7 +9,6 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
-import '../../../../common/mock/match_media';
 import { TestProviders, createMockStore } from '../../../../common/mock';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { networkModel } from '../../store';
