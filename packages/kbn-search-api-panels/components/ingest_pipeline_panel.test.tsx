@@ -13,23 +13,26 @@ import { IngestPipelinePanel } from './ingest_pipeline_panel';
 describe('IngestPipelinePanel', () => {
   const setSelectedPipelineMock = jest.fn();
 
-  const mockPipelineData = [
-    {
-      name: 'pipeline1',
+  const mockPipelineData = {
+    pipeline1: {
       processors: ['processor1', 'processor2'],
-      isManaged: true,
+      _meta: {
+        managed: true,
+      },
     },
-    {
-      name: 'pipeline2',
+    pipeline2: {
       processors: ['processor1'],
-      isManaged: false,
+      _meta: {
+        managed: false,
+      },
     },
-    {
-      name: 'search-default-ingestion',
+    'search-default-ingestion': {
       processors: ['processor1', 'processor2', 'processor3'],
-      isManaged: true,
+      _meta: {
+        managed: true,
+      },
     },
-  ] as any;
+  } as any;
 
   let exists: any;
   let find: any;
