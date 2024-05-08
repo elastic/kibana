@@ -21,6 +21,8 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
   const supertest = getService('supertest');
   const retry = getService('retry');
   const log = getService('log');
+  const browser = getService('browser');
+  const deployment = getService('deployment');
   const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
   const { common } = getPageObjects(['header', 'common']);
 
@@ -85,10 +87,10 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
   }
 
   async function navigateToError() {
+    await browser.navigateTo(deployment.getHostPort());
     await common.navigateToApp('apm', {
       hash: `/services/opbeans-go/errors?rangeFrom=now-15m&rangeTo=now`,
     });
-
     await testSubjects.click('errorGroupId');
   }
 
