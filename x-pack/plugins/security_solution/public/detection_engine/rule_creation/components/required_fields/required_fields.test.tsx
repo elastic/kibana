@@ -14,6 +14,9 @@ import { RequiredFields } from './required_fields';
 import type { RequiredFieldWithOptionalEcs } from './types';
 import type { RequiredFieldInput } from '../../../../../common/api/detection_engine';
 
+const ADD_REQUIRED_FIELD_BUTTON_TEST_ID = 'addRequiredFieldButton';
+const REQUIRED_FIELDS_GENERAL_WARNING_TEST_ID = 'requiredFieldsGeneralWarning';
+
 describe('RequiredFields form part', () => {
   it('displays the required fields label', () => {
     render(<TestForm />);
@@ -181,7 +184,7 @@ describe('RequiredFields form part', () => {
   it('adding a new required field is disabled when index patterns are loading', async () => {
     render(<TestForm indexPatternFields={undefined} isIndexPatternLoading={true} />);
 
-    expect(screen.getByTestId('addRequiredFieldButton')).toBeDisabled();
+    expect(screen.getByTestId(ADD_REQUIRED_FIELD_BUTTON_TEST_ID)).toBeDisabled();
   });
 
   it('adding a new required field is disabled when an empty row is already displayed', async () => {
@@ -191,11 +194,11 @@ describe('RequiredFields form part', () => {
 
     render(<TestForm indexPatternFields={indexPatternFields} />);
 
-    expect(screen.getByTestId('addRequiredFieldButton')).toBeEnabled();
+    expect(screen.getByTestId(ADD_REQUIRED_FIELD_BUTTON_TEST_ID)).toBeEnabled();
 
     await addRequiredFieldRow();
 
-    expect(screen.getByTestId('addRequiredFieldButton')).toBeDisabled();
+    expect(screen.getByTestId(ADD_REQUIRED_FIELD_BUTTON_TEST_ID)).toBeDisabled();
   });
 
   describe('warnings', () => {
@@ -210,9 +213,7 @@ describe('RequiredFields form part', () => {
 
       render(<TestForm initialState={initialState} indexPatternFields={indexPatternFields} />);
 
-      expect(
-        screen.getByText('Some fields are not found within specified index patterns.')
-      ).toBeVisible();
+      expect(screen.getByTestId(REQUIRED_FIELDS_GENERAL_WARNING_TEST_ID)).toBeVisible();
 
       expect(
         screen.getByText(
@@ -241,9 +242,7 @@ describe('RequiredFields form part', () => {
 
       render(<TestForm initialState={initialState} indexPatternFields={indexPatternFields} />);
 
-      expect(
-        screen.getByText('Some fields are not found within specified index patterns.')
-      ).toBeVisible();
+      expect(screen.getByTestId(REQUIRED_FIELDS_GENERAL_WARNING_TEST_ID)).toBeVisible();
 
       expect(
         screen.getByText(
@@ -272,9 +271,7 @@ describe('RequiredFields form part', () => {
 
       render(<TestForm initialState={initialState} indexPatternFields={indexPatternFields} />);
 
-      expect(
-        screen.getByText('Some fields are not found within specified index patterns.')
-      ).toBeVisible();
+      expect(screen.getByTestId(REQUIRED_FIELDS_GENERAL_WARNING_TEST_ID)).toBeVisible();
 
       expect(
         screen.getByText(
@@ -301,9 +298,7 @@ describe('RequiredFields form part', () => {
 
       render(<TestForm initialState={initialState} indexPatternFields={indexPatternFields} />);
 
-      expect(
-        screen.queryByText('Some fields are not found within specified index patterns.')
-      ).toBeNull();
+      expect(screen.queryByTestId(REQUIRED_FIELDS_GENERAL_WARNING_TEST_ID)).toBeNull();
     });
 
     it(`doesn't display a warning for an empty row`, async () => {
@@ -315,9 +310,7 @@ describe('RequiredFields form part', () => {
 
       await addRequiredFieldRow();
 
-      expect(
-        screen.queryByText('Some fields are not found within specified index patterns.')
-      ).toBeNull();
+      expect(screen.queryByTestId(REQUIRED_FIELDS_GENERAL_WARNING_TEST_ID)).toBeNull();
     });
 
     it(`doesn't display a warning when field is invalid`, async () => {
@@ -576,9 +569,7 @@ describe('RequiredFields form part', () => {
         />
       );
 
-      expect(
-        screen.queryByText('Some fields are not found within specified index patterns.')
-      ).toBeVisible();
+      expect(screen.queryByTestId(REQUIRED_FIELDS_GENERAL_WARNING_TEST_ID)).toBeVisible();
 
       await submitForm();
 
