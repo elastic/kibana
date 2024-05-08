@@ -10,7 +10,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 
 import { SERVER_APP_ID } from '../../../../../common/constants';
 import { EsqlRuleParams } from '../../rule_schema';
-import { esqlExecutor } from './esql_executor';
+import { esqlExecutor } from './esql';
 import type { CreateRuleOptions, SecurityAlertType } from '../types';
 
 export const createEsqlAlertType = (
