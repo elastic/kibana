@@ -87,7 +87,7 @@ export const postKnowledgeBaseRoute = (
           );
           //
 
-          await knowledgeBaseDataClient?.setupKnowledgeBase({ elserId, esClient, esStore });
+          await knowledgeBaseDataClient?.setupKnowledgeBase({ esStore });
 
           return response.ok({ body: { success: true } });
         }

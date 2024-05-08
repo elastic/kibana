@@ -9,14 +9,23 @@ import {
   MlTrainedModelDeploymentNodesStats,
   MlTrainedModelStats,
 } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { AuthenticatedUser } from '@kbn/core-security-common';
+import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { AIAssistantDataClient, AIAssistantDataClientParams } from '..';
 import { ElasticsearchStore } from '../../lib/langchain/elasticsearch_store/elasticsearch_store';
 import { loadESQL } from '../../lib/langchain/content_loaders/esql_loader';
+import { GetElser } from '../../types';
+
+interface KnowledgeBaseDataClientParams extends AIAssistantDataClientParams {
+  ml: MlPluginSetup;
+  getElserId: GetElser;
+}
 export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   private isInstallingElser: boolean = false;
 
-  constructor(public readonly options: AIAssistantDataClientParams) {
+  constructor(public readonly options: KnowledgeBaseDataClientParams) {
     super(options);
   }
 
@@ -56,26 +65,33 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   };
 
   /**
-   * Downloads and deploys ELSER (if not already) by means of the _inference API, then loads ES|QL docs
+   * Downloads and deploys ELSER (if not already), then loads ES|QL docs
    *
    * @param options
-   * @param options.elserId ID of the recommended ELSER model
+   * @param options.esStore ElasticsearchStore for loading ES|QL docs
    * @returns Promise<void>
    */
   public setupKnowledgeBase = async ({
-    elserId,
-    esClient,
     esStore,
   }: {
-    elserId: string;
-    esClient: ElasticsearchClient;
     esStore: ElasticsearchStore;
   }): Promise<void> => {
     if (this.isInstallingElser) {
       return;
     }
+    // TODO: Before automatically installing ELSER in the background, we should perform the following deployment resource checks
+    // Note: ESS only, as Serverless can always auto-install if `productTier === complete`
+    // 1. Deployment has ML Nodes with adequate free memory
+    //    We can just auto-install, yay!
+    // 2. Deployment doesn't have adequate ML resources, and ML Autoscaling is disabled (or unavailable due to cluster health).
+    //    Refer the user to the docs for further details
+    // 3. Deployment doesn't have adequate ML resources, but have ML Autoscaling enabled and scale limits are are NOT WITHIN the required resources.
+    //    Again, refer the user to the docs
+    // 4. Deployment doesn't have adequate ML resources, but have ML Autoscaling enabled and scale limits ARE WITHIN the required resources.
+    //    In this instance we could auto-install, but may have it behind a user action since deployment costs would change...
 
     this.isInstallingElser = true;
+    const elserId = await this.options.getElserId();
     const isInstalled = await this.isModelInstalled(elserId);
 
     if (isInstalled) {
@@ -89,26 +105,23 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     }
 
     try {
-      // Temporarily use esClient for current user until `kibana_system` user has `inference_admin` role
-      // See https://github.com/elastic/elasticsearch/pull/108262
+      const elserResponse = await this.options.ml
+        .trainedModelsProvider({} as KibanaRequest, {} as SavedObjectsClientContract)
+        .installElasticModel(elserId);
+
       // const esClient = await this.options.elasticsearchClientPromise;
-      const elserResponse = await esClient.inference.putModel({
-        inference_id: 'elser_model_2',
-        task_type: 'sparse_embedding',
-        model_config: {
-          service: 'elser',
-          service_settings: {
-            model_id: elserId,
-            num_allocations: 1,
-            num_threads: 1,
-          },
-          task_settings: {},
-        },
-      });
 
       this.options.logger.debug(`elser response:\n: ${JSON.stringify(elserResponse, null, 2)}`);
     } catch (e) {
       this.options.logger.error(`Error setting up ELSER model: ${e.message}`);
     }
   };
+
+  public addKnowledgeBaseResource = async ({
+    document,
+    authenticatedUser,
+  }: {
+    document: Document;
+    authenticatedUser: AuthenticatedUser;
+  }): Promise<void> => {};
 }

@@ -9,10 +9,11 @@ import { DataStreamSpacesAdapter, FieldMap } from '@kbn/data-stream-adapter';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { AuthenticatedUser } from '@kbn/security-plugin/server';
 import { Subject } from 'rxjs';
 import { getDefaultAnonymizationFields } from '../../common/anonymization';
-import { AssistantResourceNames } from '../types';
+import { AssistantResourceNames, GetElser } from '../types';
 import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
 import {
   InitializationPromise,
@@ -27,7 +28,7 @@ import { assistantAnonymizationFieldsFieldMap } from '../ai_assistant_data_clien
 import { AIAssistantDataClient } from '../ai_assistant_data_clients';
 import { knowledgeBaseFieldMap } from '../ai_assistant_data_clients/knowledge_base/field_maps_configuration';
 import { AIAssistantKnowledgeBaseDataClient } from '../ai_assistant_data_clients/knowledge_base';
-import { knowledgeBaseIngestPipeline } from '../ai_assistant_data_clients/knowledge_base/ingest_pipeline';
+import { createGetElserId, createPipeline, pipelineExists } from './helpers';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 
@@ -35,10 +36,11 @@ function getResourceName(resource: string) {
   return `.kibana-elastic-ai-assistant-${resource}`;
 }
 
-interface AIAssistantServiceOpts {
+export interface AIAssistantServiceOpts {
   logger: Logger;
   kibanaVersion: string;
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
+  ml: MlPluginSetup;
   taskManager: TaskManagerSetupContract;
   pluginStop$: Subject<void>;
 }
@@ -61,6 +63,7 @@ export class AIAssistantService {
   // Temporary 'feature flag' to determine if we should initialize the knowledge base, toggled when accessing data client
   private initializeKnowledgeBase: boolean = false;
   private isInitializing: boolean = false;
+  private getElserId: GetElser;
   private conversationsDataStream: DataStreamSpacesAdapter;
   private knowledgeBaseDataStream: DataStreamSpacesAdapter;
   private promptsDataStream: DataStreamSpacesAdapter;
@@ -70,6 +73,7 @@ export class AIAssistantService {
 
   constructor(private readonly options: AIAssistantServiceOpts) {
     this.initialized = false;
+    this.getElserId = createGetElserId(options.ml);
     this.conversationsDataStream = this.createDataStream({
       resource: 'conversations',
       kibanaVersion: options.kibanaVersion,
@@ -142,29 +146,22 @@ export class AIAssistantService {
           pluginStop$: this.options.pluginStop$,
         });
 
-        // TODO: Add generic ingest pipeline support to `kbn-data-stream-adapter` package?
-        // TODO: Inject `elserId`
-        let pipelineExists = false;
-        try {
-          const response = await esClient.ingest.getPipeline({
+        // TODO: Pipeline creation is temporary as we'll be moving to semantic_text field once available in ES
+        const pipelineCreated = await pipelineExists({
+          esClient,
+          id: this.resourceNames.pipelines.knowledgeBase,
+        });
+        if (!pipelineCreated) {
+          this.options.logger.debug('Installing ingest pipeline');
+          const response = await createPipeline({
+            esClient,
             id: this.resourceNames.pipelines.knowledgeBase,
+            modelId: await this.getElserId(),
           });
-          pipelineExists = Object.keys(response).length > 0;
-        } catch (e) {
-          // The GET /_ingest/pipeline/{pipelineId} API returns an empty object w/ 404 Not Found.
-          pipelineExists = false;
-        }
-        if (!pipelineExists) {
-          this.options.logger.info('Installing ingest pipeline');
-          const response = await esClient.ingest.putPipeline(
-            knowledgeBaseIngestPipeline({
-              id: this.resourceNames.pipelines.knowledgeBase,
-              modelId: '.elser_model_2',
-            })
-          );
-          this.options.logger.info(`Installed ingest pipeline: ${response.acknowledged}`);
+
+          this.options.logger.debug(`Installed ingest pipeline: ${response}`);
         } else {
-          this.options.logger.info('Ingest pipeline already exists');
+          this.options.logger.debug('Ingest pipeline already exists');
         }
       }
 
@@ -308,6 +305,8 @@ export class AIAssistantService {
       kibanaVersion: this.options.kibanaVersion,
       indexPatternsResourceName: this.resourceNames.aliases.conversations,
       currentUser: opts.currentUser,
+      ml: this.options.ml,
+      getElserId: this.getElserId,
     });
   }
 
