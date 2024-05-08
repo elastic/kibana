@@ -53,19 +53,22 @@ export type DefaultControlApi = PublishesDataLoading &
   PublishesUnsavedChanges &
   PublishesDisabledActionIds &
   PublishesWritablePanelTitle &
-  PublishesDataView &
+  PublishesControlDisplaySettings & {
+    settings: PublishingSubject<object>;
+    fieldName$: PublishingSubject<string | undefined>;
+  } & PublishesDataView &
   Partial<PublishesFilter & PublishesTimeslice> & // can publish either filters or timeslice
   HasType &
   HasUniqueId &
   HasEditCapabilities &
   HasParentApi<ControlGroupApi>;
 
-/** This is the stuff for managing the internal state - the control group doesn't care about this */
-export type DefaultControlInternalApi = PublishesControlDisplaySettings & {
-  setGrow: (grow: boolean) => void;
-  setWidth: (width: ControlWidth) => void;
-  fieldName$: BehaviorSubject<string | undefined>;
-};
+// /** This is the stuff for managing the internal state - the control group doesn't care about this */
+// export type DefaultControlInternalApi = PublishesControlDisplaySettings & {
+//   setGrow: (grow: boolean) => void;
+//   setWidth: (width: ControlWidth) => void;
+//   fieldName$: BehaviorSubject<string | undefined>;
+// };
 
 export type CommonControlOutput = ControlGroupFilterOutput & {
   dataViewId?: string;

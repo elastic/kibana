@@ -28,24 +28,20 @@ import {
   HasType,
   HasUniqueId,
   PublishesWritablePanelTitle,
+  PublishingSubject,
 } from '@kbn/presentation-publishing';
 import { PublishesDataView } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
 import { ACTION_EDIT_CONTROL, ControlGroupContainer, CONTROL_GROUP_TYPE } from '..';
 import { pluginServices } from '../../services';
-import { DefaultControlInternalApi, PublishesControlDisplaySettings } from '../../types';
+import { ControlWidth, DefaultControlApi, PublishesControlDisplaySettings } from '../../types';
 import { ControlGroupStrings } from '../control_group_strings';
 import { ControlGroupContainerContext, setFlyoutRef } from '../embeddable/control_group_container';
 import { DeleteControlAction } from './delete_control_action';
 import { EditControlFlyout } from './edit_control_flyout';
+import { ControlEditor } from '../editor/control_editor';
+import { BehaviorSubject } from 'rxjs';
 
-export type EditControlActionApi = HasType &
-  HasUniqueId &
-  PublishesWritablePanelTitle &
-  HasEditCapabilities &
-  PublishesControlDisplaySettings &
-  PublishesDataView &
-  DefaultControlInternalApi &
-  HasParentApi<PresentationContainer & HasType>;
+export type EditControlActionApi = DefaultControlApi;
 
 const isApiCompatible = (api: unknown | null): api is EditControlActionApi =>
   Boolean(
@@ -66,11 +62,13 @@ export class EditControlAction implements Action<EmbeddableApiContext> {
   private openFlyout;
   private theme;
   private i18n;
+  private dataViewsService;
 
   constructor(private deleteControlAction: DeleteControlAction) {
     ({
       overlays: { openFlyout: this.openFlyout },
       core: { theme: this.theme, i18n: this.i18n },
+      dataViews: this.dataViewsService,
     } = pluginServices.getServices());
   }
 
@@ -110,19 +108,54 @@ export class EditControlAction implements Action<EmbeddableApiContext> {
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
 
-    const controlGroup = embeddable.parentApi as ControlGroupContainer;
+    const selectedDataViewId: string | undefined =
+      embeddable.dataView.getValue()?.id ??
+      embeddable.parentApi.lastUsedDataViewId?.getValue() ??
+      embeddable.parentApi.dataViews.getValue()?.[0].id ??
+      (await this.dataViewsService.getDefaultId()) ??
+      undefined; // getDefaultId returns null rather than undefined, so catch that
+    const controlGrow = embeddable.grow$.getValue();
+
+    const stateManager = {
+      dataViewId$: new BehaviorSubject<string | undefined>(selectedDataViewId),
+      fieldName$: new BehaviorSubject<string | undefined>(embeddable.fieldName$.getValue()),
+      grow: new BehaviorSubject<boolean | undefined>(
+        controlGrow === undefined ? embeddable.parentApi.defaultGrow$.getValue() : controlGrow
+      ),
+      width: new BehaviorSubject<ControlWidth | undefined>(
+        embeddable.width$.getValue() ?? embeddable.parentApi.defaultWidth$.getValue()
+      ),
+      settings: new BehaviorSubject<object | undefined>(embeddable.settings),
+    };
+
+    console.log('stateManager', stateManager);
+
     const flyoutInstance = this.openFlyout(
       toMountPoint(
-        <ControlGroupContainerContext.Provider value={controlGroup}>
-          <EditControlFlyout
-            embeddable={embeddable}
-            removeControl={() => this.deleteControlAction.execute({ embeddable })}
-            closeFlyout={() => {
-              setFlyoutRef(undefined);
-              flyoutInstance.close();
-            }}
-          />
-        </ControlGroupContainerContext.Provider>,
+        <ControlEditor
+          api={embeddable}
+          parentApi={embeddable.parentApi}
+          stateManager={stateManager}
+          // isCreate={false}
+          // width={controlWidth ?? defaultControlWidth}
+          // grow={controlGrow === undefined ? defaultControlGrow : controlGrow}
+          // embeddable={embeddable}
+          // onCancel={onCancel}
+          // setLastUsedDataViewId={(lastUsed) => controlGroup.setLastUsedDataViewId(lastUsed)}
+          // onSave={onSave}
+          // removeControl={() => {
+          //   closeFlyout();
+          //   removeControl();
+          // }}
+        />,
+        // <EditControlFlyout
+        //   api={embeddable}
+        //   removeControl={() => this.deleteControlAction.execute({ embeddable })}
+        //   closeFlyout={() => {
+        //     setFlyoutRef(undefined);
+        //     flyoutInstance.close();
+        //   }}
+        // />,
 
         { theme: this.theme, i18n: this.i18n }
       ),

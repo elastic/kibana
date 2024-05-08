@@ -15,6 +15,7 @@ export interface PublishesDataView {
 
 export interface PublishesDataViews {
   dataViews: PublishingSubject<DataView[] | undefined>;
+  lastUsedDataViewId?: PublishingSubject<string | undefined>;
 }
 
 export const apiPublishesDataViews = (

@@ -55,6 +55,8 @@ export const ControlRenderer = <StateType extends object = object>({
         ) => {
           const { unsavedChanges, resetUnsavedChanges, cleanup } =
             startTrackingEmbeddableUnsavedChanges(uuid, parentApi, comparators, state);
+          const grow$ = new BehaviorSubject<boolean | undefined>(state.grow);
+          const width$ = new BehaviorSubject<ControlWidth | undefined>(state.width);
 
           const defaultPanelTitle = new BehaviorSubject<string | undefined>('TEST');
 
@@ -72,13 +74,13 @@ export const ControlRenderer = <StateType extends object = object>({
               });
           }
 
-          const snapshotRuntimeState = () => {
-            const comparatorKeys = Object.keys(embeddable.comparators) as Array<keyof RuntimeState>;
-            return comparatorKeys.reduce((acc, key) => {
-              acc[key] = comparators[key][0].value as RuntimeState[typeof key];
-              return acc;
-            }, {} as RuntimeState);
-          };
+          // const snapshotRuntimeState = () => {
+          //   const comparatorKeys = Object.keys(embeddable.comparators) as Array<keyof RuntimeState>;
+          //   return comparatorKeys.reduce((acc, key) => {
+          //     acc[key] = comparators[key][0].value as RuntimeState[typeof key];
+          //     return acc;
+          //   }, {} as RuntimeState);
+          // };
 
           const fullApi: DefaultControlApi<StateType> = {
             ...apiRegistration,
@@ -88,6 +90,8 @@ export const ControlRenderer = <StateType extends object = object>({
             resetUnsavedChanges,
             type: factory.type,
             defaultPanelTitle,
+            grow$,
+            width$,
           };
           cleanupFunction.current = () => cleanup();
           return fullApi;

@@ -17,6 +17,7 @@ import {
 import { PublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
 import {
   HasParentApi,
+  PublishesDataViews,
   PublishesFilters,
   PublishesUnifiedSearch,
   PublishesUnsavedChanges,
@@ -39,6 +40,7 @@ export type ControlGroupApi = PresentationContainer &
   HasSerializableState &
   PublishesFilters &
   PublishesSettings &
+  PublishesDataViews &
   PublishesUnsavedChanges<PersistableControlGroupInput> & // unsaved changes = diff published filters + combine all children unsaved changes
   PublishesControlGroupDisplaySettings &
   Partial<HasParentApi<PublishesUnifiedSearch & PublishesLastSavedState>>;

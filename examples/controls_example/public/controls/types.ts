@@ -13,7 +13,7 @@ import { StateComparators } from '@kbn/presentation-publishing';
 
 export type ControlApiRegistration = Omit<
   DefaultControlApi,
-  'uuid' | 'parent' | 'type' | 'unsavedChanges' | 'resetUnsavedChanges'
+  'uuid' | 'parent' | 'type' | 'unsavedChanges' | 'resetUnsavedChanges' | 'grow$' | 'width$'
 >;
 
 export interface ControlFactory<
@@ -25,7 +25,7 @@ export interface ControlFactory<
   getDisplayName: () => string;
   // getSupportedFieldTypes: () => string[];
   isFieldCompatible: (field: DataViewField) => boolean;
-  CustomOptionsComponent: React.FC<{ internalApi?: InternalApi }>; // manages state
+  CustomOptionsComponent: React.FC<{ internalApi?: InternalApi }>; // internal api manages state
   buildControl: (
     initialState: State,
     buildApi: (

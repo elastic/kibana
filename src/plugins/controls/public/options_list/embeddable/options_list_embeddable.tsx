@@ -93,7 +93,7 @@ const legacyControlToApi = (
     width$,
     dataView,
     fieldName$,
-    settings: 
+    // settings,
     setGrow: (grow) => {
       grow$.next(grow);
       (embeddable.parent as ControlGroupContainer)?.dispatch.setControlGrow({

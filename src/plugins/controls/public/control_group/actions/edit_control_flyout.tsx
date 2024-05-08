@@ -8,116 +8,153 @@
 
 import React from 'react';
 
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import {
+  useBatchedOptionalPublishingSubjects,
+  useBatchedPublishingSubjects,
+} from '@kbn/presentation-publishing';
 import { pluginServices } from '../../services';
-import { DataControlEditorChanges, IEditableControlFactory } from '../../types';
+import { ControlWidth, DataControlEditorChanges, DefaultControlApi } from '../../types';
 import { ControlGroupStrings } from '../control_group_strings';
 import { ControlEditor } from '../editor/control_editor';
-import { ControlGroupContainer } from '../embeddable/control_group_container';
-import { ControlGroupApi } from '../types';
-import { EditControlActionApi } from './edit_control_action';
+import { BehaviorSubject } from 'rxjs';
 
 export const EditControlFlyout = ({
-  embeddable,
+  api,
   closeFlyout,
   removeControl,
 }: {
-  embeddable: EditControlActionApi;
+  api: DefaultControlApi;
   closeFlyout: () => void;
   removeControl: () => void;
 }) => {
+  console.log('hjere2');
   // Controls Services Context
   const {
     overlays: { openConfirm },
     controls: { getControlFactory },
   } = pluginServices.getServices();
 
-  const controlGroup = embeddable.parentApi as unknown as ControlGroupContainer & ControlGroupApi;
+  const controlGroup = api.parentApi;
+
+  const [lastUsedDataViewId] = useBatchedOptionalPublishingSubjects(
+    controlGroup.lastUsedDataViewId
+  );
 
   const [
     controlWidth,
     controlGrow,
+    controlSettings,
     panelTitle,
     dataView,
     controlField,
     defaultControlWidth,
     defaultControlGrow,
+    controlGroupDataViews,
   ] = useBatchedPublishingSubjects(
-    embeddable.width$,
-    embeddable.grow$,
-    embeddable.panelTitle,
-    embeddable.dataView,
-    embeddable.fieldName$,
+    api.width$,
+    api.grow$,
+    api.settings,
+    api.panelTitle,
+    api.dataView,
+    api.fieldName$,
     controlGroup.defaultWidth$,
-    controlGroup.defaultGrow$
+    controlGroup.defaultGrow$,
+    controlGroup.dataViews
   );
+
+  /**
+   * We are only applying these changes on save - so, duplicate everything into state manager which will store
+   * the current editor state, and these changes will only be applied to the actual control state on save
+   */
+  const stateManager = {
+    dataViewId$: new BehaviorSubject<string | undefined>(
+      dataView?.id ?? lastUsedDataViewId ?? controlGroupDataViews?.[0].id
+    ),
+    fieldName$: new BehaviorSubject<string | undefined>(controlField),
+    grow: new BehaviorSubject<boolean | undefined>(
+      controlGrow === undefined ? defaultControlGrow : controlGrow
+    ),
+    width: new BehaviorSubject<ControlWidth | undefined>(controlWidth ?? defaultControlWidth),
+    settings: new BehaviorSubject<object | undefined>(controlSettings),
+  };
+
   // const [defaultPanelTitle] = useBatchedOptionalPublishingSubjects(embeddable.defaultPanelTitle);
 
-  const onCancel = (changes: DataControlEditorChanges) => {
-    if (
-      dataView?.id === changes.input.dataViewId &&
-      controlField === changes.input.fieldName &&
-      panelTitle === changes.input.title &&
-      controlGrow === changes.grow &&
-      controlWidth === changes.width
-    ) {
-      closeFlyout();
-      return;
-    }
-    openConfirm(ControlGroupStrings.management.discardChanges.getSubtitle(), {
-      confirmButtonText: ControlGroupStrings.management.discardChanges.getConfirm(),
-      cancelButtonText: ControlGroupStrings.management.discardChanges.getCancel(),
-      title: ControlGroupStrings.management.discardChanges.getTitle(),
-      buttonColor: 'danger',
-    }).then((confirmed) => {
-      if (confirmed) {
-        closeFlyout();
-      }
-    });
-  };
+  // const onCancel = (changes: DataControlEditorChanges) => {
+  //   if (
+  //     dataView?.id === changes.input.dataViewId &&
+  //     controlField === changes.input.fieldName &&
+  //     panelTitle === changes.input.title &&
+  //     controlGrow === changes.grow &&
+  //     controlWidth === changes.width
+  //   ) {
+  //     closeFlyout();
+  //     return;
+  //   }
+  //   openConfirm(ControlGroupStrings.management.discardChanges.getSubtitle(), {
+  //     confirmButtonText: ControlGroupStrings.management.discardChanges.getConfirm(),
+  //     cancelButtonText: ControlGroupStrings.management.discardChanges.getCancel(),
+  //     title: ControlGroupStrings.management.discardChanges.getTitle(),
+  //     buttonColor: 'danger',
+  //   }).then((confirmed) => {
+  //     if (confirmed) {
+  //       closeFlyout();
+  //     }
+  //   });
+  // };
 
-  const onSave = async (changes: DataControlEditorChanges, type?: string) => {
-    if (!type) {
-      closeFlyout();
-      return;
-    }
+  // const onSave = async (changes: DataControlEditorChanges, type?: string) => {
+  //   if (!type) {
+  //     closeFlyout();
+  //     return;
+  //   }
 
-    if (changes.width && changes.width !== controlWidth) {
-      embeddable.setWidth(changes.width);
-      if (controlWidth) controlGroup.setDefaultControlWidth(changes.width);
-    }
-    if (changes.grow !== undefined && changes.grow !== controlGrow) {
-      embeddable.setGrow(changes.grow);
-      if (controlGrow !== undefined) controlGroup.setDefaultControlGrow(changes.grow);
-    }
+  //   if (changes.width && changes.width !== controlWidth) {
+  //     embeddable.setWidth(changes.width);
+  //   }
+  //   if (changes.grow !== undefined && changes.grow !== controlGrow) {
+  //     embeddable.setGrow(changes.grow);
+  //   }
 
-    /**
-     * TODO: Once the embeddable refactor is complete, we could make this more efficient by only replacing the panel
-     * if the type changed - otherwise, we could simply change the individual state as needed
-     */
-    // const factory = getControlFactory(type) as IEditableControlFactory;
-    // let inputToReturn = { ...embeddable.getExplicitInput(), ...changes.input };
-    // if (factory && factory.presaveTransformFunction) {
-    //   inputToReturn = factory.presaveTransformFunction(inputToReturn, embeddable);
-    // }
-    controlGroup.replacePanel(embeddable.uuid, { panelType: type, initialState: changes.input });
+  //   /**
+  //    * TODO: Once the embeddable refactor is complete, we could make this more efficient by only replacing the panel
+  //    * if the type changed - otherwise, we could simply change the individual state as needed
+  //    */
+  //   // const factory = getControlFactory(type) as IEditableControlFactory;
+  //   // let inputToReturn = { ...embeddable.getExplicitInput(), ...changes.input };
+  //   // if (factory && factory.presaveTransformFunction) {
+  //   //   inputToReturn = factory.presaveTransformFunction(inputToReturn, embeddable);
+  //   // }
 
-    closeFlyout();
-  };
+  //   if (
+  //     type !== embeddable.type ||
+  //     changes.input.fieldName !== controlField ||
+  //     changes.input.dataViewId !== dataView?.id
+  //   ) {
+  //     controlGroup.replacePanel(embeddable.uuid, { panelType: type, initialState: changes.input });
+  //   } else {
+  //     console.log('here');
+  //   }
+
+  //   closeFlyout();
+  // };
 
   return (
     <ControlEditor
-      isCreate={false}
-      width={controlWidth ?? defaultControlWidth}
-      grow={controlGrow === undefined ? defaultControlGrow : controlGrow}
-      embeddable={embeddable}
-      onCancel={onCancel}
-      setLastUsedDataViewId={(lastUsed) => controlGroup.setLastUsedDataViewId(lastUsed)}
-      onSave={onSave}
-      removeControl={() => {
-        closeFlyout();
-        removeControl();
-      }}
+      api={api}
+      parentApi={controlGroup}
+      stateManager={stateManager}
+      // isCreate={false}
+      // width={controlWidth ?? defaultControlWidth}
+      // grow={controlGrow === undefined ? defaultControlGrow : controlGrow}
+      // embeddable={embeddable}
+      // onCancel={onCancel}
+      // setLastUsedDataViewId={(lastUsed) => controlGroup.setLastUsedDataViewId(lastUsed)}
+      // onSave={onSave}
+      // removeControl={() => {
+      //   closeFlyout();
+      //   removeControl();
+      // }}
     />
   );
 };
