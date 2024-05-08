@@ -8,10 +8,9 @@
 import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
 import type { Refetch } from '../../../common/types';
-import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { RISK_INPUTS_TAB_QUERY_ID } from '../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
-import { inputsSelectors } from '../../../common/store';
 import { useCalculateEntityRiskScore } from '../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
@@ -75,11 +74,7 @@ export const UserPanel = ({ contextID, scopeId, userName, isDraggable }: UserPan
   const { data: userRisk } = riskScoreState;
   const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
 
-  const getGlobalQuery = useMemo(() => inputsSelectors.globalQueryByIdSelector(), []);
-  const { refetch: refetchRiskInputsTab } = useDeepEqualSelector((state) =>
-    getGlobalQuery(state, RISK_INPUTS_TAB_QUERY_ID)
-  );
-
+  const refetchRiskInputsTab = useRefetchQueryById(RISK_INPUTS_TAB_QUERY_ID);
   const refetchRiskScore = useCallback(() => {
     refetch();
     (refetchRiskInputsTab as Refetch | null)?.();

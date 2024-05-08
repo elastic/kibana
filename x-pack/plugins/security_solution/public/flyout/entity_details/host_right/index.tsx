@@ -9,10 +9,9 @@ import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
+import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
 import { RISK_INPUTS_TAB_QUERY_ID } from '../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
 import type { Refetch } from '../../../common/types';
-import { inputsSelectors } from '../../../common/store';
-import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { useCalculateEntityRiskScore } from '../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { hostToCriteria } from '../../../common/components/ml/criteria/host_to_criteria';
@@ -73,11 +72,7 @@ export const HostPanel = ({ contextID, scopeId, hostName, isDraggable }: HostPan
   const hostRiskData = hostRisk && hostRisk.length > 0 ? hostRisk[0] : undefined;
   const isRiskScoreExist = !!hostRiskData?.host.risk;
 
-  const getGlobalQuery = useMemo(() => inputsSelectors.globalQueryByIdSelector(), []);
-  const { refetch: refetchRiskInputsTab } = useDeepEqualSelector((state) =>
-    getGlobalQuery(state, RISK_INPUTS_TAB_QUERY_ID)
-  );
-
+  const refetchRiskInputsTab = useRefetchQueryById(RISK_INPUTS_TAB_QUERY_ID);
   const refetchRiskScore = useCallback(() => {
     refetch();
     (refetchRiskInputsTab as Refetch | null)?.();

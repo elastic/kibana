@@ -6,20 +6,13 @@
  */
 
 import { TableId } from '@kbn/securitysolution-data-table';
-import { useCallback, useMemo } from 'react';
-import { useDeepEqualSelector } from '../../common/hooks/use_selector';
-import { inputsSelectors } from '../../common/store';
-import type { Refetch } from '../../common/types';
-
-const useRefetchByQueryId = (QueryId: string) => {
-  const getGlobalQuery = useMemo(() => inputsSelectors.globalQueryByIdSelector(), []);
-  const { refetch } = useDeepEqualSelector((state) => getGlobalQuery(state, QueryId));
-  return refetch;
-};
+import { useCallback } from 'react';
+import type { Refetch } from '../../../common/types';
+import { useRefetchQueryById } from './use_refetch_query_by_id';
 
 export const useRefetchOverviewPageRiskScore = (overviewRiskScoreQueryId: string) => {
-  const refetchOverviewRiskScore = useRefetchByQueryId(overviewRiskScoreQueryId);
-  const refetchAlertsRiskInputs = useRefetchByQueryId(TableId.alertsRiskInputs);
+  const refetchOverviewRiskScore = useRefetchQueryById(overviewRiskScoreQueryId);
+  const refetchAlertsRiskInputs = useRefetchQueryById(TableId.alertsRiskInputs);
 
   const refetchRiskScore = useCallback(() => {
     if (refetchOverviewRiskScore) {
