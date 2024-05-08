@@ -34,7 +34,7 @@ function measureInteraction() {
   };
 }
 
-interface PerformanceApi {
+export interface PerformanceApi {
   onPageReady(): void;
 }
 
