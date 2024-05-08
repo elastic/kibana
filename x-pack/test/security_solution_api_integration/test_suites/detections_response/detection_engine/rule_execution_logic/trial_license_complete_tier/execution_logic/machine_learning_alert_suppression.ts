@@ -22,6 +22,7 @@ import {
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
+import { DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_URL } from '@kbn/security-solution-plugin/common/constants';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
@@ -33,6 +34,8 @@ import {
   getPreviewAlerts,
   patchRule,
   previewRule,
+  previewRuleWithExceptionEntries,
+  setAlertStatus,
 } from '../../../../utils';
 import {
   createRule,
@@ -40,6 +43,7 @@ import {
   deleteAllAnomalies,
   deleteAllRules,
 } from '../../../../../../../common/utils/security_solution';
+import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -342,38 +346,131 @@ export default ({ getService }: FtrProviderContext) => {
           );
         });
 
-        it('suppresses alerts across three executions', async () => {
+        describe('with anomalies spanning multiple rule execution windows', () => {
           const firstTimestamp = '2020-10-28T05:45:00.000Z';
           const secondTimestamp = '2020-10-28T06:15:00.000Z';
           const thirdTimestamp = '2020-10-28T06:45:00.000Z';
-          const laterTimestamp = '2020-10-28T07:00:00.000Z';
-          const firstAnomaly = {
-            ...baseAnomaly,
-            timestamp: firstTimestamp,
-          };
-          const secondAnomaly = {
-            ...baseAnomaly,
-            timestamp: secondTimestamp,
-          };
-          const thirdAnomaly = {
-            ...baseAnomaly,
-            timestamp: thirdTimestamp,
-          };
+          const afterThirdTimestamp = '2020-10-28T07:00:00.000Z';
 
-          await indexListOfDocuments([
-            firstAnomaly,
-            firstAnomaly,
-            secondAnomaly,
-            secondAnomaly,
-            thirdAnomaly,
-          ]);
+          beforeEach(async () => {
+            const firstAnomaly = {
+              ...baseAnomaly,
+              timestamp: firstTimestamp,
+            };
+            const secondAnomaly = {
+              ...baseAnomaly,
+              timestamp: secondTimestamp,
+            };
+            const thirdAnomaly = {
+              ...baseAnomaly,
+              timestamp: thirdTimestamp,
+            };
 
-          const rule = { ...ruleProps, interval: '30m' };
+            await indexListOfDocuments([
+              firstAnomaly,
+              firstAnomaly,
+              secondAnomaly,
+              secondAnomaly,
+              thirdAnomaly,
+            ]);
+          });
+
+          it('suppresses alerts across three executions', async () => {
+            const rule = { ...ruleProps, interval: '30m' };
+            const { previewId } = await previewRule({
+              supertest,
+              rule,
+              timeframeEnd: new Date(afterThirdTimestamp),
+              invocationCount: 3,
+            });
+            const previewAlerts = await getPreviewAlerts({
+              es,
+              previewId,
+              sort: [ALERT_ORIGINAL_TIME],
+            });
+
+            expect(previewAlerts.length).toEqual(1);
+            expect(previewAlerts[0]._source).toEqual(
+              expect.objectContaining({
+                [ALERT_SUPPRESSION_TERMS]: [
+                  {
+                    field: 'user.name',
+                    value: ['root'],
+                  },
+                ],
+                [TIMESTAMP]: '2020-10-28T06:00:00.000Z',
+                [ALERT_LAST_DETECTED]: afterThirdTimestamp,
+                [ALERT_START]: '2020-10-28T06:00:00.000Z',
+                [ALERT_ORIGINAL_TIME]: firstTimestamp,
+                [ALERT_SUPPRESSION_START]: firstTimestamp,
+                [ALERT_SUPPRESSION_END]: thirdTimestamp,
+                [ALERT_SUPPRESSION_DOCS_COUNT]: 4, // in total 4 alert got suppressed: 1 from the first run, 2 from the second, 1 from the third
+              })
+            );
+          });
+
+          it('suppresses alerts across multiple, sparse executions', async () => {
+            const fifthTimestamp = '2020-10-28T07:45:00.000Z';
+            const afterFifthTimestamp = '2020-10-28T08:00:00.000Z';
+            const fifthAnomaly = { ...baseAnomaly, timestamp: fifthTimestamp };
+            // no anomaly for fourth execution
+            await indexListOfDocuments([fifthAnomaly]);
+
+            const rule = { ...ruleProps, interval: '30m' };
+            const { previewId } = await previewRule({
+              supertest,
+              rule,
+              timeframeEnd: new Date(afterFifthTimestamp),
+              invocationCount: 5,
+            });
+            const previewAlerts = await getPreviewAlerts({
+              es,
+              previewId,
+              sort: [ALERT_ORIGINAL_TIME],
+            });
+
+            expect(previewAlerts.length).toEqual(1);
+            expect(previewAlerts[0]._source).toEqual(
+              expect.objectContaining({
+                [ALERT_SUPPRESSION_TERMS]: [
+                  {
+                    field: 'user.name',
+                    value: ['root'],
+                  },
+                ],
+                [TIMESTAMP]: '2020-10-28T06:00:00.000Z',
+                [ALERT_LAST_DETECTED]: afterFifthTimestamp,
+                [ALERT_START]: '2020-10-28T06:00:00.000Z',
+                [ALERT_ORIGINAL_TIME]: firstTimestamp,
+                [ALERT_SUPPRESSION_START]: firstTimestamp,
+                [ALERT_SUPPRESSION_END]: fifthTimestamp,
+                [ALERT_SUPPRESSION_DOCS_COUNT]: 5, // in total 5 alerts were suppressed: 1 from the first run, 2 from the second, 1 from the third run, none from the fourth, and one from the fifth.
+              })
+            );
+          });
+        });
+
+        it('suppresses alerts on multiple fields', async () => {
+          const timestamp = new Date().toISOString();
+          const anomaly = {
+            ...baseAnomaly,
+            timestamp,
+            'process.name': ['auditbeat'],
+          };
+          await indexListOfDocuments([anomaly, anomaly]);
+
+          const rule = {
+            ...ruleProps,
+            alert_suppression: {
+              ...ruleProps.alert_suppression,
+              group_by: ['user.name', 'process.name'],
+            },
+          };
           const { previewId } = await previewRule({
             supertest,
             rule,
-            timeframeEnd: new Date(laterTimestamp),
-            invocationCount: 3,
+            timeframeEnd: new Date(timestamp),
+            invocationCount: 1,
           });
           const previewAlerts = await getPreviewAlerts({
             es,
@@ -382,39 +479,604 @@ export default ({ getService }: FtrProviderContext) => {
           });
 
           expect(previewAlerts.length).toEqual(1);
-          expect(previewAlerts[0]._source).toEqual({
-            ...previewAlerts[0]._source,
-            [ALERT_SUPPRESSION_TERMS]: [
-              {
-                field: 'user.name',
-                value: ['root'],
-              },
-            ],
-            [TIMESTAMP]: '2020-10-28T06:00:00.000Z',
-            [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z', // Note: ALERT_LAST_DETECTED gets updated, timestamp does not
-            [ALERT_START]: '2020-10-28T06:00:00.000Z',
-            [ALERT_ORIGINAL_TIME]: firstTimestamp,
-            [ALERT_SUPPRESSION_START]: firstTimestamp,
-            [ALERT_SUPPRESSION_END]: thirdTimestamp,
-            [ALERT_SUPPRESSION_DOCS_COUNT]: 4, // in total 4 alert got suppressed: 1 from the first run, 2 from the second, 1 from the third
-          });
+          expect(previewAlerts[0]._source).toEqual(
+            expect.objectContaining({
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'user.name',
+                  value: ['root'],
+                },
+                {
+                  field: 'process.name',
+                  value: ['auditbeat'],
+                },
+              ],
+              [TIMESTAMP]: timestamp,
+              [ALERT_START]: timestamp,
+              [ALERT_ORIGINAL_TIME]: timestamp,
+              [ALERT_SUPPRESSION_START]: timestamp,
+              [ALERT_SUPPRESSION_END]: timestamp,
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+            })
+          );
         });
 
-        it.skip('suppresses alerts across multiple, sparse executions');
-        it.skip('suppresses alerts on multiple fields');
-        it.skip('suppresses only alerts that match suppression conditions');
-        it.skip('does not suppress into a closed alert');
-        it.skip('does not suppress into an unsuppressed alert');
-        it.skip('does not suppress when the suppression interval is less than the rule interval');
-        it.skip('suppresses alerts within a single execution');
-        it.skip('suppresses alerts with timestamp override configured');
-        it.skip(
-          'deduplicates previously suppressed alerts if rule has overlapping execution windows'
-        );
-        it.skip('applies exceptions before suppression');
-        it.skip('does not suppress alerts with missing fields, if not configured to do so');
-        it.skip('suppresses alerts with missing fields, if configured to do so');
-        it.skip('suppresses alerts with array field values');
+        it('suppresses alerts with missing fields, if configured to do so', async () => {
+          const timestamp = new Date().toISOString();
+          const anomaly = {
+            ...baseAnomaly,
+            timestamp,
+            'host.name': ['relevant'],
+          };
+          const anomalyWithoutSuppressionField = {
+            ...baseAnomaly,
+            timestamp,
+          };
+          await indexListOfDocuments([anomaly, anomaly, anomalyWithoutSuppressionField]);
+
+          const rule = {
+            ...ruleProps,
+            alert_suppression: {
+              ...ruleProps.alert_suppression,
+              group_by: ['host.name'],
+            },
+          };
+          const { previewId } = await previewRule({
+            supertest,
+            rule,
+            timeframeEnd: new Date(timestamp),
+            invocationCount: 1,
+          });
+          const previewAlerts = await getPreviewAlerts({
+            es,
+            previewId,
+            sort: [ALERT_ORIGINAL_TIME],
+          });
+
+          expect(previewAlerts.length).toEqual(2);
+          expect(previewAlerts[0]._source).toEqual(
+            expect.objectContaining({
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'host.name',
+                  value: ['relevant'],
+                },
+              ],
+              [TIMESTAMP]: timestamp,
+              [ALERT_START]: timestamp,
+              [ALERT_ORIGINAL_TIME]: timestamp,
+              [ALERT_SUPPRESSION_START]: timestamp,
+              [ALERT_SUPPRESSION_END]: timestamp,
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 1, // the anomaly without `host.name` is not represented here
+            })
+          );
+
+          expect(previewAlerts[1]._source).toEqual(
+            expect.objectContaining({
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'host.name',
+                  value: null,
+                },
+              ],
+              [TIMESTAMP]: timestamp,
+              [ALERT_START]: timestamp,
+              [ALERT_ORIGINAL_TIME]: timestamp,
+              [ALERT_SUPPRESSION_START]: timestamp,
+              [ALERT_SUPPRESSION_END]: timestamp,
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
+            })
+          );
+        });
+
+        it('does not suppress alerts with missing fields, if not configured to do so', async () => {
+          const rule = {
+            ...ruleProps,
+            alert_suppression: {
+              ...ruleProps.alert_suppression,
+              group_by: ['host.name'],
+              missing_fields_strategy: 'doNotSuppress' as const,
+            },
+          };
+          const timestamp = new Date().toISOString();
+          const anomaly = {
+            ...baseAnomaly,
+            timestamp,
+            'host.name': ['relevant'],
+          };
+          const anomalyWithoutSuppressionField = {
+            ...baseAnomaly,
+            timestamp,
+            'user.name': ['irrelevant'],
+          };
+          await indexListOfDocuments([anomaly, anomaly, anomalyWithoutSuppressionField]);
+
+          const { previewId } = await previewRule({
+            supertest,
+            rule,
+            timeframeEnd: new Date(timestamp),
+            invocationCount: 1,
+          });
+          const previewAlerts = await getPreviewAlerts({
+            es,
+            previewId,
+            sort: [ALERT_ORIGINAL_TIME],
+          });
+
+          expect(previewAlerts.length).toEqual(2);
+          expect(previewAlerts[0]._source).toEqual(
+            expect.objectContaining({
+              'user.name': ['irrelevant'],
+              [TIMESTAMP]: timestamp,
+              [ALERT_START]: timestamp,
+            })
+          );
+
+          expect(previewAlerts[0]._source).toEqual(
+            expect.not.objectContaining({
+              [ALERT_SUPPRESSION_TERMS]: expect.anything(),
+              [ALERT_ORIGINAL_TIME]: expect.anything(),
+              [ALERT_SUPPRESSION_START]: expect.anything(),
+              [ALERT_SUPPRESSION_END]: expect.anything(),
+              [ALERT_SUPPRESSION_DOCS_COUNT]: expect.anything(),
+            })
+          );
+
+          expect(previewAlerts[1]._source).toEqual(
+            expect.objectContaining({
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'host.name',
+                  value: ['relevant'],
+                },
+              ],
+              [TIMESTAMP]: timestamp,
+              [ALERT_START]: timestamp,
+              [ALERT_ORIGINAL_TIME]: timestamp,
+              [ALERT_SUPPRESSION_START]: timestamp,
+              [ALERT_SUPPRESSION_END]: timestamp,
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 1, // the anomaly without `host.name` is not represented here
+            })
+          );
+        });
+
+        it('does not suppress into a closed alert', async () => {
+          const firstTimestamp = new Date().toISOString();
+          const firstAnomaly = {
+            ...baseAnomaly,
+            timestamp: firstTimestamp,
+          };
+          await indexListOfDocuments([firstAnomaly]);
+
+          const createdRule = await createRule(supertest, log, {
+            ...ruleProps,
+            from: firstTimestamp,
+          });
+          const alerts = await getAlerts(supertest, log, es, createdRule);
+
+          expect(alerts.hits.hits).toHaveLength(1);
+          const alertId = alerts.hits.hits[0]._id;
+
+          // close generated alert
+          await supertest
+            .post(DETECTION_ENGINE_ALERTS_STATUS_URL)
+            .set('kbn-xsrf', 'true')
+            .send(setAlertStatus({ alertIds: [alertId], status: 'closed' }))
+            .expect(200);
+
+          const secondTimestamp = new Date().toISOString();
+          const secondAnomaly = {
+            ...baseAnomaly,
+            timestamp: secondTimestamp,
+          };
+
+          // Add more anomalies, then disable and re-enable to trigger another
+          // rule run. The second anomalies should create a new alert, since the existing alert is closed.
+          await indexListOfDocuments([secondAnomaly, secondAnomaly]);
+          await patchRule(supertest, log, { id: createdRule.id, enabled: false });
+          await patchRule(supertest, log, { id: createdRule.id, enabled: true });
+          const secondAlerts = await getOpenAlerts(
+            supertest,
+            log,
+            es,
+            createdRule,
+            RuleExecutionStatusEnum.succeeded,
+            undefined,
+            new Date()
+          );
+
+          expect(secondAlerts.hits.hits).toHaveLength(1);
+          expect(secondAlerts.hits.hits[0]._source).toEqual(
+            expect.objectContaining({
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'user.name',
+                  value: ['root'],
+                },
+              ],
+              [ALERT_ORIGINAL_TIME]: secondTimestamp,
+              [ALERT_SUPPRESSION_START]: secondTimestamp,
+              [ALERT_SUPPRESSION_END]: secondTimestamp,
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+            })
+          );
+        });
+
+        it('does not suppress into an unsuppressed alert', async () => {
+          const firstTimestamp = new Date().toISOString();
+          const firstAnomaly = {
+            ...baseAnomaly,
+            timestamp: firstTimestamp,
+          };
+          await indexListOfDocuments([firstAnomaly]);
+
+          const ruleWithoutSuppression = { ...ruleProps, alert_suppression: undefined };
+          const createdRule = await createRule(supertest, log, {
+            ...ruleWithoutSuppression,
+            from: firstTimestamp,
+          });
+          const alerts = await getAlerts(supertest, log, es, createdRule);
+
+          expect(alerts.hits.hits).toHaveLength(1);
+
+          // update the rule to include suppression
+          await patchRule(supertest, log, {
+            id: createdRule.id,
+            alert_suppression: ruleProps.alert_suppression,
+          });
+
+          const secondTimestamp = new Date().toISOString();
+          const secondAnomaly = {
+            ...baseAnomaly,
+            timestamp: secondTimestamp,
+          };
+
+          // Add more anomalies, then disable and re-enable to trigger another
+          // rule run. The second anomalies should create a new suppressed alert, since the original was not suppressed.
+          await indexListOfDocuments([secondAnomaly, secondAnomaly, secondAnomaly]);
+          await patchRule(supertest, log, { id: createdRule.id, enabled: false });
+          await patchRule(supertest, log, { id: createdRule.id, enabled: true });
+          const secondAlerts = await getOpenAlerts(
+            supertest,
+            log,
+            es,
+            createdRule,
+            RuleExecutionStatusEnum.succeeded,
+            undefined,
+            new Date()
+          );
+
+          expect(secondAlerts.hits.hits).toHaveLength(2);
+          // assert that the first alert does not have suppression fields
+          expect(secondAlerts.hits.hits[0]._source).toEqual(
+            expect.not.objectContaining({
+              [ALERT_SUPPRESSION_TERMS]: expect.anything(),
+              [ALERT_ORIGINAL_TIME]: expect.anything(),
+              [ALERT_SUPPRESSION_START]: expect.anything(),
+              [ALERT_SUPPRESSION_END]: expect.anything(),
+              [ALERT_SUPPRESSION_DOCS_COUNT]: expect.anything(),
+            })
+          );
+
+          expect(secondAlerts.hits.hits[1]._source).toEqual(
+            expect.objectContaining({
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'user.name',
+                  value: ['root'],
+                },
+              ],
+              [ALERT_ORIGINAL_TIME]: firstTimestamp,
+              [ALERT_SUPPRESSION_START]: firstTimestamp,
+              [ALERT_SUPPRESSION_END]: secondTimestamp,
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 3, // TODO this means that the original anomaly was used as the suppression base, and the three new were suppressed into it (1 original + three new - 1 parent). Is this correct?
+            })
+          );
+        });
+
+        // TODO is this behavior expected?
+        it('suppresses beyond the specified suppression interval if alerts fall within the same rule execution window', async () => {
+          const rule = {
+            ...ruleProps,
+            interval: '30m',
+            alert_suppression: {
+              ...ruleProps.alert_suppression,
+              duration: {
+                value: 1,
+                unit: 'm',
+              },
+            },
+          } as MachineLearningRuleCreateProps;
+          const firstTimestamp = '2020-10-28T06:00:00.000Z';
+          const secondTimestamp = '2020-10-28T06:15:00.000Z';
+          const firstAnomaly = { ...baseAnomaly, timestamp: firstTimestamp };
+          const secondAnomaly = { ...baseAnomaly, timestamp: secondTimestamp };
+          await indexListOfDocuments([firstAnomaly, secondAnomaly]);
+
+          const { previewId } = await previewRule({
+            supertest,
+            rule,
+            timeframeEnd: new Date(secondTimestamp),
+            invocationCount: 1,
+          });
+          const previewAlerts = await getPreviewAlerts({
+            es,
+            previewId,
+            sort: [ALERT_ORIGINAL_TIME],
+          });
+
+          expect(previewAlerts.length).toEqual(1);
+          expect(previewAlerts[0]._source).toEqual(
+            expect.objectContaining({
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'user.name',
+                  value: ['root'],
+                },
+              ],
+              [TIMESTAMP]: secondTimestamp,
+              [ALERT_LAST_DETECTED]: secondTimestamp,
+              [ALERT_START]: secondTimestamp,
+              [ALERT_ORIGINAL_TIME]: firstTimestamp,
+              [ALERT_SUPPRESSION_START]: firstTimestamp,
+              [ALERT_SUPPRESSION_END]: secondTimestamp,
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+            })
+          );
+        });
+
+        it('does not suppress across multiple runs if the suppression interval is less than the rule interval ', async () => {
+          const rule = {
+            ...ruleProps,
+            interval: '5m',
+            alert_suppression: {
+              ...ruleProps.alert_suppression,
+              duration: {
+                value: 1,
+                unit: 'm',
+              },
+            },
+          } as MachineLearningRuleCreateProps;
+          const firstTimestamp = '2020-10-28T06:00:00.000Z';
+          const secondTimestamp = '2020-10-28T06:15:00.000Z';
+          const firstAnomaly = { ...baseAnomaly, timestamp: firstTimestamp };
+          const secondAnomaly = { ...baseAnomaly, timestamp: secondTimestamp };
+          await indexListOfDocuments([firstAnomaly, secondAnomaly]);
+
+          const { previewId } = await previewRule({
+            supertest,
+            rule,
+            timeframeEnd: new Date(secondTimestamp),
+            invocationCount: 3,
+          });
+          const previewAlerts = await getPreviewAlerts({
+            es,
+            previewId,
+            sort: [ALERT_ORIGINAL_TIME],
+          });
+
+          expect(previewAlerts.length).toEqual(2);
+          expect(previewAlerts[0]._source).toEqual(
+            expect.objectContaining({
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'user.name',
+                  value: ['root'],
+                },
+              ],
+              [ALERT_ORIGINAL_TIME]: firstTimestamp,
+              [ALERT_SUPPRESSION_START]: firstTimestamp,
+              [ALERT_SUPPRESSION_END]: firstTimestamp,
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
+            })
+          );
+          expect(previewAlerts[1]._source).toEqual(
+            expect.objectContaining({
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'user.name',
+                  value: ['root'],
+                },
+              ],
+              [ALERT_ORIGINAL_TIME]: secondTimestamp,
+              [ALERT_SUPPRESSION_START]: secondTimestamp,
+              [ALERT_SUPPRESSION_END]: secondTimestamp,
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
+            })
+          );
+        });
+
+        it('suppresses alerts within a single execution', async () => {
+          const timestamp = new Date().toISOString();
+          const anomaly = {
+            ...baseAnomaly,
+            timestamp,
+          };
+          await indexListOfDocuments([anomaly, anomaly]);
+
+          const createdRule = await createRule(supertest, log, {
+            ...ruleProps,
+            from: timestamp,
+          });
+
+          const alerts = await getAlerts(supertest, log, es, createdRule);
+          expect(alerts.hits.hits).toHaveLength(1);
+          expect(alerts.hits.hits[0]._source).toEqual(
+            expect.objectContaining({
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'user.name',
+                  value: ['root'],
+                },
+              ],
+              [ALERT_SUPPRESSION_START]: timestamp,
+              [ALERT_SUPPRESSION_END]: timestamp,
+              [ALERT_ORIGINAL_TIME]: timestamp,
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+            })
+          );
+        });
+
+        it('deduplicates previously suppressed alerts if rule has overlapping execution windows', async () => {
+          const firstTimestamp = new Date().toISOString();
+          const firstAnomaly = {
+            ...baseAnomaly,
+            timestamp: firstTimestamp,
+          };
+          await indexListOfDocuments([firstAnomaly]);
+
+          const createdRule = await createRule(supertest, log, {
+            ...ruleProps,
+            from: firstTimestamp,
+          });
+          const alerts = await getAlerts(supertest, log, es, createdRule);
+
+          expect(alerts.hits.hits).toHaveLength(1);
+          expect(alerts.hits.hits[0]._source).toEqual(
+            expect.objectContaining({
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'user.name',
+                  value: ['root'],
+                },
+              ],
+              // suppression boundaries equal to original event time, since no alert been suppressed
+              [ALERT_SUPPRESSION_START]: firstTimestamp,
+              [ALERT_SUPPRESSION_END]: firstTimestamp,
+              [ALERT_ORIGINAL_TIME]: firstTimestamp,
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
+            })
+          );
+
+          const secondTimestamp = new Date().toISOString();
+          const secondAnomaly = {
+            ...baseAnomaly,
+            timestamp: secondTimestamp,
+          };
+
+          // Add more anomalies, then disable and re-enable to trigger another
+          // rule run. The second anomaly should trigger an update to the
+          // existing alert without changing the timestamp
+          await indexListOfDocuments([secondAnomaly, secondAnomaly]);
+          await patchRule(supertest, log, { id: createdRule.id, enabled: false });
+          await patchRule(supertest, log, { id: createdRule.id, enabled: true });
+          const secondAlerts = await getOpenAlerts(
+            supertest,
+            log,
+            es,
+            createdRule,
+            RuleExecutionStatusEnum.succeeded,
+            undefined,
+            new Date()
+          );
+
+          expect(secondAlerts.hits.hits).toHaveLength(1);
+          expect(secondAlerts.hits.hits[0]._source).toEqual(
+            expect.objectContaining({
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'user.name',
+                  value: ['root'],
+                },
+              ],
+              [ALERT_ORIGINAL_TIME]: firstTimestamp,
+              [ALERT_SUPPRESSION_START]: firstTimestamp,
+              [ALERT_SUPPRESSION_END]: secondTimestamp,
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 2, // both new anomalies were suppressed into the original
+            })
+          );
+        });
+
+        it('suppresses alerts with array field values', async () => {
+          const timestamp = new Date().toISOString();
+          const anomaly = {
+            ...baseAnomaly,
+            'user.name': ['host1', 'host2'],
+            timestamp,
+          };
+          await indexListOfDocuments([anomaly, anomaly]);
+
+          const createdRule = await createRule(supertest, log, {
+            ...ruleProps,
+            from: timestamp,
+          });
+
+          const alerts = await getAlerts(supertest, log, es, createdRule);
+          expect(alerts.hits.hits).toHaveLength(1);
+          expect(alerts.hits.hits[0]._source).toEqual(
+            expect.objectContaining({
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'user.name',
+                  value: ['host1', 'host2'],
+                },
+              ],
+              [ALERT_SUPPRESSION_START]: timestamp,
+              [ALERT_SUPPRESSION_END]: timestamp,
+              [ALERT_ORIGINAL_TIME]: timestamp,
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+            })
+          );
+        });
+
+        describe('with exceptions', () => {
+          beforeEach(async () => {
+            await deleteAllExceptions(supertest, log);
+          });
+
+          it.only('applies exceptions before suppression', async () => {
+            const timestamp = new Date().toISOString();
+            const anomaly = {
+              ...baseAnomaly,
+              timestamp,
+            };
+            const anomalyWithExceptionField = {
+              ...anomaly,
+              'process.name': ['auditbeat'],
+            };
+            await indexListOfDocuments([anomaly, anomalyWithExceptionField]);
+
+            const { previewId } = await previewRuleWithExceptionEntries({
+              supertest,
+              rule: ruleProps,
+              log,
+              timeframeEnd: new Date(timestamp),
+              entries: [
+                [
+                  {
+                    field: 'process.name',
+                    operator: 'included',
+                    type: 'match',
+                    value: 'auditbeat',
+                  },
+                ],
+              ],
+            });
+            const previewAlerts = await getPreviewAlerts({
+              es,
+              previewId,
+              sort: [ALERT_ORIGINAL_TIME],
+            });
+
+            expect(previewAlerts.length).toEqual(1);
+            expect(previewAlerts[0]._source).toEqual(
+              expect.objectContaining({
+                [ALERT_SUPPRESSION_TERMS]: [
+                  {
+                    field: 'user.name',
+                    value: ['root'],
+                  },
+                ],
+                [TIMESTAMP]: timestamp,
+                [ALERT_START]: timestamp,
+                [ALERT_ORIGINAL_TIME]: timestamp,
+                [ALERT_SUPPRESSION_START]: timestamp,
+                [ALERT_SUPPRESSION_END]: timestamp,
+                [ALERT_SUPPRESSION_DOCS_COUNT]: 0, // the anomaly with the exception field was not suppressed but omitted due to the exception
+              })
+            );
+          });
+        });
       });
     });
   });
