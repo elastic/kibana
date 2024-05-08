@@ -45,7 +45,7 @@ export const AddIndicesField: React.FC<AddIndicesFieldProps> = ({
       <EuiComboBox
         singleSelection={{ asPlainText: true }}
         placeholder={i18n.translate('xpack.searchPlayground.sources.addIndex.placeholder', {
-          defaultMessage: 'Select new data source',
+          defaultMessage: 'Search for index',
         })}
         async
         isLoading={isLoading}

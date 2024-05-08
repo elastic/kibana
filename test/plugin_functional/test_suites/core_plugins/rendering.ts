@@ -271,19 +271,15 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.graph.savePolicy (alternatives)',
         'xpack.ilm.ui.enabled (boolean)',
         'xpack.index_management.ui.enabled (boolean)',
-        'xpack.index_management.enableIndexActions (any)',
-        'xpack.index_management.enableLegacyTemplates (any)',
-        'xpack.index_management.enableIndexStats (any)',
-        'xpack.index_management.editableIndexSettings (any)',
-        'xpack.index_management.enableDataStreamsStorageColumn (any)',
         'xpack.infra.sources.default.fields.message (array)',
+        'xpack.index_management.enableTogglingDataRetention (any)', // It's a boolean (any because schema.conditional)
         /**
          * Feature flags bellow are conditional based on traditional/serverless offering
          * and will all resolve to xpack.infra.featureFlags.* (boolean)
          */
         'xpack.infra.featureFlags.metricsExplorerEnabled (any)',
         'xpack.infra.featureFlags.customThresholdAlertsEnabled (any)',
-        'xpack.infra.featureFlags.osqueryEnabled (any)',
+        'xpack.infra.featureFlags.osqueryEnabled (boolean)',
         'xpack.infra.featureFlags.inventoryThresholdAlertRuleEnabled (any)',
         'xpack.infra.featureFlags.metricThresholdAlertRuleEnabled (any)',
         'xpack.infra.featureFlags.logThresholdAlertRuleEnabled (any)',
@@ -291,6 +287,12 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.infra.featureFlags.alertsAndRulesDropdownEnabled (any)',
         'xpack.infra.featureFlags.profilingEnabled (boolean)',
 
+        'xpack.index_management.enableIndexActions (any)',
+        'xpack.index_management.enableLegacyTemplates (any)',
+        'xpack.index_management.enableIndexStats (any)',
+        'xpack.index_management.editableIndexSettings (any)',
+        'xpack.index_management.enableDataStreamsStorageColumn (any)',
+        'xpack.index_management.enableMappingsSourceFieldSection (any)',
         'xpack.license_management.ui.enabled (boolean)',
         'xpack.maps.preserveDrawingBuffer (boolean)',
         'xpack.maps.showMapsInspectorAdapter (boolean)',
@@ -328,6 +330,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.stack_connectors.enableExperimental (array)',
         'xpack.trigger_actions_ui.enableExperimental (array)',
         'xpack.trigger_actions_ui.enableGeoTrackingThresholdAlert (boolean)',
+        'xpack.alerting.rules.run.alerts.max (number)',
         'xpack.upgrade_assistant.featureSet.migrateSystemIndices (boolean)',
         'xpack.upgrade_assistant.featureSet.mlSnapshots (boolean)',
         'xpack.upgrade_assistant.featureSet.reindexCorrectiveActions (boolean)',

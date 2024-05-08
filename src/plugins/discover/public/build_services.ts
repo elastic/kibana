@@ -54,6 +54,7 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { ContentClient } from '@kbn/content-management-plugin/public';
+import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import { memoize, noop } from 'lodash';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import { DiscoverStartPlugins } from './plugin';
@@ -123,6 +124,7 @@ export interface DiscoverServices {
   uiActions: UiActionsStart;
   contentClient: ContentClient;
   noDataPage?: NoDataPagePluginStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
 }
 
 export const buildServices = memoize(
@@ -203,6 +205,7 @@ export const buildServices = memoize(
       uiActions: plugins.uiActions,
       contentClient: plugins.contentManagement.client,
       noDataPage: plugins.noDataPage,
+      observabilityAIAssistant: plugins.observabilityAIAssistant,
     };
   }
 );

@@ -59,6 +59,7 @@ export const getEntityTableColumns = <T extends BasicEntityData>(
             idPrefix={contextID ? `entityTable-${contextID}` : 'entityTable'}
             isDraggable={isDraggable}
             sourcererScopeId={getSourcererScopeId(scopeId)}
+            scopeId={scopeId}
             render={renderField}
             data-test-subj="entity-table-value"
           />

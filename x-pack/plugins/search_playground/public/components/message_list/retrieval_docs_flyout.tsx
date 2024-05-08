@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
@@ -23,6 +23,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { AnalyticsEvents } from '../../analytics/constants';
+import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { Doc } from '../../types';
 
 interface RetrievalDocsFlyoutProps {
@@ -40,6 +42,7 @@ export const RetrievalDocsFlyout: React.FC<RetrievalDocsFlyoutProps> = ({
   onClose,
   retrievalDocs,
 }) => {
+  const usageTracker = useUsageTracker();
   const columns: Array<EuiBasicTableColumn<{ field: string; value: unknown }>> = [
     {
       field: 'field',
@@ -77,6 +80,10 @@ export const RetrievalDocsFlyout: React.FC<RetrievalDocsFlyoutProps> = ({
     },
   ];
 
+  useEffect(() => {
+    usageTracker?.load(AnalyticsEvents.retrievalDocsFlyoutOpened);
+  }, [usageTracker]);
+
   return (
     <EuiFlyout onClose={onClose}>
       <EuiFlyoutHeader hasBorder>
@@ -92,7 +99,7 @@ export const RetrievalDocsFlyout: React.FC<RetrievalDocsFlyoutProps> = ({
           <p>
             {i18n.translate('xpack.searchPlayground.chat.message.assistant.retrievalDoc.subtitle', {
               defaultMessage:
-                'The documents that were referenced in order to create an answer to your query. You can change the context field using the Edit Context button.',
+                'The documents that were referenced in order to create an answer to your query. You can change the context field using the Edit context button.',
             })}
           </p>
         </EuiText>

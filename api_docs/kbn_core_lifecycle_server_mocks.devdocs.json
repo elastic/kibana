@@ -184,7 +184,9 @@
               "IExecutionContext",
               ">; coreUsageData: jest.Mocked<",
               "InternalCoreUsageDataSetup",
-              ">; customBranding: { register: jest.Mock<any, any, any>; getBrandingFor: jest.Mock<any, any, any>; }; userSettings: { setUserProfileSettings: jest.Mock<any, any, any>; getUserSettingDarkMode: jest.Mock<any, any, any>; }; security: jest.Mocked<",
+              ">; customBranding: { register: jest.Mock<any, any, any>; getBrandingFor: jest.Mock<any, any, any>; }; userSettings: jest.Mocked<",
+              "InternalUserSettingsServiceSetup",
+              ">; security: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-security-server",
                 "scope": "common",
@@ -284,15 +286,15 @@
                 "section": "def-common.InternalDeprecationsServiceStart",
                 "text": "InternalDeprecationsServiceStart"
               },
-              ">; customBranding: {}; security: jest.MockedObjectDeep<",
+              ">; customBranding: {}; security: ",
               {
-                "pluginId": "@kbn/core-security-server",
+                "pluginId": "@kbn/core-security-server-mocks",
                 "scope": "common",
-                "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.SecurityServiceStart",
-                "text": "SecurityServiceStart"
+                "docId": "kibKbnCoreSecurityServerMocksPluginApi",
+                "section": "def-common.InternalSecurityStartMock",
+                "text": "InternalSecurityStartMock"
               },
-              ">; userProfile: jest.Mocked<",
+              "; userProfile: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-user-profile-server-internal",
                 "scope": "common",
