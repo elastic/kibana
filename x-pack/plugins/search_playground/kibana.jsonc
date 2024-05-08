@@ -20,7 +20,8 @@
       "triggersActionsUi",
     ],
     "optionalPlugins": [
-      "cloud"
+      "cloud",
+      "usageCollection",
     ],
     "requiredBundles": [
       "kibanaReact"
