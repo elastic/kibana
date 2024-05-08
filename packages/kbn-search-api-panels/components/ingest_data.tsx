@@ -79,7 +79,7 @@ export const IngestData: React.FC<IngestDataProps> = ({
       <EuiSpacer size="l" />
       <IngestPipelinePanel
         setSelectedPipeline={setSelectedPipeline}
-        ingestPipelinesData={ingestPipelineData?.pipelines}
+        ingestPipelinesData={ingestPipelineData}
       />
       <EuiTitle size="xs">
         <h4>
