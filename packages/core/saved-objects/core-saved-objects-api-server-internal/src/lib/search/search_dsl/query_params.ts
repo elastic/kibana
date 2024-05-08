@@ -34,11 +34,11 @@ function getTypes(registry: ISavedObjectTypeRegistry, type?: string | string[]) 
  *  Get the field params based on the types, searchFields, and rootSearchFields
  */
 function getSimpleQueryStringTypeFields(
-  types: string[],
-  searchFields: string[] = [],
+  types: string[], // TODO: remove this
+  searchFields: Map<string, string[]> = new Map(),
   rootSearchFields: string[] = []
 ) {
-  if (!searchFields.length && !rootSearchFields.length) {
+  if (!searchFields.size && !rootSearchFields.length) {
     return {
       lenient: true,
       fields: ['*'],
@@ -52,8 +52,8 @@ function getSimpleQueryStringTypeFields(
     }
   });
 
-  for (const field of searchFields) {
-    fields = fields.concat(types.map((prefix) => `${prefix}.${field}`));
+  for (const [prefix, fieldsWithoutPrefix] of searchFields) {
+    fields = fields.concat(fieldsWithoutPrefix.map((field) => `${prefix}.${field}`));
   }
 
   return { fields };
@@ -258,6 +258,7 @@ export function getQueryParams({
       }
     }
   }
+
   return { query: { bool } };
 }
 
@@ -347,10 +348,43 @@ const getMatchPhrasePrefixFields = ({
   return output;
 };
 
+/**
+ * Generates an array of subpaths in reverse order from a given string by splitting it at each '.' and incrementally joining the parts.
+ * Includes the current path and the rest of the input in each subpath.
+ * @param input - The input string to generate subpaths from.
+ * @returns An array of objects with 'current' path and 'rest' of the input in reverse order.
+ */
+function generateReverseSubPathsWithRest(input: string): Array<{ path: string; rest: string }> {
+  const parts = input.split('.');
+  return (
+    parts
+      .map((_, index) => {
+        const path = parts.slice(0, index + 1).join('.');
+        const rest = parts.slice(index + 1).join('.');
+        return { path, rest };
+      })
+      // .filter(({ rest }: { rest: string }) => Boolean(rest))
+      .reverse()
+  );
+}
+
+// TODO: should this fn search for nested field inside nested fields?
+const getAllFields = ({ mappings, type }: { mappings: IndexMapping; type: string }) => {
+  const allFields = [];
+  const props = mappings.properties[type].properties;
+  for (const field in props) {
+    if (props.hasOwnProperty(field)) {
+      allFields.push(field);
+    }
+  }
+
+  return allFields;
+};
+
 const getSearchStringQuery = ({
   search,
   types,
-  searchFields,
+  searchFields: searchFieldsParam = [],
   rootSearchFields,
   defaultSearchOperator,
   mappings,
@@ -362,48 +396,49 @@ const getSearchStringQuery = ({
   defaultSearchOperator?: SearchOperator;
   mappings: IndexMapping;
 }) => {
-  const nestedFields: string[] = [];
-  const fields: string[] = [];
+  const nestedFields: Map<string, string[]> = new Map();
+  const fields: Map<string, string[]> = new Map();
 
-  if (
-    searchFields &&
-    searchFields.length > 0 &&
-    !(searchFields.length === 1 && searchFields[0] === '*')
-  ) {
-    types.forEach((type) => {
-      searchFields.forEach((field) => {
-        const key = `${type}.${field}`;
-        if (getProperty(mappings, key)?.type === 'nested') {
-          nestedFields.push(key);
-        } else if (!fields.includes(field)) {
-          fields.push(field);
-        }
-      });
-    });
-  } else {
-    // this is the searchFields empty, searchFields = ['*'] use case
-    for (const field in mappings.properties[types[0]].properties) {
-      if (mappings.properties[types[0]].properties?.hasOwnProperty(field)) {
-        // TODO: Repeated
-        const key = `${types[0]}.${field}`;
-        const type = getProperty(mappings, key)?.type;
-        if (type === 'nested') {
-          nestedFields.push(key);
-        } else if (type === 'text' || type === 'keyword') {
-          // TODO: what about types date, unsigned_long, short, integer?
-          fields.push(field);
+  const isSearchFieldsSet =
+    searchFieldsParam.length > 0 ||
+    (searchFieldsParam.length === 1 && searchFieldsParam[0] !== '*');
+
+  types.forEach((prefix) => {
+    const searchFields = isSearchFieldsSet
+      ? searchFieldsParam
+      : getAllFields({ mappings, type: prefix });
+
+    console.log({ searchFieldsParam, isSearchFieldsSet, searchFields });
+
+    searchFields.forEach((field) => {
+      const absoluteFieldPath = `${prefix}.${field}`;
+      const paths = generateReverseSubPathsWithRest(absoluteFieldPath);
+      console.log({ paths });
+      let foundNestedField = false;
+      for (const { path, rest: fieldPath } of paths) {
+        console.log(`testing ${path}`);
+        if (getProperty(mappings, path)?.type === 'nested') {
+          const nestedPath = path;
+          console.log(`new nested field ${nestedPath}.${fieldPath}`);
+          nestedFields.set(nestedPath, [...(nestedFields.get(nestedPath) || []), fieldPath]);
+          foundNestedField = true;
+          break;
         } else {
-          console.log(`Skipping field ${field} of type ${type}`);
+          console.log('not nested');
         }
       }
-    }
-  }
 
-  // TODO: what if nestedFields is empty?
-  const nestedQuery = getNestedQueryStringClause({
-    path: nestedFields[0], // TODO: the path would be cases.customFields. We need to create one per nestedFields value
+      const absolutePathType: string | undefined = getProperty(mappings, absoluteFieldPath)?.type;
+      if (!foundNestedField && absolutePathType !== 'nested' && absolutePathType !== undefined) {
+        fields.set(prefix, [...(fields.get(prefix) || []), field]);
+      }
+    });
+  });
+  console.log({ fields, nestedFields });
+  const nestedQueries = getNestedQueryStringClause({
+    nestedFields,
     search,
-    fields: nestedFields,
+    isSearchFieldsSet,
   });
 
   const simpleQueryString = getSimpleQueryStringClause({
@@ -414,29 +449,39 @@ const getSearchStringQuery = ({
     defaultSearchOperator,
   });
 
-  return { bool: { should: [nestedQuery, simpleQueryString].filter(Boolean) } };
+  return { bool: { should: [...nestedQueries, simpleQueryString].filter(Boolean) } };
 };
 
+/**
+ * Returns an array of clauses because there for each type we need to create a nested query
+ */
 const getNestedQueryStringClause = ({
-  path,
   search,
-  fields,
+  nestedFields,
+  isSearchFieldsSet,
 }: {
-  path: string;
   search: string;
-  fields: string[];
+  nestedFields: Map<string, string[]>;
+  isSearchFieldsSet: boolean;
 }) => {
-  return {
-    nested: {
-      path,
-      query: {
-        simple_query_string: {
-          query: search,
-          fields: fields.map((field) => `${field}.value`),
+  if (nestedFields.size === 0) {
+    return [];
+  }
+
+  // TODO: what about the defaultSearchOperator? Do we need to pass it here?
+  return Array.from(nestedFields.entries()).map(([path, fields]) => {
+    return {
+      nested: {
+        path,
+        query: {
+          simple_query_string: {
+            query: search,
+            fields: isSearchFieldsSet ? fields.map((field: string) => `${path}.${field}`) : ['*'],
+          },
         },
       },
-    },
-  };
+    };
+  });
 };
 
 const getSimpleQueryStringClause = ({
@@ -448,7 +493,7 @@ const getSimpleQueryStringClause = ({
 }: {
   search: string;
   types: string[];
-  searchFields?: string[];
+  searchFields?: Map<string, string[]>;
   rootSearchFields?: string[];
   defaultSearchOperator?: SearchOperator;
 }) => {

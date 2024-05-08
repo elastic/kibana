@@ -654,20 +654,210 @@ describe('#getQueryParams', () => {
           { 'saved.description': { query: 'foo', boost: 1 } },
         ]);
       });
+    });
 
-      describe('#nested fields', () => {
-        beforeEach(() => {
-          const mappings: SavedObjectsTypeMappingDefinition = {
+    describe.only('search for nested fields', () => {
+      const getNestedMapping = ({
+        fieldName,
+      }: {
+        fieldName: string;
+      }): SavedObjectsTypeMappingDefinition => {
+        return {
+          properties: {
+            [fieldName]: {
+              type: 'nested',
+              properties: {
+                // TODO: what happens when this is not value but something else like key?
+                value: {
+                  type: 'keyword',
+                },
+                key: {
+                  type: 'keyword',
+                },
+              },
+            },
+          },
+        };
+      };
+
+      beforeEach(() => {
+        const nestedTypeSO: SavedObjectsType = {
+          name: 'nestedtype',
+          hidden: true,
+          namespaceType: 'multiple-isolated',
+          mappings: getNestedMapping({ fieldName: 'title' }),
+          management: {
+            defaultSearchField: 'title',
+          },
+        };
+
+        registry.registerType(nestedTypeSO);
+      });
+
+      it('supports nested files', () => {
+        const result = getQueryParams({
+          registry,
+          search: 'foo',
+          searchFields: ['title.value'],
+          type: ['nestedtype'],
+          // TODO: do we have to do this manually? Isn't there an internal method that does this?
+          mappings: {
+            properties: registry.getAllTypes().reduce((acc, type) => {
+              acc[type.name] = { properties: type.mappings.properties };
+              return acc;
+            }, {} as any),
+          },
+        });
+
+        const shouldClause = result.query.bool.must.bool.should;
+        const nestedQueryClause = shouldClause[0].nested;
+
+        expect(nestedQueryClause.path).toBe('nestedtype.title');
+        expect(nestedQueryClause.query.simple_query_string.query).toBe('foo');
+        expect(nestedQueryClause.query.simple_query_string.fields).toEqual([
+          'nestedtype.title.value',
+        ]);
+
+        const simpleQueryClause = shouldClause[1].simple_query_string;
+        expect(simpleQueryClause.fields).toEqual(['*']);
+        expect(simpleQueryClause.query).toBe('foo');
+      });
+
+      it.only('should identify all nested field if no searchFields is set', () => {
+        const result = getQueryParams({
+          registry,
+          search: 'foo',
+          type: ['nestedtype'],
+          // TODO: do we have to do this manually? Isn't there an internal method that does this?
+          mappings: {
+            properties: registry.getAllTypes().reduce((acc, type) => {
+              acc[type.name] = { properties: type.mappings.properties };
+              return acc;
+            }, {} as any),
+          },
+        });
+
+        const shouldClause = result.query.bool.must.bool.should;
+        const nestedQueryClause = shouldClause[0].nested;
+
+        expect(nestedQueryClause.path).toBe('nestedtype.title');
+        expect(nestedQueryClause.query.simple_query_string.query).toBe('foo');
+        expect(nestedQueryClause.query.simple_query_string.fields).toEqual(['*']);
+
+        const simpleQueryClause = shouldClause[1].simple_query_string;
+        expect(simpleQueryClause.fields).toEqual(['*']);
+        expect(simpleQueryClause.query).toBe('foo');
+      });
+
+      it('should identify repeated field names in different types', () => {
+        const result = getQueryParams({
+          registry,
+          search: 'foo',
+          searchFields: ['title', 'title.value'],
+          type: ['nestedtype', 'saved', 'pending'],
+          // TODO: do we have to do this manually? Isn't there an internal method that does this?
+          mappings: {
+            properties: registry.getAllTypes().reduce((acc, type) => {
+              acc[type.name] = { properties: type.mappings.properties };
+              return acc;
+            }, {} as any),
+          },
+        });
+
+        const shouldClause = result.query.bool.must.bool.should;
+        const nestedQueryClause = shouldClause[0].nested;
+        const simpleQueryClause = shouldClause[1].simple_query_string;
+
+        expect(nestedQueryClause.path).toBe('nestedtype.title');
+        expect(nestedQueryClause.query.simple_query_string.query).toBe('foo');
+        expect(nestedQueryClause.query.simple_query_string.fields).toEqual([
+          'nestedtype.title.value',
+        ]);
+
+        expect(simpleQueryClause.fields).toEqual(['saved.title', 'pending.title']);
+        expect(simpleQueryClause.query).toBe('foo');
+      });
+
+      it('should create multiple nested clauses if there are multiple nested fields and no searchFields set', () => {
+        const mappings = getNestedMapping({ fieldName: 'title' });
+        const anotherNestedTypeSO: SavedObjectsType = {
+          name: 'anothernestedtype',
+          hidden: true,
+          namespaceType: 'multiple-isolated',
+          mappings: {
+            ...mappings,
             properties: {
-              title: {
+              ...mappings.properties,
+              description: {
                 type: 'nested',
                 properties: {
                   key: {
                     type: 'keyword',
                   },
-                  type: {
-                    type: 'keyword',
-                  },
+                },
+              },
+            },
+          },
+          management: {
+            defaultSearchField: 'title',
+          },
+        };
+
+        registry.registerType(anotherNestedTypeSO);
+        const result = getQueryParams({
+          registry,
+          search: 'foo',
+          type: ['nestedtype', 'anothernestedtype'],
+          // TODO: do we have to do this manually? Isn't there an internal method that does this?
+          mappings: {
+            properties: registry.getAllTypes().reduce((acc, type) => {
+              acc[type.name] = { properties: type.mappings.properties };
+              return acc;
+            }, {} as any),
+          },
+        });
+
+        const shouldClause = result.query.bool.must.bool.should;
+        const nestedTypeTitleQueryClause = shouldClause[0].nested;
+        const anothernestedtypeTitleQueryClause = shouldClause[1].nested;
+        const anothernestedtypeDescriptionQueryClause = shouldClause[2].nested;
+        const simpleQueryClause = shouldClause[3].simple_query_string;
+
+        expect(nestedTypeTitleQueryClause.path).toBe('nestedtype.title');
+        expect(nestedTypeTitleQueryClause.query.simple_query_string.query).toBe('foo');
+        expect(nestedTypeTitleQueryClause.query.simple_query_string.fields).toEqual([
+          'nestedtype.title.value',
+        ]);
+
+        expect(anothernestedtypeTitleQueryClause.path).toBe('anothernestedtype.title');
+        expect(anothernestedtypeTitleQueryClause.query.simple_query_string.query).toBe('foo');
+        expect(anothernestedtypeTitleQueryClause.query.simple_query_string.fields).toEqual([
+          'anothernestedtype.title.value',
+        ]);
+
+        expect(anothernestedtypeDescriptionQueryClause.path).toBe('anothernestedtype.description');
+        expect(anothernestedtypeDescriptionQueryClause.query.simple_query_string.query).toBe('foo');
+        expect(anothernestedtypeDescriptionQueryClause.query.simple_query_string.fields).toEqual([
+          'anothernestedtype.description.value',
+        ]);
+
+        expect(simpleQueryClause.fields).toEqual(['*']);
+        expect(simpleQueryClause.query).toBe('foo');
+      });
+
+      it('should use one nested clause if there are multiple nested fields in same type', () => {
+        const mappings = getNestedMapping({ fieldName: 'title' });
+        const anotherNestedTypeSO: SavedObjectsType = {
+          name: 'anothernestedtype',
+          hidden: true,
+          namespaceType: 'multiple-isolated',
+          mappings: {
+            ...mappings,
+            properties: {
+              ...mappings.properties,
+              description: {
+                type: 'nested',
+                properties: {
                   value: {
                     type: 'keyword',
                     fields: {
@@ -679,122 +869,45 @@ describe('#getQueryParams', () => {
                 },
               },
             },
-          };
+          },
+          management: {
+            defaultSearchField: 'title',
+          },
+        };
 
-          const nestedTypeSO: SavedObjectsType = {
-            name: 'nestedtype',
-            hidden: true,
-            namespaceType: 'multiple-isolated',
-            mappings,
-            management: {
-              defaultSearchField: 'title',
-            },
-          };
-
-          registry.registerType(nestedTypeSO);
+        registry.registerType(anotherNestedTypeSO);
+        const result = getQueryParams({
+          registry,
+          search: 'foo',
+          type: ['anothernestedtype'],
+          // TODO: do we have to do this manually? Isn't there an internal method that does this?
+          mappings: {
+            properties: registry.getAllTypes().reduce((acc, type) => {
+              acc[type.name] = { properties: type.mappings.properties };
+              return acc;
+            }, {} as any),
+          },
         });
 
-        it('supports nested files', () => {
-          const result = getQueryParams({
-            registry,
-            search: 'foo',
-            searchFields: ['title'],
-            type: ['nestedtype'],
-            // TODO: do we have to do this manually? Isn't there an internal method that does this?
-            mappings: {
-              properties: registry.getAllTypes().reduce((acc, type) => {
-                acc[type.name] = { properties: type.mappings.properties };
-                return acc;
-              }, {} as any),
-            },
-          });
+        const shouldClause = result.query.bool.must.bool.should;
+        const nestedTypeQueryClause = shouldClause[0].nested;
+        const anothernestedTypeQueryClause = shouldClause[1].nested;
+        const simpleQueryClause = shouldClause[2].simple_query_string;
 
-          const mustClause = result.query.bool.must.bool.should;
-          const nestedQueryClause = mustClause[0].nested;
+        expect(nestedTypeQueryClause.path).toBe('anothernestedtype.title');
+        expect(nestedTypeQueryClause.query.simple_query_string.query).toBe('foo');
+        expect(nestedTypeQueryClause.query.simple_query_string.fields).toEqual([
+          'anothernestedtype.title.value',
+        ]);
 
-          expect(nestedQueryClause.path).toBe('nestedtype.title');
-          expect(nestedQueryClause.query.simple_query_string.query).toBe('foo');
-          expect(nestedQueryClause.query.simple_query_string.fields).toEqual([
-            'nestedtype.title.value',
-          ]);
+        expect(anothernestedTypeQueryClause.path).toBe('anothernestedtype.description');
+        expect(anothernestedTypeQueryClause.query.simple_query_string.query).toBe('foo');
+        expect(anothernestedTypeQueryClause.query.simple_query_string.fields).toEqual([
+          'anothernestedtype.description.value',
+        ]);
 
-          const simpleQueryClause = mustClause[1].simple_query_string;
-          expect(simpleQueryClause.fields).toEqual(['*']);
-          expect(simpleQueryClause.query).toBe('foo');
-        });
-
-        it('should identify all nested field if no searchFields is set', () => {
-          const result = getQueryParams({
-            registry,
-            search: 'foo',
-            type: ['nestedtype'],
-            // TODO: do we have to do this manually? Isn't there an internal method that does this?
-            mappings: {
-              properties: registry.getAllTypes().reduce((acc, type) => {
-                acc[type.name] = { properties: type.mappings.properties };
-                return acc;
-              }, {} as any),
-            },
-          });
-
-          const mustClause = result.query.bool.must.bool.should;
-          const nestedQueryClause = mustClause[0].nested;
-
-          expect(nestedQueryClause.path).toBe('nestedtype.title');
-          expect(nestedQueryClause.query.simple_query_string.query).toBe('foo');
-          expect(nestedQueryClause.query.simple_query_string.fields).toEqual([
-            'nestedtype.title.value',
-          ]);
-
-          const simpleQueryClause = mustClause[1].simple_query_string;
-          expect(simpleQueryClause.fields).toEqual(['*']);
-          expect(simpleQueryClause.query).toBe('foo');
-        });
-
-        it('should identify repeated field names with different type', () => {
-          const result = getQueryParams({
-            registry,
-            search: 'foo',
-            searchFields: ['title'],
-            type: ['nestedtype', 'saved', 'pending'],
-            // TODO: do we have to do this manually? Isn't there an internal method that does this?
-            mappings: {
-              properties: registry.getAllTypes().reduce((acc, type) => {
-                acc[type.name] = { properties: type.mappings.properties };
-                return acc;
-              }, {} as any),
-            },
-          });
-          const mustClause = result.query.bool.must.bool.should;
-          const nestedQueryClause = mustClause[0].nested;
-
-          expect(nestedQueryClause.path).toBe('nestedtype.title');
-          expect(nestedQueryClause.query.simple_query_string.query).toBe('foo');
-          expect(nestedQueryClause.query.simple_query_string.fields).toEqual([
-            'nestedtype.title.value',
-          ]);
-
-          const simpleQueryClause = mustClause[1].simple_query_string;
-          // TODO: clarify if it's an issue that nestedtype.title is in here altough we alreay cover it in the nested query
-          expect(simpleQueryClause.fields).toEqual([
-            'nestedtype.title',
-            'saved.title',
-            'pending.title',
-          ]);
-          expect(simpleQueryClause.query).toBe('foo');
-        });
-
-        it('should create multiple nested clauses if there are multiple nested fields', () => {
-          // two registries with at least one nested field
-          // should have two nested clauses
-          expect(false).toBe(true);
-        });
-
-        it('should use one nested clause if there are multiple nested fields in same type', () => {
-          // registry with two nested fields, search by them
-          // should have one nested clause with both fields
-          expect(false).toBe(true);
-        });
+        expect(simpleQueryClause.fields).toEqual(['*']);
+        expect(simpleQueryClause.query).toBe('foo');
       });
     });
   });
