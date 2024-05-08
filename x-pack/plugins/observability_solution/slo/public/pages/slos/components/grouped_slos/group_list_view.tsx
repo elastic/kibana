@@ -10,8 +10,8 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiHorizontalRule,
+  EuiLink,
   EuiSpacer,
   EuiTablePagination,
   EuiText,
@@ -19,20 +19,21 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import React, { memo, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { GroupSummary } from '@kbn/slo-schema';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { useKibana } from '../../../../utils/kibana_react';
+import React, { memo, useState } from 'react';
 import { paths } from '../../../../../common/locators/paths';
 import { useFetchSloList } from '../../../../hooks/use_fetch_slo_list';
+import { useKibana } from '../../../../utils/kibana_react';
 import { SLI_OPTIONS } from '../../../slo_edit/constants';
 import { useSloFormattedSLIValue } from '../../hooks/use_slo_summary';
-import { SlosView } from '../slos_view';
-import { SLOView } from '../toggle_slo_view';
 import type { SortDirection, SortField } from '../../hooks/use_url_search_state';
+import { SlosView } from '../slos_view';
 import { GroupByField } from '../slo_list_group_by';
+import { SLOView } from '../toggle_slo_view';
 
 interface Props {
   group: string;
@@ -156,8 +157,20 @@ export function GroupListView({
                     })}
                   </EuiBadge>
                 </EuiFlexItem>
-                {group !== 'NO_DATA' && (
-                  <EuiFlexItem>
+
+                <EuiFlexItem>
+                  {group === 'NO_DATA' ? (
+                    <span>
+                      {i18n.translate('xpack.slo.group.worstPerforming', {
+                        defaultMessage: 'Worst performing: ',
+                      })}
+                      <strong>
+                        {i18n.translate('xpack.slo.group.worstPerforming.notAvailable', {
+                          defaultMessage: 'N/A',
+                        })}
+                      </strong>
+                    </span>
+                  ) : (
                     <EuiToolTip
                       content={
                         <>
@@ -196,8 +209,8 @@ export function GroupListView({
                         </EuiTextColor>
                       </EuiLink>
                     </EuiToolTip>
-                  </EuiFlexItem>
-                )}
+                  )}
+                </EuiFlexItem>
               </EuiFlexGroup>
             }
             id={group}
