@@ -332,7 +332,7 @@ export const RequiredFieldInput = z.object({
    */
   name: NonEmptyString,
   /**
-   * Type of the Elasticsearch field
+   * Type of an Elasticsearch field
    */
   type: NonEmptyString,
 });
