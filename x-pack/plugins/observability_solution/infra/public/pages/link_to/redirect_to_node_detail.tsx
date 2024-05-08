@@ -8,7 +8,7 @@
 import { useEffect } from 'react';
 import { useLocation, useRouteMatch } from 'react-router-dom';
 import rison from '@kbn/rison';
-import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { ASSET_DETAILS_LOCATOR_ID } from '@kbn/observability-shared-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { AssetDetailsUrlState } from '../../components/asset_details/types';
@@ -47,6 +47,7 @@ const getNodeDetailSearch = (queryParams: URLSearchParams) => {
         from && to
           ? {
               from: new Date(parseFloat(from)).toISOString(),
+              interval: '>=1m',
               to: new Date(parseFloat(to)).toISOString(),
             }
           : undefined,
