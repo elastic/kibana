@@ -26,7 +26,6 @@ const useGetSentinelOneAgentStatusMock = useGetExternalAgentStatus as jest.Mock;
 const useGetAgentStatusMock = useGetAgentStatus as jest.Mock;
 const useAgentStatusHookMock = useAgentStatusHook as jest.Mock;
 
-// TODO TC: change crowdstrike tests when the useAgentStatus is implemented for Crowdstrike - now it defaults to `sentinel_one`
 describe('useHostIsolationAction', () => {
   describe.each([
     ['useGetSentinelOneAgentStatus', useGetSentinelOneAgentStatusMock],
@@ -48,6 +47,7 @@ describe('useHostIsolationAction', () => {
             detailsData:
               agentTypeAlert === 'sentinel_one'
                 ? [
+                    { category: 'kibana', field: 'kibana.alert.rule.uuid' },
                     {
                       category: 'event',
                       field: 'event.module',
@@ -65,6 +65,7 @@ describe('useHostIsolationAction', () => {
                   ]
                 : agentTypeAlert === 'crowdstrike'
                 ? [
+                    { category: 'kibana', field: 'kibana.alert.rule.uuid' },
                     {
                       category: 'event',
                       field: 'event.module',
@@ -116,8 +117,8 @@ describe('useHostIsolationAction', () => {
     it(`${name} is invoked as 'enabled' when Crowdstrike alert and FF enabled`, () => {
       render('crowdstrike');
 
-      expect(hook).toHaveBeenCalledWith([''], 'sentinel_one', {
-        enabled: false,
+      expect(hook).toHaveBeenCalledWith(['expectedCrowdstrikeAgentId'], 'crowdstrike', {
+        enabled: true,
       });
     });
 
@@ -134,7 +135,7 @@ describe('useHostIsolationAction', () => {
       useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
       render('crowdstrike');
 
-      expect(hook).toHaveBeenCalledWith([''], 'sentinel_one', {
+      expect(hook).toHaveBeenCalledWith(['expectedCrowdstrikeAgentId'], 'crowdstrike', {
         enabled: false,
       });
     });
@@ -142,7 +143,7 @@ describe('useHostIsolationAction', () => {
     it(`${name} is invoked as 'disabled' when endpoint alert`, () => {
       render('endpoint');
 
-      expect(hook).toHaveBeenCalledWith([''], 'sentinel_one', {
+      expect(hook).toHaveBeenCalledWith([''], 'endpoint', {
         enabled: false,
       });
     });

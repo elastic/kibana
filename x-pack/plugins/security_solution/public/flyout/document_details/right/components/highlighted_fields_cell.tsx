@@ -86,42 +86,40 @@ export const HighlightedFieldsCell: VFC<HighlightedFieldsCellProps> = ({
   values,
   field,
   originalField,
-}) => {
-  return (
-    <>
-      {values != null &&
-        values.map((value, i) => {
-          return (
-            <EuiFlexItem
-              grow={false}
-              key={`${i}-${value}`}
-              data-test-subj={`${value}-${HIGHLIGHTED_FIELDS_CELL_TEST_ID}`}
-            >
-              {field === HOST_NAME_FIELD_NAME || field === USER_NAME_FIELD_NAME ? (
-                <LinkFieldCell value={value} />
-              ) : field === AGENT_STATUS_FIELD_NAME &&
-                originalField === CROWDSTRIKE_AGENT_ID_FIELD ? (
-                <CrowdstrikeAgentStatus
-                  agentId={String(value ?? '')}
-                  data-test-subj={HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID}
-                />
-              ) : field === AGENT_STATUS_FIELD_NAME &&
-                originalField === SENTINEL_ONE_AGENT_ID_FIELD ? (
-                <SentinelOneAgentStatus
-                  agentId={String(value ?? '')}
-                  data-test-subj={HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID}
-                />
-              ) : field === AGENT_STATUS_FIELD_NAME ? (
-                <EndpointAgentStatusById
-                  endpointAgentId={String(value ?? '')}
-                  data-test-subj={HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID}
-                />
-              ) : (
-                <span data-test-subj={HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID}>{value}</span>
-              )}
-            </EuiFlexItem>
-          );
-        })}
-    </>
-  );
-};
+}) => (
+  <>
+    {values != null &&
+      values.map((value, i) => {
+        return (
+          <EuiFlexItem
+            grow={false}
+            key={`${i}-${value}`}
+            data-test-subj={`${value}-${HIGHLIGHTED_FIELDS_CELL_TEST_ID}`}
+          >
+            {field === HOST_NAME_FIELD_NAME || field === USER_NAME_FIELD_NAME ? (
+              <LinkFieldCell value={value} />
+            ) : field === AGENT_STATUS_FIELD_NAME &&
+              originalField === CROWDSTRIKE_AGENT_ID_FIELD ? (
+              <CrowdstrikeAgentStatus
+                agentId={String(value ?? '')}
+                data-test-subj={HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID}
+              />
+            ) : field === AGENT_STATUS_FIELD_NAME &&
+              originalField === SENTINEL_ONE_AGENT_ID_FIELD ? (
+              <SentinelOneAgentStatus
+                agentId={String(value ?? '')}
+                data-test-subj={HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID}
+              />
+            ) : field === AGENT_STATUS_FIELD_NAME ? (
+              <EndpointAgentStatusById
+                endpointAgentId={String(value ?? '')}
+                data-test-subj={HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID}
+              />
+            ) : (
+              <span data-test-subj={HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID}>{value}</span>
+            )}
+          </EuiFlexItem>
+        );
+      })}
+  </>
+);
