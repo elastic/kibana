@@ -93,5 +93,6 @@
     "@kbn/datemath",
     "@kbn/presentation-containers",
     "@kbn/dashboard-plugin",
+    "@kbn/react-kibana-context-render",
   ]
 }
