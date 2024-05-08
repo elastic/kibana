@@ -82,7 +82,10 @@ export const useHoverActionItems = ({
 }: UseHoverActionItemsProps): UseHoverActionItems => {
   const kibana = useKibana();
   const dispatch = useDispatch();
-  const { timelines, timelineFilterManager, analytics, i18n, theme } = kibana.services;
+  const { timelines, timelineDataService, analytics, i18n, theme } = kibana.services;
+  const {
+    query: { filterManager: timelineFilterManager },
+  } = timelineDataService;
   const dataViewId = useDataViewId(getSourcererScopeId(scopeId ?? ''));
 
   // Common actions used by the alert table and alert flyout
