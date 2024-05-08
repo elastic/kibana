@@ -697,15 +697,17 @@ export const UnifiedDataTable = ({
 
   const toggleRowHeight = useCallback(
     (rowIndex: number) => {
-      // mimimize to single
-      if (autoHeightRows.includes(rowIndex)) {
-        setAutoHeightRows(autoHeightRows.filter((e) => e !== rowIndex));
-      } else {
-        // expand
-        setAutoHeightRows([...autoHeightRows, rowIndex]);
+      if (isPlainRecord) {
+        // mimimize to single row
+        if (autoHeightRows.includes(rowIndex)) {
+          setAutoHeightRows(autoHeightRows.filter((e) => e !== rowIndex));
+        } else {
+          // expand
+          setAutoHeightRows([...autoHeightRows, rowIndex]);
+        }
       }
     },
-    [autoHeightRows]
+    [autoHeightRows, isPlainRecord]
   );
 
   /**

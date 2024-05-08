@@ -52,9 +52,9 @@ export function SourceDocument({
   fieldFormats: FieldFormatsStart;
   dataTestSubj?: string;
   className?: string;
-  isDarkMode: boolean;
-  isSingleRow: boolean;
-  onTreeExpand: () => void;
+  isDarkMode?: boolean;
+  isSingleRow?: boolean;
+  onTreeExpand?: () => void;
 }) {
   const pairs: FormattedHit = useTopLevelObjectColumns
     ? getTopLevelObjectPairs(row.raw, columnId, dataView, shouldShowFieldHandler).slice(
@@ -68,8 +68,8 @@ export function SourceDocument({
     return (
       <JSONTree
         data={row.raw as unknown as Record<string, unknown>}
-        isDarkMode={isDarkMode}
-        isSingleRow={isSingleRow}
+        isDarkMode={isDarkMode ?? false}
+        isSingleRow={isSingleRow ?? false}
         onTreeExpand={onTreeExpand}
       />
     );

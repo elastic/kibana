@@ -20,7 +20,7 @@ export const JSONTree = ({
   data: Record<string, unknown>;
   isDarkMode: boolean;
   isSingleRow: boolean;
-  onTreeExpand: () => void;
+  onTreeExpand?: () => void;
 }) => {
   return (
     <>
