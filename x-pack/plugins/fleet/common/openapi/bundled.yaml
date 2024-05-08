@@ -4897,8 +4897,8 @@ components:
         supports_agentless:
           type: boolean
           description: >-
-            Indicates whether the agent policy support agentless integrations.
-            Only allowed in serverless environment.
+            Indicates whether the agent policy supports agentless integrations.
+            Only allowed in a serverless environment.
       required:
         - id
         - status

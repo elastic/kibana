@@ -914,7 +914,7 @@ describe('policy preconfiguration', () => {
       );
       // @ts-ignore-next-line
       expect(nonFatalErrors[0].error.toString()).toEqual(
-        'FleetError: `supports_agentless` is only allowed in serverless environments that support agentless feature'
+        'FleetError: `supports_agentless` is only allowed in serverless environments that support the agentless feature'
       );
     });
 
@@ -985,7 +985,7 @@ describe('policy preconfiguration', () => {
       );
       // @ts-ignore-next-line
       expect(nonFatalErrors[0].error.toString()).toEqual(
-        'FleetError: `supports_agentless` is only allowed in serverless environments that support agentless feature'
+        'FleetError: `supports_agentless` is only allowed in serverless environments that support the agentless feature'
       );
     });
 
