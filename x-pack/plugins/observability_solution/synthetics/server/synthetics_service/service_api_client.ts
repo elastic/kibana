@@ -117,7 +117,7 @@ export class ServiceAPIClient {
       }
     } else {
       this.logger.debug(
-        'Failed to fetch isAllowed status since no location has been fetched from manifest.'
+        'Failed to fetch isAllowed status. Locations were not fetched from manifest.'
       );
     }
 

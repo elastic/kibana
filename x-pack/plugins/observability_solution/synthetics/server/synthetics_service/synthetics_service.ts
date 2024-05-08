@@ -151,7 +151,7 @@ export class SyntheticsService {
       service.locations = result.locations;
       service.apiClient.locations = result.locations;
       this.logger.debug(
-        `Fetched ${service.locations} number of Synthetics service locations from manifest: ${this.config.manifestUrl}`
+        `Fetched ${service.locations} Synthetics service locations from manifest: ${this.config.manifestUrl}`
       );
     } catch (e) {
       this.logger.error(e);
