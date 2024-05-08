@@ -81,6 +81,7 @@ export const getAgentStatusRouteHandler = (
       esClient,
       soClient,
       endpointService: endpointContext.service,
+      connectorActionsClient: (await context.actions).getActionsClient(),
     });
 
     // 8.15: use the new `agentStatusClientEnabled` FF enabled

@@ -33,6 +33,30 @@ export const CrowdstrikeBaseApiResponseSchema = schema.object(
   { unknowns: 'allow' }
 );
 
+export const CrowdstrikeGetAgentStatusResponseSchema = schema.object(
+  {
+    resources: schema.arrayOf(
+      schema.object(
+        {
+          state: schema.maybe(schema.string()),
+          id: schema.maybe(schema.string()),
+        },
+        { unknowns: 'allow' }
+      )
+    ),
+    errors: schema.nullable(schema.arrayOf(schema.any())),
+    meta: schema.object(
+      {
+        query_time: schema.maybe(schema.number()),
+        powered_by: schema.maybe(schema.string()),
+        trace_id: schema.maybe(schema.string()),
+      },
+      { unknowns: 'allow' }
+    ),
+  },
+  { unknowns: 'allow' }
+);
+
 export const CrowdstrikeGetAgentsResponseSchema = schema.object(
   {
     resources: schema.arrayOf(
