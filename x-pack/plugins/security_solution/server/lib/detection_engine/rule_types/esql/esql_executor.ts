@@ -43,13 +43,6 @@ import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { getIsAlertSuppressionActive } from '../utils/get_is_alert_suppression_active';
 import type { ExperimentalFeatures } from '../../../../../common';
 
-/**
- * ES|QL returns results as a single page. max size of 10,000
- * while we try increase size of the request to catch all events
- * we don't want to overload ES/Kibana with large responses
- */
-const ESQL_PAGE_SIZE_CIRCUIT_BREAKER = 500;
-
 export const esqlExecutor = async ({
   runOpts: {
     completeRule,
@@ -80,6 +73,12 @@ export const esqlExecutor = async ({
   licensing: LicensingPluginSetup;
 }) => {
   const ruleParams = completeRule.ruleParams;
+  /**
+   * ES|QL returns results as a single page. max size of 10,000
+   * while we try increase size of the request to catch all alerts that might been deduplicated
+   * we don't want to overload ES/Kibana with large responses
+   */
+  const ESQL_PAGE_SIZE_CIRCUIT_BREAKER = tuple.maxSignals * 3;
 
   return withSecuritySpan('esqlExecutor', async () => {
     const result = createSearchAfterReturnType();
