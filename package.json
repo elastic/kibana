@@ -558,6 +558,7 @@
     "@kbn/locator-explorer-plugin": "link:examples/locator_explorer",
     "@kbn/logging": "link:packages/kbn-logging",
     "@kbn/logging-mocks": "link:packages/kbn-logging-mocks",
+    "@kbn/logs-data-access-plugin": "link:x-pack/plugins/observability_solution/logs_data_access",
     "@kbn/logs-explorer-plugin": "link:x-pack/plugins/observability_solution/logs_explorer",
     "@kbn/logs-shared-plugin": "link:x-pack/plugins/observability_solution/logs_shared",
     "@kbn/logstash-plugin": "link:x-pack/plugins/logstash",
