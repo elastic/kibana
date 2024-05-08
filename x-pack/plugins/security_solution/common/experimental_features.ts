@@ -82,8 +82,10 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables use of SentinelOne response actions that complete asynchronously as well as support
    * for more response actions.
+   *
+   * Release: v8.14.0
    */
-  responseActionsSentinelOneV2Enabled: false,
+  responseActionsSentinelOneV2Enabled: true,
 
   /**
    * Enables top charts on Alerts Page
@@ -236,7 +238,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    *  Enables Security AI Assistant's Flyout mode
    */
-  aiAssistantFlyoutMode: false,
+  aiAssistantFlyoutMode: true,
 
   /**
    * Enables the new modal for the value list items
