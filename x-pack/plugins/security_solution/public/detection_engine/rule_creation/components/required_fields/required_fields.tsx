@@ -63,8 +63,8 @@ const RequiredFieldsList = ({
 
   const selectedFieldNames = fieldValue.map(({ name }) => name);
 
-  const fieldsWithTypes = indexPatternFields.filter(
-    (indexPatternField) => indexPatternField.esTypes && indexPatternField.esTypes.length > 0
+  const fieldsWithTypes = indexPatternFields.filter((indexPatternField) =>
+    Boolean(indexPatternField.esTypes?.length)
   );
 
   const allFieldNames = fieldsWithTypes.map(({ name }) => name);
