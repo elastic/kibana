@@ -47,7 +47,7 @@ export const useChangeCspRuleState = () => {
       const previousCspRules = queryClient.getQueryData(CSP_RULES_STATES_QUERY_KEY);
 
       // Optimistically update to the rules that have state changes
-      queryClient.setQueryData(['csp_rules_states_v1'], (currentRuleStates: any) => {
+      queryClient.setQueryData(CSP_RULES_STATES_QUERY_KEY, (currentRuleStates: any) => {
         return createRulesWithUpdatedState(ruleStateUpdateRequest, currentRuleStates);
       });
 
@@ -60,12 +60,17 @@ export const useChangeCspRuleState = () => {
       queryClient.invalidateQueries(KSPM_STATS_QUERY_KEY);
       queryClient.invalidateQueries(CSP_RULES_STATES_QUERY_KEY);
     },
+    onError: (err, variables, context) => {
+      if (context?.previousCspRules) {
+        queryClient.setQueryData(CSP_RULES_STATES_QUERY_KEY, context.previousCspRules);
+      }
+    },
   });
 };
 
 function createRulesWithUpdatedState(
   ruleStateUpdateRequest: RuleStateUpdateRequest,
-  currentRuleStates: any
+  currentRuleStates: Record<string, RuleStateAttributes>
 ) {
   const updateRuleStates: Record<string, RuleStateAttributes> = {};
   ruleStateUpdateRequest.ruleIds.forEach((ruleId) => {

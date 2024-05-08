@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Criteria,
   EuiButtonEmpty,
@@ -135,33 +135,19 @@ export const RulesTable = ({
     else setIsAllRulesSelectedThisPage(false);
   }, [items.length, selectedRules.length]);
 
-  const columns = useMemo(() => {
-    const startServices = { notifications, analytics, i18n: i18nStart, theme };
-    return getColumns({
-      mutateRulesStates,
-      selectedRules,
-      setSelectedRules,
-      items,
-      setIsAllRulesSelectedThisPage,
-      isAllRulesSelectedThisPage,
-      isCurrentPageRulesASubset,
-      onRuleClick,
-      http,
-      startServices,
-    });
-  }, [
+  const startServices = { notifications, analytics, i18n: i18nStart, theme };
+  const columns = getColumns({
     mutateRulesStates,
     selectedRules,
     setSelectedRules,
     items,
+    setIsAllRulesSelectedThisPage,
     isAllRulesSelectedThisPage,
+    isCurrentPageRulesASubset,
     onRuleClick,
-    notifications,
     http,
-    analytics,
-    i18nStart,
-    theme,
-  ]);
+    startServices,
+  });
 
   return (
     <>
