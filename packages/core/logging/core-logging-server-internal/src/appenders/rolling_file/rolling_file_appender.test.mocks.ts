@@ -38,10 +38,20 @@ jest.doMock('./rolling_file_context', () => ({
   RollingFileContext: RollingFileContextMock,
 }));
 
+export const createRetentionPolicyMock = jest.fn();
+jest.doMock('./retention', () => {
+  const actual = jest.requireActual('./retention');
+  return {
+    ...actual,
+    createRetentionPolicy: createRetentionPolicyMock,
+  };
+});
+
 export const resetAllMocks = () => {
   LayoutsMock.create.mockReset();
   createTriggeringPolicyMock.mockReset();
   createRollingStrategyMock.mockReset();
+  createRetentionPolicyMock.mockReset();
   RollingFileManagerMock.mockReset();
   RollingFileContextMock.mockReset();
 };
