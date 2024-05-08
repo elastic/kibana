@@ -19,6 +19,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
   const meta = getDocLinksMeta({ kibanaBranch, buildFlavor });
 
   const DOC_LINK_VERSION = meta.version;
+  const ECS_VERSION = meta.ecs_version;
   const ELASTIC_WEBSITE_URL = meta.elasticWebsiteUrl;
   const DOCS_WEBSITE_URL = meta.docsWebsiteUrl;
   const ELASTIC_GITHUB = meta.elasticGithubUrl;
@@ -479,6 +480,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       privileges: `${SECURITY_SOLUTION_DOCS}endpoint-management-req.html`,
       manageDetectionRules: `${SECURITY_SOLUTION_DOCS}rules-ui-management.html`,
       createEsqlRuleType: `${SECURITY_SOLUTION_DOCS}rules-ui-create.html#create-esql-rule`,
+      ruleUiAdvancedParams: `${SECURITY_SOLUTION_DOCS}rules-ui-create.html#rule-ui-advanced-params`,
       entityAnalytics: {
         riskScorePrerequisites: `${SECURITY_SOLUTION_DOCS}ers-requirements.html`,
         hostRiskScore: `${SECURITY_SOLUTION_DOCS}host-risk-score.html`,
@@ -786,9 +788,14 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       pipelines: isServerless
         ? `${SERVERLESS_DOCS}ingest-pipelines`
         : `${ELASTICSEARCH_DOCS}ingest.html`,
-      csvPipelines: `${ELASTIC_WEBSITE_URL}guide/en/ecs/${DOC_LINK_VERSION}/ecs-converting.html`,
+      csvPipelines: `${ELASTIC_WEBSITE_URL}guide/en/ecs/${ECS_VERSION}/ecs-converting.html`,
       pipelineFailure: `${ELASTICSEARCH_DOCS}ingest.html#handling-pipeline-failures`,
       processors: `${ELASTICSEARCH_DOCS}processors.html`,
+      arrayOrJson: `${ELASTICSEARCH_DOCS}processors.html#ingest-process-category-array-json-handling`,
+      dataEnrichment: `${ELASTICSEARCH_DOCS}processors.html#ingest-process-category-data-enrichment`,
+      dataFiltering: `${ELASTICSEARCH_DOCS}processors.html#ingest-process-category-data-filtering`,
+      dataTransformation: `${ELASTICSEARCH_DOCS}processors.html#ingest-process-category-data-transformation`,
+      pipelineHandling: `${ELASTICSEARCH_DOCS}processors.html#ingest-process-category-pipeline-handling`,
       remove: `${ELASTICSEARCH_DOCS}remove-processor.html`,
       rename: `${ELASTICSEARCH_DOCS}rename-processor.html`,
       script: `${ELASTICSEARCH_DOCS}script-processor.html`,
@@ -840,7 +847,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       scalingKubernetesResourcesAndLimits: `${FLEET_DOCS}scaling-on-kubernetes.html#_specifying_resources_and_limits_in_agent_manifests`,
     },
     ecs: {
-      guide: `${ELASTIC_WEBSITE_URL}guide/en/ecs/current/index.html`,
+      guide: `${ELASTIC_WEBSITE_URL}guide/en/ecs/${ECS_VERSION}/index.html`,
     },
     clients: {
       /** Changes to these URLs must also be synched in src/plugins/custom_integrations/server/language_clients/index.ts */
