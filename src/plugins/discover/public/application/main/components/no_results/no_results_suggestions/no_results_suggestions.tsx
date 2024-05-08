@@ -83,13 +83,13 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = ({
     if (status === TimeRangeExtendingStatus.failed) {
       toastNotifications.addDanger(
         i18n.translate('discover.noResults.suggestion.expandTimeRangeFailedNotification', {
-          defaultMessage: 'Request failed when searching the full time range of documents',
+          defaultMessage: 'Request failed when searching the entire time range of documents',
         })
       );
     } else if (status === TimeRangeExtendingStatus.timedOut) {
       toastNotifications.addDanger(
         i18n.translate('discover.noResults.suggestion.expandTimeRangeTimedOutNotification', {
-          defaultMessage: 'Request timed out when searching the full time range of documents',
+          defaultMessage: 'Request timed out when searching the entire time range of documents',
         })
       );
     }
@@ -171,7 +171,7 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = ({
             >
               <FormattedMessage
                 id="discover.noResults.suggestion.searchAllMatchesButtonText"
-                defaultMessage="Search full time range"
+                defaultMessage="Search entire time range"
               />
             </EuiButton>
           </div>
