@@ -30,7 +30,8 @@ export default ({ getService }: FtrProviderContext) => {
     return body;
   }
 
-  describe('field_caps', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/182837
+  describe.skip('field_caps', function () {
     // Failing ES Forward Compatibility: https://github.com/elastic/kibana/issues/182514
     this.onlyEsVersion('>=8');
     before(async () => {
