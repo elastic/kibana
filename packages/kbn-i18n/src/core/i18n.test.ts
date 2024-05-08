@@ -7,7 +7,7 @@
  */
 
 import * as i18nModule from './i18n';
-import type { Translation } from '../translation';
+import type { Translation, TranslationInput } from '../translation';
 import { Formats, defaultEnFormats } from './formats';
 
 const createExpectedTranslations = (
@@ -695,7 +695,7 @@ describe('I18n engine', () => {
     });
 
     test('initializes engine with received translations', async () => {
-      const translations: Omit<Translation, 'defaultLocale'> = {
+      const translations: TranslationInput = {
         locale: 'en-XA',
         formats: {
           number: { currency: { style: 'currency' } },
