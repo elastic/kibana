@@ -60,14 +60,7 @@ export class TabbedAggResponseWriter {
       rowBuffer[metric.id] = metric.value;
     }
 
-    let isPartialRow = false;
-    for (let i = 0; i < this.columns.length; i++) {
-      const column = this.columns[i];
-      if (!rowBuffer.hasOwnProperty(column.id)) {
-        isPartialRow = true;
-        break;
-      }
-    }
+    const isPartialRow = !this.columns.every((column) => rowBuffer.hasOwnProperty(column.id));
 
     const removePartial = isPartialRow && !this.partialRows;
     if (!isEmpty(rowBuffer) && !removePartial) {

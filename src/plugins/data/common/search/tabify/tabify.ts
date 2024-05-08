@@ -152,10 +152,16 @@ export function tabifyAggResponse(
   respOpts?: Partial<TabbedResponseWriterOptions>
 ): Datatable {
   const write = new TabbedAggResponseWriter(aggConfigs, respOpts || {});
-  // Check whether there's a time shift for a count operation at root level
-  const hasMultipleDocCountAtRootWithFilters = Object.keys(esResponse.aggregations ?? {}).some(
-    hasDocCount
-  );
+
+  let hasMultipleDocCountAtRootWithFilters = false;
+  if (esResponse.aggregations) {
+    for (const key in esResponse.aggregations) {
+      if (hasDocCount(key)) {
+        hasMultipleDocCountAtRootWithFilters = true;
+        break;
+      }
+    }
+  }
 
   const topLevelBucket: AggResponseBucket = {
     ...(aggConfigs.isSamplingEnabled()
