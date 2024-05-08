@@ -35,7 +35,7 @@ import type {
 } from '@elastic/react-search-ui-views';
 import type { SearchContextState } from '@elastic/search-ui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedHTMLMessage } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { indexHealthToHealthColor } from '../../../../shared/constants/health_colors';
 
@@ -163,7 +163,7 @@ export const SearchBar: React.FC<InputProps> = ({ additionalInputProps }) => (
 );
 export const PagingInfoView: React.FC<PagingInfoViewProps> = ({ start, end, totalResults }) => (
   <EuiText size="s">
-    <FormattedHTMLMessage
+    <FormattedMessage
       tagName="p"
       id="xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.pagingInfo.text"
       defaultMessage="Showing <strong>{start}-{end}</strong> of {totalResults}"
@@ -171,7 +171,7 @@ export const PagingInfoView: React.FC<PagingInfoViewProps> = ({ start, end, tota
         end,
         start,
         totalResults,
-        strong: (chunks) => `<strong>${chinks}</strong>`,
+        strong: (chunks) => `<strong>${chunks}</strong>`,
       }}
     />
   </EuiText>
