@@ -5,6 +5,11 @@
  * 2.0.
  */
 
-export { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { SloUiCommonServiceProvider } from './common';
 
-export { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+export function SloUiServiceProvider(context: FtrProviderContext) {
+  return {
+    common: SloUiCommonServiceProvider(context),
+  };
+}
