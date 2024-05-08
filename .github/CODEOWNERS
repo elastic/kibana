@@ -1032,12 +1032,6 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 x-pack/test/observability_ai_assistant_api_integration @elastic/obs-ai-assistant
 x-pack/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
 
-# Observability robots
-/.github/workflows/deploy-my-kibana.yml @elastic/observablt-robots
-/.github/workflows/undeploy-my-kibana.yml @elastic/observablt-robots
-/.github/workflows/oblt-github-commands @elastic/observablt-robots
-
-
 # Infra Monitoring
 ## This plugin mostly contains the codebase for the infra services, but also includes some code for the Logs UI app.
 ## To keep @elastic/obs-ux-logs-team as codeowner of the plugin manifest without requiring a review for all the other code changes
