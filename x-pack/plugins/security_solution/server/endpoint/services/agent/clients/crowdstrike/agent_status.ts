@@ -80,7 +80,7 @@ export const getCrowdstrikeAgentStatus = async ({
       },
     })) as ActionTypeExecutorResult<CrowdstrikeGetAgentOnlineStatusResponse>;
   } catch (error) {
-    throw new CrowdstrikeError(error.message);
+    throw new Error(error.message);
   }
 
   const agentDetailsById = keyBy(agentDetailsResponse.data?.resources, 'device_id');
