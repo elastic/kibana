@@ -873,7 +873,7 @@ export class ExecutionHandler<
               const prevActionGroupAction = this.rule.actions.find(
                 (a) => a.group === previousActionGroup
               );
-              if (!!prevActionGroupAction) {
+              if (!!prevActionGroupAction && prevActionGroupAction.doAutoRecover) {
                 executables.push({ action: prevActionGroupAction, alert, isImproving });
               }
             }
