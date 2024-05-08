@@ -16,7 +16,7 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { FIELD_TYPES, UseField } from '../../../../shared_imports';
+import { UseField } from '../../../../shared_imports';
 import { useNameField } from './use_name_field';
 import { useTypeField } from './use_type_field';
 import * as i18n from './translations';
@@ -62,7 +62,6 @@ export const RequiredFieldRow = ({
     RequiredFieldInput
   > = useMemo(
     () => ({
-      type: FIELD_TYPES.JSON,
       deserializer: (value) => {
         const rowValueWithoutEcs: RequiredFieldInput = {
           name: value.name,
