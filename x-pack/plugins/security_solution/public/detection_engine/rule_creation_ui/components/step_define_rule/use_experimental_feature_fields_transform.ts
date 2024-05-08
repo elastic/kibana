@@ -7,6 +7,8 @@
 
 import { useCallback } from 'react';
 import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { isMlRule } from '../../../../../common/detection_engine/utils';
 
 /**
  * transforms  DefineStepRule fields according to experimental feature flags
@@ -14,9 +16,29 @@ import type { DefineStepRule } from '../../../../detections/pages/detection_engi
 export const useExperimentalFeatureFieldsTransform = <T extends Partial<DefineStepRule>>(): ((
   fields: T
 ) => T) => {
-  const transformer = useCallback((fields: T) => {
-    return fields;
-  }, []);
+  const isAlertSuppressionForMachineLearningRuleEnabled = useIsExperimentalFeatureEnabled(
+    'alertSuppressionForMachineLearningRuleEnabled'
+  );
+
+  const transformer = useCallback(
+    (fields: T) => {
+      const isSuppressionDisabled =
+        isMlRule(fields.ruleType) && !isAlertSuppressionForMachineLearningRuleEnabled;
+
+      if (isSuppressionDisabled) {
+        return {
+          ...fields,
+          groupByFields: [],
+          groupByRadioSelection: undefined,
+          groupByDuration: undefined,
+          suppressionMissingFields: undefined,
+        };
+      }
+
+      return fields;
+    },
+    [isAlertSuppressionForMachineLearningRuleEnabled]
+  );
 
   return transformer;
 };

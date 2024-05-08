@@ -36,4 +36,22 @@ describe('useAlertSuppression', () => {
 
     expect(result.current.isSuppressionEnabled).toBe(false);
   });
+
+  describe('ML rules', () => {
+    it('is true if the feature flag is enabled', () => {
+      jest
+        .spyOn(useIsExperimentalFeatureEnabledMock, 'useIsExperimentalFeatureEnabled')
+        .mockReset()
+        .mockReturnValue(true);
+      const { result } = renderHook(() => useAlertSuppression('machine_learning'));
+
+      expect(result.current.isSuppressionEnabled).toBe(true);
+    });
+
+    it('is false if the feature flag is disabled', () => {
+      const { result } = renderHook(() => useAlertSuppression('machine_learning'));
+
+      expect(result.current.isSuppressionEnabled).toBe(false);
+    });
+  });
 });
