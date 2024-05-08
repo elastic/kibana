@@ -55,7 +55,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
     await apmSynthtraceEsClient.index(documents);
   }
 
-  async function createOpenAiConnector(proxy: LlmProxy) {
+  async function createConnector(proxy: LlmProxy) {
     await supertest
       .post('/api/actions/connector')
       .set('kbn-xsrf', 'foo')
@@ -81,16 +81,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         .expect(204);
     });
 
-    try {
-      await Promise.all(promises);
-    } catch (e) {
-      if (e?.response?.status === 404) {
-        return;
-      }
-
-      log.debug('Error deleting connector');
-      throw e;
-    }
+    return Promise.all(promises);
   }
 
   async function navigateToError() {
@@ -101,9 +92,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
     await testSubjects.click('errorGroupId');
   }
 
-  describe('Contextual insights for APM errors', () => {
-    let proxy: LlmProxy;
-
+  describe.only('Contextual insights for APM errors', () => {
     before(async () => {
       await Promise.all([
         deleteConnectors(), // cleanup previous connectors
@@ -111,8 +100,16 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       ]);
 
       await Promise.all([
-        createSynthtraceErrors(), // synthtrace data
+        createSynthtraceErrors(), // create synthtrace
         ui.auth.login(), // login
+      ]);
+    });
+
+    after(async () => {
+      await Promise.all([
+        deleteConnectors(), // cleanup previous connectors
+        apmSynthtraceEsClient.clean(), // cleanup synthtrace data
+        ui.auth.logout(), // logout
       ]);
     });
 
@@ -124,9 +121,15 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
     });
 
     describe('when there are connectors', () => {
+      let proxy: LlmProxy;
+
       before(async () => {
         proxy = await createLlmProxy(log);
-        await createOpenAiConnector(proxy);
+        await createConnector(proxy);
+      });
+
+      after(async () => {
+        proxy.close();
       });
 
       it('should show the contextual insight component on the APM error details page', async () => {
@@ -148,15 +151,6 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         });
 
         await waitForIntercept;
-      });
-
-      after(async () => {
-        await Promise.all([
-          deleteConnectors(), // cleanup previous connectors
-          apmSynthtraceEsClient.clean(), // cleanup synthtrace data
-          ui.auth.logout(), // logout
-        ]);
-        proxy.close();
       });
     });
   });
