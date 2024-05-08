@@ -8,12 +8,7 @@
 
 import React from 'react';
 
-const getLabel = (
-  node: Record<string, unknown>,
-  i: number,
-  isRootElement: boolean | undefined,
-  parent: unknown
-) => {
+const getLabel = (node: Record<string, unknown>, i: number, parent: unknown) => {
   const childIsArray = Array.isArray(node);
   const childIsObjectLiteral = typeof node === 'object' && !childIsArray;
   const numChildren = Object.keys(node).length;
@@ -39,15 +34,13 @@ const getLabel = (
 export const Label = ({
   node,
   i,
-  isRootElement,
   parent,
 }: {
   node: Record<string, unknown>;
   i: number;
-  isRootElement?: boolean;
   parent?: unknown;
 }) => {
-  const { text, decorator } = getLabel(node, i, isRootElement, parent) ?? {};
+  const { text, decorator } = getLabel(node, i, parent) ?? {};
   return (
     <span>
       {text}

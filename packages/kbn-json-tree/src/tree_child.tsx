@@ -68,7 +68,6 @@ export const TreeChild = ({
   const itemLabelProps = {
     node,
     i,
-    isRootElement,
     parent,
   };
 
