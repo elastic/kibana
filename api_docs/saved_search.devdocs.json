@@ -1233,9 +1233,9 @@
               "Observable",
               "<",
               {
-                "pluginId": "data",
+                "pluginId": "@kbn/search-types",
                 "scope": "common",
-                "docId": "kibDataSearchPluginApi",
+                "docId": "kibKbnSearchTypesPluginApi",
                 "section": "def-common.IKibanaSearchResponse",
                 "text": "IKibanaSearchResponse"
               },
