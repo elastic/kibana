@@ -649,7 +649,7 @@ export function MachineLearningJobWizardCommonProvider(
       });
     },
 
-    async setShortDurationTimeRange(shortDurationEndDate: string) {
+    async setTimeRange(shortDurationEndDate: string) {
       // set the new end date
       await testSubjects.setValue('mlJobWizardDatePickerRangeEndDate', shortDurationEndDate, {
         clearWithKeyboard: true,
