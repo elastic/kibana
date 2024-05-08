@@ -188,7 +188,6 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon G
     const path = `/v1/projects/${this.gcpProjectID}/locations/${this.gcpRegion}/publishers/google/models/${currentModel}:generateContent`;
     const accessToken = this.secrets.accessToken;
     const data = JSON.stringify(JSON.parse(body)['messages']);
-    // const path = `/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
 
     const requestArgs = {
       url: `${this.url}${path}`,
