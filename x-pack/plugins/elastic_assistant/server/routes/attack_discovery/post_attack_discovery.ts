@@ -143,12 +143,13 @@ export const postAttackDiscoveryRoute = (
             });
           }
 
-          const parsedAttackDiscoveries = JSON.parse(rawAttackDiscoveries);
+          const { alertsContextCount, attackDiscoveries } = JSON.parse(rawAttackDiscoveries);
 
           return response.ok({
             body: {
+              alertsContextCount,
+              attackDiscoveries,
               connector_id: connectorId,
-              attackDiscoveries: parsedAttackDiscoveries,
               replacements: latestReplacements,
             },
           });
