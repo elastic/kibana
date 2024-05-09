@@ -21,8 +21,18 @@ import { TimelineContext } from '../../../timelines/components/timeline';
 import { TableContext } from '../events_viewer/shared';
 
 type CellActionsWrapperProps = PropsWithChildren<{
+  /**
+   * The `dataProvider` is used to retrieve the `field` and `value` for the cell actions execution.
+   * */
   dataProvider: DataProvider;
+  /**
+   * The `hideTopN` is used hide the show top N action. Defaults to `false`.
+   * */
   hideTopN?: boolean;
+  /**
+   * The `scopeId` is used to determine the context of the cell actions execution.
+   * If not provided this component will try to retrieve the timeline id or the table id from the context, in that order.
+   * */
   scopeId?: string;
 }>;
 
