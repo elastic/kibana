@@ -401,11 +401,9 @@ describe('validation logic', () => {
       testErrorsAndWarnings('f', [
         `SyntaxError: mismatched input 'f' expecting {'explain', 'from', 'meta', 'row', 'show'}`,
       ]);
-      testErrorsAndWarnings(`from `, [
-        "SyntaxError: missing {QUOTED_IDENTIFIER, FROM_UNQUOTED_IDENTIFIER} at '<EOF>'",
-      ]);
+      testErrorsAndWarnings(`from `, ["SyntaxError: missing FROM_UNQUOTED_IDENTIFIER at '<EOF>'"]);
       testErrorsAndWarnings(`from index,`, [
-        "SyntaxError: missing {QUOTED_IDENTIFIER, FROM_UNQUOTED_IDENTIFIER} at '<EOF>'",
+        "SyntaxError: missing FROM_UNQUOTED_IDENTIFIER at '<EOF>'",
       ]);
       testErrorsAndWarnings(`from assignment = 1`, [
         "SyntaxError: mismatched input '=' expecting <EOF>",
@@ -414,7 +412,10 @@ describe('validation logic', () => {
       testErrorsAndWarnings(`from index`, []);
       testErrorsAndWarnings(`FROM index`, []);
       testErrorsAndWarnings(`FrOm index`, []);
-      testErrorsAndWarnings('from `index`', []);
+      testErrorsAndWarnings('from `index`', [
+        "SyntaxError: token recognition error at: '`'",
+        "SyntaxError: token recognition error at: '`'",
+      ]);
 
       testErrorsAndWarnings(`from index, other_index`, []);
       testErrorsAndWarnings(`from index, missingIndex`, ['Unknown index [missingIndex]']);
