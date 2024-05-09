@@ -60,15 +60,19 @@ export async function createIndexConnector({
 
 export async function createSlackConnector({
   supertestWithoutAuth,
+  roleAuthc,
+  internalReqHeader,
   name,
 }: {
   supertestWithoutAuth: SupertestWithoutAuthType;
+  roleAuthc: RoleCredentials;
+  internalReqHeader: InternalRequestHeader;
   name: string;
 }) {
   const { body } = await supertestWithoutAuth
     .post(`/api/actions/connector`)
-    .set('kbn-xsrf', 'foo')
-    .set('x-elastic-internal-origin', 'foo')
+    .set(internalReqHeader)
+    .set(roleAuthc.apiKeyHeader)
     .send({
       name,
       config: {},
@@ -296,37 +300,45 @@ export async function createInventoryRule({
 
 export async function disableRule({
   supertestWithoutAuth,
+  roleAuthc,
+  internalReqHeader,
   ruleId,
 }: {
   supertestWithoutAuth: SupertestWithoutAuthType;
+  roleAuthc: RoleCredentials;
+  internalReqHeader: InternalRequestHeader;
   ruleId: string;
 }) {
   const { body } = await supertestWithoutAuth
     .post(`/api/alerting/rule/${ruleId}/_disable`)
-    .set('kbn-xsrf', 'foo')
-    .set('x-elastic-internal-origin', 'foo')
+    .set(internalReqHeader)
+    .set(roleAuthc.apiKeyHeader)
     .expect(204);
   return body;
 }
 
 export async function updateEsQueryRule({
   supertestWithoutAuth,
+  roleAuthc,
+  internalReqHeader,
   ruleId,
   updates,
 }: {
   supertestWithoutAuth: SupertestWithoutAuthType;
+  roleAuthc: RoleCredentials;
+  internalReqHeader: InternalRequestHeader;
   ruleId: string;
   updates: any;
 }) {
   const { body: r } = await supertestWithoutAuth
     .get(`/api/alerting/rule/${ruleId}`)
-    .set('kbn-xsrf', 'foo')
-    .set('x-elastic-internal-origin', 'foo')
+    .set(internalReqHeader)
+    .set(roleAuthc.apiKeyHeader)
     .expect(200);
   const body = await supertestWithoutAuth
     .put(`/api/alerting/rule/${ruleId}`)
-    .set('kbn-xsrf', 'foo')
-    .set('x-elastic-internal-origin', 'foo')
+    .set(internalReqHeader)
+    .set(roleAuthc.apiKeyHeader)
     .send({
       ...{
         name: r.name,
@@ -350,92 +362,116 @@ export async function updateEsQueryRule({
 
 export async function runRule({
   supertestWithoutAuth,
+  roleAuthc,
+  internalReqHeader,
   ruleId,
 }: {
   supertestWithoutAuth: SupertestWithoutAuthType;
+  roleAuthc: RoleCredentials;
+  internalReqHeader: InternalRequestHeader;
   ruleId: string;
 }) {
   const response = await supertestWithoutAuth
     .post(`/internal/alerting/rule/${ruleId}/_run_soon`)
-    .set('kbn-xsrf', 'foo')
-    .set('x-elastic-internal-origin', 'foo')
+    .set(internalReqHeader)
+    .set(roleAuthc.apiKeyHeader)
     .expect(204);
   return response;
 }
 
 export async function muteRule({
   supertestWithoutAuth,
+  roleAuthc,
+  internalReqHeader,
   ruleId,
 }: {
   supertestWithoutAuth: SupertestWithoutAuthType;
+  roleAuthc: RoleCredentials;
+  internalReqHeader: InternalRequestHeader;
   ruleId: string;
 }) {
   const { body } = await supertestWithoutAuth
     .post(`/api/alerting/rule/${ruleId}/_mute_all`)
-    .set('kbn-xsrf', 'foo')
-    .set('x-elastic-internal-origin', 'foo')
+    .set(internalReqHeader)
+    .set(roleAuthc.apiKeyHeader)
     .expect(204);
   return body;
 }
 
 export async function enableRule({
   supertestWithoutAuth,
+  roleAuthc,
+  internalReqHeader,
   ruleId,
 }: {
   supertestWithoutAuth: SupertestWithoutAuthType;
+  roleAuthc: RoleCredentials;
+  internalReqHeader: InternalRequestHeader;
   ruleId: string;
 }) {
   const { body } = await supertestWithoutAuth
     .post(`/api/alerting/rule/${ruleId}/_enable`)
-    .set('kbn-xsrf', 'foo')
-    .set('x-elastic-internal-origin', 'foo')
+    .set(internalReqHeader)
+    .set(roleAuthc.apiKeyHeader)
     .expect(204);
   return body;
 }
 
 export async function muteAlert({
   supertestWithoutAuth,
+  roleAuthc,
+  internalReqHeader,
   ruleId,
   alertId,
 }: {
   supertestWithoutAuth: SupertestWithoutAuthType;
+  roleAuthc: RoleCredentials;
+  internalReqHeader: InternalRequestHeader;
   ruleId: string;
   alertId: string;
 }) {
   const { body } = await supertestWithoutAuth
     .post(`/api/alerting/rule/${ruleId}/alert/${alertId}/_mute`)
-    .set('kbn-xsrf', 'foo')
-    .set('x-elastic-internal-origin', 'foo')
+    .set(internalReqHeader)
+    .set(roleAuthc.apiKeyHeader)
     .expect(204);
   return body;
 }
 
 export async function unmuteRule({
   supertestWithoutAuth,
+  roleAuthc,
+  internalReqHeader,
   ruleId,
 }: {
   supertestWithoutAuth: SupertestWithoutAuthType;
+  roleAuthc: RoleCredentials;
+  internalReqHeader: InternalRequestHeader;
   ruleId: string;
 }) {
   const { body } = await supertestWithoutAuth
     .post(`/api/alerting/rule/${ruleId}/_unmute_all`)
-    .set('kbn-xsrf', 'foo')
-    .set('x-elastic-internal-origin', 'foo')
+    .set(internalReqHeader)
+    .set(roleAuthc.apiKeyHeader)
     .expect(204);
   return body;
 }
 
 export async function snoozeRule({
   supertestWithoutAuth,
+  roleAuthc,
+  internalReqHeader,
   ruleId,
 }: {
   supertestWithoutAuth: SupertestWithoutAuthType;
+  roleAuthc: RoleCredentials;
+  internalReqHeader: InternalRequestHeader;
   ruleId: string;
 }) {
   const { body } = await supertestWithoutAuth
     .post(`/internal/alerting/rule/${ruleId}/_snooze`)
-    .set('kbn-xsrf', 'foo')
-    .set('x-elastic-internal-origin', 'foo')
+    .set(internalReqHeader)
+    .set(roleAuthc.apiKeyHeader)
     .send({
       snooze_schedule: {
         duration: 100000000,
@@ -452,9 +488,13 @@ export async function snoozeRule({
 
 export async function findRule({
   supertestWithoutAuth,
+  roleAuthc,
+  internalReqHeader,
   ruleId,
 }: {
   supertestWithoutAuth: SupertestWithoutAuthType;
+  roleAuthc: RoleCredentials;
+  internalReqHeader: InternalRequestHeader;
   ruleId: string;
 }) {
   if (!ruleId) {
@@ -462,7 +502,7 @@ export async function findRule({
   }
   const response = await supertestWithoutAuth
     .get(`/api/alerting/rule/${ruleId}`)
-    .set('kbn-xsrf', 'foo')
-    .set('x-elastic-internal-origin', 'foo');
+    .set(internalReqHeader)
+    .set(roleAuthc.apiKeyHeader);
   return response.body || {};
 }
