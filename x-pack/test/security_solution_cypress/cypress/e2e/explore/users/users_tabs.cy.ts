@@ -20,7 +20,7 @@ import { visitUserDetailsPage, visitWithTimeRange } from '../../../tasks/navigat
 import { usersUrl } from '../../../urls/navigation';
 import { waitForTabToBeLoaded } from '../../../tasks/common';
 
-describe('Users stats and tables', { tags: ['@ess', '@serverless'] }, () => {
+describe('Users stats and tables', { tags: ['@ess', '@serverless', '@serverlessQA'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'users' });
 

@@ -238,25 +238,25 @@ export const INSPECT_BUTTONS_IN_SECURITY: InspectButtonMetadata[] = [
       {
         title: 'User authentications',
         panelSelector: AUTHENTICATION_VISUALIZATION,
-        embeddableId: 'usersKpiAuthenticationsQuery-authenticationsSuccess-metric-embeddable',
+        embeddableId: 'usersKpiAuthentications-authenticationsSuccess-metric-embeddable',
         tab: ALL_USERS_TAB,
       },
       {
         title: 'User authentications',
         panelSelector: AUTHENTICATION_VISUALIZATION,
-        embeddableId: 'usersKpiAuthenticationsQuery-authenticationsFailure-metric-embeddable',
+        embeddableId: 'usersKpiAuthentications-authenticationsFailure-metric-embeddable',
         tab: ALL_USERS_TAB,
       },
       {
         title: 'User authentications',
         panelSelector: AUTHENTICATION_VISUALIZATION,
-        embeddableId: 'usersKpiAuthenticationsQuery-bar-embeddable',
+        embeddableId: 'usersKpiAuthentications-bar-embeddable',
         tab: ALL_USERS_TAB,
       },
       {
         title: 'User authentications',
         panelSelector: AUTHENTICATION_VISUALIZATION,
-        embeddableId: 'usersKpiAuthenticationsQuery-area-embeddable',
+        embeddableId: 'usersKpiAuthentications-area-embeddable',
         tab: ALL_USERS_TAB,
       },
       {

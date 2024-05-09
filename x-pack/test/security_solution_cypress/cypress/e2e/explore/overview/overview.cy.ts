@@ -18,7 +18,7 @@ import { getTimeline } from '../../../objects/timeline';
 
 const mockTimeline = getTimeline();
 
-describe('Overview Page', { tags: ['@ess', '@serverless'] }, () => {
+describe('Overview Page', { tags: ['@ess', '@serverless', '@serverlessQA'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'overview' });
   });

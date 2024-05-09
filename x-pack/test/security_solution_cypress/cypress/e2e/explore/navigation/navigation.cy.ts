@@ -265,7 +265,7 @@ describe('Kibana navigation to all pages in the Security app ', { tags: '@ess' }
   });
 });
 
-describe('Serverless side navigation links', { tags: '@serverless' }, () => {
+describe('Serverless side navigation links', { tags: ['@serverless', '@serverlessQA'] }, () => {
   beforeEach(() => {
     login();
     visitGetStartedPage();
