@@ -331,7 +331,7 @@ const uploadPipeline = (pipelineContent: string | object) => {
     }
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
-
+    console.log(JSON.stringify(pipeline));
     // remove duplicated steps
     uploadPipeline([...new Set(pipeline)].join('\n'));
   } catch (ex) {
