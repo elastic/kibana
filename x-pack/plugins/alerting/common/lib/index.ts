@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE = 'data_visualizer_grid';
+export { validateBackfillSchedule } from './validate_backfill_schedule';

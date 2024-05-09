@@ -5,8 +5,14 @@
  * 2.0.
  */
 
+import type {
+  KnowledgeBaseConfig,
+  TraceOptions,
+} from '@kbn/elastic-assistant/impl/assistant/types';
+import type { AttackDiscoveryPostRequestBody } from '@kbn/elastic-assistant-common';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import type { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { isEmpty } from 'lodash/fp';
 
 // aligns with OpenAiProviderType from '@kbn/stack-connectors-plugin/common/openai/types'
 enum OpenAiProviderType {
@@ -48,3 +54,49 @@ const getAzureApiVersionParameter = (url: string): string | undefined => {
   const urlSearchParams = new URLSearchParams(new URL(url).search);
   return urlSearchParams.get('api-version') ?? undefined;
 };
+
+export const getRequestBody = ({
+  actionTypeId,
+  alertsIndexPattern,
+  anonymizationFields,
+  connectorId,
+  knowledgeBase,
+  traceOptions,
+}: {
+  actionTypeId: string;
+  alertsIndexPattern: string | undefined;
+  anonymizationFields: {
+    page: number;
+    perPage: number;
+    total: number;
+    data: Array<{
+      id: string;
+      field: string;
+      timestamp?: string | undefined;
+      allowed?: boolean | undefined;
+      anonymized?: boolean | undefined;
+      updatedAt?: string | undefined;
+      updatedBy?: string | undefined;
+      createdAt?: string | undefined;
+      createdBy?: string | undefined;
+      namespace?: string | undefined;
+    }>;
+  };
+  connectorId: string | undefined;
+  knowledgeBase: KnowledgeBaseConfig;
+  traceOptions: TraceOptions;
+}): AttackDiscoveryPostRequestBody => ({
+  actionTypeId,
+  alertsIndexPattern: alertsIndexPattern ?? '',
+  anonymizationFields: anonymizationFields?.data ?? [],
+  connectorId: connectorId ?? '',
+  langSmithProject: isEmpty(traceOptions?.langSmithProject)
+    ? undefined
+    : traceOptions?.langSmithProject,
+  langSmithApiKey: isEmpty(traceOptions?.langSmithApiKey)
+    ? undefined
+    : traceOptions?.langSmithApiKey,
+  size: knowledgeBase.latestAlerts,
+  replacements: {}, // no need to re-use replacements in the current implementation
+  subAction: 'invokeAI', // non-streaming
+});
