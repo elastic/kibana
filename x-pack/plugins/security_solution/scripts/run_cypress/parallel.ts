@@ -218,6 +218,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               const abortCtrl = new AbortController();
 
               const onEarlyExit = (msg: string) => {
+                failedSpecFilePaths.push(filePath);
                 log.error(msg);
                 abortCtrl.abort();
               };
