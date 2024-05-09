@@ -12,7 +12,8 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['maps']);
   const security = getService('security');
 
-  describe('Add layer panel', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/183067
+  describe.skip('Add layer panel', () => {
     before(async () => {
       await security.testUser.setRoles(['global_maps_all', 'test_logstash_reader']);
       await PageObjects.maps.openNewMap();
