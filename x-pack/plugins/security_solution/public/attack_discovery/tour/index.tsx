@@ -98,6 +98,7 @@ const AttackDiscoveryTourComp = () => {
   const isElementAtCurrentStepMounted = useIsElementMounted(attackDiscoveryTourStepOne?.anchor);
 
   if (
+    window.Cypress != null || // TODO: temporary workaround to disable the tour when running Cypress, because it breaks non-security Cypress suites
     !tourState.isTourActive ||
     (tourState.currentTourStep === 1 && !isElementAtCurrentStepMounted)
   ) {
