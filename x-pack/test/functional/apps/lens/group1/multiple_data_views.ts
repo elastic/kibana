@@ -23,37 +23,55 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
   const filterBar = getService('filterBar');
   const elasticChart = getService('elasticChart');
-  const fieldEditor = getService('fieldEditor');
-  const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  const browser = getService('browser');
-  const dataViews = getService('dataViews');
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
 
-  const expectedData = [
-    { x: '97.220.3.248', y: 19755 },
-    { x: '169.228.188.120', y: 18994 },
-    { x: '78.83.247.30', y: 17246 },
-    { x: '226.82.228.233', y: 15687 },
-    { x: '93.28.27.24', y: 15614.33 },
-    { x: 'Other', y: 5722.77 },
+  const expectedLogstashData = [
+    { x: 1540278360000, y: 4735 },
+    { x: 1540280820000, y: 2836 },
+  ];
+  const expectedFlightsData = [
+    { x: 1540278720000, y: 12993.16 },
+    { x: 1540279080000, y: 7927.47 },
+    { x: 1540279500000, y: 7548.66 },
+    { x: 1540280400000, y: 8418.08 },
+    { x: 1540280580000, y: 11577.86 },
+    { x: 1540281060000, y: 8088.12 },
+    { x: 1540281240000, y: 6943.55 },
   ];
 
-  function assertMatchesExpectedData(state: DebugState) {
+  function assertMatchesExpectedData(
+    state: DebugState,
+    expectedData: Array<Array<{ x: number; y: number }>>
+  ) {
     expect(
-      state.bars![0].bars.map((bar) => ({
-        x: bar.x,
-        y: Math.floor(bar.y * 100) / 100,
-      }))
+      state?.bars?.map(({ bars }) =>
+        bars.map((bar) => ({
+          x: bar.x,
+          y: Math.floor(bar.y * 100) / 100,
+        }))
+      )
     ).to.eql(expectedData);
   }
 
   describe('lens with multiple data views', () => {
+    const visTitle = 'xyChart with multiple data views';
+
     before(async () => {
+      await PageObjects.common.setTime({
+        from: 'Oct 23, 2018 @ 07:00:00.000',
+        to: 'Oct 23, 2018 @ 08:00:00.000',
+      });
+
       await esArchiver.load('test/functional/fixtures/es_archiver/kibana_sample_data_flights');
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
+      );
+
+      await esArchiver.load('test/functional/fixtures/es_archiver/long_window_logstash');
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/long_window_logstash_index_pattern'
       );
       await PageObjects.common.navigateToApp('lens');
     });
@@ -64,19 +82,43 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.unload(
         'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
       );
+      await esArchiver.unload('test/functional/fixtures/es_archiver/long_window_logstash');
+      await kibanaServer.importExport.unload(
+        'test/functional/fixtures/kbn_archiver/long_window_logstash_index_pattern'
+      );
     });
 
     it('should allow building a chart with multiple data views', async () => {
-      PageObjects.lens.clickField('bytes');
-      PageObjects.lens.createLayer('data');
+      await elasticChart.setNewChartUiDebugFlag(true);
+
+      // Logstash layer
+      await PageObjects.lens.switchDataPanelIndexPattern('long-window-logstash-*');
+      await testSubjects.click('fieldToggle-bytes');
+
+      // Flights layer
+      await PageObjects.lens.switchDataPanelIndexPattern('kibana_sample_data_flights');
+      await PageObjects.lens.createLayer('data');
+      await testSubjects.click('fieldToggle-DistanceKilometers');
+
+      const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
+      assertMatchesExpectedData(data, [expectedLogstashData, expectedFlightsData]);
     });
 
     it('ignores global filters on layers using a data view without the filter field by default', async () => {
       await filterBar.addFilter({ field: 'Carrier', operation: 'exists' });
+      const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
+      assertMatchesExpectedData(data, [expectedLogstashData, expectedFlightsData]);
+      await PageObjects.lens.save(visTitle);
     });
 
     it('applies global filters on layers using data view a without the filter field', async () => {
       await kibanaServer.uiSettings.update({ 'courier:ignoreFilterIfFieldNotInIndex': false });
+      await PageObjects.common.navigateToApp('visualize');
+      await elasticChart.setNewChartUiDebugFlag(true);
+
+      await PageObjects.visualize.openSavedVisualization(visTitle);
+      const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
+      assertMatchesExpectedData(data, [expectedFlightsData]);
     });
   });
 }
