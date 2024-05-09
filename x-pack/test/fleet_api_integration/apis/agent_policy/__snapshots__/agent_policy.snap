@@ -3,7 +3,6 @@
 exports[`Agent policies fleet_agent_policies GET /api/fleet/agent_policies should get a list of agent policies by kuery 1`] = `
 Object {
   "agents": 0,
-  "id": "522b13ab-ec6b-4d87-8957-4ceb524e9920",
   "inactivity_timeout": 1209600,
   "is_managed": false,
   "is_protected": false,
@@ -13,7 +12,6 @@ Object {
   "schema_version": "1.1.1",
   "status": "active",
   "unprivileged_agents": 0,
-  "updated_at": "2024-05-08T23:28:02.820Z",
   "updated_by": "elastic",
 }
 `;
@@ -21,7 +19,6 @@ Object {
 exports[`Agent policies fleet_agent_policies POST /api/fleet/agent_policies/_bulk_get should populate package_policies if called with ?full=true 1`] = `
 Object {
   "agents": 0,
-  "id": "0200c8d6-7380-47b9-b326-5534587709b8",
   "inactivity_timeout": 1209600,
   "is_managed": false,
   "is_protected": false,
@@ -29,10 +26,8 @@ Object {
   "namespace": "default",
   "package_policies": Array [
     Object {
-      "created_at": "2024-05-08T23:28:19.803Z",
       "created_by": "elastic",
       "enabled": true,
-      "id": "1e269f28-853f-4011-9bfc-a49c93fc414c",
       "name": "system-1",
       "namespace": "default",
       "package": Object {
@@ -40,18 +35,14 @@ Object {
         "title": "System",
         "version": "1.56.0",
       },
-      "policy_id": "0200c8d6-7380-47b9-b326-5534587709b8",
       "revision": 1,
-      "updated_at": "2024-05-08T23:28:19.803Z",
       "updated_by": "elastic",
-      "version": "WzEyNjQsMV0=",
     },
   ],
   "revision": 1,
   "schema_version": "1.1.1",
   "status": "active",
   "unprivileged_agents": 0,
-  "updated_at": "2024-05-08T23:28:16.946Z",
   "updated_by": "elastic",
 }
 `;
