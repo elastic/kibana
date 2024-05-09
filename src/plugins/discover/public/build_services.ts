@@ -57,6 +57,7 @@ import type { ContentClient } from '@kbn/content-management-plugin/public';
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import { memoize, noop } from 'lodash';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
+import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
 import { DiscoverStartPlugins } from './plugin';
 import { DiscoverContextAppLocator } from './application/context/services/locator';
 import { DiscoverSingleDocLocator } from './application/doc/locator';
@@ -107,6 +108,7 @@ export interface DiscoverServices {
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   dataViewEditor: DataViewEditorStart;
+  dataVisualizer?: DataVisualizerPluginStart;
   http: HttpStart;
   storage: Storage;
   spaces?: SpacesApi;
@@ -162,6 +164,7 @@ export const buildServices = memoize(
       chrome: core.chrome,
       core,
       data: plugins.data,
+      dataVisualizer: plugins.dataVisualizer,
       docLinks: core.docLinks,
       embeddable: plugins.embeddable,
       i18n: core.i18n,
