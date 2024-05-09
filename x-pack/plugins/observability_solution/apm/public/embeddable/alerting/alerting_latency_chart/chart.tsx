@@ -25,9 +25,7 @@ export function APMAlertingLatencyChart({
   latencyThresholdInMicroseconds,
   kuery = '',
   filters,
-}: EmbeddableApmAlertingLatencyVizProps & {
-  latencyThresholdInMicroseconds?: number;
-}) {
+}: EmbeddableApmAlertingLatencyVizProps) {
   const {
     transactionType: currentTransactionType,
     transactionTypes,

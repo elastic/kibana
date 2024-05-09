@@ -20,7 +20,7 @@ export function LatencyAggregationTypeSelect({
   latencyAggregationType,
   onChange,
 }: {
-  latencyAggregationType: LatencyAggregationType;
+  latencyAggregationType?: LatencyAggregationType;
   onChange: (value: LatencyAggregationType) => void;
 }) {
   return (
