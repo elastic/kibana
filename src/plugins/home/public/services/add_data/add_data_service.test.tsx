@@ -14,16 +14,16 @@ describe('AddDataService', () => {
     test('allows multiple register directory header link calls', () => {
       const setup = new AddDataService().setup();
       expect(() => {
-        setup.registerAddDataTab({ id: 'abc', name: 'a b c', component: () => <a>123</a> });
-        setup.registerAddDataTab({ id: 'def', name: 'a b c', component: () => <a>456</a> });
+        setup.registerAddDataTab({ id: 'abc', name: 'a b c', getComponent: () => <a>123</a> });
+        setup.registerAddDataTab({ id: 'def', name: 'a b c', getComponent: () => <a>456</a> });
       }).not.toThrow();
     });
 
     test('throws when same directory header link is registered twice', () => {
       const setup = new AddDataService().setup();
       expect(() => {
-        setup.registerAddDataTab({ id: 'abc', name: 'a b c', component: () => <a>123</a> });
-        setup.registerAddDataTab({ id: 'abc', name: 'a b c', component: () => <a>456</a> });
+        setup.registerAddDataTab({ id: 'abc', name: 'a b c', getComponent: () => <a>123</a> });
+        setup.registerAddDataTab({ id: 'abc', name: 'a b c', getComponent: () => <a>456</a> });
       }).toThrow();
     });
   });
@@ -38,8 +38,8 @@ describe('AddDataService', () => {
       const service = new AddDataService();
       const setup = service.setup();
       const links = [
-        { id: 'abc', name: 'a b c', component: () => <a>123</a> },
-        { id: 'def', name: 'a b c', component: () => <a>456</a> },
+        { id: 'abc', name: 'a b c', getComponent: () => <a>123</a> },
+        { id: 'def', name: 'a b c', getComponent: () => <a>456</a> },
       ];
       setup.registerAddDataTab(links[0]);
       setup.registerAddDataTab(links[1]);

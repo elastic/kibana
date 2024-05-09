@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { filter, map } from 'rxjs/operators';
+import { filter, map } from 'rxjs';
 import { createHashHistory } from 'history';
 import { BehaviorSubject } from 'rxjs';
 import {
@@ -105,6 +105,8 @@ import {
   setEmbeddable,
   setDocLinks,
   setSpaces,
+  setAnalytics,
+  setI18n,
   setTheme,
   setExecutionContext,
   setFieldFormats,
@@ -386,6 +388,7 @@ export class VisualizationsPlugin
     }
 
     setUISettings(core.uiSettings);
+    setAnalytics(core.analytics);
     setTheme(core.theme);
 
     expressions.registerFunction(rangeExpressionFunction);
@@ -464,6 +467,7 @@ export class VisualizationsPlugin
   ): VisualizationsStart {
     const types = this.types.start();
     setTypes(types);
+    setI18n(core.i18n);
     setEmbeddable(embeddable);
     setApplication(core.application);
     setCapabilities(core.application.capabilities);

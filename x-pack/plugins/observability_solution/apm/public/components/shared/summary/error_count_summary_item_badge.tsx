@@ -20,8 +20,7 @@ export function ErrorCountSummaryItemBadge({ count }: Props) {
   return (
     <EuiBadge color={theme.eui.euiColorDanger} style={{ maxWidth: '200px' }}>
       {i18n.translate('xpack.apm.transactionDetails.errorCount', {
-        defaultMessage:
-          '{errorCount, number} {errorCount, plural, one {Error} other {Errors}}',
+        defaultMessage: '{errorCount, number} {errorCount, plural, one {Error} other {Errors}}',
         values: { errorCount: count },
       })}
     </EuiBadge>

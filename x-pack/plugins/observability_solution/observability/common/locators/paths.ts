@@ -16,6 +16,7 @@ export const RULES_PATH = '/alerts/rules' as const;
 export const RULES_LOGS_PATH = '/alerts/rules/logs' as const;
 export const RULE_DETAIL_PATH = '/alerts/rules/:ruleId' as const;
 export const CASES_PATH = '/cases' as const;
+export const SETTINGS_PATH = '/slos/settings' as const;
 
 // // SLOs have been moved to its own app (slo). Keeping around for redirecting purposes.
 export const OLD_SLOS_PATH = '/slos' as const;

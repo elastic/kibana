@@ -7,7 +7,7 @@
  */
 
 import { Observable, combineLatest } from 'rxjs';
-import { startWith, map } from 'rxjs/operators';
+import { startWith, map } from 'rxjs';
 import { type ServiceStatus, ServiceStatusLevels } from '@kbn/core-status-common';
 import type { SavedObjectStatusMeta } from '@kbn/core-saved-objects-server';
 import type { KibanaMigratorStatus } from '@kbn/core-saved-objects-base-server-internal';

@@ -8,7 +8,7 @@
 
 import Path from 'path';
 import { firstValueFrom, Observable } from 'rxjs';
-import { filter, map, tap, toArray } from 'rxjs/operators';
+import { filter, map, tap, toArray } from 'rxjs';
 import { getFlattenedObject } from '@kbn/std';
 
 import { Logger } from '@kbn/logging';

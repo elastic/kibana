@@ -13,7 +13,7 @@ import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import type {
   EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
   EmbeddableChangePointType,
-} from '../../common/constants';
+} from '@kbn/aiops-change-point-detection/constants';
 import type { AiopsPluginStart, AiopsPluginStartDeps } from '../types';
 import type { EmbeddableChangePointChartInput } from './embeddable_change_point_chart';
 import { EmbeddableChangePointChart } from './embeddable_change_point_chart';
@@ -68,22 +68,21 @@ export class EmbeddableChangePointChartFactory implements EmbeddableFactoryDefin
   async create(input: EmbeddableChangePointChartInput, parent?: IContainer) {
     try {
       const [
-        { i18n: i18nService, theme, http, uiSettings, notifications },
+        { http, uiSettings, notifications, ...startServices },
         { lens, data, usageCollection, fieldFormats },
       ] = await this.getStartServices();
 
       return new EmbeddableChangePointChart(
         this.type,
         {
-          theme,
           http,
-          i18n: i18nService,
           uiSettings,
           data,
           notifications,
           lens,
           usageCollection,
           fieldFormats,
+          ...startServices,
         },
         input,
         parent

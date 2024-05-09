@@ -26,10 +26,13 @@ import {
   RunActionResponse,
   InvokeAIActionParams,
   InvokeAIActionResponse,
-  StreamActionParams,
   RunApiLatestResponse,
 } from '../../../common/bedrock/types';
-import { SUB_ACTION, DEFAULT_TOKEN_LIMIT } from '../../../common/bedrock/constants';
+import {
+  SUB_ACTION,
+  DEFAULT_TOKEN_LIMIT,
+  DEFAULT_TIMEOUT_MS,
+} from '../../../common/bedrock/constants';
 import {
   DashboardActionParams,
   DashboardActionResponse,
@@ -204,7 +207,12 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
    * @param body The stringified request body to be sent in the POST request.
    * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
    */
-  public async runApi({ body, model: reqModel }: RunActionParams): Promise<RunActionResponse> {
+  public async runApi({
+    body,
+    model: reqModel,
+    signal,
+    timeout,
+  }: RunActionParams): Promise<RunActionResponse> {
     // set model on per request basis
     const currentModel = reqModel ?? this.model;
     const path = `/model/${currentModel}/invoke`;
@@ -214,8 +222,9 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       url: `${this.url}${path}`,
       method: 'post' as Method,
       data: body,
+      signal,
       // give up to 2 minutes for response
-      timeout: 120000,
+      timeout: timeout ?? DEFAULT_TIMEOUT_MS,
     };
     // possible api received deprecated arguments, which will still work with the deprecated Claude 2 models
     if (usesDeprecatedArguments(body)) {
@@ -235,7 +244,9 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
   private async streamApi({
     body,
     model: reqModel,
-  }: StreamActionParams): Promise<StreamingResponse> {
+    signal,
+    timeout,
+  }: RunActionParams): Promise<StreamingResponse> {
     // set model on per request basis
     const path = `/model/${reqModel ?? this.model}/invoke-with-response-stream`;
     const signed = this.signRequest(body, path, true);
@@ -247,6 +258,8 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       responseSchema: StreamingResponseSchema,
       data: body,
       responseType: 'stream',
+      signal,
+      timeout,
     });
 
     return response.data.pipe(new PassThrough());
@@ -266,18 +279,25 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     stopSequences,
     system,
     temperature,
+    signal,
+    timeout,
   }: InvokeAIActionParams): Promise<IncomingMessage> {
     const res = (await this.streamApi({
       body: JSON.stringify(formatBedrockBody({ messages, stopSequences, system, temperature })),
       model,
+      signal,
+      timeout,
     })) as unknown as IncomingMessage;
     return res;
   }
 
   /**
-   * Deprecated. Use invokeStream instead.
-   * TODO: remove once streaming work is implemented in langchain mode for security solution
-   * tracked here: https://github.com/elastic/security-team/issues/7363
+   * Non-streamed security solution AI Assistant requests
+   * Responsible for invoking the runApi method with the provided body.
+   * It then formats the response into a string
+   * @param messages An array of messages to be sent to the API
+   * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
+   * @returns an object with the response string as a property called message
    */
   public async invokeAI({
     messages,
@@ -285,10 +305,14 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     stopSequences,
     system,
     temperature,
+    signal,
+    timeout,
   }: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
     const res = await this.runApi({
       body: JSON.stringify(formatBedrockBody({ messages, stopSequences, system, temperature })),
       model,
+      signal,
+      timeout,
     });
     return { message: res.completion.trim() };
   }
@@ -315,7 +339,6 @@ const formatBedrockBody = ({
 
 /**
  * Ensures that the messages are in the correct format for the Bedrock API
- * Bedrock only accepts assistant and user roles.
  * If 2 user or 2 assistant messages are sent in a row, Bedrock throws an error
  * We combine the messages into a single message to avoid this error
  * @param messages

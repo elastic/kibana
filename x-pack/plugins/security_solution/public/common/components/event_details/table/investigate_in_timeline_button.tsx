@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FC, PropsWithChildren } from 'react';
 import React, { useCallback } from 'react';
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
@@ -32,10 +33,11 @@ export interface InvestigateInTimelineButtonProps {
   keepDataView?: boolean;
   isDisabled?: boolean;
   iconType?: IconType;
+  children?: React.ReactNode;
 }
 
-export const InvestigateInTimelineButton: React.FunctionComponent<
-  InvestigateInTimelineButtonProps
+export const InvestigateInTimelineButton: FC<
+  PropsWithChildren<InvestigateInTimelineButtonProps>
 > = ({
   asEmptyButton,
   children,
@@ -59,15 +61,15 @@ export const InvestigateInTimelineButton: React.FunctionComponent<
     timelineType: hasTemplateProviders ? TimelineType.template : TimelineType.default,
   });
 
-  const configureAndOpenTimeline = useCallback(() => {
+  const configureAndOpenTimeline = useCallback(async () => {
     if (dataProviders || filters) {
       // Reset the current timeline
       if (timeRange) {
-        clearTimeline({
+        await clearTimeline({
           timeRange,
         });
       } else {
-        clearTimeline();
+        await clearTimeline();
       }
       if (dataProviders) {
         // Update the timeline's providers to match the current prevalence field query

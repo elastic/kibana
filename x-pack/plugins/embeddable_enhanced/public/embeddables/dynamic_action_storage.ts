@@ -14,7 +14,7 @@ import {
 import { HasDynamicActions } from './interfaces/has_dynamic_actions';
 
 export type DynamicActionStorageApi = Pick<
-  HasDynamicActions,
+  Required<HasDynamicActions>,
   'setDynamicActions' | 'dynamicActionsState$'
 >;
 export class DynamicActionStorage extends AbstractActionStorage {

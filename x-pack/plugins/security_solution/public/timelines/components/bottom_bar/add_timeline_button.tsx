@@ -48,6 +48,14 @@ export const AddTimelineButton = React.memo<AddTimelineButtonComponentProps>(({ 
     onClick: togglePopover,
   });
 
+  const handleCreateNewTimeline = useCallback(async () => {
+    await createNewTimeline();
+  }, [createNewTimeline]);
+
+  const handleCreateNewTimelineTemplate = useCallback(async () => {
+    await createNewTimelineTemplate();
+  }, [createNewTimelineTemplate]);
+
   const plusButton = useMemo(
     () => (
       <EuiButtonIcon
@@ -77,7 +85,7 @@ export const AddTimelineButton = React.memo<AddTimelineButtonComponentProps>(({ 
                 iconType="plusInCircle"
                 color="text"
                 data-test-subj="timeline-bottom-bar-create-new-timeline"
-                onClick={() => createNewTimeline()}
+                onClick={handleCreateNewTimeline}
               >
                 {i18n.NEW_TIMELINE}
               </EuiButtonEmpty>
@@ -87,7 +95,7 @@ export const AddTimelineButton = React.memo<AddTimelineButtonComponentProps>(({ 
                 iconType="plusInCircle"
                 color="text"
                 data-test-subj="timeline-bottom-bar-create-new-timeline-template"
-                onClick={() => createNewTimelineTemplate()}
+                onClick={handleCreateNewTimelineTemplate}
               >
                 {i18n.NEW_TEMPLATE_TIMELINE}
               </EuiButtonEmpty>

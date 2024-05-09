@@ -59,6 +59,7 @@ describe('TextBasedLanguagesEditor', () => {
     );
   }
   let props: TextBasedLanguagesEditorProps;
+
   beforeEach(() => {
     props = {
       query: { esql: 'from test' },
@@ -122,6 +123,44 @@ describe('TextBasedLanguagesEditor', () => {
     expect(
       component.find('[data-test-subj="TextBasedLangEditor-date-info"]').at(0).text()
     ).toStrictEqual('@timestamp found');
+  });
+
+  it('should render the query history action if isLoading is defined', async () => {
+    const newProps = {
+      ...props,
+      isCodeEditorExpanded: true,
+      isLoading: true,
+    };
+    const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
+    expect(
+      component.find('[data-test-subj="TextBasedLangEditor-toggle-query-history-button-container"]')
+        .length
+    ).not.toBe(0);
+  });
+
+  it('should not render the query history action if isLoading is undefined', async () => {
+    const newProps = {
+      ...props,
+      isCodeEditorExpanded: true,
+    };
+    const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
+    expect(
+      component.find('[data-test-subj="TextBasedLangEditor-toggle-query-history-button-container"]')
+        .length
+    ).toBe(0);
+  });
+
+  it('should not render the query history action if hideQueryHistory is set to true', async () => {
+    const newProps = {
+      ...props,
+      isCodeEditorExpanded: true,
+      hideQueryHistory: true,
+    };
+    const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
+    expect(
+      component.find('[data-test-subj="TextBasedLangEditor-toggle-query-history-button-container"]')
+        .length
+    ).toBe(0);
   });
 
   it('should  render the errors badge for the inline mode by default if errors are provided', async () => {

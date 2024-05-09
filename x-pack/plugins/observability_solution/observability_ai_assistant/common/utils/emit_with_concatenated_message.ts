@@ -5,9 +5,20 @@
  * 2.0.
  */
 
-import { concat, last, map, Observable, shareReplay, withLatestFrom } from 'rxjs';
+import {
+  concat,
+  from,
+  last,
+  mergeMap,
+  Observable,
+  OperatorFunction,
+  shareReplay,
+  withLatestFrom,
+} from 'rxjs';
+import { withoutTokenCountEvents } from './without_token_count_events';
 import {
   ChatCompletionChunkEvent,
+  ChatEvent,
   MessageAddEvent,
   StreamingChatResponseEventType,
 } from '../conversation_complete';
@@ -16,31 +27,47 @@ import {
   ConcatenatedMessage,
 } from './concatenate_chat_completion_chunks';
 
-export function emitWithConcatenatedMessage(
-  callback?: (concatenatedMessage: ConcatenatedMessage) => ConcatenatedMessage
-): (
-  source$: Observable<ChatCompletionChunkEvent>
-) => Observable<ChatCompletionChunkEvent | MessageAddEvent> {
-  return (source$: Observable<ChatCompletionChunkEvent>) => {
+type ConcatenateMessageCallback = (
+  concatenatedMessage: ConcatenatedMessage
+) => Promise<ConcatenatedMessage>;
+
+function mergeWithEditedMessage(
+  originalMessage: ConcatenatedMessage,
+  chunkEvent: ChatCompletionChunkEvent,
+  callback?: ConcatenateMessageCallback
+): Observable<MessageAddEvent> {
+  return from(
+    (callback ? callback(originalMessage) : Promise.resolve(originalMessage)).then((message) => {
+      const next: MessageAddEvent = {
+        type: StreamingChatResponseEventType.MessageAdd as const,
+        id: chunkEvent.id,
+        message: {
+          '@timestamp': new Date().toISOString(),
+          ...message,
+        },
+      };
+      return next;
+    })
+  );
+}
+
+export function emitWithConcatenatedMessage<T extends ChatEvent>(
+  callback?: ConcatenateMessageCallback
+): OperatorFunction<T, T | MessageAddEvent> {
+  return (source$) => {
     const shared = source$.pipe(shareReplay());
+
+    const withoutTokenCount$ = shared.pipe(withoutTokenCountEvents());
 
     const response$ = concat(
       shared,
       shared.pipe(
+        withoutTokenCountEvents(),
         concatenateChatCompletionChunks(),
         last(),
-        withLatestFrom(source$),
-        map(([message, chunkEvent]) => {
-          const next: MessageAddEvent = {
-            type: StreamingChatResponseEventType.MessageAdd as const,
-            id: chunkEvent.id,
-            message: {
-              '@timestamp': new Date().toISOString(),
-              ...(callback ? callback(message) : message),
-            },
-          };
-
-          return next;
+        withLatestFrom(withoutTokenCount$),
+        mergeMap(([message, chunkEvent]) => {
+          return mergeWithEditedMessage(message, chunkEvent, callback);
         })
       )
     );

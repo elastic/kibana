@@ -19,13 +19,15 @@ import { getTimeline } from '../../../objects/timeline';
 import { createTimeline, deleteTimelines } from '../../../tasks/api_calls/timelines';
 import { createCase, deleteCases } from '../../../tasks/api_calls/cases';
 
+const mockTimeline = getTimeline();
+
 describe('attach timeline to case', { tags: ['@ess', '@serverless'] }, () => {
   context('without cases created', () => {
     beforeEach(() => {
       login();
       deleteTimelines();
       deleteCases();
-      createTimeline(getTimeline()).then((response) => {
+      createTimeline().then((response) => {
         cy.wrap(response.body.data.persistTimeline.timeline).as('myTimeline');
       });
     });
@@ -61,7 +63,7 @@ describe('attach timeline to case', { tags: ['@ess', '@serverless'] }, () => {
       login();
       deleteTimelines();
       deleteCases();
-      createTimeline(getTimeline()).then((response) =>
+      createTimeline().then((response) =>
         cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId')
       );
       createCase(getCase1()).then((response) => cy.wrap(response.body.id).as('caseId'));
@@ -75,9 +77,7 @@ describe('attach timeline to case', { tags: ['@ess', '@serverless'] }, () => {
       cy.location('origin').then((origin) => {
         cy.get(ADD_COMMENT_INPUT).should(
           'have.text',
-          `[${getTimeline().title}](${origin}/app/security/timelines?timeline=(id:%27${
-            this.timelineId
-          }%27,isOpen:!t))`
+          `[${mockTimeline.title}](${origin}/app/security/timelines?timeline=(id:%27${this.timelineId}%27,isOpen:!t))`
         );
       });
     });

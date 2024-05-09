@@ -7,12 +7,12 @@
 
 import * as rt from 'io-ts';
 import { concat, defer, of } from 'rxjs';
-import { concatMap, filter, map, shareReplay, take } from 'rxjs/operators';
+import { concatMap, filter, map, shareReplay, take } from 'rxjs';
 import type {
-  IEsSearchRequest,
-  IKibanaSearchRequest,
   IKibanaSearchResponse,
-} from '@kbn/data-plugin/common';
+  IKibanaSearchRequest,
+  IEsSearchRequest,
+} from '@kbn/search-types';
 import type { ISearchStrategy, PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import { getLogEntryCursorFromHit } from '../../../common/log_entry';
 import { decodeOrThrow } from '../../../common/runtime_types';

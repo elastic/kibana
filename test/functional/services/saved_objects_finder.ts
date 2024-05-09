@@ -32,7 +32,7 @@ export class SavedObjectsFinderService extends FtrService {
     for (let i = 0; i < listItems.length; i++) {
       const listItem = await listItems[i].findByClassName('euiSelectableListItem__text');
       const text = await listItem.getVisibleText();
-      if (text.includes(type)) {
+      if (text === type) {
         await listItem.click();
         await this.toggleFilterPopover();
         break;

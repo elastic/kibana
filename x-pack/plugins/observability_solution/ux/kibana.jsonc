@@ -15,7 +15,6 @@
       "licensing",
       "triggersActionsUi",
       "observabilityShared",
-      "observabilityAIAssistant",
       "embeddable",
       "inspector",
       "apm"
@@ -30,6 +29,7 @@
       "security",
       "maps",
       "lens",
+      "observabilityAIAssistant",
       "spaces"
     ],
     "requiredBundles": [

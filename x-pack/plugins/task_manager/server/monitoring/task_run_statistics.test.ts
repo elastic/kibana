@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Subject, Observable } from 'rxjs';
 import stats from 'stats-lite';
 import sinon from 'sinon';
-import { take, tap, bufferCount, skip, map } from 'rxjs/operators';
+import { take, tap, bufferCount, skip, map } from 'rxjs';
 import { mockLogger } from '../test_utils';
 
 import { ConcreteTaskInstance, TaskStatus } from '../task';

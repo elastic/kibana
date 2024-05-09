@@ -117,7 +117,7 @@ async function initApmSynthtraceClient(options: SynthtraceClientOptions) {
     version: packageVersion,
   });
 
-  synthEsClient.pipeline(synthEsClient.getDefaultPipeline(false));
+  synthEsClient.pipeline(synthEsClient.getDefaultPipeline({ includeSerialization: false }));
 
   return synthEsClient;
 }

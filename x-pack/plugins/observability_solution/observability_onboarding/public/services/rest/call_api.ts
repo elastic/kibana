@@ -26,18 +26,9 @@ export async function callApi<T = void>(
   { http }: CoreStart | CoreSetup,
   fetchOptions: FetchOptions
 ): Promise<T> {
-  const {
-    pathname,
-    method = 'get',
-    ...options
-  } = getFetchOptions(fetchOptions);
+  const { pathname, method = 'get', ...options } = getFetchOptions(fetchOptions);
 
-  const lowercaseMethod = method.toLowerCase() as
-    | 'get'
-    | 'post'
-    | 'put'
-    | 'delete'
-    | 'patch';
+  const lowercaseMethod = method.toLowerCase() as 'get' | 'post' | 'put' | 'delete' | 'patch';
 
   const res = await http[lowercaseMethod]<T>(pathname, options);
 

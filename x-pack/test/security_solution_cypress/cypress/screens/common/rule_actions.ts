@@ -16,6 +16,8 @@ export const ACTION_BTN = '[data-test-subj$="-siem-ActionTypeSelectOption"]';
 
 export const CREATE_ACTION_CONNECTOR_BTN = '[data-test-subj="createActionConnectorButton-0"]';
 
+export const CREATE_NEW_EMAIL_CONNECTOR = '[data-test-subj="addNewActionConnectorButton-.email"]';
+
 export const SAVE_ACTION_CONNECTOR_BTN = '[data-test-subj="saveActionButtonModal"]';
 
 export const EMAIL_ACTION_TO_INPUT = '[data-test-subj="toEmailAddressInput"]';

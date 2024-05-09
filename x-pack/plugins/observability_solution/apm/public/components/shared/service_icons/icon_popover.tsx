@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiButtonIcon,
-  EuiSkeletonText,
-  EuiPopover,
-  EuiPopoverTitle,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiSkeletonText, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
 import React from 'react';
 import { PopoverItem } from '.';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
@@ -59,11 +54,7 @@ export function IconPopover({
     >
       <EuiPopoverTitle>{title}</EuiPopoverTitle>
       <div style={{ minWidth: 300 }}>
-        {isLoading ? (
-          <EuiSkeletonText data-test-subj="loading-content" />
-        ) : (
-          children
-        )}
+        {isLoading ? <EuiSkeletonText data-test-subj="loading-content" /> : children}
       </div>
     </EuiPopover>
   );

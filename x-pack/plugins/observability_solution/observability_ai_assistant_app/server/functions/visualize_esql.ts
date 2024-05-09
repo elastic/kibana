@@ -4,50 +4,45 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
-import type { ESQLSearchReponse } from '@kbn/es-types';
 import { VisualizeESQLUserIntention } from '@kbn/observability-ai-assistant-plugin/common/functions/visualize_esql';
 import { visualizeESQLFunction } from '../../common/functions/visualize_esql';
 import { FunctionRegistrationParameters } from '.';
+import { validateEsqlQuery } from './query/validate_esql_query';
+
+const getMessageForLLM = (
+  intention: VisualizeESQLUserIntention,
+  query: string,
+  hasErrors: boolean
+) => {
+  if (hasErrors) {
+    return 'The query has syntax errors';
+  }
+  return intention === VisualizeESQLUserIntention.executeAndReturnResults ||
+    intention === VisualizeESQLUserIntention.generateQueryOnly
+    ? 'These results are not visualized'
+    : 'Only following query is visualized: ```esql\n' + query + '\n```';
+};
 
 export function registerVisualizeESQLFunction({
   functions,
   resources,
 }: FunctionRegistrationParameters) {
-  functions.registerFunction(
-    visualizeESQLFunction,
-    async ({ arguments: { query, intention }, connectorId, messages }, signal) => {
-      // With limit 0 I get only the columns, it is much more performant
-      const performantQuery = `${query} | limit 0`;
-      const coreContext = await resources.context.core;
+  functions.registerFunction(visualizeESQLFunction, async ({ arguments: { query, intention } }) => {
+    const { columns, errorMessages } = await validateEsqlQuery({
+      query,
+      client: (await resources.context.core).elasticsearch.client.asCurrentUser,
+    });
 
-      const response = (await (
-        await coreContext
-      ).elasticsearch.client.asCurrentUser.transport.request({
-        method: 'POST',
-        path: '_query',
-        body: {
-          query: performantQuery,
-        },
-      })) as ESQLSearchReponse;
-      const columns =
-        response.columns?.map(({ name, type }) => ({
-          id: name,
-          name,
-          meta: { type: esFieldTypeToKibanaFieldType(type) },
-        })) ?? [];
-      return {
-        data: {
-          columns,
-        },
-        content: {
-          message:
-            intention === VisualizeESQLUserIntention.executeAndReturnResults ||
-            intention === VisualizeESQLUserIntention.generateQueryOnly
-              ? 'These results are not visualized'
-              : 'Only following query is visualized: ```esql\n' + query + '\n```',
-        },
-      };
-    }
-  );
+    const message = getMessageForLLM(intention, query, Boolean(errorMessages?.length));
+
+    return {
+      data: {
+        columns,
+      },
+      content: {
+        message,
+        errorMessages,
+      },
+    };
+  });
 }

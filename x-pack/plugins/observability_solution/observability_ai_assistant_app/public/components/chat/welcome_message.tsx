@@ -7,25 +7,17 @@
 
 import React, { useState } from 'react';
 import { css } from '@emotion/css';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiImage,
-  EuiSpacer,
-  EuiTitle,
-  useCurrentEuiBreakpoint,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, useCurrentEuiBreakpoint } from '@elastic/eui';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { GenerativeAIForObservabilityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { isSupportedConnectorType } from '@kbn/observability-ai-assistant-plugin/public';
 import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
 import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
-import ctaImage from '../../assets/elastic_ai_assistant.png';
 import { Disclaimer } from './disclaimer';
 import { WelcomeMessageConnectors } from './welcome_message_connectors';
 import { WelcomeMessageKnowledgeBase } from './welcome_message_knowledge_base';
 import { useKibana } from '../../hooks/use_kibana';
+import { StarterPrompts } from './starter_prompts';
 
 const fullHeightClassName = css`
   height: 100%;
@@ -39,9 +31,11 @@ const centerMaxWidthClassName = css`
 export function WelcomeMessage({
   connectors,
   knowledgeBase,
+  onSelectPrompt,
 }: {
   connectors: UseGenAIConnectorsResult;
   knowledgeBase: UseKnowledgeBaseResult;
+  onSelectPrompt: (prompt: string) => void;
 }) {
   const breakpoint = useCurrentEuiBreakpoint();
 
@@ -89,24 +83,6 @@ export function WelcomeMessage({
         <EuiFlexItem grow className={centerMaxWidthClassName}>
           <EuiSpacer size={['xl', 'l'].includes(breakpoint!) ? 'l' : 's'} />
 
-          <EuiImage
-            src={ctaImage}
-            alt="Elastic AI Assistant"
-            size={breakpoint === 'xl' ? 300 : 'm'}
-          />
-
-          <EuiSpacer size="m" />
-
-          <EuiTitle size={['xl', 'l'].includes(breakpoint!) ? 'm' : 's'}>
-            <h2>
-              {i18n.translate('xpack.observabilityAiAssistant.disclaimer.title', {
-                defaultMessage: 'Welcome to the AI Assistant for Observability',
-              })}
-            </h2>
-          </EuiTitle>
-
-          <EuiSpacer size="m" />
-
           <WelcomeMessageConnectors
             connectors={connectors}
             onSetupConnectorClick={handleConnectorClick}
@@ -116,7 +92,9 @@ export function WelcomeMessage({
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiSpacer size="m" />
+          <StarterPrompts onSelectPrompt={onSelectPrompt} />
+
+          <EuiSpacer size="l" />
           <Disclaimer />
         </EuiFlexItem>
       </EuiFlexGroup>

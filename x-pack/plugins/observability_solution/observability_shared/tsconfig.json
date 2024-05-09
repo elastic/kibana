@@ -42,6 +42,7 @@
     "@kbn/management-settings-utilities",
     "@kbn/core-chrome-browser",
     "@kbn/rule-data-utils",
+    "@kbn/es-query",
   ],
   "exclude": ["target/**/*"]
 }

@@ -14,6 +14,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   ALERT_RISK_SCORE,
   ALERT_RULE_NAME,
+  ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
   EVENT_KIND,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
@@ -33,7 +34,7 @@ import {
   getCriticalityModifier,
   normalize,
 } from '../asset_criticality/helpers';
-import { getAfterKeyForIdentifierType, getFieldForIdentifierAgg } from './helpers';
+import { getAfterKeyForIdentifierType, getFieldForIdentifier } from './helpers';
 import {
   buildCategoryCountDeclarations,
   buildCategoryAssignment,
@@ -48,6 +49,7 @@ import type {
   RiskScoreBucket,
 } from '../types';
 import {
+  MAX_INPUTS_COUNT,
   RISK_SCORING_INPUTS_COUNT_MAX,
   RISK_SCORING_SUM_MAX,
   RISK_SCORING_SUM_VALUE,
@@ -67,7 +69,6 @@ const formatForResponse = ({
   includeNewFields: boolean;
 }): RiskScore => {
   const riskDetails = bucket.top_inputs.risk_details;
-  const inputs = bucket.top_inputs.inputs;
 
   const criticalityModifier = getCriticalityModifier(criticality?.criticality_level);
   const normalizedScoreWithCriticality = applyCriticalityToScore({
@@ -98,15 +99,14 @@ const formatForResponse = ({
     }),
     category_1_count: riskDetails.value.category_1_count,
     notes: riskDetails.value.notes,
-    inputs: inputs.hits.hits.map((riskInput) => ({
-      id: riskInput._id,
-      index: riskInput._index,
-      description: `Alert from Rule: ${
-        riskInput.fields?.[ALERT_RULE_NAME]?.[0] ?? 'RULE_NOT_FOUND'
-      }`,
+    inputs: riskDetails.value.risk_inputs.map((riskInput) => ({
+      id: riskInput.id,
+      index: riskInput.index,
+      description: `Alert from Rule: ${riskInput.rule_name ?? 'RULE_NOT_FOUND'}`,
       category: RiskCategories.category_1,
-      risk_score: riskInput.fields?.[ALERT_RISK_SCORE]?.[0] ?? undefined,
-      timestamp: riskInput.fields?.['@timestamp']?.[0] ?? undefined,
+      risk_score: riskInput.score,
+      timestamp: riskInput.time,
+      contribution_score: riskInput.contribution,
     })),
     ...(includeNewFields ? newFields : {}),
   };
@@ -140,8 +140,14 @@ const buildReduceScript = ({
 
     double total_score = 0;
     double current_score = 0;
+    List risk_inputs = [];
     for (int i = 0; i < num_inputs_to_score; i++) {
       current_score = inputs[i].weighted_score / Math.pow(i + 1, params.p);
+
+      if (i < ${MAX_INPUTS_COUNT}) {
+        inputs[i]["contribution"] = 100 * current_score / params.risk_cap;
+        risk_inputs.add(inputs[i]);
+      }
 
       ${buildCategoryAssignment()}
       total_score += current_score;
@@ -151,6 +157,7 @@ const buildReduceScript = ({
     double score_norm = 100 * total_score / params.risk_cap;
     results['score'] = total_score;
     results['normalized_score'] = score_norm;
+    results['risk_inputs'] = risk_inputs;
 
     return results;
   `;
@@ -170,7 +177,7 @@ const buildIdentifierTypeAggregation = ({
   alertSampleSizePerShard: number;
 }): AggregationsAggregationContainer => {
   const globalIdentifierTypeWeight = getGlobalWeightForIdentifierType({ identifierType, weights });
-  const identifierField = getFieldForIdentifierAgg(identifierType);
+  const identifierField = getFieldForIdentifier(identifierType);
 
   return {
     composite: {
@@ -191,14 +198,8 @@ const buildIdentifierTypeAggregation = ({
         sampler: {
           shard_size: alertSampleSizePerShard,
         },
+
         aggs: {
-          inputs: {
-            top_hits: {
-              size: 5,
-              _source: false,
-              docvalue_fields: ['@timestamp', ALERT_RISK_SCORE, ALERT_RULE_NAME],
-            },
-          },
           risk_details: {
             scripted_metric: {
               init_script: 'state.inputs = []',
@@ -209,8 +210,13 @@ const buildIdentifierTypeAggregation = ({
                 double weighted_score = 0.0;
           
                 fields.put('time', doc['@timestamp'].value);
+                fields.put('rule_name', doc['${ALERT_RULE_NAME}'].value);
+
                 fields.put('category', category);
+                fields.put('index', doc['_index'].value);
+                fields.put('id', doc['${ALERT_UUID}'].value);
                 fields.put('score', score);
+                
                 ${buildWeightingOfScoreByCategory({ userWeights: weights, identifierType })}
                 fields.put('weighted_score', weighted_score);
           
@@ -308,7 +314,6 @@ export const calculateRiskScores = async ({
       filter.push(userFilter as QueryDslQueryContainer);
     }
     const identifierTypes: IdentifierType[] = identifierType ? [identifierType] : ['host', 'user'];
-
     const request = {
       size: 0,
       _source: false,

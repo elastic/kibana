@@ -59,6 +59,27 @@ export const assistantMessageSentEvent: TelemetryEvent = {
         optional: false,
       },
     },
+    actionTypeId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Kibana connector type',
+        optional: false,
+      },
+    },
+    model: {
+      type: 'keyword',
+      _meta: {
+        description: 'LLM model',
+        optional: true,
+      },
+    },
+    provider: {
+      type: 'keyword',
+      _meta: {
+        description: 'OpenAI provider',
+        optional: true,
+      },
+    },
   },
 };
 
@@ -96,6 +117,13 @@ export const assistantSettingToggledEvent: TelemetryEvent = {
       type: 'boolean',
       _meta: {
         description: 'Is RAG on Alerts enabled',
+        optional: true,
+      },
+    },
+    assistantStreamingEnabled: {
+      type: 'boolean',
+      _meta: {
+        description: 'Is streaming enabled',
         optional: true,
       },
     },

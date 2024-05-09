@@ -19,13 +19,13 @@ import {
   map,
   skip,
   startWith,
-} from 'rxjs/operators';
+} from 'rxjs';
 import { Unsubscribe } from 'redux';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { Query, type Filter } from '@kbn/es-query';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import {
   Embeddable,
   IContainer,
@@ -84,6 +84,7 @@ import {
 } from '../../common/constants';
 import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
 import {
+  getAnalytics,
   getCharts,
   getCoreI18n,
   getCoreOverlays,
@@ -580,13 +581,14 @@ export class MapEmbeddable
         />
       );
 
-    const I18nContext = getCoreI18n().Context;
     render(
-      <Provider store={this._savedMap.getStore()}>
-        <I18nContext>
-          <KibanaThemeProvider theme$={getTheme().theme$}>{content}</KibanaThemeProvider>
-        </I18nContext>
-      </Provider>,
+      <KibanaRenderContextProvider
+        analytics={getAnalytics()}
+        i18n={getCoreI18n()}
+        theme={getTheme()}
+      >
+        <Provider store={this._savedMap.getStore()}>{content}</Provider>
+      </KibanaRenderContextProvider>,
       this._domNode
     );
   }
@@ -673,7 +675,26 @@ export class MapEmbeddable
   linkToLibrary = undefined;
   unlinkFromLibrary = undefined;
   // add implemenation for library transform methods
-  saveStateToSavedObject = async (title: string) => {
+  checkForDuplicateTitle = async (
+    newTitle: string,
+    isTitleDuplicateConfirmed: boolean,
+    onTitleDuplicate: () => void
+  ) => {
+    await checkForDuplicateTitle(
+      {
+        title: newTitle,
+        copyOnSave: false,
+        lastSavedTitle: '',
+        isTitleDuplicateConfirmed,
+        getDisplayName: () => MAP_EMBEDDABLE_NAME,
+        onTitleDuplicate,
+      },
+      {
+        overlays: getCoreOverlays(),
+      }
+    );
+  };
+  saveToLibrary = async (title: string) => {
     const { attributes, references } = extractReferences({
       attributes: this._savedMap.getAttributes(),
     });
@@ -687,38 +708,19 @@ export class MapEmbeddable
       },
       options: { references },
     });
+    return savedObjectId;
+  };
+  getByReferenceState = (libraryId: string) => {
     return {
-      state: {
-        ..._.omit(this.getExplicitInput(), 'attributes'),
-        savedObjectId,
-      },
-      savedObjectId,
+      ..._.omit(this.getExplicitInput(), 'attributes'),
+      savedObjectId: libraryId,
     };
   };
-  savedObjectAttributesToState = () => {
+  getByValueState = () => {
     return {
       ..._.omit(this.getExplicitInput(), 'savedObjectId'),
       attributes: this._savedMap.getAttributes(),
     };
-  };
-  checkForDuplicateTitle = async (
-    newTitle: string,
-    isTitleDuplicateConfirmed: boolean,
-    onTitleDuplicate: () => void
-  ) => {
-    return checkForDuplicateTitle(
-      {
-        title: newTitle,
-        copyOnSave: false,
-        lastSavedTitle: '',
-        isTitleDuplicateConfirmed,
-        getDisplayName: () => MAP_EMBEDDABLE_NAME,
-        onTitleDuplicate,
-      },
-      {
-        overlays: getCoreOverlays(),
-      }
-    );
   };
 
   // Timing bug for dashboard with multiple maps with synchronized movement and filter by map extent enabled

@@ -17,7 +17,7 @@ import { topTermsGroups } from '@kbn/aiops-test-utils/artificial_logs/top_terms_
 import type {
   AiopsLogRateAnalysisSchema,
   AiopsLogRateAnalysisApiVersion as ApiVersion,
-} from '@kbn/aiops-plugin/common/api/log_rate_analysis/schema';
+} from '@kbn/aiops-log-rate-analysis/api/schema';
 import {
   frequentItemSetsLargeArraysGroups,
   frequentItemSetsLargeArraysSignificantItems,
@@ -25,7 +25,7 @@ import {
 
 import type { TestData } from './types';
 
-export const API_VERSIONS: ApiVersion[] = ['1', '2'];
+export const API_VERSIONS: ApiVersion[] = ['2'];
 
 export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestData<T>> => [
   {

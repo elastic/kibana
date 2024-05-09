@@ -22,6 +22,7 @@ import { ConfigKey, ServiceLocation, ServiceLocations } from '../../../../../com
 import { useCanEditSynthetics } from '../../../../hooks/use_capabilities';
 import { useFormWrapped } from '../../../../hooks/use_form_wrapped';
 import { NoPermissionsTooltip } from '../common/components/permissions';
+import { isUrlValid } from '../../utils/validators/is_url_valid';
 
 export interface SimpleFormData {
   urls: string;
@@ -75,6 +76,7 @@ export const SimpleMonitorForm = () => {
           {...register(ConfigKey.URLS, {
             validate: {
               notEmpty: (value: string) => (!Boolean(value.trim()) ? URL_REQUIRED_LABEL : true),
+              notValidUrl: (value: string) => (!isUrlValid(value) ? URL_INVALID_LABEL : true),
             },
           })}
           isInvalid={!!urlError}
@@ -154,5 +156,12 @@ export const URL_REQUIRED_LABEL = i18n.translate(
   'xpack.synthetics.monitorManagement.urlRequiredLabel',
   {
     defaultMessage: 'URL is required',
+  }
+);
+
+export const URL_INVALID_LABEL = i18n.translate(
+  'xpack.synthetics.monitorManagement.urlInvalidLabel',
+  {
+    defaultMessage: 'URL is not valid',
   }
 );

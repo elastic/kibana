@@ -52,10 +52,7 @@ export async function fetchDurationCorrelationWithHistogram({
   const eventType = getEventType(chartType, searchMetrics);
   const queryWithFieldValuePair = {
     bool: {
-      filter: [
-        query,
-        ...termQuery(fieldValuePair.fieldName, fieldValuePair.fieldValue),
-      ],
+      filter: [query, ...termQuery(fieldValuePair.fieldName, fieldValuePair.fieldValue)],
     },
   };
 

@@ -6,5 +6,5 @@
  */
 
 export * from './filter_inactive_datasets';
-export * from './merge_degraded_docs_into_datastreams';
+export * from './generate_datasets';
 export * from './use_kibana';

@@ -17,25 +17,14 @@ import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import {
-  environmentRt,
-  kueryRt,
-  probabilityRt,
-  rangeRt,
-} from '../default_api_types';
+import { environmentRt, kueryRt, probabilityRt, rangeRt } from '../default_api_types';
 import { getServiceNamesFromTermsEnum } from '../services/get_services/get_service_names_from_terms_enum';
 import {
   getServiceStatistics,
   StorageExplorerServiceStatisticsResponse,
 } from './get_service_statistics';
-import {
-  getSizeTimeseries,
-  SizeTimeseriesResponse,
-} from './get_size_timeseries';
-import {
-  getStorageDetails,
-  StorageDetailsResponse,
-} from './get_storage_details';
+import { getSizeTimeseries, SizeTimeseriesResponse } from './get_size_timeseries';
+import { getStorageDetails, StorageDetailsResponse } from './get_storage_details';
 import {
   getSummaryStatistics,
   StorageExplorerSummaryStatisticsResponse,
@@ -47,13 +36,7 @@ const storageExplorerRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/storage_explorer',
   options: { tags: ['access:apm'] },
   params: t.type({
-    query: t.intersection([
-      indexLifecyclePhaseRt,
-      probabilityRt,
-      environmentRt,
-      kueryRt,
-      rangeRt,
-    ]),
+    query: t.intersection([indexLifecyclePhaseRt, probabilityRt, environmentRt, kueryRt, rangeRt]),
   }),
   handler: async (
     resources
@@ -69,14 +52,7 @@ const storageExplorerRoute = createApmServerRoute({
     } = resources;
 
     const {
-      query: {
-        indexLifecyclePhase,
-        probability,
-        environment,
-        kuery,
-        start,
-        end,
-      },
+      query: { indexLifecyclePhase, probability, environment, kuery, start, end },
     } = params;
 
     const [apmEventClient, randomSampler] = await Promise.all([
@@ -115,13 +91,7 @@ const storageExplorerServiceDetailsRoute = createApmServerRoute({
     path: t.type({
       serviceName: t.string,
     }),
-    query: t.intersection([
-      indexLifecyclePhaseRt,
-      probabilityRt,
-      environmentRt,
-      kueryRt,
-      rangeRt,
-    ]),
+    query: t.intersection([indexLifecyclePhaseRt, probabilityRt, environmentRt, kueryRt, rangeRt]),
   }),
   handler: async (resources): Promise<StorageDetailsResponse> => {
     const {
@@ -133,14 +103,7 @@ const storageExplorerServiceDetailsRoute = createApmServerRoute({
 
     const {
       path: { serviceName },
-      query: {
-        indexLifecyclePhase,
-        probability,
-        environment,
-        kuery,
-        start,
-        end,
-      },
+      query: { indexLifecyclePhase, probability, environment, kuery, start, end },
     } = params;
 
     const [apmEventClient, randomSampler] = await Promise.all([
@@ -166,13 +129,7 @@ const storageChartRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/storage_chart',
   options: { tags: ['access:apm'] },
   params: t.type({
-    query: t.intersection([
-      indexLifecyclePhaseRt,
-      probabilityRt,
-      environmentRt,
-      kueryRt,
-      rangeRt,
-    ]),
+    query: t.intersection([indexLifecyclePhaseRt, probabilityRt, environmentRt, kueryRt, rangeRt]),
   }),
   handler: async (
     resources
@@ -188,14 +145,7 @@ const storageChartRoute = createApmServerRoute({
     } = resources;
 
     const {
-      query: {
-        indexLifecyclePhase,
-        probability,
-        environment,
-        kuery,
-        start,
-        end,
-      },
+      query: { indexLifecyclePhase, probability, environment, kuery, start, end },
     } = params;
 
     const [apmEventClient, randomSampler] = await Promise.all([
@@ -253,17 +203,9 @@ const storageExplorerSummaryStatsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/storage_explorer_summary_stats',
   options: { tags: ['access:apm'] },
   params: t.type({
-    query: t.intersection([
-      indexLifecyclePhaseRt,
-      probabilityRt,
-      environmentRt,
-      kueryRt,
-      rangeRt,
-    ]),
+    query: t.intersection([indexLifecyclePhaseRt, probabilityRt, environmentRt, kueryRt, rangeRt]),
   }),
-  handler: async (
-    resources
-  ): Promise<StorageExplorerSummaryStatisticsResponse> => {
+  handler: async (resources): Promise<StorageExplorerSummaryStatisticsResponse> => {
     const {
       config,
       params,
@@ -273,14 +215,7 @@ const storageExplorerSummaryStatsRoute = createApmServerRoute({
     } = resources;
 
     const {
-      query: {
-        indexLifecyclePhase,
-        probability,
-        environment,
-        kuery,
-        start,
-        end,
-      },
+      query: { indexLifecyclePhase, probability, environment, kuery, start, end },
     } = params;
 
     const [apmEventClient, randomSampler] = await Promise.all([
@@ -323,12 +258,7 @@ const storageExplorerGetServices = createApmServerRoute({
     tags: ['access:apm'],
   },
   params: t.type({
-    query: t.intersection([
-      indexLifecyclePhaseRt,
-      environmentRt,
-      kueryRt,
-      rangeRt,
-    ]),
+    query: t.intersection([indexLifecyclePhaseRt, environmentRt, kueryRt, rangeRt]),
   }),
   handler: async (
     resources
@@ -379,7 +309,6 @@ export const storageExplorerRouteRepository = {
   ...storageExplorerGetServices,
 };
 
-const SECURITY_REQUIRED_MESSAGE = i18n.translate(
-  'xpack.apm.api.storageExplorer.securityRequired',
-  { defaultMessage: 'Security plugin is required' }
-);
+const SECURITY_REQUIRED_MESSAGE = i18n.translate('xpack.apm.api.storageExplorer.securityRequired', {
+  defaultMessage: 'Security plugin is required',
+});

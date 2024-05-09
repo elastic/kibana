@@ -108,7 +108,6 @@ export function ShardFailureTable({ failures }: Props) {
           failureType: failure.reason.type,
         };
       })}
-      isExpandable={true}
       itemIdToExpandedRowMap={expandedRows}
       itemId="rowId"
       columns={columns}

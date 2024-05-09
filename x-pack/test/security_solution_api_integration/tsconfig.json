@@ -42,5 +42,6 @@
     "@kbn/stack-connectors-plugin",
     "@kbn/ftr-common-functional-services",
     "@kbn/actions-plugin",
+    "@kbn/task-manager-plugin",
   ]
 }

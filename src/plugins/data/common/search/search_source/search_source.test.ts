@@ -10,15 +10,15 @@ import Rx, { firstValueFrom, lastValueFrom, of, throwError } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { buildExpression, ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import type { MockedKeys } from '@kbn/utility-types-jest';
+import type { ISearchGeneric } from '@kbn/search-types';
 import { SearchSource, SearchSourceDependencies, SortDirection } from '.';
 import { AggConfigs, AggTypesRegistryStart } from '../..';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
 import { RequestAdapter, RequestResponder } from '@kbn/inspector-plugin/common';
-import { switchMap } from 'rxjs/operators';
+import { switchMap } from 'rxjs';
 import { Filter } from '@kbn/es-query';
 import { stubIndexPattern } from '../../stubs';
 import { SearchSourceSearchOptions } from './types';
-import { ISearchGeneric } from '../types';
 
 const getComputedFields = () => ({
   storedFields: [],

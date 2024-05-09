@@ -13,6 +13,7 @@ import { useNotifyService } from '../../services';
 import { RenderToDom } from '../render_to_dom';
 import { ErrorStrings } from '../../../i18n';
 import { RendererHandlers } from '../../../types';
+import { useCanvasApi } from '../hooks/use_canvas_api';
 
 const { RenderWithFn: strings } = ErrorStrings;
 
@@ -41,6 +42,7 @@ export const RenderWithFn: FC<Props> = ({
   width,
   height,
 }) => {
+  const canvasApi = useCanvasApi();
   const { error: onError } = useNotifyService();
 
   const [domNode, setDomNode] = useState<HTMLElement | null>(null);
@@ -88,9 +90,12 @@ export const RenderWithFn: FC<Props> = ({
     if (!isEqual(handlers.current, incomingHandlers)) {
       handlers.current = incomingHandlers;
     }
-
-    await renderFn(renderTarget.current!, config, handlers.current);
-  }, [renderTarget, config, renderFn, incomingHandlers]);
+    /**
+     * we are creating a new react tree when we render the element, so we need to pass the current api as a prop
+     * to the element rather than calling `useCanvasApi` directly
+     */
+    await renderFn(renderTarget.current!, { ...config, canvasApi }, handlers.current);
+  }, [renderTarget, config, renderFn, incomingHandlers, canvasApi]);
 
   useEffect(() => {
     if (!domNode) {

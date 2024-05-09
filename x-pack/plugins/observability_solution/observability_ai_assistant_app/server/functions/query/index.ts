@@ -11,6 +11,7 @@ import pLimit from 'p-limit';
 import Path from 'path';
 import { lastValueFrom, startWith } from 'rxjs';
 import { promisify } from 'util';
+import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
 import { FunctionVisibility, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import {
   VisualizeESQLUserIntention,
@@ -22,8 +23,10 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/common/utils/concatenate_chat_completion_chunks';
 import { emitWithConcatenatedMessage } from '@kbn/observability-ai-assistant-plugin/common/utils/emit_with_concatenated_message';
 import { createFunctionResponseMessage } from '@kbn/observability-ai-assistant-plugin/common/utils/create_function_response_message';
+import { ESQLSearchReponse } from '@kbn/es-types';
 import type { FunctionRegistrationParameters } from '..';
 import { correctCommonEsqlMistakes } from './correct_common_esql_mistakes';
+import { validateEsqlQuery } from './validate_esql_query';
 
 const readFile = promisify(Fs.readFile);
 const readdir = promisify(Fs.readdir);
@@ -66,20 +69,35 @@ const loadEsqlDocs = once(async () => {
   );
 });
 
-export function registerQueryFunction({
-  client,
-  functions,
-  resources,
-}: FunctionRegistrationParameters) {
+export function registerQueryFunction({ functions, resources }: FunctionRegistrationParameters) {
+  functions.registerInstruction(({ availableFunctionNames }) =>
+    availableFunctionNames.includes('query')
+      ? `You MUST use the "query" function when the user wants to:
+  - visualize data
+  - run any arbitrary query
+  - breakdown or filter ES|QL queries that are displayed on the current page
+  - convert queries from another language to ES|QL
+  - asks general questions about ES|QL
+
+  DO NOT UNDER ANY CIRCUMSTANCES generate ES|QL queries or explain anything about the ES|QL query language yourself.
+  DO NOT UNDER ANY CIRCUMSTANCES try to correct an ES|QL query yourself - always use the "query" function for this.
+
+  Even if the "context" function was used before that, follow it up with the "query" function. If a query fails, do not attempt to correct it yourself. Again you should call the "query" function,
+  even if it has been called before.
+
+  When the "visualize_query" function has been called, a visualization has been displayed to the user. DO NOT UNDER ANY CIRCUMSTANCES follow up a "visualize_query" function call with your own visualization attempt.
+  If the "execute_query" function has been called, summarize these results for the user. The user does not see a visualization in this case.`
+      : undefined
+  );
+
   functions.registerFunction(
     {
       name: 'execute_query',
-      contexts: ['core'],
-      visibility: FunctionVisibility.AssistantOnly,
-      description: 'Display the results of an ES|QL query',
+      visibility: FunctionVisibility.UserOnly,
+      description:
+        'Display the results of an ES|QL query. ONLY use this if the "query" function has been used before or if the user or screen context has provided a query you can use.',
       parameters: {
         type: 'object',
-        additionalProperties: false,
         properties: {
           query: {
             type: 'string',
@@ -89,37 +107,42 @@ export function registerQueryFunction({
       } as const,
     },
     async ({ arguments: { query } }) => {
-      const response = await (
-        await resources.context.core
-      ).elasticsearch.client.asCurrentUser.transport.request({
+      const client = (await resources.context.core).elasticsearch.client.asCurrentUser;
+      const { error, errorMessages } = await validateEsqlQuery({
+        query,
+        client,
+      });
+
+      if (!!error) {
+        return {
+          content: {
+            message: 'The query failed to execute',
+            error,
+            errorMessages,
+          },
+        };
+      }
+      const response = (await client.transport.request({
         method: 'POST',
         path: '_query',
         body: {
           query,
+          version: ESQL_LATEST_VERSION,
         },
-      });
+      })) as ESQLSearchReponse;
 
-      return { content: response };
+      return {
+        content: response,
+      };
     }
   );
   functions.registerFunction(
     {
       name: 'query',
-      contexts: ['core'],
-      description: `This function generates, executes and/or visualizes a query based on the user's request. It also explains how ES|QL works and how to convert queries from one language to another.`,
+      description: `This function generates, executes and/or visualizes a query based on the user's request. It also explains how ES|QL works and how to convert queries from one language to another. Make sure you call one of the get_dataset functions first if you need index or field names. This function takes no input.`,
       visibility: FunctionVisibility.AssistantOnly,
-      parameters: {
-        type: 'object',
-        additionalProperties: false,
-        properties: {
-          switch: {
-            type: 'boolean',
-          },
-        },
-        required: ['switch'],
-      } as const,
     },
-    async ({ messages, connectorId, chat }, signal) => {
+    async ({ messages, chat }, signal) => {
       const [systemMessage, esqlDocs] = await Promise.all([loadSystemMessage(), loadEsqlDocs()]);
 
       const withEsqlSystemMessage = (message?: string) => [
@@ -132,7 +155,6 @@ export function registerQueryFunction({
 
       const source$ = (
         await chat('classify_esql', {
-          connectorId,
           messages: withEsqlSystemMessage().concat({
             '@timestamp': new Date().toISOString(),
             message: {
@@ -147,10 +169,16 @@ export function registerQueryFunction({
               Extract data? Request \`DISSECT\` AND \`GROK\`.
               Convert a column based on a set of conditionals? Request \`EVAL\` and \`CASE\`.
 
+              ONLY use ${VisualizeESQLUserIntention.executeAndReturnResults} if you are absolutely sure
+              it is executable. If one of the get_dataset_info functions were not called before, OR if
+              one of the get_dataset_info functions returned no data, opt for an explanation only and
+              mention that there is no data for these indices. You can still use
+              ${VisualizeESQLUserIntention.generateQueryOnly} and generate an example ES|QL query.
+
               For determining the intention of the user, the following options are available:
 
               ${VisualizeESQLUserIntention.generateQueryOnly}: the user only wants to generate the query,
-              but not run it.
+              but not run it, or they ask a general question about ES|QL.
 
               ${VisualizeESQLUserIntention.executeAndReturnResults}: the user wants to execute the query,
               and have the assistant return/analyze/summarize the results. they don't need a
@@ -173,13 +201,14 @@ export function registerQueryFunction({
               ${VisualizeESQLUserIntention.visualizeXy}
 
               Some examples:
-              "Show me the avg of x" => ${VisualizeESQLUserIntention.executeAndReturnResults}
-              "Show me the results of y" => ${VisualizeESQLUserIntention.executeAndReturnResults}
-              "Display the sum of z" => ${VisualizeESQLUserIntention.executeAndReturnResults}
 
               "I want a query that ..." => ${VisualizeESQLUserIntention.generateQueryOnly}
               "... Just show me the query" => ${VisualizeESQLUserIntention.generateQueryOnly}
               "Create a query that ..." => ${VisualizeESQLUserIntention.generateQueryOnly}
+              
+              "Show me the avg of x" => ${VisualizeESQLUserIntention.executeAndReturnResults}
+              "Show me the results of y" => ${VisualizeESQLUserIntention.executeAndReturnResults}
+              "Display the sum of z" => ${VisualizeESQLUserIntention.executeAndReturnResults}
 
               "Show me the avg of x over time" => ${VisualizeESQLUserIntention.visualizeAuto}
               "I want a bar chart of ... " => ${VisualizeESQLUserIntention.visualizeBar}
@@ -201,6 +230,14 @@ export function registerQueryFunction({
               parameters: {
                 type: 'object',
                 properties: {
+                  guides: {
+                    type: 'array',
+                    items: {
+                      type: 'string',
+                      enum: ['API', 'KIBANA', 'CROSS_CLUSTER'],
+                    },
+                    description: 'A list of guides',
+                  },
                   commands: {
                     type: 'array',
                     items: {
@@ -236,12 +273,19 @@ export function registerQueryFunction({
       }
 
       const args = JSON.parse(response.message.function_call.arguments) as {
-        commands: string[];
-        functions: string[];
+        guides?: string[];
+        commands?: string[];
+        functions?: string[];
         intention: VisualizeESQLUserIntention;
       };
 
-      const keywords = args.commands.concat(args.functions).concat('SYNTAX').concat('OVERVIEW');
+      const keywords = [
+        ...(args.commands ?? []),
+        ...(args.functions ?? []),
+        ...(args.guides ?? []),
+        'SYNTAX',
+        'OVERVIEW',
+      ].map((keyword) => keyword.toUpperCase());
 
       const messagesToInclude = mapValues(pick(esqlDocs, keywords), ({ data }) => data);
 
@@ -296,6 +340,8 @@ export function registerQueryFunction({
                 \`\`\`esql
                 <query>
                 \`\`\`
+
+                Respond in plain text. Do not attempt to use a function.
   
                 Prefer to use commands and functions for which you have requested documentation.
   
@@ -331,36 +377,22 @@ export function registerQueryFunction({
                 to ES|QL, make sure that the functions are available and documented in ES|QL.
                 E.g., for SPL's LEN, use LENGTH. For IF, use CASE.
                 
-                Directive: ONLY use aggregation functions in STATS commands, and use ONLY aggregation
-                functions in stats commands, NOT in SORT or EVAL.
-                Rationale: Only aggregation functions are supported in STATS commands, and aggregation
-                functions are only supported in STATS commands. 
-                Action: Create new columns using EVAL first and then aggregate over them in STATS commands.
-                Do not use aggregation functions anywhere else, such as SORT or EVAL.
-                Example:
-                \`\`\`esql
-                EVAL is_failure_as_number = CASE(event.outcome == "failure", 1, 0)
-                | STATS total_failures = SUM(is_failure_as_number) BY my_grouping_name
-                \`\`\`
-                
                 `,
             },
           },
         ],
-        connectorId,
         signal,
         functions: functions.getActions(),
       });
 
       return esqlResponse$.pipe(
-        emitWithConcatenatedMessage((msg) => {
+        emitWithConcatenatedMessage(async (msg) => {
           if (msg.message.function_call.name) {
             return msg;
           }
-
-          const esqlQuery = correctCommonEsqlMistakes(msg.message.content, resources.logger).match(
-            /```esql([\s\S]*?)```/
-          )?.[1];
+          const esqlQuery = correctCommonEsqlMistakes(msg.message.content, resources.logger)
+            .match(/```esql([\s\S]*?)```/)?.[1]
+            ?.trim();
 
           let functionCall: ConcatenatedMessage['message']['function_call'] | undefined;
 
@@ -397,7 +429,20 @@ export function registerQueryFunction({
             },
           };
         }),
-        startWith(createFunctionResponseMessage({ name: 'query', content: { switch: true } }))
+        startWith(
+          createFunctionResponseMessage({
+            name: 'query',
+            content: {},
+            data: {
+              // add the included docs for debugging
+              documentation: {
+                intention: args.intention,
+                keywords,
+                files: messagesToInclude,
+              },
+            },
+          })
+        )
       );
     }
   );

@@ -8,9 +8,9 @@
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
+import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '@kbn/aiops-change-point-detection/constants';
 import type { AiopsPluginStartDeps } from '../types';
 import type { EditChangePointChartsPanelContext } from '../embeddable/types';
-import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '../../common/constants';
 
 export const OPEN_CHANGE_POINT_IN_ML_APP_ACTION = 'openChangePointInMlAppAction';
 

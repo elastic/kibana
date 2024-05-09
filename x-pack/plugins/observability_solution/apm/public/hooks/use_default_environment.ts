@@ -14,8 +14,7 @@ export function useDefaultEnvironment() {
   const { core } = useApmPluginContext();
 
   const defaultServiceEnvironment =
-    core.uiSettings.get<Environment>(defaultApmServiceEnvironment) ||
-    ENVIRONMENT_ALL.value;
+    core.uiSettings.get<Environment>(defaultApmServiceEnvironment) || ENVIRONMENT_ALL.value;
 
   return defaultServiceEnvironment;
 }

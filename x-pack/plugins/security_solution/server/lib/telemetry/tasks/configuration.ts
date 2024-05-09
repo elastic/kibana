@@ -45,7 +45,7 @@ export function createTelemetryConfigurationTaskConfig() {
 
         if (manifest.notModified) {
           log.l('No new configuration artifact found, skipping...');
-          taskMetricsService.end(trace);
+          await taskMetricsService.end(trace);
           return 0;
         }
 
@@ -99,14 +99,21 @@ export function createTelemetryConfigurationTaskConfig() {
           });
         }
 
-        taskMetricsService.end(trace);
+        if (configArtifact.pagination_config) {
+          log.l('Updating pagination configuration');
+          telemetryConfiguration.pagination_config = configArtifact.pagination_config;
+          _receiver.setMaxPageSizeBytes(configArtifact.pagination_config.max_page_size_bytes);
+          _receiver.setNumDocsToSample(configArtifact.pagination_config.num_docs_to_sample);
+        }
+
+        await taskMetricsService.end(trace);
 
         log.l(`Updated TelemetryConfiguration: ${JSON.stringify(telemetryConfiguration)}`);
         return 0;
       } catch (err) {
         log.l(`Failed to set telemetry configuration due to ${err.message}`);
         telemetryConfiguration.resetAllToDefault();
-        taskMetricsService.end(trace, err);
+        await taskMetricsService.end(trace, err);
         return 0;
       }
     },

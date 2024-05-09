@@ -33,4 +33,10 @@ export interface ICspConfig {
    * in a `Content-Security-Policy` header.
    */
   readonly header: string;
+
+  /**
+   * The CSP rules in a formatted directives string for use
+   * in a `Content-Security-Policy-Report-Only` header.
+   */
+  readonly reportOnlyHeader: string;
 }

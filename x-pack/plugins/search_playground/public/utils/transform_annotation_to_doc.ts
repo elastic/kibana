@@ -8,6 +8,6 @@
 import { DocAnnotation, Doc } from '../types';
 
 export const transformAnnotationToDoc = (docAnnotation: DocAnnotation): Doc => ({
-  id: docAnnotation.metadata.id,
   content: docAnnotation.pageContent,
+  metadata: docAnnotation.metadata,
 });

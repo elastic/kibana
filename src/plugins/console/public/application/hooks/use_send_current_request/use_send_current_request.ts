@@ -23,7 +23,7 @@ import { DEFAULT_VARIABLES } from '../../../../common/constants';
 export const useSendCurrentRequest = () => {
   const {
     services: { history, settings, notifications, trackUiMetric, http, autocompleteInfo, storage },
-    theme$,
+    startServices,
   } = useServicesContext();
 
   const dispatch = useRequestActionContext();
@@ -88,7 +88,7 @@ export const useSendCurrentRequest = () => {
                   notifications.toasts.remove(toast);
                 },
               }),
-              { theme$ }
+              startServices
             ),
           });
         } else {
@@ -140,7 +140,7 @@ export const useSendCurrentRequest = () => {
     notifications.toasts,
     trackUiMetric,
     history,
-    theme$,
     autocompleteInfo,
+    startServices,
   ]);
 };

@@ -9,7 +9,7 @@ import { toExpression as toExpressionString } from '@kbn/interpreter';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { SavedLensInput } from '../../../functions/external/saved_lens';
 
-export function toExpression(input: SavedLensInput, palettes: PaletteRegistry): string {
+export function toExpression(input: SavedLensInput, palettes?: PaletteRegistry): string {
   const expressionParts = [] as string[];
 
   expressionParts.push('savedLens');
@@ -26,7 +26,7 @@ export function toExpression(input: SavedLensInput, palettes: PaletteRegistry): 
     );
   }
 
-  if (input.palette) {
+  if (input.palette && palettes) {
     expressionParts.push(
       `palette={${toExpressionString(
         palettes.get(input.palette.name).toExpression(input.palette.params)
@@ -34,5 +34,5 @@ export function toExpression(input: SavedLensInput, palettes: PaletteRegistry): 
     );
   }
 
-  return expressionParts.join(' ');
+  return `${expressionParts.join(' ')} | render`;
 }

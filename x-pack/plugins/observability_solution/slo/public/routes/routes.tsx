@@ -17,50 +17,73 @@ import {
   SLO_CREATE_PATH,
   SLO_DETAIL_PATH,
   SLO_EDIT_PATH,
+  SLO_SETTINGS_PATH,
 } from '../../common/locators/paths';
 import { SlosOutdatedDefinitions } from '../pages/slo_outdated_definitions';
+import { SloSettingsPage } from '../pages/slo_settings/slo_settings';
 
-export const routes = {
-  [SLOS_PATH]: {
-    handler: () => {
-      return <SlosPage />;
+export const getRoutes = (
+  isServerless?: boolean
+): {
+  [key: string]: {
+    handler: () => React.ReactElement;
+    params: Record<string, string>;
+    exact: boolean;
+  };
+} => {
+  return {
+    [SLOS_PATH]: {
+      handler: () => {
+        return <SlosPage />;
+      },
+      params: {},
+      exact: true,
     },
-    params: {},
-    exact: true,
-  },
-  [SLO_CREATE_PATH]: {
-    handler: () => {
-      return <SloEditPage />;
+    [SLO_CREATE_PATH]: {
+      handler: () => {
+        return <SloEditPage />;
+      },
+      params: {},
+      exact: true,
     },
-    params: {},
-    exact: true,
-  },
-  [SLOS_WELCOME_PATH]: {
-    handler: () => {
-      return <SlosWelcomePage />;
+    [SLOS_WELCOME_PATH]: {
+      handler: () => {
+        return <SlosWelcomePage />;
+      },
+      params: {},
+      exact: true,
     },
-    params: {},
-    exact: true,
-  },
-  [SLOS_OUTDATED_DEFINITIONS_PATH]: {
-    handler: () => {
-      return <SlosOutdatedDefinitions />;
+    [SLOS_OUTDATED_DEFINITIONS_PATH]: {
+      handler: () => {
+        return <SlosOutdatedDefinitions />;
+      },
+      params: {},
+      exact: true,
     },
-    params: {},
-    exact: true,
-  },
-  [SLO_EDIT_PATH]: {
-    handler: () => {
-      return <SloEditPage />;
+    [SLO_EDIT_PATH]: {
+      handler: () => {
+        return <SloEditPage />;
+      },
+      params: {},
+      exact: true,
     },
-    params: {},
-    exact: true,
-  },
-  [SLO_DETAIL_PATH]: {
-    handler: () => {
-      return <SloDetailsPage />;
+    ...(!isServerless
+      ? {
+          [SLO_SETTINGS_PATH]: {
+            handler: () => {
+              return <SloSettingsPage />;
+            },
+            params: {},
+            exact: true,
+          },
+        }
+      : {}),
+    [SLO_DETAIL_PATH]: {
+      handler: () => {
+        return <SloDetailsPage />;
+      },
+      params: {},
+      exact: true,
     },
-    params: {},
-    exact: true,
-  },
+  };
 };

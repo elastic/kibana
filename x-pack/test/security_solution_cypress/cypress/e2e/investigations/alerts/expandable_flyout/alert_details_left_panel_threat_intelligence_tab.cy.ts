@@ -8,7 +8,7 @@
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../objects/rule';
 import { expandDocumentDetailsExpandableFlyoutLeftSection } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
-import { expandFirstAlertExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
+import { expandAlertAtIndexExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
 import { INDICATOR_MATCH_ENRICHMENT_SECTION } from '../../../../screens/alerts_details';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
@@ -30,7 +30,7 @@ describe(
       createRule(getNewRule());
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
-      expandFirstAlertExpandableFlyout();
+      expandAlertAtIndexExpandableFlyout();
       expandDocumentDetailsExpandableFlyoutLeftSection();
       openInsightsTab();
       openThreatIntelligenceTab();

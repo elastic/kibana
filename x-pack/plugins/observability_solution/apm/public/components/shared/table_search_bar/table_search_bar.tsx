@@ -13,11 +13,7 @@ interface Props {
   onChangeSearchQuery: (value: string) => void;
 }
 
-export function TableSearchBar({
-  placeholder,
-  searchQuery,
-  onChangeSearchQuery,
-}: Props) {
+export function TableSearchBar({ placeholder, searchQuery, onChangeSearchQuery }: Props) {
   return (
     <EuiFieldSearch
       data-test-subj="tableSearchInput"

@@ -57,7 +57,7 @@ const isApiCompatible = (api: unknown | null): api is AddPanelToLibraryActionApi
 export class AddToLibraryAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_ADD_TO_LIBRARY;
   public readonly id = ACTION_ADD_TO_LIBRARY;
-  public order = 15;
+  public order = 8;
 
   private toastsService;
 
@@ -95,11 +95,9 @@ export class AddToLibraryAction implements Action<EmbeddableApiContext> {
             props.onTitleDuplicate
           );
           try {
-            const { state, savedObjectId } = await embeddable.saveStateToSavedObject(
-              props.newTitle
-            );
-            resolve({ ...state, title: props.newTitle });
-            return { id: savedObjectId };
+            const libraryId = await embeddable.saveToLibrary(props.newTitle);
+            resolve({ ...embeddable.getByReferenceState(libraryId), title: props.newTitle });
+            return { id: libraryId };
           } catch (error) {
             reject(error);
             return { error };

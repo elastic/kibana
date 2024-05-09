@@ -27,8 +27,7 @@ export function hasDashboardFile(props: DashboardFileProps) {
 }
 
 function getDashboardFileName({ agentName }: DashboardFileProps) {
-  const dashboardFile =
-    agentName && AGENT_NAME_DASHBOARD_FILE_MAPPING[agentName];
+  const dashboardFile = agentName && AGENT_NAME_DASHBOARD_FILE_MAPPING[agentName];
   return dashboardFile;
 }
 
@@ -53,9 +52,7 @@ export async function convertSavedDashboardToPanels(
     return undefined;
   }
 
-  const panelsRawObjects = JSON.parse(
-    dashboardJSON.attributes.panelsJSON
-  ) as any[];
+  const panelsRawObjects = JSON.parse(dashboardJSON.attributes.panelsJSON) as any[];
 
   const panels = panelsRawObjects.reduce((acc, panel) => {
     const { gridData, embeddableConfig, panelIndex, title } = panel;

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { first } from 'rxjs/operators';
+import { first } from 'rxjs';
 import { schema } from '@kbn/config-schema';
 import { reportServerError } from '@kbn/kibana-utils-plugin/server';
 import { reportSearchError } from '../report_search_error';

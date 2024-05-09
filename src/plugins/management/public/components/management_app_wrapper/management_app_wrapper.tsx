@@ -8,7 +8,12 @@
 
 import React, { createRef, Component } from 'react';
 
-import { ChromeBreadcrumb, AppMountParameters, ScopedHistory } from '@kbn/core/public';
+import {
+  ChromeBreadcrumb,
+  AppMountParameters,
+  ScopedHistory,
+  ThemeServiceStart,
+} from '@kbn/core/public';
 import classNames from 'classnames';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { ThrowIfError } from '@kbn/shared-ux-error-boundary';
@@ -20,7 +25,7 @@ interface ManagementSectionWrapperProps {
   setBreadcrumbs: (crumbs?: ChromeBreadcrumb[], history?: ScopedHistory) => void;
   onAppMounted: (id: string) => void;
   history: AppMountParameters['history'];
-  theme$: AppMountParameters['theme$'];
+  theme: ThemeServiceStart;
 }
 
 interface ManagementSectionWrapperState {
@@ -40,15 +45,19 @@ export class ManagementAppWrapper extends Component<
   }
 
   componentDidMount() {
-    const { setBreadcrumbs, app, onAppMounted, history, theme$ } = this.props;
+    const { setBreadcrumbs, app, onAppMounted, history, theme } = this.props;
     const { mount, basePath } = app;
     const appHistory = history.createSubHistory(app.basePath);
+
+    // TODO: Remove this: it provides a deprecated field still needed in ManagementAppMountParams
+    const { theme$ } = theme;
 
     const mountResult = mount({
       basePath,
       setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => setBreadcrumbs(crumbs, appHistory),
       element: this.mountElementRef.current!,
       history: appHistory,
+      theme,
       theme$,
     });
 

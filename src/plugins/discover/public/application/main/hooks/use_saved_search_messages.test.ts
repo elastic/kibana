@@ -22,8 +22,8 @@ import {
   DataDocumentsMsg,
   DataMainMsg,
   RecordRawType,
-} from '../services/discover_data_state_container';
-import { filter } from 'rxjs/operators';
+} from '../state_management/discover_data_state_container';
+import { filter } from 'rxjs';
 import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { searchResponseIncompleteWarningLocalCluster } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';

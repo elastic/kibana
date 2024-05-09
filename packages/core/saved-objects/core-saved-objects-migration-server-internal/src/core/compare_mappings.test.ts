@@ -118,4 +118,32 @@ describe('getUpdatedRootFields', () => {
 
     expect(updatedFields).toEqual(['namespace', 'references']);
   });
+
+  it('ignores fields not being present on the base mapping for the diff', () => {
+    const updatedFields = getUpdatedRootFields({
+      properties: {
+        ...getBaseMappings().properties,
+        someUnknownField: {
+          type: 'text',
+        },
+      },
+    });
+
+    expect(updatedFields).toEqual([]);
+  });
+
+  it('ignores fields not being present on the base mapping even with nested props', () => {
+    const updatedFields = getUpdatedRootFields({
+      properties: {
+        ...getBaseMappings().properties,
+        someTypeProps: {
+          properties: {
+            foo: { type: 'text' },
+          },
+        },
+      },
+    });
+
+    expect(updatedFields).toEqual([]);
+  });
 });

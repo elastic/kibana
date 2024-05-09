@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import type { ChangeEventHandler } from 'react';
+import React, { memo, useMemo } from 'react';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiSwitch, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiRadio, EuiSpacer, EuiText } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
+import { shouldEnableAntivirusRegistrationForSync } from '../../../../../../../../common/endpoint/utils/update_antivirus_registration_enabled';
+import { AntivirusRegistrationModes } from '../../../../../../../../common/endpoint/types';
 import { useGetProtectionsUnavailableComponent } from '../../hooks/use_get_protections_unavailable_component';
 import { useTestIdGenerator } from '../../../../../../hooks/use_test_id_generator';
 import { SettingCard } from '../setting_card';
@@ -26,23 +29,19 @@ const DESCRIPTION = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.explanation',
   {
     defaultMessage:
-      'Toggle on to register Elastic as an official Antivirus solution for Windows OS. ' +
+      'Enable to register Elastic as an official Antivirus solution for Windows OS. ' +
       'This will also disable Windows Defender.',
   }
 );
 
-export const REGISTERED_LABEL = i18n.translate(
-  'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.type',
-  {
-    defaultMessage: 'Register as antivirus',
-  }
+const ENABLED = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.syncWithMalwarePrevent.enabled',
+  { defaultMessage: 'enabled' }
 );
 
-export const NOT_REGISTERED_LABEL = i18n.translate(
-  'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.notRegisteredLabel',
-  {
-    defaultMessage: 'Do not register as antivirus',
-  }
+const DISABLED = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.syncWithMalwarePrevent.disabled',
+  { defaultMessage: 'disabled' }
 );
 
 export type AntivirusRegistrationCardProps = PolicyFormComponentCommonProps;
@@ -51,19 +50,64 @@ export const AntivirusRegistrationCard = memo<AntivirusRegistrationCardProps>(
   ({ policy, onChange, mode, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const isProtectionsAllowed = !useGetProtectionsUnavailableComponent();
-    const isChecked = policy.windows.antivirus_registration.enabled;
     const isEditMode = mode === 'edit';
-    const label = isChecked ? REGISTERED_LABEL : NOT_REGISTERED_LABEL;
+    const currentMode = policy.windows.antivirus_registration.mode;
 
-    const handleSwitchChange = useCallback(
-      (event) => {
-        const updatedPolicy = cloneDeep(policy);
-        updatedPolicy.windows.antivirus_registration.enabled = event.target.checked;
-
-        onChange({ isValid: true, updatedPolicy });
-      },
-      [onChange, policy]
+    const labels: Record<AntivirusRegistrationModes, React.ReactNode> = useMemo(
+      () => ({
+        [AntivirusRegistrationModes.disabled]: i18n.translate(
+          'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.disabled',
+          { defaultMessage: 'Disabled' }
+        ),
+        [AntivirusRegistrationModes.enabled]: i18n.translate(
+          'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.enabled',
+          { defaultMessage: 'Enabled' }
+        ),
+        [AntivirusRegistrationModes.sync]: (
+          <>
+            <EuiText size="s">
+              {i18n.translate(
+                'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.syncWithMalwarePrevent',
+                { defaultMessage: 'Sync with malware protection level' }
+              )}{' '}
+              <EuiIconTip
+                position="right"
+                content={i18n.translate(
+                  'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.syncWithMalwarePrevent.tooltip',
+                  {
+                    defaultMessage:
+                      'Use this setting to automatically enable antivirus registration if malware protection is set to Prevent. ' +
+                      'In any other case, antivirus registration will be disabled.',
+                  }
+                )}
+              />
+            </EuiText>
+            <EuiText color={isEditMode ? 'subdued' : undefined} size="xs">
+              {i18n.translate(
+                'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.syncWithMalwarePrevent.currentOutcome',
+                {
+                  defaultMessage: '(Current level: {currentOutcome})',
+                  values: {
+                    currentOutcome: shouldEnableAntivirusRegistrationForSync(policy)
+                      ? ENABLED
+                      : DISABLED,
+                  },
+                }
+              )}
+            </EuiText>
+          </>
+        ),
+      }),
+      [isEditMode, policy]
     );
+
+    const handleChange: ChangeEventHandler<HTMLInputElement> = (event) => {
+      const updatedPolicy = cloneDeep(policy);
+      updatedPolicy.windows.antivirus_registration.mode = event.target
+        .value as AntivirusRegistrationModes;
+
+      onChange({ isValid: true, updatedPolicy });
+    };
 
     if (!isProtectionsAllowed) {
       return null;
@@ -86,16 +130,22 @@ export const AntivirusRegistrationCard = memo<AntivirusRegistrationCardProps>(
 
         <EuiSpacer size="s" />
 
-        {isEditMode ? (
-          <EuiSwitch
-            label={label}
-            checked={isChecked}
-            onChange={handleSwitchChange}
-            data-test-subj={getTestId('switch')}
-          />
-        ) : (
-          <div data-test-subj={getTestId('value')}>{label}</div>
-        )}
+        <EuiFlexGroup data-test-subj={getTestId('radioButtons')}>
+          {Object.values(AntivirusRegistrationModes).map((registrationMode) => (
+            <EuiFlexItem key={registrationMode}>
+              <EuiRadio
+                name="antivirus-registration"
+                id={registrationMode}
+                value={registrationMode}
+                onChange={handleChange}
+                label={labels[registrationMode as AntivirusRegistrationModes]}
+                checked={currentMode === registrationMode}
+                disabled={!isEditMode}
+                data-test-subj={getTestId(registrationMode)}
+              />
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
       </SettingCard>
     );
   }

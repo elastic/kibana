@@ -29,6 +29,7 @@
       "contentManagement"
     ],
     "optionalPlugins": [
+      "dataVisualizer",
       "home",
       "share",
       "usageCollection",
@@ -37,7 +38,8 @@
       "savedObjectsTaggingOss",
       "lens",
       "noDataPage",
-      "globalSearch"
+      "globalSearch",
+      "observabilityAIAssistant"
     ],
     "requiredBundles": ["kibanaUtils", "kibanaReact", "unifiedSearch", "savedObjects"],
     "extraPublicDirs": ["common"]
