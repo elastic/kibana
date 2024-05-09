@@ -21,7 +21,7 @@ import {
   ObservabilityOnboardingPluginSetupDeps,
   ObservabilityOnboardingPluginStartDeps,
 } from '../plugin';
-import { ExperimentalOnboardingFlow } from './experimental_onboarding_flow';
+import { ObservabilityOnboardingFlow } from './observability_onboarding_flow';
 
 export const onBoardingTitle = i18n.translate(
   'xpack.observability_onboarding.breadcrumbs.onboarding',
@@ -87,7 +87,7 @@ export function ObservabilityOnboardingAppRoot({
                       <ObservabilityOnboardingHeaderActionMenu />
                     </HeaderMenuPortal>
                   )}
-                  <ExperimentalOnboardingFlow />
+                  <ObservabilityOnboardingFlow />
                 </EuiErrorBoundary>
               </Router>
             </i18nCore.Context>
