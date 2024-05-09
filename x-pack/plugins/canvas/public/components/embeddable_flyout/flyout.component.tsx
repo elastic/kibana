@@ -54,24 +54,6 @@ export const AddEmbeddableFlyout: FC<Props> = ({
   const { getEmbeddableFactories } = embeddablesService;
   const { getContentManagement, getUISettings } = platformService;
 
-  const onAddPanel = useCallback(
-    (id: string, savedObjectType: string) => {
-      const embeddableFactories = getEmbeddableFactories();
-      // Find the embeddable type from the saved object type
-      const found = Array.from(embeddableFactories).find((embeddableFactory) => {
-        return Boolean(
-          embeddableFactory.savedObjectMetaData &&
-            embeddableFactory.savedObjectMetaData.type === savedObjectType
-        );
-      });
-
-      const foundEmbeddableType = found ? found.type : 'unknown';
-
-      onSelect(id, foundEmbeddableType, isByValueEnabled);
-    },
-    [isByValueEnabled, getEmbeddableFactories, onSelect]
-  );
-
   const legacyFactoriesBySavedObjectType: LegacyFactoryMap = useMemo(() => {
     return [...getEmbeddableFactories()]
       .filter(
@@ -113,6 +95,30 @@ export const AddEmbeddableFlyout: FC<Props> = ({
         .map(({ savedObjectMetaData }) => savedObjectMetaData!)
         .sort((a, b) => a.type.localeCompare(b.type)),
     [availableEmbeddables, factoriesBySavedObjectType, legacyFactoriesBySavedObjectType]
+  );
+
+  const onAddPanel = useCallback(
+    (id: string, savedObjectType: string) => {
+      if (factoriesBySavedObjectType[savedObjectType]) {
+        const factory = factoriesBySavedObjectType[savedObjectType];
+        const { type } = factory;
+        onSelect(id, type, isByValueEnabled);
+        return;
+      }
+      const embeddableFactories = getEmbeddableFactories();
+      // Find the embeddable type from the saved object type
+      const found = Array.from(embeddableFactories).find((embeddableFactory) => {
+        return Boolean(
+          embeddableFactory.savedObjectMetaData &&
+            embeddableFactory.savedObjectMetaData.type === savedObjectType
+        );
+      });
+
+      const foundEmbeddableType = found ? found.type : 'unknown';
+
+      onSelect(id, foundEmbeddableType, isByValueEnabled);
+    },
+    [isByValueEnabled, getEmbeddableFactories, onSelect, factoriesBySavedObjectType]
   );
 
   // const availableSavedObjects = Array.from(legacyEmbeddableFactories)
