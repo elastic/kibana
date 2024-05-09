@@ -52,17 +52,18 @@ const uploadPipeline = (pipelineContent: string | object) => {
     }
 
     const pipeline = [];
-
+    let removeBaseSteps = false;
     // Start project build in parallel with quick_checks and snapshot build to reduce time to deploy
     if (
       GITHUB_PR_LABELS.includes('ci:project-deploy-elasticsearch') ||
       GITHUB_PR_LABELS.includes('ci:project-deploy-observability') ||
       GITHUB_PR_LABELS.includes('ci:project-deploy-security')
     ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/deploy_project.yml'));
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/deploy_project.yml', false));
+      removeBaseSteps = true;
     }
 
-    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
+    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', removeBaseSteps));
 
     if (await doAnyChangesMatch([/^packages\/kbn-handlebars/])) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/kbn_handlebars.yml'));
