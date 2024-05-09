@@ -8,18 +8,29 @@
 
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { ContainerOutput } from '@kbn/embeddable-plugin/public';
+import { Filter } from '@kbn/es-query';
 import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
-import { ControlGroupInput } from '../../common/control_group/types';
-import { CommonControlOutput } from '../types';
+
+import { ControlGroupInput, PersistableControlGroupInput } from '../../common/control_group/types';
+import { TimeSlice } from '../../common/types';
+
+export interface ControlFilterOutput {
+  filters?: Filter[];
+}
+export interface ControlTimesliceOutput {
+  timeslice?: TimeSlice;
+}
+
+export type ControlGroupFilterOutput = ControlFilterOutput & ControlTimesliceOutput;
 
 export type ControlGroupOutput = ContainerOutput &
-  Omit<CommonControlOutput, 'dataViewId'> & { dataViewIds: string[] };
+  ControlGroupFilterOutput & { dataViewIds: string[] };
 
 // public only - redux embeddable state type
 export type ControlGroupReduxState = ReduxEmbeddableState<
   ControlGroupInput,
   ControlGroupOutput,
-  ControlGroupSettings
+  ControlGroupComponentState
 >;
 
 export type FieldFilterPredicate = (f: DataViewField) => boolean;
@@ -40,9 +51,16 @@ export interface ControlGroupSettings {
   };
 }
 
+export type ControlGroupComponentState = ControlGroupSettings & {
+  lastSavedInput?: PersistableControlGroupInput;
+  lastSavedFilters?: ControlGroupFilterOutput;
+  unpublishedFilters?: ControlGroupFilterOutput;
+  controlWithInvalidSelectionsId?: string;
+};
+
 export {
-  type ControlsPanels,
+  CONTROL_GROUP_TYPE,
   type ControlGroupInput,
   type ControlPanelState,
-  CONTROL_GROUP_TYPE,
+  type ControlsPanels,
 } from '../../common/control_group/types';

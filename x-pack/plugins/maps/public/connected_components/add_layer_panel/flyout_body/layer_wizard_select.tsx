@@ -160,7 +160,13 @@ export class LayerWizardSelect extends Component<Props, State> {
           <EuiCard
             title={layerWizard.title}
             titleSize="xs"
-            betaBadgeProps={{ label: layerWizard.isBeta ? 'beta' : '' }}
+            betaBadgeProps={{
+              label: layerWizard.isBeta
+                ? i18n.translate('xpack.maps.layerWizardSelect.technicalPreviewLabel', {
+                    defaultMessage: 'Technical preview',
+                  })
+                : '',
+            }}
             icon={icon}
             onClick={onClick}
             description={layerWizard.description}

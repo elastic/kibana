@@ -1,8 +1,9 @@
 {
   "include": [
-"v8.4.0"
+"v8.13.0"
 ],
 "exclude": [
+"v8.12.0",
 "v8.3.3",
 "v8.3.2",
 "v8.3.1",
@@ -15,8 +16,6 @@
 "v7.17.2",
 "v7.17.1",
 "v7.17.0",
-":ml",
-"Feature:Anomaly Detection",
 "Feature:Detections",
 "Feature:Endpoint",
 "Feature:Observability Landing - Milestone 1",
@@ -41,14 +40,12 @@
 "Team:Endpoint Response",
 "Team:EnterpriseSearch",
 "Team:Fleet",
-"Team:Infra Monitoring UI",
 "Team:Ingest Management",
 "Team:Observability",
 "Team:Unified observability",
 "Team:Onboarding and Lifecycle Mgt",
 "Team:Operations",
 "Team:QA",
-"Team:ResponseOps",
 "Team:SIEM",
 "Team:Security Solution Platform",
 "Team:Security",
@@ -61,6 +58,14 @@
 "Team:logs-metrics-ui",
 "Team:uptime",
 "Team: Protections Experience",
+"Team:obs-ux-infra_services",
+"Team:obs-ux-management",
+"Team:Cloud Security",
+"Team:obs-ux-logs",
+"Team:Defend Workflows",
+"Team:Entity Analytics",
+"Team:Obs AI Assistant",
+"Team:Search",
 "bump",
 "docs",
 "failed-test",
@@ -69,4 +74,3 @@
 "test_xpack_functional"
 ]
 }
-

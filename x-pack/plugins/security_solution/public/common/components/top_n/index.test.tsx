@@ -9,18 +9,9 @@ import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import React from 'react';
 import { waitFor } from '@testing-library/react';
-import '../../mock/match_media';
 import { mockBrowserFields } from '../../containers/source/mock';
-import {
-  mockGlobalState,
-  TestProviders,
-  SUB_PLUGINS_REDUCER,
-  kibanaObservable,
-  createSecuritySolutionStorageMock,
-  mockIndexPattern,
-} from '../../mock';
+import { mockGlobalState, TestProviders, mockIndexPattern, createMockStore } from '../../mock';
 import type { State } from '../../store';
-import { createStore } from '../../store';
 
 import type { Props } from './top_n';
 import { StatefulTopN } from '.';
@@ -42,7 +33,7 @@ jest.mock('react-router-dom', () => {
 
 jest.mock('../link_to');
 jest.mock('../../lib/kibana');
-jest.mock('../../../timelines/store/timeline/actions');
+jest.mock('../../../timelines/store/actions');
 jest.mock('../visualization_actions/actions');
 jest.mock('../visualization_actions/lens_embeddable');
 const field = 'process.name';
@@ -149,8 +140,7 @@ const state: State = {
   },
 };
 
-const { storage } = createSecuritySolutionStorageMock();
-const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+const store = createMockStore(state);
 
 const testProps = {
   browserFields: mockBrowserFields,
@@ -230,7 +220,7 @@ describe('StatefulTopN', () => {
     test('it has undefined combinedQueries when rendering in a global context', () => {
       const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
 
-      expect(props.combinedQueries).toBeUndefined();
+      expect(props.filterQuery).toBeUndefined();
     });
 
     test(`defaults to the 'Raw events' view when rendering in a global context`, () => {
@@ -307,7 +297,7 @@ describe('StatefulTopN', () => {
     test('it has a combinedQueries value from Redux state composed of the timeline [data providers + kql + filter-bar-filters] when rendering in a timeline context', () => {
       const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
 
-      expect(props.combinedQueries).toEqual(
+      expect(props.filterQuery).toEqual(
         '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"network.transport":"tcp"}}],"minimum_should_match":1}},{"bool":{"should":[{"exists":{"field":"host.name"}}],"minimum_should_match":1}}]}},{"match_phrase":{"source.port":{"query":"30045"}}}],"should":[],"must_not":[]}}'
       );
     });
@@ -372,6 +362,7 @@ describe('StatefulTopN', () => {
           const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
           expect(props.defaultView).toEqual('alert');
         });
+        wrapper.unmount();
       });
     });
   });

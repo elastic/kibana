@@ -6,11 +6,12 @@
  */
 
 import { openJsonTab } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
-import { expandFirstAlertExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
+import { expandAlertAtIndexExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
 import {
   DOCUMENT_DETAILS_FLYOUT_JSON_TAB_CONTENT,
   DOCUMENT_DETAILS_FLYOUT_JSON_TAB_COPY_TO_CLIPBOARD_BUTTON,
 } from '../../../../screens/expandable_flyout/alert_details_right_panel_json_tab';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -23,11 +24,12 @@ describe(
   { tags: ['@ess', '@serverless'] },
   () => {
     beforeEach(() => {
+      deleteAlertsAndRules();
       login();
       createRule(getNewRule());
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
-      expandFirstAlertExpandableFlyout();
+      expandAlertAtIndexExpandableFlyout();
       openJsonTab();
     });
 

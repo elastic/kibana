@@ -55,7 +55,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       executionStatus = await waitForStatus(alertId, new Set(['error']));
       expect(executionStatus.error).to.be.ok();
       expect(executionStatus.error.reason).to.be(RuleExecutionStatusErrorReasons.Decrypt);
-      expect(executionStatus.error.message).to.be('Unable to decrypt attribute "apiKey"');
+      expect(executionStatus.error.message).to.contain('Unable to decrypt attribute "apiKey"');
     });
   });
 

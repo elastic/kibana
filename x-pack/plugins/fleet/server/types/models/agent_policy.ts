@@ -8,8 +8,20 @@
 import { schema } from '@kbn/config-schema';
 
 import { agentPolicyStatuses, dataTypes } from '../../../common/constants';
+import { isValidNamespace } from '../../../common/services';
+import { getSettingsAPISchema } from '../../services/form_settings';
 
-import { PackagePolicySchema, NamespaceSchema } from './package_policy';
+import { PackagePolicySchema } from './package_policy';
+
+export const AgentPolicyNamespaceSchema = schema.string({
+  minLength: 1,
+  validate: (value) => {
+    const namespaceValidation = isValidNamespace(value || '');
+    if (!namespaceValidation.valid && namespaceValidation.error) {
+      return namespaceValidation.error;
+    }
+  },
+});
 
 function validateNonEmptyString(val: string) {
   if (val.trim() === '') {
@@ -28,7 +40,7 @@ function isInteger(n: number) {
 export const AgentPolicyBaseSchema = {
   id: schema.maybe(schema.string()),
   name: schema.string({ minLength: 1, validate: validateNonEmptyString }),
-  namespace: NamespaceSchema,
+  namespace: AgentPolicyNamespaceSchema,
   description: schema.maybe(schema.string()),
   is_managed: schema.maybe(schema.boolean()),
   has_fleet_server: schema.maybe(schema.boolean()),
@@ -70,10 +82,13 @@ export const AgentPolicyBaseSchema = {
       })
     )
   ),
+  ...getSettingsAPISchema('AGENT_POLICY_ADVANCED_SETTINGS'),
+  supports_agentless: schema.maybe(schema.boolean({ defaultValue: false })),
 };
 
 export const NewAgentPolicySchema = schema.object({
   ...AgentPolicyBaseSchema,
+  force: schema.maybe(schema.boolean()),
 });
 
 export const AgentPolicySchema = schema.object({

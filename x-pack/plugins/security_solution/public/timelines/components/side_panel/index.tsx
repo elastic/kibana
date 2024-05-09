@@ -13,8 +13,8 @@ import { EuiFlyout } from '@elastic/eui';
 import type { EntityType } from '@kbn/timelines-plugin/common';
 import { dataTableActions, dataTableSelectors } from '@kbn/securitysolution-data-table';
 import { getScopedActions, isInTableScope, isTimelineScope } from '../../../helpers';
-import { timelineSelectors } from '../../store/timeline';
-import { timelineDefaults } from '../../store/timeline/defaults';
+import { timelineSelectors } from '../../store';
+import { timelineDefaults } from '../../store/defaults';
 import type { BrowserFields } from '../../../common/containers/source';
 import type { RunTimeMappings } from '../../../common/store/sourcerer/model';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
@@ -34,6 +34,8 @@ interface DetailsPanelProps {
   scopeId: string;
   isReadOnly?: boolean;
 }
+
+const detailsPanelStyleProp = { zIndex: 1001 };
 
 /**
  * This panel is used in both the main timeline as well as the flyouts on the host, detection, cases, and network pages.
@@ -87,7 +89,7 @@ export const DetailsPanel = React.memo(
       }
     }, [dispatch, scopeId]);
 
-    const activeTab = tabType ?? TimelineTabs.query;
+    const activeTab: TimelineTabs = tabType ?? TimelineTabs.query;
     const closePanel = useCallback(() => {
       if (handleOnPanelClosed) handleOnPanelClosed();
       else defaultOnPanelClose();
@@ -169,6 +171,7 @@ export const DetailsPanel = React.memo(
       <EuiFlyout
         data-test-subj="timeline:details-panel:flyout"
         size={panelSize}
+        style={detailsPanelStyleProp}
         onClose={closePanel}
         ownFocus={false}
         key={flyoutUniqueKey}

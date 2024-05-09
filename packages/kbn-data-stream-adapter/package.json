@@ -1,0 +1,7 @@
+{
+  "name": "@kbn/data-stream-adapter",
+  "version": "1.0.0",
+  "description": "Utility library for Elasticsearch Data Stream management",
+  "license": "SSPL-1.0 OR Elastic License 2.0",
+  "private": true
+}

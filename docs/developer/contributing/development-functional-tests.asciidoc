@@ -81,11 +81,12 @@ export TEST_BROWSER_HEADLESS=1
 export TEST_THROTTLE_NETWORK=1
 ----------
 
-** When running against a Cloud deployment, some tests are not applicable. To skip tests that do not apply, use --exclude-tag.  An example shell file can be found at: {kibana-blob}test/scripts/jenkins_cloud.sh[test/scripts/jenkins_cloud.sh]
+** When running against a Cloud deployment, some tests are not applicable. To skip tests that do not apply, use --exclude-tag.
 +
 ["source", "shell"]
 ----------
 node scripts/functional_test_runner --exclude-tag skipCloud
+node scripts/functional_test_runner --exclude-tag skipMKI
 ----------
 
 [discrete]

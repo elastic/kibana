@@ -17,7 +17,7 @@ import {
 } from '@kbn/core/server';
 import { firstValueFrom, Observable } from 'rxjs';
 import { Server } from '@hapi/hapi';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { PluginStart } from '@kbn/data-plugin/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
@@ -62,7 +62,7 @@ export interface VisTypeTimeseriesSetup {
   getVisData: (
     requestContext: VisTypeTimeseriesRequestHandlerContext,
     fakeRequest: KibanaRequest,
-    // ideally this should be VisPayload type, but currently has inconsistencies with x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts
+    // ideally this should be VisPayload type, but currently has inconsistencies with x-pack/plugins/observability_solution/infra/server/lib/adapters/framework/kibana_framework_adapter.ts
     options: any
   ) => Promise<TimeseriesVisData>;
 }

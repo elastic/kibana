@@ -7,12 +7,12 @@
 
 import type { ExportExceptionDetails } from '@kbn/securitysolution-io-ts-list-types';
 import type { ExportRulesDetails } from '../../../../../../common/api/detection_engine/rule_management';
-import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import type { DefaultActionConnectorDetails } from './get_export_rule_action_connectors';
+import type { ExportableRule } from './exportable_rule';
 
 export const getExportDetailsNdjson = (
-  rules: RuleResponse[],
-  missingRules: Array<{ rule_id: string }> = [],
+  rules: ExportableRule[],
+  missingRuleIds: string[] = [],
   exceptionDetails?: ExportExceptionDetails,
   actionConnectorDetails?: DefaultActionConnectorDetails
 ): string => {
@@ -27,8 +27,8 @@ export const getExportDetailsNdjson = (
   const stringified: ExportRulesDetails = {
     exported_count: exportedCount,
     exported_rules_count: rules.length,
-    missing_rules: missingRules,
-    missing_rules_count: missingRules.length,
+    missing_rules: missingRuleIds.map((id) => ({ rule_id: id })),
+    missing_rules_count: missingRuleIds.length,
     ...exceptionDetails,
     ...actionConnectorDetails,
   };

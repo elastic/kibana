@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { find } from 'lodash/fp';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { find, isEmpty } from 'lodash/fp';
+import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import {
   EuiComboBox,
   EuiHealth,
@@ -40,7 +40,7 @@ import {
   NO_AGENT_AVAILABLE_TITLE,
 } from './translations';
 
-import type { SelectedGroups, AgentOptionValue, GroupOption, AgentSelection } from './types';
+import type { GroupOption, AgentSelection } from './types';
 import { AGENT_GROUP_KEY } from './types';
 
 interface AgentsTableProps {
@@ -70,48 +70,45 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
 
   const {
     isLoading: agentsLoading,
+    isRefetching: agentsRefetching,
     data: agentList,
     isFetched: agentsFetched,
   } = useAllAgents(debouncedSearchValue, {
     perPage,
+    agentIds: agentSelection?.agents,
   });
 
   // option related
   const [options, setOptions] = useState<GroupOption[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<GroupOption[]>([]);
-  const [numAgentsSelected, setNumAgentsSelected] = useState<number>(0);
   const defaultValueInitialized = useRef(false);
+
+  const numAgentsSelected = useMemo(() => {
+    const { newAgentSelection, selectedAgents, selectedGroups } =
+      generateAgentSelection(selectedOptions);
+    if (newAgentSelection.allAgentsSelected) {
+      return agentList?.total ?? 0;
+    } else {
+      const checkAgent = generateAgentCheck(selectedGroups);
+
+      return (
+        // filter out all the agents counted by selected policies and platforms
+        selectedAgents.filter(checkAgent).length +
+        // add the number of agents added via policy and platform groups
+        getNumAgentsInGrouping(selectedGroups) -
+        // subtract the number of agents double counted by policy/platform selections
+        getNumOverlapped(selectedGroups, agentList?.groups?.overlap ?? {})
+      );
+    }
+  }, [agentList?.groups?.overlap, agentList?.total, selectedOptions]);
 
   const onSelection = useCallback(
     (selection: GroupOption[]) => {
-      // TODO?: optimize this by making the selection computation incremental
-      const {
-        newAgentSelection,
-        selectedAgents,
-        selectedGroups,
-      }: {
-        newAgentSelection: AgentSelection;
-        selectedAgents: AgentOptionValue[];
-        selectedGroups: SelectedGroups;
-      } = generateAgentSelection(selection);
-      if (newAgentSelection.allAgentsSelected) {
-        setNumAgentsSelected(agentList?.total ?? 0);
-      } else {
-        const checkAgent = generateAgentCheck(selectedGroups);
-        setNumAgentsSelected(
-          // filter out all the agents counted by selected policies and platforms
-          selectedAgents.filter(checkAgent).length +
-            // add the number of agents added via policy and platform groups
-            getNumAgentsInGrouping(selectedGroups) -
-            // subtract the number of agents double counted by policy/platform selections
-            getNumOverlapped(selectedGroups, agentList?.groups?.overlap ?? {})
-        );
-      }
-
+      const { newAgentSelection } = generateAgentSelection(selection);
       onChange(newAgentSelection);
       setSelectedOptions(selection);
     },
-    [agentList?.groups?.overlap, agentList?.total, onChange]
+    [onChange]
   );
 
   useEffect(() => {
@@ -132,7 +129,13 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
       }
     };
 
-    if (agentSelection && !defaultValueInitialized.current && options.length) {
+    if (
+      agentSelection &&
+      !isEmpty(agentSelection) &&
+      !defaultValueInitialized.current &&
+      options.length &&
+      !agentsRefetching
+    ) {
       if (agentSelection.allAgentsSelected) {
         const allAgentsOptions = find(['label', ALL_AGENTS_LABEL], options);
 
@@ -150,7 +153,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
         handleSelectedOptions(agentSelection.agents, AGENT_SELECTION_LABEL);
       }
     }
-  }, [agentSelection, onSelection, options, selectedOptions]);
+  }, [agentSelection, agentsFetched, agentsRefetching, onSelection, options, selectedOptions]);
 
   useEffect(() => {
     if (agentsFetched && agentList?.groups) {

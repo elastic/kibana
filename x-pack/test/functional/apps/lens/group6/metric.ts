@@ -127,7 +127,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           subtitle: 'Average of bytes',
           extraText: 'Average of bytes 19,755',
           value: '19,755',
-          color: 'rgba(245, 247, 250, 1)',
+          color: 'rgba(255, 255, 255, 1)',
+          trendlineColor: 'rgba(255, 255, 255, 1)',
           showingTrendline: true,
           showingBar: false,
         },
@@ -136,7 +137,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           subtitle: 'Average of bytes',
           extraText: 'Average of bytes 18,994',
           value: '18,994',
-          color: 'rgba(245, 247, 250, 1)',
+          color: 'rgba(255, 255, 255, 1)',
+          trendlineColor: 'rgba(255, 255, 255, 1)',
           showingTrendline: true,
           showingBar: false,
         },
@@ -145,7 +147,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           subtitle: 'Average of bytes',
           extraText: 'Average of bytes 17,246',
           value: '17,246',
-          color: 'rgba(245, 247, 250, 1)',
+          color: 'rgba(255, 255, 255, 1)',
+          trendlineColor: 'rgba(255, 255, 255, 1)',
           showingTrendline: true,
           showingBar: false,
         },
@@ -154,7 +157,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           subtitle: 'Average of bytes',
           extraText: 'Average of bytes 15,687',
           value: '15,687',
-          color: 'rgba(245, 247, 250, 1)',
+          color: 'rgba(255, 255, 255, 1)',
+          trendlineColor: 'rgba(255, 255, 255, 1)',
           showingTrendline: true,
           showingBar: false,
         },
@@ -163,7 +167,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           subtitle: 'Average of bytes',
           extraText: 'Average of bytes 15,614.333',
           value: '15,614.333',
-          color: 'rgba(245, 247, 250, 1)',
+          color: 'rgba(255, 255, 255, 1)',
+          trendlineColor: 'rgba(255, 255, 255, 1)',
           showingTrendline: true,
           showingBar: false,
         },
@@ -172,7 +177,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           subtitle: 'Average of bytes',
           extraText: 'Average of bytes 5,722.775',
           value: '5,722.775',
-          color: 'rgba(245, 247, 250, 1)',
+          color: 'rgba(255, 255, 255, 1)',
+          trendlineColor: 'rgba(255, 255, 255, 1)',
           showingTrendline: true,
           showingBar: false,
         },
@@ -292,7 +298,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('converts color stops to number', async () => {
-      await PageObjects.lens.openPalettePanel('lnsMetric');
+      await PageObjects.lens.openPalettePanel();
       await PageObjects.common.sleep(1000);
       await testSubjects.click('lnsPalettePanel_dynamicColoring_rangeType_groups_number');
       expect([

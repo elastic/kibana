@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useState } from 'react';
+import type { EuiStepStatus } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -13,7 +15,6 @@ import {
   EuiPageBody,
   EuiSpacer,
   EuiSteps,
-  EuiStepStatus,
   EuiSwitch,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -103,6 +104,7 @@ export const Page: FC<Props> = ({ jobId }) => {
           setCurrentStep={setCurrentStep}
           step={currentStep}
           stepActivated={activatedSteps[ANALYTICS_STEPS.CONFIGURATION]}
+          sourceDataViewTitle={selectedDataView.getIndexPattern()}
         />
       ),
       status:
@@ -188,7 +190,7 @@ export const Page: FC<Props> = ({ jobId }) => {
                   <FormattedMessage
                     id="xpack.ml.dataframe.analytics.creationPageSourceIndexTitle"
                     defaultMessage="Source data view: {dataViewTitle}"
-                    values={{ dataViewTitle: selectedDataView.title }}
+                    values={{ dataViewTitle: selectedDataView.getIndexPattern() }}
                   />
                 </h2>
               </EuiFlexItem>

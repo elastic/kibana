@@ -1,0 +1,35 @@
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
+
+SRCS = glob(
+  [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  exclude = [
+    "**/test_helpers.ts",
+    "**/*.config.js",
+    "**/*.mock.*",
+    "**/*.test.*",
+    "**/*.stories.*",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
+  ],
+)
+
+BUNDLER_DEPS = [
+  "//packages/kbn-i18n",
+  "@npm//tslib",
+]
+
+js_library(
+  name = "kbn-bfetch-error",
+  package_name = "@kbn/bfetch-error",
+  srcs = ["package.json"] + SRCS,
+  deps = BUNDLER_DEPS,
+  visibility = ["//visibility:public"],
+)

@@ -70,6 +70,9 @@ export interface LensAppState extends EditorFrameState {
   // Dataview/Indexpattern management has moved in here from datasource
   dataViews: DataViewsState;
   annotationGroups: AnnotationGroups;
+
+  // Whether the current visualization is managed by the system
+  managed: boolean;
 }
 
 export interface LensState {

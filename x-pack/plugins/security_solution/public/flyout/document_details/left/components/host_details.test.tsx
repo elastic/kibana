@@ -8,10 +8,10 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { Anomalies } from '../../../../common/components/ml/types';
+import { LeftPanelContext } from '../context';
 import { TestProviders } from '../../../../common/mock';
 import { HostDetails } from './host_details';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
-import { useRiskScore } from '../../../../explore/containers/risk_score';
 import { mockAnomalies } from '../../../../common/components/ml/mock';
 import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
 import { useHostRelatedUsers } from '../../../../common/containers/related_entities/related_users';
@@ -22,6 +22,8 @@ import {
   HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID,
 } from './test_ids';
 import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '../../../shared/components/test_ids';
+import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
+import { mockContextValue } from '../mocks/mock_context';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -83,7 +85,7 @@ const mockUseHostDetails = useHostDetails as jest.Mock;
 jest.mock('../../../../common/containers/related_entities/related_users');
 const mockUseHostsRelatedUsers = useHostRelatedUsers as jest.Mock;
 
-jest.mock('../../../../explore/containers/risk_score');
+jest.mock('../../../../entity_analytics/api/hooks/use_risk_score');
 const mockUseRiskScore = useRiskScore as jest.Mock;
 
 const timestamp = '2022-07-25T08:20:18.966Z';
@@ -122,10 +124,12 @@ const mockRelatedUsersResponse = {
   loading: false,
 };
 
-const renderHostDetails = () =>
+const renderHostDetails = (contextValue: LeftPanelContext) =>
   render(
     <TestProviders>
-      <HostDetails {...defaultProps} />
+      <LeftPanelContext.Provider value={contextValue}>
+        <HostDetails {...defaultProps} />
+      </LeftPanelContext.Provider>
     </TestProviders>
   );
 
@@ -139,13 +143,13 @@ describe('<HostDetails />', () => {
   });
 
   it('should render host details correctly', () => {
-    const { getByTestId } = renderHostDetails();
+    const { getByTestId } = renderHostDetails(mockContextValue);
     expect(getByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(HOST_DETAILS_TEST_ID))).toBeInTheDocument();
   });
 
   describe('Host overview', () => {
     it('should render the HostOverview with correct dates and indices', () => {
-      const { getByTestId } = renderHostDetails();
+      const { getByTestId } = renderHostDetails(mockContextValue);
       expect(mockUseHostDetails).toBeCalledWith({
         id: 'entities-hosts-details-uuid',
         startDate: from,
@@ -164,20 +168,20 @@ describe('<HostDetails />', () => {
       });
       mockUseRiskScore.mockReturnValue({ data: [], isAuthorized: true });
 
-      const { getByText } = renderHostDetails();
+      const { getByText } = renderHostDetails(mockContextValue);
       expect(getByText('Host risk score')).toBeInTheDocument();
     });
 
     it('should not render host risk score when unauthorized', () => {
       mockUseRiskScore.mockReturnValue({ data: [], isAuthorized: false });
-      const { queryByText } = renderHostDetails();
+      const { queryByText } = renderHostDetails(mockContextValue);
       expect(queryByText('Host risk score')).not.toBeInTheDocument();
     });
   });
 
   describe('Related users', () => {
     it('should render the related user table with correct dates and indices', () => {
-      const { getByTestId } = renderHostDetails();
+      const { getByTestId } = renderHostDetails(mockContextValue);
       expect(mockUseHostsRelatedUsers).toBeCalledWith({
         from: timestamp,
         hostName: 'test host',
@@ -194,7 +198,7 @@ describe('<HostDetails />', () => {
       });
       mockUseHasSecurityCapability.mockReturnValue(true);
 
-      const { queryAllByRole } = renderHostDetails();
+      const { queryAllByRole } = renderHostDetails(mockContextValue);
       expect(queryAllByRole('columnheader').length).toBe(3);
       expect(queryAllByRole('row')[1].textContent).toContain('test user');
       expect(queryAllByRole('row')[1].textContent).toContain('100.XXX.XXX');
@@ -208,12 +212,12 @@ describe('<HostDetails />', () => {
       });
       mockUseHasSecurityCapability.mockReturnValue(false);
 
-      const { queryAllByRole } = renderHostDetails();
+      const { queryAllByRole } = renderHostDetails(mockContextValue);
       expect(queryAllByRole('columnheader').length).toBe(2);
     });
 
     it('should not render host risk score column when license is not valid', () => {
-      const { queryAllByRole } = renderHostDetails();
+      const { queryAllByRole } = renderHostDetails(mockContextValue);
       expect(queryAllByRole('columnheader').length).toBe(2);
     });
 
@@ -224,7 +228,7 @@ describe('<HostDetails />', () => {
         loading: false,
       });
 
-      const { getByTestId } = renderHostDetails();
+      const { getByTestId } = renderHostDetails(mockContextValue);
       expect(getByTestId(HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID).textContent).toContain(
         'No users identified'
       );

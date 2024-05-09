@@ -8,6 +8,7 @@
 import { MlTrainedModelConfig, MlTrainedModelStats } from '@elastic/elasticsearch/lib/api/types';
 import { BUILT_IN_MODEL_TAG, TRAINED_MODEL_TYPE } from '@kbn/ml-trained-models-utils';
 
+import { MlModel, MlModelDeploymentState } from '../types/ml';
 import { MlInferencePipeline, TrainedModelState } from '../types/pipelines';
 
 import {
@@ -19,7 +20,7 @@ import {
   parseModelStateReasonFromStats,
 } from '.';
 
-const mockModel: MlTrainedModelConfig = {
+const mockTrainedModel: MlTrainedModelConfig = {
   inference_config: {
     ner: {},
   },
@@ -32,8 +33,27 @@ const mockModel: MlTrainedModelConfig = {
   version: '1',
 };
 
+const mockModel: MlModel = {
+  modelId: 'model_1',
+  type: 'ner',
+  title: 'Model 1',
+  description: 'Model 1 description',
+  licenseType: 'elastic',
+  modelDetailsPageUrl: 'https://my-model.ai',
+  deploymentState: MlModelDeploymentState.NotDeployed,
+  startTime: 0,
+  targetAllocationCount: 0,
+  nodeAllocationCount: 0,
+  threadsPerAllocation: 0,
+  isPlaceholder: false,
+  hasStats: false,
+  types: ['pytorch', 'ner'],
+  inputFieldNames: ['title'],
+  version: '1',
+};
+
 describe('getMlModelTypesForModelConfig lib function', () => {
-  const builtInMockModel: MlTrainedModelConfig = {
+  const builtInMockTrainedModel: MlTrainedModelConfig = {
     inference_config: {
       text_classification: {},
     },
@@ -47,13 +67,13 @@ describe('getMlModelTypesForModelConfig lib function', () => {
 
   it('should return the model type and inference config type', () => {
     const expected = ['pytorch', 'ner'];
-    const response = getMlModelTypesForModelConfig(mockModel);
+    const response = getMlModelTypesForModelConfig(mockTrainedModel);
     expect(response.sort()).toEqual(expected.sort());
   });
 
   it('should include the built in type', () => {
     const expected = ['lang_ident', 'text_classification', BUILT_IN_MODEL_TAG];
-    const response = getMlModelTypesForModelConfig(builtInMockModel);
+    const response = getMlModelTypesForModelConfig(builtInMockTrainedModel);
     expect(response.sort()).toEqual(expected.sort());
   });
 });
@@ -71,9 +91,9 @@ describe('generateMlInferencePipelineBody lib function', () => {
       {
         inference: {
           field_map: {
-            'my-source-field': 'MODEL_INPUT_FIELD',
+            'my-source-field': 'title',
           },
-          model_id: 'test_id',
+          model_id: 'model_1',
           on_failure: [
             {
               append: {
@@ -154,21 +174,21 @@ describe('generateMlInferencePipelineBody lib function', () => {
           {
             inference: expect.objectContaining({
               field_map: {
-                'my-source-field1': 'MODEL_INPUT_FIELD',
+                'my-source-field1': 'title',
               },
             }),
           },
           {
             inference: expect.objectContaining({
               field_map: {
-                'my-source-field2': 'MODEL_INPUT_FIELD',
+                'my-source-field2': 'title',
               },
             }),
           },
           {
             inference: expect.objectContaining({
               field_map: {
-                'my-source-field3': 'MODEL_INPUT_FIELD',
+                'my-source-field3': 'title',
               },
             }),
           },

@@ -9,8 +9,6 @@ import { useState, useCallback, useEffect } from 'react';
 import type React from 'react';
 import type { EuiSwitchEvent } from '@elastic/eui';
 
-import type { KafkaTopicWhenType, ValueOf } from '../../common/types';
-
 export interface FormInput {
   validate: () => boolean;
 }
@@ -130,6 +128,7 @@ export function useSecretInput(
       error: errors,
       isInvalid,
       initialValue,
+      disabled,
       clear: () => {
         setValue('');
       },
@@ -305,25 +304,6 @@ export function useKeyValueInput(
     validate,
     disabled
   );
-}
-
-type Topic = Array<{
-  topic: string;
-  when?: {
-    type?: ValueOf<KafkaTopicWhenType>;
-    condition?: string;
-  };
-}>;
-
-export function useTopicsInput(
-  id: string,
-  defaultValue: Topic = [],
-  validate?: (
-    value: Topic
-  ) => Array<{ message: string; index: number; condition?: boolean }> | undefined,
-  disabled = false
-) {
-  return useCustomInput<Topic>(id, defaultValue, validate, disabled);
 }
 
 export function useNumberInput(

@@ -5,7 +5,6 @@
  * 2.0.
  */
 import type { Criteria } from '@elastic/eui';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import type { BoolQuery, Filter, Query, EsQueryConfig } from '@kbn/es-query';
 import { CspFinding } from '../../common/schemas/csp_finding';
 
@@ -18,10 +17,10 @@ export interface FindingsBaseURLQuery {
    * Filters that are part of the query but not persisted in the URL or in the Filter Manager
    */
   nonPersistedFilters?: Filter[];
-}
-
-export interface FindingsBaseProps {
-  dataView: DataView;
+  /**
+   * Grouping component selection
+   */
+  groupBy?: string[];
 }
 
 export interface FindingsBaseESQueryConfig {

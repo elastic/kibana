@@ -9,7 +9,12 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { lens, timePicker, dashboard } = getPageObjects(['lens', 'timePicker', 'dashboard']);
+  const { svlCommonPage, lens, timePicker, dashboard } = getPageObjects([
+    'svlCommonPage',
+    'lens',
+    'timePicker',
+    'dashboard',
+  ]);
 
   const panelActions = getService('dashboardPanelActions');
   const kibanaServer = getService('kibanaServer');
@@ -20,6 +25,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     before(async () => {
       await kibanaServer.importExport.load(fixture);
+      await svlCommonPage.loginWithPrivilegedRole();
     });
 
     after(async () => {
@@ -102,36 +108,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(debugState).to.not.be.eql(null);
 
       expect(debugState.legend!.items).to.eql([
-        {
-          color: '#006837',
-          key: '1,322 - 1,585.67',
-          name: '1,322 - 1,585.67',
-        },
-        {
-          color: '#4CB15D',
-          key: '1,585.67 - 1,849.33',
-          name: '1,585.67 - 1,849.33',
-        },
-        {
-          color: '#B7E075',
-          key: '1,849.33 - 2,113',
-          name: '1,849.33 - 2,113',
-        },
-        {
-          color: '#FEFEBD',
-          key: '2,113 - 2,376.67',
-          name: '2,113 - 2,376.67',
-        },
-        {
-          color: '#FDBF6F',
-          key: '2,376.67 - 2,640.33',
-          name: '2,376.67 - 2,640.33',
-        },
-        {
-          color: '#EA5839',
-          key: '2,640.33 - 2,904',
-          name: '2,640.33 - 2,904',
-        },
+        { key: '1,322 - 1,585.667', name: '1,322 - 1,585.667', color: '#006837' },
+        { key: '1,585.667 - 1,849.333', name: '1,585.667 - 1,849.333', color: '#4CB15D' },
+        { key: '1,849.333 - 2,113', name: '1,849.333 - 2,113', color: '#B7E075' },
+        { key: '2,113 - 2,376.667', name: '2,113 - 2,376.667', color: '#FEFEBD' },
+        { key: '2,376.667 - 2,640.333', name: '2,376.667 - 2,640.333', color: '#FDBF6F' },
+        { key: '2,640.333 - 2,904', name: '2,640.333 - 2,904', color: '#EA5839' },
       ]);
     });
 

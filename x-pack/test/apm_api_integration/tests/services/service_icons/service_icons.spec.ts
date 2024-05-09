@@ -16,7 +16,7 @@ type ServiceIconMetadata = APIReturnType<'GET /internal/apm/services/{serviceNam
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const { serviceName } = dataConfig;
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
@@ -44,18 +44,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177662
   registry.when('Service icons when data is generated', { config: 'basic', archives: [] }, () => {
     let body: ServiceIconMetadata;
     let status: number;
 
     before(async () => {
-      await generateData({ synthtraceEsClient, start, end });
+      await generateData({ apmSynthtraceEsClient, start, end });
       const response = await callApi();
       body = response.body;
       status = response.status;
     });
 
-    after(() => synthtraceEsClient.clean());
+    after(() => apmSynthtraceEsClient.clean());
 
     it('returns correct HTTP status', () => {
       expect(status).to.be(200);

@@ -9,7 +9,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '@kbn/ml-category-validator';
 import { NUMBER_OF_CATEGORY_EXAMPLES } from '../../../../../../common/constants/new_job';
 import type { IndexPatternTitle } from '../../../../../../common/types/kibana';
-import { CategorizationJobCreator } from '../job_creator';
+import type { CategorizationJobCreator } from '../job_creator';
 import { ml } from '../../../../services/ml_api_service';
 
 export class CategorizationExamplesLoader {

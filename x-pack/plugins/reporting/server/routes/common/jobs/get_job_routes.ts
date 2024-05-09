@@ -61,6 +61,13 @@ export const commonJobsRouteHandlerFactory = (reporting: ReportingCore) => {
       };
 
       if (filename) {
+        // event tracking of the downloaded file, if
+        // the report job was completed successfully
+        // and a file is available
+        const eventTracker = reporting.getEventTracker(docId, doc.jobtype, doc.payload.objectType);
+        const timeSinceCreation = Date.now() - new Date(doc.created_at).valueOf();
+        eventTracker?.downloadReport({ timeSinceCreation });
+
         return res.file({ body, headers, filename });
       }
 
@@ -81,17 +88,48 @@ export const commonJobsRouteHandlerFactory = (reporting: ReportingCore) => {
     return jobManagementPreRouting(reporting, res, docId, user, counters, async (doc) => {
       const docIndex = doc.index;
       const stream = await getContentStream(reporting, { id: docId, index: docIndex });
-      /** @note Overwriting existing content with an empty buffer to remove all the chunks. */
-      await new Promise<void>((resolve) => {
-        stream.end('', 'utf8', () => {
-          resolve();
-        });
-      });
-      await jobsQuery.delete(docIndex, docId);
+      const reportingSetup = reporting.getPluginSetupDeps();
+      const logger = reportingSetup.logger.get('delete-report');
 
-      return res.ok({
-        body: { deleted: true },
+      // An "error" event is emitted if an error is
+      // passed to the `stream.end` callback from
+      // the _final method of the ContentStream.
+      // This event must be handled.
+      stream.on('error', (err) => {
+        logger.error(err);
       });
+
+      try {
+        // Overwriting existing content with an
+        // empty buffer to remove all the chunks.
+        await new Promise<void>((resolve, reject) => {
+          stream.end('', 'utf8', (error?: Error) => {
+            if (error) {
+              // handle error that could be thrown
+              // from the _write method of the ContentStream
+              reject(error);
+            } else {
+              resolve();
+            }
+          });
+        });
+
+        await jobsQuery.delete(docIndex, docId);
+
+        // event tracking of the deleted report
+        const eventTracker = reporting.getEventTracker(docId, doc.jobtype, doc.payload.objectType);
+        const timeSinceCreation = Date.now() - new Date(doc.created_at).valueOf();
+        eventTracker?.deleteReport({ timeSinceCreation });
+
+        return res.ok({
+          body: { deleted: true },
+        });
+      } catch (error) {
+        logger.error(error);
+        return res.customError({
+          statusCode: 500,
+        });
+      }
     });
   };
 

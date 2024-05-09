@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { SampleDataSet, InstalledStatus } from '@kbn/home-sample-data-types';
 import { INSTALLED_STATUS, UNINSTALLED_STATUS } from '../constants';
 
@@ -28,13 +28,27 @@ export interface Props {
  * Displays the appropriate Footer component based on the status of the Sample Data Set.
  */
 export const Footer = ({ sampleDataSet, onAction }: Props) => {
-  if (sampleDataSet.status === INSTALLED_STATUS) {
-    return <RemoveFooter onRemove={(id) => onAction(id, UNINSTALLED_STATUS)} {...sampleDataSet} />;
-  }
+  const renderContent = useCallback(() => {
+    if (sampleDataSet.status === INSTALLED_STATUS) {
+      return (
+        <RemoveFooter onRemove={(id) => onAction(id, UNINSTALLED_STATUS)} {...sampleDataSet} />
+      );
+    }
 
-  if (sampleDataSet.status === UNINSTALLED_STATUS) {
-    return <InstallFooter onInstall={(id) => onAction(id, INSTALLED_STATUS)} {...sampleDataSet} />;
-  }
+    if (sampleDataSet.status === UNINSTALLED_STATUS) {
+      return (
+        <InstallFooter onInstall={(id) => onAction(id, INSTALLED_STATUS)} {...sampleDataSet} />
+      );
+    }
 
-  return <DisabledFooter {...sampleDataSet} />;
+    return <DisabledFooter {...sampleDataSet} />;
+  }, [onAction, sampleDataSet]);
+
+  return (
+    // the data-status attribute is added to solve issues with failing test,
+    // see https://github.com/elastic/kibana/issues/112103
+    <div data-status={sampleDataSet.status} style={{ display: 'contents' }}>
+      {renderContent()}
+    </div>
+  );
 };

@@ -17,7 +17,6 @@ import { useQueryClient, useMutation } from '@tanstack/react-query';
 import React, { useState } from 'react';
 import { useConnector } from '../../../hooks/api/use_connector';
 import { useSyncJobs } from '../../../hooks/api/use_sync_jobs';
-import { useShowErrorToast } from '../../../hooks/use_error_toast';
 import { useKibanaServices } from '../../../hooks/use_kibana';
 import { SyncScheduledCallOut } from './sync_scheduled_callout';
 
@@ -29,18 +28,10 @@ export const ConnectorOverview: React.FC<ConnectorOverviewProps> = ({ connector 
   const { http } = useKibanaServices();
   const queryClient = useQueryClient();
   const { queryKey } = useConnector(connector.id);
-  const showErrorToast = useShowErrorToast();
   const { data, isLoading, isSuccess, mutate } = useMutation({
     mutationFn: async () => {
       await http.post(`/internal/serverless_search/connectors/${connector.id}/sync`);
     },
-    onError: (error) =>
-      showErrorToast(
-        error,
-        i18n.translate('xpack.serverlessSearch.connectors.config.connectorSyncError', {
-          defaultMessage: 'Error scheduling sync',
-        })
-      ),
     onSuccess: () => {
       queryClient.setQueryData(queryKey, { connector: { ...connector, index_name: data } });
       queryClient.invalidateQueries(queryKey);
@@ -73,9 +64,9 @@ export const ConnectorOverview: React.FC<ConnectorOverviewProps> = ({ connector 
         <EuiButton
           data-test-subj="serverlessSearchConnectorOverviewSyncButton"
           color="primary"
-          disabled={
-            ![ConnectorStatus.CONFIGURED, ConnectorStatus.CONNECTED].includes(connector.status)
-          }
+          disabled={[ConnectorStatus.CREATED, ConnectorStatus.NEEDS_CONFIGURATION].includes(
+            connector.status
+          )}
           fill
           isLoading={isLoading}
           onClick={() => mutate()}

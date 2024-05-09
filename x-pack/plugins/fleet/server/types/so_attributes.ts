@@ -32,6 +32,7 @@ import type {
   KafkaPartitionType,
   KafkaSaslMechanism,
   KafkaTopicWhenType,
+  SimpleSOAssetType,
 } from '../../common/types';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
@@ -104,12 +105,13 @@ export interface FleetServerHostSOAttributes {
   host_urls: string[];
   is_default: boolean;
   is_preconfigured: boolean;
+  is_internal?: boolean;
   proxy_id?: string | null;
 }
 
 export interface PackagePolicySOAttributes {
   name: string;
-  namespace: string;
+  namespace?: string;
   enabled: boolean;
   revision: number;
   created_at: string;
@@ -129,6 +131,7 @@ export interface PackagePolicySOAttributes {
     };
   };
   agents?: number;
+  overrides?: any | null;
 }
 
 interface OutputSoBaseAttributes {
@@ -138,6 +141,7 @@ interface OutputSoBaseAttributes {
   hosts?: string[];
   ca_sha256?: string | null;
   ca_trusted_fingerprint?: string | null;
+  is_internal?: boolean;
   is_preconfigured?: boolean;
   config_yaml?: string | null;
   proxy_id?: string | null;
@@ -195,6 +199,7 @@ export interface OutputSoKafkaAttributes extends OutputSoBaseAttributes {
     hash?: string;
     random?: boolean;
   };
+  topic?: string;
   topics?: Array<{
     topic: string;
     when?: {
@@ -228,6 +233,7 @@ export interface SettingsSOAttributes {
   has_seen_add_data_notice?: boolean;
   fleet_server_hosts?: string[];
   secret_storage_requirements_met?: boolean;
+  output_secret_storage_requirements_met?: boolean;
 }
 
 export interface DownloadSourceSOAttributes {
@@ -237,7 +243,4 @@ export interface DownloadSourceSOAttributes {
   source_id?: string;
   proxy_id?: string | null;
 }
-export interface SimpleSOAssetAttributes {
-  title?: string;
-  description?: string;
-}
+export type SimpleSOAssetAttributes = SimpleSOAssetType['attributes'];

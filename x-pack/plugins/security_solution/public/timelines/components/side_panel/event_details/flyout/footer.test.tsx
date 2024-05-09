@@ -7,7 +7,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { FlyoutFooter } from './footer';
-import '../../../../../common/mock/match_media';
 import { TestProviders } from '../../../../../common/mock';
 import { TimelineId } from '../../../../../../common/types/timeline';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
@@ -48,7 +47,7 @@ jest.mock(
   '../../../../../detections/containers/detection_engine/alerts/use_host_isolation_status',
   () => {
     return {
-      useHostIsolationStatus: jest.fn().mockReturnValue({
+      useEndpointHostIsolationStatus: jest.fn().mockReturnValue({
         loading: false,
         isIsolated: false,
         agentStatus: 'healthy',

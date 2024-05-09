@@ -11,7 +11,7 @@ import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { EuiIconAxisLeft, EuiIconAxisBottom } from '@kbn/chart-icons';
-import { TooltipWrapper } from '@kbn/visualization-ui-components';
+import { TooltipWrapper } from '@kbn/visualization-utils';
 import type { VisualizationToolbarProps } from '../../types';
 import {
   LegendSettingsPopover,

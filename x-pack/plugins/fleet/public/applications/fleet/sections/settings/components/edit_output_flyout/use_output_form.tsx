@@ -44,7 +44,7 @@ import {
   useRadioInput,
   sendPutOutput,
   useKeyValueInput,
-  useTopicsInput,
+  useAuthz,
 } from '../../../../hooks';
 import type { Output } from '../../../../types';
 import { useConfirmModal } from '../../hooks/use_confirm_modal';
@@ -66,7 +66,6 @@ import {
   validateKafkaPasswordSecret,
   validateKafkaHeaders,
   validateKafkaDefaultTopic,
-  validateKafkaTopics,
   validateKafkaClientId,
   validateKafkaHosts,
   validateKafkaPartitioningGroupEvents,
@@ -118,7 +117,6 @@ export interface OutputFormInputsType {
   kafkaHeadersInput: ReturnType<typeof useKeyValueInput>;
   kafkaClientIdInput: ReturnType<typeof useInput>;
   kafkaDefaultTopicInput: ReturnType<typeof useInput>;
-  kafkaTopicsInput: ReturnType<typeof useTopicsInput>;
   kafkaCompressionInput: ReturnType<typeof useSwitchInput>;
   kafkaCompressionLevelInput: ReturnType<typeof useInput>;
   kafkaCompressionCodecInput: ReturnType<typeof useInput>;
@@ -156,8 +154,9 @@ function extractKafkaOutputSecrets(
   return Object.keys(secrets).length ? secrets : null;
 }
 
-export function useOutputForm(onSucess: () => void, output?: Output) {
+export function useOutputForm(onSucess: () => void, output?: Output, defaultOuput?: Output) {
   const fleetStatus = useFleetStatus();
+  const authz = useAuthz();
 
   const { showExperimentalShipperOptions } = ExperimentalFeaturesService.get();
 
@@ -166,7 +165,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   );
 
   const [isLoading, setIsloading] = useState(false);
-  const { notifications } = useStartServices();
+  const { notifications, cloud } = useStartServices();
   const { confirm } = useConfirmModal();
 
   // preconfigured output do not allow edition
@@ -176,6 +175,10 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   function isDisabled(
     field: keyof Output | keyof KafkaOutput | keyof NewRemoteElasticsearchOutput
   ) {
+    if (!authz.fleet.allSettings) {
+      return true;
+    }
+
     if (!isPreconfigured) {
       return false;
     }
@@ -208,11 +211,17 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     validateCATrustedFingerPrint,
     isDisabled('ca_trusted_fingerprint')
   );
+  // ES output's host URL is restricted to default in serverless
+  const isServerless = cloud?.isServerlessEnabled;
+  // Set the hosts to default for new ES output in serverless.
+  const elasticsearchUrlDefaultValue =
+    isServerless && !output?.hosts ? defaultOuput?.hosts || [] : output?.hosts || [];
+  const elasticsearchUrlDisabled = isServerless || isDisabled('hosts');
   const elasticsearchUrlInput = useComboInput(
     'esHostsComboxBox',
-    output?.hosts ?? [],
+    elasticsearchUrlDefaultValue,
     validateESHosts,
-    isDisabled('hosts')
+    elasticsearchUrlDisabled
   );
 
   const presetInput = useInput(
@@ -333,14 +342,6 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     return lastTopic || '';
   };
 
-  const extractKafkaTopics = (topics?: Array<{ topic: string }>) => {
-    if (!topics || topics.length <= 1) {
-      return [];
-    }
-
-    return topics.slice(0, -1);
-  };
-
   const kafkaVersionInput = useInput(
     kafkaOutput?.version ?? '1.0.0',
     undefined,
@@ -399,7 +400,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   );
 
   const kafkaSslKeySecretInput = useSecretInput(
-    kafkaOutput?.ssl?.certificate,
+    kafkaOutput?.secrets?.ssl?.key,
     kafkaAuthMethodInput.value === kafkaAuthType.Ssl ? validateSSLKeySecret : undefined,
     isSSLEditable
   );
@@ -443,12 +444,6 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   const kafkaDefaultTopicInput = useInput(
     extractDefaultKafkaTopic(kafkaOutput?.topics),
     validateKafkaDefaultTopic,
-    isDisabled('topics')
-  );
-  const kafkaTopicsInput = useTopicsInput(
-    'kafkaTopicsComboBox',
-    extractKafkaTopics(kafkaOutput?.topics),
-    validateKafkaTopics,
     isDisabled('topics')
   );
   const kafkaHeadersInput = useKeyValueInput(
@@ -559,7 +554,6 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     kafkaSslKeyInput,
     kafkaSslKeySecretInput,
     kafkaDefaultTopicInput,
-    kafkaTopicsInput,
   };
 
   const hasChanged = Object.values(inputs).some((input) => input.hasChanged);
@@ -576,7 +570,6 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     const kafkaSslKeyPlainValid = kafkaSslKeyInput.validate();
     const kafkaSslKeySecretValid = kafkaSslKeySecretInput.validate();
     const kafkaDefaultTopicValid = kafkaDefaultTopicInput.validate();
-    const kafkaTopicsValid = kafkaTopicsInput.validate();
     const kafkaHeadersValid = kafkaHeadersInput.validate();
     const logstashHostsValid = logstashHostsInput.validate();
     const additionalYamlConfigValid = additionalYamlConfigInput.validate();
@@ -619,7 +612,6 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
         kafkaPasswordValid &&
         kafkaHeadersValid &&
         kafkaDefaultTopicValid &&
-        kafkaTopicsValid &&
         additionalYamlConfigValid &&
         kafkaClientIDValid &&
         partitioningRandomGroupEventsValid &&
@@ -656,7 +648,6 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     kafkaSslKeyInput,
     kafkaSslKeySecretInput,
     kafkaDefaultTopicInput,
-    kafkaTopicsInput,
     kafkaHeadersInput,
     logstashHostsInput,
     additionalYamlConfigInput,
@@ -833,7 +824,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
                     },
                   }
                 : {}),
-              topics: [...kafkaTopicsInput.value, { topic: kafkaDefaultTopicInput.value }],
+              topics: [{ topic: kafkaDefaultTopicInput.value }],
               headers: kafkaHeadersInput.value,
               timeout: parseIntegerIfStringDefined(kafkaBrokerTimeoutInput.value),
               broker_timeout: parseIntegerIfStringDefined(
@@ -874,7 +865,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
               name: nameInput.value,
               type: outputType.RemoteElasticsearch,
               hosts: elasticsearchUrlInput.value,
-              is_default: false,
+              is_default: defaultOutputInput.value,
               is_default_monitoring: defaultMonitoringOutputInput.value,
               preset: presetInput.value,
               config_yaml: additionalYamlConfigInput.value,
@@ -978,7 +969,6 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     kafkaPartitionTypeRandomInput.value,
     kafkaPartitionTypeRoundRobinInput.value,
     kafkaPartitionTypeHashInput.value,
-    kafkaTopicsInput.value,
     kafkaDefaultTopicInput.value,
     kafkaHeadersInput.value,
     kafkaBrokerTimeoutInput.value,

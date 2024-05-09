@@ -21,51 +21,14 @@ import {
   TypedLensByValueInput,
 } from '@kbn/lens-plugin/public';
 import { Datatable } from '@kbn/expressions-plugin/common';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { GroupPreview } from './group_preview';
 import { LensByValueInput } from '@kbn/lens-plugin/public/embeddable';
 import { DATA_LAYER_ID, DATE_HISTOGRAM_COLUMN_ID, getCurrentTimeField } from './lens_attributes';
-import moment from 'moment';
-
-class EuiSuperDatePickerTestHarness {
-  public static get currentCommonlyUsedRange() {
-    return screen.queryByTestId('superDatePickerShowDatesButton')?.textContent ?? '';
-  }
-
-  // TODO - add assertion with date formatting
-  public static get currentRange() {
-    if (screen.queryByTestId('superDatePickerShowDatesButton')) {
-      // showing a commonly-used range
-      return { from: '', to: '' };
-    }
-
-    return {
-      from: screen.getByTestId('superDatePickerstartDatePopoverButton').textContent,
-      to: screen.getByTestId('superDatePickerendDatePopoverButton').textContent,
-    };
-  }
-
-  static togglePopover() {
-    userEvent.click(screen.getByRole('button', { name: 'Date quick select' }));
-  }
-
-  static async selectCommonlyUsedRange(label: string) {
-    if (!screen.queryByText('Commonly used')) this.togglePopover();
-
-    // Using fireEvent here because userEvent erroneously claims that
-    // pointer-events is set to 'none'.
-    //
-    // I have verified that this fixed on the latest version of the @testing-library/user-event package
-    fireEvent.click(await screen.findByText(label));
-  }
-
-  static refresh() {
-    userEvent.click(screen.getByRole('button', { name: 'Refresh' }));
-  }
-}
+import { EuiSuperDatePickerTestHarness } from '@kbn/test-eui-helpers';
 
 describe('group editor preview', () => {
   const annotation = getDefaultManualAnnotation('my-id', 'some-timestamp');
@@ -186,11 +149,11 @@ describe('group editor preview', () => {
     // from chart brush
     userEvent.click(screen.getByTestId('brushEnd'));
 
-    const format = 'MMM D, YYYY @ HH:mm:ss.SSS'; // from https://github.com/elastic/eui/blob/6a30eba7c2a154691c96a1d17c8b2f3506d351a3/src/components/date_picker/super_date_picker/super_date_picker.tsx#L222;
-    expect(EuiSuperDatePickerTestHarness.currentRange).toEqual({
-      from: moment(BRUSH_RANGE[0]).format(format),
-      to: moment(BRUSH_RANGE[1]).format(format),
-    });
+    EuiSuperDatePickerTestHarness.assertCurrentRange(
+      { from: BRUSH_RANGE[0], to: BRUSH_RANGE[1] },
+      expect
+    );
+
     expect(getEmbeddableTimeRange()).toEqual({
       from: new Date(BRUSH_RANGE[0]).toISOString(),
       to: new Date(BRUSH_RANGE[1]).toISOString(),
@@ -237,7 +200,7 @@ describe('group editor preview', () => {
     const assertTimeField = (fieldName: string, attributes: TypedLensByValueInput['attributes']) =>
       expect(
         (
-          attributes.state.datasourceStates.formBased.layers[DATA_LAYER_ID].columns[
+          attributes.state.datasourceStates.formBased?.layers[DATA_LAYER_ID].columns[
             DATE_HISTOGRAM_COLUMN_ID
           ] as FieldBasedIndexPatternColumn
         ).sourceField

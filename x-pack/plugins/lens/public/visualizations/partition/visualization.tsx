@@ -52,6 +52,8 @@ import { LayerSettings } from './layer_settings';
 import { checkTableForContainsSmallValues } from './render_helpers';
 import { DatasourcePublicAPI } from '../..';
 import { nonNullable, getColorMappingDefaults } from '../../utils';
+import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
+import { PersistedPieVisualizationState, convertToRuntime } from './persistence';
 
 const metricLabel = i18n.translate('xpack.lens.pie.groupMetricLabelSingular', {
   defaultMessage: 'Metric',
@@ -122,7 +124,7 @@ export const getPieVisualization = ({
 }: {
   paletteService: PaletteRegistry;
   kibanaTheme: ThemeServiceStart;
-}): Visualization<PieVisualizationState> => ({
+}): Visualization<PieVisualizationState, PersistedPieVisualizationState> => ({
   id: 'lnsPie',
 
   visualizationTypes: Object.entries(PartitionChartsMeta).map(([key, meta]) => ({
@@ -162,18 +164,19 @@ export const getPieVisualization = ({
   triggers: [VIS_EVENT_TO_TRIGGER.filter],
 
   initialize(addNewLayer, state, mainPalette) {
-    return (
-      state || {
-        shape: PieChartTypes.DONUT,
-        layers: [
-          newLayerState(
-            addNewLayer(),
-            mainPalette?.type === 'colorMapping' ? mainPalette.value : getColorMappingDefaults()
-          ),
-        ],
-        palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
-      }
-    );
+    if (state) {
+      return convertToRuntime(state);
+    }
+    return {
+      shape: PieChartTypes.DONUT,
+      layers: [
+        newLayerState(
+          addNewLayer(),
+          mainPalette?.type === 'colorMapping' ? mainPalette.value : getColorMappingDefaults()
+        ),
+      ],
+      palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
+    };
   },
 
   getMainPalette: (state) => {
@@ -772,5 +775,12 @@ export const getPieVisualization = ({
         },
       ],
     };
+  },
+
+  getTelemetryEventsOnSave(state, prevState) {
+    return getColorMappingTelemetryEvents(
+      state?.layers[0]?.colorMapping,
+      prevState?.layers[0]?.colorMapping
+    );
   },
 });

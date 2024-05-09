@@ -40,24 +40,26 @@ describe('TreeNav component', () => {
 
   it('mount with Logical View selected by default', async () => {
     renderResult = mockedContext.render(<TreeNavContainer />);
-    const elemLabel = await renderResult.getByDisplayValue(/logical/i);
-    expect(elemLabel).toBeChecked();
+    const elemLabel = await renderResult.getByTestId('treeNavType_generated-idlogical');
+    expect(elemLabel).toHaveAttribute('aria-pressed', 'true');
   });
 
   it('shows the tree path according with the selected view type', async () => {
     renderResult = mockedContext.render(<TreeNavContainer />);
 
     const logicalViewPath = 'cluster / namespace / pod / container image';
-    const logicViewRadio = await renderResult.getByDisplayValue(/logical/i);
-    expect(logicViewRadio).toBeChecked();
+    const logicViewButton = renderResult.getByTestId('treeNavType_generated-idlogical');
+    expect(logicViewButton).toHaveAttribute('aria-pressed', 'true');
     expect(renderResult.getByText(logicalViewPath)).toBeInTheDocument();
 
-    const infraStructureViewRadio = await renderResult.getByDisplayValue(/infrastructure/i);
+    const infraStructureViewRadio = renderResult.getByTestId(
+      'treeNavType_generated-idinfrastructure'
+    );
     infraStructureViewRadio.click();
 
     expect(renderResult.getByText('cluster / node / pod / container image')).toBeInTheDocument();
 
-    logicViewRadio.click();
+    logicViewButton.click();
     expect(renderResult.getByText(logicalViewPath)).toBeInTheDocument();
   });
 

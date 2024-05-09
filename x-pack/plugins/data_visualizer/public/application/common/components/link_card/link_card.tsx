@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 
+import type { IconType } from '@elastic/eui';
 import {
   EuiIcon,
-  IconType,
   EuiText,
   EuiTitle,
   EuiFlexItem,

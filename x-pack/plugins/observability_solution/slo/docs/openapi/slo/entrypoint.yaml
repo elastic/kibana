@@ -1,0 +1,46 @@
+openapi: 3.0.1
+info:
+  title: SLOs
+  description: OpenAPI schema for SLOs endpoints
+  version: "1.0"
+  contact:
+    name: Actionable Observability Team
+  license:
+    name: Elastic License 2.0
+    url: https://www.elastic.co/licensing/elastic-license
+tags:
+  - name: slo
+    description: SLO APIs enable you to define, manage and track service-level objectives
+servers:
+  - url: "http://localhost:5601"
+    description: local
+paths:
+  "/s/{spaceId}/api/observability/slos":
+    $ref: "paths/s@{spaceid}@api@slos.yaml"
+  "/s/{spaceId}/api/observability/slos/{sloId}":
+    $ref: "paths/s@{spaceid}@api@slos@{sloid}.yaml"
+  "/s/{spaceId}/api/observability/slos/{sloId}/enable":
+    $ref: "paths/s@{spaceid}@api@slos@{sloid}@enable.yaml"
+  "/s/{spaceId}/api/observability/slos/{sloId}/disable":
+    $ref: "paths/s@{spaceid}@api@slos@{sloid}@disable.yaml"
+  "/s/{spaceId}/api/observability/slos/{sloId}/_reset":
+    $ref: "paths/s@{spaceid}@api@slos@{sloid}@_reset.yaml"
+  "/s/{spaceId}/internal/observability/slos/_historical_summary":
+    $ref: "paths/s@{spaceid}@api@slos@_historical_summary.yaml"
+  "/s/{spaceId}/internal/observability/slos/_definitions":
+    $ref: "paths/s@{spaceid}@api@slos@_definitions.yaml"
+  "/s/{spaceId}/api/observability/slos/_delete_instances":
+    $ref: "paths/s@{spaceid}@api@slos@_delete_instances.yaml"
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
+security:
+  - basicAuth: []
+  - apiKeyAuth: []

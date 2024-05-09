@@ -44,13 +44,13 @@
 }
 
 .xyAnnotationTooltip__extraFieldsKey {
-  overflow-wrap: break-word;
+  overflow-wrap: anywhere;
   hyphens: auto;
 }
 
 .xyAnnotationTooltip__extraFieldsValue {
   text-align: right;
-  overflow-wrap: break-word;
+  overflow-wrap: anywhere;
   hyphens: auto;
 }
 
@@ -58,4 +58,8 @@
   position: relative;
   text-align: right;
   font-weight: $euiFontWeightRegular;
+}
+
+.echAnnotation {
+  max-width: 500px;
 }

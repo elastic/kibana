@@ -8,14 +8,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { CoreSetup, CoreStart } from '@kbn/core/public';
 import type { FileLayer } from '@elastic/ems-client';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+import { ChartSizeEvent } from '@kbn/chart-expressions-common';
 import type { MapsPluginStartDependencies } from '../../plugin';
 import type { ChoroplethChartProps } from './types';
-import type { MapEmbeddableInput, MapEmbeddableOutput } from '../../embeddable';
 
 export const RENDERER_ID = 'lens_choropleth_chart_renderer';
 
@@ -64,13 +63,6 @@ export function getExpressionRenderer(coreSetup: CoreSetup<MapsPluginStartDepend
       const { ChoroplethChart } = await import('./choropleth_chart');
       const { getEmsFileLayers } = await import('../../util');
 
-      const mapEmbeddableFactory = plugins.embeddable.getEmbeddableFactory(
-        'map'
-      ) as EmbeddableFactory<MapEmbeddableInput, MapEmbeddableOutput>;
-      if (!mapEmbeddableFactory) {
-        return;
-      }
-
       let emsFileLayers: FileLayer[] = [];
       try {
         emsFileLayers = await getEmsFileLayers();
@@ -92,13 +84,24 @@ export function getExpressionRenderer(coreSetup: CoreSetup<MapsPluginStartDepend
         handlers.done();
       };
 
+      const chartSizeEvent: ChartSizeEvent = {
+        name: 'chartSize',
+        data: {
+          maxDimensions: {
+            x: { value: 100, unit: 'percentage' },
+            y: { value: 100, unit: 'percentage' },
+          },
+        },
+      };
+
+      handlers.event(chartSizeEvent);
+
       ReactDOM.render(
         <ChoroplethChart
           {...config}
           formatFactory={plugins.fieldFormats.deserialize}
           uiSettings={coreStart.uiSettings}
           emsFileLayers={emsFileLayers}
-          mapEmbeddableFactory={mapEmbeddableFactory}
           onRenderComplete={renderComplete}
         />,
         domNode

@@ -6,35 +6,32 @@
  */
 
 import React from 'react';
-import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
-import {
-  LegendSettingsPopover,
-  LegendSettingsPopoverProps,
-  MaxLinesInput,
-} from './legend_settings_popover';
+import { LegendSettingsPopover, LegendSettingsPopoverProps } from './legend_settings_popover';
+import userEvent from '@testing-library/user-event';
+import { RenderOptions, fireEvent, render, screen } from '@testing-library/react';
+import { getSelectedButtonInGroup } from '@kbn/test-eui-helpers';
 
 describe('Legend Settings', () => {
-  const legendOptions: Array<{ id: string; value: 'auto' | 'show' | 'hide'; label: string }> = [
-    {
-      id: `test_legend_auto`,
-      value: 'auto',
-      label: 'Auto',
-    },
-    {
-      id: `test_legend_show`,
-      value: 'show',
-      label: 'Show',
-    },
-    {
-      id: `test_legend_hide`,
-      value: 'hide',
-      label: 'Hide',
-    },
-  ];
-  let props: LegendSettingsPopoverProps;
+  let defaultProps: LegendSettingsPopoverProps;
   beforeEach(() => {
-    props = {
-      legendOptions,
+    defaultProps = {
+      legendOptions: [
+        {
+          id: `test_legend_auto`,
+          value: 'auto',
+          label: 'Auto',
+        },
+        {
+          id: `test_legend_show`,
+          value: 'show',
+          label: 'Show',
+        },
+        {
+          id: `test_legend_hide`,
+          value: 'hide',
+          label: 'Hide',
+        },
+      ],
       mode: 'auto',
       showAutoLegendSizeOption: true,
       onDisplayChange: jest.fn(),
@@ -43,83 +40,89 @@ describe('Legend Settings', () => {
     };
   });
 
-  it('should have selected the given mode as Display value', () => {
-    const component = shallow(<LegendSettingsPopover {...props} />);
-    expect(component.find('[data-test-subj="lens-legend-display-btn"]').prop('idSelected')).toEqual(
-      'test_legend_auto'
+  const renderLegendSettingsPopover = (
+    overrideProps?: Partial<LegendSettingsPopoverProps>,
+    renderOptions?: RenderOptions
+  ) => {
+    const rtlRender = render(
+      <LegendSettingsPopover {...defaultProps} {...overrideProps} />,
+      renderOptions
     );
+    const openLegendPopover = () => userEvent.click(screen.getByRole('button', { name: 'Legend' }));
+
+    openLegendPopover();
+
+    return {
+      ...rtlRender,
+      getSelectedDisplayOption: getSelectedButtonInGroup('lens-legend-display-btn'),
+    };
+  };
+
+  it('should have selected the given mode as Display value', () => {
+    const { getSelectedDisplayOption } = renderLegendSettingsPopover();
+    expect(getSelectedDisplayOption()).toHaveTextContent('Auto');
   });
 
   it('should have called the onDisplayChange function on ButtonGroup change', () => {
-    const component = shallow(<LegendSettingsPopover {...props} />);
-    component.find('[data-test-subj="lens-legend-display-btn"]').simulate('change');
-    expect(props.onDisplayChange).toHaveBeenCalled();
+    renderLegendSettingsPopover();
+    fireEvent.click(screen.getByRole('button', { name: 'Show' }));
+    expect(defaultProps.onDisplayChange).toHaveBeenCalled();
   });
 
-  it('should have default the max lines input to 1 when no value is given', () => {
-    const component = shallow(<LegendSettingsPopover {...props} shouldTruncate />);
-    expect(component.find(MaxLinesInput).prop('value')).toEqual(1);
+  it('should have default line limit set to one and be enabled when it is on', () => {
+    renderLegendSettingsPopover({ shouldTruncate: true });
+    const lineLimit = screen.getByRole('spinbutton', { name: 'Line limit' });
+    expect(lineLimit).toHaveValue(1);
+    expect(lineLimit).not.toBeDisabled();
   });
 
-  it('should have the `Truncate legend text` switch enabled by default', () => {
-    const component = shallow(<LegendSettingsPopover {...props} />);
-    expect(
-      component.find('[data-test-subj="lens-legend-truncate-switch"]').prop('checked')
-    ).toEqual(true);
+  it('should have default line limit set to one and be disabled when it is off', () => {
+    renderLegendSettingsPopover({ shouldTruncate: false });
+    const lineLimit = screen.getByRole('spinbutton', { name: 'Line limit' });
+    expect(lineLimit).toHaveValue(1);
+    expect(lineLimit).toBeDisabled();
+  });
+
+  it('should have the `Label truncation` switch enabled by default', () => {
+    renderLegendSettingsPopover();
+    const switchElement = screen.getByRole('switch', { name: 'Label truncation' });
+    expect(switchElement).toBeChecked();
   });
 
   it('should set the truncate switch state when truncate prop value is false', () => {
-    const component = shallow(<LegendSettingsPopover {...props} shouldTruncate={false} />);
-    expect(
-      component.find('[data-test-subj="lens-legend-truncate-switch"]').prop('checked')
-    ).toEqual(false);
-  });
-
-  it('should hide the max lines input when truncate is set to false', () => {
-    const component = shallow(<LegendSettingsPopover {...props} shouldTruncate={false} />);
-    expect(component.exists(MaxLinesInput)).toEqual(false);
+    renderLegendSettingsPopover({ shouldTruncate: false });
+    const switchElement = screen.getByRole('switch', { name: 'Label truncation' });
+    expect(switchElement).not.toBeChecked();
   });
 
   it('should have called the onTruncateLegendChange function on truncate switch change', () => {
-    const nestedProps = {
-      ...props,
-      shouldTruncate: true,
-      onTruncateLegendChange: jest.fn(),
-    };
-    const component = shallow(<LegendSettingsPopover {...nestedProps} />);
-    component.find('[data-test-subj="lens-legend-truncate-switch"]').simulate('change');
-    expect(nestedProps.onTruncateLegendChange).toHaveBeenCalled();
+    const onTruncateLegendChange = jest.fn();
+    renderLegendSettingsPopover({ onTruncateLegendChange });
+    const switchElement = screen.getByRole('switch', { name: 'Label truncation' });
+    fireEvent.click(switchElement);
+    expect(onTruncateLegendChange).toHaveBeenCalled();
   });
 
   it('should enable the Nested Legend Switch when renderNestedLegendSwitch prop is true', () => {
-    const component = shallow(<LegendSettingsPopover {...props} renderNestedLegendSwitch />);
-    expect(component.find('[data-test-subj="lens-legend-nested-switch"]')).toHaveLength(1);
+    renderLegendSettingsPopover({ renderNestedLegendSwitch: true });
+    expect(screen.getByRole('switch', { name: 'Nested' })).toBeEnabled();
   });
 
   it('should set the switch state on nestedLegend prop value', () => {
-    const component = shallow(
-      <LegendSettingsPopover {...props} renderNestedLegendSwitch nestedLegend />
-    );
-    expect(component.find('[data-test-subj="lens-legend-nested-switch"]').prop('checked')).toEqual(
-      true
-    );
+    renderLegendSettingsPopover({ renderNestedLegendSwitch: true, nestedLegend: true });
+    expect(screen.getByRole('switch', { name: 'Nested' })).toBeChecked();
   });
 
   it('should have called the onNestedLegendChange function on switch change', () => {
-    const nestedProps = {
-      ...props,
-      renderNestedLegendSwitch: true,
-      onNestedLegendChange: jest.fn(),
-    };
-    const component = shallow(<LegendSettingsPopover {...nestedProps} />);
-    component.find('[data-test-subj="lens-legend-nested-switch"]').simulate('change');
-    expect(nestedProps.onNestedLegendChange).toHaveBeenCalled();
+    const onNestedLegendChange = jest.fn();
+    renderLegendSettingsPopover({ renderNestedLegendSwitch: true, onNestedLegendChange });
+    const switchElement = screen.getByRole('switch', { name: 'Nested' });
+    fireEvent.click(switchElement);
+    expect(onNestedLegendChange).toHaveBeenCalled();
   });
 
   it('should hide switch group on hide mode', () => {
-    const component = shallow(
-      <LegendSettingsPopover {...props} mode="hide" renderNestedLegendSwitch />
-    );
-    expect(component.exists('[data-test-subj="lens-legend-nested-switch"]')).toEqual(false);
+    renderLegendSettingsPopover({ mode: 'hide', renderNestedLegendSwitch: true });
+    expect(screen.queryByRole('switch', { name: 'Nested' })).toBeNull();
   });
 });

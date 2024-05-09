@@ -8,8 +8,7 @@
 import { IndicesIndexState, IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
 
 import { ByteSizeValue } from '@kbn/config-schema';
-
-import { ElasticsearchIndex } from '../../../../common/types/indices';
+import { ElasticsearchIndex } from '@kbn/search-connectors';
 
 export const mapIndexStats = (
   indexData: IndicesIndexState,

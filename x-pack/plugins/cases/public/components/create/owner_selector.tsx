@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect } from 'react';
+import React, { memo, useCallback } from 'react';
 
 import {
   EuiFlexGroup,
@@ -61,16 +61,6 @@ const OwnerSelector = ({
 
   const onChange = useCallback((val: string) => field.setValue(val), [field]);
 
-  useEffect(() => {
-    if (!field.value) {
-      onChange(
-        availableOwners.includes(SECURITY_SOLUTION_OWNER)
-          ? SECURITY_SOLUTION_OWNER
-          : availableOwners[0]
-      );
-    }
-  }, [availableOwners, field.value, onChange]);
-
   return (
     <EuiFormRow
       data-test-subj="caseOwnerSelector"
@@ -104,12 +94,18 @@ const OwnerSelector = ({
     </EuiFormRow>
   );
 };
+
 OwnerSelector.displayName = 'OwnerSelector';
 
 const CaseOwnerSelector: React.FC<Props> = ({ availableOwners, isLoading }) => {
+  const defaultValue = availableOwners.includes(SECURITY_SOLUTION_OWNER)
+    ? SECURITY_SOLUTION_OWNER
+    : availableOwners[0] ?? SECURITY_SOLUTION_OWNER;
+
   return (
     <UseField
       path={FIELD_NAME}
+      config={{ defaultValue }}
       component={OwnerSelector}
       componentProps={{ availableOwners, isLoading }}
     />

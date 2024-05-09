@@ -128,7 +128,7 @@ Here's a rule of id naming:
   'kbn.management.createIndexPattern.includeSystemIndicesToggleSwitch'
   'kbn.management.editIndexPattern.wrongTypeErrorMessage'
   'kbn.management.editIndexPattern.scripted.table.nameDescription'
-  'xpack.lens.formulaDocumentation.filterRatioDescription.markdown'
+  'lensFormulaDocs.documentation.filterRatioDescription.markdown'
   ```
 
 - For complex messages, which are divided into several parts, use the following approach:
@@ -183,7 +183,7 @@ Each message id should end with a type of the message.
 | tooltip | `kbn.management.editIndexPattern.removeTooltip` |
 | error message | `kbn.management.createIndexPattern.step.invalidCharactersErrorMessage` |
 | toggleSwitch | `kbn.management.createIndexPattern.includeSystemIndicesToggleSwitch` |
-| markdown | `xpack.lens.formulaDocumentation.filterRatioDescription.markdown` |
+| markdown | `lensFormulaDocs.documentation.filterRatioDescription.markdown` |
 
 For example:
 
@@ -278,7 +278,7 @@ For example:
   
   <Markdown
       markdown={
-        i18n.translate('xpack.lens.formulaDocumentation.filterRatioDescription.markdown', {
+        i18n.translate('lensFormulaDocs.documentation.filterRatioDescription.markdown', {
         defaultMessage: `### Filter ratio:
         
           Use \`kql=''\` to filter one set of documents and compare it to other documents within the same grouping.

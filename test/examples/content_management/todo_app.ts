@@ -28,17 +28,17 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       expect(todos.length).to.be(2);
 
       // check that filters work
-      await (await find.byCssSelector('label[title="Completed"]')).click();
+      await (await find.byButtonText('Completed')).click();
       await testSubjects.missingOrFail(`todoPending`);
       todos = await testSubjects.findAll(`~todoItem`);
       expect(todos.length).to.be(1);
 
-      await (await find.byCssSelector('label[title="Todo"]')).click();
+      await (await find.byButtonText('Todo')).click();
       await testSubjects.missingOrFail(`todoPending`);
       todos = await testSubjects.findAll(`~todoItem`);
       expect(todos.length).to.be(1);
 
-      await (await find.byCssSelector('label[title="All"]')).click();
+      await (await find.byButtonText('All')).click();
       await testSubjects.missingOrFail(`todoPending`);
       todos = await testSubjects.findAll(`~todoItem`);
       expect(todos.length).to.be(2);
@@ -56,9 +56,10 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       let newTodoCheckbox = await newTodo.findByTestSubject('~todoCheckbox');
       expect(await newTodoCheckbox.isSelected()).to.be(false);
       await (await newTodo.findByTagName('label')).click();
+      await newTodo.click();
       await testSubjects.missingOrFail(`todoPending`);
 
-      await (await find.byCssSelector('label[title="Completed"]')).click();
+      await (await find.byButtonText('Completed')).click();
       await testSubjects.missingOrFail(`todoPending`);
       todos = await testSubjects.findAll(`~todoItem`);
       expect(todos.length).to.be(2);

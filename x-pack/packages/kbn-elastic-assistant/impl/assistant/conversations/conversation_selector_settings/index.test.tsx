@@ -13,13 +13,13 @@ import { alertConvo, customConvo, welcomeConvo } from '../../../mock/conversatio
 const onConversationSelectionChange = jest.fn();
 const onConversationDeleted = jest.fn();
 const mockConversations = {
-  [alertConvo.id]: alertConvo,
-  [welcomeConvo.id]: welcomeConvo,
-  [customConvo.id]: customConvo,
+  [alertConvo.title]: alertConvo,
+  [welcomeConvo.title]: welcomeConvo,
+  [customConvo.title]: customConvo,
 };
 const testProps = {
   conversations: mockConversations,
-  selectedConversationId: welcomeConvo.id,
+  selectedConversationTitle: welcomeConvo.title,
   onConversationDeleted,
   onConversationSelectionChange,
 };
@@ -30,9 +30,9 @@ describe('ConversationSelectorSettings', () => {
   });
   it('Selects an existing conversation', () => {
     const { getByTestId } = render(<ConversationSelectorSettings {...testProps} />);
-    expect(getByTestId('comboBoxInput')).toHaveTextContent(welcomeConvo.id);
+    expect(getByTestId('comboBoxSearchInput')).toHaveValue(welcomeConvo.title);
     fireEvent.click(getByTestId('comboBoxToggleListButton'));
-    fireEvent.click(getByTestId(alertConvo.id));
+    fireEvent.click(getByTestId(alertConvo.title));
     expect(onConversationSelectionChange).toHaveBeenCalledWith(alertConvo);
   });
   it('Only custom option can be deleted', () => {
@@ -40,11 +40,11 @@ describe('ConversationSelectorSettings', () => {
     fireEvent.click(getByTestId('comboBoxToggleListButton'));
     // there is only one delete conversation because there is only one custom convo
     fireEvent.click(getByTestId('delete-conversation'));
-    expect(onConversationDeleted).toHaveBeenCalledWith(customConvo.id);
+    expect(onConversationDeleted).toHaveBeenCalledWith(customConvo.title);
   });
   it('Selects existing conversation from the search  input', () => {
     const { getByTestId } = render(<ConversationSelectorSettings {...testProps} />);
-    fireEvent.change(getByTestId('comboBoxSearchInput'), { target: { value: alertConvo.id } });
+    fireEvent.change(getByTestId('comboBoxSearchInput'), { target: { value: alertConvo.title } });
     fireEvent.keyDown(getByTestId('comboBoxSearchInput'), {
       key: 'Enter',
       code: 'Enter',

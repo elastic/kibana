@@ -18,11 +18,11 @@ import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
 import type { Query } from '@kbn/es-query';
 import { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 
+import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { SEARCH_SESSION_ID } from '../../dashboard_constants';
 import { DashboardContainer, DashboardLocatorParams } from '../../dashboard_container';
 import { convertPanelMapToSavedPanels } from '../../../common';
 import { pluginServices } from '../../services/plugin_services';
-import { DASHBOARD_APP_LOCATOR } from '../locator/locator';
 
 export const removeSearchSessionIdFromURL = (kbnUrlStateStorage: IKbnUrlStateStorage) => {
   kbnUrlStateStorage.kbnUrlControls.updateAsync((nextUrl) => {

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { combineLatest, Observable, of, Subject, Subscription } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { combineLatest, of, Subject, Subscription } from 'rxjs';
 import { isEqual, cloneDeep } from 'lodash';
 import {
   catchError,
@@ -18,7 +19,7 @@ import {
   pairwise,
   filter,
   skipWhile,
-} from 'rxjs/operators';
+} from 'rxjs';
 import { useEffect, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -26,9 +27,10 @@ import { type MLHttpFetchError, extractErrorMessage } from '@kbn/ml-error-utils'
 
 import { DEFAULT_MODEL_MEMORY_LIMIT } from '../../../../../../../common/constants/new_job';
 import { ml } from '../../../../../services/ml_api_service';
-import { JobValidator, VALIDATION_DELAY_MS } from '../../job_validator/job_validator';
+import type { JobValidator } from '../../job_validator/job_validator';
+import { VALIDATION_DELAY_MS } from '../../job_validator/job_validator';
 import { useMlKibana } from '../../../../../contexts/kibana';
-import { JobCreator } from '../job_creator';
+import type { JobCreator } from '../job_creator';
 
 export type CalculatePayload = Parameters<typeof ml.calculateModelMemoryLimit$>[0];
 
@@ -123,7 +125,11 @@ export const useModelMemoryEstimator = (
           title: i18n.translate('xpack.ml.newJob.wizard.estimateModelMemoryError', {
             defaultMessage: 'Model memory limit could not be calculated',
           }),
-          text: extractErrorMessage(error),
+          text: i18n.translate('xpack.ml.newJob.wizard.estimateModelMemoryErrorText', {
+            defaultMessage:
+              '{errorText}. You can proceed with creating the job, but check for warning messages once the job is running that the configured limit has not been exceeded.',
+            values: { errorText: extractErrorMessage(error) },
+          }),
         });
       })
     );

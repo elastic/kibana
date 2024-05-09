@@ -7,7 +7,7 @@
 
 import { RulesConfig } from '../config';
 
-const DEFAULT_EXECUTION_TIMEOUT = '5m';
+export const DEFAULT_EXECUTION_TIMEOUT = '5m';
 
 export const getRuleTaskTimeout = ({
   config,

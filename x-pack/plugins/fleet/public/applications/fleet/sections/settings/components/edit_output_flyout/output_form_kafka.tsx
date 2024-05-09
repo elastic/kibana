@@ -33,11 +33,11 @@ import type { OutputFormInputsType } from './use_output_form';
 interface Props {
   inputs: OutputFormInputsType;
   useSecretsStorage: boolean;
-  onUsePlainText: () => void;
+  onToggleSecretStorage: (secretEnabled: boolean) => void;
 }
 
 export const OutputFormKafkaSection: React.FunctionComponent<Props> = (props) => {
-  const { inputs, useSecretsStorage, onUsePlainText } = props;
+  const { inputs, useSecretsStorage, onToggleSecretStorage } = props;
 
   const { docLinks } = useStartServices();
 
@@ -109,7 +109,7 @@ export const OutputFormKafkaSection: React.FunctionComponent<Props> = (props) =>
       <OutputFormKafkaAuthentication
         inputs={inputs}
         useSecretsStorage={useSecretsStorage}
-        onUsePlainText={onUsePlainText}
+        onToggleSecretStorage={onToggleSecretStorage}
       />
 
       <EuiSpacer size="m" />

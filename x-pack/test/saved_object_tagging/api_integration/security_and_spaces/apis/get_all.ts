@@ -35,22 +35,32 @@ export default function (ftrContext: FtrProviderContext) {
       authorized: {
         httpCode: 200,
         expectResponse: ({ body }) => {
-          expect(body).to.eql({
-            tags: [
-              {
-                id: 'default-space-tag-1',
-                name: 'tag-1',
-                description: 'Tag 1 in default space',
-                color: '#FF00FF',
-              },
-              {
-                id: 'default-space-tag-2',
-                name: 'tag-2',
-                description: 'Tag 2 in default space',
-                color: '#77CC11',
-              },
-            ],
-          });
+          if (!Array.isArray(body.tags)) {
+            throw new Error('Expected body.tags to be an array');
+          }
+
+          const tags = (body.tags as [{ id: string }])
+            // sort the tags by ID alphabetically
+            .sort((a, b) => {
+              return a.id.localeCompare(b.id);
+            });
+
+          expect(tags).to.eql([
+            {
+              id: 'default-space-tag-1',
+              name: 'tag-1',
+              description: 'Tag 1 in default space',
+              color: '#FF00FF',
+              managed: false,
+            },
+            {
+              id: 'default-space-tag-2',
+              name: 'tag-2',
+              description: 'Tag 2 in default space',
+              color: '#77CC11',
+              managed: false,
+            },
+          ]);
         },
       },
       unauthorized: {

@@ -18,14 +18,12 @@ import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import { mouseoverOnToOverflowItem, openHoverActions } from '../../../tasks/network/flows';
 
-import { NETWORK_URL } from '../../../urls/navigation';
+import { networkUrl } from '../../../urls/navigation';
 
 const testDomainOne = 'myTest';
 const testDomainTwo = 'myTest2';
 
-// FLAKY: https://github.com/elastic/kibana/issues/165692
-// Tracked by https://github.com/elastic/security-team/issues/7696
-describe.skip('Overflow items', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Overflow items', { tags: ['@ess', '@serverless'] }, () => {
   context('Network stats and tables', () => {
     before(() => {
       cy.task('esArchiverLoad', { archiveName: 'network' });
@@ -33,7 +31,7 @@ describe.skip('Overflow items', { tags: ['@ess', '@serverless', '@brokenInServer
 
     beforeEach(() => {
       login();
-      visitWithTimeRange(NETWORK_URL);
+      visitWithTimeRange(networkUrl('flows'));
       cy.get(DESTINATION_DOMAIN).should('not.exist');
       cy.get(FILTER_IN).should('not.exist');
       cy.get(FILTER_OUT).should('not.exist');
@@ -46,7 +44,7 @@ describe.skip('Overflow items', { tags: ['@ess', '@serverless', '@brokenInServer
     });
 
     after(() => {
-      cy.task('esArchiverUnload', 'network');
+      cy.task('esArchiverUnload', { archiveName: 'network' });
     });
 
     it('Shows more items in the popover', () => {

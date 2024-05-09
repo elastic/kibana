@@ -26,11 +26,12 @@ import {
 } from '@kbn/ml-anomaly-utils';
 
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
+import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
 } from '../../../common/constants/search';
-import { getDataViewIdFromName } from '../util/index_utils';
+import type { MlIndexUtils } from '../util/index_service';
 import {
   isSourceDataChartableForDetector,
   isModelPlotChartableForDetector,
@@ -42,17 +43,16 @@ import { ml } from '../services/ml_api_service';
 import { mlJobService } from '../services/job_service';
 import { getUiSettings } from '../util/dependency_cache';
 
+import type { SwimlaneType } from './explorer_constants';
 import {
   MAX_CATEGORY_EXAMPLES,
   MAX_INFLUENCER_FIELD_VALUES,
   SWIMLANE_TYPE,
-  SwimlaneType,
   VIEW_BY_JOB_LABEL,
 } from './explorer_constants';
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
-import { MlResultsService } from '../services/results_service';
-import { TimeRangeBounds } from '../util/time_buckets';
-import { Annotations, AnnotationsTable } from '../../../common/types/annotations';
+import type { MlResultsService } from '../services/results_service';
+import type { Annotations, AnnotationsTable } from '../../../common/types/annotations';
 
 export interface ExplorerJob {
   id: string;
@@ -633,7 +633,8 @@ export function removeFilterFromQueryString(
 // Returns an object mapping job ids to source indices which map to geo fields for that index
 export async function getDataViewsAndIndicesWithGeoFields(
   selectedJobs: Array<CombinedJob | ExplorerJob>,
-  dataViewsService: DataViewsContract
+  dataViewsService: DataViewsContract,
+  mlIndexUtils: MlIndexUtils
 ): Promise<{ sourceIndicesWithGeoFieldsMap: SourceIndicesWithGeoFields; dataViews: DataView[] }> {
   const sourceIndicesWithGeoFieldsMap: SourceIndicesWithGeoFields = {};
   // Avoid searching for data view again if previous job already has same source index
@@ -654,7 +655,8 @@ export async function getDataViewsAndIndicesWithGeoFields(
       if (Array.isArray(sourceIndices)) {
         for (const sourceIndex of sourceIndices) {
           const cachedDV = dataViewsMap.get(sourceIndex);
-          const dataViewId = cachedDV?.id ?? (await getDataViewIdFromName(sourceIndex));
+          const dataViewId =
+            cachedDV?.id ?? (await mlIndexUtils.getDataViewIdFromName(sourceIndex));
 
           if (dataViewId) {
             const dataView = cachedDV ?? (await dataViewsService.get(dataViewId));

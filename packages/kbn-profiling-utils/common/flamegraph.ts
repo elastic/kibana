@@ -8,7 +8,7 @@
 
 import { createFrameGroupID } from './frame_group';
 import { fnv1a64 } from './hash';
-import { createStackFrameMetadata, getCalleeLabel } from './profiling';
+import { createStackFrameMetadata, getCalleeLabel, isErrorFrame } from './profiling';
 import { convertTonsToKgs } from './utils';
 
 /**
@@ -52,10 +52,6 @@ export interface BaseFlameGraph {
   AnnualCO2TonsInclusive: number[];
   AnnualCostsUSDInclusive: number[];
   AnnualCostsUSDExclusive: number[];
-  SelfAnnualCO2Tons: number;
-  TotalAnnualCO2Tons: number;
-  SelfAnnualCostsUSD: number;
-  TotalAnnualCostsUSD: number;
 }
 
 /** Elasticsearch flamegraph */
@@ -77,8 +73,6 @@ export interface ElasticFlameGraph
   TotalAnnualCO2KgsItems: number[];
   SelfAnnualCostsUSDItems: number[];
   TotalAnnualCostsUSDItems: number[];
-  SelfAnnualCO2Kgs: number;
-  TotalAnnualCO2Kgs: number;
 }
 
 /**
@@ -87,9 +81,25 @@ export interface ElasticFlameGraph
  * This allows us to create a flamegraph in two steps (e.g. first on the server
  * and finally in the browser).
  * @param base BaseFlameGraph
+ * @param showErrorFrames
  * @returns ElasticFlameGraph
  */
-export function createFlameGraph(base: BaseFlameGraph): ElasticFlameGraph {
+export function createFlameGraph(
+  base: BaseFlameGraph,
+  showErrorFrames: boolean
+): ElasticFlameGraph {
+  if (!showErrorFrames) {
+    // This loop jumps over the error frames in the graph.
+    // Error frames only appear as child nodes of the root frame.
+    // Error frames only have a single child node.
+    for (let i = 0; i < base.Edges[0].length; i++) {
+      const childNodeID = base.Edges[0][i];
+      if (isErrorFrame(base.FrameType[childNodeID])) {
+        base.Edges[0][i] = base.Edges[childNodeID][0];
+      }
+    }
+  }
+
   const graph: ElasticFlameGraph = {
     Size: base.Size,
     SamplingRate: base.SamplingRate,
@@ -119,10 +129,6 @@ export function createFlameGraph(base: BaseFlameGraph): ElasticFlameGraph {
     TotalAnnualCO2KgsItems: base.AnnualCO2TonsInclusive.map(convertTonsToKgs),
     SelfAnnualCostsUSDItems: base.AnnualCostsUSDExclusive,
     TotalAnnualCostsUSDItems: base.AnnualCostsUSDInclusive,
-    SelfAnnualCO2Kgs: convertTonsToKgs(base.SelfAnnualCO2Tons),
-    TotalAnnualCO2Kgs: convertTonsToKgs(base.TotalAnnualCO2Tons),
-    SelfAnnualCostsUSD: base.SelfAnnualCostsUSD,
-    TotalAnnualCostsUSD: base.TotalAnnualCostsUSD,
   };
 
   const rootFrameGroupID = createFrameGroupID(
@@ -165,7 +171,6 @@ export function createFlameGraph(base: BaseFlameGraph): ElasticFlameGraph {
       FunctionOffset: graph.FunctionOffset[i],
       SourceFilename: graph.SourceFilename[i],
       SourceLine: graph.SourceLine[i],
-      SamplingRate: graph.SamplingRate,
     });
     graph.Label[i] = getCalleeLabel(metadata);
   }

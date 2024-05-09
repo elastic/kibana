@@ -23,6 +23,7 @@ import {
   PreflightCheckHelper,
   SerializerHelper,
   MigrationHelper,
+  UserHelper,
 } from '../apis/helpers';
 import type { RepositoryEsClient } from '../repository_es_client';
 import { CreatePointInTimeFinderFn } from '../point_in_time_finder';
@@ -78,6 +79,10 @@ export const createRepositoryHelpers = ({
   });
   const migrationHelper = new MigrationHelper({
     migrator,
+    encryptionHelper,
+  });
+  const userHelper = new UserHelper({
+    securityExtension: extensions?.securityExtension,
   });
 
   const helpers: RepositoryHelpers = {
@@ -87,6 +92,7 @@ export const createRepositoryHelpers = ({
     encryption: encryptionHelper,
     serializer: serializerHelper,
     migration: migrationHelper,
+    user: userHelper,
   };
 
   return helpers;

@@ -60,9 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lnsMetric_secondaryMetricDimensionPanel > lns-empty-dimension',
         operation: 'max',
         field: 'bytes',
-        keepOpen: true,
       });
-      await PageObjects.lens.closeDimensionEditor();
       await testSubjects.click('applyFlyoutButton');
       await PageObjects.dashboard.waitForRenderComplete();
       const data = await PageObjects.lens.getMetricVisualizationData();
@@ -72,7 +70,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           subtitle: undefined,
           extraText: 'Maximum of bytes 19,986',
           value: '5,727.322',
-          color: 'rgba(245, 247, 250, 1)',
+          color: 'rgba(255, 255, 255, 1)',
+          trendlineColor: undefined,
           showingTrendline: false,
           showingBar: false,
         },
@@ -91,7 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.waitForRenderComplete();
       await elasticChart.setNewChartUiDebugFlag(true);
 
-      await dashboardPanelActions.saveToLibrary('My by reference visualization');
+      await dashboardPanelActions.legacySaveToLibrary('My by reference visualization');
 
       await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickInlineEdit();
@@ -122,11 +121,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lnsMetric_secondaryMetricDimensionPanel > lns-empty-dimension',
         operation: 'max',
         field: 'bytes',
-        keepOpen: true,
       });
 
       log.debug('Cancels the changes');
-      await PageObjects.lens.closeDimensionEditor();
       await testSubjects.click('cancelFlyoutButton');
       await PageObjects.dashboard.waitForRenderComplete();
 
@@ -137,7 +134,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           subtitle: undefined,
           extraText: '',
           value: '5,727.322',
-          color: 'rgba(245, 247, 250, 1)',
+          color: 'rgba(255, 255, 255, 1)',
+          trendlineColor: undefined,
           showingTrendline: false,
           showingBar: false,
         },

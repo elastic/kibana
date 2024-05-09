@@ -54,12 +54,14 @@ export default function ({ getService }: FtrProviderContext) {
       'kibana.alert.maintenance_window_ids',
       'kibana.alert.reason',
       'kibana.alert.rule.execution.uuid',
+      'kibana.alert.rule.execution.timestamp',
       'kibana.alert.rule.duration',
       'kibana.alert.start',
       'kibana.alert.time_range',
       'kibana.alert.uuid',
       'kibana.alert.url',
       'kibana.version',
+      'kibana.alert.consecutive_matches',
     ];
 
     afterEach(async () => {
@@ -167,6 +169,7 @@ export default function ({ getService }: FtrProviderContext) {
         [EVENT_KIND]: 'signal',
         ['kibana.alert.title']: "rule 'always fire' matched query",
         ['kibana.alert.evaluation.conditions']: 'Number of matching documents is greater than -1',
+        ['kibana.alert.evaluation.threshold']: -1,
         ['kibana.alert.evaluation.value']: '0',
         [ALERT_ACTION_GROUP]: 'query matched',
         [ALERT_FLAPPING]: false,
@@ -291,6 +294,7 @@ export default function ({ getService }: FtrProviderContext) {
         [EVENT_KIND]: 'signal',
         ['kibana.alert.title']: "rule 'always fire' matched query",
         ['kibana.alert.evaluation.conditions']: 'Number of matching documents is greater than -1',
+        ['kibana.alert.evaluation.threshold']: -1,
         ['kibana.alert.evaluation.value']: '0',
         [ALERT_ACTION_GROUP]: 'query matched',
         [ALERT_FLAPPING]: false,
@@ -507,6 +511,7 @@ export default function ({ getService }: FtrProviderContext) {
         [EVENT_KIND]: 'signal',
         ['kibana.alert.title']: "rule 'always fire' matched query",
         ['kibana.alert.evaluation.conditions']: 'Number of matching documents is greater than -1',
+        ['kibana.alert.evaluation.threshold']: -1,
         ['kibana.alert.evaluation.value']: '0',
         [ALERT_ACTION_GROUP]: 'query matched',
         [ALERT_FLAPPING]: false,

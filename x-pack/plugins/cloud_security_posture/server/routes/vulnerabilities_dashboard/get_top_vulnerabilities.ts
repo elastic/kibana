@@ -7,7 +7,7 @@
 
 import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { VulnerabilityStat } from '../../../common/types';
+import { VulnerabilityStat } from '../../../common/types_old';
 import { LATEST_VULNERABILITIES_INDEX_DEFAULT_NS } from '../../../common/constants';
 
 interface VulnerabilityBucket {

@@ -55,7 +55,7 @@ export const GetProcessesActionResult = memo<ActionRequestComponentProps>(
             comment: command.args.args?.comment?.[0],
           }
         : undefined;
-    }, [command.args.args?.comment, endpointId]);
+    }, [endpointId, command.args.args?.comment]);
 
     const { result, actionDetails: completedActionDetails } = useConsoleActionSubmitter<
       ProcessesRequestBody,

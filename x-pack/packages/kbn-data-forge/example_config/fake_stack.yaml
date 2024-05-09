@@ -1,0 +1,39 @@
+---
+elasticsearch:
+  installKibanaUser: false
+
+kibana:
+  installAssets: true
+
+indexing:
+  dataset: "fake_stack"
+  eventsPerCycle: 200
+  reduceWeekendTrafficBy: 0.5
+
+schedule:
+  # Start with good events
+  - template: "good"
+    start: "now-14d"
+    end: "now-6d-5h-3m"
+    eventsPerCycle: 200
+    randomness: 0.2
+  - template: "connectionTimeout"
+    start: "now-6d-5h-3m"
+    end: "now-6d-4h-44m"
+    eventsPerCycle: 200
+    randomness: 0.2
+  - template: "good"
+    start: "now-6d-4h-44m"
+    end: "now-1d"
+    eventsPerCycle: 200
+    randomness: 0.2
+  - template: "bad"
+    start: "now-1d"
+    end: "now-1d+45m"
+    eventsPerCycle: 200
+    randomness: 0.2
+  - template: "good"
+    start: "now-1d+45m"
+    end: false
+    eventsPerCycle: 200
+    randomness: 0.2

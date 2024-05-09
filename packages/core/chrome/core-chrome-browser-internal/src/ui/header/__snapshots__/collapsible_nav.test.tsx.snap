@@ -59,7 +59,7 @@ Array [
       </div>
     </div>
     <hr
-      class="euiHorizontalRule euiHorizontalRule--full emotion-euiHorizontalRule-full"
+      class="euiHorizontalRule emotion-euiHorizontalRule-full"
     />
     <div
       class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -157,9 +157,8 @@ Array [
         aria-labelledby="generated-id"
         class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen"
         id="generated-id"
-        role="region"
+        role="group"
         style="block-size: 0;"
-        tabindex="-1"
       >
         <div
           class="euiAccordion__children emotion-euiAccordion__children"
@@ -216,7 +215,7 @@ Array [
       </div>
     </div>
     <hr
-      class="euiHorizontalRule euiHorizontalRule--full emotion-euiHorizontalRule-full"
+      class="euiHorizontalRule emotion-euiHorizontalRule-full"
     />
     <div
       class="euiFlexItem kbnCollapsibleNav__solutions emotion-euiFlexItem-grow-1"
@@ -281,9 +280,8 @@ Array [
           aria-labelledby="generated-id"
           class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen"
           id="generated-id"
-          role="region"
+          role="group"
           style="block-size: 0;"
-          tabindex="-1"
         >
           <div
             class="euiAccordion__children emotion-euiAccordion__children"
@@ -412,9 +410,8 @@ Array [
           aria-labelledby="generated-id"
           class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen"
           id="generated-id"
-          role="region"
+          role="group"
           style="block-size: 0;"
-          tabindex="-1"
         >
           <div
             class="euiAccordion__children emotion-euiAccordion__children"
@@ -526,9 +523,8 @@ Array [
           aria-labelledby="generated-id"
           class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen"
           id="generated-id"
-          role="region"
+          role="group"
           style="block-size: 0;"
-          tabindex="-1"
         >
           <div
             class="euiAccordion__children emotion-euiAccordion__children"
@@ -623,9 +619,8 @@ Array [
           aria-labelledby="generated-id"
           class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen"
           id="generated-id"
-          role="region"
+          role="group"
           style="block-size: 0;"
-          tabindex="-1"
         >
           <div
             class="euiAccordion__children emotion-euiAccordion__children"

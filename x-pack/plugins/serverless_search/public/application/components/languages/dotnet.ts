@@ -37,6 +37,22 @@ var client = new ElasticsearchClient("${cloudId}", new ApiKey("${apiKey}"));`,
 };
 
 var response = await client.IndexAsync(doc, "books");`,
+  ingestDataIndex: ({ apiKey, cloudId, indexName }) => `using System;
+using Elastic.Clients.Elasticsearch.Serverless;
+using Elastic.Clients.Elasticsearch.Serverless.QueryDsl;
+
+var client = new ElasticsearchClient("${cloudId}", new ApiKey("${apiKey}"));
+
+var doc = new Book
+{
+  Id = "9780553351927",
+  Name = "Snow Crash",
+  Author = "Neal Stephenson",
+  ReleaseDate = new DateTime(1992, 06, 01),
+  PageCount = 470
+};
+
+var response = await client.IndexAsync(doc, "${indexName}");`,
   buildSearchQuery: `var response = await client.SearchAsync<Book>(s => s
   .Index("books")
   .From(0)

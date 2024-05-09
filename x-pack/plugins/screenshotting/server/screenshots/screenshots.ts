@@ -5,29 +5,22 @@
  * 2.0.
  */
 
+import ipaddr from 'ipaddr.js';
+import { defaultsDeep, sum } from 'lodash';
+import moment from 'moment';
+import { Observable, from, of, throwError } from 'rxjs';
+import { catchError, concatMap, first, map, mergeMap, take, takeUntil, tap, toArray } from 'rxjs';
+
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { HttpServiceSetup, Logger, PackageInfo } from '@kbn/core/server';
 import { Semaphore } from '@kbn/std';
-import ipaddr from 'ipaddr.js';
-import { defaultsDeep, sum } from 'lodash';
-import { from, Observable, of, throwError } from 'rxjs';
-import {
-  catchError,
-  concatMap,
-  first,
-  map,
-  mergeMap,
-  take,
-  takeUntil,
-  tap,
-  toArray,
-} from 'rxjs/operators';
+
 import { CaptureResult, ScreenshotOptions, ScreenshotResult } from '.';
 import {
-  errors,
   SCREENSHOTTING_APP_ID,
   SCREENSHOTTING_EXPRESSION,
   SCREENSHOTTING_EXPRESSION_INPUT,
+  errors,
 } from '../../common';
 import { HeadlessChromiumDriverFactory } from '../browsers';
 import { systemHasInsufficientMemory } from '../cloud';
@@ -41,7 +34,7 @@ import {
   toPdf,
   toPng,
 } from '../formats';
-import { createLayout, Layout } from '../layouts';
+import { Layout, createLayout } from '../layouts';
 import { EventLogger, Transactions } from './event_logger';
 import type { ScreenshotObservableOptions } from './observable';
 import { ScreenshotObservableHandler, UrlOrUrlWithContext } from './observable';
@@ -68,7 +61,8 @@ export class Screenshots {
   private captureScreenshots(
     eventLogger: EventLogger,
     layout: Layout,
-    options: ScreenshotObservableOptions
+    options: ScreenshotObservableOptions,
+    logger: Logger
   ): Observable<CaptureResult> {
     const { browserTimezone } = options;
 
@@ -79,7 +73,7 @@ export class Screenshots {
           openUrlTimeout: durationToNumber(this.config.capture.timeouts.openUrl),
           defaultViewport: { width: layout.width, deviceScaleFactor: layout.getBrowserZoom() },
         },
-        this.logger
+        logger
       )
       .pipe(
         this.semaphore.acquire(),
@@ -98,7 +92,7 @@ export class Screenshots {
                 catchError((error) => {
                   screen.checkPageIsOpen(); // this fails the job if the browser has closed
 
-                  this.logger.error(error);
+                  logger.error(error);
                   eventLogger.error(error, Transactions.SCREENSHOTTING);
                   return of({ ...DEFAULT_SETUP_RESULT, error }); // allow "as-is" screenshot with injected warning message
                 }),
@@ -174,17 +168,28 @@ export class Screenshots {
   getScreenshots(options: PdfScreenshotOptions): Observable<PdfScreenshotResult>;
   getScreenshots(options: ScreenshotOptions): Observable<ScreenshotResult>;
   getScreenshots(options: ScreenshotOptions): Observable<ScreenshotResult> {
+    const logger = options.logger?.get('screenshotting') ?? this.logger;
+    const { taskInstanceFields, format, layout } = options;
+
+    const { startedAt, retryAt } = taskInstanceFields;
+    if (startedAt) {
+      logger.debug(
+        `Task started at: ${startedAt && moment(startedAt).format()}.` +
+          ` Can run until: ${retryAt && moment(retryAt).format()}`
+      );
+    }
+
     if (this.systemHasInsufficientMemory()) {
       return throwError(() => new errors.InsufficientMemoryAvailableOnCloudError());
     }
 
-    const eventLogger = new EventLogger(this.logger, this.config);
+    const eventLogger = new EventLogger(logger, this.config);
     const transactionEnd = eventLogger.startTransaction(Transactions.SCREENSHOTTING);
 
-    const layout = createLayout(options.layout ?? {});
+    const layoutInstance = createLayout(layout ?? {});
     const captureOptions = this.getCaptureOptions(options);
 
-    return this.captureScreenshots(eventLogger, layout, captureOptions).pipe(
+    return this.captureScreenshots(eventLogger, layoutInstance, captureOptions, logger).pipe(
       tap(({ results, metrics }) => {
         transactionEnd({
           labels: {
@@ -196,9 +201,9 @@ export class Screenshots {
         });
       }),
       mergeMap((result) => {
-        switch (options.format) {
+        switch (format) {
           case 'pdf':
-            return toPdf(eventLogger, this.packageInfo, layout, options, result);
+            return toPdf(eventLogger, this.packageInfo, layoutInstance, options, result);
           default:
             return toPng(result);
         }

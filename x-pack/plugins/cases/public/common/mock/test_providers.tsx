@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { ThemeProvider } from 'styled-components';
+import { ThemeProvider } from '@emotion/react';
 
 import { render as reactRender } from '@testing-library/react';
 import type { RenderOptions, RenderResult } from '@testing-library/react';
@@ -19,7 +19,7 @@ import type { ScopedFilesClient } from '@kbn/files-plugin/public';
 import { euiDarkVars } from '@kbn/ui-theme';
 import { I18nProvider } from '@kbn/i18n-react';
 import { createMockFilesClient } from '@kbn/shared-ux-file-mocks';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient } from '@tanstack/react-query';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { FilesContext } from '@kbn/shared-ux-file-context';
@@ -108,10 +108,9 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
                 permissions,
                 getFilesClient,
               }}
+              queryClient={queryClient}
             >
-              <QueryClientProvider client={queryClient}>
-                <FilesContext client={createMockFilesClient()}>{children}</FilesContext>
-              </QueryClientProvider>
+              <FilesContext client={createMockFilesClient()}>{children}</FilesContext>
             </CasesProvider>
           </MemoryRouter>
         </ThemeProvider>
@@ -191,8 +190,9 @@ export const createAppMockRenderer = ({
                 releasePhase,
                 getFilesClient,
               }}
+              queryClient={queryClient}
             >
-              <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+              {children}
             </CasesProvider>
           </MemoryRouter>
         </ThemeProvider>

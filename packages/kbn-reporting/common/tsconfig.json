@@ -19,5 +19,6 @@
     "@kbn/utility-types",
     "@kbn/screenshotting-plugin",
     "@kbn/i18n",
+    "@kbn/task-manager-plugin",
   ]
 }

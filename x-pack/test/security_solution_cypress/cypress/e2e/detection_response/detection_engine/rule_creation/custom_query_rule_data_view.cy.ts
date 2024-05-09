@@ -47,6 +47,7 @@ import {
   DATA_VIEW_DETAILS,
   EDIT_RULE_SETTINGS_LINK,
 } from '../../../../screens/rule_details';
+import { GLOBAL_SEARCH_BAR_FILTER_ITEM } from '../../../../screens/search_bar';
 
 import {
   getRulesManagementTableRows,
@@ -61,8 +62,10 @@ import {
   createAndEnableRule,
   createRuleWithoutEnabling,
   fillAboutRuleAndContinue,
+  fillDefineCustomRule,
   fillDefineCustomRuleAndContinue,
   fillScheduleRuleAndContinue,
+  openAddFilterPopover,
   waitForAlertsToPopulate,
 } from '../../../../tasks/create_new_rule';
 
@@ -70,6 +73,7 @@ import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { openRuleManagementPageViaBreadcrumbs } from '../../../../tasks/rules_management';
 import { getDetails, waitForTheRuleToBeExecuted } from '../../../../tasks/rule_details';
+import { fillAddFilterForm } from '../../../../tasks/search_bar';
 
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 
@@ -175,6 +179,18 @@ describe('Custom query rules', { tags: ['@ess', '@serverless'] }, () => {
       cy.get(EDIT_RULE_SETTINGS_LINK).click();
 
       cy.get(RULE_NAME_HEADER).should('contain', 'Edit rule settings');
+    });
+
+    it('Adds filter on define step', () => {
+      visit(CREATE_RULE_URL);
+      fillDefineCustomRule(rule);
+      openAddFilterPopover();
+      fillAddFilterForm({
+        key: 'host.name',
+        operator: 'exists',
+      });
+      // Check that newly added filter exists
+      cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should('have.text', 'host.name: exists');
     });
   });
 });

@@ -26,6 +26,7 @@ function getOpenLensButton(attachmentId: string, props: LensProps) {
       attachmentId={attachmentId}
       attributes={props.attributes}
       timeRange={props.timeRange}
+      metadata={props.metadata}
     />
   );
 }
@@ -40,9 +41,10 @@ const getVisualizationAttachmentActions = (attachmentId: string, props: LensProp
 
 const LensAttachment = React.memo(
   (props: PersistableStateAttachmentViewProps) => {
-    const { attributes, timeRange } = props.persistableStateAttachmentState as unknown as LensProps;
+    const { attributes, timeRange, metadata } =
+      props.persistableStateAttachmentState as unknown as LensProps;
 
-    return <LensRenderer attributes={attributes} timeRange={timeRange} />;
+    return <LensRenderer attributes={attributes} timeRange={timeRange} metadata={metadata} />;
   },
   (prevProps, nextProps) =>
     deepEqual(prevProps.persistableStateAttachmentState, nextProps.persistableStateAttachmentState)

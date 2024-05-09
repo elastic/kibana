@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { PhaseEvent } from '@kbn/presentation-publishing';
 import { useCallback, useRef } from 'react';
-
-import { EmbeddablePhaseEvent } from '@kbn/embeddable-plugin/public';
 
 import { useDashboardContainer } from '../../embeddable/dashboard_container';
 import { DashboardLoadedEventStatus, DashboardRenderPerformanceStats } from '../../types';
@@ -37,7 +36,7 @@ export const useDashboardPerformanceTracker = ({ panelCount }: { panelCount: num
   performanceRefs.current = getDefaultPerformanceTracker();
 
   const onPanelStatusChange = useCallback(
-    (info: EmbeddablePhaseEvent) => {
+    (info: PhaseEvent) => {
       if (performanceRefs.current.panelIds[info.id] === undefined || info.status === 'loading') {
         performanceRefs.current.panelIds[info.id] = {};
       } else if (info.status === 'error') {

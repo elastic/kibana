@@ -8,6 +8,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { i18n } from '@kbn/i18n';
 import { SettingType } from '@kbn/management-settings-types';
 import { getFieldInputValue, useUpdate } from '@kbn/management-settings-utilities';
 
@@ -55,6 +56,24 @@ export const CodeEditorInput = ({
     async (newValue: string, onUpdateFn) => {
       const isJsonArray = Array.isArray(JSON.parse(defaultValue || '{}'));
       const parsedValue = newValue || (isJsonArray ? '[]' : '{}');
+
+      // Validate JSON syntax
+      if (field.type === 'json') {
+        try {
+          JSON.parse(parsedValue);
+        } catch (e) {
+          onUpdateFn({
+            type: field.type,
+            unsavedValue: newValue,
+            isInvalid: true,
+            error: i18n.translate('management.settings.field.codeEditorSyntaxErrorMessage', {
+              defaultMessage: 'Invalid JSON syntax',
+            }),
+          });
+          return;
+        }
+      }
+
       const validationResponse = await validateChange(field.id, parsedValue);
       if (validationResponse.successfulValidation && !validationResponse.valid) {
         onUpdateFn({
@@ -71,14 +90,17 @@ export const CodeEditorInput = ({
   );
 
   const debouncedUpdateValue = useMemo(() => {
-    // Trigger update 1000 ms after the user stopped typing to reduce validation requests to the server
-    return debounce(updateValue, 1000);
+    // Trigger update 500 ms after the user stopped typing to reduce validation requests to the server
+    return debounce(updateValue, 500);
   }, [updateValue]);
 
   const onChange: CodeEditorProps['onChange'] = async (newValue) => {
-    // @ts-expect-error
-    setValue(newValue);
-    await debouncedUpdateValue(newValue, onUpdate);
+    // Only update the value when the onChange handler is called with a different value from the current one
+    if (newValue !== value) {
+      // @ts-expect-error
+      setValue(newValue);
+      await debouncedUpdateValue(newValue, onUpdate);
+    }
   };
 
   useEffect(() => {

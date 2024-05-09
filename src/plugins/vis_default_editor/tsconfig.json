@@ -27,6 +27,8 @@
     "@kbn/es-ui-shared-plugin",
     "@kbn/utility-types",
     "@kbn/saved-search-plugin",
+    "@kbn/code-editor",
+    "@kbn/react-kibana-context-render",
   ],
   "exclude": [
     "target/**/*",

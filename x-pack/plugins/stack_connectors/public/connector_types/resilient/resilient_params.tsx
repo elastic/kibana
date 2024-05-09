@@ -11,6 +11,7 @@ import {
   EuiComboBox,
   EuiSelect,
   EuiSpacer,
+  EuiText,
   EuiTitle,
   EuiComboBoxOptionOption,
   EuiSelectOption,
@@ -171,7 +172,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
         fullWidth
         label={i18n.translate(
           'xpack.stackConnectors.components.resilient.urgencySelectFieldLabel',
-          { defaultMessage: 'Incident Type' }
+          { defaultMessage: 'Incident type' }
         )}
       >
         <EuiComboBox
@@ -214,8 +215,13 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
           incident.name !== undefined
         }
         label={i18n.translate('xpack.stackConnectors.components.resilient.nameFieldLabel', {
-          defaultMessage: 'Name (required)',
+          defaultMessage: 'Name',
         })}
+        labelAppend={
+          <EuiText size="xs" color="subdued">
+            Required
+          </EuiText>
+        }
       >
         <TextFieldWithMessageVariables
           index={index}

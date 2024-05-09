@@ -76,6 +76,7 @@ export const withSolutionNav = <P extends TemplateProps>(WrappedComponent: Compo
       ...props.pageSideBarProps,
       minWidth: isSidebarShrunk ? euiTheme.size.xxl : undefined,
       className: sideBarClasses,
+      hasEmbellish: !isSidebarShrunk,
     };
 
     return (

@@ -9,7 +9,7 @@ Object {
     "id": "123",
   },
   "host": Object {
-    "name": "metric-only-production",
+    "name": "multiple-env-service-production",
   },
   "kubernetes": Object {
     "container": Object {},
@@ -23,7 +23,7 @@ Object {
     "environment": "production",
     "name": "service1",
     "node": Object {
-      "name": "metric-only-production",
+      "name": "multiple-env-service-production",
     },
   },
 }

@@ -1,0 +1,26 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "react"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/i18n",
+    "@kbn/core",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/bfetch-error",
+    "@kbn/search-types",
+  ]
+}

@@ -10,7 +10,7 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UiCounterMetricType } from '@kbn/analytics';
-import { DragDrop } from '@kbn/dom-drag-drop';
+import { Draggable } from '@kbn/dom-drag-drop';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { SearchMode } from '../../types';
 import { FieldItemButton, type FieldItemButtonProps } from '../../components/field_item_button';
@@ -29,6 +29,7 @@ import type {
   UnifiedFieldListSidebarContainerStateService,
   AddFieldFilterHandler,
 } from '../../types';
+import { canProvideStatsForFieldTextBased } from '../../utils/can_provide_stats';
 
 interface GetCommonFieldItemButtonPropsParams {
   stateService: UnifiedFieldListSidebarContainerStateService;
@@ -286,7 +287,7 @@ function UnifiedFieldListItemComponent({
           onAddFilter={addFilterAndClosePopover}
         />
 
-        {multiFields && (
+        {searchMode === 'documents' && multiFields && (
           <>
             <EuiSpacer size="m" />
             <MultiFields
@@ -299,7 +300,7 @@ function UnifiedFieldListItemComponent({
           </>
         )}
 
-        {!!services.uiActions && (
+        {searchMode === 'documents' && !!services.uiActions && (
           <FieldPopoverFooter
             field={field}
             dataView={dataView}
@@ -333,8 +334,8 @@ function UnifiedFieldListItemComponent({
     <FieldPopover
       isOpen={infoIsOpen}
       button={
-        <DragDrop
-          draggable
+        <Draggable
+          dragType="copy"
           dragClassName="unifiedFieldListItemButton__dragging"
           order={order}
           value={value}
@@ -349,6 +350,7 @@ function UnifiedFieldListItemComponent({
             fieldSearchHighlight={highlight}
             isEmpty={isEmpty}
             isActive={infoIsOpen}
+            withDragIcon={!isDragDisabled}
             flush={alwaysShowActionButton ? 'both' : undefined}
             shouldAlwaysShowAction={alwaysShowActionButton}
             onClick={field.type !== '_source' ? togglePopover : undefined}
@@ -360,7 +362,7 @@ function UnifiedFieldListItemComponent({
               size,
             })}
           />
-        </DragDrop>
+        </Draggable>
       }
       closePopover={closePopover}
       data-test-subj={stateService.creationOptions.dataTestSubj?.fieldListItemPopoverDataTestSubj}
@@ -375,7 +377,12 @@ function UnifiedFieldListItemComponent({
           {...customPopoverHeaderProps}
         />
       )}
-      renderContent={searchMode === 'documents' ? renderPopover : undefined}
+      renderContent={
+        (searchMode === 'text-based' && canProvideStatsForFieldTextBased(field)) ||
+        searchMode === 'documents'
+          ? renderPopover
+          : undefined
+      }
     />
   );
 }

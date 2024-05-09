@@ -12,7 +12,7 @@ import type { ChromeBreadcrumb } from '@kbn/core/public';
 import type { Dispatch } from 'redux';
 import { SecurityPageName } from '../../../../app/types';
 import type { RouteSpyState } from '../../../utils/route/types';
-import { timelineActions } from '../../../../timelines/store/timeline';
+import { timelineActions } from '../../../../timelines/store';
 import { TimelineId } from '../../../../../common/types/timeline';
 import type { GetSecuritySolutionUrl } from '../../link_to';
 import { useGetSecuritySolutionUrl } from '../../link_to';

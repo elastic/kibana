@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import datemath from '@kbn/datemath';
 import { useKibana } from '../../common/lib/kibana';
@@ -37,7 +37,6 @@ const isGlobal = (props: UseLoadRuleEventLogsProps): props is LoadGlobalExecutio
 
 export function useLoadRuleEventLogs(props: UseLoadRuleEventLogsProps) {
   const { http } = useKibana().services;
-
   const queryFn = useCallback(() => {
     if (isGlobal(props)) {
       return loadGlobalExecutionLogAggregations({
@@ -55,16 +54,21 @@ export function useLoadRuleEventLogs(props: UseLoadRuleEventLogsProps) {
     });
   }, [props, http]);
 
-  const { data, isLoading, isFetching, refetch } = useQuery({
+  const { data, error, isLoading, isFetching, refetch } = useQuery({
     queryKey: ['loadRuleEventLog', props],
     queryFn,
     onError: props.onError,
+    retry: 0,
     refetchOnWindowFocus: false,
   });
-
-  return {
-    data,
-    isLoading: isLoading || isFetching,
-    loadEventLogs: refetch,
-  };
+  const hasExceedLogs = useMemo(() => error && error.body.statusCode === 413, [error]);
+  return useMemo(
+    () => ({
+      data,
+      hasExceedLogs,
+      isLoading: isLoading || isFetching,
+      loadEventLogs: refetch,
+    }),
+    [data, hasExceedLogs, isFetching, isLoading, refetch]
+  );
 }

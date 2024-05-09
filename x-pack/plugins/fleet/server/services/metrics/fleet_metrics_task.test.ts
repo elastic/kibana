@@ -104,6 +104,11 @@ describe('fleet metrics task', () => {
             count: 2,
           },
         ],
+        unhealthy_reason: {
+          input: 2,
+          output: 1,
+          other: 3,
+        },
       });
     });
 
@@ -148,6 +153,11 @@ describe('fleet metrics task', () => {
                 upgrading_step: {
                   scheduled: 1,
                   requested: 1,
+                },
+                unhealthy_reason: {
+                  input: 2,
+                  output: 1,
+                  other: 3,
                 },
               },
             },

@@ -15,6 +15,7 @@
  */
 export const IGNORE_FILE_GLOBS = [
   '.node-version',
+  'sonar-project.properties',
   '.github/**/*',
   'docs/**/*',
   '**/bin/**/*',
@@ -37,10 +38,8 @@ export const IGNORE_FILE_GLOBS = [
   'packages/core/apps/core-apps-server-internal/assets/fonts/**/*',
   'src/dev/code_coverage/ingest_coverage/integration_tests/mocks/**/*',
   'packages/kbn-utility-types/test-d/**/*',
-  '**/Jenkinsfile*',
   'Dockerfile*',
   'vars/*',
-  '.ci/pipeline-library/**/*',
   'packages/kbn-test/jest-preset.js',
   'packages/kbn-test/*/jest-preset.js',
   'test/package/Vagrantfile',
@@ -69,7 +68,7 @@ export const IGNORE_FILE_GLOBS = [
 
   'x-pack/plugins/maps/server/fonts/**/*',
 
-  'x-pack/plugins/profiling/Makefile',
+  'x-pack/plugins/observability_solution/profiling/Makefile',
 
   // Bazel default files
   '**/WORKSPACE.bazel',
@@ -80,6 +79,9 @@ export const IGNORE_FILE_GLOBS = [
 
   // generator templates use weird filenames based on the requirements for the files they're generating
   'packages/kbn-generate/templates/**/*',
+
+  // ecs templates
+  '**/ecs/fields/**/*',
 ];
 
 /**

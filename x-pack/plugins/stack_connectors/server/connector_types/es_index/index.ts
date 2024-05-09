@@ -160,11 +160,16 @@ async function executor(
 }
 
 function renderParameterTemplates(
+  logger: Logger,
   params: ActionParamsType,
   variables: Record<string, unknown>,
   actionId?: string
 ): ActionParamsType {
-  const { documents, indexOverride } = renderMustacheObject<ActionParamsType>(params, variables);
+  const { documents, indexOverride } = renderMustacheObject<ActionParamsType>(
+    logger,
+    params,
+    variables
+  );
 
   if (actionId === AlertHistoryEsIndexConnectorId) {
     const alertHistoryDoc = buildAlertHistoryDocument(variables);

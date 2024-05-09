@@ -43,8 +43,8 @@ const babelTester = [
 
 const invalid: RuleTester.InvalidTestCase[] = [
   {
-    name: 'When a string literal is passed to i18n.translate, it should start with the correct i18n identifier.',
-    filename: '/x-pack/plugins/observability/public/test_component.ts',
+    name: 'When a string literal is passed to i18n.translate, it should start with the correct i18n identifier, and if no existing defaultMessage is passed, it should add an empty default.',
+    filename: '/x-pack/plugins/observability_solution/observability/public/test_component.ts',
     code: `
 import { i18n } from '@kbn/i18n';
 
@@ -61,12 +61,56 @@ function TestComponent() {
 import { i18n } from '@kbn/i18n';
 
 function TestComponent() {
-  const foo = i18n.translate('xpack.observability.testComponent.', { defaultMessage: '' });
+  const foo = i18n.translate('xpack.observability.', { defaultMessage: '' });
+}`,
+  },
+  {
+    name: 'When a string literal is passed to i18n.translate, and the root of the i18n identifier is not correct, it should keep the existing identifier but only update the right base app.',
+    filename: '/x-pack/plugins/observability_solution/observability/public/test_component.ts',
+    code: `
+import { i18n } from '@kbn/i18n';
+
+function TestComponent() {
+  const foo = i18n.translate('foo.bar.baz');
+}`,
+    errors: [
+      {
+        line: 5,
+        message: RULE_WARNING_MESSAGE,
+      },
+    ],
+    output: `
+import { i18n } from '@kbn/i18n';
+
+function TestComponent() {
+  const foo = i18n.translate('xpack.observability.bar.baz', { defaultMessage: '' });
+}`,
+  },
+  {
+    name: 'When a string literal is passed to i18n.translate, and the root of the i18n identifier is not correct, it should keep the existing identifier but only update the right base app, and keep the default message if available.',
+    filename: '/x-pack/plugins/observability_solution/observability/public/test_component.ts',
+    code: `
+import { i18n } from '@kbn/i18n';
+
+function TestComponent() {
+  const foo = i18n.translate('foo.bar.baz', { defaultMessage: 'giraffe' });
+}`,
+    errors: [
+      {
+        line: 5,
+        message: RULE_WARNING_MESSAGE,
+      },
+    ],
+    output: `
+import { i18n } from '@kbn/i18n';
+
+function TestComponent() {
+  const foo = i18n.translate('xpack.observability.bar.baz', { defaultMessage: 'giraffe' });
 }`,
   },
   {
     name: 'When no string literal is passed to i18n.translate, it should start with the correct i18n identifier.',
-    filename: '/x-pack/plugins/observability/public/test_component.ts',
+    filename: '/x-pack/plugins/observability_solution/observability/public/test_component.ts',
     code: `
 import { i18n } from '@kbn/i18n';
 
@@ -88,7 +132,7 @@ function TestComponent() {
   },
   {
     name: 'When i18n is not imported yet, the rule should add it.',
-    filename: '/x-pack/plugins/observability/public/test_component.ts',
+    filename: '/x-pack/plugins/observability_solution/observability/public/test_component.ts',
     code: `
 function TestComponent() {
   const foo = i18n.translate();

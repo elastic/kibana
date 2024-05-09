@@ -6,13 +6,15 @@
  */
 
 import { interval, merge, of, Observable } from 'rxjs';
-import { filter, mergeScan, map, scan, distinctUntilChanged, startWith } from 'rxjs/operators';
+import { filter, mergeScan, map, scan, distinctUntilChanged, startWith } from 'rxjs';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { Logger } from '@kbn/core/server';
 import { isEsCannotExecuteScriptError } from './identify_es_error';
 
 const FLUSH_MARKER = Symbol('flush');
 export const ADJUST_THROUGHPUT_INTERVAL = 10 * 1000;
+export const PREFERRED_MAX_POLL_INTERVAL = 60 * 1000;
+export const MIN_WORKERS = 1;
 
 // When errors occur, reduce maxWorkers by MAX_WORKERS_DECREASE_PERCENTAGE
 // When errors no longer occur, start increasing maxWorkers by MAX_WORKERS_INCREASE_PERCENTAGE
@@ -65,7 +67,10 @@ function createMaxWorkersScan(logger: Logger, startingMaxWorkers: number) {
     if (errorCount > 0) {
       // Decrease max workers by MAX_WORKERS_DECREASE_PERCENTAGE while making sure it doesn't go lower than 1.
       // Using Math.floor to make sure the number is different than previous while not being a decimal value.
-      newMaxWorkers = Math.max(Math.floor(previousMaxWorkers * MAX_WORKERS_DECREASE_PERCENTAGE), 1);
+      newMaxWorkers = Math.max(
+        Math.floor(previousMaxWorkers * MAX_WORKERS_DECREASE_PERCENTAGE),
+        MIN_WORKERS
+      );
     } else {
       // Increase max workers by MAX_WORKERS_INCREASE_PERCENTAGE while making sure it doesn't go
       // higher than the starting value. Using Math.ceil to make sure the number is different than
@@ -95,7 +100,18 @@ function createPollIntervalScan(logger: Logger, startingPollInterval: number) {
     if (errorCount > 0) {
       // Increase poll interval by POLL_INTERVAL_INCREASE_PERCENTAGE and use Math.ceil to
       // make sure the number is different than previous while not being a decimal value.
-      newPollInterval = Math.ceil(previousPollInterval * POLL_INTERVAL_INCREASE_PERCENTAGE);
+      // Also ensure we don't go over PREFERRED_MAX_POLL_INTERVAL or startingPollInterval,
+      // whichever is greater.
+      newPollInterval = Math.min(
+        Math.ceil(previousPollInterval * POLL_INTERVAL_INCREASE_PERCENTAGE),
+        Math.ceil(Math.max(PREFERRED_MAX_POLL_INTERVAL, startingPollInterval))
+      );
+      if (!Number.isSafeInteger(newPollInterval) || newPollInterval < 0) {
+        logger.error(
+          `Poll interval configuration had an issue calculating the new poll interval: Math.min(Math.ceil(${previousPollInterval} * ${POLL_INTERVAL_INCREASE_PERCENTAGE}), Math.max(${PREFERRED_MAX_POLL_INTERVAL}, ${startingPollInterval})) = ${newPollInterval}, will keep the poll interval unchanged (${previousPollInterval})`
+        );
+        newPollInterval = previousPollInterval;
+      }
     } else {
       // Decrease poll interval by POLL_INTERVAL_DECREASE_PERCENTAGE and use Math.floor to
       // make sure the number is different than previous while not being a decimal value.
@@ -103,6 +119,12 @@ function createPollIntervalScan(logger: Logger, startingPollInterval: number) {
         startingPollInterval,
         Math.floor(previousPollInterval * POLL_INTERVAL_DECREASE_PERCENTAGE)
       );
+      if (!Number.isSafeInteger(newPollInterval) || newPollInterval < 0) {
+        logger.error(
+          `Poll interval configuration had an issue calculating the new poll interval: Math.max(${startingPollInterval}, Math.floor(${previousPollInterval} * ${POLL_INTERVAL_DECREASE_PERCENTAGE})) = ${newPollInterval}, will keep the poll interval unchanged (${previousPollInterval})`
+        );
+        newPollInterval = previousPollInterval;
+      }
     }
     if (newPollInterval !== previousPollInterval) {
       logger.debug(

@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EsError should render error message 1`] = `
+<div>
+  <pre>
+    <code
+      data-test-subj="errMessage"
+    >
+      The supplied interval [2q] could not be parsed as a calendar interval.
+    </code>
+  </pre>
+</div>
+`;

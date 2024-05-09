@@ -8,7 +8,8 @@
 import { each, get, sortedIndex } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { DataPublicPluginStart, ISearchOptions } from '@kbn/data-plugin/public';
+import type { ISearchOptions } from '@kbn/search-types';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import seedrandom from 'seedrandom';
 import { isDefined } from '@kbn/ml-is-defined';
 import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
@@ -25,7 +26,7 @@ export const getDocumentCountStats = async (
   search: DataPublicPluginStart['search'],
   params: OverallStatsSearchStrategyParams,
   searchOptions: ISearchOptions,
-  browserSessionSeed: string,
+  browserSessionSeed?: string,
   probability?: number | null,
   minimumRandomSamplerDocCount?: number
 ): Promise<DocumentCountStats> => {
@@ -193,6 +194,7 @@ export const getDocumentCountStats = async (
       }
     }
   }
+
   return result;
 };
 

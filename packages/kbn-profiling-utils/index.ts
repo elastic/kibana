@@ -12,6 +12,7 @@ export { ProfilingESField } from './common/elasticsearch';
 export {
   groupStackFrameMetadataByStackTrace,
   describeFrameType,
+  normalizeFrameType,
   FrameType,
   getCalleeFunction,
   getCalleeSource,
@@ -52,3 +53,4 @@ export type {
 } from './common/profiling';
 export type { ProfilingStatus } from './common/profiling_status';
 export type { TopNFunctions } from './common/functions';
+export type { AggregationField, ESTopNFunctions } from './common/es_functions';

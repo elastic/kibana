@@ -51,6 +51,8 @@
           "BooleanC",
           "; pendingRecoveredCount: ",
           "NumberC",
+          "; activeCount: ",
+          "NumberC",
           "; }>>; trackedAlertsRecovered: ",
           "RecordC",
           "<",
@@ -70,6 +72,8 @@
           ">; flapping: ",
           "BooleanC",
           "; pendingRecoveredCount: ",
+          "NumberC",
+          "; activeCount: ",
           "NumberC",
           "; }>>; }>"
         ],
@@ -120,7 +124,7 @@
         "label": "LatestAlertInstanceMetaSchema",
         "description": [],
         "signature": [
-          "{ readonly uuid?: string | undefined; readonly lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; readonly flappingHistory?: boolean[] | undefined; readonly flapping?: boolean | undefined; readonly maintenanceWindowIds?: string[] | undefined; readonly pendingRecoveredCount?: number | undefined; }"
+          "{ readonly uuid?: string | undefined; readonly lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; readonly flappingHistory?: boolean[] | undefined; readonly flapping?: boolean | undefined; readonly maintenanceWindowIds?: string[] | undefined; readonly pendingRecoveredCount?: number | undefined; readonly activeCount?: number | undefined; }"
         ],
         "path": "x-pack/packages/kbn-alerting-state-types/src/task_state/index.ts",
         "deprecated": false,
@@ -165,7 +169,7 @@
         "label": "LatestRawAlertInstanceSchema",
         "description": [],
         "signature": [
-          "{ readonly meta?: Readonly<{ uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; } & {}> | undefined; readonly state?: Record<string, any> | undefined; }"
+          "{ readonly meta?: Readonly<{ uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; readonly state?: Record<string, any> | undefined; }"
         ],
         "path": "x-pack/packages/kbn-alerting-state-types/src/task_state/index.ts",
         "deprecated": false,
@@ -180,7 +184,7 @@
         "label": "LatestTaskStateSchema",
         "description": [],
         "signature": [
-          "{ readonly alertTypeState?: Record<string, any> | undefined; readonly alertInstances?: Record<string, Readonly<{ meta?: Readonly<{ uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; readonly alertRecoveredInstances?: Record<string, Readonly<{ meta?: Readonly<{ uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; readonly previousStartedAt?: string | null | undefined; readonly summaryActions?: Record<string, Readonly<{} & { date: string; }>> | undefined; }"
+          "{ readonly alertTypeState?: Record<string, any> | undefined; readonly alertInstances?: Record<string, Readonly<{ meta?: Readonly<{ uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; readonly alertRecoveredInstances?: Record<string, Readonly<{ meta?: Readonly<{ uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; readonly previousStartedAt?: string | null | undefined; readonly summaryActions?: Record<string, Readonly<{} & { date: string; }>> | undefined; }"
         ],
         "path": "x-pack/packages/kbn-alerting-state-types/src/task_state/index.ts",
         "deprecated": false,
@@ -210,7 +214,7 @@
         "label": "MutableLatestAlertInstanceMetaSchema",
         "description": [],
         "signature": [
-          "{ uuid?: Mutable<string | undefined>; lastScheduledActions?: Mutable<Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined>; flappingHistory?: Mutable<boolean[] | undefined>; flapping?: Mutable<boolean | undefined>; maintenanceWindowIds?: Mutable<string[] | undefined>; pendingRecoveredCount?: Mutable<number | undefined>; }"
+          "{ uuid?: Mutable<string | undefined>; lastScheduledActions?: Mutable<Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined>; flappingHistory?: Mutable<boolean[] | undefined>; flapping?: Mutable<boolean | undefined>; maintenanceWindowIds?: Mutable<string[] | undefined>; pendingRecoveredCount?: Mutable<number | undefined>; activeCount?: Mutable<number | undefined>; }"
         ],
         "path": "x-pack/packages/kbn-alerting-state-types/src/task_state/index.ts",
         "deprecated": false,
@@ -225,7 +229,7 @@
         "label": "MutableLatestTaskStateSchema",
         "description": [],
         "signature": [
-          "{ alertTypeState?: Mutable<Record<string, any> | undefined>; alertInstances?: Mutable<Record<string, Readonly<{ meta?: Readonly<{ uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined>; alertRecoveredInstances?: Mutable<Record<string, Readonly<{ meta?: Readonly<{ uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined>; previousStartedAt?: Mutable<string | null | undefined>; summaryActions?: Mutable<Record<string, Readonly<{} & { date: string; }>> | undefined>; }"
+          "{ alertTypeState?: Mutable<Record<string, any> | undefined>; alertInstances?: Mutable<Record<string, Readonly<{ meta?: Readonly<{ uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined>; alertRecoveredInstances?: Mutable<Record<string, Readonly<{ meta?: Readonly<{ uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined>; previousStartedAt?: Mutable<string | null | undefined>; summaryActions?: Mutable<Record<string, Readonly<{} & { date: string; }>> | undefined>; }"
         ],
         "path": "x-pack/packages/kbn-alerting-state-types/src/task_state/index.ts",
         "deprecated": false,
@@ -255,7 +259,7 @@
         "label": "TrackedLifecycleAlertState",
         "description": [],
         "signature": [
-          "{ alertId: string; alertUuid: string; started: string; flappingHistory: boolean[]; flapping: boolean; pendingRecoveredCount: number; }"
+          "{ alertId: string; alertUuid: string; started: string; flappingHistory: boolean[]; flapping: boolean; pendingRecoveredCount: number; activeCount: number; }"
         ],
         "path": "x-pack/packages/kbn-alerting-state-types/src/lifecycle_state.ts",
         "deprecated": false,
@@ -272,7 +276,7 @@
           "\nThis is redefined instead of derived from above `wrappedStateRt` because\nthere's no easy way to instantiate generic values such as the runtime type\nfactory function."
         ],
         "signature": [
-          "RuleTypeState & { wrapped: State; trackedAlerts: Record<string, { alertId: string; alertUuid: string; started: string; flappingHistory: boolean[]; flapping: boolean; pendingRecoveredCount: number; }>; trackedAlertsRecovered: Record<string, { alertId: string; alertUuid: string; started: string; flappingHistory: boolean[]; flapping: boolean; pendingRecoveredCount: number; }>; }"
+          "RuleTypeState & { wrapped: State; trackedAlerts: Record<string, { alertId: string; alertUuid: string; started: string; flappingHistory: boolean[]; flapping: boolean; pendingRecoveredCount: number; activeCount: number; }>; trackedAlertsRecovered: Record<string, { alertId: string; alertUuid: string; started: string; flappingHistory: boolean[]; flapping: boolean; pendingRecoveredCount: number; activeCount: number; }>; }"
         ],
         "path": "x-pack/packages/kbn-alerting-state-types/src/lifecycle_state.ts",
         "deprecated": false,
@@ -400,7 +404,7 @@
             "label": "1",
             "description": [],
             "signature": [
-              "{ up: (state: Record<string, unknown>) => Readonly<{ alertTypeState?: Record<string, any> | undefined; alertInstances?: Record<string, Readonly<{ meta?: Readonly<{ uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; alertRecoveredInstances?: Record<string, Readonly<{ meta?: Readonly<{ uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; previousStartedAt?: string | null | undefined; summaryActions?: Record<string, Readonly<{} & { date: string; }>> | undefined; } & {}>; schema: ",
+              "{ up: (state: Record<string, unknown>) => Readonly<{ alertTypeState?: Record<string, any> | undefined; alertInstances?: Record<string, Readonly<{ meta?: Readonly<{ uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; alertRecoveredInstances?: Record<string, Readonly<{ meta?: Readonly<{ uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; previousStartedAt?: string | null | undefined; summaryActions?: Record<string, Readonly<{} & { date: string; }>> | undefined; } & {}>; schema: ",
               {
                 "pluginId": "@kbn/config-schema",
                 "scope": "common",
@@ -424,7 +428,7 @@
                 "section": "def-common.Type",
                 "text": "Type"
               },
-              "<Record<string, Readonly<{ meta?: Readonly<{ uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined>; alertRecoveredInstances: ",
+              "<Record<string, Readonly<{ meta?: Readonly<{ uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined>; alertRecoveredInstances: ",
               {
                 "pluginId": "@kbn/config-schema",
                 "scope": "common",
@@ -432,7 +436,7 @@
                 "section": "def-common.Type",
                 "text": "Type"
               },
-              "<Record<string, Readonly<{ meta?: Readonly<{ uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined>; previousStartedAt: ",
+              "<Record<string, Readonly<{ meta?: Readonly<{ uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined>; previousStartedAt: ",
               {
                 "pluginId": "@kbn/config-schema",
                 "scope": "common",

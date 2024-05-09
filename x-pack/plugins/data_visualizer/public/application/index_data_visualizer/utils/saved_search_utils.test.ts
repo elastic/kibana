@@ -5,22 +5,28 @@
  * 2.0.
  */
 
-import {
-  getQueryFromSavedSearchObject,
-  createMergedEsQuery,
-  getEsQueryFromSavedSearch,
-} from './saved_search_utils';
+import { getQueryFromSavedSearchObject, getEsQueryFromSavedSearch } from './saved_search_utils';
 import type { SavedSearchSavedObject } from '../../../../common/types';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { type Filter, FilterStateStore } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 import { stubbedSavedObjectIndexPattern } from '@kbn/data-views-plugin/common/data_view.stub';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
-import { Query } from '@kbn/es-query';
-import { FilterMetaParams } from '@kbn/es-query/src/filters/build_filters';
+import type { Query, Filter } from '@kbn/es-query';
+import type { FilterMetaParams } from '@kbn/es-query/src/filters/build_filters';
+import type { FilterManager } from '@kbn/data-plugin/public';
 
+function createMockFilterManager() {
+  const filters: Filter[] = [];
+  return {
+    getFilters: () => filters,
+    addFilters: (value: Filter[]) => {
+      filters.push(...value);
+    },
+  } as unknown as jest.Mocked<FilterManager>;
+}
 // helper function to create data views
 function createMockDataView(id: string) {
   const {
@@ -217,80 +223,6 @@ describe('getQueryFromSavedSearchObject()', () => {
   });
 });
 
-describe('createMergedEsQuery()', () => {
-  const luceneQuery = {
-    query: 'responsetime:>50',
-    language: 'lucene',
-  };
-  const kqlQuery = {
-    query: 'responsetime > 49',
-    language: 'kuery',
-  };
-  const mockFilters: Filter[] = [
-    {
-      meta: {
-        index: '90a978e0-1c80-11ec-b1d7-f7e5cf21b9e0',
-        negate: false,
-        disabled: false,
-        alias: null,
-        type: 'phrase',
-        key: 'airline',
-        params: {
-          query: 'ASA',
-        },
-      },
-      query: {
-        match: {
-          airline: {
-            query: 'ASA',
-            type: 'phrase',
-          },
-        },
-      },
-      $state: {
-        store: 'appState' as FilterStateStore,
-      },
-    },
-  ];
-
-  it('return formatted ES bool query with both the original query and filters combined', () => {
-    expect(createMergedEsQuery(luceneQuery, mockFilters)).toEqual({
-      bool: {
-        filter: [{ match_phrase: { airline: { query: 'ASA' } } }],
-        must: [{ query_string: { query: 'responsetime:>50' } }],
-        must_not: [],
-        should: [],
-      },
-    });
-    expect(createMergedEsQuery(kqlQuery, mockFilters)).toEqual({
-      bool: {
-        filter: [{ match_phrase: { airline: { query: 'ASA' } } }],
-        minimum_should_match: 1,
-        must_not: [],
-        should: [{ range: { responsetime: { gt: '49' } } }],
-      },
-    });
-  });
-  it('return formatted ES bool query without filters ', () => {
-    expect(createMergedEsQuery(luceneQuery)).toEqual({
-      bool: {
-        filter: [],
-        must: [{ query_string: { query: 'responsetime:>50' } }],
-        must_not: [],
-        should: [],
-      },
-    });
-    expect(createMergedEsQuery(kqlQuery)).toEqual({
-      bool: {
-        filter: [],
-        minimum_should_match: 1,
-        must_not: [],
-        should: [{ range: { responsetime: { gt: '49' } } }],
-      },
-    });
-  });
-});
-
 describe('getEsQueryFromSavedSearch()', () => {
   it('return undefined if saved search is not provided', () => {
     expect(
@@ -307,6 +239,7 @@ describe('getEsQueryFromSavedSearch()', () => {
         dataView: mockDataView,
         savedSearch: luceneSavedSearch,
         uiSettings: mockUiSettings,
+        filterManager: createMockFilterManager(),
       })
     ).toEqual({
       queryLanguage: 'lucene',
@@ -359,6 +292,7 @@ describe('getEsQueryFromSavedSearch()', () => {
           query: 'responsetime:>100',
           language: 'lucene',
         },
+        filterManager: createMockFilterManager(),
       })
     ).toEqual({
       queryLanguage: 'lucene',
@@ -432,13 +366,38 @@ describe('getEsQueryFromSavedSearch()', () => {
             },
           },
         ],
+        filterManager: createMockFilterManager(),
       })
     ).toEqual({
       queryLanguage: 'lucene',
       queryOrAggregateQuery: { language: 'lucene', query: 'responsetime:>100' },
       searchQuery: {
         bool: {
-          filter: [],
+          filter: [
+            {
+              bool: {
+                should: [
+                  {
+                    bool: {
+                      must: [],
+                      filter: [{ match_phrase: { airline: 'ACA' } }],
+                      should: [],
+                      must_not: [],
+                    },
+                  },
+                  {
+                    bool: {
+                      must: [],
+                      filter: [{ match_phrase: { airline: 'FFT' } }],
+                      should: [],
+                      must_not: [],
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          ],
           must: [{ query_string: { query: 'responsetime:>100' } }],
           must_not: [{ match_phrase: { airline: 'JZA' } }],
           should: [],

@@ -19,13 +19,13 @@ import {
   map,
   skip,
   startWith,
-} from 'rxjs/operators';
+} from 'rxjs';
 import { Unsubscribe } from 'redux';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { type Filter } from '@kbn/es-query';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { Query, type Filter } from '@kbn/es-query';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import {
   Embeddable,
   IContainer,
@@ -77,14 +77,17 @@ import {
   APP_ID,
   getEditPath,
   getFullPath,
+  MAP_EMBEDDABLE_NAME,
   MAP_SAVED_OBJECT_TYPE,
   RawValue,
   RENDER_TIMEOUT,
 } from '../../common/constants';
 import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
 import {
+  getAnalytics,
   getCharts,
   getCoreI18n,
+  getCoreOverlays,
   getExecutionContextService,
   getHttp,
   getSearchService,
@@ -93,6 +96,7 @@ import {
   getUiActions,
 } from '../kibana_services';
 import { LayerDescriptor, MapExtent } from '../../common/descriptor_types';
+import { extractReferences } from '../../common/migrations/references';
 import { MapContainer } from '../connected_components/map_container';
 import { SavedMap } from '../routes/map_page';
 import { getIndexPatternsFromIds } from '../index_pattern_util';
@@ -101,6 +105,7 @@ import { isUrlDrilldown, toValueClickDataFormat } from '../trigger_actions/trigg
 import { waitUntilTimeLayersLoad$ } from '../routes/map_page/map_app/wait_until_time_layers_load';
 import { mapEmbeddablesSingleton } from './map_embeddables_singleton';
 import { getGeoFieldsLabel } from './get_geo_fields_label';
+import { checkForDuplicateTitle, getMapClient } from '../content_management';
 
 import {
   MapByValueInput,
@@ -344,14 +349,14 @@ export class MapEmbeddable
     return getLayerList(this._savedMap.getStore().getState());
   }
 
-  public async getFilters() {
+  public getFilters() {
     const embeddableSearchContext = getEmbeddableSearchContext(
       this._savedMap.getStore().getState()
     );
     return embeddableSearchContext ? embeddableSearchContext.filters : [];
   }
 
-  public async getQuery() {
+  public getQuery(): Query | undefined {
     const embeddableSearchContext = getEmbeddableSearchContext(
       this._savedMap.getStore().getState()
     );
@@ -576,13 +581,14 @@ export class MapEmbeddable
         />
       );
 
-    const I18nContext = getCoreI18n().Context;
     render(
-      <Provider store={this._savedMap.getStore()}>
-        <I18nContext>
-          <KibanaThemeProvider theme$={getTheme().theme$}>{content}</KibanaThemeProvider>
-        </I18nContext>
-      </Provider>,
+      <KibanaRenderContextProvider
+        analytics={getAnalytics()}
+        i18n={getCoreI18n()}
+        theme={getTheme()}
+      >
+        <Provider store={this._savedMap.getStore()}>{content}</Provider>
+      </KibanaRenderContextProvider>,
       this._domNode
     );
   }
@@ -663,6 +669,58 @@ export class MapEmbeddable
       embeddable: this,
       trigger,
     } as ActionExecutionContext;
+  };
+
+  // remove legacy library tranform methods
+  linkToLibrary = undefined;
+  unlinkFromLibrary = undefined;
+  // add implemenation for library transform methods
+  checkForDuplicateTitle = async (
+    newTitle: string,
+    isTitleDuplicateConfirmed: boolean,
+    onTitleDuplicate: () => void
+  ) => {
+    await checkForDuplicateTitle(
+      {
+        title: newTitle,
+        copyOnSave: false,
+        lastSavedTitle: '',
+        isTitleDuplicateConfirmed,
+        getDisplayName: () => MAP_EMBEDDABLE_NAME,
+        onTitleDuplicate,
+      },
+      {
+        overlays: getCoreOverlays(),
+      }
+    );
+  };
+  saveToLibrary = async (title: string) => {
+    const { attributes, references } = extractReferences({
+      attributes: this._savedMap.getAttributes(),
+    });
+
+    const {
+      item: { id: savedObjectId },
+    } = await getMapClient().create({
+      data: {
+        ...attributes,
+        title,
+      },
+      options: { references },
+    });
+    return savedObjectId;
+  };
+  getByReferenceState = (libraryId: string) => {
+    return {
+      ..._.omit(this.getExplicitInput(), 'attributes'),
+      savedObjectId: libraryId,
+    };
+  };
+  getByValueState = () => {
+    return {
+      ..._.omit(this.getExplicitInput(), 'savedObjectId'),
+      attributes: this._savedMap.getAttributes(),
+    };
   };
 
   // Timing bug for dashboard with multiple maps with synchronized movement and filter by map extent enabled

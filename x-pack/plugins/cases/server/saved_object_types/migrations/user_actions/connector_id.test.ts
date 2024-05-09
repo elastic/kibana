@@ -254,7 +254,7 @@ describe('user action migrations', () => {
           const log = context.log as jest.Mocked<SavedObjectsMigrationLogger>;
           expect(log.error.mock.calls[0]).toMatchInlineSnapshot(`
             Array [
-              "Failed to migrate user action connector with doc id: 1 version: 8.0.0 error: Unexpected token a in JSON at position 1",
+              "Failed to migrate user action connector with doc id: 1 version: 8.0.0 error: Expected property name or '}' in JSON at position 1",
               Object {
                 "migrations": Object {
                   "userAction": Object {
@@ -448,7 +448,7 @@ describe('user action migrations', () => {
           const log = context.log as jest.Mocked<SavedObjectsMigrationLogger>;
           expect(log.error.mock.calls[0]).toMatchInlineSnapshot(`
             Array [
-              "Failed to migrate user action connector with doc id: 1 version: 8.0.0 error: Unexpected token b in JSON at position 1",
+              "Failed to migrate user action connector with doc id: 1 version: 8.0.0 error: Expected property name or '}' in JSON at position 1",
               Object {
                 "migrations": Object {
                   "userAction": Object {
@@ -644,7 +644,7 @@ describe('user action migrations', () => {
           const log = context.log as jest.Mocked<SavedObjectsMigrationLogger>;
           expect(log.error.mock.calls[0]).toMatchInlineSnapshot(`
             Array [
-              "Failed to migrate user action connector with doc id: 1 version: 8.0.0 error: Unexpected token e in JSON at position 1",
+              "Failed to migrate user action connector with doc id: 1 version: 8.0.0 error: Unexpected token 'e', \\"new json value\\" is not valid JSON",
               Object {
                 "migrations": Object {
                   "userAction": Object {

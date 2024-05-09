@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Field, AggFieldPair } from '@kbn/ml-anomaly-utils';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { PopulationJobCreator } from '../../../../../common/job_creator';
-import { Results, ModelItem, Anomaly } from '../../../../../common/results_loader';
-import { LineChartData } from '../../../../../common/chart_loader';
+import type { PopulationJobCreator } from '../../../../../common/job_creator';
+import type { Results, ModelItem, Anomaly } from '../../../../../common/results_loader';
+import type { LineChartData } from '../../../../../common/chart_loader';
 import { getChartSettings, defaultChartSettings } from '../../../charts/common/settings';
 import { ChartGrid } from './chart_grid';
 import { getToastNotificationService } from '../../../../../../../services/toast_notification_service';

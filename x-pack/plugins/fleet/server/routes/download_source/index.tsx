@@ -31,7 +31,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .get({
       path: DOWNLOAD_SOURCE_API_ROUTES.LIST_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readSettings: true },
       },
     })
     .addVersion(
@@ -46,7 +46,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .get({
       path: DOWNLOAD_SOURCE_API_ROUTES.INFO_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readSettings: true },
       },
     })
     .addVersion(
@@ -61,7 +61,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .put({
       path: DOWNLOAD_SOURCE_API_ROUTES.UPDATE_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allSettings: true },
       },
     })
     .addVersion(
@@ -76,7 +76,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .post({
       path: DOWNLOAD_SOURCE_API_ROUTES.CREATE_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allSettings: true },
       },
     })
     .addVersion(
@@ -91,7 +91,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .delete({
       path: DOWNLOAD_SOURCE_API_ROUTES.DELETE_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allSettings: true },
       },
     })
     .addVersion(

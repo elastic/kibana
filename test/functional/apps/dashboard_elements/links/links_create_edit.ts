@@ -98,7 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await dashboard.clickUnsavedChangesContinueEditing(DASHBOARD_NAME);
 
           await dashboard.waitForRenderComplete();
-          await dashboardPanelActions.saveToLibrary('Some more links');
+          await dashboardPanelActions.legacySaveToLibrary('Some more links');
           await testSubjects.existOrFail('addPanelToLibrarySuccess');
         });
 
@@ -115,7 +115,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
-        await dashboardLinks.expectFlyoutIsOpen();
+        await dashboardLinks.expectPanelEditorFlyoutIsOpen();
 
         // Move the third link up one step
         await dashboardLinks.reorderLinks('link003', 3, 1, true);
@@ -135,7 +135,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
-        await dashboardLinks.expectFlyoutIsOpen();
+        await dashboardLinks.expectPanelEditorFlyoutIsOpen();
 
         await dashboardLinks.editLinkByIndex(5);
         await testSubjects.exists('links--linkEditor--flyout');
@@ -154,7 +154,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
-        await dashboardLinks.expectFlyoutIsOpen();
+        await dashboardLinks.expectPanelEditorFlyoutIsOpen();
 
         await dashboardLinks.deleteLinkByIndex(5);
         await dashboardLinks.clickPanelEditorSaveButton();

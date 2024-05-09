@@ -13,6 +13,7 @@ import { merge } from 'lodash';
 import { getRegistryDataStreamAssetBaseName } from '../../../common/services';
 
 import type { ExperimentalIndexingFeature } from '../../../common/types';
+import { PackageNotFoundError } from '../../errors';
 import type {
   NewPackagePolicy,
   PackagePolicy,
@@ -22,8 +23,9 @@ import type {
 import { appContextService } from '../app_context';
 import { prepareTemplate } from '../epm/elasticsearch/template/install';
 import { updateCurrentWriteIndices } from '../epm/elasticsearch/template/template';
-import { getInstallation, getPackageInfo } from '../epm/packages';
+import { getInstalledPackageWithAssets } from '../epm/packages/get';
 import { updateDatastreamExperimentalFeatures } from '../epm/packages/update';
+
 import {
   applyDocOnlyValueToMapping,
   forEachMappings,
@@ -38,7 +40,10 @@ export async function handleExperimentalDatastreamFeatureOptIn({
   esClient: ElasticsearchClient;
   packagePolicy: PackagePolicy | NewPackagePolicy;
 }) {
-  if (!packagePolicy.package?.experimental_data_stream_features) {
+  if (
+    !packagePolicy.package?.experimental_data_stream_features ||
+    (packagePolicy.package?.experimental_data_stream_features?.length ?? 0) === 0
+  ) {
     return;
   }
 
@@ -49,16 +54,16 @@ export async function handleExperimentalDatastreamFeatureOptIn({
   const templateMappings: { [key: string]: any } = {};
 
   if (packagePolicy.package) {
-    installation = await getInstallation({
+    const installedPackageWithAssets = await getInstalledPackageWithAssets({
       savedObjectsClient: soClient,
       pkgName: packagePolicy.package.name,
     });
 
-    const packageInfo = await getPackageInfo({
-      savedObjectsClient: soClient,
-      pkgName: packagePolicy.package.name,
-      pkgVersion: packagePolicy.package.version,
-    });
+    if (!installedPackageWithAssets) {
+      throw new PackageNotFoundError(`package not found with assets ${packagePolicy.package.name}`);
+    }
+    installation = installedPackageWithAssets.installation;
+    const { packageInfo, paths, assetsMap } = installedPackageWithAssets;
 
     // prepare template from package spec to find original index:false values
     const templates = packageInfo.data_streams?.map((dataStream: any) => {
@@ -67,7 +72,15 @@ export async function handleExperimentalDatastreamFeatureOptIn({
           (datastreamFeature) =>
             datastreamFeature.data_stream === getRegistryDataStreamAssetBaseName(dataStream)
         );
-      return prepareTemplate({ pkg: packageInfo, dataStream, experimentalDataStreamFeature });
+      return prepareTemplate({
+        packageInstallContext: {
+          assetsMap,
+          packageInfo,
+          paths,
+        },
+        dataStream,
+        experimentalDataStreamFeature,
+      });
     });
 
     templates?.forEach((template) => {

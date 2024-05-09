@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 
 import { uniq } from 'lodash';
 
@@ -103,11 +103,15 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
   }, []);
 };
 
-export const useAvailablePackages = () => {
+export type AvailablePackagesHookType = typeof useAvailablePackages;
+
+export const useAvailablePackages = ({
+  prereleaseIntegrationsEnabled,
+}: {
+  prereleaseIntegrationsEnabled: boolean;
+}) => {
   const [preference, setPreference] = useState<IntegrationPreferenceType>('recommended');
-  const [prereleaseIntegrationsEnabled, setPrereleaseIntegrationsEnabled] = React.useState<
-    boolean | undefined
-  >(undefined);
+
   const { showIntegrationsSubcategories } = ExperimentalFeaturesService.get();
 
   const {
@@ -245,6 +249,5 @@ export const useAvailablePackages = () => {
     eprPackageLoadingError,
     eprCategoryLoadingError,
     filteredCards,
-    setPrereleaseIntegrationsEnabled,
   };
 };

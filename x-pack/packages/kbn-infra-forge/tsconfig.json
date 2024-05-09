@@ -17,10 +17,10 @@
     "./src/data_sources/composable/template.json"
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ],
   "kbn_references": [
     "@kbn/tooling-log",
-    "@kbn/datemath",
+    "@kbn/datemath"
   ]
 }

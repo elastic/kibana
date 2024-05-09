@@ -9,7 +9,7 @@ import type { RuleTypeParams, SanitizedRule } from '@kbn/alerting-plugin/common'
 // eslint-disable-next-line no-restricted-imports
 import type { LegacyReadNotificationParams } from './legacy_types';
 // eslint-disable-next-line no-restricted-imports
-import { legacyIsAlertType } from './legacy_types';
+import { isLegacyRuleType } from './legacy_types';
 // eslint-disable-next-line no-restricted-imports
 import { legacyFindNotifications } from './legacy_find_notifications';
 
@@ -24,7 +24,7 @@ export const legacyReadNotifications = async ({
   if (id != null) {
     try {
       const notification = await rulesClient.get({ id });
-      if (legacyIsAlertType(notification)) {
+      if (isLegacyRuleType(notification)) {
         return notification;
       } else {
         return null;
@@ -43,10 +43,7 @@ export const legacyReadNotifications = async ({
       filter: `alert.attributes.params.ruleAlertId: "${ruleAlertId}"`,
       page: 1,
     });
-    if (
-      notificationFromFind.data.length === 0 ||
-      !legacyIsAlertType(notificationFromFind.data[0])
-    ) {
+    if (notificationFromFind.data.length === 0 || !isLegacyRuleType(notificationFromFind.data[0])) {
       return null;
     } else {
       return notificationFromFind.data[0];

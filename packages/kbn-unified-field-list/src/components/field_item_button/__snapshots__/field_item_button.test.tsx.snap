@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`UnifiedFieldList <FieldItemButton /> renders properly 1`] = `
+exports[`UnifiedFieldList FieldItemButton renders properly 1`] = `
 <FieldButton
   buttonProps={
     Object {
@@ -10,10 +10,18 @@ exports[`UnifiedFieldList <FieldItemButton /> renders properly 1`] = `
   className="unifiedFieldListItemButton unifiedFieldListItemButton--number unifiedFieldListItemButton--exists"
   dataTestSubj="field-bytes-showDetails"
   fieldIcon={
-    <WrappedFieldIcon
-      scripted={false}
-      type="number"
-    />
+    <div
+      className="unifiedFieldListItemButton__fieldIconContainer"
+    >
+      <div
+        className="unifiedFieldListItemButton__fieldIcon"
+      >
+        <WrappedFieldIcon
+          scripted={false}
+          type="number"
+        />
+      </div>
+    </div>
   }
   fieldName={
     <EuiHighlight
@@ -31,7 +39,7 @@ exports[`UnifiedFieldList <FieldItemButton /> renders properly 1`] = `
 />
 `;
 
-exports[`UnifiedFieldList <FieldItemButton /> renders properly for Records (Lens field) 1`] = `
+exports[`UnifiedFieldList FieldItemButton renders properly for Records (Lens field) 1`] = `
 <FieldButton
   buttonProps={
     Object {
@@ -41,10 +49,18 @@ exports[`UnifiedFieldList <FieldItemButton /> renders properly for Records (Lens
   className="unifiedFieldListItemButton unifiedFieldListItemButton--document unifiedFieldListItemButton--exists"
   dataTestSubj="field-___records___-showDetails"
   fieldIcon={
-    <WrappedFieldIcon
-      scripted={false}
-      type="document"
-    />
+    <div
+      className="unifiedFieldListItemButton__fieldIconContainer"
+    >
+      <div
+        className="unifiedFieldListItemButton__fieldIcon"
+      >
+        <WrappedFieldIcon
+          scripted={false}
+          type="document"
+        />
+      </div>
+    </div>
   }
   fieldName={
     <EuiHighlight
@@ -62,7 +78,7 @@ exports[`UnifiedFieldList <FieldItemButton /> renders properly for Records (Lens
 />
 `;
 
-exports[`UnifiedFieldList <FieldItemButton /> renders properly for search with spaces 1`] = `
+exports[`UnifiedFieldList FieldItemButton renders properly for search with spaces 1`] = `
 <FieldButton
   buttonProps={
     Object {
@@ -72,10 +88,18 @@ exports[`UnifiedFieldList <FieldItemButton /> renders properly for search with s
   className="unifiedFieldListItemButton unifiedFieldListItemButton--date unifiedFieldListItemButton--exists"
   dataTestSubj="field-script date-showDetails"
   fieldIcon={
-    <WrappedFieldIcon
-      scripted={true}
-      type="date"
-    />
+    <div
+      className="unifiedFieldListItemButton__fieldIconContainer"
+    >
+      <div
+        className="unifiedFieldListItemButton__fieldIcon"
+      >
+        <WrappedFieldIcon
+          scripted={true}
+          type="date"
+        />
+      </div>
+    </div>
   }
   fieldName={
     <EuiHighlight
@@ -92,7 +116,7 @@ exports[`UnifiedFieldList <FieldItemButton /> renders properly for search with s
 />
 `;
 
-exports[`UnifiedFieldList <FieldItemButton /> renders properly for text-based column field 1`] = `
+exports[`UnifiedFieldList FieldItemButton renders properly for text-based column field 1`] = `
 <FieldButton
   buttonProps={
     Object {
@@ -102,9 +126,17 @@ exports[`UnifiedFieldList <FieldItemButton /> renders properly for text-based co
   className="unifiedFieldListItemButton unifiedFieldListItemButton--string unifiedFieldListItemButton--exists"
   dataTestSubj="field-agent-showDetails"
   fieldIcon={
-    <WrappedFieldIcon
-      type="string"
-    />
+    <div
+      className="unifiedFieldListItemButton__fieldIconContainer"
+    >
+      <div
+        className="unifiedFieldListItemButton__fieldIcon"
+      >
+        <WrappedFieldIcon
+          type="string"
+        />
+      </div>
+    </div>
   }
   fieldName={
     <EuiHighlight
@@ -121,7 +153,7 @@ exports[`UnifiedFieldList <FieldItemButton /> renders properly for text-based co
 />
 `;
 
-exports[`UnifiedFieldList <FieldItemButton /> renders properly for wildcard search 1`] = `
+exports[`UnifiedFieldList FieldItemButton renders properly for wildcard search 1`] = `
 <FieldButton
   buttonProps={
     Object {
@@ -131,10 +163,18 @@ exports[`UnifiedFieldList <FieldItemButton /> renders properly for wildcard sear
   className="unifiedFieldListItemButton unifiedFieldListItemButton--date unifiedFieldListItemButton--exists"
   dataTestSubj="field-script date-showDetails"
   fieldIcon={
-    <WrappedFieldIcon
-      scripted={true}
-      type="date"
-    />
+    <div
+      className="unifiedFieldListItemButton__fieldIconContainer"
+    >
+      <div
+        className="unifiedFieldListItemButton__fieldIcon"
+      >
+        <WrappedFieldIcon
+          scripted={true}
+          type="date"
+        />
+      </div>
+    </div>
   }
   fieldName={
     <EuiHighlight
@@ -151,7 +191,7 @@ exports[`UnifiedFieldList <FieldItemButton /> renders properly for wildcard sear
 />
 `;
 
-exports[`UnifiedFieldList <FieldItemButton /> renders properly when a conflict field 1`] = `
+exports[`UnifiedFieldList FieldItemButton renders properly when a conflict field 1`] = `
 <FieldButton
   buttonProps={
     Object {
@@ -161,10 +201,18 @@ exports[`UnifiedFieldList <FieldItemButton /> renders properly when a conflict f
   className="unifiedFieldListItemButton unifiedFieldListItemButton--conflict unifiedFieldListItemButton--exists"
   dataTestSubj="field-custom_user_field-showDetails"
   fieldIcon={
-    <WrappedFieldIcon
-      scripted={false}
-      type="conflict"
-    />
+    <div
+      className="unifiedFieldListItemButton__fieldIconContainer"
+    >
+      <div
+        className="unifiedFieldListItemButton__fieldIcon"
+      >
+        <WrappedFieldIcon
+          scripted={false}
+          type="conflict"
+        />
+      </div>
+    </div>
   }
   fieldInfoIcon={
     <FieldConflictInfoIcon
@@ -196,7 +244,7 @@ exports[`UnifiedFieldList <FieldItemButton /> renders properly when a conflict f
 />
 `;
 
-exports[`UnifiedFieldList <FieldItemButton /> renders properly when empty 1`] = `
+exports[`UnifiedFieldList FieldItemButton renders properly when empty 1`] = `
 <FieldButton
   buttonProps={
     Object {
@@ -206,10 +254,18 @@ exports[`UnifiedFieldList <FieldItemButton /> renders properly when empty 1`] = 
   className="unifiedFieldListItemButton unifiedFieldListItemButton--date unifiedFieldListItemButton--missing"
   dataTestSubj="field-script date-showDetails"
   fieldIcon={
-    <WrappedFieldIcon
-      scripted={true}
-      type="date"
-    />
+    <div
+      className="unifiedFieldListItemButton__fieldIconContainer"
+    >
+      <div
+        className="unifiedFieldListItemButton__fieldIcon"
+      >
+        <WrappedFieldIcon
+          scripted={true}
+          type="date"
+        />
+      </div>
+    </div>
   }
   fieldName={
     <EuiHighlight
@@ -227,25 +283,36 @@ exports[`UnifiedFieldList <FieldItemButton /> renders properly when empty 1`] = 
 />
 `;
 
-exports[`UnifiedFieldList <FieldItemButton /> renders properly with a drag handle 1`] = `
+exports[`UnifiedFieldList FieldItemButton renders properly with a drag icon 1`] = `
 <FieldButton
   buttonProps={
     Object {
       "aria-label": "Preview bytes: number",
     }
   }
-  className="unifiedFieldListItemButton unifiedFieldListItemButton--number unifiedFieldListItemButton--exists unifiedFieldListItemButton--withDragHandle custom"
+  className="unifiedFieldListItemButton unifiedFieldListItemButton--number unifiedFieldListItemButton--exists unifiedFieldListItemButton--withDragIcon custom"
   dataTestSubj="test-subj"
-  dragHandle={
-    <span>
-      dragHandle
-    </span>
-  }
   fieldIcon={
-    <WrappedFieldIcon
-      scripted={false}
-      type="number"
-    />
+    <div
+      className="unifiedFieldListItemButton__fieldIconContainer"
+    >
+      <div
+        className="unifiedFieldListItemButton__fieldIcon"
+      >
+        <WrappedFieldIcon
+          scripted={false}
+          type="number"
+        />
+      </div>
+      <div
+        className="unifiedFieldListItemButton__fieldIconDrag"
+      >
+        <EuiIcon
+          size="m"
+          type="grabOmnidirectional"
+        />
+      </div>
+    </div>
   }
   fieldName={
     <EuiHighlight
@@ -262,7 +329,7 @@ exports[`UnifiedFieldList <FieldItemButton /> renders properly with a drag handl
 />
 `;
 
-exports[`UnifiedFieldList <FieldItemButton /> renders properly with an action when deselected 1`] = `
+exports[`UnifiedFieldList FieldItemButton renders properly with an action when deselected 1`] = `
 <FieldButton
   buttonProps={
     Object {
@@ -289,10 +356,18 @@ exports[`UnifiedFieldList <FieldItemButton /> renders properly with an action wh
     </EuiToolTip>
   }
   fieldIcon={
-    <WrappedFieldIcon
-      scripted={false}
-      type="number"
-    />
+    <div
+      className="unifiedFieldListItemButton__fieldIconContainer"
+    >
+      <div
+        className="unifiedFieldListItemButton__fieldIcon"
+      >
+        <WrappedFieldIcon
+          scripted={false}
+          type="number"
+        />
+      </div>
+    </div>
   }
   fieldName={
     <EuiHighlight
@@ -309,7 +384,7 @@ exports[`UnifiedFieldList <FieldItemButton /> renders properly with an action wh
 />
 `;
 
-exports[`UnifiedFieldList <FieldItemButton /> renders properly with an action when selected 1`] = `
+exports[`UnifiedFieldList FieldItemButton renders properly with an action when selected 1`] = `
 <FieldButton
   buttonProps={
     Object {
@@ -336,10 +411,18 @@ exports[`UnifiedFieldList <FieldItemButton /> renders properly with an action wh
     </EuiToolTip>
   }
   fieldIcon={
-    <WrappedFieldIcon
-      scripted={false}
-      type="number"
-    />
+    <div
+      className="unifiedFieldListItemButton__fieldIconContainer"
+    >
+      <div
+        className="unifiedFieldListItemButton__fieldIcon"
+      >
+        <WrappedFieldIcon
+          scripted={false}
+          type="number"
+        />
+      </div>
+    </div>
   }
   fieldName={
     <EuiHighlight

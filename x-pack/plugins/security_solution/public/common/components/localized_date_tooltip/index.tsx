@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiToolTip, type EuiToolTipProps } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
 import moment from 'moment';
 import React from 'react';
@@ -15,10 +15,12 @@ export const LocalizedDateTooltip = React.memo<{
   date: Date;
   fieldName?: string;
   className?: string;
-}>(({ children, date, fieldName, className = '' }) => (
+  tooltipProps?: Partial<EuiToolTipProps>;
+}>(({ children, date, fieldName, className = '', tooltipProps }) => (
   <EuiToolTip
     data-test-subj="localized-date-tool-tip"
     anchorClassName={className}
+    {...tooltipProps}
     content={
       <EuiFlexGroup data-test-subj="dates-container" direction="column" gutterSize="none">
         {fieldName != null ? (

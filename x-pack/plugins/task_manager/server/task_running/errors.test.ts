@@ -6,9 +6,11 @@
  */
 
 import {
-  createSkipError,
-  isSkipError,
+  createTaskRunError,
+  getErrorSource,
   isUnrecoverableError,
+  isUserError,
+  TaskErrorSource,
   throwUnrecoverableError,
 } from './errors';
 
@@ -32,8 +34,22 @@ describe('Error Types', () => {
       expect(isUnrecoverableError(new Error('OMG'))).toBeFalsy();
     });
 
-    it('createSkipError', () => {
-      expect(isSkipError(createSkipError(new Error('OMG')))).toBeTruthy();
+    it('createTaskRunError', () => {
+      expect(isUserError(createTaskRunError(new Error('OMG'), TaskErrorSource.USER))).toBeTruthy();
+    });
+
+    it('createTaskRunError without errorSourceParam ', () => {
+      expect(getErrorSource(createTaskRunError(new Error('OMG')))).toBe(TaskErrorSource.FRAMEWORK);
+    });
+
+    it('getErrorSource', () => {
+      expect(getErrorSource(createTaskRunError(new Error('OMG'), TaskErrorSource.USER))).toBe(
+        TaskErrorSource.USER
+      );
+    });
+
+    it('getErrorSource return undefined when there is no source data', () => {
+      expect(getErrorSource(new Error('OMG'))).toBeUndefined();
     });
   });
 });

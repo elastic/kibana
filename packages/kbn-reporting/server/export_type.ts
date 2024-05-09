@@ -55,7 +55,7 @@ export abstract class ExportType<
   abstract jobContentEncoding?: 'base64' | 'csv';
   abstract jobContentExtension: 'pdf' | 'png' | 'csv';
 
-  abstract createJob: CreateJobFn<JobParamsType>;
+  abstract createJob: CreateJobFn<JobParamsType, TaskPayloadType>;
   abstract runTask: RunTaskFn<TaskPayloadType>;
 
   abstract validLicenses: LicenseType[];

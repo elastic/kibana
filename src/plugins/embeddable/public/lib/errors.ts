@@ -21,6 +21,18 @@ export class PanelNotFoundError extends Error {
   }
 }
 
+export class PanelIncompatibleError extends Error {
+  code = 'PANEL_INCOMPATIBLE';
+
+  constructor() {
+    super(
+      i18n.translate('embeddableApi.errors.panelIncompatibleError', {
+        defaultMessage: 'Panel api is incompatible',
+      })
+    );
+  }
+}
+
 export class EmbeddableFactoryNotFoundError extends Error {
   code = 'EMBEDDABLE_FACTORY_NOT_FOUND';
 

@@ -29,3 +29,6 @@ helpers to have to pass all the parameters again.
 ### lib/apis/internals
 I would call them 'utilities with business logic'. These are the 'big' chunks of logic called by the APIs. 
 E.g preflightCheckForCreate, internalBulkResolve and so on.
+
+### Unit tests
+Unit tests should be kept close to the implementation. While not always possible to customize test fixtures and mocks completely, it is perfectly acceptible to duplicate code, with a focus on code coverage.

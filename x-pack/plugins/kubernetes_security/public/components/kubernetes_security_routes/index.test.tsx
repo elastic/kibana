@@ -29,6 +29,8 @@ jest.mock('../container_name_widget', () => ({
   ContainerNameWidget: () => <div>{'Mock Container Name widget'}</div>,
 }));
 
+const dataViewId = 'dataViewId';
+
 const renderWithRouter = (
   initialEntries: MemoryRouterProps['initialEntries'] = ['/kubernetes']
 ) => {
@@ -64,6 +66,7 @@ const renderWithRouter = (
           endDate: '2022-06-09T17:52:15.532Z',
         }}
         renderSessionsView={jest.fn()}
+        dataViewId={dataViewId}
       />
     </MemoryRouter>
   );

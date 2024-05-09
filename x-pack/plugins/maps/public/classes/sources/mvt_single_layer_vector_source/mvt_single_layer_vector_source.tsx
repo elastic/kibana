@@ -229,4 +229,8 @@ export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVe
     // Its not possible to filter by geometry for vector tile sources since there is no way to get original geometry
     return [];
   }
+
+  getInspectorRequestIds(): string[] {
+    return [];
+  }
 }

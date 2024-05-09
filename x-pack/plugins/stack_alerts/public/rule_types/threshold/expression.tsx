@@ -13,7 +13,6 @@ import {
   EuiCallOut,
   EuiEmptyPrompt,
   EuiText,
-  EuiTitle,
   EuiFieldSearch,
   EuiFormRow,
 } from '@elastic/eui';
@@ -71,6 +70,15 @@ function indexParamToArray(index: string | string[]): string[] {
   return isString(index) ? [index] : index;
 }
 
+interface EsField {
+  name: string;
+  type: string;
+  normalizedType: string;
+  searchable: boolean;
+  aggregatable: boolean;
+}
+const EMPTY_ARRAY: EsField[] = [];
+
 export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
   Omit<RuleTypeParamsExpressionProps<IndexThresholdRuleParams>, 'unifiedSearch'>
 > = ({ ruleParams, ruleInterval, setRuleParams, setRuleProperty, errors, charts, data }) => {
@@ -92,15 +100,7 @@ export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
   const indexArray = indexParamToArray(index);
   const { http } = useKibana<KibanaDeps>().services;
 
-  const [esFields, setEsFields] = useState<
-    Array<{
-      name: string;
-      type: string;
-      normalizedType: string;
-      searchable: boolean;
-      aggregatable: boolean;
-    }>
-  >([]);
+  const [esFields, setEsFields] = useState<EsField[] | undefined>(undefined);
 
   const hasExpressionErrors = !!Object.keys(errors).find(
     (errorKey) =>
@@ -131,9 +131,10 @@ export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
       groupBy: groupBy ?? DEFAULT_VALUES.GROUP_BY,
       threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
     });
-
     if (indexArray.length > 0) {
       await refreshEsFields(indexArray);
+    } else {
+      setEsFields([]);
     }
   };
 
@@ -163,69 +164,71 @@ export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
           <EuiSpacer />
         </Fragment>
       ) : null}
-      <EuiTitle size="xs">
-        <h5>
+      <EuiFormRow
+        fullWidth
+        label={
           <FormattedMessage
             id="xpack.stackAlerts.threshold.ui.selectIndex"
             defaultMessage="Select indices"
           />
-        </h5>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <IndexSelectPopover
-        index={indexArray}
-        data-test-subj="indexSelectPopover"
-        esFields={esFields}
-        timeField={timeField}
-        errors={errors}
-        onIndexChange={async (indices: string[]) => {
-          setRuleParams('index', indices);
-
-          // reset expression fields if indices are deleted
-          if (indices.length === 0) {
-            setRuleProperty('params', {
-              ...ruleParams,
-              index: indices,
-              aggType: DEFAULT_VALUES.AGGREGATION_TYPE,
-              termSize: DEFAULT_VALUES.TERM_SIZE,
-              thresholdComparator: DEFAULT_VALUES.THRESHOLD_COMPARATOR,
-              timeWindowSize: DEFAULT_VALUES.TIME_WINDOW_SIZE,
-              timeWindowUnit: DEFAULT_VALUES.TIME_WINDOW_UNIT,
-              groupBy: DEFAULT_VALUES.GROUP_BY,
-              threshold: DEFAULT_VALUES.THRESHOLD,
-              timeField: '',
-            });
-          } else {
-            await refreshEsFields(indices);
-          }
-        }}
-        onTimeFieldChange={(updatedTimeField: string) =>
-          setRuleParams('timeField', updatedTimeField)
         }
-      />
+      >
+        <IndexSelectPopover
+          index={indexArray}
+          data-test-subj="indexSelectPopover"
+          esFields={esFields ?? EMPTY_ARRAY}
+          timeField={timeField}
+          errors={errors}
+          onIndexChange={async (indices: string[]) => {
+            setRuleParams('index', indices);
+
+            // reset expression fields if indices are deleted
+            if (indices.length === 0) {
+              setRuleProperty('params', {
+                ...ruleParams,
+                index: indices,
+                aggType: DEFAULT_VALUES.AGGREGATION_TYPE,
+                termSize: DEFAULT_VALUES.TERM_SIZE,
+                thresholdComparator: DEFAULT_VALUES.THRESHOLD_COMPARATOR,
+                timeWindowSize: DEFAULT_VALUES.TIME_WINDOW_SIZE,
+                timeWindowUnit: DEFAULT_VALUES.TIME_WINDOW_UNIT,
+                groupBy: DEFAULT_VALUES.GROUP_BY,
+                threshold: DEFAULT_VALUES.THRESHOLD,
+                timeField: '',
+              });
+            } else {
+              await refreshEsFields(indices);
+            }
+          }}
+          onTimeFieldChange={(updatedTimeField: string) =>
+            setRuleParams('timeField', updatedTimeField)
+          }
+        />
+      </EuiFormRow>
       <EuiSpacer />
-      <EuiTitle size="xs">
-        <h5>
+      <EuiFormRow
+        fullWidth
+        label={
           <FormattedMessage
             id="xpack.stackAlerts.threshold.ui.conditionPrompt"
             defaultMessage="Define the condition"
           />
-        </h5>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <WhenExpression
-        display="fullWidth"
-        data-test-subj="whenExpression"
-        aggType={aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE}
-        onChangeSelectedAggType={(selectedAggType: string) =>
-          setRuleParams('aggType', selectedAggType)
         }
-      />
+      >
+        <WhenExpression
+          display="fullWidth"
+          data-test-subj="whenExpression"
+          aggType={aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE}
+          onChangeSelectedAggType={(selectedAggType: string) =>
+            setRuleParams('aggType', selectedAggType)
+          }
+        />
+      </EuiFormRow>
       {aggType && builtInAggregationTypes[aggType].fieldRequired ? (
         <OfExpression
           aggField={aggField}
           data-test-subj="aggTypeExpression"
-          fields={esFields}
+          fields={esFields ?? EMPTY_ARRAY}
           aggType={aggType}
           errors={errors}
           display="fullWidth"

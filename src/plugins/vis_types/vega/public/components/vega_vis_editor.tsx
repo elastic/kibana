@@ -15,7 +15,7 @@ import compactStringify from 'json-stringify-pretty-compact';
 import { i18n } from '@kbn/i18n';
 
 import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
-import { CodeEditor, HJsonLang } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor, HJsonLang } from '@kbn/code-editor';
 import { getNotifications } from '../services';
 import { VisParams } from '../vega_fn';
 import { VegaHelpMenu } from './vega_help_menu';

@@ -6,138 +6,111 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
-import { act, waitFor } from '@testing-library/react';
+import { waitFor, screen } from '@testing-library/react';
 
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
-import { OBSERVABILITY_OWNER } from '../../../common/constants';
-import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { OBSERVABILITY_OWNER, OWNER_INFO } from '../../../common/constants';
 import { CreateCaseOwnerSelector } from './owner_selector';
-import type { FormProps } from './schema';
-import { schema } from './schema';
-import { waitForComponentToPaint } from '../../common/test_utils';
+import { FormTestComponent } from '../../common/test_utils';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer } from '../../common/mock';
+import userEvent from '@testing-library/user-event';
 
 describe('Case Owner Selection', () => {
-  let globalForm: FormHook;
-
-  const MockHookWrapperComponent: React.FC = ({ children }) => {
-    const { form } = useForm<FormProps>({
-      defaultValue: { selectedOwner: '' },
-      schema: {
-        selectedOwner: schema.selectedOwner,
-      },
-    });
-
-    globalForm = form;
-
-    return <Form form={form}>{children}</Form>;
-  };
+  const onSubmit = jest.fn();
+  let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    appMockRender = createAppMockRenderer();
   });
 
   it('renders', async () => {
-    const wrapper = mount(
-      <MockHookWrapperComponent>
+    appMockRender.render(
+      <FormTestComponent onSubmit={onSubmit}>
         <CreateCaseOwnerSelector availableOwners={[SECURITY_SOLUTION_OWNER]} isLoading={false} />
-      </MockHookWrapperComponent>
+      </FormTestComponent>
     );
 
-    await waitForComponentToPaint(wrapper);
-    expect(wrapper.find(`[data-test-subj="caseOwnerSelector"]`).exists()).toBeTruthy();
+    expect(await screen.findByTestId('caseOwnerSelector')).toBeInTheDocument();
   });
 
   it.each([
     [OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER],
     [SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER],
   ])('disables %s button if user only has %j', async (disabledButton, permission) => {
-    const wrapper = mount(
-      <MockHookWrapperComponent>
+    appMockRender.render(
+      <FormTestComponent onSubmit={onSubmit}>
         <CreateCaseOwnerSelector availableOwners={[permission]} isLoading={false} />
-      </MockHookWrapperComponent>
+      </FormTestComponent>
     );
 
-    await waitForComponentToPaint(wrapper);
-
-    expect(
-      wrapper.find(`[data-test-subj="${disabledButton}RadioButton"] input`).first().props().disabled
-    ).toBeTruthy();
-    expect(
-      wrapper.find(`[data-test-subj="${permission}RadioButton"] input`).first().props().disabled
-    ).toBeFalsy();
-    expect(
-      wrapper.find(`[data-test-subj="${permission}RadioButton"] input`).first().props().checked
-    ).toBeTruthy();
+    expect(await screen.findByLabelText(OWNER_INFO[disabledButton].label)).toBeDisabled();
+    expect(await screen.findByLabelText(OWNER_INFO[permission].label)).not.toBeDisabled();
   });
 
   it('defaults to security Solution', async () => {
-    const wrapper = mount(
-      <MockHookWrapperComponent>
+    appMockRender.render(
+      <FormTestComponent onSubmit={onSubmit}>
         <CreateCaseOwnerSelector
           availableOwners={[OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER]}
           isLoading={false}
         />
-      </MockHookWrapperComponent>
+      </FormTestComponent>
     );
 
-    await waitForComponentToPaint(wrapper);
+    expect(await screen.findByLabelText('Observability')).not.toBeChecked();
+    expect(await screen.findByLabelText('Security')).toBeChecked();
 
-    expect(
-      wrapper.find(`[data-test-subj="observabilityRadioButton"] input`).first().props().checked
-    ).toBeFalsy();
-    expect(
-      wrapper.find(`[data-test-subj="securitySolutionRadioButton"] input`).first().props().checked
-    ).toBeTruthy();
+    userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
+
+    await waitFor(() => {
+      // data, isValid
+      expect(onSubmit).toBeCalledWith({ selectedOwner: 'securitySolution' }, true);
+    });
   });
 
-  it('it changes the selection', async () => {
-    const wrapper = mount(
-      <MockHookWrapperComponent>
+  it('defaults to security Solution with empty owners', async () => {
+    appMockRender.render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <CreateCaseOwnerSelector availableOwners={[]} isLoading={false} />
+      </FormTestComponent>
+    );
+
+    expect(await screen.findByLabelText('Observability')).not.toBeChecked();
+    expect(await screen.findByLabelText('Security')).toBeChecked();
+
+    userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
+
+    await waitFor(() => {
+      // data, isValid
+      expect(onSubmit).toBeCalledWith({ selectedOwner: 'securitySolution' }, true);
+    });
+  });
+
+  it('changes the selection', async () => {
+    appMockRender.render(
+      <FormTestComponent onSubmit={onSubmit}>
         <CreateCaseOwnerSelector
           availableOwners={[OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER]}
           isLoading={false}
         />
-      </MockHookWrapperComponent>
+      </FormTestComponent>
     );
 
-    await act(async () => {
-      wrapper
-        .find(`[data-test-subj="observabilityRadioButton"] input`)
-        .first()
-        .simulate('change', OBSERVABILITY_OWNER);
-    });
+    expect(await screen.findByLabelText('Security')).toBeChecked();
+    expect(await screen.findByLabelText('Observability')).not.toBeChecked();
+
+    userEvent.click(await screen.findByLabelText('Observability'));
+
+    expect(await screen.findByLabelText('Observability')).toBeChecked();
+    expect(await screen.findByLabelText('Security')).not.toBeChecked();
+
+    userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
 
     await waitFor(() => {
-      wrapper.update();
-      expect(
-        wrapper.find(`[data-test-subj="observabilityRadioButton"] input`).first().props().checked
-      ).toBeTruthy();
-      expect(
-        wrapper.find(`[data-test-subj="securitySolutionRadioButton"] input`).first().props().checked
-      ).toBeFalsy();
+      // data, isValid
+      expect(onSubmit).toBeCalledWith({ selectedOwner: 'observability' }, true);
     });
-
-    expect(globalForm.getFormData()).toEqual({ selectedOwner: OBSERVABILITY_OWNER });
-
-    await act(async () => {
-      wrapper
-        .find(`[data-test-subj="securitySolutionRadioButton"] input`)
-        .first()
-        .simulate('change', SECURITY_SOLUTION_OWNER);
-    });
-
-    await waitFor(() => {
-      wrapper.update();
-      expect(
-        wrapper.find(`[data-test-subj="securitySolutionRadioButton"] input`).first().props().checked
-      ).toBeTruthy();
-      expect(
-        wrapper.find(`[data-test-subj="observabilityRadioButton"] input`).first().props().checked
-      ).toBeFalsy();
-    });
-
-    expect(globalForm.getFormData()).toEqual({ selectedOwner: SECURITY_SOLUTION_OWNER });
   });
 });

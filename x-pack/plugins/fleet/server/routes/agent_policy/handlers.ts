@@ -19,7 +19,7 @@ import { HTTPAuthorizationHeader } from '../../../common/http_authorization_head
 
 import { fullAgentPolicyToYaml } from '../../../common/services';
 import { appContextService, agentPolicyService } from '../../services';
-import { getAgentsByKuery } from '../../services/agents';
+import { getAgentsByKuery, getLatestAvailableAgentVersion } from '../../services/agents';
 import { AGENTS_PREFIX } from '../../constants';
 import type {
   GetAgentPoliciesRequestSchema,
@@ -48,7 +48,11 @@ import type {
   GetFullAgentManifestResponse,
   BulkGetAgentPoliciesResponse,
 } from '../../../common/types';
-import { defaultFleetErrorHandler, AgentPolicyNotFoundError } from '../../errors';
+import {
+  defaultFleetErrorHandler,
+  AgentPolicyNotFoundError,
+  FleetUnauthorizedError,
+} from '../../errors';
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
 
 export async function populateAssignedAgentsCount(
@@ -69,16 +73,42 @@ export async function populateAssignedAgentsCount(
   );
 }
 
+function sanitizeItemForReadAgentOnly(item: AgentPolicy): AgentPolicy {
+  return {
+    id: item.id,
+    name: item.name,
+    description: item.description,
+    revision: item.revision,
+    namespace: item.namespace,
+    is_managed: item.is_managed,
+    is_protected: item.is_protected,
+    status: item.status,
+    updated_at: item.updated_at,
+    updated_by: item.updated_by,
+    has_fleet_server: item.has_fleet_server,
+    monitoring_enabled: item.monitoring_enabled,
+    package_policies: [],
+  };
+}
+
 export const getAgentPoliciesHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetAgentPoliciesRequestSchema.query>
 > = async (context, request, response) => {
-  const coreContext = await context.core;
-  const fleetContext = await context.fleet;
-  const soClient = fleetContext.internalSoClient;
-  const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const { full: withPackagePolicies = false, noAgentCount = false, ...restOfQuery } = request.query;
   try {
+    const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
+    const soClient = fleetContext.internalSoClient;
+    const esClient = coreContext.elasticsearch.client.asInternalUser;
+    const {
+      full: withPackagePolicies = false,
+      noAgentCount = false,
+      ...restOfQuery
+    } = request.query;
+    if (!fleetContext.authz.fleet.readAgentPolicies && withPackagePolicies) {
+      throw new FleetUnauthorizedError(
+        'full query parameter require agent policies read permissions'
+      );
+    }
     const { items, total, page, perPage } = await agentPolicyService.list(soClient, {
       withPackagePolicies,
       esClient,
@@ -87,7 +117,9 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
     });
 
     const body: GetAgentPoliciesResponse = {
-      items,
+      items: !fleetContext.authz.fleet.readAgentPolicies
+        ? items.map(sanitizeItemForReadAgentOnly)
+        : items,
       total,
       page,
       perPage,
@@ -103,18 +135,19 @@ export const bulkGetAgentPoliciesHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof BulkGetAgentPoliciesRequestSchema.body>
 > = async (context, request, response) => {
-  const coreContext = await context.core;
-  const fleetContext = await context.fleet;
-  const soClient = fleetContext.internalSoClient;
-  const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const { full: withPackagePolicies = false, ignoreMissing = false, ids } = request.body;
   try {
+    const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
+    const soClient = fleetContext.internalSoClient;
+    const esClient = coreContext.elasticsearch.client.asInternalUser;
+    const { full: withPackagePolicies = false, ignoreMissing = false, ids } = request.body;
     const items = await agentPolicyService.getByIDs(soClient, ids, {
       withPackagePolicies,
       ignoreMissing,
     });
     const body: BulkGetAgentPoliciesResponse = {
-      items,
+      items: !fleetContext.authz.fleet.readAgentPolicies
+        ? items.map(sanitizeItemForReadAgentOnly)
+        : items,
     };
 
     await populateAssignedAgentsCount(esClient, soClient, items);
@@ -133,18 +166,21 @@ export const bulkGetAgentPoliciesHandler: FleetRequestHandler<
   }
 };
 
-export const getOneAgentPolicyHandler: RequestHandler<
+export const getOneAgentPolicyHandler: FleetRequestHandler<
   TypeOf<typeof GetOneAgentPolicyRequestSchema.params>
 > = async (context, request, response) => {
-  const coreContext = await context.core;
-  const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const soClient = coreContext.savedObjects.client;
   try {
+    const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
+    const esClient = coreContext.elasticsearch.client.asInternalUser;
+    const soClient = coreContext.savedObjects.client;
+
     const agentPolicy = await agentPolicyService.get(soClient, request.params.agentPolicyId);
     if (agentPolicy) {
       await populateAssignedAgentsCount(esClient, soClient, [agentPolicy]);
       const body: GetOneAgentPolicyResponse = {
-        item: agentPolicy,
+        item: !fleetContext.authz.fleet.readAgentPolicies
+          ? sanitizeItemForReadAgentOnly(agentPolicy)
+          : agentPolicy,
       };
       return response.ok({
         body,
@@ -172,7 +208,7 @@ export const createAgentPolicyHandler: FleetRequestHandler<
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   const withSysMonitoring = request.query.sys_monitoring ?? false;
   const monitoringEnabled = request.body.monitoring_enabled;
-  const { has_fleet_server: hasFleetServer, ...newPolicy } = request.body;
+  const { has_fleet_server: hasFleetServer, force, ...newPolicy } = request.body;
   const spaceId = fleetContext.spaceId;
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
 
@@ -188,6 +224,7 @@ export const createAgentPolicyHandler: FleetRequestHandler<
         spaceId,
         user,
         authorizationHeader,
+        force,
       }),
     };
 
@@ -195,6 +232,12 @@ export const createAgentPolicyHandler: FleetRequestHandler<
       body,
     });
   } catch (error) {
+    if (error.statusCode) {
+      return response.customError({
+        statusCode: error.statusCode,
+        body: { message: error.message },
+      });
+    }
     return defaultFleetErrorHandler({ error, response });
   }
 };
@@ -229,6 +272,12 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
       body,
     });
   } catch (error) {
+    if (error.statusCode) {
+      return response.customError({
+        statusCode: error.statusCode,
+        body: { message: error.message },
+      });
+    }
     return defaultFleetErrorHandler({ error, response });
   }
 };
@@ -417,13 +466,12 @@ export const getK8sManifest: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetK8sManifestRequestSchema.query>
 > = async (context, request, response) => {
-  const fleetContext = await context.fleet;
-
   try {
     const fleetServer = request.query.fleetServer ?? '';
     const token = request.query.enrolToken ?? '';
-    const agentVersion =
-      await fleetContext.agentClient.asInternalUser.getLatestAgentAvailableVersion();
+
+    const agentVersion = await getLatestAvailableAgentVersion();
+
     const fullAgentManifest = await agentPolicyService.getFullAgentManifest(
       fleetServer,
       token,
@@ -451,13 +499,10 @@ export const downloadK8sManifest: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetK8sManifestRequestSchema.query>
 > = async (context, request, response) => {
-  const fleetContext = await context.fleet;
-
   try {
     const fleetServer = request.query.fleetServer ?? '';
     const token = request.query.enrolToken ?? '';
-    const agentVersion =
-      await fleetContext.agentClient.asInternalUser.getLatestAgentAvailableVersion();
+    const agentVersion = await getLatestAvailableAgentVersion();
     const fullAgentManifest = await agentPolicyService.getFullAgentManifest(
       fleetServer,
       token,

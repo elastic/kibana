@@ -15,6 +15,7 @@ import { INTERNAL_TAGS_URL } from '../../../../common/constants';
 
 export interface Tag {
   id: string;
+  managed: boolean;
   attributes: TagAttributes;
 }
 

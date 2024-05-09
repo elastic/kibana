@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
   EuiButtonEmpty,
@@ -26,10 +27,11 @@ import {
   ANALYSIS_CONFIG_TYPE,
 } from '@kbn/ml-data-frame-analytics-utils';
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useMlKibana } from '../../../../../contexts/kibana';
 
-import { getValuesFromResponse, loadEvalData, loadDocsCount, Eval } from '../../../../common';
+import type { Eval } from '../../../../common';
+import { getValuesFromResponse, loadEvalData, loadDocsCount } from '../../../../common';
 import {
   isResultsSearchBoolQuery,
   isRegressionEvaluateResponse,

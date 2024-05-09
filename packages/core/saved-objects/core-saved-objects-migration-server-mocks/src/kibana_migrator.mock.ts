@@ -16,6 +16,7 @@ import {
   buildActiveMappings,
   buildTypesMappings,
 } from '@kbn/core-saved-objects-migration-server-internal';
+import { createDocumentMigratorMock } from '@kbn/core-saved-objects-base-server-mocks';
 
 const defaultSavedObjectTypes: SavedObjectsType[] = [
   {
@@ -58,10 +59,13 @@ const createMigrator = (
           ],
         })
     ),
+    getDocumentMigrator: jest.fn(),
   };
 
   mockMigrator.getActiveMappings.mockReturnValue(buildActiveMappings(buildTypesMappings(types)));
   mockMigrator.migrateDocument.mockImplementation((doc) => doc);
+  mockMigrator.getDocumentMigrator.mockReturnValue(createDocumentMigratorMock());
+
   return mockMigrator;
 };
 

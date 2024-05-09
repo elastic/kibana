@@ -6,7 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { getServicesMock as getNavigationServicesMock } from './src/jest';
-export { StorybookMock as NavigationStorybookMock } from './src/storybook';
-export type { Params as NavigationStorybookParams } from './src/storybook';
-export { navLinksMock } from './src/navlinks';
+export { StorybookMock as NavigationStorybookMock } from './storybook';
+export type { Params as NavigationStorybookParams } from './storybook';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useContext } from 'react';
+import React, { FC, PropsWithChildren, useContext } from 'react';
 import {
   KibanaNoDataPageKibanaProvider,
   KibanaNoDataPageProvider,
@@ -23,14 +23,16 @@ const Context = React.createContext<Services | null>(null);
 /**
  * A Context Provider that provides services to the component and its dependencies.
  */
-export const AnalyticsNoDataPageProvider: FC<AnalyticsNoDataPageServices> = ({
+export const AnalyticsNoDataPageProvider: FC<PropsWithChildren<AnalyticsNoDataPageServices>> = ({
   children,
   ...services
 }) => {
-  const { kibanaGuideDocLink, customBranding, prependBasePath, pageFlavor } = services;
+  const { kibanaGuideDocLink, customBranding, getHttp, prependBasePath, pageFlavor } = services;
 
   return (
-    <Context.Provider value={{ kibanaGuideDocLink, customBranding, prependBasePath, pageFlavor }}>
+    <Context.Provider
+      value={{ kibanaGuideDocLink, customBranding, getHttp, prependBasePath, pageFlavor }}
+    >
       <KibanaNoDataPageProvider {...services}>{children}</KibanaNoDataPageProvider>
     </Context.Provider>
   );
@@ -39,15 +41,15 @@ export const AnalyticsNoDataPageProvider: FC<AnalyticsNoDataPageServices> = ({
 /**
  * Kibana-specific Provider that maps dependencies to services.
  */
-export const AnalyticsNoDataPageKibanaProvider: FC<AnalyticsNoDataPageKibanaDependencies> = ({
-  children,
-  ...dependencies
-}) => {
+export const AnalyticsNoDataPageKibanaProvider: FC<
+  PropsWithChildren<AnalyticsNoDataPageKibanaDependencies>
+> = ({ children, ...dependencies }) => {
   const value: Services = {
     kibanaGuideDocLink: dependencies.coreStart.docLinks.links.kibana.guide,
     customBranding: {
       hasCustomBranding$: dependencies.coreStart.customBranding.hasCustomBranding$,
     },
+    getHttp: dependencies.coreStart.http.get,
     prependBasePath: dependencies.coreStart.http.basePath.prepend,
     pageFlavor: dependencies.noDataPage?.getAnalyticsNoDataPageFlavor() ?? 'kibana',
   };

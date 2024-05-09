@@ -20,6 +20,11 @@ import {
 } from './elasticsearch_store';
 import { mockMsearchResponse } from '../../../__mocks__/msearch_response';
 import { mockQueryText } from '../../../__mocks__/query_text';
+import { coreMock } from '@kbn/core/server/mocks';
+import {
+  KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT,
+  KNOWLEDGE_BASE_EXECUTION_SUCCESS_EVENT,
+} from '../../telemetry/event_based_telemetry';
 
 jest.mock('uuid', () => ({
   v4: jest.fn(),
@@ -36,10 +41,12 @@ jest.mock('@kbn/core/server', () => ({
 
 const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
 const mockLogger = loggingSystemMock.createLogger();
+const reportEvent = jest.fn();
+const mockTelemetry = { ...coreMock.createSetup().analytics, reportEvent };
 const KB_INDEX = '.elastic-assistant-kb';
 
 const getElasticsearchStore = () => {
-  return new ElasticsearchStore(mockEsClient, KB_INDEX, mockLogger);
+  return new ElasticsearchStore(mockEsClient, KB_INDEX, mockLogger, mockTelemetry);
 };
 
 describe('ElasticsearchStore', () => {
@@ -413,6 +420,31 @@ describe('ElasticsearchStore', () => {
             size: TERMS_QUERY_SIZE,
           },
         ],
+      });
+    });
+
+    it('Reports successful telemetry event', async () => {
+      mockEsClient.msearch.mockResolvedValue(mockMsearchResponse);
+
+      await esStore.similaritySearch(mockQueryText);
+
+      expect(reportEvent).toHaveBeenCalledWith(KNOWLEDGE_BASE_EXECUTION_SUCCESS_EVENT.eventType, {
+        model: '.elser_model_2',
+        resourceAccessed: 'esql',
+        responseTime: 142,
+        resultCount: 2,
+      });
+    });
+
+    it('Reports error telemetry event', async () => {
+      mockEsClient.msearch.mockRejectedValue(new Error('Oh no!'));
+
+      await esStore.similaritySearch(mockQueryText);
+
+      expect(reportEvent).toHaveBeenCalledWith(KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT.eventType, {
+        model: '.elser_model_2',
+        resourceAccessed: 'esql',
+        errorMessage: 'Oh no!',
       });
     });
   });

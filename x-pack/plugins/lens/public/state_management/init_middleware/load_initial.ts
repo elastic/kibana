@@ -25,10 +25,15 @@ export const getPersisted = async ({
   history,
 }: {
   initialInput: LensEmbeddableInput;
-  lensServices: LensAppServices;
+  lensServices: Pick<LensAppServices, 'attributeService' | 'notifications' | 'spaces' | 'http'>;
   history?: History<unknown>;
 }): Promise<
-  { doc: Document; sharingSavedObjectProps: Omit<SharingSavedObjectProps, 'sourceId'> } | undefined
+  | {
+      doc: Document;
+      sharingSavedObjectProps: Omit<SharingSavedObjectProps, 'sourceId'>;
+      managed: boolean;
+    }
+  | undefined
 > => {
   const { notifications, spaces, attributeService } = lensServices;
   let doc: Document;
@@ -44,6 +49,7 @@ export const getPersisted = async ({
         sharingSavedObjectProps: {
           outcome: 'exactMatch',
         },
+        managed: false,
       };
     }
     const { metaInfo, attributes } = result;
@@ -74,6 +80,7 @@ export const getPersisted = async ({
         aliasTargetId: sharingSavedObjectProps?.aliasTargetId,
         outcome: sharingSavedObjectProps?.outcome,
       },
+      managed: Boolean(metaInfo?.managed),
     };
   } catch (e) {
     notifications.toasts.addDanger(
@@ -104,7 +111,7 @@ export function loadInitial(
     storeDeps;
   const { resolvedDateRange, searchSessionId, isLinkedToOriginatingApp, ...emptyState } =
     getPreloadedState(storeDeps);
-  const { attributeService, notifications, data, dashboardFeatureFlag } = lensServices;
+  const { attributeService, notifications, data } = lensServices;
   const { lens } = store.getState();
 
   const loaderSharedArgs = {
@@ -273,7 +280,7 @@ export function loadInitial(
     .then(
       (persisted) => {
         if (persisted) {
-          const { doc, sharingSavedObjectProps } = persisted;
+          const { doc, sharingSavedObjectProps, managed } = persisted;
           if (attributeService.inputIsRefType(initialInput)) {
             lensServices.chrome.recentlyAccessed.add(
               getFullPath(initialInput.savedObjectId),
@@ -337,11 +344,11 @@ export function loadInitial(
                     filters: data.query.filterManager.getFilters(),
                     query: doc.state.query,
                     searchSessionId:
-                      dashboardFeatureFlag.allowByValueEmbeddables &&
-                      !(initialInput as LensByReferenceInput)?.savedObjectId &&
-                      currentSessionId
+                      !(initialInput as LensByReferenceInput)?.savedObjectId && currentSessionId
                         ? currentSessionId
-                        : data.search.session.start(),
+                        : !inlineEditing
+                        ? data.search.session.start()
+                        : undefined,
                     persistedDoc: doc,
                     activeDatasourceId: getInitialDatasourceId(datasourceMap, doc),
                     visualization: {
@@ -361,6 +368,7 @@ export function loadInitial(
                     ),
                     isLoading: false,
                     annotationGroups,
+                    managed,
                   })
                 );
 

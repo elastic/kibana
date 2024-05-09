@@ -15,7 +15,7 @@ import { setup as restoreSnapshotSetup } from './restore_snapshot.helpers';
 import { setup as snapshotListSetup } from './snapshot_list.helpers';
 
 export type { TestBed } from '@kbn/test-jest-helpers';
-export { nextTick, getRandomString, findTestSubject, delay } from '@kbn/test-jest-helpers';
+export { getRandomString, findTestSubject } from '@kbn/test-jest-helpers';
 
 export { setupEnvironment } from './setup_environment';
 

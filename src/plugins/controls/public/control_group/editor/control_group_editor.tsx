@@ -16,30 +16,31 @@
 
 import fastIsEqual from 'fast-deep-equal';
 import React, { useCallback, useState } from 'react';
+
 import {
-  EuiFlyoutHeader,
+  EuiButton,
+  EuiButtonEmpty,
   EuiButtonGroup,
-  EuiFlyoutBody,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
+  EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiButton,
-  EuiFormRow,
-  EuiButtonEmpty,
-  EuiSpacer,
+  EuiFlyoutHeader,
   EuiForm,
-  EuiSwitch,
-  EuiText,
+  EuiFormRow,
   EuiHorizontalRule,
+  EuiSpacer,
+  EuiSwitch,
+  EuiTitle,
 } from '@elastic/eui';
 
-import { CONTROL_LAYOUT_OPTIONS } from './editor_constants';
-import { ControlGroupStrings } from '../control_group_strings';
-import { ControlStyle } from '../../types';
-import { ParentIgnoreSettings } from '../..';
 import { ControlGroupInput } from '..';
+import { ParentIgnoreSettings } from '../..';
 import { getDefaultControlGroupInput } from '../../../common';
+import { ControlSettingTooltipLabel } from '../../components/control_setting_tooltip_label';
+import { ControlStyle } from '../../types';
+import { ControlGroupStrings } from '../control_group_strings';
+import { CONTROL_LAYOUT_OPTIONS } from './editor_constants';
 
 interface EditControlGroupProps {
   initialInput: ControlGroupInput;
@@ -48,8 +49,6 @@ interface EditControlGroupProps {
   onDeleteAll: () => void;
   onClose: () => void;
 }
-
-type EditorControlGroupInput = ControlGroupInput;
 
 const editorControlGroupInputIsEqual = (a: ControlGroupInput, b: ControlGroupInput) =>
   fastIsEqual(a, b);
@@ -61,7 +60,7 @@ export const ControlGroupEditor = ({
   onDeleteAll,
   onClose,
 }: EditControlGroupProps) => {
-  const [controlGroupEditorState, setControlGroupEditorState] = useState<EditorControlGroupInput>({
+  const [controlGroupEditorState, setControlGroupEditorState] = useState<ControlGroupInput>({
     ...getDefaultControlGroupInput(),
     ...initialInput,
   });
@@ -91,7 +90,9 @@ export const ControlGroupEditor = ({
 
   const applyChangesToInput = useCallback(() => {
     const inputToApply = { ...controlGroupEditorState };
-    if (!editorControlGroupInputIsEqual(inputToApply, initialInput)) updateInput(inputToApply);
+    if (!editorControlGroupInputIsEqual(inputToApply, initialInput)) {
+      updateInput(inputToApply);
+    }
   }, [controlGroupEditorState, initialInput, updateInput]);
 
   return (
@@ -102,7 +103,7 @@ export const ControlGroupEditor = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj="control-group-settings-flyout">
-        <EuiForm>
+        <EuiForm component="form" fullWidth>
           <EuiFormRow label={ControlGroupStrings.management.labelPosition.getLabelPositionTitle()}>
             <EuiButtonGroup
               color="primary"
@@ -112,43 +113,69 @@ export const ControlGroupEditor = ({
               legend={ControlGroupStrings.management.labelPosition.getLabelPositionLegend()}
               onChange={(newControlStyle: string) => {
                 // The UI copy calls this setting labelPosition, but to avoid an unnecessary migration it will be left as controlStyle in the state.
-                updateControlGroupEditorSetting({ controlStyle: newControlStyle as ControlStyle });
+                updateControlGroupEditorSetting({
+                  controlStyle: newControlStyle as ControlStyle,
+                });
               }}
             />
           </EuiFormRow>
-          <EuiHorizontalRule margin="m" />
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiSpacer size="xs" />
+
+          <EuiFormRow
+            label={ControlGroupStrings.management.filteringSettings.getFilteringSettingsTitle()}
+          >
+            <div>
               <EuiSwitch
+                compressed
+                data-test-subj="control-group-filter-sync"
+                label={ControlGroupStrings.management.filteringSettings.getUseGlobalFiltersTitle()}
+                onChange={(e) =>
+                  updateIgnoreSetting({
+                    ignoreFilters: !e.target.checked,
+                    ignoreQuery: !e.target.checked,
+                  })
+                }
+                checked={
+                  !Boolean(controlGroupEditorState.ignoreParentSettings?.ignoreFilters) ||
+                  !Boolean(controlGroupEditorState.ignoreParentSettings?.ignoreQuery)
+                }
+              />
+              <EuiSpacer size="s" />
+              <EuiSwitch
+                compressed
+                data-test-subj="control-group-query-sync-time-range"
+                label={ControlGroupStrings.management.filteringSettings.getUseGlobalTimeRangeTitle()}
+                onChange={(e) => updateIgnoreSetting({ ignoreTimerange: !e.target.checked })}
+                checked={!Boolean(controlGroupEditorState.ignoreParentSettings?.ignoreTimerange)}
+              />
+            </div>
+          </EuiFormRow>
+
+          <EuiFormRow
+            label={ControlGroupStrings.management.selectionSettings.getSelectionSettingsTitle()}
+          >
+            <div>
+              <EuiSwitch
+                compressed
                 data-test-subj="control-group-validate-selections"
-                label={ControlGroupStrings.management.validateSelections.getValidateSelectionsTitle()}
-                showLabel={false}
+                label={
+                  <ControlSettingTooltipLabel
+                    label={ControlGroupStrings.management.selectionSettings.validateSelections.getValidateSelectionsTitle()}
+                    tooltip={ControlGroupStrings.management.selectionSettings.validateSelections.getValidateSelectionsTooltip()}
+                  />
+                }
                 checked={!Boolean(controlGroupEditorState.ignoreParentSettings?.ignoreValidations)}
                 onChange={(e) => updateIgnoreSetting({ ignoreValidations: !e.target.checked })}
               />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTitle size="xxs">
-                <h3>
-                  {ControlGroupStrings.management.validateSelections.getValidateSelectionsTitle()}
-                </h3>
-              </EuiTitle>
-              <EuiText size="s">
-                <p>
-                  {ControlGroupStrings.management.validateSelections.getValidateSelectionsSubTitle()}
-                </p>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiHorizontalRule margin="m" />
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiSpacer size="xs" />
+              <EuiSpacer size="s" />
               <EuiSwitch
+                compressed
                 data-test-subj="control-group-chaining"
-                label={ControlGroupStrings.management.controlChaining.getHierarchyTitle()}
-                showLabel={false}
+                label={
+                  <ControlSettingTooltipLabel
+                    label={ControlGroupStrings.management.selectionSettings.controlChaining.getHierarchyTitle()}
+                    tooltip={ControlGroupStrings.management.selectionSettings.controlChaining.getHierarchyTooltip()}
+                  />
+                }
                 checked={controlGroupEditorState.chainingSystem === 'HIERARCHICAL'}
                 onChange={(e) =>
                   updateControlGroupEditorSetting({
@@ -156,31 +183,42 @@ export const ControlGroupEditor = ({
                   })
                 }
               />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTitle size="xxs">
-                <h3>{ControlGroupStrings.management.controlChaining.getHierarchyTitle()}</h3>
-              </EuiTitle>
-              <EuiText size="s">
-                <p>{ControlGroupStrings.management.controlChaining.getHierarchySubTitle()}</p>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+              <EuiSpacer size="s" />
+              <EuiSwitch
+                compressed
+                data-test-subj="control-group-auto-apply-selections"
+                label={
+                  <ControlSettingTooltipLabel
+                    label={ControlGroupStrings.management.selectionSettings.showApplySelections.getShowApplySelectionsTitle()}
+                    tooltip={ControlGroupStrings.management.selectionSettings.showApplySelections.getShowApplySelectionsTooltip()}
+                  />
+                }
+                checked={!controlGroupEditorState.showApplySelections}
+                onChange={(e) =>
+                  updateControlGroupEditorSetting({
+                    showApplySelections: !e.target.checked,
+                  })
+                }
+              />
+            </div>
+          </EuiFormRow>
+
           {controlCount > 0 && (
             <>
               <EuiHorizontalRule margin="m" />
-              <EuiSpacer size="m" />
-              <EuiButtonEmpty
-                onClick={onDeleteAll}
-                data-test-subj="delete-all-controls-button"
-                aria-label={'delete-all'}
-                iconType="trash"
-                color="danger"
-                flush="left"
-                size="s"
-              >
-                {ControlGroupStrings.management.getDeleteAllButtonTitle()}
-              </EuiButtonEmpty>
+              <EuiFormRow>
+                <EuiButtonEmpty
+                  onClick={onDeleteAll}
+                  data-test-subj="delete-all-controls-button"
+                  aria-label={'delete-all'}
+                  iconType="trash"
+                  color="danger"
+                  flush="left"
+                  size="s"
+                >
+                  {ControlGroupStrings.management.getDeleteAllButtonTitle()}
+                </EuiButtonEmpty>
+              </EuiFormRow>
             </>
           )}
         </EuiForm>

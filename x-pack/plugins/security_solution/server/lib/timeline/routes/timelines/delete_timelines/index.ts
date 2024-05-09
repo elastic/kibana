@@ -42,9 +42,9 @@ export const deleteTimelinesRoute = (
 
         try {
           const frameworkRequest = await buildFrameworkRequest(context, security, request);
-          const { savedObjectIds } = request.body;
+          const { savedObjectIds, searchIds } = request.body;
 
-          await deleteTimeline(frameworkRequest, savedObjectIds);
+          await deleteTimeline(frameworkRequest, savedObjectIds, searchIds);
           return response.ok({ body: { data: { deleteTimeline: true } } });
         } catch (err) {
           const error = transformError(err);

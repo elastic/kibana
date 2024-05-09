@@ -55,7 +55,14 @@ const createSetupContractMock = () => {
     },
   } as any);
   setupContract.getPlugins.mockReturnValue([]);
-  setupContract.getTheme.mockReturnValue({ darkMode: false, version: 'v8' });
+  setupContract.getTheme.mockReturnValue({
+    darkMode: false,
+    version: 'v8',
+    stylesheetPaths: {
+      default: ['light-1.css'],
+      dark: ['dark-1.css'],
+    },
+  });
   return setupContract;
 };
 

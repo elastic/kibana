@@ -13,6 +13,7 @@ export { FieldParamEditor } from './field';
 export { FiltersParamEditor } from './filters';
 export { HasExtendedBoundsParamEditor } from './has_extended_bounds';
 export { IncludeExcludeParamEditor } from './include_exclude';
+export { IpPrefixParamEditor } from './ip_prefix';
 export { IpRangesParamEditor } from './ip_ranges';
 export { IpRangeTypeParamEditor } from './ip_range_type';
 export { MetricAggParamEditor } from './metric_agg';

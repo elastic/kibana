@@ -20,6 +20,7 @@ describe('makeSingleFieldMatchQuery', () => {
       query: {
         bool: {
           should: [],
+          filter: [],
           minimum_should_match: 1,
         },
       },
@@ -54,6 +55,46 @@ describe('makeSingleFieldMatchQuery', () => {
                 'enrichment.host.name': {
                   query: 'host name 2',
                   minimum_should_match: 1,
+                },
+              },
+            },
+          ],
+          filter: [],
+          minimum_should_match: 1,
+        },
+      },
+    });
+  });
+
+  it('return query with extra filters', () => {
+    expect(
+      makeSingleFieldMatchQuery({
+        values: [],
+        searchByField: 'host.name',
+        extraFilters: [
+          {
+            match: {
+              id_field: {
+                query: 'host.name',
+              },
+            },
+          },
+        ],
+      })
+    ).toEqual({
+      meta: {
+        alias: null,
+        negate: false,
+        disabled: false,
+      },
+      query: {
+        bool: {
+          should: [],
+          filter: [
+            {
+              match: {
+                id_field: {
+                  query: 'host.name',
                 },
               },
             },

@@ -17,9 +17,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const endpointTestResources = getService('endpointTestResources');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/171649
-  // FLAKY: https://github.com/elastic/kibana/issues/171650
-  describe.skip('Endpoint permissions:', function () {
+  describe('Endpoint permissions:', function () {
     targetTags(this, ['@ess']);
 
     let indexedData: IndexedHostsAndAlertsResponse;
@@ -30,10 +28,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       // Force a logout so that we start from the login page
       await PageObjects.security.forceLogout();
+
+      // ensure Security Solution is properly initialized
+      await PageObjects.security.login('system_indices_superuser', 'changeme');
+      await PageObjects.detections.navigateToAlerts();
+      await testSubjects.existOrFail('manage-alert-detection-rules');
+
+      // logout again
+      await PageObjects.security.forceLogout();
     });
 
     after(async () => {
-      await endpointTestResources.unloadEndpointData(indexedData);
+      if (indexedData) {
+        await endpointTestResources.unloadEndpointData(indexedData);
+      }
     });
 
     // Run the same set of tests against all of the Security Solution roles

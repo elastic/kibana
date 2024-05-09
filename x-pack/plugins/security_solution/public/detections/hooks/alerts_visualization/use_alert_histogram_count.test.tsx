@@ -10,21 +10,15 @@ import { TestProviders } from '../../../common/mock';
 import { useAlertHistogramCount } from './use_alert_histogram_count';
 
 jest.mock('../../../common/components/visualization_actions/use_visualization_response', () => ({
-  useVisualizationResponse: jest.fn().mockReturnValue([{ hits: { total: 100 } }]),
+  useVisualizationResponse: jest.fn().mockReturnValue({ responses: [{ hits: { total: 100 } }] }),
 }));
 
 describe('useAlertHistogramCount', () => {
   const props = {
-    totalAlertsObj: { value: 10, relation: '' },
     visualizationId: 'mockVisualizationId',
-    isChartEmbeddablesEnabled: false,
   };
-  it('returns total alerts count', () => {
-    const { result } = renderHook(() => useAlertHistogramCount(props), { wrapper: TestProviders });
-    expect(result.current).toEqual('Showing: 10 alerts');
-  });
 
-  it('returns visualization alerts count when isChartEmbeddablesEnabled is true', () => {
+  it('returns visualization alerts count', () => {
     const testPops = { ...props, isChartEmbeddablesEnabled: true };
     const { result } = renderHook(() => useAlertHistogramCount(testPops), {
       wrapper: TestProviders,

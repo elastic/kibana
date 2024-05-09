@@ -9,13 +9,13 @@
     "browser": true,
     "requiredPlugins": [
       "embeddable",
-      "uiActions",
       "uiActionsEnhanced"
     ],
     "requiredBundles": [
       "kibanaUtils",
       "kibanaReact",
-      "imageEmbeddable"
+      "imageEmbeddable",
+      "uiActions"
     ]
   }
 }

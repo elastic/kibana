@@ -40,6 +40,8 @@ export const querySignalsRoute = (
         },
       },
       async (context, request, response) => {
+        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const { query, aggs, _source, fields, track_total_hits, size, runtime_mappings, sort } =
           request.body;
@@ -58,10 +60,11 @@ export const querySignalsRoute = (
             body: '"value" must have at least 1 children',
           });
         }
-
         try {
           const spaceId = (await context.securitySolution).getSpaceId();
-          const result = await ruleDataClient?.getReader({ namespace: spaceId }).search({
+          const indexPattern = ruleDataClient?.indexNameWithNamespace(spaceId);
+          const result = await esClient.search({
+            index: indexPattern,
             body: {
               query,
               // Note: I use a spread operator to please TypeScript with aggs: { ...aggs }

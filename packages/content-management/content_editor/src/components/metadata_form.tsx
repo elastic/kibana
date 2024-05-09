@@ -27,6 +27,7 @@ interface Props {
     isSubmitted: boolean;
   };
   isReadonly: boolean;
+  readonlyReason: string;
   tagsReferences: SavedObjectsReference[];
   TagList?: Services['TagList'];
   TagSelector?: Services['TagSelector'];
@@ -40,6 +41,7 @@ export const MetadataForm: FC<Props> = ({
   TagList,
   TagSelector,
   isReadonly,
+  readonlyReason,
 }) => {
   const {
     title,
@@ -53,11 +55,6 @@ export const MetadataForm: FC<Props> = ({
     getErrors,
     getWarnings,
   } = form;
-
-  const readOnlyToolTip = i18n.translate(
-    'contentManagement.contentEditor.metadataForm.readOnlyToolTip',
-    { defaultMessage: 'To edit these details, contact your administrator for access.' }
-  );
 
   return (
     <EuiForm isInvalid={isSubmitted && !isValid} error={getErrors()} data-test-subj="metadataForm">
@@ -73,7 +70,7 @@ export const MetadataForm: FC<Props> = ({
       >
         <EuiToolTip
           position="top"
-          content={isReadonly ? readOnlyToolTip : undefined}
+          content={isReadonly ? readonlyReason : undefined}
           display="block"
         >
           <EuiFieldText
@@ -104,7 +101,7 @@ export const MetadataForm: FC<Props> = ({
       >
         <EuiToolTip
           position="top"
-          content={isReadonly ? readOnlyToolTip : undefined}
+          content={isReadonly ? readonlyReason : undefined}
           display="block"
         >
           <EuiTextArea

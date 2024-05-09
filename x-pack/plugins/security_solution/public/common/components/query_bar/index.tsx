@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { cloneDeep } from 'lodash';
 import React, { memo, useMemo, useCallback, useState, useEffect } from 'react';
 import deepEqual from 'fast-deep-equal';
 
@@ -126,7 +127,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
         setDataView(indexPattern);
       } else if (!isEsql) {
         const createDataView = async () => {
-          dv = await data.dataViews.create({ title: indexPattern.title });
+          dv = await data.dataViews.create({ id: indexPattern.title, title: indexPattern.title });
           setDataView(dv);
         };
         createDataView();
@@ -138,6 +139,20 @@ export const QueryBar = memo<QueryBarComponentProps>(
       };
     }, [data.dataViews, indexPattern, isEsql]);
 
+    const searchBarFilters = useMemo(() => {
+      if (isDataView(indexPattern) || isEsql) {
+        return filters;
+      }
+
+      /**
+       * We update filters and set new data view id to make sure that SearchBar does not show data view picker
+       * More details in https://github.com/elastic/kibana/issues/174026
+       */
+      const updatedFilters = cloneDeep(filters);
+      updatedFilters.forEach((filter) => (filter.meta.index = indexPattern.title));
+      return updatedFilters;
+    }, [filters, indexPattern, isEsql]);
+
     const timeHistory = useMemo(() => new TimeHistory(new Storage(localStorage)), []);
     const arrDataView = useMemo(() => (dataView != null ? [dataView] : []), [dataView]);
     return (
@@ -145,7 +160,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
         showSubmitButton={false}
         dateRangeFrom={dateRangeFrom}
         dateRangeTo={dateRangeTo}
-        filters={filters}
+        filters={searchBarFilters}
         indexPatterns={arrDataView}
         isLoading={isLoading}
         isRefreshPaused={isRefreshPaused}

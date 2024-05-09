@@ -8,7 +8,10 @@
 import { loggerMock } from '@kbn/logging-mocks';
 
 import { RISK_SCORE_PREVIEW_URL } from '../../../../../common/constants';
-import { RiskCategories, RiskWeightTypes } from '../../../../../common/risk_engine';
+import {
+  RiskCategories,
+  RiskWeightTypes,
+} from '../../../../../common/entity_analytics/risk_engine';
 import {
   serverMock,
   requestContextMock,

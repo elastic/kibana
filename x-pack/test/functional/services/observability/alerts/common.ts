@@ -8,8 +8,8 @@
 import expect from '@kbn/expect';
 import { chunk } from 'lodash';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED, AlertStatus } from '@kbn/rule-data-utils';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { WebElementWrapper } from '../../../../../../test/functional/services/lib/web_element_wrapper';
 
 // Based on the x-pack/test/functional/es_archives/observability/alerts archive.
 const DATE_WITH_DATA = {
@@ -159,9 +159,16 @@ export function ObservabilityAlertsCommonProvider({
   };
 
   // Flyout
-  const openAlertsFlyout = retryOnStale.wrap(async () => {
-    await openActionsMenuForRow(0);
-    await testSubjects.click('viewAlertDetailsFlyout');
+  const getReasonMessageLinkByIndex = async (index: number) => {
+    const reasonMessageLinks = await find.allByCssSelector(
+      '[data-test-subj="o11yGetRenderCellValueLink"]'
+    );
+    return reasonMessageLinks[index] || null;
+  };
+
+  const openAlertsFlyout = retryOnStale.wrap(async (index: number = 0) => {
+    const reasonMessageLink = await getReasonMessageLinkByIndex(index);
+    await reasonMessageLink.click();
     await retry.waitFor(
       'flyout open',
       async () => await testSubjects.exists(ALERTS_FLYOUT_SELECTOR, { timeout: 2500 })
@@ -241,8 +248,8 @@ export function ObservabilityAlertsCommonProvider({
     }
 
     // wait for a confirmation toast (the css index is 1-based)
-    await toasts.getToastElement(1);
-    await toasts.dismissAllToasts();
+    await toasts.getElementByIndex(1);
+    await toasts.dismissAll();
   };
 
   const setWorkflowStatusFilter = retryOnStale.wrap(async (workflowStatus: WorkflowStatus) => {

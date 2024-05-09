@@ -5,21 +5,32 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import moment from 'moment';
-import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
+import { i18n } from '@kbn/i18n';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import moment from 'moment';
 import { firstValueFrom } from 'rxjs';
-import { MlCoreSetup } from '../plugin';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, SwimLaneDrilldownContext } from '../embeddables';
+import { isAnomalySwimlaneSelectionTriggerContext } from './triggers';
+import type { AppStateSelectedCells } from '../application/explorer/explorer_utils';
+import type { AnomalySwimLaneEmbeddableApi } from '../embeddables/anomaly_swimlane/types';
+import type { MlCoreSetup } from '../plugin';
 
 export const APPLY_TIME_RANGE_SELECTION_ACTION = 'applyTimeRangeSelectionAction';
 
 const supportedApps = [DASHBOARD_APP_ID];
 
+export interface ApplyTimeRangeSelectionActionContext extends EmbeddableApiContext {
+  embeddable: AnomalySwimLaneEmbeddableApi;
+  /**
+   * Optional data provided by swim lane selection
+   */
+  data?: AppStateSelectedCells;
+}
+
 export function createApplyTimeRangeSelectionAction(
   getStartServices: MlCoreSetup['getStartServices']
-): UiActionsActionDefinition<SwimLaneDrilldownContext> {
+): UiActionsActionDefinition<ApplyTimeRangeSelectionActionContext> {
   return {
     id: 'apply-time-range-selection',
     type: APPLY_TIME_RANGE_SELECTION_ACTION,
@@ -36,9 +47,9 @@ export function createApplyTimeRangeSelectionAction(
       }
       const [, pluginStart] = await getStartServices();
       const timefilter = pluginStart.data.query.timefilter.timefilter;
-      const { interval } = embeddable.getOutput();
+      const { interval } = embeddable;
 
-      if (!interval) {
+      if (!interval.getValue()) {
         throw new Error('Interval is required to set a time range');
       }
 
@@ -52,14 +63,10 @@ export function createApplyTimeRangeSelectionAction(
         mode: 'absolute',
       });
     },
-    async isCompatible({ embeddable, data }) {
+    async isCompatible(context) {
       const [{ application }] = await getStartServices();
       const appId = await firstValueFrom(application.currentAppId$);
-      return (
-        embeddable.type === ANOMALY_SWIMLANE_EMBEDDABLE_TYPE &&
-        data !== undefined &&
-        supportedApps.includes(appId!)
-      );
+      return isAnomalySwimlaneSelectionTriggerContext(context) && supportedApps.includes(appId!);
     },
   };
 }

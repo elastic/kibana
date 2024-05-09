@@ -31,8 +31,8 @@ describe('FormFields ', () => {
       </FormTestComponent>
     );
 
-    expect(screen.getByTestId('custom-field-label-input')).toBeInTheDocument();
-    expect(screen.getByTestId('custom-field-type-selector')).toBeInTheDocument();
+    expect(await screen.findByTestId('custom-field-label-input')).toBeInTheDocument();
+    expect(await screen.findByTestId('custom-field-type-selector')).toBeInTheDocument();
   });
 
   it('disables field type selector on edit mode', async () => {
@@ -42,7 +42,7 @@ describe('FormFields ', () => {
       </FormTestComponent>
     );
 
-    expect(screen.getByTestId('custom-field-type-selector')).toHaveAttribute('disabled');
+    expect(await screen.findByTestId('custom-field-type-selector')).toHaveAttribute('disabled');
   });
 
   it('submit data correctly', async () => {
@@ -52,20 +52,20 @@ describe('FormFields ', () => {
       </FormTestComponent>
     );
 
-    userEvent.type(screen.getByTestId('custom-field-label-input'), 'hello');
-
-    fireEvent.change(screen.getByTestId('custom-field-type-selector'), {
+    fireEvent.change(await screen.findByTestId('custom-field-type-selector'), {
       target: { value: CustomFieldTypes.TOGGLE },
     });
 
-    userEvent.click(screen.getByText('Submit'));
+    userEvent.type(await screen.findByTestId('custom-field-label-input'), 'hello');
+    userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       // data, isValid
       expect(onSubmit).toBeCalledWith(
         {
           label: 'hello',
-          type: 'toggle',
+          type: CustomFieldTypes.TOGGLE,
+          defaultValue: false,
         },
         true
       );

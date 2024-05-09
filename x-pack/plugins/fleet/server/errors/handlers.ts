@@ -20,18 +20,14 @@ import { UninstallTokenError } from '../../common/errors';
 import { appContextService } from '../services';
 
 import {
-  AgentNotFoundError,
-  AgentActionNotFoundError,
   AgentPolicyNameExistsError,
   ConcurrentInstallOperationError,
   FleetError,
-  PackageNotFoundError,
   PackageUnsupportedMediaTypeError,
   RegistryConnectionError,
   RegistryError,
   RegistryResponseError,
   PackageFailedVerificationError,
-  PackagePolicyNotFoundError,
   FleetUnauthorizedError,
   PackagePolicyNameExistsError,
   PackageOutdatedError,
@@ -41,6 +37,12 @@ import {
   PackageESError,
   KibanaSOReferenceError,
   PackageAlreadyInstalledError,
+  AgentPolicyInvalidError,
+  EnrollmentKeyNameExistsError,
+  AgentRequestInvalidError,
+  PackagePolicyRequestError,
+  FleetNotFoundError,
+  PackageSavedObjectConflictError,
 } from '.';
 
 type IngestErrorHandler = (
@@ -71,25 +73,35 @@ const getHTTPResponseCode = (error: FleetError): number => {
   if (error instanceof KibanaSOReferenceError) {
     return 400;
   }
+  if (error instanceof AgentPolicyInvalidError) {
+    return 400;
+  }
+  if (error instanceof AgentRequestInvalidError) {
+    return 400;
+  }
+  if (error instanceof PackagePolicyRequestError) {
+    return 400;
+  }
   // Unauthorized
   if (error instanceof FleetUnauthorizedError) {
     return 403;
   }
   // Not Found
-  if (error instanceof PackageNotFoundError || error instanceof PackagePolicyNotFoundError) {
+  if (error instanceof FleetNotFoundError) {
     return 404;
   }
-  if (error instanceof AgentNotFoundError) {
-    return 404;
-  }
-  if (error instanceof AgentActionNotFoundError) {
-    return 404;
-  }
+
   // Conflict
   if (error instanceof AgentPolicyNameExistsError) {
     return 409;
   }
+  if (error instanceof EnrollmentKeyNameExistsError) {
+    return 409;
+  }
   if (error instanceof ConcurrentInstallOperationError) {
+    return 409;
+  }
+  if (error instanceof PackageSavedObjectConflictError) {
     return 409;
   }
   if (error instanceof PackagePolicyNameExistsError) {

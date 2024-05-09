@@ -27,20 +27,24 @@ export const useStyles = () => {
     & .euiDataGrid--headerUnderline .euiDataGridHeaderCell {
       border-bottom: ${euiTheme.border.width.thick} solid ${euiTheme.colors.fullShade};
     }
-    & .euiDataGridRowCell__contentByHeight + .euiDataGridRowCell__expandActions {
-      padding: 0;
-    }
     & .euiButtonIcon[data-test-subj='docTableExpandToggleColumn'] {
       color: ${euiTheme.colors.primary};
     }
 
     & .euiDataGridRowCell {
       font-size: ${euiTheme.size.m};
-    }
-    & .euiDataGridRowCell__expandFlex {
-      align-items: center;
+
+      // Vertically center content
+      .euiDataGridRowCell__content {
+        display: flex;
+        align-items: center;
+      }
     }
     & .euiDataGridRowCell.euiDataGridRowCell--numeric {
+      text-align: left;
+    }
+    & .euiDataGridHeaderCell--numeric .euiDataGridHeaderCell__content {
+      flex-grow: 0;
       text-align: left;
     }
     & .euiDataGrid__controls {
@@ -55,7 +59,7 @@ export const useStyles = () => {
       font-size: ${euiTheme.size.m};
       font-weight: ${euiTheme.font.weight.bold};
       border-right: ${euiTheme.border.thin};
-      margin-right: ${euiTheme.size.s};
+      margin-inline: ${euiTheme.size.s};
       padding-right: ${euiTheme.size.m};
     }
     & .euiDataGrid__rightControls {
@@ -69,6 +73,9 @@ export const useStyles = () => {
 
     & .unifiedDataTable__cellValue {
       font-family: ${euiTheme.font.family};
+    }
+    & .unifiedDataTable__inner .euiDataGrid__controls {
+      border-top: none;
     }
   `;
 

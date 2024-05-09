@@ -13,7 +13,6 @@
       "plugin",
     ],
     "requiredPlugins": [
-      "kibanaReact",
       "cloud"
     ],
     "optionalPlugins": [],

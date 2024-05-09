@@ -224,7 +224,6 @@ const getCspmAccountsStats = (
     nodes_count: account.nodes_count.value,
     pods_count: account.resources.pods_count.value,
   }));
-  logger.info('CSPM telemetry: accounts stats was sent');
 
   return cspmAccountsStats;
 };

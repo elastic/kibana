@@ -5,24 +5,33 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { settingsRoutesService } from '../../services';
-import type { PutSettingsResponse, PutSettingsRequest, GetSettingsResponse } from '../../types';
+import type {
+  PutSettingsResponse,
+  PutSettingsRequest,
+  GetSettingsResponse,
+  GetEnrollmentSettingsRequest,
+  GetEnrollmentSettingsResponse,
+} from '../../types';
 
 import { API_VERSIONS } from '../../../common/constants';
 
 import type { RequestError } from './use_request';
 import { sendRequest, sendRequestForRq, useRequest } from './use_request';
 
-export function useGetSettingsQuery() {
-  return useQuery<GetSettingsResponse, RequestError>(['settings'], () =>
-    sendRequestForRq<GetSettingsResponse>({
-      method: 'get',
-      path: settingsRoutesService.getInfoPath(),
-      version: API_VERSIONS.public.v1,
-    })
-  );
+export function useGetSettingsQuery(options?: { enabled?: boolean }) {
+  return useQuery<GetSettingsResponse, RequestError>({
+    queryKey: ['settings'],
+    enabled: options?.enabled,
+    queryFn: () =>
+      sendRequestForRq<GetSettingsResponse>({
+        method: 'get',
+        path: settingsRoutesService.getInfoPath(),
+        version: API_VERSIONS.public.v1,
+      }),
+  });
 }
 
 export function useGetSettings() {
@@ -41,11 +50,40 @@ export function sendGetSettings() {
   });
 }
 
+export function usePutSettingsMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: sendPutSettings,
+    onSuccess: () => {
+      queryClient.invalidateQueries(['settings']);
+    },
+  });
+}
+
 export function sendPutSettings(body: PutSettingsRequest['body']) {
   return sendRequest<PutSettingsResponse>({
     method: 'put',
     path: settingsRoutesService.getUpdatePath(),
     version: API_VERSIONS.public.v1,
     body,
+  });
+}
+
+export function useGetEnrollmentSettings(query?: GetEnrollmentSettingsRequest['query']) {
+  return useRequest<GetEnrollmentSettingsResponse>({
+    method: 'get',
+    path: settingsRoutesService.getEnrollmentInfoPath(),
+    version: API_VERSIONS.public.v1,
+    query,
+  });
+}
+
+export function sendGetEnrollmentSettings(query?: GetEnrollmentSettingsRequest['query']) {
+  return sendRequest<GetEnrollmentSettingsResponse>({
+    method: 'get',
+    path: settingsRoutesService.getEnrollmentInfoPath(),
+    version: API_VERSIONS.public.v1,
+    query,
   });
 }

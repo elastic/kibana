@@ -7,7 +7,6 @@
  */
 
 /* eslint-disable max-classes-per-file */
-import { ContainerAsset } from '../assets';
 import { Entity, Fields } from '../entity';
 import { Serializable } from '../serializable';
 
@@ -15,6 +14,7 @@ interface ContainerDocument extends Fields {
   'container.id': string;
   'kubernetes.pod.uid': string;
   'kubernetes.node.name': string;
+  'metricset.name'?: string;
 }
 
 export class Container extends Entity<ContainerDocument> {
@@ -22,15 +22,6 @@ export class Container extends Entity<ContainerDocument> {
     return new ContainerMetrics({
       ...this.fields,
       'kubernetes.container.cpu.usage.limit.pct': 46,
-    });
-  }
-
-  asset() {
-    return new ContainerAsset({
-      'asset.kind': 'container',
-      'asset.id': this.fields['container.id'],
-      'asset.name': this.fields['container.id'],
-      'asset.ean': `container:${this.fields['container.id']}`,
     });
   }
 }

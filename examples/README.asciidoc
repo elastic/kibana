@@ -1,7 +1,7 @@
 [[example-plugins]]
 == Example plugins
 
-This folder contains example plugins.  To run the plugins in this folder, use the `--run-examples` flag, via
+This folder contains example plugins.  To run the plugins in this folder, use the `--run-examples` flag (without a basepath), via
 
 [source,bash]
 ----

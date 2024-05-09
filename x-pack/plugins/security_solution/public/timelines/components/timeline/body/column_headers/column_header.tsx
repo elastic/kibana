@@ -27,7 +27,7 @@ import { EventsTh, EventsThContent, EventsHeadingHandle } from '../../styles';
 import type { Sort } from '../sort';
 
 import { Header } from './header';
-import { timelineActions } from '../../../../store/timeline';
+import { timelineActions } from '../../../../store';
 
 import * as i18n from './translations';
 
@@ -42,7 +42,7 @@ const ContextMenu = styled(EuiContextMenu)`
 `;
 
 const PopoverContainer = styled.div<{ $width: number }>`
-  & .euiPopover__anchor {
+  & .euiPopover {
     padding-right: 8px;
     width: ${({ $width }) => $width}px;
   }

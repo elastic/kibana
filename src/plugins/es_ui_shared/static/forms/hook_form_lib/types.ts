@@ -101,6 +101,7 @@ export interface FormHook<T extends FormData = FormData, I extends FormData = T>
     InternalFieldType = FieldType
   >(
     fieldPath: string
+    // @ts-expect-error upgrade typescript v4.9.5
   ) => FieldConfig<FieldType, FormType, InternalFieldType> | undefined;
   __getFormDefaultValue: () => I | undefined;
   __getFieldsRemoved: () => FieldsMap;

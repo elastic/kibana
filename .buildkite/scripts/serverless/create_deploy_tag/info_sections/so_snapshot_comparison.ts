@@ -11,12 +11,15 @@ import { readFileSync } from 'fs';
 import { exec } from '../shared';
 import { BuildkiteClient, getKibanaDir } from '#pipeline-utils';
 
+type VersionChanges = Record<string, { from: number; to: number; emoji: string }>;
+
 export function compareSOSnapshots(
   previousSha: string,
   selectedSha: string
 ): null | {
   hasChanges: boolean;
   changed: string[];
+  versionChanges: VersionChanges;
   command: string;
 } {
   assertValidSha(previousSha);
@@ -33,9 +36,15 @@ export function compareSOSnapshots(
     const buildkite = new BuildkiteClient({ exec });
     buildkite.uploadArtifacts(outputPath);
 
+    const versionChanges = Object.keys(soComparisonResult.changes).reduce((changes, pluginId) => {
+      changes[pluginId] = soComparisonResult.changes[pluginId].versionChange;
+      return changes;
+    }, {} as VersionChanges);
+
     return {
       hasChanges: soComparisonResult.hasChanges,
       changed: soComparisonResult.changed,
+      versionChanges,
       command,
     };
   } catch (ex) {
@@ -47,14 +56,24 @@ export function compareSOSnapshots(
 export function makeSOComparisonBlockHtml(comparisonResult: {
   hasChanges: boolean;
   changed: string[];
+  versionChanges: VersionChanges;
   command: string;
 }): string {
   if (comparisonResult.hasChanges) {
+    const { versionChanges, changed, command } = comparisonResult;
     return `<div>
-<h4>Plugin Saved Object migration changes: *yes, ${comparisonResult.changed.length} plugin(s)*</h4>
-<div>Changed plugins: <strong>${comparisonResult.changed.join(', ')}</strong></div>
+<h4>Plugin Saved Object migration changes: *yes, ${changed.length} plugin(s)*</h4>
+<div>Changed plugins:</div>
+ <div>
+    <ul>
+${Object.keys(versionChanges).map((key) => {
+  const { from, to, emoji } = versionChanges[key];
+  return `<li>${emoji} ${key}: ${from} => ${to}</li>`;
+})}
+    </ul>
+ </div>
 <i>Find detailed info in the archived artifacts, or run the command yourself: </i>
-<div><pre>${comparisonResult.command}</pre></div>
+<div><pre>${command}</pre></div>
 </div>`;
   } else {
     return `<div>

@@ -7,9 +7,10 @@
 
 import React from 'react';
 import { EuiDescriptionList, EuiText } from '@elastic/eui';
+import type { EuiDescriptionListProps } from '@elastic/eui';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { getHumanizedDuration } from '../../../../detections/pages/detection_engine/rules/helpers';
-import { DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
+import { DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
 import * as i18n from './translations';
 
 interface IntervalProps {
@@ -35,10 +36,12 @@ const From = ({ from, interval }: FromProps) => (
 
 export interface RuleScheduleSectionProps extends React.ComponentProps<typeof EuiDescriptionList> {
   rule: Partial<RuleResponse>;
+  columnWidths?: EuiDescriptionListProps['columnWidths'];
 }
 
 export const RuleScheduleSection = ({
   rule,
+  columnWidths = DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS,
   ...descriptionListProps
 }: RuleScheduleSectionProps) => {
   if (!rule.interval || !rule.from) {
@@ -64,7 +67,7 @@ export const RuleScheduleSection = ({
         type={descriptionListProps.type ?? 'column'}
         rowGutterSize={descriptionListProps.rowGutterSize ?? 'm'}
         listItems={ruleSectionListItems}
-        columnWidths={DESCRIPTION_LIST_COLUMN_WIDTHS}
+        columnWidths={columnWidths}
         {...descriptionListProps}
       />
     </div>

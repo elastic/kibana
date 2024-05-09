@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/data-stream-adapter",
+  "owner": "@elastic/security-threat-hunting-explore"
+}

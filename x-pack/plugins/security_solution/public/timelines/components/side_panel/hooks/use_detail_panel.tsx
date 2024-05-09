@@ -9,17 +9,20 @@ import React, { useMemo, useCallback, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import type { EntityType } from '@kbn/timelines-plugin/common';
 import { dataTableSelectors } from '@kbn/securitysolution-data-table';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../../../../common/lib/kibana';
 import type { ExpandedDetailType } from '../../../../../common/types';
 import { getScopedActions, isInTableScope, isTimelineScope } from '../../../../helpers';
-import type { FlowTargetSourceDest } from '../../../../../common/search_strategy';
-import { timelineSelectors } from '../../../store/timeline';
+import { timelineSelectors } from '../../../store';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import type { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { activeTimeline } from '../../../containers/active_timeline_context';
-import { TimelineTabs, TimelineId } from '../../../../../common/types/timeline';
-import { timelineDefaults } from '../../../store/timeline/defaults';
+import { TimelineTabs } from '../../../../../common/types/timeline';
+import { timelineDefaults } from '../../../store/defaults';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { DetailsPanel as DetailsPanelComponent } from '..';
+import { ENABLE_EXPANDABLE_FLYOUT_SETTING } from '../../../../../common/constants';
+import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
 
 export interface UseDetailPanelConfig {
   entityType?: EntityType;
@@ -30,14 +33,6 @@ export interface UseDetailPanelConfig {
 }
 export interface UseDetailPanelReturn {
   openEventDetailsPanel: (eventId?: string, onClose?: () => void) => void;
-  openHostDetailsPanel: (hostName: string, onClose?: () => void) => void;
-  openNetworkDetailsPanel: (
-    ip: string,
-    flowTarget: FlowTargetSourceDest,
-    onClose?: () => void
-  ) => void;
-  openUserDetailsPanel: (userName: string, onClose?: () => void) => void;
-  handleOnDetailsPanelClosed: () => void;
   DetailsPanel: JSX.Element | null;
   shouldShowDetailsPanel: boolean;
 }
@@ -49,8 +44,13 @@ export const useDetailPanel = ({
   scopeId,
   tabType = TimelineTabs.query,
 }: UseDetailPanelConfig): UseDetailPanelReturn => {
+  const { telemetry } = useKibana().services;
   const { browserFields, selectedPatterns, runtimeMappings } = useSourcererDataView(sourcererScope);
   const dispatch = useDispatch();
+
+  const { openFlyout } = useExpandableFlyoutApi();
+  const [isSecurityFlyoutEnabled] = useUiSetting$<boolean>(ENABLE_EXPANDABLE_FLYOUT_SETTING);
+
   const getScope = useMemo(() => {
     if (isTimelineScope(scopeId)) {
       return timelineSelectors.getTimelineByIdSelector();
@@ -98,56 +98,39 @@ export const useDetailPanel = ({
 
   const openEventDetailsPanel = useCallback(
     (eventId?: string, onClose?: () => void) => {
-      if (eventId) {
+      if (isSecurityFlyoutEnabled) {
+        openFlyout({
+          right: {
+            id: DocumentDetailsRightPanelKey,
+            params: {
+              id: eventId,
+              indexName: eventDetailsIndex,
+              scopeId,
+            },
+          },
+        });
+        telemetry.reportDetailsFlyoutOpened({
+          location: scopeId,
+          panel: 'right',
+        });
+      } else if (eventId) {
         loadDetailsPanel({
           panelView: 'eventDetail',
           params: { eventId, indexName: eventDetailsIndex },
         });
+        onPanelClose.current = onClose ?? noopPanelClose;
       }
-      onPanelClose.current = onClose ?? noopPanelClose;
     },
-    [loadDetailsPanel, eventDetailsIndex]
-  );
-
-  const openHostDetailsPanel = useCallback(
-    (hostName: string, onClose?: () => void) => {
-      loadDetailsPanel({ panelView: 'hostDetail', params: { hostName } });
-      onPanelClose.current = onClose ?? noopPanelClose;
-    },
-    [loadDetailsPanel]
-  );
-
-  const openNetworkDetailsPanel = useCallback(
-    (ip: string, flowTarget: FlowTargetSourceDest, onClose?: () => void) => {
-      loadDetailsPanel({ panelView: 'networkDetail', params: { ip, flowTarget } });
-      onPanelClose.current = onClose ?? noopPanelClose;
-    },
-    [loadDetailsPanel]
-  );
-
-  const openUserDetailsPanel = useCallback(
-    (userName: string, onClose?: () => void) => {
-      loadDetailsPanel({ panelView: 'userDetail', params: { userName } });
-      onPanelClose.current = onClose ?? noopPanelClose;
-    },
-    [loadDetailsPanel]
+    [isSecurityFlyoutEnabled, openFlyout, eventDetailsIndex, scopeId, telemetry, loadDetailsPanel]
   );
 
   const handleOnDetailsPanelClosed = useCallback(() => {
+    if (isSecurityFlyoutEnabled) return;
     if (onPanelClose.current) onPanelClose.current();
     if (scopedActions) {
       dispatch(scopedActions.toggleDetailPanel({ tabType, id: scopeId }));
     }
-
-    if (
-      tabType &&
-      expandedDetail[tabType]?.panelView &&
-      scopeId === TimelineId.active &&
-      shouldShowDetailsPanel
-    ) {
-      activeTimeline.toggleExpandedDetail({});
-    }
-  }, [scopedActions, tabType, expandedDetail, scopeId, shouldShowDetailsPanel, dispatch]);
+  }, [isSecurityFlyoutEnabled, scopedActions, dispatch, tabType, scopeId]);
 
   const DetailsPanel = useMemo(
     () =>
@@ -176,10 +159,6 @@ export const useDetailPanel = ({
 
   return {
     openEventDetailsPanel,
-    openHostDetailsPanel,
-    openNetworkDetailsPanel,
-    openUserDetailsPanel,
-    handleOnDetailsPanelClosed,
     shouldShowDetailsPanel,
     DetailsPanel,
   };

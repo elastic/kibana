@@ -85,25 +85,13 @@ export const mapSortingColumns = ({
 export const addBuildingBlockStyle = (
   ecs: Ecs,
   theme: EuiTheme,
-  setCellProps: EuiDataGridCellValueElementProps['setCellProps'],
-  defaultStyles?: React.CSSProperties
+  setCellProps: EuiDataGridCellValueElementProps['setCellProps']
 ) => {
-  const currentStyles = defaultStyles ?? {};
   if (isEventBuildingBlockType(ecs)) {
-    setCellProps({
-      style: {
-        ...currentStyles,
-        backgroundColor: `${theme.eui.euiColorHighlight}`,
-      },
-    });
+    setCellProps({ style: { backgroundColor: `${theme.eui.euiColorHighlight}` } });
   } else {
     // reset cell style
-    setCellProps({
-      style: {
-        ...currentStyles,
-        backgroundColor: 'inherit',
-      },
-    });
+    setCellProps({ style: { backgroundColor: 'inherit' } });
   }
 };
 

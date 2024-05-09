@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTextColor, EuiTitle } f
 
 import { MLModelTypeBadge } from '../ml_model_type_badge';
 
-import { MLInferencePipelineOption } from './ml_inference_logic';
+import { MLInferencePipelineOption } from './pipeline_select_logic';
 import { EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELDS, MODEL_REDACTED_VALUE } from './utils';
 
 export interface PipelineSelectOptionProps {
@@ -45,21 +45,23 @@ export const PipelineSelectOption: React.FC<PipelineSelectOptionProps> = ({ pipe
     // TODO: Add model state & pipeline info link. Make sure to check mobile rendering when doing this!
     <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexItem>
-        <EuiTitle size="xxs">
-          <h5>{pipeline.pipelineName}</h5>
+        <EuiTitle size="xs">
+          <h4>{pipeline.pipelineName}</h4>
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFlexGroup gutterSize="s" justifyContent="flexStart">
+        <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center">
           <EuiFlexItem grow={pipeline.modelType.length === 0}>
-            <EuiText size="s">{modelIdDisplay}</EuiText>
+            <EuiText size="s" color="subdued">
+              {modelIdDisplay}
+            </EuiText>
           </EuiFlexItem>
           {pipeline.modelType.length > 0 && (
             <EuiFlexItem>
-              {/* Wrap in a div to prevent the badge from growing to a whole row on mobile*/}
-              <div>
+              {/* Wrap in a span to prevent the badge from growing to a whole row on mobile*/}
+              <span>
                 <MLModelTypeBadge type={pipeline.modelType} />
-              </div>
+              </span>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

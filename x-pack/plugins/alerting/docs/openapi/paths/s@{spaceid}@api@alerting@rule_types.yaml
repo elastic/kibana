@@ -76,6 +76,64 @@ get:
                             type: string 
                 alerts:
                   type: object
+                  description: >
+                    Details for writing alerts as data documents for this rule type.
+                  properties:
+                    context:
+                      type: string
+                      description: >
+                        The namespace for this rule type.
+                      enum:
+                        - ml.anomaly-detection
+                        - observability.apm
+                        - observability.logs
+                        - observability.metrics
+                        - observability.slo
+                        - observability.threshold
+                        - observability.uptime
+                        - security
+                        - stack
+                    dynamic:
+                      type: string
+                      description: Indicates whether new fields are added dynamically.
+                      enum:
+                        - "false"
+                        - "runtime"
+                        - "strict"
+                        - "true"
+                    isSpaceAware:
+                      type: boolean
+                      description: >
+                        Indicates whether the alerts are space-aware.
+                        If true, space-specific alert indices are used.
+                    mappings:
+                      type: object
+                      properties:
+                        fieldMap:
+                          type: object
+                          description: >
+                            Mapping information for each field supported in alerts as data documents for this rule type.
+                            For more information about mapping parameters, refer to the Elasticsearch documentation.
+                          additionalProperties:
+                            $ref: '../components/schemas/fieldmap_properties.yaml'
+                    secondaryAlias:
+                      type: string
+                      description: >
+                        A secondary alias.
+                        It is typically used to support the signals alias for detection rules.
+                    shouldWrite: 
+                      type: boolean
+                      description: >
+                        Indicates whether the rule should write out alerts as data.
+                    useEcs:
+                      type: boolean
+                      description: >
+                        Indicates whether to include the ECS component template for the alerts.
+                    useLegacyAlerts:
+                      type: boolean
+                      default: false
+                      description: >
+                        Indicates whether to include the legacy component template for the alerts.
                 authorized_consumers:
                   description: The list of the plugins IDs that have access to the rule type.
                   type: object
@@ -175,6 +233,7 @@ get:
                   type: boolean
                 has_alerts_mappings:
                   type: boolean
+                  description: Indicates whether the rule type has custom mappings for the alert data.
                 has_fields_for_a_a_d:
                   type: boolean
                 id: 

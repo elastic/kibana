@@ -43,6 +43,7 @@ describe('Agent policy advanced options content', () => {
 
   const render = ({
     isProtected = false,
+    isManaged = false,
     policyId = 'agent-policy-1',
     newAgentPolicy = false,
     packagePolicy = [createPackagePolicyMock()],
@@ -54,6 +55,7 @@ describe('Agent policy advanced options content', () => {
         ...createAgentPolicyMock(),
         package_policies: packagePolicy,
         id: policyId,
+        is_managed: isManaged,
       };
     }
 
@@ -89,6 +91,16 @@ describe('Agent policy advanced options content', () => {
         hasAtLeast: () => false,
       } as unknown as LicenseService);
       render();
+      expect(renderResult.queryByTestId('tamperProtectionSwitch')).not.toBeInTheDocument();
+    });
+    it('should be visible if policy is not managed/hosted', () => {
+      usePlatinumLicense();
+      render({ isManaged: false });
+      expect(renderResult.queryByTestId('tamperProtectionSwitch')).toBeInTheDocument();
+    });
+    it('should not be visible if policy is managed/hosted', () => {
+      usePlatinumLicense();
+      render({ isManaged: true });
       expect(renderResult.queryByTestId('tamperProtectionSwitch')).not.toBeInTheDocument();
     });
     it('switched to true enables the uninstall command link', async () => {

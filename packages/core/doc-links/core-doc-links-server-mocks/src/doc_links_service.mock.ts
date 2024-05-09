@@ -15,9 +15,10 @@ type DocLinksServiceContract = PublicMethodsOf<DocLinksService>;
 
 const createSetupMock = (): DocLinksServiceSetup => {
   const branch = 'test-branch';
+  const buildFlavor = 'traditional';
   return {
-    ...getDocLinksMeta({ kibanaBranch: branch }),
-    links: getDocLinks({ kibanaBranch: branch }),
+    ...getDocLinksMeta({ kibanaBranch: branch, buildFlavor }),
+    links: getDocLinks({ kibanaBranch: branch, buildFlavor }),
   };
 };
 

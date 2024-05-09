@@ -7,13 +7,11 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import type { ISource } from './source';
 
 export type SourceRegistryEntry = {
   ConstructorFunction: new (
-    sourceDescriptor: any, // this is the source-descriptor that corresponds specifically to the particular ISource instance
-    inspectorAdapters?: Adapters
+    sourceDescriptor: any // this is the source-descriptor that corresponds specifically to the particular ISource instance
   ) => ISource;
   type: string;
 };

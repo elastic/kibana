@@ -23,6 +23,7 @@ import { toMountPoint as _toMountPoint } from '@kbn/react-kibana-mount';
 // and will be removed when the deprecated usages are removed.
 const themeStart: ThemeServiceStart = {
   theme$: new Observable((subscriber) => subscriber.next(defaultTheme)),
+  getTheme: () => defaultTheme,
 };
 
 // The `i18n` start contract should always be included to ensure

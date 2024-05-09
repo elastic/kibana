@@ -14,10 +14,12 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 
 import type { RequestError } from '../../hooks';
 import { useStartServices } from '../../hooks';
@@ -32,6 +34,7 @@ import {
 
 import { UninstallCommandsPerPlatform } from './uninstall_commands_per_platform';
 import type { UninstallCommandTarget } from './types';
+import { EmptyPolicyNameHint } from './empty_policy_name_hint';
 
 const UninstallAgentDescription = () => {
   const { docLinks } = useStartServices();
@@ -104,9 +107,11 @@ const ErrorFetchingUninstallToken = ({ error }: { error: RequestError | null }) 
 );
 
 const UninstallCommandsByTokenId = ({ uninstallTokenId }: { uninstallTokenId: string }) => {
+  const theme = useEuiTheme();
   const { isLoading, error, data } = useGetUninstallToken(uninstallTokenId);
   const token = data?.item.token;
   const policyId = data?.item.policy_id;
+  const policyName = data?.item.policy_name;
 
   return isLoading ? (
     <Loading size="l" />
@@ -118,12 +123,23 @@ const UninstallCommandsByTokenId = ({ uninstallTokenId }: { uninstallTokenId: st
 
       <EuiSpacer size="l" />
 
-      <EuiText data-test-subj="uninstall-command-flyout-policy-id-hint">
-        <FormattedMessage
-          id="xpack.fleet.agentUninstallCommandFlyout.validForPolicyId"
-          defaultMessage="Valid for the following agent policy:"
-        />{' '}
-        <EuiCode>{policyId}</EuiCode>
+      <EuiText
+        data-test-subj="uninstall-command-flyout-policy-id-hint"
+        css={css`
+          p {
+            margin-block-end: ${theme.euiTheme.size.s};
+          }
+        `}
+      >
+        <p>
+          <FormattedMessage
+            id="xpack.fleet.agentUninstallCommandFlyout.validForPolicyId"
+            defaultMessage="Valid for the following agent policy:"
+          />
+        </p>
+        <p>
+          {policyName ?? <EmptyPolicyNameHint />} (<EuiCode>{policyId}</EuiCode>)
+        </p>
       </EuiText>
     </>
   );

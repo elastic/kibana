@@ -21,7 +21,7 @@ import {
   EuiSkeletonTitle,
   DraggableProvidedDragHandleProps,
 } from '@elastic/eui';
-import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
+import type { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import { LinkInfo } from '../../embeddable/types';
 import { validateUrl } from '../external_link/external_link_tools';
@@ -160,7 +160,7 @@ export const LinksEditorSingleLink = ({
                   size="xs"
                   iconType="pencil"
                   onClick={editLink}
-                  aria-label={LinksStrings.editor.getEditLinkTitle()}
+                  aria-label={LinksStrings.editor.getEditLinkTitle(linkLabel)}
                   data-test-subj="panelEditorLink--editBtn"
                 />
               </EuiToolTip>
@@ -170,7 +170,7 @@ export const LinksEditorSingleLink = ({
                 <EuiButtonIcon
                   size="xs"
                   iconType="trash"
-                  aria-label={LinksStrings.editor.getDeleteLinkTitle()}
+                  aria-label={LinksStrings.editor.getDeleteLinkTitle(linkLabel)}
                   color="danger"
                   onClick={deleteLink}
                   data-test-subj="panelEditorLink--deleteBtn"

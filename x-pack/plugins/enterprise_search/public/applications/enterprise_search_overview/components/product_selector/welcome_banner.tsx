@@ -37,7 +37,7 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({ user, image }) => 
             <EuiText color="subdued">
               {i18n.translate('xpack.enterpriseSearch.welcomeBanner.header.titleDescription', {
                 defaultMessage:
-                  "There's endless ways to ingest and explore data with Elasticsearch, but here's a few of the most popular",
+                  'There are endless ways to ingest and explore data with Elasticsearch, connect to your Elasticsearch instance and start indexing data',
               })}
             </EuiText>
           </EuiFlexItem>

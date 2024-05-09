@@ -10,7 +10,7 @@ import type { Agent, AgentPolicy } from '../../../../types';
 import { getCommonTags } from './get_common_tags';
 
 describe('getCommonTags', () => {
-  it('should return common tags from visibleAgents if agents is empty string', () => {
+  it('should return common tags from agentsOnCurrentPage if agents is empty string', () => {
     const result = getCommonTags(
       '',
       [{ tags: ['tag1'] }, { tags: ['tag1', 'tag2'] }] as Agent[],
@@ -20,7 +20,7 @@ describe('getCommonTags', () => {
     expect(result).toEqual(['tag1']);
   });
 
-  it('should return common tags from visibleAgents if agents is query', () => {
+  it('should return common tags from agentsOnCurrentPage if agents is query', () => {
     const result = getCommonTags(
       'query',
       [{ tags: ['tag1'] }, { tags: ['tag1', 'tag2'] }] as Agent[],
@@ -30,7 +30,7 @@ describe('getCommonTags', () => {
     expect(result).toEqual(['tag1']);
   });
 
-  it('should return empty common tags if visibleAgents is empty', () => {
+  it('should return empty common tags if agentsOnCurrentPage is empty', () => {
     const result = getCommonTags('', [], []);
 
     expect(result).toEqual([]);
@@ -52,7 +52,7 @@ describe('getCommonTags', () => {
     expect(result).toEqual(['oldTag', 'tag1']);
   });
 
-  it('should return common tags from old data if visibleAgents empty', () => {
+  it('should return common tags from old data if agentsOnCurrentPage empty', () => {
     const result = getCommonTags(
       [
         { id: 'agent1', tags: ['oldTag'] },

@@ -7,20 +7,24 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { get } from 'lodash';
-import { Observable, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import type { Observable } from 'rxjs';
+import { of } from 'rxjs';
+import { catchError, map } from 'rxjs';
 import type {
-  IKibanaSearchRequest,
   IKibanaSearchResponse,
+  IKibanaSearchRequest,
   ISearchOptions,
-  ISearchStart,
-} from '@kbn/data-plugin/public';
+} from '@kbn/search-types';
+import type { ISearchStart } from '@kbn/data-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { buildAggregationWithSamplingOption } from './build_random_sampler_agg';
-import type { FieldStatsCommonRequestParams } from '../../../../../common/types/field_stats';
+import type {
+  FieldStatsCommonRequestParams,
+  FieldStatsError,
+} from '../../../../../common/types/field_stats';
 import type { Field, DateFieldStats, Aggs } from '../../../../../common/types/field_stats';
-import { FieldStatsError, isIKibanaSearchResponse } from '../../../../../common/types/field_stats';
+import { isIKibanaSearchResponse } from '../../../../../common/types/field_stats';
 
 export const getDateFieldsStatsRequest = (
   params: FieldStatsCommonRequestParams,

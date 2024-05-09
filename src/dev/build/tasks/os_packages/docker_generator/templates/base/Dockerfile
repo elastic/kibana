@@ -25,21 +25,27 @@ RUN cd /tmp && \
      https://{{publicArtifactSubdomain}}.elastic.co/downloads/kibana/{{artifactPrefix}}-$(arch).tar.gz && \
   cd -
 {{/usePublicArtifact}}
-
 {{^usePublicArtifact}}
 COPY {{artifactTarball}} /tmp/kibana.tar.gz
 {{/usePublicArtifact}}
 
 RUN mkdir /usr/share/kibana
 WORKDIR /usr/share/kibana
-RUN tar --strip-components=1 -zxf /tmp/kibana.tar.gz
+RUN tar \
+# Exclude serverless.yml disabled assets
+{{#serverless}}
+  --exclude=screenshotting-plugin/chromium \
+  --exclude=screenshotting-plugin/server/assets \
+{{/serverless}}
+  --strip-components=1 \
+  -zxf /tmp/kibana.tar.gz
 # Ensure that group permissions are the same as user permissions.
 # This will help when relying on GID-0 to run Kibana, rather than UID-1000.
 # OpenShift does this, for example.
 # REF: https://docs.openshift.org/latest/creating_images/guidelines.html
 RUN chmod -R g=u /usr/share/kibana
-
 {{#cloud}}
+
 COPY {{filebeatTarball}} /tmp/filebeat.tar.gz
 COPY {{metricbeatTarball}} /tmp/metricbeat.tar.gz
 
@@ -61,7 +67,7 @@ EXPOSE 5601
 RUN for iter in {1..10}; do \
       {{packageManager}} update --setopt=tsflags=nodocs -y && \
       {{packageManager}} install --setopt=tsflags=nodocs -y \
-        fontconfig freetype shadow-utils nss findutils && \
+        fontconfig freetype shadow-utils nss findutils {{#fips}}perl make gcc tar {{/fips}}&& \
       {{packageManager}} clean all && exit_code=0 && break || exit_code=$? && echo "{{packageManager}} error: retry $iter in 10s" && \
       sleep 10; \
     done; \
@@ -112,6 +118,37 @@ COPY --from=builder --chown=1000:0 /usr/share/kibana /usr/share/kibana
 COPY --from=builder --chown=0:0 /opt /opt
 {{/cloud}}
 WORKDIR /usr/share/kibana
+{{#fips}}
+
+# OpenSSL requires specific versions that are FIPS certified. Further, the FIPS modules
+# need to be compiled on the machine to pass its own self validation on startup.
+#
+# See:
+# https://github.com/openssl/openssl/blob/openssl-3.0/README-FIPS.md
+# https://www.openssl.org/docs/man3.0/man7/fips_module.html
+
+# Ideally we would handle this in the builder step, but make is installing over the OS version
+# of OpenSSL and requires linking of many submodules.
+RUN set -e ; \
+ curl --retry 8 -S -L -O https://www.openssl.org/source/openssl-3.0.8.tar.gz ; \
+ curl --retry 8 -S -L -O https://www.openssl.org/source/openssl-3.0.8.tar.gz.sha256  ; \
+ echo "$(cat openssl-3.0.8.tar.gz.sha256) openssl-3.0.8.tar.gz" | sha256sum -c ; \
+ tar -zxf openssl-3.0.8.tar.gz  ; \
+ rm -rf openssl-3.0.8.tar*  ; \
+ cd /usr/share/kibana/openssl-3.0.8   ; \
+ ./Configure enable-fips  ; \
+ make -j $(nproc)  ; \
+ make install  ; \
+ ldconfig /usr/local/lib64/  ; \
+ chown -R 1000:0 /usr/share/kibana/openssl-3.0.8
+
+# Enable FIPS for Kibana only. In the future we can override OS wide with ENV OPENSSL_CONF
+RUN /usr/bin/echo -e '\n--enable-fips' >> config/node.options
+RUN /usr/bin/echo '--openssl-config=/usr/share/kibana/openssl-3.0.8/nodejs.cnf' >> config/node.options
+COPY --chown=1000:0 openssl/nodejs.cnf /usr/share/kibana/openssl-3.0.8/nodejs.cnf
+ENV OPENSSL_MODULES=/usr/local/lib64/ossl-modules
+
+{{/fips}}
 RUN ln -s /usr/share/kibana /opt/kibana
 
 {{! Please notify @elastic/kibana-security if you want to remove or change this environment variable. }}
@@ -126,9 +163,7 @@ COPY --chown=1000:0 config/serverless.yml /usr/share/kibana/config/serverless.ym
 COPY --chown=1000:0 config/serverless.es.yml /usr/share/kibana/config/serverless.es.yml
 COPY --chown=1000:0 config/serverless.oblt.yml /usr/share/kibana/config/serverless.oblt.yml
 COPY --chown=1000:0 config/serverless.security.yml /usr/share/kibana/config/serverless.security.yml
-# Supportability enhancement: enable capturing heap snapshots. See https://nodejs.org/api/cli.html#--heapsnapshot-signalsignal
-RUN echo '\n--heapsnapshot-signal=SIGUSR2' >> config/node.options
-RUN echo '--diagnostic-dir=./data' >> config/node.options
+ENV PROFILER_SIGNAL=SIGUSR1
 {{/serverless}}
 {{^opensslLegacyProvider}}
 RUN sed 's/\(--openssl-legacy-provider\)/#\1/' -i config/node.options
@@ -190,7 +225,7 @@ ENTRYPOINT ["/bin/tini", "--"]
 CMD ["/app/kibana.sh"]
 # Generate a stub command that will be overwritten at runtime
 RUN mkdir /app && \
-    echo -e '#!/bin/bash\nexec /usr/local/bin/kibana-docker' > /app/kibana.sh && \
+    /usr/bin/echo -e '#!/bin/bash\nexec /usr/local/bin/kibana-docker' > /app/kibana.sh && \
     chmod 0555 /app/kibana.sh
 {{/cloud}}
 

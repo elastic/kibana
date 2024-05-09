@@ -129,6 +129,12 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
       [actionItem]
     );
 
+    const actionItemSavedSearchId = useMemo(() => {
+      return actionItem != null && actionItem.savedSearchId != null
+        ? [actionItem.savedSearchId]
+        : undefined;
+    }, [actionItem]);
+
     const onRefreshBtnClick = useCallback(() => {
       if (refetch != null) {
         refetch();
@@ -197,6 +203,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
         <EditTimelineActions
           deleteTimelines={deleteTimelines}
           ids={actionItemId}
+          savedSearchIds={actionItemSavedSearchId}
           isDeleteTimelineModalOpen={isDeleteTimelineModalOpen}
           isEnableDownloader={isEnableDownloader}
           onComplete={onCompleteEditTimelineAction}
@@ -218,7 +225,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
           title={i18n.IMPORT_TIMELINE}
         />
 
-        <div className={OPEN_TIMELINE_CLASS_NAME}>
+        <div data-test-subj="timelines-page-container" className={OPEN_TIMELINE_CLASS_NAME}>
           {!!timelineFilter && timelineFilter}
           <SearchRow
             data-test-subj="search-row"

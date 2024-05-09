@@ -10,6 +10,7 @@ import { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/s
 import { PluginSetupContract as AlertingPluginSetup } from '@kbn/alerting-plugin/server/plugin';
 import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { defineAlertTypes } from './alert_types';
 
 export interface FixtureSetupDeps {
@@ -34,7 +35,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
         all: {
           app: ['alerts', 'kibana'],
           savedObject: {
-            all: ['alert'],
+            all: [RULE_SAVED_OBJECT_TYPE],
             read: [],
           },
           alerting: {

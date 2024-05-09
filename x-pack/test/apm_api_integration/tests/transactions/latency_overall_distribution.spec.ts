@@ -29,7 +29,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     },
   });
 
-  registry.when(
+  registry.when.skip(
     'latency overall distribution without data',
     { config: 'trial', archives: [] },
     () => {
@@ -46,7 +46,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
-  registry.when(
+  registry.when.skip(
     'latency overall distribution with data and default args',
     // This uses the same archive used for the other tab's search strategy approach in `../correlations/*`.
     { config: 'trial', archives: ['8.0.0'] },

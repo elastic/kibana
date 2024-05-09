@@ -11,9 +11,9 @@ import { isEmpty } from 'lodash/fp';
 
 import { getTimelineUrl, useFormatUrl } from '../../../common/components/link_to';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
-import { timelineSelectors, timelineActions } from '../../../timelines/store/timeline';
+import { timelineSelectors, timelineActions } from '../../../timelines/store';
 import { SecurityPageName } from '../../../app/types';
-import { setInsertTimeline } from '../../../timelines/store/timeline/actions';
+import { setInsertTimeline } from '../../../timelines/store/actions';
 
 export interface UseInsertTimelineReturn {
   handleOnTimelineChange: (title: string, id: string | null, graphEventId?: string) => void;

@@ -8,7 +8,7 @@
 import { RawRule } from '../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { retryIfConflicts } from '../../lib/retry_if_conflicts';
-import { partiallyUpdateAlert } from '../../saved_objects';
+import { partiallyUpdateRule, RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RulesClientContext } from '../types';
 import { updateMetaAttributes } from '../lib';
@@ -28,7 +28,7 @@ export async function unmuteAll(
 
 async function unmuteAllWithOCC(context: RulesClientContext, { id }: { id: string }) {
   const { attributes, version } = await context.unsecuredSavedObjectsClient.get<RawRule>(
-    'alert',
+    RULE_SAVED_OBJECT_TYPE,
     id
   );
 
@@ -47,7 +47,7 @@ async function unmuteAllWithOCC(context: RulesClientContext, { id }: { id: strin
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.UNMUTE,
-        savedObject: { type: 'alert', id },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
         error,
       })
     );
@@ -58,7 +58,7 @@ async function unmuteAllWithOCC(context: RulesClientContext, { id }: { id: strin
     ruleAuditEvent({
       action: RuleAuditAction.UNMUTE,
       outcome: 'unknown',
-      savedObject: { type: 'alert', id },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
     })
   );
 
@@ -73,7 +73,7 @@ async function unmuteAllWithOCC(context: RulesClientContext, { id }: { id: strin
   });
   const updateOptions = { version };
 
-  await partiallyUpdateAlert(
+  await partiallyUpdateRule(
     context.unsecuredSavedObjectsClient,
     id,
     updateAttributes,

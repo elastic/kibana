@@ -7,17 +7,18 @@
 
 import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Router, Routes, Route } from '@kbn/shared-ux-router';
+
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { CoreStart } from '@kbn/core/public';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { EuiLoadingSpinner } from '@elastic/eui';
-import { AlertingPluginStart } from '../plugin';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { Route, Router, Routes } from '@kbn/shared-ux-router';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MAINTENANCE_WINDOW_PATHS } from '../../common';
 import { useLicense } from '../hooks/use_license';
+import { AlertingPluginStart } from '../plugin';
 
 const MaintenanceWindowsLazy: React.FC = React.lazy(() => import('../pages/maintenance_windows'));
 const MaintenanceWindowsCreateLazy: React.FC = React.lazy(
@@ -76,14 +77,13 @@ export const renderApp = ({
   mountParams: ManagementAppMountParams;
   kibanaVersion: string;
 }) => {
-  const { element, history, theme$ } = mountParams;
-  const i18nCore = core.i18n;
-  const isDarkMode = core.uiSettings.get('theme:darkMode');
+  const { element, history } = mountParams;
+  const { i18n, theme } = core;
 
   const queryClient = new QueryClient();
 
   ReactDOM.render(
-    <KibanaThemeProvider theme$={theme$}>
+    <KibanaRenderContextProvider i18n={i18n} theme={theme}>
       <KibanaContextProvider
         services={{
           ...core,
@@ -93,16 +93,12 @@ export const renderApp = ({
         }}
       >
         <Router history={history}>
-          <EuiThemeProvider darkMode={isDarkMode}>
-            <i18nCore.Context>
-              <QueryClientProvider client={queryClient}>
-                <App />
-              </QueryClientProvider>
-            </i18nCore.Context>
-          </EuiThemeProvider>
+          <QueryClientProvider client={queryClient}>
+            <App />
+          </QueryClientProvider>
         </Router>
       </KibanaContextProvider>
-    </KibanaThemeProvider>,
+    </KibanaRenderContextProvider>,
     element
   );
   return () => {

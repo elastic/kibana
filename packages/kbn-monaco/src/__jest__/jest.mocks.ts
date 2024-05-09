@@ -13,7 +13,7 @@ const createMockModel = (ID: string) => {
     uri: '',
     id: 'mockModel',
     value: '',
-    getModeId: () => ID,
+    getLanguageId: () => ID,
     changeContentListeners: [],
     setValue(newValue) {
       this.value = newValue;

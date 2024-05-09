@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
 import { get, isEmpty } from 'lodash';
 
 import { OptionsListRequestBody } from '../../common/options_list/types';
@@ -16,7 +17,7 @@ import { OptionsListValidationAggregationBuilder } from './types';
  */
 export const getValidationAggregationBuilder: () => OptionsListValidationAggregationBuilder =
   () => ({
-    buildAggregation: ({ selectedOptions, fieldName }: OptionsListRequestBody) => {
+    buildAggregation: ({ selectedOptions, fieldName, fieldSpec }: OptionsListRequestBody) => {
       let selectedOptionsFilters;
       if (selectedOptions) {
         selectedOptionsFilters = selectedOptions.reduce((acc, currentOption) => {
@@ -24,16 +25,43 @@ export const getValidationAggregationBuilder: () => OptionsListValidationAggrega
           return acc;
         }, {} as { [key: string]: { match: { [key: string]: string } } });
       }
-      return selectedOptionsFilters && !isEmpty(selectedOptionsFilters)
-        ? {
-            filters: {
-              filters: selectedOptionsFilters,
+
+      if (isEmpty(selectedOptionsFilters ?? [])) {
+        return {};
+      }
+
+      let validationAggregation: any = {
+        validation: {
+          filters: {
+            filters: selectedOptionsFilters,
+          },
+        },
+      };
+
+      const isNested = fieldSpec && getFieldSubtypeNested(fieldSpec);
+      if (isNested) {
+        validationAggregation = {
+          nestedValidation: {
+            nested: {
+              path: isNested.nested.path,
             },
-          }
-        : undefined;
+            aggs: {
+              ...validationAggregation,
+            },
+          },
+        };
+      }
+
+      return validationAggregation;
     },
-    parse: (rawEsResult) => {
-      const rawInvalidSuggestions = get(rawEsResult, 'aggregations.validation.buckets');
+    parse: (rawEsResult, { fieldSpec }) => {
+      const isNested = fieldSpec && getFieldSubtypeNested(fieldSpec);
+      const rawInvalidSuggestions = get(
+        rawEsResult,
+        isNested
+          ? 'aggregations.nestedValidation.validation.buckets'
+          : 'aggregations.validation.buckets'
+      );
       return rawInvalidSuggestions && !isEmpty(rawInvalidSuggestions)
         ? Object.keys(rawInvalidSuggestions).filter(
             (key) => rawInvalidSuggestions[key].doc_count === 0

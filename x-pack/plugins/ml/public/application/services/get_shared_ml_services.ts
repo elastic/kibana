@@ -21,5 +21,6 @@ export function getMlSharedServices(httpStart: HttpStart) {
 
   return {
     elasticModels: new ElasticModels(mlApiServices.trainedModels),
+    mlApiServices,
   };
 }

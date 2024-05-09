@@ -7,7 +7,7 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import { keyBy } from 'lodash';
 import { defer, from } from 'rxjs';
 import { rateLimitingForkJoin } from '../../common/data_views/utils';
@@ -18,6 +18,7 @@ import {
   getCapabilitiesForRollupIndices,
   mergeCapabilitiesWithFields,
 } from './lib';
+import { DataViewType } from '../../common/types';
 
 export interface FieldDescriptor {
   aggregatable: boolean;
@@ -32,6 +33,7 @@ export interface FieldDescriptor {
   timeZone?: string[];
   timeSeriesMetric?: estypes.MappingTimeSeriesMetricType;
   timeSeriesDimension?: boolean;
+  defaultFormatter?: string;
 }
 
 interface FieldSubType {
@@ -39,19 +41,24 @@ interface FieldSubType {
   nested?: { path: string };
 }
 
+interface IndexPatternsFetcherOptionalParams {
+  uiSettingsClient: IUiSettingsClient;
+  allowNoIndices?: boolean;
+  rollupsEnabled?: boolean;
+}
+
 export class IndexPatternsFetcher {
-  private elasticsearchClient: ElasticsearchClient;
-  private allowNoIndices: boolean;
-  private rollupsEnabled: boolean;
+  private readonly uiSettingsClient?: IUiSettingsClient;
+  private readonly allowNoIndices: boolean;
+  private readonly rollupsEnabled: boolean;
 
   constructor(
-    elasticsearchClient: ElasticsearchClient,
-    allowNoIndices: boolean = false,
-    rollupsEnabled: boolean = false
+    private readonly elasticsearchClient: ElasticsearchClient,
+    optionalParams?: IndexPatternsFetcherOptionalParams
   ) {
-    this.elasticsearchClient = elasticsearchClient;
-    this.allowNoIndices = allowNoIndices;
-    this.rollupsEnabled = rollupsEnabled;
+    this.uiSettingsClient = optionalParams?.uiSettingsClient;
+    this.allowNoIndices = optionalParams?.allowNoIndices || false;
+    this.rollupsEnabled = optionalParams?.rollupsEnabled || false;
   }
 
   /**
@@ -72,6 +79,8 @@ export class IndexPatternsFetcher {
     indexFilter?: QueryDslQueryContainer;
     fields?: string[];
     allowHidden?: boolean;
+    fieldTypes?: string[];
+    includeEmptyFields?: boolean;
   }): Promise<{ fields: FieldDescriptor[]; indices: string[] }> {
     const {
       pattern,
@@ -81,6 +90,8 @@ export class IndexPatternsFetcher {
       rollupIndex,
       indexFilter,
       allowHidden,
+      fieldTypes,
+      includeEmptyFields,
     } = options;
     const allowNoIndices = fieldCapsOptions
       ? fieldCapsOptions.allow_no_indices
@@ -90,6 +101,7 @@ export class IndexPatternsFetcher {
 
     const fieldCapsResponse = await getFieldCapabilities({
       callCluster: this.elasticsearchClient,
+      uiSettingsClient: this.uiSettingsClient,
       indices: pattern,
       metaFields,
       fieldCapsOptions: {
@@ -99,9 +111,11 @@ export class IndexPatternsFetcher {
       indexFilter,
       fields: options.fields || ['*'],
       expandWildcards,
+      fieldTypes,
+      includeEmptyFields,
     });
 
-    if (this.rollupsEnabled && type === 'rollup' && rollupIndex) {
+    if (this.rollupsEnabled && type === DataViewType.ROLLUP && rollupIndex) {
       const rollupFields: FieldDescriptor[] = [];
       const capabilityCheck = getCapabilitiesForRollupIndices(
         await this.elasticsearchClient.rollup.getRollupIndexCaps({

@@ -29,18 +29,20 @@ import {
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_TRIAL,
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
-  REPORTING_TRANSACTION_TYPE,
 } from '@kbn/reporting-common';
-import type { TaskRunResult } from '@kbn/reporting-common/types';
+import type { TaskInstanceFields, TaskRunResult } from '@kbn/reporting-common/types';
 import {
   JobParamsPNGV2,
   PNG_JOB_TYPE_V2,
   PNG_REPORT_TYPE_V2,
   TaskPayloadPNGV2,
 } from '@kbn/reporting-export-types-png-common';
-import { decryptJobHeaders, getFullRedirectAppUrl, ExportType } from '@kbn/reporting-server';
-
-import { generatePngObservable } from './generate_png';
+import {
+  decryptJobHeaders,
+  ExportType,
+  getFullRedirectAppUrl,
+  REPORTING_TRANSACTION_TYPE,
+} from '@kbn/reporting-server';
 
 export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> {
   id = PNG_REPORT_TYPE_V2;
@@ -85,17 +87,18 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
   public runTask = (
     jobId: string,
     payload: TaskPayloadPNGV2,
+    taskInstanceFields: TaskInstanceFields,
     cancellationToken: CancellationToken,
     stream: Writable
   ) => {
-    const jobLogger = this.logger.get(`execute-job:${jobId}`);
+    const logger = this.logger.get(`execute-job:${jobId}`);
     const apmTrans = apm.startTransaction('execute-job-pdf-v2', REPORTING_TRANSACTION_TYPE);
     const apmGetAssets = apmTrans.startSpan('get-assets', 'setup');
     let apmGeneratePng: { end: () => void } | null | undefined;
     const { encryptionKey } = this.config;
 
     const process$: Observable<TaskRunResult> = of(1).pipe(
-      mergeMap(() => decryptJobHeaders(encryptionKey, payload.headers, jobLogger)),
+      mergeMap(() => decryptJobHeaders(encryptionKey, payload.headers, logger)),
       mergeMap((headers) => {
         const url = getFullRedirectAppUrl(
           this.config,
@@ -109,21 +112,55 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
         apmGetAssets?.end();
         apmGeneratePng = apmTrans.startSpan('generate-png-pipeline', 'execute');
 
-        return generatePngObservable(
-          () =>
-            this.startDeps.screenshotting!.getScreenshots({
-              format: 'png',
-              headers,
-              layout: { ...payload.layout, id: 'preserve_layout' },
-              urls: [[url, { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: locatorParams }]],
-            }),
-          jobLogger,
-          {
-            headers,
+        const layout = { ...payload.layout, id: 'preserve_layout' as const };
+        if (!layout.dimensions) {
+          throw new Error(`LayoutParams.Dimensions is undefined.`);
+        }
+
+        const apmScreenshots = apmTrans?.startSpan('screenshots-pipeline', 'setup');
+        let apmBuffer: typeof apm.currentSpan;
+
+        return this.startDeps
+          .screenshotting!.getScreenshots({
+            format: 'png',
             browserTimezone: payload.browserTimezone,
-            layout: { ...payload.layout, id: 'preserve_layout' },
-          }
-        );
+            headers,
+            layout,
+            urls: [[url, { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: locatorParams }]],
+            taskInstanceFields,
+            logger,
+          })
+          .pipe(
+            tap(({ metrics }) => {
+              if (metrics) {
+                apmTrans.setLabel('cpu', metrics.cpu, false);
+                apmTrans.setLabel('memory', metrics.memory, false);
+              }
+              apmScreenshots?.end();
+              apmBuffer = apmTrans.startSpan('get-buffer', 'output') ?? null;
+            }),
+            map(({ metrics, results }) => ({
+              metrics,
+              buffer: results[0].screenshots[0].data,
+              warnings: results.reduce((found, current) => {
+                if (current.error) {
+                  found.push(current.error.message);
+                }
+                if (current.renderErrors) {
+                  found.push(...current.renderErrors);
+                }
+                return found;
+              }, [] as string[]),
+            })),
+            tap(({ buffer }) => {
+              logger.debug(`PNG buffer byte length: ${buffer.byteLength}`);
+              apmTrans.setLabel('byte-length', buffer.byteLength, false);
+            }),
+            finalize(() => {
+              apmBuffer?.end();
+              apmTrans.end();
+            })
+          );
       }),
       tap(({ buffer }) => stream.write(buffer)),
       map(({ metrics, warnings }) => ({
@@ -131,7 +168,7 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
         metrics: { png: metrics },
         warnings,
       })),
-      tap({ error: (error) => jobLogger.error(error) }),
+      tap({ error: (error) => logger.error(error) }),
       finalize(() => apmGeneratePng?.end())
     );
 

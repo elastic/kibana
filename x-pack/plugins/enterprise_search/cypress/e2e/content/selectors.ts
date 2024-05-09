@@ -6,10 +6,10 @@
  */
 
 export const ROUTES = {
-  CRAWLER_INDEX: '/app/enterprise_search/content/search_indices/new_index/crawler',
+  CRAWLER_INDEX: '/app/enterprise_search/content/crawlers/new_crawler',
   NEW_INDEX: '/app/enterprise_search/content/search_indices/new_index',
   SEARCH_INDICES_OVERVIEW: '/app/enterprise_search/content/search_indices/',
-  SELECT_CONNECTOR: '/app/enterprise_search/content/search_indices/new_index/select_connector',
+  SELECT_CONNECTOR: '/app/enterprise_search/content/connectors/select_connector',
 };
 
 export const SEARCH_INDICES = {

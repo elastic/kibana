@@ -7,7 +7,7 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { getVulnerabilitiesTrends } from './get_vulnerabilities_trend';
-import type { CnvmDashboardData } from '../../../common/types';
+import type { CnvmDashboardData } from '../../../common/types_old';
 import { VULNERABILITIES_DASHBOARD_ROUTE_PATH } from '../../../common/constants';
 import { CspRouter } from '../../types';
 import { getVulnerabilitiesStatistics } from './get_vulnerabilities_statistics';

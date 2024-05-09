@@ -37,6 +37,13 @@ import {
 import { DataRequest } from '../../util/data_request';
 import { FeatureGeometryFilterForm } from '../../../connected_components/mb_map/tooltip_control/features_tooltip';
 
+export function hasVectorSourceMethod(
+  source: ISource,
+  methodName: keyof IVectorSource
+): source is Pick<IVectorSource, typeof methodName> {
+  return typeof (source as IVectorSource)[methodName] === 'function';
+}
+
 export interface SourceStatus {
   tooltipContent: string | null;
   areResultsTrimmed: boolean;
@@ -133,6 +140,11 @@ export interface IVectorSource extends ISource {
     mbFeature,
     onClose,
   }: GetFeatureActionsArgs): TooltipFeatureAction[];
+
+  /*
+   * Provide unique ids for managing source requests in Inspector
+   */
+  getInspectorRequestIds(): string[];
 }
 
 export class AbstractVectorSource extends AbstractSource implements IVectorSource {
@@ -178,7 +190,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     isRequestStillActive: () => boolean,
     inspectorAdapters: Adapters
   ): Promise<GeoJsonWithMeta> {
-    throw new Error('Should implement VectorSource#getGeoJson');
+    throw new Error('Should implement VectorSource#getGeoJsonWithMeta');
   }
 
   hasTooltipProperties() {
@@ -284,5 +296,9 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
           },
         ]
       : [];
+  }
+
+  getInspectorRequestIds(): string[] {
+    return [];
   }
 }

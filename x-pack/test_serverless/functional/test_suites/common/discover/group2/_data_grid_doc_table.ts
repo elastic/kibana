@@ -19,6 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects([
     'common',
+    'svlCommonPage',
     'discover',
     'header',
     'timePicker',
@@ -41,6 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await PageObjects.svlCommonPage.loginWithPrivilegedRole();
     });
 
     beforeEach(async () => {
@@ -95,7 +97,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug(`expanded document id: ${expandDocId}`);
 
       await dataGrid.clickRowToggle();
-      await find.clickByCssSelectorWhenNotDisabledWithoutRetry('#kbn_doc_viewer_tab_1');
+      await find.clickByCssSelectorWhenNotDisabledWithoutRetry(
+        '#kbn_doc_viewer_tab_doc_view_source'
+      );
 
       await retry.waitForWithTimeout(
         'document id in flyout matching the expanded document id',
@@ -137,7 +141,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug(`expanded document id: ${expandDocId}`);
 
       await dataGrid.clickRowToggle();
-      await find.clickByCssSelectorWhenNotDisabledWithoutRetry('#kbn_doc_viewer_tab_1');
+      await find.clickByCssSelectorWhenNotDisabledWithoutRetry(
+        '#kbn_doc_viewer_tab_doc_view_source'
+      );
 
       await retry.waitForWithTimeout(
         'document id in flyout matching the expanded document id',

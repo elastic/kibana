@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiText } from '@elastic/eui';
 
-import { CombinedField } from './types';
+import type { CombinedField } from './types';
 
 export function CombinedFieldLabel({ combinedField }: { combinedField: CombinedField }) {
   return <EuiText size="s">{getCombinedFieldLabel(combinedField)}</EuiText>;

@@ -9,36 +9,18 @@ import {
   BULK_ACTIONS,
   EXPORT_TIMELINE,
   TIMELINE_CHECKBOX,
-  EXPAND_NOTES_BTN,
   EXPORT_TIMELINE_ACTION,
-  IMPORT_BTN,
-  IMPORT_TIMELINE_BTN,
-  INPUT_FILE,
   TIMELINES_TABLE,
   TIMELINE,
   TIMELINE_NAME,
   TIMELINE_ITEM_ACTION_BTN,
+  TIMELINES_OVERVIEW_SEARCH,
+  TIMELINES_OVERVIEW_ONLY_FAVORITES,
 } from '../screens/timelines';
 import { SELECT_ALL_CHECKBOX } from '../screens/shared';
-import { CREATE_NEW_TIMELINE_WITH_BORDER } from '../screens/timeline';
-
-export const expandNotes = () => {
-  cy.get(EXPAND_NOTES_BTN).click();
-};
-
-export const importTimeline = (timeline: string) => {
-  cy.get(IMPORT_TIMELINE_BTN).click();
-  cy.get(INPUT_FILE).click({ force: true });
-  cy.get(INPUT_FILE).attachFile(timeline);
-  cy.get(INPUT_FILE).trigger('change');
-  cy.get(IMPORT_BTN).last().click({ force: true });
-  cy.get(INPUT_FILE).should('not.exist');
-};
 
 export const openTimeline = (id?: string) => {
-  cy.get(id ? TIMELINE(id) : TIMELINE_NAME)
-    .should('be.visible')
-    .click();
+  cy.get(id ? TIMELINE(id) : TIMELINE_NAME).click();
 };
 
 export const waitForTimelinesPanelToBeLoaded = () => {
@@ -55,7 +37,6 @@ export const selectTimeline = (timelineId: string) => {
 };
 
 export const selectAllTimelines = () => {
-  cy.get(SELECT_ALL_CHECKBOX).should('exist');
   cy.get(SELECT_ALL_CHECKBOX).click();
 };
 
@@ -64,5 +45,24 @@ export const exportSelectedTimelines = () => {
   cy.get(EXPORT_TIMELINE_ACTION).should('not.be.disabled');
   cy.get(EXPORT_TIMELINE_ACTION).click();
 };
+/**
+ * Toggle on/off to filter for favorite timelines
+ */
+export const toggleFavoriteFilter = () => {
+  cy.get(TIMELINES_OVERVIEW_ONLY_FAVORITES).click();
+};
 
-export const createTimeline = () => cy.get(CREATE_NEW_TIMELINE_WITH_BORDER).click();
+/**
+ * Enter a value in the search bar and press enter to filter the timelines table
+ */
+export const searchForTimeline = (filter: string) => {
+  cy.get(TIMELINES_OVERVIEW_SEARCH).type(filter);
+  cy.get(TIMELINES_OVERVIEW_SEARCH).trigger('search');
+};
+
+/**
+ * Clear the search bar
+ */
+export const clearSearchBar = () => {
+  cy.get(TIMELINES_OVERVIEW_SEARCH).clear();
+};

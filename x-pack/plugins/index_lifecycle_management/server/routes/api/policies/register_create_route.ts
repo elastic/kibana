@@ -33,6 +33,7 @@ async function createPolicy(
  */
 const bodySchema = schema.object({
   name: schema.string(),
+  deprecated: schema.maybe(schema.boolean()),
   phases: schema.object({
     hot: schema.any(),
     warm: schema.maybe(schema.any()),

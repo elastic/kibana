@@ -1369,7 +1369,7 @@
             "section": "def-common.Tag",
             "text": "Tag"
           },
-          " | { type: \"__create_option__\"; }>, \"options\" | \"selectedOptions\" | \"async\" | \"compressed\" | \"fullWidth\" | \"isClearable\" | \"singleSelection\" | \"prepend\" | \"append\" | \"sortMatchesBy\"> & Partial<DefaultProps<",
+          " | { type: \"__create_option__\"; }>, \"options\" | \"selectedOptions\" | \"optionMatcher\" | \"async\" | \"compressed\" | \"fullWidth\" | \"isClearable\" | \"singleSelection\" | \"prepend\" | \"append\" | \"sortMatchesBy\"> & Partial<DefaultProps<",
           {
             "pluginId": "savedObjectsTaggingOss",
             "scope": "common",
@@ -2017,6 +2017,17 @@
             "type": "string",
             "tags": [],
             "label": "id",
+            "description": [],
+            "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsTaggingOss",
+            "id": "def-common.Tag.managed",
+            "type": "boolean",
+            "tags": [],
+            "label": "managed",
             "description": [],
             "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
             "deprecated": false,

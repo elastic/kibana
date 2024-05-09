@@ -84,7 +84,7 @@ import {
   getIndicatorAndButton,
   getIndicatorAtLeastOneInvalidationText,
   getIndicatorDeleteButton,
-  getIndicatorIndex,
+  getRuleIndexInput,
   getIndicatorIndexComboField,
   getIndicatorIndicatorIndex,
   getIndicatorInvalidationText,
@@ -115,8 +115,7 @@ import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 
 const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"';
 
-// TODO: https://github.com/elastic/kibana/issues/161539
-describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('indicator match', { tags: ['@ess', '@serverless'] }, () => {
   describe('Detection rules, Indicator Match', () => {
     const expectedUrls = getNewThreatIndicatorRule().references?.join('');
     const expectedFalsePositives = getNewThreatIndicatorRule().false_positives?.join('');
@@ -136,13 +135,12 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
     describe('Creating new indicator match rules', () => {
       describe('Index patterns', () => {
         beforeEach(() => {
-          login();
           visit(CREATE_RULE_URL);
           selectIndicatorMatchType();
         });
 
         it('Contains a predefined index pattern', () => {
-          getIndicatorIndex().should('have.text', getIndexPatterns().join(''));
+          getRuleIndexInput().should('have.text', getIndexPatterns().join(''));
         });
 
         it('Does NOT show invalidation text on initial page load if indicator index pattern is filled out', () => {
@@ -160,7 +158,6 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
 
       describe('Indicator index patterns', () => {
         beforeEach(() => {
-          login();
           visit(CREATE_RULE_URL);
           selectIndicatorMatchType();
         });
@@ -182,7 +179,6 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
 
       describe('custom query input', () => {
         beforeEach(() => {
-          login();
           visit(CREATE_RULE_URL);
           selectIndicatorMatchType();
         });
@@ -199,7 +195,6 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
 
       describe('custom indicator query input', () => {
         beforeEach(() => {
-          login();
           visit(CREATE_RULE_URL);
           selectIndicatorMatchType();
         });
@@ -216,7 +211,6 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
 
       describe('Indicator mapping', () => {
         beforeEach(() => {
-          login();
           const rule = getNewThreatIndicatorRule();
           visit(CREATE_RULE_URL);
           selectIndicatorMatchType();
@@ -287,10 +281,9 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
           });
           getIndicatorDeleteButton().click();
           getIndicatorIndexComboField().find('input').should('have.value', 'agent.name');
-          getIndicatorMappingComboField().should(
-            'have.text',
-            getNewThreatIndicatorRule().threat_mapping[0].entries[0].value
-          );
+          getIndicatorMappingComboField()
+            .find('input')
+            .should('have.value', getNewThreatIndicatorRule().threat_mapping[0].entries[0].value);
           getIndicatorIndexComboField(2).should('not.exist');
           getIndicatorMappingComboField(2).should('not.exist');
         });
@@ -343,8 +336,14 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
             indicatorIndexField: getNewThreatIndicatorRule().threat_mapping[0].entries[0].value,
           });
           getIndicatorDeleteButton().click();
-          getIndicatorIndexComboField().should('text', 'Search');
-          getIndicatorMappingComboField().should('text', 'Search');
+          getIndicatorIndexComboField()
+            .find('input')
+            .should('value', '')
+            .should('have.attr', 'placeholder', 'Search');
+          getIndicatorMappingComboField()
+            .find('input')
+            .should('value', '')
+            .should('have.attr', 'placeholder', 'Search');
           getIndicatorIndexComboField(2).should('not.exist');
           getIndicatorMappingComboField(2).should('not.exist');
         });
@@ -368,22 +367,18 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
             indicatorIndexField: getNewThreatIndicatorRule().threat_mapping[0].entries[0].value,
           });
           getIndicatorDeleteButton(2).click();
-          getIndicatorIndexComboField(1).should(
-            'text',
-            getNewThreatIndicatorRule().threat_mapping[0].entries[0].field
-          );
-          getIndicatorMappingComboField(1).should(
-            'text',
-            getNewThreatIndicatorRule().threat_mapping[0].entries[0].value
-          );
-          getIndicatorIndexComboField(2).should(
-            'text',
-            getNewThreatIndicatorRule().threat_mapping[0].entries[0].field
-          );
-          getIndicatorMappingComboField(2).should(
-            'text',
-            getNewThreatIndicatorRule().threat_mapping[0].entries[0].value
-          );
+          getIndicatorIndexComboField(1)
+            .find('input')
+            .should('value', getNewThreatIndicatorRule().threat_mapping[0].entries[0].field);
+          getIndicatorMappingComboField(1)
+            .find('input')
+            .should('value', getNewThreatIndicatorRule().threat_mapping[0].entries[0].value);
+          getIndicatorIndexComboField(2)
+            .find('input')
+            .should('value', getNewThreatIndicatorRule().threat_mapping[0].entries[0].field);
+          getIndicatorMappingComboField(2)
+            .find('input')
+            .should('value', getNewThreatIndicatorRule().threat_mapping[0].entries[0].value);
           getIndicatorIndexComboField(3).should('not.exist');
           getIndicatorMappingComboField(3).should('not.exist');
         });
@@ -401,14 +396,12 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
             indicatorIndexField: getNewThreatIndicatorRule().threat_mapping[0].entries[0].value,
           });
           getIndicatorDeleteButton().click();
-          getIndicatorIndexComboField().should(
-            'text',
-            getNewThreatIndicatorRule().threat_mapping[0].entries[0].field
-          );
-          getIndicatorMappingComboField().should(
-            'text',
-            getNewThreatIndicatorRule().threat_mapping[0].entries[0].value
-          );
+          getIndicatorIndexComboField()
+            .find('input')
+            .should('value', getNewThreatIndicatorRule().threat_mapping[0].entries[0].field);
+          getIndicatorMappingComboField()
+            .find('input')
+            .should('value', getNewThreatIndicatorRule().threat_mapping[0].entries[0].value);
           getIndicatorIndexComboField(2).should('not.exist');
           getIndicatorMappingComboField(2).should('not.exist');
         });
@@ -416,7 +409,6 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
 
       describe('Schedule', () => {
         it('IM rule has 1h time interval and lookback by default', () => {
-          login();
           visit(CREATE_RULE_URL);
           selectIndicatorMatchType();
           fillDefineIndicatorMatchRuleAndContinue(getNewThreatIndicatorRule());

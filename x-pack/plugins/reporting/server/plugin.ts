@@ -12,9 +12,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { PLUGIN_ID } from '@kbn/reporting-common';
-import type { ReportingConfigType } from '@kbn/reporting-server';
-import { setFieldFormats } from '@kbn/reporting-server';
+import { PLUGIN_ID, setFieldFormats, type ReportingConfigType } from '@kbn/reporting-server';
 import { ReportingCore } from '.';
 import { registerUiSettings } from './config';
 import { registerDeprecations } from './deprecations';
@@ -27,7 +25,7 @@ import type {
   ReportingStartDeps,
 } from './types';
 import { ReportingRequestHandlerContext } from './types';
-import { registerReportingUsageCollector } from './usage';
+import { registerReportingEventTypes, registerReportingUsageCollector } from './usage';
 
 /*
  * @internal
@@ -74,6 +72,7 @@ export class ReportingPlugin
     registerUiSettings(core);
     registerDeprecations({ core, reportingCore });
     registerReportingUsageCollector(reportingCore, plugins.usageCollection);
+    registerReportingEventTypes(core);
 
     // Routes
     registerRoutes(reportingCore, this.logger);
@@ -108,6 +107,7 @@ export class ReportingPlugin
       await reportingCore.pluginStart({
         logger,
         esClient: elasticsearch.client,
+        analytics: core.analytics,
         savedObjects,
         uiSettings,
         store,

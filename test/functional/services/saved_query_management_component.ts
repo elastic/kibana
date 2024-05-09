@@ -88,6 +88,9 @@ export class SavedQueryManagementComponentService extends FtrService {
     await this.testSubjects.click(`~load-saved-query-${title}-button`);
     await this.testSubjects.click('saved-query-management-apply-changes-button');
     await this.retry.try(async () => {
+      await this.testSubjects.missingOrFail('queryBarMenuPanel');
+    });
+    await this.retry.try(async () => {
       await this.openSavedQueryManagementComponent();
       const selectedSavedQueryText = await this.testSubjects.getVisibleText('savedQueryTitle');
       expect(selectedSavedQueryText).to.eql(title);
@@ -105,7 +108,7 @@ export class SavedQueryManagementComponentService extends FtrService {
     }
     await this.testSubjects.click(`~load-saved-query-${title}-button`);
     await this.retry.waitFor('delete saved query', async () => {
-      await this.testSubjects.click(`delete-saved-query-${title}-button`);
+      await this.testSubjects.click(`delete-saved-query-button`);
       const exists = await this.testSubjects.exists('confirmModalTitleText');
       return exists === true;
     });
@@ -149,6 +152,9 @@ export class SavedQueryManagementComponentService extends FtrService {
     }
 
     await this.testSubjects.click('savedQueryFormSaveButton');
+    await this.retry.try(async () => {
+      await this.testSubjects.missingOrFail('saveQueryForm');
+    });
   }
 
   async savedQueryExist(title: string) {
@@ -160,8 +166,8 @@ export class SavedQueryManagementComponentService extends FtrService {
   }
 
   async savedQueryExistOrFail(title: string) {
-    await this.openSavedQueryManagementComponent();
     await this.retry.waitFor('load saved query', async () => {
+      await this.openSavedQueryManagementComponent();
       const shouldClickLoadMenu = await this.testSubjects.exists(
         'saved-query-management-load-button'
       );

@@ -6,7 +6,7 @@
  */
 
 import React, { Component, Fragment, ReactNode } from 'react';
-
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { EuiButtonEmpty, EuiIcon, EuiToolTip, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { type ILayer, INCOMPLETE_RESULTS_WARNING } from '../../../../../../classes/layers/layer';
@@ -19,6 +19,7 @@ interface Footnote {
 }
 
 export interface ReduxStateProps {
+  inspectorAdapters: Adapters;
   isUsingSearch: boolean;
   zoom: number;
 }
@@ -69,7 +70,7 @@ export class TOCEntryButton extends Component<Props, State> {
     footnotes: Footnote[];
     postScript?: string;
   } {
-    const errors = this.props.layer.getErrors();
+    const errors = this.props.layer.getErrors(this.props.inspectorAdapters);
     if (errors.length) {
       const errorIcon = (
         <EuiIcon
@@ -88,7 +89,7 @@ export class TOCEntryButton extends Component<Props, State> {
         : {
             icon: errorIcon,
             tooltipContent: this.props.layer
-              .getErrors()
+              .getErrors(this.props.inspectorAdapters)
               .map(({ title }) => <div key={title}>{title}</div>),
             footnotes: [],
           };

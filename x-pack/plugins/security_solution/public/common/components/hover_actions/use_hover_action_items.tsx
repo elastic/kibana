@@ -11,17 +11,15 @@ import type { DraggableId } from '@hello-pangea/dnd';
 
 import { isEmpty } from 'lodash';
 
-import { FilterManager } from '@kbn/data-plugin/public';
 import { useDispatch } from 'react-redux';
-import { isActiveTimeline } from '../../../helpers';
-import { timelineSelectors } from '../../../timelines/store/timeline';
+import { getSourcererScopeId, isActiveTimeline } from '../../../helpers';
 import { useKibana } from '../../lib/kibana';
 import { allowTopN } from '../drag_and_drop/helpers';
 import type { ColumnHeaderOptions, DataProvider } from '../../../../common/types/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
 import { ShowTopNButton } from './actions/show_top_n';
-import { addProvider } from '../../../timelines/store/timeline/actions';
-import { useDeepEqualSelector } from '../../hooks/use_selector';
+import { addProvider } from '../../../timelines/store/actions';
+import { useDataViewId } from '../../hooks/use_data_view_id';
 export interface UseHoverActionItemsProps {
   dataProvider?: DataProvider | DataProvider[];
   dataType?: string;
@@ -84,7 +82,12 @@ export const useHoverActionItems = ({
 }: UseHoverActionItemsProps): UseHoverActionItems => {
   const kibana = useKibana();
   const dispatch = useDispatch();
-  const { timelines, uiSettings } = kibana.services;
+  const { timelines, timelineDataService, analytics, i18n, theme } = kibana.services;
+  const {
+    query: { filterManager: timelineFilterManager },
+  } = timelineDataService;
+  const dataViewId = useDataViewId(getSourcererScopeId(scopeId ?? ''));
+
   // Common actions used by the alert table and alert flyout
   const {
     getAddToTimelineButton,
@@ -94,22 +97,12 @@ export const useHoverActionItems = ({
     getFilterOutValueButton,
     getOverflowButton,
   } = timelines.getHoverActions();
-  const filterManagerBackup = useMemo(
-    () => kibana.services.data.query.filterManager,
-    [kibana.services.data.query.filterManager]
-  );
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
 
-  const activeFilterManager = useDeepEqualSelector((state) =>
-    isActiveTimeline(scopeId ?? '') ? getTimeline(state, scopeId ?? '')?.filterManager : undefined
-  );
-  const filterManager = useMemo(
-    () =>
-      isActiveTimeline(scopeId ?? '')
-        ? activeFilterManager ?? new FilterManager(uiSettings)
-        : filterManagerBackup,
-    [scopeId, activeFilterManager, uiSettings, filterManagerBackup]
-  );
+  const filterManager = useMemo(() => {
+    return isActiveTimeline(scopeId ?? '')
+      ? timelineFilterManager
+      : kibana.services.data.query.filterManager;
+  }, [scopeId, timelineFilterManager, kibana.services.data.query.filterManager]);
 
   /*
    *   Add to Timeline button, adds data to dataprovider but does not persists the Timeline
@@ -178,124 +171,130 @@ export const useHoverActionItems = ({
     ]
   );
 
-  const allItems = useMemo(
-    () =>
-      [
-        showFilters ? (
-          <div data-test-subj="hover-actions-filter-for" key="hover-actions-filter-for">
-            {getFilterForValueButton({
-              defaultFocusedButtonRef,
-              field,
-              filterManager,
-              keyboardEvent: stKeyboardEvent,
-              onClick: handleHoverActionClicked,
-              onFilterAdded,
-              ownFocus,
-              showTooltip: enableOverflowButton ? false : true,
-              value: values,
-            })}
-          </div>
-        ) : null,
-        showFilters ? (
-          <div data-test-subj="hover-actions-filter-out" key="hover-actions-filter-out">
-            {getFilterOutValueButton({
-              field,
-              filterManager,
-              keyboardEvent: stKeyboardEvent,
-              onFilterAdded,
-              ownFocus,
-              onClick: handleHoverActionClicked,
-              showTooltip: enableOverflowButton ? false : true,
-              value: values,
-            })}
-          </div>
-        ) : null,
-        toggleColumn && !shouldDisableColumnToggle ? (
-          <div data-test-subj="hover-actions-toggle-column" key="hover-actions-toggle-column">
-            {getColumnToggleButton({
-              Component: enableOverflowButton ? EuiContextMenuItem : undefined,
-              field,
-              isDisabled: isObjectArray && dataType !== 'geo_point',
-              isObjectArray,
-              keyboardEvent: stKeyboardEvent,
-              ownFocus,
-              onClick: handleHoverActionClicked,
-              showTooltip: enableOverflowButton ? false : true,
-              toggleColumn,
-              value: values,
-            })}
-          </div>
-        ) : null,
-        values != null && (draggableId != null || !isEmpty(dataProvider)) && !hideAddToTimeline ? (
-          <div data-test-subj="hover-actions-add-timeline" key="hover-actions-add-timeline">
-            {getAddToTimelineButton({
-              Component: enableOverflowButton ? EuiContextMenuItem : undefined,
-              dataProvider,
-              draggableId,
-              field,
-              keyboardEvent: stKeyboardEvent,
-              ownFocus,
-              onClick: onAddToTimelineClicked,
-              showTooltip: enableOverflowButton ? false : true,
-              value: values,
-            })}
-          </div>
-        ) : null,
-        allowTopN({
-          fieldType,
-          isAggregatable,
-          fieldName: field,
-          hideTopN,
-        })
-          ? showTopNBtn
-          : null,
-        field != null ? (
-          <div data-test-subj="hover-actions-copy-button" key="hover-actions-copy-button">
-            {getCopyButton({
-              Component: enableOverflowButton ? EuiContextMenuItem : undefined,
-              field,
-              isHoverAction: true,
-              keyboardEvent: stKeyboardEvent,
-              ownFocus,
-              onClick: handleHoverActionClicked,
-              showTooltip: enableOverflowButton ? false : true,
-              value: values,
-            })}
-          </div>
-        ) : null,
-      ].filter((item) => {
-        return item != null;
-      }),
-    [
-      dataProvider,
-      dataType,
-      defaultFocusedButtonRef,
-      draggableId,
-      enableOverflowButton,
-      field,
-      fieldType,
-      isAggregatable,
-      filterManager,
-      getAddToTimelineButton,
-      getColumnToggleButton,
-      getCopyButton,
-      getFilterForValueButton,
-      getFilterOutValueButton,
-      handleHoverActionClicked,
-      onAddToTimelineClicked,
-      hideAddToTimeline,
-      hideTopN,
-      isObjectArray,
-      onFilterAdded,
-      ownFocus,
-      shouldDisableColumnToggle,
-      showFilters,
-      showTopNBtn,
-      stKeyboardEvent,
-      toggleColumn,
-      values,
-    ]
-  ) as JSX.Element[];
+  const allItems = useMemo(() => {
+    const startServices = { analytics, i18n, theme };
+    return [
+      showFilters ? (
+        <div data-test-subj="hover-actions-filter-for" key="hover-actions-filter-for">
+          {getFilterForValueButton({
+            defaultFocusedButtonRef,
+            field,
+            filterManager,
+            keyboardEvent: stKeyboardEvent,
+            onClick: handleHoverActionClicked,
+            onFilterAdded,
+            ownFocus,
+            showTooltip: enableOverflowButton ? false : true,
+            value: values,
+            dataViewId,
+          })}
+        </div>
+      ) : null,
+      showFilters ? (
+        <div data-test-subj="hover-actions-filter-out" key="hover-actions-filter-out">
+          {getFilterOutValueButton({
+            field,
+            filterManager,
+            keyboardEvent: stKeyboardEvent,
+            onFilterAdded,
+            ownFocus,
+            onClick: handleHoverActionClicked,
+            showTooltip: enableOverflowButton ? false : true,
+            value: values,
+            dataViewId,
+          })}
+        </div>
+      ) : null,
+      toggleColumn && !shouldDisableColumnToggle ? (
+        <div data-test-subj="hover-actions-toggle-column" key="hover-actions-toggle-column">
+          {getColumnToggleButton({
+            Component: enableOverflowButton ? EuiContextMenuItem : undefined,
+            field,
+            isDisabled: isObjectArray && dataType !== 'geo_point',
+            isObjectArray,
+            keyboardEvent: stKeyboardEvent,
+            ownFocus,
+            onClick: handleHoverActionClicked,
+            showTooltip: enableOverflowButton ? false : true,
+            toggleColumn,
+            value: values,
+          })}
+        </div>
+      ) : null,
+      values != null && (draggableId != null || !isEmpty(dataProvider)) && !hideAddToTimeline ? (
+        <div data-test-subj="hover-actions-add-timeline" key="hover-actions-add-timeline">
+          {getAddToTimelineButton({
+            Component: enableOverflowButton ? EuiContextMenuItem : undefined,
+            dataProvider,
+            draggableId,
+            field,
+            keyboardEvent: stKeyboardEvent,
+            ownFocus,
+            onClick: onAddToTimelineClicked,
+            showTooltip: enableOverflowButton ? false : true,
+            value: values,
+            startServices,
+          })}
+        </div>
+      ) : null,
+      allowTopN({
+        fieldType,
+        isAggregatable,
+        fieldName: field,
+        hideTopN,
+      })
+        ? showTopNBtn
+        : null,
+      field != null ? (
+        <div data-test-subj="hover-actions-copy-button" key="hover-actions-copy-button">
+          {getCopyButton({
+            Component: enableOverflowButton ? EuiContextMenuItem : undefined,
+            field,
+            isHoverAction: true,
+            keyboardEvent: stKeyboardEvent,
+            ownFocus,
+            onClick: handleHoverActionClicked,
+            showTooltip: enableOverflowButton ? false : true,
+            value: values,
+          })}
+        </div>
+      ) : null,
+    ].filter((item) => {
+      return item != null;
+    });
+  }, [
+    dataProvider,
+    dataType,
+    defaultFocusedButtonRef,
+    draggableId,
+    enableOverflowButton,
+    field,
+    fieldType,
+    isAggregatable,
+    filterManager,
+    getAddToTimelineButton,
+    getColumnToggleButton,
+    getCopyButton,
+    getFilterForValueButton,
+    getFilterOutValueButton,
+    handleHoverActionClicked,
+    onAddToTimelineClicked,
+    hideAddToTimeline,
+    hideTopN,
+    isObjectArray,
+    onFilterAdded,
+    ownFocus,
+    shouldDisableColumnToggle,
+    showFilters,
+    showTopNBtn,
+    stKeyboardEvent,
+    toggleColumn,
+    values,
+    dataViewId,
+    analytics,
+    i18n,
+    theme,
+  ]) as JSX.Element[];
 
   const overflowActionItems = useMemo(
     () =>

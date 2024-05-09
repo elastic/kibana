@@ -55,6 +55,7 @@ export const IndexTemplatesFlyout: FunctionComponent<Props> = ({
       <EuiFlyoutBody>
         <EuiInMemoryTable
           pagination={true}
+          // @ts-expect-error - EuiInMemoryTable wants an array of objects, but will accept strings if coerced
           items={indexTemplates ?? []}
           columns={[
             {
@@ -62,6 +63,7 @@ export const IndexTemplatesFlyout: FunctionComponent<Props> = ({
                 'xpack.indexLifecycleMgmt.policyTable.indexTemplatesTable.nameHeader',
                 { defaultMessage: 'Index template name' }
               ),
+              // @ts-expect-error - EuiInMemoryTable wants an array of objects, but will accept strings if coerced
               render: (value: string) => {
                 return (
                   <EuiLink

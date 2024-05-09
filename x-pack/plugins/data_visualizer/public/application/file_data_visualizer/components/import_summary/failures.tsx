@@ -7,8 +7,10 @@
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Component } from 'react';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 import { EuiAccordion, EuiPagination } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 const PAGE_SIZE = 100;
 
@@ -28,13 +30,22 @@ interface State {
   page: number;
 }
 
+const containerStyle = css({
+  maxHeight: '200px',
+  overflowY: 'auto',
+});
+
+const errorStyle = css({
+  color: euiThemeVars.euiColorDanger,
+});
+
 export class Failures extends Component<Props, State> {
   state: State = { page: 0 };
 
   _renderPaginationControl() {
     return this.props.failedDocs.length > PAGE_SIZE ? (
       <EuiPagination
-        pageCount={Math.floor(this.props.failedDocs.length / PAGE_SIZE)}
+        pageCount={Math.ceil(this.props.failedDocs.length / PAGE_SIZE)}
         activePage={this.state.page}
         onPageClick={(page) => this.setState({ page })}
         compressed
@@ -43,9 +54,8 @@ export class Failures extends Component<Props, State> {
   }
 
   render() {
-    const lastDocIndex = this.props.failedDocs.length - 1;
     const startIndex = this.state.page * PAGE_SIZE;
-    const endIndex = startIndex + PAGE_SIZE > lastDocIndex ? lastDocIndex : startIndex + PAGE_SIZE;
+    const endIndex = startIndex + PAGE_SIZE;
     return (
       <EuiAccordion
         id="failureList"
@@ -57,11 +67,11 @@ export class Failures extends Component<Props, State> {
         }
         paddingSize="m"
       >
-        <div className="failure-list">
+        <div css={containerStyle}>
           {this._renderPaginationControl()}
           {this.props.failedDocs.slice(startIndex, endIndex).map(({ item, reason, doc }) => (
             <div key={item}>
-              <div className="error-message">
+              <div css={errorStyle}>
                 {item}: {reason}
               </div>
               <div>{JSON.stringify(doc)}</div>

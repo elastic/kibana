@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { FC, useContext, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { CategorizationJobCreator } from '../../../../../common/job_creator';
-import { CountCard, RareCard } from './detector_cards';
+import type { CategorizationJobCreator } from '../../../../../common/job_creator';
+import { CountCard, HighCountCard, RareCard } from './detector_cards';
 
 export const CategorizationDetector: FC = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
@@ -36,6 +37,9 @@ export const CategorizationDetector: FC = () => {
   function onCountSelection() {
     setCategorizationDetectorType(ML_JOB_AGGREGATION.COUNT);
   }
+  function onHighCountSelection() {
+    setCategorizationDetectorType(ML_JOB_AGGREGATION.HIGH_COUNT);
+  }
   function onRareSelection() {
     setCategorizationDetectorType(ML_JOB_AGGREGATION.RARE);
   }
@@ -51,10 +55,14 @@ export const CategorizationDetector: FC = () => {
         </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="l" style={{ maxWidth: '824px' }}>
+      <EuiFlexGroup gutterSize="l" css={{ maxWidth: '1100px' }}>
         <CountCard
           onClick={onCountSelection}
           isSelected={categorizationDetectorType === ML_JOB_AGGREGATION.COUNT}
+        />
+        <HighCountCard
+          onClick={onHighCountSelection}
+          isSelected={categorizationDetectorType === ML_JOB_AGGREGATION.HIGH_COUNT}
         />
         <RareCard
           onClick={onRareSelection}

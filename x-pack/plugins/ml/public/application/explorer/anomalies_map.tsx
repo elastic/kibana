@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -16,19 +17,19 @@ import {
   EuiTitle,
   htmlIdGenerator,
 } from '@elastic/eui';
+import type { VectorLayerDescriptor } from '@kbn/maps-plugin/common';
+import { INITIAL_LOCATION } from '@kbn/maps-plugin/common';
 import {
   FIELD_ORIGIN,
   LAYER_TYPE,
   SOURCE_TYPES,
   STYLE_TYPE,
   COLOR_MAP_TYPE,
-  VectorLayerDescriptor,
 } from '@kbn/maps-plugin/common';
-import { EMSTermJoinConfig } from '@kbn/maps-plugin/public';
+import type { EMSTermJoinConfig } from '@kbn/maps-plugin/public';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
 import { useMlKibana } from '../contexts/kibana';
-import { MlEmbeddedMapComponent } from '../components/ml_embedded_map';
 
 const MAX_ENTITY_VALUES = 3;
 
@@ -252,7 +253,16 @@ export const AnomaliesMap: FC<Props> = ({ anomalies, jobIds }) => {
             data-test-subj="mlAnomalyExplorerAnomaliesMap"
             style={{ width: '100%', height: 300 }}
           >
-            <MlEmbeddedMapComponent layerList={layerList} />
+            {mapsPlugin && (
+              <mapsPlugin.Map
+                layerList={layerList}
+                hideFilterActions={true}
+                mapSettings={{
+                  initialLocation: INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS,
+                  autoFitToDataBounds: true,
+                }}
+              />
+            )}
           </div>
         </EuiAccordion>
       </EuiPanel>

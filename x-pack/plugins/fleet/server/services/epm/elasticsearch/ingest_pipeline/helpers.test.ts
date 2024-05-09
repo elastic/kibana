@@ -188,7 +188,7 @@ processors:
     });
 
     expect(pipelineInstall.contentForInstallation).toMatchInlineSnapshot(
-      `"{\\"processors\\":[{\\"set\\":{\\"field\\":\\"test\\",\\"value\\":\\"toto\\"}},{\\"pipeline\\":{\\"name\\":\\"global@custom\\",\\"ignore_missing_pipeline\\":true}},{\\"pipeline\\":{\\"name\\":\\"logs@custom\\",\\"ignore_missing_pipeline\\":true}},{\\"pipeline\\":{\\"name\\":\\"logs-test@custom\\",\\"ignore_missing_pipeline\\":true}}]}"`
+      `"{\\"processors\\":[{\\"set\\":{\\"field\\":\\"test\\",\\"value\\":\\"toto\\"}},{\\"pipeline\\":{\\"name\\":\\"global@custom\\",\\"ignore_missing_pipeline\\":true,\\"description\\":\\"[Fleet] Global pipeline for all data streams\\"}},{\\"pipeline\\":{\\"name\\":\\"logs@custom\\",\\"ignore_missing_pipeline\\":true,\\"description\\":\\"[Fleet] Pipeline for all data streams of type \`logs\`\\"}},{\\"pipeline\\":{\\"name\\":\\"logs-test@custom\\",\\"ignore_missing_pipeline\\":true,\\"description\\":\\"[Fleet] Pipeline for the \`test\` dataset\\"}}]}"`
     );
   });
 
@@ -231,12 +231,15 @@ processors:
           - pipeline:
               name: global@custom
               ignore_missing_pipeline: true
+              description: '[Fleet] Global pipeline for all data streams'
           - pipeline:
               name: logs@custom
               ignore_missing_pipeline: true
+              description: '[Fleet] Pipeline for all data streams of type \`logs\`'
           - pipeline:
               name: logs-test.access@custom
               ignore_missing_pipeline: true
+              description: '[Fleet] Pipeline for the \`test.access\` dataset'
           - reroute:
               tag: test.access
               dataset: test.reroute
@@ -280,7 +283,7 @@ processors:
       });
 
       expect(pipelineInstall.contentForInstallation).toMatchInlineSnapshot(
-        `"{\\"processors\\":[{\\"set\\":{\\"field\\":\\"test\\",\\"value\\":\\"toto\\"}},{\\"pipeline\\":{\\"name\\":\\"global@custom\\",\\"ignore_missing_pipeline\\":true}},{\\"pipeline\\":{\\"name\\":\\"logs@custom\\",\\"ignore_missing_pipeline\\":true}},{\\"pipeline\\":{\\"name\\":\\"logs-test.access@custom\\",\\"ignore_missing_pipeline\\":true}},{\\"reroute\\":{\\"tag\\":\\"test.access\\",\\"dataset\\":\\"test.reroute\\",\\"namespace\\":\\"default\\",\\"if\\":\\"true == true\\"}}]}"`
+        `"{\\"processors\\":[{\\"set\\":{\\"field\\":\\"test\\",\\"value\\":\\"toto\\"}},{\\"pipeline\\":{\\"name\\":\\"global@custom\\",\\"ignore_missing_pipeline\\":true,\\"description\\":\\"[Fleet] Global pipeline for all data streams\\"}},{\\"pipeline\\":{\\"name\\":\\"logs@custom\\",\\"ignore_missing_pipeline\\":true,\\"description\\":\\"[Fleet] Pipeline for all data streams of type \`logs\`\\"}},{\\"pipeline\\":{\\"name\\":\\"logs-test.access@custom\\",\\"ignore_missing_pipeline\\":true,\\"description\\":\\"[Fleet] Pipeline for the \`test.access\` dataset\\"}},{\\"reroute\\":{\\"tag\\":\\"test.access\\",\\"dataset\\":\\"test.reroute\\",\\"namespace\\":\\"default\\",\\"if\\":\\"true == true\\"}}]}"`
       );
     });
   });

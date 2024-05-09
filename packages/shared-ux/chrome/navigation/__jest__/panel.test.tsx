@@ -7,175 +7,102 @@
  */
 import './setup_jest_mocks';
 import React from 'react';
-import { type RenderResult } from '@testing-library/react';
-import { BehaviorSubject } from 'rxjs';
-import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import { BehaviorSubject, of } from 'rxjs';
+import type {
+  ChromeProjectNavigationNode,
+  NavigationTreeDefinitionUI,
+} from '@kbn/core-chrome-browser';
 
-import { Navigation } from '../src/ui/components/navigation';
-import type { RootNavigationItemDefinition } from '../src/ui/types';
 import { PanelContentProvider } from '../src/ui';
-import {
-  renderNavigation,
-  errorHandler,
-  TestType,
-  getMockFn,
-  ProjectNavigationChangeListener,
-} from './utils';
+import { renderNavigation } from './utils';
 
 describe('Panel', () => {
   test('should render group as panel opener', async () => {
-    const onProjectNavigationChange = getMockFn<ProjectNavigationChangeListener>();
-
-    const runTests = async (type: TestType, { findByTestId, queryByTestId }: RenderResult) => {
-      try {
-        expect(await findByTestId(/panelOpener-root.group1/)).toBeVisible();
-        expect(queryByTestId(/sideNavPanel/)).toBeNull();
-        (await findByTestId(/panelOpener-root.group1/)).click(); // open the panel
-        expect(queryByTestId(/sideNavPanel/)).toBeVisible();
-
-        expect(onProjectNavigationChange).toHaveBeenCalled();
-        const lastCall =
-          onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
-        const [{ navigationTree }] = lastCall;
-
-        const [root] = navigationTree;
-        expect(root.id).toBe('root');
-        expect(root.children?.[0]).toMatchObject({
-          id: 'group1',
-          renderAs: 'panelOpener',
-          children: [
-            {
-              id: 'management',
-              title: 'Deeplink management',
-            },
-          ],
-        });
-      } catch (e) {
-        errorHandler(type)(e);
-      }
-    };
-
-    // -- Default navigation
-    {
-      const navigationBody: RootNavigationItemDefinition[] = [
+    const navigationTree: NavigationTreeDefinitionUI = {
+      body: [
         {
-          type: 'navGroup',
           id: 'root',
+          title: 'Root',
+          path: 'root',
           isCollapsible: false,
           children: [
             {
               id: 'group1',
-              link: 'dashboards',
+              title: 'Group 1',
+              href: '/app/item1',
+              path: 'root.group1',
               renderAs: 'panelOpener',
-              children: [{ link: 'management' }],
+              children: [
+                {
+                  id: 'item1',
+                  title: 'Item 1',
+                  href: '/app/item1',
+                  path: 'root.group1.item1',
+                },
+              ],
             },
           ],
         },
-      ];
+      ],
+    };
 
-      const renderResult = renderNavigation({
-        navTreeDef: { body: navigationBody },
-        onProjectNavigationChange,
-      });
+    const { findByTestId, queryByTestId } = renderNavigation({
+      navTreeDef: of(navigationTree),
+    });
 
-      await runTests('treeDef', renderResult);
-
-      renderResult.unmount();
-    }
-
-    // -- With UI Components
-    {
-      const renderResult = renderNavigation({
-        navigationElement: (
-          <Navigation>
-            <Navigation.Group id="root" isCollapsible={false}>
-              <Navigation.Group id="group1" link="dashboards" renderAs="panelOpener">
-                <Navigation.Item link="management" />
-              </Navigation.Group>
-            </Navigation.Group>
-          </Navigation>
-        ),
-        onProjectNavigationChange,
-      });
-      await runTests('uiComponents', renderResult);
-    }
+    expect(await findByTestId(/panelOpener-root.group1/)).toBeVisible();
+    expect(queryByTestId(/sideNavPanel/)).toBeNull();
+    (await findByTestId(/panelOpener-root.group1/)).click(); // open the panel
+    expect(queryByTestId(/sideNavPanel/)).toBeVisible();
   });
 
   test('should not render group if all children are hidden', async () => {
-    const onProjectNavigationChange = getMockFn<ProjectNavigationChangeListener>();
-
-    const runTests = async (type: TestType, { queryByTestId }: RenderResult) => {
-      try {
-        expect(queryByTestId(/panelOpener-root.group1/)).toBeNull();
-        expect(queryByTestId(/panelOpener-root.group2/)).toBeNull();
-        expect(queryByTestId(/panelOpener-root.group3/)).toBeVisible();
-      } catch (e) {
-        errorHandler(type)(e);
-      }
-    };
-
-    // -- Default navigation
-    {
-      const navigationBody: Array<RootNavigationItemDefinition<any>> = [
+    const navigationTree: NavigationTreeDefinitionUI = {
+      body: [
         {
-          type: 'navGroup',
           id: 'root',
+          title: 'Root',
+          path: 'root',
           isCollapsible: false,
           children: [
             {
               id: 'group1',
-              link: 'dashboards',
+              title: 'Group 1',
+              path: 'root.group1',
+              href: '/app/item1',
               renderAs: 'panelOpener',
-              children: [{ link: 'unknown' }],
+              children: [
+                // All children are hidden, this group should not render
+                {
+                  id: 'item1',
+                  title: 'Item 1',
+                  href: '/app/item1',
+                  path: 'root.group1.item1',
+                  sideNavStatus: 'hidden',
+                },
+              ],
             },
             {
               id: 'group2',
-              link: 'dashboards',
+              title: 'Group 2',
+              path: 'root.group2',
               renderAs: 'panelOpener',
-              children: [{ link: 'management', sideNavStatus: 'hidden' }],
-            },
-            {
-              id: 'group3',
-              link: 'dashboards',
-              renderAs: 'panelOpener',
-              children: [{ link: 'management' }], // sideNavStatus is "visible" by default
+              children: [
+                // sideNavStatus is "visible" by default
+                { id: 'item1', title: 'Item 1', href: '/app/item1', path: 'root.group2.item1' },
+              ],
             },
           ],
         },
-      ];
+      ],
+    };
 
-      const renderResult = renderNavigation({
-        navTreeDef: { body: navigationBody },
-        onProjectNavigationChange,
-      });
+    const { queryByTestId } = renderNavigation({
+      navTreeDef: of(navigationTree),
+    });
 
-      await runTests('treeDef', renderResult);
-
-      renderResult.unmount();
-    }
-
-    // -- With UI Components
-    {
-      const renderResult = renderNavigation({
-        navigationElement: (
-          <Navigation>
-            <Navigation.Group id="root" isCollapsible={false}>
-              <Navigation.Group id="group1" link="dashboards" renderAs="panelOpener">
-                <Navigation.Item<any> link="unknown" />
-              </Navigation.Group>
-              <Navigation.Group id="group2" link="dashboards" renderAs="panelOpener">
-                <Navigation.Item link="management" sideNavStatus="hidden" />
-              </Navigation.Group>
-              <Navigation.Group id="group3" link="dashboards" renderAs="panelOpener">
-                <Navigation.Item link="management" />
-              </Navigation.Group>
-            </Navigation.Group>
-          </Navigation>
-        ),
-        onProjectNavigationChange,
-      });
-      await runTests('uiComponents', renderResult);
-    }
+    expect(queryByTestId(/panelOpener-root.group1/)).toBeNull();
+    expect(queryByTestId(/panelOpener-root.group2/)).toBeVisible();
   });
 
   describe('custom content', () => {
@@ -216,330 +143,254 @@ describe('Panel', () => {
         ],
       ]);
 
-      const runTests = async (type: TestType, { queryByTestId }: RenderResult) => {
-        try {
-          queryByTestId(/panelOpener-root.group1/)?.click(); // open the panel
-
-          expect(queryByTestId(/customPanelContent/)).toBeVisible();
-          // Test that the selected node is correclty passed
-          expect(queryByTestId(/customPanelSelectedNode/)?.textContent).toBe('root.group1');
-          // Test that the active nodes are correclty passed
-          expect(queryByTestId(/customPanelActiveNodes/)?.textContent).toBe(
-            'activeGroup1activeItem1'
-          );
-          // Test that handler to close the panel is correctly passed
-          queryByTestId(/customPanelCloseBtn/)?.click(); // close the panel
-          expect(queryByTestId(/customPanelContent/)).toBeNull();
-          expect(queryByTestId(/sideNavPanel/)).toBeNull();
-        } catch (e) {
-          errorHandler(type)(e);
-        }
-      };
-
-      // -- Default navigation
-      {
-        const navigationBody: Array<RootNavigationItemDefinition<any>> = [
+      const navTree: NavigationTreeDefinitionUI = {
+        body: [
           {
-            type: 'navGroup',
             id: 'root',
+            title: 'Root',
+            path: 'root',
             isCollapsible: false,
             children: [
               {
                 id: 'group1',
-                link: 'dashboards',
+                title: 'Group 1',
+                path: 'root.group1',
+                href: '/app/item1',
                 renderAs: 'panelOpener',
-                children: [{ link: 'management' }],
+                children: [
+                  { id: 'item1', title: 'Item 1', href: '/app/item1', path: 'root.group1.item1' },
+                ],
               },
             ],
           },
-        ];
+        ],
+      };
 
-        const renderResult = renderNavigation({
-          navTreeDef: { body: navigationBody },
-          panelContentProvider,
-          services: { activeNodes$ },
-        });
+      const { queryByTestId } = renderNavigation({
+        navTreeDef: of(navTree),
+        panelContentProvider,
+        services: { activeNodes$ },
+      });
 
-        await runTests('treeDef', renderResult);
+      expect(queryByTestId(/sideNavPanel/)).toBeNull();
+      expect(queryByTestId(/customPanelContent/)).toBeNull();
 
-        renderResult.unmount();
-      }
+      queryByTestId(/panelOpener-root.group1/)?.click(); // open the panel
 
-      // -- With UI Components
-      {
-        const renderResult = renderNavigation({
-          navigationElement: (
-            <Navigation panelContentProvider={panelContentProvider}>
-              <Navigation.Group id="root" isCollapsible={false}>
-                <Navigation.Group id="group1" link="dashboards" renderAs="panelOpener">
-                  <Navigation.Item link="management" />
-                </Navigation.Group>
-              </Navigation.Group>
-            </Navigation>
-          ),
-          services: { activeNodes$ },
-        });
-        await runTests('uiComponents', renderResult);
-      }
+      expect(queryByTestId(/sideNavPanel/)).not.toBeNull();
+      expect(queryByTestId(/customPanelContent/)).not.toBeNull();
+      expect(queryByTestId(/customPanelContent/)).toBeVisible();
+      // Test that the selected node is correclty passed
+      expect(queryByTestId(/customPanelSelectedNode/)?.textContent).toBe('root.group1');
+      // Test that the active nodes are correclty passed
+      expect(queryByTestId(/customPanelActiveNodes/)?.textContent).toBe('activeGroup1activeItem1');
+      // Test that handler to close the panel is correctly passed
+      queryByTestId(/customPanelCloseBtn/)?.click(); // close the panel
+      expect(queryByTestId(/customPanelContent/)).toBeNull();
+      expect(queryByTestId(/sideNavPanel/)).toBeNull();
     });
   });
 
   describe('auto generated content', () => {
     test('should rendre block groups with title', async () => {
-      const runTests = async (
-        type: TestType,
-        { queryByTestId, queryAllByTestId }: RenderResult
-      ) => {
-        try {
-          queryByTestId(/panelOpener-root.group1/)?.click(); // open the panel
-
-          expect(queryByTestId(/panelGroupId-foo/)).toBeVisible();
-          expect(queryByTestId(/panelGroupTitleId-foo/)?.textContent).toBe('Foo');
-
-          const panelNavItems = queryAllByTestId(/panelNavItem/);
-          expect(panelNavItems.length).toBe(2); // "item2" has been filtered out as it is hidden
-          expect(panelNavItems.map(({ textContent }) => textContent?.trim())).toEqual([
-            'Item 1',
-            'Item 3',
-          ]);
-        } catch (e) {
-          errorHandler(type)(e);
-        }
-      };
-
-      // -- Default navigation
-      {
-        const navigationBody: Array<RootNavigationItemDefinition<any>> = [
+      const navTree: NavigationTreeDefinitionUI = {
+        body: [
           {
-            type: 'navGroup',
             id: 'root',
+            title: 'Root',
+            path: 'root',
             isCollapsible: false,
             children: [
               {
                 id: 'group1',
-                link: 'dashboards',
+                title: 'Group 1',
+                path: 'root.group1',
+                href: '/app/item1',
                 renderAs: 'panelOpener',
                 children: [
                   {
                     id: 'foo',
                     title: 'Foo',
+                    path: 'root.group1.foo',
                     children: [
-                      { id: 'item1', link: 'management', title: 'Item 1' },
-                      { id: 'item2', link: 'management', title: 'Item 2', sideNavStatus: 'hidden' },
-                      { id: 'item3', link: 'management', title: 'Item 3' },
+                      {
+                        id: 'item1',
+                        href: '/app/item1',
+                        path: 'root.group2.foo.item1',
+                        title: 'Item 1',
+                      },
+                      {
+                        id: 'item2',
+                        href: '/app/item2',
+                        path: 'root.group2.foo.item2',
+                        title: 'Item 2',
+                        sideNavStatus: 'hidden',
+                      },
+                      {
+                        id: 'item3',
+                        href: '/app/item3',
+                        path: 'root.group2.foo.item3',
+                        title: 'Item 3',
+                      },
                     ],
                   },
                 ],
               },
             ],
           },
-        ];
+        ],
+      };
 
-        const renderResult = renderNavigation({
-          navTreeDef: { body: navigationBody },
-        });
+      const { queryByTestId, queryAllByTestId } = renderNavigation({
+        navTreeDef: of(navTree),
+      });
 
-        await runTests('treeDef', renderResult);
+      queryByTestId(/panelOpener-root.group1/)?.click(); // open the panel
 
-        renderResult.unmount();
-      }
+      expect(queryByTestId(/panelGroupId-foo/)).toBeVisible();
+      expect(queryByTestId(/panelGroupTitleId-foo/)?.textContent).toBe('Foo');
 
-      // -- With UI Components
-      {
-        const renderResult = renderNavigation({
-          navigationElement: (
-            <Navigation>
-              <Navigation.Group id="root" isCollapsible={false}>
-                <Navigation.Group id="group1" link="dashboards" renderAs="panelOpener">
-                  <Navigation.Group id="foo" title="Foo">
-                    <Navigation.Item id="item1" link="management" title="Item 1" />
-                    <Navigation.Item
-                      id="item2"
-                      link="management"
-                      sideNavStatus="hidden"
-                      title="Item 2"
-                    />
-                    <Navigation.Item id="item3" link="management" title="Item 3" />
-                  </Navigation.Group>
-                </Navigation.Group>
-              </Navigation.Group>
-            </Navigation>
-          ),
-        });
-        await runTests('uiComponents', renderResult);
-      }
+      const panelNavItems = queryAllByTestId(/panelNavItem/);
+      expect(panelNavItems.length).toBe(2); // "item2" has been filtered out as it is hidden
+      expect(panelNavItems.map(({ textContent }) => textContent?.trim())).toEqual([
+        'Item 1',
+        'Item 3',
+      ]);
     });
 
     test('should rendre block groups without title', async () => {
-      const runTests = async (
-        type: TestType,
-        { queryByTestId, queryAllByTestId }: RenderResult
-      ) => {
-        try {
-          queryByTestId(/panelOpener-root.group1/)?.click(); // open the panel
-
-          expect(queryByTestId(/panelGroupTitleId-foo/)).toBeNull(); // No title rendered
-
-          const panelNavItems = queryAllByTestId(/panelNavItem/);
-          expect(panelNavItems.length).toBe(2); // "item2" has been filtered out as it is hidden
-          expect(panelNavItems.map(({ textContent }) => textContent?.trim())).toEqual([
-            'Item 1',
-            'Item 3',
-          ]);
-        } catch (e) {
-          errorHandler(type)(e);
-        }
-      };
-
-      // -- Default navigation
-      {
-        const navigationBody: Array<RootNavigationItemDefinition<any>> = [
+      const navTree: NavigationTreeDefinitionUI = {
+        body: [
           {
-            type: 'navGroup',
             id: 'root',
+            title: 'Root',
+            path: 'root',
             isCollapsible: false,
             children: [
               {
                 id: 'group1',
-                link: 'dashboards',
+                title: 'Group 1',
+                path: 'root.group1',
+                href: '/app/item1',
                 renderAs: 'panelOpener',
                 children: [
                   {
                     id: 'foo',
+                    title: '', // Empty title are not rendered
+                    path: 'root.group1.foo',
                     children: [
-                      { id: 'item1', link: 'management', title: 'Item 1' },
-                      { id: 'item2', link: 'management', title: 'Item 2', sideNavStatus: 'hidden' },
-                      { id: 'item3', link: 'management', title: 'Item 3' },
+                      {
+                        id: 'item1',
+                        href: '/app/item1',
+                        path: 'root.group2.foo.item1',
+                        title: 'Item 1',
+                      },
+                      {
+                        id: 'item2',
+                        href: '/app/item2',
+                        path: 'root.group2.foo.item2',
+                        title: 'Item 2',
+                        sideNavStatus: 'hidden',
+                      },
+                      {
+                        id: 'item3',
+                        href: '/app/item3',
+                        path: 'root.group2.foo.item3',
+                        title: 'Item 3',
+                      },
                     ],
                   },
                 ],
               },
             ],
           },
-        ];
+        ],
+      };
 
-        const renderResult = renderNavigation({
-          navTreeDef: { body: navigationBody },
-        });
+      const { queryByTestId, queryAllByTestId } = renderNavigation({
+        navTreeDef: of(navTree),
+      });
 
-        await runTests('treeDef', renderResult);
+      queryByTestId(/panelOpener-root.group1/)?.click(); // open the panel
 
-        renderResult.unmount();
-      }
+      expect(queryByTestId(/panelGroupTitleId-foo/)).toBeNull(); // No title rendered
 
-      // -- With UI Components
-      {
-        // const renderResult = renderNavigation({
-        //   navigationElement: (
-        //     <Navigation>
-        //       <Navigation.Group id="root" isCollapsible={false}>
-        //         <Navigation.Group id="group1" link="dashboards" renderAs="panelOpener">
-        //           <Navigation.Group id="foo" title="Foo">
-        //             <Navigation.Item id="item1" link="management" title="Item 1" />
-        //             <Navigation.Item
-        //               id="item2"
-        //               link="management"
-        //               sideNavStatus="hidden"
-        //               title="Item 2"
-        //             />
-        //             <Navigation.Item id="item3" link="management" title="Item 3" />
-        //           </Navigation.Group>
-        //         </Navigation.Group>
-        //       </Navigation.Group>
-        //     </Navigation>
-        //   ),
-        // });
-        // await runTests('uiComponents', renderResult);
-      }
+      const panelNavItems = queryAllByTestId(/panelNavItem/);
+      expect(panelNavItems.length).toBe(2); // "item2" has been filtered out as it is hidden
+      expect(panelNavItems.map(({ textContent }) => textContent?.trim())).toEqual([
+        'Item 1',
+        'Item 3',
+      ]);
     });
 
     test('should rendre accordion groups', async () => {
-      const runTests = async (
-        type: TestType,
-        { queryByTestId, queryAllByTestId, findByRole }: RenderResult
-      ) => {
-        try {
-          queryByTestId(/panelOpener-root.group1/)?.click(); // open the panel
-
-          expect(queryByTestId(/panelGroupId-foo/)).toBeVisible();
-
-          const panelNavItems = queryAllByTestId(/panelNavItem/);
-          expect(panelNavItems.length).toBe(2); // "item2" has been filtered out as it is hidden
-
-          expect(queryByTestId(/panelNavItem-id-item1/)).not.toBeVisible(); // Accordion is collapsed
-          expect(queryByTestId(/panelNavItem-id-item3/)).not.toBeVisible(); // Accordion is collapsed
-
-          queryByTestId(/panelAccordionBtnId-foo/)?.click(); // Expand accordion
-
-          expect(queryByTestId(/panelNavItem-id-item1/)).toBeVisible();
-          expect(queryByTestId(/panelNavItem-id-item3/)).toBeVisible();
-        } catch (e) {
-          errorHandler(type)(e);
-        }
-      };
-
-      // -- Default navigation
-      {
-        const navigationBody: Array<RootNavigationItemDefinition<any>> = [
+      const navTree: NavigationTreeDefinitionUI = {
+        body: [
           {
-            type: 'navGroup',
             id: 'root',
+            title: 'Root',
+            path: 'root',
             isCollapsible: false,
             children: [
               {
                 id: 'group1',
-                link: 'dashboards',
+                title: 'Group 1',
+                path: 'root.group1',
+                href: '/app/item1',
                 renderAs: 'panelOpener',
                 children: [
                   {
                     id: 'foo',
                     title: 'Foo',
+                    path: 'root.group1.foo',
                     renderAs: 'accordion',
                     children: [
-                      { id: 'item1', link: 'management', title: 'Item 1' },
-                      { id: 'item2', link: 'management', title: 'Item 2', sideNavStatus: 'hidden' },
-                      { id: 'item3', link: 'management', title: 'Item 3' },
+                      {
+                        id: 'item1',
+                        href: '/app/item1',
+                        path: 'root.group2.foo.item1',
+                        title: 'Item 1',
+                      },
+                      {
+                        id: 'item2',
+                        href: '/app/item2',
+                        path: 'root.group2.foo.item2',
+                        title: 'Item 2',
+                        sideNavStatus: 'hidden',
+                      },
+                      {
+                        id: 'item3',
+                        href: '/app/item3',
+                        path: 'root.group2.foo.item3',
+                        title: 'Item 3',
+                      },
                     ],
                   },
                 ],
               },
             ],
           },
-        ];
+        ],
+      };
 
-        const renderResult = renderNavigation({
-          navTreeDef: { body: navigationBody },
-        });
+      const { queryByTestId, queryAllByTestId } = renderNavigation({
+        navTreeDef: of(navTree),
+      });
 
-        await runTests('treeDef', renderResult);
+      queryByTestId(/panelOpener-root.group1/)?.click(); // open the panel
 
-        renderResult.unmount();
-      }
+      expect(queryByTestId(/panelGroupId-foo/)).toBeVisible();
 
-      // -- With UI Components
-      {
-        const renderResult = renderNavigation({
-          navigationElement: (
-            <Navigation>
-              <Navigation.Group id="root" isCollapsible={false}>
-                <Navigation.Group id="group1" link="dashboards" renderAs="panelOpener">
-                  <Navigation.Group id="foo" title="Foo" renderAs="accordion">
-                    <Navigation.Item id="item1" link="management" title="Item 1" />
-                    <Navigation.Item
-                      id="item2"
-                      link="management"
-                      sideNavStatus="hidden"
-                      title="Item 2"
-                    />
-                    <Navigation.Item id="item3" link="management" title="Item 3" />
-                  </Navigation.Group>
-                </Navigation.Group>
-              </Navigation.Group>
-            </Navigation>
-          ),
-        });
-        await runTests('uiComponents', renderResult);
-      }
+      const panelNavItems = queryAllByTestId(/panelNavItem/);
+      expect(panelNavItems.length).toBe(2); // "item2" has been filtered out as it is hidden
+
+      expect(queryByTestId(/panelNavItem-id-item1/)).not.toBeVisible(); // Accordion is collapsed
+      expect(queryByTestId(/panelNavItem-id-item3/)).not.toBeVisible(); // Accordion is collapsed
+
+      queryByTestId(/panelAccordionBtnId-foo/)?.click(); // Expand accordion
+
+      expect(queryByTestId(/panelNavItem-id-item1/)).toBeVisible();
+      expect(queryByTestId(/panelNavItem-id-item3/)).toBeVisible();
     });
   });
 });

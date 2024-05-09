@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { withSpan } from '@kbn/apm-utils';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { getRuleSavedObject } from '../../../../rules_client/lib';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
@@ -71,7 +72,7 @@ async function snoozeWithOCC(
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.SNOOZE,
-        savedObject: { type: 'alert', id },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
         error,
       })
     );
@@ -82,7 +83,7 @@ async function snoozeWithOCC(
     ruleAuditEvent({
       action: RuleAuditAction.SNOOZE,
       outcome: 'unknown',
-      savedObject: { type: 'alert', id },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
     })
   );
 

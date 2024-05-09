@@ -63,8 +63,6 @@ export const validatePackagePolicy = (
     inputs: {},
     vars: {},
   };
-  const namespaceValidation = isValidNamespace(packagePolicy.namespace);
-
   if (!packagePolicy.name.trim()) {
     validationResults.name = [
       i18n.translate('xpack.fleet.packagePolicyValidation.nameRequiredErrorMessage', {
@@ -73,8 +71,11 @@ export const validatePackagePolicy = (
     ];
   }
 
-  if (!namespaceValidation.valid && namespaceValidation.error) {
-    validationResults.namespace = [namespaceValidation.error];
+  if (packagePolicy?.namespace) {
+    const namespaceValidation = isValidNamespace(packagePolicy?.namespace, true);
+    if (!namespaceValidation.valid && namespaceValidation.error) {
+      validationResults.namespace = [namespaceValidation.error];
+    }
   }
 
   // Validate package-level vars

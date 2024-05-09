@@ -64,6 +64,23 @@
       },
       {
         "parentPluginId": "@kbn/xstate-utils",
+        "id": "def-common.getDevToolsOptions",
+        "type": "Function",
+        "tags": [],
+        "label": "getDevToolsOptions",
+        "description": [],
+        "signature": [
+          "() => boolean | object"
+        ],
+        "path": "packages/kbn-xstate-utils/src/dev_tools.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/xstate-utils",
         "id": "def-common.isDevMode",
         "type": "Function",
         "tags": [],
@@ -224,7 +241,13 @@
         "signature": [
           "TState extends ",
           "State",
-          "<any, infer TEvent, infer TStateSchema, infer TTypestate, infer TResolvedTypesMeta> ? ",
+          "<any, infer TEvent extends ",
+          "EventObject",
+          ", infer TStateSchema extends ",
+          "StateSchema",
+          "<any>, infer TTypestate extends ",
+          "Typestate",
+          "<any>, infer TResolvedTypesMeta> ? ",
           "State",
           "<(TTypestate extends any ? { value: TStateValue; context: any; } extends TTypestate ? TTypestate : never : never)[\"context\"], TEvent, TStateSchema, TTypestate, TResolvedTypesMeta> & { value: TStateValue; } : never"
         ],
@@ -244,7 +267,13 @@
           "EmittedFrom",
           "<TActorRef> extends ",
           "State",
-          "<any, infer TEvent, infer TStateSchema, infer TTypestate, infer TResolvedTypesMeta> ? ",
+          "<any, infer TEvent extends ",
+          "EventObject",
+          ", infer TStateSchema extends ",
+          "StateSchema",
+          "<any>, infer TTypestate extends ",
+          "Typestate",
+          "<any>, infer TResolvedTypesMeta> ? ",
           "State",
           "<(TTypestate extends any ? { value: TStateValue; context: any; } extends TTypestate ? TTypestate : never : never)[\"context\"], TEvent, TStateSchema, TTypestate, TResolvedTypesMeta> & { value: TStateValue; } : never"
         ],

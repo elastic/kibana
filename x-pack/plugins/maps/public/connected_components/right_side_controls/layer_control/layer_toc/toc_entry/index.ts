@@ -22,6 +22,7 @@ import {
   getOpenTOCDetails,
   getFlyoutDisplay,
 } from '../../../../../selectors/ui_selectors';
+import { getInspectorAdapters } from '../../../../../reducers/non_serializable_instances';
 import {
   fitToLayerExtent,
   setSelectedLayer,
@@ -37,6 +38,7 @@ import { DRAW_MODE } from '../../../../../../common/constants';
 function mapStateToProps(state: MapStoreState, ownProps: OwnProps): ReduxStateProps {
   const flyoutDisplay = getFlyoutDisplay(state);
   return {
+    inspectorAdapters: getInspectorAdapters(state),
     isReadOnly: getIsReadOnly(state),
     zoom: getMapZoom(state),
     selectedLayer: getSelectedLayer(state),

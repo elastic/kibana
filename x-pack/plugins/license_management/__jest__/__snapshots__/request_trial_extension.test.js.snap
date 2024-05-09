@@ -38,13 +38,13 @@ exports[`RequestTrialExtension component should display when enterprise license 
               >
                 subscription features
                 <span
-                  class="emotion-euiLink__externalIcon"
+                  class="emotion-EuiExternalLinkIcon"
                   data-euiicon-type="popout"
                 >
                   External link
                 </span>
                 <span
-                  class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+                  class="emotion-euiScreenReaderOnly"
                 >
                   (opens in a new tab or window)
                 </span>
@@ -114,13 +114,13 @@ exports[`RequestTrialExtension component should display when license is active a
               >
                 subscription features
                 <span
-                  class="emotion-euiLink__externalIcon"
+                  class="emotion-EuiExternalLinkIcon"
                   data-euiicon-type="popout"
                 >
                   External link
                 </span>
                 <span
-                  class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+                  class="emotion-euiScreenReaderOnly"
                 >
                   (opens in a new tab or window)
                 </span>
@@ -190,13 +190,13 @@ exports[`RequestTrialExtension component should display when license is not acti
               >
                 subscription features
                 <span
-                  class="emotion-euiLink__externalIcon"
+                  class="emotion-EuiExternalLinkIcon"
                   data-euiicon-type="popout"
                 >
                   External link
                 </span>
                 <span
-                  class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+                  class="emotion-euiScreenReaderOnly"
                 >
                   (opens in a new tab or window)
                 </span>
@@ -266,13 +266,13 @@ exports[`RequestTrialExtension component should display when platinum license is
               >
                 subscription features
                 <span
-                  class="emotion-euiLink__externalIcon"
+                  class="emotion-EuiExternalLinkIcon"
                   data-euiicon-type="popout"
                 >
                   External link
                 </span>
                 <span
-                  class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+                  class="emotion-euiScreenReaderOnly"
                 >
                   (opens in a new tab or window)
                 </span>

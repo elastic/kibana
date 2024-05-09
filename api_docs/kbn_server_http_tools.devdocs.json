@@ -787,6 +787,17 @@
           },
           {
             "parentPluginId": "@kbn/server-http-tools",
+            "id": "def-common.IHttpConfig.payloadTimeout",
+            "type": "number",
+            "tags": [],
+            "label": "payloadTimeout",
+            "description": [],
+            "path": "packages/kbn-server-http-tools/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/server-http-tools",
             "id": "def-common.IHttpConfig.cors",
             "type": "Object",
             "tags": [],

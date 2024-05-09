@@ -19,14 +19,16 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { PLUGIN_ID } from '../../../../common';
+
 import { useConnectorTypes } from '../../hooks/api/use_connector_types';
-import { useKibanaServices } from '../../hooks/use_kibana';
+import { useCreateConnector } from '../../hooks/api/use_create_connector';
+import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 
 export const EmptyConnectorsPrompt: React.FC = () => {
-  const { http } = useKibanaServices();
-  const { data: connectorTypes } = useConnectorTypes();
-  const assetBasePath = http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets`);
+  const connectorTypes = useConnectorTypes();
+  const { createConnector, isLoading } = useCreateConnector();
+
+  const assetBasePath = useAssetBasePath();
   const connectorsPath = assetBasePath + '/connectors.svg';
   return (
     <EuiFlexGroup alignItems="center" direction="column">
@@ -167,6 +169,8 @@ export const EmptyConnectorsPrompt: React.FC = () => {
                 data-test-subj="serverlessSearchEmptyConnectorsPromptCreateConnectorButton"
                 fill
                 iconType="plusInCircleFilled"
+                onClick={() => createConnector()}
+                isLoading={isLoading}
               >
                 {i18n.translate('xpack.serverlessSearch.connectorsEmpty.createConnector', {
                   defaultMessage: 'Create connector',
@@ -187,7 +191,7 @@ export const EmptyConnectorsPrompt: React.FC = () => {
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="s">
-          {connectorTypes?.connectors.map((connectorType) => (
+          {connectorTypes.map((connectorType) => (
             <EuiFlexItem key={connectorType.name}>
               <EuiToolTip content={connectorType.name}>
                 <EuiIcon

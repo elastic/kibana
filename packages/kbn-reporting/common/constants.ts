@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-export const PLUGIN_ID = 'reporting';
-
 export const ALLOWED_JOB_CONTENT_TYPES = [
   'application/json',
   'application/pdf',
@@ -16,16 +14,18 @@ export const ALLOWED_JOB_CONTENT_TYPES = [
   'text/plain',
 ];
 
-// APM
-export const REPORTING_TRANSACTION_TYPE = PLUGIN_ID;
-
-export const REPORTING_REDIRECT_LOCATOR_STORE_KEY = '__REPORTING_REDIRECT_LOCATOR_STORE_KEY__';
+/*
+ * UI Settings
+ */
 
 export const UI_SETTINGS_SEARCH_INCLUDE_FROZEN = 'search:includeFrozen';
 export const UI_SETTINGS_CUSTOM_PDF_LOGO = 'xpackReporting:customPdfLogo';
 export const UI_SETTINGS_DATEFORMAT_TZ = 'dateFormat:tz';
 
-// Licenses
+/*
+ * Licenses
+ */
+
 export const LICENSE_TYPE_TRIAL = 'trial' as const;
 export const LICENSE_TYPE_BASIC = 'basic' as const;
 export const LICENSE_TYPE_CLOUD_STANDARD = 'standard' as const;
@@ -33,29 +33,29 @@ export const LICENSE_TYPE_GOLD = 'gold' as const;
 export const LICENSE_TYPE_PLATINUM = 'platinum' as const;
 export const LICENSE_TYPE_ENTERPRISE = 'enterprise' as const;
 
-export const REPORTING_SYSTEM_INDEX = '.reporting';
+/*
+ * Notifications
+ */
 
 export const JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY =
   'xpack.reporting.jobCompletionNotifications';
 
-/**
- * A way to get the client side route for the reporting redirect app.
- *
- * TODO: Add a job ID and a locator to use so that we can redirect without expecting state to
- * be injected to the page
+/*
+ * Client-side paths
  */
-export const getRedirectAppPath = () => {
-  return '/app/reportingRedirect';
-};
 
-export const ILM_POLICY_NAME = 'kibana-reporting';
-
-// Usage counter types
-export const API_USAGE_COUNTER_TYPE = 'reportingApi';
-export const API_USAGE_ERROR_TYPE = 'reportingApiError';
+// Redirection URL used to load app state for screenshotting
+export const REPORTING_REDIRECT_APP = '/app/reportingRedirect';
+export const REPORTING_REDIRECT_LOCATOR_STORE_KEY = '__REPORTING_REDIRECT_LOCATOR_STORE_KEY__';
 
 // Management UI route
 export const REPORTING_MANAGEMENT_HOME = '/app/management/insightsAndAlerting/reporting';
+
+/*
+ * ILM
+ */
+
+export const ILM_POLICY_NAME = 'kibana-reporting';
 
 /*
  * JobStatus:
@@ -72,7 +72,10 @@ export enum JOB_STATUS {
   WARNINGS = 'completed_with_warnings',
 }
 
-// Job params require a `version` field as of 7.15.0. For older jobs set with
-// automation that have no version value in the job params, we assume the
-// intended version is 7.14.0
-export const UNVERSIONED_VERSION = '7.14.0';
+/*
+ * Test Subjects
+ */
+
+// Management app subjects
+export const REPORT_TABLE_ID = 'reportJobListing';
+export const REPORT_TABLE_ROW_ID = 'reportJobRow';

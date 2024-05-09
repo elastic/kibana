@@ -87,7 +87,6 @@ export type {
   RouteValidationResultFactory,
   RouteValidationSpec,
   RouteValidatorConfig,
-  RouteValidatorFullConfig,
   RouteValidatorOptions,
   IRouter,
   RouteRegistrar,
@@ -95,13 +94,26 @@ export type {
   IKibanaSocket,
   KibanaErrorResponseFactory,
   KibanaRedirectionResponseFactory,
+  KibanaNotModifiedResponseFactory,
   KibanaSuccessResponseFactory,
   KibanaResponseFactory,
   LifecycleResponseFactory,
   RawRequest,
   FakeRawRequest,
+  RouteValidator,
+  RouteValidatorRequestAndResponses,
+  RouteValidatorFullConfigRequest,
+  RouteValidatorFullConfigResponse,
+  LazyValidator,
 } from './src/router';
-export { validBodyOutput, RouteValidationError } from './src/router';
+export {
+  validBodyOutput,
+  RouteValidationError,
+  getRequestValidation,
+  getResponseValidation,
+  isFullValidatorContainer,
+  isKibanaResponse,
+} from './src/router';
 
 export type { ICspConfig } from './src/csp';
 
@@ -136,11 +148,13 @@ export type {
   VersionedRouteRequestValidation,
   VersionedRouteResponseValidation,
   ApiVersion,
-  FullValidationConfig,
+  VersionedRouteValidation,
   VersionedRoute,
   VersionedRouteConfig,
   VersionedRouteRegistrar,
   VersionedRouter,
+  VersionedRouteCustomResponseBodyValidation,
+  VersionedResponseBodyValidation,
 } from './src/versioning';
 
 export type { IStaticAssets } from './src/static_assets';

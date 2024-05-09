@@ -6,17 +6,13 @@
  */
 
 import React, { type FC } from 'react';
-
 import { EuiCode, EuiInputPopover } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
 
-import { QueryStringInput } from '@kbn/unified-search-plugin/public';
-
 import { PLUGIN } from '../../../../../../common/constants';
-import { SearchItems } from '../../../../hooks/use_search_items';
-
-import { StepDefineFormHook, QUERY_LANGUAGE_KUERY } from '../step_define';
+import type { SearchItems } from '../../../../hooks/use_search_items';
+import type { StepDefineFormHook } from '../step_define';
+import { QUERY_LANGUAGE_KUERY } from '../step_define';
 import { useAppDependencies } from '../../../../app_dependencies';
 
 interface SourceSearchBarProps {
@@ -30,15 +26,9 @@ export const SourceSearchBar: FC<SourceSearchBarProps> = ({ dataView, searchBar 
   } = searchBar;
 
   const {
-    uiSettings,
-    notifications,
-    http,
-    docLinks,
-    data,
-    dataViews,
-    storage,
-    unifiedSearch,
-    usageCollection,
+    unifiedSearch: {
+      ui: { QueryStringInput },
+    },
   } = useAppDependencies();
 
   return (
@@ -67,17 +57,6 @@ export const SourceSearchBar: FC<SourceSearchBarProps> = ({ dataView, searchBar 
           dataTestSubj="transformQueryInput"
           languageSwitcherPopoverAnchorPosition="rightDown"
           appName={PLUGIN.getI18nName()}
-          deps={{
-            unifiedSearch,
-            notifications,
-            http,
-            docLinks,
-            uiSettings,
-            data,
-            dataViews,
-            storage,
-            usageCollection,
-          }}
         />
       }
       isOpen={queryErrorMessage?.query === searchInput.query && queryErrorMessage?.message !== ''}

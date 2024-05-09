@@ -8,7 +8,7 @@
 import { ActionResult } from '@kbn/actions-plugin/server';
 import { RuleTypeParams, SanitizedRule } from '@kbn/alerting-plugin/common';
 import { ALERT_ACTION_TYPE_LOG } from '../../../../../common/constants';
-import { AlertsFactory } from '../../../../alerts';
+import { RulesFactory } from '../../../../rules';
 import { handleError } from '../../../../lib/errors';
 import { MonitoringCore, RouteDependencies } from '../../../../types';
 
@@ -26,7 +26,7 @@ export function enableAlertsRoute(server: MonitoringCore, npRoute: RouteDependen
         const infraContext = await context.infra;
         const actionContext = await context.actions;
 
-        const alerts = AlertsFactory.getAll();
+        const alerts = RulesFactory.getAll();
         if (alerts.length) {
           const { isSufficientlySecure, hasPermanentEncryptionKey } = npRoute.alerting
             ?.getSecurityHealth

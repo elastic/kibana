@@ -17,11 +17,6 @@ export type {
 
 export type {
   EsQuerySortValue,
-  IEsSearchRequest,
-  IEsSearchResponse,
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-  ISearchGeneric,
   ISearchSource,
   SearchError,
   SearchRequest,
@@ -56,7 +51,5 @@ export { getEsPreference } from './es_search';
 
 export type { SearchInterceptorDeps } from './search_interceptor';
 export { SearchInterceptor } from './search_interceptor';
-export { getSearchErrorOverrideDisplay } from './search_interceptor/utils';
-export * from './errors';
 
 export { SearchService } from './search_service';

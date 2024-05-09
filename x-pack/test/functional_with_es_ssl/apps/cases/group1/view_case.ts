@@ -46,7 +46,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it('should show the case view page correctly', async () => {
         await testSubjects.existOrFail('case-view-title');
         await testSubjects.existOrFail('header-page-supplements');
+        await testSubjects.existOrFail('case-action-bar-wrapper');
 
+        await testSubjects.existOrFail('case-view-tabs');
+        await testSubjects.existOrFail('case-view-tab-title-alerts');
         await testSubjects.existOrFail('case-view-tab-title-activity');
         await testSubjects.existOrFail('case-view-tab-title-files');
         await testSubjects.existOrFail('description');
@@ -866,17 +869,15 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         expect(userActionsLists).length(2);
 
-        expect(await userActionsLists[0].findAllByClassName('euiComment')).length(10);
+        expect(await userActionsLists[0].findAllByCssSelector('li')).length(10);
 
-        expect(await userActionsLists[1].findAllByClassName('euiComment')).length(4);
+        expect(await userActionsLists[1].findAllByCssSelector('li')).length(4);
 
         testSubjects.click('cases-show-more-user-actions');
 
         await header.waitUntilLoadingHasFinished();
 
-        expect(await userActionsLists[0].findAllByClassName('euiComment')).length(20);
-
-        expect(await userActionsLists[1].findAllByClassName('euiComment')).length(4);
+        expect(await userActionsLists[0].findAllByCssSelector('li')).length(20);
       });
     });
 
@@ -1013,13 +1014,27 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     describe('Tabs', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
 
+      it('renders tabs correctly', async () => {
+        await testSubjects.existOrFail('case-view-tab-title-activity');
+        await testSubjects.existOrFail('case-view-tab-title-files');
+        await testSubjects.existOrFail('case-view-tab-title-alerts');
+      });
+
       it('shows the "activity" tab by default', async () => {
         await testSubjects.existOrFail('case-view-tab-title-activity');
         await testSubjects.existOrFail('case-view-tab-content-activity');
       });
 
-      // there are no alerts in stack management yet
-      it.skip("shows the 'alerts' tab when clicked", async () => {
+      it("shows the 'activity' tab when clicked", async () => {
+        // Go to the files tab first
+        await testSubjects.click('case-view-tab-title-files');
+        await testSubjects.existOrFail('case-view-tab-content-files');
+
+        await testSubjects.click('case-view-tab-title-activity');
+        await testSubjects.existOrFail('case-view-tab-content-activity');
+      });
+
+      it("shows the 'alerts' tab when clicked", async () => {
         await testSubjects.click('case-view-tab-title-alerts');
         await testSubjects.existOrFail('case-view-tab-content-alerts');
       });
@@ -1027,6 +1042,36 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it("shows the 'files' tab when clicked", async () => {
         await testSubjects.click('case-view-tab-title-files');
         await testSubjects.existOrFail('case-view-tab-content-files');
+      });
+
+      describe('Query params', () => {
+        it('renders the activity tab when the query parameter tabId=activity', async () => {
+          const theCase = await createAndNavigateToCase(getPageObject, getService);
+
+          await cases.navigation.navigateToSingleCase('cases', theCase.id, 'activity');
+          await testSubjects.existOrFail('case-view-tab-title-activity');
+        });
+
+        it('renders the activity tab when the query parameter tabId=alerts', async () => {
+          const theCase = await createAndNavigateToCase(getPageObject, getService);
+
+          await cases.navigation.navigateToSingleCase('cases', theCase.id, 'alerts');
+          await testSubjects.existOrFail('case-view-tab-title-activity');
+        });
+
+        it('renders the activity tab when the query parameter tabId=files', async () => {
+          const theCase = await createAndNavigateToCase(getPageObject, getService);
+
+          await cases.navigation.navigateToSingleCase('cases', theCase.id, 'files');
+          await testSubjects.existOrFail('case-view-tab-content-files');
+        });
+
+        it('renders the activity tab when the query parameter tabId has an unknown value', async () => {
+          const theCase = await createAndNavigateToCase(getPageObject, getService);
+
+          await cases.navigation.navigateToSingleCase('cases', theCase.id, 'fake');
+          await testSubjects.existOrFail('case-view-tab-title-activity');
+        });
       });
     });
 
@@ -1183,13 +1228,15 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         {
           key: 'valid_key_1',
           label: 'Summary',
-          type: CustomFieldTypes.TEXT,
+          type: CustomFieldTypes.TEXT as const,
+          defaultValue: 'foobar',
           required: true,
         },
         {
           key: 'valid_key_2',
           label: 'Sync',
-          type: CustomFieldTypes.TOGGLE,
+          type: CustomFieldTypes.TOGGLE as const,
+          defaultValue: false,
           required: true,
         },
       ];
@@ -1247,19 +1294,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await header.waitUntilLoadingHasFinished();
 
-        await retry.waitFor('update toast exist', async () => {
-          return await testSubjects.exists('toastCloseButton');
-        });
-
-        await testSubjects.click('toastCloseButton');
-
-        await header.waitUntilLoadingHasFinished();
+        expect(await textField.getVisibleText()).equal('this is a text field value edited!!');
 
         await toggle.click();
 
         await header.waitUntilLoadingHasFinished();
-
-        expect(await textField.getVisibleText()).equal('this is a text field value edited!!');
 
         expect(await toggle.getAttribute('aria-checked')).equal('false');
 

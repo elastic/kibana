@@ -6,6 +6,7 @@
  */
 
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import { CustomFieldTypes } from '../../../common/types/domain';
 import type {
   AttachmentAggregationResult,
   AttachmentFrameworkAggsResult,
@@ -21,6 +22,7 @@ import {
   getCountsAggregationQuery,
   getCountsAndMaxData,
   getCountsFromBuckets,
+  getCustomFieldsTelemetry,
   getMaxBucketOnCaseAggregationQuery,
   getOnlyAlertsCommentsFilter,
   getOnlyConnectorsFilter,
@@ -1197,6 +1199,63 @@ describe('utils', () => {
         ],
         function: 'is',
         type: 'function',
+      });
+    });
+  });
+
+  describe('getCustomFieldsTelemetry', () => {
+    const customFieldsMock = [
+      {
+        key: 'foobar1',
+        label: 'foobar1',
+        type: CustomFieldTypes.TEXT,
+        required: false,
+      },
+      {
+        key: 'foobar2',
+        label: 'foobar2',
+        type: CustomFieldTypes.TOGGLE,
+        required: true,
+      },
+      {
+        key: 'foobar3',
+        label: 'foobar3',
+        type: 'foo',
+        required: true,
+      },
+      {
+        key: 'foobar4',
+        label: 'foobar4',
+        type: CustomFieldTypes.TOGGLE,
+        required: true,
+      },
+    ];
+
+    it('returns customFields telemetry correctly', () => {
+      expect(getCustomFieldsTelemetry(customFieldsMock)).toEqual({
+        totalsByType: {
+          text: 1,
+          toggle: 2,
+          foo: 1,
+        },
+        totals: 4,
+        required: 3,
+      });
+    });
+
+    it('returns correctly when customFields undefined', () => {
+      expect(getCustomFieldsTelemetry(undefined)).toEqual({
+        totalsByType: {},
+        totals: 0,
+        required: 0,
+      });
+    });
+
+    it('returns correctly when customFields empty', () => {
+      expect(getCustomFieldsTelemetry([])).toEqual({
+        totalsByType: {},
+        totals: 0,
+        required: 0,
       });
     });
   });

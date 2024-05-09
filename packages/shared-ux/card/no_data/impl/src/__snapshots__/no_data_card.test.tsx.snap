@@ -61,9 +61,11 @@ exports[`NoDataCard props button 1`] = `
       <div
         class="emotion-euiCard__footer"
       >
-        <button
+        <a
           class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
-          type="button"
+          data-test-subj="noDataDefaultFooterAction"
+          href="/app/integrations/browse"
+          rel="noreferrer"
         >
           <span
             class="emotion-euiButtonDisplayContent"
@@ -74,7 +76,7 @@ exports[`NoDataCard props button 1`] = `
               Button
             </span>
           </span>
-        </button>
+        </a>
       </div>
     </div>
   </div>
@@ -142,9 +144,11 @@ exports[`NoDataCard props extends EuiCardProps 1`] = `
       <div
         class="emotion-euiCard__footer"
       >
-        <button
+        <a
           class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
-          type="button"
+          data-test-subj="noDataDefaultFooterAction"
+          href="/app/integrations/browse"
+          rel="noreferrer"
         >
           <span
             class="emotion-euiButtonDisplayContent"
@@ -155,7 +159,7 @@ exports[`NoDataCard props extends EuiCardProps 1`] = `
               Button
             </span>
           </span>
-        </button>
+        </a>
       </div>
     </div>
   </div>
@@ -223,9 +227,11 @@ exports[`NoDataCard props href 1`] = `
       <div
         class="emotion-euiCard__footer"
       >
-        <button
+        <a
           class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
-          type="button"
+          data-test-subj="noDataDefaultFooterAction"
+          href="#"
+          rel="noreferrer"
         >
           <span
             class="emotion-euiButtonDisplayContent"
@@ -236,7 +242,7 @@ exports[`NoDataCard props href 1`] = `
               Button
             </span>
           </span>
-        </button>
+        </a>
       </div>
     </div>
   </div>
@@ -370,9 +376,11 @@ exports[`NoDataCard renders 1`] = `
       <div
         class="emotion-euiCard__footer"
       >
-        <button
+        <a
           class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
-          type="button"
+          data-test-subj="noDataDefaultFooterAction"
+          href="/app/integrations/browse"
+          rel="noreferrer"
         >
           <span
             class="emotion-euiButtonDisplayContent"
@@ -383,7 +391,7 @@ exports[`NoDataCard renders 1`] = `
               Card title
             </span>
           </span>
-        </button>
+        </a>
       </div>
     </div>
   </div>

@@ -14,14 +14,24 @@ import { get } from 'lodash';
 
 import { ES_AGGREGATION, ML_JOB_AGGREGATION, DOC_COUNT, _DOC_COUNT } from '@kbn/ml-anomaly-utils';
 
-import { SeriesConfig } from '../../../common/types/results';
-import { Job } from '../../../common/types/anomaly_detection_jobs';
+import type { SeriesConfig } from '../../../common/types/results';
+import type { Job } from '../../../common/types/anomaly_detection_jobs';
 
 import { mlFunctionToESAggregation } from '../../../common/util/job_utils';
 
-// Builds the basic configuration to plot a chart of the source data
-// analyzed by the the detector at the given index from the specified ML job.
-export function buildConfigFromDetector(job: Job, detectorIndex: number) {
+/**
+ * Builds the basic configuration to plot a chart of the source data
+ * analyzed by the the detector at the given index from the specified ML job.
+ * @param job Job config info
+ * @param detectorIndex The index of the detector in the job config
+ * @param metricFunctionDescription The underlying function (min, max, avg) for "metric" detector type
+ * @returns
+ */
+export function buildConfigFromDetector(
+  job: Job,
+  detectorIndex: number,
+  metricFunctionDescription?: ES_AGGREGATION
+) {
   const analysisConfig = job.analysis_config;
   const detector = analysisConfig.detectors[detectorIndex];
 
@@ -38,6 +48,9 @@ export function buildConfigFromDetector(job: Job, detectorIndex: number) {
     datafeedConfig: job.datafeed_config!,
     summaryCountFieldName: job.analysis_config.summary_count_field_name,
   };
+  if (detector.function === ML_JOB_AGGREGATION.METRIC && metricFunctionDescription !== undefined) {
+    config.metricFunction = metricFunctionDescription;
+  }
 
   if (detector.field_name !== undefined) {
     config.metricFieldName = detector.field_name;

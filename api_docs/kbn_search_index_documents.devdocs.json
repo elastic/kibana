@@ -98,8 +98,8 @@
             "pluginId": "@kbn/core-elasticsearch-server",
             "scope": "common",
             "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-common.IScopedClusterClient",
-            "text": "IScopedClusterClient"
+            "section": "def-common.ElasticsearchClient",
+            "text": "ElasticsearchClient"
           },
           ", indexName: string, query?: string | undefined, from?: number, size?: number) => Promise<",
           {
@@ -129,8 +129,8 @@
                 "pluginId": "@kbn/core-elasticsearch-server",
                 "scope": "common",
                 "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-common.IScopedClusterClient",
-                "text": "IScopedClusterClient"
+                "section": "def-common.ElasticsearchClient",
+                "text": "ElasticsearchClient"
               }
             ],
             "path": "packages/kbn-search-index-documents/lib/fetch_search_results.ts",

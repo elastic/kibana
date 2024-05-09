@@ -11,6 +11,7 @@ import {
   SavedObjectsServiceStart,
   PluginInitializerContext,
   ISavedObjectsRepository,
+  CoreStart,
 } from '@kbn/core/server';
 import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import {
@@ -28,6 +29,13 @@ import { AlertingAuthorizationClientFactory } from './alerting_authorization_cli
 import { AlertingRulesConfig } from './config';
 import { GetAlertIndicesAlias } from './lib';
 import { AlertsService } from './alerts_service/alerts_service';
+import { BackfillClient } from './backfill_client/backfill_client';
+import {
+  AD_HOC_RUN_SAVED_OBJECT_TYPE,
+  API_KEY_PENDING_INVALIDATION_TYPE,
+  RULE_SAVED_OBJECT_TYPE,
+} from './saved_objects';
+import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
 export interface RulesClientFactoryOpts {
   logger: Logger;
   taskManager: TaskManagerStartContract;
@@ -47,6 +55,9 @@ export interface RulesClientFactoryOpts {
   maxScheduledPerMinute: AlertingRulesConfig['maxScheduledPerMinute'];
   getAlertIndicesAlias: GetAlertIndicesAlias;
   alertsService: AlertsService | null;
+  backfillClient: BackfillClient;
+  connectorAdapterRegistry: ConnectorAdapterRegistry;
+  uiSettings: CoreStart['uiSettings'];
 }
 
 export class RulesClientFactory {
@@ -69,6 +80,9 @@ export class RulesClientFactory {
   private maxScheduledPerMinute!: AlertingRulesConfig['maxScheduledPerMinute'];
   private getAlertIndicesAlias!: GetAlertIndicesAlias;
   private alertsService!: AlertsService | null;
+  private backfillClient!: BackfillClient;
+  private connectorAdapterRegistry!: ConnectorAdapterRegistry;
+  private uiSettings!: CoreStart['uiSettings'];
 
   public initialize(options: RulesClientFactoryOpts) {
     if (this.isInitialized) {
@@ -93,6 +107,9 @@ export class RulesClientFactory {
     this.maxScheduledPerMinute = options.maxScheduledPerMinute;
     this.getAlertIndicesAlias = options.getAlertIndicesAlias;
     this.alertsService = options.alertsService;
+    this.backfillClient = options.backfillClient;
+    this.connectorAdapterRegistry = options.connectorAdapterRegistry;
+    this.uiSettings = options.uiSettings;
   }
 
   public create(request: KibanaRequest, savedObjects: SavedObjectsServiceStart): RulesClient {
@@ -113,7 +130,11 @@ export class RulesClientFactory {
       maxScheduledPerMinute: this.maxScheduledPerMinute,
       unsecuredSavedObjectsClient: savedObjects.getScopedClient(request, {
         excludedExtensions: [SECURITY_EXTENSION_ID],
-        includedHiddenTypes: ['alert', 'api_key_pending_invalidation'],
+        includedHiddenTypes: [
+          RULE_SAVED_OBJECT_TYPE,
+          API_KEY_PENDING_INVALIDATION_TYPE,
+          AD_HOC_RUN_SAVED_OBJECT_TYPE,
+        ],
       }),
       authorization: this.authorization.create(request),
       actionsAuthorization: actions.getActionsAuthorizationWithRequest(request),
@@ -123,6 +144,10 @@ export class RulesClientFactory {
       auditLogger: securityPluginSetup?.audit.asScoped(request),
       getAlertIndicesAlias: this.getAlertIndicesAlias,
       alertsService: this.alertsService,
+      backfillClient: this.backfillClient,
+      connectorAdapterRegistry: this.connectorAdapterRegistry,
+      uiSettings: this.uiSettings,
+
       async getUserName() {
         if (!securityPluginStart) {
           return null;
@@ -139,7 +164,7 @@ export class RulesClientFactory {
         // privileges
         const createAPIKeyResult = await securityPluginStart.authc.apiKeys.grantAsInternalUser(
           request,
-          { name, role_descriptors: {} }
+          { name, role_descriptors: {}, metadata: { managed: true } }
         );
         if (!createAPIKeyResult) {
           return { apiKeysEnabled: false };
@@ -179,6 +204,9 @@ export class RulesClientFactory {
           };
         }
         return { apiKeysEnabled: false };
+      },
+      isSystemAction(actionId: string) {
+        return actions.isSystemActionConnector(actionId);
       },
     });
   }

@@ -29,8 +29,7 @@ export type DeprecatedCellValueElementProps = EuiDataGridCellValueElementProps &
   isTimeline?: boolean; // Default cell renderer is used for both the alert table and timeline. This allows us to cheaply separate concerns
   linkValues: string[] | undefined;
   rowRenderers?: DeprecatedRowRenderer[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  setFlyoutAlert?: (data: any) => void;
+  setFlyoutAlert?: (alertId: string) => void;
   scopeId: string;
   truncate?: boolean;
   key?: string;

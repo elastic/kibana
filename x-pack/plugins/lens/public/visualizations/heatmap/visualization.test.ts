@@ -99,7 +99,7 @@ describe('heatmap', () => {
 
   describe('#getConfiguration', () => {
     beforeEach(() => {
-      const mockDatasource = createMockDatasource('testDatasource');
+      const mockDatasource = createMockDatasource();
 
       mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         dataType: 'string',
@@ -378,7 +378,7 @@ describe('heatmap', () => {
     let datasourceLayers: DatasourceLayers;
 
     beforeEach(() => {
-      const mockDatasource = createMockDatasource('testDatasource');
+      const mockDatasource = createMockDatasource();
 
       mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         dataType: 'string',
@@ -493,7 +493,7 @@ describe('heatmap', () => {
     let datasourceLayers: DatasourceLayers;
 
     beforeEach(() => {
-      const mockDatasource = createMockDatasource('testDatasource');
+      const mockDatasource = createMockDatasource();
 
       mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         dataType: 'string',
@@ -633,7 +633,7 @@ describe('heatmap', () => {
 
     describe('warnings', () => {
       beforeEach(() => {
-        const mockDatasource = createMockDatasource('testDatasource');
+        const mockDatasource = createMockDatasource();
 
         mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
           dataType: 'string',

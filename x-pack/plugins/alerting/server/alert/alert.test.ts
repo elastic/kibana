@@ -543,6 +543,7 @@ describe('toRaw', () => {
         },
         flappingHistory: [false, true, true],
         pendingRecoveredCount: 2,
+        activeCount: 1,
       },
     };
     const alertInstance = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>(
@@ -562,6 +563,7 @@ describe('toRaw', () => {
         },
         flappingHistory: [false, true, true],
         flapping: false,
+        activeCount: 1,
       },
     };
     const alertInstance = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>(
@@ -574,6 +576,7 @@ describe('toRaw', () => {
         flapping: false,
         maintenanceWindowIds: [],
         uuid: expect.any(String),
+        activeCount: 1,
       },
     });
   });
@@ -744,5 +747,45 @@ describe('isFilteredOut', () => {
       meta: { pendingRecoveredCount: 3, uuid: '3' },
     });
     expect(alert.isFilteredOut(summarizedAlerts)).toBe(true);
+  });
+});
+
+describe('incrementActiveCount', () => {
+  test('correctly increments activeCount', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: { activeCount: 3 },
+    });
+    alert.incrementActiveCount();
+    expect(alert.getActiveCount()).toEqual(4);
+  });
+
+  test('correctly increments activeCount when it is not already defined', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
+    alert.incrementActiveCount();
+    expect(alert.getActiveCount()).toEqual(1);
+  });
+});
+
+describe('getActiveCount', () => {
+  test('returns ActiveCount', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: { activeCount: 3 },
+    });
+    expect(alert.getActiveCount()).toEqual(3);
+  });
+
+  test('defines and returns activeCount when it is not already defined', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
+    expect(alert.getActiveCount()).toEqual(0);
+  });
+});
+
+describe('resetActiveCount', () => {
+  test('resets activeCount to 0', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: { activeCount: 3 },
+    });
+    alert.resetActiveCount();
+    expect(alert.getActiveCount()).toEqual(0);
   });
 });

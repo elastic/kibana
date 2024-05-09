@@ -7,7 +7,7 @@
 
 import { coreMock } from '@kbn/core/server/mocks';
 import { MonitoringPlugin } from './plugin';
-import { AlertsFactory } from './alerts';
+import { RulesFactory } from './rules';
 
 jest.mock('./es_client/instantiate_client', () => ({
   instantiateClient: jest.fn().mockImplementation(() => ({
@@ -71,10 +71,10 @@ describe('Monitoring plugin', () => {
     expect(plugin['bulkUploader']).not.toBeUndefined();
   });
 
-  it('should register all alerts', async () => {
-    const alerts = AlertsFactory.getAll();
+  it('should register all rules', async () => {
+    const rules = RulesFactory.getAll();
     const plugin = new MonitoringPlugin(initializerContext as any);
     await plugin.setup(coreSetup as any, setupPlugins as any);
-    expect(setupPlugins.alerting.registerType).toHaveBeenCalledTimes(alerts.length);
+    expect(setupPlugins.alerting.registerType).toHaveBeenCalledTimes(rules.length);
   });
 });

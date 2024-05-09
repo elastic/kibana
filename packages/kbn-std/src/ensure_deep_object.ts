@@ -17,7 +17,7 @@ const separator = '.';
  * @returns Same object instance with expanded properties.
  */
 export function ensureDeepObject(obj: any, path: string[] = []): any {
-  assertValidPath(path);
+  ensureValidObjectPath(path);
 
   if (obj == null || typeof obj !== 'object') {
     return obj;
@@ -41,7 +41,7 @@ export function ensureDeepObject(obj: any, path: string[] = []): any {
 }
 
 function walk(obj: any, keys: string[], value: any, path: string[]) {
-  assertValidPath([...path, ...keys]);
+  ensureValidObjectPath([...path, ...keys]);
 
   const key = keys.shift()!;
   if (keys.length === 0) {
@@ -56,7 +56,7 @@ function walk(obj: any, keys: string[], value: any, path: string[]) {
   walk(obj[key], keys, ensureDeepObject(value, [...path, key, ...keys]), [...path, key]);
 }
 
-const assertValidPath = (path: string[]) => {
+export const ensureValidObjectPath = (path: string[]) => {
   const flat = path.join('.');
   FORBIDDEN_PATTERNS.forEach((pattern) => {
     if (flat.includes(pattern)) {

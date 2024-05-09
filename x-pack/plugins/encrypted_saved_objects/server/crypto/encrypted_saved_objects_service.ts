@@ -32,7 +32,7 @@ export interface AttributeToEncrypt {
 export interface EncryptedSavedObjectTypeRegistration {
   readonly type: string;
   readonly attributesToEncrypt: ReadonlySet<string | AttributeToEncrypt>;
-  readonly attributesToExcludeFromAAD?: ReadonlySet<string>;
+  readonly attributesToIncludeInAAD?: ReadonlySet<string>;
 }
 
 /**
@@ -286,11 +286,15 @@ export class EncryptedSavedObjectsService {
           encryptedAttributes[attributeName] = (yield [attributeValue, encryptionAAD])!;
         } catch (err) {
           this.options.logger.error(
-            `Failed to encrypt "${attributeName}" attribute: ${err.message || err}`
+            `Failed to encrypt "${attributeName}" attribute of saved object "${descriptorToArray(
+              descriptor
+            )}": ${err.message || err}`
           );
 
           throw new EncryptionError(
-            `Unable to encrypt attribute "${attributeName}"`,
+            `Unable to encrypt attribute "${attributeName}" of saved object "${descriptorToArray(
+              descriptor
+            )}"`,
             attributeName,
             EncryptionErrorOperation.Encryption,
             err
@@ -544,11 +548,15 @@ export class EncryptedSavedObjectsService {
         decryptedAttributes[attributeName] = (yield [attributeValue, encryptionAADs])!;
       } catch (err) {
         this.options.logger.error(
-          `Failed to decrypt "${attributeName}" attribute: ${err.message || err}`
+          `Failed to decrypt attribute "${attributeName}" of saved object "${descriptorToArray(
+            descriptor
+          )}": ${err.message || err}`
         );
 
         throw new EncryptionError(
-          `Unable to decrypt attribute "${attributeName}"`,
+          `Unable to decrypt attribute "${attributeName}" of saved object "${descriptorToArray(
+            descriptor
+          )}"`,
           attributeName,
           EncryptionErrorOperation.Decryption,
           err
@@ -592,12 +600,8 @@ export class EncryptedSavedObjectsService {
     attributes: Record<string, unknown>
   ) {
     // Collect all attributes (both keys and values) that should contribute to AAD.
-    const attributesAAD: Record<string, unknown> = {};
-    for (const [attributeKey, attributeValue] of Object.entries(attributes)) {
-      if (!typeDefinition.shouldBeExcludedFromAAD(attributeKey)) {
-        attributesAAD[attributeKey] = attributeValue;
-      }
-    }
+    const attributesAAD: Record<string, unknown> =
+      typeDefinition.collectAttributesForAAD(attributes);
 
     if (Object.keys(attributesAAD).length === 0) {
       this.options.logger.debug(
@@ -607,6 +611,7 @@ export class EncryptedSavedObjectsService {
       );
     }
 
+    // Always add the descriptor to the AAD.
     return stringify([...descriptorToArray(descriptor), attributesAAD]);
   }
 

@@ -239,12 +239,7 @@ export function suggestions({
         ],
       },
       previewIcon: PartitionChartsMeta.treemap.icon,
-      // hide treemap suggestions from bottom bar, but keep them for chart switcher
-      hide:
-        table.changeType === 'reduced' ||
-        !state ||
-        hasIntervalScale(groups) ||
-        (state && state.shape === PieChartTypes.TREEMAP),
+      hide: table.changeType === 'reduced' || hasIntervalScale(groups),
     });
   }
 
@@ -292,11 +287,7 @@ export function suggestions({
         ],
       },
       previewIcon: PartitionChartsMeta.mosaic.icon,
-      hide:
-        groups.length !== 2 ||
-        table.changeType === 'reduced' ||
-        hasIntervalScale(groups) ||
-        (state && state.shape === 'mosaic'),
+      hide: groups.length !== 2 || table.changeType === 'reduced' || hasIntervalScale(groups),
     });
   }
 
@@ -341,11 +332,7 @@ export function suggestions({
         ],
       },
       previewIcon: PartitionChartsMeta.waffle.icon,
-      hide:
-        groups.length !== 1 ||
-        table.changeType === 'reduced' ||
-        hasIntervalScale(groups) ||
-        (state && state.shape === 'waffle'),
+      hide: groups.length !== 1 || table.changeType === 'reduced' || hasIntervalScale(groups),
     });
   }
 
@@ -359,7 +346,12 @@ export function suggestions({
     .sort((a, b) => b.score - a.score)
     .map((suggestion) => ({
       ...suggestion,
-      hide: shouldHideSuggestion || incompleteConfiguration || suggestion.hide,
+      hide:
+        // avoid to suggest the same shape if already used
+        (state && state.shape === suggestion.state.shape) ||
+        shouldHideSuggestion ||
+        incompleteConfiguration ||
+        suggestion.hide,
       incomplete: incompleteConfiguration,
     }));
 }

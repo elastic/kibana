@@ -13,24 +13,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Actions
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           repository: 'elastic/kibana-github-actions'
           ref: main
           path: ./actions
 
       - name: Install Actions
-        run: npm install --production --prefix ./actions
+        run: npm ci --omit=dev --prefix ./actions
 
       - name: User Permission Check
         uses: ./actions/permission-check
         with:
           permission: admin
-          teams: appex-qa
+          teams: appex-qa, security-solution-test-skippers
           token: ${{secrets.KIBANAMACHINE_TOKEN}}
 
       - name: Checkout kibana-operations
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           repository: 'elastic/kibana-operations'
           ref: main
@@ -41,6 +41,7 @@ jobs:
         working-directory: ./kibana-operations/triage
         env:
           GITHUB_TOKEN: ${{secrets.KIBANAMACHINE_TOKEN}}
+          SLACK_TOKEN: ${{secrets.SLACK_TOKEN_FAILED_TEST_NOTIFIER}}
         run: |
-          npm install
+          npm ci --omit=dev
           node failed-test-auto ${{github.event.issue.number}}

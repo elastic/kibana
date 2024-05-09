@@ -96,6 +96,9 @@ export type {
   InstallationInfo,
   ActionStatusOptions,
   PackageSpecTags,
+  AssetsMap,
+  InstallResultStatus,
+  InstallLatestExecutedState,
 } from '../../common/types';
 export { ElasticsearchAssetType, KibanaAssetType, KibanaSavedObjectType } from '../../common/types';
 export { dataTypes } from '../../common/constants';

@@ -15,13 +15,18 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/server';
 import { RuleTypeState } from '@kbn/alerting-plugin/server';
 import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
-import { MAX_SELECTABLE_GROUP_BY_TERMS } from '../../../common/constants';
-import { ComparatorFnNames } from '../../../common';
+import {
+  MAX_SELECTABLE_SOURCE_FIELDS,
+  MAX_SELECTABLE_GROUP_BY_TERMS,
+} from '../../../common/constants';
+import {
+  ComparatorFnNames,
+  ES_QUERY_MAX_HITS_PER_EXECUTION,
+  ES_QUERY_MAX_HITS_PER_EXECUTION_SERVERLESS,
+} from '../../../common';
 import { Comparator } from '../../../common/comparator_types';
 import { getComparatorSchemaType } from '../lib/comparator';
 import { isEsqlQueryRule, isSearchSourceRule } from './util';
-
-export const ES_QUERY_MAX_HITS_PER_EXECUTION = 10000;
 
 // rule type parameters
 export type EsQueryRuleParams = TypeOf<typeof EsQueryRuleParamsSchema>;
@@ -95,6 +100,17 @@ const EsQueryRuleParamsSchemaProperties = {
     schema.literal('esqlQuery'),
     schema.object({ esql: schema.string({ minLength: 1 }) }),
     schema.never()
+  ),
+  sourceFields: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        label: schema.string(),
+        searchPath: schema.string(),
+      }),
+      {
+        maxSize: MAX_SELECTABLE_SOURCE_FIELDS,
+      }
+    )
   ),
 };
 
@@ -196,6 +212,20 @@ function validateParams(anyParams: unknown): string | undefined {
     return i18n.translate('xpack.stackAlerts.esQuery.invalidEsQueryErrorMessage', {
       defaultMessage: '[esQuery]: must be valid JSON',
     });
+  }
+}
+
+export function validateServerless(params: EsQueryRuleParams) {
+  const { size } = params;
+  if (size > ES_QUERY_MAX_HITS_PER_EXECUTION_SERVERLESS) {
+    throw new Error(
+      i18n.translate('xpack.stackAlerts.esQuery.serverless.sizeErrorMessage', {
+        defaultMessage: '[size]: must be less than or equal to {maxSize}',
+        values: {
+          maxSize: ES_QUERY_MAX_HITS_PER_EXECUTION_SERVERLESS,
+        },
+      })
+    );
   }
 }
 

@@ -6,25 +6,32 @@
  * Side Public License, v 1.
  */
 import chroma from 'chroma-js';
+import { findLast } from 'lodash';
 import { ColorMapping } from '../config';
 import { changeAlpha, combineColors, getValidColor } from './color_math';
-import { generateAutoAssignmentsForCategories } from '../config/assignment_from_categories';
-import { getPalette } from '../palettes';
+import { getPalette, NeutralPalette } from '../palettes';
 import { ColorMappingInputData } from '../categorical_color_mapping';
 import { ruleMatch } from './rule_matching';
 import { GradientColorMode } from '../config/types';
+import {
+  DEFAULT_NEUTRAL_PALETTE_INDEX,
+  DEFAULT_OTHER_ASSIGNMENT_INDEX,
+} from '../config/default_color_mapping';
 
 export function getAssignmentColor(
   colorMode: ColorMapping.Config['colorMode'],
-  color: ColorMapping.Config['assignments'][number]['color'],
+  color:
+    | ColorMapping.Config['assignments'][number]['color']
+    | (ColorMapping.LoopColor & { paletteId: string; colorIndex: number }),
   getPaletteFn: ReturnType<typeof getPalette>,
   isDarkMode: boolean,
   index: number,
   total: number
-) {
+): string {
   switch (color.type) {
     case 'colorCode':
     case 'categorical':
+    case 'loop':
       return getColor(color, getPaletteFn, isDarkMode);
     case 'gradient': {
       if (colorMode.type === 'categorical') {
@@ -37,31 +44,28 @@ export function getAssignmentColor(
 }
 
 export function getColor(
-  color: ColorMapping.ColorCode | ColorMapping.CategoricalColor,
+  color:
+    | ColorMapping.ColorCode
+    | ColorMapping.CategoricalColor
+    | (ColorMapping.LoopColor & { paletteId: string; colorIndex: number }),
   getPaletteFn: ReturnType<typeof getPalette>,
   isDarkMode: boolean
-) {
+): string {
   return color.type === 'colorCode'
     ? color.colorCode
-    : getValidColor(getPaletteFn(color.paletteId).getColor(color.colorIndex, isDarkMode)).hex();
+    : getValidColor(
+        getPaletteFn(color.paletteId).getColor(color.colorIndex, isDarkMode, true)
+      ).hex();
 }
 
 export function getColorFactory(
-  model: ColorMapping.Config,
+  { assignments, specialAssignments, colorMode, paletteId }: ColorMapping.Config,
   getPaletteFn: ReturnType<typeof getPalette>,
   isDarkMode: boolean,
   data: ColorMappingInputData
 ): (category: string | string[]) => string {
-  const palette = getPaletteFn(model.paletteId);
-  // generate on-the-fly assignments in auto-mode based on current data.
-  // This simplify the code by always using assignments, even if there is no real static assigmnets
-  const assignments =
-    model.assignmentMode === 'auto'
-      ? generateAutoAssignmentsForCategories(data, palette, model.colorMode)
-      : model.assignments;
-
   // find auto-assigned colors
-  const autoAssignedColors =
+  const autoByOrderAssignments =
     data.type === 'categories'
       ? assignments.filter((a) => {
           return (
@@ -71,75 +75,90 @@ export function getColorFactory(
       : [];
 
   // find all categories that doesn't match with an assignment
-  const nonAssignedCategories =
+  const notAssignedCategories =
     data.type === 'categories'
       ? data.categories.filter((category) => {
           return !assignments.some(({ rule }) => ruleMatch(rule, category));
         })
       : [];
 
+  const lastCategorical = findLast(assignments, (d) => {
+    return d.color.type === 'categorical';
+  });
+  const nextCategoricalIndex =
+    lastCategorical?.color.type === 'categorical' ? lastCategorical.color.colorIndex + 1 : 0;
+
   return (category: string | string[]) => {
     if (typeof category === 'string' || Array.isArray(category)) {
-      const nonAssignedCategoryIndex = nonAssignedCategories.indexOf(category);
+      const nonAssignedCategoryIndex = notAssignedCategories.indexOf(category);
 
-      // return color for a non assigned category
+      // this category is not assigned to a specific color
       if (nonAssignedCategoryIndex > -1) {
-        if (nonAssignedCategoryIndex < autoAssignedColors.length) {
+        // if the category order is within current number of auto-assigned items pick the defined color
+        if (nonAssignedCategoryIndex < autoByOrderAssignments.length) {
           const autoAssignmentIndex = assignments.findIndex(
-            (d) => d === autoAssignedColors[nonAssignedCategoryIndex]
+            (d) => d === autoByOrderAssignments[nonAssignedCategoryIndex]
           );
           return getAssignmentColor(
-            model.colorMode,
-            autoAssignedColors[nonAssignedCategoryIndex].color,
+            colorMode,
+            autoByOrderAssignments[nonAssignedCategoryIndex].color,
             getPaletteFn,
             isDarkMode,
             autoAssignmentIndex,
             assignments.length
           );
         }
-        // if no auto-assign color rule/color is available then use the other color
-        // TODO: the specialAssignment[0] position is arbitrary, we should fix it better
-        return getColor(model.specialAssignments[0].color, getPaletteFn, isDarkMode);
-      }
+        const totalColorsIfGradient = assignments.length || notAssignedCategories.length;
+        const indexIfGradient =
+          (nonAssignedCategoryIndex - autoByOrderAssignments.length) % totalColorsIfGradient;
 
-      // find the assignment where the category matches the rule
-      const matchingAssignmentIndex = assignments.findIndex(({ rule }) => {
-        return ruleMatch(rule, category);
-      });
-
-      // return the assigned color
-      if (matchingAssignmentIndex > -1) {
-        const assignment = assignments[matchingAssignmentIndex];
+        // if no auto-assign color rule/color is available then use the color looping palette
         return getAssignmentColor(
-          model.colorMode,
-          assignment.color,
+          colorMode,
+          // TODO: the specialAssignment[0] position is arbitrary, we should fix it better
+          specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX].color.type === 'loop'
+            ? colorMode.type === 'gradient'
+              ? { type: 'gradient' }
+              : {
+                  type: 'loop',
+                  // those are applied here and depends on the current non-assigned category - auto-assignment list
+                  colorIndex:
+                    nonAssignedCategoryIndex - autoByOrderAssignments.length + nextCategoricalIndex,
+                  paletteId,
+                }
+            : specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX].color,
           getPaletteFn,
           isDarkMode,
-          matchingAssignmentIndex,
-          assignments.length
+          indexIfGradient,
+          totalColorsIfGradient
         );
       }
-      // if no assign color rule/color is available then use the other color
-      // TODO: the specialAssignment[0] position is arbitrary, we should fix it better
-      return getColor(model.specialAssignments[0].color, getPaletteFn, isDarkMode);
-    } else {
-      const matchingAssignmentIndex = assignments.findIndex(({ rule }) => {
-        return ruleMatch(rule, category);
-      });
-
-      if (matchingAssignmentIndex > -1) {
-        const assignment = assignments[matchingAssignmentIndex];
-        return getAssignmentColor(
-          model.colorMode,
-          assignment.color,
-          getPaletteFn,
-          isDarkMode,
-          matchingAssignmentIndex,
-          assignments.length
-        );
-      }
-      return getColor(model.specialAssignments[0].color, getPaletteFn, isDarkMode);
     }
+    // find the assignment where the category matches the rule
+    const matchingAssignmentIndex = assignments.findIndex(({ rule }) => {
+      return ruleMatch(rule, category);
+    });
+
+    if (matchingAssignmentIndex > -1) {
+      const assignment = assignments[matchingAssignmentIndex];
+      return getAssignmentColor(
+        colorMode,
+        assignment.color,
+        getPaletteFn,
+        isDarkMode,
+        matchingAssignmentIndex,
+        assignments.length
+      );
+    }
+    return getColor(
+      {
+        type: 'categorical',
+        paletteId: NeutralPalette.id,
+        colorIndex: DEFAULT_NEUTRAL_PALETTE_INDEX,
+      },
+      getPaletteFn,
+      isDarkMode
+    );
   };
 }
 

@@ -17,13 +17,14 @@ import type {
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import type { SOWithMetadata } from '@kbn/content-management-utils';
-import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { EmbeddableStart, registerSavedObjectToPanelMethod } from '@kbn/embeddable-plugin/public';
 import {
   getSavedSearch,
   saveSavedSearch,
   SaveSavedSearchOptions,
   getNewSavedSearch,
   SavedSearchUnwrapResult,
+  SearchByValueInput,
 } from './services/saved_searches';
 import { SavedSearch, SavedSearchAttributes } from '../common/types';
 import { SavedSearchType, LATEST_VERSION } from '../common';
@@ -35,6 +36,7 @@ import {
   getSavedSearchAttributeService,
   toSavedSearch,
 } from './services/saved_searches';
+import { savedObjectToEmbeddableAttributes } from './services/saved_searches/saved_search_attribute_service';
 
 /**
  * Saved search plugin public Setup contract
@@ -114,6 +116,19 @@ export class SavedSearchPublicPlugin
     );
 
     expressions.registerType(kibanaContext);
+
+    registerSavedObjectToPanelMethod<SavedSearchAttributes, SearchByValueInput>(
+      SavedSearchType,
+      (savedObject) => {
+        if (!savedObject.managed) {
+          return { savedObjectId: savedObject.id };
+        }
+
+        return {
+          attributes: savedObjectToEmbeddableAttributes(savedObject),
+        };
+      }
+    );
 
     return {};
   }

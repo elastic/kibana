@@ -5,17 +5,28 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { CustomBrandingPluginSetup, CustomBrandingPluginStart } from './types';
+import { Plugin } from '@kbn/core/public';
+import type {
+  CustomBrandingPublicSetup,
+  CustomBrandingPublicStart,
+  CustomBrandingPublicSetupDependencies,
+  CustomBrandingPublicStartDependencies,
+} from './types';
 
 export class CustomBrandingPlugin
-  implements Plugin<CustomBrandingPluginSetup, CustomBrandingPluginStart>
+  implements
+    Plugin<
+      CustomBrandingPublicSetup,
+      CustomBrandingPublicStart,
+      CustomBrandingPublicSetupDependencies,
+      CustomBrandingPublicStartDependencies
+    >
 {
-  public setup(core: CoreSetup): CustomBrandingPluginSetup {
+  public setup(): CustomBrandingPublicSetup {
     return {};
   }
 
-  public start(core: CoreStart): CustomBrandingPluginStart {
+  public start(): CustomBrandingPublicStart {
     return {};
   }
 

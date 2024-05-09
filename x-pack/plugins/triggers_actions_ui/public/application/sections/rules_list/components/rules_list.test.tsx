@@ -123,6 +123,19 @@ jest.mock('../../../../common/get_experimental_features', () => ({
   getIsExperimentalFeatureEnabled: jest.fn(),
 }));
 
+jest.mock('@kbn/kibana-utils-plugin/public', () => {
+  const originalModule = jest.requireActual('@kbn/kibana-utils-plugin/public');
+  return {
+    ...originalModule,
+    createKbnUrlStateStorage: jest.fn(() => ({
+      get: jest.fn(() => null),
+      set: jest.fn(() => null),
+    })),
+  };
+});
+
+jest.mock('react-use/lib/useLocalStorage', () => jest.fn(() => [null, () => null]));
+
 const ruleTags = ['a', 'b', 'c', 'd'];
 
 const { loadRuleTypes } = jest.requireMock('../../../lib/rule_api/rule_types');
@@ -294,11 +307,11 @@ describe('rules_list component empty', () => {
     renderWithProviders(<RulesList showCreateRuleButtonInPrompt />);
 
     const createRuleEl = await screen.findByText('Create rule');
-    expect(screen.queryByTestId('addRuleFlyoutTitle')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ruleTypeModal')).not.toBeInTheDocument();
 
     fireEvent.click(createRuleEl);
 
-    expect(await screen.findByTestId('addRuleFlyoutTitle')).toBeInTheDocument();
+    expect(await screen.findByTestId('ruleTypeModal')).toBeInTheDocument();
   });
 });
 

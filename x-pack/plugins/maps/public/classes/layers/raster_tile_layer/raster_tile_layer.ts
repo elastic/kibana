@@ -82,7 +82,7 @@ export class RasterTileLayer extends AbstractLayer {
       ...dataFilters,
       applyGlobalQuery: source.getApplyGlobalQuery(),
       applyGlobalTime: source.getApplyGlobalTime(),
-      applyForceRefresh: source.isESSource() ? source.getApplyForceRefresh() : false,
+      applyForceRefresh: source.getApplyForceRefresh(),
       sourceQuery: this.getQuery() || undefined,
       isForceRefresh,
     };

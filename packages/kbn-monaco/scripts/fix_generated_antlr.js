@@ -32,7 +32,9 @@ function execute(folder) {
           .toString()
           .split('\n');
 
-        fileContentRows.unshift('// @ts-nocheck');
+        if (!/\@ts-nocheck/.test(fileContentRows[0])) {
+          fileContentRows.unshift('// @ts-nocheck');
+        }
 
         const filePath = join(generatedAntlrFolder, file);
         const fileContent = fileContentRows.join('\n');
@@ -44,7 +46,7 @@ function execute(folder) {
     });
 
   // Rename generated parserListener file to snakecase to satisfy file casing check
-  // There doesn't appear to be a way to fix this OOTB with antlr4ts-cli
+  // There doesn't appear to be a way to fix this OOTB with antlr4
   try {
     renameSync(
       join(generatedAntlrFolder, `${folder}_parserListener.ts`),

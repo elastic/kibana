@@ -28,7 +28,9 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await endpointTestResources.unloadEndpointData(indexedData);
+      if (indexedData) {
+        await endpointTestResources.unloadEndpointData(indexedData);
+      }
     });
 
     it('should not allow `execute` action without required privilege', async () => {

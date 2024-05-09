@@ -14,7 +14,6 @@
       "licensing",
       "data",
       "navigation",
-      "savedObjects",
       "unifiedSearch",
       "inspector",
       "savedObjectsManagement",
@@ -27,9 +26,9 @@
       "spaces"
     ],
     "requiredBundles": [
-      "unifiedSearch",
       "kibanaUtils",
-      "kibanaReact"
+      "kibanaReact",
+      "savedObjects"
     ]
   }
 }

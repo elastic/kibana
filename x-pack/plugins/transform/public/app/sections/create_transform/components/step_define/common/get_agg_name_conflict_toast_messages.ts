@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { AggName } from '../../../../../../../common/types/aggregations';
-import { PivotAggsConfigDict, PivotGroupByConfigDict } from '../../../../../common';
+import type { AggName } from '../../../../../../../common/types/aggregations';
+import type { PivotAggsConfigDict, PivotGroupByConfigDict } from '../../../../../common';
 
 export function getAggNameConflictToastMessages(
   aggName: AggName,

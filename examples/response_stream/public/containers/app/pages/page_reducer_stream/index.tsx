@@ -8,7 +8,15 @@
 
 import React, { useEffect, useState, FC } from 'react';
 
-import { Chart, Settings, Axis, BarSeries, Position, ScaleType } from '@elastic/charts';
+import {
+  Chart,
+  Settings,
+  Axis,
+  BarSeries,
+  Position,
+  ScaleType,
+  LEGACY_LIGHT_THEME,
+} from '@elastic/charts';
 
 import {
   EuiBadge,
@@ -97,7 +105,7 @@ export const PageReducerStream: FC = () => {
       <br />
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiButton type="primary" size="s" onClick={onClickHandler} aria-label={buttonLabel}>
+          <EuiButton color="primary" size="s" onClick={onClickHandler} aria-label={buttonLabel}>
             {buttonLabel}
           </EuiButton>
         </EuiFlexItem>
@@ -113,7 +121,11 @@ export const PageReducerStream: FC = () => {
       <EuiSpacer />
       <div style={{ height: '300px' }}>
         <Chart>
-          <Settings rotation={90} />
+          <Settings
+            // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+            baseTheme={LEGACY_LIGHT_THEME}
+            rotation={90}
+          />
           <Axis id="entities" position={Position.Bottom} title="Commits" showOverlappingTicks />
           <Axis id="left2" title="Developers" position={Position.Left} />
 

@@ -6,7 +6,7 @@
  */
 import type { UseMutationOptions } from '@tanstack/react-query';
 import { useMutation } from '@tanstack/react-query';
-import { disableRiskEngine } from '../api';
+import { useEntityAnalyticsRoutes } from '../api';
 import { useInvalidateRiskEngineStatusQuery } from './use_risk_engine_status';
 import type {
   EnableRiskEngineResponse,
@@ -17,6 +17,7 @@ export const DISABLE_RISK_ENGINE_MUTATION_KEY = ['POST', 'DISABLE_RISK_ENGINE'];
 
 export const useDisableRiskEngineMutation = (options?: UseMutationOptions<{}>) => {
   const invalidateRiskEngineStatusQuery = useInvalidateRiskEngineStatusQuery();
+  const { disableRiskEngine } = useEntityAnalyticsRoutes();
 
   return useMutation<EnableRiskEngineResponse, EnableDisableRiskEngineErrorResponse>(
     () => disableRiskEngine(),

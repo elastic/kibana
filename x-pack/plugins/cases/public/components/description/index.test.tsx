@@ -13,14 +13,14 @@ import { basicCase } from '../../containers/mock';
 
 import { Description } from '.';
 import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer, noUpdateCasesPermissions, TestProviders } from '../../common/mock';
+import { createAppMockRenderer, noUpdateCasesPermissions } from '../../common/mock';
 import { MAX_DESCRIPTION_LENGTH } from '../../../common/constants';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
 
 const defaultProps = {
-  appId: 'testAppId',
+  appId: 'securitySolution',
   caseData: {
     ...basicCase,
   },
@@ -39,48 +39,42 @@ describe('Description', () => {
   it('renders description correctly', async () => {
     appMockRender.render(<Description {...defaultProps} onUpdateField={onUpdateField} />);
 
-    expect(screen.getByTestId('description')).toBeInTheDocument();
-    expect(screen.getByText('Security banana Issue')).toBeInTheDocument();
+    expect(await screen.findByTestId('description')).toBeInTheDocument();
+    expect(await screen.findByText('Security banana Issue')).toBeInTheDocument();
   });
 
   it('hides and shows the description correctly when collapse button clicked', async () => {
-    const res = appMockRender.render(
-      <Description {...defaultProps} onUpdateField={onUpdateField} />
-    );
+    appMockRender.render(<Description {...defaultProps} onUpdateField={onUpdateField} />);
 
-    userEvent.click(res.getByTestId('description-collapse-icon'));
+    userEvent.click(await screen.findByTestId('description-collapse-icon'));
 
     await waitFor(() => {
       expect(screen.queryByText('Security banana Issue')).not.toBeInTheDocument();
     });
 
-    userEvent.click(res.getByTestId('description-collapse-icon'));
+    userEvent.click(await screen.findByTestId('description-collapse-icon'));
 
     expect(await screen.findByText('Security banana Issue')).toBeInTheDocument();
   });
 
   it('shows textarea on edit click', async () => {
-    const res = appMockRender.render(
-      <Description {...defaultProps} onUpdateField={onUpdateField} />
-    );
+    appMockRender.render(<Description {...defaultProps} onUpdateField={onUpdateField} />);
 
-    userEvent.click(res.getByTestId('description-edit-icon'));
+    userEvent.click(await screen.findByTestId('description-edit-icon'));
 
     expect(await screen.findByTestId('euiMarkdownEditorTextArea')).toBeInTheDocument();
   });
 
   it('edits the description correctly when saved', async () => {
     const editedDescription = 'New updated description';
-    const res = appMockRender.render(
-      <Description {...defaultProps} onUpdateField={onUpdateField} />
-    );
+    appMockRender.render(<Description {...defaultProps} onUpdateField={onUpdateField} />);
 
-    userEvent.click(res.getByTestId('description-edit-icon'));
+    userEvent.click(await screen.findByTestId('description-edit-icon'));
 
-    userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
-    userEvent.paste(screen.getByTestId('euiMarkdownEditorTextArea'), editedDescription);
+    userEvent.clear(await screen.findByTestId('euiMarkdownEditorTextArea'));
+    userEvent.paste(await screen.findByTestId('euiMarkdownEditorTextArea'), editedDescription);
 
-    userEvent.click(screen.getByTestId('editable-save-markdown'));
+    userEvent.click(await screen.findByTestId('editable-save-markdown'));
 
     await waitFor(() => {
       expect(onUpdateField).toHaveBeenCalledWith({
@@ -92,37 +86,33 @@ describe('Description', () => {
 
   it('keeps the old description correctly when canceled', async () => {
     const editedDescription = 'New updated description';
-    const res = appMockRender.render(
-      <Description {...defaultProps} onUpdateField={onUpdateField} />
-    );
+    appMockRender.render(<Description {...defaultProps} onUpdateField={onUpdateField} />);
 
-    userEvent.click(res.getByTestId('description-edit-icon'));
+    userEvent.click(await screen.findByTestId('description-edit-icon'));
 
-    userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
-    userEvent.paste(screen.getByTestId('euiMarkdownEditorTextArea'), editedDescription);
+    userEvent.clear(await screen.findByTestId('euiMarkdownEditorTextArea'));
+    userEvent.paste(await screen.findByTestId('euiMarkdownEditorTextArea'), editedDescription);
 
-    expect(screen.getByText(editedDescription)).toBeInTheDocument();
+    expect(await screen.findByText(editedDescription)).toBeInTheDocument();
 
-    userEvent.click(screen.getByTestId('editable-cancel-markdown'));
+    userEvent.click(await screen.findByTestId('editable-cancel-markdown'));
 
     await waitFor(() => {
       expect(onUpdateField).not.toHaveBeenCalled();
     });
 
-    expect(screen.getByText('Security banana Issue')).toBeInTheDocument();
+    expect(await screen.findByText('Security banana Issue')).toBeInTheDocument();
   });
 
   it('shows an error when description is too long', async () => {
     const longDescription = 'a'.repeat(MAX_DESCRIPTION_LENGTH + 1);
 
-    const res = appMockRender.render(
-      <Description {...defaultProps} onUpdateField={onUpdateField} />
-    );
+    appMockRender.render(<Description {...defaultProps} onUpdateField={onUpdateField} />);
 
-    userEvent.click(res.getByTestId('description-edit-icon'));
+    userEvent.click(await screen.findByTestId('description-edit-icon'));
 
-    userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
-    userEvent.paste(screen.getByTestId('euiMarkdownEditorTextArea'), longDescription);
+    userEvent.clear(await screen.findByTestId('euiMarkdownEditorTextArea'));
+    userEvent.paste(await screen.findByTestId('euiMarkdownEditorTextArea'), longDescription);
 
     expect(
       await screen.findByText(
@@ -133,19 +123,24 @@ describe('Description', () => {
     expect(await screen.findByTestId('editable-save-markdown')).toHaveAttribute('disabled');
   });
 
-  it('should hide the edit button when the user does not have update permissions', () => {
-    appMockRender.render(
-      <TestProviders permissions={noUpdateCasesPermissions()}>
-        <Description {...defaultProps} onUpdateField={onUpdateField} />
-      </TestProviders>
-    );
+  it('should hide the edit button when the user does not have update permissions', async () => {
+    appMockRender = createAppMockRenderer({ permissions: noUpdateCasesPermissions() });
+    appMockRender.render(<Description {...defaultProps} onUpdateField={onUpdateField} />);
 
-    expect(screen.getByText('Security banana Issue')).toBeInTheDocument();
+    expect(await screen.findByText('Security banana Issue')).toBeInTheDocument();
     expect(screen.queryByTestId('description-edit-icon')).not.toBeInTheDocument();
   });
 
+  it('should display description when case is loading', async () => {
+    appMockRender.render(
+      <Description {...defaultProps} onUpdateField={onUpdateField} isLoadingDescription={true} />
+    );
+
+    expect(await screen.findByTestId('description')).toBeInTheDocument();
+  });
+
   describe('draft message', () => {
-    const draftStorageKey = `cases.testAppId.basic-case-id.description.markdownEditor`;
+    const draftStorageKey = `cases.securitySolution.basic-case-id.description.markdownEditor`;
 
     beforeEach(() => {
       sessionStorage.setItem(draftStorageKey, 'value set in storage');

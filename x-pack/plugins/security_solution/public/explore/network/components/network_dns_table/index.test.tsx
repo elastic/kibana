@@ -10,16 +10,7 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
-import '../../../../common/mock/match_media';
-import {
-  mockGlobalState,
-  TestProviders,
-  SUB_PLUGINS_REDUCER,
-  kibanaObservable,
-  createSecuritySolutionStorageMock,
-} from '../../../../common/mock';
-import type { State } from '../../../../common/store';
-import { createStore } from '../../../../common/store';
+import { TestProviders, createMockStore } from '../../../../common/mock';
 import { networkModel } from '../../store';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 
@@ -30,9 +21,7 @@ jest.mock('../../../../common/lib/kibana');
 
 describe('NetworkTopNFlow Table Component', () => {
   const loadPage = jest.fn();
-  const state: State = mockGlobalState;
-  const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  let store = createMockStore();
   const mount = useMountAppended();
 
   const defaultProps = {
@@ -49,7 +38,7 @@ describe('NetworkTopNFlow Table Component', () => {
   };
 
   beforeEach(() => {
-    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createMockStore();
   });
 
   describe('rendering', () => {

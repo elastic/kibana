@@ -10,6 +10,7 @@ import type { Moment } from 'moment';
 import type { Logger } from '@kbn/logging';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 
 import type { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 
@@ -26,7 +27,6 @@ import type { ListClient } from '@kbn/lists-plugin/server';
 import type {
   PersistenceServices,
   IRuleDataClient,
-  IRuleDataReader,
   SuppressedAlertService,
 } from '@kbn/rule-registry-plugin/server';
 import type { EcsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
@@ -37,7 +37,7 @@ import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { RuleResponseAction } from '../../../../common/api/detection_engine/model/rule_response_actions';
 import type { ConfigType } from '../../../config';
 import type { SetupPlugins } from '../../../plugin';
-import type { CompleteRule, RuleParams } from '../rule_schema';
+import type { CompleteRule, EqlRuleParams, RuleParams, ThreatRuleParams } from '../rule_schema';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import type { ITelemetryEventsSender } from '../../telemetry/sender';
 import type { IRuleExecutionLogForExecutors, IRuleMonitoringService } from '../rule_monitoring';
@@ -65,6 +65,7 @@ export interface SecurityAlertTypeReturnValue<TState extends RuleTypeState> {
   createdSignalsCount: number;
   createdSignals: unknown[];
   errors: string[];
+  userError?: boolean;
   lastLookbackDate?: Date | null;
   searchAfterTimes: string[];
   state: TState;
@@ -86,7 +87,7 @@ export interface RunOpts<TParams extends RuleParams> {
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
   wrapSequences: WrapSequences;
-  ruleDataReader: IRuleDataReader;
+  ruleDataClient: IRuleDataClient;
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   mergeStrategy: ConfigType['alertMergeStrategy'];
@@ -136,6 +137,7 @@ export interface CreateSecurityRuleTypeWrapperProps {
   version: string;
   isPreview?: boolean;
   experimentalFeatures?: ExperimentalFeatures;
+  alerting: SetupPlugins['alerting'];
 }
 
 export type CreateSecurityRuleTypeWrapper = (
@@ -336,6 +338,11 @@ export type WrapHits = (
   buildReasonMessage: BuildReasonMessage
 ) => Array<WrappedFieldsLatest<BaseFieldsLatest>>;
 
+export type WrapSuppressedHits = (
+  hits: Array<estypes.SearchHit<SignalSource>>,
+  buildReasonMessage: BuildReasonMessage
+) => Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>>;
+
 export type WrapSequences = (
   sequences: Array<EqlSequence<SignalSource>>,
   buildReasonMessage: BuildReasonMessage
@@ -383,7 +390,9 @@ export interface SearchAfterAndBulkCreateReturnType {
   createdSignalsCount: number;
   createdSignals: unknown[];
   errors: string[];
+  userError?: boolean;
   warningMessages: string[];
+  suppressedAlertsCount?: number;
 }
 
 // the new fields can be added later if needed
@@ -391,3 +400,5 @@ export interface OverrideBodyQuery {
   _source?: estypes.SearchSourceConfig;
   fields?: estypes.Fields;
 }
+
+export type RuleWithInMemorySuppression = ThreatRuleParams | EqlRuleParams;

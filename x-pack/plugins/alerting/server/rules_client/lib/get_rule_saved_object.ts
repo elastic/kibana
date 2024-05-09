@@ -11,6 +11,7 @@ import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RulesClientContext } from '../types';
 import { getRuleSo } from '../../data/rule';
 import { RuleAttributes } from '../../data/rule/types';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 interface GetRuleSavedObjectParams {
   ruleId: string;
@@ -26,7 +27,7 @@ export async function getRuleSavedObject(
     ruleAuditEvent({
       action: RuleAuditAction.GET,
       outcome: 'unknown',
-      savedObject: { type: 'alert', id: ruleId },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId },
     })
   );
 

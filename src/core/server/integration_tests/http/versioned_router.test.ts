@@ -14,7 +14,7 @@ import { schema } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
-import { createHttpServer, createConfigService } from '@kbn/core-http-server-mocks';
+import { createHttpService, createConfigService } from '@kbn/core-http-server-mocks';
 import type { HttpConfigType, HttpService } from '@kbn/core-http-server-internal';
 import type { IRouter } from '@kbn/core-http-server';
 import type { CliArgs } from '@kbn/config';
@@ -23,20 +23,26 @@ import { ELASTIC_HTTP_VERSION_QUERY_PARAM } from '@kbn/core-http-common';
 let server: HttpService;
 let logger: ReturnType<typeof loggingSystemMock.create>;
 
+interface AdditionalOptions {
+  useVersionResolutionStrategyForInternalPaths?: string[];
+}
+
 describe('Routing versioned requests', () => {
   let router: IRouter;
   let supertest: Supertest.SuperTest<Supertest.Test>;
 
-  async function setupServer(cliArgs: Partial<CliArgs> = {}) {
+  async function setupServer(cliArgs: Partial<CliArgs> = {}, options: AdditionalOptions = {}) {
     logger = loggingSystemMock.create();
     await server?.stop(); // stop the already started server
     const serverConfig: Partial<HttpConfigType> = {
       versioned: {
         versionResolution: cliArgs.dev ? 'none' : cliArgs.serverless ? 'newest' : 'oldest',
         strictClientVersionCheck: !cliArgs.serverless,
+        useVersionResolutionStrategyForInternalPaths:
+          options.useVersionResolutionStrategyForInternalPaths ?? [],
       },
     };
-    server = createHttpServer({
+    server = createHttpService({
       logger,
       env: createTestEnv({ envOptions: getEnvOptions({ cliArgs }) }),
       configService: createConfigService({
@@ -193,14 +199,16 @@ describe('Routing versioned requests', () => {
     router.versioned
       .get({ path: '/my-path', access: 'internal' })
       .addVersion(
-        { validate: { response: { 200: { body: schema.number() } } }, version: '1' },
+        { validate: { response: { 200: { body: () => schema.number() } } }, version: '1' },
         async (ctx, req, res) => {
           return res.ok({ body: { v: '1' } });
         }
       )
       .addVersion(
         {
-          validate: { response: { 200: { body: schema.object({}, { unknowns: 'forbid' }) } } },
+          validate: {
+            response: { 200: { body: () => schema.object({}, { unknowns: 'forbid' }) } },
+          },
           version: '2',
         },
         async (ctx, req, res) => {
@@ -209,7 +217,9 @@ describe('Routing versioned requests', () => {
       )
       .addVersion(
         {
-          validate: { response: { 200: { body: schema.object({}, { unknowns: 'allow' }) } } },
+          validate: {
+            response: { 200: { body: () => schema.object({}, { unknowns: 'allow' }) } },
+          },
           version: '3',
         },
         async (ctx, req, res) => {
@@ -265,7 +275,7 @@ describe('Routing versioned requests', () => {
     router.versioned
       .get({ path: '/my-path', access: 'internal' })
       .addVersion(
-        { validate: { response: { 200: { body: schema.number() } } }, version: '1' },
+        { validate: { response: { 200: { body: () => schema.number() } } }, version: '1' },
         async (ctx, req, res) => {
           return res.ok({ body: { v: '1' } });
         }
@@ -288,11 +298,11 @@ describe('Routing versioned requests', () => {
     router.versioned
       .get({ path: '/my-path', access: 'internal' })
       .addVersion(
-        { version: '1', validate: { response: { 200: { body: schema.number() } } } },
+        { version: '1', validate: { response: { 200: { body: () => schema.number() } } } },
         async (ctx, req, res) => res.ok()
       )
       .addVersion(
-        { version: '2', validate: { response: { 200: { body: schema.number() } } } },
+        { version: '2', validate: { response: { 200: { body: () => schema.number() } } } },
         async (ctx, req, res) => res.ok()
       );
     await server.start();
@@ -497,6 +507,36 @@ describe('Routing versioned requests', () => {
         const [[_, req]] = internalHandler.mock.calls;
         expect(req.query).toEqual({ a: 2 }); // does not contain apiVersion key
       }
+    });
+  });
+
+  it('defaults version parameters for select internal paths', async () => {
+    await setupServer(
+      {},
+      { useVersionResolutionStrategyForInternalPaths: ['/my_path_to_bypass/{id?}'] }
+    );
+
+    router.versioned
+      .get({ path: '/my_path_to_bypass/{id?}', access: 'internal' })
+      .addVersion({ validate: false, version: '1' }, async (ctx, req, res) => {
+        return res.ok({ body: { ok: true } });
+      });
+    router.versioned
+      .get({ path: '/my_other_path', access: 'internal' })
+      .addVersion({ validate: false, version: '1' }, async (ctx, req, res) => {
+        return res.ok({ body: { ok: true } });
+      });
+
+    await server.start();
+
+    await supertest.get('/my_path_to_bypass/123').expect(200);
+    const response = await supertest.get('/my_other_path').expect(400);
+
+    expect(response).toMatchObject({
+      status: 400,
+      body: {
+        message: expect.stringContaining('Please specify a version'),
+      },
     });
   });
 });

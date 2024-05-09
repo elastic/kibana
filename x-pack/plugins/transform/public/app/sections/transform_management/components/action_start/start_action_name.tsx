@@ -15,7 +15,8 @@ import { TRANSFORM_STATE } from '../../../../../../common/constants';
 import { createCapabilityFailureMessage } from '../../../../../../common/utils/create_capability_failure_message';
 
 import { useTransformCapabilities } from '../../../../hooks';
-import { TransformListRow, isCompletedBatchTransform } from '../../../../common';
+import type { TransformListRow } from '../../../../common';
+import { isCompletedBatchTransform } from '../../../../common';
 
 export const startActionNameText = i18n.translate(
   'xpack.transform.transformList.startActionNameText',

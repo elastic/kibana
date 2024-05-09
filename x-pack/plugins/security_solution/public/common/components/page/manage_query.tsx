@@ -7,10 +7,8 @@
 
 import type { Position } from '@elastic/charts';
 import { omit } from 'lodash/fp';
-import type { MutableRefObject } from 'react';
 import React, { useEffect } from 'react';
 
-import type { ISessionService } from '@kbn/data-plugin/public';
 import type { inputsModel } from '../../store';
 import type { GlobalTimeArgs } from '../../containers/use_global_time';
 import type { InputsModelId } from '../../store/inputs/constants';
@@ -23,14 +21,13 @@ export interface OwnProps extends Pick<GlobalTimeArgs, 'deleteQuery' | 'setQuery
   legendPosition?: Position;
   loading: boolean;
   refetch: inputsModel.Refetch;
-  session?: MutableRefObject<ISessionService>;
 }
 
 export function manageQuery<T>(
   WrappedComponent: React.ComponentClass<T> | React.ComponentType<T>
 ): React.FC<OwnProps & T> {
   const ManageQuery = (props: OwnProps & T) => {
-    const { deleteQuery, id, inspect = null, loading, refetch, setQuery, session } = props;
+    const { deleteQuery, id, inspect = null, loading, refetch, setQuery } = props;
 
     useQueryInspector({
       deleteQuery,
@@ -38,11 +35,11 @@ export function manageQuery<T>(
       loading,
       queryId: id,
       refetch,
-      session,
       setQuery,
     });
 
     const otherProps = omit(['refetch', 'setQuery'], props);
+    // @ts-expect-error upgrade typescript v4.9.5
     return <WrappedComponent {...(otherProps as T)} />;
   };
 
@@ -56,7 +53,6 @@ interface UseQueryInspectorTypes extends Pick<GlobalTimeArgs, 'deleteQuery' | 's
   loading: boolean;
   refetch: inputsModel.Refetch;
   inspect?: inputsModel.InspectQuery | null;
-  session?: MutableRefObject<ISessionService>;
 }
 
 export const useQueryInspector = ({
@@ -66,7 +62,6 @@ export const useQueryInspector = ({
   inspect,
   loading,
   queryId,
-  session,
 }: UseQueryInspectorTypes) => {
   useEffect(() => {
     setQuery({
@@ -74,9 +69,8 @@ export const useQueryInspector = ({
       inspect: inspect ?? null,
       loading,
       refetch,
-      searchSessionId: session?.current.start(),
     });
-  }, [deleteQuery, setQuery, queryId, refetch, inspect, loading, session]);
+  }, [deleteQuery, setQuery, queryId, refetch, inspect, loading]);
 
   useEffect(() => {
     return () => {

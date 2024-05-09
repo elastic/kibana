@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DataView, DataViewField, RuntimeField } from '@kbn/data-views-plugin/public';
+import { DataView, DataViewField, DataViewType, RuntimeField } from '@kbn/data-views-plugin/public';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
@@ -80,6 +80,7 @@ export const EditIndexPattern = withRouter(
       IndexPatternEditor,
       savedObjectsManagement,
       application,
+      ...startServices
     } = useKibana<IndexPatternManagmentContext>().services;
     const [fields, setFields] = useState<DataViewField[]>(indexPattern.getNonScriptedFields());
     const [compositeRuntimeFields, setCompositeRuntimeFields] = useState<
@@ -95,6 +96,9 @@ export const EditIndexPattern = withRouter(
     const [showEditDialog, setShowEditDialog] = useState<boolean>(false);
     const [relationships, setRelationships] = useState<SavedObjectRelationWithTitle[]>([]);
     const [allowedTypes, setAllowedTypes] = useState<SavedObjectManagementTypeInfo[]>([]);
+    const [refreshCount, setRefreshCount] = useState<number>(0); // used for forcing rerender of field list
+    const [isRefreshing, setIsRefreshing] = React.useState(false);
+
     const conflictFieldsUrl = useMemo(() => {
       return setStateToKbnUrl(
         APP_STATE_STORAGE_KEY,
@@ -144,7 +148,7 @@ export const EditIndexPattern = withRouter(
       setConflictedFields(
         indexPattern.fields.getAll().filter((field) => field.type === 'conflict')
       );
-    }, [indexPattern]);
+    }, [indexPattern, refreshCount]);
 
     useEffect(() => {
       setTags(
@@ -164,10 +168,11 @@ export const EditIndexPattern = withRouter(
       onDelete: () => {
         history.push('');
       },
+      startServices,
     });
 
     const isRollup =
-      new URLSearchParams(useLocation().search).get('type') === 'rollup' &&
+      new URLSearchParams(useLocation().search).get('type') === DataViewType.ROLLUP &&
       dataViews.getRollupsEnabled();
     const displayIndexPatternEditor = showEditDialog ? (
       <IndexPatternEditor
@@ -332,6 +337,13 @@ export const EditIndexPattern = withRouter(
             setFields(indexPattern.getNonScriptedFields());
             setCompositeRuntimeFields(getCompositeRuntimeFields(indexPattern));
           }}
+          refreshIndexPatternClick={async () => {
+            setIsRefreshing(true);
+            await dataViews.refreshFields(indexPattern, false, true);
+            setRefreshCount(refreshCount + 1); // rerender field list
+            setIsRefreshing(false);
+          }}
+          isRefreshing={isRefreshing}
         />
         {displayIndexPatternEditor}
       </div>

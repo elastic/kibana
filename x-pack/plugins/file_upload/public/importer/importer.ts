@@ -23,10 +23,27 @@ const REDUCED_CHUNK_SIZE = 100;
 export const MAX_CHUNK_CHAR_COUNT = 1000000;
 export const IMPORT_RETRIES = 5;
 const STRING_CHUNKS_MB = 100;
+const DEFAULT_TIME_FIELD = '@timestamp';
 
 export abstract class Importer implements IImporter {
   protected _docArray: ImportDoc[] = [];
   private _chunkSize = CHUNK_SIZE;
+  private _index: string | undefined;
+  private _pipeline: IngestPipeline | undefined;
+  private _timeFieldName: string | undefined;
+  private _initialized = false;
+
+  public initialized() {
+    return this._initialized;
+  }
+
+  public getIndex() {
+    return this._index;
+  }
+
+  public getTimeField() {
+    return this._timeFieldName;
+  }
 
   public read(data: ArrayBuffer) {
     const decoder = new TextDecoder();
@@ -56,7 +73,7 @@ export abstract class Importer implements IImporter {
     return { success: true };
   }
 
-  protected abstract _createDocs(t: string, isLastPart: boolean): CreateDocsResponse;
+  protected abstract _createDocs(t: string, isLastPart: boolean): CreateDocsResponse<ImportDoc>;
 
   public async initializeImport(
     index: string,
@@ -81,6 +98,19 @@ export abstract class Importer implements IImporter {
             pipeline,
           }
         : {};
+
+    this._index = index;
+    this._pipeline = pipeline;
+
+    // if an @timestamp field has been added to the
+    // mappings, use this field as the time field.
+    // This relies on the field being populated by
+    // the ingest pipeline on ingest
+    this._timeFieldName = isPopulatedObject(mappings.properties, [DEFAULT_TIME_FIELD])
+      ? DEFAULT_TIME_FIELD
+      : undefined;
+
+    this._initialized = true;
 
     return await callImportRoute({
       id: undefined,
@@ -179,6 +209,39 @@ export abstract class Importer implements IImporter {
     }
 
     return result;
+  }
+
+  private _getFirstReadDocs(count = 1): object[] {
+    const firstReadDocs = this._docArray.slice(0, count);
+    return firstReadDocs.map((doc) => (typeof doc === 'string' ? JSON.parse(doc) : doc));
+  }
+
+  private _getLastReadDocs(count = 1): object[] {
+    const lastReadDocs = this._docArray.slice(-count);
+    return lastReadDocs.map((doc) => (typeof doc === 'string' ? JSON.parse(doc) : doc));
+  }
+
+  public async previewIndexTimeRange() {
+    if (this._initialized === false || this._pipeline === undefined) {
+      throw new Error('Import has not been initialized');
+    }
+
+    // take the first and last 10 docs from the file, to reduce the chance of getting
+    // bad data or out of order data.
+    const firstDocs = this._getFirstReadDocs(10);
+    const lastDocs = this._getLastReadDocs(10);
+
+    const body = JSON.stringify({
+      docs: firstDocs.concat(lastDocs),
+      pipeline: this._pipeline,
+      timeField: this._timeFieldName,
+    });
+    return await getHttp().fetch<{ start: number | null; end: number | null }>({
+      path: `/internal/file_upload/preview_index_time_range`,
+      method: 'POST',
+      version: '1',
+      body,
+    });
   }
 }
 

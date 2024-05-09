@@ -13,6 +13,7 @@ import { mockTelemetryService } from '../mocks';
 import {
   FetchSnapshotTelemetry,
   INTERNAL_VERSION,
+  LastReportedRoute,
   OptInRoute,
   UserHasSeenNoticeRoute,
 } from '../../common/routes';
@@ -352,6 +353,19 @@ describe('TelemetryService', () => {
       });
 
       expect(telemetryService.canSendTelemetry()).toBe(true);
+    });
+  });
+
+  describe('updateLastReported', () => {
+    let telemetryService: ReturnType<typeof mockTelemetryService>;
+
+    beforeEach(() => {
+      telemetryService = mockTelemetryService();
+    });
+
+    it('calls expected URL with expected headers', async () => {
+      await telemetryService.updateLastReported();
+      expect(telemetryService['http'].put).toBeCalledWith(LastReportedRoute, INTERNAL_VERSION);
     });
   });
 });

@@ -168,12 +168,12 @@ export function getUiSettings(
       name: i18n.translate('data.advancedSettings.defaultIndexTitle', {
         defaultMessage: 'Default data view',
       }),
-      value: null,
+      value: '',
       type: 'string',
       description: i18n.translate('data.advancedSettings.defaultIndexText', {
         defaultMessage: 'Used by discover and visualizations when a data view is not set.',
       }),
-      schema: schema.nullable(schema.string()),
+      schema: schema.string(),
     },
     [UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX]: {
       name: i18n.translate('data.advancedSettings.courier.ignoreFilterTitle', {
@@ -386,6 +386,13 @@ export function getUiSettings(
             }),
           },
           {
+            from: 'now-1m',
+            to: 'now',
+            display: i18n.translate('data.advancedSettings.timepicker.last1Minute', {
+              defaultMessage: 'Last 1 minute',
+            }),
+          },
+          {
             from: 'now-15m',
             to: 'now',
             display: i18n.translate('data.advancedSettings.timepicker.last15Minutes', {
@@ -464,6 +471,7 @@ export function getUiSettings(
             '</a>',
         },
       }),
+      requiresPageReload: true,
       schema: enableValidations
         ? schema.arrayOf(
             schema.object({
@@ -471,7 +479,7 @@ export function getUiSettings(
               to: schema.string(),
               display: schema.string(),
             }),
-            { maxSize: 10 }
+            { maxSize: 12 }
           )
         : schema.arrayOf(
             schema.object({
@@ -490,6 +498,7 @@ export function getUiSettings(
         defaultMessage: 'Whether the filters should have a global state (be pinned) by default',
       }),
       schema: schema.boolean(),
+      requiresPageReload: true,
     },
     [UI_SETTINGS.FILTERS_EDITOR_SUGGEST_VALUES]: {
       name: i18n.translate('data.advancedSettings.suggestFilterValuesTitle', {
@@ -502,6 +511,7 @@ export function getUiSettings(
           'Set this property to false to prevent the filter editor from suggesting values for fields.',
       }),
       schema: schema.boolean(),
+      requiresPageReload: true,
     },
     [UI_SETTINGS.AUTOCOMPLETE_VALUE_SUGGESTION_METHOD]: {
       name: i18n.translate('data.advancedSettings.autocompleteValueSuggestionMethod', {
@@ -527,6 +537,7 @@ export function getUiSettings(
       options: ['terms_enum', 'terms_agg'],
       category: ['autocomplete'],
       schema: schema.string(),
+      requiresPageReload: true,
     },
     [UI_SETTINGS.AUTOCOMPLETE_USE_TIMERANGE]: {
       name: i18n.translate('data.advancedSettings.autocompleteIgnoreTimerange', {
@@ -548,6 +559,7 @@ export function getUiSettings(
       }),
       category: ['autocomplete'],
       schema: schema.boolean(),
+      requiresPageReload: true,
     },
     [UI_SETTINGS.SEARCH_TIMEOUT]: {
       name: i18n.translate('data.advancedSettings.searchTimeout', {
@@ -561,6 +573,7 @@ export function getUiSettings(
       type: 'number',
       category: ['search'],
       schema: schema.number(),
+      requiresPageReload: true,
     },
   };
 }

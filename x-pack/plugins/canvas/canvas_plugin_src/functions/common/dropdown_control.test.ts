@@ -10,25 +10,16 @@ import { testTable, relationalTable } from './__fixtures__/test_tables';
 import { dropdownControl } from './dropdownControl';
 import { ExecutionContext } from '@kbn/expressions-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/common';
-import { SerializableRecord } from '@kbn/utility-types';
 
 describe('dropdownControl', () => {
   const fn = functionWrapper(dropdownControl);
 
   it('returns a render as dropdown_filter', () => {
     expect(
-      fn(
-        testTable,
-        { filterColumn: 'name', valueColumn: 'name' },
-        {} as ExecutionContext<Adapters, SerializableRecord>
-      )
+      fn(testTable, { filterColumn: 'name', valueColumn: 'name' }, {} as ExecutionContext<Adapters>)
     ).toHaveProperty('type', 'render');
     expect(
-      fn(
-        testTable,
-        { filterColumn: 'name', valueColumn: 'name' },
-        {} as ExecutionContext<Adapters, SerializableRecord>
-      )
+      fn(testTable, { filterColumn: 'name', valueColumn: 'name' }, {} as ExecutionContext<Adapters>)
     ).toHaveProperty('as', 'dropdown_filter');
   });
 
@@ -41,25 +32,16 @@ describe('dropdownControl', () => {
           []
         );
         expect(
-          fn(
-            testTable,
-            { valueColumn: 'name' },
-            {} as ExecutionContext<Adapters, SerializableRecord>
-          )?.value?.choices
+          fn(testTable, { valueColumn: 'name' }, {} as ExecutionContext<Adapters>)?.value?.choices
         ).toEqual(uniqueNames);
       });
 
       it('returns an empty array when provided an invalid column', () => {
         expect(
-          fn(
-            testTable,
-            { valueColumn: 'foo' },
-            {} as ExecutionContext<Adapters, SerializableRecord>
-          )?.value?.choices
+          fn(testTable, { valueColumn: 'foo' }, {} as ExecutionContext<Adapters>)?.value?.choices
         ).toEqual([]);
         expect(
-          fn(testTable, { valueColumn: '' }, {} as ExecutionContext<Adapters, SerializableRecord>)
-            ?.value?.choices
+          fn(testTable, { valueColumn: '' }, {} as ExecutionContext<Adapters>)?.value?.choices
         ).toEqual([]);
       });
     });
@@ -71,7 +53,7 @@ describe('dropdownControl', () => {
           fn(
             relationalTable,
             { valueColumn: 'id', labelColumn: 'name' },
-            {} as ExecutionContext<Adapters, SerializableRecord>
+            {} as ExecutionContext<Adapters>
           )?.value?.choices
         ).toEqual(expectedChoices);
       });
@@ -81,28 +63,20 @@ describe('dropdownControl', () => {
   describe('filterColumn', () => {
     it('sets which column the filter is applied to', () => {
       expect(
-        fn(
-          testTable,
-          { filterColumn: 'name' },
-          {} as ExecutionContext<Adapters, SerializableRecord>
-        )?.value
+        fn(testTable, { filterColumn: 'name' }, {} as ExecutionContext<Adapters>)?.value
       ).toHaveProperty('column', 'name');
       expect(
         fn(
           testTable,
           { filterColumn: 'name', valueColumn: 'price' },
-          {} as ExecutionContext<Adapters, SerializableRecord>
+          {} as ExecutionContext<Adapters>
         )?.value
       ).toHaveProperty('column', 'name');
     });
 
     it('defaults to valueColumn if not provided', () => {
       expect(
-        fn(
-          testTable,
-          { valueColumn: 'price' },
-          {} as ExecutionContext<Adapters, SerializableRecord>
-        )?.value
+        fn(testTable, { valueColumn: 'price' }, {} as ExecutionContext<Adapters>)?.value
       ).toHaveProperty('column', 'price');
     });
   });

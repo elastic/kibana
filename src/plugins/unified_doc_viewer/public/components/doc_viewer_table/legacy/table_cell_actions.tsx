@@ -35,24 +35,30 @@ export const TableActions = ({
 }: TableActionsProps) => {
   return (
     <div className="kbnDocViewer__buttons">
-      <DocViewTableRowBtnFilterAdd
-        disabled={!fieldMapping || !fieldMapping.filterable || ignoredValue || !onFilter}
-        onClick={() => onFilter(fieldMapping, flattenedField, '+')}
-      />
-      <DocViewTableRowBtnFilterRemove
-        disabled={!fieldMapping || !fieldMapping.filterable || ignoredValue || !onFilter}
-        onClick={() => onFilter(fieldMapping, flattenedField, '-')}
-      />
+      {onFilter && (
+        <DocViewTableRowBtnFilterAdd
+          disabled={!fieldMapping || !fieldMapping.filterable || ignoredValue}
+          onClick={() => onFilter(fieldMapping, flattenedField, '+')}
+        />
+      )}
+      {onFilter && (
+        <DocViewTableRowBtnFilterRemove
+          disabled={!fieldMapping || !fieldMapping.filterable || ignoredValue}
+          onClick={() => onFilter(fieldMapping, flattenedField, '-')}
+        />
+      )}
       <DocViewTableRowBtnToggleColumn
         active={isActive}
         fieldname={field}
         onClick={() => onToggleColumn(field)}
       />
-      <DocViewTableRowBtnFilterExists
-        disabled={!fieldMapping || !fieldMapping.filterable || !onFilter}
-        onClick={() => onFilter('_exists_', field, '+')}
-        scripted={fieldMapping && fieldMapping.scripted}
-      />
+      {onFilter && (
+        <DocViewTableRowBtnFilterExists
+          disabled={!fieldMapping || !fieldMapping.filterable}
+          onClick={() => onFilter('_exists_', field, '+')}
+          scripted={fieldMapping && fieldMapping.scripted}
+        />
+      )}
     </div>
   );
 };

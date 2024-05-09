@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { SavedObject } from '@kbn/core-saved-objects-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   CommonHelper,
@@ -14,6 +15,7 @@ import type {
   PreflightCheckHelper,
   SerializerHelper,
   MigrationHelper,
+  UserHelper,
 } from '../lib/apis/helpers';
 
 export type MigrationHelperMock = jest.Mocked<PublicMethodsOf<MigrationHelper>>;
@@ -22,10 +24,14 @@ const createMigrationHelperMock = (): MigrationHelperMock => {
   const mock: MigrationHelperMock = {
     migrateInputDocument: jest.fn(),
     migrateStorageDocument: jest.fn(),
+    migrateAndDecryptStorageDocument: jest.fn(),
   };
 
   mock.migrateInputDocument.mockImplementation((doc) => doc);
   mock.migrateStorageDocument.mockImplementation((doc) => doc);
+  mock.migrateAndDecryptStorageDocument.mockImplementation(({ document }) =>
+    Promise.resolve(document as SavedObject)
+  );
 
   return mock;
 };
@@ -99,6 +105,16 @@ const createPreflightCheckHelperMock = (): PreflightCheckHelperMock => {
   return mock;
 };
 
+export type UserHelperMock = jest.Mocked<PublicMethodsOf<UserHelper>>;
+
+const createUserHelperMock = (): UserHelperMock => {
+  const mock: UserHelperMock = {
+    getCurrentUserProfileUid: jest.fn(),
+  };
+
+  return mock;
+};
+
 export interface RepositoryHelpersMock {
   common: CommonHelperMock;
   encryption: EncryptionHelperMock;
@@ -106,6 +122,7 @@ export interface RepositoryHelpersMock {
   preflight: PreflightCheckHelperMock;
   serializer: SerializerHelperMock;
   migration: MigrationHelperMock;
+  user: UserHelperMock;
 }
 
 const createRepositoryHelpersMock = (): RepositoryHelpersMock => {
@@ -116,6 +133,7 @@ const createRepositoryHelpersMock = (): RepositoryHelpersMock => {
     preflight: createPreflightCheckHelperMock(),
     serializer: createSerializerHelperMock(),
     migration: createMigrationHelperMock(),
+    user: createUserHelperMock(),
   };
 };
 

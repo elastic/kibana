@@ -229,6 +229,13 @@ export class Config {
   }
 
   /**
+   * Get the first 12 digits of the git sha for this build
+   */
+  getBuildShaShort() {
+    return this.versionInfo.buildShaShort;
+  }
+
+  /**
    * Get the ISO 8601 date for this build
    */
   getBuildDate() {
@@ -246,7 +253,7 @@ export class Config {
     return getPackages(this.repoRoot).filter(
       (p) =>
         (this.pluginSelector.testPlugins || !p.isDevOnly()) &&
-        (!p.isPlugin() || this.pluginFilter(p))
+        (!p.isPlugin() || (this.pluginFilter(p) && !p.isDevOnly()))
     );
   }
 

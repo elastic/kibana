@@ -20,6 +20,7 @@ import {
   ExpressionFunctionDerivative,
   ExpressionFunctionMovingAverage,
   ExpressionFunctionOverallMetric,
+  ExpressionFunctionMathColumn,
 } from './specs';
 import { ExpressionAstFunction } from '../ast';
 
@@ -132,4 +133,5 @@ export interface ExpressionFunctionDefinitions {
   overall_metric: ExpressionFunctionOverallMetric;
   derivative: ExpressionFunctionDerivative;
   moving_average: ExpressionFunctionMovingAverage;
+  math_column: ExpressionFunctionMathColumn;
 }

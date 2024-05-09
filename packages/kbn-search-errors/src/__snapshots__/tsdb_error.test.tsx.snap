@@ -1,0 +1,18 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Tsdb error should render error message 1`] = `
+<div>
+  <p
+    className="eui-textBreakWord"
+  >
+    The field [bytes_counter] of Time series type [counter] has been used with the unsupported operation [sum].
+  </p>
+  <EuiLink
+    external={true}
+    href=""
+    target="_blank"
+  >
+    See more about Time series field types and [counter] supported aggregations
+  </EuiLink>
+</div>
+`;

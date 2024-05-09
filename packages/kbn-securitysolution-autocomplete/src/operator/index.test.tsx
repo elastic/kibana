@@ -152,7 +152,7 @@ describe('operator', () => {
     );
 
     expect(
-      wrapper.find(`[data-test-subj="operatorAutocompleteComboBox"] EuiComboBoxPill`).at(0).text()
+      wrapper.find('[data-test-subj="operatorAutocompleteComboBox"] input').at(0).props().value
     ).toEqual('is');
   });
 

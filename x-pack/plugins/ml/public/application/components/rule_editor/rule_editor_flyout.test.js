@@ -93,6 +93,11 @@ function prepareTest() {
             },
           },
         },
+        notifications: {
+          toasts: {
+            addDanger: () => {},
+          },
+        },
       },
     },
   };

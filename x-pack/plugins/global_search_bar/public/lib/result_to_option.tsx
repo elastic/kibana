@@ -25,7 +25,9 @@ export const resultToOption = (
     type === 'application' ||
     type === 'integration' ||
     type.toLowerCase() === 'enterprise search' ||
-    type.toLowerCase() === 'search';
+    type.toLowerCase() === 'search' ||
+    type.toLowerCase() === 'index' ||
+    type.toLowerCase() === 'connector';
   const option: EuiSelectableTemplateSitewideOption = {
     key: id,
     label: title,

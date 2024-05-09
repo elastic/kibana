@@ -138,7 +138,6 @@ export type {
   OptionedValueProp,
   ParsedInterval,
   // expressions
-  ExecutionContextSearch,
   ExpressionFunctionKql,
   ExpressionFunctionLucene,
   ExpressionFunctionKibana,
@@ -153,20 +152,13 @@ export type {
   // search
   ES_SEARCH_STRATEGY,
   EsQuerySortValue,
-  IEsSearchRequest,
-  IEsSearchResponse,
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
   ISearchSetup,
   ISearchStart,
   ISearchStartSearchSource,
-  ISearchGeneric,
   ISearchSource,
   SearchRequest,
   SearchSourceFields,
   SerializedSearchSourceFields,
-  // errors
-  IEsError,
   WaitUntilNextSessionCompletesOptions,
 } from './search';
 
@@ -178,8 +170,6 @@ export {
   noSearchSessionStorageCapabilityMessage,
   SEARCH_SESSIONS_MANAGEMENT_ID,
   waitUntilNextSessionCompletes$,
-  isEsError,
-  getSearchErrorOverrideDisplay,
   SearchSource,
   SearchSessionState,
   SortDirection,
@@ -193,7 +183,6 @@ export type {
   SearchUsageCollector,
 } from './search';
 
-export type { ISearchOptions } from '../common';
 export { isRunningResponse } from '../common';
 
 // Search namespace

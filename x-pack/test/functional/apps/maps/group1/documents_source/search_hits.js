@@ -120,7 +120,7 @@ export default function ({ getPageObjects, getService }) {
         const { lat, lon, zoom } = await PageObjects.maps.getView();
         expect(Math.round(lat)).to.equal(43);
         expect(Math.round(lon)).to.equal(-102);
-        expect(Math.round(zoom)).to.equal(4);
+        expect(Math.round(zoom)).to.equal(5);
       });
     });
 

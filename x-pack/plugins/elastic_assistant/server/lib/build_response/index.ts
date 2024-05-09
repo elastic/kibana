@@ -41,10 +41,13 @@ export class ResponseFactory {
   constructor(private response: KibanaResponseFactory) {}
 
   /** error */
+  // @ts-expect-error upgrade typescript v4.9.5
   error<T>({ statusCode, body, headers }: CustomHttpResponseOptions<T>) {
+    // @ts-expect-error upgrade typescript v4.9.5
     const contentType: CustomHttpResponseOptions<T>['headers'] = {
       'content-type': 'application/json',
     };
+    // @ts-expect-error upgrade typescript v4.9.5
     const defaultedHeaders: CustomHttpResponseOptions<T>['headers'] = {
       ...contentType,
       ...(headers ?? {}),

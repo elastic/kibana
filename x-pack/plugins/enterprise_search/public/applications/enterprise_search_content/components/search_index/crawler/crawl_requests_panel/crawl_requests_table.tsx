@@ -97,6 +97,7 @@ export const CrawlRequestsTable: React.FC = () => {
       noItemsMessage={
         <EuiEmptyPrompt
           iconType="tableDensityExpanded"
+          titleSize="s"
           title={
             <h3>
               {i18n.translate(

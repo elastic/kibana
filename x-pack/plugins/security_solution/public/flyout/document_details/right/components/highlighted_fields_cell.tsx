@@ -8,7 +8,7 @@
 import type { VFC } from 'react';
 import React, { useCallback } from 'react';
 import { EuiFlexItem, EuiLink } from '@elastic/eui';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { SentinelOneAgentStatus } from '../../../../detections/components/host_isolation/sentinel_one_agent_status';
 import { SENTINEL_ONE_AGENT_ID_FIELD } from '../../../../common/utils/sentinelone_alert_check';
 import { EndpointAgentStatusById } from '../../../../common/components/endpoint/endpoint_agent_status';
@@ -18,7 +18,8 @@ import {
   HOST_NAME_FIELD_NAME,
   USER_NAME_FIELD_NAME,
 } from '../../../../timelines/components/timeline/body/renderers/constants';
-import { LeftPanelInsightsTab, DocumentDetailsLeftPanelKey } from '../../left';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import { LeftPanelInsightsTab } from '../../left';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import {
   HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID,
@@ -40,7 +41,7 @@ interface LinkFieldCellProps {
  */
 const LinkFieldCell: VFC<LinkFieldCellProps> = ({ value }) => {
   const { scopeId, eventId, indexName } = useRightPanelContext();
-  const { openLeftPanel } = useExpandableFlyoutContext();
+  const { openLeftPanel } = useExpandableFlyoutApi();
 
   const goToInsightsEntities = useCallback(() => {
     openLeftPanel({
@@ -67,6 +68,10 @@ export interface HighlightedFieldsCellProps {
    */
   field: string;
   /**
+   * Highlighted field's original name, when the field is overridden
+   */
+  originalField?: string;
+  /**
    * Highlighted field's value to display
    */
   values: string[] | null | undefined;
@@ -75,7 +80,11 @@ export interface HighlightedFieldsCellProps {
 /**
  * Renders a component in the highlighted fields table cell based on the field name
  */
-export const HighlightedFieldsCell: VFC<HighlightedFieldsCellProps> = ({ values, field }) => (
+export const HighlightedFieldsCell: VFC<HighlightedFieldsCellProps> = ({
+  values,
+  field,
+  originalField,
+}) => (
   <>
     {values != null &&
       values.map((value, i) => {
@@ -87,13 +96,17 @@ export const HighlightedFieldsCell: VFC<HighlightedFieldsCellProps> = ({ values,
           >
             {field === HOST_NAME_FIELD_NAME || field === USER_NAME_FIELD_NAME ? (
               <LinkFieldCell value={value} />
+            ) : field === AGENT_STATUS_FIELD_NAME &&
+              originalField === SENTINEL_ONE_AGENT_ID_FIELD ? (
+              <SentinelOneAgentStatus
+                agentId={String(value ?? '')}
+                data-test-subj={HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID}
+              />
             ) : field === AGENT_STATUS_FIELD_NAME ? (
               <EndpointAgentStatusById
                 endpointAgentId={String(value ?? '')}
                 data-test-subj={HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID}
               />
-            ) : field === SENTINEL_ONE_AGENT_ID_FIELD ? (
-              <SentinelOneAgentStatus agentId={String(value ?? '')} />
             ) : (
               <span data-test-subj={HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID}>{value}</span>
             )}

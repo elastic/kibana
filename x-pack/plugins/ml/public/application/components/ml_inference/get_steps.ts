@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { AddInferencePipelineSteps } from './types';
+import type { AddInferencePipelineSteps } from './types';
 import { ADD_INFERENCE_PIPELINE_STEPS } from './constants';
 
 export function getSteps(
   step: AddInferencePipelineSteps,
   isConfigureStepValid: boolean,
-  isPipelineDataValid: boolean
+  isPipelineDataValid: boolean,
+  hasProcessorStep: boolean
 ) {
   let nextStep: AddInferencePipelineSteps | undefined;
   let previousStep: AddInferencePipelineSteps | undefined;
@@ -19,7 +20,9 @@ export function getSteps(
 
   switch (step) {
     case ADD_INFERENCE_PIPELINE_STEPS.DETAILS:
-      nextStep = ADD_INFERENCE_PIPELINE_STEPS.CONFIGURE_PROCESSOR;
+      nextStep = hasProcessorStep
+        ? ADD_INFERENCE_PIPELINE_STEPS.CONFIGURE_PROCESSOR
+        : ADD_INFERENCE_PIPELINE_STEPS.ON_FAILURE;
       isContinueButtonEnabled = isConfigureStepValid;
       break;
     case ADD_INFERENCE_PIPELINE_STEPS.CONFIGURE_PROCESSOR:
@@ -29,7 +32,9 @@ export function getSteps(
       break;
     case ADD_INFERENCE_PIPELINE_STEPS.ON_FAILURE:
       nextStep = ADD_INFERENCE_PIPELINE_STEPS.TEST;
-      previousStep = ADD_INFERENCE_PIPELINE_STEPS.CONFIGURE_PROCESSOR;
+      previousStep = hasProcessorStep
+        ? ADD_INFERENCE_PIPELINE_STEPS.CONFIGURE_PROCESSOR
+        : ADD_INFERENCE_PIPELINE_STEPS.DETAILS;
       isContinueButtonEnabled = isPipelineDataValid;
       break;
     case ADD_INFERENCE_PIPELINE_STEPS.TEST:

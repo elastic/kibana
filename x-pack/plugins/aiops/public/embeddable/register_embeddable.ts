@@ -7,6 +7,8 @@
 
 import type { CoreSetup } from '@kbn/core-lifecycle-browser';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '@kbn/aiops-change-point-detection/constants';
 import type { AiopsPluginStart, AiopsPluginStartDeps } from '../types';
 import { EmbeddableChangePointChartFactory } from './embeddable_change_point_chart_factory';
 
@@ -14,6 +16,12 @@ export const registerEmbeddable = (
   core: CoreSetup<AiopsPluginStartDeps, AiopsPluginStart>,
   embeddable: EmbeddableSetup
 ) => {
-  const factory = new EmbeddableChangePointChartFactory(core.getStartServices);
-  embeddable.registerEmbeddableFactory(factory.type, factory);
+  const changePointChartFactory = new EmbeddableChangePointChartFactory(
+    EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
+    i18n.translate('xpack.aiops.embeddableChangePointChartDisplayName', {
+      defaultMessage: 'Change point detection',
+    }),
+    core.getStartServices
+  );
+  embeddable.registerEmbeddableFactory(changePointChartFactory.type, changePointChartFactory);
 };

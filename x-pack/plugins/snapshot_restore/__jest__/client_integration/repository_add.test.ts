@@ -11,7 +11,7 @@ import { INVALID_NAME_CHARS } from '../../public/application/services/validation
 import { API_BASE_PATH } from '../../common';
 import { getRepository } from '../../test/fixtures';
 import { RepositoryType } from '../../common/types';
-import { setupEnvironment, pageHelpers, nextTick, delay } from './helpers';
+import { setupEnvironment, pageHelpers } from './helpers';
 import { RepositoryAddTestBed } from './helpers/repository_add.helpers';
 
 const { setup } = pageHelpers.repositoryAdd;
@@ -61,8 +61,9 @@ describe('<RepositoryAdd />', () => {
   describe('when no repository types are not found', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadRepositoryTypesResponse([]);
-      testBed = await setup(httpSetup);
-      await nextTick();
+      await act(async () => {
+        testBed = await setup(httpSetup);
+      });
       testBed.component.update();
     });
 
@@ -77,8 +78,9 @@ describe('<RepositoryAdd />', () => {
   describe('when repository types are found', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadRepositoryTypesResponse(repositoryTypes);
-      testBed = await setup(httpSetup);
-      await nextTick();
+      await act(async () => {
+        testBed = await setup(httpSetup);
+      });
       testBed.component.update();
     });
 
@@ -100,8 +102,9 @@ describe('<RepositoryAdd />', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadRepositoryTypesResponse(repositoryTypes);
 
-      testBed = await setup(httpSetup);
-      await nextTick();
+      await act(async () => {
+        testBed = await setup(httpSetup);
+      });
       testBed.component.update();
     });
 
@@ -155,9 +158,8 @@ describe('<RepositoryAdd />', () => {
 
           await act(async () => {
             actions.clickSubmitButton();
-            await nextTick();
-            component.update();
           });
+          component.update();
 
           const expectedErrors = typeToErrorMessagesMap[type];
           const errorsFound = form.getErrorsMessages();
@@ -174,9 +176,8 @@ describe('<RepositoryAdd />', () => {
 
           await act(async () => {
             actions.clickBackButton();
-            await delay(100);
-            component.update();
           });
+          component.update();
         };
 
         await selectRepoTypeAndExpectErrors('fs');

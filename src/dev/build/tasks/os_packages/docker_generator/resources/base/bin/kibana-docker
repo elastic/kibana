@@ -39,6 +39,7 @@ kibana_vars=(
     csp.frame_ancestors
     csp.report_uri
     csp.report_to
+    csp.report_only.form_action
     data.autocomplete.valueSuggestions.terminateAfter
     data.autocomplete.valueSuggestions.timeout
     data.search.asyncSearch.waitForCompletion
@@ -136,12 +137,14 @@ kibana_vars=(
     ops.interval
     path.data
     pid.file
+    profiler.signal
     regionmap
     savedObjects.maxImportExportSize
     savedObjects.maxImportPayloadBytes
     savedObjects.allowHttpApiAccess
     security.showInsecureClusterWarning
     server.basePath
+    server.cdn.url
     server.compression.enabled
     server.compression.referrerWhitelist
     server.cors
@@ -337,6 +340,7 @@ kibana_vars=(
     xpack.reporting.csv.maxSizeBytes
     xpack.reporting.csv.scroll.duration
     xpack.reporting.csv.scroll.size
+    xpack.reporting.csv.scroll.strategy
     xpack.reporting.csv.useByteOrderMarkEncoding
     xpack.reporting.enabled
     xpack.reporting.encryptionKey

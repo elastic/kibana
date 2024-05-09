@@ -106,12 +106,12 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
         )}
         <FormGroupResponsiveFields
           title={
-            <h4>
+            <h3>
               <FormattedMessage
                 id="xpack.fleet.createPackagePolicy.stepConfigure.integrationSettingsSectionTitle"
                 defaultMessage="Integration settings"
               />
-            </h4>
+            </h3>
           }
           description={
             <FormattedMessage
@@ -284,6 +284,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                     >
                       <EuiComboBox
                         noSuggestions
+                        placeholder={agentPolicy?.namespace}
                         isDisabled={isEditPage && packageInfo.type === 'input'}
                         singleSelection={true}
                         selectedOptions={

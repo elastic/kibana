@@ -156,6 +156,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         expect(doc._source['kibana.alert.url']).to.contain(
           '/s/space1/app/ml/explorer/?_g=(ml%3A(jobIds%3A!(rt-anomaly-mean-value))'
         );
+        expect(doc._source['kibana.alert.anomaly_score'][0]).to.be.above(0);
       }
     });
 

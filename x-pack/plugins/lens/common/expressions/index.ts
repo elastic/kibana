@@ -11,3 +11,4 @@ export * from './format_column';
 export * from './map_to_columns';
 export * from './time_scale';
 export * from './datatable';
+export * from './formula_context';

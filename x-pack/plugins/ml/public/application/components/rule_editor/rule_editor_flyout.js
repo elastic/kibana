@@ -32,7 +32,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
-import { extractErrorMessage } from '@kbn/ml-error-utils';
 import {
   ML_DETECTOR_RULE_ACTION,
   ML_DETECTOR_RULE_CONDITIONS_NOT_SUPPORTED_FUNCTIONS,
@@ -55,7 +54,7 @@ import {
 
 import { getPartitioningFieldNames } from '../../../../common/util/job_utils';
 import { mlJobService } from '../../services/job_service';
-import { ml } from '../../services/ml_api_service';
+import { toastNotificationServiceProvider } from '../../services/toast_notification_service';
 
 class RuleEditorFlyoutUI extends Component {
   static propTypes = {
@@ -83,8 +82,13 @@ class RuleEditorFlyoutUI extends Component {
   }
 
   componentDidMount() {
-    if (typeof this.props.setShowFunction === 'function') {
-      this.props.setShowFunction(this.showFlyout);
+    if (this.props.kibana.services.notifications) {
+      this.toastNotificationService = toastNotificationServiceProvider(
+        this.props.kibana.services.notifications.toasts
+      );
+      if (typeof this.props.setShowFunction === 'function') {
+        this.props.setShowFunction(this.showFlyout);
+      }
     }
   }
 
@@ -105,8 +109,7 @@ class RuleEditorFlyoutUI extends Component {
         i18n.translate(
           'xpack.ml.ruleEditor.ruleEditorFlyout.unableToConfigureRulesNotificationMesssage',
           {
-            defaultMessage:
-              'Unable to configure job rules as an error occurred obtaining details for job ID {jobId}',
+            defaultMessage: 'Unable to configure job rules as no job found with ID {jobId}',
             values: { jobId: anomaly.jobId },
           }
         )
@@ -145,7 +148,7 @@ class RuleEditorFlyoutUI extends Component {
 
     if (this.partitioningFieldNames.length > 0 && this.canGetFilters) {
       // Load the current list of filters. These are used for configuring rule scope.
-      ml.filters
+      this.props.kibana.services.mlServices.mlApiServices.filters
         .filters()
         .then((filters) => {
           const filterListIds = filters.map((filter) => filter.filter_id);
@@ -153,10 +156,9 @@ class RuleEditorFlyoutUI extends Component {
             filterListIds,
           });
         })
-        .catch((resp) => {
-          console.log('Error loading list of filters:', resp);
-          const { toasts } = this.props.kibana.services.notifications;
-          toasts.addDanger(
+        .catch((error) => {
+          this.toastNotificationService.displayErrorToast(
+            error,
             i18n.translate(
               'xpack.ml.ruleEditor.ruleEditorFlyout.errorWithLoadingFilterListsNotificationMesssage',
               {
@@ -374,8 +376,8 @@ class RuleEditorFlyoutUI extends Component {
         }
       })
       .catch((error) => {
-        console.error(error);
-        toasts.addDanger(
+        this.toastNotificationService.displayErrorToast(
+          error,
           i18n.translate(
             'xpack.ml.ruleEditor.ruleEditorFlyout.errorWithSavingChangesToJobDetectorRulesNotificationMessage',
             {
@@ -426,18 +428,16 @@ class RuleEditorFlyoutUI extends Component {
         }
       })
       .catch((error) => {
-        console.error(error);
-        let errorMessage = i18n.translate(
-          'xpack.ml.ruleEditor.ruleEditorFlyout.errorWithDeletingRuleFromJobDetectorNotificationMessage',
-          {
-            defaultMessage: 'Error deleting rule from {jobId} detector',
-            values: { jobId },
-          }
+        this.toastNotificationService.displayErrorToast(
+          error,
+          i18n.translate(
+            'xpack.ml.ruleEditor.ruleEditorFlyout.errorWithDeletingRuleFromJobDetectorNotificationMessage',
+            {
+              defaultMessage: 'Error deleting rule from {jobId} detector',
+              values: { jobId },
+            }
+          )
         );
-        if (error.error) {
-          errorMessage += ` : ${extractErrorMessage(error.error)}`;
-        }
-        toasts.addDanger(errorMessage);
       });
   };
 
@@ -467,8 +467,8 @@ class RuleEditorFlyoutUI extends Component {
         }
       })
       .catch((error) => {
-        console.log(`Error adding ${item} to filter ${filterId}:`, error);
-        toasts.addDanger(
+        this.toastNotificationService.displayErrorToast(
+          error,
           i18n.translate(
             'xpack.ml.ruleEditor.ruleEditorFlyout.errorWithAddingItemToFilterListNotificationMessage',
             {
@@ -481,7 +481,7 @@ class RuleEditorFlyoutUI extends Component {
   };
 
   render() {
-    const docsUrl = this.props.kibana.services.docLinks.links.ml.customRules;
+    const docsUrl = this.props.kibana.services.docLinks?.links.ml.customRules;
     const {
       isFlyoutVisible,
       job,

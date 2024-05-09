@@ -17,7 +17,8 @@ import {
 
 import { newJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 
-import { isClassificationEvaluateResponse, ResultsSearchQuery } from '../../../../common/analytics';
+import type { ResultsSearchQuery } from '../../../../common/analytics';
+import { isClassificationEvaluateResponse } from '../../../../common/analytics';
 import { loadEvalData } from '../../../../common';
 
 import { ACTUAL_CLASS_ID, OTHER_CLASS_ID } from './column_data';

@@ -35,10 +35,21 @@ describe('<NoDataViewsPromptTest />', () => {
     const component = mount(<NoDataViewsPrompt onDataViewCreated={jest.fn()} />);
 
     expect(services.openDataViewEditor).not.toHaveBeenCalled();
-    component.find('button').simulate('click');
+    component.find('button[data-test-subj="createDataViewButton"]').simulate('click');
 
     component.unmount();
 
     expect(services.openDataViewEditor).toHaveBeenCalled();
+  });
+
+  test('on ES|QL try', () => {
+    const component = mount(<NoDataViewsPrompt onDataViewCreated={jest.fn()} />);
+
+    expect(services.onTryESQL).not.toHaveBeenCalled();
+    component.find('button[data-test-subj="tryESQLLink"]').simulate('click');
+
+    component.unmount();
+
+    expect(services.onTryESQL).toHaveBeenCalled();
   });
 });

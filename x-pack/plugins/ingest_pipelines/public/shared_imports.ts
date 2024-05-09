@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { useKibana as _useKibana, CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { useKibana as _useKibana } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 import { AppServices } from './application';
 
 export { CodeEditor };
@@ -81,10 +82,9 @@ export {
 
 export { isJSON, isEmptyString } from '@kbn/es-ui-shared-plugin/static/validators/string';
 
-export {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-  useExecutionContext,
-} from '@kbn/kibana-react-plugin/public';
+export { KibanaContextProvider, useExecutionContext } from '@kbn/kibana-react-plugin/public';
+export { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+
+export { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 export const useKibana = () => _useKibana<AppServices>();

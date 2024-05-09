@@ -8,7 +8,6 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import '../../../../../common/mock/match_media';
 import { defaultHeaders } from './default_headers';
 import { mockBrowserFields } from '../../../../../common/containers/source/mock';
 import type { Sort } from '../sort';
@@ -18,7 +17,7 @@ import { useMountAppended } from '../../../../../common/utils/use_mount_appended
 import type { ColumnHeadersComponentProps } from '.';
 import { ColumnHeadersComponent } from '.';
 import { cloneDeep } from 'lodash/fp';
-import { timelineActions } from '../../../../store/timeline';
+import { timelineActions } from '../../../../store';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { Direction } from '../../../../../../common/search_strategy';
 import { getDefaultControlColumn } from '../control_columns';
@@ -97,6 +96,11 @@ describe('ColumnHeaders', () => {
     });
 
     test('it renders the field browser', () => {
+      const mockCloseEditor = jest.fn();
+      mockUseFieldBrowserOptions.mockImplementation(({ editorActionsRef }) => {
+        editorActionsRef.current = { closeEditor: mockCloseEditor };
+        return {};
+      });
       const wrapper = mount(
         <TestProviders>
           <ColumnHeadersComponent {...defaultProps} />

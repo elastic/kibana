@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import {
   applyActionListEsSearchMock,
   createActionRequestsEsSearchResultsMock,
-  createActionResponsesEsSearchResultsMock,
 } from '../services/actions/mocks';
-import { getActions, getActionResponses } from './action_list_helpers';
+import { getActions } from './action_list_helpers';
 
 describe('action helpers', () => {
   let mockScopedEsClient: ScopedClusterClientMock;
@@ -36,18 +34,7 @@ describe('action helpers', () => {
                 must: [
                   {
                     bool: {
-                      filter: [
-                        {
-                          term: {
-                            input_type: 'endpoint',
-                          },
-                        },
-                        {
-                          term: {
-                            type: 'INPUT_ACTION',
-                          },
-                        },
-                      ],
+                      filter: [],
                     },
                   },
                 ],
@@ -81,6 +68,7 @@ describe('action helpers', () => {
         size: 20,
         from: 5,
         startDate: 'now-10d',
+        agentTypes: ['endpoint'],
         elasticAgentIds: ['agent-123', 'agent-456'],
         endDate: 'now',
         commands: ['isolate', 'unisolate', 'get-file'],
@@ -96,16 +84,6 @@ describe('action helpers', () => {
                   {
                     bool: {
                       filter: [
-                        {
-                          term: {
-                            input_type: 'endpoint',
-                          },
-                        },
-                        {
-                          term: {
-                            type: 'INPUT_ACTION',
-                          },
-                        },
                         {
                           range: {
                             '@timestamp': {
@@ -123,6 +101,11 @@ describe('action helpers', () => {
                         {
                           terms: {
                             'data.command': ['isolate', 'unisolate', 'get-file'],
+                          },
+                        },
+                        {
+                          terms: {
+                            input_type: ['endpoint'],
                           },
                         },
                         {
@@ -211,16 +194,6 @@ describe('action helpers', () => {
                     bool: {
                       filter: [
                         {
-                          term: {
-                            input_type: 'endpoint',
-                          },
-                        },
-                        {
-                          term: {
-                            type: 'INPUT_ACTION',
-                          },
-                        },
-                        {
                           range: {
                             '@timestamp': {
                               gte: 'now-1d',
@@ -306,98 +279,323 @@ describe('action helpers', () => {
       expect(actions.actionIds).toEqual(['123']);
       expect(actions.actionRequests?.body?.hits?.hits[0]._source?.agent.id).toEqual('agent-a');
     });
-  });
 
-  describe('#getActionResponses', () => {
-    it('should use base filters correctly when no other filter options provided', async () => {
-      const esClient = mockScopedEsClient.asInternalUser;
-      applyActionListEsSearchMock(esClient);
-      await getActionResponses({ esClient, actionIds: [] });
+    describe('action `Types` filter', () => {
+      it('should correctly query with multiple action `types` filter options provided', async () => {
+        const esClient = mockScopedEsClient.asInternalUser;
 
-      expect(esClient.search).toHaveBeenCalledWith(
-        {
-          body: {
-            query: {
-              bool: {
-                filter: [],
-              },
-            },
-          },
-          from: 0,
-          index: ['.fleet-actions-results', '.logs-endpoint.action.responses-*'],
-          size: 10000,
-        },
-        {
-          headers: {
-            'X-elastic-product-origin': 'fleet',
-          },
-          ignore: [404],
-          meta: true,
-        }
-      );
-    });
-    it('should query with actionIds and elasticAgentIds when provided', async () => {
-      const actionIds = [uuidv4(), uuidv4()];
-      const elasticAgentIds = ['123', '456'];
-      const esClient = mockScopedEsClient.asInternalUser;
-      applyActionListEsSearchMock(esClient);
-      await getActionResponses({ esClient, actionIds, elasticAgentIds });
+        applyActionListEsSearchMock(esClient);
+        await getActions({
+          esClient,
+          size: 20,
+          from: 5,
+          startDate: 'now-10d',
+          elasticAgentIds: ['agent-123', 'agent-456'],
+          endDate: 'now',
+          types: ['manual', 'automated'],
+          userIds: ['*elastic*', '*kibana*'],
+        });
 
-      expect(esClient.search).toHaveBeenCalledWith(
-        {
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  {
-                    terms: {
-                      agent_id: elasticAgentIds,
+        expect(esClient.search).toHaveBeenCalledWith(
+          {
+            body: {
+              query: {
+                bool: {
+                  must: [
+                    {
+                      bool: {
+                        filter: [
+                          {
+                            range: {
+                              '@timestamp': {
+                                gte: 'now-10d',
+                              },
+                            },
+                          },
+                          {
+                            range: {
+                              '@timestamp': {
+                                lte: 'now',
+                              },
+                            },
+                          },
+
+                          {
+                            terms: {
+                              agents: ['agent-123', 'agent-456'],
+                            },
+                          },
+                        ],
+                      },
                     },
-                  },
-                  {
-                    terms: {
-                      action_id: actionIds,
+                    {
+                      bool: {
+                        should: [
+                          {
+                            bool: {
+                              should: [
+                                {
+                                  query_string: {
+                                    fields: ['user_id'],
+                                    query: '*elastic*',
+                                  },
+                                },
+                              ],
+                              minimum_should_match: 1,
+                            },
+                          },
+                          {
+                            bool: {
+                              should: [
+                                {
+                                  query_string: {
+                                    fields: ['user_id'],
+                                    query: '*kibana*',
+                                  },
+                                },
+                              ],
+                              minimum_should_match: 1,
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
                     },
-                  },
-                ],
+                  ],
+                },
               },
+              sort: [
+                {
+                  '@timestamp': {
+                    order: 'desc',
+                  },
+                },
+              ],
             },
+            from: 5,
+            index: '.logs-endpoint.actions-default',
+            size: 20,
           },
-          from: 0,
-          index: ['.fleet-actions-results', '.logs-endpoint.action.responses-*'],
-          size: 10000,
-        },
-        {
-          headers: {
-            'X-elastic-product-origin': 'fleet',
-          },
-          ignore: [404],
-          meta: true,
-        }
-      );
-    });
-    it('should return expected output', async () => {
-      const esClient = mockScopedEsClient.asInternalUser;
-      const actionRes = createActionResponsesEsSearchResultsMock();
-      applyActionListEsSearchMock(esClient, undefined, actionRes);
-
-      const responses = await getActionResponses({
-        esClient,
-        actionIds: ['123'],
-        elasticAgentIds: ['agent-a'],
+          {
+            ignore: [404],
+            meta: true,
+          }
+        );
       });
 
-      const responseHits = responses.body.hits.hits;
+      it('should correctly query with single `manual` action `types` filter options provided', async () => {
+        const esClient = mockScopedEsClient.asInternalUser;
 
-      expect(responseHits.length).toEqual(2);
-      expect(
-        responseHits.map((e) => e._index).filter((e) => e.includes('.fleet-actions-results')).length
-      ).toEqual(1);
-      expect(
-        responseHits
-          .map((e) => e._index)
-          .filter((e) => e.includes('.logs-endpoint.action.responses')).length
-      ).toEqual(1);
+        applyActionListEsSearchMock(esClient);
+        await getActions({
+          esClient,
+          size: 20,
+          from: 5,
+          startDate: 'now-10d',
+          elasticAgentIds: ['agent-123', 'agent-456'],
+          endDate: 'now',
+          types: ['manual'],
+          userIds: ['*elastic*', '*kibana*'],
+        });
+
+        expect(esClient.search).toHaveBeenCalledWith(
+          {
+            body: {
+              query: {
+                bool: {
+                  must: [
+                    {
+                      bool: {
+                        filter: [
+                          {
+                            range: {
+                              '@timestamp': {
+                                gte: 'now-10d',
+                              },
+                            },
+                          },
+                          {
+                            range: {
+                              '@timestamp': {
+                                lte: 'now',
+                              },
+                            },
+                          },
+
+                          {
+                            terms: {
+                              agents: ['agent-123', 'agent-456'],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    {
+                      bool: {
+                        should: [
+                          {
+                            bool: {
+                              should: [
+                                {
+                                  query_string: {
+                                    fields: ['user_id'],
+                                    query: '*elastic*',
+                                  },
+                                },
+                              ],
+                              minimum_should_match: 1,
+                            },
+                          },
+                          {
+                            bool: {
+                              should: [
+                                {
+                                  query_string: {
+                                    fields: ['user_id'],
+                                    query: '*kibana*',
+                                  },
+                                },
+                              ],
+                              minimum_should_match: 1,
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  ],
+                  must_not: {
+                    exists: {
+                      field: 'data.alert_id',
+                    },
+                  },
+                },
+              },
+              sort: [
+                {
+                  '@timestamp': {
+                    order: 'desc',
+                  },
+                },
+              ],
+            },
+            from: 5,
+            index: '.logs-endpoint.actions-default',
+            size: 20,
+          },
+          {
+            ignore: [404],
+            meta: true,
+          }
+        );
+      });
+
+      it('should correctly query with single `automated` action `types` filter options provided', async () => {
+        const esClient = mockScopedEsClient.asInternalUser;
+
+        applyActionListEsSearchMock(esClient);
+        await getActions({
+          esClient,
+          size: 20,
+          from: 5,
+          startDate: 'now-10d',
+          elasticAgentIds: ['agent-123', 'agent-456'],
+          endDate: 'now',
+          types: ['automated'],
+          userIds: ['*elastic*', '*kibana*'],
+        });
+
+        expect(esClient.search).toHaveBeenCalledWith(
+          {
+            body: {
+              query: {
+                bool: {
+                  must: [
+                    {
+                      bool: {
+                        filter: [
+                          {
+                            range: {
+                              '@timestamp': {
+                                gte: 'now-10d',
+                              },
+                            },
+                          },
+                          {
+                            range: {
+                              '@timestamp': {
+                                lte: 'now',
+                              },
+                            },
+                          },
+
+                          {
+                            terms: {
+                              agents: ['agent-123', 'agent-456'],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    {
+                      bool: {
+                        should: [
+                          {
+                            bool: {
+                              should: [
+                                {
+                                  query_string: {
+                                    fields: ['user_id'],
+                                    query: '*elastic*',
+                                  },
+                                },
+                              ],
+                              minimum_should_match: 1,
+                            },
+                          },
+                          {
+                            bool: {
+                              should: [
+                                {
+                                  query_string: {
+                                    fields: ['user_id'],
+                                    query: '*kibana*',
+                                  },
+                                },
+                              ],
+                              minimum_should_match: 1,
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  ],
+                  filter: {
+                    exists: {
+                      field: 'data.alert_id',
+                    },
+                  },
+                },
+              },
+              sort: [
+                {
+                  '@timestamp': {
+                    order: 'desc',
+                  },
+                },
+              ],
+            },
+            from: 5,
+            index: '.logs-endpoint.actions-default',
+            size: 20,
+          },
+          {
+            ignore: [404],
+            meta: true,
+          }
+        );
+      });
     });
   });
 });

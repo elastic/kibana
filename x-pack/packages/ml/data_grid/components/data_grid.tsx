@@ -6,9 +6,14 @@
  */
 
 import { isEqual } from 'lodash';
-import React, { memo, useEffect, useRef, FC } from 'react';
-import { css } from '@emotion/react';
+import type { FC } from 'react';
+import React, { memo, useEffect, useRef } from 'react';
 
+import type {
+  EuiDataGridCellPopoverElementProps,
+  EuiDataGridProps,
+  UseEuiTheme,
+} from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -16,37 +21,67 @@ import {
   EuiCodeBlock,
   EuiCopy,
   EuiDataGrid,
-  EuiDataGridCellPopoverElementProps,
-  EuiDataGridProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiMutationObserver,
   EuiSpacer,
   EuiTitle,
   EuiToolTip,
+  mathWithUnits,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CoreSetup } from '@kbn/core/public';
+import type { CoreSetup } from '@kbn/core/public';
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import { euiDataGridStyle, euiDataGridToolbarSettings, INDEX_STATUS } from '../lib/common';
-import { UseIndexDataReturnType } from '../lib/types';
+import type { UseIndexDataReturnType } from '../lib/types';
 
-const cssOverride = css({
-  '.euiDataGridRowCell--boolean': { textTransform: 'none' },
-  // Overrides to align the sorting arrow, actions icon and the column header when no chart is available,
-  // to the bottom of the cell when histogram charts are enabled.
-  // Note that overrides have to be used as currently it is not possible to add a custom class name
-  // for the EuiDataGridHeaderCell - see https://github.com/elastic/eui/issues/5106
-  '.euiDataGridHeaderCell': {
-    '.euiDataGridHeaderCell__sortingArrow,.euiDataGridHeaderCell__icon,.euiPopover': {
-      marginTop: 'auto',
+const histogramHeaderProps = { className: 'cellHeaderWithHistogramChart' };
+const cssOverride = ({ euiTheme }: UseEuiTheme) =>
+  ({
+    '.euiDataGridRowCell--boolean': { textTransform: 'none' },
+    // When a histogram chart is present in the column header, absolutely position
+    // the sorting arrow and actions icon so that the chart can expand to the full width
+    // of the header
+    '.cellHeaderWithHistogramChart': {
+      '.euiDataGridHeaderCell__content': {
+        width: '100%',
+        textAlign: 'left', // Should be overridden by EuiDataGrid's base CSS for numeric & currency schema
+      },
+      '.euiDataGridHeaderCell__sortingArrow': {
+        position: 'absolute',
+        bottom: 0,
+        right: euiTheme.size.base, // Positioned to the left of the actions icon
+        // If the arrow is visible, ensure the icon is as well
+        '+ .euiPopover .euiDataGridHeaderCell__icon': {
+          width: 'auto',
+          opacity: '1',
+        },
+      },
+      '.euiDataGridHeaderCell__button > .euiPopover': {
+        position: 'absolute',
+        bottom: 0,
+        right: 0,
+      },
+      // Re-apply cell icon affordances manually (due to absolute positioning)
+      '.histogramLabel': {
+        transition: `margin ${euiTheme.animation.fast} ease-in`,
+      },
+      '&:hover, &:focus-within, &:has(.euiPopover-isOpen)': {
+        '.histogramLabel': {
+          marginRight: euiTheme.size.base,
+        },
+      },
+      '&:has(.euiDataGridHeaderCell__sortingArrow)': {
+        '.histogramLabel': {
+          marginRight: mathWithUnits([euiTheme.size.xl, euiTheme.size.xxs], (x, y) => x + y),
+        },
+      },
     },
-  },
-});
+  } as const);
 
 export const DataGridTitle: FC<{ title: string }> = ({ title }) => (
   <EuiTitle size="xs">
@@ -264,6 +299,7 @@ export const DataGrid: FC<Props> = memo(
                   aria-label={isWithHeader(props) ? props.title : ''}
                   columns={columnsWithCharts.map((c) => {
                     c.initialWidth = 165;
+                    if (chartsVisible) c.displayHeaderCellProps = histogramHeaderProps;
                     return c;
                   })}
                   columnVisibility={{ visibleColumns, setVisibleColumns }}

@@ -30,7 +30,7 @@ export interface PerformIncrementCounterInternalParams<T = unknown> {
 
 export const incrementCounterInternal = async <T>(
   { type, id, counterFields, options }: PerformIncrementCounterInternalParams<T>,
-  { registry, helpers, client, serializer, migrator }: ApiExecutionContext
+  { registry, helpers, client, serializer }: ApiExecutionContext
 ): Promise<SavedObject<T>> => {
   const { common: commonHelper, preflight: preflightHelper, migration: migrationHelper } = helpers;
 
@@ -163,9 +163,9 @@ export const incrementCounterInternal = async <T>(
     ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
     ...(originId && { originId }),
     updated_at: time,
-    references: body.get?._source.references ?? [],
+    references: body.get?._source?.references ?? [],
     version: encodeHitVersion(body),
-    attributes: body.get?._source[type],
+    attributes: body.get?._source?.[type],
     ...(managed && { managed }),
   };
 };

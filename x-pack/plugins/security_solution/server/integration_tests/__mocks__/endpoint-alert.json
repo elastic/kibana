@@ -1,0 +1,196 @@
+{
+  "@timestamp": "2024-01-13T01:49:46.2633272Z",
+  "Endpoint": {
+    "policy": {
+      "applied": {
+        "artifacts": {
+          "global": {
+            "identifiers": [
+              {
+                "name": "diagnostic-configuration-v1",
+                "sha256": "9a0c8808ce6d9b8043cc3033ec55de4fee958dc871680789f699c16e3079cc05"
+              },
+              {
+                "name": "diagnostic-endpointpe-v4-blocklist",
+                "sha256": "9b98d31453367a4a4af2f32763ef9d08faadd0520a4c34104ebd89060bcbc87c"
+              }
+            ],
+            "version": "staging.NOT_FOUND-1705109685512"
+          },
+          "user": {
+            "identifiers": [
+              {
+                "name": "endpoint-eventfilterlist-windows-v1",
+                "sha256": "d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658"
+              },
+              {
+                "name": "endpoint-exceptionlist-windows-v1",
+                "sha256": "d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658"
+              }
+            ],
+            "version": "1.0.0"
+          }
+        }
+      }
+    }
+  },
+  "agent": {
+    "build": {
+      "original": "version: 7.17.16, compiled: Mon Nov 13 15:00:00 2023, branch: HEAD, commit: db581d419ce896071e0fcfbec5ae0666297d37dc"
+    },
+    "id": "69bb7a83-c735-4c27-9646-01f697aa3f68",
+    "type": "endpoint",
+    "version": "7.17.16"
+  },
+  "cluster_name": "639afbf700044279b8221d6a5f935f33",
+  "cluster_uuid": "F6paC1IFSXCcT3N9MiWttw",
+  "data_stream": {
+    "dataset": "endpoint.alerts",
+    "namespace": "default",
+    "type": "logs"
+  },
+  "ecs": {
+    "version": "1.11.0"
+  },
+  "elastic": {
+    "agent": {
+      "id": "69bb7a83-c735-4c27-9646-01f697aa3f68"
+    }
+  },
+  "event": {
+    "action": "creation",
+    "agent_id_status": "verified",
+    "category": ["malware", "intrusion_detection", "file"],
+    "code": "malicious_file",
+    "created": "2024-01-13T01:49:46.2633272Z",
+    "dataset": "endpoint.alerts",
+    "id": "NO5fsT3K5DRjdEjO++++++zo",
+    "ingested": "2024-01-13T01:50:17Z",
+    "kind": "alert",
+    "module": "endpoint",
+    "outcome": "success",
+    "risk_score": 99,
+    "sequence": 2382,
+    "severity": 99,
+    "type": ["info", "creation", "allowed"]
+  },
+  "file": {
+    "Ext": {
+      "code_signature": [
+        {
+          "exists": false
+        }
+      ],
+      "malware_classification": {
+        "identifier": "endpointpe-v4-model",
+        "score": 0.9998635053634644,
+        "threshold": 0.58,
+        "version": "4.0.38000"
+      }
+    },
+    "accessed": "2024-01-13T01:49:46.2633272Z",
+    "created": "2024-01-13T01:49:46.2633272Z",
+    "directory": "C:\\Windows\\TEMP\\d9a4d415-0a1f-451d-a878-c0753eb653dd",
+    "extension": "exe",
+    "hash": {
+      "md5": "f410cff9e5d18862b08a448c278817f0",
+      "sha1": "c4c355c5a23454418009401e3a16d8625f081e23",
+      "sha256": "5a79448a3c3062794851a986f55d118a9a71ca057bfcb0fda1997142125736c2"
+    },
+    "mtime": "2024-01-13T01:49:46.2633272Z",
+    "name": "sample.exe",
+    "path": "C:\\Windows\\TEMP\\d9a4d415-0a1f-451d-a878-c0753eb653dd\\sample.exe",
+    "size": 288256
+  },
+  "host": {
+    "os": {
+      "Ext": {
+        "variant": "Windows Server 2019 Datacenter"
+      },
+      "family": "windows",
+      "full": "Windows Server 2019 Datacenter 1809 (10.0.17763.3406)",
+      "kernel": "1809 (10.0.17763.3406)",
+      "name": "Windows",
+      "platform": "windows",
+      "type": "windows",
+      "version": "1809 (10.0.17763.3406)"
+    }
+  },
+  "license": {
+    "issued_to": "639afbf700044279b8221d6a5f935f33",
+    "issuer": "elasticsearch",
+    "status": "active",
+    "type": "trial",
+    "uid": "b7f9aac3-751e-4cbb-84a8-1b853c53d197"
+  },
+  "process": {
+    "Ext": {
+      "architecture": "x86_64",
+      "code_signature": [
+        {
+          "exists": true,
+          "status": "trusted",
+          "subject_name": "Microsoft Windows",
+          "trusted": true
+        }
+      ],
+      "token": {
+        "integrity_level_name": "system"
+      }
+    },
+    "args": [
+      "powershell.exe",
+      "-NoProfile",
+      "-NoLogo",
+      "-ExecutionPolicy",
+      "Unrestricted",
+      "-File",
+      "C:\\Windows\\TEMP\\metadata-scripts2073839487\\windows-startup-script-ps1.ps1"
+    ],
+    "command_line": "powershell.exe -NoProfile -NoLogo -ExecutionPolicy Unrestricted -File C:\\Windows\\TEMP\\metadata-scripts2073839487\\windows-startup-script-ps1.ps1",
+    "entity_id": "NjliYjdhODMtYzczNS00YzI3LTk2NDYtMDFmNjk3YWEzZjY4LTQwODgtMTMzNDk1ODQwNTUuNDIzODIxNDAw",
+    "executable": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+    "hash": {
+      "md5": "7353f60b1739074eb17c5f4dddefe239",
+      "sha1": "6cbce4a295c163791b60fc23d285e6d84f28ee4c",
+      "sha256": "de96a6e69944335375dc1ac238336066889d9ffc7d73628ef4fe1b1b160ab32c"
+    },
+    "name": "powershell.exe",
+    "parent": {
+      "Ext": {
+        "architecture": "x86_64",
+        "code_signature": [
+          {
+            "exists": true,
+            "status": "trusted",
+            "subject_name": "Google LLC",
+            "trusted": true
+          }
+        ]
+      },
+      "args": [
+        "C:\\Program Files\\Google\\Compute Engine\\metadata_scripts\\GCEMetadataScripts.exe",
+        "startup"
+      ],
+      "command_line": "\"C:\\Program Files\\Google\\Compute Engine\\metadata_scripts\\GCEMetadataScripts.exe\"  \"startup\"",
+      "entity_id": "NjliYjdhODMtYzczNS00YzI3LTk2NDYtMDFmNjk3YWEzZjY4LTM4OTItMTMzNDk1ODQwNTQuOTkwOTU1NjAw",
+      "executable": "C:\\Program Files\\Google\\Compute Engine\\metadata_scripts\\GCEMetadataScripts.exe",
+      "hash": {
+        "md5": "98aea13d8067b8f89ee0dce69a154966",
+        "sha1": "88ceb122a9a4b33674ecdba95784e82ea5be08f6",
+        "sha256": "590870dc691dd708c875bfc5385a9482fa6ecce0b34d607fe23a71c55b2693ee"
+      },
+      "name": "GCEMetadataScripts.exe",
+      "pid": 3892,
+      "uptime": 132
+    },
+    "pe": {
+      "original_file_name": "PowerShell.EXE"
+    },
+    "pid": 4088,
+    "uptime": 131
+  },
+  "rule": {
+    "ruleset": "production"
+  }
+}

@@ -23,7 +23,7 @@ export function RemoveLayerConfirmModal(props: Props) {
     layerGroup.getChildren().forEach((childLayer) => {
       count++;
       if (isLayerGroup(childLayer)) {
-        count = count + getChildrenCount(childLayer as LayerGroup);
+        count = count + getChildrenCount(childLayer);
       }
     });
     return count;
@@ -34,7 +34,7 @@ export function RemoveLayerConfirmModal(props: Props) {
       return null;
     }
 
-    const numChildren = getChildrenCount(props.layer as LayerGroup);
+    const numChildren = getChildrenCount(props.layer);
     return numChildren > 0 ? (
       <p>
         {i18n.translate('xpack.maps.deleteLayerConfirmModal.multiLayerWarning', {

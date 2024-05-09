@@ -10,17 +10,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import type { EqlOptionsSelected } from '@kbn/timelines-plugin/common';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { convertKueryToElasticSearchQuery } from '../../../../common/lib/kuery';
-import { updateIsLoading } from '../../../../timelines/store/timeline/actions';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import type { TimelineModel } from '../../../..';
-import type { FieldValueQueryBar } from '../../../components/rules/query_bar';
+import type { FieldValueQueryBar } from '../../../../detection_engine/rule_creation_ui/components/query_bar';
 import { sourcererActions } from '../../../../common/store/sourcerer';
-import {
-  dispatchUpdateTimeline,
-  queryTimelineById,
-} from '../../../../timelines/components/open_timeline/helpers';
+import { useQueryTimelineById } from '../../../../timelines/components/open_timeline/helpers';
 import { useGetInitialUrlParamValue } from '../../../../common/utils/global_query_string/helpers';
 import { buildGlobalQuery } from '../../../../timelines/components/timeline/helpers';
 import { getDataProviderFilter } from '../../../../timelines/components/timeline/query_bar';
@@ -49,6 +46,10 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
   const { addError } = useAppToasts();
   const { browserFields, dataViewId, selectedPatterns } = useSourcererDataView(
     SourcererScopeName.timeline
+  );
+
+  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineEnabled'
   );
 
   const isEql = useRef(false);
@@ -191,24 +192,19 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
   }, [handleSetRuleFromTimeline, selectedDataViewBrowserFields]);
   // end set rule
 
+  const queryTimelineById = useQueryTimelineById();
+
   const getTimelineById = useCallback(
     (timelineId: string) => {
       if (selectedTimeline == null || timelineId !== selectedTimeline.id) {
         queryTimelineById({
           timelineId,
           onOpenTimeline,
-          updateIsLoading: ({
-            id: currentTimelineId,
-            isLoading,
-          }: {
-            id: string;
-            isLoading: boolean;
-          }) => dispatch(updateIsLoading({ id: currentTimelineId, isLoading })),
-          updateTimeline: dispatchUpdateTimeline(dispatch),
+          unifiedComponentsInTimelineEnabled,
         });
       }
     },
-    [dispatch, onOpenTimeline, selectedTimeline]
+    [onOpenTimeline, queryTimelineById, selectedTimeline, unifiedComponentsInTimelineEnabled]
   );
 
   const [urlStateInitialized, setUrlStateInitialized] = useState(false);

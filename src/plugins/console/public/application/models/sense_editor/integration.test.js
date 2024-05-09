@@ -80,7 +80,7 @@ describe('Integration', () => {
           });
         }
       }
-      kb.setActiveApi(testApi);
+      kb._test.setActiveApi(testApi);
       const { cursor } = testToRun;
       senseEditor.update(editorValue, true).then(() => {
         senseEditor.getCoreEditor().moveCursorToPosition(cursor);

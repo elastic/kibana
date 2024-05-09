@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
 
@@ -32,6 +32,9 @@ export const riskEngineConfigurationTypeMappings: SavedObjectsType['mappings'] =
     pageSize: {
       type: 'integer',
     },
+    alertSampleSizePerShard: {
+      type: 'integer',
+    },
     range: {
       properties: {
         start: {
@@ -45,10 +48,24 @@ export const riskEngineConfigurationTypeMappings: SavedObjectsType['mappings'] =
   },
 };
 
+const version1: SavedObjectsModelVersion = {
+  changes: [
+    {
+      type: 'mappings_addition',
+      addedMappings: {
+        alertSampleSizePerShard: { type: 'integer' },
+      },
+    },
+  ],
+};
+
 export const riskEngineConfigurationType: SavedObjectsType = {
   name: riskEngineConfigurationTypeName,
   indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: riskEngineConfigurationTypeMappings,
+  modelVersions: {
+    1: version1,
+  },
 };

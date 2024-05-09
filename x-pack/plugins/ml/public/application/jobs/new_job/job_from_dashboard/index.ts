@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { QuickJobCreatorBase, isLensEmbeddable, isMapEmbeddable } from './quick_create_job_base';
+export { QuickJobCreatorBase } from './quick_create_job_base';
 export type { CreateState } from './quick_create_job_base';

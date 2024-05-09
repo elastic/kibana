@@ -42,6 +42,7 @@ import {
   EuiErrorBoundary,
   EuiToolTip,
   EuiCallOut,
+  EuiAccordion,
 } from '@elastic/eui';
 import { capitalize } from 'lodash';
 import { KibanaFeature } from '@kbn/features-plugin/public';
@@ -53,10 +54,11 @@ import {
 } from '@kbn/alerting-plugin/common/parse_duration';
 import {
   RuleActionParam,
-  ALERTS_FEATURE_ID,
+  ALERTING_FEATURE_ID,
   RecoveredActionGroup,
   isActionGroupDisabledForActionTypeId,
   RuleActionAlertsFilterProperty,
+  RuleActionKey,
 } from '@kbn/alerting-plugin/common';
 import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { AlertConsumers } from '@kbn/rule-data-utils';
@@ -65,12 +67,12 @@ import {
   RuleTypeModel,
   Rule,
   IErrorObject,
-  RuleAction,
   RuleType,
   RuleTypeRegistryContract,
   ActionTypeRegistryContract,
   TriggersActionsUiConfig,
   RuleCreationValidConsumer,
+  RuleUiAction,
 } from '../../../types';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
 import { ActionForm } from '../action_connector_form';
@@ -157,6 +159,7 @@ interface RuleFormProps<MetaData = Record<string, any>> {
   validConsumers?: RuleCreationValidConsumer[];
   onChangeMetaData: (metadata: MetaData) => void;
   useRuleProducer?: boolean;
+  initialSelectedConsumer?: RuleCreationValidConsumer | null;
 }
 
 const EMPTY_ARRAY: string[] = [];
@@ -183,6 +186,7 @@ export const RuleForm = ({
   validConsumers,
   onChangeMetaData,
   useRuleProducer,
+  initialSelectedConsumer,
 }: RuleFormProps) => {
   const {
     notifications: { toasts },
@@ -213,6 +217,7 @@ export const RuleForm = ({
       ? getDurationUnitValue(rule.schedule.interval)
       : defaultScheduleIntervalUnit
   );
+  const [alertDelay, setAlertDelay] = useState<number | undefined>(rule.alertDelay?.active ?? 1);
   const [defaultActionGroupId, setDefaultActionGroupId] = useState<string | undefined>(undefined);
 
   const [availableRuleTypes, setAvailableRuleTypes] = useState<RuleTypeItems>([]);
@@ -258,7 +263,7 @@ export const RuleForm = ({
           })
         )
         .filter((item) =>
-          rule.consumer === ALERTS_FEATURE_ID
+          rule.consumer === ALERTING_FEATURE_ID
             ? !item.ruleTypeModel.requiresAppContext
             : item.ruleType!.producer === rule.consumer
         );
@@ -327,6 +332,12 @@ export const RuleForm = ({
   }, [rule.schedule.interval, defaultScheduleInterval, defaultScheduleIntervalUnit]);
 
   useEffect(() => {
+    if (rule.alertDelay) {
+      setAlertDelay(rule.alertDelay.active);
+    }
+  }, [rule.alertDelay]);
+
+  useEffect(() => {
     if (!flyoutBodyOverflowRef.current) {
       // We're using this as a reliable way to reset the scroll position
       // of the flyout independently of the selected rule type
@@ -350,7 +361,7 @@ export const RuleForm = ({
   );
 
   const setActions = useCallback(
-    (updatedActions: RuleAction[]) => setRuleProperty('actions', updatedActions),
+    (updatedActions: RuleUiAction[]) => setRuleProperty('actions', updatedActions),
     [setRuleProperty]
   );
 
@@ -362,9 +373,9 @@ export const RuleForm = ({
     dispatch({ command: { type: 'setScheduleProperty' }, payload: { key, value } });
   };
 
-  const setActionProperty = <Key extends keyof RuleAction>(
+  const setActionProperty = <Key extends RuleActionKey>(
     key: Key,
-    value: RuleAction[Key] | null,
+    value: RuleActionParam | null,
     index: number
   ) => {
     dispatch({ command: { type: 'setRuleActionProperty' }, payload: { key, value, index } });
@@ -390,6 +401,10 @@ export const RuleForm = ({
     },
     [dispatch]
   );
+
+  const setAlertDelayProperty = (key: string, value: any) => {
+    dispatch({ command: { type: 'setAlertDelayProperty' }, payload: { key, value } });
+  };
 
   useEffect(() => {
     const searchValue = searchText ? searchText.trim().toLocaleLowerCase() : null;
@@ -424,7 +439,7 @@ export const RuleForm = ({
   const authorizedConsumers = useMemo(() => {
     // If the app context provides a consumer, we assume that consumer is
     // is what we set for all rules that is created in that context
-    if (rule.consumer !== ALERTS_FEATURE_ID) {
+    if (rule.consumer !== ALERTING_FEATURE_ID) {
       return [];
     }
 
@@ -618,7 +633,7 @@ export const RuleForm = ({
     }
 
     // No help text if there is an error
-    if (errors['schedule.interval'].length > 0) {
+    if (errors['schedule.interval'].length) {
       return '';
     }
 
@@ -658,14 +673,22 @@ export const RuleForm = ({
       : false;
 
     if (MULTI_CONSUMER_RULE_TYPE_IDS.includes(rule?.ruleTypeId ?? '')) {
+      // Use selectedConsumer when creating a new rule, existing rule consumer when editing
+      const ruleConsumer = initialSelectedConsumer ? selectedConsumer : rule.consumer;
       return (
-        (validConsumers || VALID_CONSUMERS).includes(
-          selectedConsumer as RuleCreationValidConsumer
-        ) && hasAlertHasData
+        (validConsumers || VALID_CONSUMERS).includes(ruleConsumer as RuleCreationValidConsumer) &&
+        hasAlertHasData
       );
     }
     return hasAlertHasData;
-  }, [rule?.ruleTypeId, selectedConsumer, selectedRuleType, validConsumers]);
+  }, [
+    rule?.ruleTypeId,
+    initialSelectedConsumer,
+    rule.consumer,
+    selectedConsumer,
+    selectedRuleType,
+    validConsumers,
+  ]);
 
   const ruleTypeDetails = (
     <>
@@ -764,51 +787,109 @@ export const RuleForm = ({
         </EuiErrorBoundary>
       ) : null}
       {hideInterval !== true && (
-        <EuiFlexItem>
-          <EuiFormRow
-            fullWidth
-            data-test-subj="intervalFormRow"
-            display="rowCompressed"
-            helpText={getHelpTextForInterval()}
-            isInvalid={errors['schedule.interval'].length > 0}
-            error={errors['schedule.interval']}
-          >
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem grow={2}>
-                <EuiFieldNumber
-                  prepend={labelForRuleChecked}
-                  fullWidth
-                  min={1}
-                  isInvalid={errors['schedule.interval'].length > 0}
-                  value={ruleInterval || ''}
-                  name="interval"
-                  data-test-subj="intervalInput"
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    if (value === '' || INTEGER_REGEX.test(value)) {
-                      const parsedValue = value === '' ? '' : parseInt(value, 10);
-                      setRuleInterval(parsedValue || undefined);
-                      setScheduleProperty('interval', `${parsedValue}${ruleIntervalUnit}`);
-                    }
-                  }}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={3}>
-                <EuiSelect
-                  fullWidth
-                  value={ruleIntervalUnit}
-                  options={getTimeOptions(ruleInterval ?? 1)}
-                  onChange={(e) => {
-                    setRuleIntervalUnit(e.target.value);
-                    setScheduleProperty('interval', `${ruleInterval}${e.target.value}`);
-                  }}
-                  data-test-subj="intervalInputUnit"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFormRow>
-        </EuiFlexItem>
+        <>
+          <EuiFlexItem>
+            <EuiFormRow
+              fullWidth
+              data-test-subj="intervalFormRow"
+              display="rowCompressed"
+              helpText={getHelpTextForInterval()}
+              isInvalid={errors['schedule.interval'].length > 0}
+              error={errors['schedule.interval']}
+            >
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem grow={2}>
+                  <EuiFieldNumber
+                    prepend={labelForRuleChecked}
+                    fullWidth
+                    min={1}
+                    isInvalid={errors['schedule.interval'].length > 0}
+                    value={ruleInterval || ''}
+                    name="interval"
+                    data-test-subj="intervalInput"
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value === '' || INTEGER_REGEX.test(value)) {
+                        const parsedValue = value === '' ? '' : parseInt(value, 10);
+                        setRuleInterval(parsedValue || undefined);
+                        setScheduleProperty('interval', `${parsedValue}${ruleIntervalUnit}`);
+                      }
+                    }}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={3}>
+                  <EuiSelect
+                    fullWidth
+                    value={ruleIntervalUnit}
+                    options={getTimeOptions(ruleInterval ?? 1)}
+                    onChange={(e) => {
+                      setRuleIntervalUnit(e.target.value);
+                      setScheduleProperty('interval', `${ruleInterval}${e.target.value}`);
+                    }}
+                    data-test-subj="intervalInputUnit"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiSpacer size="m" />
+        </>
       )}
+
+      <EuiFlexItem>
+        <EuiAccordion
+          id="advancedOptionsAccordion"
+          data-test-subj="advancedOptionsAccordion"
+          buttonContent={
+            <EuiText size="s">
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.ruleForm.advancedOptionsLabel"
+                defaultMessage="Advanced options"
+              />
+            </EuiText>
+          }
+        >
+          <EuiSpacer size="s" />
+          <EuiFormRow fullWidth data-test-subj="alertDelayFormRow" display="rowCompressed">
+            <EuiFieldNumber
+              fullWidth
+              min={1}
+              value={alertDelay || ''}
+              name="alertDelay"
+              data-test-subj="alertDelayInput"
+              prepend={[
+                i18n.translate('xpack.triggersActionsUI.sections.ruleForm.alertDelayFieldLabel', {
+                  defaultMessage: 'Alert after',
+                }),
+                <EuiIconTip
+                  position="right"
+                  type="questionInCircle"
+                  content={
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.ruleForm.alertDelayFieldHelp"
+                      defaultMessage="An alert occurs only when the specified number of consecutive runs meet the rule conditions."
+                    />
+                  }
+                />,
+              ]}
+              append={i18n.translate(
+                'xpack.triggersActionsUI.sections.ruleForm.alertDelayFieldAppendLabel',
+                {
+                  defaultMessage: 'consecutive matches',
+                }
+              )}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value === '' || INTEGER_REGEX.test(value)) {
+                  const parsedValue = value === '' ? '' : parseInt(value, 10);
+                  setAlertDelayProperty('active', parsedValue || 1);
+                  setAlertDelay(parsedValue || undefined);
+                }
+              }}
+            />
+          </EuiFormRow>
+        </EuiAccordion>
+      </EuiFlexItem>
       {shouldShowConsumerSelect && (
         <>
           <EuiSpacer size="m" />
@@ -818,6 +899,7 @@ export const RuleForm = ({
               onChange={setConsumer}
               errors={errors}
               selectedConsumer={selectedConsumer}
+              initialSelectedConsumer={initialSelectedConsumer}
             />
           </EuiFlexItem>
         </>
@@ -829,7 +911,7 @@ export const RuleForm = ({
       rule.ruleTypeId &&
       selectedRuleType ? (
         <>
-          {errors.actionConnectors.length >= 1 ? (
+          {!!errors.actionConnectors.length ? (
             <>
               <EuiSpacer />
               <EuiCallOut color="danger" size="s" title={errors.actionConnectors} />
@@ -901,13 +983,13 @@ export const RuleForm = ({
                 defaultMessage="Name"
               />
             }
-            isInvalid={errors.name.length > 0 && rule.name !== undefined}
+            isInvalid={!!errors.name.length && rule.name !== undefined}
             error={errors.name}
           >
             <EuiFieldText
               fullWidth
               autoFocus={true}
-              isInvalid={errors.name.length > 0 && rule.name !== undefined}
+              isInvalid={!!errors.name.length && rule.name !== undefined}
               name="name"
               data-test-subj="ruleNameInput"
               value={rule.name || ''}
@@ -1037,7 +1119,7 @@ export const RuleForm = ({
               </EuiFlexGroup>
             </EuiFormRow>
             <EuiSpacer />
-            {errors.ruleTypeId.length >= 1 && rule.ruleTypeId !== undefined ? (
+            {!!errors.ruleTypeId.length && rule.ruleTypeId !== undefined ? (
               <>
                 <EuiSpacer />
                 <EuiCallOut color="danger" size="s" title={errors.ruleTypeId} />

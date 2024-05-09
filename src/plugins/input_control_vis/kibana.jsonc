@@ -12,10 +12,11 @@
       "expressions",
       "visDefaultEditor",
       "visualizations",
-      "unifiedSearch"
+      "unifiedSearch",
+      "uiActions"
     ],
     "requiredBundles": [
-      "kibanaReact"
+      "kibanaReact", "embeddable"
     ]
   }
 }

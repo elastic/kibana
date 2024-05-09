@@ -24,10 +24,11 @@ import {
   FILTER_BY_ASSIGNEES_BUTTON,
   TAKE_ACTION_POPOVER_BTN,
   TIMELINE_CONTEXT_MENU_BTN,
+  ALERT_ASSIGNEES_SELECTABLE_OPTIONS,
 } from '../screens/alerts';
 import { PAGE_TITLE } from '../screens/common/page';
 import { DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES } from '../screens/expandable_flyout/alert_details_right_panel';
-import { selectFirstPageAlerts } from './alerts';
+import { expandFirstAlertActions, selectFirstPageAlerts } from './alerts';
 import { login } from './login';
 import { visitWithTimeRange } from './navigation';
 
@@ -38,8 +39,8 @@ export const waitForAssigneesToPopulatePopover = () => {
     () => {
       cy.log('Waiting for assignees to appear in popover');
       return cy.root().then(($el) => {
-        const $updateButton = $el.find(ALERT_ASSIGNEES_UPDATE_BUTTON);
-        return !$updateButton.prop('disabled');
+        const $assigneesOptions = $el.find(ALERT_ASSIGNEES_SELECTABLE_OPTIONS);
+        return $assigneesOptions.length > 0;
       });
     },
     { interval: 500, timeout: 12000 }
@@ -56,8 +57,8 @@ export const loadPageAs = (url: string, role?: SecurityRoleName) => {
   waitForPageTitleToBeShown();
 };
 
-export const openAlertAssigningActionMenu = (alertIndex = 0) => {
-  cy.get(TIMELINE_CONTEXT_MENU_BTN).eq(alertIndex).click();
+export const openFirstAlertAssigningActionMenu = () => {
+  expandFirstAlertActions();
   cy.get(ALERT_ASSIGN_CONTEXT_MENU_ITEM).click();
 };
 
@@ -93,8 +94,8 @@ export const alertsTableMoreActionsAreNotAvailable = () => {
   cy.get(TIMELINE_CONTEXT_MENU_BTN).should('not.exist');
 };
 
-export const asigneesMenuItemsAreNotAvailable = (alertIndex = 0) => {
-  cy.get(TIMELINE_CONTEXT_MENU_BTN).eq(alertIndex).click();
+export const asigneesMenuItemsAreNotAvailable = () => {
+  expandFirstAlertActions();
   cy.get(ALERT_ASSIGN_CONTEXT_MENU_ITEM).should('not.exist');
   cy.get(ALERT_UNASSIGN_CONTEXT_MENU_ITEM).should('not.exist');
 };
@@ -110,7 +111,7 @@ export const cannotAddAssigneesViaDetailsFlyout = () => {
   cy.get(ALERT_DETAILS_ASSIGN_BUTTON).should('be.disabled');
 };
 
-export const alertsTableShowsAssigneesForAlert = (users: SecurityRoleName[], alertIndex = 0) => {
+export const alertsTableShowsAssigneesForAlert = (users: string[], alertIndex = 0) => {
   cy.get(ALERT_ASIGNEES_COLUMN)
     .eq(alertIndex)
     .within(() => {
@@ -118,7 +119,7 @@ export const alertsTableShowsAssigneesForAlert = (users: SecurityRoleName[], ale
     });
 };
 
-export const alertsTableShowsAssigneesForAllAlerts = (users: SecurityRoleName[]) => {
+export const alertsTableShowsAssigneesForAllAlerts = (users: string[]) => {
   cy.get(ALERT_ASIGNEES_COLUMN).each(($column) => {
     cy.wrap($column).within(() => {
       users.forEach((user) => cy.get(`.euiAvatar${ALERT_USER_AVATAR(user)}`).should('exist'));
@@ -126,25 +127,22 @@ export const alertsTableShowsAssigneesForAllAlerts = (users: SecurityRoleName[])
   });
 };
 
-export const alertsTableShowsAssigneesBadgeForAlert = (
-  users: SecurityRoleName[],
-  alertIndex = 0
-) => {
+export const alertsTableShowsAssigneesBadgeForFirstAlert = (users: string[]) => {
   cy.get(ALERT_ASIGNEES_COLUMN)
-    .eq(alertIndex)
+    .first()
     .within(() => {
       cy.get(ALERT_ASSIGNEES_COUNT_BADGE).contains(users.length);
       users.forEach((user) => cy.get(`.euiAvatar${ALERT_USER_AVATAR(user)}`).should('not.exist'));
     });
 };
 
-export const alertDetailsFlyoutShowsAssignees = (users: SecurityRoleName[]) => {
+export const alertDetailsFlyoutShowsAssignees = (users: string[]) => {
   cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES).within(() => {
     users.forEach((user) => cy.get(`.euiAvatar${ALERT_USER_AVATAR(user)}`).should('exist'));
   });
 };
 
-export const alertDetailsFlyoutShowsAssigneesBadge = (users: SecurityRoleName[]) => {
+export const alertDetailsFlyoutShowsAssigneesBadge = (users: string[]) => {
   cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES).within(() => {
     cy.get(ALERT_ASSIGNEES_COUNT_BADGE).contains(users.length);
     users.forEach((user) => cy.get(`.euiAvatar${ALERT_USER_AVATAR(user)}`).should('not.exist'));
@@ -166,17 +164,16 @@ export const selectAlertAssignee = (assignee: string) => {
 /**
  * This will update assignees for selected alert
  * @param users The list of assugnees to update. If assignee is not assigned yet it will be assigned, otherwise it will be unassigned
- * @param alertIndex The index of the alert in the alerts table
  */
-export const updateAssigneesForAlert = (users: SecurityRoleName[], alertIndex = 0) => {
-  openAlertAssigningActionMenu(alertIndex);
+export const updateAssigneesForFirstAlert = (users: string[]) => {
+  openFirstAlertAssigningActionMenu();
   waitForAssigneesToPopulatePopover();
   users.forEach((user) => selectAlertAssignee(user));
   updateAlertAssignees();
   cy.get(ALERTS_TABLE_ROW_LOADER).should('not.exist');
 };
 
-export const updateAssigneesViaAddButtonInFlyout = (users: SecurityRoleName[]) => {
+export const updateAssigneesViaAddButtonInFlyout = (users: string[]) => {
   cy.get(ALERT_DETAILS_ASSIGN_BUTTON).click();
   waitForAssigneesToPopulatePopover();
   users.forEach((user) => selectAlertAssignee(user));
@@ -184,7 +181,7 @@ export const updateAssigneesViaAddButtonInFlyout = (users: SecurityRoleName[]) =
   cy.get(ALERTS_TABLE_ROW_LOADER).should('not.exist');
 };
 
-export const updateAssigneesViaTakeActionButtonInFlyout = (users: SecurityRoleName[]) => {
+export const updateAssigneesViaTakeActionButtonInFlyout = (users: string[]) => {
   cy.get(ALERT_DETAILS_TAKE_ACTION_BUTTON).click();
   cy.get(ALERT_ASSIGN_CONTEXT_MENU_ITEM).click();
   waitForAssigneesToPopulatePopover();
@@ -193,7 +190,7 @@ export const updateAssigneesViaTakeActionButtonInFlyout = (users: SecurityRoleNa
   cy.get(ALERTS_TABLE_ROW_LOADER).should('not.exist');
 };
 
-export const bulkUpdateAssignees = (users: SecurityRoleName[]) => {
+export const bulkUpdateAssignees = (users: string[]) => {
   openAlertAssigningBulkActionMenu();
   waitForAssigneesToPopulatePopover();
   users.forEach((user) => selectAlertAssignee(user));
@@ -201,8 +198,8 @@ export const bulkUpdateAssignees = (users: SecurityRoleName[]) => {
   cy.get(ALERTS_TABLE_ROW_LOADER).should('not.exist');
 };
 
-export const removeAllAssigneesForAlert = (alertIndex = 0) => {
-  cy.get(TIMELINE_CONTEXT_MENU_BTN).eq(alertIndex).click();
+export const removeAllAssigneesForFirstAlert = () => {
+  expandFirstAlertActions();
   cy.get(ALERT_UNASSIGN_CONTEXT_MENU_ITEM).click();
   cy.get(ALERTS_TABLE_ROW_LOADER).should('not.exist');
 };
@@ -219,9 +216,10 @@ export const bulkRemoveAllAssignees = () => {
   cy.get(ALERTS_TABLE_ROW_LOADER).should('not.exist');
 };
 
-export const filterByAssignees = (users: Array<SecurityRoleName | typeof NO_ASSIGNEES>) => {
+export const filterByAssignees = (users: Array<string | typeof NO_ASSIGNEES>) => {
   cy.get(FILTER_BY_ASSIGNEES_BUTTON).scrollIntoView();
   cy.get(FILTER_BY_ASSIGNEES_BUTTON).click();
+  cy.get(FILTER_BY_ASSIGNEES_BUTTON).trigger('mouseleave');
   users.forEach((user) => selectAlertAssignee(user));
   cy.get(FILTER_BY_ASSIGNEES_BUTTON).click();
 };

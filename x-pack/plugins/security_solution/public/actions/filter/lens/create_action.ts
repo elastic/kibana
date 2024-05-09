@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { addFilterIn, addFilterOut } from '@kbn/cell-actions';
+import { addExistsFilter, addFilterIn, addFilterOut } from '@kbn/cell-actions';
 import {
   isValueSupportedByDefaultActions,
   valueToArray,
   filterOutNullableValues,
 } from '@kbn/cell-actions/src/actions/utils';
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
-import type { CellValueContext } from '@kbn/embeddable-plugin/public';
+import type { CellValueContext, IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { ACTION_INCOMPATIBLE_VALUE_WARNING } from '@kbn/cell-actions/src/actions/translations';
 import { i18n } from '@kbn/i18n';
-import { timelineSelectors } from '../../../timelines/store/timeline';
+import { timelineSelectors } from '../../../timelines/store';
 import { fieldHasCellActions, isInSecurityApp, isLensEmbeddable } from '../../utils';
 import { TimelineId } from '../../../../common/types';
 import { DefaultCellActionTypes } from '../../constants';
@@ -31,20 +31,31 @@ function isDataColumnsValid(data?: CellValueContext['data']): boolean {
   );
 }
 
+export interface CreateFilterLensActionParams {
+  id: string;
+  order: number;
+  store: SecurityAppStore;
+  services: StartServices;
+  negate?: boolean;
+}
+
 export const createFilterLensAction = ({
   id,
   order,
   store,
   services,
   negate,
-}: {
-  id: string;
-  order: number;
-  store: SecurityAppStore;
-  services: StartServices;
-  negate?: boolean;
-}) => {
-  const { application, notifications, data: dataService, topValuesPopover } = services;
+}: CreateFilterLensActionParams) => {
+  const {
+    application,
+    notifications,
+    data: dataService,
+    topValuesPopover,
+    timelineDataService,
+  } = services;
+  const {
+    query: { filterManager: timelineFilterManager },
+  } = timelineDataService;
 
   let currentAppId: string | undefined;
   application.currentAppId$.subscribe((appId) => {
@@ -66,13 +77,16 @@ export const createFilterLensAction = ({
           }),
     type: DefaultCellActionTypes.FILTER,
     isCompatible: async ({ embeddable, data }) =>
-      !isErrorEmbeddable(embeddable) &&
-      isLensEmbeddable(embeddable) &&
+      !isErrorEmbeddable(embeddable as IEmbeddable) &&
+      isLensEmbeddable(embeddable as IEmbeddable) &&
       isDataColumnsValid(data) &&
       isInSecurityApp(currentAppId),
     execute: async ({ data }) => {
       const field = data[0]?.columnMeta?.field;
+      const isCounter = data[0]?.columnMeta?.sourceParams?.type === 'value_count';
       const rawValue = data[0]?.value;
+      const mayBeDataViewId = data[0]?.columnMeta?.sourceParams?.indexPatternId;
+      const dataViewId = typeof mayBeDataViewId === 'string' ? mayBeDataViewId : undefined;
       const value = filterOutNullableValues(valueToArray(rawValue));
 
       if (!isValueSupportedByDefaultActions(value)) {
@@ -85,15 +99,30 @@ export const createFilterLensAction = ({
 
       topValuesPopover.closePopover();
 
-      const addFilter = negate === true ? addFilterOut : addFilterIn;
-
       const timeline = getTimelineById(store.getState(), TimelineId.active);
       // timeline is open add the filter to timeline, otherwise add filter to global filters
       const filterManager = timeline?.show
-        ? timeline.filterManager
+        ? timelineFilterManager
         : dataService.query.filterManager;
 
-      addFilter({ filterManager, fieldName: field, value });
+      // If value type is value_count, we want to filter an `Exists` filter instead of a `Term` filter
+      if (isCounter) {
+        addExistsFilter({
+          filterManager,
+          key: field,
+          negate: !!negate,
+          dataViewId,
+        });
+        return;
+      }
+
+      const addFilter = negate === true ? addFilterOut : addFilterIn;
+      addFilter({
+        filterManager,
+        fieldName: field,
+        value,
+        dataViewId,
+      });
     },
   });
 };

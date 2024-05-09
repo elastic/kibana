@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { TestSubjects } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../ftr_provider_context';
-import { TestSubjects } from '../../../../test/functional/services/common';
-import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 
 export function AppSearchPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common']);

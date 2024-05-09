@@ -110,6 +110,7 @@ export async function fetchEsQuery({
       aggField: params.aggField,
       termField: params.termField,
       termSize: params.termSize,
+      sourceFieldsParams: params.sourceFields,
       condition: {
         resultLimit: alertLimit,
         conditionScript: getComparatorScript(
@@ -140,6 +141,7 @@ export async function fetchEsQuery({
       isGroupAgg,
       esResult: searchResult,
       resultLimit: alertLimit,
+      sourceFieldsParams: params.sourceFields,
     }),
     link,
     index: params.index,

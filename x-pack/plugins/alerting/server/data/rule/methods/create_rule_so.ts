@@ -10,6 +10,7 @@ import {
   SavedObjectsCreateOptions,
   SavedObject,
 } from '@kbn/core/server';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import { RuleAttributes } from '../types';
 
 export interface CreateRuleSoParams {
@@ -21,5 +22,9 @@ export interface CreateRuleSoParams {
 export const createRuleSo = (params: CreateRuleSoParams): Promise<SavedObject<RuleAttributes>> => {
   const { savedObjectsClient, ruleAttributes, savedObjectsCreateOptions } = params;
 
-  return savedObjectsClient.create('alert', ruleAttributes, savedObjectsCreateOptions);
+  return savedObjectsClient.create(
+    RULE_SAVED_OBJECT_TYPE,
+    ruleAttributes,
+    savedObjectsCreateOptions
+  );
 };

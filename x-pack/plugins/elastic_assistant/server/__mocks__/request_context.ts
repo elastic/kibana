@@ -14,6 +14,9 @@ import {
   ElasticAssistantRequestHandlerContext,
 } from '../types';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { conversationsDataClientMock, dataClientMock } from './data_clients.mock';
+import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
+import { AIAssistantDataClient } from '../ai_assistant_data_clients';
 
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();
@@ -24,7 +27,15 @@ export const createMockClients = () => {
     clusterClient: core.elasticsearch.client,
     elasticAssistant: {
       actions: actionsClientMock.create(),
+      getRegisteredFeatures: jest.fn(),
+      getRegisteredTools: jest.fn(),
       logger: loggingSystemMock.createLogger(),
+      telemetry: coreMock.createSetup().analytics,
+      getAIAssistantConversationsDataClient: conversationsDataClientMock.create(),
+      getAIAssistantPromptsDataClient: dataClientMock.create(),
+      getAIAssistantAnonymizationFieldsDataClient: dataClientMock.create(),
+      getSpaceId: jest.fn(),
+      getCurrentUser: jest.fn(),
     },
     savedObjectsClient: core.savedObjects.client,
 
@@ -50,12 +61,14 @@ const createMockConfig = () => ({});
 
 const createAppClientMock = () => ({});
 
+const license = licensingMock.createLicense({ license: { type: 'enterprise' } });
 const createRequestContextMock = (
   clients: MockClients = createMockClients()
 ): ElasticAssistantRequestHandlerContextMock => {
   return {
     core: clients.core,
     elasticAssistant: createElasticAssistantRequestContextMock(clients),
+    licensing: licensingMock.createRequestHandlerContext({ license }),
   };
 };
 
@@ -72,7 +85,32 @@ const createElasticAssistantRequestContextMock = (
 ): jest.Mocked<ElasticAssistantApiRequestHandlerContext> => {
   return {
     actions: clients.elasticAssistant.actions as unknown as ActionsPluginStart,
+    getRegisteredFeatures: jest.fn(),
+    getRegisteredTools: jest.fn(),
     logger: clients.elasticAssistant.logger,
+
+    getAIAssistantConversationsDataClient: jest.fn(
+      () => clients.elasticAssistant.getAIAssistantConversationsDataClient
+    ) as unknown as jest.MockInstance<
+      Promise<AIAssistantConversationsDataClient | null>,
+      [],
+      unknown
+    > &
+      (() => Promise<AIAssistantConversationsDataClient | null>),
+
+    getAIAssistantAnonymizationFieldsDataClient: jest.fn(
+      () => clients.elasticAssistant.getAIAssistantAnonymizationFieldsDataClient
+    ) as unknown as jest.MockInstance<Promise<AIAssistantDataClient | null>, [], unknown> &
+      (() => Promise<AIAssistantDataClient | null>),
+    getAIAssistantPromptsDataClient: jest.fn(
+      () => clients.elasticAssistant.getAIAssistantPromptsDataClient
+    ) as unknown as jest.MockInstance<Promise<AIAssistantDataClient | null>, [], unknown> &
+      (() => Promise<AIAssistantDataClient | null>),
+    getCurrentUser: jest.fn(),
+    getServerBasePath: jest.fn(),
+    getSpaceId: jest.fn(),
+    core: clients.core,
+    telemetry: clients.elasticAssistant.telemetry,
   };
 };
 

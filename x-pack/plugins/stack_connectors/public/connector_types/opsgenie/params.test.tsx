@@ -10,20 +10,8 @@ import { act, screen, render, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import OpsgenieParamFields from './params';
 import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
-import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
 import { OpsgenieSubActions } from '../../../common';
 import type { OpsgenieActionParams } from '../../../server/connector_types';
-const kibanaReactPath = '../../../../../../src/plugins/kibana_react/public';
-
-jest.mock(kibanaReactPath, () => {
-  const original = jest.requireActual(kibanaReactPath);
-  return {
-    ...original,
-    CodeEditor: (props: any) => {
-      return <MockCodeEditor {...props} />;
-    },
-  };
-});
 
 describe('OpsgenieParamFields', () => {
   const editAction = jest.fn();
@@ -230,6 +218,7 @@ describe('OpsgenieParamFields', () => {
     expect(screen.getByDisplayValue('123')).toBeInTheDocument();
 
     rerender(
+      // @ts-expect-error upgrade typescript v4.9.5
       <OpsgenieParamFields
         {...{
           ...defaultCloseAlertProps,
@@ -265,6 +254,7 @@ describe('OpsgenieParamFields', () => {
     expect(screen.getByDisplayValue('456')).toBeInTheDocument();
 
     rerender(
+      // @ts-expect-error upgrade typescript v4.9.5
       <OpsgenieParamFields
         {...{
           ...defaultCreateAlertProps,
@@ -304,6 +294,7 @@ describe('OpsgenieParamFields', () => {
     expect(editAction).toBeCalledTimes(1);
 
     rerender(
+      // @ts-expect-error upgrade typescript v4.9.5
       <OpsgenieParamFields
         {...{
           ...defaultCloseAlertProps,

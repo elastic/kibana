@@ -41,7 +41,7 @@ import type {
 } from '../../network/components/network_top_countries_table/columns';
 import type { TlsColumns } from '../../network/components/tls_table/columns';
 import type { UncommonProcessTableColumns } from '../../hosts/components/uncommon_process_table';
-import type { HostRiskScoreColumns } from '../../hosts/components/host_risk_score_table';
+import type { HostRiskScoreColumns } from '../../../entity_analytics/components/host_risk_score_table';
 
 import type { UsersColumns } from '../../network/components/users_table/columns';
 import { HeaderSection } from '../../../common/components/header_section';
@@ -117,8 +117,7 @@ export interface BasicTableProps<T> {
   loading: boolean;
   loadPage: (activePage: number) => void;
   onChange?: (criteria: Criteria) => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  pageOfItems: any[];
+  pageOfItems: unknown[];
   setQuerySkip: (skip: boolean) => void;
   showMorePagesIndicator: boolean;
   sorting?: SortingBasicTable;
@@ -292,6 +291,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
           }
           title={headerTitle}
           tooltip={headerTooltip}
+          inspectMultiple
         >
           {!loadingInitial && headerSupplement}
         </HeaderSection>

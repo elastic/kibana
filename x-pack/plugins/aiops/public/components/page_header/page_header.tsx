@@ -6,7 +6,8 @@
  */
 
 import { css } from '@emotion/react';
-import React, { FC, useCallback, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiPageHeader } from '@elastic/eui';
 

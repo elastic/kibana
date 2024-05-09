@@ -52,9 +52,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('change closure option successfully', async () => {
         await cases.common.selectRadioGroupValue('closure-options-radio-group', 'close-by-pushing');
-        const toast = await toasts.getToastElement(1);
+        const toast = await toasts.getElementByIndex(1);
         expect(await toast.getVisibleText()).to.be('Settings successfully updated');
-        await toasts.dismissAllToasts();
+        await toasts.dismissAll();
       });
     });
 
@@ -80,7 +80,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await testSubjects.setValue('custom-field-label-input', 'Summary');
 
-        await testSubjects.setCheckbox('text-custom-field-options-wrapper', 'check');
+        await testSubjects.setCheckbox('text-custom-field-required-wrapper', 'check');
 
         await testSubjects.click('custom-field-flyout-save');
         expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);

@@ -14,7 +14,7 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import { BehaviorSubject, mergeMap } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { take } from 'rxjs';
 
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
@@ -32,10 +32,10 @@ import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plu
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 
 import type { MapsStartApi, MapsSetupApi } from '@kbn/maps-plugin/public';
-import {
+import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
@@ -45,17 +45,17 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { FieldFormatsSetup } from '@kbn/field-formats-plugin/public';
 import type { DashboardSetup, DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import type { CasesUiSetup, CasesUiStart } from '@kbn/cases-plugin/public';
+import type { CasesPublicSetup, CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
-import {
-  getMlSharedServices,
-  MlSharedServices,
-} from './application/services/get_shared_ml_services';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
+import type { MlSharedServices } from './application/services/get_shared_ml_services';
+import { getMlSharedServices } from './application/services/get_shared_ml_services';
 import { registerManagementSection } from './application/management';
-import { MlLocatorDefinition, MlLocatorParams, type MlLocator } from './locator';
+import type { MlLocatorParams } from './locator';
+import { MlLocatorDefinition, type MlLocator } from './locator';
 import { setDependencyCache } from './application/util/dependency_cache';
 import { registerHomeFeature } from './register_home_feature';
 import { isFullLicense, isMlEnabled } from '../common/license';
@@ -66,12 +66,16 @@ import {
   PLUGIN_ICON_SOLUTION,
   PLUGIN_ID,
   type ConfigSchema,
+  type ExperimentalFeatures,
+  initExperimentalFeatures,
 } from '../common/constants/app';
-import type { MlCapabilities } from './shared';
-import { ElasticModels } from './application/services/elastic_models_service';
+import type { ElasticModels } from './application/services/elastic_models_service';
+import type { MlApiServices } from './application/services/ml_api_service';
+import type { MlCapabilities } from '../common/types/capabilities';
+import { AnomalySwimLane } from './shared_components';
 
 export interface MlStartDependencies {
-  cases?: CasesUiStart;
+  cases?: CasesPublicStart;
   charts: ChartsPluginStart;
   contentManagement: ContentManagementPublicStart;
   dashboard: DashboardStart;
@@ -96,7 +100,7 @@ export interface MlStartDependencies {
 
 export interface MlSetupDependencies {
   alerting?: AlertingSetup;
-  cases?: CasesUiSetup;
+  cases?: CasesPublicSetup;
   dashboard: DashboardSetup;
   embeddable: EmbeddableSetup;
   fieldFormats: FieldFormatsSetup;
@@ -127,10 +131,14 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     dfa: true,
     nlp: true,
   };
+  private experimentalFeatures: ExperimentalFeatures = {
+    ruleFormV2: false,
+  };
 
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
     initEnabledFeatures(this.enabledFeatures, initializerContext.config.get());
+    initExperimentalFeatures(this.experimentalFeatures, initializerContext.config.get());
   }
 
   setup(
@@ -183,7 +191,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
           },
           params,
           this.isServerless,
-          this.enabledFeatures
+          this.enabledFeatures,
+          this.experimentalFeatures
         );
       },
     });
@@ -214,6 +223,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
           const { capabilities } = coreStart.application;
           const mlCapabilities = capabilities.ml as MlCapabilities;
 
+          const isEsqlEnabled = core.uiSettings.get(ENABLE_ESQL);
+
           // register various ML plugin features which require a full license
           // note including registerHomeFeature in register_helper would cause the page bundle size to increase significantly
           if (mlEnabled) {
@@ -226,11 +237,33 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
               registerEmbeddables,
               registerMlUiActions,
               registerSearchLinks,
-              registerMlAlerts,
-              registerMapExtension,
               registerCasesAttachments,
             } = await import('./register_helper');
-            registerSearchLinks(this.appUpdater$, fullLicense, mlCapabilities, !this.isServerless);
+            registerSearchLinks(
+              this.appUpdater$,
+              fullLicense,
+              mlCapabilities,
+              this.isServerless,
+              isEsqlEnabled
+            );
+
+            if (
+              pluginsSetup.triggersActionsUi &&
+              ((fullLicense && mlCapabilities.canUseMlAlerts && mlCapabilities.canGetJobs) ||
+                // Register rules for basic license to show them in the UI as disabled
+                !fullLicense)
+            ) {
+              // This module contains async imports itself, and it is conditionally loaded based on the license. We'll save
+              // traffic if we load it async.
+              const { registerMlAlerts } = await import('./alerting/register_ml_alerts');
+
+              registerMlAlerts(
+                pluginsSetup.triggersActionsUi,
+                core.getStartServices,
+                mlCapabilities,
+                pluginsSetup.alerting
+              );
+            }
 
             if (fullLicense) {
               registerMlUiActions(pluginsSetup.uiActions, core);
@@ -242,19 +275,11 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
                   registerCasesAttachments(pluginsSetup.cases, coreStart, pluginStart);
                 }
 
-                if (
-                  pluginsSetup.triggersActionsUi &&
-                  mlCapabilities.canUseMlAlerts &&
-                  mlCapabilities.canGetJobs
-                ) {
-                  registerMlAlerts(
-                    pluginsSetup.triggersActionsUi,
-                    core.getStartServices,
-                    pluginsSetup.alerting
-                  );
-                }
-
                 if (pluginsSetup.maps) {
+                  // This module contains async imports itself, and it is conditionally loaded if maps is enabled. We'll save
+                  // traffic if we load it async.
+                  const { registerMapExtension } = await import('./maps/register_map_extension');
+
                   // Pass canGetJobs as minimum permission to show anomalies card in maps layers
                   await registerMapExtension(pluginsSetup.maps, core, {
                     canGetJobs: mlCapabilities.canGetJobs,
@@ -282,18 +307,25 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   start(
     core: CoreStart,
     deps: MlStartDependencies
-  ): { locator?: LocatorPublic<MlLocatorParams>; elasticModels?: ElasticModels } {
+  ): {
+    locator?: LocatorPublic<MlLocatorParams>;
+    elasticModels?: ElasticModels;
+    mlApi?: MlApiServices;
+    components: { AnomalySwimLane: typeof AnomalySwimLane };
+  } {
     setDependencyCache({
       docLinks: core.docLinks!,
-      basePath: core.http.basePath,
       http: core.http,
       i18n: core.i18n,
-      lens: deps.lens,
     });
 
     return {
       locator: this.locator,
       elasticModels: this.sharedMlServices?.elasticModels,
+      mlApi: this.sharedMlServices?.mlApiServices,
+      components: {
+        AnomalySwimLane,
+      },
     };
   }
 

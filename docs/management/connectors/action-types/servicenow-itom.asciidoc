@@ -37,10 +37,8 @@ Client ID::
 The client identifier assigned to your OAuth application.
 Client secret:: 
 The client secret assigned to your OAuth application.
-JWT key ID::
+JWT verifier key ID::
 The key identifier assigned to the JWT verifier map of your OAuth application.
-Connector name::
-The name is used to identify a connector in the management UI connector listing or in the connector list when configuring an action.
 Password::
 The password for HTTP basic authentication.
 Private key::

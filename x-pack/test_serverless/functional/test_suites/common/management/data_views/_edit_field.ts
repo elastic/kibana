@@ -15,6 +15,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   describe('edit field', function () {
+    // failsOnMKI, see https://github.com/elastic/kibana/issues/180568
+    this.tags(['failsOnMKI']);
     before(async function () {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
     });
@@ -34,26 +36,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should show preview for fields in _source', async function () {
         await PageObjects.settings.filterField('extension');
         await testSubjects.click('editFieldFormat');
-        await testSubjects.find('value');
-        let previewText = '';
-        await retry.waitForWithTimeout('get preview value', 1000, async () => {
-          previewText = await testSubjects.getVisibleText('value');
-          return previewText !== 'Value not set';
+        await retry.tryForTime(5000, async () => {
+          const previewText = await testSubjects.getVisibleText('fieldPreviewItem > value');
+          expect(previewText).to.be('css');
         });
-        expect(previewText).to.be('css');
         await PageObjects.settings.closeIndexPatternFieldEditor();
       });
 
       it('should show preview for fields not in _source', async function () {
         await PageObjects.settings.filterField('extension.raw');
         await testSubjects.click('editFieldFormat');
-        await testSubjects.find('value');
-        let previewText = '';
-        await retry.waitForWithTimeout('get preview value', 1000, async () => {
-          previewText = await testSubjects.getVisibleText('value');
-          return previewText !== 'Value not set';
+        await retry.tryForTime(5000, async () => {
+          const previewText = await testSubjects.getVisibleText('fieldPreviewItem > value');
+          expect(previewText).to.be('css');
         });
-        expect(previewText).to.be('css');
         await PageObjects.settings.closeIndexPatternFieldEditor();
       });
     });

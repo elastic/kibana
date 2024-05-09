@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { PluginServiceProvider, PluginServiceProviders } from './provider';
 import { PluginServiceProvidersMediator } from './providers_mediator';
 
@@ -18,7 +18,10 @@ import { PluginServiceProvidersMediator } from './providers_mediator';
  * The `StartParameters` generic determines what parameters are expected to
  * start the service.
  */
-export class PluginServiceRegistry<Services, StartParameters = {}> {
+export class PluginServiceRegistry<
+  Services extends Record<keyof Services, {}>,
+  StartParameters = {}
+> {
   private providers: PluginServiceProviders<Services, StartParameters>;
   private providersMediator: PluginServiceProvidersMediator<Services, StartParameters>;
   private _isStarted = false;
@@ -55,7 +58,7 @@ export class PluginServiceRegistry<Services, StartParameters = {}> {
 
     // Collect and combine Context.Provider elements from each Service Provider into a single
     // Functional Component.
-    const provider: React.FC = ({ children }) => (
+    const provider: FC<PropsWithChildren<unknown>> = ({ children }) => (
       <>
         {values.reduceRight((acc, serviceProvider) => {
           return <serviceProvider.Provider>{acc}</serviceProvider.Provider>;

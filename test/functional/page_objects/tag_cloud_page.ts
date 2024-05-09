@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
-import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
 export class TagCloudPageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
@@ -36,7 +36,7 @@ export class TagCloudPageObject extends FtrService {
     const tags = await this.find.allByCssSelector('text');
     async function returnTagSize(tag: WebElementWrapper) {
       const style = await tag.getAttribute('style');
-      const fontSize = style.match(/font-size: ([^;]*);/);
+      const fontSize = style?.match(/font-size: ([^;]*);/);
       return fontSize ? fontSize[1] : '';
     }
     return await Promise.all(tags.map(returnTagSize));

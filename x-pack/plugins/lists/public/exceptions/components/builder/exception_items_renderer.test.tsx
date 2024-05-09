@@ -16,6 +16,7 @@ import { fields, getField } from '@kbn/data-plugin/common/mocks';
 import { getExceptionListItemSchemaMock } from '../../../../common/schemas/response/exception_list_item_schema.mock';
 import { getEntryMatchAnyMock } from '../../../../common/schemas/types/entry_match_any.mock';
 import { getEmptyValue } from '../../../common/empty_value';
+import { MockedShowValueListModal } from '../__mock__/show_value_list_modal.mock';
 
 import { ExceptionBuilderComponent } from './exception_items_renderer';
 
@@ -54,22 +55,25 @@ describe('ExceptionBuilderComponent', () => {
           listType="detection"
           ruleName="Test rule"
           onChange={jest.fn()}
+          showValueListModal={MockedShowValueListModal}
         />
       </EuiThemeProvider>
     );
 
+    // console.log(wrapper.find('[data-test-subj="valuesAutocompleteMatch"] input').html());
+
     expect(wrapper.find('EuiFlexGroup[data-test-subj="exceptionItemEntryContainer"]')).toHaveLength(
       1
     );
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').at(0).text()).toEqual(
-      'Search'
-    );
-    expect(wrapper.find('[data-test-subj="operatorAutocompleteComboBox"]').at(0).text()).toEqual(
-      'is'
-    );
-    expect(wrapper.find('[data-test-subj="valuesAutocompleteMatch"]').at(0).text()).toEqual(
-      'Please select a field first...'
-    );
+    expect(
+      wrapper.find('[data-test-subj="fieldAutocompleteComboBox"] input').props().placeholder
+    ).toEqual('Search');
+    expect(
+      wrapper.find('[data-test-subj="operatorAutocompleteComboBox"] input').props().value
+    ).toEqual('is');
+    expect(
+      wrapper.find('[data-test-subj="valuesAutocompleteMatch"] input').props().placeholder
+    ).toEqual('Please select a field first...');
   });
 
   test('it displays "exceptionListItems" that are passed in', async () => {
@@ -100,18 +104,20 @@ describe('ExceptionBuilderComponent', () => {
           listType="detection"
           ruleName="Test rule"
           onChange={jest.fn()}
+          showValueListModal={MockedShowValueListModal}
         />
       </EuiThemeProvider>
     );
+
     expect(wrapper.find('EuiFlexGroup[data-test-subj="exceptionItemEntryContainer"]')).toHaveLength(
       1
     );
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').at(0).text()).toEqual(
-      'ip'
-    );
-    expect(wrapper.find('[data-test-subj="operatorAutocompleteComboBox"]').at(0).text()).toEqual(
-      'is one of'
-    );
+    expect(
+      wrapper.find('[data-test-subj="fieldAutocompleteComboBox"] input').props().value
+    ).toEqual('ip');
+    expect(
+      wrapper.find('[data-test-subj="operatorAutocompleteComboBox"] input').props().value
+    ).toEqual('is one of');
     expect(wrapper.find('[data-test-subj="valuesAutocompleteMatchAny"]').at(0).text()).toEqual(
       'some ip'
     );
@@ -145,6 +151,7 @@ describe('ExceptionBuilderComponent', () => {
           listType="detection"
           ruleName="Test rule"
           onChange={jest.fn()}
+          showValueListModal={MockedShowValueListModal}
         />
       </EuiThemeProvider>
     );
@@ -182,6 +189,7 @@ describe('ExceptionBuilderComponent', () => {
           listType="detection"
           ruleName="Test rule"
           onChange={jest.fn()}
+          showValueListModal={MockedShowValueListModal}
         />
       </EuiThemeProvider>
     );
@@ -213,6 +221,7 @@ describe('ExceptionBuilderComponent', () => {
           listNamespaceType="single"
           ruleName="Test rule"
           onChange={jest.fn()}
+          showValueListModal={MockedShowValueListModal}
         />
       </EuiThemeProvider>
     );
@@ -249,6 +258,7 @@ describe('ExceptionBuilderComponent', () => {
           listNamespaceType="single"
           ruleName="Test rule"
           onChange={jest.fn()}
+          showValueListModal={MockedShowValueListModal}
         />
       </EuiThemeProvider>
     );
@@ -263,25 +273,27 @@ describe('ExceptionBuilderComponent', () => {
       expect(
         wrapper.find('EuiFlexGroup[data-test-subj="exceptionItemEntryContainer"]')
       ).toHaveLength(2);
-      expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').at(0).text()).toEqual(
-        'Search'
-      );
-      expect(wrapper.find('[data-test-subj="operatorAutocompleteComboBox"]').at(0).text()).toEqual(
-        'is'
-      );
-      expect(wrapper.find('[data-test-subj="valuesAutocompleteMatch"]').at(0).text()).toEqual(
-        'Please select a field first...'
-      );
+      expect(
+        wrapper.find('[data-test-subj="exceptionBuilderEntryField"] input').at(0).props()
+          .placeholder
+      ).toEqual('Search');
+      expect(
+        wrapper.find('[data-test-subj="operatorAutocompleteComboBox"] input').at(0).props().value
+      ).toEqual('is');
+      expect(
+        wrapper.find('[data-test-subj="valuesAutocompleteMatch"] input').at(0).props().placeholder
+      ).toEqual('Please select a field first...');
 
-      expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').at(1).text()).toEqual(
-        'Search'
-      );
-      expect(wrapper.find('[data-test-subj="operatorAutocompleteComboBox"]').at(1).text()).toEqual(
-        'is'
-      );
-      expect(wrapper.find('[data-test-subj="valuesAutocompleteMatch"]').at(1).text()).toEqual(
-        'Please select a field first...'
-      );
+      expect(
+        wrapper.find('[data-test-subj="exceptionBuilderEntryField"] input').at(1).props()
+          .placeholder
+      ).toEqual('Search');
+      expect(
+        wrapper.find('[data-test-subj="operatorAutocompleteComboBox"] input').at(1).props().value
+      ).toEqual('is');
+      expect(
+        wrapper.find('[data-test-subj="valuesAutocompleteMatch"] input').at(1).props().placeholder
+      ).toEqual('Please select a field first...');
     });
   });
 
@@ -306,6 +318,7 @@ describe('ExceptionBuilderComponent', () => {
           listNamespaceType="single"
           ruleName="Test rule"
           onChange={jest.fn()}
+          showValueListModal={MockedShowValueListModal}
         />
       </EuiThemeProvider>
     );
@@ -324,25 +337,25 @@ describe('ExceptionBuilderComponent', () => {
       const item1 = wrapper.find('EuiFlexGroup[data-test-subj="exceptionEntriesContainer"]').at(0);
       const item2 = wrapper.find('EuiFlexGroup[data-test-subj="exceptionEntriesContainer"]').at(1);
 
-      expect(item1.find('[data-test-subj="exceptionBuilderEntryField"]').at(0).text()).toEqual(
-        'Search'
-      );
-      expect(item1.find('[data-test-subj="operatorAutocompleteComboBox"]').at(0).text()).toEqual(
-        'is'
-      );
-      expect(item1.find('[data-test-subj="valuesAutocompleteMatch"]').at(0).text()).toEqual(
-        'Please select a field first...'
-      );
+      expect(
+        item1.find('[data-test-subj="exceptionBuilderEntryField"] input').at(0).props().placeholder
+      ).toEqual('Search');
+      expect(
+        item1.find('[data-test-subj="operatorAutocompleteComboBox"] input').at(0).props().value
+      ).toEqual('is');
+      expect(
+        item1.find('[data-test-subj="valuesAutocompleteMatch"] input').at(0).props().placeholder
+      ).toEqual('Please select a field first...');
 
-      expect(item2.find('[data-test-subj="exceptionBuilderEntryField"]').at(0).text()).toEqual(
-        'Search'
-      );
-      expect(item2.find('[data-test-subj="operatorAutocompleteComboBox"]').at(0).text()).toEqual(
-        'is'
-      );
-      expect(item2.find('[data-test-subj="valuesAutocompleteMatch"]').at(0).text()).toEqual(
-        'Please select a field first...'
-      );
+      expect(
+        item2.find('[data-test-subj="exceptionBuilderEntryField"] input').at(0).props().placeholder
+      ).toEqual('Search');
+      expect(
+        item2.find('[data-test-subj="operatorAutocompleteComboBox"] input').at(0).props().value
+      ).toEqual('is');
+      expect(
+        item2.find('[data-test-subj="valuesAutocompleteMatch"] input').at(0).props().placeholder
+      ).toEqual('Please select a field first...');
     });
   });
 
@@ -374,31 +387,32 @@ describe('ExceptionBuilderComponent', () => {
           listNamespaceType="single"
           ruleName="Test rule"
           onChange={jest.fn()}
+          showValueListModal={MockedShowValueListModal}
         />
       </EuiThemeProvider>
     );
 
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').at(0).text()).toEqual(
-      'ip'
-    );
-    expect(wrapper.find('[data-test-subj="operatorAutocompleteComboBox"]').at(0).text()).toEqual(
-      'is one of'
-    );
+    expect(
+      wrapper.find('[data-test-subj="exceptionBuilderEntryField"] input').props().value
+    ).toEqual('ip');
+    expect(
+      wrapper.find('[data-test-subj="operatorAutocompleteComboBox"] input').at(0).props().value
+    ).toEqual('is one of');
     expect(wrapper.find('[data-test-subj="valuesAutocompleteMatchAny"]').at(0).text()).toEqual(
       'some ip'
     );
 
     wrapper.find('[data-test-subj="firstRowBuilderDeleteButton"] button').simulate('click');
 
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').at(0).text()).toEqual(
-      'Search'
-    );
-    expect(wrapper.find('[data-test-subj="operatorAutocompleteComboBox"]').at(0).text()).toEqual(
-      'is'
-    );
-    expect(wrapper.find('[data-test-subj="valuesAutocompleteMatch"]').at(0).text()).toEqual(
-      'Please select a field first...'
-    );
+    expect(
+      wrapper.find('[data-test-subj="exceptionBuilderEntryField"] input').at(0).props().placeholder
+    ).toEqual('Search');
+    expect(
+      wrapper.find('[data-test-subj="operatorAutocompleteComboBox"] input').at(0).props().value
+    ).toEqual('is');
+    expect(
+      wrapper.find('[data-test-subj="valuesAutocompleteMatch"] input').at(0).props().placeholder
+    ).toEqual('Please select a field first...');
   });
 
   test('it displays "and" badge if at least one exception item includes more than one entry', () => {
@@ -422,6 +436,7 @@ describe('ExceptionBuilderComponent', () => {
           listNamespaceType="single"
           ruleName="Test rule"
           onChange={jest.fn()}
+          showValueListModal={MockedShowValueListModal}
         />
       </EuiThemeProvider>
     );
@@ -458,6 +473,7 @@ describe('ExceptionBuilderComponent', () => {
           listNamespaceType="single"
           ruleName="Test rule"
           onChange={jest.fn()}
+          showValueListModal={MockedShowValueListModal}
         />
       </EuiThemeProvider>
     );
@@ -497,6 +513,7 @@ describe('ExceptionBuilderComponent', () => {
             listNamespaceType="single"
             ruleName="Test rule"
             onChange={jest.fn()}
+            showValueListModal={MockedShowValueListModal}
           />
         </EuiThemeProvider>
       );
@@ -507,14 +524,17 @@ describe('ExceptionBuilderComponent', () => {
         const entry2 = wrapper
           .find('EuiFlexGroup[data-test-subj="exceptionItemEntryContainer"]')
           .at(1);
-        expect(entry2.find('[data-test-subj="exceptionBuilderEntryField"]').at(0).text()).toEqual(
-          'Search nested field'
-        );
-        expect(entry2.find('[data-test-subj="operatorAutocompleteComboBox"]').at(0).text()).toEqual(
-          'is'
-        );
+
         expect(
-          entry2.find('[data-test-subj="exceptionBuilderEntryFieldExists"]').at(0).text()
+          entry2.find('[data-test-subj="exceptionBuilderEntryField"] input').at(0).props()
+            .placeholder
+        ).toEqual('Search nested field');
+        expect(
+          entry2.find('[data-test-subj="operatorAutocompleteComboBox"] input').at(0).props().value
+        ).toEqual('is');
+        expect(
+          entry2.find('[data-test-subj="exceptionBuilderEntryFieldExists"] input').at(0).props()
+            .placeholder
         ).toEqual(getEmptyValue());
       });
     });

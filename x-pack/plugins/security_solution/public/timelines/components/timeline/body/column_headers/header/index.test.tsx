@@ -8,7 +8,7 @@
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 
-import { timelineActions } from '../../../../../store/timeline';
+import { timelineActions } from '../../../../../store';
 import { TestProviders } from '../../../../../../common/mock';
 import type { Sort } from '../../sort';
 import { CloseButton } from '../actions';

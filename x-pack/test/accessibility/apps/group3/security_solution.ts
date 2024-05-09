@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         describe('Custom Query Rule', () => {
           describe('Define Step', () => {
             it('default view meets a11y requirements', async () => {
-              await toasts.dismissAllToasts();
+              await toasts.dismissAll();
               await testSubjects.click('customRuleType');
               await a11y.testAppSnapshot();
             });

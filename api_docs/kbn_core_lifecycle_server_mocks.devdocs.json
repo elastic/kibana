@@ -184,7 +184,25 @@
               "IExecutionContext",
               ">; coreUsageData: jest.Mocked<",
               "InternalCoreUsageDataSetup",
-              ">; customBranding: { register: jest.Mock<any, any, any>; getBrandingFor: jest.Mock<any, any, any>; }; userSettings: { setUserProfileSettings: jest.Mock<any, any, any>; getUserSettingDarkMode: jest.Mock<any, any, any>; }; }"
+              ">; customBranding: { register: jest.Mock<any, any, any>; getBrandingFor: jest.Mock<any, any, any>; }; userSettings: jest.Mocked<",
+              "InternalUserSettingsServiceSetup",
+              ">; security: jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-common.SecurityServiceSetup",
+                "text": "SecurityServiceSetup"
+              },
+              ">; userProfile: jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-user-profile-server",
+                "scope": "common",
+                "docId": "kibKbnCoreUserProfileServerPluginApi",
+                "section": "def-common.UserProfileServiceSetup",
+                "text": "UserProfileServiceSetup"
+              },
+              ">; }"
             ],
             "path": "packages/core/lifecycle/core-lifecycle-server-mocks/src/index.ts",
             "deprecated": false,
@@ -224,15 +242,7 @@
                 "section": "def-common.DocLinksServiceSetup",
                 "text": "DocLinksServiceSetup"
               },
-              "; elasticsearch: ",
-              {
-                "pluginId": "@kbn/core-elasticsearch-server-mocks",
-                "scope": "common",
-                "docId": "kibKbnCoreElasticsearchServerMocksPluginApi",
-                "section": "def-common.MockedElasticSearchServiceStart",
-                "text": "MockedElasticSearchServiceStart"
-              },
-              "; http: ",
+              "; elasticsearch: MockedInternalElasticsearchServiceStart; http: ",
               {
                 "pluginId": "@kbn/core-http-server-mocks",
                 "scope": "common",
@@ -249,13 +259,7 @@
                 "text": "MetricsServiceSetup"
               },
               ">; savedObjects: jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectsServiceStart",
-                "text": "SavedObjectsServiceStart"
-              },
+              "InternalSavedObjectsServiceStart",
               ">; uiSettings: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-ui-settings-server",
@@ -282,7 +286,23 @@
                 "section": "def-common.InternalDeprecationsServiceStart",
                 "text": "InternalDeprecationsServiceStart"
               },
-              ">; customBranding: {}; }"
+              ">; customBranding: {}; security: ",
+              {
+                "pluginId": "@kbn/core-security-server-mocks",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityServerMocksPluginApi",
+                "section": "def-common.InternalSecurityStartMock",
+                "text": "InternalSecurityStartMock"
+              },
+              "; userProfile: jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-user-profile-server-internal",
+                "scope": "common",
+                "docId": "kibKbnCoreUserProfileServerInternalPluginApi",
+                "section": "def-common.InternalUserProfileServiceStart",
+                "text": "InternalUserProfileServiceStart"
+              },
+              ">; }"
             ],
             "path": "packages/core/lifecycle/core-lifecycle-server-mocks/src/index.ts",
             "deprecated": false,

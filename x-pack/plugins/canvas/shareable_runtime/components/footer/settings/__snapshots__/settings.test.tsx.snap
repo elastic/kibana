@@ -9,7 +9,7 @@ exports[`<Settings /> can navigate Autoplay Settings 1`] = `
       aria-describedby="generated-id"
       aria-live="off"
       aria-modal="true"
-      class="euiPanel euiPanel--plain euiPopover__panel emotion-euiPanel-grow-m-plain-euiPopover__panel-hasTransform"
+      class="euiPanel euiPanel--plain euiPopover__panel emotion-euiPanel-grow-m-plain-euiPopover__panel-light-hasTransform"
       data-popover-panel="true"
       role="dialog"
       style="top: -16px; left: -22px; will-change: transform, opacity; z-index: 2000;"
@@ -102,7 +102,7 @@ exports[`<Settings /> can navigate Autoplay Settings 2`] = `
       aria-describedby="generated-id"
       aria-live="off"
       aria-modal="true"
-      class="euiPanel euiPanel--plain euiPopover__panel emotion-euiPanel-grow-m-plain-euiPopover__panel-isOpen-hasTransform-top"
+      class="euiPanel euiPanel--plain euiPopover__panel emotion-euiPanel-grow-m-plain-euiPopover__panel-light-isOpen-hasTransform-top"
       data-popover-open="true"
       data-popover-panel="true"
       role="dialog"
@@ -244,7 +244,7 @@ exports[`<Settings /> can navigate Autoplay Settings 2`] = `
                   </span>
                 </div>
                 <hr
-                  class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium emotion-euiHorizontalRule-full-m"
+                  class="euiHorizontalRule emotion-euiHorizontalRule-full-m"
                 />
                 <form>
                   <div
@@ -345,7 +345,7 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 1`] =
       aria-describedby="generated-id"
       aria-live="off"
       aria-modal="true"
-      class="euiPanel euiPanel--plain euiPopover__panel emotion-euiPanel-grow-m-plain-euiPopover__panel-hasTransform"
+      class="euiPanel euiPanel--plain euiPopover__panel emotion-euiPanel-grow-m-plain-euiPopover__panel-light-hasTransform"
       data-popover-panel="true"
       role="dialog"
       style="top: -16px; left: -22px; will-change: transform, opacity; z-index: 2000;"
@@ -438,7 +438,7 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 2`] =
       aria-describedby="generated-id"
       aria-live="off"
       aria-modal="true"
-      class="euiPanel euiPanel--plain euiPopover__panel emotion-euiPanel-grow-m-plain-euiPopover__panel-isOpen-hasTransform-top"
+      class="euiPanel euiPanel--plain euiPopover__panel emotion-euiPanel-grow-m-plain-euiPopover__panel-light-isOpen-hasTransform-top"
       data-popover-open="true"
       data-popover-panel="true"
       role="dialog"
@@ -615,7 +615,7 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 3`] =
       aria-describedby="generated-id"
       aria-live="off"
       aria-modal="true"
-      class="euiPanel euiPanel--plain euiPopover__panel emotion-euiPanel-grow-m-plain-euiPopover__panel-hasTransform"
+      class="euiPanel euiPanel--plain euiPopover__panel emotion-euiPanel-grow-m-plain-euiPopover__panel-light-hasTransform"
       data-popover-panel="true"
       role="dialog"
       style="top: -16px; left: -22px; z-index: 2000;"

@@ -39,7 +39,6 @@ export const config: PluginConfigDescriptor = {
     },
     internal: {
       fleetServerStandalone: true,
-      disableProxies: true,
       activeAgentsSoftLimit: true,
       onlyAllowAgentUpgradeToKnownVersions: true,
     },
@@ -126,6 +125,7 @@ export const config: PluginConfigDescriptor = {
   ],
   schema: schema.object(
     {
+      isAirGapped: schema.maybe(schema.boolean({ defaultValue: false })),
       registryUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
       registryProxyUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
       agents: schema.object({
@@ -150,6 +150,7 @@ export const config: PluginConfigDescriptor = {
       setup: schema.maybe(
         schema.object({
           agentPolicySchemaUpgradeBatchSize: schema.maybe(schema.number()),
+          uninstallTokenVerificationBatchSize: schema.maybe(schema.number()),
         })
       ),
       developer: schema.object({
@@ -157,6 +158,9 @@ export const config: PluginConfigDescriptor = {
         disableRegistryVersionCheck: schema.boolean({ defaultValue: false }),
         allowAgentUpgradeSourceUri: schema.boolean({ defaultValue: false }),
         bundledPackageLocation: schema.string({ defaultValue: DEFAULT_BUNDLED_PACKAGE_LOCATION }),
+        disableBundledPackagesCache: schema.boolean({
+          defaultValue: false,
+        }),
       }),
       packageVerification: schema.object({
         gpgKeyPath: schema.string({ defaultValue: DEFAULT_GPG_KEY_PATH }),
@@ -177,9 +181,6 @@ export const config: PluginConfigDescriptor = {
       internal: schema.maybe(
         schema.object({
           disableILMPolicies: schema.boolean({
-            defaultValue: false,
-          }),
-          disableProxies: schema.boolean({
             defaultValue: false,
           }),
           fleetServerStandalone: schema.boolean({

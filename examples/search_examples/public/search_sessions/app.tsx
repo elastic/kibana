@@ -26,7 +26,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { catchError, map, tap } from 'rxjs/operators';
+import { catchError, map, tap } from 'rxjs';
 import { lastValueFrom, of } from 'rxjs';
 
 import { CoreStart } from '@kbn/core/public';
@@ -34,11 +34,11 @@ import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 import type { TimeRange } from '@kbn/es-query';
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
+import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
+
 import {
   connectToQueryState,
   DataPublicPluginStart,
-  IEsSearchRequest,
-  IEsSearchResponse,
   isRunningResponse,
   QueryState,
   SearchSessionState,

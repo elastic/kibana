@@ -56,8 +56,7 @@ export default function ({
       await browser.setWindowSize(1300, 900);
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/163207
-    describe.skip('default URL params', () => {
+    describe('default URL params', () => {
       it('hides the chrome', async () => {
         const globalNavShown = await globalNav.exists();
         expect(globalNavShown).to.be(true);
@@ -91,8 +90,7 @@ export default function ({
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/168648
-    describe.skip('non-default URL params', () => {
+    describe('non-default URL params', () => {
       it('shows or hides elements based on URL params', async () => {
         const currentUrl = await browser.getCurrentUrl();
         const newUrl = [currentUrl].concat(urlParamExtensions).join('&');

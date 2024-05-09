@@ -6,9 +6,10 @@
  */
 
 import * as Rx from 'rxjs';
-import { map, take } from 'rxjs/operators';
+import { map, take } from 'rxjs';
 
 import type {
+  AnalyticsServiceStart,
   CoreSetup,
   DocLinksServiceSetup,
   IBasePath,
@@ -46,13 +47,15 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
+import { checkLicense } from '@kbn/reporting-server/check_license';
+import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import type { ReportingSetup } from '.';
 import { createConfig } from './config';
-import { ExportTypesRegistry, checkLicense } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
-import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
+import { ExecuteReportTask, ReportTaskParams } from './lib/tasks';
 import type { ReportingPluginRouter } from './types';
+import { EventTracker } from './usage';
 
 export interface ReportingInternalSetup {
   basePath: Pick<IBasePath, 'set'>;
@@ -69,6 +72,7 @@ export interface ReportingInternalSetup {
 
 export interface ReportingInternalStart {
   store: ReportingStore;
+  analytics: AnalyticsServiceStart;
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
   esClient: IClusterClient;
@@ -93,7 +97,6 @@ export class ReportingCore {
   private readonly pluginStart$ = new Rx.ReplaySubject<ReportingInternalStart>(); // observe async background startDeps
   private deprecatedAllowedRoles: string[] | false = false; // DEPRECATED. If `false`, the deprecated features have been disableed
   private executeTask: ExecuteReportTask;
-  private monitorTask: MonitorReportsTask;
   private config: ReportingConfigType;
   private executing: Set<string>;
   private exportTypesRegistry = new ExportTypesRegistry();
@@ -116,7 +119,6 @@ export class ReportingCore {
     });
     this.deprecatedAllowedRoles = config.roles.enabled ? config.roles.allow : false;
     this.executeTask = new ExecuteReportTask(this, config, this.logger);
-    this.monitorTask = new MonitorReportsTask(this, config, this.logger);
 
     this.getContract = () => ({
       usesUiCapabilities: () => config.roles.enabled === false,
@@ -142,10 +144,9 @@ export class ReportingCore {
       et.setup(setupDeps);
     });
 
-    const { executeTask, monitorTask } = this;
+    const { executeTask } = this;
     setupDeps.taskManager.registerTaskDefinitions({
       [executeTask.TYPE]: executeTask.getTaskDefinition(),
-      [monitorTask.TYPE]: monitorTask.getTaskDefinition(),
     });
   }
 
@@ -161,9 +162,9 @@ export class ReportingCore {
     });
 
     const { taskManager } = startDeps;
-    const { executeTask, monitorTask } = this;
-    // enable this instance to generate reports and to monitor for pending reports
-    await Promise.all([executeTask.init(taskManager), monitorTask.init(taskManager)]);
+    const { executeTask } = this;
+    // enable this instance to generate reports
+    await Promise.all([executeTask.init(taskManager)]);
   }
 
   public pluginStop() {
@@ -304,11 +305,24 @@ export class ReportingCore {
   }
 
   /*
-   *
-   * Track usage of code paths for telemetry
+   * Track usage of API endpoints
    */
   public getUsageCounter(): UsageCounter | undefined {
     return this.pluginSetupDeps?.usageCounter;
+  }
+
+  /*
+   * Track metrics of internal events
+   */
+  public getEventTracker(
+    reportId: string,
+    exportType: string,
+    objectType: string
+  ): EventTracker | undefined {
+    const { analytics } = this.pluginStartDeps ?? {};
+    if (analytics) {
+      return new EventTracker(analytics, reportId, exportType, objectType);
+    }
   }
 
   /*
@@ -404,6 +418,10 @@ export class ReportingCore {
     return new ReportingEventLogger(report, task);
   }
 
+  /**
+   * @deprecated
+   * Requires `xpack.reporting.csv.enablePanelActionDownload` set to `true` (default is false)
+   */
   public async getCsvSearchSourceImmediate() {
     const startDeps = await this.getPluginStartDeps();
 

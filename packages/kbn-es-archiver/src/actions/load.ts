@@ -28,6 +28,7 @@ import {
   migrateSavedObjectIndices,
   Progress,
   createDefaultSpace,
+  type LoadActionPerfOptions,
 } from '../lib';
 
 import soOverrideAllowedList from '../fixtures/override_saved_objects_index/exception_list.json';
@@ -58,6 +59,7 @@ export async function loadAction({
   client,
   log,
   kbnClient,
+  performance,
 }: {
   inputDir: string;
   skipExisting: boolean;
@@ -66,6 +68,7 @@ export async function loadAction({
   client: Client;
   log: ToolingLog;
   kbnClient: KbnClient;
+  performance?: LoadActionPerfOptions;
 }) {
   const name = relative(REPO_ROOT, inputDir);
   const isArchiveInExceptionList = soOverrideAllowedList.includes(name);
@@ -104,7 +107,7 @@ export async function loadAction({
       isArchiveInExceptionList,
       log,
     }),
-    createIndexDocRecordsStream(client, stats, progress, useCreate),
+    createIndexDocRecordsStream(client, stats, progress, useCreate, performance),
   ]);
 
   progress.deactivate();

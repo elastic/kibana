@@ -32,10 +32,12 @@ import {
   actionFormSelector,
   ACTIONS_NOTIFY_PER_RULE_RUN_BUTTON,
   INDEX_CONNECTOR_COMBO_BOX_INPUT,
+  CREATE_NEW_EMAIL_CONNECTOR,
 } from '../../screens/common/rule_actions';
 import { COMBO_BOX_SELECTION } from '../../screens/common/controls';
 import type { EmailConnector, IndexConnector } from '../../objects/connector';
 import { getEmailConnector, getIndexConnector } from '../../objects/connector';
+import { CLOUD_SERVERLESS } from '../../env_var_names_constants';
 
 export const addSlackRuleAction = (message: string) => {
   cy.get(SLACK_ACTION_BTN).click();
@@ -58,7 +60,11 @@ export const fillEmailConnectorForm = (connector: EmailConnector = getEmailConne
 };
 
 export const createEmailConnector = () => {
-  cy.get(CREATE_ACTION_CONNECTOR_BTN).click();
+  // In cloud there is a default connector for email already created, in that case the selector we need to use is different.
+  const CREATE_CONNECTOR_ELEMENT = Cypress.env(CLOUD_SERVERLESS)
+    ? CREATE_NEW_EMAIL_CONNECTOR
+    : CREATE_ACTION_CONNECTOR_BTN;
+  cy.get(CREATE_CONNECTOR_ELEMENT).click();
   fillEmailConnectorForm();
   cy.get(SAVE_ACTION_CONNECTOR_BTN).click();
 };

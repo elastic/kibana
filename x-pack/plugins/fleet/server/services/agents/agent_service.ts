@@ -28,7 +28,7 @@ import { FleetUnauthorizedError } from '../../errors';
 
 import { getAgentsByKuery, getAgentById } from './crud';
 import { getAgentStatusById, getAgentStatusForAgentPolicy } from './status';
-import { getLatestAvailableVersion } from './versions';
+import { getLatestAvailableAgentVersion } from './versions';
 
 /**
  * A service for interacting with Agent data. See {@link AgentClient} for more information.
@@ -139,7 +139,7 @@ class AgentClientImpl implements AgentClient {
 
   public async getLatestAgentAvailableVersion(includeCurrentVersion?: boolean) {
     await this.#runPreflight();
-    return getLatestAvailableVersion(includeCurrentVersion);
+    return getLatestAvailableAgentVersion({ includeCurrentVersion });
   }
 
   #runPreflight = async () => {

@@ -15,7 +15,7 @@ export const performExtensionAction =
     try {
       await requestMethod(indexNames, httpService.httpClient);
     } catch (error) {
-      notificationService.showDangerToast(error.message);
+      notificationService.showDangerToast(error.body.message);
       return;
     }
     dispatch(reloadIndices(indexNames));

@@ -7,15 +7,15 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { EuiDataGridSorting, EuiDataGridColumn } from '@elastic/eui';
+import type { EuiDataGridSorting, EuiDataGridColumn } from '@elastic/eui';
 
 import { ES_CLIENT_TOTAL_HITS_RELATION } from '@kbn/ml-query-utils';
 
 import { INDEX_STATUS } from '../lib/common';
-import { ChartData } from '../lib/field_histograms';
+import type { ChartData } from '../lib/field_histograms';
 import { ColumnChart } from '../components/column_chart';
 import { COLUMN_CHART_DEFAULT_VISIBILITY_ROWS_THRESHOLD, INIT_MAX_COLUMNS } from '../lib/common';
-import {
+import type {
   ChartsVisible,
   ColumnId,
   DataGridItem,

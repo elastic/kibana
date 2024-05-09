@@ -8,9 +8,15 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { RightPanelContext } from '../context';
-import { INSIGHTS_HEADER_TEST_ID } from './test_ids';
+import {
+  INSIGHTS_HEADER_TEST_ID,
+  INSIGHTS_THREAT_INTELLIGENCE_TEST_ID,
+  CORRELATIONS_TEST_ID,
+  INSIGHTS_CONTENT_TEST_ID,
+  INSIGHTS_ENTITIES_TEST_ID,
+  PREVALENCE_TEST_ID,
+} from './test_ids';
 import { TestProviders } from '../../../../common/mock';
-import { useRiskScore } from '../../../../explore/containers/risk_score';
 import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
 import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
@@ -20,6 +26,9 @@ import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { InsightsSection } from './insights_section';
 import { useAlertPrevalence } from '../../../../common/containers/alerts/use_alert_prevalence';
+import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
+import { useExpandSection } from '../hooks/use_expand_section';
+import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
 
 jest.mock('../../../../common/containers/alerts/use_alert_prevalence');
 
@@ -47,10 +56,16 @@ jest.mock('react-router-dom', () => {
   alertIds: [],
 });
 
+jest.mock('../../../../timelines/containers/use_timeline_data_filters', () => ({
+  useTimelineDataFilters: jest.fn(),
+}));
+const mockUseTimelineDataFilters = useTimelineDataFilters as jest.Mock;
+
 const from = '2022-04-05T12:00:00.000Z';
 const to = '2022-04-08T12:00:00.;000Z';
 const selectedPatterns = 'alerts';
 
+jest.mock('../hooks/use_expand_section');
 const mockUseGlobalTime = jest.fn().mockReturnValue({ from, to });
 jest.mock('../../../../common/containers/use_global_time', () => {
   return {
@@ -69,7 +84,7 @@ const mockUseUserDetails = useObservedUserDetails as jest.Mock;
 jest.mock('../../../../explore/users/containers/users/observed_details');
 
 const mockUseRiskScore = useRiskScore as jest.Mock;
-jest.mock('../../../../explore/containers/risk_score');
+jest.mock('../../../../entity_analytics/api/hooks/use_risk_score');
 
 const mockUseFirstLastSeen = useFirstLastSeen as jest.Mock;
 jest.mock('../../../../common/containers/use_first_last_seen');
@@ -81,17 +96,18 @@ jest.mock('../hooks/use_fetch_threat_intelligence');
 
 jest.mock('../../shared/hooks/use_prevalence');
 
-const renderInsightsSection = (contextValue: RightPanelContext, expanded: boolean) =>
+const renderInsightsSection = (contextValue: RightPanelContext) =>
   render(
     <TestProviders>
       <RightPanelContext.Provider value={contextValue}>
-        <InsightsSection expanded={expanded} />
+        <InsightsSection />
       </RightPanelContext.Provider>
     </TestProviders>
   );
 
 describe('<InsightsSection />', () => {
   beforeEach(() => {
+    mockUseTimelineDataFilters.mockReturnValue({ selectedPatterns: ['index'] });
     mockUseUserDetails.mockReturnValue([false, { userDetails: null }]);
     mockUseRiskScore.mockReturnValue({ data: null, isAuthorized: false });
     mockUseHostDetails.mockReturnValue([false, { hostDetails: null }]);
@@ -114,24 +130,84 @@ describe('<InsightsSection />', () => {
       getFieldsData: mockGetFieldsData,
     } as unknown as RightPanelContext;
 
-    const wrapper = renderInsightsSection(contextValue, false);
+    const wrapper = renderInsightsSection(contextValue);
 
     expect(wrapper.getByTestId(INSIGHTS_HEADER_TEST_ID)).toBeInTheDocument();
-    expect(wrapper.getAllByRole('button')[0]).toHaveAttribute('aria-expanded', 'false');
-    expect(wrapper.getAllByRole('button')[0]).not.toHaveAttribute('disabled');
+    expect(wrapper.getByTestId(INSIGHTS_HEADER_TEST_ID)).toHaveTextContent('Insights');
+    expect(wrapper.getByTestId(INSIGHTS_CONTENT_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should render insights component as expanded when expanded is true', () => {
+  it('should render the component collapsed if value is false in local storage', () => {
+    (useExpandSection as jest.Mock).mockReturnValue(false);
+
     const contextValue = {
       eventId: 'some_Id',
       dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
       getFieldsData: mockGetFieldsData,
     } as unknown as RightPanelContext;
 
-    const wrapper = renderInsightsSection(contextValue, true);
+    const wrapper = renderInsightsSection(contextValue);
+    expect(wrapper.getByTestId(INSIGHTS_CONTENT_TEST_ID)).not.toBeVisible();
+  });
 
-    expect(wrapper.getByTestId(INSIGHTS_HEADER_TEST_ID)).toBeInTheDocument();
-    expect(wrapper.getAllByRole('button')[0]).toHaveAttribute('aria-expanded', 'true');
-    expect(wrapper.getAllByRole('button')[0]).not.toHaveAttribute('disabled');
+  it('should render the component expanded if value is true in local storage', () => {
+    (useExpandSection as jest.Mock).mockReturnValue(true);
+
+    const contextValue = {
+      eventId: 'some_Id',
+      dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
+      getFieldsData: mockGetFieldsData,
+    } as unknown as RightPanelContext;
+
+    const wrapper = renderInsightsSection(contextValue);
+    expect(wrapper.getByTestId(INSIGHTS_CONTENT_TEST_ID)).toBeVisible();
+  });
+
+  it('should render all children when event kind is signal', () => {
+    (useExpandSection as jest.Mock).mockReturnValue(true);
+
+    const getFieldsData = (field: string) => {
+      switch (field) {
+        case 'event.kind':
+          return 'signal';
+      }
+    };
+    const contextValue = {
+      eventId: 'some_Id',
+      getFieldsData,
+      documentIsSignal: true,
+    } as unknown as RightPanelContext;
+
+    const { getByTestId } = renderInsightsSection(contextValue);
+
+    expect(getByTestId(`${INSIGHTS_ENTITIES_TEST_ID}LeftSection`)).toBeInTheDocument();
+    expect(getByTestId(`${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}LeftSection`)).toBeInTheDocument();
+    expect(getByTestId(`${CORRELATIONS_TEST_ID}LeftSection`)).toBeInTheDocument();
+    expect(getByTestId(`${PREVALENCE_TEST_ID}LeftSection`)).toBeInTheDocument();
+  });
+
+  it('should not render threat intel and correlations insights component when document is not signal', () => {
+    (useExpandSection as jest.Mock).mockReturnValue(true);
+
+    const getFieldsData = (field: string) => {
+      switch (field) {
+        case 'event.kind':
+          return 'metric';
+      }
+    };
+    const contextValue = {
+      eventId: 'some_Id',
+      getFieldsData,
+      documentIsSignal: false,
+    } as unknown as RightPanelContext;
+
+    const { getByTestId, queryByTestId } = renderInsightsSection(contextValue);
+
+    expect(getByTestId(`${INSIGHTS_ENTITIES_TEST_ID}LeftSection`)).toBeInTheDocument();
+    expect(
+      queryByTestId(`${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}LeftSection`)
+    ).not.toBeInTheDocument();
+    expect(getByTestId(`${CORRELATIONS_TEST_ID}LeftSection`)).toBeInTheDocument();
+    expect(getByTestId(`${PREVALENCE_TEST_ID}LeftSection`)).toBeInTheDocument();
   });
 });

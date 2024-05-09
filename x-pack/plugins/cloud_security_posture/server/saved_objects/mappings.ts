@@ -7,7 +7,7 @@
 
 import { SavedObjectsTypeMappingDefinition } from '@kbn/core/server';
 
-export const cspRuleTemplateSavedObjectMapping: SavedObjectsTypeMappingDefinition = {
+export const cspBenchmarkRuleSavedObjectMapping: SavedObjectsTypeMappingDefinition = {
   dynamic: false,
   properties: {
     metadata: {
@@ -59,4 +59,9 @@ export const cspRuleTemplateSavedObjectMapping: SavedObjectsTypeMappingDefinitio
       },
     },
   },
+};
+
+export const cspSettingsSavedObjectMapping: SavedObjectsTypeMappingDefinition = {
+  dynamic: false,
+  properties: {},
 };

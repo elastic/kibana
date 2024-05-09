@@ -48,35 +48,6 @@ export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContex
           pitId?: string;
           getStatusSummary?: boolean;
         };
-        try {
-          esAgents = await osqueryContext.service.getAgentService()?.asInternalUser.listAgents({
-            page: query.page,
-            perPage: query.perPage,
-            sortField: query.sortField,
-            sortOrder: query.sortOrder,
-            showUpgradeable: query.showUpgradeable,
-            getStatusSummary: query.getStatusSummary,
-            pitId: query.pitId,
-            searchAfter: query.searchAfter,
-            kuery: query.kuery,
-            showInactive: query.showInactive,
-            aggregations: {
-              platforms: {
-                terms: {
-                  field: 'local_metadata.os.platform',
-                },
-              },
-              policies: {
-                terms: {
-                  field: 'policy_id',
-                  size: 2000,
-                },
-              },
-            },
-          });
-        } catch (error) {
-          return response.badRequest({ body: error });
-        }
 
         const internalSavedObjectsClient = await getInternalSavedObjectsClient(
           osqueryContext.getStartServices
@@ -102,7 +73,57 @@ export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContex
           agentPolicyIds
         );
 
+        // FIND agents by policy_name
+        const policyNamePattern = /policy_name:([^ ]+)/;
+        let kuery = query.kuery;
+        const policyName: string | undefined = kuery.match(policyNamePattern)?.[1];
+
+        const foundPolicyByName = policyName
+          ? agentPolicies?.filter((policy) =>
+              policy.name.toLowerCase().includes(policyName.toLowerCase())
+            )
+          : [];
+
+        if (foundPolicyByName?.length) {
+          kuery =
+            // remove the ) from the end of the kuery
+            kuery.slice(0, -1) +
+            ' or ' +
+            foundPolicyByName.map((p) => `policy_id:${p.id}`).join(' or ') +
+            ')';
+        }
+
         const agentPolicyById = mapKeys(agentPolicies, 'id');
+
+        try {
+          esAgents = await osqueryContext.service.getAgentService()?.asInternalUser.listAgents({
+            page: query.page,
+            perPage: query.perPage,
+            sortField: query.sortField,
+            sortOrder: query.sortOrder,
+            showUpgradeable: query.showUpgradeable,
+            getStatusSummary: query.getStatusSummary,
+            pitId: query.pitId,
+            searchAfter: query.searchAfter,
+            kuery,
+            showInactive: query.showInactive,
+            aggregations: {
+              platforms: {
+                terms: {
+                  field: 'local_metadata.os.platform',
+                },
+              },
+              policies: {
+                terms: {
+                  field: 'policy_id',
+                  size: 2000,
+                },
+              },
+            },
+          });
+        } catch (error) {
+          return response.badRequest({ body: error });
+        }
 
         const { platforms, overlap, policies } = processAggregations(esAgents?.aggregations);
 

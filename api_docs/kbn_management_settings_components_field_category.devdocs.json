@@ -129,7 +129,7 @@
           "\nKibana-specific Provider that maps Kibana plugins and services to a {@link FieldCategoryProvider}."
         ],
         "signature": [
-          "React.FunctionComponent<",
+          "React.FunctionComponent<React.PropsWithChildren<",
           {
             "pluginId": "@kbn/management-settings-components-field-row",
             "scope": "common",
@@ -137,7 +137,7 @@
             "section": "def-common.FieldRowKibanaDependencies",
             "text": "FieldRowKibanaDependencies"
           },
-          ">"
+          ">>"
         ],
         "path": "packages/kbn-management/settings/components/field_category/services.tsx",
         "deprecated": false,
@@ -354,7 +354,13 @@
             "label": "categoryCounts",
             "description": [],
             "signature": [
-              "{ [category: string]: number; }"
+              {
+                "pluginId": "@kbn/management-settings-types",
+                "scope": "common",
+                "docId": "kibKbnManagementSettingsTypesPluginApi",
+                "section": "def-common.CategoryCounts",
+                "text": "CategoryCounts"
+              }
             ],
             "path": "packages/kbn-management/settings/components/field_category/categories.tsx",
             "deprecated": false,

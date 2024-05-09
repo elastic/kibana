@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import '@kbn/code-editor-mock/jest_helper';
 import { DocViewerSource } from './source';
 import * as hooks from '../../hooks/use_es_doc_search';
 import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';

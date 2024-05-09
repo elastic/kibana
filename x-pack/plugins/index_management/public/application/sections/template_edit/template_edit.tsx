@@ -70,6 +70,7 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
   };
 
   let isSystemTemplate;
+  let isDeprecatedTemplate;
 
   if (isLoading) {
     return (
@@ -100,6 +101,7 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
     } = template;
 
     isSystemTemplate = templateName && templateName.startsWith('.');
+    isDeprecatedTemplate = template?.deprecated;
 
     if (type === 'cloudManaged') {
       return (
@@ -148,6 +150,27 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
           </EuiCallOut>
           <EuiSpacer size="l" />
         </Fragment>
+      )}
+      {isDeprecatedTemplate && (
+        <>
+          <EuiCallOut
+            title={
+              <FormattedMessage
+                id="xpack.idxMgmt.templateEdit.deprecatedTemplateWarningTitle"
+                defaultMessage="This index template is deprecated"
+              />
+            }
+            iconType="warning"
+            color="warning"
+            data-test-subj="deprecatedIndexTemplateCallout"
+          >
+            <FormattedMessage
+              id="xpack.idxMgmt.templateEdit.deprecatedTemplateWarningDescription"
+              defaultMessage="This index template is no longer supported and might be removed in a future release. Instead, use one of the other index templates available or create a new one."
+            />
+          </EuiCallOut>
+          <EuiSpacer size="l" />
+        </>
       )}
 
       <TemplateForm

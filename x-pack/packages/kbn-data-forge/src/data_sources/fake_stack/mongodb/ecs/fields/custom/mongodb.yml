@@ -1,0 +1,31 @@
+- name: mongodb
+  title: MongoDB
+  description: >
+    MongoDB context, compontent, and id
+  type: group
+  fields:
+    - name: context
+      type: keyword
+      level: custom
+      description: >
+        Context of the message
+    - name: component
+      type: keyword
+      level: custom
+      description: >
+        Component of the message
+    - name: database
+      type: keyword
+      level: custom
+      description: >
+        The name of the database
+    - name: collection
+      type: keyword
+      level: custom
+      description: >
+        The name of the collection
+    - name: action
+      type: keyword
+      level: custom
+      description: >
+        The action being taken

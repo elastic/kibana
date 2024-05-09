@@ -6,8 +6,9 @@
  */
 
 import { DOCUMENT_DETAILS_FLYOUT_ALERT_REASON_PREVIEW_CONTAINER } from '../../../../screens/expandable_flyout/alert_details_preview_panel_alert_reason_preview';
-import { expandFirstAlertExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
+import { expandAlertAtIndexExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
 import { clickAlertReasonButton } from '../../../../tasks/expandable_flyout/alert_details_right_panel_overview_tab';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -22,11 +23,12 @@ describe(
     const rule = getNewRule();
 
     beforeEach(() => {
+      deleteAlertsAndRules();
       login();
       createRule(rule);
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
-      expandFirstAlertExpandableFlyout();
+      expandAlertAtIndexExpandableFlyout();
       clickAlertReasonButton();
     });
 

@@ -79,9 +79,11 @@ const AnnotationEditorControls = ({
   }, [isQueryBased]);
 
   const update = useCallback(
-    <T extends EventAnnotationConfig>(newAnnotation: Partial<T> | undefined) =>
-      newAnnotation &&
-      onAnnotationChange(sanitizeProperties({ ...currentAnnotation, ...newAnnotation })),
+    <T extends EventAnnotationConfig>(newAnnotation: Partial<T> | undefined) => {
+      if (!newAnnotation) return;
+
+      onAnnotationChange(sanitizeProperties({ ...currentAnnotation, ...newAnnotation }));
+    },
     [currentAnnotation, onAnnotationChange]
   );
 
@@ -243,15 +245,13 @@ const AnnotationEditorControls = ({
                   <>
                     <EuiSpacer size="xs" />
                     <FieldPicker
-                      selectedOptions={
+                      activeField={
                         selectedField
-                          ? [
-                              {
-                                label: selectedField,
-                                value: { type: 'field', field: selectedField },
-                              },
-                            ]
-                          : []
+                          ? {
+                              label: selectedField,
+                              value: { type: 'field', field: selectedField },
+                            }
+                          : undefined
                       }
                       options={options}
                       onChoose={function (choice: FieldOptionValue | undefined): void {

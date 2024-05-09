@@ -16,7 +16,6 @@
     "@kbn/core",
     "@kbn/config-schema",
     "@kbn/security-solution-plugin",
-    "@kbn/i18n",
     "@kbn/cloud-experiments-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/security-solution-features",
@@ -24,5 +23,10 @@
     "@kbn/security-solution-navigation",
     "@kbn/licensing-plugin",
     "@kbn/security-solution-upselling",
+    "@kbn/i18n",
+    "@kbn/navigation-plugin",
+    "@kbn/management-cards-navigation",
+    "@kbn/management-plugin",
+    "@kbn/core-chrome-browser",
   ]
 }

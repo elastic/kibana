@@ -42,6 +42,7 @@ const toTableListViewSavedObject = (hit: DashboardItem): DashboardSavedObjectUse
     type: 'dashboard',
     id: hit.id,
     updatedAt: hit.updatedAt!,
+    createdBy: hit.createdBy,
     references: hit.references,
     managed: hit.managed,
     attributes: {
@@ -283,7 +284,6 @@ export const useDashboardListingTable = ({
       createItem: !showWriteControls || !showCreateDashboardButton ? undefined : createItem,
       deleteItems: !showWriteControls ? undefined : deleteItems,
       editItem: !showWriteControls ? undefined : editItem,
-      itemIsEditable: () => showWriteControls,
       emptyPrompt,
       entityName,
       entityNamePlural,
@@ -298,6 +298,7 @@ export const useDashboardListingTable = ({
       setPageDataTestSubject,
       title,
       urlStateEnabled,
+      createdByEnabled: true,
     }),
     [
       contentEditorValidators,

@@ -12,7 +12,7 @@ import {
   PACKAGE_POLICY_API_ROUTES,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common/constants';
-import { catchAxiosErrorFormatAndThrow } from './format_axios_error';
+import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
 import { indexFleetEndpointPolicy } from '../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { setupFleetForEndpoint } from '../../../common/endpoint/data_loaders/setup_fleet_for_endpoint';
 import type { GetPolicyListResponse } from '../../../public/management/pages/policy/types';

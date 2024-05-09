@@ -44,7 +44,7 @@ import type {
   CspStatusCode,
   IndexStatus,
   PostureTypes,
-} from '../../../common/types';
+} from '../../../common/types_old';
 import {
   getAgentStatusesByAgentPolicies,
   getCspAgentPolicies,

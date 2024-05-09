@@ -25,7 +25,7 @@ export const dataQualityIndexCheckedEvent: DataQualityTelemetryIndexCheckedEvent
       type: 'keyword',
       _meta: {
         description: 'Index uuid',
-        optional: false,
+        optional: true,
       },
     },
     indexName: {
@@ -77,10 +77,31 @@ export const dataQualityIndexCheckedEvent: DataQualityTelemetryIndexCheckedEvent
         optional: true,
       },
     },
+    numberOfFields: {
+      type: 'integer',
+      _meta: {
+        description: 'Total number of fields',
+        optional: true,
+      },
+    },
     numberOfIncompatibleFields: {
       type: 'integer',
       _meta: {
         description: 'Number of incompatible fields',
+        optional: true,
+      },
+    },
+    numberOfEcsFields: {
+      type: 'integer',
+      _meta: {
+        description: 'Number of ecs compatible fields',
+        optional: true,
+      },
+    },
+    numberOfCustomFields: {
+      type: 'integer',
+      _meta: {
+        description: 'Number of custom fields',
         optional: true,
       },
     },
@@ -187,10 +208,31 @@ export const dataQualityCheckAllClickedEvent: DataQualityTelemetryCheckAllComple
         optional: true,
       },
     },
+    numberOfFields: {
+      type: 'integer',
+      _meta: {
+        description: 'Total number of fields',
+        optional: true,
+      },
+    },
     numberOfIncompatibleFields: {
       type: 'integer',
       _meta: {
         description: 'Number of incompatible fields',
+        optional: true,
+      },
+    },
+    numberOfEcsFields: {
+      type: 'integer',
+      _meta: {
+        description: 'Number of ecs compatible fields',
+        optional: true,
+      },
+    },
+    numberOfCustomFields: {
+      type: 'integer',
+      _meta: {
+        description: 'Number of custom fields',
         optional: true,
       },
     },

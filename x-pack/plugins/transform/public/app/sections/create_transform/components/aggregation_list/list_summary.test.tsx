@@ -10,9 +10,10 @@ import { render } from '@testing-library/react';
 
 import { PIVOT_SUPPORTED_AGGS } from '../../../../../../common/types/pivot_aggs';
 
-import { PivotAggsConfig } from '../../../../common';
+import type { PivotAggsConfig } from '../../../../common';
 
-import { AggListSummary, AggListSummaryProps } from './list_summary';
+import type { AggListSummaryProps } from './list_summary';
+import { AggListSummary } from './list_summary';
 
 describe('Transform: <AggListSummary />', () => {
   test('Minimal initialization', () => {

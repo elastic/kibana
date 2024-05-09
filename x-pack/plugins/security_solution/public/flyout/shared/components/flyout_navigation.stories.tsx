@@ -7,9 +7,8 @@
 
 import React from 'react';
 import type { Story } from '@storybook/react';
-import type { ExpandableFlyoutContextValue } from '@kbn/expandable-flyout/src/context';
-import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { EuiButtonIcon } from '@elastic/eui';
+import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { FlyoutNavigation } from './flyout_navigation';
 
 const expandDetails = () => window.alert('expand left panel');
@@ -19,57 +18,45 @@ export default {
   title: 'Flyout/Navigation',
 };
 
-const flyoutContextValue = {
-  closeLeftPanel: () => window.alert('close left panel'),
-  panels: {},
-} as unknown as ExpandableFlyoutContextValue;
-
 export const Expand: Story<void> = () => {
   return (
-    <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
+    <TestProvider>
       <FlyoutNavigation flyoutIsExpandable={true} expandDetails={expandDetails} />
-    </ExpandableFlyoutContext.Provider>
+    </TestProvider>
   );
 };
 
 export const Collapse: Story<void> = () => {
   return (
-    <ExpandableFlyoutContext.Provider
-      value={
-        {
-          ...flyoutContextValue,
-          panels: { left: {} },
-        } as unknown as ExpandableFlyoutContextValue
-      }
-    >
+    <TestProvider>
       <FlyoutNavigation flyoutIsExpandable={true} expandDetails={expandDetails} />
-    </ExpandableFlyoutContext.Provider>
+    </TestProvider>
   );
 };
 export const CollapsableWithAction: Story<void> = () => {
   return (
-    <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
+    <TestProvider>
       <FlyoutNavigation
         flyoutIsExpandable={true}
         expandDetails={expandDetails}
         actions={<EuiButtonIcon iconType="share" />}
       />
-    </ExpandableFlyoutContext.Provider>
+    </TestProvider>
   );
 };
 
 export const NonCollapsableWithAction: Story<void> = () => {
   return (
-    <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
+    <TestProvider>
       <FlyoutNavigation flyoutIsExpandable={false} actions={<EuiButtonIcon iconType="share" />} />
-    </ExpandableFlyoutContext.Provider>
+    </TestProvider>
   );
 };
 
 export const Empty: Story<void> = () => {
   return (
-    <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
+    <TestProvider>
       <FlyoutNavigation flyoutIsExpandable={false} />
-    </ExpandableFlyoutContext.Provider>
+    </TestProvider>
   );
 };

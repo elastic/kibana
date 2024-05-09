@@ -11,6 +11,7 @@ export interface NewFleetServerHost {
   host_urls: string[];
   is_default: boolean;
   is_preconfigured: boolean;
+  is_internal?: boolean;
   proxy_id?: string | null;
 }
 

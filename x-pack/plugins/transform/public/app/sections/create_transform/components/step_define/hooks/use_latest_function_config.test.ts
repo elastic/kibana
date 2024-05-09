@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LatestFunctionConfigUI } from '../../../../../../../common/types/transform';
+import type { LatestFunctionConfigUI } from '../../../../../../../common/types/transform';
 
 import { latestConfigMapper, validateLatestConfig } from './use_latest_function_config';
 

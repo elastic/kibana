@@ -5,33 +5,35 @@
  * 2.0.
  */
 
-import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DiscoverSetup } from '@kbn/discover-plugin/public';
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
 import { ObservabilityPublicSetup } from '@kbn/observability-plugin/public';
 import {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
+import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ServerlessObservabilityPluginSetup {}
+export interface ServerlessObservabilityPublicSetup {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ServerlessObservabilityPluginStart {}
+export interface ServerlessObservabilityPublicStart {}
 
-export interface ServerlessObservabilityPluginSetupDependencies {
+export interface ServerlessObservabilityPublicSetupDependencies {
   observability: ObservabilityPublicSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
   serverless: ServerlessPluginSetup;
   management: ManagementSetup;
+  discover: DiscoverSetup;
 }
 
-export interface ServerlessObservabilityPluginStartDependencies {
+export interface ServerlessObservabilityPublicStartDependencies {
   observabilityShared: ObservabilitySharedPluginStart;
   serverless: ServerlessPluginStart;
   management: ManagementStart;
-  cloud: CloudStart;
   data: DataPublicPluginStart;
+  security: SecurityPluginStart;
 }

@@ -100,5 +100,5 @@ export function generateHostsData({
   return range
     .interval('1m')
     .rate(1)
-    .generator((timestamp, index) => hosts.map((host) => host.metrics().timestamp(timestamp)));
+    .generator((timestamp, index) => hosts.map((host) => host.cpu().timestamp(timestamp)));
 }

@@ -8,20 +8,21 @@
 
 import { rpcSchemas } from '../../../common/schemas';
 import type { SearchIn } from '../../../common';
+import { getContentClientFactory } from '../../content_client';
 import type { ProcedureDefinition } from '../rpc_service';
 import type { Context } from '../types';
-import { getStorageContext } from './utils';
 
 export const search: ProcedureDefinition<Context, SearchIn<string>> = {
   schemas: rpcSchemas.search,
   fn: async (ctx, { contentTypeId, version, query, options }) => {
-    const storageContext = getStorageContext({
-      contentTypeId,
+    const clientFactory = getContentClientFactory({
+      contentRegistry: ctx.contentRegistry,
+    });
+    const client = clientFactory(contentTypeId).getForRequest({
+      ...ctx,
       version,
-      ctx,
     });
 
-    const crudInstance = ctx.contentRegistry.getCrud(contentTypeId);
-    return crudInstance.search(storageContext, query, options);
+    return client.search(query, options);
   },
 };

@@ -144,11 +144,10 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     );
   }, [disabled, onButtonClick, ariaLabel, isPopoverOpen]);
 
-  const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
-    newQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
-  };
-
   const refetchAll = useCallback(() => {
+    const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
+      newQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
+    };
     if (isActiveTimeline(scopeId ?? '')) {
       refetchQuery([timelineQuery]);
     } else {
@@ -431,6 +430,8 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
     (isLoadingAlertData && isSignalIndexLoading) ||
     enrichedAlert == null ||
     (memoRuleIndices == null && memoDataViewId == null);
+
+  if (isLoading || isRuleLoading) return null;
 
   return (
     <AddExceptionFlyout

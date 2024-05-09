@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import './connector_add_modal.scss';
-import { betaBadgeProps } from './beta_badge_props';
+import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import {
   ActionType,
@@ -244,8 +244,8 @@ const ConnectorAddModal = ({
               {actionTypeModel && actionTypeModel.isExperimental && (
                 <EuiFlexItem className="betaBadgeFlexItem" grow={false}>
                   <EuiBetaBadge
-                    label={betaBadgeProps.label}
-                    tooltipContent={betaBadgeProps.tooltipContent}
+                    label={TECH_PREVIEW_LABEL}
+                    tooltipContent={TECH_PREVIEW_DESCRIPTION}
                   />
                 </EuiFlexItem>
               )}

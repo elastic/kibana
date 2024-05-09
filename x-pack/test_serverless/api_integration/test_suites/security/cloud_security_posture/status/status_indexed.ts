@@ -9,7 +9,7 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import type { CspSetupStatus } from '@kbn/cloud-security-posture-plugin/common/types';
+import type { CspSetupStatus } from '@kbn/cloud-security-posture-plugin/common/types_old';
 import {
   FINDINGS_INDEX_DEFAULT_NS,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
@@ -47,7 +47,8 @@ export default function (providerContext: FtrProviderContext) {
 
     let agentPolicyId: string;
 
-    describe('STATUS = INDEXED TEST', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/178027
+    describe.skip('STATUS = INDEXED TEST', () => {
       beforeEach(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
         await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');

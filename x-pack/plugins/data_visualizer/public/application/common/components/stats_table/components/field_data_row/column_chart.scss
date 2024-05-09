@@ -16,7 +16,7 @@
   font-weight: normal;
   text-align: left;
   line-height: 1.1;
-  font-size: #{$euiFontSizeL / 2}; // 10px
+  font-size: #{calc($euiFontSizeL / 2)}; // 10px
 }
 
 .dataGridChart__legend--numeric {

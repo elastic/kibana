@@ -15,7 +15,7 @@ import { EuiLoadingChart } from '@elastic/eui';
 import { Filter, onlyDisabledFiltersChanged, Query, TimeRange } from '@kbn/es-query';
 import type { KibanaExecutionContext, SavedObjectAttributes } from '@kbn/core/public';
 import type { ErrorLike } from '@kbn/expressions-plugin/common';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { TimefilterContract } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { Warnings } from '@kbn/charts-plugin/public';
@@ -40,18 +40,13 @@ import {
 import type { RenderMode } from '@kbn/expressions-plugin/common';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
 import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
+import { isChartSizeEvent } from '@kbn/chart-expressions-common';
 import { isFallbackDataView } from '../visualize_app/utils';
 import { VisualizationMissedSavedObjectError } from '../components/visualization_missed_saved_object_error';
 import VisualizationError from '../components/visualization_error';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import { SerializedVis, Vis } from '../vis';
-import {
-  getApplication,
-  getExecutionContext,
-  getExpressions,
-  getTheme,
-  getUiActions,
-} from '../services';
+import { getApplication, getExecutionContext, getExpressions, getUiActions } from '../services';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { getSavedVisualization } from '../utils/saved_visualize_utils';
@@ -210,12 +205,8 @@ export class VisualizeEmbeddable
    * Gets the Visualize embeddable's local filters
    * @returns Local/panel-level array of filters for Visualize embeddable
    */
-  public async getFilters() {
-    let input = this.getInput();
-    if (this.inputIsRefType(input)) {
-      input = await this.getInputAsValueType();
-    }
-    const filters = input.savedVis?.data.searchSource?.filter ?? [];
+  public getFilters() {
+    const filters = this.vis.serialize().data.searchSource?.filter ?? [];
     // must clone the filters so that it's not read only, because mapAndFlattenFilters modifies the array
     return mapAndFlattenFilters(_.cloneDeep(filters));
   }
@@ -224,12 +215,8 @@ export class VisualizeEmbeddable
    * Gets the Visualize embeddable's local query
    * @returns Local/panel-level query for Visualize embeddable
    */
-  public async getQuery() {
-    let input = this.getInput();
-    if (this.inputIsRefType(input)) {
-      input = await this.getInputAsValueType();
-    }
-    return input.savedVis?.data.searchSource?.query;
+  public getQuery() {
+    return this.vis.serialize().data.searchSource.query;
   }
 
   public getInspectorAdapters = () => {
@@ -454,13 +441,14 @@ export class VisualizeEmbeddable
 
     this.domNode = div;
     super.render(this.domNode);
+    const { core } = this.deps.start();
 
     render(
-      <KibanaThemeProvider theme$={getTheme().theme$}>
+      <KibanaRenderContextProvider {...core}>
         <div className="visChart__spinner">
           <EuiLoadingChart mono size="l" />
         </div>
-      </KibanaThemeProvider>,
+      </KibanaRenderContextProvider>,
       this.domNode
     );
 
@@ -477,6 +465,10 @@ export class VisualizeEmbeddable
       this.handler.events$
         .pipe(
           mergeMap(async (event) => {
+            // Visualize doesn't respond to sizing events, so ignore.
+            if (isChartSizeEvent(event)) {
+              return;
+            }
             if (!this.input.disableTriggers) {
               const triggerId = get(VIS_EVENT_TO_TRIGGER, event.name, VIS_EVENT_TO_TRIGGER.filter);
               let context;
@@ -624,7 +616,7 @@ export class VisualizeEmbeddable
     }
 
     if (this.handler && !abortController.signal.aborted) {
-      await this.handler.update(this.expression, expressionParams);
+      this.handler.update(this.expression, expressionParams);
     }
   }
 
@@ -670,12 +662,14 @@ export class VisualizeEmbeddable
   };
 
   getInputAsRefType = async (): Promise<VisualizeByReferenceInput> => {
-    const { data, spaces, savedObjectsTaggingOss } = await this.deps.start().plugins;
+    const { plugins, core } = this.deps.start();
+    const { data, spaces, savedObjectsTaggingOss } = plugins;
     const savedVis = await getSavedVisualization({
       search: data.search,
       dataViews: data.dataViews,
       spaces,
       savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
+      ...core,
     });
     if (!savedVis) {
       throw new Error('Error creating a saved vis object');

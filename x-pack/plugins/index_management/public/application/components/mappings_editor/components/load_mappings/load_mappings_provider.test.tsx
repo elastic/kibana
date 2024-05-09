@@ -19,8 +19,8 @@ jest.mock('lodash', () => {
   };
 });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/code-editor', () => {
+  const original = jest.requireActual('@kbn/code-editor');
 
   const CodeEditorMock = (props: any) => (
     <input

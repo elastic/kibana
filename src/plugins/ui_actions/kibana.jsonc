@@ -7,12 +7,9 @@
     "id": "uiActions",
     "server": false,
     "browser": true,
-    "requiredPlugins": [
-      "dataViews"
-    ],
+    "requiredPlugins": [],
     "requiredBundles": [
-      "kibanaUtils",
-      "kibanaReact"
+      "kibanaUtils"
     ]
   }
 }

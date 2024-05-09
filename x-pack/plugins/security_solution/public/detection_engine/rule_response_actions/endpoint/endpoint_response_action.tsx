@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { ConfigFields } from './config_fields';
 import type { ArrayItem } from '../../../shared_imports';
 import { CommentField } from './comment_field';
 import { ActionTypeField } from './action_type_field';
@@ -28,6 +29,12 @@ export const EndpointResponseAction = React.memo((props: EndpointResponseActionP
       />
 
       <EndpointActionCallout basePath={paramsPath} editDisabled={props.editDisabled} />
+
+      <ConfigFields
+        basePath={paramsPath}
+        disabled={props.editDisabled}
+        readDefaultValueOnForm={!props.item.isNew}
+      />
 
       <CommentField
         basePath={paramsPath}

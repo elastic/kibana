@@ -7,3 +7,5 @@
  */
 
 export { runBuildApiDocsCli } from './src';
+
+export { findPlugins, findTeamPlugins } from './src/find_plugins';

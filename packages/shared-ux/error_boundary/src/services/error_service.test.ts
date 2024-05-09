@@ -20,7 +20,7 @@ describe('KibanaErrorBoundary Error Service', () => {
 
   it('decorates fatal error object', () => {
     const testFatal = new Error('This is an unrecognized and fatal error');
-    const serviceError = service.registerError(testFatal, {});
+    const serviceError = service.registerError(testFatal, { componentStack: '' });
 
     expect(serviceError.isFatal).toBe(true);
   });
@@ -28,7 +28,7 @@ describe('KibanaErrorBoundary Error Service', () => {
   it('decorates recoverable error object', () => {
     const testRecoverable = new Error('Could not load chunk blah blah');
     testRecoverable.name = 'ChunkLoadError';
-    const serviceError = service.registerError(testRecoverable, {});
+    const serviceError = service.registerError(testRecoverable, { componentStack: '' });
 
     expect(serviceError.isFatal).toBe(false);
   });
@@ -88,9 +88,36 @@ describe('KibanaErrorBoundary Error Service', () => {
     service.registerError(testFatal, errorInfo);
 
     expect(mockDeps.analytics.reportEvent).toHaveBeenCalledTimes(1);
-    expect(mockDeps.analytics.reportEvent).toHaveBeenCalledWith('fatal-error-react', {
+    expect(mockDeps.analytics.reportEvent.mock.calls[0][0]).toBe('fatal-error-react');
+    expect(mockDeps.analytics.reportEvent.mock.calls[0][1]).toMatchObject({
       component_name: 'OutrageousMaker',
       error_message: 'Error: This is an outrageous and fatal error',
     });
+  });
+
+  it('captures component stack trace and error stack trace for telemetry', () => {
+    jest.resetAllMocks();
+    const testFatal = new Error('This is an outrageous and fatal error');
+
+    const errorInfo = {
+      componentStack: `
+    at OutrageousMaker (http://localhost:9001/main.iframe.bundle.js:11616:73)
+    `,
+    };
+
+    service.registerError(testFatal, errorInfo);
+
+    expect(mockDeps.analytics.reportEvent).toHaveBeenCalledTimes(1);
+    expect(mockDeps.analytics.reportEvent.mock.calls[0][0]).toBe('fatal-error-react');
+    expect(
+      String(mockDeps.analytics.reportEvent.mock.calls[0][1].component_stack).includes(
+        'at OutrageousMaker'
+      )
+    ).toBe(true);
+    expect(
+      String(mockDeps.analytics.reportEvent.mock.calls[0][1].error_stack).startsWith(
+        'Error: This is an outrageous and fatal error'
+      )
+    ).toBe(true);
   });
 });
