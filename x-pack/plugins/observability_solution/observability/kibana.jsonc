@@ -29,7 +29,6 @@
       "inspector",
       "lens",
       "observabilityShared",
-      "observabilityAIAssistant",
       "ruleRegistry",
       "triggersActionsUi",
       "security",
@@ -48,7 +47,8 @@
       "cloud",
       "spaces",
       "serverless",
-      "guidedOnboarding"
+      "guidedOnboarding",
+      "observabilityAIAssistant",
     ],
     "requiredBundles": [
       "data",

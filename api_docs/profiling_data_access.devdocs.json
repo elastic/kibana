@@ -65,6 +65,16 @@
             "section": "def-common.TopNFunctions",
             "text": "TopNFunctions"
           },
+          ">; fetchESFunctions: ({ core, esClient, indices, stacktraceIdsField, query, aggregationField, limit, totalSeconds, }: ",
+          "FetchFunctionsParams",
+          ") => Promise<",
+          {
+            "pluginId": "@kbn/profiling-utils",
+            "scope": "common",
+            "docId": "kibKbnProfilingUtilsPluginApi",
+            "section": "def-common.TopNFunctions",
+            "text": "TopNFunctions"
+          },
           ">; }; }"
         ],
         "path": "x-pack/plugins/observability_solution/profiling_data_access/server/plugin.ts",

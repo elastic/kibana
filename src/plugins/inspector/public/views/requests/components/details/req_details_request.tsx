@@ -9,7 +9,7 @@
 import React, { Component } from 'react';
 import { Request } from '../../../../../common/adapters/request/types';
 import { DetailViewProps } from './types';
-import { RequestCodeViewer } from './req_code_viewer';
+import { RequestDetailsRequestContent } from './req_details_request_content';
 
 export class RequestDetailsRequest extends Component<DetailViewProps> {
   static shouldShow = (request: Request) => Boolean(request && request.json);
@@ -22,7 +22,7 @@ export class RequestDetailsRequest extends Component<DetailViewProps> {
     }
 
     return (
-      <RequestCodeViewer
+      <RequestDetailsRequestContent
         indexPattern={this.props.request.stats?.indexPattern?.value}
         requestParams={this.props.request.response?.requestParams}
         json={JSON.stringify(json, null, 2)}

@@ -58,9 +58,20 @@ export const ConnectorDetail: React.FC = () => {
   }>();
 
   const {
-    productAccess: { hasAppSearchAccess },
+    guidedOnboarding,
     productFeatures: { hasDefaultIngestPipeline },
   } = useValues(KibanaLogic);
+
+  useEffect(() => {
+    const subscription = guidedOnboarding?.guidedOnboardingApi
+      ?.isGuideStepActive$('databaseSearch', 'add_data')
+      .subscribe((isStepActive) => {
+        if (isStepActive && index?.count) {
+          guidedOnboarding.guidedOnboardingApi?.completeGuideStep('databaseSearch', 'add_data');
+        }
+      });
+    return () => subscription?.unsubscribe();
+  }, [guidedOnboarding, index?.count]);
 
   const ALL_INDICES_TABS = [
     {
@@ -239,7 +250,7 @@ export const ConnectorDetail: React.FC = () => {
           responsive: false,
           wrap: false,
         },
-        rightSideItems: getHeaderActions(index, hasAppSearchAccess, connector),
+        rightSideItems: getHeaderActions(index, connector),
         tabs,
       }}
     >

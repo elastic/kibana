@@ -224,7 +224,6 @@ describe('getSavedSearchAttributeService', () => {
             "removeField": [MockFunction],
             "serialize": [MockFunction],
             "setField": [MockFunction],
-            "setFields": [MockFunction],
             "setOverwriteDataViewType": [MockFunction],
             "setParent": [MockFunction],
             "toExpressionAst": [MockFunction],
@@ -242,6 +241,7 @@ describe('getSavedSearchAttributeService', () => {
           "title": "saved-search-title",
           "usesAdHocDataView": undefined,
           "viewMode": undefined,
+          "visContext": undefined,
         }
       `);
     });

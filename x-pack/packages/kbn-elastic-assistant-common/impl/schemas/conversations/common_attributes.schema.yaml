@@ -110,10 +110,14 @@ components:
       type: object
       required:
         - connectorId
+        - actionTypeId
       properties:
         connectorId:
           type: string
           description: connector Id
+        actionTypeId:
+          type: string
+          description: action type Id
         defaultSystemPromptId:
           type: string
           description: defaultSystemPromptId
@@ -250,6 +254,9 @@ components:
       required:
         - title
       properties:
+        id:
+          type: string
+          description: The conversation id.
         title:
           type: string
           description: The conversation title.

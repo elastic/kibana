@@ -29,10 +29,12 @@ exports[`Should remove selected fields from selectable 1`] = `
   <EuiSelectable
     isPreFiltered={false}
     onChange={[Function]}
+    optionMatcher={[Function]}
     options={
       Array [
         Object {
           "label": "@timestamp-label",
+          "name": "@timestamp",
           "prepend": <FieldIcon
             className="eui-alignMiddle"
             fill="none"
@@ -103,10 +105,12 @@ exports[`Should render 1`] = `
   <EuiSelectable
     isPreFiltered={false}
     onChange={[Function]}
+    optionMatcher={[Function]}
     options={
       Array [
         Object {
           "label": "@timestamp-label",
+          "name": "@timestamp",
           "prepend": <FieldIcon
             className="eui-alignMiddle"
             fill="none"
@@ -116,6 +120,7 @@ exports[`Should render 1`] = `
         },
         Object {
           "label": "custom label for prop1",
+          "name": "prop1",
           "prepend": <FieldIcon
             className="eui-alignMiddle"
             fill="none"
@@ -125,6 +130,7 @@ exports[`Should render 1`] = `
         },
         Object {
           "label": "prop2-label",
+          "name": "prop2",
           "prepend": <FieldIcon
             className="eui-alignMiddle"
             fill="none"

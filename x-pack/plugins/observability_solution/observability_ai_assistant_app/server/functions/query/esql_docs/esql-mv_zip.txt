@@ -1,0 +1,17 @@
+MV_ZIP
+
+Syntax
+Parameters
+string1
+Multivalue expression.
+string2
+Multivalue expression.
+delim
+Delimiter. Optional; if omitted, , is used as a default delimiter.
+DescriptionCombines the values from two multivalued fields with a delimiter that joins them together.Supported types
+Example
+```esql
+ROW a = ["x", "y", "z"], b = ["1", "2"]
+| EVAL c = mv_zip(a, b, "-")
+| KEEP a, b, c
+```

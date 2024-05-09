@@ -5,5 +5,15 @@
  * 2.0.
  */
 
-export { transformRuleToRuleResponse } from './transform_rule_to_rule_response/latest';
-export { transformRuleToRuleResponse as transformRuleToRuleResponseV1 } from './transform_rule_to_rule_response/v1';
+export {
+  transformRuleToRuleResponse,
+  transformRuleActions,
+  transformRuleLastRun,
+  transformMonitoring,
+} from './transform_rule_to_rule_response/latest';
+export {
+  transformRuleToRuleResponse as transformRuleToRuleResponseV1,
+  transformRuleActions as transformRuleActionsV1,
+  transformRuleLastRun as transformRuleLastRunV1,
+  transformMonitoring as transformMonitoringV1,
+} from './transform_rule_to_rule_response/v1';

@@ -230,7 +230,6 @@ export function LensEditConfigurationFlyout({
       },
       references,
       visualizationType: visualization.activeId,
-      title: visualization.activeId ?? '',
     };
     if (savedObjectId) {
       saveByRef?.(attrs);
@@ -413,10 +412,14 @@ export function LensEditConfigurationFlyout({
               flex-direction: column;
             }
             .euiAccordion__childWrapper {
-              overflow-y: auto !important;
               ${euiScrollBarStyles(euiTheme)}
+              overflow-y: auto !important;
+              pointer-events: none;
               padding-left: ${euiThemeVars.euiFormMaxWidth};
               margin-left: -${euiThemeVars.euiFormMaxWidth};
+              > * {
+                pointer-events: auto;
+              }
 
               .euiAccordion-isOpen & {
                 block-size: auto !important;

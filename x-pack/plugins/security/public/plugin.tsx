@@ -36,7 +36,7 @@ import { AnalyticsService } from './analytics';
 import { AnonymousAccessService } from './anonymous_access';
 import { AuthenticationService } from './authentication';
 import { AuthorizationService } from './authorization';
-import { buildSecurityApi } from './build_security_api';
+import { buildSecurityApi, buildUserProfileApi } from './build_delegate_api';
 import type { SecurityApiClients } from './components';
 import type { ConfigType } from './config';
 import { ManagementService, UserAPIClient } from './management';
@@ -143,7 +143,10 @@ export class SecurityPlugin
       securityApiClients: this.securityApiClients,
     });
 
-    core.security.registerSecurityApi(buildSecurityApi({ authc: this.authc }));
+    core.security.registerSecurityDelegate(buildSecurityApi({ authc: this.authc }));
+    core.userProfile.registerUserProfileDelegate(
+      buildUserProfileApi({ userProfile: this.securityApiClients.userProfiles })
+    );
 
     if (management) {
       this.managementService.setup({
@@ -196,10 +199,11 @@ export class SecurityPlugin
 
     const sessionExpired = new SessionExpired(application, logoutUrl, tenant);
     http.intercept(new UnauthorizedResponseHttpInterceptor(sessionExpired, anonymousPaths));
-    this.sessionTimeout = new SessionTimeout(notifications, sessionExpired, http, tenant);
+    this.sessionTimeout = new SessionTimeout(core, notifications, sessionExpired, http, tenant);
 
     this.sessionTimeout.start();
     this.securityCheckupService.start({ http, notifications, docLinks });
+    this.securityApiClients.userProfiles.start();
 
     if (management) {
       this.managementService.start({
@@ -231,7 +235,12 @@ export class SecurityPlugin
         update: this.securityApiClients.userProfiles.update.bind(
           this.securityApiClients.userProfiles
         ),
+        partialUpdate: this.securityApiClients.userProfiles.partialUpdate.bind(
+          this.securityApiClients.userProfiles
+        ),
         userProfile$: this.securityApiClients.userProfiles.userProfile$,
+        userProfileLoaded$: this.securityApiClients.userProfiles.userProfileLoaded$,
+        enabled$: this.securityApiClients.userProfiles.enabled$,
       },
     };
   }

@@ -3,4 +3,8 @@ steps:
     label: ES|QL Grammar Sync
     timeout_in_minutes: 10
     agents:
-      queue: n2-2-spot
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-qa
+      provider: gcp
+      machineType: n2-standard-2
+      preemptible: true

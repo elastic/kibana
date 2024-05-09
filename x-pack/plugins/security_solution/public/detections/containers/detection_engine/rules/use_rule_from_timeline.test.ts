@@ -17,6 +17,7 @@ import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 import { mockTimeline } from '../../../../../server/lib/timeline/__mocks__/create_timelines';
 import type { TimelineModel } from '../../../..';
 
+jest.mock('../../../../common/hooks/use_experimental_features');
 jest.mock('../../../../common/utils/global_query_string/helpers');
 jest.mock('../../../../timelines/containers/api');
 jest.mock('../../../../common/hooks/use_app_toasts');

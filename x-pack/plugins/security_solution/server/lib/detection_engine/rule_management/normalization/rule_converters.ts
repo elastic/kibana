@@ -23,7 +23,6 @@ import type { PatchRuleRequestBody } from '../../../../../common/api/detection_e
 import type {
   RelatedIntegrationArray,
   RequiredFieldArray,
-  SetupGuide,
   RuleCreateProps,
   TypeSpecificCreateProps,
   TypeSpecificResponse,
@@ -85,6 +84,7 @@ import {
 } from '../utils/utils';
 import { createRuleExecutionSummary } from '../../rule_monitoring';
 import type { PrebuiltRuleAsset } from '../../prebuilt_rules';
+import { convertObjectKeysToSnakeCase } from '../../../../utils/object_case_converters';
 
 const DEFAULT_FROM = 'now-6m' as const;
 const DEFAULT_TO = 'now' as const;
@@ -113,6 +113,7 @@ export const typeSpecificSnakeToCamel = (
         timestampField: params.timestamp_field,
         eventCategoryOverride: params.event_category_override,
         tiebreakerField: params.tiebreaker_field,
+        alertSuppression: convertAlertSuppressionToCamel(params.alert_suppression),
       };
     }
     case 'esql': {
@@ -200,6 +201,7 @@ export const typeSpecificSnakeToCamel = (
         filters: params.filters,
         language: params.language ?? 'kuery',
         dataViewId: params.data_view_id,
+        alertSuppression: convertAlertSuppressionToCamel(params.alert_suppression),
       };
     }
     default: {
@@ -222,6 +224,8 @@ const patchEqlParams = (
     timestampField: params.timestamp_field ?? existingRule.timestampField,
     eventCategoryOverride: params.event_category_override ?? existingRule.eventCategoryOverride,
     tiebreakerField: params.tiebreaker_field ?? existingRule.tiebreakerField,
+    alertSuppression:
+      convertAlertSuppressionToCamel(params.alert_suppression) ?? existingRule.alertSuppression,
   };
 };
 
@@ -346,6 +350,8 @@ const patchNewTermsParams = (
     filters: params.filters ?? existingRule.filters,
     newTermsFields: params.new_terms_fields ?? existingRule.newTermsFields,
     historyWindowStart: params.history_window_start ?? existingRule.historyWindowStart,
+    alertSuppression:
+      convertAlertSuppressionToCamel(params.alert_suppression) ?? existingRule.alertSuppression,
   };
 };
 
@@ -426,7 +432,6 @@ export const convertPatchAPIToInternalSchema = (
   nextParams: PatchRuleRequestBody & {
     related_integrations?: RelatedIntegrationArray;
     required_fields?: RequiredFieldArray;
-    setup?: SetupGuide;
   },
   existingRule: SanitizedRule<RuleParams>
 ): InternalRuleUpdate => {
@@ -487,7 +492,6 @@ export const convertCreateAPIToInternalSchema = (
   input: RuleCreateProps & {
     related_integrations?: RelatedIntegrationArray;
     required_fields?: RequiredFieldArray;
-    setup?: SetupGuide;
   },
   immutable = false,
   defaultEnabled = true
@@ -559,6 +563,7 @@ export const typeSpecificCamelToSnake = (
         timestamp_field: params.timestampField,
         event_category_override: params.eventCategoryOverride,
         tiebreaker_field: params.tiebreakerField,
+        alert_suppression: convertAlertSuppressionToSnake(params.alertSuppression),
       };
     }
     case 'esql': {
@@ -646,6 +651,7 @@ export const typeSpecificCamelToSnake = (
         filters: params.filters,
         language: params.language,
         data_view_id: params.dataViewId,
+        alert_suppression: convertAlertSuppressionToSnake(params.alertSuppression),
       };
     }
     default: {
@@ -686,6 +692,7 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
     version: params.version,
     exceptions_list: params.exceptionsList,
     immutable: params.immutable,
+    rule_source: convertObjectKeysToSnakeCase(params.ruleSource),
     related_integrations: params.relatedIntegrations ?? [],
     required_fields: params.requiredFields ?? [],
     setup: params.setup ?? '',

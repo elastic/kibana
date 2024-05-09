@@ -112,7 +112,9 @@
     "@kbn/shared-svg",
     "@kbn/shared-ux-utility",
     "@kbn/management-settings-components-field-row",
-    "@kbn/shared-ux-markdown"
+    "@kbn/shared-ux-markdown",
+    "@kbn/core-http-request-handler-context-server",
+    "@kbn/search-types",
   ],
   "exclude": ["target/**/*"]
 }

@@ -6,17 +6,23 @@
  */
 
 import React from 'react';
+import { useSpaceId } from '../../../hooks/use_space_id';
 import { useAvailableSteps } from './hooks/use_available_steps';
 import { useProductTypes } from './hooks/use_product_types';
 import { Onboarding } from './onboarding';
 
-export const OnboardingWithSettingsComponent: React.FC<{ indicesExist?: boolean }> = ({
+const OnboardingWithSettingsComponent: React.FC<{ indicesExist?: boolean }> = ({
   indicesExist,
 }) => {
   const productTypes = useProductTypes();
   const onboardingSteps = useAvailableSteps();
+  const spaceId = useSpaceId();
 
-  if (!onboardingSteps) {
+  /* spaceId returns undefined if the space is loading.
+   ** We render the onboarding component only when spaceId is ready
+   ** to make sure it reads the local storage data with the correct spaceId.
+   */
+  if (!onboardingSteps || !spaceId) {
     return null;
   }
 
@@ -25,9 +31,12 @@ export const OnboardingWithSettingsComponent: React.FC<{ indicesExist?: boolean 
       indicesExist={indicesExist}
       productTypes={productTypes}
       onboardingSteps={onboardingSteps}
+      spaceId={spaceId}
     />
   );
 };
 
+export const OnboardingWithSettings = React.memo(OnboardingWithSettingsComponent);
+
 // eslint-disable-next-line import/no-default-export
-export default OnboardingWithSettingsComponent;
+export default OnboardingWithSettings;

@@ -1,10 +1,12 @@
 TANH
 
-
-Tangent hyperbolic function.
+Syntax
+Parameters
+angle
+An angle, in radians. If null, the function returns null.
+DescriptionReturns the Tangent hyperbolic function of an angle.Supported types
+Example
 ```esql
 ROW a=1.8
 | EVAL tanh=TANH(a)
 ```
-
-Supported types:

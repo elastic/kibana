@@ -57,7 +57,6 @@ export const QueryClicksTable: React.FC<Props> = ({ items }) => {
     <EuiBasicTable
       columns={[DOCUMENT_COLUMN, TAGS_LIST_COLUMN, CLICKS_COLUMN] as Columns}
       items={items}
-      responsive
       noItemsMessage={
         <EuiEmptyPrompt
           iconType="visLine"

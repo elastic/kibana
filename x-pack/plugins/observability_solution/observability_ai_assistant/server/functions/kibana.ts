@@ -20,13 +20,11 @@ export function registerKibanaFunction({
   functions.registerFunction(
     {
       name: 'kibana',
-      contexts: ['core'],
       description:
         'Call Kibana APIs on behalf of the user. Only call this function when the user has explicitly requested it, and you know how to call it, for example by querying the knowledge base or having the user explain it to you. Assume that pathnames, bodies and query parameters may have changed since your knowledge cut off date.',
       descriptionForUser: 'Call Kibana APIs on behalf of the user',
       parameters: {
         type: 'object',
-        additionalProperties: false,
         properties: {
           method: {
             type: 'string',
@@ -40,9 +38,6 @@ export function registerKibanaFunction({
           query: {
             type: 'object',
             description: 'The query parameters, as an object',
-            additionalProperties: {
-              type: 'string',
-            },
           },
           body: {
             type: 'object',
@@ -67,7 +62,7 @@ export function registerKibanaFunction({
           '/internal/observability_ai_assistant/chat/complete',
           pathname
         ),
-        query,
+        query: query ? (query as Record<string, string>) : undefined,
       };
 
       const copiedHeaderNames = [

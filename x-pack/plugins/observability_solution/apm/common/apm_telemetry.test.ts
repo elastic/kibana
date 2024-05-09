@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  getApmTelemetryMapping,
-  mergeApmTelemetryMapping,
-} from './apm_telemetry';
+import { getApmTelemetryMapping, mergeApmTelemetryMapping } from './apm_telemetry';
 
 // Add this snapshot serializer for this test. The default snapshot serializer
 // prints "Object" next to objects in the JSON output, but we want to be able to
@@ -80,8 +77,8 @@ describe('APM telemetry helpers', () => {
         };
 
         expect(
-          mergeApmTelemetryMapping(validTelemetryMapping)?.mappings.properties
-            .stack_stats.properties.kibana.properties.plugins.properties.apm
+          mergeApmTelemetryMapping(validTelemetryMapping)?.mappings.properties.stack_stats
+            .properties.kibana.properties.plugins.properties.apm
         ).toEqual(getApmTelemetryMapping());
       });
     });

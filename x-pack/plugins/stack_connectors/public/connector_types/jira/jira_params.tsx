@@ -18,12 +18,14 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiText,
+  EuiIconTip,
 } from '@elastic/eui';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,
   useKibana,
+  JsonEditorWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { JiraActionParams } from './types';
 import { useGetIssueTypes } from './use_get_issue_types';
@@ -381,6 +383,51 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
             }
           )}
         />
+        <EuiFormRow
+          fullWidth
+          error={errors['subActionParams.incident.otherFields']}
+          isInvalid={
+            errors['subActionParams.incident.otherFields'] !== undefined &&
+            errors['subActionParams.incident.otherFields'].length > 0
+          }
+        >
+          <JsonEditorWithMessageVariables
+            messageVariables={messageVariables}
+            paramsProperty={'otherFields'}
+            inputTargetValue={actionParams.subActionParams?.incident?.otherFields}
+            errors={errors.otherFields as string[]}
+            label={
+              <>
+                {i18n.translate('xpack.stackConnectors.components.jira.otherFieldsFieldLabel', {
+                  defaultMessage: 'Additional fields',
+                })}
+                <EuiIconTip
+                  size="s"
+                  color="subdued"
+                  type="questionInCircle"
+                  className="eui-alignTop"
+                  data-test-subj="otherFieldsHelpTooltip"
+                  aria-label={i18n.translate(
+                    'xpack.stackConnectors.components.jira.otherFieldsHelpTooltip',
+                    {
+                      defaultMessage: 'Additional fields help',
+                    }
+                  )}
+                  content={i18n.translate(
+                    'xpack.stackConnectors.components.jira.otherFieldsHelpText',
+                    {
+                      defaultMessage:
+                        'Custom fields are not validated by the connector. To avoid failed actions, ensure compliance with your Jira policies.',
+                    }
+                  )}
+                />
+              </>
+            }
+            onDocumentsChange={(json: string) => {
+              editSubActionProperty('otherFields', json);
+            }}
+          />
+        </EuiFormRow>
       </>
     </>
   );

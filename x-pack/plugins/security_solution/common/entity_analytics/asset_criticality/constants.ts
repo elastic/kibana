@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+export const ASSET_CRITICALITY_URL = `/internal/asset_criticality`;
+export const ASSET_CRITICALITY_PRIVILEGES_URL = `/internal/asset_criticality/privileges`;
+export const ASSET_CRITICALITY_STATUS_URL = `${ASSET_CRITICALITY_URL}/status`;
+export const ASSET_CRITICALITY_CSV_UPLOAD_URL = `${ASSET_CRITICALITY_URL}/upload_csv`;
+
 export const ASSET_CRITICALITY_INDEX_PATTERN = '.asset-criticality.asset-criticality-*';
 
 type AssetCriticalityIndexPrivilege = 'read' | 'write';
@@ -22,6 +27,8 @@ export enum CriticalityLevels {
   LOW_IMPACT = 'low_impact',
 }
 
+export const ValidCriticalityLevels = Object.values(CriticalityLevels);
+
 /**
  * CriticalityModifiers are used to adjust the risk score based on the criticality of the asset.
  */
@@ -31,3 +38,8 @@ export const CriticalityModifiers: Record<CriticalityLevels, number> = {
   [CriticalityLevels.MEDIUM_IMPACT]: 1,
   [CriticalityLevels.LOW_IMPACT]: 0.5,
 };
+
+export const CRITICALITY_CSV_MAX_SIZE_BYTES = 1024 * 1024; // 1MB
+export const CRITICALITY_CSV_SIZE_TOLERANCE_BYTES = 1024 * 50; // ~= 50kb
+export const CRITICALITY_CSV_MAX_SIZE_BYTES_WITH_TOLERANCE =
+  CRITICALITY_CSV_MAX_SIZE_BYTES + CRITICALITY_CSV_SIZE_TOLERANCE_BYTES;

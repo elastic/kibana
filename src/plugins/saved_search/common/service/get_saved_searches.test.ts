@@ -128,7 +128,6 @@ describe('getSavedSearch', () => {
           "removeField": [MockFunction],
           "serialize": [MockFunction],
           "setField": [MockFunction],
-          "setFields": [MockFunction],
           "setOverwriteDataViewType": [MockFunction],
           "setParent": [MockFunction],
           "toExpressionAst": [MockFunction],
@@ -148,6 +147,7 @@ describe('getSavedSearch', () => {
         "title": "test1",
         "usesAdHocDataView": undefined,
         "viewMode": undefined,
+        "visContext": undefined,
       }
     `);
   });
@@ -236,7 +236,6 @@ describe('getSavedSearch', () => {
           "removeField": [MockFunction],
           "serialize": [MockFunction],
           "setField": [MockFunction],
-          "setFields": [MockFunction],
           "setOverwriteDataViewType": [MockFunction],
           "setParent": [MockFunction],
           "toExpressionAst": [MockFunction],
@@ -256,6 +255,7 @@ describe('getSavedSearch', () => {
         "title": "test2",
         "usesAdHocDataView": undefined,
         "viewMode": undefined,
+        "visContext": undefined,
       }
     `);
   });

@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useEffect } from 'react';
 import { parse } from '@kbn/datemath';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -12,25 +13,23 @@ import type { IToasts, NotificationsStart } from '@kbn/core-notifications-browse
 import type { Conversation } from '@kbn/elastic-assistant';
 import {
   AssistantProvider as ElasticAssistantProvider,
-  bulkChangeConversations,
-  mergeBaseWithPersistedConversations,
-  useFetchCurrentUserConversations,
+  bulkUpdateConversations,
+  getUserConversations,
 } from '@kbn/elastic-assistant';
 
-import type { FetchConversationsResponse } from '@kbn/elastic-assistant/impl/assistant/api';
 import { once } from 'lodash/fp';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { Message } from '@kbn/elastic-assistant-common';
+import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
+import { APP_ID } from '../../common';
 import { useBasePath, useKibana } from '../common/lib/kibana';
 import { useAssistantTelemetry } from './use_assistant_telemetry';
 import { getComments } from './get_comments';
 import { LOCAL_STORAGE_KEY, augmentMessageCodeBlocks } from './helpers';
 import { useBaseConversations } from './use_conversation_store';
-import { DEFAULT_ALLOW, DEFAULT_ALLOW_REPLACEMENT } from './content/anonymization';
 import { PROMPT_CONTEXTS } from './content/prompt_contexts';
 import { BASE_SECURITY_QUICK_PROMPTS } from './content/quick_prompts';
 import { BASE_SECURITY_SYSTEM_PROMPTS } from './content/prompts/system';
-import { useAnonymizationStore } from './use_anonymization_store';
 import { useAssistantAvailability } from './use_assistant_availability';
 import { useAppToasts } from '../common/hooks/use_app_toasts';
 import { useSignalIndex } from '../detections/containers/detection_engine/alerts/use_signal_index';
@@ -47,22 +46,15 @@ const LOCAL_CONVERSATIONS_MIGRATION_STATUS_TOAST_TITLE = i18n.translate(
 );
 
 export const createConversations = async (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  conversationsData: Record<string, any>,
   notifications: NotificationsStart,
   http: HttpSetup,
   storage: Storage
 ) => {
   // migrate conversations with messages from the local storage
   // won't happen next time
-  const conversations = storage.get(`securitySolution.${LOCAL_STORAGE_KEY}`);
+  const conversations = storage.get(`${APP_ID}.${LOCAL_STORAGE_KEY}`);
 
-  if (
-    conversationsData &&
-    Object.keys(conversationsData).length === 0 &&
-    conversations &&
-    Object.keys(conversations).length > 0
-  ) {
+  if (conversations && Object.keys(conversations).length > 0) {
     const conversationsToCreate = Object.values(conversations).filter(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (c: any) => c.messages && c.messages.length > 0
@@ -75,13 +67,28 @@ export const createConversations = async (
         timestamp: timestamp == null ? new Date().toISOString() : timestamp,
       };
     };
+    const connectors = await loadConnectors({ http });
 
     // post bulk create
-    const bulkResult = await bulkChangeConversations(
+    const bulkResult = await bulkUpdateConversations(
       http,
       {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         create: conversationsToCreate.reduce((res: Record<string, Conversation>, c: any) => {
+          // ensure actionTypeId is added to apiConfig from legacy conversation data
+          if (c.apiConfig && !c.apiConfig.actionTypeId) {
+            const selectedConnector = (connectors ?? []).find(
+              (connector) => connector.id === c.apiConfig.connectorId
+            );
+            if (selectedConnector) {
+              c.apiConfig = {
+                ...c.apiConfig,
+                actionTypeId: selectedConnector.actionTypeId,
+              };
+            } else {
+              c.apiConfig = undefined;
+            }
+          }
           res[c.id] = {
             ...c,
             messages: (c.messages ?? []).map(transformMessage),
@@ -94,7 +101,7 @@ export const createConversations = async (
       notifications.toasts
     );
     if (bulkResult && bulkResult.success) {
-      storage.remove(`securitySolution.${LOCAL_STORAGE_KEY}`);
+      storage.remove(`${APP_ID}.${LOCAL_STORAGE_KEY}`);
       notifications.toasts?.addSuccess({
         iconType: 'check',
         title: LOCAL_CONVERSATIONS_MIGRATION_STATUS_TOAST_TITLE,
@@ -108,7 +115,7 @@ export const createConversations = async (
 /**
  * This component configures the Elastic AI Assistant context provider for the Security Solution app.
  */
-export const AssistantProvider: React.FC = ({ children }) => {
+export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const {
     http,
     notifications,
@@ -122,28 +129,27 @@ export const AssistantProvider: React.FC = ({ children }) => {
   const assistantAvailability = useAssistantAvailability();
   const assistantTelemetry = useAssistantTelemetry();
 
-  const migrateConversationsFromLocalStorage = once(
-    (conversationsData: Record<string, Conversation>) =>
-      createConversations(conversationsData, notifications, http, storage)
-  );
-  const onFetchedConversations = useCallback(
-    (conversationsData: FetchConversationsResponse): Record<string, Conversation> => {
-      const mergedData = mergeBaseWithPersistedConversations({}, conversationsData);
-      if (assistantAvailability.isAssistantEnabled && assistantAvailability.hasAssistantPrivilege) {
-        migrateConversationsFromLocalStorage(mergedData);
+  useEffect(() => {
+    const migrateConversationsFromLocalStorage = once(async () => {
+      const res = await getUserConversations({
+        http,
+      });
+      if (
+        assistantAvailability.isAssistantEnabled &&
+        assistantAvailability.hasAssistantPrivilege &&
+        res.total === 0
+      ) {
+        await createConversations(notifications, http, storage);
       }
-      return mergedData;
-    },
-    [
-      assistantAvailability.hasAssistantPrivilege,
-      assistantAvailability.isAssistantEnabled,
-      migrateConversationsFromLocalStorage,
-    ]
-  );
-  useFetchCurrentUserConversations({ http, onFetch: onFetchedConversations });
-
-  const { defaultAllow, defaultAllowReplacement, setDefaultAllow, setDefaultAllowReplacement } =
-    useAnonymizationStore();
+    });
+    migrateConversationsFromLocalStorage();
+  }, [
+    assistantAvailability.hasAssistantPrivilege,
+    assistantAvailability.isAssistantEnabled,
+    http,
+    notifications,
+    storage,
+  ]);
 
   const { signalIndexName } = useSignalIndex();
   const alertsIndexPattern = signalIndexName ?? undefined;
@@ -156,11 +162,7 @@ export const AssistantProvider: React.FC = ({ children }) => {
       augmentMessageCodeBlocks={augmentMessageCodeBlocks}
       assistantAvailability={assistantAvailability}
       assistantTelemetry={assistantTelemetry}
-      defaultAllow={defaultAllow} // to server and plugin start
-      defaultAllowReplacement={defaultAllowReplacement} // to server and plugin start
       docLinks={{ ELASTIC_WEBSITE_URL, DOC_LINK_VERSION }}
-      baseAllow={DEFAULT_ALLOW} // to server and plugin start
-      baseAllowReplacement={DEFAULT_ALLOW_REPLACEMENT} // to server and plugin start
       basePath={basePath}
       basePromptContexts={Object.values(PROMPT_CONTEXTS)}
       baseQuickPrompts={BASE_SECURITY_QUICK_PROMPTS} // to server and plugin start
@@ -168,8 +170,6 @@ export const AssistantProvider: React.FC = ({ children }) => {
       baseConversations={baseConversations}
       getComments={getComments}
       http={http}
-      setDefaultAllow={setDefaultAllow} // remove
-      setDefaultAllowReplacement={setDefaultAllowReplacement} // remove
       title={ASSISTANT_TITLE}
       toasts={toasts}
     >

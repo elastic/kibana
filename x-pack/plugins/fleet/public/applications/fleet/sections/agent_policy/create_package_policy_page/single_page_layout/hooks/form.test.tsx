@@ -80,6 +80,7 @@ describe('useOnSubmit', () => {
         selectedPolicyTab: SelectedPolicyTab.NEW,
         newAgentPolicy: { name: 'test', namespace: '' },
         queryParamsPolicyId: undefined,
+        hasFleetAddAgentsPrivileges: true,
       })
     ));
 

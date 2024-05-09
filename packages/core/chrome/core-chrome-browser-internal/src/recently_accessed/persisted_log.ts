@@ -8,7 +8,7 @@
 
 import { cloneDeep, isEqual, take } from 'lodash';
 import * as Rx from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 
 interface PersistedLogOptions<T = any> {
   maxLength: number | string;

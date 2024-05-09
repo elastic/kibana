@@ -418,11 +418,7 @@
               "\nAdd to blocklist feature"
             ],
             "signature": [
-              "{ canWriteBlocklist: boolean; exceptionListApiClient: unknown; useSetUrlParams: () => (params: Record<string, string | number | null | undefined>, replace?: boolean | undefined) => void; getFlyoutComponent: () => React.NamedExoticComponent<",
-              "BlockListFlyoutProps",
-              ">; getFormComponent: () => React.NamedExoticComponent<",
-              "BlockListFormProps",
-              ">; }"
+              "Blocking"
             ],
             "path": "x-pack/plugins/threat_intelligence/public/types.ts",
             "deprecated": false,

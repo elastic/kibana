@@ -9,7 +9,7 @@
 import { resolve } from 'path';
 import { statSync } from 'fs';
 
-import { tap, filter, map, toArray } from 'rxjs/operators';
+import { tap, filter, map, toArray } from 'rxjs';
 
 import { scan$, Task } from '../lib';
 

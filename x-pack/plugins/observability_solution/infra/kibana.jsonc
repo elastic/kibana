@@ -16,6 +16,7 @@
       "data",
       "dataViews",
       "dataViewEditor",
+      "dashboard",
       "discover",
       "embeddable",
       "features",
@@ -24,7 +25,6 @@
       "logsShared",
       "metricsDataAccess",
       "observability",
-      "observabilityAIAssistant",
       "observabilityShared",
       "ruleRegistry",
       "security",
@@ -44,6 +44,7 @@
       "osquery",
       "cloud",
       "profilingDataAccess",
+      "observabilityAIAssistant",
       "licenseManagement",
       "serverless"
     ],

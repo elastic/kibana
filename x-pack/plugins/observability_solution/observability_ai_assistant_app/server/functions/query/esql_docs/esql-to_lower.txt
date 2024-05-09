@@ -1,0 +1,12 @@
+TO_LOWER
+
+Syntax
+Parameters
+str
+String expression. If null, the function returns null.
+DescriptionReturns a new string representing the input string converted to lower case.Supported types
+Example
+```esql
+ROW message = "Some Text"
+| EVAL message_lower = TO_LOWER(message)
+```

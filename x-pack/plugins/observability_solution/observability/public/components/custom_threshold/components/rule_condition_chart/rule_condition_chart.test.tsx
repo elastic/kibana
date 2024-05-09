@@ -6,11 +6,14 @@
  */
 
 import React from 'react';
-import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { act } from 'react-dom/test-utils';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { Comparator, Aggregators } from '../../../../../common/custom_threshold_rule/types';
+import {
+  Comparator,
+  Aggregators,
+  CustomThresholdSearchSourceFields,
+} from '../../../../../common/custom_threshold_rule/types';
 import { useKibana } from '../../../../utils/kibana_react';
 import { kibanaStartMock } from '../../../../utils/kibana_react.mock';
 import { MetricExpression } from '../../types';
@@ -36,7 +39,7 @@ describe('Rule condition chart', () => {
       <RuleConditionChart
         metricExpression={expression}
         dataView={dataView}
-        searchConfiguration={{} as SerializedSearchSourceFields}
+        searchConfiguration={{} as CustomThresholdSearchSourceFields}
         groupBy={[]}
         error={{}}
         timeRange={{ from: 'now-15m', to: 'now' }}

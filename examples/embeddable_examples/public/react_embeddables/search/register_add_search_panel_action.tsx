@@ -6,27 +6,27 @@
  * Side Public License, v 1.
  */
 
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { embeddableExamplesGrouping } from '../embeddable_examples_grouping';
 import { ADD_SEARCH_ACTION_ID, SEARCH_EMBEDDABLE_ID } from './constants';
+import { SearchSerializedState } from './types';
 
 export const registerAddSearchPanelAction = (uiActions: UiActionsStart) => {
   uiActions.registerAction<EmbeddableApiContext>({
     id: ADD_SEARCH_ACTION_ID,
-    getDisplayName: () => 'Unified search example',
-    getDisplayNameTooltip: () =>
-      'Demonstrates how to use global filters, global time range, panel time range, and global query state in an embeddable',
+    grouping: [embeddableExamplesGrouping],
+    getDisplayName: () => 'Search example',
     getIconType: () => 'search',
     isCompatible: async ({ embeddable }) => {
-      return apiIsPresentationContainer(embeddable);
+      return apiCanAddNewPanel(embeddable);
     },
     execute: async ({ embeddable }) => {
-      if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
-      embeddable.addNewPanel(
+      if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
+      embeddable.addNewPanel<SearchSerializedState>(
         {
           panelType: SEARCH_EMBEDDABLE_ID,
-          initialState: {},
         },
         true
       );

@@ -14,7 +14,9 @@ export interface UseAlertSuppressionReturn {
 
 export const useAlertSuppression = (ruleType: Type | undefined): UseAlertSuppressionReturn => {
   const isSuppressionEnabledForRuleType = useCallback(() => {
-    if (!ruleType) return false;
+    if (!ruleType) {
+      return false;
+    }
 
     return isSuppressibleAlertRule(ruleType);
   }, [ruleType]);

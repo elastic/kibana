@@ -19,7 +19,11 @@ import { FormattedRelative } from '@kbn/i18n-react';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
-
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useKibana } from '../../../../common/lib/kibana';
+import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
 import type { TimelineResultNote } from '../types';
 import { getEmptyValue, defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { MarkdownRenderer } from '../../../../common/components/markdown_editor';
@@ -31,7 +35,8 @@ import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useDeleteNote } from './hooks/use_delete_note';
-import { getTimelineNoteSelector } from '../../timeline/notes_tab_content/selectors';
+import { getTimelineNoteSelector } from '../../timeline/tabs/notes/selectors';
+import { ENABLE_EXPANDABLE_FLYOUT_SETTING } from '../../../../../common/constants';
 
 export const NotePreviewsContainer = styled.section`
   padding-top: ${({ theme }) => `${theme.eui.euiSizeS}`};
@@ -51,19 +56,54 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
   const dispatch = useDispatch();
   const { selectedPatterns } = useSourcererDataView(SourcererScopeName.timeline);
 
+  const { telemetry } = useKibana().services;
+  const { openFlyout } = useExpandableFlyoutApi();
+  const [isSecurityFlyoutEnabled] = useUiSetting$<boolean>(ENABLE_EXPANDABLE_FLYOUT_SETTING);
+  const expandableTimelineFlyoutEnabled = useIsExperimentalFeatureEnabled(
+    'expandableTimelineFlyoutEnabled'
+  );
+
   const handleClick = useCallback(() => {
-    dispatch(
-      timelineActions.toggleDetailPanel({
-        panelView: 'eventDetail',
-        tabType: TimelineTabs.notes,
-        id: timelineId,
-        params: {
-          eventId,
-          indexName: selectedPatterns.join(','),
+    const indexName = selectedPatterns.join(',');
+
+    if (isSecurityFlyoutEnabled && expandableTimelineFlyoutEnabled) {
+      openFlyout({
+        right: {
+          id: DocumentDetailsRightPanelKey,
+          params: {
+            id: eventId,
+            indexName,
+            scopeId: timelineId,
+          },
         },
-      })
-    );
-  }, [dispatch, eventId, selectedPatterns, timelineId]);
+      });
+      telemetry.reportDetailsFlyoutOpened({
+        location: timelineId,
+        panel: 'right',
+      });
+    } else {
+      dispatch(
+        timelineActions.toggleDetailPanel({
+          panelView: 'eventDetail',
+          tabType: TimelineTabs.notes,
+          id: timelineId,
+          params: {
+            eventId,
+            indexName,
+          },
+        })
+      );
+    }
+  }, [
+    dispatch,
+    eventId,
+    expandableTimelineFlyoutEnabled,
+    isSecurityFlyoutEnabled,
+    openFlyout,
+    selectedPatterns,
+    telemetry,
+    timelineId,
+  ]);
 
   return (
     <EuiButtonIcon

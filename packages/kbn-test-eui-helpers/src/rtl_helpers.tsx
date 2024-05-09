@@ -5,14 +5,68 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+/* eslint-disable max-classes-per-file */
+
 import moment from 'moment';
 import userEvent from '@testing-library/user-event';
 import { screen, within, fireEvent } from '@testing-library/react';
 
-export const getButtonGroupInputValue = (testId: string) => () => {
+export const getSelectedButtonInGroup = (testId: string) => () => {
   const buttonGroup = screen.getByTestId(testId);
   return within(buttonGroup).getByRole('button', { pressed: true });
 };
+
+export class EuiButtonGroupTestHarness {
+  #testId: string;
+
+  /**
+   * Returns button group or throws
+   */
+  get #buttonGroup() {
+    return screen.getByTestId(this.#testId);
+  }
+
+  constructor(testId: string) {
+    this.#testId = testId;
+  }
+
+  /**
+   * Returns `data-test-subj` of button group
+   */
+  public get testId() {
+    return this.#testId;
+  }
+
+  /**
+   * Returns button group if found, otherwise `null`
+   */
+  public get self() {
+    return screen.queryByTestId(this.#testId);
+  }
+
+  /**
+   * Returns all options of button groups
+   */
+  public get options() {
+    return within(this.#buttonGroup).getAllByRole('button');
+  }
+
+  /**
+   * Returns selected value of button group
+   */
+  public get selected() {
+    return within(this.#buttonGroup).getByRole('button', { pressed: true });
+  }
+
+  /**
+   * Select option from group
+   */
+  public select(optionName: string | RegExp) {
+    const option = within(this.#buttonGroup).getByRole('button', { name: optionName });
+    fireEvent.click(option);
+  }
+}
 
 export class EuiSuperDatePickerTestHarness {
   // From https://github.com/elastic/eui/blob/6a30eba7c2a154691c96a1d17c8b2f3506d351a3/src/components/date_picker/super_date_picker/super_date_picker.tsx#L222

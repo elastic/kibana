@@ -33,6 +33,8 @@ jest.mock('../../common/containers/use_global_time', () => {
 });
 jest.mock('../../common/lib/kibana');
 
+jest.mock('../../common/hooks/use_experimental_features');
+
 describe('useCreateTimeline', () => {
   const resetDiscoverAppState = jest.fn().mockResolvedValue({});
   (useDiscoverInTimelineContext as jest.Mock).mockReturnValue({ resetDiscoverAppState });

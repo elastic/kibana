@@ -21,6 +21,7 @@ import {
   apmLabsButton,
   enableAgentExplorerView,
   apmEnableTableSearchBar,
+  apmEnableMultiSignal,
   enableAwsLambdaMetrics,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
@@ -43,6 +44,7 @@ import {
   apmEnableTransactionProfiling,
   enableInfrastructureAssetCustomDashboards,
   apmEnableServiceInventoryTableSearchBar,
+  profilingFetchTopNFunctionsFromStacktraces,
 } from '../common/ui_settings_keys';
 
 const betaLabel = i18n.translate('xpack.observability.uiSettings.betaLabel', {
@@ -325,6 +327,23 @@ export const uiSettings: Record<string, UiSettings> = {
     requiresPageReload: true,
     type: 'boolean',
   },
+  [apmEnableMultiSignal]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmEnableMultiSignal', {
+      defaultMessage: 'Multi signal APM',
+    }),
+    description: i18n.translate('xpack.observability.apmEnableMultiSignalDescription', {
+      defaultMessage:
+        '{technicalPreviewLabel} Enable the multi-signal feature in APM, which allows you to monitor services from logs and traces.',
+      values: {
+        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
+      },
+    }),
+    schema: schema.boolean(),
+    value: false,
+    requiresPageReload: true,
+    type: 'boolean',
+  },
   [apmEnableServiceInventoryTableSearchBar]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.apmEnableServiceInventoryTableSearchBar', {
@@ -599,6 +618,21 @@ export const uiSettings: Record<string, UiSettings> = {
     value: true,
     schema: schema.boolean(),
     requiresPageReload: true,
+  },
+  [profilingFetchTopNFunctionsFromStacktraces]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.profilingFetchTopNFunctionsFromStacktraces', {
+      defaultMessage: 'Switch to fetch the TopN Functions from the Stacktraces API.',
+    }),
+    description: i18n.translate(
+      'xpack.observability.profilingFetchTopNFunctionsFromStacktracesDescription',
+      {
+        defaultMessage: `The topN functions pages use the topN/functions API, turn it on to switch to the stacktraces api`,
+      }
+    ),
+    value: false,
+    schema: schema.boolean(),
+    requiresPageReload: false,
   },
 };
 

@@ -41,10 +41,10 @@ export const IndicesTable: React.FC<IndicesTableProps> = ({ indices, onRemoveCli
             ),
             icon: 'minusInCircle',
             onClick: (item: { index: string }) => onRemoveClick(item.index),
+            'data-test-subj': `removeIndexButton`,
           },
         ],
       },
     ]}
-    hasActions
   />
 );

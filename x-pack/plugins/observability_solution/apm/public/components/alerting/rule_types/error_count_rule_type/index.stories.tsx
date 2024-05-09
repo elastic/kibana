@@ -55,10 +55,7 @@ const stories: Meta<{}> = {
 };
 export default stories;
 
-export const CreatingInApmFromInventory: Story<Args> = ({
-  ruleParams,
-  metadata,
-}) => {
+export const CreatingInApmFromInventory: Story<Args> = ({ ruleParams, metadata }) => {
   const [params, setParams] = useState<ErrorCountRuleParams>(ruleParams);
 
   function setRuleParams(property: string, value: any) {
@@ -84,10 +81,7 @@ CreatingInApmFromInventory.args = {
   },
 };
 
-export const CreatingInApmFromService: Story<Args> = ({
-  ruleParams,
-  metadata,
-}) => {
+export const CreatingInApmFromService: Story<Args> = ({ ruleParams, metadata }) => {
   const [params, setParams] = useState<ErrorCountRuleParams>(ruleParams);
 
   function setRuleParams(property: string, value: any) {
@@ -113,10 +107,7 @@ CreatingInApmFromService.args = {
   },
 };
 
-export const EditingInStackManagement: Story<Args> = ({
-  ruleParams,
-  metadata,
-}) => {
+export const EditingInStackManagement: Story<Args> = ({ ruleParams, metadata }) => {
   const [params, setParams] = useState<ErrorCountRuleParams>(ruleParams);
 
   function setRuleParams(property: string, value: any) {
@@ -143,10 +134,7 @@ EditingInStackManagement.args = {
   metadata: undefined,
 };
 
-export const CreatingInStackManagement: Story<Args> = ({
-  ruleParams,
-  metadata,
-}) => {
+export const CreatingInStackManagement: Story<Args> = ({ ruleParams, metadata }) => {
   const [params, setParams] = useState<ErrorCountRuleParams>(ruleParams);
 
   function setRuleParams(property: string, value: any) {

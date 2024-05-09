@@ -354,6 +354,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
     'data-test-subj':
       stateService.creationOptions.dataTestSubj?.fieldListAddFieldButtonTestSubj ??
       'unifiedFieldListAddField',
+    className: 'unifiedFieldListSidebar__addBtn',
   };
   const buttonAddFieldLabel = i18n.translate(
     'unifiedFieldList.fieldListSidebar.addFieldButtonLabel',

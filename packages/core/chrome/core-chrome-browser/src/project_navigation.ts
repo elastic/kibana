@@ -20,7 +20,16 @@ import type {
   AppId as ManagementApp,
   DeepLinkId as ManagementLink,
 } from '@kbn/deeplinks-management';
-import type { AppId as SearchApp, DeepLinkId as SearchLink } from '@kbn/deeplinks-search';
+import type {
+  EnterpriseSearchApp,
+  EnterpriseSearchContentApp,
+  EnterpriseSearchApplicationsApp,
+  EnterpriseSearchAnalyticsApp,
+  EnterpriseSearchAppsearchApp,
+  EnterpriseSearchWorkplaceSearchApp,
+  ServerlessSearchApp,
+  DeepLinkId as SearchLink,
+} from '@kbn/deeplinks-search';
 import type {
   AppId as ObservabilityApp,
   DeepLinkId as ObservabilityLink,
@@ -39,7 +48,13 @@ export type AppId =
   | AnalyticsApp
   | MlApp
   | ManagementApp
-  | SearchApp
+  | EnterpriseSearchApp
+  | EnterpriseSearchContentApp
+  | EnterpriseSearchApplicationsApp
+  | EnterpriseSearchAnalyticsApp
+  | EnterpriseSearchAppsearchApp
+  | EnterpriseSearchWorkplaceSearchApp
+  | ServerlessSearchApp
   | ObservabilityApp
   | SecurityApp
   | FleetApp

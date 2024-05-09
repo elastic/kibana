@@ -24,7 +24,7 @@ import {
 import {
   DiscoverAppState,
   isEqualFilters,
-} from '../application/main/services/discover_app_state_container';
+} from '../application/main/state_management/discover_app_state_container';
 import { getSortForSearchSource } from './sorting';
 
 /**
@@ -39,7 +39,6 @@ export async function getSharingData(
   const { uiSettings, data } = services;
   const searchSource = currentSearchSource.createCopy();
   const index = searchSource.getField('index')!;
-  let existingFilter = searchSource.getField('filter') as Filter[] | Filter | undefined;
 
   searchSource.setField(
     'sort',
@@ -50,7 +49,6 @@ export async function getSharingData(
     })
   );
 
-  searchSource.removeField('filter');
   searchSource.removeField('highlight');
   searchSource.removeField('highlightAll');
   searchSource.removeField('aggs');
@@ -81,6 +79,10 @@ export async function getSharingData(
       addGlobalTimeFilter?: boolean;
       absoluteTime?: boolean;
     }): SerializedSearchSourceFields => {
+      let existingFilter = searchSource.getField('filter') as Filter[] | Filter | undefined;
+      const searchSourceUpdated = searchSource.createCopy();
+      searchSourceUpdated.removeField('filter');
+
       const timeFilter = absoluteTime ? absoluteTimeFilter : relativeTimeFilter;
       if (addGlobalTimeFilter && timeFilter) {
         // remove timeFilter from existing filter
@@ -102,7 +104,7 @@ export async function getSharingData(
       }
 
       if (existingFilter) {
-        searchSource.setField('filter', existingFilter);
+        searchSourceUpdated.setField('filter', existingFilter);
       }
 
       /*
@@ -112,7 +114,7 @@ export async function getSharingData(
        */
       const useFieldsApi = !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
       if (useFieldsApi) {
-        searchSource.removeField('fieldsFromSource');
+        searchSourceUpdated.removeField('fieldsFromSource');
         const fields = columns.length
           ? columns.map((column) => {
               let field = column;
@@ -127,9 +129,9 @@ export async function getSharingData(
             })
           : [{ field: '*', include_unmapped: 'true' }];
 
-        searchSource.setField('fields', fields);
+        searchSourceUpdated.setField('fields', fields);
       }
-      return searchSource.getSerializedFields(true);
+      return searchSourceUpdated.getSerializedFields(true);
     },
     columns,
   };

@@ -14,11 +14,11 @@ import type {
   OnPreAuthHandler,
   OnPreAuthToolkit,
 } from '@kbn/core-http-server';
+import { isKibanaResponse } from '@kbn/core-http-server';
 import { OnPreAuthResultType } from '@kbn/core-http-server';
 import {
   HapiResponseAdapter,
   CoreKibanaRequest,
-  isKibanaResponse,
   lifecycleResponseFactory,
 } from '@kbn/core-http-router-server-internal';
 

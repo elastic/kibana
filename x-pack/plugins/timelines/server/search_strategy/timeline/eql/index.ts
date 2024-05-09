@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { map, mergeMap } from 'rxjs/operators';
+import { map, mergeMap } from 'rxjs';
 import { ISearchStrategy, PluginStart, shimHitsTotal } from '@kbn/data-plugin/server';
 import { EqlSearchStrategyResponse, EQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import { TimelineEqlRequestOptions } from '../../../../common/api/search_strategy';

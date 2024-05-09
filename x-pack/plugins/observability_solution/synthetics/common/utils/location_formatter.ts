@@ -8,6 +8,16 @@
 import { PrivateLocation, ServiceLocation } from '../runtime_types';
 
 export const formatLocation = (location: ServiceLocation | PrivateLocation) => {
+  if ('agentPolicyId' in location) {
+    return {
+      id: location.id,
+      label: location.label,
+      geo: location.geo,
+      isServiceManaged: location.isServiceManaged,
+      agentPolicyId: location.agentPolicyId,
+    };
+  }
+
   return {
     id: location.id,
     label: location.label,

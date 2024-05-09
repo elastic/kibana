@@ -1,10 +1,14 @@
 SPLIT
 
-Split a single valued string into multiple strings. For example:
+Syntax
+Parameters
+string
+String expression. If null, the function returns null.
+delim
+Delimiter. Only single byte delimiters are currently supported.
+DescriptionSplit a single valued string into multiple strings.Supported types
+Example
 ```esql
 ROW words="foo;bar;baz;qux;quux;corge"
 | EVAL word = SPLIT(words, ";")
 ```
-
-Which splits "foo;bar;baz;qux;quux;corge" on ; and returns an array:
-Only single byte delimiters are currently supported.

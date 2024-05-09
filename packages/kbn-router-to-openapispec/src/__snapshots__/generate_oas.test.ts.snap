@@ -1,0 +1,481 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`generateOpenApiDocument @kbn/config-schema generates references in the expected format 1`] = `
+Object {
+  "components": Object {
+    "schemas": Object {
+      "my.name": Object {
+        "minLength": 1,
+        "type": "string",
+      },
+    },
+    "securitySchemes": Object {
+      "apiKeyAuth": Object {
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey",
+      },
+      "basicAuth": Object {
+        "scheme": "basic",
+        "type": "http",
+      },
+    },
+  },
+  "externalDocs": undefined,
+  "info": Object {
+    "description": undefined,
+    "title": "test",
+    "version": "99.99.99",
+  },
+  "openapi": "3.0.0",
+  "paths": Object {
+    "/foo/{id}": Object {
+      "get": Object {
+        "operationId": "/foo/{id}#0",
+        "parameters": Array [
+          Object {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": Object {
+              "default": "2023-10-31",
+              "enum": Array [
+                "2023-10-31",
+              ],
+              "type": "string",
+            },
+          },
+          Object {
+            "description": undefined,
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": Object {
+              "minLength": 1,
+              "type": "string",
+            },
+          },
+        ],
+        "requestBody": Object {
+          "content": Object {
+            "application/json; Elastic-Api-Version=2023-10-31": Object {
+              "schema": Object {
+                "additionalProperties": false,
+                "properties": Object {
+                  "name": Object {
+                    "$ref": "#/components/schemas/my.name",
+                  },
+                  "other": Object {
+                    "type": "string",
+                  },
+                },
+                "required": Array [
+                  "name",
+                  "other",
+                ],
+                "type": "object",
+              },
+            },
+          },
+        },
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "application/json; Elastic-Api-Version=2023-10-31": Object {
+                "schema": Object {
+                  "maxLength": 10,
+                  "minLength": 1,
+                  "type": "string",
+                },
+              },
+            },
+            "description": "No description",
+          },
+        },
+        "summary": "",
+      },
+    },
+  },
+  "security": Array [
+    Object {
+      "basicAuth": Array [],
+    },
+  ],
+  "servers": Array [
+    Object {
+      "url": "https://test.oas",
+    },
+  ],
+  "tags": undefined,
+}
+`;
+
+exports[`generateOpenApiDocument @kbn/config-schema generates the expected OpenAPI document 1`] = `
+Object {
+  "components": Object {
+    "schemas": Object {},
+    "securitySchemes": Object {
+      "apiKeyAuth": Object {
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey",
+      },
+      "basicAuth": Object {
+        "scheme": "basic",
+        "type": "http",
+      },
+    },
+  },
+  "externalDocs": undefined,
+  "info": Object {
+    "description": undefined,
+    "title": "test",
+    "version": "99.99.99",
+  },
+  "openapi": "3.0.0",
+  "paths": Object {
+    "/bar": Object {
+      "get": Object {
+        "operationId": "/bar#0",
+        "parameters": Array [
+          Object {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": Object {
+              "default": "oas-test-version-2",
+              "enum": Array [
+                "oas-test-version-1",
+                "oas-test-version-2",
+              ],
+              "type": "string",
+            },
+          },
+        ],
+        "requestBody": Object {
+          "content": Object {
+            "application/json; Elastic-Api-Version=oas-test-version-1": Object {
+              "schema": Object {
+                "additionalProperties": false,
+                "properties": Object {
+                  "deprecatedFoo": Object {
+                    "deprecated": true,
+                    "description": "deprecated foo",
+                    "type": "string",
+                  },
+                  "foo": Object {
+                    "type": "string",
+                  },
+                },
+                "required": Array [
+                  "foo",
+                ],
+                "type": "object",
+              },
+            },
+            "application/json; Elastic-Api-Version=oas-test-version-2": Object {
+              "schema": Object {
+                "additionalProperties": false,
+                "properties": Object {
+                  "foo": Object {
+                    "type": "string",
+                  },
+                },
+                "required": Array [
+                  "foo",
+                ],
+                "type": "object",
+              },
+            },
+          },
+        },
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "application/json; Elastic-Api-Version=oas-test-version-1": Object {
+                "schema": Object {
+                  "additionalProperties": false,
+                  "description": "fooResponse",
+                  "properties": Object {
+                    "fooResponseWithDescription": Object {
+                      "type": "string",
+                    },
+                  },
+                  "required": Array [
+                    "fooResponseWithDescription",
+                  ],
+                  "type": "object",
+                },
+              },
+              "application/octet-stream; Elastic-Api-Version=oas-test-version-2": Object {
+                "schema": Object {
+                  "description": "stream response",
+                  "type": "object",
+                },
+              },
+            },
+          },
+        },
+        "summary": "versioned route",
+      },
+    },
+    "/foo/{id}": Object {
+      "get": Object {
+        "operationId": "/foo/{id}#0",
+        "parameters": Array [
+          Object {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": Object {
+              "default": "2023-10-31",
+              "enum": Array [
+                "2023-10-31",
+              ],
+              "type": "string",
+            },
+          },
+          Object {
+            "description": "id",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": Object {
+              "maxLength": 36,
+              "type": "string",
+            },
+          },
+          Object {
+            "description": "page",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": Object {
+              "default": 1,
+              "maximum": 999,
+              "minimum": 1,
+              "type": "number",
+            },
+          },
+        ],
+        "requestBody": Object {
+          "content": Object {
+            "application/json; Elastic-Api-Version=2023-10-31": Object {
+              "schema": Object {
+                "additionalProperties": false,
+                "properties": Object {
+                  "any": Object {},
+                  "booleanDefault": Object {
+                    "default": true,
+                    "description": "defaults to to true",
+                    "type": "boolean",
+                  },
+                  "ipType": Object {
+                    "format": "ipv4",
+                    "type": "string",
+                  },
+                  "literalType": Object {
+                    "enum": Array [
+                      "literallythis",
+                    ],
+                    "type": "string",
+                  },
+                  "map": Object {
+                    "additionalProperties": Object {
+                      "type": "string",
+                    },
+                    "type": "object",
+                  },
+                  "maybeNumber": Object {
+                    "maximum": 1000,
+                    "minimum": 1,
+                    "type": "number",
+                  },
+                  "record": Object {
+                    "additionalProperties": Object {
+                      "type": "string",
+                    },
+                    "type": "object",
+                  },
+                  "string": Object {
+                    "maxLength": 10,
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "union": Object {
+                    "anyOf": Array [
+                      Object {
+                        "description": "Union string",
+                        "maxLength": 1,
+                        "type": "string",
+                      },
+                      Object {
+                        "description": "Union number",
+                        "minimum": 0,
+                        "type": "number",
+                      },
+                    ],
+                  },
+                  "uri": Object {
+                    "default": "prototest://something",
+                    "format": "uri",
+                    "type": "string",
+                  },
+                },
+                "required": Array [
+                  "string",
+                  "ipType",
+                  "literalType",
+                  "map",
+                  "record",
+                  "union",
+                  "any",
+                ],
+                "type": "object",
+              },
+            },
+          },
+        },
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "application/json; Elastic-Api-Version=2023-10-31": Object {
+                "schema": Object {
+                  "maxLength": 10,
+                  "minLength": 1,
+                  "type": "string",
+                },
+              },
+            },
+            "description": "route",
+          },
+        },
+        "summary": "route",
+      },
+    },
+  },
+  "security": Array [
+    Object {
+      "basicAuth": Array [],
+    },
+  ],
+  "servers": Array [
+    Object {
+      "url": "https://test.oas",
+    },
+  ],
+  "tags": undefined,
+}
+`;
+
+exports[`generateOpenApiDocument unknown schema/validation produces the expected output 1`] = `
+Object {
+  "components": Object {
+    "schemas": Object {},
+    "securitySchemes": Object {
+      "apiKeyAuth": Object {
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey",
+      },
+      "basicAuth": Object {
+        "scheme": "basic",
+        "type": "http",
+      },
+    },
+  },
+  "externalDocs": undefined,
+  "info": Object {
+    "description": undefined,
+    "title": "test",
+    "version": "99.99.99",
+  },
+  "openapi": "3.0.0",
+  "paths": Object {
+    "/foo/{id}": Object {
+      "get": Object {
+        "operationId": "/foo/{id}#0",
+        "parameters": Array [
+          Object {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": Object {
+              "default": "2023-10-31",
+              "enum": Array [
+                "2023-10-31",
+              ],
+              "type": "string",
+            },
+          },
+        ],
+        "requestBody": Object {
+          "content": Object {
+            "application/json; Elastic-Api-Version=2023-10-31": Object {
+              "schema": Object {},
+            },
+          },
+        },
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "application/json; Elastic-Api-Version=2023-10-31": Object {
+                "schema": Object {},
+              },
+            },
+            "description": "No description",
+          },
+        },
+        "summary": "",
+      },
+    },
+    "/test": Object {
+      "get": Object {
+        "operationId": "/test#0",
+        "parameters": Array [
+          Object {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": Object {
+              "default": "123",
+              "enum": Array [
+                "123",
+              ],
+              "type": "string",
+            },
+          },
+        ],
+        "requestBody": Object {
+          "content": Object {
+            "application/json; Elastic-Api-Version=123": Object {
+              "schema": Object {},
+            },
+          },
+        },
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "application/json; Elastic-Api-Version=123": Object {
+                "schema": Object {},
+              },
+            },
+          },
+        },
+        "summary": "",
+      },
+    },
+  },
+  "security": Array [
+    Object {
+      "basicAuth": Array [],
+    },
+  ],
+  "servers": Array [
+    Object {
+      "url": "https://test.oas",
+    },
+  ],
+  "tags": undefined,
+}
+`;

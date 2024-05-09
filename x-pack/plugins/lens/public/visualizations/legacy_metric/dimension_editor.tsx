@@ -71,7 +71,6 @@ export function MetricDimensionEditor(
             defaultMessage: 'Color by value',
           })}
           data-test-subj="lnsLegacyMetric_dynamicColoring_groups"
-          name="dynamicColoring"
           buttonSize="compressed"
           options={[
             {

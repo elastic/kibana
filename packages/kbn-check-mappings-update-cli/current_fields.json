@@ -4,6 +4,15 @@
     "name"
   ],
   "action_task_params": [],
+  "ad_hoc_run_params": [
+    "apiKeyId",
+    "createdAt",
+    "end",
+    "rule",
+    "rule.alertTypeId",
+    "rule.consumer",
+    "start"
+  ],
   "alert": [
     "actions",
     "actions.actionRef",
@@ -195,6 +204,13 @@
   "cases-connector-mappings": [
     "owner"
   ],
+  "cases-rules": [
+    "counter",
+    "createdAt",
+    "rules",
+    "rules.id",
+    "updatedAt"
+  ],
   "cases-telemetry": [],
   "cases-user-actions": [
     "action",
@@ -290,6 +306,7 @@
     "installed_kibana_space_id",
     "internal",
     "keep_policies_up_to_date",
+    "latest_executed_state",
     "latest_install_failed_attempts",
     "name",
     "package_assets",
@@ -462,14 +479,15 @@
   ],
   "infra-custom-dashboards": [
     "assetType",
-    "dashboardIdList",
-    "kuery"
+    "dashboardFilterAssetIdEnabled",
+    "dashboardSavedObjectId"
   ],
   "infrastructure-monitoring-log-view": [
     "name"
   ],
   "infrastructure-ui-source": [],
   "ingest-agent-policies": [
+    "advanced_settings",
     "agent_features",
     "agent_features.enabled",
     "agent_features.name",
@@ -492,6 +510,7 @@
     "revision",
     "schema_version",
     "status",
+    "supports_agentless",
     "unenroll_timeout",
     "updated_at",
     "updated_by"
@@ -575,6 +594,7 @@
     "is_managed",
     "name",
     "namespace",
+    "overrides",
     "package",
     "package.name",
     "package.title",
@@ -903,6 +923,7 @@
     "tags",
     "version"
   ],
+  "slo-settings": [],
   "space": [
     "name"
   ],
@@ -913,6 +934,7 @@
     "alert.status.enabled",
     "alert.tls",
     "alert.tls.enabled",
+    "config_id",
     "custom_heartbeat_id",
     "enabled",
     "hash",

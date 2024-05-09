@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { take } from 'rxjs/operators';
+import { take } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';

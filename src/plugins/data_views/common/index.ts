@@ -70,7 +70,7 @@ export type {
   DataViewsServicePublicMethods,
   TimeBasedDataView,
 } from './data_views';
-export { DataView } from './data_views';
+export { DataView, DataViewLazy } from './data_views';
 export {
   DuplicateDataViewError,
   DataViewSavedObjectConflictError,

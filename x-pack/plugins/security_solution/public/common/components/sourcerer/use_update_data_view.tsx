@@ -8,7 +8,7 @@
 import React, { useCallback } from 'react';
 import { EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { useKibana } from '../../lib/kibana';
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import * as i18n from './translations';
@@ -19,7 +19,7 @@ import { ensurePatternFormat } from '../../../../common/utils/sourcerer';
 export const useUpdateDataView = (
   onOpenAndReset: () => void
 ): ((missingPatterns: string[]) => Promise<boolean>) => {
-  const { theme, uiSettings } = useKibana().services;
+  const { uiSettings, ...startServices } = useKibana().services;
   const { addSuccess, addError } = useAppToasts();
   return useCallback(
     async (missingPatterns: string[]): Promise<boolean> => {
@@ -40,8 +40,8 @@ export const useUpdateDataView = (
       if (isUiSettingsSuccess) {
         addSuccess({
           color: 'success',
-          title: toMountPoint(i18n.SUCCESS_TOAST_TITLE, { theme$: theme.theme$ }),
-          text: toMountPoint(<RefreshButton />, { theme$: theme.theme$ }),
+          title: toMountPoint(i18n.SUCCESS_TOAST_TITLE, startServices),
+          text: toMountPoint(<RefreshButton />, startServices),
           iconType: undefined,
           toastLifeTimeMs: 600000,
         });
@@ -67,6 +67,6 @@ export const useUpdateDataView = (
       });
       return false;
     },
-    [addError, addSuccess, onOpenAndReset, theme.theme$, uiSettings]
+    [addError, addSuccess, onOpenAndReset, uiSettings, startServices]
   );
 };

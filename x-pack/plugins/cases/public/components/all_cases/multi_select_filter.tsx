@@ -155,6 +155,10 @@ export const MultiSelectFilter = <T extends string, K extends string = string>({
         closePopover={() => setIsPopoverOpen(false)}
         panelPaddingSize="none"
         repositionOnScroll
+        panelProps={{
+          'data-test-subj': `options-filter-popover-panel-${id}`,
+        }}
+        data-test-subj={`options-filter-popover-${id}`}
       >
         {isInvalid && (
           <>

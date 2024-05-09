@@ -14,8 +14,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlCommonPage = getPageObject('svlCommonPage');
 
   describe('default dataView', function () {
-    // Error: expected testSubject(kbnOverviewElasticsearchGettingStarted) to exist
-    this.tags(['failsOnMKI']);
     before(async () => {
       await svlCommonPage.login();
       await svlSearchNavigation.navigateToLandingPage();
@@ -42,15 +40,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
         text: 'Editing New Dashboard',
       });
-    });
-
-    it('should show dashboard but with no data in visualize', async () => {
-      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'visualize' });
-      await testSubjects.existOrFail('~breadcrumb-deepLinkId-visualize');
-      await testSubjects.existOrFail('top-nav');
-      await testSubjects.click('newItemButton');
-      await testSubjects.existOrFail('visType-lens');
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Visualizations' });
     });
   });
 }

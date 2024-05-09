@@ -1,10 +1,12 @@
 TAN
 
-
-Tangent trigonometric function. Input expected in radians.
+Syntax
+Parameters
+angle
+An angle, in radians. If null, the function returns null.
+DescriptionReturns the Tangent trigonometric function of an angle.Supported types
+Example
 ```esql
 ROW a=1.8
 | EVAL tan=TAN(a)
 ```
-
-Supported types:

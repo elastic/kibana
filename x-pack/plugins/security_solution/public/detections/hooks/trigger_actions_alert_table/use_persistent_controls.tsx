@@ -129,9 +129,7 @@ export const getPersistentControlsHook = (tableId: TableId) => {
       [tableView, handleChangeTableView, additionalFiltersComponent, groupSelector]
     );
 
-    return {
-      right: rightTopMenu,
-    };
+    return useMemo(() => ({ right: rightTopMenu }), [rightTopMenu]);
   };
 
   return usePersistentControls;

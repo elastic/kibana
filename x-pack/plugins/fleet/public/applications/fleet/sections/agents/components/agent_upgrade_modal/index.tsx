@@ -28,6 +28,7 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 
 import semverGt from 'semver/functions/gt';
 import semverLt from 'semver/functions/lt';
+import semverValid from 'semver/functions/valid';
 
 import {
   AGENT_UPGRADE_COOLDOWN_IN_MIN,
@@ -267,12 +268,27 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
     }
   }, [agents, fleetServerAgents, isSingleAgent, latestAgentVersion, selectedVersion]);
 
+  const semverErrors = useMemo(() => {
+    if (!selectedVersion[0].value) return undefined;
+    if (!semverValid(selectedVersion[0].value)) {
+      return (
+        <FormattedMessage
+          id="xpack.fleet.upgradeAgents.invalidSemverError"
+          defaultMessage="Invalid version, please use a valid semver version, e.g. 8.14.0"
+        />
+      );
+    }
+  }, [selectedVersion]);
+
   const [selectedMaintenanceWindow, setSelectedMaintenanceWindow] = useState([
     isSmallBatch ? maintenanceOptions[0] : maintenanceOptions[1],
   ]);
 
   const { startDatetime, onChangeStartDateTime, initialDatetime, minTime, maxTime } =
     useScheduleDateTime();
+
+  const isSingleAgentFleetServer =
+    isSingleAgent && fleetServerAgents.map((agent) => agent.id).includes(agents[0].id);
 
   const isSubmitButtonDisabled = useMemo(
     () =>
@@ -281,6 +297,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
       !selectedVersion[0].value ||
       (isSingleAgent && !isAgentUpgradeableToVersion(agents[0], selectedVersion[0].value)) ||
       (isSingleAgent &&
+        !isSingleAgentFleetServer &&
         !isAgentVersionLessThanFleetServer(selectedVersion[0].value, fleetServerAgents)),
     [
       agents,
@@ -290,6 +307,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
       isUpdating,
       selectedVersion,
       updatingAgents,
+      isSingleAgentFleetServer,
     ]
   );
 
@@ -501,13 +519,15 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
           defaultMessage: 'Upgrade version',
         })}
         fullWidth
-        isInvalid={isInvalid}
+        isInvalid={isInvalid || !!semverErrors}
         error={
           isInvalid ? (
             <FormattedMessage
               id="xpack.fleet.upgradeAgents.versionRequiredText"
               defaultMessage="Version is required"
             />
+          ) : !!semverErrors ? (
+            semverErrors
           ) : undefined
         }
       >
@@ -522,6 +542,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
               setSelectedVersionStr(newValue);
               setSelectedVersion([{ label: newValue, value: newValue }]);
             }}
+            isInvalid={!!semverErrors}
           />
         ) : (
           <EuiComboBox
