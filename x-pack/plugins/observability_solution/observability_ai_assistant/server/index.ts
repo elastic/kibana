@@ -18,7 +18,13 @@ export type {
   ObservabilityAIAssistantServerSetup,
 } from './types';
 
-export { aiAssistantResponseLanguage, aiAssistantLogsIndexPattern } from '../common';
+export {
+  aiAssistantResponseLanguage,
+  aiAssistantLogsIndexPattern,
+  aiAssistantSimulatedFunctionCalling,
+} from '../common';
+
+export { streamIntoObservable } from './service/util/stream_into_observable';
 
 export const config: PluginConfigDescriptor<ObservabilityAIAssistantConfig> = {
   deprecations: ({ unusedFromRoot }) => [

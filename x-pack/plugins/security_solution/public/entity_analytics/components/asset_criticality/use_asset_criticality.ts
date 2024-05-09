@@ -8,6 +8,7 @@
 import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 import { ENABLE_ASSET_CRITICALITY_SETTING } from '../../../../common/constants';
 import { useHasSecurityCapability } from '../../../helper_hooks';
@@ -21,21 +22,23 @@ const PRIVILEGES_KEY = 'PRIVILEGES';
 
 const nonAuthorizedResponse: Promise<EntityAnalyticsPrivileges> = Promise.resolve({
   has_all_required: false,
+  has_write_permissions: false,
+  has_read_permissions: false,
   privileges: {
     elasticsearch: {},
   },
 });
 
 export const useAssetCriticalityPrivileges = (
-  entityName: string
-): UseQueryResult<EntityAnalyticsPrivileges> => {
+  queryKey: string
+): UseQueryResult<EntityAnalyticsPrivileges, SecurityAppError> => {
   const { fetchAssetCriticalityPrivileges } = useEntityAnalyticsRoutes();
   const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
   const [isAssetCriticalityEnabled] = useUiSetting$<boolean>(ENABLE_ASSET_CRITICALITY_SETTING);
   const isEnabled = isAssetCriticalityEnabled && hasEntityAnalyticsCapability;
 
   return useQuery({
-    queryKey: [ASSET_CRITICALITY_KEY, PRIVILEGES_KEY, entityName, isEnabled],
+    queryKey: [ASSET_CRITICALITY_KEY, PRIVILEGES_KEY, queryKey, isEnabled],
     queryFn: isEnabled ? fetchAssetCriticalityPrivileges : () => nonAuthorizedResponse,
   });
 };
@@ -43,9 +46,11 @@ export const useAssetCriticalityPrivileges = (
 export const useAssetCriticalityData = ({
   entity,
   enabled = true,
+  onChange,
 }: {
   entity: Entity;
   enabled?: boolean;
+  onChange?: () => void;
 }): State => {
   const QC = useQueryClient();
   const QUERY_KEY = [ASSET_CRITICALITY_KEY, entity.name];
@@ -68,18 +73,24 @@ export const useAssetCriticalityData = ({
   >({
     mutationFn: (params: Params) => {
       if (params.criticalityLevel === 'unassigned') {
-        return deleteAssetCriticality({ idField: params.idField, idValue: params.idValue });
+        return deleteAssetCriticality({
+          idField: params.idField,
+          idValue: params.idValue,
+          refresh: 'wait_for',
+        });
       }
 
       return createAssetCriticality({
         idField: params.idField,
         idValue: params.idValue,
         criticalityLevel: params.criticalityLevel,
+        refresh: 'wait_for',
       });
     },
     onSuccess: (data) => {
       const queryData = 'deleted' in data ? null : data;
       QC.setQueryData(QUERY_KEY, queryData);
+      onChange?.();
     },
   });
 

@@ -16,6 +16,7 @@ import {
   DATA_COLLECTION_SETUP_STEP,
   DATE_PICKER_ABSOLUTE_TAB,
   DATE_PICKER_ABSOLUTE_TAB_SEL,
+  SECURITY_SOLUTION_FLYOUT_TOUR_SEL,
   TOAST_CLOSE_BTN,
   TOAST_CLOSE_BTN_SEL,
 } from '../screens/integrations';
@@ -135,6 +136,16 @@ export function closeToastIfVisible() {
   });
 }
 
+export function closeAlertsStepTourIfVisible() {
+  cy.get(SECURITY_SOLUTION_FLYOUT_TOUR_SEL).then(($el) => {
+    if ($el.length > 0) {
+      cy.wrap($el).within(() => {
+        cy.contains('Exit').click();
+      });
+    }
+  });
+}
+
 export const deleteIntegrations = async (integrationName: string) => {
   const ids: string[] = [];
   cy.contains(integrationName)
@@ -162,9 +173,9 @@ export const installPackageWithVersion = (integration: string, version: string) 
 };
 
 const extractSemanticVersion = (str: string) => {
-  const match = str.match(/(\d+\.\d+\.\d+)/);
+  const match = str.match(/(Managerv\d+\.\d+\.\d+)/);
   if (match && match[1]) {
-    return match[1];
+    return match[1].replace('Managerv', '');
   } else {
     return null; // Return null if no match found
   }

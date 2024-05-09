@@ -16,11 +16,11 @@ import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
-import { DiscoverStateContainer } from '../../services/discover_state';
+import { DiscoverStateContainer } from '../../state_management/discover_state';
 import { FieldStatisticsTab } from '../field_stats_table';
 import { DiscoverDocuments } from './discover_documents';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
-import { useAppStateSelector } from '../../services/discover_app_state_container';
+import { useAppStateSelector } from '../../state_management/discover_app_state_container';
 import type { PanelsToggleProps } from '../../../../components/panels_toggle';
 
 const DROP_PROPS = {
@@ -61,7 +61,9 @@ export const DiscoverMainContent = ({
   panelsToggle,
   isChartAvailable,
 }: DiscoverMainContentProps) => {
-  const { trackUiMetric } = useDiscoverServices();
+  const { trackUiMetric, dataVisualizer: dataVisualizerService } = useDiscoverServices();
+
+  const shouldShowViewModeToggle = dataVisualizerService !== undefined;
 
   const setDiscoverViewMode = useCallback(
     (mode: VIEW_MODE) => {
@@ -81,7 +83,7 @@ export const DiscoverMainContent = ({
   const isDropAllowed = Boolean(onDropFieldToTable);
 
   const viewModeToggle = useMemo(() => {
-    return (
+    return shouldShowViewModeToggle ? (
       <DocumentViewModeToggle
         viewMode={viewMode}
         isTextBasedQuery={isPlainRecord}
@@ -93,6 +95,8 @@ export const DiscoverMainContent = ({
             : undefined
         }
       />
+    ) : (
+      <React.Fragment />
     );
   }, [
     viewMode,
@@ -101,6 +105,7 @@ export const DiscoverMainContent = ({
     stateContainer,
     panelsToggle,
     isChartAvailable,
+    shouldShowViewModeToggle,
   ]);
 
   const showChart = useAppStateSelector((state) => !state.hideChart);
@@ -125,7 +130,7 @@ export const DiscoverMainContent = ({
             <DiscoverDocuments
               viewModeToggle={viewModeToggle}
               dataView={dataView}
-              onAddFilter={!isPlainRecord ? onAddFilter : undefined}
+              onAddFilter={onAddFilter}
               stateContainer={stateContainer}
               onFieldEdited={!isPlainRecord ? onFieldEdited : undefined}
             />

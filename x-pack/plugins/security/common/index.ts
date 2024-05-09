@@ -19,7 +19,7 @@ export type {
   InvalidRoleTemplate,
   InlineRoleTemplate,
 } from './model';
-export { getUserDisplayName, isRoleReserved } from './model';
+export { getUserDisplayName, isRoleReserved, isRoleWithWildcardBasePrivilege } from './model';
 
 // Re-export types from the plugin directly to enhance the developer experience for consumers of the Security plugin.
 export type {
@@ -31,6 +31,7 @@ export type {
   RoleIndexPrivilege,
   RoleKibanaPrivilege,
   RoleRemoteIndexPrivilege,
+  RoleRemoteClusterPrivilege,
   FeaturesPrivileges,
   LoginLayout,
   SecurityLicenseFeatures,

@@ -24,10 +24,10 @@ export interface FunctionDefinition {
       noNestingFunctions?: boolean;
       supportsWildcard?: boolean;
       /**
-       * if set this indicates that the value must be a literal
-       * but can be any literal of the correct type
+       * If set, this parameter does not accept a field. It only accepts a constant,
+       * though a function can be used to create the value. (e.g. now() for dates or concat() for strings)
        */
-      literalOnly?: boolean;
+      constantOnly?: boolean;
       /**
        * if provided this means that the value must be one
        * of the options in the array iff the value is a literal.
@@ -39,6 +39,17 @@ export interface FunctionDefinition {
        * matches one of the options prior to runtime.
        */
       literalOptions?: string[];
+      /**
+       * Must only be included _in addition to_ literalOptions.
+       *
+       * If provided this is the list of suggested values that
+       * will show up in the autocomplete. If omitted, the literalOptions
+       * will be used as suggestions.
+       *
+       * This is useful for functions that accept
+       * values that we don't want to show as suggestions.
+       */
+      literalSuggestions?: string[];
     }>;
     minParams?: number;
     returnType: string;
@@ -62,7 +73,7 @@ export interface CommandBaseDefinition {
       innerType?: string;
       values?: string[];
       valueDescriptions?: string[];
-      literalOnly?: boolean;
+      constantOnly?: boolean;
       wildcards?: boolean;
     }>;
   };

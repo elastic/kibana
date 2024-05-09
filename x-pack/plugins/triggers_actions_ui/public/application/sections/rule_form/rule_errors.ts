@@ -131,10 +131,11 @@ export function getRuleErrors(
   rule: Rule,
   ruleTypeModel: RuleTypeModel | null,
   config: TriggersActionsUiConfig,
-  actionTypeRegistry: ActionTypeRegistryContract
+  actionTypeRegistry: ActionTypeRegistryContract,
+  isServerless?: boolean
 ) {
   const ruleParamsErrors: IErrorObject = ruleTypeModel
-    ? ruleTypeModel.validate(rule.params).errors
+    ? ruleTypeModel.validate(rule.params, isServerless).errors
     : {};
 
   const ruleBaseErrors = validateBaseProperties(rule, config, actionTypeRegistry)

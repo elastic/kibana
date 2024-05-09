@@ -119,10 +119,12 @@ export class JsonSchemaService {
       Fs.readFileSync(Path.resolve(__dirname, 'openapi_source.json'), 'utf8')
     );
 
-    supportedEndpoints.forEach((e) => {
-      // need to extract schema in order to keep required components
-      this.extractSchema(e.path, e.method, schema);
-    });
+    await Promise.all(
+      supportedEndpoints.map(async (e) => {
+        // need to extract schema in order to keep required components
+        await this.extractSchema(e.path, e.method, schema);
+      })
+    );
 
     for (const pathName in schema.paths) {
       if (!schema.paths.hasOwnProperty(pathName)) continue;

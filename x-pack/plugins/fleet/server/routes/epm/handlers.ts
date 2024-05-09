@@ -237,10 +237,16 @@ export const getBulkAssetsHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetBulkAssetsRequestSchema.body>
 > = async (context, request, response) => {
+  const coreContext = await context.core;
   try {
     const { assetIds } = request.body;
-    const savedObjectsClient = (await context.fleet).internalSoClient;
-    const assets = await getBulkAssets(savedObjectsClient, assetIds as AssetSOObject[]);
+    const savedObjectsClient = coreContext.savedObjects.client;
+    const savedObjectsTypeRegistry = coreContext.savedObjects.typeRegistry;
+    const assets = await getBulkAssets(
+      savedObjectsClient,
+      savedObjectsTypeRegistry,
+      assetIds as AssetSOObject[]
+    );
 
     const body: GetBulkAssetsResponse = {
       items: assets,

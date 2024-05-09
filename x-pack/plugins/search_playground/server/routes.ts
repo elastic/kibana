@@ -7,20 +7,21 @@
 
 import { schema } from '@kbn/config-schema';
 import { streamFactory } from '@kbn/ml-response-stream/server';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { IRouter, StartServicesAccessor } from '@kbn/core/server';
-import { v4 as uuidv4 } from 'uuid';
-import { ActionsClientChatOpenAI } from '@kbn/elastic-assistant-common/impl/llm';
-import { fetchFields } from './utils/fetch_query_source_fields';
+import { sendMessageEvent, SendMessageEventData } from './analytics/events';
+import { fetchFields } from './lib/fetch_query_source_fields';
 import { AssistClientOptionsWithClient, createAssist as Assist } from './utils/assist';
-import { ConversationalChain } from './utils/conversational_chain';
-import { Prompt } from '../common/prompt';
+import { ConversationalChain } from './lib/conversational_chain';
 import { errorHandler } from './utils/error_handler';
 import {
   APIRoutes,
   SearchPlaygroundPluginStart,
   SearchPlaygroundPluginStartDependencies,
 } from './types';
+import { getChatParams } from './lib/get_chat_params';
+import { fetchIndices } from './lib/fetch_indices';
+import { isNotNullish } from '../common/is_not_nullish';
 
 export function createRetriever(esQuery: string) {
   return (question: string) => {
@@ -35,11 +36,11 @@ export function createRetriever(esQuery: string) {
 }
 
 export function defineRoutes({
-  log,
+  logger,
   router,
   getStartServices,
 }: {
-  log: Logger;
+  logger: Logger;
   router: IRouter;
   getStartServices: StartServicesAccessor<
     SearchPlaygroundPluginStartDependencies,
@@ -88,78 +89,90 @@ export function defineRoutes({
       },
     },
     errorHandler(async (context, request, response) => {
-      const [, { actions }] = await getStartServices();
+      const [{ analytics }, { actions }] = await getStartServices();
       const { client } = (await context.core).elasticsearch;
-      try {
-        const aiClient = Assist({
-          es_client: client.asCurrentUser,
-        } as AssistClientOptionsWithClient);
-        const { messages, data } = await request.body;
-        const abortController = new AbortController();
-        const abortSignal = abortController.signal;
-        const model = new ActionsClientChatOpenAI({
-          actions,
-          logger: log,
-          request,
+      const aiClient = Assist({
+        es_client: client.asCurrentUser,
+      } as AssistClientOptionsWithClient);
+      const { messages, data } = await request.body;
+      const { chatModel, chatPrompt, connector } = await getChatParams(
+        {
           connectorId: data.connector_id,
           model: data.summarization_model,
-          traceId: uuidv4(),
-          signal: abortSignal,
-          // prevents the agent from retrying on failure
-          // failure could be due to bad connector, we should deliver that result to the client asap
-          maxRetries: 0,
-        });
+          citations: data.citations,
+          prompt: data.prompt,
+        },
+        { actions, logger, request }
+      );
 
-        let sourceFields = {};
+      let sourceFields = {};
 
-        try {
-          sourceFields = JSON.parse(data.source_fields);
-        } catch (e) {
-          log.error('Failed to parse the source fields', e);
-          throw Error(e);
+      try {
+        sourceFields = JSON.parse(data.source_fields);
+      } catch (e) {
+        logger.error('Failed to parse the source fields', e);
+        throw Error(e);
+      }
+
+      const chain = ConversationalChain({
+        model: chatModel,
+        rag: {
+          index: data.indices,
+          retriever: createRetriever(data.elasticsearch_query),
+          content_field: sourceFields,
+          size: Number(data.doc_size),
+        },
+        prompt: chatPrompt,
+      });
+
+      let stream: ReadableStream<Uint8Array>;
+
+      try {
+        stream = await chain.stream(aiClient, messages);
+      } catch (e) {
+        logger.error('Failed to create the chat stream', e);
+
+        if (typeof e === 'object') {
+          return response.badRequest({
+            body: {
+              message: e.message,
+            },
+          });
         }
 
-        const chain = ConversationalChain({
-          model,
-          rag: {
-            index: data.indices,
-            retriever: createRetriever(data.elasticsearch_query),
-            content_field: sourceFields,
-            size: Number(data.doc_size),
-          },
-          prompt: Prompt(data.prompt, {
-            citations: data.citations,
-            context: true,
-            type: 'openai',
-          }),
-        });
+        throw e;
+      }
 
-        const stream = await chain.stream(aiClient, messages);
+      const { end, push, responseWithHeaders } = streamFactory(request.headers, logger);
 
-        const { end, push, responseWithHeaders } = streamFactory(request.headers, log);
+      const reader = (stream as ReadableStream).getReader();
+      const textDecoder = new TextDecoder();
 
-        const reader = (stream as ReadableStream).getReader();
-        const textDecoder = new TextDecoder();
-
-        async function pushStreamUpdate() {
-          reader.read().then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
+      function pushStreamUpdate() {
+        reader
+          .read()
+          .then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
             if (done) {
               end();
               return;
             }
             push(textDecoder.decode(value));
             pushStreamUpdate();
-          });
-        }
-
-        pushStreamUpdate();
-
-        return response.ok(responseWithHeaders);
-      } catch (e) {
-        log.error('Failed to create the chat stream', e);
-
-        throw Error(e);
+          })
+          .catch(() => {});
       }
+
+      pushStreamUpdate();
+
+      analytics.reportEvent<SendMessageEventData>(sendMessageEvent.eventType, {
+        connectorType:
+          connector.actionTypeId +
+          (connector.config?.apiProvider ? `-${connector.config.apiProvider}` : ''),
+        model: data.summarization_model ?? '',
+        isCitationsEnabled: data.citations,
+      });
+
+      return response.ok(responseWithHeaders);
     })
   );
 
@@ -196,6 +209,37 @@ export function defineRoutes({
 
       return response.ok({
         body: { apiKey },
+        headers: { 'content-type': 'application/json' },
+      });
+    })
+  );
+
+  // SECURITY: We don't apply any authorization tags to this route because all actions performed
+  // on behalf of the user making the request and governed by the user's own cluster privileges.
+  router.get(
+    {
+      path: APIRoutes.GET_INDICES,
+      validate: {
+        query: schema.object({
+          search_query: schema.maybe(schema.string()),
+          size: schema.number({ defaultValue: 10, min: 0 }),
+        }),
+      },
+    },
+    errorHandler(async (context, request, response) => {
+      const { search_query: searchQuery, size } = request.query;
+      const {
+        client: { asCurrentUser },
+      } = (await context.core).elasticsearch;
+
+      const { indexNames } = await fetchIndices(asCurrentUser, searchQuery);
+
+      const indexNameSlice = indexNames.slice(0, size).filter(isNotNullish);
+
+      return response.ok({
+        body: {
+          indices: indexNameSlice,
+        },
         headers: { 'content-type': 'application/json' },
       });
     })

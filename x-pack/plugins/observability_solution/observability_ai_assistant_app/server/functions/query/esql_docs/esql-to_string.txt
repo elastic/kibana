@@ -1,7 +1,11 @@
 TO_STRING
 
-
-Converts a field into a string. For example:
+Syntax
+Parameters
+field
+Input value. The input can be a single- or multi-valued column or an expression.
+DescriptionConverts an input value into a string.Supported types
+Examples
 ```esql
 ROW a=10
 | EVAL j = TO_STRING(a)
@@ -12,5 +16,3 @@ It also works fine on multivalued fields:
 ROW a=[10, 9, 8]
 | EVAL j = TO_STRING(a)
 ```
-
-Alias: TO_STRSupported types:

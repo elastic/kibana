@@ -48,11 +48,7 @@ Object {
                 <span
                   class="euiExpression__value emotion-euiExpression__value"
                 >
-                  <span
-                    class="css-ffm88e"
-                  >
-                    list_id
-                  </span>
+                  list_id
                 </span>
               </span>
             </div>
@@ -105,11 +101,7 @@ Object {
               <span
                 class="euiExpression__value emotion-euiExpression__value"
               >
-                <span
-                  class="css-ffm88e"
-                >
-                  list_id
-                </span>
+                list_id
               </span>
             </span>
           </div>

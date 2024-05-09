@@ -6,37 +6,28 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
-import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
-import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
-import {
-  EmbeddableInput,
-  EmbeddableOutput,
-  ErrorEmbeddable,
-  IEmbeddable,
-  isErrorEmbeddable,
-} from '@kbn/embeddable-plugin/public';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import React, { useEffect, useMemo, useCallback } from 'react';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
-import { of } from 'rxjs';
+import { of, map } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FIELD_STATISTICS_LOADED } from './constants';
-import type { DiscoverStateContainer } from '../../services/discover_state';
-export interface RandomSamplingOption {
-  mode: 'random_sampling';
-  seed: string;
-  probability: number;
-}
+import type { NormalSamplingOption, FieldStatisticsTableProps } from './types';
+export type { FieldStatisticsTableProps };
 
-export interface NormalSamplingOption {
-  mode: 'normal_sampling';
-  seed: string;
-  shardSize: number;
-}
+const statsTableCss = css({
+  width: '100%',
+  height: '100%',
+  overflowY: 'auto',
+  '.kbnDocTableWrapper': {
+    overflowX: 'hidden',
+  },
+});
 
+<<<<<<< HEAD
 export interface NoSamplingOption {
   mode: 'no_sampling';
   seed: string;
@@ -117,6 +108,9 @@ export interface FieldStatisticsTableProps {
    */
   isPlainRecord?: boolean;
 }
+=======
+const fallBacklastReloadRequestTime$ = new BehaviorSubject(0);
+>>>>>>> upstream/main
 
 export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
   const {
@@ -131,30 +125,52 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     trackUiMetric,
     searchSessionId,
   } = props;
+
   const totalHits = useObservable(stateContainer?.dataState.data$.totalHits$ ?? of(undefined));
   const totalDocuments = useMemo(() => totalHits?.result, [totalHits]);
 
   const services = useDiscoverServices();
-  const [embeddable, setEmbeddable] = useState<
-    | ErrorEmbeddable
-    | IEmbeddable<DataVisualizerGridEmbeddableInput, DataVisualizerGridEmbeddableOutput>
-    | undefined
-  >();
-  const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
+  const dataVisualizerService = services.dataVisualizer;
 
+  // State from Discover we want the embeddable to reflect
   const showPreviewByDefault = useMemo(
     () => (stateContainer ? !stateContainer.appState.getState().hideAggregatedPreview : true),
     [stateContainer]
   );
 
-  useEffect(() => {
-    const availableFields$ = stateContainer?.dataState.data$.availableFields$;
-    const sub = embeddable?.getOutput$().subscribe((output: DataVisualizerGridEmbeddableOutput) => {
-      if (output.showDistributions !== undefined && stateContainer) {
-        stateContainer.appState.update({ hideAggregatedPreview: !output.showDistributions });
-      }
-    });
+  const lastReloadRequestTime$ = useMemo(() => {
+    return stateContainer?.dataState?.refetch$
+      ? stateContainer?.dataState?.refetch$.pipe(map(() => Date.now()))
+      : fallBacklastReloadRequestTime$;
+  }, [stateContainer]);
 
+  const lastReloadRequestTime = useObservable(lastReloadRequestTime$, 0);
+
+  useEffect(() => {
+    // Track should only be called once when component is loaded
+    trackUiMetric?.(METRIC_TYPE.LOADED, FIELD_STATISTICS_LOADED);
+  }, [trackUiMetric]);
+
+  const samplingOption: NormalSamplingOption = useMemo(
+    () =>
+      ({
+        mode: 'normal_sampling',
+        shardSize: 5000,
+        seed: searchSessionId,
+      } as NormalSamplingOption),
+    [searchSessionId]
+  );
+
+  const updateState = useCallback(
+    (changes) => {
+      if (changes.showDistributions !== undefined && stateContainer) {
+        stateContainer.appState.update({ hideAggregatedPreview: !changes.showDistributions });
+      }
+    },
+    [stateContainer]
+  );
+
+<<<<<<< HEAD
     const refetch = stateContainer?.dataState.refetch$.subscribe(() => {
       if (embeddable && !isErrorEmbeddable(embeddable)) {
         embeddable.updateInput({ lastReloadRequestTime: Date.now() });
@@ -273,14 +289,26 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
       overflow-x: hidden;
     }
   `;
+=======
+  if (!dataVisualizerService) return null;
+>>>>>>> upstream/main
 
   return (
-    <EuiFlexItem css={statsTableCss}>
-      <div
-        data-test-subj="dscFieldStatsEmbeddedContent"
-        ref={embeddableRoot}
-        // Match the scroll bar of the Discover doc table
-        className="kbnDocTableWrapper"
+    <EuiFlexItem css={statsTableCss} data-test-subj="dscFieldStatsEmbeddedContent">
+      <dataVisualizerService.FieldStatisticsTable
+        shouldGetSubfields={true}
+        dataView={dataView}
+        savedSearch={savedSearch}
+        filters={filters}
+        query={query}
+        visibleFieldNames={columns}
+        sessionId={searchSessionId}
+        totalDocuments={totalDocuments}
+        samplingOption={samplingOption}
+        lastReloadRequestTime={lastReloadRequestTime}
+        onAddFilter={onAddFilter}
+        showPreviewByDefault={showPreviewByDefault}
+        onTableUpdate={updateState}
       />
     </EuiFlexItem>
   );

@@ -1,14 +1,13 @@
 DATE_TRUNC
 
 Syntax
-DATE_TRUNC(interval, date)
 Parameters
 interval
-Interval, expressed using the timespan literal
-syntax. If null, the function returns null.
+Interval; expressed using the timespan literal syntax.
 date
-Date expression. If null, the function returns null.
-DescriptionRounds down a date to the closest interval.Examples
+Date expression
+DescriptionRounds down a date to the closest interval.Supported types
+Examples
 ```esql
 FROM employees
 | KEEP first_name, last_name, hire_date

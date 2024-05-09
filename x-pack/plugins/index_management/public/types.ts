@@ -5,6 +5,44 @@
  * 2.0.
  */
 
+import {
+  AnalyticsServiceStart,
+  I18nStart,
+  OverlayStart,
+  ThemeServiceStart,
+} from '@kbn/core/public';
+import { CloudSetup } from '@kbn/cloud-plugin/public';
+import { ConsolePluginStart } from '@kbn/console-plugin/public';
+import { ManagementSetup } from '@kbn/management-plugin/public';
+import { MlPluginStart } from '@kbn/ml-plugin/public';
+import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+
+export interface IndexManagementStartServices {
+  analytics: Pick<AnalyticsServiceStart, 'reportEvent'>;
+  i18n: I18nStart;
+  overlays: OverlayStart;
+  theme: Pick<ThemeServiceStart, 'theme$'>;
+}
+
+export interface SetupDependencies {
+  fleet?: unknown;
+  usageCollection: UsageCollectionSetup;
+  management: ManagementSetup;
+  share: SharePluginSetup;
+  cloud?: CloudSetup;
+}
+
+export interface StartDependencies {
+  cloud?: CloudSetup;
+  console?: ConsolePluginStart;
+  share: SharePluginStart;
+  fleet?: unknown;
+  usageCollection: UsageCollectionSetup;
+  management: ManagementSetup;
+  ml?: MlPluginStart;
+}
+
 export interface ClientConfigType {
   ui: {
     enabled: boolean;
@@ -14,4 +52,6 @@ export interface ClientConfigType {
   enableIndexStats?: boolean;
   editableIndexSettings?: 'all' | 'limited';
   enableDataStreamsStorageColumn?: boolean;
+  enableMappingsSourceFieldSection?: boolean;
+  enableTogglingDataRetention?: boolean;
 }

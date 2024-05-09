@@ -6,15 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React, { lazy, Suspense } from 'react';
+import React, { lazy, Suspense, FC, PropsWithChildren } from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { CoreSetup } from '@kbn/core/public';
-import { wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { SavedObjectManagementTypeInfo } from '../../common/types';
 import { StartDependencies, SavedObjectsManagementPluginStart } from '../plugin';
 import { getAllowedTypes } from '../lib';
@@ -37,7 +36,6 @@ export const mountManagementSection = async ({ core, mountParams }: MountParams)
     await core.getStartServices();
   const { capabilities } = coreStart.application;
   const { element, history, setBreadcrumbs } = mountParams;
-  const { theme$ } = core.theme;
 
   if (!allowedObjectTypes) {
     allowedObjectTypes = await getAllowedTypes(coreStart.http);
@@ -45,7 +43,7 @@ export const mountManagementSection = async ({ core, mountParams }: MountParams)
 
   coreStart.chrome.docTitle.change(title);
 
-  const RedirectToHomeIfUnauthorized: React.FunctionComponent = ({ children }) => {
+  const RedirectToHomeIfUnauthorized: FC<PropsWithChildren<unknown>> = ({ children }) => {
     const allowed = capabilities?.management?.kibana?.objects ?? false;
 
     if (!allowed) {
@@ -56,43 +54,40 @@ export const mountManagementSection = async ({ core, mountParams }: MountParams)
   };
 
   ReactDOM.render(
-    wrapWithTheme(
-      <I18nProvider>
-        <Router history={history}>
-          <Routes>
-            <Route path={'/:type/:id'} exact={true}>
-              <RedirectToHomeIfUnauthorized>
-                <Suspense fallback={<EuiLoadingSpinner />}>
-                  <SavedObjectsEditionPage
-                    coreStart={coreStart}
-                    setBreadcrumbs={setBreadcrumbs}
-                    history={history}
-                  />
-                </Suspense>
-              </RedirectToHomeIfUnauthorized>
-            </Route>
-            <Route path={'/'} exact={false}>
-              <RedirectToHomeIfUnauthorized>
-                <Suspense fallback={<EuiLoadingSpinner />}>
-                  <SavedObjectsTablePage
-                    coreStart={coreStart}
-                    taggingApi={savedObjectsTaggingOss?.getTaggingApi()}
-                    spacesApi={spacesApi}
-                    dataStart={data}
-                    dataViewsApi={dataViews}
-                    actionRegistry={pluginStart.actions}
-                    columnRegistry={pluginStart.columns}
-                    allowedTypes={allowedObjectTypes}
-                    setBreadcrumbs={setBreadcrumbs}
-                  />
-                </Suspense>
-              </RedirectToHomeIfUnauthorized>
-            </Route>
-          </Routes>
-        </Router>
-      </I18nProvider>,
-      theme$
-    ),
+    <KibanaRenderContextProvider {...coreStart}>
+      <Router history={history}>
+        <Routes>
+          <Route path={'/:type/:id'} exact={true}>
+            <RedirectToHomeIfUnauthorized>
+              <Suspense fallback={<EuiLoadingSpinner />}>
+                <SavedObjectsEditionPage
+                  coreStart={coreStart}
+                  setBreadcrumbs={setBreadcrumbs}
+                  history={history}
+                />
+              </Suspense>
+            </RedirectToHomeIfUnauthorized>
+          </Route>
+          <Route path={'/'} exact={false}>
+            <RedirectToHomeIfUnauthorized>
+              <Suspense fallback={<EuiLoadingSpinner />}>
+                <SavedObjectsTablePage
+                  coreStart={coreStart}
+                  taggingApi={savedObjectsTaggingOss?.getTaggingApi()}
+                  spacesApi={spacesApi}
+                  dataStart={data}
+                  dataViewsApi={dataViews}
+                  actionRegistry={pluginStart.actions}
+                  columnRegistry={pluginStart.columns}
+                  allowedTypes={allowedObjectTypes}
+                  setBreadcrumbs={setBreadcrumbs}
+                />
+              </Suspense>
+            </RedirectToHomeIfUnauthorized>
+          </Route>
+        </Routes>
+      </Router>
+    </KibanaRenderContextProvider>,
     element
   );
 

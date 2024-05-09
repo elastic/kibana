@@ -119,6 +119,9 @@ export function getSampleDashboardInput(
     timeRestore: false,
     viewMode: ViewMode.VIEW,
     panels: {},
+    executionContext: {
+      type: 'dashboard',
+    },
     ...overrides,
   };
 }

@@ -53,6 +53,7 @@
       "notifications",
       "savedSearch",
       "unifiedDocViewer",
+      "charts"
     ],
     "optionalPlugins": [
       "cloudExperiments",
@@ -64,6 +65,7 @@
       "usageCollection",
       "lists",
       "home",
+      "management",
       "telemetry",
       "dataViewFieldEditor",
       "osquery",

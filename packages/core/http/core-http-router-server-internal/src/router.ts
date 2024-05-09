@@ -34,6 +34,7 @@ import { kibanaResponseFactory } from './response';
 import { HapiResponseAdapter } from './response_adapter';
 import { wrapErrors } from './error_wrapper';
 import { Method } from './versioned_router/types';
+import { prepareRouteConfigValidation } from './util';
 
 export type ContextEnhancer<
   P,
@@ -124,6 +125,9 @@ export interface RouterOptions {
   /** Whether we are running in development */
   isDev?: boolean;
 
+  /** Plugin for which this router was registered */
+  pluginId?: symbol;
+
   versionedRouterOptions?: {
     /** {@inheritdoc VersionedRouterArgs['defaultHandlerResolutionStrategy'] }*/
     defaultHandlerResolutionStrategy?: 'newest' | 'oldest' | 'none';
@@ -134,19 +138,19 @@ export interface RouterOptions {
 }
 
 /** @internal */
-interface InternalRegistrarOptions {
+export interface InternalRegistrarOptions {
   isVersioned: boolean;
 }
 
 /** @internal */
-type InternalRegistrar<M extends Method, C extends RequestHandlerContextBase> = <P, Q, B>(
+export type InternalRegistrar<M extends Method, C extends RequestHandlerContextBase> = <P, Q, B>(
   route: RouteConfig<P, Q, B, M>,
   handler: RequestHandler<P, Q, B, C, M>,
   internalOpts?: InternalRegistrarOptions
 ) => ReturnType<RouteRegistrar<M, C>>;
 
 /** @internal */
-interface InternalRouterRoute extends RouterRoute {
+export interface InternalRouterRoute extends RouterRoute {
   readonly isVersioned: boolean;
 }
 
@@ -162,6 +166,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
   implements IRouter<Context>
 {
   public routes: Array<Readonly<InternalRouterRoute>> = [];
+  public pluginId?: symbol;
   public get: InternalRegistrar<'get', Context>;
   public post: InternalRegistrar<'post', Context>;
   public delete: InternalRegistrar<'delete', Context>;
@@ -174,6 +179,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     private readonly enhanceWithContext: ContextEnhancer<any, any, any, any, any>,
     private readonly options: RouterOptions
   ) {
+    this.pluginId = options.pluginId;
     const buildMethod =
       <Method extends RouteMethod>(method: Method) =>
       <P, Q, B>(
@@ -181,6 +187,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
         handler: RequestHandler<P, Q, B, Context, Method>,
         internalOptions: { isVersioned: boolean } = { isVersioned: false }
       ) => {
+        route = prepareRouteConfigValidation(route);
         const routeSchemas = routeSchemasFromRouteConfig(route, method);
 
         this.routes.push({

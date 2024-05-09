@@ -11,7 +11,7 @@ import { useCallback, useMemo } from 'react';
 import { TableId, tableDefaults, dataTableSelectors } from '@kbn/securitysolution-data-table';
 import type { UseDataGridColumnsSecurityCellActionsProps } from '../../../common/components/cell_actions';
 import { useDataGridColumnsSecurityCellActions } from '../../../common/components/cell_actions';
-import { SecurityCellActionsTrigger, SecurityCellActionType } from '../../../actions/constants';
+import { SecurityCellActionsTrigger, SecurityCellActionType } from '../../../app/actions/constants';
 import { VIEW_SELECTION } from '../../../../common/constants';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
@@ -107,10 +107,12 @@ export const getUseCellActionsHook = (tableId: TableId) => {
       [cellActions]
     );
 
-    return {
-      getCellActions,
-      visibleCellActions: 3,
-    };
+    return useMemo(() => {
+      return {
+        getCellActions,
+        visibleCellActions: 3,
+      };
+    }, [getCellActions]);
   };
 
   return useCellActions;

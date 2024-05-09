@@ -44,6 +44,7 @@ import {
   useGetPackageInfoByKeyQuery,
   useStartServices,
   useUIExtension,
+  useAuthz,
 } from '../../../../hooks';
 import {
   DevtoolsRequestFlyoutButton,
@@ -99,6 +100,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   const {
     agents: { enabled: isFleetEnabled },
   } = useConfig();
+  const hasFleetAddAgentsPrivileges = useAuthz().fleet.addAgents;
   const { params } = useRouteMatch<AddToPolicyParams>();
   const fleetStatus = useFleetStatus();
   const { docLinks } = useStartServices();
@@ -167,6 +169,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     withSysMonitoring,
     queryParamsPolicyId,
     integrationToEnable: integrationInfo?.name,
+    hasFleetAddAgentsPrivileges,
   });
 
   const setPolicyValidation = useCallback(
@@ -223,10 +226,15 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       }
     };
 
+    if (selectedPolicyTab === SelectedPolicyTab.NEW) {
+      setAgentCount(0);
+      return;
+    }
+
     if (isFleetEnabled && agentPolicyId) {
       getAgentCount();
     }
-  }, [agentPolicyId, isFleetEnabled]);
+  }, [agentPolicyId, selectedPolicyTab, isFleetEnabled]);
 
   const handleExtensionViewOnChange = useCallback<
     PackagePolicyEditExtensionComponentProps['onChange']
@@ -400,6 +408,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       }),
       'data-test-subj': 'dataCollectionSetupStep',
       children: replaceStepConfigurePackagePolicy || stepConfigurePackagePolicy,
+      headingElement: 'h2',
     },
   ];
 
@@ -409,6 +418,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         defaultMessage: 'Where to add this integration?',
       }),
       children: stepSelectAgentPolicy,
+      headingElement: 'h2',
     });
   }
 

@@ -10,34 +10,71 @@ import { createQuery, getDefaultQueryFields, getDefaultSourceFields } from './cr
 
 describe('create_query', () => {
   describe('createQuery', () => {
-    it('should return a query', () => {
+    it('should return a sparse single query', () => {
       const fields = {
         index1: ['field1'],
       };
 
       const fieldDescriptors: IndicesQuerySourceFields = {
         index1: {
-          elser_query_fields: [{ field: 'field1', model_id: 'model1', nested: false }],
+          elser_query_fields: [
+            { field: 'field1', model_id: 'model1', nested: false, indices: ['index1'] },
+          ],
           dense_vector_query_fields: [],
           bm25_query_fields: [],
           source_fields: [],
+          skipped_fields: 0,
         },
       };
 
       expect(createQuery(fields, fieldDescriptors)).toEqual({
-        query: {
-          bool: {
-            should: [
-              {
-                text_expansion: {
-                  field1: {
+        retriever: {
+          standard: {
+            query: {
+              text_expansion: {
+                field1: {
+                  model_id: 'model1',
+                  model_text: '{query}',
+                },
+              },
+            },
+          },
+        },
+      });
+    });
+
+    it('should return a knn query single', () => {
+      const fields = {
+        index1: ['field1'],
+      };
+
+      const fieldDescriptors: IndicesQuerySourceFields = {
+        index1: {
+          elser_query_fields: [],
+          dense_vector_query_fields: [
+            { field: 'field1', model_id: 'model1', nested: false, indices: ['index1'] },
+          ],
+          bm25_query_fields: [],
+          source_fields: [],
+          skipped_fields: 0,
+        },
+      };
+
+      expect(createQuery(fields, fieldDescriptors)).toEqual({
+        retriever: {
+          standard: {
+            query: {
+              knn: {
+                field: 'field1',
+                num_candidates: 100,
+                query_vector_builder: {
+                  text_embedding: {
                     model_id: 'model1',
                     model_text: '{query}',
                   },
                 },
               },
-            ],
-            minimum_should_match: 1,
+            },
           },
         },
       });
@@ -51,33 +88,36 @@ describe('create_query', () => {
 
       const fieldDescriptors: IndicesQuerySourceFields = {
         index1: {
-          elser_query_fields: [{ field: 'field1', model_id: 'model1', nested: false }],
+          elser_query_fields: [
+            { field: 'field1', model_id: 'model1', nested: false, indices: ['index1', 'index2'] },
+          ],
           dense_vector_query_fields: [],
           bm25_query_fields: [],
           source_fields: [],
+          skipped_fields: 0,
         },
         index2: {
-          elser_query_fields: [{ field: 'field1', model_id: 'model1', nested: false }],
+          elser_query_fields: [
+            { field: 'field1', model_id: 'model1', nested: false, indices: ['index1', 'index2'] },
+          ],
           dense_vector_query_fields: [],
           bm25_query_fields: [],
           source_fields: [],
+          skipped_fields: 0,
         },
       };
 
       expect(createQuery(fields, fieldDescriptors)).toEqual({
-        query: {
-          bool: {
-            should: [
-              {
-                text_expansion: {
-                  field1: {
-                    model_id: 'model1',
-                    model_text: '{query}',
-                  },
+        retriever: {
+          standard: {
+            query: {
+              text_expansion: {
+                field1: {
+                  model_id: 'model1',
+                  model_text: '{query}',
                 },
               },
-            ],
-            minimum_should_match: 1,
+            },
           },
         },
       });
@@ -91,47 +131,60 @@ describe('create_query', () => {
 
       const fieldDescriptors: IndicesQuerySourceFields = {
         index1: {
-          elser_query_fields: [{ field: 'field1', model_id: 'model1', nested: false }],
+          elser_query_fields: [
+            { field: 'field1', model_id: 'model1', nested: false, indices: ['index1'] },
+          ],
           dense_vector_query_fields: [],
           bm25_query_fields: [],
           source_fields: [],
+          skipped_fields: 0,
         },
         index2: {
-          elser_query_fields: [{ field: 'field2', model_id: 'model1', nested: false }],
+          elser_query_fields: [
+            { field: 'field2', model_id: 'model1', nested: false, indices: ['index2'] },
+          ],
           dense_vector_query_fields: [],
           bm25_query_fields: [],
           source_fields: [],
+          skipped_fields: 0,
         },
       };
 
       expect(createQuery(fields, fieldDescriptors)).toEqual({
-        query: {
-          bool: {
-            should: [
+        retriever: {
+          rrf: {
+            retrievers: [
               {
-                text_expansion: {
-                  field1: {
-                    model_id: 'model1',
-                    model_text: '{query}',
+                standard: {
+                  query: {
+                    text_expansion: {
+                      field1: {
+                        model_id: 'model1',
+                        model_text: '{query}',
+                      },
+                    },
                   },
                 },
               },
               {
-                text_expansion: {
-                  field2: {
-                    model_id: 'model1',
-                    model_text: '{query}',
+                standard: {
+                  query: {
+                    text_expansion: {
+                      field2: {
+                        model_id: 'model1',
+                        model_text: '{query}',
+                      },
+                    },
                   },
                 },
               },
             ],
-            minimum_should_match: 1,
           },
         },
       });
     });
 
-    it('should throw for nested dense query', () => {
+    it('should return empty for nested dense query', () => {
       const fields = {
         index1: ['passages.field1.predicted_value'],
       };
@@ -140,17 +193,31 @@ describe('create_query', () => {
         index1: {
           elser_query_fields: [],
           dense_vector_query_fields: [
-            { field: 'passages.field1.predicted_value', model_id: 'model1', nested: true },
+            {
+              field: 'passages.field1.predicted_value',
+              model_id: 'model1',
+              nested: true,
+              indices: ['index1'],
+            },
           ],
           bm25_query_fields: [],
           source_fields: [],
+          skipped_fields: 0,
         },
       };
 
-      expect(createQuery(fields, fieldDescriptors)).toEqual({});
+      expect(createQuery(fields, fieldDescriptors)).toEqual({
+        retriever: {
+          standard: {
+            query: {
+              match_all: {},
+            },
+          },
+        },
+      });
     });
 
-    it('should throw for nested sparse query', () => {
+    it('should return empty for nested sparse query', () => {
       const fields = {
         index1: ['passages.field1.tokens'],
       };
@@ -158,68 +225,167 @@ describe('create_query', () => {
       const fieldDescriptors: IndicesQuerySourceFields = {
         index1: {
           elser_query_fields: [
-            { field: 'passages.field1.tokens', model_id: 'model1', nested: true },
+            {
+              field: 'passages.field1.tokens',
+              model_id: 'model1',
+              nested: true,
+              indices: ['index1'],
+            },
           ],
           dense_vector_query_fields: [],
           bm25_query_fields: [],
           source_fields: [],
-        },
-      };
-
-      expect(createQuery(fields, fieldDescriptors)).toEqual({});
-    });
-
-    it('should return a hybrid query', () => {
-      const fields = {
-        index1: ['field1', 'content', 'title'],
-        index2: ['field2'],
-      };
-
-      const fieldDescriptors: IndicesQuerySourceFields = {
-        index1: {
-          elser_query_fields: [{ field: 'field1', model_id: 'model1', nested: false }],
-          dense_vector_query_fields: [],
-          bm25_query_fields: ['content', 'title'],
-          source_fields: [],
-        },
-        index2: {
-          elser_query_fields: [{ field: 'field2', model_id: 'model1', nested: false }],
-          dense_vector_query_fields: [],
-          bm25_query_fields: [],
-          source_fields: [],
+          skipped_fields: 0,
         },
       };
 
       expect(createQuery(fields, fieldDescriptors)).toEqual({
-        query: {
-          bool: {
-            should: [
-              {
-                text_expansion: {
-                  field1: {
-                    model_id: 'model1',
-                    model_text: '{query}',
-                  },
-                },
-              },
-              {
-                multi_match: {
-                  query: '{query}',
-                  fields: ['content', 'title'],
-                },
-              },
-              {
-                text_expansion: {
-                  field2: {
-                    model_id: 'model1',
-                    model_text: '{query}',
-                  },
-                },
-              },
-            ],
-            minimum_should_match: 1,
+        retriever: {
+          standard: {
+            query: {
+              match_all: {},
+            },
           },
         },
+      });
+    });
+
+    describe('hybrid without RRF', () => {
+      it('should return a hybrid query', () => {
+        const fields = {
+          index1: ['field1', 'content', 'title'],
+          index2: ['field2'],
+        };
+
+        const fieldDescriptors: IndicesQuerySourceFields = {
+          index1: {
+            elser_query_fields: [
+              { field: 'field1', model_id: 'model1', nested: false, indices: ['index1'] },
+            ],
+            dense_vector_query_fields: [],
+            bm25_query_fields: ['content', 'title'],
+            source_fields: [],
+            skipped_fields: 0,
+          },
+          index2: {
+            elser_query_fields: [
+              { field: 'field2', model_id: 'model1', nested: false, indices: ['index2'] },
+            ],
+            dense_vector_query_fields: [],
+            bm25_query_fields: [],
+            source_fields: [],
+            skipped_fields: 0,
+          },
+        };
+
+        expect(createQuery(fields, fieldDescriptors, { rrf: false })).toEqual({
+          retriever: {
+            standard: {
+              query: {
+                bool: {
+                  should: [
+                    {
+                      text_expansion: {
+                        field1: {
+                          model_id: 'model1',
+                          model_text: '{query}',
+                        },
+                      },
+                    },
+                    {
+                      multi_match: {
+                        query: '{query}',
+                        fields: ['content', 'title'],
+                      },
+                    },
+                    {
+                      text_expansion: {
+                        field2: {
+                          model_id: 'model1',
+                          model_text: '{query}',
+                        },
+                      },
+                    },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            },
+          },
+        });
+      });
+    });
+
+    describe('hybrid with RRF', () => {
+      it('should return a hybrid query', () => {
+        const fields = {
+          index1: ['field1', 'content', 'title'],
+          index2: ['field2'],
+        };
+
+        const fieldDescriptors: IndicesQuerySourceFields = {
+          index1: {
+            elser_query_fields: [
+              { field: 'field1', model_id: 'model1', nested: false, indices: ['index1'] },
+            ],
+            dense_vector_query_fields: [],
+            bm25_query_fields: ['content', 'title'],
+            source_fields: [],
+            skipped_fields: 0,
+          },
+          index2: {
+            elser_query_fields: [
+              { field: 'field2', model_id: 'model1', nested: false, indices: ['index2'] },
+            ],
+            dense_vector_query_fields: [],
+            bm25_query_fields: [],
+            source_fields: [],
+            skipped_fields: 0,
+          },
+        };
+
+        expect(createQuery(fields, fieldDescriptors)).toEqual({
+          retriever: {
+            rrf: {
+              retrievers: [
+                {
+                  standard: {
+                    query: {
+                      text_expansion: {
+                        field1: {
+                          model_id: 'model1',
+                          model_text: '{query}',
+                        },
+                      },
+                    },
+                  },
+                },
+                {
+                  standard: {
+                    query: {
+                      multi_match: {
+                        query: '{query}',
+                        fields: ['content', 'title'],
+                      },
+                    },
+                  },
+                },
+                {
+                  standard: {
+                    query: {
+                      text_expansion: {
+                        field2: {
+                          model_id: 'model1',
+                          model_text: '{query}',
+                        },
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        });
       });
     });
 
@@ -231,32 +397,42 @@ describe('create_query', () => {
       const fieldDescriptors: IndicesQuerySourceFields = {
         index1: {
           elser_query_fields: [],
-          dense_vector_query_fields: [{ field: 'field1', model_id: 'model1', nested: false }],
+          dense_vector_query_fields: [
+            { field: 'field1', model_id: 'model1', nested: false, indices: ['index1'] },
+          ],
           bm25_query_fields: ['content', 'title'],
           source_fields: [],
+          skipped_fields: 0,
         },
         index2: {
-          elser_query_fields: [{ field: 'field2', model_id: 'model1', nested: false }],
+          elser_query_fields: [
+            { field: 'field2', model_id: 'model1', nested: false, indices: ['index2'] },
+          ],
           dense_vector_query_fields: [],
           bm25_query_fields: [],
           source_fields: [],
+          skipped_fields: 0,
         },
       };
 
       expect(createQuery(fields, fieldDescriptors)).toEqual({
-        knn: [
-          {
-            field: 'field1',
-            k: 10,
-            num_candidates: 100,
-            query_vector_builder: {
-              text_embedding: {
-                model_id: 'model1',
-                model_text: '{query}',
+        retriever: {
+          standard: {
+            query: {
+              knn: {
+                field: 'field1',
+                num_candidates: 100,
+                filter: { terms: { _index: ['index1'] } },
+                query_vector_builder: {
+                  text_embedding: {
+                    model_id: 'model1',
+                    model_text: '{query}',
+                  },
+                },
               },
             },
           },
-        ],
+        },
       });
     });
 
@@ -268,39 +444,48 @@ describe('create_query', () => {
       const fieldDescriptors: IndicesQuerySourceFields = {
         index1: {
           elser_query_fields: [],
-          dense_vector_query_fields: [{ field: 'field1', model_id: 'model1', nested: false }],
+          dense_vector_query_fields: [
+            { field: 'field1', model_id: 'model1', nested: false, indices: ['index1'] },
+          ],
           bm25_query_fields: ['content', 'title'],
           source_fields: [],
+          skipped_fields: 0,
         },
       };
 
       expect(createQuery(fields, fieldDescriptors)).toEqual({
-        query: {
-          bool: {
-            should: [
+        retriever: {
+          rrf: {
+            retrievers: [
               {
-                multi_match: {
-                  query: '{query}',
-                  fields: ['title', 'content'],
+                standard: {
+                  query: {
+                    multi_match: {
+                      query: '{query}',
+                      fields: ['title', 'content'],
+                    },
+                  },
+                },
+              },
+              {
+                standard: {
+                  query: {
+                    knn: {
+                      field: 'field1',
+                      num_candidates: 100,
+                      query_vector_builder: {
+                        text_embedding: {
+                          model_id: 'model1',
+                          model_text: '{query}',
+                        },
+                      },
+                    },
+                  },
                 },
               },
             ],
-            minimum_should_match: 1,
           },
         },
-        knn: [
-          {
-            field: 'field1',
-            k: 10,
-            num_candidates: 100,
-            query_vector_builder: {
-              text_embedding: {
-                model_id: 'model1',
-                model_text: '{query}',
-              },
-            },
-          },
-        ],
       });
     });
   });
@@ -309,10 +494,15 @@ describe('create_query', () => {
     it('should return default ELSER query fields', () => {
       const fieldDescriptors: IndicesQuerySourceFields = {
         index1: {
-          elser_query_fields: [{ field: 'field1', model_id: 'model1', nested: false }],
-          dense_vector_query_fields: [{ field: 'field1', model_id: 'dense_model', nested: false }],
+          elser_query_fields: [
+            { field: 'field1', model_id: 'model1', nested: false, indices: ['index1'] },
+          ],
+          dense_vector_query_fields: [
+            { field: 'field1', model_id: 'dense_model', nested: false, indices: ['index1'] },
+          ],
           bm25_query_fields: [],
           source_fields: [],
+          skipped_fields: 0,
         },
       };
 
@@ -322,20 +512,36 @@ describe('create_query', () => {
     it('should return default elser query fields for multiple indices', () => {
       const fieldDescriptors: IndicesQuerySourceFields = {
         index1: {
-          elser_query_fields: [{ field: 'field1', model_id: 'model1', nested: false }],
+          elser_query_fields: [
+            { field: 'field1', model_id: 'model1', nested: false, indices: ['index1'] },
+          ],
           dense_vector_query_fields: [
-            { field: 'dv_field1', model_id: 'dense_model', nested: false },
+            {
+              field: 'dv_field1',
+              model_id: 'dense_model',
+              nested: false,
+              indices: ['index1', 'index2'],
+            },
           ],
           bm25_query_fields: [],
           source_fields: [],
+          skipped_fields: 0,
         },
         index2: {
-          elser_query_fields: [{ field: 'vector', model_id: 'model1', nested: false }],
+          elser_query_fields: [
+            { field: 'vector', model_id: 'model1', nested: false, indices: ['index2'] },
+          ],
           dense_vector_query_fields: [
-            { field: 'dv_field1', model_id: 'dense_model', nested: false },
+            {
+              field: 'dv_field1',
+              model_id: 'dense_model',
+              nested: false,
+              indices: ['index1', 'index2'],
+            },
           ],
           bm25_query_fields: [],
           source_fields: [],
+          skipped_fields: 0,
         },
       };
 
@@ -348,20 +554,36 @@ describe('create_query', () => {
     it('should return elser query fields for default fields', () => {
       const fieldDescriptors: IndicesQuerySourceFields = {
         index1: {
-          elser_query_fields: [{ field: 'field1', model_id: 'model1', nested: false }],
+          elser_query_fields: [
+            { field: 'field1', model_id: 'model1', nested: false, indices: ['index1'] },
+          ],
           dense_vector_query_fields: [
-            { field: 'dv_field1', model_id: 'dense_model', nested: false },
+            {
+              field: 'dv_field1',
+              model_id: 'dense_model',
+              nested: false,
+              indices: ['index1', 'index2'],
+            },
           ],
           bm25_query_fields: [],
           source_fields: [],
+          skipped_fields: 0,
         },
         index2: {
-          elser_query_fields: [{ field: 'vector', model_id: 'model1', nested: false }],
+          elser_query_fields: [
+            { field: 'vector', model_id: 'model1', nested: false, indices: ['index2'] },
+          ],
           dense_vector_query_fields: [
-            { field: 'dv_field1', model_id: 'dense_model', nested: false },
+            {
+              field: 'dv_field1',
+              model_id: 'dense_model',
+              nested: false,
+              indices: ['index1', 'index2'],
+            },
           ],
           bm25_query_fields: [],
           source_fields: [],
+          skipped_fields: 0,
         },
       };
 
@@ -376,10 +598,11 @@ describe('create_query', () => {
         index1: {
           elser_query_fields: [],
           dense_vector_query_fields: [
-            { field: 'dv_field1', model_id: 'dense_model', nested: false },
+            { field: 'dv_field1', model_id: 'dense_model', nested: false, indices: ['index1'] },
           ],
           bm25_query_fields: [],
           source_fields: [],
+          skipped_fields: 0,
         },
       };
 
@@ -393,6 +616,7 @@ describe('create_query', () => {
           dense_vector_query_fields: [],
           bm25_query_fields: ['title', 'text', 'content'],
           source_fields: [],
+          skipped_fields: 0,
         },
       };
 
@@ -408,6 +632,7 @@ describe('create_query', () => {
           dense_vector_query_fields: [],
           bm25_query_fields: ['unknown1', 'unknown2'],
           source_fields: [],
+          skipped_fields: 0,
         },
       };
 
@@ -457,6 +682,7 @@ describe('create_query', () => {
             'url_path_dir2',
             'url_path_dir1',
           ],
+          skipped_fields: 0,
         },
       };
 
@@ -465,17 +691,22 @@ describe('create_query', () => {
       });
     });
 
-    it('should return an error when no source fields', () => {
+    it('should return undefined with index name when no source fields found', () => {
       const fieldDescriptors: IndicesQuerySourceFields = {
         'search-search-labs': {
           elser_query_fields: [],
           dense_vector_query_fields: [],
           bm25_query_fields: [],
           source_fields: [],
+          skipped_fields: 0,
         },
       };
 
-      expect(() => getDefaultSourceFields(fieldDescriptors)).toThrowError('No source fields found');
+      const defaultSourceFields = getDefaultSourceFields(fieldDescriptors);
+
+      expect(defaultSourceFields).toEqual({
+        'search-search-labs': [undefined],
+      });
     });
 
     it('should return the first single field when no source fields', () => {
@@ -485,6 +716,7 @@ describe('create_query', () => {
           dense_vector_query_fields: [],
           bm25_query_fields: [],
           source_fields: ['non_suggested_field'],
+          skipped_fields: 0,
         },
       };
 

@@ -39,19 +39,12 @@ import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { Breakpoints, useBreakpoints } from '../../../../hooks/use_breakpoints';
 import { useFallbackToTransactionsFetcher } from '../../../../hooks/use_fallback_to_transactions_fetcher';
-import {
-  FETCH_STATUS,
-  isFailure,
-  isPending,
-} from '../../../../hooks/use_fetcher';
+import { FETCH_STATUS, isFailure, isPending } from '../../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { unit } from '../../../../utils/style';
 import { ApmRoutes } from '../../../routing/apm_route_config';
 import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
-import {
-  ChartType,
-  getTimeSeriesColor,
-} from '../../../shared/charts/helper/get_timeseries_color';
+import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
 import { EnvironmentBadge } from '../../../shared/environment_badge';
 import { ServiceLink } from '../../../shared/links/apm/service_link';
 import { ListMetric } from '../../../shared/list_metric';
@@ -100,18 +93,12 @@ export function getServiceColumns({
             field: ServiceInventoryFieldName.AlertsCount,
             name: (
               <ColumnHeaderWithTooltip
-                tooltipContent={i18n.translate(
-                  'xpack.apm.servicesTable.tooltip.alertsCount',
-                  {
-                    defaultMessage: 'The count of the active alerts',
-                  }
-                )}
-                label={i18n.translate(
-                  'xpack.apm.servicesTable.alertsColumnLabel',
-                  {
-                    defaultMessage: 'Alerts',
-                  }
-                )}
+                tooltipContent={i18n.translate('xpack.apm.servicesTable.tooltip.alertsCount', {
+                  defaultMessage: 'The count of the active alerts',
+                })}
+                label={i18n.translate('xpack.apm.servicesTable.alertsColumnLabel', {
+                  defaultMessage: 'Alerts',
+                })}
               />
             ),
             width: `${unit * 6}px`,
@@ -165,24 +152,17 @@ export function getServiceColumns({
                   }}
                   position="right"
                   color="subdued"
-                  content={i18n.translate(
-                    'xpack.apm.servicesTable.healthColumnLabel.tooltip',
-                    {
-                      defaultMessage:
-                        'Health status is determined by the latency anomalies detected by the ML jobs specific to the selected service environment and the supported transaction types. These transaction types include "page-load", "request", and "mobile".',
-                    }
-                  )}
+                  content={i18n.translate('xpack.apm.servicesTable.healthColumnLabel.tooltip', {
+                    defaultMessage:
+                      'Health status is determined by the latency anomalies detected by the ML jobs specific to the selected service environment and the supported transaction types. These transaction types include "page-load", "request", and "mobile".',
+                  })}
                 />
               </>
             ),
             width: `${unit * 6}px`,
             sortable: true,
             render: (_, { healthStatus }) => {
-              return (
-                <HealthBadge
-                  healthStatus={healthStatus ?? ServiceHealthStatus.unknown}
-                />
-              );
+              return <HealthBadge healthStatus={healthStatus ?? ServiceHealthStatus.unknown} />;
             },
           } as ITableColumn<ServiceListItem>,
         ]
@@ -206,17 +186,12 @@ export function getServiceColumns({
       ? [
           {
             field: ServiceInventoryFieldName.Environments,
-            name: i18n.translate(
-              'xpack.apm.servicesTable.environmentColumnLabel',
-              {
-                defaultMessage: 'Environment',
-              }
-            ),
+            name: i18n.translate('xpack.apm.servicesTable.environmentColumnLabel', {
+              defaultMessage: 'Environment',
+            }),
             width: `${unit * 9}px`,
             sortable: true,
-            render: (_, { environments }) => (
-              <EnvironmentBadge environments={environments ?? []} />
-            ),
+            render: (_, { environments }) => <EnvironmentBadge environments={environments ?? []} />,
           } as ITableColumn<ServiceListItem>,
         ]
       : []),
@@ -224,10 +199,9 @@ export function getServiceColumns({
       ? [
           {
             field: ServiceInventoryFieldName.TransactionType,
-            name: i18n.translate(
-              'xpack.apm.servicesTable.transactionColumnLabel',
-              { defaultMessage: 'Transaction type' }
-            ),
+            name: i18n.translate('xpack.apm.servicesTable.transactionColumnLabel', {
+              defaultMessage: 'Transaction type',
+            }),
             width: `${unit * 8}px`,
             sortable: true,
           },
@@ -248,9 +222,7 @@ export function getServiceColumns({
           <ListMetric
             isLoading={comparisonDataLoading}
             series={comparisonData?.currentPeriod[serviceName]?.latency}
-            comparisonSeries={
-              comparisonData?.previousPeriod[serviceName]?.latency
-            }
+            comparisonSeries={comparisonData?.previousPeriod[serviceName]?.latency}
             hideSeries={!showWhenSmallOrGreaterThanLarge}
             color={currentPeriodColor}
             valueLabel={asMillisecondDuration(latency || 0)}
@@ -276,9 +248,7 @@ export function getServiceColumns({
           <ListMetric
             isLoading={comparisonDataLoading}
             series={comparisonData?.currentPeriod[serviceName]?.throughput}
-            comparisonSeries={
-              comparisonData?.previousPeriod[serviceName]?.throughput
-            }
+            comparisonSeries={comparisonData?.previousPeriod[serviceName]?.throughput}
             hideSeries={!showWhenSmallOrGreaterThanLarge}
             color={currentPeriodColor}
             valueLabel={asTransactionRate(throughput)}
@@ -303,12 +273,8 @@ export function getServiceColumns({
         return (
           <ListMetric
             isLoading={comparisonDataLoading}
-            series={
-              comparisonData?.currentPeriod[serviceName]?.transactionErrorRate
-            }
-            comparisonSeries={
-              comparisonData?.previousPeriod[serviceName]?.transactionErrorRate
-            }
+            series={comparisonData?.currentPeriod[serviceName]?.transactionErrorRate}
+            comparisonSeries={comparisonData?.previousPeriod[serviceName]?.transactionErrorRate}
             hideSeries={!showWhenSmallOrGreaterThanLarge}
             color={currentPeriodColor}
             valueLabel={valueLabel}
@@ -361,14 +327,11 @@ export function ServiceList({
   isSavingSetting,
   onChangeTableSearchBarVisibility,
 }: Props) {
-  const { kibanaVersion, isCloudEnv, isServerlessEnv } = useContext(
-    KibanaEnvironmentContext
-  );
+  const { kibanaVersion, isCloudEnv, isServerlessEnv } = useContext(KibanaEnvironmentContext);
   const breakpoints = useBreakpoints();
   const { link } = useApmRouter();
   const showTransactionTypeColumn = items.some(
-    ({ transactionType }) =>
-      transactionType && !isDefaultTransactionType(transactionType)
+    ({ transactionType }) => transactionType && !isDefaultTransactionType(transactionType)
   );
 
   const { query } = useApmParams('/services');
@@ -408,10 +371,9 @@ export function ServiceList({
       fieldsToSearch: ['serviceName'],
       maxCountExceeded,
       onChangeSearchQuery,
-      placeholder: i18n.translate(
-        'xpack.apm.servicesTable.filterServicesPlaceholder',
-        { defaultMessage: 'Search services by name' }
-      ),
+      placeholder: i18n.translate('xpack.apm.servicesTable.filterServicesPlaceholder', {
+        defaultMessage: 'Search services by name',
+      }),
     };
   }, [isTableSearchBarEnabled, maxCountExceeded, onChangeSearchQuery]);
 
@@ -420,19 +382,15 @@ export function ServiceList({
       <EuiFlexItem>
         <TryItButton
           isFeatureEnabled={isTableSearchBarEnabled}
-          promoLabel={i18n.translate('xpack.apm.serviceList.promoLabel', {
-            defaultMessage: 'Want to filter your services faster?',
-          })}
           linkLabel={
             isTableSearchBarEnabled
-              ? i18n.translate('xpack.apm.serviceList.turnFastFilterOff', {
-                  defaultMessage: 'Turn off Fast Filter',
+              ? i18n.translate('xpack.apm.serviceList.disableFastFilter', {
+                  defaultMessage: 'Disable fast filter',
                 })
-              : i18n.translate('xpack.apm.serviceList.turnFastFilterOn', {
-                  defaultMessage: 'Try the new Fast Filter',
+              : i18n.translate('xpack.apm.serviceList.enableFastFilter', {
+                  defaultMessage: 'Enable fast filter',
                 })
           }
-          icon="beaker"
           onClick={onChangeTableSearchBarVisibility}
           isLoading={isSavingSetting}
           popoverContent={
@@ -448,18 +406,16 @@ export function ServiceList({
                   <EuiLink
                     data-test-subj="apmServiceListGiveFeedbackLink"
                     href={getSurveyFeedbackURL({
-                      formUrl:
-                        'https://ela.st/service-inventory-fast-filter-feedback',
+                      formUrl: 'https://ela.st/service-inventory-fast-filter-feedback',
                       kibanaVersion,
                       isCloudEnv,
                       isServerlessEnv,
                     })}
                     target="_blank"
                   >
-                    {i18n.translate(
-                      'xpack.apm.serviceList.giveFeedbackFlexItemLabel',
-                      { defaultMessage: 'Give feedback' }
-                    )}
+                    {i18n.translate('xpack.apm.serviceList.giveFeedbackFlexItemLabel', {
+                      defaultMessage: 'Give feedback',
+                    })}
                   </EuiLink>
                 </EuiFlexItem>
               )}
@@ -469,11 +425,7 @@ export function ServiceList({
         <EuiSpacer size="s" />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFlexGroup
-          alignItems="center"
-          gutterSize="xs"
-          justifyContent="flexEnd"
-        >
+        <EuiFlexGroup alignItems="center" gutterSize="xs" justifyContent="flexEnd">
           {fallbackToTransactions && (
             <EuiFlexItem>
               <AggregatedTransactionsBadge />
@@ -483,13 +435,10 @@ export function ServiceList({
             <EuiFlexItem grow={false}>
               <EuiToolTip
                 position="top"
-                content={i18n.translate(
-                  'xpack.apm.servicesTable.tooltip.maxCountExceededWarning',
-                  {
-                    defaultMessage:
-                      'The limit of 1,000 services is exceeded. Please use the query bar to narrow down the results or create service groups.',
-                  }
-                )}
+                content={i18n.translate('xpack.apm.servicesTable.tooltip.maxCountExceededWarning', {
+                  defaultMessage:
+                    'The limit of 1,000 services is exceeded. Please use the query bar to narrow down the results or create service groups.',
+                })}
               >
                 <EuiIcon type="warning" color="danger" />
               </EuiToolTip>
@@ -498,23 +447,19 @@ export function ServiceList({
           <EuiFlexItem grow={false}>
             <EuiToolTip
               position="top"
-              content={i18n.translate(
-                'xpack.apm.servicesTable.tooltip.metricsExplanation',
-                {
-                  defaultMessage:
-                    'Service metrics are aggregated on their transaction type, which can be request or page-load. If neither exists, metrics are aggregated on the top available transaction type.',
-                }
-              )}
+              content={i18n.translate('xpack.apm.servicesTable.tooltip.metricsExplanation', {
+                defaultMessage:
+                  'Service metrics are aggregated on their transaction type, which can be request or page-load. If neither exists, metrics are aggregated on the top available transaction type.',
+              })}
             >
               <EuiIcon type="questionInCircle" color="subdued" />
             </EuiToolTip>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="xs" color="subdued">
-              {i18n.translate(
-                'xpack.apm.servicesTable.metricsExplanationLabel',
-                { defaultMessage: 'What are these metrics?' }
-              )}
+              {i18n.translate('xpack.apm.servicesTable.metricsExplanationLabel', {
+                defaultMessage: 'What are these metrics?',
+              })}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>

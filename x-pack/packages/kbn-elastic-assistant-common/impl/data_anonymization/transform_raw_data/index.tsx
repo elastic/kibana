@@ -24,7 +24,7 @@ export const transformRawData = ({
     currentReplacements,
     rawValue,
   }: {
-    currentReplacements: Record<string, string> | undefined;
+    currentReplacements: Replacements | undefined;
     rawValue: string;
   }) => string;
   onNewReplacements?: (replacements: Replacements) => void;

@@ -201,7 +201,7 @@ describe('IndexPatterns', () => {
     expect(apiClient.getFieldsForWildcard).toBeCalledWith(args);
   });
 
-  test('getFieldsForWildcard called with allowNoIndex set to true as default ', async () => {
+  test('getFieldsForWildcard called with allowNoIndex set to true as default', async () => {
     const id = '1';
     await indexPatterns.get(id);
     expect(apiClient.getFieldsForWildcard).toBeCalledWith({
@@ -209,6 +209,82 @@ describe('IndexPatterns', () => {
       indexFilter: undefined,
       metaFields: false,
       pattern: 'something',
+      rollupIndex: undefined,
+      type: undefined,
+    });
+  });
+
+  test('getFieldsForIndexPattern called with allowHidden set to undefined as default', async () => {
+    await indexPatterns.getFieldsForIndexPattern({ id: '1' } as DataViewSpec, {
+      pattern: 'something',
+    });
+    expect(apiClient.getFieldsForWildcard).toBeCalledWith({
+      allowHidden: undefined,
+      allowNoIndex: true,
+      metaFields: false,
+      pattern: undefined,
+      rollupIndex: undefined,
+      type: undefined,
+    });
+  });
+
+  test('getFieldsForIndexPattern called with allowHidden set to true', async () => {
+    await indexPatterns.getFieldsForIndexPattern({ id: '1', allowHidden: true } as DataViewSpec, {
+      pattern: 'something',
+    });
+    expect(apiClient.getFieldsForWildcard).toBeCalledWith({
+      allowHidden: true,
+      allowNoIndex: true,
+      metaFields: false,
+      pattern: undefined,
+      rollupIndex: undefined,
+      type: undefined,
+    });
+  });
+
+  test('getFieldsForIndexPattern called with allowHidden set to false', async () => {
+    await indexPatterns.getFieldsForIndexPattern({ id: '1', allowHidden: false } as DataViewSpec, {
+      pattern: 'something',
+    });
+    expect(apiClient.getFieldsForWildcard).toBeCalledWith({
+      allowHidden: false,
+      allowNoIndex: true,
+      metaFields: false,
+      pattern: undefined,
+      rollupIndex: undefined,
+      type: undefined,
+    });
+  });
+
+  test('getFieldsForIndexPattern called with getAllowHidden returning true', async () => {
+    await indexPatterns.getFieldsForIndexPattern(
+      { id: '1', getAllowHidden: () => true } as DataView,
+      {
+        pattern: 'something',
+      }
+    );
+    expect(apiClient.getFieldsForWildcard).toBeCalledWith({
+      allowHidden: true,
+      allowNoIndex: true,
+      metaFields: false,
+      pattern: undefined,
+      rollupIndex: undefined,
+      type: undefined,
+    });
+  });
+
+  test('getFieldsForIndexPattern called with getAllowHidden returning false', async () => {
+    await indexPatterns.getFieldsForIndexPattern(
+      { id: '1', getAllowHidden: () => false } as DataView,
+      {
+        pattern: 'something',
+      }
+    );
+    expect(apiClient.getFieldsForWildcard).toBeCalledWith({
+      allowHidden: false,
+      allowNoIndex: true,
+      metaFields: false,
+      pattern: undefined,
       rollupIndex: undefined,
       type: undefined,
     });

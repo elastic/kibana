@@ -16,8 +16,7 @@ import { MockApmPluginStorybook } from '../../../../../../../context/apm_plugin/
 import { APIReturnType } from '../../../../../../../services/rest/create_call_apm_api';
 
 type Args = ComponentProps<typeof SpanFlyout>;
-type SpanDetailsApiReturnType =
-  APIReturnType<'GET /internal/apm/traces/{traceId}/spans/{spanId}'>;
+type SpanDetailsApiReturnType = APIReturnType<'GET /internal/apm/traces/{traceId}/spans/{spanId}'>;
 
 function generateData() {
   const serviceName = 'synth-apple';
@@ -34,9 +33,7 @@ function generateData() {
     .duration(1000)
     .failure()
     .errors(
-      instanceJava
-        .error({ message: '[ResponseError] index_not_found_exception' })
-        .timestamp(50)
+      instanceJava.error({ message: '[ResponseError] index_not_found_exception' }).timestamp(50)
     )
     .children(
       instanceJava
@@ -50,9 +47,7 @@ function generateData() {
         .success()
     )
     .serialize();
-  const spanEvent = events.find(
-    (event) => event['processor.event'] === ProcessorEvent.span
-  )!;
+  const spanEvent = events.find((event) => event['processor.event'] === ProcessorEvent.span)!;
 
   const parentTransaction = events.find(
     (event) => event['transaction.id'] === spanEvent['parent.id']
@@ -72,10 +67,7 @@ export default {
           get: async (): Promise<SpanDetailsApiReturnType> => {
             return {
               span: dedot(data.spanEvent, {}) as Span,
-              parentTransaction: dedot(
-                data.parentTransaction,
-                {}
-              ) as Transaction,
+              parentTransaction: dedot(data.parentTransaction, {}) as Transaction,
             };
           },
         },

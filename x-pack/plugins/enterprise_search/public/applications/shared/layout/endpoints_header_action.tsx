@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
-
+import React, { FC, PropsWithChildren } from 'react';
 import { useState, useEffect } from 'react';
 
 import { css } from '@emotion/react';
@@ -40,7 +39,7 @@ import { KibanaLogic } from '../kibana';
 
 import { EndpointIcon } from './endpoint_icon';
 
-export const EndpointsHeaderAction: React.FC = ({ children }) => {
+export const EndpointsHeaderAction: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
   const { cloud, esConfig, navigateToUrl } = useValues(KibanaLogic);
   const { makeRequest } = useActions(FetchApiKeysAPILogic);
