@@ -57,7 +57,6 @@ export interface BuildkiteCommandStep {
   timeout_in_minutes?: number;
   key?: string;
   cancel_on_build_failing?: boolean;
-  continue_on_failure?: boolean;
   depends_on?: string | string[];
   retry?: {
     automatic: Array<{

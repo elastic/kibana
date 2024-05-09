@@ -238,7 +238,6 @@ pipeline.steps.push({
   retry: {
     automatic: [{ exit_status: '-1', limit: 3 }],
   },
-  continue_on_failure: true,
 });
 
 console.log(JSON.stringify(pipeline, null, 2));
