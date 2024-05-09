@@ -18,17 +18,22 @@ import {
 } from '../../../common/es_fields';
 import { createDatasetQualityESClient, wildcardQuery } from '../../utils';
 
+interface ResultBucket {
+  dataset: string;
+  count: number;
+}
+
 export async function getDegradedDocsPaginated(options: {
   esClient: ElasticsearchClient;
   type?: DataStreamType;
-  start?: number;
-  end?: number;
+  start: number;
+  end: number;
   datasetQuery?: string;
   after?: {
     degradedDocs?: { dataset: string; namespace: string };
     totalDocs?: { dataset: string; namespace: string };
   };
-  prevResults?: { degradedDocs: DegradedDocs[]; totalDocs: DegradedDocs[] };
+  prevResults?: { degradedDocs: ResultBucket[]; totalDocs: ResultBucket[] };
 }): Promise<DegradedDocs[]> {
   const {
     esClient,
@@ -106,7 +111,7 @@ export async function getDegradedDocsPaginated(options: {
   const currTotalDocs =
     response.responses[1].aggregations?.datasets.buckets.map((bucket) => ({
       dataset: `${type}-${bucket.key.dataset}-${bucket.key.namespace}`,
-      totalDocs: bucket.doc_count,
+      count: bucket.doc_count,
     })) ?? [];
 
   const totalDocs = [...prevResults.totalDocs, ...currTotalDocs];
@@ -150,8 +155,9 @@ export async function getDegradedDocsPaginated(options: {
 
     return {
       ...curr,
+      totalDocs: curr.count,
       count: degradedDocsCount,
-      percentage: (degradedDocsCount / curr.totalDocs!) * 100,
+      percentage: (degradedDocsCount / curr.count) * 100,
     };
   });
 }

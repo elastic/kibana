@@ -68,16 +68,12 @@ export const getIntegrationsResponseRt = rt.exact(
   })
 );
 
-export const degradedDocsRt = rt.intersection([
-  rt.type({
-    dataset: rt.string,
-  }),
-  rt.partial({
-    count: rt.number,
-    totalDocs: rt.number,
-    percentage: rt.number,
-  }),
-]);
+export const degradedDocsRt = rt.type({
+  dataset: rt.string,
+  count: rt.number,
+  totalDocs: rt.number,
+  percentage: rt.number,
+});
 
 export type DegradedDocs = rt.TypeOf<typeof degradedDocsRt>;
 
