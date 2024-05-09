@@ -57,9 +57,10 @@ const uploadPipeline = (pipelineContent: string | object) => {
     if (
       GITHUB_PR_LABELS.includes('ci:project-deploy-elasticsearch') ||
       GITHUB_PR_LABELS.includes('ci:project-deploy-observability') ||
-      GITHUB_PR_LABELS.includes('ci:project-deploy-security')
+      GITHUB_PR_LABELS.includes('ci:project-deploy-security') ||
+      GITHUB_PR_LABELS.includes('ci:build-serverless-image')
     ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/deploy_project.yml', false));
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/build_project.yml', false));
       removeBaseSteps = true;
     }
 
@@ -161,8 +162,12 @@ const uploadPipeline = (pipelineContent: string | object) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/fips.yml'));
     }
 
-    if (GITHUB_PR_LABELS.includes('ci:build-serverless-image')) {
-      pipeline.push(getPipeline('.buildkite/pipelines/artifacts_container_image.yml'));
+    if (
+      GITHUB_PR_LABELS.includes('ci:project-deploy-elasticsearch') ||
+      GITHUB_PR_LABELS.includes('ci:project-deploy-observability') ||
+      GITHUB_PR_LABELS.includes('ci:project-deploy-security')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/deploy_project.yml', false));
     }
 
     if (
