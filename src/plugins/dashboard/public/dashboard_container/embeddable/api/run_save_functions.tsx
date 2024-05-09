@@ -236,6 +236,10 @@ export async function runQuickSave(this: DashboardContainer) {
   return saveResult;
 }
 
+/**
+ * @description exclusively for view interaction mode,
+ * accounts for scenarios of cloning elastic managed dashboard into user managed dashboards
+ */
 export async function runClone(this: DashboardContainer) {
   const {
     dashboardContentManagement: { saveDashboardState, checkForDuplicateDashboardTitle },
