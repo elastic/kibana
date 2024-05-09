@@ -24,6 +24,7 @@ interface SaveDashboardOptions {
   storeTimeWithDashboard?: boolean;
   saveAsNew?: boolean;
   tags?: string[];
+  operation?: 'update' | 'create';
 }
 
 interface AddNewDashboardOptions {
@@ -521,11 +522,20 @@ export class DashboardPageObject extends FtrService {
    */
   public async saveDashboard(
     dashboardName: string,
-    saveOptions: SaveDashboardOptions = { waitDialogIsClosed: true, exitFromEditMode: true }
+    saveOptions: SaveDashboardOptions = {
+      waitDialogIsClosed: true,
+      exitFromEditMode: true,
+      operation: 'update',
+    }
   ) {
     await this.retry.try(async () => {
-      await this.modifyExistingDashboardDetails(dashboardName, saveOptions);
-      await this.clickQuickSave();
+      if (saveOptions.operation === 'update') {
+        await this.modifyExistingDashboardDetails(dashboardName, saveOptions);
+        await this.clickQuickSave();
+      } else if (saveOptions.operation === 'create') {
+        await this.enterDashboardSaveModalApplyUpdatesAndClickSave(dashboardName, saveOptions);
+        await this.clickSave();
+      }
 
       // Confirm that the Dashboard has actually been saved
       await this.testSubjects.existOrFail('saveDashboardSuccess');
@@ -559,7 +569,7 @@ export class DashboardPageObject extends FtrService {
    */
   public async enterDashboardSaveModalApplyUpdatesAndClickSave(
     dashboardTitle: string,
-    saveOptions: SaveDashboardOptions = { waitDialogIsClosed: true }
+    saveOptions: Omit<SaveDashboardOptions, 'operation'> = { waitDialogIsClosed: true }
   ) {
     const isSaveModalOpen = await this.testSubjects.exists('savedObjectSaveModal', {
       timeout: 2000,
