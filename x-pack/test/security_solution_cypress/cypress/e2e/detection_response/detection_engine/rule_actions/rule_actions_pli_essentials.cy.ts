@@ -64,7 +64,7 @@ describe(
       cy.get(SLACK_ACTION_BTN).should('be.visible');
       cy.get(EMAIL_ACTION_BTN).should('be.visible');
 
-      // complete tiers actions are not available
+      // complete tier actions are not available
       cy.get(WEBHOOK_ACTION_BTN).should('not.exist');
       cy.get(XMATTERS_ACTION_BTN).should('not.exist');
       cy.get(SERVER_LOG_ACTION_BTN).should('not.exist');
