@@ -32,77 +32,11 @@ export const GeoPointContentWithMap: FC<{
     services: { maps: mapsPlugin, data },
   } = useDataVisualizerKibana();
 
-<<<<<<< HEAD
-  // Update the layer list  with updated geo points upon refresh
-  useEffect(() => {
-    async function updateIndexPatternSearchLayer() {
-      if (
-        dataView?.id !== undefined &&
-        config !== undefined &&
-        config.fieldName !== undefined &&
-        (config.type === SUPPORTED_FIELD_TYPES.GEO_POINT ||
-          config.type === SUPPORTED_FIELD_TYPES.GEO_SHAPE)
-      ) {
-        const params = {
-          indexPatternId: dataView.id,
-          geoFieldName: config.fieldName,
-          geoFieldType: config.type as ES_GEO_FIELD_TYPE,
-          filters: data.query.filterManager.getFilters() ?? [],
-
-          ...(typeof esql === 'string' ? { esql, type: 'ESQL' } : {}),
-          ...(combinedQuery
-            ? {
-                query: {
-                  query: combinedQuery.searchString,
-                  language: combinedQuery.searchQueryLanguage,
-                },
-              }
-            : {}),
-        };
-        const searchLayerDescriptor = mapsPlugin
-          ? await mapsPlugin.createLayerDescriptors.createESSearchSourceLayerDescriptor(params)
-          : null;
-
-        if (searchLayerDescriptor?.sourceDescriptor) {
-          if (esql !== undefined) {
-            // Currently, createESSearchSourceLayerDescriptor doesn't support ES|QL yet
-            // but we can manually override the source descriptor with the ES|QL ESQLSourceDescriptor
-            const esqlSourceDescriptor = {
-              columns: [
-                {
-                  name: config.fieldName,
-                  type: config.type,
-                },
-              ],
-              dataViewId: dataView.id,
-              dateField: dataView.timeFieldName ?? timeFieldName,
-              geoField: config.fieldName,
-              esql,
-              narrowByGlobalSearch: true,
-              narrowByGlobalTime: true,
-              narrowByMapBounds: true,
-              id: searchLayerDescriptor.sourceDescriptor.id,
-              type: 'ESQL',
-              applyForceRefresh: true,
-            };
-
-            setLayerList([
-              ...layerList,
-              {
-                ...searchLayerDescriptor,
-                sourceDescriptor: esqlSourceDescriptor,
-              },
-            ]);
-          } else {
-            setLayerList([...layerList, searchLayerDescriptor]);
-          }
-=======
   const query = useMemo(() => {
     return combinedQuery
       ? {
           query: combinedQuery.searchString,
           language: combinedQuery.searchQueryLanguage,
->>>>>>> upstream/main
         }
       : undefined;
   }, [combinedQuery]);

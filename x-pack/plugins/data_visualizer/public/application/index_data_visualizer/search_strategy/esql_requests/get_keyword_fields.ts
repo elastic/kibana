@@ -9,11 +9,7 @@ import type { UseCancellableSearch } from '@kbn/ml-cancellable-search';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { ESQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import pLimit from 'p-limit';
-<<<<<<< HEAD
-import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
-=======
 import { ESQL_LATEST_VERSION, appendToESQLQuery } from '@kbn/esql-utils';
->>>>>>> upstream/main
 import type { Column } from '../../hooks/esql/use_esql_overall_stats_data';
 import { getSafeESQLName } from '../requests/esql_utils';
 import { isFulfilled, isRejected } from '../../../common/util/promise_all_settled_utils';
@@ -36,16 +32,6 @@ export const getESQLKeywordFieldStats = async ({
   const limiter = pLimit(MAX_CONCURRENT_REQUESTS);
 
   const keywordFields = columns.map((field) => {
-<<<<<<< HEAD
-    const query =
-      esqlBaseQuery +
-      `| STATS ${getSafeESQLName(`${field.name}_in_records`)} = count(MV_MIN(${getSafeESQLName(
-        field.name
-      )})), ${getSafeESQLName(`${field.name}_in_values`)} = count(${getSafeESQLName(field.name)})
-      BY ${getSafeESQLName(field.name)}
-    | SORT ${getSafeESQLName(`${field.name}_in_records`)} DESC
-    | LIMIT 10`;
-=======
     const query = appendToESQLQuery(
       esqlBaseQuery,
       `| STATS ${getSafeESQLName(`${field.name}_in_records`)} = count(MV_MIN(${getSafeESQLName(
@@ -55,7 +41,6 @@ export const getESQLKeywordFieldStats = async ({
   | SORT ${getSafeESQLName(`${field.name}_in_records`)} DESC
   | LIMIT 10`
     );
->>>>>>> upstream/main
     return {
       field,
       request: {

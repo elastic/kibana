@@ -105,11 +105,6 @@ const getESQLOverallStatsInChunk = async ({
       (evalQuery ? ' | EVAL ' + evalQuery : '') + countQuery
     );
 
-<<<<<<< HEAD
-    const query = esqlBaseQueryWithLimit + (evalQuery ? ' | EVAL ' + evalQuery : '') + countQuery;
-
-=======
->>>>>>> upstream/main
     const request = {
       params: {
         query,

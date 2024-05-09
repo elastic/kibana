@@ -75,11 +75,7 @@ export const KeywordContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) =
         />
       ) : null}
 
-<<<<<<< HEAD
-      {EMSSuggestion && stats && <ChoroplethMap stats={stats} suggestion={EMSSuggestion} />}
-=======
       {suggestion && stats && <ChoroplethMap stats={stats} suggestion={suggestion} />}
->>>>>>> upstream/main
     </ExpandedRowContent>
   );
 };

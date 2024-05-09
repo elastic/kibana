@@ -75,11 +75,7 @@ export const TopValues: FC<Props> = ({
   if (originalTopValues?.length === 0) return null;
   const totalDocuments = showSampledValues
     ? stats.topValuesSampleSize ?? 0
-<<<<<<< HEAD
-    : Math.min(sampleCount ?? 0, stats.totalDocuments ?? 0);
-=======
     : Math.min(sampleCount ?? Infinity, stats.totalDocuments ?? Infinity);
->>>>>>> upstream/main
 
   const getMessage = () => {
     if (showSampledValues && stats.topValuesSampleSize !== undefined) {
@@ -158,11 +154,7 @@ export const TopValues: FC<Props> = ({
         {showSampledValues ? (
           <FormattedMessage
             id="xpack.dataVisualizer.dataGrid.field.topSampledValuesLabel"
-<<<<<<< HEAD
-            defaultMessage="Top Sampled values"
-=======
             defaultMessage="Top sampled values"
->>>>>>> upstream/main
           />
         ) : (
           <FormattedMessage

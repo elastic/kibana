@@ -14,11 +14,7 @@ import { type UseCancellableSearch, useCancellableSearch } from '@kbn/ml-cancell
 import type { estypes } from '@elastic/elasticsearch';
 import type { ISearchOptions } from '@kbn/search-types';
 import type { TimeBucketsInterval } from '@kbn/ml-time-buckets';
-<<<<<<< HEAD
-import { getESQLWithSafeLimit, ESQL_LATEST_VERSION } from '@kbn/esql-utils';
-=======
 import { getESQLWithSafeLimit, ESQL_LATEST_VERSION, appendToESQLQuery } from '@kbn/esql-utils';
->>>>>>> upstream/main
 import { isDefined } from '@kbn/ml-is-defined';
 import { OMIT_FIELDS } from '../../../../../common/constants';
 import type {
