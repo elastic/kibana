@@ -18,7 +18,7 @@ import {
   EuiSuperSelect,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IngestGetPipelineResponse } from '@elastic/elasticsearch/lib/api/types';
+import { IngestGetPipelineResponse, IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 
 import { DEFAULT_INGESTION_PIPELINE } from '../constants';
 
@@ -33,68 +33,79 @@ interface IngestPipelinePanelProps {
   ingestPipelinesData?: IngestGetPipelineResponse;
 }
 
+interface IngestPipelineWithDeprecated extends IngestPipeline {
+  deprecated?: boolean;
+}
+
 export const IngestPipelinePanel: React.FC<IngestPipelinePanelProps> = ({
   setSelectedPipeline,
   ingestPipelinesData,
 }) => {
+  const createProcessorCount = (item: IngestPipelineWithDeprecated | undefined) => (
+    <EuiFlexItem grow={false}>
+      <EuiText size="s" color="subdued">
+        <p>
+          {i18n.translate('searchApiPanels.welcomeBanner.ingestPipelinePanel.processorCount', {
+            defaultMessage: '{count} {count, plural, one {processor} other {processors}}',
+            values: { count: item?.processors?.length },
+          })}
+        </p>
+      </EuiText>
+    </EuiFlexItem>
+  );
+
+  const createManagedBadge = (item: IngestPipelineWithDeprecated | undefined) =>
+    item?._meta?.managed && (
+      <EuiFlexItem grow={false}>
+        <EuiBadge>
+          {i18n.translate('searchApiPanels.welcomeBanner.ingestPipelinePanel.managedBadge', {
+            defaultMessage: 'Managed',
+          })}
+        </EuiBadge>
+      </EuiFlexItem>
+    );
+
+  const createRecommendedBadge = (pipelineName: string) =>
+    pipelineName === DEFAULT_INGESTION_PIPELINE && (
+      <EuiFlexItem grow={false}>
+        <EuiBadge color="primary">
+          {i18n.translate('searchApiPanels.welcomeBanner.ingestPipelinePanel.recommendedBadge', {
+            defaultMessage: 'Recommended',
+          })}
+        </EuiBadge>
+      </EuiFlexItem>
+    );
+
   const options = useMemo(() => {
+    const createOptionItem = (pipelineName: string): OptionItem => {
+      const item: IngestPipelineWithDeprecated | undefined = ingestPipelinesData?.[pipelineName];
+      return {
+        value: pipelineName,
+        inputDisplay: pipelineName,
+        dropdownDisplay: (
+          <Fragment>
+            <strong>{pipelineName}</strong>
+            <EuiFlexGroup
+              gutterSize="s"
+              alignItems="center"
+              data-test-subj="ingestPipelinePanelProcessors"
+            >
+              {createProcessorCount(item)}
+              {createManagedBadge(item)}
+              {createRecommendedBadge(pipelineName)}
+            </EuiFlexGroup>
+          </Fragment>
+        ),
+      };
+    };
+
     return ingestPipelinesData
-      ? Object.keys(ingestPipelinesData).map((pipelineName: string): OptionItem => {
-          const item = ingestPipelinesData[pipelineName];
-          return {
-            value: pipelineName,
-            inputDisplay: pipelineName,
-            dropdownDisplay: (
-              <Fragment>
-                <strong>{pipelineName}</strong>
-                <EuiFlexGroup
-                  gutterSize="s"
-                  alignItems="center"
-                  data-test-subj="ingestPipelinePanelProcessors"
-                >
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="s" color="subdued">
-                      <p>
-                        {i18n.translate(
-                          'searchApiPanels.welcomeBanner.ingestPipelinePanel.processorCount',
-                          {
-                            defaultMessage:
-                              '{count} {count, plural, one {processor} other {processors}}',
-                            values: { count: item.processors?.length },
-                          }
-                        )}
-                      </p>
-                    </EuiText>
-                  </EuiFlexItem>
-                  {item._meta?.managed && (
-                    <EuiFlexItem grow={false}>
-                      <EuiBadge>
-                        {i18n.translate(
-                          'searchApiPanels.welcomeBanner.ingestPipelinePanel.managedBadge',
-                          {
-                            defaultMessage: 'Managed',
-                          }
-                        )}
-                      </EuiBadge>
-                    </EuiFlexItem>
-                  )}
-                  {pipelineName === DEFAULT_INGESTION_PIPELINE && (
-                    <EuiFlexItem grow={false}>
-                      <EuiBadge color="primary">
-                        {i18n.translate(
-                          'searchApiPanels.welcomeBanner.ingestPipelinePanel.recommendedBadge',
-                          {
-                            defaultMessage: 'Recommended',
-                          }
-                        )}
-                      </EuiBadge>
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
-              </Fragment>
-            ),
-          };
-        })
+      ? Object.keys(ingestPipelinesData)
+          .filter(
+            (pipelineName: string) =>
+              !(ingestPipelinesData[pipelineName] as IngestPipelineWithDeprecated)?.deprecated
+          )
+          .map(createOptionItem)
       : [];
   }, [ingestPipelinesData]);
 
