@@ -231,7 +231,7 @@ pipeline.steps.push({
 });
 
 pipeline.steps.push({
-  command: '.buildkite/pipelines/flaky_tests/post_stats_on_pr.ts',
+  command: 'ts-node .buildkite/pipelines/flaky_tests/post_stats_on_pr.ts',
   label: 'Post results on Github pull request',
   agents: getAgentRule('n2-4-spot'),
   timeout_in_minutes: 15,
