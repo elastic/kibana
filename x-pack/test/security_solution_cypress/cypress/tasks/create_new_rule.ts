@@ -887,7 +887,7 @@ export const enablesAndPopulatesThresholdSuppression = (
 
 export const fillAlertSuppressionFields = (fields: string[]) => {
   fields.forEach((field) => {
-    cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).type(`${field}{enter}`);
+    cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).type(`${field}{downArrow}{enter}`);
   });
 };
 
