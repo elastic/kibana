@@ -35,7 +35,7 @@ export function useGetPreviewData({
   groupings?: Record<string, unknown>;
   objective?: Objective;
   indicator: Indicator;
-  range: { start: number; end: number };
+  range: { from: Date; to: Date };
 }): UseGetPreviewData {
   const { http } = useKibana().services;
 

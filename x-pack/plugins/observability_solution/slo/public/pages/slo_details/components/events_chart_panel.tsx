@@ -47,10 +47,7 @@ import { getDiscoverLink } from '../../../utils/slo/get_discover_link';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
-  range: {
-    start: number;
-    end: number;
-  };
+  range: { from: Date; to: Date };
   selectedTabId: SloTabId;
   onBrushed?: (timeBounds: TimeBounds) => void;
 }

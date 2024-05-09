@@ -107,10 +107,7 @@ export function SLODetailsHistory({ slo, isAutoRefreshing, selectedTabId }: Prop
         <EuiFlexItem>
           <EventsChartPanel
             slo={slo}
-            range={{
-              start: range.from.getTime(),
-              end: range.to.getTime(),
-            }}
+            range={range}
             selectedTabId={selectedTabId}
             onBrushed={onBrushed}
           />
