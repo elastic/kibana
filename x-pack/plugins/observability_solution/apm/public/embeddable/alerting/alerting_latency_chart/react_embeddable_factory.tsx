@@ -4,15 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect } from 'react';
+import React from 'react';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import {
-  initializeTitles,
-  useBatchedPublishingSubjects,
-  fetch$,
-} from '@kbn/presentation-publishing';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { initializeTitles, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { BehaviorSubject } from 'rxjs';
 import type { EmbeddableApmAlertingLatencyVizProps } from '../types';
 import type { EmbeddableDeps } from '../../types';
 import { ApmEmbeddableContext } from '../../embeddable_context';
@@ -44,7 +40,6 @@ export const getApmAlertingLatencyChartEmbeddableFactory = (deps: EmbeddableDeps
       const alert$ = new BehaviorSubject(state.alert);
       const kuery$ = new BehaviorSubject(state.kuery);
       const filters$ = new BehaviorSubject(state.filters);
-      const reload$ = new Subject<boolean>();
 
       const api = buildApi(
         {
@@ -87,12 +82,6 @@ export const getApmAlertingLatencyChartEmbeddableFactory = (deps: EmbeddableDeps
         }
       );
 
-      const fetchSubscription = fetch$(api)
-        .pipe()
-        .subscribe((next) => {
-          reload$.next(next.isReload);
-        });
-
       return {
         api,
         Component: () => {
@@ -121,12 +110,6 @@ export const getApmAlertingLatencyChartEmbeddableFactory = (deps: EmbeddableDeps
             kuery$,
             filters$
           );
-
-          useEffect(() => {
-            return () => {
-              fetchSubscription.unsubscribe();
-            };
-          }, []);
 
           return (
             <ApmEmbeddableContext deps={deps} rangeFrom={rangeFrom} rangeTo={rangeTo}>
