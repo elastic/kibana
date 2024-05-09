@@ -15,6 +15,8 @@ import { registerDeploymentsCpuRoute } from './deployments_cpu';
 import { registerDeploymentsMemoryRoute } from './deployments_memory';
 import { registerDaemonsetsCpuRoute } from './daemonsets_cpu';
 import { registerDaemonsetsMemoryRoute } from './daemonsets_memory';
+import { registerEventsRoute } from './events';
+
 
 export const registerRoutes = (
   router: IRouter,
@@ -30,4 +32,5 @@ export const registerRoutes = (
   registerDeploymentsMemoryRoute(router, logger)
   registerDaemonsetsCpuRoute(router, logger)
   registerDaemonsetsMemoryRoute(router, logger)
+  registerEventsRoute(router, logger);
 };

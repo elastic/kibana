@@ -167,7 +167,8 @@ export async function getPodEvents(client: any, podName: string, namespace: stri
       'note': note,
       'time': lastObserved,
       'type': eventType,
-      'pod': podName
+      'kind': "Pod",
+      'object': podName
     };
   }
   return event;

@@ -18,3 +18,5 @@ export const DAEMONSET_CPU_ROUTE = '/api/kubernetes/daemonsets/cpu';
 export const POD_MEMORY_ROUTE = '/api/kubernetes/pods/memory';
 export const DEPLOYMENT_MEMORY_ROUTE = '/api/kubernetes/deployments/memory';
 export const DAEMONSET_MEMORY_ROUTE = '/api/kubernetes/daemonsets/memory';
+//EVENTS
+export const EVENTS_ROUTE = '/api/kubernetes/events';
