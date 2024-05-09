@@ -14,10 +14,11 @@ import {
 } from '@elastic/eui';
 import DateMath from '@kbn/datemath';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { BurnRates } from '../../../../components/slo/burn_rate/burn_rates';
 import { useKibana } from '../../../../utils/kibana_react';
 import { useBurnRateOptions } from '../../hooks/use_burn_rate_options';
+import { TimeBounds } from '../../types';
 import { EventsChartPanel } from '../events_chart_panel';
 import { HistoricalDataCharts } from '../historical_data_charts';
 import { SloTabId } from '../slo_details';
@@ -30,9 +31,7 @@ export interface Props {
 
 export function SLODetailsHistory({ slo, isAutoRefreshing, selectedTabId }: Props) {
   const { uiSettings } = useKibana().services;
-
   const { burnRateOptions } = useBurnRateOptions(slo);
-
   const [start, setStart] = useState(`now-${slo.timeWindow.duration}`);
   const [end, setEnd] = useState('now');
 
@@ -44,18 +43,21 @@ export function SLODetailsHistory({ slo, isAutoRefreshing, selectedTabId }: Prop
   const onRefresh = (val: OnRefreshProps) => {};
 
   const absRange = useMemo(() => {
+    const parsedStartDate = DateMath.parse(start)!.valueOf();
+    const parsedEndDate = DateMath.parse(end, { roundUp: true })!.valueOf();
+
     return {
-      from: new Date(DateMath.parse(start)!.valueOf()),
-      to: new Date(DateMath.parse(end, { roundUp: true })!.valueOf()),
-      absoluteFrom: DateMath.parse(start)!.valueOf(),
-      absoluteTo: DateMath.parse(end, { roundUp: true })!.valueOf(),
+      from: new Date(parsedStartDate),
+      to: new Date(parsedEndDate),
+      absoluteFrom: parsedStartDate,
+      absoluteTo: parsedEndDate,
     };
   }, [start, end]);
 
-  const onBrushed = useCallback(({ fromUtc, toUtc }) => {
-    setStart(fromUtc);
-    setEnd(toUtc);
-  }, []);
+  const onBrushed = ({ from, to }: TimeBounds) => {
+    setStart(from.toISOString());
+    setEnd(to.toISOString());
+  };
 
   return (
     <>

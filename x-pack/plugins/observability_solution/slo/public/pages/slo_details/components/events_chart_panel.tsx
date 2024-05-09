@@ -37,7 +37,7 @@ import moment from 'moment';
 import React, { useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TimeBounds } from '../types';
-import { getBrushData } from '../../../utils/slo/duration';
+import { getBrushTimeBounds } from '../../../utils/slo/duration';
 import { SloTabId } from './slo_details';
 import { useGetPreviewData } from '../../../hooks/use_get_preview_data';
 import { useKibana } from '../../../utils/kibana_react';
@@ -234,7 +234,7 @@ export function EventsChartPanel({ slo, range, selectedTabId, onBrushed }: Props
                     pointerUpdateTrigger={'x'}
                     locale={i18n.getLocale()}
                     onBrushEnd={(brushArea) => {
-                      onBrushed?.(getBrushData(brushArea));
+                      onBrushed?.(getBrushTimeBounds(brushArea));
                     }}
                   />
                   {annotation}
