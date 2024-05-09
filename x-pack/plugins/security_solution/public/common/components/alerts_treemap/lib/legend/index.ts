@@ -7,6 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 
+import { TableId } from '@kbn/securitysolution-data-table';
 import { firstNonNullValue } from '../../../../../../common/endpoint/models/ecs_safety_helpers';
 import type { LegendItem } from '../../../charts/draggable_legend_item';
 import { getFillColor } from '../chart_palette';
@@ -44,6 +45,7 @@ export const getLegendItemFromRawBucket = ({
     }),
   field: stackByField0,
   value: bucket.key_as_string ?? firstNonNullValue(bucket.key) ?? 0,
+  scopeId: TableId.alertsOnAlertsPage,
 });
 
 export const getLegendItemFromFlattenedBucket = ({
@@ -70,6 +72,7 @@ export const getLegendItemFromFlattenedBucket = ({
   render: () => `${stackByField1Key}`,
   field: `${stackByField1}`,
   value: `${stackByField1Key}`,
+  scopeId: TableId.alertsOnAlertsPage,
 });
 
 export const getFirstGroupLegendItems = ({
