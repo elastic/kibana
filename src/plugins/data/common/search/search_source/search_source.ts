@@ -59,7 +59,18 @@
  */
 
 import { setWith } from '@kbn/safer-lodash-set';
-import { difference, isEqual, isFunction, isObject, keyBy, pick, uniqueId, concat } from 'lodash';
+import {
+  difference,
+  isEqual,
+  isFunction,
+  isObject,
+  keyBy,
+  pick,
+  uniqueId,
+  concat,
+  omitBy,
+  isNil,
+} from 'lodash';
 import { catchError, finalize, first, last, map, shareReplay, switchMap, tap } from 'rxjs';
 import { defer, EMPTY, from, lastValueFrom, Observable } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -69,6 +80,8 @@ import {
   isOfQueryType,
   isPhraseFilter,
   isPhrasesFilter,
+  Query,
+  AggregateQuery,
 } from '@kbn/es-query';
 import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/common';
 import { getHighlightRequest } from '@kbn/field-formats-plugin/common';
@@ -134,6 +147,8 @@ interface ExpressionAstOptions {
    */
   asDatatable?: boolean;
 }
+
+type AnyQuery = Query | AggregateQuery;
 
 /** @public **/
 export class SearchSource {
@@ -766,7 +781,7 @@ export class SearchSource {
     const { getConfig } = this.dependencies;
     const searchRequest = this.mergeProps();
     searchRequest.body = searchRequest.body || {};
-    const { body, index, query, filters, highlightAll, pit } = searchRequest;
+    const { body, index, query, filters, highlightAll } = searchRequest;
     searchRequest.indexType = this.getIndexType(index);
     const metaFields = getConfig(UI_SETTINGS.META_FIELDS) ?? [];
 
@@ -899,11 +914,7 @@ export class SearchSource {
     const filtersInMustClause = (body.sort ?? []).some((sort: EsQuerySortValue[]) =>
       sort.hasOwnProperty('_score')
     );
-    const esQueryConfigs = {
-      ...getEsQueryConfig({ get: getConfig }),
-      filtersInMustClause,
-    };
-    body.query = buildEsQuery(index, query, filters, esQueryConfigs);
+    // TODO REMOVE body.query = buildEsQuery(index, query, filters, esQueryConfigs);
 
     // For testing shard failure messages in the UI, follow these steps:
     // 1. Add all three sample data sets (flights, ecommerce, logs) to Kibana.
@@ -924,16 +935,49 @@ export class SearchSource {
     // });
     // Alternatively you could also add this query via "Edit as Query DSL", then it needs no code to be changed
 
-    if (highlightAll && body.query) {
-      body.highlight = getHighlightRequest(getConfig(UI_SETTINGS.DOC_HIGHLIGHT));
-      delete searchRequest.highlightAll;
-    }
+    // simply filters out null or undefined object values
+    const omitByIsNil = (object: Record<string, any>) => omitBy(object, isNil);
 
-    if (pit) {
-      body.pit = pit;
-    }
+    const enableHighlight = highlightAll && body.query;
 
-    return searchRequest;
+    const bodyToReturn = {
+      ...searchRequest.body,
+      pit: searchRequest.pit,
+      highlight: enableHighlight
+        ? getHighlightRequest(getConfig(UI_SETTINGS.DOC_HIGHLIGHT))
+        : undefined,
+      query: this.getEsQuery({ index, query, filters, getConfig, filtersInMustClause }),
+    };
+
+    const searchRequestToReturn: SearchRequest = {
+      ...searchRequest,
+      highlightAll: enableHighlight ? undefined : searchRequest.highlightAll,
+      body: omitByIsNil(bodyToReturn),
+    };
+
+    return omitByIsNil(searchRequestToReturn) as SearchRequest;
+  }
+
+  private getEsQuery({
+    index,
+    query,
+    filters,
+    getConfig,
+    filtersInMustClause,
+  }: {
+    index?: DataView;
+    query: AnyQuery | AnyQuery[];
+    filters: Filter | Filter[];
+    esQueryConfigs?: Record<string, any>;
+    getConfig: (key: string) => any;
+    filtersInMustClause: any;
+  }) {
+    const esQueryConfigs = {
+      ...getEsQueryConfig({ get: getConfig }),
+      filtersInMustClause,
+    };
+
+    return buildEsQuery(index, query, filters, esQueryConfigs);
   }
 
   /**
