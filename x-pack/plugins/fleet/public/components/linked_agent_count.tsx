@@ -21,8 +21,9 @@ export const LinkedAgentCount = memo<
     count: number;
     agentPolicyId: string;
     showAgentText?: boolean;
+    additionalKuery?: string;
   }
->(({ count, agentPolicyId, showAgentText, ...otherEuiLinkProps }) => {
+>(({ count, agentPolicyId, showAgentText, additionalKuery = '', ...otherEuiLinkProps }) => {
   const { getHref } = useLink();
   const displayValue = showAgentText ? (
     <FormattedMessage
@@ -33,13 +34,12 @@ export const LinkedAgentCount = memo<
   ) : (
     count
   );
+  const kuery = `${AGENTS_PREFIX}.policy_id : ${agentPolicyId}${
+    additionalKuery && ` and ${additionalKuery}`
+  }`;
+
   return count > 0 ? (
-    <EuiLink
-      {...otherEuiLinkProps}
-      href={getHref('agent_list', {
-        kuery: `${AGENTS_PREFIX}.policy_id : ${agentPolicyId}`,
-      })}
-    >
+    <EuiLink {...otherEuiLinkProps} href={getHref('agent_list', { kuery })}>
       {displayValue}
     </EuiLink>
   ) : (

@@ -15,7 +15,6 @@ import {
   EuiEmptyPrompt,
   EuiBasicTable,
   EuiLink,
-  EuiTextColor,
 } from '@elastic/eui';
 import type { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { i18n } from '@kbn/i18n';
@@ -23,7 +22,7 @@ import { FormattedMessage, FormattedDate } from '@kbn/i18n-react';
 import { useHistory } from 'react-router-dom';
 
 import type { AgentPolicy } from '../../../types';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../constants';
+import { AGENTS_PREFIX, AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
   useAuthz,
   usePagination,
@@ -104,21 +103,9 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         name: i18n.translate('xpack.fleet.agentPolicyList.nameColumnTitle', {
           defaultMessage: 'Name',
         }),
-        width: '25%',
-        render: (name: string, agentPolicy: AgentPolicy) => (
-          <AgentPolicySummaryLine policy={agentPolicy} />
-        ),
-      },
-      {
-        field: 'description',
-        name: i18n.translate('xpack.fleet.agentPolicyList.descriptionColumnTitle', {
-          defaultMessage: 'Description',
-        }),
         width: '35%',
-        render: (value: string) => (
-          <EuiTextColor color="subdued" className="eui-textTruncate" title={value}>
-            {value}
-          </EuiTextColor>
+        render: (name: string, agentPolicy: AgentPolicy) => (
+          <AgentPolicySummaryLine policy={agentPolicy} withDescription={true} />
         ),
       },
       {
@@ -134,11 +121,39 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
       {
         field: 'agents',
         name: i18n.translate('xpack.fleet.agentPolicyList.agentsColumnTitle', {
-          defaultMessage: 'Agents',
+          defaultMessage: 'Total agents',
         }),
         dataType: 'number',
         render: (agents: number, agentPolicy: AgentPolicy) => (
           <LinkedAgentCount count={agents} agentPolicyId={agentPolicy.id} />
+        ),
+      },
+      {
+        field: 'unprivileged_agents',
+        name: i18n.translate('xpack.fleet.agentPolicyList.agentsColumnTitle', {
+          defaultMessage: 'Unprivileged agents',
+        }),
+        dataType: 'number',
+        render: (unprivilegedAgents: number, agentPolicy: AgentPolicy) => (
+          <LinkedAgentCount
+            count={unprivilegedAgents}
+            agentPolicyId={agentPolicy.id}
+            additionalKuery={`${AGENTS_PREFIX}.local_metadata.elastic.agent.unprivileged: true`}
+          />
+        ),
+      },
+      {
+        field: 'agents',
+        name: i18n.translate('xpack.fleet.agentPolicyList.agentsColumnTitle', {
+          defaultMessage: 'Privileged agents',
+        }),
+        dataType: 'number',
+        render: (agents: number, agentPolicy: AgentPolicy) => (
+          <LinkedAgentCount
+            count={agents - (agentPolicy.unprivileged_agents || 0)}
+            agentPolicyId={agentPolicy.id}
+            additionalKuery={`not ${AGENTS_PREFIX}.local_metadata.elastic.agent.unprivileged: true`}
+          />
         ),
       },
       {
@@ -155,6 +170,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         name: i18n.translate('xpack.fleet.agentPolicyList.actionsColumnTitle', {
           defaultMessage: 'Actions',
         }),
+        width: '70px',
         actions: [
           {
             render: (agentPolicy: AgentPolicy) => (
