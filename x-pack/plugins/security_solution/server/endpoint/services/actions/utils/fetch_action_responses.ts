@@ -8,7 +8,6 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { EndpointError } from '../../../../../common/endpoint/errors';
 import type {
   EndpointActionResponse,
   LogsEndpointActionResponse,
@@ -32,15 +31,9 @@ interface FetchActionResponsesResult {
 
 /** @private */
 const buildSearchQuery = (
-  actionIds?: string[],
-  agentIds?: string[]
+  actionIds: string[] = [],
+  agentIds: string[] = []
 ): estypes.QueryDslQueryContainer => {
-  if ((!actionIds || actionIds.length === 0) && (!agentIds || agentIds.length === 0)) {
-    throw new EndpointError(
-      `Unable to build query to retrieve Action responses. 'actionIds' and 'agentIds' are both empty`
-    );
-  }
-
   const filter: estypes.QueryDslQueryContainer[] = [];
   const query: estypes.QueryDslQueryContainer = { bool: { filter } };
 

@@ -37,11 +37,11 @@ import type {
 } from '../../../../../../common/endpoint/types';
 import type { SearchHit, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ResponseActionGetFileRequestBody } from '../../../../../../common/api/endpoint';
-import { SENTINEL_ONE_ZIP_PASSCODE } from '../../../../../../common/endpoint/service/response_actions/sentinel_one';
 import { SUB_ACTION } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
 import { ACTIONS_SEARCH_PAGE_SIZE } from '../../constants';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { Readable } from 'stream';
+import { RESPONSE_ACTIONS_ZIP_PASSCODE } from '../../../../../../common/endpoint/service/response_actions/constants';
 
 jest.mock('../../action_details_by_id', () => {
   const originalMod = jest.requireActual('../../action_details_by_id');
@@ -758,7 +758,7 @@ describe('SentinelOneActionsClient class', () => {
           subActionParams: {
             agentUUID: '1-2-3',
             files: [getFileReqOptions.parameters.path],
-            zipPassCode: SENTINEL_ONE_ZIP_PASSCODE,
+            zipPassCode: RESPONSE_ACTIONS_ZIP_PASSCODE.sentinel_one,
           },
         },
       });

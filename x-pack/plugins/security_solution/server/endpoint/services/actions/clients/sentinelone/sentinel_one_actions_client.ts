@@ -25,7 +25,6 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { Readable } from 'stream';
 import { ACTIONS_SEARCH_PAGE_SIZE } from '../../constants';
-import { SENTINEL_ONE_ZIP_PASSCODE } from '../../../../../../common/endpoint/service/response_actions/sentinel_one';
 import type {
   NormalizedExternalConnectorClient,
   NormalizedExternalConnectorClientExecuteOptions,
@@ -70,6 +69,7 @@ import type {
   ResponseActionsClientWriteActionRequestToEndpointIndexOptions,
 } from '../lib/base_response_actions_client';
 import { ResponseActionsClientImpl } from '../lib/base_response_actions_client';
+import { RESPONSE_ACTIONS_ZIP_PASSCODE } from '../../../../../../common/endpoint/service/response_actions/constants';
 
 export type SentinelOneActionsClientOptions = ResponseActionsClientOptions & {
   connectorActions: NormalizedExternalConnectorClient;
@@ -400,7 +400,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
           await this.sendAction(SUB_ACTION.FETCH_AGENT_FILES, {
             agentUUID: actionRequest.endpoint_ids[0],
             files: [actionRequest.parameters.path],
-            zipPassCode: SENTINEL_ONE_ZIP_PASSCODE,
+            zipPassCode: RESPONSE_ACTIONS_ZIP_PASSCODE.sentinel_one,
           });
         } catch (err) {
           error = err;
