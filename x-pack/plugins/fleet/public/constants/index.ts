@@ -45,6 +45,7 @@ export const DURATION_APM_SETTINGS_VARS = {
 export const TOUR_STORAGE_KEYS = {
   AGENT_ACTIVITY: 'fleet.agentActivityTour',
   ADD_AGENT_POPOVER: 'fleet.addAgentPopoverTour',
+  INACTIVE_AGENTS: 'fleet.inactiveAgentsTour',
 };
 
 export interface TOUR_STORAGE_CONFIG {
@@ -52,6 +53,9 @@ export interface TOUR_STORAGE_CONFIG {
     active: boolean;
   };
   ADD_AGENT_POPOVER: {
+    active: boolean;
+  };
+  INACTIVE_AGENTS: {
     active: boolean;
   };
 }
