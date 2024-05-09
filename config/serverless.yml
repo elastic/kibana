@@ -141,6 +141,7 @@ xpack.actions.queued.max: 10000
 uiSettings:
   overrides:
     enableESQL: true
+    bfetch:disable: true
 
 # Task Manager
 xpack.task_manager.allow_reading_invalid_state: false
