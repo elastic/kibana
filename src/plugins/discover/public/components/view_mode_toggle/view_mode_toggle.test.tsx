@@ -17,6 +17,7 @@ import { BehaviorSubject } from 'rxjs';
 import { getDiscoverStateMock } from '../../__mocks__/discover_state.mock';
 import { DataTotalHits$ } from '../../application/main/state_management/discover_data_state_container';
 import { FetchStatus } from '../../application/types';
+import { discoverServiceMock } from '../../__mocks__/services';
 
 describe('Document view mode toggle component', () => {
   const mountComponent = ({
@@ -25,7 +26,8 @@ describe('Document view mode toggle component', () => {
     isTextBasedQuery = false,
     setDiscoverViewMode = jest.fn(),
   } = {}) => {
-    const serivces = {
+    const services = {
+      ...discoverServiceMock,
       uiSettings: {
         get: () => showFieldStatistics,
       },
@@ -38,7 +40,7 @@ describe('Document view mode toggle component', () => {
     }) as DataTotalHits$;
 
     return mountWithIntl(
-      <KibanaContextProvider services={serivces}>
+      <KibanaContextProvider services={services}>
         <DocumentViewModeToggle
           viewMode={viewMode}
           isTextBasedQuery={isTextBasedQuery}
