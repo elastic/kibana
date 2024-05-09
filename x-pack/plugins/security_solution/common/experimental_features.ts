@@ -134,11 +134,6 @@ export const allowedExperimentalValues = Object.freeze({
   alertsPageFiltersEnabled: true,
 
   /**
-   * Enables the Attack discovery feature and API endpoint
-   */
-  attackDiscoveryEnabled: false,
-
-  /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
    */
   assistantModelEvaluation: false,
@@ -209,6 +204,11 @@ export const allowedExperimentalValues = Object.freeze({
   crowdstrikeDataInAnalyzerEnabled: false,
 
   /**
+   * Enables experimental JAMF integration data to be available in Analyzer
+   */
+  jamfDataInAnalyzerEnabled: false,
+
+  /**
    * Enables experimental "Updates" tab in the prebuilt rule upgrade flyout.
    * This tab shows the JSON diff between the installed prebuilt rule
    * version and the latest available version.
@@ -255,12 +255,17 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    *  Enables Security AI Assistant's Flyout mode
    */
-  aiAssistantFlyoutMode: false,
+  aiAssistantFlyoutMode: true,
 
   /**
    * Enables the new modal for the value list items
    */
   valueListItemsModalEnabled: true,
+
+  /**
+   * Enables the new rule's bulk action to manage custom highlighted fields
+   */
+  bulkCustomHighlightedFieldsEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

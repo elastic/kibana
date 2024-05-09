@@ -37,6 +37,7 @@ export const ATTACK_DISCOVERY_TOOL: AssistantTool = {
   sourceRegister: APP_UI_ID,
   isSupported: (params: AssistantToolParams): params is AttackDiscoveryToolParams => {
     const { alertsIndexPattern, llm, request, size } = params;
+
     return (
       requestHasRequiredAnonymizationParams(request) &&
       alertsIndexPattern != null &&
@@ -75,6 +76,12 @@ export const ATTACK_DISCOVERY_TOOL: AssistantTool = {
           size,
         });
 
+        const alertsContextCount = anonymizedAlerts.length;
+        if (alertsContextCount === 0) {
+          // No alerts to analyze, so return an empty attack discoveries array
+          return JSON.stringify({ alertsContextCount, attackDiscoveries: [] }, null, 2);
+        }
+
         const outputParser = getOutputParser();
         const outputFixingParser = OutputFixingParser.fromLLM(llm, outputParser);
 
@@ -96,8 +103,9 @@ export const ATTACK_DISCOVERY_TOOL: AssistantTool = {
         const result = await answerFormattingChain.call({
           query: getAttackDiscoveryPrompt({ anonymizedAlerts }),
         });
+        const attackDiscoveries = result.records;
 
-        return JSON.stringify(result.records, null, 2);
+        return JSON.stringify({ alertsContextCount, attackDiscoveries }, null, 2);
       },
       tags: ['attack-discovery'],
     });

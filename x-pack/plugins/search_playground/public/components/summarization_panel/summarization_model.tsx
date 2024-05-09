@@ -97,7 +97,7 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
   );
 
   useEffect(() => {
-    usageTracker.click(
+    usageTracker?.click(
       `${AnalyticsEvents.modelSelected}_${selectedModel.value || selectedModel.connectorType}`
     );
   }, [usageTracker, selectedModel]);
@@ -119,7 +119,7 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
           content={i18n.translate(
             'xpack.searchPlayground.sidebar.summarizationModel.manageConnectorTooltip',
             {
-              defaultMessage: 'Manage connector',
+              defaultMessage: 'Manage',
             }
           )}
         >
