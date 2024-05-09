@@ -36,7 +36,7 @@ export const getESQLKeywordFieldStats = async ({
       esqlBaseQuery,
       `| STATS ${getSafeESQLName(`${field.name}_in_records`)} = count(MV_MIN(${getSafeESQLName(
         field.name
-      )})), ${getSafeESQLName(`${field.name}_in_values`)} = count(${getSafeESQLName(field.name)})
+      )}))
     BY ${getSafeESQLName(field.name)}
   | SORT ${getSafeESQLName(`${field.name}_in_records`)} DESC
   | LIMIT 10`
@@ -74,20 +74,14 @@ export const getESQLKeywordFieldStats = async ({
               return row[1] + acc;
             }, 0);
 
-            const sampledValues = results.map((row) => ({
-              key: row[2],
-              doc_count: row[1],
-            }));
-
             const terms = results.map((row) => ({
-              key: row[2],
+              key: row[1],
               doc_count: row[0],
             }));
 
             return {
               fieldName: field.name,
               topValues: terms,
-              sampledValues,
               isTopValuesSampled: true,
               topValuesSampleSize,
             } as StringFieldStats;
