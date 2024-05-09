@@ -8,7 +8,10 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexGrid } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { ContainerCharts } from '../../../charts/container_charts';
+import { DockerCharts } from '../../../charts/container_charts';
+import { INTEGRATIONS } from '../../../constants';
+import { useIntegrationCheck } from '../../../hooks/use_integration_check';
+import { KubernetesContainerCharts } from '../../../charts/kubernetes_charts';
 
 interface Props {
   assetId: string;
@@ -17,11 +20,20 @@ interface Props {
 }
 
 export const ContainerMetrics = (props: Props) => {
-  return (
+  const isK8sContainer = useIntegrationCheck({ dependsOn: INTEGRATIONS.kubernetesContainer });
+
+  return isK8sContainer ? (
     <EuiFlexGroup gutterSize="m" direction="column">
       <EuiFlexGrid columns={2} gutterSize="s">
-        <ContainerCharts {...props} metric="cpu" />
-        <ContainerCharts {...props} metric="memory" />
+        <KubernetesContainerCharts {...props} metric="cpu" />
+        <KubernetesContainerCharts {...props} metric="memory" />
+      </EuiFlexGrid>
+    </EuiFlexGroup>
+  ) : (
+    <EuiFlexGroup gutterSize="m" direction="column">
+      <EuiFlexGrid columns={2} gutterSize="s">
+        <DockerCharts {...props} metric="cpu" />
+        <DockerCharts {...props} metric="memory" />
       </EuiFlexGrid>
     </EuiFlexGroup>
   );

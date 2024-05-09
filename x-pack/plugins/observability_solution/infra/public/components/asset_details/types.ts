@@ -100,5 +100,5 @@ export type DataViewOrigin = 'logs' | 'metrics';
 export enum INTEGRATION_NAME {
   kubernetesNode = 'kubernetesNode',
   kubernetesContainer = 'kubernetesContainer',
-  dockerContainer = 'dockerContainer',
+  docker = 'docker',
 }
