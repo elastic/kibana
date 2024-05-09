@@ -7,7 +7,12 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import { IHttpFetchError } from '@kbn/core-http-browser';
-import { API_VERSIONS, ApiConfig, Replacements } from '@kbn/elastic-assistant-common';
+import {
+  API_VERSIONS,
+  ApiConfig,
+  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
+  Replacements,
+} from '@kbn/elastic-assistant-common';
 import { API_ERROR } from '../translations';
 import { getOptionalRequestParams } from '../helpers';
 import { TraceOptions } from '../types';
@@ -209,7 +214,7 @@ export const getKnowledgeBaseStatus = async ({
   signal,
 }: GetKnowledgeBaseStatusParams): Promise<GetKnowledgeBaseStatusResponse | IHttpFetchError> => {
   try {
-    const path = `/internal/elastic_assistant/knowledge_base/${resource || ''}`;
+    const path = ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL.replace('{resource?}', resource || '');
     const response = await http.fetch(path, {
       method: 'GET',
       signal,
@@ -248,7 +253,7 @@ export const postKnowledgeBase = async ({
   signal,
 }: PostKnowledgeBaseParams): Promise<PostKnowledgeBaseResponse | IHttpFetchError> => {
   try {
-    const path = `/internal/elastic_assistant/knowledge_base/${resource || ''}`;
+    const path = ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL.replace('{resource?}', resource || '');
     const response = await http.fetch(path, {
       method: 'POST',
       signal,
@@ -287,7 +292,7 @@ export const deleteKnowledgeBase = async ({
   signal,
 }: DeleteKnowledgeBaseParams): Promise<DeleteKnowledgeBaseResponse | IHttpFetchError> => {
   try {
-    const path = `/internal/elastic_assistant/knowledge_base/${resource || ''}`;
+    const path = ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL.replace('{resource?}', resource || '');
     const response = await http.fetch(path, {
       method: 'DELETE',
       signal,

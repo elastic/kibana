@@ -8,7 +8,10 @@
 import { IRouter, KibanaRequest } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import { ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION } from '@kbn/elastic-assistant-common';
+import {
+  ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
+} from '@kbn/elastic-assistant-common';
 import {
   DeleteKnowledgeBaseRequestParams,
   DeleteKnowledgeBaseResponse,
@@ -16,7 +19,6 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../types';
-import { KNOWLEDGE_BASE } from '../../../common/constants';
 import { ElasticsearchStore } from '../../lib/langchain/elasticsearch_store/elasticsearch_store';
 import { ESQL_RESOURCE, KNOWLEDGE_BASE_INDEX_PATTERN } from './constants';
 
@@ -30,7 +32,7 @@ export const deleteKnowledgeBaseRoute = (
   router.versioned
     .delete({
       access: 'internal',
-      path: KNOWLEDGE_BASE,
+      path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
       options: {
         tags: ['access:elasticAssistant'],
       },

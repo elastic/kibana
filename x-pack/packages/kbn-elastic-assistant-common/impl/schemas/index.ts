@@ -37,5 +37,8 @@ export * from './conversations/find_conversations_route.gen';
 // Actions Connector Schemas
 export * from './actions_connector/post_actions_connector_execute_route.gen';
 
-// KB Schemas
+// Knowledge Base Schemas
 export * from './knowledge_base/crud_kb_route.gen';
+export * from './knowledge_base/bulk_crud_knowledge_base_route.gen';
+// export * from './knowledge_base/common_attributes.gen';
+export * from './knowledge_base/crud_knowledge_base_route.gen';

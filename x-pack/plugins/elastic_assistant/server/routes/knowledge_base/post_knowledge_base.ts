@@ -11,12 +11,12 @@ import {
   ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
   CreateKnowledgeBaseRequestParams,
   CreateKnowledgeBaseResponse,
+  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { IKibanaResponse, KibanaRequest } from '@kbn/core/server';
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantPluginRouter, GetElser } from '../../types';
-import { KNOWLEDGE_BASE } from '../../../common/constants';
 import { ElasticsearchStore } from '../../lib/langchain/elasticsearch_store/elasticsearch_store';
 import { ESQL_DOCS_LOADED_QUERY, ESQL_RESOURCE, KNOWLEDGE_BASE_INDEX_PATTERN } from './constants';
 import { getKbResource } from './get_kb_resource';
@@ -35,7 +35,7 @@ export const postKnowledgeBaseRoute = (
   router.versioned
     .post({
       access: 'internal',
-      path: KNOWLEDGE_BASE,
+      path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
       options: {
         tags: ['access:elasticAssistant'],
       },

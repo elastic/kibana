@@ -12,6 +12,46 @@ export const knowledgeBaseFieldMap: FieldMap = {
     array: false,
     required: false,
   },
+  id: {
+    type: 'keyword',
+    array: false,
+    required: true,
+  },
+  created_at: {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  created_by: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  updated_at: {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  updated_by: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  users: {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'users.id': {
+    type: 'keyword',
+    array: false,
+    required: true,
+  },
+  'users.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   metadata: {
     type: 'object',
     array: false,
