@@ -37,7 +37,13 @@ import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { RuleResponseAction } from '../../../../common/api/detection_engine/model/rule_response_actions';
 import type { ConfigType } from '../../../config';
 import type { SetupPlugins } from '../../../plugin';
-import type { CompleteRule, EqlRuleParams, RuleParams, ThreatRuleParams } from '../rule_schema';
+import type {
+  CompleteRule,
+  EqlRuleParams,
+  MachineLearningRuleParams,
+  RuleParams,
+  ThreatRuleParams,
+} from '../rule_schema';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import type { ITelemetryEventsSender } from '../../telemetry/sender';
 import type { IRuleExecutionLogForExecutors, IRuleMonitoringService } from '../rule_monitoring';
