@@ -52,6 +52,7 @@ export interface CalculateAndPersistScoresParams {
   weights?: RiskWeights;
   alertSampleSizePerShard?: number;
   returnScores?: boolean;
+  refresh?: 'wait_for';
 }
 
 export interface CalculateAndPersistScoresResponse {
