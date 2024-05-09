@@ -35,6 +35,7 @@ export const SourcesPanelForStartChat: React.FC = () => {
           "Select the Elasticsearch indices you'd like to query, providing additional context for the LLM.",
       })}
       isValid={!!selectedIndices.length}
+      dataTestSubj="selectIndicesChatPanel"
     >
       {!!selectedIndices?.length && (
         <EuiFlexItem>

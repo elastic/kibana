@@ -61,7 +61,9 @@ export const DiscoverMainContent = ({
   panelsToggle,
   isChartAvailable,
 }: DiscoverMainContentProps) => {
-  const { trackUiMetric } = useDiscoverServices();
+  const { trackUiMetric, dataVisualizer: dataVisualizerService } = useDiscoverServices();
+
+  const shouldShowViewModeToggle = dataVisualizerService !== undefined;
 
   const setDiscoverViewMode = useCallback(
     (mode: VIEW_MODE) => {
@@ -81,7 +83,7 @@ export const DiscoverMainContent = ({
   const isDropAllowed = Boolean(onDropFieldToTable);
 
   const viewModeToggle = useMemo(() => {
-    return (
+    return shouldShowViewModeToggle ? (
       <DocumentViewModeToggle
         viewMode={viewMode}
         isTextBasedQuery={isPlainRecord}
@@ -93,6 +95,8 @@ export const DiscoverMainContent = ({
             : undefined
         }
       />
+    ) : (
+      <React.Fragment />
     );
   }, [
     viewMode,
@@ -101,6 +105,7 @@ export const DiscoverMainContent = ({
     stateContainer,
     panelsToggle,
     isChartAvailable,
+    shouldShowViewModeToggle,
   ]);
 
   const showChart = useAppStateSelector((state) => !state.hideChart);
@@ -125,7 +130,7 @@ export const DiscoverMainContent = ({
             <DiscoverDocuments
               viewModeToggle={viewModeToggle}
               dataView={dataView}
-              onAddFilter={!isPlainRecord ? onAddFilter : undefined}
+              onAddFilter={onAddFilter}
               stateContainer={stateContainer}
               onFieldEdited={!isPlainRecord ? onFieldEdited : undefined}
             />
