@@ -57,12 +57,7 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
   const isMounted = useMountedState();
   const newJobUrl = useMlLink({ page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB });
   const [jobIds, setJobIds] = useState(initialInput?.jobIds ?? []);
-
-  const initialValuesRef = useRef({
-    titleManuallyChanged: !!initialInput?.title,
-    isNewJob:
-      initialInput?.jobIds !== undefined && jobIds.length && initialInput?.jobIds[0] !== jobIds[0],
-  });
+  const titleManuallyChanged = useRef(!!initialInput?.title);
 
   const [job, setJob] = useState<MlJob | undefined>();
   const [panelTitle, setPanelTitle] = useState<string>(initialInput?.title ?? '');
@@ -71,14 +66,10 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
   );
   // Reset detector index and entities if the job has changed
   const [selectedDetectorIndex, setSelectedDetectorIndex] = useState<number>(
-    !initialValuesRef.current.isNewJob && initialInput?.selectedDetectorIndex
-      ? initialInput.selectedDetectorIndex
-      : 0
+    initialInput?.selectedDetectorIndex ?? 0
   );
   const [selectedEntities, setSelectedEntities] = useState<MlEntity | undefined>(
-    !initialValuesRef.current.isNewJob && initialInput?.selectedEntities
-      ? initialInput.selectedEntities
-      : undefined
+    initialInput?.selectedEntities
   );
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
   const isPanelTitleValid = panelTitle.length > 0;
@@ -89,22 +80,16 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
         const { jobs } = await mlApiServices.getJobs({ jobId: jobIds.join(',') });
 
         if (isMounted() && jobs.length === 1) {
-          // Reset values if the job has changed
-          if (initialValuesRef.current.isNewJob) {
-            setSelectedDetectorIndex(0);
-            setSelectedEntities(undefined);
-            setFunctionDescription(undefined);
-          }
-
           setJob(jobs[0]);
           setErrorMessage(undefined);
         }
       }
 
       if (jobIds.length === 1) {
-        if (!initialValuesRef.current.titleManuallyChanged) {
+        if (!titleManuallyChanged.current) {
           setPanelTitle(getDefaultSingleMetricViewerPanelTitle(jobIds[0]));
         }
+        // Fetch job if a jobId has been selected and if there is no corresponding fetched job or the job selection has changed
         if (mlApiServices && jobIds.length === 1 && jobIds[0] !== job?.job_id) {
           fetchJob().catch((error) => {
             const errorMsg = extractErrorMessage(error);
@@ -113,7 +98,7 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
         }
       }
     },
-    [isMounted, jobIds, mlApiServices, panelTitle, initialValuesRef.current.isNewJob, job?.job_id]
+    [isMounted, jobIds, mlApiServices, panelTitle, job?.job_id]
   );
 
   const handleStateUpdate = (
@@ -155,9 +140,11 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
             createJobUrl={newJobUrl}
             jobsAndGroupIds={jobIds}
             onChange={(update) => {
-              initialValuesRef.current.isNewJob =
-                update?.jobIds !== undefined && update.jobIds[0] !== jobIds[0];
               setJobIds([...(update?.jobIds ?? []), ...(update?.groupIds ?? [])]);
+              // Reset values when selected job has changed
+              setSelectedDetectorIndex(0);
+              setSelectedEntities(undefined);
+              setFunctionDescription(undefined);
             }}
             {...(errorMessage && { errors: [errorMessage] })}
           />
@@ -177,7 +164,7 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
               name="panelTitle"
               value={panelTitle}
               onChange={(e) => {
-                initialValuesRef.current.titleManuallyChanged = true;
+                titleManuallyChanged.current = true;
                 setPanelTitle(e.target.value);
               }}
               isInvalid={!isPanelTitleValid}
@@ -208,7 +195,7 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
               data-test-subj="mlsingleMetricViewerInitializerCancelButton"
             >
               <FormattedMessage
-                id="xpack.ml.singleMetricViewerEmbeddable.cancelButtonLabel"
+                id="xpack.ml.singleMetricViewerEmbeddable.setupModal.cancelButtonLabel"
                 defaultMessage="Cancel"
               />
             </EuiButtonEmpty>

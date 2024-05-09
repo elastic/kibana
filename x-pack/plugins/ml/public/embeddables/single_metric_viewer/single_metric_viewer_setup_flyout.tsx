@@ -25,7 +25,7 @@ export async function resolveEmbeddableSingleMetricViewerUserInput(
   const {
     http,
     overlays,
-    application: { currentAppId$ },
+    application: { currentLocation$ },
     ...startServices
   } = coreStart;
   const { data, share } = services;
@@ -71,7 +71,7 @@ export async function resolveEmbeddableSingleMetricViewerUserInput(
         }
       );
       // Close the flyout when user navigates out of the current plugin
-      currentAppId$
+      currentLocation$
         .pipe(skip(1), takeUntil(from(flyoutSession.onClose)), distinctUntilChanged())
         .subscribe(() => {
           flyoutSession.close();
