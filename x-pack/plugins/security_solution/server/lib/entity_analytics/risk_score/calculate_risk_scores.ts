@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import fs from 'fs';
 import { isEmpty } from 'lodash';
 import type {
   AggregationsAggregationContainer,
@@ -46,10 +45,12 @@ import {
   RISK_SCORING_SUM_VALUE,
 } from './constants';
 
-// load some painless scripts from disk.
-// lets do it sync, so we can error right away as if we were actually being compiled
-// TODO: can we bundle these scripts up during the build process?
-const { initScript, combineScript, mapScript, reduceScript } = painlessScripts();
+import {
+  RISK_SCORING_INIT_SCRIPT,
+  RISK_SCORING_MAP_SCRIPT,
+  RISK_SCORING_REDUCE_SCRIPT,
+  RISK_SCORING_COMBINE_SCRIPT,
+} from './painless';
 
 const formatForResponse = ({
   bucket,
@@ -151,16 +152,16 @@ const buildIdentifierTypeAggregation = ({
         aggs: {
           risk_details: {
             scripted_metric: {
-              init_script: initScript,
-              map_script: mapScript,
-              combine_script: combineScript,
+              init_script: RISK_SCORING_INIT_SCRIPT,
+              map_script: RISK_SCORING_MAP_SCRIPT,
+              combine_script: RISK_SCORING_COMBINE_SCRIPT,
               params: {
                 max_risk_inputs_per_identity: RISK_SCORING_INPUTS_COUNT_MAX,
                 p: RISK_SCORING_SUM_VALUE,
                 risk_cap: RISK_SCORING_SUM_MAX,
                 global_identifier_type_weight: globalIdentifierTypeWeight,
               },
-              reduce_script: reduceScript,
+              reduce_script: RISK_SCORING_REDUCE_SCRIPT,
             },
           },
         },
@@ -333,24 +334,3 @@ export const calculateRiskScores = async ({
       },
     };
   });
-
-interface PainlessScripts {
-  init_script: string;
-  map_script: string;
-  combine_script: string;
-  reduce_script: string;
-}
-function painlessScripts(): PainlessScripts {
-  // TODO, instead of loading these, bundle them.
-  const phases = ['init', 'combine', 'map', 'reduce'];
-  return Object.fromEntries(
-    phases.map(function (phase) {
-      return [
-        phase,
-        fs.readFileSync(`${__dirname}/painless/risk_scoring_${phase}.painless`, {
-          encoding: 'utf-8',
-        }),
-      ];
-    })
-  ) as PainlessScripts;
-}
