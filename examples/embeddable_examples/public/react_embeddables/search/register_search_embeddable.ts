@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import { SEARCH_EMBEDDABLE_ID } from './constants';
 import { Services } from './types';
 
-export function registerSearchEmbeddable(services: Services) {
-  services.embeddable.registerReactEmbeddableFactory(SEARCH_EMBEDDABLE_ID, async () => {
+export function registerSearchEmbeddable(embeddable: EmbeddableSetup, services: Promise<Services>) {
+  embeddable.registerReactEmbeddableFactory(SEARCH_EMBEDDABLE_ID, async () => {
     const { getSearchEmbeddableFactory } = await import('./search_react_embeddable');
-    return getSearchEmbeddableFactory(services);
+    return getSearchEmbeddableFactory(await services);
   });
 }

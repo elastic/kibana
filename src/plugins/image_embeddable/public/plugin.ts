@@ -60,6 +60,15 @@ export class ImageEmbeddablePlugin
     plugins: ImageEmbeddableSetupDependencies
   ): SetupContract {
     plugins.uiActions.registerTrigger(imageClickTrigger);
+
+    plugins.embeddable.registerReactEmbeddableFactory(IMAGE_EMBEDDABLE_TYPE, async () => {
+      const [_, { getImageEmbeddableFactory }, [__, { embeddableEnhanced }]] = await Promise.all([
+        untilPluginStartServicesReady(),
+        import('./image_embeddable/get_image_embeddable_factory'),
+        core.getStartServices(),
+      ]);
+      return getImageEmbeddableFactory({ embeddableEnhanced });
+    });
     return {};
   }
 
@@ -68,13 +77,6 @@ export class ImageEmbeddablePlugin
 
     untilPluginStartServicesReady().then(() => {
       registerCreateImageAction();
-    });
-    plugins.embeddable.registerReactEmbeddableFactory(IMAGE_EMBEDDABLE_TYPE, async () => {
-      const [_, { getImageEmbeddableFactory }] = await Promise.all([
-        untilPluginStartServicesReady(),
-        import('./image_embeddable/get_image_embeddable_factory'),
-      ]);
-      return getImageEmbeddableFactory({ embeddableEnhanced: plugins.embeddableEnhanced });
     });
 
     return {};

@@ -47,36 +47,44 @@ export interface StartDeps {
 export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
   public setup(core: CoreSetup<StartDeps>, { embeddable, developerExamples }: SetupDeps) {
     setupApp(core, developerExamples);
-  }
 
-  public start(core: CoreStart, deps: StartDeps) {
-    registerCreateFieldListAction(deps.uiActions);
-    deps.embeddable.registerReactEmbeddableFactory(FIELD_LIST_ID, async () => {
+    const startServicesPromise = core.getStartServices();
+
+    embeddable.registerReactEmbeddableFactory(FIELD_LIST_ID, async () => {
       const { getFieldListFactory } = await import(
         './react_embeddables/field_list/field_list_react_embeddable'
       );
-      return getFieldListFactory(core, deps);
+      const [coreStart, deps] = await startServicesPromise;
+      return getFieldListFactory(coreStart, deps);
     });
-    registerFieldListPanelPlacementSetting(deps.dashboard);
 
-    registerCreateEuiMarkdownAction(deps.uiActions);
-    deps.embeddable.registerReactEmbeddableFactory(EUI_MARKDOWN_ID, async () => {
+    embeddable.registerReactEmbeddableFactory(EUI_MARKDOWN_ID, async () => {
       const { markdownEmbeddableFactory } = await import(
         './react_embeddables/eui_markdown/eui_markdown_react_embeddable'
       );
       return markdownEmbeddableFactory;
     });
 
-    registerAddSearchPanelAction(deps.uiActions);
-    registerSearchEmbeddable(deps);
-
-    registerCreateDataTableAction(deps.uiActions);
-    deps.embeddable.registerReactEmbeddableFactory(DATA_TABLE_ID, async () => {
+    embeddable.registerReactEmbeddableFactory(DATA_TABLE_ID, async () => {
       const { getDataTableFactory } = await import(
         './react_embeddables/data_table/data_table_react_embeddable'
       );
-      return getDataTableFactory(core, deps);
+      const [coreStart, deps] = await startServicesPromise;
+      return getDataTableFactory(coreStart, deps);
     });
+
+    registerSearchEmbeddable(embeddable, startServicesPromise);
+  }
+
+  public start(core: CoreStart, deps: StartDeps) {
+    registerCreateFieldListAction(deps.uiActions);
+    registerFieldListPanelPlacementSetting(deps.dashboard);
+
+    registerCreateEuiMarkdownAction(deps.uiActions);
+
+    registerAddSearchPanelAction(deps.uiActions);
+
+    registerCreateDataTableAction(deps.uiActions);
   }
 
   public stop() {}

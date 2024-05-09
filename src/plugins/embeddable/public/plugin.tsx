@@ -91,11 +91,6 @@ export interface EmbeddableSetup {
   ) => void;
 
   /**
-   * Checks if a {@link ReactEmbeddableFactory} has been registered using {@link registerReactEmbeddableFactory}
-   */
-  reactEmbeddableRegistryHasKey: (type: string) => boolean;
-
-  /**
    * @deprecated use {@link registerReactEmbeddableFactory} instead.
    */
   registerEmbeddableFactory: <
@@ -117,17 +112,6 @@ export interface EmbeddableSetup {
 }
 
 export interface EmbeddableStart extends PersistableStateService<EmbeddableStateWithType> {
-  /**
-   * Registers an async {@link ReactEmbeddableFactory} getter.
-   */
-  registerReactEmbeddableFactory: <
-    StateType extends object = object,
-    APIType extends DefaultEmbeddableApi<StateType> = DefaultEmbeddableApi<StateType>
-  >(
-    type: string,
-    getFactory: () => Promise<ReactEmbeddableFactory<StateType, APIType>>
-  ) => void;
-
   /**
    * Checks if a {@link ReactEmbeddableFactory} has been registered using {@link registerReactEmbeddableFactory}
    */
@@ -233,7 +217,6 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       );
 
     const embeddableStart: EmbeddableStart = {
-      registerReactEmbeddableFactory,
       reactEmbeddableRegistryHasKey,
 
       getEmbeddableFactory: this.getEmbeddableFactory,

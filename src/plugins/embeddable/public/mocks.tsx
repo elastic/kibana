@@ -106,7 +106,6 @@ const createSetupContract = (): Setup => {
       .fn()
       .mockImplementation(registerReactEmbeddableSavedObject),
     registerReactEmbeddableFactory: jest.fn().mockImplementation(registerReactEmbeddableFactory),
-    reactEmbeddableRegistryHasKey: jest.fn().mockImplementation(reactEmbeddableRegistryHasKey),
     registerEmbeddableFactory: jest.fn(),
     registerEnhancement: jest.fn(),
     setCustomEmbeddableFactoryProvider: jest.fn(),
@@ -116,7 +115,6 @@ const createSetupContract = (): Setup => {
 
 const createStartContract = (): Start => {
   const startContract: Start = {
-    registerReactEmbeddableFactory: jest.fn().mockImplementation(registerReactEmbeddableFactory),
     reactEmbeddableRegistryHasKey: jest.fn().mockImplementation(reactEmbeddableRegistryHasKey),
     getEmbeddableFactories: jest.fn(),
     getEmbeddableFactory: jest.fn(),
