@@ -51,7 +51,7 @@ describe('IngestPipelinePanel', () => {
       defaultProps: {
         setSelectedPipeline: setSelectedPipelineMock,
         ingestPipelinesData: mockPipelineData,
-        defaultIngestionPipeline: DEFAULT_INGESTION_PIPELINE,
+        defaultIngestPipeline: DEFAULT_INGESTION_PIPELINE,
       },
       memoryRouter: { wrapComponent: false },
     });

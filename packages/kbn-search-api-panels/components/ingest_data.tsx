@@ -36,7 +36,7 @@ interface IngestDataProps {
   additionalIngestionPanel?: React.ReactNode;
   ingestPipelineData?: IngestGetPipelineResponse;
   setSelectedPipeline: (pipelineId: string) => void;
-  defaultIngestionPipeline: string;
+  defaultIngestPipeline: string;
 }
 
 export const IngestData: React.FC<IngestDataProps> = ({
@@ -53,7 +53,7 @@ export const IngestData: React.FC<IngestDataProps> = ({
   additionalIngestionPanel,
   ingestPipelineData,
   setSelectedPipeline,
-  defaultIngestionPipeline,
+  defaultIngestPipeline,
 }) => {
   return (
     <OverviewPanel
@@ -82,7 +82,7 @@ export const IngestData: React.FC<IngestDataProps> = ({
       <IngestPipelinePanel
         setSelectedPipeline={setSelectedPipeline}
         ingestPipelinesData={ingestPipelineData}
-        defaultIngestionPipeline={defaultIngestionPipeline}
+        defaultIngestPipeline={defaultIngestPipeline}
       />
       <EuiTitle size="xs">
         <h4>

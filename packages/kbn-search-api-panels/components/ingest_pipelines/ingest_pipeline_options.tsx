@@ -50,12 +50,12 @@ const ManagedBadge = ({ item }: { item: IngestPipelineWithDeprecated | undefined
 
 const RecommendedBadge = ({
   pipelineName,
-  defaultIngestionPipeline,
+  defaultIngestPipeline,
 }: {
   pipelineName: string;
-  defaultIngestionPipeline: string;
+  defaultIngestPipeline: string;
 }) => {
-  if (pipelineName !== defaultIngestionPipeline) return null;
+  if (pipelineName !== defaultIngestPipeline) return null;
   return (
     <EuiFlexItem grow={false}>
       <EuiBadge color="primary">
@@ -70,7 +70,7 @@ const RecommendedBadge = ({
 const createOptionItem = (
   pipelineName: string,
   item: IngestPipelineWithDeprecated | undefined,
-  defaultIngestionPipeline: string
+  defaultIngestPipeline: string
 ): OptionItem => {
   return {
     value: pipelineName,
@@ -87,7 +87,7 @@ const createOptionItem = (
           <ManagedBadge item={item} />
           <RecommendedBadge
             pipelineName={pipelineName}
-            defaultIngestionPipeline={defaultIngestionPipeline}
+            defaultIngestPipeline={defaultIngestPipeline}
           />
         </EuiFlexGroup>
       </Fragment>
@@ -97,7 +97,7 @@ const createOptionItem = (
 
 export const createIngestPipelineOptions = (
   ingestPipelinesData: IngestGetPipelineResponse | undefined,
-  defaultIngestionPipeline: string
+  defaultIngestPipeline: string
 ) => {
   if (!ingestPipelinesData) return [];
 
@@ -107,18 +107,18 @@ export const createIngestPipelineOptions = (
         !(ingestPipelinesData[pipelineName] as IngestPipelineWithDeprecated)?.deprecated
     )
     .map((pipelineName) =>
-      createOptionItem(pipelineName, ingestPipelinesData[pipelineName], defaultIngestionPipeline)
+      createOptionItem(pipelineName, ingestPipelinesData[pipelineName], defaultIngestPipeline)
     );
 
-  if (ingestPipelinesData[defaultIngestionPipeline]) {
+  if (ingestPipelinesData[defaultIngestPipeline]) {
     const defaultOption = createOptionItem(
-      defaultIngestionPipeline,
-      ingestPipelinesData[defaultIngestionPipeline],
-      defaultIngestionPipeline
+      defaultIngestPipeline,
+      ingestPipelinesData[defaultIngestPipeline],
+      defaultIngestPipeline
     );
     options = [
       defaultOption,
-      ...options.filter((option) => option.value !== defaultIngestionPipeline),
+      ...options.filter((option) => option.value !== defaultIngestPipeline),
     ];
   }
 

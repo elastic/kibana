@@ -320,7 +320,7 @@ export const ElasticsearchOverview = () => {
           sharePlugin={share}
           additionalIngestionPanel={<ConnectorIngestionPanel assetBasePath={assetBasePath} />}
           setSelectedPipeline={setSelectedPipeline}
-          defaultIngestionPipeline={DEFAULT_INGESTION_PIPELINE}
+          defaultIngestPipeline={DEFAULT_INGESTION_PIPELINE}
         />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section

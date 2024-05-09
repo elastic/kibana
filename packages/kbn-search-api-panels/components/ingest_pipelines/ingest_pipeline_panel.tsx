@@ -24,17 +24,17 @@ import { createIngestPipelineOptions } from './ingest_pipeline_options';
 interface IngestPipelinePanelProps {
   setSelectedPipeline: (pipeline: string) => void;
   ingestPipelinesData?: IngestGetPipelineResponse;
-  defaultIngestionPipeline: string;
+  defaultIngestPipeline: string;
 }
 
 export const IngestPipelinePanel: React.FC<IngestPipelinePanelProps> = ({
   setSelectedPipeline,
   ingestPipelinesData,
-  defaultIngestionPipeline,
+  defaultIngestPipeline,
 }) => {
   const options = useMemo(
-    () => createIngestPipelineOptions(ingestPipelinesData, defaultIngestionPipeline),
-    [ingestPipelinesData, defaultIngestionPipeline]
+    () => createIngestPipelineOptions(ingestPipelinesData, defaultIngestPipeline),
+    [ingestPipelinesData, defaultIngestPipeline]
   );
 
   const [selected, setSelected] = useState<string>();
