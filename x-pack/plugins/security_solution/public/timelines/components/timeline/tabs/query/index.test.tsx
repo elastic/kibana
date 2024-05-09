@@ -55,6 +55,10 @@ mockUseResizeObserver.mockImplementation(() => ({}));
 
 jest.mock('../../../../../common/lib/kibana');
 
+jest.mock('../../../../containers/use_timeline_data_filters', () => ({
+  useTimelineDataFilters: jest.fn().mockReturnValue({ from: 'now-15m', to: 'now' }),
+}));
+
 describe('Timeline', () => {
   let props = {} as QueryTabContentComponentProps;
   const sort: Sort[] = [
