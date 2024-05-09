@@ -5,6 +5,7 @@
       "filter_path": [],
       "human": "__flag__",
       "pretty": "__flag__",
+      "force_synthetic_source": "__flag__",
       "preference": "",
       "realtime": "__flag__",
       "refresh": "__flag__",

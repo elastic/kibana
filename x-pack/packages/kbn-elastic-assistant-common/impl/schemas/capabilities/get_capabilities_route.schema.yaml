@@ -19,12 +19,9 @@ paths:
               schema:
                 type: object
                 properties:
-                  assistantAlertsInsights:
-                    type: boolean
                   assistantModelEvaluation:
                     type: boolean
                 required:
-                  - assistantAlertsInsights
                   - assistantModelEvaluation
         '400':
           description: Generic Error

@@ -8,6 +8,7 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type { ConfigType } from '../../../../../../config';
 import type { PerformBulkActionResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   BulkActionTypeEnum,
@@ -47,6 +48,7 @@ const MAX_ROUTE_CONCURRENCY = 5;
 
 export const performBulkActionRoute = (
   router: SecuritySolutionPluginRouter,
+  config: ConfigType,
   ml: SetupPlugins['ml'],
   logger: Logger
 ) => {
@@ -143,6 +145,7 @@ export const performBulkActionRoute = (
               ids: body.ids,
               actions: body.edit,
               mlAuthz,
+              experimentalFeatures: config.experimentalFeatures,
             });
 
             return buildBulkResponse(response, {
@@ -303,7 +306,12 @@ export const performBulkActionRoute = (
                 concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
                 items: rules,
                 executor: async (rule) => {
-                  await dryRunValidateBulkEditRule({ mlAuthz, rule, edit: body.edit });
+                  await dryRunValidateBulkEditRule({
+                    mlAuthz,
+                    rule,
+                    edit: body.edit,
+                    experimentalFeatures: config.experimentalFeatures,
+                  });
 
                   return rule;
                 },
