@@ -129,6 +129,16 @@ export const useGetDashboard = ({ connectorId, selectedProvider }: Props): UseGe
 };
 
 const getDashboardId = (selectedProvider: string, spaceId: string): string =>
-  `generative-ai-token-usage-${
-    selectedProvider.toLowerCase().includes('openai') ? 'openai' : 'bedrock'
-  }-${spaceId}`;
+  {
+      let ai = "openai"
+      if (selectedProvider.toLowerCase().includes('bedrock')) {
+          ai = 'bedrock'
+      } else if (selectedProvider.toLowerCase().includes('gemini')) {
+          ai = 'gemini'
+      }
+      return `generative-ai-token-usage-${ai}-${spaceId}`;
+  }
+  
+  // `generative-ai-token-usage-${
+  //   selectedProvider.toLowerCase().includes('openai') ? 'openai' : 'bedrock'
+  // }-${spaceId}`;
