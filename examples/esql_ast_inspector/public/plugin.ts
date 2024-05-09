@@ -11,7 +11,7 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { mount } from './mount';
-import image from './esql_validation_app.png';
+import image from './esql_ast_inspector.png';
 
 export interface SetupDependencies {
   developerExamples: DeveloperExamplesSetup;

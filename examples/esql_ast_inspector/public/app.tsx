@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { JSONTree } from 'react-json-tree';
 import React, { useState } from 'react';
 import {
   EuiPage,
@@ -15,48 +14,30 @@ import {
   EuiPageHeader,
   EuiSpacer,
   EuiForm,
-  EuiButtonGroup,
   EuiTextArea,
   EuiFormRow,
 } from '@elastic/eui';
 
 import type { CoreStart } from '@kbn/core/public';
 
-import { ESQLAst, getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import { EditorError, ESQLAst, getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { CodeEditor } from '@kbn/code-editor';
 import type { StartDependencies } from './plugin';
 
-const theme = {
-  scheme: 'monokai',
-  author: 'wimer hazenberg (http://www.monokai.nl)',
-  base00: '#272822',
-  base01: '#383830',
-  base02: '#49483e',
-  base03: '#75715e',
-  base04: '#a59f85',
-  base05: '#f8f8f2',
-  base06: '#f5f4f1',
-  base07: '#f9f8f5',
-  base08: '#f92672',
-  base09: '#fd971f',
-  base0A: '#f4bf75',
-  base0B: '#a6e22e',
-  base0C: '#a1efe4',
-  base0D: '#66d9ef',
-  base0E: '#ae81ff',
-  base0F: '#cc6633',
-};
-
 export const App = (props: { core: CoreStart; plugins: StartDependencies }) => {
-  const [currentErrors, setErrors] = useState<string[]>([]);
-  const [currentWarnings, setWarnings] = useState<string[]>([]);
-  const [currentQuery, setQuery] = useState(
+  const [currentErrors, setErrors] = useState<EditorError[]>([]);
+  const [currentQuery, _setQuery] = useState(
     'from index1 | eval var0 = round(numberField, 2) | stats by stringField'
   );
 
   const [ast, setAST] = useState<ESQLAst>(getAstAndSyntaxErrors(currentQuery).ast);
 
-  const [useTree, setUseTree] = useState(false);
+  const setQuery = (query: string) => {
+    const { ast: _ast, errors } = getAstAndSyntaxErrors(query);
+    _setQuery(query);
+    setErrors(errors);
+    setAST(_ast);
+  };
 
   return (
     <EuiPage>
@@ -68,45 +49,29 @@ export const App = (props: { core: CoreStart; plugins: StartDependencies }) => {
           <EuiSpacer />
 
           <EuiForm>
-            <EuiFormRow fullWidth label="Query">
+            <EuiFormRow
+              fullWidth
+              label="Query"
+              isInvalid={Boolean(currentErrors.length)}
+              error={currentErrors.map((error) => error.message)}
+            >
               <EuiTextArea
+                isInvalid={Boolean(currentErrors.length)}
                 fullWidth
                 value={currentQuery}
                 onChange={(e) => setQuery(e.target.value)}
-              />
-            </EuiFormRow>
-            <EuiFormRow fullWidth label="Display">
-              <EuiButtonGroup
-                idSelected={useTree ? 'tree' : 'json'}
-                buttonSize="s"
-                onChange={(id: string) => setUseTree(id === 'tree')}
-                legend="Theme"
-                options={[
-                  {
-                    id: 'json',
-                    label: 'JSON',
-                  },
-                  {
-                    id: 'tree',
-                    label: 'Tree',
-                  },
-                ]}
+                css={{
+                  height: '5em',
+                }}
               />
             </EuiFormRow>
           </EuiForm>
           <EuiSpacer />
-          {useTree ? (
-            <JSONTree
-              data={ast}
-              theme={theme}
-              invertTheme={true}
-              shouldExpandNodeInitially={(nodes) => {
-                return nodes.length < 3;
-              }}
-            />
-          ) : (
-            <CodeEditor height={700} languageId={'json'} value={JSON.stringify(ast, null, 2)} />
-          )}
+          <CodeEditor
+            allowFullScreen={true}
+            languageId={'json'}
+            value={JSON.stringify(ast, null, 2)}
+          />
         </EuiPageSection>
       </EuiPageBody>
     </EuiPage>
