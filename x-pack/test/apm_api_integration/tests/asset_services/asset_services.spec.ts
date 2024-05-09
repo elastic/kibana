@@ -21,6 +21,8 @@ import {
   APIReturnType,
   APIClientRequestParamsOf,
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
+import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -47,6 +49,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           start,
           end,
           kuery: '',
+          documentType: ApmDocumentType.TransactionEvent,
+          rollupInterval: RollupInterval.None,
+          useDurationSummary: false,
           ...overrides?.query,
         },
       },

@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
-import { ApmDocumentType } from '../../../../common/document_type';
+import {
+  ApmDocumentType,
+  ApmServiceTransactionDocumentType,
+} from '../../../../common/document_type';
 import { SERVICE_NAME, TRANSACTION_TYPE } from '../../../../common/es_fields/apm';
+import { RollupInterval } from '../../../../common/rollup';
 import { isDefaultTransactionType } from '../../../../common/transaction_types';
 import { maybe } from '../../../../common/utils/maybe';
 import { calculateThroughputWithRange } from '../../../lib/helpers/calculate_throughput';
@@ -36,16 +39,22 @@ export async function getServicesTransactionStats({
   end,
   kuery,
   serviceNames,
+  documentType,
+  rollupInterval,
+  useDurationSummary,
 }: {
   apmEventClient: APMEventClient;
   start: number;
   end: number;
   kuery: string;
   serviceNames: string[];
+  documentType: ApmServiceTransactionDocumentType;
+  rollupInterval: RollupInterval;
+  useDurationSummary: boolean;
 }): Promise<AssetServicesMetricsMap> {
   const response = await apmEventClient.search('get_services_transaction_stats', {
     apm: {
-      events: [ProcessorEvent.span, ProcessorEvent.transaction],
+      sources: [{ documentType, rollupInterval }],
     },
     body: {
       track_total_hits: false,
@@ -73,7 +82,10 @@ export async function getServicesTransactionStats({
               aggs: {
                 avg_duration: {
                   avg: {
-                    field: getDurationFieldForTransactions(ApmDocumentType.TransactionEvent, false),
+                    field: getDurationFieldForTransactions(
+                      ApmDocumentType.TransactionEvent,
+                      useDurationSummary
+                    ),
                   },
                 },
                 ...getOutcomeAggregation(ApmDocumentType.TransactionEvent),

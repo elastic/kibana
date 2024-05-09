@@ -8,6 +8,8 @@ import { errors } from '@elastic/elasticsearch';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/server';
 import { WrappedElasticsearchClientError } from '@kbn/observability-plugin/server';
+import { ApmServiceTransactionDocumentType } from '../../../../common/document_type';
+import { RollupInterval } from '../../../../common/rollup';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { AssetsESClient } from '../../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
 import { withApmSpan } from '../../../utils/with_apm_span';
@@ -27,6 +29,9 @@ export async function getServiceAssets({
   apmEventClient,
   logsDataAccessStart,
   esClient,
+  documentType,
+  rollupInterval,
+  useDurationSummary,
 }: {
   assetsESClient: AssetsESClient;
   start: number;
@@ -36,6 +41,9 @@ export async function getServiceAssets({
   apmEventClient: APMEventClient;
   logsDataAccessStart: LogsDataAccessPluginStart;
   esClient: ElasticsearchClient;
+  documentType: ApmServiceTransactionDocumentType;
+  rollupInterval: RollupInterval;
+  useDurationSummary: boolean;
 }) {
   return withApmSpan('get_service_assets', async () => {
     try {
@@ -65,27 +73,38 @@ export async function getServiceAssets({
 
       const { logsServiceNames, tracesServiceNames } = getServiceNamesPerSignalType(services);
 
-      const [apmMetrics, logsMetrics] = await Promise.all([
-        getServicesTransactionStats({
-          apmEventClient,
-          start,
-          end,
-          kuery,
-          serviceNames: tracesServiceNames,
-        }),
-        logsDataAccessStart.services.getLogsRatesService({
-          esClient,
-          identifyingMetadata: 'service.name',
-          timeFrom: start,
-          timeTo: end,
-          serviceNames: logsServiceNames,
-        }),
+      const [traceMetrics = {}, logsMetrics = {}] = await Promise.all([
+        tracesServiceNames.length
+          ? getServicesTransactionStats({
+              apmEventClient,
+              start,
+              end,
+              kuery,
+              serviceNames: tracesServiceNames,
+              documentType,
+              rollupInterval,
+              useDurationSummary,
+            })
+          : undefined,
+        logsServiceNames.length
+          ? logsDataAccessStart.services.getLogsRatesService({
+              esClient,
+              identifyingMetadata: 'service.name',
+              timeFrom: start,
+              timeTo: end,
+              serviceNames: logsServiceNames,
+            })
+          : undefined,
       ]);
 
-      return services.map((item) => ({
-        ...item,
-        metrics: { ...apmMetrics[item.service.name], ...logsMetrics[item.service.name] },
-      }));
+      return services.map((item) => {
+        const serviceTraceMetrics = traceMetrics[item.service.name];
+        const serviceLogsMetrics = logsMetrics[item.service.name];
+        return {
+          ...item,
+          metrics: { ...serviceTraceMetrics, ...serviceLogsMetrics },
+        };
+      });
     } catch (error) {
       // If the index does not exist, handle it gracefully
       if (

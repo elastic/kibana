@@ -5,17 +5,23 @@
  * 2.0.
  */
 import * as t from 'io-ts';
+import { toBooleanRt } from '@kbn/io-ts-utils';
 import { createAssetsESClient } from '../../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
 import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
-import { kueryRt, rangeRt } from '../../default_api_types';
+import { kueryRt, rangeRt, serviceTransactionDataSourceRt } from '../../default_api_types';
 import { getServiceAssets } from './get_service_assets';
 import { AssetServicesResponse } from './types';
 
 const servicesAssetsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/assets/services',
   params: t.type({
-    query: t.intersection([kueryRt, rangeRt]),
+    query: t.intersection([
+      kueryRt,
+      rangeRt,
+      serviceTransactionDataSourceRt,
+      t.type({ useDurationSummary: toBooleanRt }),
+    ]),
   }),
   options: { tags: ['access:apm'] },
   async handler(resources): Promise<AssetServicesResponse> {
@@ -31,7 +37,7 @@ const servicesAssetsRoute = createApmServerRoute({
       esClient: coreContext.elasticsearch.client.asCurrentUser,
     });
 
-    const { start, end, kuery } = params.query;
+    const { start, end, kuery, documentType, rollupInterval, useDurationSummary } = params.query;
 
     const services = await getServiceAssets({
       assetsESClient,
@@ -42,6 +48,9 @@ const servicesAssetsRoute = createApmServerRoute({
       apmEventClient,
       logsDataAccessStart,
       esClient: coreContext.elasticsearch.client.asCurrentUser,
+      documentType,
+      rollupInterval,
+      useDurationSummary,
     });
 
     return { services };
