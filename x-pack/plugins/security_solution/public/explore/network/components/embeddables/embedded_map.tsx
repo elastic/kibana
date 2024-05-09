@@ -37,7 +37,7 @@ interface EmbeddableMapProps {
   maintainRatio?: boolean;
 }
 
-const EmbeddableMap = styled.div.attrs(() => ({
+const EmbeddableMapRatioHolder = styled.div.attrs(() => ({
   className: 'siemEmbeddable__map',
 }))<EmbeddableMapProps>`
   .embPanel {
@@ -83,7 +83,18 @@ const StyledEuiAccordion = styled(EuiAccordion)`
   }
 `;
 
-EmbeddableMap.displayName = 'EmbeddableMap';
+EmbeddableMapRatioHolder.displayName = 'EmbeddableMapRatioHolder';
+
+const EmbeddableMapWrapper = styled.div`
+  position: relative;
+`;
+
+const EmbeddableMap = styled.div`
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+`;
 
 export interface EmbeddedMapProps {
   query: Query;
@@ -181,31 +192,33 @@ export const EmbeddedMapComponent = ({
       <InPortal node={portalNode}>
         <MapToolTip />
       </InPortal>
-
-      <EmbeddableMap maintainRatio={!isIndexError}>
+      <EmbeddableMapWrapper>
+        <EmbeddableMapRatioHolder maintainRatio={!isIndexError} />
         {isIndexError ? (
           <IndexPatternsMissingPrompt data-test-subj="missing-prompt" />
         ) : (
-          <services.maps.Map
-            // eslint-disable-next-line react/display-name
-            getTooltipRenderer={() => (tooltipProps: RenderTooltipContentParams) =>
-              <OutPortal node={portalNode} {...tooltipProps} />}
-            mapCenter={{ lon: -1.05469, lat: 15.96133, zoom: 1 }}
-            layerList={layerList}
-            filters={appliedFilters}
-            query={query}
-            onApiAvailable={(api: MapApi) => {
-              // Wire up to app refresh action
-              setQuery({
-                id: 'embeddedMap', // Scope to page type if using map elsewhere
-                inspect: null,
-                loading: false,
-                refetch: () => api.reload(),
-              });
-            }}
-          />
+          <EmbeddableMap>
+            <services.maps.Map
+              // eslint-disable-next-line react/display-name
+              getTooltipRenderer={() => (tooltipProps: RenderTooltipContentParams) =>
+                <OutPortal node={portalNode} {...tooltipProps} />}
+              mapCenter={{ lon: -1.05469, lat: 15.96133, zoom: 1 }}
+              layerList={layerList}
+              filters={appliedFilters}
+              query={query}
+              onApiAvailable={(api: MapApi) => {
+                // Wire up to app refresh action
+                setQuery({
+                  id: 'embeddedMap', // Scope to page type if using map elsewhere
+                  inspect: null,
+                  loading: false,
+                  refetch: () => api.reload(),
+                });
+              }}
+            />
+          </EmbeddableMap>
         )}
-      </EmbeddableMap>
+      </EmbeddableMapWrapper>
     </Embeddable>
   );
 
