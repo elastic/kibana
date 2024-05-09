@@ -91,7 +91,8 @@ export default function (ctx: FtrProviderContext) {
     }
   }
 
-  describe('Security: App vs Global privilege', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/183066
+  describe.skip('Security: App vs Global privilege', () => {
     apps.forEach((appName) => {
       before(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
