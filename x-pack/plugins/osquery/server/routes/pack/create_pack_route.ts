@@ -20,7 +20,7 @@ import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { PLUGIN_ID } from '../../../common';
 import { packSavedObjectType } from '../../../common/types';
-import { convertPackQueriesToSO } from './utils';
+import { convertPackQueriesToSO, getInitialPolicies } from './utils';
 import { getInternalSavedObjectsClient } from '../../usage/collector';
 
 export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
@@ -92,12 +92,22 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         }
       )) ?? { items: [] };
 
-      const agentPolicies = policy_ids
-        ? mapKeys(await agentPolicyService?.getByIds(internalSavedObjectsClient, policy_ids), 'id')
+      const { policiesList, invalidPolicies } = getInitialPolicies(packagePolicies, policy_ids);
+
+      if (invalidPolicies?.length) {
+        return response.badRequest({
+          body: `The following policy ids are invalid: ${invalidPolicies.join(', ')}`,
+        });
+      }
+      const agentPolicies = policiesList
+        ? mapKeys(
+            await agentPolicyService?.getByIds(internalSavedObjectsClient, policiesList),
+            'id'
+          )
         : {};
 
-      const references = policy_ids
-        ? policy_ids.map((policyId: string) => ({
+      const references = policiesList
+        ? policiesList.map((policyId: string) => ({
             id: policyId,
             name: agentPolicies[policyId].name,
             type: AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -122,9 +132,9 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         }
       );
 
-      if (enabled && policy_ids?.length) {
+      if (enabled && policiesList?.length) {
         await Promise.all(
-          policy_ids.map((agentPolicyId) => {
+          policiesList.map((agentPolicyId) => {
             const packagePolicy = find(packagePolicies, ['policy_id', agentPolicyId]);
             if (packagePolicy) {
               return packagePolicyService?.update(
