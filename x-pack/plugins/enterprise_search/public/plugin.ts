@@ -29,6 +29,7 @@ import type { IndexManagementPluginStart } from '@kbn/index-management';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
 import { SearchConnectorsPluginStart } from '@kbn/search-connectors-plugin/public';
 import { SearchPlaygroundPluginStart } from '@kbn/search-playground/public';
@@ -63,6 +64,7 @@ import {
 } from './applications/enterprise_search_content/routes';
 
 import { docLinks } from './applications/shared/doc_links';
+import { getNavigationTreeDefinition } from './navigation_tree';
 
 export interface ClientData extends InitialAppData {
   errorConnectingMessage?: string;
@@ -89,6 +91,7 @@ export interface PluginsStart {
   lens?: LensPublicStart;
   licensing?: LicensingPluginStart;
   ml?: MlPluginStart;
+  navigation: NavigationPublicPluginStart;
   searchConnectors?: SearchConnectorsPluginStart;
   searchPlayground?: SearchPlaygroundPluginStart;
   security?: SecurityPluginStart;
@@ -529,6 +532,8 @@ export class EnterpriseSearchPlugin implements Plugin {
     // This must be called here in start() and not in `applications/index.tsx` to prevent loading
     // race conditions with our apps' `routes.ts` being initialized before `renderApp()`
     docLinks.setDocLinks(core.docLinks);
+
+    plugins.navigation.addSolutionNavigation(getNavigationTreeDefinition());
 
     // Return empty start contract rather than void in order for plugins
     // that depend on the enterprise search plugin to determine whether it is enabled or not
