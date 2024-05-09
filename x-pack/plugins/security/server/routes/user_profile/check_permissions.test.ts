@@ -39,7 +39,7 @@ describe('Valid API Keys route', () => {
     authc.apiKeys.areCrossClusterAPIKeysEnabled.mockResolvedValue(true);
   });
 
-  it('should show valid keys with own api key permission', async () => {
+  it('should return true with own api key permission', async () => {
     esClientMock.asCurrentUser.security.hasPrivileges.mockResponse({
       cluster: {
         manage_own_api_key: true,
@@ -59,7 +59,7 @@ describe('Valid API Keys route', () => {
     expect(response).toBe(true);
   });
 
-  it('should not show valid keys without own api key permission', async () => {
+  it('should return false without own api key permission', async () => {
     esClientMock.asCurrentUser.security.hasPrivileges.mockResponse({
       cluster: {
         manage_own_api_key: false,
