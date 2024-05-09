@@ -8,10 +8,10 @@ import { schema } from '@kbn/config-schema';
 import { estypes } from '@elastic/elasticsearch';
 // import { transformError } from '@kbn/securitysolution-es-utils';
 // import type { ElasticsearchClient } from '@kbn/core/server';
-import {extractFieldValue, round} from '../lib/utils';
+import { extractFieldValue, round } from '../lib/utils';
 import { IRouter, Logger } from '@kbn/core/server';
 import {
-    POD_MEMORY_ROUTE,
+  POD_MEMORY_ROUTE,
 } from '../../common/constants';
 import { double } from '@elastic/elasticsearch/lib/api/types';
 
@@ -47,78 +47,86 @@ export const registerPodsMemoryRoute = (router: IRouter, logger: Logger) => {
             },
           },
           { exists: { field: 'metrics.k8s.pod.memory.usage' } }
-          ];
+        ];
         const dsl: estypes.SearchRequest = {
-            index: ["metrics-otel.*"],
-            size: 1,
-            sort: [{ '@timestamp': 'desc' }],
-            _source: false,
-            fields: [
-              '@timestamp',
-              'metrics.k8s.pod.memory.*',
-              'resource.attributes.k8s.*',
-            ],
-            query: {
-              bool: {
-                must: musts,
-              },
+          index: ["metrics-otel.*"],
+          size: 1,
+          sort: [{ '@timestamp': 'desc' }],
+          _source: false,
+          fields: [
+            '@timestamp',
+            'metrics.k8s.pod.memory.*',
+            'resource.attributes.k8s.*',
+          ],
+          query: {
+            bool: {
+              must: musts,
             },
+          },
         };
-        
+
         console.log(musts);
         console.log(dsl);
         const esResponse = await client.search(dsl);
         console.log(esResponse);
         if (esResponse.hits.hits.length > 0) {
           type Limits = {
-            [key: string]: double ;
+            [key: string]: double;
           };
           const limits: Limits = {
             medium: 0.7,
             high: 0.9,
           };
-          
-            const hit = esResponse.hits.hits[0];
-            const { fields = {} } = hit;
-            const memory_usage = extractFieldValue(fields['metrics.k8s.pod.memory.usage'])
-            const memory_available = extractFieldValue(fields['metrics.k8s.pod.memory.available'])
-            const podMemoryUtilization = round(memory_usage/memory_available,3);
-            var message = '';
-            var reason = '';
-            const time = extractFieldValue(fields['@timestamp']);
+
+          const hit = esResponse.hits.hits[0];
+          const { fields = {} } = hit;
+          const time = extractFieldValue(fields['@timestamp']);
+          const memory_usage = extractFieldValue(fields['metrics.k8s.pod.memory.usage'])
+          const memory_available = extractFieldValue(fields['metrics.k8s.pod.memory.available'])
+          var message = '';
+          var reason = '';
+          var podMemoryUtilization = 0
+          if (memory_available != null) {
+            podMemoryUtilization = round(memory_usage / memory_available, 3);
+            
             if (podMemoryUtilization < limits["medium"]) {
               reason = "Low"
-            }else if(podMemoryUtilization >= limits["medium"] && podMemoryUtilization < limits["high"]){
+            } else if (podMemoryUtilization >= limits["medium"] && podMemoryUtilization < limits["high"]) {
               reason = "Medium"
-            }else {
+            } else {
               reason = "High"
             }
-
-                message = `Pod ${request.query.namespace}/${request.query.pod_name} has CPU utilisation ${podMemoryUtilization}!
-                          Memory usage: ${memory_usage} Bytes
-                          Memory available: ${memory_available} Bytes
-                          `;
-                return response.ok({
-                    body: {
-                    time: time,
-                    message: message,
-                    name: request.query.pod_name,
-                    namespace: request.query.namespace,
-                    reason: reason+" memory utilisation",
-                    },
-                });
-              } else {
-              const message =  `Pod ${request.query.namespace}/${request.query.pod_name} not found`
-              return response.ok({
-                  body: {
-                    time: '',
-                    message: message,
-                    name: request.query.pod_name,
-                    namespace: request.query.namespace,
-                    reason: "Not found",
-                  },
-              });
-            }
+            message = `Pod ${request.query.namespace}/${request.query.pod_name} has Memory utilisation ${podMemoryUtilization}!
+            Memory usage: ${memory_usage} Bytes
+            Memory available: ${memory_available} Bytes
+            `;
+            reason= reason + " memory utilisation";
+          }else{
+            reason = "Memory Limit is undefinded"
+            message = `Pod ${request.query.namespace}/${request.query.pod_name} has: Memory usage: ${memory_usage} Bytes
+            `;
           }
-        );
-  };
+          return response.ok({
+            body: {
+              time: time,
+              message: message,
+              name: request.query.pod_name,
+              namespace: request.query.namespace,
+              reason: reason,
+            },
+          });
+        } else {
+          const message = `Pod ${request.query.namespace}/${request.query.pod_name} not found`
+          return response.ok({
+            body: {
+              time: '',
+              message: message,
+              name: request.query.pod_name,
+              namespace: request.query.namespace,
+              reason: "Not found",
+            },
+          });
+        }
+      }
+    );
+};

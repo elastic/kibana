@@ -8,10 +8,10 @@ import { schema } from '@kbn/config-schema';
 import { estypes } from '@elastic/elasticsearch';
 // import { transformError } from '@kbn/securitysolution-es-utils';
 // import type { ElasticsearchClient } from '@kbn/core/server';
-import {extractFieldValue} from '../lib/utils';
+import { extractFieldValue } from '../lib/utils';
 import { IRouter, Logger } from '@kbn/core/server';
 import {
-    POD_CPU_ROUTE,
+  POD_CPU_ROUTE,
 } from '../../common/constants';
 import { double } from '@elastic/elasticsearch/lib/api/types';
 
@@ -47,73 +47,73 @@ export const registerPodsCpuRoute = (router: IRouter, logger: Logger) => {
             },
           },
           { exists: { field: 'metrics.k8s.pod.cpu.utilization' } }
-          ];
+        ];
         const dsl: estypes.SearchRequest = {
-            index: ["metrics-otel.*"],
-            size: 1,
-            sort: [{ '@timestamp': 'desc' }],
-            _source: false,
-            fields: [
-              '@timestamp',
-              'metrics.k8s.pod.cpu.utilization',
-              'resource.attributes.k8s.*',
-            ],
-            query: {
-              bool: {
-                must: musts,
-              },
+          index: ["metrics-otel.*"],
+          size: 1,
+          sort: [{ '@timestamp': 'desc' }],
+          _source: false,
+          fields: [
+            '@timestamp',
+            'metrics.k8s.pod.cpu.utilization',
+            'resource.attributes.k8s.*',
+          ],
+          query: {
+            bool: {
+              must: musts,
             },
+          },
         };
-        
+
         console.log(musts);
         console.log(dsl);
         const esResponse = await client.search(dsl);
         console.log(esResponse);
         if (esResponse.hits.hits.length > 0) {
           type Limits = {
-            [key: string]: double ;
+            [key: string]: double;
           };
           const limits: Limits = {
             medium: 0.7,
             high: 0.9,
           };
-          
-            const hit = esResponse.hits.hits[0];
-            const { fields = {} } = hit;
-            const podCpuUtilization = extractFieldValue(fields['metrics.k8s.pod.cpu.utilization']);
-            var message = '';
-            var reason = '';
-            const time = extractFieldValue(fields['@timestamp']);
-            if (podCpuUtilization < limits["medium"]) {
-              reason = "Low"
-            }else if(podCpuUtilization >= limits["medium"] && podCpuUtilization < limits["high"]){
-              reason = "Medium"
-            }else {
-              reason = "High"
-            }
 
-                message = `Pod ${request.query.namespace}/${request.query.pod_name} has CPU utilisation ${podCpuUtilization}`;
-                return response.ok({
-                    body: {
-                    time: time,
-                    message: message,
-                    name: request.query.pod_name,
-                    namespace: request.query.namespace,
-                    reason: reason+" cpu utilisation",
-                    },
-                });
-              } else {
-              const message =  `Pod ${request.query.namespace}/${request.query.pod_name} not found`
-              return response.ok({
-                  body: {
-                    time: '',
-                    message: message,
-                    name: request.query.pod_name,
-                    namespace: request.query.namespace,
-                    reason: "Not found",
-                  },
-              });
-            }
+          const hit = esResponse.hits.hits[0];
+          const { fields = {} } = hit;
+          const podCpuUtilization = extractFieldValue(fields['metrics.k8s.pod.cpu.utilization']);
+          var message = '';
+          var reason = '';
+          const time = extractFieldValue(fields['@timestamp']);
+          if (podCpuUtilization < limits["medium"]) {
+            reason = "Low"
+          } else if (podCpuUtilization >= limits["medium"] && podCpuUtilization < limits["high"]) {
+            reason = "Medium"
+          } else {
+            reason = "High"
           }
-        );
-  };
+
+          message = `Pod ${request.query.namespace}/${request.query.pod_name} has CPU utilisation ${podCpuUtilization}`;
+          return response.ok({
+            body: {
+              time: time,
+              message: message,
+              name: request.query.pod_name,
+              namespace: request.query.namespace,
+              reason: reason + " cpu utilisation",
+            },
+          });
+        } else {
+          const message = `Pod ${request.query.namespace}/${request.query.pod_name} not found`
+          return response.ok({
+            body: {
+              time: '',
+              message: message,
+              name: request.query.pod_name,
+              namespace: request.query.namespace,
+              reason: "Not found",
+            },
+          });
+        }
+      }
+    );
+};

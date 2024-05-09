@@ -8,18 +8,18 @@ import { schema } from '@kbn/config-schema';
 import { estypes } from '@elastic/elasticsearch';
 // import { transformError } from '@kbn/securitysolution-es-utils';
 // import type { ElasticsearchClient } from '@kbn/core/server';
-import {extractFieldValue} from '../lib/utils';
+import { extractFieldValue, round } from '../lib/utils';
 import { IRouter, Logger } from '@kbn/core/server';
 import {
-    POD_CPU_ROUTE,
+  DAEMONSET_CPU_ROUTE,
 } from '../../common/constants';
 import { double } from '@elastic/elasticsearch/lib/api/types';
 
-export const registerPodsCpuRoute = (router: IRouter, logger: Logger) => {
+export const registerDaemonsetsCpuRoute = (router: IRouter, logger: Logger) => {
   router.versioned
     .get({
       access: 'internal',
-      path: POD_CPU_ROUTE,
+      path: DAEMONSET_CPU_ROUTE,
     })
     .addVersion(
       {
@@ -27,7 +27,7 @@ export const registerPodsCpuRoute = (router: IRouter, logger: Logger) => {
         validate: {
           request: {
             query: schema.object({
-              pod_name: schema.string(),
+              daemonset_name: schema.string(),
               namespace: schema.string(),
             }),
           },
@@ -38,7 +38,7 @@ export const registerPodsCpuRoute = (router: IRouter, logger: Logger) => {
         const musts = [
           {
             term: {
-              'resource.attributes.k8s.pod.name': request.query.pod_name,
+              'resource.attributes.k8s.daemonset.name': request.query.daemonset_name,
             },
           },
           {
@@ -46,76 +46,165 @@ export const registerPodsCpuRoute = (router: IRouter, logger: Logger) => {
               'resource.attributes.k8s.namespace.name': request.query.namespace,
             },
           },
-          { exists: { field: 'metrics.k8s.pod.cpu.utilization' } }
-          ];
+          { exists: { field: 'metrics.k8s.daemonset.ready_nodes' } }
+        ];
         const dsl: estypes.SearchRequest = {
+          index: ["metrics-otel.*"],
+          size: 1,
+          sort: [{ '@timestamp': 'desc' }],
+          _source: false,
+          fields: [
+            '@timestamp',
+            'metrics.k8s.daemonset.ready_nodes',
+            'resource.attributes.k8s.*',
+          ],
+          query: {
+            bool: {
+              must: musts,
+            },
+          },
+        };
+        //console.log(musts);
+        //console.log(dsl);
+        const esResponse = await client.search(dsl);
+        console.log(esResponse.hits);
+        if (esResponse.hits.hits.length > 0) {
+          const hit = esResponse.hits.hits[0];
+          const { fields = {} } = hit;
+          const readynodesAvailable = extractFieldValue(fields['metrics.k8s.daemonset.ready_nodes']);
+          const mustsPods = [
+            {
+              term: {
+                'resource.attributes.k8s.daemonset.name': request.query.daemonset_name,
+              },
+            },
+            {
+              term: {
+                'resource.attributes.k8s.namespace.name': request.query.namespace,
+              },
+            },
+            { exists: { field: 'metrics.k8s.pod.phase' } }
+          ];
+          const dslPods: estypes.SearchRequest = {
             index: ["metrics-otel.*"],
-            size: 1,
             sort: [{ '@timestamp': 'desc' }],
+            size: Number(readynodesAvailable),
             _source: false,
             fields: [
               '@timestamp',
-              'metrics.k8s.pod.cpu.utilization',
+              'metrics.k8s.pod.phase',
               'resource.attributes.k8s.*',
             ],
             query: {
               bool: {
-                must: musts,
+                must: mustsPods,
               },
             },
-        };
-        
-        console.log(musts);
-        console.log(dsl);
-        const esResponse = await client.search(dsl);
-        console.log(esResponse);
-        if (esResponse.hits.hits.length > 0) {
-          type Limits = {
-            [key: string]: double ;
+            aggs: {
+              unique_values: {
+                terms: { field: 'resource.attributes.k8s.pod.name' },
+              },
+            },
           };
-          const limits: Limits = {
-            medium: 0.7,
-            high: 0.9,
-          };
-          
-            const hit = esResponse.hits.hits[0];
-            const { fields = {} } = hit;
-            const podCpuUtilization = extractFieldValue(fields['metrics.k8s.pod.cpu.utilization']);
-            const desiredNodes = extractFieldValue(fields['metrics.k8s.daemonset.desired_scheduled_nodes']);
-            var message = '';
-            var reason = '';
-            const time = extractFieldValue(fields['@timestamp']);
-            if (podCpuUtilization < limits["medium"]) {
-              reason = "Low"
-            }else if(podCpuUtilization >= limits["medium"] && podCpuUtilization < limits["high"]){
-              reason = "Medium"
-            }else {
-              reason = "High"
-            }
 
-                message = `Pod ${request.query.namespace}/${request.query.pod_name} has CPU utilisation ${podCpuUtilization}`;
-                return response.ok({
-                    body: {
-                    time: time,
-                    message: message,
-                    desiredNodes: desiredNodes,
-                    name: request.query.pod_name,
-                    namespace: request.query.namespace,
-                    reason: reason,
-                    },
-                });
+          // console.log(mustsPods);
+          // console.log(dslPods);
+          const esResponsePods = await client.search(dslPods);
+          //console.log(esResponsePods);
+
+          const hitsPods = esResponsePods.hits.hits;
+          const time = extractFieldValue(fields['@timestamp']);
+          var reasons = new Array();
+          var messages = new Array();
+          var message = '';
+          var reason = '';
+          var alarm = '';
+
+          for (const hitpod of hitsPods) {
+            const { fields = {} } = hitpod;
+            const podName = extractFieldValue(fields['resource.attributes.k8s.pod.name']);
+            const mustsPodsCpu = [
+              {
+                term: {
+                  'resource.attributes.k8s.pod.name': podName,
+                },
+              },
+              {
+                term: {
+                  'resource.attributes.k8s.namespace.name': request.query.namespace,
+                },
+              },
+              { exists: { field: 'metrics.k8s.pod.cpu.utilization' } }
+            ];
+            const dslPodsCpu: estypes.SearchRequest = {
+              index: ["metrics-otel.*"],
+              size: 1,
+              sort: [{ '@timestamp': 'desc' }],
+              _source: false,
+              fields: [
+                '@timestamp',
+                'metrics.k8s.pod.cpu.utilization',
+                'resource.attributes.k8s.*',
+              ],
+              query: {
+                bool: {
+                  must: mustsPodsCpu,
+                },
+              },
+            };
+
+            // console.log(mustsPodsCpu);
+            // console.log(dslPodsCpu);
+            const esResponsePodsCpu = await client.search(dslPodsCpu);
+            if (esResponsePodsCpu.hits.hits.length > 0) {
+              const hitpodcpu = esResponsePodsCpu.hits.hits[0];
+              const { fields = {} } = hitpodcpu;
+              console.log(hitpod);
+
+              const podCpuUtilization = round(extractFieldValue(fields['metrics.k8s.pod.cpu.utilization']),3);
+              console.log(podCpuUtilization);
+
+              type Limits = {
+                [key: string]: double;
+              };
+              const limits: Limits = {
+                medium: 0.7,
+                high: 0.9,
+              };
+              if (podCpuUtilization < limits["medium"]) {
+                alarm = "Low"
+              } else if (podCpuUtilization >= limits["medium"] && podCpuUtilization < limits["high"]) {
+                alarm = "Medium"
               } else {
-              const message =  `Pod ${request.query.namespace}/${request.query.pod_name} not found`
-              return response.ok({
-                  body: {
-                    time: '',
-                    message: message,
-                    name: request.query.pod_name,
-                    namespace: request.query.namespace,
-                    reason: "Not found",
-                  },
-              });
+                alarm = "High"
+              }
+              reason = `Pod ${request.query.namespace}/${podName} Reason: ${alarm} CPU utilisation`;
+              reasons.push(reason);
+              message = `Pod ${request.query.namespace}/${podName} has CPU utilisation ${podCpuUtilization}`;
+              messages.push(message);
             }
           }
-        );
-  };
+          return response.ok({
+            body: {
+              time: time,
+              message: messages.join(" & "),
+              name: request.query.daemonset_name,
+              namespace: request.query.namespace,
+              reason: reasons.join(" & "),
+            },
+          });
+        } else {
+          const message = `Daemonset ${request.query.namespace}/${request.query.daemonset_name} not found`
+          return response.ok({
+            body: {
+              time: '',
+              message: message,
+              name: request.query.daemonset_name,
+              namespace: request.query.namespace,
+              reason: "Not found",
+            },
+          });
+        }
+      }
+    );
+};

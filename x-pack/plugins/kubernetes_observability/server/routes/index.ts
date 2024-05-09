@@ -12,6 +12,9 @@ import { registerDaemonsetsRoute } from './daemonsets';
 import { registerPodsCpuRoute } from './pods_cpu';
 import { registerPodsMemoryRoute } from './pods_memory';
 import { registerDeploymentsCpuRoute } from './deployments_cpu';
+import { registerDeploymentsMemoryRoute } from './deployments_memory';
+import { registerDaemonsetsCpuRoute } from './daemonsets_cpu';
+import { registerDaemonsetsMemoryRoute } from './daemonsets_memory';
 
 export const registerRoutes = (
   router: IRouter,
@@ -24,4 +27,7 @@ export const registerRoutes = (
   registerPodsCpuRoute(router, logger);
   registerPodsMemoryRoute(router, logger);
   registerDeploymentsCpuRoute(router, logger)
+  registerDeploymentsMemoryRoute(router, logger)
+  registerDaemonsetsCpuRoute(router, logger)
+  registerDaemonsetsMemoryRoute(router, logger)
 };
