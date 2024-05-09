@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiListGroup,
   EuiFlexGroup,
@@ -50,6 +50,7 @@ export interface SolutionSideNavProps {
    * e.g.: usageCollection?.reportUiCounter?.bind(null, appId)
    * */
   tracker?: Tracker;
+  onMount?: () => void;
 }
 type ActivePanelNav = string | null;
 /**
@@ -62,6 +63,7 @@ export const SolutionSideNav: React.FC<SolutionSideNavProps> = React.memo(functi
   panelBottomOffset,
   panelTopOffset,
   tracker,
+  onMount,
 }) {
   const isMobileSize = useIsWithinBreakpoints(['xs', 's']);
 
@@ -72,6 +74,10 @@ export const SolutionSideNav: React.FC<SolutionSideNavProps> = React.memo(functi
     activePanelNavIdRef.current = id;
     setActivePanelNavId(id);
   };
+
+  useEffect(() => {
+    if (onMount) onMount();
+  }, [onMount]);
 
   const onClosePanelNav = useCallback(() => {
     activePanelNavIdRef.current = null;
@@ -290,6 +296,7 @@ const SolutionSideNavItem: React.FC<SolutionSideNavItemProps> = React.memo(
                 className={itemClassNames}
                 color="text"
                 size="s"
+                id={`solutionSideNavItemLink-${id}`}
                 data-test-subj={`solutionSideNavItemLink-${id}`}
               />
             </EuiListGroup>
