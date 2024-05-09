@@ -98,6 +98,8 @@ paths:
                 properties:
                   connector_id:
                     type: string
+                  alertsContextCount:
+                    type: number
                   attackDiscoveries:
                     type: array
                     items:

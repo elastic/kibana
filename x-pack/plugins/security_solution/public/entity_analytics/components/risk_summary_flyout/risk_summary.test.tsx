@@ -49,6 +49,7 @@ describe('RiskSummary', () => {
           riskScoreData={mockHostRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
+          recalculatingScore={false}
         />
       </TestProviders>
     );
@@ -79,6 +80,7 @@ describe('RiskSummary', () => {
           riskScoreData={mockHostRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
+          recalculatingScore={false}
         />
       </TestProviders>
     );
@@ -110,10 +112,26 @@ describe('RiskSummary', () => {
           riskScoreData={{ ...mockHostRiskScoreState, data: undefined }}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
+          recalculatingScore={false}
         />
       </TestProviders>
     );
     expect(getByTestId('risk-summary-table')).toBeInTheDocument();
+  });
+
+  it('risk summary header does not render link when riskScoreData is loading', () => {
+    const { queryByTestId } = render(
+      <TestProviders>
+        <RiskSummary
+          riskScoreData={{ ...mockHostRiskScoreState, data: undefined, loading: true }}
+          queryId={'testQuery'}
+          openDetailsPanel={() => {}}
+          recalculatingScore={false}
+        />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('riskInputsTitleLink')).not.toBeInTheDocument();
   });
 
   it('renders visualization embeddable', () => {
@@ -123,6 +141,7 @@ describe('RiskSummary', () => {
           riskScoreData={mockHostRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
+          recalculatingScore={false}
         />
       </TestProviders>
     );
@@ -137,6 +156,7 @@ describe('RiskSummary', () => {
           riskScoreData={mockHostRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
+          recalculatingScore={false}
         />
       </TestProviders>
     );
@@ -151,6 +171,7 @@ describe('RiskSummary', () => {
           riskScoreData={mockHostRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
+          recalculatingScore={false}
         />
       </TestProviders>
     );
@@ -177,6 +198,7 @@ describe('RiskSummary', () => {
           riskScoreData={mockHostRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
+          recalculatingScore={false}
         />
       </TestProviders>
     );
@@ -198,6 +220,7 @@ describe('RiskSummary', () => {
           riskScoreData={mockUserRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
+          recalculatingScore={false}
         />
       </TestProviders>
     );
@@ -219,6 +242,7 @@ describe('RiskSummary', () => {
           riskScoreData={mockUserRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
+          recalculatingScore={false}
         />
       </TestProviders>
     );
