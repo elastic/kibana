@@ -17,7 +17,10 @@ import {
   ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
   ENDPOINT_ACTIONS_INDEX,
 } from '../../../../../../common/endpoint/constants';
-import type { NormalizedExternalConnectorClient } from '../../..';
+import type {
+  NormalizedExternalConnectorClient,
+  NormalizedExternalConnectorClientExecuteOptions,
+} from '../../..';
 import { applyEsClientSearchMock } from '../../../../mocks/utils.mock';
 import { SENTINEL_ONE_ACTIVITY_INDEX_PATTERN } from '../../../../../../common';
 import { SentinelOneDataGenerator } from '../../../../../../common/endpoint/data_generators/sentinelone_data_generator';
@@ -37,6 +40,8 @@ import type { ResponseActionGetFileRequestBody } from '../../../../../../common/
 import { SENTINEL_ONE_ZIP_PASSCODE } from '../../../../../../common/endpoint/service/response_actions/sentinel_one';
 import { SUB_ACTION } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
 import { ACTIONS_SEARCH_PAGE_SIZE } from '../../constants';
+import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { Readable } from 'stream';
 
 jest.mock('../../action_details_by_id', () => {
   const originalMod = jest.requireActual('../../action_details_by_id');
@@ -560,7 +565,7 @@ describe('SentinelOneActionsClient class', () => {
       });
     });
 
-    describe('for Get File', () => {
+    describe('for get-file response action', () => {
       let actionRequestsSearchResponse: SearchResponse<
         LogsEndpointAction<ResponseActionGetFileParameters, ResponseActionGetFileOutputContent>
       >;
@@ -714,6 +719,8 @@ describe('SentinelOneActionsClient class', () => {
             activityLogEntryId: 'activity-222',
             downloadUrl: '/agents/5173897/uploads/40558796',
             elasticDocId: '16ae44fc-4be7-446c-8e8f-a5c082dda918',
+            createdAt: expect.any(String),
+            filename: 'file.zip',
           },
         });
       });
@@ -931,6 +938,188 @@ describe('SentinelOneActionsClient class', () => {
       );
 
       expect(classConstructorOptions.casesClient?.attachments.bulkCreate).toHaveBeenCalled();
+    });
+  });
+
+  describe('#getFileInfo()', () => {
+    beforeEach(() => {
+      // @ts-expect-error updating readonly attribute
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
+        true;
+    });
+
+    it('should throw error if feature flag is disabled', async () => {
+      // @ts-expect-error updating readonly attribute
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
+        false;
+
+      await expect(s1ActionsClient.getFileInfo('acb', '123')).rejects.toThrow(
+        'File downloads are not supported for sentinel_one agent type. Feature disabled'
+      );
+    });
+
+    it('should throw error if action id is not for an agent type of sentinelOne', async () => {
+      applyEsClientSearchMock({
+        esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+        index: ENDPOINT_ACTIONS_INDEX,
+        response: SentinelOneDataGenerator.toEsSearchResponse([]),
+      });
+
+      await expect(s1ActionsClient.getFileInfo('abc', '123')).rejects.toThrow(
+        'Action id [abc] not found with an agent type of [sentinel_one]'
+      );
+    });
+
+    it('should return file info with with status of AWAITING_UPLOAD if action is still pending', async () => {
+      applyEsClientSearchMock({
+        esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+        index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+        response: SentinelOneDataGenerator.toEsSearchResponse([]),
+      });
+
+      await expect(s1ActionsClient.getFileInfo('abc', '123')).resolves.toEqual({
+        actionId: 'abc',
+        agentId: '123',
+        agentType: 'sentinel_one',
+        created: '',
+        id: '123',
+        mimeType: '',
+        name: '',
+        size: 0,
+        status: 'AWAITING_UPLOAD',
+      });
+    });
+
+    it('should return expected file information', async () => {
+      applyEsClientSearchMock({
+        esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+        index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+        response: SentinelOneDataGenerator.toEsSearchResponse([]),
+      });
+    });
+  });
+
+  describe('#getFileDownload()', () => {
+    let s1DataGenerator: SentinelOneDataGenerator;
+    let actionResponseDoc: LogsEndpointActionResponse;
+
+    beforeEach(() => {
+      s1DataGenerator = new SentinelOneDataGenerator('seed');
+
+      // @ts-expect-error updating readonly attribute
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
+        true;
+
+      const esHit = s1DataGenerator.generateResponseEsHit({
+        agent: { id: '123' },
+        EndpointActions: { data: { command: 'get-file' } },
+        meta: {
+          activityLogEntryId: 'activity-1',
+          elasticDocId: 'esdoc-1',
+          downloadUrl: '/some/url',
+          createdAt: '2024-05-09',
+          filename: 'foo.zip',
+        },
+      });
+
+      actionResponseDoc = esHit._source!;
+
+      applyEsClientSearchMock({
+        esClientMock: classConstructorOptions.esClient,
+        index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+        response: s1DataGenerator.toEsSearchResponse([esHit]),
+      });
+
+      (connectorActionsMock.execute as jest.Mock).mockImplementation(
+        (options: NormalizedExternalConnectorClientExecuteOptions) => {
+          if (options.params.subAction === SUB_ACTION.DOWNLOAD_AGENT_FILE) {
+            return {
+              data: Readable.from(['test']),
+            };
+          }
+        }
+      );
+    });
+
+    it('should throw error if feature flag is disabled', async () => {
+      // @ts-expect-error updating readonly attribute
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
+        false;
+
+      await expect(s1ActionsClient.getFileDownload('acb', '123')).rejects.toThrow(
+        'File downloads are not supported for sentinel_one agent type. Feature disabled'
+      );
+    });
+
+    it('should throw error if action id is not for an agent type of sentinelOne', async () => {
+      applyEsClientSearchMock({
+        esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+        index: ENDPOINT_ACTIONS_INDEX,
+        response: SentinelOneDataGenerator.toEsSearchResponse([]),
+      });
+
+      await expect(s1ActionsClient.getFileDownload('abc', '123')).rejects.toThrow(
+        'Action id [abc] not found with an agent type of [sentinel_one]'
+      );
+    });
+
+    it('should throw error if action is still pending for the given agent id', async () => {
+      applyEsClientSearchMock({
+        esClientMock: classConstructorOptions.esClient,
+        index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+        response: s1DataGenerator.toEsSearchResponse([]),
+      });
+      await expect(s1ActionsClient.getFileDownload('abc', '123')).rejects.toThrow(
+        'Action ID [abc] for agent ID [abc] is still pending'
+      );
+    });
+
+    it('should throw error if the action response ES Doc is missing required data', async () => {
+      applyEsClientSearchMock({
+        esClientMock: classConstructorOptions.esClient,
+        index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+        response: s1DataGenerator.toEsSearchResponse([
+          s1DataGenerator.generateResponseEsHit({
+            agent: { id: '123' },
+            EndpointActions: { data: { command: 'get-file' } },
+            meta: { activityLogEntryId: undefined },
+          }),
+        ]),
+      });
+
+      await expect(s1ActionsClient.getFileDownload('abc', '123')).rejects.toThrow(
+        'Unable to retrieve file from SentinelOne. Response ES document is missing [meta.activityLogEntryId]'
+      );
+    });
+
+    it('should call SentinelOne connector to get file download Readable stream', async () => {
+      await s1ActionsClient.getFileDownload('abc', '123');
+
+      expect(connectorActionsMock.execute).toHaveBeenCalledWith({
+        params: {
+          subAction: 'downloadAgentFile',
+          subActionParams: {
+            activityId: 'activity-1',
+            agentUUID: '123',
+          },
+        },
+      });
+    });
+
+    it('should throw an error if call to SentinelOne did not return a Readable stream', async () => {
+      (connectorActionsMock.execute as jest.Mock).mockReturnValue({ data: undefined });
+
+      await expect(s1ActionsClient.getFileDownload('abc', '123')).rejects.toThrow(
+        'Unable to establish a readable stream for file with SentinelOne'
+      );
+    });
+
+    it('should return expected data', async () => {
+      await expect(s1ActionsClient.getFileDownload('abc', '123')).resolves.toEqual({
+        stream: expect.any(Readable),
+        fileName: 'foo.zip',
+        mimeType: undefined,
+      });
     });
   });
 });
