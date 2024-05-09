@@ -398,12 +398,7 @@ const mockApmDataStreamClientServerLineLayer = {
   label: 'traces-apm*,logs-apm*,metrics-apm*,apm-* | Line',
 };
 
-export const mockLayerList = [
-  mockLineLayer,
-  mockDestinationLayer,
-  mockSourceLayer,
-  mockLayerGroup,
-];
+export const mockLayerList = [mockLineLayer, mockDestinationLayer, mockSourceLayer, mockLayerGroup];
 
 export const mockLayerListDouble = [
   mockLineLayer,
