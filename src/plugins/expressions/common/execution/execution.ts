@@ -258,13 +258,11 @@ export class Execution<
   constructor(
     public readonly execution: ExecutionParams,
     private readonly logger?: Logger,
-    private readonly functionCache?: Map<string, FunctionCacheItem>
+    private readonly functionCache: Map<string, FunctionCacheItem> = new Map()
   ) {
     const { executor } = execution;
 
     this.contract = new ExecutionContract<Input, Output, InspectorAdapters>(this);
-
-    if (!this.functionCache) this.functionCache = new Map();
 
     if (!execution.ast && !execution.expression) {
       throw new TypeError('Execution params should contain at least .ast or .expression key.');
@@ -484,8 +482,8 @@ export class Execution<
         return normalizedInput;
       }),
       switchMap((normalizedInput) => {
-        if (hash && this.functionCache!.has(hash)) {
-          const cached = this.functionCache!.get(hash);
+        if (hash && this.functionCache.has(hash)) {
+          const cached = this.functionCache.get(hash);
           if (cached && Date.now() - cached.time < this.cacheTimeout) {
             return of(cached.value);
           }
@@ -523,10 +521,10 @@ export class Execution<
         }
 
         if (hash) {
-          while (this.functionCache!.size >= maxCacheSize) {
-            this.functionCache!.delete(this.functionCache!.keys().next().value);
+          while (this.functionCache.size >= maxCacheSize) {
+            this.functionCache.delete(this.functionCache.keys().next().value);
           }
-          this.functionCache!.set(hash, { value: output, time: Date.now() });
+          this.functionCache.set(hash, { value: output, time: Date.now() });
         }
         return output;
       })

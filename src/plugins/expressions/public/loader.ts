@@ -191,9 +191,7 @@ export class ExpressionLoader {
     this.params.debug = Boolean(params.debug);
     this.params.partial = Boolean(params.partial);
     this.params.throttle = Number(params.throttle ?? 1000);
-    if (params.allowCache !== undefined) {
-      this.params.allowCache = params.allowCache;
-    }
+    this.params.allowCache = params.allowCache;
 
     this.params.inspectorAdapters = (params.inspectorAdapters ||
       this.execution?.inspect()) as Adapters;

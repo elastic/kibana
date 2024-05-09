@@ -341,7 +341,7 @@ describe('Executor', () => {
       expect(result?.result).toEqual(fakeCacheEntry.value);
     });
 
-    it('doesnt cache if disableCache flag is enabled', async () => {
+    it('doesnt cache if allowCache flag is false', async () => {
       await executor.run('theme size default=12', null, { allowCache: true }).toPromise();
       expect(functionCache.size).toEqual(1);
       const entry = functionCache.keys().next().value;
@@ -353,7 +353,7 @@ describe('Executor', () => {
       expect(result?.result).not.toEqual(fakeCacheEntry.value);
     });
 
-    it('doesnt cache results of functions that have disableCache property set', async () => {
+    it('doesnt cache results of functions that have allowCache property set to false', async () => {
       await executor.run('var name="test"', null, { allowCache: true }).toPromise();
       expect(functionCache.size).toEqual(0);
     });

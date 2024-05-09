@@ -124,7 +124,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     this.functions = new FunctionsRegistry(this as Executor);
     this.types = new TypesRegistry(this as Executor);
     this.container = createExecutorContainer<Context>(state);
-    this.functionCache = functionCache || new Map();
+    this.functionCache = functionCache;
   }
 
   public get state(): ExecutorState<Context> {

@@ -40,7 +40,6 @@ export interface IExpressionLoaderParams {
   variables?: Record<string, unknown>;
   // Enables debug tracking on each expression in the AST
   debug?: boolean;
-  disableCaching?: boolean;
   customFunctions?: [];
   customRenderers?: [];
   uiState?: unknown;
