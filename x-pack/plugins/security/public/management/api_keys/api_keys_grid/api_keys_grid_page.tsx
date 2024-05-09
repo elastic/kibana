@@ -284,7 +284,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
           />
           <EuiSpacer />
           <KibanaPageTemplate.Section paddingSize="none">
-            {createdApiKey && (
+            {createdApiKey && !state.loading && (
               <>
                 <ApiKeyCreatedCallout createdApiKey={createdApiKey} />
                 <EuiSpacer />
