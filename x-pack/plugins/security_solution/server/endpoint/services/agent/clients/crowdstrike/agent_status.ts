@@ -24,7 +24,7 @@ import { CustomHttpRequestError } from '../../../../../utils/custom_http_request
 import {
   CROWDSTRIKE_NETWORK_STATUS,
   CROWDSTRIKE_STATUS_RESPONSE,
-} from './crowdstrike_one_agent_status_client';
+} from './crowdstrike_agent_status_client';
 import type { GetAgentStatusOptions } from '../lib/types';
 
 export const getCrowdstrikeAgentStatus = async ({

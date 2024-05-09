@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { CrowdstrikeGetAgentsResponse } from '@kbn/stack-connectors-plugin/common/crowdstrike/types';
+import type {
+  CrowdstrikeGetAgentsResponse,
+  CrowdstrikeBaseApiResponse,
+  CrowdstrikeGetAgentOnlineStatusResponse,
+} from '@kbn/stack-connectors-plugin/common/crowdstrike/types';
 import {
   CROWDSTRIKE_CONNECTOR_ID,
   SUB_ACTION,
@@ -20,6 +24,18 @@ import type { NormalizedExternalConnectorClient } from '../../..';
 export interface CrowdstrikeActionsClientOptionsMock extends ResponseActionsClientOptionsMock {
   connectorActions: NormalizedExternalConnectorClient;
 }
+
+const createCrowdstrikeGetAgentOnlineStatusDetailsMock = (
+  overrides: Partial<CrowdstrikeGetAgentOnlineStatusResponse['resources'][number]> = {}
+): CrowdstrikeGetAgentOnlineStatusResponse['resources'][number] => {
+  return merge(
+    {
+      state: 'offline',
+      id: '123456789',
+    },
+    overrides
+  );
+};
 
 const createCrowdstrikeAgentDetailsMock = (
   overrides: Partial<CrowdstrikeGetAgentsResponse['resources'][number]> = {}
@@ -132,8 +148,8 @@ const createCrowdstrikeAgentDetailsMock = (
 };
 
 const createCrowdstrikeGetAgentsApiResponseMock = (
-  data: CrowdstrikeGetAgentsResponse['resources'][number] = createCrowdstrikeAgentDetailsMock()
-): CrowdstrikeGetAgentsResponse => {
+  data: CrowdstrikeBaseApiResponse['resources']
+) => {
   return {
     meta: {
       query_time: 0.001831479,
@@ -141,7 +157,7 @@ const createCrowdstrikeGetAgentsApiResponseMock = (
       trace_id: '4567898765-432423432432-42342342',
     },
     errors: null,
-    resources: [data],
+    resources: data,
   };
 };
 
@@ -167,7 +183,9 @@ const createConnectorActionsClientMock = (): ActionsClientMock => {
       switch (subAction) {
         case SUB_ACTION.GET_AGENT_DETAILS:
           return responseActionsClientMock.createConnectorActionExecuteResponse({
-            data: createCrowdstrikeGetAgentsApiResponseMock(),
+            data: createCrowdstrikeGetAgentsApiResponseMock([
+              createCrowdstrikeAgentDetailsMock({}),
+            ]),
           });
 
         default:
@@ -224,6 +242,7 @@ const createEventSearchResponseMock = (): CrowdstrikeEventSearchResponseMock => 
 
 export const CrowdstrikeMock = {
   createGetAgentsResponse: createCrowdstrikeGetAgentsApiResponseMock,
+  createGetAgentOnlineStatusDetails: createCrowdstrikeGetAgentOnlineStatusDetailsMock,
   createCrowdstrikeAgentDetails: createCrowdstrikeAgentDetailsMock,
   createConnectorActionsClient: createConnectorActionsClientMock,
   createConstructorOptions: createConstructorOptionsMock,

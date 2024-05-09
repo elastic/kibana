@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CrowdstrikeAgentStatusClient } from './crowdstrike/crowdstrike_one_agent_status_client';
+import { CrowdstrikeAgentStatusClient } from './crowdstrike/crowdstrike_agent_status_client';
 import { SentinelOneAgentStatusClient } from './sentinel_one/sentinel_one_agent_status_client';
 import type { AgentStatusClientInterface } from './lib/types';
 import type { AgentStatusClientOptions } from './lib/base_agent_status_client';
