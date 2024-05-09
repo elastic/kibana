@@ -72,12 +72,7 @@ export const alertRenderer: RowRenderer = {
     return (
       <RowRendererContainer>
         <Details data-test-subj="alertRenderer">
-          <EuiFlexGroup
-            alignItems="center"
-            gutterSize="xs"
-            justifyContent="center"
-            wrap={true}
-          >
+          <EuiFlexGroup alignItems="center" gutterSize="xs" justifyContent="center" wrap={true}>
             <AlertField
               contextId={contextId}
               data-test-subj={EVENT_CATEGORY}

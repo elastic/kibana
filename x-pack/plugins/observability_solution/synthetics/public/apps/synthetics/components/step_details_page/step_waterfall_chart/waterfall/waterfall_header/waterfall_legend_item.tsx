@@ -59,7 +59,7 @@ export function WaterfallLegendItem<T = string>({
   );
 }
 
-const StyledLegendItem = euiStyled.div<{ role: AriaRole; }>`
+const StyledLegendItem = euiStyled.div<{ role: AriaRole }>`
   flex-grow: 0;
   flex-shrink: 0;
   &:active {
