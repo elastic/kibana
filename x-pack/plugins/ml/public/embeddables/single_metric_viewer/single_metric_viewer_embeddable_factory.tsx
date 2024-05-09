@@ -91,7 +91,7 @@ export const getSingleMetricViewerEmbeddableFactory = (
           isEditingEnabled: () => true,
           getTypeDisplayName: () =>
             i18n.translate('xpack.ml.singleMetricViewerEmbeddable.typeDisplayName', {
-              defaultMessage: 'Single metric viewer',
+              defaultMessage: 'single metric viewer',
             }),
           onEdit: async () => {
             try {

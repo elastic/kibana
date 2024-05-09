@@ -85,33 +85,31 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
 
   useEffect(
     function setUpPanel() {
-      if (isMounted()) {
-        async function fetchJob() {
-          const { jobs } = await mlApiServices.getJobs({ jobId: jobIds.join(',') });
+      async function fetchJob() {
+        const { jobs } = await mlApiServices.getJobs({ jobId: jobIds.join(',') });
 
-          if (jobs.length > 0) {
-            // Reset values if the job has changed
-            if (initialValuesRef.current.isNewJob) {
-              setSelectedDetectorIndex(0);
-              setSelectedEntities(undefined);
-              setFunctionDescription(undefined);
-            }
-
-            setJob(jobs[0]);
-            setErrorMessage(undefined);
+        if (isMounted() && jobs.length === 1) {
+          // Reset values if the job has changed
+          if (initialValuesRef.current.isNewJob) {
+            setSelectedDetectorIndex(0);
+            setSelectedEntities(undefined);
+            setFunctionDescription(undefined);
           }
+
+          setJob(jobs[0]);
+          setErrorMessage(undefined);
         }
+      }
 
-        if (jobIds.length === 1) {
-          if (!initialValuesRef.current.titleManuallyChanged) {
-            setPanelTitle(getDefaultSingleMetricViewerPanelTitle(jobIds[0]));
-          }
-          if (mlApiServices && jobIds.length === 1 && jobIds[0] !== job?.job_id) {
-            fetchJob().catch((error) => {
-              const errorMsg = extractErrorMessage(error);
-              setErrorMessage(errorMsg);
-            });
-          }
+      if (jobIds.length === 1) {
+        if (!initialValuesRef.current.titleManuallyChanged) {
+          setPanelTitle(getDefaultSingleMetricViewerPanelTitle(jobIds[0]));
+        }
+        if (mlApiServices && jobIds.length === 1 && jobIds[0] !== job?.job_id) {
+          fetchJob().catch((error) => {
+            const errorMsg = extractErrorMessage(error);
+            setErrorMessage(errorMsg);
+          });
         }
       }
     },
@@ -187,7 +185,7 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
             />
           </EuiFormRow>
           <EuiSpacer />
-          {job && job.job_id && jobIds.length && jobIds[0] === job.job_id ? (
+          {job?.job_id && jobIds.length && jobIds[0] === job.job_id ? (
             <SeriesControls
               selectedJobId={jobIds[0]}
               job={job}
@@ -210,14 +208,16 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
               data-test-subj="mlsingleMetricViewerInitializerCancelButton"
             >
               <FormattedMessage
-                id="xpack.ml.singleMetricViewerEmbeddable.CancelButtonLabel"
+                id="xpack.ml.singleMetricViewerEmbeddable.cancelButtonLabel"
                 defaultMessage="Cancel"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              isDisabled={!isPanelTitleValid || errorMessage !== undefined || !jobIds.length}
+              isDisabled={
+                !isPanelTitleValid || errorMessage !== undefined || !jobIds.length || !job
+              }
               onClick={onCreate.bind(null, {
                 jobIds,
                 functionDescription,
