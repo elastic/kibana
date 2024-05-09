@@ -237,17 +237,17 @@ const comparisonFunctions: FunctionDefinition[] = [
       // constant strings okay because of implicit casting
       {
         params: [
-          { name: 'left', type: 'boolean' },
-          { name: 'right', type: 'string', constantOnly: true },
+          { name: 'left', type: 'boolean' as const },
+          { name: 'right', type: 'string' as const, constantOnly: true },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
       },
       {
         params: [
-          { name: 'right', type: 'string', constantOnly: true },
-          { name: 'right', type: 'boolean' },
+          { name: 'right', type: 'string' as const, constantOnly: true },
+          { name: 'right', type: 'boolean' as const },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
       },
     ],
   },
@@ -267,17 +267,17 @@ const comparisonFunctions: FunctionDefinition[] = [
       // constant strings okay because of implicit casting
       {
         params: [
-          { name: 'left', type: 'boolean' },
-          { name: 'right', type: 'string', constantOnly: true },
+          { name: 'left', type: 'boolean' as const },
+          { name: 'right', type: 'string' as const, constantOnly: true },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
       },
       {
         params: [
-          { name: 'right', type: 'string', constantOnly: true },
-          { name: 'right', type: 'boolean' },
+          { name: 'right', type: 'string' as const, constantOnly: true },
+          { name: 'right', type: 'boolean' as const },
         ],
-        returnType: 'boolean',
+        returnType: 'boolean' as const,
       },
     ],
   },
