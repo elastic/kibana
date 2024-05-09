@@ -8,8 +8,8 @@
 import { lastValueFrom } from 'rxjs';
 
 import type estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-
-import type { DataPublicPluginStart, IKibanaSearchResponse } from '@kbn/data-plugin/public';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { TimeBuckets } from '@kbn/ml-time-buckets';
 
 import type { LineChartPoint } from './event_rate_chart';

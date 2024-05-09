@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { GroupByField } from '../../../../../pages/slos/components/slo_list_group_by';
+
 interface Props {
   kqlQuery: string;
   groups: string[];
-  groupBy: string;
+  groupBy: GroupByField;
 }
 
 export const buildCombinedKqlQuery = ({ groups, groupBy, kqlQuery }: Props) => {
