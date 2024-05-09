@@ -368,6 +368,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    // Adding comment for PR diff, running flaky test runner.
     describe('logging out', () => {
       let sessionCookie: Cookie;
 
