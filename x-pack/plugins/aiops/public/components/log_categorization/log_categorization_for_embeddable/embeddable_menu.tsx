@@ -73,6 +73,9 @@ export const EmbeddableMenu: FC<Props> = ({
         onClick={() => togglePopover()}
         // @ts-ignore - subdued does work
         color="subdued"
+        aria-label={i18n.translate('xpack.aiops.logCategorization.embeddableMenu.aria', {
+          defaultMessage: 'Pattern analysis options',
+        })}
       />
     </EuiToolTip>
   );

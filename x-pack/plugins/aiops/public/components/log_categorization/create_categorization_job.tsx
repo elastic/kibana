@@ -75,6 +75,9 @@ export const CreateCategorizationJobButton: FC<Props> = ({
           onClick={createADJob}
           // @ts-ignore - subdued does work
           color="subdued"
+          aria-label={i18n.translate('xpack.aiops.categorizeFlyout.findAnomalies.tooltip', {
+            defaultMessage: 'Create Anomaly Detection job to find anomalies in patterns',
+          })}
         />
       </EuiToolTip>
     );
