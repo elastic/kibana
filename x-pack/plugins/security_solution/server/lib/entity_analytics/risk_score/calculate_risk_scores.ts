@@ -50,7 +50,7 @@ import {
   RISK_SCORING_MAP_SCRIPT,
   RISK_SCORING_REDUCE_SCRIPT,
   RISK_SCORING_COMBINE_SCRIPT,
-} from './painless';
+} from './risk_scoring_painless_scripts';
 
 const formatForResponse = ({
   bucket,

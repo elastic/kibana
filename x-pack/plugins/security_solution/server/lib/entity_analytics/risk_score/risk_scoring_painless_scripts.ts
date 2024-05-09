@@ -5,6 +5,31 @@
  * 2.0.
  */
 
+export const RISK_SCORING_INIT_SCRIPT = `
+state.inputs = []
+`;
+
+export const RISK_SCORING_MAP_SCRIPT = `
+Map fields = new HashMap();
+String category = doc['event.kind'].value;
+double score = doc['kibana.alert.risk_score'].value;
+double weighted_score = 0.0;
+
+fields.put('time', doc['@timestamp'].value);
+fields.put('rule_name', doc['kibana.alert.rule.name'].value);
+fields.put('category', category);
+fields.put('index', doc['_index'].value);
+fields.put('id', doc['kibana.alert.uuid'].value);
+fields.put('score', score);
+fields.put('weighted_score', weighted_score);
+
+state.inputs.add(fields);
+`;
+
+export const RISK_SCORING_COMBINE_SCRIPT = `
+return state;
+`;
+
 export const RISK_SCORING_REDUCE_SCRIPT = `
 Map results = new HashMap();
 List inputs = [];
