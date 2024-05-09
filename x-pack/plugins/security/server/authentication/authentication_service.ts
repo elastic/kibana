@@ -364,9 +364,6 @@ export class AuthenticationService {
     const getCurrentUser = (request: KibanaRequest) =>
       http.auth.get<AuthenticatedUser>(request).state ?? null;
 
-    const checkPermissions = (request: KibanaRequest) =>
-      http.auth.get<Promise<boolean>>(request).state;
-
     this.session = session;
     const authenticator = (this.authenticator = new Authenticator({
       audit,
@@ -385,7 +382,6 @@ export class AuthenticationService {
       session,
       isElasticCloudDeployment,
       customLogoutURL,
-      checkPermissions,
     }));
 
     return {
