@@ -86,6 +86,9 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   ]);
   const isPlainRecord = useMemo(() => getRawRecordType(query) === RecordRawType.PLAIN, [query]);
   const viewMode: VIEW_MODE = useAppStateSelector((state) => {
+    if (state.viewMode === VIEW_MODE.DOCUMENT_LEVEL || state.viewMode === VIEW_MODE.PATTERN_LEVEL) {
+      return state.viewMode;
+    }
     if (uiSettings.get(SHOW_FIELD_STATISTICS) !== true || isPlainRecord)
       return VIEW_MODE.DOCUMENT_LEVEL;
     return state.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;

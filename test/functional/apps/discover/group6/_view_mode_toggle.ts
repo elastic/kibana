@@ -99,6 +99,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.existOrFail('dscViewModeToggle');
         });
 
+        it('should show Patterns tab', async () => {
+          await testSubjects.click('dscViewModePatternAnalysisButton');
+
+          await retry.try(async () => {
+            const fieldStatsTab = await testSubjects.find('dscViewModePatternAnalysisButton');
+            expect(await fieldStatsTab.getAttribute('aria-selected')).to.be('true');
+          });
+
+          await testSubjects.existOrFail('dscViewModeToggle');
+        });
+
         it('should not show view mode toggle for text-based searches', async () => {
           await testSubjects.click('dscViewModeDocumentButton');
 
