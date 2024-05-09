@@ -11,9 +11,10 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { firstValueFrom } from 'rxjs';
 
 export function getPatternAnalysisAvailable(licensing: LicensingPluginStart) {
+  const lic = firstValueFrom(licensing.license$);
   return async (dataView: DataView) => {
     const hasTextFields = dataView.fields.some((f) => f.esTypes?.includes(ES_FIELD_TYPES.TEXT));
-    const isPlatinum = (await firstValueFrom(licensing.license$)).hasAtLeast('platinum');
+    const isPlatinum = (await lic).hasAtLeast('platinum');
     return isPlatinum && hasTextFields;
   };
 }
