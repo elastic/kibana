@@ -47,7 +47,7 @@ export interface EditorRequest {
   text: string;
 }
 
-interface AdjustedParsedRequest extends ParsedRequest {
+export interface AdjustedParsedRequest extends ParsedRequest {
   startLineNumber: number;
   endLineNumber: number;
 }
@@ -343,24 +343,23 @@ export class MonacoEditorActionsProvider {
     return this.getSuggestions(model, position);
   }
 
-  private getSelectedTextLines(selectionRange: monaco.IRange): string[] {
+  private getTextInRange(selectionRange: monaco.IRange): string {
     const model = this.editor.getModel();
     if (!model || !selectionRange) {
-      return [];
+      return '';
     }
     const { startLineNumber, startColumn, endLineNumber, endColumn } = selectionRange;
-    const value = model.getValueInRange({
+    const text = model.getValueInRange({
       startLineNumber,
       startColumn,
       endLineNumber,
       endColumn,
     });
-    return value.split(`\n`);
+    return text;
   }
 
   public async autoIndent(event: React.MouseEvent) {
     event.preventDefault();
-    const requests = await this.getRequests();
     const parsedRequests = await this.getSelectedParsedRequests();
     const selectionStartLineNumber = parsedRequests[0].startLineNumber;
     const selectionEndLineNumber = parsedRequests[parsedRequests.length - 1].endLineNumber;
@@ -375,9 +374,9 @@ export class MonacoEditorActionsProvider {
       return;
     }
 
-    const textLines = this.getSelectedTextLines(selectedRange);
+    const selectedText = this.getTextInRange(selectedRange);
 
-    const autoIndentedText = getAutoIndentedRequests(requests, textLines);
+    const autoIndentedText = getAutoIndentedRequests(parsedRequests, selectedText);
 
     this.editor.executeEdits('', [
       {

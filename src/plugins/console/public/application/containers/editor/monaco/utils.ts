@@ -12,7 +12,7 @@ import { getTopLevelUrlCompleteComponents } from '../../../../lib/kb';
 import { AutoCompleteContext } from '../../../../lib/autocomplete/types';
 import { constructUrl } from '../../../../lib/es';
 import type { DevToolsVariable } from '../../../components';
-import { EditorRequest } from './monaco_editor_actions_provider';
+import { EditorRequest, AdjustedParsedRequest } from './monaco_editor_actions_provider';
 import { MetricsTracker } from '../../../../types';
 import { populateContext } from '../../../../lib/autocomplete/engine';
 
@@ -144,12 +144,14 @@ const containsComments = (text: string) => {
   return text.indexOf('//') >= 0 || text.indexOf('/*') >= 0;
 };
 
-export const getAutoIndentedRequests = (requests: EditorRequest[], textLines: string[]): string => {
+/*
+ * This function takes a list of parsed requests and a string representing the unformatted
+ * text from the editor that contains these requests, and returns a text in which
+ * the requests are auto-indented.
+ */
+export const getAutoIndentedRequests = (requests: AdjustedParsedRequest[], text: string): string => {
+  const textLines = text.split(`\n`);
   const formattedText: string[] = [];
-
-  if (requests.length < 1) {
-    return textLines.join(`\n`);
-  }
 
   let currentLineIndex = 0;
   let currentRequestIndex = 0;
@@ -166,12 +168,13 @@ export const getAutoIndentedRequests = (requests: EditorRequest[], textLines: st
         // TODO: Format requests with comments
         formattedText.push(...requestLines);
       } else {
-        // If no comments, add parsed request - it is already formatted as it is JSON-parsed
-        const firstLine = request.method + ' ' + request.url;
+        // If no comments, add stringified parsed request
+        const stringifiedRequest = stringifyRequest(request);
+        const firstLine = stringifiedRequest.method + ' ' + stringifiedRequest.url;
         formattedText.push(firstLine);
 
-        if (request.data && request.data.length > 0) {
-          formattedText.push(...request.data);
+        if (stringifiedRequest.data && stringifiedRequest.data.length > 0) {
+          formattedText.push(...stringifiedRequest.data);
         }
       }
 
