@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { estypes } from '@elastic/elasticsearch';
 // import { transformError } from '@kbn/securitysolution-es-utils';
 // import type { ElasticsearchClient } from '@kbn/core/server';
-import { extractFieldValue } from '../lib/utils';
+import { extractFieldValue, round } from '../lib/utils';
 import { IRouter, Logger } from '@kbn/core/server';
 import {
   POD_CPU_ROUTE,
@@ -80,7 +80,7 @@ export const registerPodsCpuRoute = (router: IRouter, logger: Logger) => {
 
           const hit = esResponse.hits.hits[0];
           const { fields = {} } = hit;
-          const podCpuUtilization = extractFieldValue(fields['metrics.k8s.pod.cpu.utilization']);
+          const podCpuUtilization = round(extractFieldValue(fields['metrics.k8s.pod.cpu.utilization']),3);
           var message = '';
           var reason = '';
           const time = extractFieldValue(fields['@timestamp']);
@@ -92,7 +92,7 @@ export const registerPodsCpuRoute = (router: IRouter, logger: Logger) => {
             reason = "High"
           }
 
-          message = `Pod ${request.query.namespace}/${request.query.pod_name} has CPU utilisation ${podCpuUtilization}`;
+          message = `Pod ${request.query.namespace}/${request.query.pod_name} has CPU utilisation ${podCpuUtilization}%`;
           return response.ok({
             body: {
               time: time,
