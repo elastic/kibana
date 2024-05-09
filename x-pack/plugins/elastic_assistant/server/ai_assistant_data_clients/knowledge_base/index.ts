@@ -79,17 +79,9 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     if (this.isInstallingElser) {
       return;
     }
-    // TODO: Before automatically installing ELSER in the background, we should perform the following deployment resource checks
+    // TODO: Before automatically installing ELSER in the background, we should perform deployment resource checks
     // Note: ESS only, as Serverless can always auto-install if `productTier === complete`
-    // 1. Deployment has ML Nodes with adequate free memory
-    //    We can just auto-install, yay!
-    // 2. Deployment doesn't have adequate ML resources, and ML Autoscaling is disabled (or unavailable due to cluster health).
-    //    Refer the user to the docs for further details
-    // 3. Deployment doesn't have adequate ML resources, but have ML Autoscaling enabled and scale limits are are NOT WITHIN the required resources.
-    //    Again, refer the user to the docs
-    // 4. Deployment doesn't have adequate ML resources, but have ML Autoscaling enabled and scale limits ARE WITHIN the required resources.
-    //    In this instance we could auto-install, but may have it behind a user action since deployment costs would change...
-
+    // See ml-team issue for providing 'dry run' flag to perform these checks: https://github.com/elastic/ml-team/issues/1208
     this.isInstallingElser = true;
     const elserId = await this.options.getElserId();
     const isInstalled = await this.isModelInstalled(elserId);
