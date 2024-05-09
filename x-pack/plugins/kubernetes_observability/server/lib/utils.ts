@@ -10,7 +10,8 @@ export type Event = {
     reason: string;
     type: string;
     time: string;
-    pod: string;
+    kind: string;
+    object: string;
   };
 
 export function extractFieldValue<T>(maybeArray: T | T[] | undefined): T {
@@ -48,4 +49,12 @@ export function phaseToState(phase: number) {
             return "Unknown"; 
         } 
     } 
+}
+
+export function toEntries<T>(a: T[]) {
+    return a.map((value, index) => [index, value] as const);
+}
+
+export function capitalizeFirstLetter(str: string): string {
+    return str.charAt(0).toUpperCase() + str.slice(1);
 }
