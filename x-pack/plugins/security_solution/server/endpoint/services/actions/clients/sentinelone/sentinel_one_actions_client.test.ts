@@ -1001,7 +1001,6 @@ describe('SentinelOneActionsClient class', () => {
 
   describe('#getFileDownload()', () => {
     let s1DataGenerator: SentinelOneDataGenerator;
-    let actionResponseDoc: LogsEndpointActionResponse;
 
     beforeEach(() => {
       s1DataGenerator = new SentinelOneDataGenerator('seed');
@@ -1021,8 +1020,6 @@ describe('SentinelOneActionsClient class', () => {
           filename: 'foo.zip',
         },
       });
-
-      actionResponseDoc = esHit._source!;
 
       applyEsClientSearchMock({
         esClientMock: classConstructorOptions.esClient,
