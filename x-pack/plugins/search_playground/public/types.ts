@@ -40,7 +40,7 @@ export interface SearchPlaygroundPluginStart {
 
 export interface AppPluginStartDependencies {
   history: AppMountParameters['history'];
-  usageCollection: UsageCollectionStart;
+  usageCollection?: UsageCollectionStart;
   navigation: NavigationPublicPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   share: SharePluginStart;
@@ -52,7 +52,7 @@ export interface AppServicesContext {
   share: SharePluginStart;
   cloud?: CloudSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-  usageCollection: UsageCollectionStart;
+  usageCollection?: UsageCollectionStart;
 }
 
 export enum ChatFormFields {
