@@ -62,6 +62,69 @@ const validateLogFunctions = `(fnDef: ESQLFunction) => {
   return messages;
 }`;
 
+const dateDiffSuggestions = [
+  'year',
+  'quarter',
+  'month',
+  'week',
+  'day',
+  'hour',
+  'minute',
+  'second',
+  'millisecond',
+  'microsecond',
+  'nanosecond',
+];
+
+const dateDiffOptions = [
+  'year',
+  'years',
+  'yy',
+  'yyyy',
+  'quarter',
+  'quarters',
+  'qq',
+  'q',
+  'month',
+  'months',
+  'mm',
+  'm',
+  'dayofyear',
+  'dy',
+  'y',
+  'day',
+  'days',
+  'dd',
+  'd',
+  'week',
+  'weeks',
+  'wk',
+  'ww',
+  'weekday',
+  'weekdays',
+  'dw',
+  'hour',
+  'hours',
+  'hh',
+  'minute',
+  'minutes',
+  'mi',
+  'n',
+  'second',
+  'seconds',
+  'ss',
+  's',
+  'millisecond',
+  'milliseconds',
+  'ms',
+  'microsecond',
+  'microseconds',
+  'mcs',
+  'nanosecond',
+  'nanoseconds',
+  'ns',
+];
+
 /**
  * Enrichments for function definitions
  *
@@ -74,6 +137,13 @@ const functionEnrichments = {
   },
   log: {
     validate: validateLogFunctions,
+  },
+  date_diff: {
+    signatures: [
+      {
+        params: [{ literalOptions: dateDiffOptions, literalSuggestions: dateDiffSuggestions }],
+      },
+    ],
   },
   date_extract: {
     signatures: [
@@ -160,10 +230,12 @@ function printGeneratedFunctionsFile(functionDefinitions) {
     return asciidocString.replace(inlineLinkRegex, '$1');
   };
 
+  const getDefinitionName = (name) => _.camelCase(`${name}Definition`);
+
   const printFunctionDefinition = (functionDefinition) => {
     const { type, name, description, alias, signatures } = functionDefinition;
 
-    return `{
+    return `const ${getDefinitionName(name)}: FunctionDefinition = {
     type: '${type}',
     name: '${name}',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.${name}', { defaultMessage: ${JSON.stringify(
@@ -189,9 +261,12 @@ import type { FunctionDefinition } from './types';
 
 `;
 
-  const functionDefinitionsString = functionDefinitions.map(printFunctionDefinition).join(',\n');
+  const functionDefinitionsString = functionDefinitions.map(printFunctionDefinition).join('\n\n');
 
-  const fileContents = `${fileHeader}export const evalFunctionDefinitions: FunctionDefinition[] = [\n${functionDefinitionsString}\n];`;
+  const fileContents = `${fileHeader}${functionDefinitionsString}
+  export const evalFunctionDefinitions = [${functionDefinitions
+    .map(({ name }) => getDefinitionName(name))
+    .join(',\n')}];`;
 
   return fileContents;
 }
