@@ -16,7 +16,7 @@ const cleanMeta = (str: string) => (str.charAt(0).toUpperCase() + str.slice(1)).
 export const resultToOption = (
   result: GlobalSearchResult,
   searchTagIds: string[],
-  getTag?: SavedObjectTaggingPluginStart['ui']['getTag']
+  getTagList?: SavedObjectTaggingPluginStart['ui']['getTagList']
 ): EuiSelectableTemplateSitewideOption => {
   const { id, title, url, icon, type, meta = {} } = result;
   const { tagIds = [], categoryLabel = '' } = meta as { tagIds: string[]; categoryLabel: string };
@@ -42,21 +42,19 @@ export const resultToOption = (
       ? [{ text: categoryLabel }]
       : [{ text: cleanMeta((meta.displayName as string) ?? type) }];
 
-  if (getTag && tagIds.length) {
-    const tags = tagIds.map(getTag).filter((tag, index) => {
+  if (tagIds.length && getTagList) {
+    const tags = getTagList().filter((tag, index) => {
       if (!tag) {
-        // eslint-disable-next-line no-console
+        //  eslint-disable-next-line no-console
         console.warn(
           `SearchBar: Tag with id "${tagIds[index]}" not found. Tag "${tagIds[index]}" is referenced by the search result "${result.type}:${result.id}". Skipping displaying the missing tag.`
         );
         return false;
       }
-
       return true;
     }) as Tag[];
 
     if (tags.length) {
-      // TODO #85189 - refactor to use TagList instead of getTag
       option.append = <ResultTagList tags={tags} searchTagIds={searchTagIds} />;
     }
   }

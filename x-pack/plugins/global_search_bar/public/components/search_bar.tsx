@@ -108,7 +108,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
           resultToOption(
             option,
             searchTagIds?.filter((id) => id !== UNKNOWN_TAG_ID) ?? [],
-            taggingApi?.ui.getTag
+            taggingApi?.ui.getTagList
           )
         ),
       ]);
@@ -125,18 +125,18 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
           searchSubscription.current = null;
         }
 
-        const suggestions = loadSuggestions(searchValue);
+        const suggestions = loadSuggestions(searchValue.toLowerCase());
 
         let aggregatedResults: GlobalSearchResult[] = [];
         if (searchValue.length !== 0) {
           reportEvent.searchRequest();
         }
 
-        const rawParams = parseSearchParams(searchValue);
+        const rawParams = parseSearchParams(searchValue.toLowerCase());
         const tagIds =
           taggingApi && rawParams.filters.tags
             ? rawParams.filters.tags.map(
-                (tagName) => taggingApi.ui.getTagIdFromName(tagName) ?? UNKNOWN_TAG_ID
+                (tagName) => taggingApi.ui.getTagIdFromName(tagName.toLowerCase()) ?? UNKNOWN_TAG_ID
               )
             : undefined;
         const searchParams: GlobalSearchFindParams = {
