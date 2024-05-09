@@ -727,7 +727,7 @@ interface EmbeddableState extends State<Embeddable> {
 const foo = useSelector<EmbeddableState>((state) => state.foo);
 ```
 
-## Documenation and examples
+## Documentation and examples
 
-Embeddable documenation and examples are bundled with Kibana and accessable by running `yarn start --run-examples`.
+Embeddable documentation and examples are bundled with Kibana and accessable by running `yarn start --run-examples`.
 Navigate to `http://localhost:5601/app/embeddablesApp`.
