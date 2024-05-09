@@ -109,7 +109,9 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({
     <EuiModal
       onClose={() => {
         onClose();
-        anchorElement?.focus();
+        setTimeout(() => {
+          anchorElement?.focus();
+        }, 1);
       }}
       style={{ ...(modalWidth ? { width: modalWidth } : {}) }}
       maxWidth={true}

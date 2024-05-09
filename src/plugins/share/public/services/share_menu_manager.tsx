@@ -55,11 +55,6 @@ export class ShareMenuManager {
     };
   }
 
-  // private onClose = () => {
-  //   ReactDOM.unmountComponentAtNode(this.container);
-  //   this.isOpen = false;
-  // };
-
   private toggleShareContextMenu({
     anchorElement,
     allowEmbed,
@@ -98,7 +93,6 @@ export class ShareMenuManager {
   }) {
     if (this.isOpen) {
       onClose();
-      anchorElement.focus();
       return;
     }
 
