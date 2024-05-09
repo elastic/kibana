@@ -15,12 +15,18 @@ import { getSloAlertsTableConfiguration } from './slo/get_slo_alerts_table_confi
 export const registerAlertsTableConfiguration = (
   alertTableConfigRegistry: AlertTableConfigRegistry,
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry,
-  config: ConfigSchema
+  config: ConfigSchema,
+  dataViews?,
+  http?,
+  notifications?
 ) => {
   // Alert page
   const alertsPageAlertsTableConfig = getAlertsPageTableConfiguration(
     observabilityRuleTypeRegistry,
-    config
+    config,
+    dataViews,
+    http,
+    notifications
   );
   alertTableConfigRegistry.register(alertsPageAlertsTableConfig);
 

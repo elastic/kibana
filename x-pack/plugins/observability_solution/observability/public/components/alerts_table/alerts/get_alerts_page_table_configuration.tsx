@@ -12,7 +12,12 @@ import {
   AlertsTableConfigurationRegistry,
   RenderCustomActionsRowArgs,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { casesFeatureId, observabilityFeatureId } from '../../../../common';
+import { getUsePersistentControls } from '@kbn/alerts-ui-shared/src/grouped_alerts_table/hooks/use_persistent_controls';
+import {
+  casesFeatureId,
+  observabilityAlertFeatureIds,
+  observabilityFeatureId,
+} from '../../../../common';
 import { AlertActions } from '../../../pages/alerts/components/alert_actions';
 import { useGetAlertFlyoutComponents } from '../../alerts_flyout/use_get_alert_flyout_components';
 import type { ObservabilityRuleTypeRegistry } from '../../../rules/create_observability_rule_type_registry';
@@ -22,7 +27,10 @@ import { getColumns } from '../common/get_columns';
 
 export const getAlertsPageTableConfiguration = (
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry,
-  config: ConfigSchema
+  config: ConfigSchema,
+  dataViews?,
+  http?,
+  notifications?
 ): AlertsTableConfigurationRegistry => {
   const renderCustomActionsRow = (props: RenderCustomActionsRowArgs) => {
     return (
@@ -53,6 +61,13 @@ export const getAlertsPageTableConfiguration = (
       return { header, body, footer };
     },
     ruleTypeIds: observabilityRuleTypeRegistry.list(),
+    usePersistentControls: getUsePersistentControls({
+      groupingId: observabilityFeatureId,
+      featureIds: observabilityAlertFeatureIds,
+      dataViews,
+      http,
+      notifications,
+    }),
     showInspectButton: true,
   };
 };

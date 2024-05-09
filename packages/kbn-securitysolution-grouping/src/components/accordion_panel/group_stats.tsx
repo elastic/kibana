@@ -121,7 +121,7 @@ const GroupStatsComponent = <T,>({
       alignItems="center"
     >
       {statsComponent}
-      {takeActionMenu}
+      {!!takeActionItems?.length && takeActionMenu}
     </EuiFlexGroup>
   );
 };

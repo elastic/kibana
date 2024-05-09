@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { BrushEndListener, XYBrushEvent } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { BoolQuery } from '@kbn/es-query';
+import { BoolQuery, Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
-import { AlertConsumers } from '@kbn/rule-data-utils';
+// import { AlertConsumers } from '@kbn/rule-data-utils';
+import { GroupedAlertsTable } from '@kbn/alerts-ui-shared/src/grouped_alerts_table/components/alerts_grouping';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 
-import { rulesLocatorID } from '../../../common';
+import { AlertConsumers } from '@kbn/rule-data-utils';
+import { observabilityFeatureId, rulesLocatorID } from '../../../common';
 import { RulesParams } from '../../locators/rules';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -36,6 +38,7 @@ import { observabilityAlertFeatureIds } from '../../../common/constants';
 import { ALERTS_URL_STORAGE_KEY } from '../../../common/constants';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { useGetAvailableRulesWithDescriptions } from '../../hooks/use_get_available_rules_with_descriptions';
+import { buildEsQuery } from '../../utils/build_es_query';
 
 const ALERTS_SEARCH_BAR_ID = 'alerts-search-bar-o11y';
 const ALERTS_PER_PAGE = 50;
@@ -48,13 +51,10 @@ function InternalAlertsPage() {
   const kibanaServices = useKibana().services;
   const {
     charts,
-    data: {
-      query: {
-        timefilter: { timefilter: timeFilterService },
-      },
-    },
+    data,
     http,
-    notifications: { toasts },
+    notifications,
+    dataViews,
     observabilityAIAssistant,
     share: {
       url: { locators },
@@ -66,7 +66,14 @@ function InternalAlertsPage() {
       getAlertSummaryWidget: AlertSummaryWidget,
     },
     uiSettings,
+    storage,
   } = kibanaServices;
+  const { toasts } = notifications;
+  const {
+    query: {
+      timefilter: { timefilter: timeFilterService },
+    },
+  } = data;
   const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
   const alertSearchBarStateProps = useAlertSearchBarStateContainer(ALERTS_URL_STORAGE_KEY, {
     replace: false,
@@ -197,6 +204,27 @@ function InternalAlertsPage() {
 
   const manageRulesHref = http.basePath.prepend('/app/observability/alerts/rules');
 
+  const renderAlertTable = useCallback(
+    (groupingFilters: Filter[]) => {
+      const query = buildEsQuery({
+        filters: groupingFilters,
+      });
+      return (
+        <AlertsStateTable
+          id={observabilityFeatureId}
+          featureIds={observabilityAlertFeatureIds}
+          configurationId={AlertConsumers.OBSERVABILITY}
+          query={query}
+          showAlertStatusWithFlapping
+          pageSize={ALERTS_PER_PAGE}
+          cellContext={{ observabilityRuleTypeRegistry }}
+          alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
+        />
+      );
+    },
+    [AlertsStateTable, alertsTableConfigurationRegistry, observabilityRuleTypeRegistry]
+  );
+
   return (
     <Provider value={alertSearchBarStateContainer}>
       <ObservabilityPageTemplate
@@ -241,15 +269,29 @@ function InternalAlertsPage() {
           </EuiFlexItem>
           <EuiFlexItem>
             {esQuery && (
-              <AlertsStateTable
-                alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
-                configurationId={AlertConsumers.OBSERVABILITY}
-                id={ALERTS_TABLE_ID}
+              <GroupedAlertsTable
+                // currentAlertStatusFilterValue={statusFilter}
                 featureIds={observabilityAlertFeatureIds}
-                query={esQuery}
-                showAlertStatusWithFlapping
-                pageSize={ALERTS_PER_PAGE}
-                cellContext={{ observabilityRuleTypeRegistry }}
+                defaultFilters={[]}
+                from={alertSearchBarStateProps.rangeFrom}
+                globalFilters={alertSearchBarStateProps.filters}
+                globalQuery={{ query: alertSearchBarStateProps.kuery, language: 'kql' }}
+                hasIndexMaintenance={false}
+                hasIndexWrite={false}
+                loading={false}
+                renderChildComponent={renderAlertTable}
+                // runtimeMappings={runtimeMappings}
+                // signalIndexName={signalIndexName}
+                tableId={observabilityFeatureId}
+                to={alertSearchBarStateProps.rangeTo}
+                services={{
+                  uiSettings,
+                  storage,
+                  notifications,
+                  dataViews,
+                  http,
+                  data,
+                }}
               />
             )}
           </EuiFlexItem>
