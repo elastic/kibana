@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { defineValidPermissionRoutes } from './check_permissions';
 import { defineCreateApiKeyRoutes } from './create';
 import { defineEnabledApiKeysRoutes } from './enabled';
 import { defineGetApiKeysRoutes } from './get';
@@ -22,7 +21,6 @@ export type {
   UpdateRestAPIKeyWithKibanaPrivilegesParams,
 } from './update';
 export type { GetAPIKeysResult } from './get';
-export type { ValidPermissionsResult } from './check_permissions';
 
 export function defineApiKeysRoutes(params: RouteDefinitionParams) {
   defineEnabledApiKeysRoutes(params);
@@ -31,5 +29,4 @@ export function defineApiKeysRoutes(params: RouteDefinitionParams) {
   defineCreateApiKeyRoutes(params);
   defineUpdateApiKeyRoutes(params);
   defineInvalidateApiKeysRoutes(params);
-  defineValidPermissionRoutes(params);
 }

@@ -69,7 +69,7 @@ export interface APIKeys {
    */
   invalidateAsInternalUser(params: InvalidateAPIKeysParams): Promise<InvalidateAPIKeyResult | null>;
 
-  checkPermissions(request: KibanaRequest): Promise<boolean>;
+  checkPermissions(): Promise<boolean>;
 }
 
 export type CreateAPIKeyParams =

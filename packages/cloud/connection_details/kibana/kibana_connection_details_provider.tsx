@@ -69,13 +69,11 @@ const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
           },
         };
       },
-      hasPermission: async ({ request }) => {
-        return once(
-          async () => await start.plugins?.security?.authc.apiKeys.checkPermissions(request)
-        );
-      },
-      ...options?.apiKeys,
+      hasPermission: once(
+        async () => (await start.plugins?.security?.authc.apiKeys.checkPermissions()) ?? false
+      ),
     },
+    ...options?.apiKeys,
   };
 
   return result;
