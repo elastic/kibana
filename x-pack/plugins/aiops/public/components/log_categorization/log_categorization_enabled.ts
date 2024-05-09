@@ -15,6 +15,6 @@ export function getPatternAnalysisAvailable(licensing: LicensingPluginStart) {
   return async (dataView: DataView) => {
     const hasTextFields = dataView.fields.some((f) => f.esTypes?.includes(ES_FIELD_TYPES.TEXT));
     const isPlatinum = (await lic).hasAtLeast('platinum');
-    return isPlatinum && hasTextFields;
+    return isPlatinum && hasTextFields && dataView.isTimeBased();
   };
 }

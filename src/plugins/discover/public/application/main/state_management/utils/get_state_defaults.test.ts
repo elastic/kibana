@@ -91,14 +91,25 @@ describe('getStateDefaults', () => {
     });
     expect(actualForUndefinedViewMode.viewMode).toBeUndefined();
 
-    const actualForTextBasedWithInvalidViewMode = getStateDefaults({
+    const actualForTextBasedWithInvalidAggLevelViewMode = getStateDefaults({
       services: discoverServiceMock,
       savedSearch: {
         ...savedSearchMockWithESQL,
         viewMode: VIEW_MODE.AGGREGATED_LEVEL,
       },
     });
-    expect(actualForTextBasedWithInvalidViewMode.viewMode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
+    expect(actualForTextBasedWithInvalidAggLevelViewMode.viewMode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
+
+    const actualForTextBasedWithInvalidPatternLevelViewMode = getStateDefaults({
+      services: discoverServiceMock,
+      savedSearch: {
+        ...savedSearchMockWithESQL,
+        viewMode: VIEW_MODE.PATTERN_LEVEL,
+      },
+    });
+    expect(actualForTextBasedWithInvalidPatternLevelViewMode.viewMode).toBe(
+      VIEW_MODE.DOCUMENT_LEVEL
+    );
 
     const actualForTextBasedWithValidViewMode = getStateDefaults({
       services: discoverServiceMock,
@@ -110,15 +121,27 @@ describe('getStateDefaults', () => {
     expect(actualForTextBasedWithValidViewMode.viewMode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
     expect(actualForTextBasedWithValidViewMode.index).toBe(undefined);
 
-    const actualForWithValidViewMode = getStateDefaults({
+    const actualForWithValidAggLevelViewMode = getStateDefaults({
       services: discoverServiceMock,
       savedSearch: {
         ...savedSearchMock,
         viewMode: VIEW_MODE.AGGREGATED_LEVEL,
       },
     });
-    expect(actualForWithValidViewMode.viewMode).toBe(VIEW_MODE.AGGREGATED_LEVEL);
-    expect(actualForWithValidViewMode.index).toBe(
+    expect(actualForWithValidAggLevelViewMode.viewMode).toBe(VIEW_MODE.AGGREGATED_LEVEL);
+    expect(actualForWithValidAggLevelViewMode.index).toBe(
+      savedSearchMock.searchSource.getField('index')?.id
+    );
+
+    const actualForWithValidPatternLevelViewMode = getStateDefaults({
+      services: discoverServiceMock,
+      savedSearch: {
+        ...savedSearchMock,
+        viewMode: VIEW_MODE.PATTERN_LEVEL,
+      },
+    });
+    expect(actualForWithValidPatternLevelViewMode.viewMode).toBe(VIEW_MODE.PATTERN_LEVEL);
+    expect(actualForWithValidPatternLevelViewMode.index).toBe(
       savedSearchMock.searchSource.getField('index')?.id
     );
   });

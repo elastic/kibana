@@ -31,6 +31,13 @@ describe('getValidViewMode', () => {
         isTextBasedQueryMode: false,
       })
     ).toBe(VIEW_MODE.AGGREGATED_LEVEL);
+
+    expect(
+      getValidViewMode({
+        viewMode: VIEW_MODE.PATTERN_LEVEL,
+        isTextBasedQueryMode: false,
+      })
+    ).toBe(VIEW_MODE.PATTERN_LEVEL);
   });
 
   test('should work correctly for text-based mode', () => {
@@ -51,6 +58,13 @@ describe('getValidViewMode', () => {
     expect(
       getValidViewMode({
         viewMode: VIEW_MODE.AGGREGATED_LEVEL,
+        isTextBasedQueryMode: true,
+      })
+    ).toBe(VIEW_MODE.DOCUMENT_LEVEL);
+
+    expect(
+      getValidViewMode({
+        viewMode: VIEW_MODE.PATTERN_LEVEL,
         isTextBasedQueryMode: true,
       })
     ).toBe(VIEW_MODE.DOCUMENT_LEVEL);
