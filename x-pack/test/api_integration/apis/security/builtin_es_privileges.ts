@@ -24,7 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
             const sampleOfExpectedIndexPrivileges = ['create', 'index', 'delete'];
 
             const payload = response.body;
-            expect(Object.keys(payload).sort()).to.eql(['cluster', 'index']);
+            expect(Object.keys(payload).sort()).to.eql(['cluster', 'index', 'remote_cluster']);
 
             sampleOfExpectedClusterPrivileges.forEach((privilege) =>
               expect(payload.cluster).to.contain(privilege)

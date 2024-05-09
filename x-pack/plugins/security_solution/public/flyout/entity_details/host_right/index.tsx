@@ -9,6 +9,10 @@ import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
+import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
+import { RISK_INPUTS_TAB_QUERY_ID } from '../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
+import type { Refetch } from '../../../common/types';
+import { useCalculateEntityRiskScore } from '../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { hostToCriteria } from '../../../common/components/ml/criteria/host_to_criteria';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
@@ -68,6 +72,18 @@ export const HostPanel = ({ contextID, scopeId, hostName, isDraggable }: HostPan
   const hostRiskData = hostRisk && hostRisk.length > 0 ? hostRisk[0] : undefined;
   const isRiskScoreExist = !!hostRiskData?.host.risk;
 
+  const refetchRiskInputsTab = useRefetchQueryById(RISK_INPUTS_TAB_QUERY_ID);
+  const refetchRiskScore = useCallback(() => {
+    refetch();
+    (refetchRiskInputsTab as Refetch | null)?.();
+  }, [refetch, refetchRiskInputsTab]);
+
+  const { isLoading: recalculatingScore, calculateEntityRiskScore } = useCalculateEntityRiskScore(
+    RiskScoreEntity.host,
+    hostName,
+    { onSuccess: refetchRiskScore }
+  );
+
   useQueryInspector({
     deleteQuery,
     inspect: inspectRiskScore,
@@ -96,9 +112,9 @@ export const HostPanel = ({ contextID, scopeId, hostName, isDraggable }: HostPan
   );
 
   const openDefaultPanel = useCallback(() => openTabPanel(), [openTabPanel]);
-  const observedHost = useObservedHost(hostName);
+  const observedHost = useObservedHost(hostName, scopeId);
 
-  if (riskScoreState.loading || observedHost.isLoading) {
+  if (observedHost.isLoading) {
     return <FlyoutLoading />;
   }
 
@@ -134,6 +150,8 @@ export const HostPanel = ({ contextID, scopeId, hostName, isDraggable }: HostPan
               scopeId={scopeId}
               isDraggable={!!isDraggable}
               openDetailsPanel={openTabPanel}
+              recalculatingScore={recalculatingScore}
+              onAssetCriticalityChange={calculateEntityRiskScore}
             />
           </>
         );

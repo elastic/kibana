@@ -14,8 +14,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlCommonPage = getPageObject('svlCommonPage');
 
   describe('default dataView', function () {
-    // Error: expected testSubject(kbnOverviewElasticsearchGettingStarted) to exist
-    this.tags(['failsOnMKI']);
     before(async () => {
       await svlCommonPage.login();
       await svlSearchNavigation.navigateToLandingPage();

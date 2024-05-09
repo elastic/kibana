@@ -532,6 +532,7 @@ examples/locator_examples @elastic/appex-sharedux
 examples/locator_explorer @elastic/appex-sharedux
 packages/kbn-logging @elastic/kibana-core
 packages/kbn-logging-mocks @elastic/kibana-core
+x-pack/plugins/observability_solution/logs_data_access @elastic/obs-ux-logs-team
 x-pack/plugins/observability_solution/logs_explorer @elastic/obs-ux-logs-team
 x-pack/plugins/observability_solution/logs_shared @elastic/obs-ux-logs-team
 x-pack/plugins/logstash @elastic/logstash
@@ -1028,10 +1029,9 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 
 ### Observability Plugins
 
-# Observability robots
-/.github/workflows/deploy-my-kibana.yml @elastic/observablt-robots
-/.github/workflows/undeploy-my-kibana.yml @elastic/observablt-robots
-/.github/workflows/oblt-github-commands @elastic/observablt-robots
+# Observability AI Assistant
+x-pack/test/observability_ai_assistant_api_integration @elastic/obs-ai-assistant
+x-pack/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
 
 # Infra Monitoring
 ## This plugin mostly contains the codebase for the infra services, but also includes some code for the Logs UI app.
@@ -1432,6 +1432,7 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/test/security_solution_cypress/cypress/tasks/hosts @elastic/security-threat-hunting-explore
 /x-pack/test/security_solution_cypress/cypress/tasks/network @elastic/security-threat-hunting-explore
 
+/x-pack/plugins/security_solution/public/app/actions @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/guided_onboarding_tour @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/charts @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/detections/components/alerts_table/grouping_settings @elastic/security-threat-hunting-explore
@@ -1685,6 +1686,11 @@ x-pack/plugins/fleet/server/saved_objects/index.ts @elastic/fleet @elastic/kiban
 x-pack/plugins/observability_solution/synthetics/server/saved_objects/saved_objects.ts @elastic/obs-ux-infra_services-team @elastic/kibana-security
 x-pack/plugins/observability_solution/synthetics/server/saved_objects/synthetics_monitor.ts @elastic/obs-ux-infra_services-team @elastic/kibana-security
 x-pack/plugins/observability_solution/synthetics/server/saved_objects/synthetics_param.ts @elastic/obs-ux-infra_services-team @elastic/kibana-security
+
+# Specialised GitHub workflows for the Observability robots
+/.github/workflows/deploy-my-kibana.yml   @elastic/observablt-robots @elastic/kibana-operations
+/.github/workflows/oblt-github-commands   @elastic/observablt-robots @elastic/kibana-operations
+/.github/workflows/undeploy-my-kibana.yml @elastic/observablt-robots @elastic/kibana-operations
 
 ####
 ## These rules are always last so they take ultimate priority over everything else
