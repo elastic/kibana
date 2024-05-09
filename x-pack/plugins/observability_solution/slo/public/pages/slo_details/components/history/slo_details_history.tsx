@@ -4,23 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo, useState } from 'react';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSuperDatePicker,
-  OnTimeChangeProps,
-  OnRefreshProps,
   EuiSpacer,
+  EuiSuperDatePicker,
+  OnRefreshProps,
+  OnTimeChangeProps,
 } from '@elastic/eui';
 import DateMath from '@kbn/datemath';
-import { useKibana } from '../../../../utils/kibana_react';
-import { HistoricalDataCharts } from '../historical_data_charts';
-import { useBurnRateOptions } from '../../hooks/use_burn_rate_options';
-import { SloTabId } from '../slo_details';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import React, { useCallback, useMemo, useState } from 'react';
 import { BurnRates } from '../../../../components/slo/burn_rate/burn_rates';
+import { useKibana } from '../../../../utils/kibana_react';
+import { useBurnRateOptions } from '../../hooks/use_burn_rate_options';
 import { EventsChartPanel } from '../events_chart_panel';
+import { HistoricalDataCharts } from '../historical_data_charts';
+import { SloTabId } from '../slo_details';
+
 export interface Props {
   slo: SLOWithSummaryResponse;
   isAutoRefreshing: boolean;
@@ -32,7 +33,7 @@ export function SLODetailsHistory({ slo, isAutoRefreshing, selectedTabId }: Prop
 
   const { burnRateOptions } = useBurnRateOptions(slo);
 
-  const [start, setStart] = useState('now-30d');
+  const [start, setStart] = useState(`now-${slo.timeWindow.duration}`);
   const [end, setEnd] = useState('now');
 
   const onTimeChange = (val: OnTimeChangeProps) => {
