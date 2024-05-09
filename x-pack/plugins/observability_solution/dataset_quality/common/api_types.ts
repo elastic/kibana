@@ -70,8 +70,9 @@ export const getIntegrationsResponseRt = rt.exact(
 
 export const degradedDocsRt = rt.type({
   dataset: rt.string,
-  percentage: rt.number,
   count: rt.number,
+  totalDocs: rt.number,
+  percentage: rt.number,
 });
 
 export type DegradedDocs = rt.TypeOf<typeof degradedDocsRt>;

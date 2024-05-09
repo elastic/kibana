@@ -38,7 +38,7 @@ export function DependenciesInventoryTable() {
             start,
             end,
             environment,
-            numBuckets: 20,
+            numBuckets: 8,
             offset: comparisonEnabled && isTimeComparison(offset) ? offset : undefined,
             kuery,
           },
