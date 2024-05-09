@@ -15,6 +15,7 @@ import {
   EuiEmptyPrompt,
   EuiBasicTable,
   EuiLink,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { i18n } from '@kbn/i18n';
@@ -121,39 +122,67 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
       {
         field: 'agents',
         name: i18n.translate('xpack.fleet.agentPolicyList.agentsColumnTitle', {
-          defaultMessage: 'Total agents',
+          defaultMessage: 'Unprivileged / Privileged',
         }),
         dataType: 'number',
         render: (agents: number, agentPolicy: AgentPolicy) => (
-          <LinkedAgentCount count={agents} agentPolicyId={agentPolicy.id} />
-        ),
-      },
-      {
-        field: 'unprivileged_agents',
-        name: i18n.translate('xpack.fleet.agentPolicyList.agentsColumnTitle', {
-          defaultMessage: 'Unprivileged agents',
-        }),
-        dataType: 'number',
-        render: (unprivilegedAgents: number, agentPolicy: AgentPolicy) => (
-          <LinkedAgentCount
-            count={unprivilegedAgents}
-            agentPolicyId={agentPolicy.id}
-            additionalKuery={`${AGENTS_PREFIX}.local_metadata.elastic.agent.unprivileged: true`}
-          />
-        ),
-      },
-      {
-        field: 'agents',
-        name: i18n.translate('xpack.fleet.agentPolicyList.agentsColumnTitle', {
-          defaultMessage: 'Privileged agents',
-        }),
-        dataType: 'number',
-        render: (agents: number, agentPolicy: AgentPolicy) => (
-          <LinkedAgentCount
-            count={agents - (agentPolicy.unprivileged_agents || 0)}
-            agentPolicyId={agentPolicy.id}
-            additionalKuery={`not ${AGENTS_PREFIX}.local_metadata.elastic.agent.unprivileged: true`}
-          />
+          <EuiFlexGroup direction="row" gutterSize="xs" justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={
+                  <FormattedMessage
+                    id="xpack.fleet.agentPolicyList.agentsColumn.unprivilegedAgentsTooltip"
+                    defaultMessage="Unprivileged agents"
+                  />
+                }
+              >
+                <LinkedAgentCount
+                  count={agentPolicy.unprivileged_agents || 0}
+                  agentPolicyId={agentPolicy.id}
+                  showAgentText={false}
+                  additionalKuery={`${AGENTS_PREFIX}.local_metadata.elastic.agent.unprivileged: true`}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>/</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={
+                  <FormattedMessage
+                    id="xpack.fleet.agentPolicyList.agentsColumn.privilegedAgentsTooltip"
+                    defaultMessage="Privileged agents"
+                  />
+                }
+              >
+                <LinkedAgentCount
+                  count={agents - (agentPolicy.unprivileged_agents || 0)}
+                  agentPolicyId={agentPolicy.id}
+                  showAgentText={false}
+                  additionalKuery={`not ${AGENTS_PREFIX}.local_metadata.elastic.agent.unprivileged: true`}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <span>
+                {'('}
+                <EuiToolTip
+                  content={
+                    <FormattedMessage
+                      id="xpack.fleet.agentPolicyList.agentsColumn.totalAgentsTooltip"
+                      defaultMessage="Total agents"
+                    />
+                  }
+                >
+                  <LinkedAgentCount
+                    count={agents}
+                    agentPolicyId={agentPolicy.id}
+                    showAgentText={false}
+                  />
+                </EuiToolTip>
+                {')'}
+              </span>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ),
       },
       {
@@ -170,7 +199,6 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         name: i18n.translate('xpack.fleet.agentPolicyList.actionsColumnTitle', {
           defaultMessage: 'Actions',
         }),
-        width: '70px',
         actions: [
           {
             render: (agentPolicy: AgentPolicy) => (
