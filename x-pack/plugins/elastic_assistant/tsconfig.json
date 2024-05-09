@@ -45,6 +45,8 @@
     "@kbn/ml-response-stream",
     "@kbn/data-plugin",
     "@kbn/i18n",
+    "@kbn/core-security-common",
+    "@kbn/core-saved-objects-api-server",
   ],
   "exclude": [
     "target/**/*",
