@@ -58,7 +58,7 @@ export interface IModalTabDeclaration<S = {}> extends EuiTabProps, ITabDeclarati
 export interface ITabbedModalInner extends Pick<ComponentProps<typeof EuiModal>, 'onClose'> {
   modalWidth?: number;
   modalTitle?: string;
-  anchorElement: HTMLElement;
+  anchorElement?: HTMLElement;
 }
 
 const TabbedModalInner: FC<ITabbedModalInner> = ({
@@ -109,7 +109,7 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({
     <EuiModal
       onClose={() => {
         onClose();
-        setTimeout(() => anchorElement.focus(), 1);
+        setTimeout(() => anchorElement?.focus(), 1);
       }}
       style={{ ...(modalWidth ? { width: modalWidth } : {}) }}
       maxWidth={true}
