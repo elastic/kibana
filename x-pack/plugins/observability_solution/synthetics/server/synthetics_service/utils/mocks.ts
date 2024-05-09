@@ -24,7 +24,7 @@ export const mockEncryptedSO = ({
       createPointInTimeFinderDecryptedAsInternalUser: jest
         .fn()
         .mockImplementation(({ perPage, type: soType }) => ({
-          close: jest.fn(),
+          close: jest.fn(async () => {}),
           find: jest.fn().mockReturnValue({
             async *[Symbol.asyncIterator]() {
               if (soType === syntheticsParamType) {

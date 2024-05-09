@@ -10,7 +10,6 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import type { DraggableStateSnapshot, DraggingStyle } from '@hello-pangea/dnd';
 
-import '../../mock/match_media';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { TestProviders } from '../../mock';
 import { mockDataProviders } from '../../../timelines/components/timeline/data_providers/mock/mock_data_providers';

@@ -79,7 +79,7 @@ export class Plugin implements PluginType {
 
     this.syntheticsService = new SyntheticsService(this.server);
 
-    this.syntheticsService.setup(plugins.taskManager);
+    this.syntheticsService.setup(plugins.taskManager).catch(() => {});
 
     this.syntheticsMonitorClient = new SyntheticsMonitorClient(this.syntheticsService, this.server);
 
@@ -112,7 +112,7 @@ export class Plugin implements PluginType {
 
     this.syntheticsService?.start(pluginsStart.taskManager);
 
-    this.telemetryEventsSender.start(pluginsStart.telemetry, coreStart);
+    this.telemetryEventsSender.start(pluginsStart.telemetry, coreStart).catch(() => {});
   }
 
   public stop() {}

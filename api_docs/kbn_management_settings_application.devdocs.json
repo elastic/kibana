@@ -95,7 +95,7 @@
           "\nKibana-specific Provider that maps dependencies to services."
         ],
         "signature": [
-          "({ children, ...dependencies }: React.PropsWithChildren<",
+          "({ children, ...dependencies }: React.PropsWithChildren<React.PropsWithChildren<",
           {
             "pluginId": "@kbn/management-settings-application",
             "scope": "common",
@@ -103,7 +103,7 @@
             "section": "def-common.SettingsApplicationKibanaDependencies",
             "text": "SettingsApplicationKibanaDependencies"
           },
-          ">) => JSX.Element"
+          ">>) => JSX.Element"
         ],
         "path": "packages/kbn-management/settings/application/services.tsx",
         "deprecated": false,
@@ -114,10 +114,10 @@
             "id": "def-common.SettingsApplicationKibanaProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  children,\n  ...dependencies\n}",
+            "label": "{ children, ...dependencies }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
+              "React.PropsWithChildren<React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/management-settings-application",
                 "scope": "common",
@@ -125,7 +125,7 @@
                 "section": "def-common.SettingsApplicationKibanaDependencies",
                 "text": "SettingsApplicationKibanaDependencies"
               },
-              ">"
+              ">>"
             ],
             "path": "packages/kbn-management/settings/application/services.tsx",
             "deprecated": false,
@@ -146,7 +146,7 @@
           "\nA Context Provider that provides services to the component and its dependencies."
         ],
         "signature": [
-          "({ children, ...services }: React.PropsWithChildren<",
+          "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
           {
             "pluginId": "@kbn/management-settings-application",
             "scope": "common",
@@ -154,7 +154,7 @@
             "section": "def-common.SettingsApplicationServices",
             "text": "SettingsApplicationServices"
           },
-          ">) => JSX.Element"
+          ">>) => JSX.Element"
         ],
         "path": "packages/kbn-management/settings/application/services.tsx",
         "deprecated": false,
@@ -168,7 +168,7 @@
             "label": "{\n  children,\n  ...services\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
+              "React.PropsWithChildren<React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/management-settings-application",
                 "scope": "common",
@@ -176,7 +176,7 @@
                 "section": "def-common.SettingsApplicationServices",
                 "text": "SettingsApplicationServices"
               },
-              ">"
+              ">>"
             ],
             "path": "packages/kbn-management/settings/application/services.tsx",
             "deprecated": false,

@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { coreMock } from '@kbn/core/public/mocks';
 import { toastsServiceMock } from '@kbn/core-notifications-browser-mocks/src/toasts_service.mock';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import {
@@ -57,7 +58,7 @@ describe('annotation group save action', () => {
         .prop('options') as React.ReactElement)!.props.onTagsSelected(myTags);
 
       // ignore the linter, you need this await statement
-      await wrapper.find(SavedObjectSaveModal).prop('onSave')({
+      wrapper.find(SavedObjectSaveModal).prop('onSave')({
         newTitle,
         newDescription,
         ...modalSaveArgs,
@@ -114,6 +115,7 @@ describe('annotation group save action', () => {
   });
 
   describe('save routine', () => {
+    const coreStart = coreMock.createStart();
     const layerId = 'mylayerid';
 
     const byValueLayer: XYByValueAnnotationLayerConfig = {
@@ -171,6 +173,7 @@ describe('annotation group save action', () => {
         },
         dataViews,
         goToAnnotationLibrary: () => Promise.resolve(),
+        startServices: coreStart,
       };
     };
 

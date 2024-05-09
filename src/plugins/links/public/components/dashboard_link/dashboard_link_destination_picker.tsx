@@ -20,7 +20,7 @@ import {
   EuiFlexGroup,
   EuiComboBoxOptionOption,
 } from '@elastic/eui';
-import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
+import type { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import { DashboardItem } from '../../embeddable/types';
 import { DashboardLinkStrings } from './dashboard_link_strings';

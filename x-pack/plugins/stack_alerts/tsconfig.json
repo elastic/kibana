@@ -50,6 +50,7 @@
     "@kbn/code-editor",
     "@kbn/esql-utils",
     "@kbn/data-view-utils",
+    "@kbn/search-types",
   ],
   "exclude": [
     "target/**/*",

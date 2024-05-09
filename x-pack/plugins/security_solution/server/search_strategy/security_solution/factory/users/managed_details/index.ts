@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/search-types';
 
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getOr } from 'lodash/fp';

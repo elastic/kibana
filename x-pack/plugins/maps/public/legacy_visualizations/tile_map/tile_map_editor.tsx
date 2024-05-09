@@ -14,7 +14,7 @@ import { extractLayerDescriptorParams } from './utils';
 import { TileMapVisParams } from './types';
 import { title } from './tile_map_vis_type';
 
-function TileMapEditor(props: VisEditorOptionsProps) {
+export function TileMapEditor(props: VisEditorOptionsProps) {
   const onClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
@@ -32,7 +32,3 @@ function TileMapEditor(props: VisEditorOptionsProps) {
 
   return <ViewInMaps onClick={onClick} visualizationLabel={title} />;
 }
-
-// default export required for React.Lazy
-// eslint-disable-next-line import/no-default-export
-export default TileMapEditor;

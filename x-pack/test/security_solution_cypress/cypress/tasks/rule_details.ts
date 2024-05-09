@@ -34,6 +34,8 @@ import {
   EXCEPTIONS_TAB_EXPIRED_FILTER,
   EXCEPTIONS_TAB_ACTIVE_FILTER,
   RULE_NAME_HEADER,
+  INVESTIGATION_FIELDS_DETAILS,
+  ABOUT_DETAILS,
 } from '../screens/rule_details';
 import { RuleDetailsTabs, ruleDetailsUrl } from '../urls/rule_details';
 import {
@@ -176,6 +178,12 @@ export const assertDetailsNotExist = (title: string | RegExp) =>
 export const hasIndexPatterns = (indexPatterns: string) => {
   cy.get(DEFINITION_DETAILS).within(() => {
     getDetails(INDEX_PATTERNS_DETAILS).should('have.text', indexPatterns);
+  });
+};
+
+export const hasInvestigationFields = (fields: string) => {
+  cy.get(ABOUT_DETAILS).within(() => {
+    getDetails(INVESTIGATION_FIELDS_DETAILS).should('have.text', fields);
   });
 };
 

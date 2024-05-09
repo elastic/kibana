@@ -20,14 +20,14 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { type MlPluginSetup } from '@kbn/ml-plugin/server';
-import { Tool } from '@langchain/core/tools';
+import { DynamicStructuredTool, Tool } from '@langchain/core/tools';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { RetrievalQAChain } from 'langchain/chains';
 import { ElasticsearchClient } from '@kbn/core/server';
 import {
-  AlertsInsightsPostRequestBody,
+  AttackDiscoveryPostRequestBody,
   AssistantFeatures,
   ExecuteConnectorRequestBody,
   Replacements,
@@ -202,7 +202,7 @@ export interface AssistantTool {
   description: string;
   sourceRegister: string;
   isSupported: (params: AssistantToolParams) => boolean;
-  getTool: (params: AssistantToolParams) => Tool | null;
+  getTool: (params: AssistantToolParams) => Tool | DynamicStructuredTool | null;
 }
 
 export interface AssistantToolParams {
@@ -218,7 +218,7 @@ export interface AssistantToolParams {
   request: KibanaRequest<
     unknown,
     unknown,
-    ExecuteConnectorRequestBody | AlertsInsightsPostRequestBody
+    ExecuteConnectorRequestBody | AttackDiscoveryPostRequestBody
   >;
   size?: number;
 }

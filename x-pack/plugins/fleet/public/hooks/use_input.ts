@@ -128,6 +128,7 @@ export function useSecretInput(
       error: errors,
       isInvalid,
       initialValue,
+      disabled,
       clear: () => {
         setValue('');
       },

@@ -38,16 +38,6 @@ jest.mock('@kbn/code-editor', () => {
   };
 });
 
-window.matchMedia = jest.fn().mockImplementation((query) => {
-  return {
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: jest.fn(),
-    removeListener: jest.fn(),
-  };
-});
-
 const mockServices = {
   settings: {
     client: {

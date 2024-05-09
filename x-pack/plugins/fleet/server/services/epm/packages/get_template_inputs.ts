@@ -39,6 +39,7 @@ export const templatePackagePolicyToFullInputStreams = (
     const fullInputStream = {
       // @ts-ignore-next-line the following id is actually one level above the one in fullInputStream, but the linter thinks it gets overwritten
       id: input.policy_template ? `${input.type}-${input.policy_template}` : `${input.type}`,
+      type: input.type,
       ...getFullInputStreams(input, true),
     };
 

@@ -10,6 +10,9 @@ import { euiDarkVars as darkTheme, euiLightVars as lightTheme } from '@kbn/ui-th
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
+import { FIRST_RECORD_PAGINATION } from '../../../entity_analytics/common';
+import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { buildUserNamesFilter, RiskScoreEntity } from '../../../../common/search_strategy';
 import type { DescriptionList } from '../../../../common/utility_types';
@@ -61,6 +64,8 @@ const UserRiskOverviewWrapper = styled(EuiFlexGroup)`
   width: ${({ $width }: { $width: string }) => $width};
 `;
 
+export const USER_OVERVIEW_RISK_SCORE_QUERY_ID = 'riskInputsTabQuery';
+
 export const UserOverview = React.memo<UserSummaryProps>(
   ({
     anomaliesData,
@@ -86,11 +91,29 @@ export const UserOverview = React.memo<UserSummaryProps>(
       () => (userName ? buildUserNamesFilter([userName]) : undefined),
       [userName]
     );
+    const { deleteQuery, setQuery } = useGlobalTime();
 
-    const { data: userRisk, isAuthorized } = useRiskScore({
+    const {
+      data: userRisk,
+      isAuthorized,
+      inspect: inspectRiskScore,
+      loading: loadingRiskScore,
+      refetch: refetchRiskScore,
+    } = useRiskScore({
       filterQuery,
       skip: userName == null,
       riskEntity: RiskScoreEntity.user,
+      onlyLatest: false,
+      pagination: FIRST_RECORD_PAGINATION,
+    });
+
+    useQueryInspector({
+      deleteQuery,
+      inspect: inspectRiskScore,
+      loading: loadingRiskScore,
+      queryId: USER_OVERVIEW_RISK_SCORE_QUERY_ID,
+      refetch: refetchRiskScore,
+      setQuery,
     });
 
     const getDefaultRenderer = useCallback(

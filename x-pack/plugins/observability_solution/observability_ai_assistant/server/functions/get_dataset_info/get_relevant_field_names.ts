@@ -5,13 +5,13 @@
  * 2.0.
  */
 import datemath from '@elastic/datemath';
-import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { castArray, chunk, groupBy, uniq } from 'lodash';
-import { lastValueFrom, Observable } from 'rxjs';
-import type { ObservabilityAIAssistantClient } from '../../service/client';
-import { type ChatCompletionChunkEvent, type Message, MessageRole } from '../../../common';
+import { lastValueFrom } from 'rxjs';
+import { MessageRole, type Message } from '../../../common';
 import { concatenateChatCompletionChunks } from '../../../common/utils/concatenate_chat_completion_chunks';
+import { FunctionCallChatFunction } from '../../service/types';
 
 export async function getRelevantFieldNames({
   index,
@@ -22,6 +22,7 @@ export async function getRelevantFieldNames({
   savedObjectsClient,
   chat,
   messages,
+  signal,
 }: {
   index: string | string[];
   start?: string;
@@ -30,13 +31,8 @@ export async function getRelevantFieldNames({
   esClient: ElasticsearchClient;
   savedObjectsClient: SavedObjectsClientContract;
   messages: Message[];
-  chat: (
-    name: string,
-    {}: Pick<
-      Parameters<ObservabilityAIAssistantClient['chat']>[1],
-      'functionCall' | 'functions' | 'messages'
-    >
-  ) => Promise<Observable<ChatCompletionChunkEvent>>;
+  chat: FunctionCallChatFunction;
+  signal: AbortSignal;
 }): Promise<{ fields: string[] }> {
   const dataViewsService = await dataViews.dataViewsServiceFactory(savedObjectsClient, esClient);
 
@@ -79,6 +75,7 @@ export async function getRelevantFieldNames({
     chunk(fieldNames, 500).map(async (fieldsInChunk) => {
       const chunkResponse$ = (
         await chat('get_relevent_dataset_names', {
+          signal,
           messages: [
             {
               '@timestamp': new Date().toISOString(),

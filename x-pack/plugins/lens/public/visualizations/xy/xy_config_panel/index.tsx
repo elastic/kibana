@@ -9,16 +9,17 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Position, ScaleType } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
+import { AxisExtentConfig, YScaleType } from '@kbn/expression-xy-plugin/common';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { TooltipWrapper } from '@kbn/visualization-utils';
+import { XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import type { LegendSettingsPopoverProps } from '../../../shared_components/legend/legend_settings_popover';
 import type { VisualizationToolbarProps, FramePublicAPI } from '../../../types';
 import { State, XYState, AxesSettingsConfig } from '../types';
 import { isHorizontalChart } from '../state_helpers';
 import { hasNumericHistogramDimension, LegendSettingsPopover } from '../../../shared_components';
 import { AxisSettingsPopover } from './axis_settings_popover';
-import { getAxesConfiguration, getXDomain, GroupsConfiguration } from '../axes_configuration';
+import { getAxesConfiguration, getXDomain, AxisGroupConfiguration } from '../axes_configuration';
 import { VisualOptionsPopover } from './visual_options_popover';
 import { getScaleType } from '../to_expression';
 import { getDefaultVisualValuesForLayer } from '../../../shared_components/datasource_default_values';
@@ -68,16 +69,17 @@ const legendOptions: Array<{
 
 const getDataBounds = function (
   activeData: FramePublicAPI['activeData'],
-  axes: GroupsConfiguration
+  axes: AxisGroupConfiguration[]
 ) {
   const groups: Partial<Record<string, { min: number; max: number }>> = {};
   axes.forEach((axis) => {
-    let min = Number.MAX_VALUE;
-    let max = Number.MIN_VALUE;
+    let min = Number.MAX_SAFE_INTEGER;
+    let max = -Number.MAX_SAFE_INTEGER;
     axis.series.forEach((series) => {
       activeData?.[series.layer]?.rows.forEach((row) => {
         const value = row[series.accessor];
-        if (!Number.isNaN(value)) {
+        // TODO: add tests for null value
+        if (value !== null && Number.isFinite(value)) {
           if (value < min) {
             min = value;
           }
@@ -87,7 +89,7 @@ const getDataBounds = function (
         }
       });
     });
-    if (min !== Number.MAX_VALUE && max !== Number.MIN_VALUE) {
+    if (min !== Number.MAX_SAFE_INTEGER && max !== -Number.MAX_SAFE_INTEGER) {
       groups[axis.groupId] = {
         min: Math.round((min + Number.EPSILON) * 100) / 100,
         max: Math.round((max + Number.EPSILON) * 100) / 100,
@@ -98,7 +100,7 @@ const getDataBounds = function (
   return groups;
 };
 
-function hasPercentageAxis(axisGroups: GroupsConfiguration, groupId: string, state: XYState) {
+function hasPercentageAxis(axisGroups: AxisGroupConfiguration[], groupId: string, state: XYState) {
   return Boolean(
     axisGroups
       .find((group) => group.groupId === groupId)
@@ -121,7 +123,6 @@ export const XyToolbar = memo(function XyToolbar(
   props: VisualizationToolbarProps<State> & { useLegacyTimeAxis?: boolean }
 ) {
   const { state, setState, frame, useLegacyTimeAxis } = props;
-
   const dataLayers = getDataLayers(state?.layers);
   const shouldRotate = state?.layers.length ? isHorizontalChart(state.layers) : false;
   const axisGroups = getAxesConfiguration(dataLayers, shouldRotate, frame.activeData);
@@ -259,24 +260,39 @@ export const XyToolbar = memo(function XyToolbar(
         return seriesType?.includes('bar') || seriesType?.includes('area');
       })
   );
-  const setLeftExtent = useCallback(
-    (extent: AxisExtentConfig | undefined) => {
+
+  const setScaleWithExtentFn = useCallback(
+    (extentKey: 'yLeftExtent' | 'yRightExtent', scaleKey: 'yLeftScale' | 'yRightScale') =>
+      (extent?: AxisExtentConfig, scale?: YScaleType) => {
+        setState({
+          ...state,
+          [extentKey]: extent,
+          [scaleKey]: scale,
+        });
+      },
+    [setState, state]
+  );
+
+  const setExtentFn = useCallback(
+    (extentKey: 'xExtent' | 'yLeftExtent' | 'yRightExtent') => (extent?: AxisExtentConfig) => {
       setState({
         ...state,
-        yLeftExtent: extent,
+        [extentKey]: extent,
       });
     },
     [setState, state]
   );
-  const setXExtent = useCallback(
-    (extent: AxisExtentConfig | undefined) => {
+
+  const setScaleFn = useCallback(
+    (scaleKey: 'yLeftScale' | 'yRightScale') => (scale?: YScaleType) => {
       setState({
         ...state,
-        xExtent: extent,
+        [scaleKey]: scale,
       });
     },
     [setState, state]
   );
+
   const hasBarOrAreaOnRightAxis = Boolean(
     axisGroups
       .find((group) => group.groupId === 'right')
@@ -284,15 +300,6 @@ export const XyToolbar = memo(function XyToolbar(
         const seriesType = dataLayers.find((l) => l.layerId === series.layer)?.seriesType;
         return seriesType?.includes('bar') || seriesType?.includes('area');
       })
-  );
-  const setRightExtent = useCallback(
-    (extent: AxisExtentConfig | undefined) => {
-      setState({
-        ...state,
-        yRightExtent: extent,
-      });
-    },
-    [setState, state]
   );
 
   const filteredBarLayers = dataLayers.filter((layer) => layer.seriesType.includes('bar'));
@@ -428,12 +435,15 @@ export const XyToolbar = memo(function XyToolbar(
                 legend: { ...state.legend, verticalAlignment, horizontalAlignment },
               });
             }}
-            renderValueInLegendSwitch={nonOrdinalXAxis}
-            valueInLegend={state?.valuesInLegend}
-            onValueInLegendChange={() => {
+            allowLegendStats={nonOrdinalXAxis}
+            legendStats={state?.legend.legendStats}
+            onLegendStatsChange={(checked) => {
               setState({
                 ...state,
-                valuesInLegend: !state.valuesInLegend,
+                legend: {
+                  ...state.legend,
+                  legendStats: checked ? [XYLegendValue.CurrentAndLastValue] : [],
+                },
               });
             }}
             legendSize={legendSize}
@@ -483,17 +493,13 @@ export const XyToolbar = memo(function XyToolbar(
               setOrientation={onLabelsOrientationChange}
               isAxisTitleVisible={axisTitlesVisibilitySettings.yLeft}
               extent={state?.yLeftExtent || { mode: 'full' }}
-              setExtent={setLeftExtent}
+              setExtent={setExtentFn('yLeftExtent')}
               hasBarOrAreaOnAxis={hasBarOrAreaOnLeftAxis}
               dataBounds={dataBounds.left}
               hasPercentageAxis={hasPercentageAxis(axisGroups, 'left', state)}
               scale={state?.yLeftScale}
-              setScale={(scale) => {
-                setState({
-                  ...state,
-                  yLeftScale: scale,
-                });
-              }}
+              setScale={setScaleFn('yLeftScale')}
+              setScaleWithExtent={setScaleWithExtentFn('yLeftExtent', 'yLeftScale')}
             />
           </TooltipWrapper>
 
@@ -519,7 +525,7 @@ export const XyToolbar = memo(function XyToolbar(
               isTimeHistogramModeEnabled && !useLegacyTimeAxis && !shouldRotate
             }
             extent={hasNumberHistogram ? state?.xExtent || { mode: 'dataBounds' } : undefined}
-            setExtent={setXExtent}
+            setExtent={setExtentFn('xExtent')}
             dataBounds={xDataBounds}
           />
 
@@ -555,16 +561,12 @@ export const XyToolbar = memo(function XyToolbar(
               hasPercentageAxis={hasPercentageAxis(axisGroups, 'right', state)}
               isAxisTitleVisible={axisTitlesVisibilitySettings.yRight}
               extent={state?.yRightExtent || { mode: 'full' }}
-              setExtent={setRightExtent}
+              setExtent={setExtentFn('yRightExtent')}
               hasBarOrAreaOnAxis={hasBarOrAreaOnRightAxis}
               dataBounds={dataBounds.right}
               scale={state?.yRightScale}
-              setScale={(scale) => {
-                setState({
-                  ...state,
-                  yRightScale: scale,
-                });
-              }}
+              setScale={setScaleFn('yRightScale')}
+              setScaleWithExtent={setScaleWithExtentFn('yRightExtent', 'yRightScale')}
             />
           </TooltipWrapper>
         </EuiFlexGroup>

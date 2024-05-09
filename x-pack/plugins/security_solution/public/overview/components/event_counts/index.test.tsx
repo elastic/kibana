@@ -11,7 +11,6 @@ import React from 'react';
 import type { OverviewHostProps } from '../overview_host';
 import type { OverviewNetworkProps } from '../overview_network';
 import { mockIndexPattern, TestProviders } from '../../../common/mock';
-import '../../../common/mock/match_media';
 
 import { EventCounts } from '.';
 

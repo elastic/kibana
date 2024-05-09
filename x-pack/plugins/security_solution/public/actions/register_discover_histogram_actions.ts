@@ -7,19 +7,21 @@
 
 import { createFilterAction } from '@kbn/unified-search-plugin/public';
 import type { History } from 'history';
+import type { CoreSetup } from '@kbn/core/public';
 import type { SecurityAppStore } from '../common/store';
 import type { StartServices } from '../types';
 import { EsqlInTimelineTrigger, EsqlInTimelineAction } from './constants';
 
 const createDiscoverHistogramCustomFilterAction = (
-  store: SecurityAppStore,
-  history: History,
+  _store: SecurityAppStore,
+  _history: History,
+  coreSetup: CoreSetup,
   services: StartServices
 ) => {
   const histogramApplyFilter = createFilterAction(
     services.customDataService.query.filterManager,
     services.customDataService.query.timefilter.timefilter,
-    services.theme,
+    coreSetup,
     EsqlInTimelineAction.VIS_FILTER_ACTION,
     EsqlInTimelineAction.VIS_FILTER_ACTION
   );
@@ -29,8 +31,8 @@ const createDiscoverHistogramCustomFilterAction = (
 };
 
 const createDiscoverHistogramCustomTrigger = (
-  store: SecurityAppStore,
-  history: History,
+  _store: SecurityAppStore,
+  _history: History,
   services: StartServices
 ) => {
   services.uiActions.registerTrigger({
@@ -41,11 +43,17 @@ const createDiscoverHistogramCustomTrigger = (
 export const registerDiscoverHistogramActions = (
   store: SecurityAppStore,
   history: History,
+  coreSetup: CoreSetup,
   services: StartServices
 ) => {
   createDiscoverHistogramCustomTrigger(store, history, services);
 
-  const histogramApplyFilter = createDiscoverHistogramCustomFilterAction(store, history, services);
+  const histogramApplyFilter = createDiscoverHistogramCustomFilterAction(
+    store,
+    history,
+    coreSetup,
+    services
+  );
 
   services.uiActions.attachAction(EsqlInTimelineTrigger.HISTOGRAM_TRIGGER, histogramApplyFilter.id);
 };

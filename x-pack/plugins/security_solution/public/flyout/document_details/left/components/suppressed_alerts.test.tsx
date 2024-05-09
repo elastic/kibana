@@ -20,6 +20,13 @@ import {
 } from '../../../shared/components/test_ids';
 import { LeftPanelContext } from '../context';
 import { mockContextValue } from '../mocks/mock_context';
+import { isSuppressionRuleInGA } from '../../../../../common/detection_engine/utils';
+
+jest.mock('../../../../../common/detection_engine/utils', () => ({
+  isSuppressionRuleInGA: jest.fn().mockReturnValue(false),
+}));
+
+const isSuppressionRuleInGAMock = isSuppressionRuleInGA as jest.Mock;
 
 const mockDataAsNestedObject = {
   _id: 'testId',
@@ -77,5 +84,14 @@ describe('<SuppressedAlerts />', () => {
     expect(getByTestId(INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID)).toBeInTheDocument();
     expect(queryByTestId(TOGGLE_ICON)).not.toBeInTheDocument();
     expect(getByTestId(SUPPRESSED_ALERTS_SECTION_TECHNICAL_PREVIEW_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('should not render Technical Preview badge if rule type is in GA', () => {
+    isSuppressionRuleInGAMock.mockReturnValueOnce(true);
+    const { queryByTestId } = renderSuppressedAlerts(2);
+
+    expect(
+      queryByTestId(SUPPRESSED_ALERTS_SECTION_TECHNICAL_PREVIEW_TEST_ID)
+    ).not.toBeInTheDocument();
   });
 });

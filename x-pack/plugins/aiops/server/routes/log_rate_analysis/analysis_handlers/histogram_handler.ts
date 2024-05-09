@@ -41,7 +41,6 @@ export const histogramHandlerFactory =
     requestBody,
     responseStream,
     stateHandler,
-    version,
   }: ResponseStreamFetchOptions<T>) =>
   async (
     fieldValuePairsCount: number,
@@ -132,14 +131,6 @@ export const histogramHandlerFactory =
               ) ?? {
                 doc_count: 0,
               };
-              if (version === '1') {
-                return {
-                  key: o.key,
-                  key_as_string: o.key_as_string ?? '',
-                  doc_count_significant_term: current.doc_count,
-                  doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
-                };
-              }
 
               return {
                 key: o.key,
@@ -154,21 +145,18 @@ export const histogramHandlerFactory =
           stateHandler.loaded((1 / fieldValuePairsCount) * PROGRESS_STEP_HISTOGRAMS, false);
           pushHistogramDataLoadingState();
           responseStream.push(
-            addSignificantItemsHistogramAction(
-              [
-                {
-                  fieldName,
-                  fieldValue,
-                  histogram,
-                },
-              ],
-              version
-            )
+            addSignificantItemsHistogramAction([
+              {
+                fieldName,
+                fieldValue,
+                histogram,
+              },
+            ])
           );
         }
       }, MAX_CONCURRENT_QUERIES);
 
-      fieldValueHistogramQueue.push(significantTerms);
+      await fieldValueHistogramQueue.push(significantTerms);
       await fieldValueHistogramQueue.drain();
     }
 
@@ -237,15 +225,6 @@ export const histogramHandlerFactory =
               doc_count: 0,
             };
 
-            if (version === '1') {
-              return {
-                key: o.key,
-                key_as_string: o.key_as_string ?? '',
-                doc_count_significant_term: current.doc_count,
-                doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
-              };
-            }
-
             return {
               key: o.key,
               key_as_string: o.key_as_string ?? '',
@@ -259,16 +238,13 @@ export const histogramHandlerFactory =
         stateHandler.loaded((1 / fieldValuePairsCount) * PROGRESS_STEP_HISTOGRAMS, false);
         pushHistogramDataLoadingState();
         responseStream.push(
-          addSignificantItemsHistogramAction(
-            [
-              {
-                fieldName,
-                fieldValue,
-                histogram,
-              },
-            ],
-            version
-          )
+          addSignificantItemsHistogramAction([
+            {
+              fieldName,
+              fieldValue,
+              histogram,
+            },
+          ])
         );
       }
     }

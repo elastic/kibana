@@ -43,6 +43,7 @@ describe('Agent Status API route handler', () => {
     apiTestSetup.endpointAppContextMock.experimentalFeatures = {
       ...apiTestSetup.endpointAppContextMock.experimentalFeatures,
       responseActionsSentinelOneV1Enabled: true,
+      responseActionsCrowdstrikeManualHostIsolationEnabled: false,
       agentStatusClientEnabled: false,
     };
 
@@ -53,6 +54,7 @@ describe('Agent Status API route handler', () => {
     apiTestSetup.endpointAppContextMock.experimentalFeatures = {
       ...apiTestSetup.endpointAppContextMock.experimentalFeatures,
       responseActionsSentinelOneV1Enabled: false,
+      responseActionsCrowdstrikeManualHostIsolationEnabled: false,
     };
 
     await apiTestSetup
@@ -68,11 +70,19 @@ describe('Agent Status API route handler', () => {
   it.each(RESPONSE_ACTION_AGENT_TYPE)('should accept agent type of %s', async (agentType) => {
     // @ts-expect-error `query.*` is not mutable
     httpRequestMock.query.agentType = agentType;
-    await apiTestSetup
-      .getRegisteredVersionedRoute('get', AGENT_STATUS_ROUTE, '1')
-      .routeHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
-
-    expect(httpResponseMock.ok).toHaveBeenCalled();
+    // TODO TC: Temporary workaround to catch thrown error while Crowdstrike status is not yet supported
+    try {
+      await apiTestSetup
+        .getRegisteredVersionedRoute('get', AGENT_STATUS_ROUTE, '1')
+        .routeHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
+    } catch (error) {
+      if (agentType === 'crowdstrike') {
+        expect(error.message).toBe('Agent type [crowdstrike] does not support agent status');
+      }
+    }
+    if (agentType !== 'crowdstrike') {
+      expect(httpResponseMock.ok).toHaveBeenCalled();
+    }
   });
 
   it('should accept agent type of `endpoint` when FF is disabled', async () => {

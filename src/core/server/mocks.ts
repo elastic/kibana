@@ -20,6 +20,7 @@ import { deprecationsServiceMock } from '@kbn/core-deprecations-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { coreLifecycleMock, coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
+import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import type { SharedGlobalConfig, PluginInitializerContext } from '@kbn/core-plugins-server';
 
 export { configServiceMock, configDeprecationsMock } from '@kbn/config-mocks';
@@ -47,6 +48,7 @@ export { executionContextServiceMock } from '@kbn/core-execution-context-server-
 export { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 export { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
 export { securityServiceMock } from '@kbn/core-security-server-mocks';
+export { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 
 export type {
   ElasticsearchClientMock,
@@ -135,6 +137,7 @@ function createCoreRequestHandlerContextMock() {
       client: deprecationsServiceMock.createClient(),
     },
     security: securityServiceMock.createRequestHandlerContext(),
+    userProfile: userProfileServiceMock.createRequestHandlerContext(),
   };
 }
 

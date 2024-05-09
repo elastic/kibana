@@ -12,12 +12,12 @@ import { rangeQuery, termQuery, typedSearch } from '@kbn/observability-plugin/se
 import * as t from 'io-ts';
 import moment from 'moment';
 import { ESSearchRequest } from '@kbn/es-types';
+import { alertDetailsContextRt } from '@kbn/observability-plugin/server/services';
 import { ApmDocumentType } from '../../../../common/document_type';
 import {
   APMEventClient,
   APMEventESSearchRequest,
 } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import { observabilityAlertDetailsContextRt } from '.';
 import { RollupInterval } from '../../../../common/rollup';
 
 export async function getServiceNameFromSignals({
@@ -26,9 +26,9 @@ export async function getServiceNameFromSignals({
   coreContext,
   apmEventClient,
 }: {
-  query: t.TypeOf<typeof observabilityAlertDetailsContextRt>;
+  query: t.TypeOf<typeof alertDetailsContextRt>;
   esClient: ElasticsearchClient;
-  coreContext: CoreRequestHandlerContext;
+  coreContext: Pick<CoreRequestHandlerContext, 'uiSettings'>;
   apmEventClient: APMEventClient;
 }) {
   if (query['service.name']) {
@@ -85,7 +85,7 @@ async function getServiceNameFromLogs({
 }: {
   params: ESSearchRequest['body'];
   esClient: ElasticsearchClient;
-  coreContext: CoreRequestHandlerContext;
+  coreContext: Pick<CoreRequestHandlerContext, 'uiSettings'>;
 }) {
   const index = await coreContext.uiSettings.client.get<string>(aiAssistantLogsIndexPattern);
   const res = await typedSearch<{ service: { name: string } }, any>(esClient, {

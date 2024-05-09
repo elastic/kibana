@@ -240,6 +240,7 @@ export const getAboutStepsData = (rule: RuleResponse, detailsView: boolean): Abo
     investigation_fields: investigationFields,
     tags,
     threat,
+    max_signals: maxSignals,
   } = rule;
   const threatIndicatorPath =
     'threat_indicator_path' in rule ? rule.threat_indicator_path : undefined;
@@ -272,6 +273,7 @@ export const getAboutStepsData = (rule: RuleResponse, detailsView: boolean): Abo
     investigationFields: investigationFields?.field_names ?? [],
     threat: threat as Threats,
     threatIndicatorPath,
+    maxSignals,
     setup,
   };
 };

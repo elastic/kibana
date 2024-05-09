@@ -6,7 +6,7 @@
  */
 
 import { EuiLoadingLogo, EuiPageTemplate } from '@elastic/eui';
-import React, { FC, memo } from 'react';
+import React, { memo, PropsWithChildren } from 'react';
 import { LOADING_LOGO_TEST_ID } from './test_ids';
 import { useIntegrations } from '../hooks/use_integrations';
 import { EmptyPage } from '../modules/empty_page/empty_page';
@@ -19,7 +19,7 @@ import { SecuritySolutionPluginTemplateWrapper } from './security_solution_plugi
  * If none are received, show the EmptyPage with a link to go install integrations.
  * While the indicators call and the integrations call are loading, display a loading screen.
  */
-export const IntegrationsGuard: FC = memo(({ children }) => {
+export const IntegrationsGuard = memo<PropsWithChildren<unknown>>(({ children }) => {
   const { isLoading: indicatorsTotalCountLoading, count: indicatorsTotalCount } =
     useIndicatorsTotalCount();
 

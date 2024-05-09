@@ -417,7 +417,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   if (yAxis?.mode) {
     stackMode = yAxis?.mode === AxisModes.NORMAL ? undefined : yAxis?.mode;
   }
-  const scaleType = yAxis?.scaleType || ScaleType.Linear;
+  const yScaleType = yAxis?.scaleType || ScaleType.Linear;
   const isBarChart = layer.seriesType === SeriesTypes.BAR;
   const xColumnId =
     layer.xAccessor !== undefined
@@ -533,9 +533,9 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     data: rows,
     xScaleType: xColumnId ? layer.xScaleType ?? defaultXScaleType : 'ordinal',
     yScaleType:
-      formatter?.id === 'bytes' && scaleType === ScaleType.Linear
+      formatter?.id === 'bytes' && yScaleType === ScaleType.Linear
         ? ScaleType.LinearBinary
-        : scaleType,
+        : yScaleType,
     color: colorAccessorFn,
     groupId: yAxis?.groupId,
     enableHistogramMode,

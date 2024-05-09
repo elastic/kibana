@@ -29,11 +29,11 @@ import {
   type StreamingChatResponseEventWithoutError,
 } from '../../common';
 import { ObservabilityAIAssistantScreenContext } from '../../common/types';
-import { createFunctionResponseError } from '../../common/utils/create_function_response_error';
 import { createFunctionResponseMessage } from '../../common/utils/create_function_response_message';
 import { throwSerializedChatCompletionErrors } from '../../common/utils/throw_serialized_chat_completion_errors';
 import type { ObservabilityAIAssistantAPIClientRequestParamsOf } from '../api';
 import { ObservabilityAIAssistantChatService } from '../types';
+import { createPublicFunctionResponseError } from '../utils/create_function_response_error';
 
 export function complete(
   {
@@ -43,6 +43,7 @@ export function complete(
     conversationId,
     messages: initialMessages,
     persist,
+    disableFunctions,
     signal,
     responseLanguage,
   }: {
@@ -52,6 +53,7 @@ export function complete(
     conversationId?: string;
     messages: Message[];
     persist: boolean;
+    disableFunctions: boolean;
     signal: AbortSignal;
     responseLanguage: string;
   },
@@ -69,6 +71,7 @@ export function complete(
           connectorId,
           messages: initialMessages,
           persist,
+          disableFunctions,
           screenContexts,
           conversationId,
           responseLanguage,
@@ -144,13 +147,14 @@ export function complete(
               signal,
               persist,
               responseLanguage,
+              disableFunctions,
             },
             requestCallback
           ).subscribe(subscriber);
         }
 
         if (!requestedAction) {
-          const errorMessage = createFunctionResponseError({
+          const errorMessage = createPublicFunctionResponseError({
             name: functionCall.name,
             error: new Error(`Requested action ${functionCall.name} was not found`),
           });
@@ -207,7 +211,7 @@ export function complete(
             });
           })
           .catch((error) => {
-            return createFunctionResponseError({
+            return createPublicFunctionResponseError({
               name: functionCall.name,
               error,
             });

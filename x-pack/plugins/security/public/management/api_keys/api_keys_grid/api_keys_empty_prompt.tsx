@@ -7,7 +7,7 @@
 
 import { EuiAccordion, EuiErrorBoundary, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
-import type { FunctionComponent } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -21,7 +21,7 @@ export interface ApiKeysEmptyPromptProps {
   readOnly?: boolean;
 }
 
-export const ApiKeysEmptyPrompt: FunctionComponent<ApiKeysEmptyPromptProps> = ({
+export const ApiKeysEmptyPrompt: FC<PropsWithChildren<ApiKeysEmptyPromptProps>> = ({
   error,
   readOnly,
   children,

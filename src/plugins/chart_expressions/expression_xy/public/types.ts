@@ -18,6 +18,7 @@ import type {
   MultiValueClickContext,
 } from '@kbn/embeddable-plugin/public';
 import { ExpressionsServiceStart, ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import { CoreStart } from '@kbn/core/public';
 
 export interface SetupDeps {
   expressions: ExpressionsSetup;
@@ -29,6 +30,8 @@ export interface SetupDeps {
 export interface StartDeps {
   expression: ExpressionsServiceStart;
 }
+
+export type StartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
 
 export type ExpressionXyPluginSetup = void;
 export type ExpressionXyPluginStart = void;

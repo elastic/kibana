@@ -31,7 +31,7 @@ export default ({ getService }: FtrProviderContext): void => {
   /* from a package that was bundled with Kibana */
   //
   // FLAKY: https://github.com/elastic/kibana/issues/180087
-  describe.skip('@ess @serverless @skipInQA install_bundled_prebuilt_rules', () => {
+  describe.skip('@ess @serverless @skipInServerlessMKI install_bundled_prebuilt_rules', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllPrebuiltRuleAssets(es, log);

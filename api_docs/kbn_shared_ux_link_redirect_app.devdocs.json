@@ -146,9 +146,9 @@
           "\nKibana-specific contextual services Provider."
         ],
         "signature": [
-          "({ children, coreStart, }: React.PropsWithChildren<",
+          "({ children, coreStart }: React.PropsWithChildren<React.PropsWithChildren<",
           "RedirectAppLinksKibanaDependencies",
-          ">) => JSX.Element"
+          ">>) => JSX.Element"
         ],
         "path": "packages/shared-ux/link/redirect_app/impl/src/services.tsx",
         "deprecated": false,
@@ -159,12 +159,12 @@
             "id": "def-common.RedirectAppLinksKibanaProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  children,\n  coreStart,\n}",
+            "label": "{ children, coreStart }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
+              "React.PropsWithChildren<React.PropsWithChildren<",
               "RedirectAppLinksKibanaDependencies",
-              ">"
+              ">>"
             ],
             "path": "packages/shared-ux/link/redirect_app/impl/src/services.tsx",
             "deprecated": false,
@@ -185,9 +185,9 @@
           "\nContextual services Provider."
         ],
         "signature": [
-          "({ children, ...services }: React.PropsWithChildren<",
+          "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
           "RedirectAppLinksServices",
-          ">) => JSX.Element"
+          ">>) => JSX.Element"
         ],
         "path": "packages/shared-ux/link/redirect_app/impl/src/services.tsx",
         "deprecated": false,
@@ -201,9 +201,9 @@
             "label": "{\n  children,\n  ...services\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
+              "React.PropsWithChildren<React.PropsWithChildren<",
               "RedirectAppLinksServices",
-              ">"
+              ">>"
             ],
             "path": "packages/shared-ux/link/redirect_app/impl/src/services.tsx",
             "deprecated": false,

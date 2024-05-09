@@ -602,7 +602,7 @@ describe('Response actions history page', () => {
         }
       });
 
-      expect(history.location.search).toEqual('?agentTypes=endpoint%2Csentinel_one');
+      expect(history.location.search).toEqual('?agentTypes=endpoint%2Csentinel_one%2Ccrowdstrike');
     });
   });
 
@@ -687,7 +687,7 @@ describe('Response actions history page', () => {
       });
 
       expect(history.location.search).toEqual(
-        '?agentTypes=endpoint%2Csentinel_one&types=automated%2Cmanual'
+        '?agentTypes=endpoint%2Csentinel_one%2Ccrowdstrike&types=automated%2Cmanual'
       );
 
       const clearAllButton = getByTestId(`${testPrefix}-${filterPrefix}-clearAllButton`);

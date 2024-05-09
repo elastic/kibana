@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { FunctionComponent } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
@@ -52,7 +52,7 @@ export interface ProvidersProps {
   defaultCode?: string;
 }
 
-export const Providers: FunctionComponent<ProvidersProps> = ({
+export const Providers: FC<PropsWithChildren<ProvidersProps>> = ({
   defaultCode,
   services,
   children,

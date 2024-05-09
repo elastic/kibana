@@ -16,8 +16,6 @@ import {
   EuiIconTip,
   EuiSkeletonTitle,
 } from '@elastic/eui';
-import { summaryPanelLast24hText } from '../../../../common/translations';
-
 interface LastDayDataPlaceholderParams {
   title: string;
   tooltip: string;
@@ -34,16 +32,11 @@ export function LastDayDataPlaceholder({
   return (
     <EuiPanel hasBorder>
       <EuiFlexGroup gutterSize="m" direction="column">
-        <EuiFlexGroup direction="column" gutterSize="xs">
-          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-            <EuiText size="s">{title}</EuiText>
-            <EuiFlexItem grow={false}>
-              <EuiIconTip content={tooltip} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiText color="subdued" size="xs">
-            {summaryPanelLast24hText}
-          </EuiText>
+        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+          <EuiText size="s">{title}</EuiText>
+          <EuiFlexItem grow={false}>
+            <EuiIconTip content={tooltip} />
+          </EuiFlexItem>
         </EuiFlexGroup>
         {isLoading ? (
           <EuiSkeletonTitle size="m" data-test-subj={`datasetQuality-${title}-loading`} />

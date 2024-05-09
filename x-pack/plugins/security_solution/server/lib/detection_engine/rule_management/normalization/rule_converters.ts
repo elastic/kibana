@@ -84,6 +84,7 @@ import {
 } from '../utils/utils';
 import { createRuleExecutionSummary } from '../../rule_monitoring';
 import type { PrebuiltRuleAsset } from '../../prebuilt_rules';
+import { convertObjectKeysToSnakeCase } from '../../../../utils/object_case_converters';
 
 const DEFAULT_FROM = 'now-6m' as const;
 const DEFAULT_TO = 'now' as const;
@@ -691,6 +692,7 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
     version: params.version,
     exceptions_list: params.exceptionsList,
     immutable: params.immutable,
+    rule_source: convertObjectKeysToSnakeCase(params.ruleSource),
     related_integrations: params.relatedIntegrations ?? [],
     required_fields: params.requiredFields ?? [],
     setup: params.setup ?? '',

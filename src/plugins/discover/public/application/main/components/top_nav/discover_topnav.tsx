@@ -10,20 +10,20 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import { type DataView, DataViewType } from '@kbn/data-views-plugin/public';
 import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
-import { ENABLE_ESQL } from '@kbn/discover-utils';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { TextBasedLanguages } from '@kbn/esql-utils';
 import {
   useSavedSearch,
   useSavedSearchHasChanged,
   useSavedSearchInitial,
-} from '../../services/discover_state_provider';
-import { useInternalStateSelector } from '../../services/discover_internal_state_container';
+} from '../../state_management/discover_state_provider';
+import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import type { DiscoverStateContainer } from '../../services/discover_state';
+import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { onSaveSearch } from './on_save_search';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { addLog } from '../../../../utils/add_log';
-import { useAppStateSelector } from '../../services/discover_app_state_container';
+import { useAppStateSelector } from '../../state_management/discover_app_state_container';
 import { isTextBasedQuery } from '../../utils/is_text_based_query';
 import { useDiscoverTopNav } from './use_discover_topnav';
 

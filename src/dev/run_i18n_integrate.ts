@@ -7,12 +7,13 @@
  */
 
 import chalk from 'chalk';
-import Listr from 'listr';
+import { Listr } from 'listr2';
 
 import { createFailError } from '@kbn/dev-cli-errors';
 import { run } from '@kbn/dev-cli-runner';
 import { ErrorReporter, integrateLocaleFiles } from './i18n';
 import { extractDefaultMessages, mergeConfigs } from './i18n/tasks';
+import { I18nCheckTaskContext } from './i18n/types';
 
 run(
   async ({
@@ -69,7 +70,7 @@ run(
 
     const srcPaths = Array().concat(path || ['./src', './packages', './x-pack']);
 
-    const list = new Listr(
+    const list = new Listr<I18nCheckTaskContext>(
       [
         {
           title: 'Merging .i18nrc.json files',
@@ -77,13 +78,13 @@ run(
         },
         {
           title: 'Extracting Default Messages',
-          task: ({ config }) =>
-            new Listr(extractDefaultMessages(config, srcPaths), { exitOnError: true }),
+          task: (context) =>
+            new Listr(extractDefaultMessages(context.config!, srcPaths), { exitOnError: true }),
         },
         {
           title: 'Integrating Locale File',
-          task: async ({ messages, config }) => {
-            await integrateLocaleFiles(messages, {
+          task: async (context) => {
+            await integrateLocaleFiles(context.messages, {
               sourceFileName: source,
               targetFileName: target,
               dryRun,
@@ -91,14 +92,14 @@ run(
               ignoreUnused,
               ignoreMissing,
               ignoreMalformed,
-              config,
+              config: context.config!,
               log,
             });
           },
         },
       ],
       {
-        renderer: process.env.CI ? 'verbose' : 'default',
+        renderer: process.env.CI ? 'verbose' : ('default' as any),
       }
     );
 

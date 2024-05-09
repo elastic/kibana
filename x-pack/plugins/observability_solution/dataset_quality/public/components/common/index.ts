@@ -6,4 +6,3 @@
  */
 
 export * from './integration_icon';
-export * from './types';

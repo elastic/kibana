@@ -10,7 +10,7 @@ import type { EuiCheckboxGroupOption } from '@elastic/eui';
 import { EuiCallOut, EuiCheckboxGroup, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { I18nStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
+import type { CoreStart, OverlayStart } from '@kbn/core/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -219,7 +219,7 @@ export const StopModelDeploymentsConfirmDialog: FC<ForceStopModelConfirmDialogPr
 };
 
 export const getUserConfirmationProvider =
-  (overlays: OverlayStart, theme: ThemeServiceStart, i18nStart: I18nStart) =>
+  (overlays: OverlayStart, startServices: Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>) =>
   async (forceStopModel: ModelItem): Promise<string[]> => {
     return new Promise(async (resolve, reject) => {
       try {
@@ -236,7 +236,7 @@ export const getUserConfirmationProvider =
                 resolve(deploymentIds);
               }}
             />,
-            { theme, i18n: i18nStart }
+            startServices
           )
         );
       } catch (e) {

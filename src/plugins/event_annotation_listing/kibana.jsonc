@@ -22,9 +22,7 @@
       "savedObjectsTagging",
       "lens",
     ],
-    "requiredBundles": [
-      "kibanaReact",
-    ],
+    "requiredBundles": [],
     "extraPublicDirs": []
   }
 }

@@ -7,6 +7,7 @@
 
 import { EuiButtonEmpty } from '@elastic/eui';
 import { act, fireEvent, render, screen } from '@testing-library/react';
+import { coreMock } from '@kbn/core/public/mocks';
 import React from 'react';
 
 import AddToTimelineButton, {
@@ -17,6 +18,8 @@ import AddToTimelineButton, {
 import { DataProvider, IS_OPERATOR } from '../../../../common/types';
 import { TestProviders } from '../../../mock';
 import * as i18n from './translations';
+
+const coreStart = coreMock.createStart();
 
 const mockAddSuccess = jest.fn();
 jest.mock('../../../hooks/use_app_toasts', () => ({
@@ -93,7 +96,7 @@ describe('add to timeline', () => {
     beforeEach(() => {
       render(
         <TestProviders>
-          <AddToTimelineButton field={field} ownFocus={false} />
+          <AddToTimelineButton field={field} ownFocus={false} startServices={coreStart} />
         </TestProviders>
       );
     });
@@ -111,7 +114,12 @@ describe('add to timeline', () => {
     beforeEach(() => {
       render(
         <TestProviders>
-          <AddToTimelineButton Component={EuiButtonEmpty} field={field} ownFocus={false} />
+          <AddToTimelineButton
+            Component={EuiButtonEmpty}
+            field={field}
+            ownFocus={false}
+            startServices={coreStart}
+          />
         </TestProviders>
       );
     });
@@ -128,7 +136,12 @@ describe('add to timeline', () => {
   test('it renders a tooltip when `showTooltip` is true', () => {
     const { container } = render(
       <TestProviders>
-        <AddToTimelineButton field={field} ownFocus={false} showTooltip={true} />
+        <AddToTimelineButton
+          field={field}
+          ownFocus={false}
+          showTooltip={true}
+          startServices={coreStart}
+        />
       </TestProviders>
     );
 
@@ -138,7 +151,7 @@ describe('add to timeline', () => {
   test('it does NOT render a tooltip when `showTooltip` is false (default)', () => {
     const { container } = render(
       <TestProviders>
-        <AddToTimelineButton field={field} ownFocus={false} />
+        <AddToTimelineButton field={field} ownFocus={false} startServices={coreStart} />
       </TestProviders>
     );
 
@@ -151,7 +164,12 @@ describe('add to timeline', () => {
     test('it starts dragging to timeline when a `draggableId` is provided', () => {
       render(
         <TestProviders>
-          <AddToTimelineButton draggableId={draggableId} field={field} ownFocus={false} />
+          <AddToTimelineButton
+            draggableId={draggableId}
+            field={field}
+            ownFocus={false}
+            startServices={coreStart}
+          />
         </TestProviders>
       );
 
@@ -163,7 +181,7 @@ describe('add to timeline', () => {
     test('it does NOT start dragging to timeline when a `draggableId` is NOT provided', () => {
       render(
         <TestProviders>
-          <AddToTimelineButton field={field} ownFocus={false} />
+          <AddToTimelineButton field={field} ownFocus={false} startServices={coreStart} />
         </TestProviders>
       );
 
@@ -175,7 +193,12 @@ describe('add to timeline', () => {
     test('it dispatches a single `addProviderToTimeline` action when a single, non-array `dataProvider` is provided', () => {
       render(
         <TestProviders>
-          <AddToTimelineButton dataProvider={providerA} field={field} ownFocus={false} />
+          <AddToTimelineButton
+            dataProvider={providerA}
+            field={field}
+            ownFocus={false}
+            startServices={coreStart}
+          />
         </TestProviders>
       );
 
@@ -209,6 +232,7 @@ describe('add to timeline', () => {
             dataProvider={[providerA, providerB]}
             field={field}
             ownFocus={false}
+            startServices={coreStart}
           />
         </TestProviders>
       );
@@ -217,7 +241,7 @@ describe('add to timeline', () => {
 
       expect(mockDispatch).toHaveBeenCalledTimes(2);
 
-      providers.forEach((p, i) =>
+      providers.forEach((_p, i) =>
         expect(mockDispatch).toHaveBeenNthCalledWith(i + 1, {
           payload: {
             dataProvider: {
@@ -241,7 +265,12 @@ describe('add to timeline', () => {
 
       render(
         <TestProviders>
-          <AddToTimelineButton field={field} onClick={onClick} ownFocus={false} />
+          <AddToTimelineButton
+            field={field}
+            onClick={onClick}
+            ownFocus={false}
+            startServices={coreStart}
+          />
         </TestProviders>
       );
 
@@ -273,6 +302,7 @@ describe('add to timeline', () => {
                 keyboardEvent={keyboardEvent}
                 ownFocus={true}
                 showTooltip={true}
+                startServices={coreStart}
               />
             </TestProviders>
           );
@@ -290,6 +320,7 @@ describe('add to timeline', () => {
                 keyboardEvent={keyboardEvent}
                 ownFocus={true}
                 showTooltip={true}
+                startServices={coreStart}
               />
             </TestProviders>
           );
@@ -308,6 +339,7 @@ describe('add to timeline', () => {
                 keyboardEvent={keyboardEvent}
                 ownFocus={true}
                 showTooltip={true}
+                startServices={coreStart}
               />
             </TestProviders>
           );
@@ -338,6 +370,7 @@ describe('add to timeline', () => {
                 keyboardEvent={keyboardEvent}
                 ownFocus={true}
                 showTooltip={true}
+                startServices={coreStart}
               />
             </TestProviders>
           );
@@ -355,6 +388,7 @@ describe('add to timeline', () => {
                 keyboardEvent={keyboardEvent}
                 ownFocus={true}
                 showTooltip={true}
+                startServices={coreStart}
               />
             </TestProviders>
           );
@@ -373,6 +407,7 @@ describe('add to timeline', () => {
                 keyboardEvent={keyboardEvent}
                 ownFocus={true}
                 showTooltip={true}
+                startServices={coreStart}
               />
             </TestProviders>
           );
@@ -387,7 +422,12 @@ describe('add to timeline', () => {
     test('Add success is called with "timeline" if timeline type is timeline', () => {
       render(
         <TestProviders>
-          <AddToTimelineButton dataProvider={providerA} field={field} ownFocus={false} />
+          <AddToTimelineButton
+            dataProvider={providerA}
+            field={field}
+            ownFocus={false}
+            startServices={coreStart}
+          />
         </TestProviders>
       );
 
@@ -408,6 +448,7 @@ describe('add to timeline', () => {
             field={field}
             ownFocus={false}
             timelineType={'template'}
+            startServices={coreStart}
           />
         </TestProviders>
       );

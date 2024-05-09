@@ -21,7 +21,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const elasticChart = getService('elasticChart');
 
-  describe('Gauge', function describeIndexTests() {
+  // Failing: See https://github.com/elastic/kibana/issues/181895
+  describe.skip('Gauge', function describeIndexTests() {
     const isNewChartsLibraryEnabled = true;
 
     before(async () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parseIndex } from './common';
+import { getTimesliceTargetComparator, parseIndex } from './common';
 
 describe('common', () => {
   describe('parseIndex', () => {
@@ -18,6 +18,16 @@ describe('common', () => {
       ['remote:foo*,bar-*,remote:baz-*', ['remote:foo*', 'bar-*', 'remote:baz-*']],
     ])("parses the index '%s' correctly", (index, expected) => {
       expect(parseIndex(index)).toEqual(expected);
+    });
+  });
+
+  describe('timeslice target comparator', () => {
+    it('returns GT when timeslice target is 0', () => {
+      expect(getTimesliceTargetComparator(0)).toBe('>');
+    });
+
+    it('returns GTE when timeslice tyarnarget is not 0', () => {
+      expect(getTimesliceTargetComparator(0.000000001)).toBe('>=');
     });
   });
 });

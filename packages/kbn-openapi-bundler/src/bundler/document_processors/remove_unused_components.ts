@@ -8,7 +8,7 @@
 
 import { hasProp } from '../../utils/has_prop';
 import { isPlainObjectType } from '../../utils/is_plain_object_type';
-import { PlainObjectNode, ResolvedRef } from '../types';
+import { DocumentNodeProcessor, PlainObjectNode, ResolvedRef } from '../types';
 
 /**
  * Helps to remove unused components.
@@ -17,10 +17,10 @@ import { PlainObjectNode, ResolvedRef } from '../types';
  * and then `removeUnusedComponents()` should be invoked after document processing to perform
  * actual unused components deletion.
  */
-export class RemoveUnusedComponentsProcessor {
+export class RemoveUnusedComponentsProcessor implements DocumentNodeProcessor {
   private refs = new Set();
 
-  ref(node: unknown, resolvedRef: ResolvedRef): void {
+  onRefNodeLeave(node: unknown, resolvedRef: ResolvedRef): void {
     // If the reference has been inlined by one of the previous processors skip it
     if (!hasProp(node, '$ref')) {
       return;

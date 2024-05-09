@@ -9,6 +9,7 @@ import { addBasePath } from '..';
 import { RouterMock, routeDependencies, RequestMock } from '../../../test/helpers';
 
 import { registerDataStreamRoutes } from '.';
+import { getEsWarningText } from './register_put_route';
 
 describe('Data streams API', () => {
   const router = new RouterMock();
@@ -56,6 +57,12 @@ describe('Data streams API', () => {
       updateDataLifecycle.mockRejectedValue(error);
 
       await expect(router.runRequest(mockRequest)).rejects.toThrowError(error);
+    });
+
+    it('knows how to extract the es warning header from the response', () => {
+      expect(getEsWarningText('Elasticsearch-asdqwe123 "Test string"')).toBeNull();
+      expect(getEsWarningText('299 Easdqwe123 "Test string"')).toBeNull();
+      expect(getEsWarningText('299 Elasticsearch-asdqwe123 "Test string"')).toBe('Test string');
     });
   });
 });

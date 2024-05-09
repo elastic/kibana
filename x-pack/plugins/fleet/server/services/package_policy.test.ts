@@ -2888,7 +2888,7 @@ describe('Package policy service', () => {
       it('should fail to return the package policy', async () => {
         const soClient = savedObjectsClientMock.create();
         const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-        expect(
+        await expect(
           packagePolicyService.runExternalCallbacks(
             'packagePolicyCreate',
             newPackagePolicy,
@@ -4905,7 +4905,7 @@ describe('Package policy service', () => {
     it('should return error if package policy newer than package version', async () => {
       mockPackage('aws');
 
-      expect(
+      await expect(
         packagePolicyService.getUpgradePackagePolicyInfo(savedObjectsClient, 'package-policy-id')
       ).rejects.toEqual(
         new PackagePolicyIneligibleForUpgradeError(
@@ -4917,7 +4917,7 @@ describe('Package policy service', () => {
     it('should return error if package not installed', async () => {
       mockPackage('notinstalled');
 
-      expect(
+      await expect(
         packagePolicyService.getUpgradePackagePolicyInfo(savedObjectsClient, 'package-policy-id')
       ).rejects.toEqual(new FleetError('Package notinstalled is not installed'));
     });

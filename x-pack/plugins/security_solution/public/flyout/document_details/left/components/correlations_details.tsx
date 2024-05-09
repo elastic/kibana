@@ -20,6 +20,8 @@ import { useShowRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_sh
 import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
 import { RelatedAlertsByAncestry } from './related_alerts_by_ancestry';
 import { SuppressedAlerts } from './suppressed_alerts';
+import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
+import { isActiveTimeline } from '../../../../helpers';
 
 export const CORRELATIONS_TAB_ID = 'correlations';
 
@@ -27,27 +29,18 @@ export const CORRELATIONS_TAB_ID = 'correlations';
  * Correlations displayed in the document details expandable flyout left section under the Insights tab
  */
 export const CorrelationsDetails: React.FC = () => {
-  const {
-    dataAsNestedObject,
-    dataFormattedForFieldBrowser,
-    eventId,
-    getFieldsData,
-    scopeId,
-    isPreview,
-  } = useLeftPanelContext();
+  const { dataAsNestedObject, eventId, getFieldsData, scopeId, isPreview } = useLeftPanelContext();
 
-  const {
-    show: showAlertsByAncestry,
-    indices,
-    documentId,
-  } = useShowRelatedAlertsByAncestry({
+  const { selectedPatterns } = useTimelineDataFilters(isActiveTimeline(scopeId));
+
+  const { show: showAlertsByAncestry, documentId } = useShowRelatedAlertsByAncestry({
     getFieldsData,
     dataAsNestedObject,
-    dataFormattedForFieldBrowser,
     eventId,
     isPreview,
   });
   const { show: showSameSourceAlerts, originalEventId } = useShowRelatedAlertsBySameSourceEvent({
+    eventId,
     getFieldsData,
   });
   const { show: showAlertsBySession, entityId } = useShowRelatedAlertsBySession({ getFieldsData });
@@ -80,7 +73,7 @@ export const CorrelationsDetails: React.FC = () => {
               <RelatedCases eventId={eventId} />
             </EuiFlexItem>
           )}
-          {showSameSourceAlerts && originalEventId && (
+          {showSameSourceAlerts && (
             <EuiFlexItem>
               <RelatedAlertsBySameSourceEvent
                 originalEventId={originalEventId}
@@ -94,10 +87,10 @@ export const CorrelationsDetails: React.FC = () => {
               <RelatedAlertsBySession entityId={entityId} scopeId={scopeId} eventId={eventId} />
             </EuiFlexItem>
           )}
-          {showAlertsByAncestry && documentId && indices && (
+          {showAlertsByAncestry && (
             <EuiFlexItem>
               <RelatedAlertsByAncestry
-                indices={indices}
+                indices={selectedPatterns}
                 scopeId={scopeId}
                 documentId={documentId}
               />

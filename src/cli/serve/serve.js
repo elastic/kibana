@@ -96,7 +96,7 @@ function pathCollector() {
 const configPathCollector = pathCollector();
 const pluginPathCollector = pathCollector();
 
-export function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
+export function applyConfigOverrides(rawConfig, opts, extraCliOptions, keystoreConfig) {
   const set = _.partial(lodashSet, rawConfig);
   const get = _.partial(_.get, rawConfig);
   const has = _.partial(_.has, rawConfig);
@@ -209,7 +209,7 @@ export function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   set('plugins.paths', _.compact([].concat(get('plugins.paths'), opts.pluginPath)));
 
   _.mergeWith(rawConfig, extraCliOptions, mergeAndReplaceArrays);
-  _.merge(rawConfig, readKeystore());
+  _.merge(rawConfig, keystoreConfig);
 
   return rawConfig;
 }
@@ -324,11 +324,12 @@ export default function (program) {
     // Kibana server process, and will be using core's bootstrap script
     // to effectively start Kibana.
     const bootstrapScript = getBootstrapScript(cliArgs.dev);
-
+    const keystoreConfig = await readKeystore();
     await bootstrapScript({
       configs,
       cliArgs,
-      applyConfigOverrides: (rawConfig) => applyConfigOverrides(rawConfig, opts, unknownOptions),
+      applyConfigOverrides: (rawConfig) =>
+        applyConfigOverrides(rawConfig, opts, unknownOptions, keystoreConfig),
     });
   });
 }

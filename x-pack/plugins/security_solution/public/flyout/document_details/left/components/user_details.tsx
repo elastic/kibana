@@ -281,7 +281,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
                 content={
                   <FormattedMessage
                     id="xpack.securitySolution.flyout.left.insights.entities.relatedHostsTooltip"
-                    defaultMessage="After this alert was generated, {userName} logged into these hosts. Check if this activity is normal."
+                    defaultMessage="After this event, {userName} logged into these hosts. Check if this activity is normal."
                     values={{ userName }}
                   />
                 }

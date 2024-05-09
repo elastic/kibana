@@ -71,7 +71,7 @@ export const AnalyzerPreviewContainer: React.FC = () => {
               tooltip: (
                 <FormattedMessage
                   id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.analyzerPreviewTooltip"
-                  defaultMessage="Show analyzer graph"
+                  defaultMessage="Investigate in timeline"
                 />
               ),
             },

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { type FC } from 'react';
+import React, { type FC, type PropsWithChildren } from 'react';
 import { CoreTheme } from '@kbn/core-theme-browser/src/types';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { Observable } from 'rxjs';
@@ -21,7 +21,7 @@ interface CoreThemeProviderProps {
  * @internal Only meant to be used within core for internal usages of EUI/React
  * @deprecated use `KibanaThemeProvider` from `@kbn/react-kibana-context-theme
  */
-export const CoreThemeProvider: FC<CoreThemeProviderProps> = ({
+export const CoreThemeProvider: FC<PropsWithChildren<CoreThemeProviderProps>> = ({
   theme$,
   globalStyles,
   children,

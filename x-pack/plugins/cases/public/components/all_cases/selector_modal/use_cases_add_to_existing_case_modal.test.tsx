@@ -8,6 +8,7 @@
 import { waitFor } from '@testing-library/react';
 import { act, renderHook } from '@testing-library/react-hooks';
 import userEvent from '@testing-library/user-event';
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import AllCasesSelectorModal from '.';
 import type { CaseUI } from '../../../../common';
@@ -64,7 +65,7 @@ describe('use cases add to existing case modal hook', () => {
 
   const dispatch = jest.fn();
   let appMockRender: AppMockRenderer;
-  const wrapper: React.FC = ({ children }) => {
+  const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
     return (
       <CasesContext.Provider
         value={{

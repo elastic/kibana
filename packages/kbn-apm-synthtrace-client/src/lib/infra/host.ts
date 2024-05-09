@@ -5,9 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 /* eslint-disable max-classes-per-file */
-import { HostAsset } from '../assets';
 import { Entity, Fields } from '../entity';
 import { Serializable } from '../serializable';
 import { pod } from './pod';
@@ -87,15 +85,6 @@ class Host extends Entity<HostDocument> {
       'system.diskio.write.bytes': 48595652608,
       'metricset.period': 10000,
       'metricset.name': 'diskio',
-    });
-  }
-
-  asset() {
-    return new HostAsset({
-      'asset.kind': 'host',
-      'asset.id': this.fields['host.hostname'],
-      'asset.name': this.fields['host.hostname'],
-      'asset.ean': `host:${this.fields['host.hostname']}`,
     });
   }
 

@@ -50,9 +50,9 @@
           "\nKibana-specific Provider that maps dependencies to services."
         ],
         "signature": [
-          "({ children, ...dependencies }: React.PropsWithChildren<",
+          "({ children, ...dependencies }: React.PropsWithChildren<React.PropsWithChildren<",
           "KibanaNoDataPageKibanaDependencies",
-          ">) => JSX.Element"
+          ">>) => JSX.Element"
         ],
         "path": "packages/shared-ux/page/kibana_no_data/impl/src/services.tsx",
         "deprecated": false,
@@ -63,12 +63,12 @@
             "id": "def-public.KibanaNoDataPageKibanaProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  children,\n  ...dependencies\n}",
+            "label": "{ children, ...dependencies }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
+              "React.PropsWithChildren<React.PropsWithChildren<",
               "KibanaNoDataPageKibanaDependencies",
-              ">"
+              ">>"
             ],
             "path": "packages/shared-ux/page/kibana_no_data/impl/src/services.tsx",
             "deprecated": false,
@@ -89,9 +89,9 @@
           "\nA Context Provider that provides services to the component."
         ],
         "signature": [
-          "({ children, ...services }: React.PropsWithChildren<",
+          "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
           "KibanaNoDataPageServices",
-          ">) => JSX.Element"
+          ">>) => JSX.Element"
         ],
         "path": "packages/shared-ux/page/kibana_no_data/impl/src/services.tsx",
         "deprecated": false,
@@ -105,9 +105,9 @@
             "label": "{\n  children,\n  ...services\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
+              "React.PropsWithChildren<React.PropsWithChildren<",
               "KibanaNoDataPageServices",
-              ">"
+              ">>"
             ],
             "path": "packages/shared-ux/page/kibana_no_data/impl/src/services.tsx",
             "deprecated": false,

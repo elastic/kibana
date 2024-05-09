@@ -48,7 +48,7 @@ export default ({ getService }: FtrProviderContext) => {
   const config = getService('config');
   const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
 
-  describe('@serverless @ess create "rule_default" exceptions', () => {
+  describe('@serverless @serverlessQA @ess create "rule_default" exceptions', () => {
     before(async () => {
       await createAlertsIndex(supertest, log);
     });

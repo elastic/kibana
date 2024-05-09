@@ -6,20 +6,23 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 
 export interface TestComponentProps {
   customProp?: boolean;
+  children?: React.ReactNode;
 }
 
-export const TestComponent: React.FunctionComponent<TestComponentProps> = ({ children }) => {
+export const TestComponent: FC<PropsWithChildren<TestComponentProps>> = ({ children }) => {
   return <span>{children} Test component</span>;
 };
 
-export const ForwardeRefTestComponent: React.FunctionComponent<TestComponentProps> =
-  React.forwardRef<HTMLSpanElement, TestComponentProps>(({ children }, ref) => {
-    return <span ref={ref}>{children} Test component</span>;
-  });
+export const ForwardeRefTestComponent: FC<PropsWithChildren<TestComponentProps>> = React.forwardRef<
+  HTMLSpanElement,
+  PropsWithChildren<TestComponentProps>
+>(({ children }, ref) => {
+  return <span ref={ref}>{children} Test component</span>;
+});
 
 // eslint-disable-next-line import/no-default-export
 export default TestComponent;

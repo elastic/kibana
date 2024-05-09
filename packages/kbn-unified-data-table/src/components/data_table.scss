@@ -53,12 +53,6 @@
     border-bottom: $euiBorderThin;
   }
 
-  .euiDataGridRowCell--controlColumn:hover::after,
-  .euiDataGridRowCell--controlColumn:focus::after,
-  .euiDataGridRowCell--controlColumn.euiDataGridRowCell--open::after {
-    border-color: transparent;
-  }
-
   .euiDataGridRowCell--controlColumn .euiDataGridRowCell__content,
   .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='openDetails'],
   .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='select'] {

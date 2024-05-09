@@ -10,6 +10,7 @@ import { createFailError } from '@kbn/dev-cli-errors';
 import { matchEntriesWithExctractors } from '../extract_default_translations';
 import { I18nConfig } from '../config';
 import { normalizePath, readFileAsync, ErrorReporter } from '../utils';
+import { I18nCheckTaskContext } from '../types';
 
 function filterEntries(entries: string[], exclude: string[]) {
   return entries.filter((entry: string) =>
@@ -24,7 +25,7 @@ export async function extractUntrackedMessagesTask({
 }: {
   path?: string | string[];
   config: I18nConfig;
-  reporter: any;
+  reporter: ErrorReporter;
 }) {
   const inputPaths = Array.isArray(path) ? path : [path || './'];
   const availablePaths = Object.values(config.paths).flat();
@@ -76,10 +77,14 @@ export async function extractUntrackedMessagesTask({
 export function extractUntrackedMessages(inputPaths: string[]) {
   return inputPaths.map((inputPath) => ({
     title: `Checking untracked messages in ${inputPath}`,
-    task: async (context: { reporter: ErrorReporter; config: I18nConfig }) => {
+    task: async (context: I18nCheckTaskContext) => {
       const { reporter, config } = context;
       const initialErrorsNumber = reporter.errors.length;
-      const result = await extractUntrackedMessagesTask({ path: inputPath, config, reporter });
+      const result = await extractUntrackedMessagesTask({
+        path: inputPath,
+        config: config as I18nConfig,
+        reporter,
+      });
       if (reporter.errors.length === initialErrorsNumber) {
         return result;
       }

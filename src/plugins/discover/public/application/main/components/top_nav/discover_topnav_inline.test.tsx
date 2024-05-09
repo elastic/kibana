@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { DiscoverMainProvider } from '../../services/discover_state_provider';
+import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 import { DiscoverTopNavInline } from './discover_topnav_inline';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';

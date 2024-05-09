@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
+import React, { FC, useMemo, PropsWithChildren } from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useSecurityContext } from '../../../hooks/use_security_context';
 import {
@@ -16,7 +16,7 @@ import {
 /**
  * Container used to wrap components and share the {@link FilterManager} through React context.
  */
-export const IndicatorsFilters: FC = ({ children }) => {
+export const IndicatorsFilters: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const securityContext = useSecurityContext();
 
   const {

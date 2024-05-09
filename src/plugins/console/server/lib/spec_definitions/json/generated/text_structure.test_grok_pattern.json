@@ -14,7 +14,7 @@
     "patterns": [
       "_text_structure/test_grok_pattern"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/test-grok-pattern-api.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/test-grok-pattern.html",
     "availability": {
       "stack": true,
       "serverless": false

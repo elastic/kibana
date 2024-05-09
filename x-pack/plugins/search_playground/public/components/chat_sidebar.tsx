@@ -30,14 +30,14 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({ selectedIndicesCount }
     {
       id: useGeneratedHtmlId({ prefix: 'summarizationAccordion' }),
       title: i18n.translate('xpack.searchPlayground.sidebar.summarizationTitle', {
-        defaultMessage: 'Summarization',
+        defaultMessage: 'Model settings',
       }),
       children: <SummarizationPanel />,
     },
     {
       id: useGeneratedHtmlId({ prefix: 'sourcesAccordion' }),
       title: i18n.translate('xpack.searchPlayground.sidebar.sourceTitle', {
-        defaultMessage: 'Sources',
+        defaultMessage: 'Indices',
       }),
       extraAction: !!selectedIndicesCount && (
         <EuiText size="xs">

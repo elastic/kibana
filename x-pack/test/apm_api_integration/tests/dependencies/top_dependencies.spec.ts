@@ -16,7 +16,7 @@ type TopDependencies = APIReturnType<'GET /internal/apm/dependencies/top_depende
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
@@ -55,12 +55,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       let topDependencies: TopDependencies;
 
       before(async () => {
-        await generateData({ synthtraceEsClient, start, end });
+        await generateData({ apmSynthtraceEsClient, start, end });
         const response = await callApi();
         topDependencies = response.body;
       });
 
-      after(() => synthtraceEsClient.clean());
+      after(() => apmSynthtraceEsClient.clean());
 
       it('returns an array of dependencies', () => {
         expect(topDependencies).to.have.property('dependencies');

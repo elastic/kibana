@@ -97,9 +97,12 @@ export const ALERTS = i18n.translate('xpack.securitySolution.navigation.alerts',
   defaultMessage: 'Alerts',
 });
 
-export const AI_INSIGHTS = i18n.translate('xpack.securitySolution.navigation.aiInsights', {
-  defaultMessage: 'AI Insights',
-});
+export const ATTACK_DISCOVERY = i18n.translate(
+  'xpack.securitySolution.navigation.attackDiscovery',
+  {
+    defaultMessage: 'Attack discovery',
+  }
+);
 
 export const TIMELINES = i18n.translate('xpack.securitySolution.navigation.timelines', {
   defaultMessage: 'Timelines',

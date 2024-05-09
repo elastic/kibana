@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { DecoratorFn } from '@storybook/react';
 import { ServicesProvider, CloudChatServices } from '../public/services';
 
@@ -27,7 +27,7 @@ const services: CloudChatServices = {
   },
 };
 
-export const getCloudContextProvider: () => React.FC =
+export const getCloudContextProvider: () => FC<PropsWithChildren<unknown>> =
   () =>
   ({ children }) =>
     <ServicesProvider {...services}>{children}</ServicesProvider>;

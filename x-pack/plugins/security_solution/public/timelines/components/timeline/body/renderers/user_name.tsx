@@ -9,7 +9,6 @@ import React, { useCallback, useContext, useMemo } from 'react';
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { isString } from 'lodash/fp';
-import { TableId } from '@kbn/securitysolution-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { UserPanelKey } from '../../../../../flyout/entity_details/user_right';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
@@ -79,7 +78,7 @@ const UserNameComponent: React.FC<Props> = ({
           params: {
             userName,
             contextID: contextId,
-            scopeId: TableId.alertsOnAlertsPage,
+            scopeId: timelineID,
             isDraggable,
           },
         });

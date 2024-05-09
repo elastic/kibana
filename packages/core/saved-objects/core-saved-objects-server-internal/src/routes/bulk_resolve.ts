@@ -40,25 +40,26 @@ export const registerBulkResolveRoute = (
         ),
       },
     },
-    catchAndReturnBoomErrors(async (context, req, res) => {
+    catchAndReturnBoomErrors(async (context, request, response) => {
       logWarnOnExternalRequest({
         method: 'post',
         path: '/api/saved_objects/_bulk_resolve',
-        req,
+        request,
         logger,
       });
+      const types = [...new Set(request.body.map(({ type }) => type))];
+
       const usageStatsClient = coreUsageData.getClient();
-      usageStatsClient.incrementSavedObjectsBulkResolve({ request: req }).catch(() => {});
+      usageStatsClient.incrementSavedObjectsBulkResolve({ request, types }).catch(() => {});
 
       const { savedObjects } = await context.core;
-      const typesToCheck = [...new Set(req.body.map(({ type }) => type))];
       if (!allowHttpApiAccess) {
-        throwIfAnyTypeNotVisibleByAPI(typesToCheck, savedObjects.typeRegistry);
+        throwIfAnyTypeNotVisibleByAPI(types, savedObjects.typeRegistry);
       }
-      const result = await savedObjects.client.bulkResolve(req.body, {
+      const result = await savedObjects.client.bulkResolve(request.body, {
         migrationVersionCompatibility: 'compatible',
       });
-      return res.ok({ body: result });
+      return response.ok({ body: result });
     })
   );
 };

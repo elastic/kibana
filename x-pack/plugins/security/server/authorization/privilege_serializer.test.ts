@@ -8,7 +8,7 @@
 import { PrivilegeSerializer } from './privilege_serializer';
 
 describe(`#isSerializedGlobalBasePrivilege`, () => {
-  ['all', 'read'].forEach((validValue) => {
+  ['all', 'read', '*'].forEach((validValue) => {
     test(`returns true for '${validValue}'`, () => {
       expect(PrivilegeSerializer.isSerializedGlobalBasePrivilege(validValue)).toBe(true);
     });

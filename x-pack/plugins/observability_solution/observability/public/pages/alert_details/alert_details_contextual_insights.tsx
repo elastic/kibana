@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import dedent from 'dedent';
-import { isEmpty } from 'lodash';
+import { type AlertDetailsContextualInsight } from '../../../server/services';
 import { useKibana } from '../../utils/kibana_react';
 import { AlertData } from '../../hooks/use_fetch_alert_detail';
 
@@ -22,14 +22,16 @@ export function AlertDetailContextualInsights({ alert }: { alert: AlertData | nu
   const ObservabilityAIAssistantContextualInsight =
     observabilityAIAssistant?.ObservabilityAIAssistantContextualInsight;
 
-  const getPromptMessages = useCallback(async () => {
+  const getAlertContextMessages = useCallback(async () => {
     const fields = alert?.formatted.fields as Record<string, string> | undefined;
     if (!observabilityAIAssistant || !fields || !alert) {
       return [];
     }
 
     try {
-      const res = await http.get('/internal/apm/assistant/get_obs_alert_details_context', {
+      const { alertContext } = await http.get<{
+        alertContext: AlertDetailsContextualInsight[];
+      }>('/internal/observability/assistant/alert_details_contextual_insights', {
         query: {
           alert_started_at: new Date(alert.formatted.start).toISOString(),
 
@@ -46,77 +48,28 @@ export function AlertDetailContextualInsights({ alert }: { alert: AlertData | nu
         },
       });
 
-      const {
-        serviceSummary,
-        downstreamDependencies,
-        logCategories,
-        serviceChangePoints,
-        exitSpanChangePoints,
-        anomalies,
-      } = res as any;
-
-      const serviceName = fields['service.name'];
-      const serviceEnvironment = fields['service.environment'];
-
-      const obsAlertContext = `${
-        !isEmpty(serviceSummary)
-          ? `Metadata for the service where the alert occurred:
-${JSON.stringify(serviceSummary, null, 2)}`
-          : ''
-      }
-
-    ${
-      !isEmpty(downstreamDependencies)
-        ? `Downstream dependencies from the service "${serviceName}". Problems in these services can negatively affect the performance of "${serviceName}":
-${JSON.stringify(downstreamDependencies, null, 2)}`
-        : ''
-    }
-    
-    ${
-      !isEmpty(serviceChangePoints)
-        ? `Significant change points for "${serviceName}". Use this to spot dips and spikes in throughput, latency and failure rate:
-    ${JSON.stringify(serviceChangePoints, null, 2)}`
-        : ''
-    }
-  
-    ${
-      !isEmpty(exitSpanChangePoints)
-        ? `Significant change points for the dependencies of "${serviceName}". Use this to spot dips or spikes in throughput, latency and failure rate for downstream dependencies:
-    ${JSON.stringify(exitSpanChangePoints, null, 2)}`
-        : ''
-    }
-    
-    ${
-      !isEmpty(logCategories)
-        ? `Log events occurring around the time of the alert:
-    ${JSON.stringify(logCategories, null, 2)}`
-        : ''
-    }
-  
-    ${
-      !isEmpty(anomalies)
-        ? `Anomalies for services running in the environment "${serviceEnvironment}":
-    ${anomalies}`
-        : ''
-    }          
-    `;
+      const obsAlertContext = alertContext
+        .map(({ description, data }) => `${description}:\n${JSON.stringify(data, null, 2)}`)
+        .join('\n\n');
 
       return observabilityAIAssistant.getContextualInsightMessages({
         message: `I'm looking at an alert and trying to understand why it was triggered`,
         instructions: dedent(
-          `I'm an SRE. I am looking at an alert that was triggered. I want to understand why it was triggered, what it means, and what I should do next.        
+          `I'm an SRE. I am looking at an alert that was triggered. I want to understand why it was triggered, what it means, and what I should do next.
 
-        The following contextual information is available to help me understand the alert:
+        The following contextual information is available to help you understand the alert:
         ${obsAlertContext}
 
         Be brief and to the point.
         Do not list the alert details as bullet points.
         Refer to the contextual information provided above when relevant.
-        Pay specific attention to why the alert happened and what may have contributed to it.
+        Pay special attention to regressions in downstream dependencies like big increases or decreases in throughput, latency or failure rate
+        Suggest reasons why the alert happened and what may have contributed to it.
         `
         ),
       });
     } catch (e) {
+      console.error('An error occurred while fetching alert context', e);
       return observabilityAIAssistant.getContextualInsightMessages({
         message: `I'm looking at an alert and trying to understand why it was triggered`,
         instructions: dedent(
@@ -138,7 +91,7 @@ ${JSON.stringify(downstreamDependencies, null, 2)}`
             'xpack.observability.alertDetailContextualInsights.InsightButtonLabel',
             { defaultMessage: 'Help me understand this alert' }
           )}
-          messages={getPromptMessages}
+          messages={getAlertContextMessages}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

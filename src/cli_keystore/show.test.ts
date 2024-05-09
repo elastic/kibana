@@ -41,42 +41,46 @@ import { Keystore } from '../cli/keystore';
 import { show } from './show';
 
 describe('Kibana keystore: show', () => {
-  const keystore = new Keystore('mock-path', '');
+  let keystore: Keystore;
 
-  it('reads stored strings', () => {
-    const exitCode = show(keystore, 'foo', {});
+  beforeAll(async () => {
+    keystore = new Keystore('mock-path', '');
+  });
+
+  it('reads stored strings', async () => {
+    const exitCode = await show(keystore, 'foo', {});
 
     expect(exitCode).toBe(0);
     expect(mockLogFn).toHaveBeenCalledWith('turbo2000');
     expect(mockErrFn).not.toHaveBeenCalled();
   });
 
-  it('reads stored numbers', () => {
-    const exitCode = show(keystore, 'num', {});
+  it('reads stored numbers', async () => {
+    const exitCode = await show(keystore, 'num', {});
 
     expect(exitCode).toBe(0);
     expect(mockLogFn).toHaveBeenCalledWith('12345');
     expect(mockErrFn).not.toHaveBeenCalled();
   });
 
-  it('reads stored objecs', () => {
-    const exitCode = show(keystore, 'bar', {});
+  it('reads stored objecs', async () => {
+    const exitCode = await show(keystore, 'bar', {});
 
     expect(exitCode).toBe(0);
     expect(mockLogFn).toHaveBeenCalledWith(JSON.stringify({ sub: 0 }));
     expect(mockErrFn).not.toHaveBeenCalled();
   });
 
-  it('outputs to a file when the arg is passed', () => {
-    const exitCode = show(keystore, 'foo', { output: 'non-existent-file.txt' });
+  it('outputs to a file when the arg is passed', async () => {
+    const exitCode = await show(keystore, 'foo', { output: 'non-existent-file.txt' });
 
     expect(exitCode).toBe(0);
     expect(mockLogFn).toHaveBeenCalledWith('Writing output to file: non-existent-file.txt');
     expect(mockErrFn).not.toHaveBeenCalled();
   });
 
-  it('logs and terminates with an error when output file exists', () => {
-    const exitCode = show(keystore, 'foo', { output: 'existing-file.txt' });
+  it('logs and terminates with an error when output file exists', async () => {
+    const exitCode = await show(keystore, 'foo', { output: 'existing-file.txt' });
 
     expect(exitCode).toBe(-1);
     expect(mockErrFn).toHaveBeenCalledWith(
@@ -85,8 +89,8 @@ describe('Kibana keystore: show', () => {
     expect(mockLogFn).not.toHaveBeenCalled();
   });
 
-  it("logs and terminates with an error when the store doesn't have the key", () => {
-    const exitCode = show(keystore, 'no-key');
+  it("logs and terminates with an error when the store doesn't have the key", async () => {
+    const exitCode = await show(keystore, 'no-key');
 
     expect(exitCode).toBe(-1);
     expect(mockErrFn).toHaveBeenCalledWith("ERROR: Kibana keystore doesn't have requested key.");

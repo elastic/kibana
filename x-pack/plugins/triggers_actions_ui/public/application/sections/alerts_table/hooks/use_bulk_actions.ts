@@ -16,6 +16,7 @@ import {
   BulkActionsPanelConfig,
   BulkActionsState,
   BulkActionsVerbs,
+  BulkActionsReducerAction,
   UseBulkActionsRegistry,
 } from '../../../../types';
 import {
@@ -50,6 +51,7 @@ export interface UseBulkActions {
   bulkActions: BulkActionsPanelConfig[];
   setIsBulkActionsLoading: (isLoading: boolean) => void;
   clearSelection: () => void;
+  updateBulkActionsState: React.Dispatch<BulkActionsReducerAction>;
 }
 
 type UseBulkAddToCaseActionsProps = Pick<BulkActionsProps, 'casesConfig' | 'refresh'> &
@@ -90,7 +92,9 @@ const addItemsToInitialPanel = ({
 }) => {
   if (panels.length > 0) {
     if (panels[0].items) {
-      panels[0].items.push(...items);
+      panels[0].items = [...panels[0].items, ...items].filter(
+        (item, index, self) => index === self.findIndex((newItem) => newItem.key === item.key)
+      );
     }
     return panels;
   } else {
@@ -205,6 +209,33 @@ export const useBulkUntrackActions = ({
   const hasUptimePermission = application?.capabilities.uptime?.show;
   const hasSloPermission = application?.capabilities.slo?.show;
   const hasObservabilityPermission = application?.capabilities.observability?.show;
+  const onClick = useCallback(
+    async (alerts?: TimelineItem[]) => {
+      if (!alerts) return;
+      const alertUuids = alerts.map((alert) => alert._id);
+      const indices = alerts.map((alert) => alert._index ?? '');
+      try {
+        setIsBulkActionsLoading(true);
+        if (isAllSelected) {
+          await untrackAlertsByQuery({ query, featureIds });
+        } else {
+          await untrackAlerts({ indices, alertUuids });
+        }
+        onSuccess();
+      } finally {
+        setIsBulkActionsLoading(false);
+      }
+    },
+    [
+      query,
+      featureIds,
+      isAllSelected,
+      onSuccess,
+      setIsBulkActionsLoading,
+      untrackAlerts,
+      untrackAlertsByQuery,
+    ]
+  );
 
   return useMemo(() => {
     // Check if at least one Observability feature is enabled
@@ -225,28 +256,10 @@ export const useBulkUntrackActions = ({
         disableOnQuery: false,
         disabledLabel: MARK_AS_UNTRACKED,
         'data-test-subj': 'mark-as-untracked',
-        onClick: async (alerts?: TimelineItem[]) => {
-          if (!alerts) return;
-          const alertUuids = alerts.map((alert) => alert._id);
-          const indices = alerts.map((alert) => alert._index ?? '');
-          try {
-            setIsBulkActionsLoading(true);
-            if (isAllSelected) {
-              await untrackAlertsByQuery({ query, featureIds });
-            } else {
-              await untrackAlerts({ indices, alertUuids });
-            }
-            onSuccess();
-          } finally {
-            setIsBulkActionsLoading(false);
-          }
-        },
+        onClick,
       },
     ];
   }, [
-    onSuccess,
-    setIsBulkActionsLoading,
-    untrackAlerts,
     application?.capabilities,
     hasApmPermission,
     hasInfrastructurePermission,
@@ -254,10 +267,7 @@ export const useBulkUntrackActions = ({
     hasUptimePermission,
     hasSloPermission,
     hasObservabilityPermission,
-    featureIds,
-    query,
-    isAllSelected,
-    untrackAlertsByQuery,
+    onClick,
   ]);
 };
 

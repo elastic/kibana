@@ -117,12 +117,12 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
     () => (
       <EuiDescribedFormGroup
         title={
-          <h4>
+          <h3>
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.tamperingLabel"
               defaultMessage="Agent tamper protection"
             />
-          </h4>
+          </h3>
         }
         description={
           <FormattedMessage
@@ -209,12 +209,12 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
     <>
       <EuiDescribedFormGroup
         title={
-          <h4>
+          <h3>
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.descriptionFieldLabel"
               defaultMessage="Description"
             />
-          </h4>
+          </h3>
         }
         description={
           <FormattedMessage
@@ -254,12 +254,12 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
       </EuiDescribedFormGroup>
       <EuiDescribedFormGroup
         title={
-          <h4 data-test-subj="defaultNamespaceHeader">
+          <h3 data-test-subj="defaultNamespaceHeader">
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.namespaceFieldLabel"
               defaultMessage="Default namespace"
             />
-          </h4>
+          </h3>
         }
         description={
           <FormattedMessage
@@ -305,12 +305,12 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
       </EuiDescribedFormGroup>
       <EuiDescribedFormGroup
         title={
-          <h4>
+          <h3>
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.monitoringLabel"
               defaultMessage="Agent monitoring"
             />
-          </h4>
+          </h3>
         }
         description={
           <FormattedMessage
@@ -403,7 +403,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
 
       <EuiDescribedFormGroup
         title={
-          <h4>
+          <h3>
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.inactivityTimeoutLabel"
               defaultMessage="Inactivity timeout"
@@ -428,7 +428,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                 </EuiToolTip>
               </>
             )}
-          </h4>
+          </h3>
         }
         description={
           <FormattedMessage
@@ -464,12 +464,12 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
       </EuiDescribedFormGroup>
       <EuiDescribedFormGroup
         title={
-          <h4>
+          <h3>
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.fleetServerHostsLabel"
               defaultMessage="Fleet Server"
             />
-          </h4>
+          </h3>
         }
         description={
           <FormattedMessage
@@ -504,12 +504,12 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
       </EuiDescribedFormGroup>
       <EuiDescribedFormGroup
         title={
-          <h4>
+          <h3>
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.dataOutputLabel"
               defaultMessage="Output for integrations"
             />
-          </h4>
+          </h3>
         }
         description={
           <FormattedMessage
@@ -544,12 +544,12 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
       </EuiDescribedFormGroup>
       <EuiDescribedFormGroup
         title={
-          <h4>
+          <h3>
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.monitoringOutputLabel"
               defaultMessage="Output for agent monitoring"
             />
-          </h4>
+          </h3>
         }
         description={
           <FormattedMessage
@@ -584,13 +584,13 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
       </EuiDescribedFormGroup>
       <EuiDescribedFormGroup
         title={
-          <h4>
+          <h3>
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.downloadSourceLabel"
               defaultMessage="Agent Binary Download"
               data-test-subj="agentPolicyForm.downloadSource.label"
             />
-          </h4>
+          </h3>
         }
         description={
           <FormattedMessage
@@ -626,7 +626,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
       </EuiDescribedFormGroup>
       <EuiDescribedFormGroup
         title={
-          <h4>
+          <h3>
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.unenrollmentTimeoutLabel"
               defaultMessage="Unenrollment timeout"
@@ -646,7 +646,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                 size="s"
               />
             </EuiToolTip>
-          </h4>
+          </h3>
         }
         description={
           <FormattedMessage
@@ -682,14 +682,14 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
       </EuiDescribedFormGroup>
       <EuiDescribedFormGroup
         title={
-          <h4>
+          <h3>
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.hostnameFormatLabel"
               defaultMessage="Host name format"
             />
             &nbsp;
             <EuiBetaBadge label="beta" size="s" color="accent" />
-          </h4>
+          </h3>
         }
         description={
           <FormattedMessage

@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import type { CoreStart } from '@kbn/core/public';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -20,10 +19,10 @@ import {
   EuiModalHeaderTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import type { LayerAction } from '../../../../types';
+import type { LayerAction, StartServices } from '../../../../types';
 import { LOCAL_STORAGE_LENS_KEY } from '../../../../settings_storage';
 import type { LayerType } from '../../../../../common/types';
 import { LAST_ACTION_ORDER } from './order_bounds';
@@ -33,7 +32,7 @@ interface RemoveLayerAction {
   layerIndex: number;
   layerType?: LayerType;
   isOnlyLayer: boolean;
-  core: Pick<CoreStart, 'overlays' | 'theme'>;
+  core: StartServices;
   customModalText?: { title?: string; description?: string };
 }
 
@@ -224,7 +223,8 @@ export const getRemoveLayerAction = (props: RemoveLayerAction): LayerAction => {
       };
 
       if (!lensLocalStorage.skipDeleteModal) {
-        const modal = props.core.overlays.openModal(
+        const { overlays, ...startServices } = props.core;
+        const modal = overlays.openModal(
           toMountPoint(
             <RemoveConfirmModal
               modalTitle={modalTitle}
@@ -235,7 +235,7 @@ export const getRemoveLayerAction = (props: RemoveLayerAction): LayerAction => {
               closeModal={() => modal.close()}
               updateLensLocalStorage={updateLensLocalStorage}
             />,
-            { theme$: props.core.theme.theme$ }
+            startServices
           ),
           {
             'data-test-subj': 'lnsLayerRemoveModal',

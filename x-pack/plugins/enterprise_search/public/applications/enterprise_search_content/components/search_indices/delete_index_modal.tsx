@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -39,6 +39,9 @@ export const DeleteIndexModal: React.FC = () => {
   } = useValues(IndicesLogic);
 
   const [inputIndexName, setInputIndexName] = useState('');
+  useEffect(() => {
+    setInputIndexName('');
+  }, [isDeleteModalVisible, indexName]);
 
   return isDeleteModalVisible ? (
     <EuiConfirmModal
@@ -138,6 +141,8 @@ export const DeleteIndexModal: React.FC = () => {
           )}
         >
           <EuiFieldText
+            data-test-subj="entSearchContent-indices-deleteModal-input"
+            data-telemetry-id="entSearchContent-indices-deleteModal-input"
             onChange={(e) => setInputIndexName(e.target.value)}
             value={inputIndexName}
           />

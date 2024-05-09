@@ -20,6 +20,174 @@
     "classes": [
       {
         "parentPluginId": "@kbn/test-eui-helpers",
+        "id": "def-common.EuiButtonGroupTestHarness",
+        "type": "Class",
+        "tags": [],
+        "label": "EuiButtonGroupTestHarness",
+        "description": [],
+        "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiButtonGroupTestHarness.testId",
+            "type": "string",
+            "tags": [],
+            "label": "#testId",
+            "description": [],
+            "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiButtonGroupTestHarness.buttonGroup",
+            "type": "Object",
+            "tags": [],
+            "label": "#buttonGroup",
+            "description": [
+              "\nReturns button group or throws"
+            ],
+            "signature": [
+              "HTMLElement"
+            ],
+            "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiButtonGroupTestHarness.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiButtonGroupTestHarness.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "testId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiButtonGroupTestHarness.testId",
+            "type": "string",
+            "tags": [],
+            "label": "testId",
+            "description": [
+              "\nReturns `data-test-subj` of button group"
+            ],
+            "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiButtonGroupTestHarness.self",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "self",
+            "description": [
+              "\nReturns button group if found, otherwise `null`"
+            ],
+            "signature": [
+              "HTMLElement | null"
+            ],
+            "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiButtonGroupTestHarness.options",
+            "type": "Array",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "\nReturns all options of button groups"
+            ],
+            "signature": [
+              "HTMLElement[]"
+            ],
+            "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiButtonGroupTestHarness.selected",
+            "type": "Object",
+            "tags": [],
+            "label": "selected",
+            "description": [
+              "\nReturns selected value of button group"
+            ],
+            "signature": [
+              "HTMLElement"
+            ],
+            "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiButtonGroupTestHarness.select",
+            "type": "Function",
+            "tags": [],
+            "label": "select",
+            "description": [
+              "\nSelect option from group"
+            ],
+            "signature": [
+              "(optionName: string | RegExp) => void"
+            ],
+            "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiButtonGroupTestHarness.select.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "optionName",
+                "description": [],
+                "signature": [
+                  "string | RegExp"
+                ],
+                "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-eui-helpers",
         "id": "def-common.EuiSuperDatePickerTestHarness",
         "type": "Class",
         "tags": [],

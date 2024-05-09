@@ -2330,6 +2330,10 @@
                 "path": "x-pack/plugins/alerting/server/plugin.test.ts"
               },
               {
+                "plugin": "cases",
+                "path": "x-pack/plugins/cases/server/client/factory.test.ts"
+              },
+              {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/server/authorization/app_authorization.test.ts"
               },

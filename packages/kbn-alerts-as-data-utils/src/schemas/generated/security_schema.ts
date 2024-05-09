@@ -159,6 +159,7 @@ const SecurityAlertOptional = rt.partial({
   'kibana.alert.rule.created_by': schemaString,
   'kibana.alert.rule.description': schemaString,
   'kibana.alert.rule.enabled': schemaString,
+  'kibana.alert.rule.execution.timestamp': schemaDate,
   'kibana.alert.rule.execution.uuid': schemaString,
   'kibana.alert.rule.from': schemaString,
   'kibana.alert.rule.immutable': schemaStringArray,

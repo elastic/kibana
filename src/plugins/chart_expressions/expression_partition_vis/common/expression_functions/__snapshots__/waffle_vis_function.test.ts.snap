@@ -92,6 +92,9 @@ Object {
       "legendDisplay": "show",
       "legendPosition": "right",
       "legendSize": "medium",
+      "legendStats": Array [
+        "value",
+      ],
       "maxLegendLines": 2,
       "metrics": Array [
         Object {
@@ -108,7 +111,6 @@ Object {
         "name": "kibana_palette",
         "type": "system_palette",
       },
-      "showValuesInLegend": true,
       "splitColumn": undefined,
       "splitRow": undefined,
       "truncateLegend": true,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CSSProperties, ReactNode } from 'react';
+import type { CSSProperties, PropsWithChildren } from 'react';
 import React, { useState, useRef, useEffect, createContext, useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import cytoscape, { type Stylesheet } from 'cytoscape';
@@ -19,7 +19,6 @@ cytoscape.use(dagre);
 export const CytoscapeContext = createContext<cytoscape.Core | undefined>(undefined);
 
 interface CytoscapeProps {
-  children?: ReactNode;
   elements: cytoscape.ElementDefinition[];
   theme: EuiThemeType;
   height: number;
@@ -77,7 +76,7 @@ export function Cytoscape({
   resetCy,
   style,
   width,
-}: CytoscapeProps) {
+}: PropsWithChildren<CytoscapeProps>) {
   const cytoscapeOptions = useMemo(() => {
     return {
       ...getCytoscapeOptions(theme),

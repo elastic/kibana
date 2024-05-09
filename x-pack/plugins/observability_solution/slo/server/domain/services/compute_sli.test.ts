@@ -23,4 +23,8 @@ describe('computeSLI', () => {
   it('returns rounds the value to 6 digits', () => {
     expect(computeSLI(33, 90)).toEqual(0.366667);
   });
+
+  it('returns the sli value using totalSlicesInRange when provided', () => {
+    expect(computeSLI(90, 100, 10_080)).toEqual(0.999008);
+  });
 });

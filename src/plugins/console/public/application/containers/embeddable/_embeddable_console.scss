@@ -38,24 +38,9 @@
     animation-duration: $euiAnimSpeedNormal;
     animation-timing-function: $euiAnimSlightResistance;
     animation-fill-mode: forwards;
-  }
-
-  &-isOpen.embeddableConsole--large {
-    animation-name: embeddableConsoleOpenPanelLarge;
-    height: $embeddableConsoleMaxHeight;
-    bottom: map-get($embeddableConsoleHeights, 'l') * -1;
-  }
-
-  &-isOpen.embeddableConsole--medium {
-    animation-name: embeddableConsoleOpenPanelMedium;
-    height: map-get($embeddableConsoleHeights, 'm');
-    bottom: map-get($embeddableConsoleHeights, 'm') * -1;
-  }
-
-  &-isOpen.embeddableConsole--small {
-    animation-name: embeddableConsoleOpenPanelSmall;
-    height: map-get($embeddableConsoleHeights, 's');
-    bottom: map-get($embeddableConsoleHeights, 's') * -1;
+    animation-name: embeddableConsoleOpenPanel;
+    height: var(--embedded-console-height);
+    bottom: var(--embedded-console-bottom);
   }
 }
 
@@ -80,7 +65,6 @@
 
   &--altViewButton-container {
     margin-left: auto;
-    // padding: $euiSizeS;
   }
 }
 
@@ -132,34 +116,13 @@
   }
 }
 
-@keyframes embeddableConsoleOpenPanelLarge {
-  0% {
-    // Accounts for the initial height offset from the top
-    transform: translateY(calc((#{$embeddableConsoleInitialHeight} * 3) * -1));
-  }
-
-  100% {
-    transform: translateY(map-get($embeddableConsoleHeights, 'l') * -1);
-  }
-}
-
-@keyframes embeddableConsoleOpenPanelMedium {
+@keyframes embeddableConsoleOpenPanel {
   0% {
     transform: translateY(-$embeddableConsoleInitialHeight);
   }
 
   100% {
-    transform: translateY(map-get($embeddableConsoleHeights, 'm') * -1);
-  }
-}
-
-@keyframes embeddableConsoleOpenPanelSmall {
-  0% {
-    transform: translateY(-$embeddableConsoleInitialHeight);
-  }
-
-  100% {
-    transform: translateY(map-get($embeddableConsoleHeights, 's') * -1);
+    transform: translateY(var(--embedded-console-bottom));
   }
 }
 

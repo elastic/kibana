@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { FC, ReactNode } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -140,10 +140,9 @@ const Lines: FC<{ result: NerResponse }> = ({ result }) => {
 const EntityBadge = ({
   entity,
   children,
-}: {
+}: PropsWithChildren<{
   entity: estypes.MlTrainedModelEntities;
-  children: ReactNode;
-}) => {
+}>) => {
   const { euiTheme } = useCurrentThemeVars();
   return (
     <EuiBadge

@@ -22,6 +22,7 @@ import { RawRule } from '../../types';
 import { getBeforeSetup, mockedDateString } from '../tests/lib';
 import { createNewAPIKeySet } from './create_new_api_key_set';
 import { RulesClientContext } from '../types';
+import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
 import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
 
 const taskManager = taskManagerMock.createStart();
@@ -57,6 +58,7 @@ const rulesClientParams: jest.Mocked<RulesClientContext> = {
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
+  backfillClient: backfillClientMock.create(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
   isSystemAction: jest.fn(),
 };

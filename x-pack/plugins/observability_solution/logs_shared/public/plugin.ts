@@ -11,7 +11,7 @@ import {
   NodeLogsLocatorDefinition,
   TraceLogsLocatorDefinition,
 } from '../common/locators';
-import { createLogAIAssistant } from './components/log_ai_assistant';
+import { createLogAIAssistant, createLogsAIAssistantRenderer } from './components/log_ai_assistant';
 import { LogViewsService } from './services/log_views';
 import {
   LogsSharedClientCoreSetup,
@@ -52,7 +52,7 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
 
   public start(core: CoreStart, plugins: LogsSharedClientStartDeps) {
     const { http } = core;
-    const { data, dataViews, observabilityAIAssistant } = plugins;
+    const { data, dataViews, discoverShared, observabilityAIAssistant } = plugins;
 
     const logViews = this.logViews.start({
       http,
@@ -67,6 +67,11 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
     }
 
     const LogAIAssistant = createLogAIAssistant({ observabilityAIAssistant });
+
+    discoverShared.features.registry.register({
+      id: 'observability-logs-ai-assistant',
+      render: createLogsAIAssistantRenderer(LogAIAssistant),
+    });
 
     return {
       logViews,

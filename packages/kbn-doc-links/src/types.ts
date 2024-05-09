@@ -11,6 +11,7 @@
  */
 export interface DocLinksMeta {
   version: string;
+  ecs_version: string;
   elasticWebsiteUrl: string;
   elasticGithubUrl: string;
   docsWebsiteUrl: string;
@@ -170,7 +171,6 @@ export interface DocLinks {
     readonly languageClients: string;
     readonly licenseManagement: string;
     readonly machineLearningStart: string;
-    readonly playground: string;
     readonly mailService: string;
     readonly mlDocumentEnrichment: string;
     readonly searchApplicationsTemplates: string;
@@ -355,6 +355,7 @@ export interface DocLinks {
     readonly privileges: string;
     readonly manageDetectionRules: string;
     readonly createEsqlRuleType: string;
+    readonly ruleUiAdvancedParams: string;
     readonly entityAnalytics: {
       readonly riskScorePrerequisites: string;
       readonly hostRiskScore: string;
@@ -647,6 +648,9 @@ export interface DocLinks {
   };
   readonly telemetry: {
     readonly settings: string;
+  };
+  readonly playground: {
+    readonly chatPlayground: string;
   };
 }
 

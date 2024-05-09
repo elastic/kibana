@@ -22,7 +22,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');
   const retry = getService('retry');
 
-  describe('@ess @serverless @skipInQA install_prebuilt_rules_from_real_package', () => {
+  describe('@ess @serverless @skipInServerlessMKI install_prebuilt_rules_from_real_package', () => {
     beforeEach(async () => {
       await deletePrebuiltRulesFleetPackage(supertest);
       await deleteAllRules(supertest, log);

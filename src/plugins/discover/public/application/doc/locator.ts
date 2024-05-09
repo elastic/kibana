@@ -9,7 +9,6 @@
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import { DataViewSpec } from '@kbn/data-views-plugin/public';
-import { addProfile } from '../../../common/customizations';
 
 export const DISCOVER_SINGLE_DOC_LOCATOR = 'DISCOVER_SINGLE_DOC_LOCATOR';
 
@@ -18,7 +17,6 @@ export interface DiscoverSingleDocLocatorParams extends SerializableRecord {
   rowId: string;
   rowIndex: string;
   referrer: string; // discover main view url
-  profile?: string;
 }
 
 export type DiscoverSingleDocLocator = LocatorPublic<DiscoverSingleDocLocatorParams>;
@@ -47,13 +45,7 @@ export class DiscoverSingleDocLocatorDefinition
       dataViewId = index;
     }
 
-    let path = '#/';
-
-    if (params.profile) {
-      path = addProfile(path, params.profile);
-    }
-
-    path = `${path}doc/${dataViewId}/${rowIndex}?id=${encodeURIComponent(rowId)}`;
+    const path = `#/doc/${dataViewId}/${rowIndex}?id=${encodeURIComponent(rowId)}`;
 
     return {
       app: 'discover',

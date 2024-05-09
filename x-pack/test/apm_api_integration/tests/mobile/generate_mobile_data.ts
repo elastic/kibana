@@ -12,11 +12,11 @@ export const SERVICE_VERSIONS = ['2.3', '1.2', '1.1'];
 export async function generateMobileData({
   start,
   end,
-  synthtraceEsClient,
+  apmSynthtraceEsClient,
 }: {
   start: number;
   end: number;
-  synthtraceEsClient: ApmSynthtraceEsClient;
+  apmSynthtraceEsClient: ApmSynthtraceEsClient;
 }) {
   const galaxy10 = apm
     .mobileApp({
@@ -210,7 +210,7 @@ export async function generateMobileData({
     })
     .setNetworkConnection({ type: 'wifi' });
 
-  return await synthtraceEsClient.index([
+  return await apmSynthtraceEsClient.index([
     timerange(start, end)
       .interval('5m')
       .rate(1)

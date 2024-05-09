@@ -310,7 +310,7 @@ export const runTask = async ({
     };
     telemetry.reportEvent(RISK_SCORE_EXECUTION_SUCCESS_EVENT.eventType, telemetryEvent);
 
-    riskScoreService.scheduleLatestTransformNow();
+    await riskScoreService.scheduleLatestTransformNow();
 
     if (isCancelled()) {
       log('task was cancelled');

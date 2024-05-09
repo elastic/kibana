@@ -308,6 +308,7 @@ export const buildXYExpression = (
         ? Math.min(5, state.legend.floatingColumns)
         : [],
     maxLines: state.legend.maxLines,
+    legendStats: state.legend.legendStats,
     shouldTruncate:
       state.legend.shouldTruncate ??
       getDefaultVisualValuesForLayer(state, datasourceLayers).truncateText,
@@ -341,7 +342,6 @@ export const buildXYExpression = (
     hideEndzones: state.hideEndzones ?? false,
     addTimeMarker:
       (isTimeChart(validDataLayers, { datasourceLayers }) && state.showCurrentTimeMarker) ?? false,
-    valuesInLegend: state.valuesInLegend ?? false,
     yAxisConfigs: [...yAxisConfigsToExpression(yAxisConfigs)],
     xAxisConfig: buildExpression([xAxisConfigFn]).toAst(),
     showTooltip: [],

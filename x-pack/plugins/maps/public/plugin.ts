@@ -10,7 +10,6 @@ import type { Setup as InspectorSetupContract } from '@kbn/inspector-plugin/publ
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
-import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type {
@@ -90,10 +89,11 @@ import {
 import { MapInspectorView } from './inspector/map_adapter/map_inspector_view';
 import { VectorTileInspectorView } from './inspector/vector_tile_adapter/vector_tile_inspector_view';
 
-import { setupLensChoroplethChart } from './lens';
+import { PassiveMapLazy, setupLensChoroplethChart } from './lens';
 import { CONTENT_ID, LATEST_VERSION, MapAttributes } from '../common/content_management';
 import { savedObjectToEmbeddableAttributes } from './map_attribute_service';
 import { MapByValueInput } from './embeddable';
+import { MapComponentLazy } from './embeddable/map_component_lazy';
 
 export interface MapsPluginSetupDependencies {
   cloud?: CloudSetup;
@@ -124,7 +124,6 @@ export interface MapsPluginStartDependencies {
   uiActions: UiActionsStart;
   share: SharePluginStart;
   visualizations: VisualizationsStart;
-  dashboard: DashboardStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   presentationUtil: PresentationUtilPluginStart;
   security?: SecurityPluginStart;
@@ -275,6 +274,8 @@ export class MapsPlugin
     return {
       createLayerDescriptors,
       suggestEMSTermJoinConfig,
+      Map: MapComponentLazy,
+      PassiveMap: PassiveMapLazy,
     };
   }
 }

@@ -32,7 +32,9 @@ export function initializeActionsTelemetry(
 }
 
 export function scheduleActionsTelemetry(logger: Logger, taskManager: TaskManagerStartContract) {
-  scheduleTasks(logger, taskManager);
+  scheduleTasks(logger, taskManager).catch(() => {
+    // it shouldn't throw anything. But adding the catch just in case
+  });
 }
 
 function registerActionsTelemetryTask(

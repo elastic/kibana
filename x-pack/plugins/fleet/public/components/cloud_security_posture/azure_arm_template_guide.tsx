@@ -28,8 +28,7 @@ export const AzureArmTemplateGuide = ({
   enrollmentToken?: string;
 }) => {
   const { agentPolicyWithPackagePolicies } = useAgentPolicyWithPackagePolicies(agentPolicy?.id);
-  const { fleetServerHosts } = useFleetServerHostsForPolicy(agentPolicyWithPackagePolicies);
-  const fleetServerHost = fleetServerHosts[0];
+  const { fleetServerHost } = useFleetServerHostsForPolicy(agentPolicyWithPackagePolicies);
 
   return (
     <EuiText>

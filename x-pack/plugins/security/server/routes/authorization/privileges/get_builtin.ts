@@ -21,7 +21,10 @@ export function defineGetBuiltinPrivilegesRoutes({ router }: RouteDefinitionPara
         : [privileges.index];
       privileges.index = indexPriviledges.filter((privilege) => privilege !== 'none');
 
-      return response.ok({ body: privileges });
+      // TODO: remove hardcoded value once ES returns built-in privileges for remote_cluster
+      const remoteClusterPrivileges = ['monitor_enrich'];
+
+      return response.ok({ body: { ...privileges, remote_cluster: remoteClusterPrivileges } });
     }
   );
 }

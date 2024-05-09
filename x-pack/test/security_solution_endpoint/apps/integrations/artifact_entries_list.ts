@@ -52,9 +52,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       .set('kbn-xsrf', 'true');
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/180493
-  // Failing: See https://github.com/elastic/kibana/issues/180493
-  describe.skip('For each artifact list under management', function () {
+  describe('For each artifact list under management', function () {
+    // It's flaky only in Serverless
     targetTags(this, ['@ess', '@serverless']);
 
     this.timeout(60_000 * 5);
@@ -156,10 +155,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         } else if (formAction.type === 'click') {
           await testSubjects.click(formAction.selector);
         } else if (formAction.type === 'input') {
-          await testSubjects.setValue(
-            formAction.selector,
-            (formAction.value || '') + (suffix ? suffix : '')
-          );
+          const newValue = (formAction.value || '') + (suffix ? suffix : '');
+          await testSubjects.setValue(formAction.selector, newValue);
+          await testSubjects.getAttribute(formAction.selector, 'value').then((value) => {
+            if (value !== newValue) {
+              return testSubjects.setValue(formAction.selector, newValue);
+            }
+          });
         } else if (formAction.type === 'clear') {
           await (
             await (await testSubjects.find(formAction.selector)).findByCssSelector('button')

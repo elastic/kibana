@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { UserSettingsService } from './user_settings_service';
-export type { InternalUserSettingsServiceSetup } from './user_settings_service';
+export { UserSettingsService } from './src/user_settings_service';
+export type { InternalUserSettingsServiceSetup } from './src/user_settings_service';

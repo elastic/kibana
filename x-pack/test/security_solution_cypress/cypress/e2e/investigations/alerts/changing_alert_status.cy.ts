@@ -40,7 +40,8 @@ import { visit } from '../../../tasks/navigation';
 import { ALERTS_URL } from '../../../urls/navigation';
 
 // Iusse tracked in: https://github.com/elastic/kibana/issues/167809
-describe('Changing alert status', { tags: ['@ess', '@skipInServerless'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/182206
+describe.skip('Changing alert status', { tags: ['@ess', '@skipInServerless'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
   });

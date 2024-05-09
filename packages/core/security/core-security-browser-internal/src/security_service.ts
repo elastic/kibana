@@ -8,7 +8,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-browser-internal';
-import type { CoreSecurityContract } from '@kbn/core-security-browser';
+import type { CoreSecurityDelegateContract } from '@kbn/core-security-browser';
 import type {
   InternalSecurityServiceSetup,
   InternalSecurityServiceStart,
@@ -19,7 +19,7 @@ export class SecurityService
   implements CoreService<InternalSecurityServiceSetup, InternalSecurityServiceStart>
 {
   private readonly log: Logger;
-  private securityApi?: CoreSecurityContract;
+  private securityApi?: CoreSecurityDelegateContract;
 
   constructor(coreContext: CoreContext) {
     this.log = coreContext.logger.get('security-service');
@@ -27,7 +27,7 @@ export class SecurityService
 
   public setup(): InternalSecurityServiceSetup {
     return {
-      registerSecurityApi: (api) => {
+      registerSecurityDelegate: (api) => {
         if (this.securityApi) {
           throw new Error('security API can only be registered once');
         }

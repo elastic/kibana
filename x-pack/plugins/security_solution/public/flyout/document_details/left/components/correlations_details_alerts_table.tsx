@@ -6,7 +6,7 @@
  */
 
 import type { ReactElement, ReactNode } from 'react';
-import React, { type VFC, useMemo, useCallback } from 'react';
+import React, { type FC, useMemo, useCallback } from 'react';
 import { type Criteria, EuiBasicTable, formatDate } from '@elastic/eui';
 import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { Filter } from '@kbn/es-query';
@@ -131,7 +131,7 @@ export interface CorrelationsDetailsAlertsTableProps {
 /**
  * Renders paginated alert array based on the provided alertIds
  */
-export const CorrelationsDetailsAlertsTable: VFC<CorrelationsDetailsAlertsTableProps> = ({
+export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTableProps> = ({
   title,
   loading,
   alertIds,

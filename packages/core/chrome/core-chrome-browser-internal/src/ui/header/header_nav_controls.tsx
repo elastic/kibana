@@ -16,12 +16,13 @@ import { HeaderExtension } from './header_extension';
 interface Props {
   navControls$: Observable<readonly ChromeNavControl[]>;
   side?: 'left' | 'right';
+  append?: JSX.Element | null;
 }
 
-export function HeaderNavControls({ navControls$ }: Props) {
+export function HeaderNavControls({ navControls$, append = null }: Props) {
   const navControls = useObservable(navControls$, []);
 
-  if (!navControls) {
+  if (!navControls || navControls.length === 0) {
     return null;
   }
 
@@ -34,6 +35,7 @@ export function HeaderNavControls({ navControls$ }: Props) {
           <HeaderExtension extension={navControl.mount} />
         </EuiHeaderSectionItem>
       ))}
+      {append}
     </>
   );
 }

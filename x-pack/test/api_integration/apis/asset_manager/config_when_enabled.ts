@@ -8,7 +8,6 @@
 import {
   ApmSynthtraceEsClient,
   ApmSynthtraceKibanaClient,
-  AssetsSynthtraceEsClient,
   createLogger,
   InfraSynthtraceEsClient,
   LogLevel,
@@ -20,9 +19,6 @@ import { InheritedServices } from './types';
 
 interface AssetManagerConfig {
   services: InheritedServices & {
-    assetsSynthtraceEsClient: (
-      context: InheritedFtrProviderContext
-    ) => Promise<AssetsSynthtraceEsClient>;
     infraSynthtraceEsClient: (
       context: InheritedFtrProviderContext
     ) => Promise<InfraSynthtraceEsClient>;
@@ -41,13 +37,6 @@ export default async function createTestConfig({
     testFiles: [require.resolve('./tests')],
     services: {
       ...services,
-      assetsSynthtraceEsClient: (context: InheritedFtrProviderContext) => {
-        return new AssetsSynthtraceEsClient({
-          client: context.getService('es'),
-          logger: createLogger(LogLevel.info),
-          refreshAfterIndex: true,
-        });
-      },
       infraSynthtraceEsClient: (context: InheritedFtrProviderContext) => {
         return new InfraSynthtraceEsClient({
           client: context.getService('es'),

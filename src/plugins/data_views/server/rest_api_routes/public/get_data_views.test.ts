@@ -11,9 +11,9 @@ import { dataViewsService } from '../../mocks';
 import { getUsageCollection } from './test_utils';
 
 describe('get all data views', () => {
-  it('call usageCollection', () => {
+  it('call usageCollection', async () => {
     const usageCollection = getUsageCollection();
-    getDataViews({
+    await getDataViews({
       dataViewsService,
       counterName: 'GET /path',
       usageCollection,

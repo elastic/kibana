@@ -109,6 +109,7 @@ export function privilegesFactory(
             actions.api.get('decryptedTelemetry'),
             actions.api.get('features'),
             actions.api.get('taskManager'),
+            actions.api.get('manageSpaces'),
             actions.space.manage,
             actions.ui.get('spaces', 'manage'),
             actions.ui.get('management', 'kibana', 'spaces'),

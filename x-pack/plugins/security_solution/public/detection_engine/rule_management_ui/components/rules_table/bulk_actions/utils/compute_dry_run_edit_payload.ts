@@ -20,6 +20,16 @@ import { assertUnreachable } from '../../../../../../../common/utility_types';
  */
 export function computeDryRunEditPayload(editAction: BulkActionEditType): BulkActionEditPayload[] {
   switch (editAction) {
+    case BulkActionEditTypeEnum.add_investigation_fields:
+    case BulkActionEditTypeEnum.delete_investigation_fields:
+    case BulkActionEditTypeEnum.set_investigation_fields:
+      return [
+        {
+          type: editAction,
+          value: { field_names: ['@timestamp'] },
+        },
+      ];
+
     case BulkActionEditTypeEnum.add_index_patterns:
     case BulkActionEditTypeEnum.delete_index_patterns:
     case BulkActionEditTypeEnum.set_index_patterns:

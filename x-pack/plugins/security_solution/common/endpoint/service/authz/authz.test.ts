@@ -98,6 +98,27 @@ describe('Endpoint Authz service', () => {
       );
     });
 
+    it('should not give canReadFleetAgents if `fleet.readAgents` is false', () => {
+      fleetAuthz.fleet.readAgents = false;
+      expect(calculateEndpointAuthz(licenseService, fleetAuthz, userRoles).canReadFleetAgents).toBe(
+        false
+      );
+    });
+
+    it('should not give canWriteFleetAgents if `fleet.allAgents` is false', () => {
+      fleetAuthz.fleet.allAgents = false;
+      expect(
+        calculateEndpointAuthz(licenseService, fleetAuthz, userRoles).canWriteFleetAgents
+      ).toBe(false);
+    });
+
+    it('should not give canReadFleetAgentPolicies if `fleet.readAgentPolicies` is false', () => {
+      fleetAuthz.fleet.readAgentPolicies = false;
+      expect(
+        calculateEndpointAuthz(licenseService, fleetAuthz, userRoles).canReadFleetAgentPolicies
+      ).toBe(false);
+    });
+
     it('should not give canAccessEndpointManagement if not superuser', () => {
       userRoles = [];
       expect(
@@ -276,6 +297,9 @@ describe('Endpoint Authz service', () => {
         canWriteSecuritySolution: false,
         canReadSecuritySolution: false,
         canAccessFleet: false,
+        canReadFleetAgentPolicies: false,
+        canReadFleetAgents: false,
+        canWriteFleetAgents: false,
         canAccessEndpointActionsLogManagement: false,
         canAccessEndpointManagement: false,
         canCreateArtifactsByPolicy: false,

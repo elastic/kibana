@@ -10,8 +10,8 @@ import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
-
 import { useAgentPolicyRefresh, useAuthz, useLink } from '../hooks';
+import { policyHasFleetServer } from '../services';
 
 import { AgentEnrollmentFlyout } from './agent_enrollment_flyout';
 import { ContextMenuActions } from './context_menu_actions';
@@ -35,8 +35,12 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
 }) => {
   const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState(false);
   const { getHref } = useLink();
-  const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
-  const canAddAgents = useAuthz().fleet.addAgents;
+  const authz = useAuthz();
+
+  const canWriteIntegrationPolicies = authz.integrations.writeIntegrationPolicies;
+  const isFleetServerPolicy = agentPolicy && policyHasFleetServer(agentPolicy);
+
+  const canAddAgents = isFleetServerPolicy ? authz.fleet.addFleetServers : authz.fleet.addAgents;
   const refreshAgentPolicy = useAgentPolicyRefresh();
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(defaultIsOpen);
 

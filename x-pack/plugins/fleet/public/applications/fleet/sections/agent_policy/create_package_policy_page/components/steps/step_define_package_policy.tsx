@@ -106,12 +106,12 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
         )}
         <FormGroupResponsiveFields
           title={
-            <h4>
+            <h3>
               <FormattedMessage
                 id="xpack.fleet.createPackagePolicy.stepConfigure.integrationSettingsSectionTitle"
                 defaultMessage="Integration settings"
               />
-            </h4>
+            </h3>
           }
           description={
             <FormattedMessage

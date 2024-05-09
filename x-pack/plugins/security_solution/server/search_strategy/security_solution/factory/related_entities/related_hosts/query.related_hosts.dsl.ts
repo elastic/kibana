@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ISearchRequestParams } from '@kbn/data-plugin/common';
+import type { ISearchRequestParams } from '@kbn/search-types';
 import type { RelatedHostsRequestOptions } from '../../../../../../common/api/search_strategy';
 
 export const buildRelatedHostsQuery = ({

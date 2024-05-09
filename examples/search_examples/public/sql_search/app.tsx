@@ -22,12 +22,8 @@ import {
 } from '@elastic/eui';
 
 import { CoreStart } from '@kbn/core/public';
-
-import {
-  DataPublicPluginStart,
-  IKibanaSearchResponse,
-  isRunningResponse,
-} from '@kbn/data-plugin/public';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
+import { DataPublicPluginStart, isRunningResponse } from '@kbn/data-plugin/public';
 import {
   SQL_SEARCH_STRATEGY,
   SqlSearchStrategyRequest,

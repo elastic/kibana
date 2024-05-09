@@ -16,14 +16,15 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import type { HttpSetup, NotificationsStart } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { HttpSetup } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { QueryClient, useQueryClient } from '@tanstack/react-query';
 import type { RuleResponse } from '../common/types';
 import { CREATE_RULE_ACTION_SUBJ, TAKE_ACTION_SUBJ } from './test_subjects';
 import { useKibana } from '../common/hooks/use_kibana';
 import { DETECTION_ENGINE_ALERTS_KEY, DETECTION_ENGINE_RULES_KEY } from '../common/constants';
+import { CloudSecurityPostureStartServices } from '../types';
 
 const RULE_PAGE_PATH = '/app/security/rules/id/';
 
@@ -35,16 +36,19 @@ interface TakeActionProps {
 }
 
 export const showCreateDetectionRuleSuccessToast = (
-  notifications: NotificationsStart,
+  cloudSecurityStartServices: CloudSecurityPostureStartServices,
   http: HttpSetup,
   ruleResponse: RuleResponse
 ) => {
+  const { notifications, analytics, i18n, theme } = cloudSecurityStartServices;
+  const startServices = { analytics, i18n, theme };
+
   return notifications.toasts.addSuccess({
     toastLifeTimeMs: 10000,
     color: 'success',
     iconType: '',
     'data-test-subj': 'csp:toast-success',
-    text: toMountPoint(
+    title: toMountPoint(
       <div>
         <EuiText size="m">
           <strong data-test-subj="csp:toast-success-title">{ruleResponse.name}</strong>
@@ -60,6 +64,11 @@ export const showCreateDetectionRuleSuccessToast = (
             defaultMessage="Add rule actions to get notified when alerts are generated."
           />
         </EuiText>
+      </div>,
+      startServices
+    ),
+    text: toMountPoint(
+      <div>
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiButton
@@ -74,41 +83,48 @@ export const showCreateDetectionRuleSuccessToast = (
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </div>
+      </div>,
+      startServices
     ),
   });
 };
 
 export const showChangeBenchmarkRuleStatesSuccessToast = (
-  notifications: NotificationsStart,
+  cloudSecurityStartServices: CloudSecurityPostureStartServices,
   isBenchmarkRuleMuted: boolean,
   data: {
     numberOfRules: number;
     numberOfDetectionRules: number;
   }
 ) => {
+  const { notifications, analytics, i18n, theme } = cloudSecurityStartServices;
+  const startServices = { analytics, i18n, theme };
+
   return notifications.toasts.addSuccess({
     toastLifeTimeMs: 10000,
     color: 'success',
     iconType: '',
     'data-test-subj': 'csp:toast-success-rule-state-change',
+    title: toMountPoint(
+      <EuiText size="m">
+        <strong data-test-subj={`csp:toast-success-rule-title`}>
+          {isBenchmarkRuleMuted ? (
+            <FormattedMessage
+              id="xpack.csp.flyout.ruleEnabledToastTitle"
+              defaultMessage="Rule Enabled"
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.csp.flyout.ruleDisabledToastTitle"
+              defaultMessage="Rule Disabled"
+            />
+          )}
+        </strong>
+      </EuiText>,
+      startServices
+    ),
     text: toMountPoint(
       <div>
-        <EuiText size="m">
-          <strong data-test-subj={`csp:toast-success-rule-title`}>
-            {isBenchmarkRuleMuted ? (
-              <FormattedMessage
-                id="xpack.csp.flyout.ruleEnabledToastTitle"
-                defaultMessage="Rule Enabled"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.csp.flyout.ruleDisabledToastTitle"
-                defaultMessage="Rule Disabled"
-              />
-            )}
-          </strong>
-        </EuiText>
         {isBenchmarkRuleMuted ? (
           <FormattedMessage
             id="xpack.csp.flyout.ruleEnabledToastRulesCount"
@@ -139,7 +155,8 @@ export const showChangeBenchmarkRuleStatesSuccessToast = (
             )}
           </>
         )}
-      </div>
+      </div>,
+      startServices
     ),
   });
 };
@@ -165,8 +182,6 @@ export const TakeAction = ({
     prefix: 'smallContextMenuPopover',
   });
 
-  const { http, notifications } = useKibana().services;
-
   const button = (
     <EuiButton
       isLoading={isLoading}
@@ -187,8 +202,6 @@ export const TakeAction = ({
         createRuleFn={createRuleFn}
         setIsLoading={setIsLoading}
         closePopover={closePopover}
-        notifications={notifications}
-        http={http}
         queryClient={queryClient}
         isCreateDetectionRuleDisabled={isCreateDetectionRuleDisabled}
       />
@@ -200,9 +213,6 @@ export const TakeAction = ({
         enableBenchmarkRuleFn={enableBenchmarkRuleFn}
         setIsLoading={setIsLoading}
         closePopover={closePopover}
-        notifications={notifications}
-        http={http}
-        queryClient={queryClient}
       />
     );
   if (disableBenchmarkRuleFn)
@@ -212,9 +222,6 @@ export const TakeAction = ({
         disableBenchmarkRuleFn={disableBenchmarkRuleFn}
         setIsLoading={setIsLoading}
         closePopover={closePopover}
-        notifications={notifications}
-        http={http}
-        queryClient={queryClient}
       />
     );
 
@@ -237,19 +244,17 @@ const CreateDetectionRule = ({
   createRuleFn,
   setIsLoading,
   closePopover,
-  notifications,
-  http,
   queryClient,
   isCreateDetectionRuleDisabled = false,
 }: {
   createRuleFn: (http: HttpSetup) => Promise<RuleResponse>;
   setIsLoading: (isLoading: boolean) => void;
   closePopover: () => void;
-  notifications: NotificationsStart;
-  http: HttpSetup;
   queryClient: QueryClient;
   isCreateDetectionRuleDisabled: boolean;
 }) => {
+  const { http, ...startServices } = useKibana().services;
+
   return (
     <EuiContextMenuItem
       key="createRule"
@@ -259,7 +264,7 @@ const CreateDetectionRule = ({
         setIsLoading(true);
         const ruleResponse = await createRuleFn(http);
         setIsLoading(false);
-        showCreateDetectionRuleSuccessToast(notifications, http, ruleResponse);
+        showCreateDetectionRuleSuccessToast(startServices, http, ruleResponse);
         // Triggering a refetch of rules and alerts to update the UI
         queryClient.invalidateQueries([DETECTION_ENGINE_RULES_KEY]);
         queryClient.invalidateQueries([DETECTION_ENGINE_ALERTS_KEY]);
@@ -278,14 +283,10 @@ const EnableBenchmarkRule = ({
   enableBenchmarkRuleFn,
   setIsLoading,
   closePopover,
-  notifications,
 }: {
   enableBenchmarkRuleFn: () => Promise<void>;
   setIsLoading: (isLoading: boolean) => void;
   closePopover: () => void;
-  notifications: NotificationsStart;
-  http: HttpSetup;
-  queryClient: QueryClient;
 }) => {
   return (
     <EuiContextMenuItem
@@ -307,14 +308,10 @@ const DisableBenchmarkRule = ({
   disableBenchmarkRuleFn,
   setIsLoading,
   closePopover,
-  notifications,
 }: {
   disableBenchmarkRuleFn: () => Promise<void>;
   setIsLoading: (isLoading: boolean) => void;
   closePopover: () => void;
-  notifications: NotificationsStart;
-  http: HttpSetup;
-  queryClient: QueryClient;
 }) => {
   return (
     <EuiContextMenuItem

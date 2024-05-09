@@ -110,6 +110,7 @@ describe('Header Actions', () => {
         const { getByTestId, findByTestId } = render(
           <HeaderActions
             alert={alertWithTags}
+            alertIndex={'alert-index'}
             alertStatus={alertWithTags.fields[ALERT_STATUS] as AlertStatus}
             onUntrackAlert={mockOnUntrackAlert}
           />
@@ -122,7 +123,7 @@ describe('Header Actions', () => {
         expect(attachments).toEqual([
           {
             alertId: mockAlertUuid,
-            index: '.internal.alerts-observability.metrics.alerts-*',
+            index: 'alert-index',
             rule: {
               id: mockRuleId,
               name: mockRuleName,

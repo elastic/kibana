@@ -292,6 +292,7 @@ In other use cases the message field can be used to concatenate different values
     ]
   }
   end="2018-03-24T03:33:52.253Z"
+  eventIdToNoteIds={Object {}}
   expandedDetail={Object {}}
   filters={Array []}
   isLive={false}
@@ -307,6 +308,7 @@ In other use cases the message field can be used to concatenate different values
   kqlQueryExpression=" "
   kqlQueryLanguage="kuery"
   onEventClosed={[MockFunction]}
+  pinnedEventIds={Object {}}
   renderCellValue={[Function]}
   rowRenderers={
     Array [

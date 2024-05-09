@@ -61,6 +61,8 @@ export interface DataStream {
   nextGenerationManagedBy: string;
   lifecycle?: IndicesDataStreamLifecycleWithRollover & {
     enabled?: boolean;
+    effective_retention?: string;
+    retention_determined_by?: string;
   };
 }
 

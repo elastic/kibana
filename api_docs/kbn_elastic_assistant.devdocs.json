@@ -397,6 +397,112 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.getUserConversations",
+        "type": "Function",
+        "tags": [],
+        "label": "getUserConversations",
+        "description": [
+          "\nAPI call for getting all user conversations.\n"
+        ],
+        "signature": [
+          "({ http, signal, toasts, }: { http: ",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-common.HttpSetup",
+            "text": "HttpSetup"
+          },
+          "; toasts?: ",
+          {
+            "pluginId": "@kbn/core-notifications-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+            "section": "def-common.IToasts",
+            "text": "IToasts"
+          },
+          " | undefined; signal?: AbortSignal | undefined; }) => Promise<",
+          "FetchConversationsResponse",
+          ">"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/api/conversations/conversations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.getUserConversations.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  http,\n  signal,\n  toasts,\n}",
+            "description": [],
+            "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/api/conversations/conversations.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/elastic-assistant",
+                "id": "def-public.getUserConversations.$1.http",
+                "type": "Object",
+                "tags": [],
+                "label": "http",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-http-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpBrowserPluginApi",
+                    "section": "def-common.HttpSetup",
+                    "text": "HttpSetup"
+                  }
+                ],
+                "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/api/conversations/conversations.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/elastic-assistant",
+                "id": "def-public.getUserConversations.$1.toasts",
+                "type": "Object",
+                "tags": [],
+                "label": "toasts",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-notifications-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+                    "section": "def-common.IToasts",
+                    "text": "IToasts"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/api/conversations/conversations.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/elastic-assistant",
+                "id": "def-public.getUserConversations.$1.signal",
+                "type": "Object",
+                "tags": [],
+                "label": "signal",
+                "description": [],
+                "signature": [
+                  "AbortSignal | undefined"
+                ],
+                "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/api/conversations/conversations.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
         "id": "def-public.mergeBaseWithPersistedConversations",
         "type": "Function",
         "tags": [],
@@ -2362,7 +2468,7 @@
             "tags": [],
             "label": "replacements",
             "description": [
-              "\nReplacements associated with the context, i.e. replacements for an insight provided as context"
+              "\nReplacements associated with the context, i.e. replacements for an attack discovery provided as context"
             ],
             "signature": [
               "Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined"
@@ -2488,13 +2594,13 @@
     "misc": [
       {
         "parentPluginId": "@kbn/elastic-assistant",
-        "id": "def-public.AI_INSIGHTS_STORAGE_KEY",
+        "id": "def-public.ATTACK_DISCOVERY_STORAGE_KEY",
         "type": "string",
         "tags": [],
-        "label": "AI_INSIGHTS_STORAGE_KEY",
+        "label": "ATTACK_DISCOVERY_STORAGE_KEY",
         "description": [],
         "signature": [
-          "\"aiInsights\""
+          "\"attackDiscovery\""
         ],
         "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/constants.tsx",
         "deprecated": false,

@@ -14,13 +14,13 @@ export const dataConfig = {
 };
 
 export async function generateData({
-  synthtraceEsClient,
+  apmSynthtraceEsClient,
   start,
   end,
   coldStartRate,
   warmStartRate,
 }: {
-  synthtraceEsClient: ApmSynthtraceEsClient;
+  apmSynthtraceEsClient: ApmSynthtraceEsClient;
   start: number;
   end: number;
   coldStartRate: number;
@@ -60,5 +60,5 @@ export async function generateData({
       ),
   ];
 
-  await synthtraceEsClient.index(traceEvents);
+  await apmSynthtraceEsClient.index(traceEvents);
 }

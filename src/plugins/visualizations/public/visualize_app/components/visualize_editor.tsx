@@ -52,7 +52,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
     } else {
       data.search.session.start();
     }
-    setEmbeddableInput(valueInputValue);
+    setEmbeddableInput(valueInputValue as VisualizeInput | undefined);
     setEmbeddableId(embeddableId);
     setOriginatingApp(value);
     setOriginatingPath(pathValue);

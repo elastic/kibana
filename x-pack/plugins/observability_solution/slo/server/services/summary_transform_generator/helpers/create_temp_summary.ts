@@ -48,6 +48,8 @@ export interface EsSummaryDocument {
   isTempDoc: boolean;
   spaceId: string;
   kibanaUrl?: string; // >= 8.14
+  summaryUpdatedAt: string | null;
+  latestSliTimestamp: string | null;
 }
 
 export function createTempSummaryDocument(
@@ -102,6 +104,8 @@ export function createTempSummaryDocument(
     isTempDoc: true,
     spaceId,
     kibanaUrl: basePath.publicBaseUrl ?? '', // added in 8.14, i.e. might be undefined
+    summaryUpdatedAt: null,
+    latestSliTimestamp: null,
   };
 
   return doc;

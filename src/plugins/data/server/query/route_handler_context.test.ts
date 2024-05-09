@@ -207,12 +207,12 @@ describe('saved query route handler context', () => {
 
       const response = context.create(savedQueryAttributes);
 
-      expect(response).rejects.toMatchInlineSnapshot(`[Error: An Error]`);
+      await expect(response).rejects.toMatchInlineSnapshot(`[Error: An Error]`);
     });
 
     it('should throw an error if the saved query does not have a title', async () => {
       const response = context.create({ ...savedQueryAttributes, title: '' });
-      expect(response).rejects.toMatchInlineSnapshot(
+      await expect(response).rejects.toMatchInlineSnapshot(
         `[Error: Cannot create query without a title]`
       );
     });
@@ -266,12 +266,12 @@ describe('saved query route handler context', () => {
 
       const response = context.update('foo', savedQueryAttributes);
 
-      expect(response).rejects.toMatchInlineSnapshot(`[Error: An Error]`);
+      await expect(response).rejects.toMatchInlineSnapshot(`[Error: An Error]`);
     });
 
     it('should throw an error if the saved query does not have a title', async () => {
       const response = context.create({ ...savedQueryAttributes, title: '' });
-      expect(response).rejects.toMatchInlineSnapshot(
+      await expect(response).rejects.toMatchInlineSnapshot(
         `[Error: Cannot create query without a title]`
       );
     });
@@ -609,7 +609,7 @@ describe('saved query route handler context', () => {
       });
 
       const result = context.get('food');
-      expect(result).rejects.toMatchInlineSnapshot(
+      await expect(result).rejects.toMatchInlineSnapshot(
         `[Error: Multiple saved queries found with ID: food (legacy URL alias conflict)]`
       );
     });

@@ -7,6 +7,7 @@
  */
 
 import type { OpenAPIV3 } from 'openapi-types';
+import { metaFields } from '@kbn/config-schema';
 
 export const stripBadDefault = (schema: OpenAPIV3.SchemaObject): void => {
   if (schema.default?.special === 'deep') {
@@ -26,7 +27,18 @@ export const stripBadDefault = (schema: OpenAPIV3.SchemaObject): void => {
   }
 };
 
+export const processDeprecated = (schema: OpenAPIV3.SchemaObject): void => {
+  if (metaFields.META_FIELD_X_OAS_DEPRECATED in schema) {
+    schema.deprecated = true;
+    deleteField(schema, metaFields.META_FIELD_X_OAS_DEPRECATED);
+  }
+};
+
 /** Just for type convenience */
 export const deleteField = (schema: Record<any, unknown>, field: string): void => {
   delete schema[field];
+};
+
+export const isAnyType = (schema: OpenAPIV3.SchemaObject): boolean => {
+  return metaFields.META_FIELD_X_OAS_ANY in schema;
 };

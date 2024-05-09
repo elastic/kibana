@@ -104,7 +104,7 @@ function isValidColumnName(column: string) {
 }
 
 function escapeColumns(line: string) {
-  const [, command, body] = line.match(/^([A-Za-z_]+)(.*)$/) ?? ['', '', ''];
+  const [, command, body] = line.match(/^([A-Za-z_]+)(.*)$/s) ?? ['', '', ''];
 
   const escapedBody = split(body.trim(), ',')
     .map((statement) => {
@@ -198,7 +198,7 @@ function escapeExpressionsInSort(sortCommand: string) {
 
 export function correctCommonEsqlMistakes(content: string, log: Logger) {
   return content.replaceAll(/```esql\n(.*?)\n```/gms, (_, query: string) => {
-    const commands = splitIntoCommands(query);
+    const commands = splitIntoCommands(query.trim());
 
     const formattedCommands: string[] = commands.map(({ name, command }, index) => {
       let formattedCommand = command;

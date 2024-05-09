@@ -21,10 +21,15 @@ export const useCardStepStyles = () => {
         '.stepContentWrapper': {
           display: 'grid',
           gridTemplateRows: '1fr',
-          transition: `grid-template-rows ${HEIGHT_ANIMATION_DURATION}ms ease-in`,
+          visibility: 'visible',
+          transition: `
+            grid-template-rows ${HEIGHT_ANIMATION_DURATION}ms ease-in, 
+            visibility ${euiTheme.animation.normal} ${euiTheme.animation.resistance}
+          `,
         },
 
         '&.step-panel-collapsed .stepContentWrapper': {
+          visibility: 'collapse',
           gridTemplateRows: '0fr',
         },
 
@@ -74,6 +79,8 @@ export const useCardStepStyles = () => {
     }),
     [
       completeStepBackgroundColor,
+      euiTheme.animation.normal,
+      euiTheme.animation.resistance,
       euiTheme.base,
       euiTheme.colors.body,
       euiTheme.colors.successText,

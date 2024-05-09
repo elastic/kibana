@@ -68,6 +68,8 @@ export function SvlSearchLandingPageProvider({ getService }: FtrProviderContext)
       },
       async expectRoleDescriptorsEditorToExist() {
         await testSubjects.existOrFail('create-api-role-descriptors-code-editor-container');
+        await testSubjects.existOrFail('serverlessSearchSecurityPrivilegesFormReadOnlyButton');
+        await testSubjects.existOrFail('serverlessSearchSecurityPrivilegesFormWriteOnlyButton');
       },
       async setRoleDescriptorsValue(value: string) {
         await testSubjects.existOrFail('create-api-role-descriptors-code-editor-container');
@@ -77,13 +79,19 @@ export function SvlSearchLandingPageProvider({ getService }: FtrProviderContext)
       },
     },
     pipeline: {
-      async click() {
+      async createPipeline() {
         await testSubjects.click('create-a-pipeline-button');
       },
       async expectNavigateToCreatePipelinePage() {
         expect(await browser.getCurrentUrl()).contain(
           '/app/management/ingest/ingest_pipelines/create'
         );
+      },
+      async managePipeline() {
+        await testSubjects.click('manage-pipeline-button');
+      },
+      async expectNavigateToManagePipelinePage() {
+        expect(await browser.getCurrentUrl()).contain('/app/management/ingest/ingest_pipelines');
       },
     },
   };

@@ -10,7 +10,7 @@ import React, { useMemo } from 'react';
 import type { Observable } from 'rxjs';
 import { map } from 'rxjs';
 import { pick } from 'lodash';
-import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { EuiSpacer } from '@elastic/eui';
 
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -90,7 +90,7 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
 
   return (
     <PresentationContextProvider>
-      <StyledComponentsThemeProvider>
+      <KibanaThemeProvider theme={appDependencies.theme}>
         <CasesContext owner={[]} permissions={casesPermissions!}>
           <AiopsAppContext.Provider value={appDependencies}>
             <UrlStateProvider>
@@ -114,7 +114,7 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
             </UrlStateProvider>
           </AiopsAppContext.Provider>
         </CasesContext>
-      </StyledComponentsThemeProvider>
+      </KibanaThemeProvider>
     </PresentationContextProvider>
   );
 };

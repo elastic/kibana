@@ -9,7 +9,6 @@ import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import React from 'react';
 import { waitFor } from '@testing-library/react';
-import '../../mock/match_media';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { mockGlobalState, TestProviders, mockIndexPattern, createMockStore } from '../../mock';
 import type { State } from '../../store';

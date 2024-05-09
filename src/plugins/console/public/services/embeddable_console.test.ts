@@ -6,12 +6,17 @@
  * Side Public License, v 1.
  */
 
+import { StorageMock } from './storage.mock';
 import { EmbeddableConsoleInfo } from './embeddable_console';
 
 describe('EmbeddableConsoleInfo', () => {
+  jest.useFakeTimers();
+
   let eConsole: EmbeddableConsoleInfo;
+  let storage: StorageMock;
   beforeEach(() => {
-    eConsole = new EmbeddableConsoleInfo();
+    storage = new StorageMock({} as unknown as Storage, 'test');
+    eConsole = new EmbeddableConsoleInfo(storage);
   });
   describe('isEmbeddedConsoleAvailable', () => {
     it('returns true if dispatch has been set', () => {
@@ -48,6 +53,30 @@ describe('EmbeddableConsoleInfo', () => {
         type: 'open',
         payload: { content: 'GET /_cat/_indices' },
       });
+    });
+  });
+  describe('getConsoleHeight', () => {
+    it('returns value in storage when found', () => {
+      storage.get.mockReturnValue('201');
+      expect(eConsole.getConsoleHeight()).toEqual('201');
+      expect(storage.get).toHaveBeenCalledWith('embeddedConsoleHeight', undefined);
+    });
+    it('returns undefined when not found', () => {
+      storage.get.mockReturnValue(undefined);
+      expect(eConsole.getConsoleHeight()).toEqual(undefined);
+    });
+  });
+  describe('setConsoleHeight', () => {
+    it('stores value in storage', () => {
+      // setConsoleHeight calls are debounced
+      eConsole.setConsoleHeight('120');
+      eConsole.setConsoleHeight('110');
+      eConsole.setConsoleHeight('100');
+
+      jest.runAllTimers();
+
+      expect(storage.set).toHaveBeenCalledTimes(1);
+      expect(storage.set).toHaveBeenCalledWith('embeddedConsoleHeight', '100');
     });
   });
 });

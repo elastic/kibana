@@ -81,7 +81,7 @@ export default ({ getService }: FtrProviderContext) => {
   };
 
   // Failing: See https://github.com/elastic/kibana/issues/180236
-  describe.skip('@ess @serverless New terms type rules', () => {
+  describe.skip('@ess @serverless @serverlessQA New terms type rules', () => {
     before(async () => {
       await esArchiver.load(path);
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/new_terms');

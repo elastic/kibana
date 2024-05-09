@@ -46,41 +46,44 @@ export class ProfilingPlugin
       PROFILING_SERVER_FEATURE_ID
     );
 
-    core.getStartServices().then(([coreStart, depsStart]) => {
-      const profilingSpecificEsClient = config.elasticsearch
-        ? coreStart.elasticsearch.createClient('profiling', {
-            hosts: [config.elasticsearch.hosts],
-            username: config.elasticsearch.username,
-            password: config.elasticsearch.password,
-          })
-        : undefined;
+    core
+      .getStartServices()
+      .then(([coreStart, depsStart]) => {
+        const profilingSpecificEsClient = config.elasticsearch
+          ? coreStart.elasticsearch.createClient('profiling', {
+              hosts: [config.elasticsearch.hosts],
+              username: config.elasticsearch.username,
+              password: config.elasticsearch.password,
+            })
+          : undefined;
 
-      registerRoutes({
-        router,
-        logger: this.logger!,
-        dependencies: {
-          start: depsStart,
-          setup: deps,
-          config,
-          stackVersion,
-          telemetryUsageCounter,
-        },
-        services: {
-          createProfilingEsClient: ({
-            request,
-            esClient: defaultEsClient,
-            useDefaultAuth = false,
-          }) => {
-            const esClient =
-              profilingSpecificEsClient && !useDefaultAuth
-                ? profilingSpecificEsClient.asScoped(request).asInternalUser
-                : defaultEsClient;
-
-            return createProfilingEsClient({ request, esClient });
+        registerRoutes({
+          router,
+          logger: this.logger!,
+          dependencies: {
+            start: depsStart,
+            setup: deps,
+            config,
+            stackVersion,
+            telemetryUsageCounter,
           },
-        },
-      });
-    });
+          services: {
+            createProfilingEsClient: ({
+              request,
+              esClient: defaultEsClient,
+              useDefaultAuth = false,
+            }) => {
+              const esClient =
+                profilingSpecificEsClient && !useDefaultAuth
+                  ? profilingSpecificEsClient.asScoped(request).asInternalUser
+                  : defaultEsClient;
+
+              return createProfilingEsClient({ request, esClient });
+            },
+          },
+        });
+      })
+      .catch(() => {});
 
     return {};
   }

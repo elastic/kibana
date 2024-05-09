@@ -201,7 +201,10 @@ export default function ({ getService }: FtrProviderContext) {
           .send({})
           .expect(200);
 
-        expect(body).to.eql({ success: true });
+        // Providing an infinite retention might not be allowed for a given project,
+        // due to it having an existing max retention period. Because of this
+        // we will only check whether the request was recieved by ES.
+        expect(body.success).to.eql(true);
       });
 
       it('can disable lifecycle for a given policy', async () => {

@@ -13,7 +13,7 @@ import { DocumentNodeProcessor } from '../types';
  */
 export function createSkipInternalPathProcessor(skipPathPrefix: string): DocumentNodeProcessor {
   return {
-    enter(_, context) {
+    shouldRemove(_, context) {
       if (typeof context.parentKey === 'number') {
         return false;
       }

@@ -24,7 +24,7 @@ interface UsageCounterEvent {
   total: number;
 }
 
-export interface UiCountersUsage {
+export interface UsageCounters {
   dailyEvents: UsageCounterEvent[];
 }
 
@@ -52,7 +52,7 @@ export function transformRawCounter(
 }
 
 export function registerUsageCountersUsageCollector(usageCollection: UsageCollectionSetup) {
-  const collector = usageCollection.makeUsageCollector<UiCountersUsage>({
+  const collector = usageCollection.makeUsageCollector<UsageCounters>({
     type: 'usage_counters',
     schema: {
       dailyEvents: {

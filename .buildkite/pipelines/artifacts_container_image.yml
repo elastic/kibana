@@ -2,9 +2,5 @@ steps:
   - command: .buildkite/scripts/steps/artifacts/docker_image.sh
     label: Build serverless container images
     agents:
-      queue: n2-16-spot
+      queue: c2-16
     timeout_in_minutes: 60
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3

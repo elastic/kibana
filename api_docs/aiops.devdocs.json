@@ -664,7 +664,7 @@
             "signature": [
               "{ useFieldStatsTrigger: () => { renderOption: ((option: ",
               "EuiComboBoxOptionOption",
-              "<string>, searchValue: string, OPTION_CONTENT_CLASSNAME: string) => React.ReactNode) | undefined; closeFlyout: () => void; }; FieldStatsFlyoutProvider: React.FC<{ dataView: ",
+              "<string>, searchValue: string, OPTION_CONTENT_CLASSNAME: string) => React.ReactNode) | undefined; closeFlyout: () => void; }; FieldStatsFlyoutProvider: React.FC<React.PropsWithChildren<{ dataView: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -688,7 +688,7 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              " | undefined; dslQuery?: object | undefined; }>; } | undefined"
+              " | undefined; dslQuery?: object | undefined; }>>; } | undefined"
             ],
             "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,

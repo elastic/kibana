@@ -17,7 +17,7 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { LEGACY_HEATMAP_CHARTS_LIBRARY } from '@kbn/vis-type-heatmap-plugin/common';
 import { LEGACY_GAUGE_CHARTS_LIBRARY } from '@kbn/vis-type-gauge-plugin/common';
 import { VislibPublicConfig } from '../config';
-import { setUsageCollectionStart } from './services';
+import { setAnalytics, setI18n, setUsageCollectionStart } from './services';
 import { heatmapVisTypeDefinition } from './heatmap';
 
 import { createVisTypeVislibVisFn } from './vis_type_vislib_vis_fn';
@@ -88,6 +88,8 @@ export class VisTypeVislibPlugin
   ) {
     setFormatService(fieldFormats);
     setDataActions(data.actions);
+    setAnalytics(core.analytics);
+    setI18n(core.i18n);
     setTheme(core.theme);
     if (usageCollection) {
       setUsageCollectionStart(usageCollection);

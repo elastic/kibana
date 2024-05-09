@@ -201,6 +201,7 @@ interface DefaultFieldRendererProps {
   render?: (item: string) => React.ReactNode;
   rowItems: string[] | null | undefined;
   sourcererScopeId?: SourcererScopeName;
+  scopeId?: string;
 }
 
 export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> = ({
@@ -212,6 +213,7 @@ export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> 
   render,
   rowItems,
   sourcererScopeId,
+  scopeId,
 }) => {
   if (rowItems != null && rowItems.length > 0) {
     const draggables = rowItems.slice(0, displayCount).map((rowItem, index) => {
@@ -234,6 +236,7 @@ export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> 
               value={rowItem}
               isAggregatable={true}
               fieldType={'keyword'}
+              scopeId={scopeId}
             >
               {render ? render(rowItem) : rowItem}
             </DefaultDraggable>

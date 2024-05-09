@@ -40,7 +40,7 @@ export const CreateIndexCallout: React.FC = () => {
         <p>
           <FormattedMessage
             id="xpack.searchPlayground.sources.createIndexCallout.description"
-            defaultMessage="You can not continue without having at least one index with data to search."
+            defaultMessage="You need at least one index with data to search. "
           />
         </p>
       </EuiText>

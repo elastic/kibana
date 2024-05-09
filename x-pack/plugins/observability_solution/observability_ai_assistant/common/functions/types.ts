@@ -28,11 +28,6 @@ export type CompatibleJSONSchema = {
   description?: string;
 };
 
-export interface ContextDefinition {
-  name: string;
-  description: string;
-}
-
 export type FunctionResponse =
   | {
       content?: any;
@@ -46,10 +41,6 @@ export interface FunctionDefinition<TParameters extends CompatibleJSONSchema = a
   visibility?: FunctionVisibility;
   descriptionForUser?: string;
   parameters?: TParameters;
-  contexts: string[];
 }
 
-export type RegisterContextDefinition = (options: ContextDefinition) => void;
-
-export type ContextRegistry = Map<string, ContextDefinition>;
 export type FunctionRegistry = Map<string, FunctionDefinition>;

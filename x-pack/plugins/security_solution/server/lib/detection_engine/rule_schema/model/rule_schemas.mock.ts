@@ -23,7 +23,7 @@ import type {
 import type { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
 import { sampleRuleGuid } from '../../rule_types/__mocks__/es_results';
 
-const getBaseRuleParams = (): BaseRuleParams => {
+export const getBaseRuleParams = (): BaseRuleParams => {
   return {
     author: ['Elastic'],
     buildingBlockType: 'default',

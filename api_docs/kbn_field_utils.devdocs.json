@@ -21,6 +21,64 @@
     "functions": [
       {
         "parentPluginId": "@kbn/field-utils",
+        "id": "def-common.comboBoxFieldOptionMatcher",
+        "type": "Function",
+        "tags": [],
+        "label": "comboBoxFieldOptionMatcher",
+        "description": [
+          "\nAdapts fieldNameWildcardMatcher to combobox props."
+        ],
+        "signature": [
+          "({ option: { name, label }, searchValue, }: { option: { name?: string | undefined; label: string; }; searchValue: string; }) => boolean"
+        ],
+        "path": "packages/kbn-field-utils/src/utils/field_name_wildcard_matcher.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/field-utils",
+            "id": "def-common.comboBoxFieldOptionMatcher.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  option: { name, label },\n  searchValue,\n}",
+            "description": [],
+            "path": "packages/kbn-field-utils/src/utils/field_name_wildcard_matcher.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/field-utils",
+                "id": "def-common.comboBoxFieldOptionMatcher.$1.option",
+                "type": "Object",
+                "tags": [],
+                "label": "option",
+                "description": [],
+                "signature": [
+                  "{ name?: string | undefined; label: string; }"
+                ],
+                "path": "packages/kbn-field-utils/src/utils/field_name_wildcard_matcher.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/field-utils",
+                "id": "def-common.comboBoxFieldOptionMatcher.$1.searchValue",
+                "type": "string",
+                "tags": [],
+                "label": "searchValue",
+                "description": [],
+                "path": "packages/kbn-field-utils/src/utils/field_name_wildcard_matcher.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/field-utils",
         "id": "def-common.FieldDescription",
         "type": "Function",
         "tags": [],

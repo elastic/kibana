@@ -11,7 +11,8 @@ import { useExpandableFlyoutApi, type ExpandableFlyoutApi } from '@kbn/expandabl
 import { RightPanelContext } from '../context';
 import { TestProviders } from '../../../../common/mock';
 import { ThreatIntelligenceOverview } from './threat_intelligence_overview';
-import { LeftPanelInsightsTab, DocumentDetailsLeftPanelKey } from '../../left';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import { LeftPanelInsightsTab } from '../../left';
 import { useFetchThreatIntelligence } from '../hooks/use_fetch_threat_intelligence';
 import { THREAT_INTELLIGENCE_TAB_ID } from '../../left/components/threat_intelligence_details';
 import { INSIGHTS_THREAT_INTELLIGENCE_TEST_ID } from './test_ids';

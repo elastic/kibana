@@ -7,7 +7,7 @@
 
 import type { ESSearchResponse } from '@kbn/es-types';
 import { DataPublicPluginStart, isRunningResponse } from '@kbn/data-plugin/public';
-import { IKibanaSearchRequest } from '@kbn/data-plugin/common';
+import { IKibanaSearchRequest } from '@kbn/search-types';
 import {
   FetchDataParams,
   HasDataParams,

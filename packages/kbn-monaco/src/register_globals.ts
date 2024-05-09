@@ -13,14 +13,17 @@ import { monaco } from './monaco_imports';
 import { ESQL_THEME_ID, ESQLLang, buildESQlTheme } from './esql';
 import { YAML_LANG_ID } from './yaml';
 import { registerLanguage, registerTheme } from './helpers';
+import { ConsoleLang, ConsoleOutputLang, CONSOLE_THEME_ID, buildConsoleTheme } from './console';
 import {
-  ConsoleLang,
-  ConsoleOutputLang,
-  CONSOLE_THEME_ID,
-  CONSOLE_OUTPUT_THEME_ID,
-  buildConsoleTheme,
-  buildConsoleOutputTheme,
-} from './console';
+  CODE_EDITOR_LIGHT_THEME_ID,
+  CODE_EDITOR_DARK_THEME_ID,
+  CODE_EDITOR_LIGHT_THEME_TRANSPARENT_ID,
+  CODE_EDITOR_DARK_THEME_TRANSPARENT_ID,
+  buildLightTheme,
+  buildDarkTheme,
+  buildLightTransparentTheme,
+  buildDarkTransparentTheme,
+} from './code_editor';
 
 export const DEFAULT_WORKER_ID = 'default';
 const langSpecificWorkerIds = [
@@ -48,7 +51,10 @@ registerLanguage(ConsoleOutputLang);
  */
 registerTheme(ESQL_THEME_ID, buildESQlTheme());
 registerTheme(CONSOLE_THEME_ID, buildConsoleTheme());
-registerTheme(CONSOLE_OUTPUT_THEME_ID, buildConsoleOutputTheme());
+registerTheme(CODE_EDITOR_LIGHT_THEME_ID, buildLightTheme());
+registerTheme(CODE_EDITOR_DARK_THEME_ID, buildDarkTheme());
+registerTheme(CODE_EDITOR_LIGHT_THEME_TRANSPARENT_ID, buildLightTransparentTheme());
+registerTheme(CODE_EDITOR_DARK_THEME_TRANSPARENT_ID, buildDarkTransparentTheme());
 
 const monacoBundleDir = (window as any).__kbnPublicPath__?.['kbn-monaco'];
 

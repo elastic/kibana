@@ -46,7 +46,7 @@ export async function resolveEmbeddableChangePointUserInput(
               }}
             />
           </AiopsAppContext.Provider>,
-          { theme: coreStart.theme, i18n: coreStart.i18n }
+          coreStart
         )
       );
     } catch (error) {

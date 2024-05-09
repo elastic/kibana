@@ -10,6 +10,9 @@ import { euiDarkVars as darkTheme, euiLightVars as lightTheme } from '@kbn/ui-th
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
+import { useQueryInspector } from '../../../common/components/page/manage_query';
+import { FIRST_RECORD_PAGINATION } from '../../../entity_analytics/common';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import type { HostItem } from '../../../../common/search_strategy';
 import { buildHostNamesFilter, RiskScoreEntity } from '../../../../common/search_strategy';
@@ -63,6 +66,8 @@ const HostRiskOverviewWrapper = styled(EuiFlexGroup)`
   width: ${({ $width }: { $width: string }) => $width};
 `;
 
+export const HOST_OVERVIEW_RISK_SCORE_QUERY_ID = 'riskInputsTabQuery';
+
 export const HostOverview = React.memo<HostSummaryProps>(
   ({
     anomaliesData,
@@ -88,11 +93,29 @@ export const HostOverview = React.memo<HostSummaryProps>(
       () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
       [hostName]
     );
+    const { deleteQuery, setQuery } = useGlobalTime();
 
-    const { data: hostRisk, isAuthorized } = useRiskScore({
+    const {
+      data: hostRisk,
+      isAuthorized,
+      inspect: inspectRiskScore,
+      loading: loadingRiskScore,
+      refetch: refetchRiskScore,
+    } = useRiskScore({
       filterQuery,
       riskEntity: RiskScoreEntity.host,
       skip: hostName == null,
+      onlyLatest: false,
+      pagination: FIRST_RECORD_PAGINATION,
+    });
+
+    useQueryInspector({
+      deleteQuery,
+      inspect: inspectRiskScore,
+      loading: loadingRiskScore,
+      queryId: HOST_OVERVIEW_RISK_SCORE_QUERY_ID,
+      refetch: refetchRiskScore,
+      setQuery,
     });
 
     const getDefaultRenderer = useCallback(

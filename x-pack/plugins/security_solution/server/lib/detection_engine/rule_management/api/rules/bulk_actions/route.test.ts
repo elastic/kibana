@@ -18,7 +18,12 @@ import {
   getFindResultWithSingleHit,
   getFindResultWithMultiHits,
 } from '../../../../routes/__mocks__/request_responses';
-import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
+import {
+  createMockConfig,
+  requestContextMock,
+  serverMock,
+  requestMock,
+} from '../../../../routes/__mocks__';
 import { performBulkActionRoute } from './route';
 import {
   getPerformBulkActionEditSchemaMock,
@@ -32,6 +37,7 @@ jest.mock('../../../logic/crud/read_rules', () => ({ readRules: jest.fn() }));
 
 describe('Perform bulk action route', () => {
   const readRulesMock = readRules as jest.Mock;
+  let config: ReturnType<typeof createMockConfig>;
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
@@ -42,6 +48,7 @@ describe('Perform bulk action route', () => {
     server = serverMock.create();
     logger = loggingSystemMock.createLogger();
     ({ clients, context } = requestContextMock.createTools());
+    config = createMockConfig();
     ml = mlServicesMock.createSetupContract();
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
@@ -50,7 +57,7 @@ describe('Perform bulk action route', () => {
       errors: [],
       total: 1,
     });
-    performBulkActionRoute(server.router, ml, logger);
+    performBulkActionRoute(server.router, config, ml, logger);
   });
 
   describe('status codes', () => {

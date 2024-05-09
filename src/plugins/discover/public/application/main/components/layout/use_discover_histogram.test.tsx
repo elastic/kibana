@@ -11,12 +11,12 @@ import { AggregateQuery, Query } from '@kbn/es-query';
 import { act, renderHook, WrapperComponent } from '@testing-library/react-hooks';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { FetchStatus } from '../../../types';
-import type { DiscoverStateContainer } from '../../services/discover_state';
+import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { useDiscoverHistogram, UseDiscoverHistogramProps } from './use_discover_histogram';
 import { setTimeout } from 'timers/promises';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { DiscoverMainProvider } from '../../services/discover_state_provider';
+import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
 import {
   UnifiedHistogramFetchStatus,

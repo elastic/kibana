@@ -24,7 +24,7 @@ export const GeoDetectorsSummary: FC = () => {
   const splitField = jobCreator.splitField;
 
   const {
-    services: { data, notifications },
+    services: { notifications },
   } = useMlKibana();
 
   // Load example field values for summary view
@@ -56,14 +56,12 @@ export const GeoDetectorsSummary: FC = () => {
   useEffect(() => {
     async function getMapLayersForGeoJob() {
       if (geoField) {
-        const { filter, query } = jobCreator.savedSearchQuery ?? {};
-        const filters = [...data.query.filterManager.getFilters(), ...(filter ?? [])];
+        const { query } = jobCreator.savedSearchQuery ?? {};
 
         const layers = await mapLoader.getMapLayersForGeoJob(
           geoField,
           splitField,
           fieldValues,
-          filters,
           query
         );
         setLayerList(layers);

@@ -10,12 +10,20 @@ import { render as testingLibraryRender } from '@testing-library/react';
 import { SummarizationModel } from './summarization_model';
 import { useManagementLink } from '../../hooks/use_management_link';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { LLMs } from '../../types';
 
 const render = (children: React.ReactNode) =>
   testingLibraryRender(<IntlProvider locale="en">{children}</IntlProvider>);
 const MockIcon = () => <span />;
 
 jest.mock('../../hooks/use_management_link');
+jest.mock('../../hooks/use_usage_tracker', () => ({
+  useUsageTracker: () => ({
+    count: jest.fn(),
+    load: jest.fn(),
+    click: jest.fn(),
+  }),
+}));
 
 const mockUseManagementLink = useManagementLink as jest.Mock;
 
@@ -36,6 +44,7 @@ describe('SummarizationModel', () => {
         icon: MockIcon,
         connectorId: 'connector1',
         connectorName: 'nameconnector1',
+        connectorType: LLMs.openai_azure,
       },
       {
         name: 'Model2',
@@ -43,6 +52,7 @@ describe('SummarizationModel', () => {
         icon: MockIcon,
         connectorId: 'connector2',
         connectorName: 'nameconnector2',
+        connectorType: LLMs.openai,
       },
     ];
     const { getByTestId } = render(

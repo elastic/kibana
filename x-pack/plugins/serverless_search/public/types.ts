@@ -7,6 +7,7 @@
 
 import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { ConsolePluginStart } from '@kbn/console-plugin/public';
+import { SearchPlaygroundPluginStart } from '@kbn/search-playground/public';
 import { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
@@ -30,6 +31,7 @@ export interface ServerlessSearchPluginSetupDependencies {
 export interface ServerlessSearchPluginStartDependencies {
   cloud: CloudStart;
   console: ConsolePluginStart;
+  searchPlayground: SearchPlaygroundPluginStart;
   management: ManagementStart;
   security: SecurityPluginStart;
   serverless: ServerlessPluginStart;

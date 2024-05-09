@@ -75,12 +75,12 @@ export class CorsTestPlugin implements Plugin {
         return h.response(renderBody(kibanaUrl));
       },
     });
-    server.start();
+    void server.start();
   }
 
   public stop() {
     if (this.server) {
-      this.server.stop();
+      void this.server.stop();
     }
   }
 }

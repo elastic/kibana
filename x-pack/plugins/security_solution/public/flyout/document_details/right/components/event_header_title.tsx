@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
 import { startCase } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
@@ -22,7 +21,7 @@ import { EVENT_CATEGORY_TO_FIELD } from '../utils/event_utils';
 /**
  * Event details flyout right section header
  */
-export const EventHeaderTitle: FC = memo(() => {
+export const EventHeaderTitle = memo(() => {
   const { dataFormattedForFieldBrowser, getFieldsData } = useRightPanelContext();
   const { timestamp } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
 

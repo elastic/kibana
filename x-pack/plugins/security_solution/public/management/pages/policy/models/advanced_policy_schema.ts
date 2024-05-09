@@ -843,6 +843,28 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'linux.advanced.memory_protection.enable_fork_scan',
+    first_supported_version: '8.14',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.memory_protection.enable_fork_scan',
+      {
+        defaultMessage:
+          'Enable memory scanning on process fork events. This will have the effect of more memory regions being scanned. Default: true.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.memory_protection.enable_shared_dirty_scan',
+    first_supported_version: '8.14',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.memory_protection.enable_shared_dirty_scan',
+      {
+        defaultMessage:
+          'Instead of ignoring regions with just no Private_Dirty bytes, ingore regions with the combination of no Private_Dirty bytes, no Shared_Dirty bytes and is file backed. This has the effect of scanning more memory regions because of the loosened restrictions. Default: true.',
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.memory_protection.shellcode_collect_sample',
     first_supported_version: '7.15',
     documentation: i18n.translate(

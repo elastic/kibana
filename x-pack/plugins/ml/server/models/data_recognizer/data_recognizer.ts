@@ -590,7 +590,7 @@ export class DataRecognizer {
       }
     }
     // merge all the save results
-    this._updateResults(results, saveResults);
+    await this._updateResults(results, saveResults);
     return results;
   }
 

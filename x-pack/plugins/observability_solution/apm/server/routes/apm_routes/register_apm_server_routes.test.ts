@@ -256,7 +256,8 @@ describe('createApi', () => {
         expect(response.custom).toHaveBeenCalledWith({
           body: {
             attributes: { _inspect: [], data: null },
-            message: 'Invalid value "1" supplied to "query,_inspect"',
+            message: `Failed to validate: 
+  in /query/_inspect: 1 does not match expected type pipe(JSON, boolean)`,
           },
           statusCode: 400,
         });

@@ -21,18 +21,12 @@ import { CREATE_RULE_URL } from '../../../../urls/navigation';
 describe(
   'Detection rules, Alert Suppression for Essentials tier',
   {
-    tags: ['@serverless'],
+    tags: ['@serverless', '@skipInServerlessMKI'],
     env: {
       ftrConfig: {
         productTypes: [
           { product_line: 'security', product_tier: 'essentials' },
           { product_line: 'endpoint', product_tier: 'essentials' },
-        ],
-        // alertSuppressionForNewTermsRuleEnabled feature flag is also enabled in a global config
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'alertSuppressionForNewTermsRuleEnabled',
-          ])}`,
         ],
       },
     },

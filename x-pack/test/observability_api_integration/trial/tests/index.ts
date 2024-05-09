@@ -11,5 +11,6 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderContext) {
   describe('Observability specs (trial)', function () {
     loadTestFile(require.resolve('./annotations'));
+    loadTestFile(require.resolve('./obs_alert_details_context'));
   });
 }

@@ -28,6 +28,7 @@ import {
   EuiSelect,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiToolTip,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { css } from '@emotion/react';
@@ -36,6 +37,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { useForm, FormProvider, useController } from 'react-hook-form';
+import { useUpsellingMessage } from '../../../../hooks/use_upselling';
 import { useAppToasts } from '../../../../hooks/use_app_toasts';
 import { useKibana } from '../../../../lib/kibana';
 import { useInsightQuery } from './use_insight_query';
@@ -240,19 +242,21 @@ const InsightComponent = ({
   relativeFrom,
   relativeTo,
 }: InsightComponentProps) => {
-  const isPlatinum = useLicense().isPlatinumPlus();
+  const insightsUpsellingMessage = useUpsellingMessage('investigation_guide');
 
-  if (isPlatinum === false) {
+  if (insightsUpsellingMessage) {
     return (
       <>
-        <EuiButton
-          isDisabled={true}
-          iconSide={'left'}
-          iconType={'timeline'}
-          data-test-subj="insight-investigate-in-timeline-button"
-        >
-          {`${label}`}
-        </EuiButton>
+        <EuiToolTip content={insightsUpsellingMessage}>
+          <EuiButton
+            isDisabled={true}
+            iconSide={'left'}
+            iconType={'timeline'}
+            data-test-subj="insight-investigate-in-timeline-button"
+          >
+            {`${label}`}
+          </EuiButton>
+        </EuiToolTip>
         <div>{description}</div>
       </>
     );

@@ -23,6 +23,7 @@ import { deprecationsServiceMock } from '@kbn/core-deprecations-server-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { userSettingsServiceMock } from '@kbn/core-user-settings-server-mocks';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
+import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 
 export const mockHttpService = httpServiceMock.create();
 jest.doMock('@kbn/core-http-server-internal', () => ({
@@ -138,6 +139,11 @@ jest.doMock('@kbn/core-doc-links-server-internal', () => ({
 export const mockSecurityService = securityServiceMock.create();
 jest.doMock('@kbn/core-security-server-internal', () => ({
   SecurityService: jest.fn(() => mockSecurityService),
+}));
+
+export const mockUserProfileService = userProfileServiceMock.create();
+jest.doMock('@kbn/core-user-profile-server-internal', () => ({
+  UserProfileService: jest.fn(() => mockUserProfileService),
 }));
 
 export const mockUsageDataService = coreUsageDataServiceMock.create();

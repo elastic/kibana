@@ -22,6 +22,7 @@ import {
 } from '../common/locators';
 import { DataViewLocatorDefinition } from '../common/locators/data_view_locator';
 import { type ObservabilityLogsExplorerConfig } from '../common/plugin_config';
+import { DATA_RECEIVED_TELEMETRY_EVENT } from '../common/telemetry_events';
 import { logsExplorerAppTitle } from '../common/translations';
 import type {
   ObservabilityLogsExplorerAppMountParameters,
@@ -44,7 +45,7 @@ export class ObservabilityLogsExplorerPlugin
     core: CoreSetup<ObservabilityLogsExplorerStartDeps, ObservabilityLogsExplorerPluginStart>,
     _pluginsSetup: ObservabilityLogsExplorerSetupDeps
   ) {
-    const { share } = _pluginsSetup;
+    const { discover, share } = _pluginsSetup;
     const useHash = core.uiSettings.get('state:storeInSessionStorage');
 
     core.application.register({
@@ -71,6 +72,12 @@ export class ObservabilityLogsExplorerPlugin
       },
     });
 
+    // ensure the tabs are shown when in the observability nav mode
+    discover.configureInlineTopNav('oblt', {
+      enabled: true,
+      showLogsExplorerTabs: true,
+    });
+
     // App used solely to redirect from "/app/observability-log-explorer" to "/app/observability-logs-explorer"
     core.application.register({
       id: 'observability-log-explorer',
@@ -85,6 +92,8 @@ export class ObservabilityLogsExplorerPlugin
         return renderObservabilityLogsExplorerRedirect(coreStart, appMountParams);
       },
     });
+
+    core.analytics.registerEventType(DATA_RECEIVED_TELEMETRY_EVENT);
 
     // Register Locators
     const allDatasetsLocator = share.url.locators.create(

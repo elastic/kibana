@@ -431,6 +431,8 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
     enrichedAlert == null ||
     (memoRuleIndices == null && memoDataViewId == null);
 
+  if (isLoading || isRuleLoading) return null;
+
   return (
     <AddExceptionFlyout
       rules={memoRule}

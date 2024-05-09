@@ -9,6 +9,7 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import chalk from 'chalk';
+import { inspect } from 'util';
 
 /**
  * Capture and return the calling stack for the context that called this utility.
@@ -60,4 +61,13 @@ export const prefixedOutputLogger = (prefix: string, log: ToolingLog): ToolingLo
   });
 
   return proxy;
+};
+
+/**
+ * Safely traverse some content (object, array, etc) and stringify it
+ * @param content
+ * @param depth
+ */
+export const dump = (content: any, depth: number = 5): string => {
+  return inspect(content, { depth });
 };

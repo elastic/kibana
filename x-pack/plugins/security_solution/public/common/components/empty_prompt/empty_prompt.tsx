@@ -67,7 +67,7 @@ const footerStyles = css`
   margin: 20px auto 0;
 `;
 
-export const EmptyPromptComponent: React.FC = memo(() => {
+export const EmptyPromptComponent = memo(() => {
   const { euiTheme } = useEuiTheme();
 
   const { navigateTo } = useNavigateTo();

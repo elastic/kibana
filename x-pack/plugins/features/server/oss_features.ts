@@ -209,6 +209,7 @@ export const buildOSSFeatures = ({
             ],
           },
           ui: ['createNew', 'show', 'showWriteControls', 'saveQuery'],
+          api: ['bulkGetUserProfiles'],
         },
         read: {
           app: ['dashboards', 'kibana'],
@@ -229,6 +230,7 @@ export const buildOSSFeatures = ({
             ],
           },
           ui: ['show'],
+          api: ['bulkGetUserProfiles'],
         },
       },
       subFeatures: [

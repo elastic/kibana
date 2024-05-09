@@ -358,7 +358,7 @@ export function ChangeDataView({
             }}
           >
             {i18n.translate('unifiedSearch.query.queryBar.textBasedLanguagesTryLabel', {
-              defaultMessage: 'Try ES|QL',
+              defaultMessage: 'Language: ES|QL',
             })}
           </EuiButton>
         </EuiPanel>

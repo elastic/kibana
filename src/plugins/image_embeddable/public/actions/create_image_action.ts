@@ -14,6 +14,7 @@ import {
   ADD_IMAGE_EMBEDDABLE_ACTION_ID,
   IMAGE_EMBEDDABLE_TYPE,
 } from '../image_embeddable/constants';
+import { ImageEmbeddableSerializedState } from '../image_embeddable/types';
 import { uiActionsService } from '../services/kibana_services';
 
 const parentApiIsCompatible = async (parentApi: unknown): Promise<CanAddNewPanel | undefined> => {
@@ -36,7 +37,7 @@ export const registerCreateImageAction = () => {
       try {
         const imageConfig = await openImageEditor({ parentApi: canAddNewPanelParent });
 
-        canAddNewPanelParent.addNewPanel({
+        canAddNewPanelParent.addNewPanel<ImageEmbeddableSerializedState>({
           panelType: IMAGE_EMBEDDABLE_TYPE,
           initialState: { imageConfig },
         });

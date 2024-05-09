@@ -105,6 +105,12 @@ describe('getAnomalySwimLaneEmbeddableFactory', () => {
           rawState,
         }}
         onApiAvailable={onApiAvailable}
+        parentApi={{
+          executionContext: {
+            type: 'dashboard',
+            id: 'dashboard-id',
+          },
+        }}
       />
     );
 

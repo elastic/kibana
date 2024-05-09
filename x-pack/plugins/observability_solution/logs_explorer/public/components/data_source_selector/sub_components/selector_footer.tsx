@@ -7,7 +7,6 @@
 
 import React from 'react';
 import {
-  EuiBetaBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -58,22 +57,7 @@ export const ESQLButton = (props: DiscoverEsqlUrlProps) => {
 
   return (
     <EuiFlexItem grow={false}>
-      <EuiButton
-        {...linkProps}
-        iconType={() => (
-          <EuiBetaBadge
-            label="ESQL Beta"
-            color="hollow"
-            iconType="beaker"
-            size="s"
-            alignment="middle"
-          />
-        )}
-        iconSide="right"
-        color="success"
-        size="s"
-        data-test-subj="esqlLink"
-      >
+      <EuiButton {...linkProps} color="success" size="s" data-test-subj="esqlLink">
         {tryEsql}
       </EuiButton>
     </EuiFlexItem>

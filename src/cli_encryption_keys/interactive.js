@@ -8,7 +8,7 @@
 
 import { writeFileSync } from 'fs';
 import { join } from 'path';
-import { confirm, question } from '../cli_keystore/utils';
+import { confirm, question } from '../cli/keystore/utils';
 import { getConfigDirectory } from '@kbn/utils';
 import { safeDump } from 'js-yaml';
 

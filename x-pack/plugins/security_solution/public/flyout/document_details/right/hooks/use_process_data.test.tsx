@@ -7,7 +7,7 @@
 
 import { getUserDisplayName, useProcessData } from './use_process_data';
 import { renderHook } from '@testing-library/react-hooks';
-import type { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { RightPanelContext } from '../context';
 import React from 'react';
 
@@ -61,7 +61,7 @@ const panelContextValue = {
   getFieldsData: jest.fn().mockReturnValue('test'),
 } as unknown as RightPanelContext;
 
-const ProviderComponent: FC = ({ children }) => (
+const ProviderComponent: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <RightPanelContext.Provider value={panelContextValue}>{children}</RightPanelContext.Provider>
 );
 

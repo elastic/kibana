@@ -66,6 +66,24 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-i18n-server",
+            "id": "def-common.I18nServiceSetup.getTranslationHash",
+            "type": "Function",
+            "tags": [],
+            "label": "getTranslationHash",
+            "description": [
+              "\nReturns the hash generated from the current translations."
+            ],
+            "signature": [
+              "() => string"
+            ],
+            "path": "packages/core/i18n/core-i18n-server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

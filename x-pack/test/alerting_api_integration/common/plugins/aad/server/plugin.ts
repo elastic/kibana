@@ -17,6 +17,7 @@ import { schema } from '@kbn/config-schema';
 import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
+import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server/saved_objects';
 
 interface FixtureSetupDeps {
   spaces?: SpacesPluginSetup;
@@ -50,7 +51,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
         const [, { encryptedSavedObjects }] = await core.getStartServices();
         await encryptedSavedObjects
           .getClient({
-            includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE, 'action'],
+            includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE, 'action', AD_HOC_RUN_SAVED_OBJECT_TYPE],
           })
           .getDecryptedAsInternalUser(req.body.type, req.body.id, {
             namespace,

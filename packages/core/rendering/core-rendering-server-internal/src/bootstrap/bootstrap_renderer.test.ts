@@ -129,7 +129,7 @@ describe('bootstrapRenderer', () => {
     });
 
     it('calls getThemeTag with values (true/dark) from the UserSettingsService when provided', async () => {
-      userSettingsService.getUserSettingDarkMode.mockReturnValueOnce(true);
+      userSettingsService.getUserSettingDarkMode.mockResolvedValueOnce(true);
 
       renderer = bootstrapRendererFactory({
         auth,
@@ -155,7 +155,7 @@ describe('bootstrapRenderer', () => {
     });
 
     it('calls getThemeTag with values (false/light) from the UserSettingsService when provided', async () => {
-      userSettingsService.getUserSettingDarkMode.mockReturnValueOnce(false);
+      userSettingsService.getUserSettingDarkMode.mockResolvedValueOnce(false);
 
       renderer = bootstrapRendererFactory({
         auth,
@@ -181,7 +181,7 @@ describe('bootstrapRenderer', () => {
     });
 
     it('calls getThemeTag with values from the UiSettingsClient when values (false/light) from UserSettingsService are `undefined`', async () => {
-      userSettingsService.getUserSettingDarkMode.mockReturnValueOnce(undefined);
+      userSettingsService.getUserSettingDarkMode.mockResolvedValueOnce(undefined);
 
       renderer = bootstrapRendererFactory({
         auth,
@@ -207,7 +207,7 @@ describe('bootstrapRenderer', () => {
     });
 
     it('calls getThemeTag with values from the UiSettingsClient when values (true/dark) from UserSettingsService are `undefined`', async () => {
-      userSettingsService.getUserSettingDarkMode.mockReturnValueOnce(undefined);
+      userSettingsService.getUserSettingDarkMode.mockResolvedValueOnce(undefined);
 
       renderer = bootstrapRendererFactory({
         auth,

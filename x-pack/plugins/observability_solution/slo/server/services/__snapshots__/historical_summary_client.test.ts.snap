@@ -1516,12 +1516,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.001344,
+    "consumed": 0.00134,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.998656,
+    "remaining": 0.99866,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.999933,
   "status": "HEALTHY",
 }
 `;
@@ -1530,12 +1530,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.002688,
+    "consumed": 0.00268,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.997312,
+    "remaining": 0.99732,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.999866,
   "status": "HEALTHY",
 }
 `;
@@ -1544,12 +1544,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.004032,
+    "consumed": 0.00404,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.995968,
+    "remaining": 0.99596,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.999798,
   "status": "HEALTHY",
 }
 `;
@@ -1558,12 +1558,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.005376,
+    "consumed": 0.00538,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.994624,
+    "remaining": 0.99462,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.999731,
   "status": "HEALTHY",
 }
 `;
@@ -1572,12 +1572,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.006721,
+    "consumed": 0.00672,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.993279,
+    "remaining": 0.99328,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.999664,
   "status": "HEALTHY",
 }
 `;
@@ -1586,12 +1586,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.008065,
+    "consumed": 0.00806,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.991935,
+    "remaining": 0.99194,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.999597,
   "status": "HEALTHY",
 }
 `;
@@ -1600,12 +1600,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.009409,
+    "consumed": 0.0094,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.990591,
+    "remaining": 0.9906,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.99953,
   "status": "HEALTHY",
 }
 `;
@@ -1614,12 +1614,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.010753,
+    "consumed": 0.01076,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.989247,
+    "remaining": 0.98924,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.999462,
   "status": "HEALTHY",
 }
 `;
@@ -1628,12 +1628,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.012097,
+    "consumed": 0.0121,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.987903,
+    "remaining": 0.9879,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.999395,
   "status": "HEALTHY",
 }
 `;
@@ -1642,12 +1642,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.013441,
+    "consumed": 0.01344,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.986559,
+    "remaining": 0.98656,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.999328,
   "status": "HEALTHY",
 }
 `;
@@ -1656,12 +1656,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.014785,
+    "consumed": 0.01478,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.985215,
+    "remaining": 0.98522,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.999261,
   "status": "HEALTHY",
 }
 `;
@@ -1670,12 +1670,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.016129,
+    "consumed": 0.01612,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.983871,
+    "remaining": 0.98388,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.999194,
   "status": "HEALTHY",
 }
 `;
@@ -1684,12 +1684,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.017474,
+    "consumed": 0.01748,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.982526,
+    "remaining": 0.98252,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.999126,
   "status": "HEALTHY",
 }
 `;
@@ -1698,12 +1698,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.018818,
+    "consumed": 0.01882,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.981182,
+    "remaining": 0.98118,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.999059,
   "status": "HEALTHY",
 }
 `;
@@ -1712,12 +1712,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.020162,
+    "consumed": 0.02016,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.979838,
+    "remaining": 0.97984,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.998992,
   "status": "HEALTHY",
 }
 `;
@@ -1726,12 +1726,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.021506,
+    "consumed": 0.0215,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.978494,
+    "remaining": 0.9785,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.998925,
   "status": "HEALTHY",
 }
 `;
@@ -1740,12 +1740,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.02285,
+    "consumed": 0.02284,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.97715,
+    "remaining": 0.97716,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.998858,
   "status": "HEALTHY",
 }
 `;
@@ -1754,12 +1754,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.024194,
+    "consumed": 0.0242,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.975806,
+    "remaining": 0.9758,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.99879,
   "status": "HEALTHY",
 }
 `;
@@ -1768,12 +1768,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.025538,
+    "consumed": 0.02554,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.974462,
+    "remaining": 0.97446,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.998723,
   "status": "HEALTHY",
 }
 `;
@@ -1782,12 +1782,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.026882,
+    "consumed": 0.02688,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.973118,
+    "remaining": 0.97312,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.998656,
   "status": "HEALTHY",
 }
 `;
@@ -1796,12 +1796,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.028226,
+    "consumed": 0.02822,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.971774,
+    "remaining": 0.97178,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.998589,
   "status": "HEALTHY",
 }
 `;
@@ -1810,12 +1810,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.029571,
+    "consumed": 0.02958,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.970429,
+    "remaining": 0.97042,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.998521,
   "status": "HEALTHY",
 }
 `;
@@ -1824,12 +1824,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.030915,
+    "consumed": 0.03092,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.969085,
+    "remaining": 0.96908,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.998454,
   "status": "HEALTHY",
 }
 `;
@@ -1838,12 +1838,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.032259,
+    "consumed": 0.03226,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.967741,
+    "remaining": 0.96774,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.998387,
   "status": "HEALTHY",
 }
 `;
@@ -1852,12 +1852,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.033603,
+    "consumed": 0.0336,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.966397,
+    "remaining": 0.9664,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.99832,
   "status": "HEALTHY",
 }
 `;
@@ -1866,12 +1866,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.034947,
+    "consumed": 0.03494,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.965053,
+    "remaining": 0.96506,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.998253,
   "status": "HEALTHY",
 }
 `;
@@ -1880,12 +1880,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.036291,
+    "consumed": 0.0363,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.963709,
+    "remaining": 0.9637,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.998185,
   "status": "HEALTHY",
 }
 `;
@@ -1894,12 +1894,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.037635,
+    "consumed": 0.03764,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.962365,
+    "remaining": 0.96236,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.998118,
   "status": "HEALTHY",
 }
 `;
@@ -1908,12 +1908,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.038979,
+    "consumed": 0.03898,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.961021,
+    "remaining": 0.96102,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.998051,
   "status": "HEALTHY",
 }
 `;
@@ -1922,12 +1922,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.040323,
+    "consumed": 0.04032,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.959677,
+    "remaining": 0.95968,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.997984,
   "status": "HEALTHY",
 }
 `;
@@ -1936,12 +1936,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.041668,
+    "consumed": 0.04166,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.958332,
+    "remaining": 0.95834,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.997917,
   "status": "HEALTHY",
 }
 `;
@@ -1950,12 +1950,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.043012,
+    "consumed": 0.04302,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.956988,
+    "remaining": 0.95698,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.997849,
   "status": "HEALTHY",
 }
 `;
@@ -1964,12 +1964,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.044356,
+    "consumed": 0.04436,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.955644,
+    "remaining": 0.95564,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.997782,
   "status": "HEALTHY",
 }
 `;
@@ -1983,7 +1983,7 @@ Object {
     "isEstimated": false,
     "remaining": 0.9543,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.997715,
   "status": "HEALTHY",
 }
 `;
@@ -1992,12 +1992,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.047044,
+    "consumed": 0.04704,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.952956,
+    "remaining": 0.95296,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.997648,
   "status": "HEALTHY",
 }
 `;
@@ -2006,12 +2006,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.048388,
+    "consumed": 0.04838,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.951612,
+    "remaining": 0.95162,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.997581,
   "status": "HEALTHY",
 }
 `;
@@ -2020,12 +2020,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.049732,
+    "consumed": 0.04974,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.950268,
+    "remaining": 0.95026,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.997513,
   "status": "HEALTHY",
 }
 `;
@@ -2034,12 +2034,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.051076,
+    "consumed": 0.05108,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.948924,
+    "remaining": 0.94892,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.997446,
   "status": "HEALTHY",
 }
 `;
@@ -2048,12 +2048,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.052421,
+    "consumed": 0.05242,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.947579,
+    "remaining": 0.94758,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.997379,
   "status": "HEALTHY",
 }
 `;
@@ -2062,12 +2062,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.053765,
+    "consumed": 0.05376,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.946235,
+    "remaining": 0.94624,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.997312,
   "status": "HEALTHY",
 }
 `;
@@ -2076,12 +2076,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.055109,
+    "consumed": 0.0551,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.944891,
+    "remaining": 0.9449,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.997245,
   "status": "HEALTHY",
 }
 `;
@@ -2090,12 +2090,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.056453,
+    "consumed": 0.05646,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.943547,
+    "remaining": 0.94354,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.997177,
   "status": "HEALTHY",
 }
 `;
@@ -2104,12 +2104,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.057797,
+    "consumed": 0.0578,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.942203,
+    "remaining": 0.9422,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.99711,
   "status": "HEALTHY",
 }
 `;
@@ -2118,12 +2118,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.059141,
+    "consumed": 0.05914,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.940859,
+    "remaining": 0.94086,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.997043,
   "status": "HEALTHY",
 }
 `;
@@ -2132,12 +2132,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.060485,
+    "consumed": 0.06048,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.939515,
+    "remaining": 0.93952,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.996976,
   "status": "HEALTHY",
 }
 `;
@@ -2146,12 +2146,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.061829,
+    "consumed": 0.06182,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.938171,
+    "remaining": 0.93818,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.996909,
   "status": "HEALTHY",
 }
 `;
@@ -2160,12 +2160,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.063173,
+    "consumed": 0.06318,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.936827,
+    "remaining": 0.93682,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.996841,
   "status": "HEALTHY",
 }
 `;
@@ -2174,12 +2174,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.064518,
+    "consumed": 0.06452,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.935482,
+    "remaining": 0.93548,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.996774,
   "status": "HEALTHY",
 }
 `;
@@ -2188,12 +2188,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.065862,
+    "consumed": 0.06586,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.934138,
+    "remaining": 0.93414,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.996707,
   "status": "HEALTHY",
 }
 `;
@@ -2202,12 +2202,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.067206,
+    "consumed": 0.0672,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.932794,
+    "remaining": 0.9328,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.99664,
   "status": "HEALTHY",
 }
 `;
@@ -2216,12 +2216,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.06855,
+    "consumed": 0.06854,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.93145,
+    "remaining": 0.93146,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.996573,
   "status": "HEALTHY",
 }
 `;
@@ -2230,12 +2230,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.069894,
+    "consumed": 0.0699,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.930106,
+    "remaining": 0.9301,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.996505,
   "status": "HEALTHY",
 }
 `;
@@ -2244,12 +2244,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.071238,
+    "consumed": 0.07124,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.928762,
+    "remaining": 0.92876,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.996438,
   "status": "HEALTHY",
 }
 `;
@@ -2258,12 +2258,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.072582,
+    "consumed": 0.07258,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.927418,
+    "remaining": 0.92742,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.996371,
   "status": "HEALTHY",
 }
 `;
@@ -2272,12 +2272,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.073926,
+    "consumed": 0.07392,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.926074,
+    "remaining": 0.92608,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.996304,
   "status": "HEALTHY",
 }
 `;
@@ -2286,12 +2286,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.075271,
+    "consumed": 0.07528,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.924729,
+    "remaining": 0.92472,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.996236,
   "status": "HEALTHY",
 }
 `;
@@ -2300,12 +2300,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.076615,
+    "consumed": 0.07662,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.923385,
+    "remaining": 0.92338,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.996169,
   "status": "HEALTHY",
 }
 `;
@@ -2314,12 +2314,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.077959,
+    "consumed": 0.07796,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.922041,
+    "remaining": 0.92204,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.996102,
   "status": "HEALTHY",
 }
 `;
@@ -2328,12 +2328,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.079303,
+    "consumed": 0.0793,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.920697,
+    "remaining": 0.9207,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.996035,
   "status": "HEALTHY",
 }
 `;
@@ -2342,12 +2342,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.080647,
+    "consumed": 0.08064,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.919353,
+    "remaining": 0.91936,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.995968,
   "status": "HEALTHY",
 }
 `;
@@ -2356,12 +2356,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.081991,
+    "consumed": 0.082,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.918009,
+    "remaining": 0.918,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.9959,
   "status": "HEALTHY",
 }
 `;
@@ -2370,12 +2370,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.083335,
+    "consumed": 0.08334,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.916665,
+    "remaining": 0.91666,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.995833,
   "status": "HEALTHY",
 }
 `;
@@ -2384,12 +2384,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.084679,
+    "consumed": 0.08468,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.915321,
+    "remaining": 0.91532,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.995766,
   "status": "HEALTHY",
 }
 `;
@@ -2398,12 +2398,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.086023,
+    "consumed": 0.08602,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.913977,
+    "remaining": 0.91398,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.995699,
   "status": "HEALTHY",
 }
 `;
@@ -2412,12 +2412,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.087368,
+    "consumed": 0.08736,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.912632,
+    "remaining": 0.91264,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.995632,
   "status": "HEALTHY",
 }
 `;
@@ -2426,12 +2426,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.088712,
+    "consumed": 0.08872,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.911288,
+    "remaining": 0.91128,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.995564,
   "status": "HEALTHY",
 }
 `;
@@ -2440,12 +2440,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.090056,
+    "consumed": 0.09006,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.909944,
+    "remaining": 0.90994,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.995497,
   "status": "HEALTHY",
 }
 `;
@@ -2459,7 +2459,7 @@ Object {
     "isEstimated": false,
     "remaining": 0.9086,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.99543,
   "status": "HEALTHY",
 }
 `;
@@ -2468,12 +2468,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.092744,
+    "consumed": 0.09274,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.907256,
+    "remaining": 0.90726,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.995363,
   "status": "HEALTHY",
 }
 `;
@@ -2482,12 +2482,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.094088,
+    "consumed": 0.09408,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.905912,
+    "remaining": 0.90592,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.995296,
   "status": "HEALTHY",
 }
 `;
@@ -2496,12 +2496,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.095432,
+    "consumed": 0.09544,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.904568,
+    "remaining": 0.90456,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.995228,
   "status": "HEALTHY",
 }
 `;
@@ -2510,12 +2510,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.096776,
+    "consumed": 0.09678,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.903224,
+    "remaining": 0.90322,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.995161,
   "status": "HEALTHY",
 }
 `;
@@ -2529,7 +2529,7 @@ Object {
     "isEstimated": false,
     "remaining": 0.90188,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.995094,
   "status": "HEALTHY",
 }
 `;
@@ -2538,12 +2538,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.099465,
+    "consumed": 0.09946,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.900535,
+    "remaining": 0.90054,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.995027,
   "status": "HEALTHY",
 }
 `;
@@ -2552,12 +2552,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.100809,
+    "consumed": 0.1008,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.899191,
+    "remaining": 0.8992,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.99496,
   "status": "HEALTHY",
 }
 `;
@@ -2566,12 +2566,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.102153,
+    "consumed": 0.10216,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.897847,
+    "remaining": 0.89784,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.994892,
   "status": "HEALTHY",
 }
 `;
@@ -2580,12 +2580,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.103497,
+    "consumed": 0.1035,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.896503,
+    "remaining": 0.8965,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.994825,
   "status": "HEALTHY",
 }
 `;
@@ -2594,12 +2594,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.104841,
+    "consumed": 0.10484,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.895159,
+    "remaining": 0.89516,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.994758,
   "status": "HEALTHY",
 }
 `;
@@ -2608,12 +2608,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.106185,
+    "consumed": 0.10618,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.893815,
+    "remaining": 0.89382,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.994691,
   "status": "HEALTHY",
 }
 `;
@@ -2622,12 +2622,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.107529,
+    "consumed": 0.10752,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.892471,
+    "remaining": 0.89248,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.994624,
   "status": "HEALTHY",
 }
 `;
@@ -2636,12 +2636,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.108873,
+    "consumed": 0.10888,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.891127,
+    "remaining": 0.89112,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.994556,
   "status": "HEALTHY",
 }
 `;
@@ -2650,12 +2650,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.110218,
+    "consumed": 0.11022,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.889782,
+    "remaining": 0.88978,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.994489,
   "status": "HEALTHY",
 }
 `;
@@ -2664,12 +2664,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.111562,
+    "consumed": 0.11156,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.888438,
+    "remaining": 0.88844,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.994422,
   "status": "HEALTHY",
 }
 `;
@@ -2678,12 +2678,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.112906,
+    "consumed": 0.1129,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.887094,
+    "remaining": 0.8871,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.994355,
   "status": "HEALTHY",
 }
 `;
@@ -2692,12 +2692,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.11425,
+    "consumed": 0.11424,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.88575,
+    "remaining": 0.88576,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.994288,
   "status": "HEALTHY",
 }
 `;
@@ -2706,12 +2706,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.115594,
+    "consumed": 0.1156,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.884406,
+    "remaining": 0.8844,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.99422,
   "status": "HEALTHY",
 }
 `;
@@ -2720,12 +2720,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.116938,
+    "consumed": 0.11694,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.883062,
+    "remaining": 0.88306,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.994153,
   "status": "HEALTHY",
 }
 `;
@@ -2734,12 +2734,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.118282,
+    "consumed": 0.11828,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.881718,
+    "remaining": 0.88172,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.994086,
   "status": "HEALTHY",
 }
 `;
@@ -2748,12 +2748,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.119626,
+    "consumed": 0.11962,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.880374,
+    "remaining": 0.88038,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.994019,
   "status": "HEALTHY",
 }
 `;
@@ -2762,12 +2762,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.12097,
+    "consumed": 0.12098,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.87903,
+    "remaining": 0.87902,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.993951,
   "status": "HEALTHY",
 }
 `;
@@ -2776,12 +2776,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.122315,
+    "consumed": 0.12232,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.877685,
+    "remaining": 0.87768,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.993884,
   "status": "HEALTHY",
 }
 `;
@@ -2790,12 +2790,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.123659,
+    "consumed": 0.12366,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.876341,
+    "remaining": 0.87634,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.993817,
   "status": "HEALTHY",
 }
 `;
@@ -2804,12 +2804,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.125003,
+    "consumed": 0.125,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.874997,
+    "remaining": 0.875,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.99375,
   "status": "HEALTHY",
 }
 `;
@@ -2818,12 +2818,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.126347,
+    "consumed": 0.12634,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.873653,
+    "remaining": 0.87366,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.993683,
   "status": "HEALTHY",
 }
 `;
@@ -2832,12 +2832,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.127691,
+    "consumed": 0.1277,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.872309,
+    "remaining": 0.8723,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.993615,
   "status": "HEALTHY",
 }
 `;
@@ -2846,12 +2846,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.129035,
+    "consumed": 0.12904,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.870965,
+    "remaining": 0.87096,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.993548,
   "status": "HEALTHY",
 }
 `;
@@ -2860,12 +2860,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.130379,
+    "consumed": 0.13038,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.869621,
+    "remaining": 0.86962,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.993481,
   "status": "HEALTHY",
 }
 `;
@@ -2874,12 +2874,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.131723,
+    "consumed": 0.13172,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.868277,
+    "remaining": 0.86828,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.993414,
   "status": "HEALTHY",
 }
 `;
@@ -2888,12 +2888,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.133067,
+    "consumed": 0.13306,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.866933,
+    "remaining": 0.86694,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.993347,
   "status": "HEALTHY",
 }
 `;
@@ -2902,12 +2902,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.134412,
+    "consumed": 0.13442,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.865588,
+    "remaining": 0.86558,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.993279,
   "status": "HEALTHY",
 }
 `;
@@ -2916,12 +2916,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.135756,
+    "consumed": 0.13576,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.864244,
+    "remaining": 0.86424,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.993212,
   "status": "HEALTHY",
 }
 `;
@@ -2935,7 +2935,7 @@ Object {
     "isEstimated": false,
     "remaining": 0.8629,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.993145,
   "status": "HEALTHY",
 }
 `;
@@ -2944,12 +2944,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.138444,
+    "consumed": 0.13844,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.861556,
+    "remaining": 0.86156,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.993078,
   "status": "HEALTHY",
 }
 `;
@@ -2958,12 +2958,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.139788,
+    "consumed": 0.13978,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.860212,
+    "remaining": 0.86022,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.993011,
   "status": "HEALTHY",
 }
 `;
@@ -2972,12 +2972,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.141132,
+    "consumed": 0.14114,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.858868,
+    "remaining": 0.85886,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.992943,
   "status": "HEALTHY",
 }
 `;
@@ -2986,12 +2986,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.142476,
+    "consumed": 0.14248,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.857524,
+    "remaining": 0.85752,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.992876,
   "status": "HEALTHY",
 }
 `;
@@ -3005,7 +3005,7 @@ Object {
     "isEstimated": false,
     "remaining": 0.85618,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.992809,
   "status": "HEALTHY",
 }
 `;
@@ -3014,12 +3014,12 @@ exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.145165,
+    "consumed": 0.14516,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.854835,
+    "remaining": 0.85484,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.992742,
   "status": "HEALTHY",
 }
 `;
@@ -5548,12 +5548,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.00138,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.99862,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.999931,
   "status": "HEALTHY",
 }
 `;
@@ -5562,12 +5562,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.00278,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.99722,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.999861,
   "status": "HEALTHY",
 }
 `;
@@ -5576,12 +5576,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.00416,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.99584,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.999792,
   "status": "HEALTHY",
 }
 `;
@@ -5590,12 +5590,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.00556,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.99444,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.999722,
   "status": "HEALTHY",
 }
 `;
@@ -5604,12 +5604,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.00694,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.99306,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.999653,
   "status": "HEALTHY",
 }
 `;
@@ -5618,12 +5618,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.00834,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.99166,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.999583,
   "status": "HEALTHY",
 }
 `;
@@ -5632,12 +5632,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.00972,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.99028,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.999514,
   "status": "HEALTHY",
 }
 `;
@@ -5646,12 +5646,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.01112,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.98888,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.999444,
   "status": "HEALTHY",
 }
 `;
@@ -5660,12 +5660,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.0125,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.9875,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.999375,
   "status": "HEALTHY",
 }
 `;
@@ -5674,12 +5674,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.01388,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.98612,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.999306,
   "status": "HEALTHY",
 }
 `;
@@ -5688,12 +5688,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.01528,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.98472,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.999236,
   "status": "HEALTHY",
 }
 `;
@@ -5702,12 +5702,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.01666,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.98334,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.999167,
   "status": "HEALTHY",
 }
 `;
@@ -5716,12 +5716,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.01806,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.98194,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.999097,
   "status": "HEALTHY",
 }
 `;
@@ -5730,12 +5730,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.01944,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.98056,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.999028,
   "status": "HEALTHY",
 }
 `;
@@ -5744,12 +5744,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.02084,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.97916,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.998958,
   "status": "HEALTHY",
 }
 `;
@@ -5758,12 +5758,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.02222,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.97778,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.998889,
   "status": "HEALTHY",
 }
 `;
@@ -5772,12 +5772,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.02362,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.97638,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.998819,
   "status": "HEALTHY",
 }
 `;
@@ -5786,12 +5786,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.025,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.975,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.99875,
   "status": "HEALTHY",
 }
 `;
@@ -5800,12 +5800,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.02638,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.97362,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.998681,
   "status": "HEALTHY",
 }
 `;
@@ -5814,12 +5814,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.02778,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.97222,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.998611,
   "status": "HEALTHY",
 }
 `;
@@ -5828,12 +5828,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.02916,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.97084,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.998542,
   "status": "HEALTHY",
 }
 `;
@@ -5842,12 +5842,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.03056,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.96944,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.998472,
   "status": "HEALTHY",
 }
 `;
@@ -5856,12 +5856,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.03194,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.96806,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.998403,
   "status": "HEALTHY",
 }
 `;
@@ -5870,12 +5870,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.03334,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.96666,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.998333,
   "status": "HEALTHY",
 }
 `;
@@ -5884,12 +5884,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.03472,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.96528,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.998264,
   "status": "HEALTHY",
 }
 `;
@@ -5898,12 +5898,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.03612,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.96388,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.998194,
   "status": "HEALTHY",
 }
 `;
@@ -5912,12 +5912,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.0375,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.9625,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.998125,
   "status": "HEALTHY",
 }
 `;
@@ -5926,12 +5926,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.03888,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.96112,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.998056,
   "status": "HEALTHY",
 }
 `;
@@ -5940,12 +5940,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.04028,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.95972,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.997986,
   "status": "HEALTHY",
 }
 `;
@@ -5954,12 +5954,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.04166,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.95834,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.997917,
   "status": "HEALTHY",
 }
 `;
@@ -5968,12 +5968,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.04306,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.95694,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.997847,
   "status": "HEALTHY",
 }
 `;
@@ -5982,12 +5982,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.04444,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.95556,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.997778,
   "status": "HEALTHY",
 }
 `;
@@ -5996,12 +5996,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.04584,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.95416,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.997708,
   "status": "HEALTHY",
 }
 `;
@@ -6010,12 +6010,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.04722,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.95278,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.997639,
   "status": "HEALTHY",
 }
 `;
@@ -6024,12 +6024,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.04862,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.95138,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.997569,
   "status": "HEALTHY",
 }
 `;
@@ -6038,12 +6038,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.05,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.95,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.9975,
   "status": "HEALTHY",
 }
 `;
@@ -6052,12 +6052,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.05138,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.94862,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.997431,
   "status": "HEALTHY",
 }
 `;
@@ -6066,12 +6066,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.05278,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.94722,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.997361,
   "status": "HEALTHY",
 }
 `;
@@ -6080,12 +6080,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.05416,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.94584,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.997292,
   "status": "HEALTHY",
 }
 `;
@@ -6094,12 +6094,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.05556,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.94444,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.997222,
   "status": "HEALTHY",
 }
 `;
@@ -6108,12 +6108,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.05694,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.94306,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.997153,
   "status": "HEALTHY",
 }
 `;
@@ -6122,12 +6122,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.05834,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.94166,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.997083,
   "status": "HEALTHY",
 }
 `;
@@ -6136,12 +6136,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.05972,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.94028,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.997014,
   "status": "HEALTHY",
 }
 `;
@@ -6150,12 +6150,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.06112,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.93888,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.996944,
   "status": "HEALTHY",
 }
 `;
@@ -6164,12 +6164,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.0625,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.9375,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.996875,
   "status": "HEALTHY",
 }
 `;
@@ -6178,12 +6178,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.06388,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.93612,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.996806,
   "status": "HEALTHY",
 }
 `;
@@ -6192,12 +6192,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.06528,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.93472,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.996736,
   "status": "HEALTHY",
 }
 `;
@@ -6206,12 +6206,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.06666,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.93334,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.996667,
   "status": "HEALTHY",
 }
 `;
@@ -6220,12 +6220,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.06806,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.93194,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.996597,
   "status": "HEALTHY",
 }
 `;
@@ -6234,12 +6234,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.06944,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.93056,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.996528,
   "status": "HEALTHY",
 }
 `;
@@ -6248,12 +6248,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.07084,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.92916,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.996458,
   "status": "HEALTHY",
 }
 `;
@@ -6262,12 +6262,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.07222,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.92778,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.996389,
   "status": "HEALTHY",
 }
 `;
@@ -6276,12 +6276,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.07362,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.92638,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.996319,
   "status": "HEALTHY",
 }
 `;
@@ -6290,12 +6290,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.075,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.925,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.99625,
   "status": "HEALTHY",
 }
 `;
@@ -6304,12 +6304,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.07638,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.92362,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.996181,
   "status": "HEALTHY",
 }
 `;
@@ -6318,12 +6318,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.07778,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.92222,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.996111,
   "status": "HEALTHY",
 }
 `;
@@ -6332,12 +6332,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.07916,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.92084,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.996042,
   "status": "HEALTHY",
 }
 `;
@@ -6346,12 +6346,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.08056,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.91944,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.995972,
   "status": "HEALTHY",
 }
 `;
@@ -6360,12 +6360,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.08194,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.91806,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.995903,
   "status": "HEALTHY",
 }
 `;
@@ -6374,12 +6374,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.08334,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.91666,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.995833,
   "status": "HEALTHY",
 }
 `;
@@ -6388,12 +6388,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.08472,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.91528,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.995764,
   "status": "HEALTHY",
 }
 `;
@@ -6402,12 +6402,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.08612,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.91388,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.995694,
   "status": "HEALTHY",
 }
 `;
@@ -6416,12 +6416,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.0875,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.9125,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.995625,
   "status": "HEALTHY",
 }
 `;
@@ -6430,12 +6430,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.08888,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.91112,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.995556,
   "status": "HEALTHY",
 }
 `;
@@ -6444,12 +6444,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.09028,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.90972,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.995486,
   "status": "HEALTHY",
 }
 `;
@@ -6458,12 +6458,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.09166,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.90834,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.995417,
   "status": "HEALTHY",
 }
 `;
@@ -6472,12 +6472,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.09306,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.90694,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.995347,
   "status": "HEALTHY",
 }
 `;
@@ -6486,12 +6486,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.09444,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.90556,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.995278,
   "status": "HEALTHY",
 }
 `;
@@ -6500,12 +6500,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.09584,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.90416,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.995208,
   "status": "HEALTHY",
 }
 `;
@@ -6514,12 +6514,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.09722,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.90278,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.995139,
   "status": "HEALTHY",
 }
 `;
@@ -6528,12 +6528,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.09862,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.90138,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.995069,
   "status": "HEALTHY",
 }
 `;
@@ -6542,12 +6542,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.1,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.9,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.995,
   "status": "HEALTHY",
 }
 `;
@@ -6556,12 +6556,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.10138,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.89862,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.994931,
   "status": "HEALTHY",
 }
 `;
@@ -6570,12 +6570,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.10278,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.89722,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.994861,
   "status": "HEALTHY",
 }
 `;
@@ -6584,12 +6584,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.10416,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.89584,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.994792,
   "status": "HEALTHY",
 }
 `;
@@ -6598,12 +6598,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.10556,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.89444,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.994722,
   "status": "HEALTHY",
 }
 `;
@@ -6612,12 +6612,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.10694,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.89306,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.994653,
   "status": "HEALTHY",
 }
 `;
@@ -6626,12 +6626,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.10834,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.89166,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.994583,
   "status": "HEALTHY",
 }
 `;
@@ -6640,12 +6640,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.10972,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.89028,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.994514,
   "status": "HEALTHY",
 }
 `;
@@ -6654,12 +6654,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.11112,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.88888,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.994444,
   "status": "HEALTHY",
 }
 `;
@@ -6668,12 +6668,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.1125,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.8875,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.994375,
   "status": "HEALTHY",
 }
 `;
@@ -6682,12 +6682,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.11388,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.88612,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.994306,
   "status": "HEALTHY",
 }
 `;
@@ -6696,12 +6696,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.11528,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.88472,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.994236,
   "status": "HEALTHY",
 }
 `;
@@ -6710,12 +6710,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.11666,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.88334,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.994167,
   "status": "HEALTHY",
 }
 `;
@@ -6724,12 +6724,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.11806,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.88194,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.994097,
   "status": "HEALTHY",
 }
 `;
@@ -6738,12 +6738,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.11944,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.88056,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.994028,
   "status": "HEALTHY",
 }
 `;
@@ -6752,12 +6752,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.12084,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.87916,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.993958,
   "status": "HEALTHY",
 }
 `;
@@ -6766,12 +6766,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.12222,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.87778,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.993889,
   "status": "HEALTHY",
 }
 `;
@@ -6780,12 +6780,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.12362,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.87638,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.993819,
   "status": "HEALTHY",
 }
 `;
@@ -6794,12 +6794,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.125,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.875,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.99375,
   "status": "HEALTHY",
 }
 `;
@@ -6808,12 +6808,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.12638,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.87362,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.993681,
   "status": "HEALTHY",
 }
 `;
@@ -6822,12 +6822,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.12778,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.87222,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.993611,
   "status": "HEALTHY",
 }
 `;
@@ -6836,12 +6836,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.12916,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.87084,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.993542,
   "status": "HEALTHY",
 }
 `;
@@ -6850,12 +6850,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.13056,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.86944,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.993472,
   "status": "HEALTHY",
 }
 `;
@@ -6864,12 +6864,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.13194,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.86806,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.993403,
   "status": "HEALTHY",
 }
 `;
@@ -6878,12 +6878,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.13334,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.86666,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.993333,
   "status": "HEALTHY",
 }
 `;
@@ -6892,12 +6892,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.13472,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.86528,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.993264,
   "status": "HEALTHY",
 }
 `;
@@ -6906,12 +6906,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.13612,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.86388,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.993194,
   "status": "HEALTHY",
 }
 `;
@@ -6920,12 +6920,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.1375,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.8625,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.993125,
   "status": "HEALTHY",
 }
 `;
@@ -6934,12 +6934,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.13888,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.86112,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.993056,
   "status": "HEALTHY",
 }
 `;
@@ -6948,12 +6948,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.14028,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.85972,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.992986,
   "status": "HEALTHY",
 }
 `;
@@ -6962,12 +6962,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.14166,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.85834,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.992917,
   "status": "HEALTHY",
 }
 `;
@@ -6976,12 +6976,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.14306,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.85694,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.992847,
   "status": "HEALTHY",
 }
 `;
@@ -6990,12 +6990,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.14444,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.85556,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.992778,
   "status": "HEALTHY",
 }
 `;
@@ -7004,12 +7004,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.14584,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.85416,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.992708,
   "status": "HEALTHY",
 }
 `;
@@ -7018,12 +7018,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.14722,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.85278,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.992639,
   "status": "HEALTHY",
 }
 `;
@@ -7032,12 +7032,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.14862,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.85138,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.992569,
   "status": "HEALTHY",
 }
 `;
@@ -7046,12 +7046,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.15,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.85,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.9925,
   "status": "HEALTHY",
 }
 `;
@@ -7060,12 +7060,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.15138,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.84862,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.992431,
   "status": "HEALTHY",
 }
 `;
@@ -7074,12 +7074,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.15278,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.84722,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.992361,
   "status": "HEALTHY",
 }
 `;
@@ -7088,12 +7088,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.15416,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.84584,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.992292,
   "status": "HEALTHY",
 }
 `;
@@ -7102,12 +7102,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.15556,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.84444,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.992222,
   "status": "HEALTHY",
 }
 `;
@@ -7116,12 +7116,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.15694,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.84306,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.992153,
   "status": "HEALTHY",
 }
 `;
@@ -7130,12 +7130,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.15834,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.84166,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.992083,
   "status": "HEALTHY",
 }
 `;
@@ -7144,12 +7144,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.15972,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.84028,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.992014,
   "status": "HEALTHY",
 }
 `;
@@ -7158,12 +7158,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.16112,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.83888,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.991944,
   "status": "HEALTHY",
 }
 `;
@@ -7172,12 +7172,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.1625,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.8375,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.991875,
   "status": "HEALTHY",
 }
 `;
@@ -7186,12 +7186,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.16388,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.83612,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.991806,
   "status": "HEALTHY",
 }
 `;
@@ -7200,12 +7200,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.16528,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.83472,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.991736,
   "status": "HEALTHY",
 }
 `;
@@ -7214,12 +7214,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.16666,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.83334,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.991667,
   "status": "HEALTHY",
 }
 `;
@@ -7228,12 +7228,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.16806,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.83194,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.991597,
   "status": "HEALTHY",
 }
 `;
@@ -7242,12 +7242,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.16944,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.83056,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.991528,
   "status": "HEALTHY",
 }
 `;
@@ -7256,12 +7256,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.17084,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.82916,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.991458,
   "status": "HEALTHY",
 }
 `;
@@ -7270,12 +7270,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.17222,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.82778,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.991389,
   "status": "HEALTHY",
 }
 `;
@@ -7284,12 +7284,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.17362,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.82638,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.991319,
   "status": "HEALTHY",
 }
 `;
@@ -7298,12 +7298,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.175,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.825,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.99125,
   "status": "HEALTHY",
 }
 `;
@@ -7312,12 +7312,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.17638,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.82362,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.991181,
   "status": "HEALTHY",
 }
 `;
@@ -7326,12 +7326,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.17778,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.82222,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.991111,
   "status": "HEALTHY",
 }
 `;
@@ -7340,12 +7340,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.17916,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.82084,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.991042,
   "status": "HEALTHY",
 }
 `;
@@ -7354,12 +7354,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.18056,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.81944,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.990972,
   "status": "HEALTHY",
 }
 `;
@@ -7368,12 +7368,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.18194,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.81806,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.990903,
   "status": "HEALTHY",
 }
 `;
@@ -7382,12 +7382,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.18334,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.81666,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.990833,
   "status": "HEALTHY",
 }
 `;
@@ -7396,12 +7396,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.18472,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.81528,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.990764,
   "status": "HEALTHY",
 }
 `;
@@ -7410,12 +7410,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.18612,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.81388,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.990694,
   "status": "HEALTHY",
 }
 `;
@@ -7424,12 +7424,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.1875,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.8125,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.990625,
   "status": "HEALTHY",
 }
 `;
@@ -7438,12 +7438,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.18888,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.81112,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.990556,
   "status": "HEALTHY",
 }
 `;
@@ -7452,12 +7452,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.19028,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.80972,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.990486,
   "status": "HEALTHY",
 }
 `;
@@ -7466,12 +7466,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.19166,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.80834,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.990417,
   "status": "HEALTHY",
 }
 `;
@@ -7480,12 +7480,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.19306,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.80694,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.990347,
   "status": "HEALTHY",
 }
 `;
@@ -7494,12 +7494,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.19444,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.80556,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.990278,
   "status": "HEALTHY",
 }
 `;
@@ -7508,12 +7508,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.19584,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.80416,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.990208,
   "status": "HEALTHY",
 }
 `;
@@ -7522,12 +7522,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.19722,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.80278,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.990139,
   "status": "HEALTHY",
 }
 `;
@@ -7536,12 +7536,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.19862,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.80138,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.990069,
   "status": "HEALTHY",
 }
 `;
@@ -7550,12 +7550,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.2,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.8,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.99,
   "status": "HEALTHY",
 }
 `;
@@ -7564,12 +7564,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.20138,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.79862,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.989931,
   "status": "HEALTHY",
 }
 `;
@@ -7578,12 +7578,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.20278,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.79722,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.989861,
   "status": "HEALTHY",
 }
 `;
@@ -7592,12 +7592,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.20416,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.79584,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.989792,
   "status": "HEALTHY",
 }
 `;
@@ -7606,12 +7606,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.20556,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.79444,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.989722,
   "status": "HEALTHY",
 }
 `;
@@ -7620,12 +7620,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.20694,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.79306,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.989653,
   "status": "HEALTHY",
 }
 `;
@@ -7634,12 +7634,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.20834,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.79166,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.989583,
   "status": "HEALTHY",
 }
 `;
@@ -7648,12 +7648,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.20972,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.79028,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.989514,
   "status": "HEALTHY",
 }
 `;
@@ -7662,12 +7662,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.21112,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.78888,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.989444,
   "status": "HEALTHY",
 }
 `;
@@ -7676,12 +7676,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.2125,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.7875,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.989375,
   "status": "HEALTHY",
 }
 `;
@@ -7690,12 +7690,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.21388,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.78612,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.989306,
   "status": "HEALTHY",
 }
 `;
@@ -7704,12 +7704,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.21528,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.78472,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.989236,
   "status": "HEALTHY",
 }
 `;
@@ -7718,12 +7718,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.21666,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.78334,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.989167,
   "status": "HEALTHY",
 }
 `;
@@ -7732,12 +7732,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.21806,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.78194,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.989097,
   "status": "HEALTHY",
 }
 `;
@@ -7746,12 +7746,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.21944,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.78056,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.989028,
   "status": "HEALTHY",
 }
 `;
@@ -7760,12 +7760,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.22084,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.77916,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.988958,
   "status": "HEALTHY",
 }
 `;
@@ -7774,12 +7774,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.22222,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.77778,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.988889,
   "status": "HEALTHY",
 }
 `;
@@ -7788,12 +7788,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.22362,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.77638,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.988819,
   "status": "HEALTHY",
 }
 `;
@@ -7802,12 +7802,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.225,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.775,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.98875,
   "status": "HEALTHY",
 }
 `;
@@ -7816,12 +7816,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.22638,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.77362,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.988681,
   "status": "HEALTHY",
 }
 `;
@@ -7830,12 +7830,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.22778,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.77222,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.988611,
   "status": "HEALTHY",
 }
 `;
@@ -7844,12 +7844,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.22916,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.77084,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.988542,
   "status": "HEALTHY",
 }
 `;
@@ -7858,12 +7858,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.23056,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.76944,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.988472,
   "status": "HEALTHY",
 }
 `;
@@ -7872,12 +7872,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.23194,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.76806,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.988403,
   "status": "HEALTHY",
 }
 `;
@@ -7886,12 +7886,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.23334,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.76666,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.988333,
   "status": "HEALTHY",
 }
 `;
@@ -7900,12 +7900,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.23472,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.76528,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.988264,
   "status": "HEALTHY",
 }
 `;
@@ -7914,12 +7914,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.23612,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.76388,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.988194,
   "status": "HEALTHY",
 }
 `;
@@ -7928,12 +7928,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.2375,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.7625,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.988125,
   "status": "HEALTHY",
 }
 `;
@@ -7942,12 +7942,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.23888,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.76112,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.988056,
   "status": "HEALTHY",
 }
 `;
@@ -7956,12 +7956,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.24028,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.75972,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.987986,
   "status": "HEALTHY",
 }
 `;
@@ -7970,12 +7970,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.24166,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.75834,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.987917,
   "status": "HEALTHY",
 }
 `;
@@ -7984,12 +7984,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.24306,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.75694,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.987847,
   "status": "HEALTHY",
 }
 `;
@@ -7998,12 +7998,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.24444,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.75556,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.987778,
   "status": "HEALTHY",
 }
 `;
@@ -8012,12 +8012,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.24584,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.75416,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.987708,
   "status": "HEALTHY",
 }
 `;
@@ -8026,12 +8026,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.24722,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.75278,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.987639,
   "status": "HEALTHY",
 }
 `;
@@ -8040,12 +8040,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.24862,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.75138,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.987569,
   "status": "HEALTHY",
 }
 `;
@@ -8054,12 +8054,12 @@ exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 
 Object {
   "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.6,
+    "consumed": 0.25,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.4,
+    "remaining": 0.75,
   },
-  "sliValue": 0.97,
+  "sliValue": 0.9875,
   "status": "HEALTHY",
 }
 `;

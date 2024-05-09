@@ -20,22 +20,21 @@ function onFilterCell(
   context: DataTableContext,
   rowIndex: EuiDataGridColumnCellActionProps['rowIndex'],
   columnId: EuiDataGridColumnCellActionProps['columnId'],
-  mode: '+' | '-'
+  mode: '+' | '-',
+  field: DataViewField
 ) {
   const row = context.rows[rowIndex];
   const value = row.flattened[columnId];
-  const field = context.dataView.fields.getByName(columnId);
 
   if (field && context.onFilter) {
     context.onFilter(field, value, mode);
   }
 }
 
-export const FilterInBtn = ({
-  Component,
-  rowIndex,
-  columnId,
-}: EuiDataGridColumnCellActionProps) => {
+export const FilterInBtn = (
+  { Component, rowIndex, columnId }: EuiDataGridColumnCellActionProps,
+  field: DataViewField
+) => {
   const context = useContext(UnifiedDataTableContext);
   const buttonTitle = i18n.translate('unifiedDataTable.grid.filterForAria', {
     defaultMessage: 'Filter for this {value}',
@@ -45,7 +44,7 @@ export const FilterInBtn = ({
   return (
     <Component
       onClick={() => {
-        onFilterCell(context, rowIndex, columnId, '+');
+        onFilterCell(context, rowIndex, columnId, '+', field);
       }}
       iconType="plusInCircle"
       aria-label={buttonTitle}
@@ -59,11 +58,10 @@ export const FilterInBtn = ({
   );
 };
 
-export const FilterOutBtn = ({
-  Component,
-  rowIndex,
-  columnId,
-}: EuiDataGridColumnCellActionProps) => {
+export const FilterOutBtn = (
+  { Component, rowIndex, columnId }: EuiDataGridColumnCellActionProps,
+  field: DataViewField
+) => {
   const context = useContext(UnifiedDataTableContext);
   const buttonTitle = i18n.translate('unifiedDataTable.grid.filterOutAria', {
     defaultMessage: 'Filter out this {value}',
@@ -73,7 +71,7 @@ export const FilterOutBtn = ({
   return (
     <Component
       onClick={() => {
-        onFilterCell(context, rowIndex, columnId, '-');
+        onFilterCell(context, rowIndex, columnId, '-', field);
       }}
       iconType="minusInCircle"
       aria-label={buttonTitle}
@@ -126,7 +124,20 @@ export function buildCellActions(
   onFilter?: DocViewFilterFn
 ) {
   return [
-    ...(onFilter && field.filterable ? [FilterInBtn, FilterOutBtn] : []),
+    ...(onFilter && field.filterable
+      ? [
+          ({ Component, rowIndex, columnId }: EuiDataGridColumnCellActionProps) =>
+            FilterInBtn(
+              { Component, rowIndex, columnId } as EuiDataGridColumnCellActionProps,
+              field
+            ),
+          ({ Component, rowIndex, columnId }: EuiDataGridColumnCellActionProps) =>
+            FilterOutBtn(
+              { Component, rowIndex, columnId } as EuiDataGridColumnCellActionProps,
+              field
+            ),
+        ]
+      : []),
     ({ Component, rowIndex, columnId }: EuiDataGridColumnCellActionProps) =>
       buildCopyValueButton(
         { Component, rowIndex, columnId } as EuiDataGridColumnCellActionProps,

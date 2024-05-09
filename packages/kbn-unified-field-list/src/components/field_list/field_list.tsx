@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -39,7 +39,7 @@ export interface FieldListProps {
  * @public
  * @constructor
  */
-export const FieldList: React.FC<FieldListProps> = ({
+export const FieldList: FC<PropsWithChildren<FieldListProps>> = ({
   'data-test-subj': dataTestSubject = 'fieldList',
   isProcessing,
   prepend,

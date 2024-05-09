@@ -181,7 +181,7 @@ function TestComponent() {
 }`,
   },
   {
-    name: 'JSX elements that have a label, aria-label or title prop with a string value should be translated with i18n',
+    name: 'JSX elements that have a label, aria-label or title prop with a string value should be translated with FormattedMessage',
     filename: '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
     code: `
 import React from 'react';
@@ -237,7 +237,63 @@ function TestComponent3() {
 }`,
   },
   {
-    name: 'JSX elements that have a label, aria-label or title prop with a JSXExpression value that is a string should be translated with i18n',
+    name: 'JSX elements that have a label, aria-label or title prop with a string value with quotes in it should be correctly translated with FormattedMessage',
+    filename: '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
+    code: `
+import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+
+function TestComponent() {
+  return (
+    <SomeChildComponent label="This here'a is a 'test'" />
+  )
+}
+function TestComponent2() {
+  return (
+    <SomeChildComponent aria-label="This here'a is a 'test'" />
+  )
+}
+function TestComponent3() {
+  return (
+    <SomeChildComponent title="This here'a is a 'test'" />
+  )
+}`,
+    errors: [
+      {
+        line: 7,
+        message: RULE_WARNING_MESSAGE,
+      },
+      {
+        line: 12,
+        message: RULE_WARNING_MESSAGE,
+      },
+      {
+        line: 17,
+        message: RULE_WARNING_MESSAGE,
+      },
+    ],
+    output: `
+import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+
+function TestComponent() {
+  return (
+    <SomeChildComponent label={<FormattedMessage id="xpack.observability.testComponent.someChildComponent.thisHereaIsALabel" defaultMessage="This here\\'a is a \\'test\\'" />} />
+  )
+}
+function TestComponent2() {
+  return (
+    <SomeChildComponent aria-label={<FormattedMessage id="xpack.observability.testComponent2.someChildComponent.thisHereaIsALabel" defaultMessage="This here\\'a is a \\'test\\'" />} />
+  )
+}
+function TestComponent3() {
+  return (
+    <SomeChildComponent title={<FormattedMessage id="xpack.observability.testComponent3.someChildComponent.thisHereaIsALabel" defaultMessage="This here\\'a is a \\'test\\'" />} />
+  )
+}`,
+  },
+  {
+    name: 'JSX elements that have a label, aria-label or title prop with a JSXExpression value that is a string should be translated with FormattedMessage',
     filename: '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
     code: `
   import React from 'react';
@@ -289,6 +345,62 @@ function TestComponent3() {
   function TestComponent3() {
     return (
       <SomeChildComponent title={<FormattedMessage id="xpack.observability.testComponent3.someChildComponent.thisIsATestLabel" defaultMessage="This is a test" />} />
+    )
+  }`,
+  },
+  {
+    name: 'JSX elements that have a label, aria-label or title prop with a JSXExpression value that is a string with quotes in it should be correctly translated with FormattedMessage',
+    filename: '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
+    code: `
+  import React from 'react';
+  import { FormattedMessage } from '@kbn/i18n-react';
+
+  function TestComponent() {
+    return (
+      <SomeChildComponent label={"This here'a is a 'test'"} />
+    )
+  }
+  function TestComponent2() {
+    return (
+      <SomeChildComponent aria-label={"This here'a is a 'test'"} />
+    )
+  }
+  function TestComponent3() {
+    return (
+      <SomeChildComponent title={"This here'a is a 'test'"} />
+    )
+  }`,
+    errors: [
+      {
+        line: 7,
+        message: RULE_WARNING_MESSAGE,
+      },
+      {
+        line: 12,
+        message: RULE_WARNING_MESSAGE,
+      },
+      {
+        line: 17,
+        message: RULE_WARNING_MESSAGE,
+      },
+    ],
+    output: `
+  import React from 'react';
+  import { FormattedMessage } from '@kbn/i18n-react';
+
+  function TestComponent() {
+    return (
+      <SomeChildComponent label={<FormattedMessage id="xpack.observability.testComponent.someChildComponent.thisHereaIsALabel" defaultMessage="This here\\'a is a \\'test\\'" />} />
+    )
+  }
+  function TestComponent2() {
+    return (
+      <SomeChildComponent aria-label={<FormattedMessage id="xpack.observability.testComponent2.someChildComponent.thisHereaIsALabel" defaultMessage="This here\\'a is a \\'test\\'" />} />
+    )
+  }
+  function TestComponent3() {
+    return (
+      <SomeChildComponent title={<FormattedMessage id="xpack.observability.testComponent3.someChildComponent.thisHereaIsALabel" defaultMessage="This here\\'a is a \\'test\\'" />} />
     )
   }`,
   },

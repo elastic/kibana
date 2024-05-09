@@ -14,7 +14,7 @@ import type { CoreAuthenticationService } from './authc';
  *
  * @public
  */
-export interface CoreSecurityContract {
+export interface CoreSecurityDelegateContract {
   authc: AuthenticationServiceContract;
 }
 

@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const VALUE_LISTS_FLYOUT_TITLE = i18n.translate(
   'xpack.securitySolution.lists.importValueListTitle',
   {
-    defaultMessage: 'Import value lists',
+    defaultMessage: 'Manage value lists',
   }
 );
 

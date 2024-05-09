@@ -13,7 +13,7 @@ import { Reason } from './reason';
 import { RightPanelContext } from '../context';
 import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
-import { DocumentDetailsPreviewPanelKey } from '../../preview';
+import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
 import { TestProviders } from '../../../../common/mock';
 import { i18n } from '@kbn/i18n';
 import { type ExpandableFlyoutApi, useExpandableFlyoutApi } from '@kbn/expandable-flyout';

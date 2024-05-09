@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, memo } from 'react';
+import React, { memo, PropsWithChildren } from 'react';
 
 import { Paywall } from '../components/paywall';
 import { useSecurityContext } from '../hooks/use_security_context';
 import { SecuritySolutionPluginTemplateWrapper } from './security_solution_plugin_template_wrapper';
 
-export const EnterpriseGuard: FC = memo(({ children }) => {
+export const EnterpriseGuard = memo<PropsWithChildren<unknown>>(({ children }) => {
   const { licenseService } = useSecurityContext();
 
   if (licenseService.isEnterprise()) {

@@ -194,7 +194,7 @@ export const CategoryTable: FC<Props> = ({
         defaultMessage: 'Actions',
       }),
       sortable: false,
-      width: '60px',
+      width: '65px',
       actions: [
         {
           name: labels.singleSelect.in,

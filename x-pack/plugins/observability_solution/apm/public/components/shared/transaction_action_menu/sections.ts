@@ -10,18 +10,16 @@ import { Location } from 'history';
 import { IBasePath } from '@kbn/core/public';
 import { isEmpty, pickBy } from 'lodash';
 import moment from 'moment';
-import url from 'url';
 import type { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
-import { LocatorPublic } from '@kbn/share-plugin/common';
-import { AllDatasetsLocatorParams } from '@kbn/deeplinks-observability/locators';
 import type { ProfilingLocators } from '@kbn/observability-shared-plugin/public';
+import { LocatorPublic } from '@kbn/share-plugin/common';
+import { SerializableRecord } from '@kbn/utility-types';
 import { Environment } from '../../../../common/environment_rt';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { getDiscoverHref } from '../links/discover_links/discover_link';
 import { getDiscoverQuery } from '../links/discover_links/discover_transaction_link';
 import { getInfraHref } from '../links/infra_link';
-import { fromQuery } from '../links/url_helpers';
 import { SectionRecord, getNonEmptySections, Action } from './sections_helper';
 import { HOST_NAME, TRACE_ID } from '../../../../common/es_fields/apm';
 import { ApmRouter } from '../../routing/apm_route_config';
@@ -42,11 +40,11 @@ export const getSections = ({
   location,
   apmRouter,
   infraLinksAvailable,
+  uptimeLocator,
   profilingLocators,
   rangeFrom,
   rangeTo,
   environment,
-  allDatasetsLocator,
   logsLocators,
   dataViewId,
 }: {
@@ -55,11 +53,11 @@ export const getSections = ({
   location: Location;
   apmRouter: ApmRouter;
   infraLinksAvailable: boolean;
+  uptimeLocator?: LocatorPublic<SerializableRecord>;
   profilingLocators?: ProfilingLocators;
   rangeFrom: string;
   rangeTo: string;
   environment: Environment;
-  allDatasetsLocator: LocatorPublic<AllDatasetsLocatorParams>;
   logsLocators: ReturnType<typeof getLogsLocatorsFromUrlService>;
   dataViewId?: string;
 }) => {
@@ -72,19 +70,16 @@ export const getSections = ({
   const time = Math.round(transaction.timestamp.us / 1000);
   const infraMetricsQuery = getInfraMetricsQuery(transaction);
 
-  const uptimeLink = url.format({
-    pathname: basePath.prepend('/app/uptime'),
-    search: `?${fromQuery(
-      pickBy(
-        {
-          dateRangeStart: rangeFrom,
-          dateRangeEnd: rangeTo,
-          search: `url.domain:"${transaction.url?.domain}"`,
-        },
-        (val) => !isEmpty(val)
-      )
-    )}`,
-  });
+  const uptimeLink = uptimeLocator?.getRedirectUrl(
+    pickBy(
+      {
+        dateRangeStart: rangeFrom,
+        dateRangeEnd: rangeTo,
+        search: `url.domain:"${transaction.url?.domain}"`,
+      },
+      (val) => !isEmpty(val)
+    )
+  );
 
   // Logs hrefs
   const podLogsHref = logsLocators.nodeLogsLocator.getRedirectUrl({
@@ -231,7 +226,7 @@ export const getSections = ({
         defaultMessage: 'Status',
       }),
       href: uptimeLink,
-      condition: !!transaction.url?.domain,
+      condition: !!transaction.url?.domain && !!uptimeLink,
     },
   ];
 

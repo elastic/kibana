@@ -9,7 +9,8 @@ import { EuiButton } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useRightPanelContext } from '../context';
-import { DocumentDetailsLeftPanelKey, LeftPanelResponseTab } from '../../left';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import { LeftPanelResponseTab } from '../../left';
 import { RESPONSE_BUTTON_TEST_ID } from './test_ids';
 
 /**

@@ -18,7 +18,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
-  describe('gauge chart', function indexPatternCreation() {
+  // FLAKY: https://github.com/elastic/kibana/issues/181883
+  describe.skip('gauge chart', function indexPatternCreation() {
     before(async () => {
       await PageObjects.visualize.initTests();
     });

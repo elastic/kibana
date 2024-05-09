@@ -14,10 +14,10 @@ import { getDefaultControlColumn } from '../../../../timelines/components/timeli
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 
 jest.mock('../../../hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
+  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
 }));
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
-useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
+useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {

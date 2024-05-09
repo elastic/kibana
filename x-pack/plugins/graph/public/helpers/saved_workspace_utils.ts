@@ -7,7 +7,7 @@
 
 import { cloneDeep, assign, defaults, forOwn } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { IBasePath, OverlayStart, SavedObjectAttributes } from '@kbn/core/public';
+import { CoreStart, IBasePath, SavedObjectAttributes } from '@kbn/core/public';
 
 import { SavedObjectSaveOpts, isErrorNonFatal } from '@kbn/saved-objects-plugin/public';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
@@ -167,8 +167,7 @@ export async function saveSavedWorkspace(
   }: SavedObjectSaveOpts = {},
   services: {
     contentClient: ContentClient;
-    overlays: OverlayStart;
-  }
+  } & Pick<CoreStart, 'overlays' | 'analytics' | 'i18n' | 'theme'>
 ) {
   let attributes: SavedObjectAttributes = {};
 

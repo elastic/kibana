@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 
 export function whenIdle(doWork: () => void) {
   const requestIdleCallback = window.requestIdleCallback || window.setTimeout;
@@ -21,7 +21,7 @@ export function whenIdle(doWork: () => void) {
 /**
  * Postpone rendering of children until the page is loaded and browser is idle.
  */
-export const WhenIdle: React.FC = ({ children }) => {
+export const WhenIdle: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const [idleFired, setIdleFired] = React.useState(false);
 
   React.useEffect(() => {

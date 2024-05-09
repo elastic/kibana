@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, FC, PropsWithChildren } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -28,7 +28,9 @@ export interface UnifiedDataTableFooterProps {
   fieldFormats: FieldFormatsStart;
 }
 
-export const UnifiedDataTableFooter: React.FC<UnifiedDataTableFooterProps> = (props) => {
+export const UnifiedDataTableFooter: FC<PropsWithChildren<UnifiedDataTableFooterProps>> = (
+  props
+) => {
   const {
     isLoadingMore,
     rowCount,

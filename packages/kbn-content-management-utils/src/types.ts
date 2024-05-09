@@ -194,6 +194,7 @@ export interface SOWithMetadata<Attributes extends object = object> {
   version?: string;
   createdAt?: string;
   updatedAt?: string;
+  createdBy?: string;
   error?: {
     error: string;
     message: string;

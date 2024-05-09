@@ -11,6 +11,8 @@ export * from './format_hit';
 export * from './format_value';
 export * from './get_doc_id';
 export * from './get_ignored_reason';
+export * from './get_log_document_overview';
+export * from './get_message_field_with_fallbacks';
 export * from './get_should_show_field_handler';
 export * from './nested_fields';
 export { isLegacyTableEnabled } from './is_legacy_table_enabled';

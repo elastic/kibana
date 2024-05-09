@@ -169,7 +169,6 @@ export const LogRateAnalysisPage: FC<Props> = ({ stickyHistogram }) => {
         <EuiFlexGroup gutterSize="m" direction="column">
           <EuiFlexItem>
             <SearchPanel
-              dataView={dataView}
               searchString={searchString ?? ''}
               searchQuery={searchQuery}
               searchQueryLanguage={searchQueryLanguage}
@@ -177,7 +176,6 @@ export const LogRateAnalysisPage: FC<Props> = ({ stickyHistogram }) => {
             />
           </EuiFlexItem>
           <LogRateAnalysisContent
-            dataView={dataView}
             embeddingOrigin={AIOPS_TELEMETRY_ID.AIOPS_DEFAULT_SOURCE}
             esSearchQuery={searchQuery}
             onWindowParametersChange={onWindowParametersHandler}

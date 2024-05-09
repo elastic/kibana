@@ -10,18 +10,19 @@ import expect from '@kbn/expect';
 import { DatasetQualityApiClientKey } from '../../common/config';
 import { DatasetQualityApiError } from '../../common/dataset_quality_api_supertest';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { expectToReject, getDataStreamSettingsOfFirstIndex } from '../../utils';
+import { expectToReject } from '../../utils';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const synthtrace = getService('logSynthtraceEsClient');
-  const esClient = getService('es');
   const datasetQualityApiClient = getService('datasetQualityApiClient');
   const start = '2023-12-11T18:00:00.000Z';
   const end = '2023-12-11T18:01:00.000Z';
   const type = 'logs';
   const dataset = 'nginx.access';
   const namespace = 'default';
+  const serviceName = 'my-service';
+  const hostName = 'synth-host';
 
   async function callApiAs(user: DatasetQualityApiClientKey, dataStream: string) {
     return await datasetQualityApiClient[user]({
@@ -29,6 +30,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       params: {
         path: {
           dataStream,
+        },
+        query: {
+          start,
+          end,
         },
       },
     });
@@ -50,6 +55,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .namespace(namespace)
                 .defaults({
                   'log.file.path': '/my-service.log',
+                  'service.name': serviceName,
+                  'host.name': hostName,
                 })
             ),
         ]);
@@ -71,13 +78,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(resp.body).empty();
       });
 
-      it('returns data stream details correctly', async () => {
-        const dataStreamSettings = await getDataStreamSettingsOfFirstIndex(
-          esClient,
-          `logs-${dataset}-${namespace}`
-        );
+      it('returns "sizeBytes" correctly', async () => {
         const resp = await callApiAs('datasetQualityLogsUser', `${type}-${dataset}-${namespace}`);
-        expect(resp.body.createdOn).to.be(Number(dataStreamSettings?.index?.creation_date));
+        expect(isNaN(resp.body.sizeBytes as number)).to.be(false);
+        expect(resp.body.sizeBytes).to.be.greaterThan(0);
+      });
+
+      it('returns service.name and host.name correctly', async () => {
+        const resp = await callApiAs('datasetQualityLogsUser', `${type}-${dataset}-${namespace}`);
+        expect(resp.body.services).to.eql({ ['service.name']: [serviceName] });
+        expect(resp.body.hosts?.['host.name']).to.eql([hostName]);
       });
 
       after(async () => {

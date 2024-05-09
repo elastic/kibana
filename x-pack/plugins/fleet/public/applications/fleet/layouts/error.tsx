@@ -22,10 +22,10 @@ const Panel = styled(EuiPanel)`
   margin-left: auto;
 `;
 
-export const ErrorLayout: React.FunctionComponent<{ isAddIntegrationsPath: boolean }> = ({
-  isAddIntegrationsPath,
-  children,
-}) => (
+export const ErrorLayout: React.FunctionComponent<{
+  children: React.ReactNode;
+  isAddIntegrationsPath: boolean;
+}> = ({ isAddIntegrationsPath, children }) => (
   <EuiErrorBoundary>
     {isAddIntegrationsPath ? (
       <WithHeaderLayout leftColumn={<DefaultPageTitle />}>{children}</WithHeaderLayout>

@@ -18,7 +18,8 @@ import { useDataVisualizerKibana } from '../../../kibana_context';
 
 const BAR_TARGET = 150;
 const PROGRESS_INCREMENT = 5;
-const FINISHED_CHECKS = 3;
+const FINISHED_CHECKS = 10;
+const FINISHED_CHECKS_INTERVAL_MS = 2 * 1000;
 const ERROR_ATTEMPTS = 3;
 const BACK_FILL_BUCKETS = 8;
 
@@ -43,6 +44,7 @@ export const DocCountChart: FC<{
 
   const [eventRateChartData, setEventRateChartData] = useState<LineChartPoint[]>([]);
   const [timeRange, setTimeRange] = useState<{ start: Moment; end: Moment } | undefined>(undefined);
+  const [dataReady, setDataReady] = useState(false);
 
   const loadFullData = useRef(false);
 
@@ -91,6 +93,10 @@ export const DocCountChart: FC<{
           ? data
           : [...eventRateChartData].splice(0, lastNonZeroTimeMs?.index ?? 0).concat(data);
 
+      if (dataReady === false && newData.some((d) => d.value > 0)) {
+        setDataReady(true);
+      }
+
       setEventRateChartData(newData);
       setLastNonZeroTimeMs(findLastTimestamp(newData, BACK_FILL_BUCKETS));
     } catch (error) {
@@ -104,6 +110,7 @@ export const DocCountChart: FC<{
     timeBuckets,
     lastNonZeroTimeMs,
     dataStart,
+    dataReady,
     eventRateChartData,
     recordFailure,
   ]);
@@ -114,7 +121,7 @@ export const DocCountChart: FC<{
       if (counter !== 0) {
         setTimeout(() => {
           finishedChecks(counter - 1);
-        }, 2 * 1000);
+        }, FINISHED_CHECKS_INTERVAL_MS);
       }
     },
     [loadData]
@@ -179,7 +186,8 @@ export const DocCountChart: FC<{
     statuses.indexCreatedStatus === IMPORT_STATUS.INCOMPLETE ||
     statuses.ingestPipelineCreatedStatus === IMPORT_STATUS.INCOMPLETE ||
     errorAttempts === 0 ||
-    eventRateChartData.length === 0
+    eventRateChartData.length === 0 ||
+    dataReady === false
   ) {
     return null;
   }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React, { useState, useCallback } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 
@@ -49,7 +49,6 @@ export interface CreateADJobParams {
 }
 
 interface Props {
-  children?: React.ReactElement;
   createADJobInWizard: () => void;
   createADJob: (args: CreateADJobParams) => Promise<CreateState>;
   layer?: LayerResult;
@@ -67,7 +66,7 @@ enum STATE {
   SAVE_FAILED,
 }
 
-export const JobDetails: FC<Props> = ({
+export const JobDetails: FC<PropsWithChildren<Props>> = ({
   children,
   createADJobInWizard,
   createADJob,

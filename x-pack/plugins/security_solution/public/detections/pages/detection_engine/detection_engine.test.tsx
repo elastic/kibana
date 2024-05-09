@@ -8,7 +8,6 @@
 import React, { useEffect } from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { useParams } from 'react-router-dom';
-import '../../../common/mock/match_media';
 import { mockGlobalState, TestProviders, createMockStore } from '../../../common/mock';
 import { useUserData } from '../../components/user_info';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';

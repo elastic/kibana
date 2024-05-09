@@ -192,6 +192,7 @@ describe('ruleType', () => {
     await ruleType.executor({
       executionId: uuidv4(),
       startedAt: new Date(),
+      startedAtOverridden: false,
       previousStartedAt: new Date(),
       services: alertServices as unknown as RuleExecutorServices<
         {},
@@ -287,6 +288,7 @@ describe('ruleType', () => {
     await ruleType.executor({
       executionId: uuidv4(),
       startedAt: new Date(),
+      startedAtOverridden: false,
       previousStartedAt: new Date(),
       services: customAlertServices as unknown as RuleExecutorServices<
         {},
@@ -356,6 +358,7 @@ describe('ruleType', () => {
     await ruleType.executor({
       executionId: uuidv4(),
       startedAt: new Date(),
+      startedAtOverridden: false,
       previousStartedAt: new Date(),
       services: customAlertServices as unknown as RuleExecutorServices<
         {},
@@ -424,6 +427,7 @@ describe('ruleType', () => {
     await ruleType.executor({
       executionId: uuidv4(),
       startedAt: new Date(),
+      startedAtOverridden: false,
       previousStartedAt: new Date(),
       services: alertServices as unknown as RuleExecutorServices<
         {},

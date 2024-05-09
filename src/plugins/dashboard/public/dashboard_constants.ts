@@ -65,6 +65,13 @@ export const DEFAULT_PANEL_WIDTH = DASHBOARD_GRID_COLUMN_COUNT / 2;
 
 export const CHANGE_CHECK_DEBOUNCE = 100;
 
+export enum PanelPlacementStrategy {
+  /** Place on the very top of the Dashboard, add the height of this panel to all other panels. */
+  placeAtTop = 'placeAtTop',
+  /** Look for the smallest y and x value where the default panel will fit. */
+  findTopLeftMostOpenSpace = 'findTopLeftMostOpenSpace',
+}
+
 // ------------------------------------------------------------------
 // Content Management
 // ------------------------------------------------------------------
@@ -85,6 +92,9 @@ export const DEFAULT_DASHBOARD_INPUT: Omit<DashboardContainerInput, 'id'> = {
   panels: {},
   title: '',
   tags: [],
+  executionContext: {
+    type: 'dashboard',
+  },
 
   // options
   useMargins: true,

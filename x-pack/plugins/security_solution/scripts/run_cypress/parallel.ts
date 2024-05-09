@@ -343,8 +343,6 @@ ${JSON.stringify(
 
                 fleetServer = await startFleetServer({
                   kbnClient,
-                  // TODO TC: https://github.com/elastic/kibana/pull/180879 - there was an issue with 8.14.0, this should be removed when it's fixed
-                  version: '8.13.0-SNAPSHOT',
                   logger: log,
                   port:
                     fleetServerPort ?? config.has('servers.fleetserver.port')

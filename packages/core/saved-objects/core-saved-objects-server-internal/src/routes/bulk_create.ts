@@ -58,30 +58,30 @@ export const registerBulkCreateRoute = (
         ),
       },
     },
-    catchAndReturnBoomErrors(async (context, req, res) => {
+    catchAndReturnBoomErrors(async (context, request, response) => {
       logWarnOnExternalRequest({
         method: 'post',
         path: '/api/saved_objects/_bulk_create',
-        req,
+        request,
         logger,
       });
-      const { overwrite } = req.query;
+      const { overwrite } = request.query;
+      const types = [...new Set(request.body.map(({ type }) => type))];
 
       const usageStatsClient = coreUsageData.getClient();
-      usageStatsClient.incrementSavedObjectsBulkCreate({ request: req }).catch(() => {});
+      usageStatsClient.incrementSavedObjectsBulkCreate({ request, types }).catch(() => {});
 
       const { savedObjects } = await context.core;
 
-      const typesToCheck = [...new Set(req.body.map(({ type }) => type))];
       if (!allowHttpApiAccess) {
-        throwIfAnyTypeNotVisibleByAPI(typesToCheck, savedObjects.typeRegistry);
+        throwIfAnyTypeNotVisibleByAPI(types, savedObjects.typeRegistry);
       }
 
-      const result = await savedObjects.client.bulkCreate(req.body, {
+      const result = await savedObjects.client.bulkCreate(request.body, {
         overwrite,
         migrationVersionCompatibility: 'compatible',
       });
-      return res.ok({ body: result });
+      return response.ok({ body: result });
     })
   );
 };

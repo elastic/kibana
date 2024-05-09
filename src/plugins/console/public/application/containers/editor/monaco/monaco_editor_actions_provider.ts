@@ -17,21 +17,24 @@ import {
 import { IToasts } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
 import type { HttpSetup } from '@kbn/core-http-browser';
-import { AutoCompleteContext } from '../../../../lib/autocomplete/types';
-import { populateContext } from '../../../../lib/autocomplete/engine';
 import { DEFAULT_VARIABLES } from '../../../../../common/constants';
 import { getStorage, StorageKeys } from '../../../../services';
-import { getTopLevelUrlCompleteComponents } from '../../../../lib/kb';
 import { sendRequest } from '../../../hooks/use_send_current_request/send_request';
 import { MetricsTracker } from '../../../../types';
 import { Actions } from '../../../stores/request';
 import {
-  stringifyRequest,
-  replaceRequestVariables,
+  containsUrlParams,
   getCurlRequest,
+  getDocumentationLink,
+  getLineTokens,
+  getMethodCompletionItems,
+  getRequestEndLineNumber,
+  getRequestStartLineNumber,
+  getUrlParamsCompletionItems,
+  getUrlPathCompletionItems,
+  replaceRequestVariables,
+  stringifyRequest,
   trackSentRequests,
-  tokenizeRequestUrl,
-  getDocumentationLinkFromAutocompleteContext,
 } from './utils';
 
 const selectedRequestsClass = 'console__monaco_editor__selectedRequests';
@@ -40,6 +43,17 @@ export interface EditorRequest {
   method: string;
   url: string;
   data: string[];
+}
+
+interface AdjustedParsedRequest extends ParsedRequest {
+  startLineNumber: number;
+  endLineNumber: number;
+}
+enum AutocompleteType {
+  PATH = 'path',
+  URL_PARAMS = 'url_params',
+  METHOD = 'method',
+  BODY = 'body',
 }
 
 export class MonacoEditorActionsProvider {
@@ -91,12 +105,21 @@ export class MonacoEditorActionsProvider {
 
   private async highlightRequests(): Promise<void> {
     // get the requests in the selected range
-    const { range: selectedRange, parsedRequests } = await this.getSelectedParsedRequestsAndRange();
+    const parsedRequests = await this.getSelectedParsedRequests();
     // if any requests are selected, highlight the lines and update the position of actions buttons
     if (parsedRequests.length > 0) {
-      const selectedRequestStartLine = selectedRange.startLineNumber;
       // display the actions buttons on the 1st line of the 1st selected request
-      this.updateEditorActions(selectedRequestStartLine);
+      const selectionStartLineNumber = parsedRequests[0].startLineNumber;
+      this.updateEditorActions(selectionStartLineNumber);
+      // highlight the lines from the 1st line of the first selected request
+      // to the last line of the last selected request
+      const selectionEndLineNumber = parsedRequests[parsedRequests.length - 1].endLineNumber;
+      const selectedRange = new monaco.Range(
+        selectionStartLineNumber,
+        1,
+        selectionEndLineNumber,
+        this.editor.getModel()?.getLineMaxColumn(selectionEndLineNumber) ?? 1
+      );
       this.highlightedLines.set([
         {
           range: selectedRange,
@@ -113,67 +136,51 @@ export class MonacoEditorActionsProvider {
     }
   }
 
-  private async getSelectedParsedRequestsAndRange(): Promise<{
-    parsedRequests: ParsedRequest[];
-    range: monaco.IRange;
-  }> {
+  private async getSelectedParsedRequests(): Promise<AdjustedParsedRequest[]> {
     const model = this.editor.getModel();
     const selection = this.editor.getSelection();
     if (!model || !selection) {
-      return Promise.resolve({
-        parsedRequests: [],
-        range: selection ?? new monaco.Range(1, 1, 1, 1),
-      });
+      return Promise.resolve([]);
     }
     const { startLineNumber, endLineNumber } = selection;
-    const parsedRequests = await this.parsedRequestsProvider.getRequests();
-    const selectedRequests = [];
-    let selectionStartLine = startLineNumber;
-    let selectionEndLine = endLineNumber;
-    for (const parsedRequest of parsedRequests) {
-      const { startOffset: requestStart, endOffset: requestEnd } = parsedRequest;
-      const { lineNumber: requestStartLine } = model.getPositionAt(requestStart);
-      let { lineNumber: requestEndLine } = model.getPositionAt(requestEnd);
-      const requestEndLineContent = model.getLineContent(requestEndLine);
+    return this.getRequestsBetweenLines(model, startLineNumber, endLineNumber);
+  }
 
-      // sometimes the parser includes a trailing empty line into the request
-      if (requestEndLineContent.trim().length < 1) {
-        requestEndLine = requestEndLine - 1;
-      }
-      if (requestStartLine > endLineNumber) {
+  private async getRequestsBetweenLines(
+    model: monaco.editor.ITextModel,
+    startLineNumber: number,
+    endLineNumber: number
+  ): Promise<AdjustedParsedRequest[]> {
+    const parsedRequests = await this.parsedRequestsProvider.getRequests();
+    const selectedRequests: AdjustedParsedRequest[] = [];
+    for (const [index, parsedRequest] of parsedRequests.entries()) {
+      const requestStartLineNumber = getRequestStartLineNumber(parsedRequest, model);
+      const requestEndLineNumber = getRequestEndLineNumber(
+        parsedRequest,
+        model,
+        index,
+        parsedRequests
+      );
+      if (requestStartLineNumber > endLineNumber) {
         // request is past the selection, no need to check further requests
         break;
       }
-      if (requestEndLine < startLineNumber) {
+      if (requestEndLineNumber < startLineNumber) {
         // request is before the selection, do nothing
       } else {
         // request is selected
-        selectedRequests.push(parsedRequest);
-        // expand the start of the selection to the request start
-        if (selectionStartLine > requestStartLine) {
-          selectionStartLine = requestStartLine;
-        }
-        // expand the end of the selection to the request end
-        if (selectionEndLine < requestEndLine) {
-          selectionEndLine = requestEndLine;
-        }
+        selectedRequests.push({
+          ...parsedRequest,
+          startLineNumber: requestStartLineNumber,
+          endLineNumber: requestEndLineNumber,
+        });
       }
     }
-    return {
-      parsedRequests: selectedRequests,
-      // the expanded selected range goes from the 1st char of the start line of the 1st request
-      // to the last char of the last line of the last request
-      range: new monaco.Range(
-        selectionStartLine,
-        1,
-        selectionEndLine,
-        model.getLineMaxColumn(selectionEndLine)
-      ),
-    };
+    return selectedRequests;
   }
 
   private async getRequests() {
-    const { parsedRequests } = await this.getSelectedParsedRequestsAndRange();
+    const parsedRequests = await this.getSelectedParsedRequests();
     const stringifiedRequests = parsedRequests.map((parsedRequest) =>
       stringifyRequest(parsedRequest)
     );
@@ -248,21 +255,89 @@ export class MonacoEditorActionsProvider {
     }
     const request = requests[0];
 
-    // get autocomplete components for the request method
-    const components = getTopLevelUrlCompleteComponents(request.method);
-    // get the url parts from the request url
-    const urlTokens = tokenizeRequestUrl(request.url);
+    return getDocumentationLink(request, docLinkVersion);
+  }
 
-    // this object will contain the information later, it needs to be initialized with some data
-    // similar to the old ace editor context
-    const context: AutoCompleteContext = {
-      method: request.method,
-      urlTokenPath: urlTokens,
+  private async getAutocompleteType(
+    model: monaco.editor.ITextModel,
+    { lineNumber, column }: monaco.Position
+  ): Promise<AutocompleteType | null> {
+    // get the current request on this line
+    const currentRequests = await this.getRequestsBetweenLines(model, lineNumber, lineNumber);
+    const currentRequest = currentRequests.at(0);
+    // if there is no request, suggest method
+    if (!currentRequest) {
+      return AutocompleteType.METHOD;
+    }
+
+    // if on the 1st line of the request, suggest method, url or url_params depending on the content
+    const { startLineNumber: requestStartLineNumber } = currentRequest;
+    if (lineNumber === requestStartLineNumber) {
+      // get the content on the line up until the position
+      const lineContent = model.getValueInRange({
+        startLineNumber: lineNumber,
+        startColumn: 1,
+        endLineNumber: lineNumber,
+        endColumn: column,
+      });
+      const lineTokens = getLineTokens(lineContent);
+      // if there is 1 or fewer tokens, suggest method
+      if (lineTokens.length <= 1) {
+        return AutocompleteType.METHOD;
+      }
+      // if there are 2 tokens, look at the 2nd one and suggest path or url_params
+      if (lineTokens.length === 2) {
+        const token = lineTokens[1];
+        if (containsUrlParams(token)) {
+          return AutocompleteType.URL_PARAMS;
+        }
+        return AutocompleteType.PATH;
+      }
+      // if more than 2 tokens, no suggestions
+      return null;
+    }
+
+    // if not on the 1st line of the request, suggest request body
+
+    return AutocompleteType.BODY;
+  }
+
+  private async getSuggestions(model: monaco.editor.ITextModel, position: monaco.Position) {
+    // determine autocomplete type
+    const autocompleteType = await this.getAutocompleteType(model, position);
+    if (!autocompleteType) {
+      return {
+        suggestions: [],
+      };
+    }
+    if (autocompleteType === AutocompleteType.METHOD) {
+      return {
+        // suggest all methods, the editor will filter according to the input automatically
+        suggestions: getMethodCompletionItems(model, position),
+      };
+    }
+    if (autocompleteType === AutocompleteType.PATH) {
+      return {
+        suggestions: getUrlPathCompletionItems(model, position),
+      };
+    }
+
+    if (autocompleteType === AutocompleteType.URL_PARAMS) {
+      return {
+        suggestions: getUrlParamsCompletionItems(model, position),
+      };
+    }
+
+    return {
+      suggestions: [],
     };
-
-    // this function uses the autocomplete info and the url tokens to find the correct endpoint
-    populateContext(urlTokens, context, undefined, true, components);
-
-    return getDocumentationLinkFromAutocompleteContext(context, docLinkVersion);
+  }
+  public provideCompletionItems(
+    model: monaco.editor.ITextModel,
+    position: monaco.Position,
+    context: monaco.languages.CompletionContext,
+    token: monaco.CancellationToken
+  ): monaco.languages.ProviderResult<monaco.languages.CompletionList> {
+    return this.getSuggestions(model, position);
   }
 }

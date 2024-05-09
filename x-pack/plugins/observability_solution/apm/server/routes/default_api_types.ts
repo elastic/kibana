@@ -7,6 +7,8 @@
 
 import * as t from 'io-ts';
 import { isoToEpochRt, toNumberRt } from '@kbn/io-ts-utils';
+import { either } from 'fp-ts/lib/Either';
+import { BoolQuery } from '@kbn/es-query';
 import { ApmDocumentType } from '../../common/document_type';
 import { RollupInterval } from '../../common/rollup';
 
@@ -48,3 +50,31 @@ export const transactionDataSourceRt = t.type({
     t.literal(RollupInterval.None),
   ]),
 });
+
+const BoolQueryRt = t.type({
+  should: t.array(t.record(t.string, t.unknown)),
+  must: t.array(t.record(t.string, t.unknown)),
+  must_not: t.array(t.record(t.string, t.unknown)),
+  filter: t.array(t.record(t.string, t.unknown)),
+});
+
+export const filtersRt = new t.Type<BoolQuery, string, unknown>(
+  'BoolQuery',
+  BoolQueryRt.is,
+  (input: unknown, context: t.Context) =>
+    either.chain(t.string.validate(input, context), (value: string) => {
+      try {
+        const filters = JSON.parse(value);
+        const decoded = {
+          should: [],
+          must: [],
+          must_not: filters.must_not ? [...filters.must_not] : [],
+          filter: filters.filter ? [...filters.filter] : [],
+        };
+        return t.success(decoded);
+      } catch (err) {
+        return t.failure(input, context, err.message);
+      }
+    }),
+  (filters: BoolQuery): string => JSON.stringify(filters)
+);

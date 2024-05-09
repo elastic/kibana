@@ -18,9 +18,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 const mockOverrideService = {};
-const getDiscoverServicesMock = jest.fn(
-  () => new Promise<DiscoverServices>((resolve) => resolve(discoverServiceMock))
-);
+const getDiscoverServicesMock = jest.fn(() => discoverServiceMock);
 
 jest.mock('../../application/main', () => {
   return {
@@ -57,8 +55,7 @@ describe('DiscoverContainerInternal should render properly', () => {
   afterEach(() => jest.clearAllMocks());
 
   it('should render', async () => {
-    const { getByTestId, queryByTestId } = render(<TestComponent />);
-    expect(queryByTestId(TEST_IDS.DISCOVER_CONTAINER_INTERNAL)).not.toBeInTheDocument();
+    const { getByTestId } = render(<TestComponent />);
 
     expect(getDiscoverServicesMock).toHaveBeenCalledTimes(1);
 

@@ -118,6 +118,7 @@ interface EditorFooterProps {
   hideQueryHistory?: boolean;
   refetchHistoryItems?: boolean;
   isInCompactMode?: boolean;
+  queryHasChanged?: boolean;
 }
 
 export const EditorFooter = memo(function EditorFooter({
@@ -142,6 +143,7 @@ export const EditorFooter = memo(function EditorFooter({
   hideQueryHistory,
   refetchHistoryItems,
   isInCompactMode,
+  queryHasChanged,
 }: EditorFooterProps) {
   const { euiTheme } = useEuiTheme();
   const [isErrorPopoverOpen, setIsErrorPopoverOpen] = useState(false);
@@ -329,9 +331,15 @@ export const EditorFooter = memo(function EditorFooter({
                     >
                       <EuiButtonIcon
                         display="base"
-                        color="primary"
+                        color={queryHasChanged ? 'success' : 'primary'}
                         onClick={runQuery}
-                        iconType={allowQueryCancellation && isLoading ? 'cross' : 'refresh'}
+                        iconType={
+                          allowQueryCancellation && isLoading
+                            ? 'cross'
+                            : queryHasChanged
+                            ? 'play'
+                            : 'refresh'
+                        }
                         size="s"
                         isLoading={isLoading && !allowQueryCancellation}
                         isDisabled={Boolean(disableSubmitAction && !allowQueryCancellation)}

@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import { CoreStart } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { IClickActionDescriptor } from '..';
 import { OnActionDismiss } from './types';
@@ -112,7 +112,7 @@ export const createRenameActionDescriptor = (
     const ref = core.overlays.openModal(
       toMountPoint(
         <RenameDialog onActionDismiss={() => ref?.close()} api={api} searchSession={uiSession} />,
-        { theme$: core.theme.theme$ }
+        core
       )
     );
     await ref.onClose;

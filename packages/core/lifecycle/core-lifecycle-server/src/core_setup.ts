@@ -26,6 +26,7 @@ import type { CustomBrandingSetup } from '@kbn/core-custom-branding-server';
 import type { UserSettingsServiceSetup } from '@kbn/core-user-settings-server';
 import type { PluginsServiceSetup } from '@kbn/core-plugins-contracts-server';
 import type { SecurityServiceSetup } from '@kbn/core-security-server';
+import type { UserProfileServiceSetup } from '@kbn/core-user-profile-server';
 import type { CoreStart } from './core_start';
 
 /**
@@ -79,6 +80,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   plugins: PluginsServiceSetup;
   /** {@link SecurityServiceSetup} */
   security: SecurityServiceSetup;
+  /** {@link UserProfileServiceSetup} */
+  userProfile: UserProfileServiceSetup;
 }
 
 /**

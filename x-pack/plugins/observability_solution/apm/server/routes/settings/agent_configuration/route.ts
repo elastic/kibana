@@ -265,7 +265,7 @@ const agentConfigurationSearchRoute = createApmServerRoute({
     );
 
     if (willMarkAsApplied) {
-      markAppliedByAgent({
+      await markAppliedByAgent({
         id: configuration._id,
         body: configuration._source,
         internalESClient,

@@ -42,7 +42,7 @@ import {
   useESQLDataVisualizerData,
 } from '../../hooks/esql/use_data_visualizer_esql_data';
 import type {
-  DataVisualizerGridInput,
+  ESQLDataVisualizerGridEmbeddableState,
   ESQLDataVisualizerIndexBasedPageUrlState,
   ESQLDefaultLimitSizeOption,
 } from '../../embeddables/grid_embeddable/types';
@@ -136,7 +136,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
     [indexPattern, data.dataViews, currentDataView]
   );
 
-  const input: DataVisualizerGridInput<ESQLQuery> = useMemo(() => {
+  const input: ESQLDataVisualizerGridEmbeddableState = useMemo(() => {
     return {
       dataView: currentDataView,
       query,
@@ -146,6 +146,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
       allowEditDataView: true,
       id: 'esql_data_visualizer',
       indexPattern,
+      esql: true,
     };
   }, [currentDataView, query?.esql]);
 
@@ -198,6 +199,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
       setLocalQuery(q);
     }
   }, []);
+
   return (
     <EuiPageTemplate
       offset={0}

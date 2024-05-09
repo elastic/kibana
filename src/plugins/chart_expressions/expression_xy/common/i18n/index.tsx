@@ -81,9 +81,9 @@ export const strings = {
     i18n.translate('expressionXY.xyVis.hideEndzones.help', {
       defaultMessage: 'Hide endzone markers for partial data',
     }),
-  getValuesInLegendHelp: () =>
-    i18n.translate('expressionXY.xyVis.valuesInLegend.help', {
-      defaultMessage: 'Show values in legend',
+  getLegendStatsArgHelp: () =>
+    i18n.translate('expressionXY.xyVis.legendStats.help', {
+      defaultMessage: 'Define the stats to show in the legend',
     }),
   getAriaLabelHelp: () =>
     i18n.translate('expressionXY.xyVis.ariaLabel.help', {

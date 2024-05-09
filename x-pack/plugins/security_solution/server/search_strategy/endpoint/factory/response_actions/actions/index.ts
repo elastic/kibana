@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/search-types';
 
 import { inspectStringifyObject } from '@kbn/osquery-plugin/common/utils/build_query';
 import { buildResponseActionsQuery } from './query.all_actions.dsl';

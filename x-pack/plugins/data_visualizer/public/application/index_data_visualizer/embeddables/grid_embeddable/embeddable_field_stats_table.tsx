@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import type { Required } from 'utility-types';
-import type { DataVisualizerGridEmbeddableInput } from './types';
+import type { FieldStatisticTableEmbeddableProps } from './types';
 import type { ItemIdToExpandedRowMap } from '../../../common/components/stats_table';
 import { DataVisualizerTable } from '../../../common/components/stats_table';
 import type { FieldVisConfig } from '../../../common/components/stats_table/types';
@@ -20,24 +20,22 @@ import { EmbeddableNoResultsEmptyPrompt } from './embeddable_field_stats_no_resu
 
 const restorableDefaults = getDefaultDataVisualizerListState();
 
-export const EmbeddableFieldStatsTableWrapper = ({
-  input,
-  onOutputChange,
-}: {
-  input: Required<DataVisualizerGridEmbeddableInput, 'dataView'>;
-  onOutputChange?: (ouput: any) => void;
-}) => {
+const EmbeddableFieldStatsTableWrapper = (
+  props: Required<FieldStatisticTableEmbeddableProps, 'dataView'>
+) => {
+  const { onTableUpdate, onAddFilter, ...state } = props;
+
   const [dataVisualizerListState, setDataVisualizerListState] =
     useState<Required<DataVisualizerIndexBasedAppState>>(restorableDefaults);
 
   const onTableChange = useCallback(
     (update: DataVisualizerTableState) => {
       setDataVisualizerListState({ ...dataVisualizerListState, ...update });
-      if (onOutputChange) {
-        onOutputChange(update);
+      if (onTableUpdate) {
+        onTableUpdate(update);
       }
     },
-    [dataVisualizerListState, onOutputChange]
+    [dataVisualizerListState, onTableUpdate]
   );
 
   const {
@@ -48,11 +46,11 @@ export const EmbeddableFieldStatsTableWrapper = ({
     progress,
     overallStatsProgress,
     setLastRefresh,
-  } = useDataVisualizerGridData(input, dataVisualizerListState);
+  } = useDataVisualizerGridData(state, dataVisualizerListState);
 
   useEffect(() => {
     setLastRefresh(Date.now());
-  }, [input?.lastReloadRequestTime, setLastRefresh]);
+  }, [state?.lastReloadRequestTime, setLastRefresh]);
 
   const getItemIdToExpandedRowMap = useCallback(
     function (itemIds: string[], items: FieldVisConfig[]): ItemIdToExpandedRowMap {
@@ -62,17 +60,17 @@ export const EmbeddableFieldStatsTableWrapper = ({
           m[fieldName] = (
             <IndexBasedDataVisualizerExpandedRow
               item={item}
-              dataView={input.dataView}
+              dataView={state.dataView}
               combinedQuery={{ searchQueryLanguage, searchString }}
-              onAddFilter={input.onAddFilter}
-              totalDocuments={input.totalDocuments}
+              onAddFilter={onAddFilter}
+              totalDocuments={state.totalDocuments}
             />
           );
         }
         return m;
       }, {} as ItemIdToExpandedRowMap);
     },
-    [input, searchQueryLanguage, searchString]
+    [state.dataView, searchQueryLanguage, searchString, state.totalDocuments, onAddFilter]
   );
 
   if (progress === 100 && configs.length === 0) {
@@ -85,10 +83,14 @@ export const EmbeddableFieldStatsTableWrapper = ({
       updatePageState={onTableChange}
       getItemIdToExpandedRowMap={getItemIdToExpandedRowMap}
       extendedColumns={extendedColumns}
-      showPreviewByDefault={input?.showPreviewByDefault}
-      onChange={onOutputChange}
+      showPreviewByDefault={state?.showPreviewByDefault}
+      onChange={onTableUpdate}
       loading={progress < 100}
       overallStatsRunning={overallStatsProgress.isRunning}
     />
   );
 };
+
+// exporting as default so it be lazy-loaded
+// eslint-disable-next-line import/no-default-export
+export default EmbeddableFieldStatsTableWrapper;

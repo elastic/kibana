@@ -9,16 +9,19 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiLink,
   EuiLoadingSpinner,
   EuiPopover,
-  EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { useLocalStorage } from '../../../hooks/use_local_storage';
+import { TechnicalPreviewBadge } from '../technical_preview_badge';
 
 interface Props {
   isFeatureEnabled: boolean;
@@ -26,7 +29,6 @@ interface Props {
   linkLabel: string;
   onClick: () => void;
   popoverContent?: React.ReactElement;
-  icon?: 'beta' | 'beaker';
   isLoading: boolean;
 }
 
@@ -36,13 +38,19 @@ export function TryItButton({
   onClick,
   popoverContent,
   promoLabel,
-  icon,
   isLoading,
 }: Props) {
+  const [showFastFilterTryCallout, setShowFastFilterTryCallout] = useLocalStorage(
+    'apm.showFastFilterTryCallout',
+    true
+  );
   const { core } = useApmPluginContext();
   const canEditAdvancedSettings = core.application.capabilities.advancedSettings?.save;
-
   const [isPopoverOpen, togglePopover] = useToggle(false);
+
+  if (!showFastFilterTryCallout) {
+    return null;
+  }
 
   function TryItBadge() {
     return (
@@ -52,29 +60,6 @@ export function TryItButton({
           label={i18n.translate('xpack.apm.tryIt.betaBadgeLabel', {
             defaultMessage: 'Try it',
           })}
-        />
-      </EuiFlexItem>
-    );
-  }
-
-  function Icon() {
-    if (!icon) {
-      return null;
-    }
-    return (
-      <EuiFlexItem grow={false}>
-        <EuiBetaBadge
-          color="hollow"
-          iconType={icon}
-          label={
-            icon === 'beaker'
-              ? i18n.translate('xpack.apm.tryIt.techPreview', {
-                  defaultMessage: 'Technical preview',
-                })
-              : i18n.translate('xpack.apm.tryIt.beta', {
-                  defaultMessage: 'Beta',
-                })
-          }
         />
       </EuiFlexItem>
     );
@@ -92,7 +77,7 @@ export function TryItButton({
   }
 
   function Popover() {
-    if (!popoverContent && canEditAdvancedSettings) {
+    if (!popoverContent) {
       return null;
     }
     return (
@@ -101,7 +86,7 @@ export function TryItButton({
           button={
             <EuiButtonIcon
               data-test-subj="apmPopoverButton"
-              iconType="questionInCircle"
+              iconType="iInCircle"
               aria-label={i18n.translate(
                 'xpack.apm.tryItButton.euiButtonIcon.tryItHelperButtonLabel',
                 { defaultMessage: 'Try it helper button' }
@@ -113,35 +98,74 @@ export function TryItButton({
           closePopover={togglePopover}
           anchorPosition="upCenter"
         >
-          <>
-            {popoverContent}
-            {!canEditAdvancedSettings && (
-              <>
-                <EuiSpacer size="s" />
-                {i18n.translate('xpack.apm.tryItButton.euiButtonIcon.adminAccess', {
-                  defaultMessage:
-                    'Please ask your administrator to turn it on by enabling it in within settings.',
-                })}
-              </>
-            )}
-          </>
+          <>{popoverContent}</>
         </EuiPopover>
       </EuiFlexItem>
     );
   }
 
   function Link() {
-    return (
-      <>
-        {linkLabel && canEditAdvancedSettings && (
-          <EuiFlexItem grow={false}>
-            <EuiLink data-test-subj="apmLink" disabled={isLoading} onClick={onClick}>
-              {linkLabel}
-            </EuiLink>
-          </EuiFlexItem>
-        )}
-      </>
+    if (!linkLabel) {
+      return null;
+    }
+
+    const linkComponent = (
+      <EuiFlexItem grow={false}>
+        <EuiLink
+          data-test-subj="apmLink"
+          disabled={isLoading || !canEditAdvancedSettings}
+          onClick={onClick}
+        >
+          {linkLabel}
+        </EuiLink>
+      </EuiFlexItem>
     );
+
+    if (!canEditAdvancedSettings) {
+      return (
+        <EuiToolTip
+          content={
+            <EuiFlexGroup gutterSize="s" direction="column">
+              <EuiFlexItem>
+                <EuiFlexGroup gutterSize="s" direction="row">
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type="lock" size="s" />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiText size="xs">
+                      {i18n.translate('xpack.apm.tryItButton.euiButtonIcon.featureDisabled', {
+                        defaultMessage: 'This feature is currently disabled.',
+                      })}
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText size="xs">
+                  {i18n.translate('xpack.apm.tryItButton.euiButtonIcon.admin', {
+                    defaultMessage:
+                      'Please speak to you administrator to turn {featureEnabled} this feature.',
+                    values: {
+                      featureEnabled: isFeatureEnabled
+                        ? i18n.translate('xpack.apm.tryItButton.euiButtonIcon.admin.off', {
+                            defaultMessage: 'off',
+                          })
+                        : i18n.translate('xpack.apm.tryItButton.euiButtonIcon.admin.on', {
+                            defaultMessage: 'on',
+                          }),
+                    },
+                  })}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+        >
+          {linkComponent}
+        </EuiToolTip>
+      );
+    }
+
+    return <>{linkComponent}</>;
   }
 
   function Loading() {
@@ -156,25 +180,31 @@ export function TryItButton({
     );
   }
 
-  if (isFeatureEnabled) {
+  function HideThisButton() {
     return (
-      <EuiFlexGroup gutterSize="s" alignItems="center">
-        <Icon />
-        <Link />
-        <Popover />
-        <Loading />
-      </EuiFlexGroup>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip content="Hide this">
+          <EuiButtonIcon
+            data-test-subj="apmHideThisButtonButton"
+            iconType="cross"
+            onClick={() => {
+              setShowFastFilterTryCallout(false);
+            }}
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
     );
   }
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
-      <TryItBadge />
-      <Icon />
-      <PromoLabel />
-      <Popover />
+      {isFeatureEnabled ? null : <TryItBadge />}
+      <TechnicalPreviewBadge icon="beaker" />
+      {isFeatureEnabled ? null : <PromoLabel />}
       <Link />
+      <Popover />
       <Loading />
+      <HideThisButton />
     </EuiFlexGroup>
   );
 }

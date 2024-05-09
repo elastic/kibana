@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         datasetHealthDegraded: '0',
         datasetHealthGood: '3',
         activeDatasets: '0 of 3',
-        estimatedData: '0 Bytes',
+        estimatedData: '0.0 B',
       });
     });
 

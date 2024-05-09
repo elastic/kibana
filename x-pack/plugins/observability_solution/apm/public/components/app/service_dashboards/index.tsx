@@ -101,7 +101,10 @@ export function ServiceDashboards() {
       viewMode: ViewMode.VIEW,
       timeRange: { from: rangeFrom, to: rangeTo },
     });
-    return Promise.resolve<DashboardCreationOptions>({ getInitialInput });
+    return Promise.resolve<DashboardCreationOptions>({
+      getInitialInput,
+      useControlGroupIntegration: true,
+    });
   }, [rangeFrom, rangeTo]);
 
   useEffect(() => {

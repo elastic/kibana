@@ -84,6 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        await reportingAPI.deleteAllReports();
         await esArchiver.unload(archives.ecommerce.data);
         await kibanaServer.importExport.unload(archives.ecommerce.savedObjects);
       });
@@ -684,6 +685,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        await reportingAPI.deleteAllReports();
         await esArchiver.unload(archives.ecommerce.data);
         await kibanaServer.importExport.unload(archives.ecommerce.savedObjects);
       });

@@ -21,18 +21,22 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
 
 import { i18n } from '@kbn/i18n';
+import { usePluginContext } from './hooks/use_plugin_context';
 import { PluginContext } from './context/plugin_context';
 
 import { SloPublicPluginsStart } from './types';
-import { routes } from './routes/routes';
+import { getRoutes } from './routes/routes';
 import { ExperimentalFeatures } from '../common/config';
 
 function App() {
+  const { isServerless } = usePluginContext();
+
+  const routes = getRoutes(isServerless);
+
   return (
     <>
       <Routes>
-        {Object.keys(routes).map((key) => {
-          const path = key as keyof typeof routes;
+        {Object.keys(routes).map((path) => {
           const { handler, exact } = routes[path];
           const Wrapper = () => {
             return handler();
@@ -124,6 +128,7 @@ export const renderApp = ({
                 <PluginContext.Provider
                   value={{
                     isDev,
+                    isServerless,
                     appMountParameters,
                     ObservabilityPageTemplate,
                     observabilityRuleTypeRegistry,

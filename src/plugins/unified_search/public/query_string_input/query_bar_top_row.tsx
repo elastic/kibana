@@ -591,7 +591,6 @@ export const QueryBarTopRow = React.memo(
               fill={props.isDirty}
               needsUpdate={props.isDirty}
               data-test-subj="querySubmitButton"
-              // @ts-expect-error Need to fix expecting `children` in EUI
               toolTipProps={{
                 content: props.isDirty ? tooltipDirty : buttonLabelRefresh,
                 delay: 'long',

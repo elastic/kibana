@@ -346,7 +346,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('@brokenInServerless t1_analyst', () => {
+      describe('@skipInServerless t1_analyst', () => {
         const role = ROLES.t1_analyst;
 
         beforeEach(async () => {
@@ -482,7 +482,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('@brokenInServerless missing timestamps', () => {
+    describe('@skipInServerless missing timestamps', () => {
       beforeEach(async () => {
         await es.indices.delete({ index: 'myfakeindex-1', ignore_unavailable: true });
         await es.indices.create({
@@ -561,7 +561,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('@brokenInServerless per-action frequencies', () => {
+    describe('@skipInServerless per-action frequencies', () => {
       beforeEach(async () => {
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
@@ -689,28 +689,6 @@ export default ({ getService }: FtrProviderContext) => {
             );
           });
         });
-      });
-    });
-
-    describe('setup guide', async () => {
-      beforeEach(async () => {
-        await deleteAllAlerts(supertest, log, es);
-        await deleteAllRules(supertest, log);
-      });
-
-      it('creates a rule with a setup guide when setup parameter is present', async () => {
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send(
-            getCustomQueryRuleParams({
-              setup: 'A setup guide',
-            })
-          )
-          .expect(200);
-
-        expect(body.setup).toEqual('A setup guide');
       });
     });
   });

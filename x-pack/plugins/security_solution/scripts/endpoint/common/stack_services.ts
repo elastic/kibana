@@ -16,6 +16,7 @@ import { type AxiosResponse } from 'axios';
 import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
 import fs from 'fs';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { omit } from 'lodash';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
 import { isLocalhost } from './is_localhost';
@@ -107,15 +108,16 @@ export const createRuntimeServices = async ({
   username: _username,
   password: _password,
   apiKey,
-  esUsername,
-  esPassword,
-  log: _log,
+  esUsername: _esUsername,
+  esPassword: _esPassword,
+  log = createToolingLogger(),
   asSuperuser = false,
   noCertForSsl,
 }: CreateRuntimeServicesOptions): Promise<RuntimeServices> => {
-  const log = _log ?? createToolingLogger();
   let username = _username;
   let password = _password;
+  let esUsername = _esUsername;
+  let esPassword = _esPassword;
 
   if (asSuperuser) {
     const tmpKbnClient = createKbnClient({
@@ -131,12 +133,15 @@ export const createRuntimeServices = async ({
 
     if (isServerlessEs) {
       log?.warning(
-        'Creating Security Superuser is not supported in current environment. ES is running in serverless mode. ' +
+        'Creating Security Superuser is not supported in current environment.\nES is running in serverless mode. ' +
           'Will use username [system_indices_superuser] instead.'
       );
 
       username = 'system_indices_superuser';
       password = 'changeme';
+
+      esUsername = 'system_indices_superuser';
+      esPassword = 'changeme';
     } else {
       const superuserResponse = await createSecuritySuperuser(
         createEsClient({
@@ -243,7 +248,12 @@ export const createEsClient = ({
   }
 
   if (log) {
-    log.verbose(`Creating Elasticsearch client options: ${JSON.stringify(clientOptions)}`);
+    log.verbose(
+      `Creating Elasticsearch client options: ${JSON.stringify({
+        ...omit(clientOptions, 'tls'),
+        ...(clientOptions.tls ? { tls: { ca: [typeof clientOptions.tls.ca] } } : {}),
+      })}`
+    );
   }
 
   return new Client(clientOptions);

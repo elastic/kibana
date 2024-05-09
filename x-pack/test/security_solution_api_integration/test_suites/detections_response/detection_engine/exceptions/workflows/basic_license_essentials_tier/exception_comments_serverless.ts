@@ -26,9 +26,10 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  // @skipInQA purposefully - only running tests in MKI whose failure should block release
-  describe('@serverless @skipInQA exception item comments - serverless specific behavior', () => {
-    describe('Rule Exceptions', () => {
+  // Skipping in MKI due to roles testing not yet being available
+  describe('@serverless @skipInServerlessMKI exception item comments - serverless specific behavior', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/181507
+    describe.skip('Rule Exceptions', () => {
       afterEach(async () => {
         await deleteAllExceptions(supertest, log);
       });

@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiDescriptionList, EuiToolTip } from '@elastic/eui';
 
-export const Requirements: React.FC = memo(() => {
+export const Requirements = memo(() => {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>

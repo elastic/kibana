@@ -26,7 +26,9 @@ export const routeHandlerFactory: (
   StartTransformsRequestSchema,
   TransformRequestHandlerContext
 > = (routeDependencies) => async (ctx, req, res) => {
-  const { coreStart, security: securityStart } = routeDependencies;
+  const { getCoreStart, getSecurity } = routeDependencies;
+  const coreStart = await getCoreStart();
+  const securityStart = await getSecurity();
 
   try {
     const transformsInfo = req.body;

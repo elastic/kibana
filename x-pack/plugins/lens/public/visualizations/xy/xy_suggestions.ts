@@ -598,7 +598,6 @@ function buildSuggestion({
     yRightTitle: currentState?.yRightTitle,
     hideEndzones: currentState?.hideEndzones,
     showCurrentTimeMarker: currentState?.showCurrentTimeMarker,
-    valuesInLegend: currentState?.valuesInLegend,
     yLeftExtent: currentState?.yLeftExtent,
     yRightExtent: currentState?.yRightExtent,
     yLeftScale: currentState?.yLeftScale,

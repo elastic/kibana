@@ -8,7 +8,7 @@
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { once } from 'lodash/fp';
 
-import { postAlertsInsightsRoute } from './insights/alerts/post_alerts_insights';
+import { postAttackDiscoveryRoute } from './attack_discovery/post_attack_discovery';
 import {
   ElasticAssistantPluginRouter,
   ElasticAssistantPluginSetupDependencies,
@@ -80,6 +80,6 @@ export const registerRoutes = (
   bulkActionAnonymizationFieldsRoute(router, logger);
   findAnonymizationFieldsRoute(router, logger);
 
-  // Alerts Insights
-  postAlertsInsightsRoute(router);
+  // Attack Discovery
+  postAttackDiscoveryRoute(router);
 };

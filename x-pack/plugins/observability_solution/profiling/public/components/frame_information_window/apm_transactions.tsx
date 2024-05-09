@@ -12,7 +12,9 @@ import {
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiLink,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
@@ -77,6 +79,22 @@ const findServicesAndTransactions = (
     totalItemCount: filteredItems.length,
   };
 };
+
+function EstimatedLabel({ label }: { label: string }) {
+  return (
+    <EuiToolTip
+      content={i18n.translate('xpack.profiling.functionsView.samplesColumnLabel.hint', {
+        defaultMessage: 'Estimated values',
+      })}
+    >
+      <>
+        {label} <EuiIcon size="s" color="subdued" type="questionInCircle" />
+      </>
+    </EuiToolTip>
+  );
+}
+
+const SAMPLES_COLUMN_WIDTH = '152px';
 
 export function APMTransactions({ functionName, serviceNames }: Props) {
   const {
@@ -199,11 +217,15 @@ export function APMTransactions({ functionName, serviceNames }: Props) {
       },
       {
         field: 'serviceSamples',
-        name: i18n.translate('xpack.profiling.apmTransactions.columns.serviceSamplesName', {
-          defaultMessage: 'Service Samples',
-        }),
-        width: '150px',
+        width: SAMPLES_COLUMN_WIDTH,
         sortable: true,
+        name: (
+          <EstimatedLabel
+            label={i18n.translate('xpack.profiling.apmTransactions.columns.serviceSamplesName', {
+              defaultMessage: 'Service Samples',
+            })}
+          />
+        ),
         render(_, { serviceSamples }) {
           return asNumber(serviceSamples);
         },
@@ -239,10 +261,14 @@ export function APMTransactions({ functionName, serviceNames }: Props) {
       },
       {
         field: 'transactionSamples',
-        name: i18n.translate('xpack.profiling.apmTransactions.columns.transactionSamples', {
-          defaultMessage: 'Transaction Samples',
-        }),
-        width: '150px',
+        name: (
+          <EstimatedLabel
+            label={i18n.translate('xpack.profiling.apmTransactions.columns.transactionSamples', {
+              defaultMessage: 'Transaction Samples',
+            })}
+          />
+        ),
+        width: SAMPLES_COLUMN_WIDTH,
         render(_, { transactionSamples }) {
           if (isLoadingTransactions) {
             return '--';

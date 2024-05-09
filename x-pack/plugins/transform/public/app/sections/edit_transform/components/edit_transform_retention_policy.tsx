@@ -30,7 +30,7 @@ import { useRetentionPolicyField } from '../state_management/selectors/retention
 import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
 
 export const EditTransformRetentionPolicy: FC = () => {
-  const { i18n: i18nStart, theme } = useAppDependencies();
+  const startServices = useAppDependencies();
 
   const toastNotifications = useToastNotifications();
 
@@ -70,7 +70,7 @@ export const EditTransformRetentionPolicy: FC = () => {
         }),
         text: toMountPoint(
           <ToastNotificationText text={getErrorMessage(transformsPreviewError)} />,
-          { theme, i18n: i18nStart }
+          startServices
         ),
       });
     }

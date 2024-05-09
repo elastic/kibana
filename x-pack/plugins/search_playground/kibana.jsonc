@@ -14,12 +14,14 @@
       "actions",
       "encryptedSavedObjects",
       "navigation",
+      "share",
       "security",
       "stackConnectors",
       "triggersActionsUi",
     ],
     "optionalPlugins": [
-      "cloud"
+      "cloud",
+      "usageCollection",
     ],
     "requiredBundles": [
       "kibanaReact"

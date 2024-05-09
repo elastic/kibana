@@ -20,6 +20,7 @@ import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { coreUsageDataServiceMock } from '@kbn/core-usage-data-server-mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mocks';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
+import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 
 export function createCoreStartMock() {
   const mock: MockedKeys<CoreStart> = {
@@ -35,6 +36,7 @@ export function createCoreStartMock() {
     executionContext: executionContextServiceMock.createInternalStartContract(),
     customBranding: customBrandingServiceMock.createStartContract(),
     security: securityServiceMock.createStart(),
+    userProfile: userProfileServiceMock.createStart(),
     plugins: {
       onStart: jest.fn(),
     },

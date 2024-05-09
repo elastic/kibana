@@ -9,12 +9,14 @@
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
+import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { DashboardSettingsService } from './types';
 
 type SettingsServiceFactory = PluginServiceFactory<DashboardSettingsService>;
 
 export const settingsServiceFactory: SettingsServiceFactory = () => {
   return {
+    i18n: i18nServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
     theme: themeServiceMock.createStartContract(),
     isProjectEnabledInLabs: jest.fn().mockReturnValue(true),

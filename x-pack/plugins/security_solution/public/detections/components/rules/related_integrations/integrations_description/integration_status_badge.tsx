@@ -31,26 +31,22 @@ const IntegrationStatusBadgeComponent: React.FC<IntegrationStatusBadgeProps> = (
 
   const { isInstalled, isEnabled } = installationStatus;
 
-  const badgeInstalledColor = 'success';
-  const badgeUninstalledColor = '#E0E5EE';
-  const badgeColor = isInstalled ? badgeInstalledColor : badgeUninstalledColor;
-
-  const badgeTooltip = isInstalled
+  const color = isEnabled ? 'success' : isInstalled ? 'primary' : undefined;
+  const tooltipText = isInstalled
     ? isEnabled
       ? i18n.INTEGRATIONS_ENABLED_TOOLTIP
       : i18n.INTEGRATIONS_INSTALLED_TOOLTIP
     : i18n.INTEGRATIONS_UNINSTALLED_TOOLTIP;
-
-  const badgeText = isInstalled
-    ? isEnabled
-      ? i18n.INTEGRATIONS_ENABLED
-      : i18n.INTEGRATIONS_INSTALLED
+  const statusText = isEnabled
+    ? i18n.INTEGRATIONS_ENABLED
+    : isInstalled
+    ? i18n.INTEGRATIONS_DISABLED
     : i18n.INTEGRATIONS_UNINSTALLED;
 
   return (
-    <EuiToolTip content={badgeTooltip}>
-      <PaddedBadge color={badgeColor} data-test-subj={'statusBadge'}>
-        {badgeText}
+    <EuiToolTip content={tooltipText}>
+      <PaddedBadge color={color} data-test-subj={'statusBadge'}>
+        {statusText}
       </PaddedBadge>
     </EuiToolTip>
   );

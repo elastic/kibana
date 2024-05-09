@@ -40,6 +40,7 @@ export default function uiCapabilitiesTests({ loadTestFile, getService }: FtrPro
           if (isCustomRoleSpecification(role)) {
             await securityService.role.create(role.name, {
               kibana: role.kibana,
+              ...(role.elasticsearch ? { elasticsearch: role.elasticsearch } : {}),
             });
           }
         }
@@ -66,5 +67,6 @@ export default function uiCapabilitiesTests({ loadTestFile, getService }: FtrPro
     loadTestFile(require.resolve('./catalogue'));
     loadTestFile(require.resolve('./foo'));
     loadTestFile(require.resolve('./nav_links'));
+    loadTestFile(require.resolve('./roles'));
   });
 }

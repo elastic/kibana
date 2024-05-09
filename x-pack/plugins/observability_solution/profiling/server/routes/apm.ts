@@ -83,6 +83,7 @@ export function registerTopNFunctionsAPMTransactionsRoute({
               indices: transactionIndices.split(','),
               stacktraceIdsField: 'transaction.profiler_stack_trace_ids',
               limit: 1000,
+              totalSeconds: endSecs - startSecs,
             });
             const apmFunction = apmFunctions.TopN.find(
               (topNFunction) => topNFunction.Frame.FunctionName === functionName

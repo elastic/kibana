@@ -62,12 +62,14 @@ export function definePutRolesRoutes({
       const { createOnly } = request.query;
       try {
         const esClient = (await context.core).elasticsearch.client;
+
         const [features, rawRoles] = await Promise.all([
           getFeatures(),
           esClient.asCurrentUser.security.getRole({ name: request.params.name }, { ignore: [404] }),
         ]);
 
         const { validationErrors } = validateKibanaPrivileges(features, request.body.kibana);
+
         if (validationErrors.length) {
           return response.badRequest({
             body: {

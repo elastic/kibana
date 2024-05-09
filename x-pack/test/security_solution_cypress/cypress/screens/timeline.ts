@@ -61,6 +61,10 @@ export const UNLOCKED_ICON = '[data-test-subj="timeline-date-picker-unlock-butto
 
 export const ROW_ADD_NOTES_BUTTON = '[data-test-subj="timeline-notes-button-small"]';
 
+export const ADD_NOTE_CONTAINER = '[data-test-subj="add-note-container"]';
+
+export const RESOLVER_GRAPH_CONTAINER = '[data-test-subj="resolver:graph"]';
+
 export const NOTE_CARD_CONTENT = '[data-test-subj="notes"]';
 
 export const NOTE_DESCRIPTION = '[data-test-subj="note-preview-description"]';

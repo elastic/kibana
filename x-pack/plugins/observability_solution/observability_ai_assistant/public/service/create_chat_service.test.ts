@@ -243,6 +243,7 @@ describe('createChatService', () => {
         getScreenContexts: () => [],
         messages: [],
         persist: false,
+        disableFunctions: false,
         signal: new AbortController().signal,
         responseLanguage: 'orcish',
       });

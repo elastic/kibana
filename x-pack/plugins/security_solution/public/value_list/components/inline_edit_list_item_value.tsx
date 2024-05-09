@@ -12,6 +12,7 @@ import { usePatchListItemMutation } from '@kbn/securitysolution-list-hooks';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
 import { EDIT_TEXT_INLINE_LABEL, SUCCESSFULLY_UPDATED_LIST_ITEM } from '../translations';
+import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../common/lib/telemetry';
 
 const toastOptions = {
   toastLifeTimeMs: 5000,
@@ -41,6 +42,7 @@ export const InlineEditListItemValue = ({ listItem }: { listItem: ListItemSchema
 
   const onSave = useCallback(
     async (newValue) => {
+      track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.EDIT_VALUE_LIST_ITEM);
       await patchListItemMutation.mutateAsync({
         id: listItem.id,
         value: newValue,

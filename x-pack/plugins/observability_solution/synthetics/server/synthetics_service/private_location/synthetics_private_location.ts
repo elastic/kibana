@@ -201,7 +201,7 @@ export class SyntheticsPrivateLocation {
       const result = await this.createPolicyBulk(newPolicies);
       if (result?.created && result?.created?.length > 0 && testRunId) {
         // ignore await here, we don't want to wait for this to finish
-        scheduleCleanUpTask(this.server);
+        void scheduleCleanUpTask(this.server);
       }
       return result;
     } catch (e) {

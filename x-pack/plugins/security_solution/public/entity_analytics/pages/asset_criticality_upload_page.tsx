@@ -121,7 +121,7 @@ export const AssetCriticalityUploadPage = () => {
             <h2>
               <FormattedMessage
                 id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.subTitle"
-                defaultMessage="Quickly Assign Asset Criticality with CSV Upload"
+                defaultMessage="Import your asset criticality data"
               />
             </h2>
           </EuiTitle>
@@ -129,7 +129,7 @@ export const AssetCriticalityUploadPage = () => {
           <EuiText size="s">
             <FormattedMessage
               id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.description"
-              defaultMessage="Effortlessly import asset criticality from your asset management tools via CSV. This simple upload ensures data accuracy and reduces manual input errors."
+              defaultMessage="Bulk assign asset criticality by importing a CSV, TXT, or TSV file exported from your asset management tools. This ensures data accuracy and reduces manual input errors."
             />
           </EuiText>
           <EuiSpacer size="s" />
@@ -152,7 +152,7 @@ export const AssetCriticalityUploadPage = () => {
             <EuiText size="s">
               <FormattedMessage
                 id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.information.description"
-                defaultMessage="Allows you to classify assets based on their value and impact on business operations, to guide prioritization for alert triaging, threat-hunting, and investigation activities."
+                defaultMessage="Asset criticality allows you to classify entities based on their importance and impact on business operations. Use asset criticality to guide prioritization for alert triaging, threat-hunting, and investigation activities."
               />
             </EuiText>
             <EuiHorizontalRule />

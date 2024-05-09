@@ -5,13 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { KibanaRequest } from '@kbn/core-http-server';
 
 /** @public */
-export interface UserSettingsServiceSetup {
-  setUserProfileSettings: (client: UserProfileSettingsClientContract) => void;
-}
-
-export interface UserProfileSettingsClientContract {
-  get: (request: KibanaRequest) => Promise<Record<string, string>>;
-}
+// keeping the empty service contract for now as we might re-use it very soon
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface UserSettingsServiceSetup {}

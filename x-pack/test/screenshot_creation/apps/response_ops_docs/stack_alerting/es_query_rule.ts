@@ -37,8 +37,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.header.waitUntilLoadingHasFinished();
       await rules.common.clickCreateAlertButton();
-      await testSubjects.setValue('ruleNameInput', ruleName);
       await testSubjects.click(`.es-query-SelectOption`);
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.setValue('ruleNameInput', ruleName);
       await testSubjects.click('queryFormType_esQuery');
       const indexSelector = await testSubjects.find('selectIndexExpression');
       await indexSelector.click();

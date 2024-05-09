@@ -199,7 +199,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ])}`,
           `--xpack.actions.enableFooterInEmail=${enableFooterInEmail}`,
           '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
-          '--xpack.alerting.invalidateApiKeysTask.interval="15s"',
+          '--xpack.alerting.invalidateApiKeysTask.removalDelay="1s"',
           '--xpack.alerting.healthCheck.interval="1s"',
           '--xpack.alerting.rules.minimumScheduleInterval.value="1s"',
           '--xpack.alerting.rules.run.alerts.max=20',

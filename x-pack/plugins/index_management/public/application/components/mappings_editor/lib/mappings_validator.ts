@@ -223,6 +223,7 @@ export const mappingsConfigurationSchema = t.exact(
         enabled: t.boolean,
         includes: t.array(t.string),
         excludes: t.array(t.string),
+        mode: t.union([t.literal('disabled'), t.literal('stored'), t.literal('synthetic')]),
       })
     ),
     _meta: t.UnknownRecord,

@@ -130,6 +130,7 @@ export interface LogAlertsOpts {
 export interface InitializeExecutionOpts {
   maxAlerts: number;
   ruleLabel: string;
+  runTimestamp?: Date;
   startedAt: Date | null;
   flappingSettings: RulesSettingsFlappingProperties;
   activeAlertsFromState: Record<string, RawAlertInstance>;

@@ -37,7 +37,8 @@ import {
 } from '../../../tasks/timeline';
 import { EXPLORE_URL, hostsUrl, MANAGE_URL } from '../../../urls/navigation';
 
-describe('[ESS] Save Timeline Prompts', { tags: ['@ess'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/174068
+describe.skip('[ESS] Save Timeline Prompts', { tags: ['@ess'] }, () => {
   beforeEach(() => {
     login();
     visitWithTimeRange(hostsUrl('allHosts'));

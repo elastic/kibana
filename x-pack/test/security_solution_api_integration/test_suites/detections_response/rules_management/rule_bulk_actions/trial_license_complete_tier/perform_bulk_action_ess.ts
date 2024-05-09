@@ -106,7 +106,7 @@ export default ({ getService }: FtrProviderContext): void => {
               webhookUrl: 'http://localhost:1234',
             },
           }),
-        createRule(supertest, log, getSimpleRule(ruleId, false)),
+        createRule(supertest, log, { ...getSimpleRule(ruleId, false), index: ['*'] }),
       ]);
       await createLegacyRuleAction(supertest, rule1.id, connector.body.id);
 

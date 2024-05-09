@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiLink,
+  EuiCallOut,
 } from '@elastic/eui';
 import type { EuiInMemoryTableProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -34,8 +35,38 @@ interface Props {
   integration?: string | null;
 }
 
+const getInputs = ({ packageInfo, integration }: Props) => {
+  return packageInfo.policy_templates?.reduce((acc, policyTemplate) => {
+    if (integration && policyTemplate.name !== integration) {
+      return acc;
+    }
+    if ('inputs' in policyTemplate && policyTemplate.inputs) {
+      return [
+        ...acc,
+        ...policyTemplate.inputs.map((input) => ({
+          key: `${policyTemplate.name}-${input.type}`,
+          ...input,
+          streams: getStreamsForInputType(input.type, packageInfo, []),
+        })),
+      ];
+    }
+    return acc;
+  }, [] as RegistryInputWithStreams[]);
+};
+
+export const hasDocumentation = ({ packageInfo, integration }: Props) => {
+  if (packageInfo.vars && packageInfo.vars.length > 0) {
+    return true;
+  }
+
+  if ((getInputs({ packageInfo, integration }) || []).length > 0) {
+    return true;
+  }
+};
+
 export const DocumentationPage: React.FunctionComponent<Props> = ({ packageInfo, integration }) => {
   const { docLinks } = useStartServices();
+  const showDocumentation = hasDocumentation({ packageInfo, integration });
 
   const content = (
     <>
@@ -47,7 +78,7 @@ export const DocumentationPage: React.FunctionComponent<Props> = ({ packageInfo,
               defaultMessage="This documents all the inputs, streams, and variables available to use this integration programmatically via the Fleet Kibana API. {learnMore}"
               values={{
                 learnMore: (
-                  <EuiLink href={docLinks.links.fleet.api}>
+                  <EuiLink href={docLinks.links.fleet.api} external={true}>
                     <FormattedMessage
                       id="xpack.fleet.epm.packageDetails.apiReference.learnMoreLink"
                       defaultMessage="Learn more"
@@ -60,9 +91,21 @@ export const DocumentationPage: React.FunctionComponent<Props> = ({ packageInfo,
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <PackageVars vars={packageInfo.vars} />
-
-      <Inputs packageInfo={packageInfo} integration={integration} />
+      {showDocumentation ? (
+        <>
+          <PackageVars vars={packageInfo.vars} />
+          <Inputs packageInfo={packageInfo} integration={integration} />
+        </>
+      ) : (
+        <EuiCallOut
+          title={
+            <FormattedMessage
+              id="xpack.fleet.epm.packageDetails.apiReference.noDocumentationMessage"
+              defaultMessage="This integration has no references available."
+            />
+          }
+        />
+      )}
       <EuiSpacer size="m" />
     </>
   );
@@ -127,26 +170,7 @@ const Inputs: React.FunctionComponent<{
   packageInfo: PackageInfo;
   integration?: string | null;
 }> = ({ packageInfo, integration }) => {
-  const inputs = useMemo(
-    () =>
-      packageInfo.policy_templates?.reduce((acc, policyTemplate) => {
-        if (integration && policyTemplate.name !== integration) {
-          return acc;
-        }
-        if ('inputs' in policyTemplate && policyTemplate.inputs) {
-          return [
-            ...acc,
-            ...policyTemplate.inputs.map((input) => ({
-              key: `${policyTemplate.name}-${input.type}`,
-              ...input,
-              streams: getStreamsForInputType(input.type, packageInfo, []),
-            })),
-          ];
-        }
-        return acc;
-      }, [] as RegistryInputWithStreams[]),
-    [packageInfo, integration]
-  );
+  const inputs = useMemo(() => getInputs({ packageInfo, integration }), [packageInfo, integration]);
   return (
     <>
       <EuiSpacer size="m" />

@@ -28,7 +28,7 @@ import type { EmbeddableSloProps, SloAlertsEmbeddableInput, SloItem } from './ty
 
 interface SloConfigurationProps {
   initialInput?: Partial<SloAlertsEmbeddableInput>;
-  onCreate: (props: EmbeddableSloProps) => void; // TODO check change point detection
+  onCreate: (props: EmbeddableSloProps) => void;
   onCancel: () => void;
 }
 

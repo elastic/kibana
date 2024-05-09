@@ -7,13 +7,20 @@
  */
 
 import type { FC } from 'react';
+import type { AnalyticsServiceStart, I18nStart, ThemeServiceStart } from '@kbn/core/public';
 import { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import { DevToolsSetup } from '@kbn/dev-tools-plugin/public';
 import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { SharePluginSetup, SharePluginStart, LocatorPublic } from '@kbn/share-plugin/public';
 
 import { ConsoleUILocatorParams } from './locator';
-import { EmbeddableConsoleProps, EmbeddedConsoleView } from './embeddable_console';
+import { EmbeddedConsoleView } from './embeddable_console';
+
+export interface ConsoleStartServices {
+  analytics: Pick<AnalyticsServiceStart, 'reportEvent'>;
+  i18n: I18nStart;
+  theme: Pick<ThemeServiceStart, 'theme$'>;
+}
 
 export interface AppSetupUIPluginDependencies {
   home?: HomePublicPluginSetup;
@@ -55,7 +62,7 @@ export interface ConsolePluginStart {
   /**
    * EmbeddableConsole is a functional component used to render a portable version of the dev tools console on any page in Kibana
    */
-  EmbeddableConsole?: FC<EmbeddableConsoleProps>;
+  EmbeddableConsole?: FC<{}>;
   /**
    * Register an alternate view for the Embedded Console
    *

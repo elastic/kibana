@@ -11,9 +11,9 @@ import { createRoot } from '@kbn/core-test-helpers-kbn-server';
 describe('SO default search fields', () => {
   let root: ReturnType<typeof createRoot>;
 
-  afterEach(() => {
+  afterEach(async () => {
     try {
-      root?.shutdown();
+      await root?.shutdown();
     } catch (e) {
       /* trap */
     }

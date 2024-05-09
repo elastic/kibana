@@ -21,6 +21,7 @@ export type UpsellingSectionId =
 
 export type UpsellingMessageId =
   | 'investigation_guide'
+  | 'investigation_guide_interactions'
   | 'alert_assignments'
   | 'alert_suppression_rule_form'
   | 'alert_suppression_rule_details';

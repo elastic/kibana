@@ -216,7 +216,7 @@ export const navigationTree: NavigationTreeDefinition = {
     {
       type: 'navItem',
       title: i18n.translate('xpack.serverlessObservability.nav.getStarted', {
-        defaultMessage: 'Get started',
+        defaultMessage: 'Add data',
       }),
       link: 'observabilityOnboarding',
       icon: 'launch',

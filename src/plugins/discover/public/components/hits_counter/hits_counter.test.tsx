@@ -13,7 +13,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { BehaviorSubject } from 'rxjs';
 import { getDiscoverStateMock } from '../../__mocks__/discover_state.mock';
-import { DataTotalHits$ } from '../../application/main/services/discover_data_state_container';
+import { DataTotalHits$ } from '../../application/main/state_management/discover_data_state_container';
 import { FetchStatus } from '../../application/types';
 
 describe('hits counter', function () {

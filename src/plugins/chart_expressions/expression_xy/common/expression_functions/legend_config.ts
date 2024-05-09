@@ -99,6 +99,13 @@ export const legendConfigFunction: LegendConfigFn = {
       ],
       strict: true,
     },
+    legendStats: {
+      types: ['string'],
+      multi: true,
+      help: i18n.translate('expressionXY.legendConfig.legendStats.help', {
+        defaultMessage: 'Specifies the legend stats.',
+      }),
+    },
   },
   async fn(input, args, handlers) {
     const { legendConfigFn } = await import('./legend_config_fn');

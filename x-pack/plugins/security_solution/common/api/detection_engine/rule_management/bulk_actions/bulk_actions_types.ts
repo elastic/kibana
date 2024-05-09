@@ -7,6 +7,7 @@
 
 import type {
   BulkActionEditPayloadIndexPatterns,
+  BulkActionEditPayloadInvestigationFields,
   BulkActionEditPayloadRuleActions,
   BulkActionEditPayloadSchedule,
   BulkActionEditPayloadTags,
@@ -26,5 +27,6 @@ export type BulkActionEditForRuleAttributes =
  */
 export type BulkActionEditForRuleParams =
   | BulkActionEditPayloadIndexPatterns
+  | BulkActionEditPayloadInvestigationFields
   | BulkActionEditPayloadTimeline
   | BulkActionEditPayloadSchedule;

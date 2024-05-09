@@ -5,28 +5,24 @@
  * 2.0.
  */
 
-import { noop } from 'lodash';
-import { forkJoin, last, Observable, shareReplay, tap } from 'rxjs';
-import {
-  ChatCompletionChunkEvent,
-  createFunctionNotFoundError,
-  FunctionDefinition,
-} from '../../../../common';
-import { TokenCountEvent } from '../../../../common/conversation_complete';
+import { ignoreElements, last, merge, Observable, shareReplay, tap } from 'rxjs';
+import { createFunctionNotFoundError, FunctionDefinition } from '../../../../common';
+import { ChatEvent } from '../../../../common/conversation_complete';
 import { concatenateChatCompletionChunks } from '../../../../common/utils/concatenate_chat_completion_chunks';
-import { rejectTokenCountEvents } from '../../util/reject_token_count_events';
+import { withoutTokenCountEvents } from '../../../../common/utils/without_token_count_events';
 
 export function failOnNonExistingFunctionCall({
   functions,
 }: {
   functions?: Array<Pick<FunctionDefinition, 'name' | 'description' | 'parameters'>>;
 }) {
-  return (source$: Observable<ChatCompletionChunkEvent | TokenCountEvent>) => {
-    return new Observable<ChatCompletionChunkEvent | TokenCountEvent>((subscriber) => {
-      const shared = source$.pipe(shareReplay());
+  return (source$: Observable<ChatEvent>) => {
+    const shared$ = source$.pipe(shareReplay());
 
-      const checkFunctionCallResponse$ = shared.pipe(
-        rejectTokenCountEvents(),
+    return merge(
+      shared$,
+      shared$.pipe(
+        withoutTokenCountEvents(),
         concatenateChatCompletionChunks(),
         last(),
         tap((event) => {
@@ -36,24 +32,9 @@ export function failOnNonExistingFunctionCall({
           ) {
             throw createFunctionNotFoundError(event.message.function_call.name);
           }
-        })
-      );
-
-      source$.subscribe({
-        next: (val) => {
-          subscriber.next(val);
-        },
-        error: noop,
-      });
-
-      forkJoin([source$, checkFunctionCallResponse$]).subscribe({
-        complete: () => {
-          subscriber.complete();
-        },
-        error: (error) => {
-          subscriber.error(error);
-        },
-      });
-    });
+        }),
+        ignoreElements()
+      )
+    );
   };
 }

@@ -89,7 +89,8 @@
     "@kbn/license-management-plugin",
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-render",
-    "@kbn/react-kibana-context-theme"
+    "@kbn/react-kibana-context-theme",
+    "@kbn/search-types"
   ],
   "exclude": ["target/**/*"]
 }

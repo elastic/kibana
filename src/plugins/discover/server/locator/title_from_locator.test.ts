@@ -105,7 +105,7 @@ test(`throws error if DiscoverAppLocatorParams do not contain a saved search ID`
     return await provider(mockPayload[0].params);
   };
 
-  expect(testFn).rejects.toEqual(
+  await expect(testFn).rejects.toEqual(
     new Error('DiscoverAppLocatorParams must contain a saved search reference')
   );
 });

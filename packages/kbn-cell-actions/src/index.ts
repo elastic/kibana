@@ -34,6 +34,7 @@ export {
   createFilterOutActionFactory,
   addFilterIn,
   addFilterOut,
+  addExistsFilter,
 } from './actions/filter';
 
 // Action factory

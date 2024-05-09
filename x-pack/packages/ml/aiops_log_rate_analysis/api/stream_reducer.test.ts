@@ -38,24 +38,21 @@ describe('streamReducer', () => {
   it('adds significant item, then resets all state again', () => {
     const state1 = streamReducer(
       initialState,
-      addSignificantItemsAction(
-        [
-          {
-            key: 'the-field-name:the-field-value',
-            type: 'keyword',
-            fieldName: 'the-field-name',
-            fieldValue: 'the-field-value',
-            doc_count: 10,
-            bg_count: 100,
-            total_doc_count: 1000,
-            total_bg_count: 10000,
-            score: 0.1,
-            pValue: 0.01,
-            normalizedScore: 0.123,
-          },
-        ],
-        '2'
-      )
+      addSignificantItemsAction([
+        {
+          key: 'the-field-name:the-field-value',
+          type: 'keyword',
+          fieldName: 'the-field-name',
+          fieldValue: 'the-field-value',
+          doc_count: 10,
+          bg_count: 100,
+          total_doc_count: 1000,
+          total_bg_count: 10000,
+          score: 0.1,
+          pValue: 0.01,
+          normalizedScore: 0.123,
+        },
+      ])
     );
 
     expect(state1.significantItems).toHaveLength(1);
@@ -66,14 +63,14 @@ describe('streamReducer', () => {
   });
 
   it('adds significant items and groups, then resets groups only', () => {
-    const state1 = streamReducer(initialState, addSignificantItemsAction(significantTerms, '2'));
+    const state1 = streamReducer(initialState, addSignificantItemsAction(significantTerms));
 
     expect(state1.significantItems).toHaveLength(4);
     expect(state1.significantItemsGroups).toHaveLength(0);
 
     const state2 = streamReducer(
       state1,
-      addSignificantItemsGroupAction(finalSignificantItemGroups, '2')
+      addSignificantItemsGroupAction(finalSignificantItemGroups)
     );
 
     expect(state2.significantItems).toHaveLength(4);

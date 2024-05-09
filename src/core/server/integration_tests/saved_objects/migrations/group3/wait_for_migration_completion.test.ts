@@ -60,7 +60,7 @@ describe('migration with waitForCompletion=true', () => {
     await root.preboot();
     await root.setup();
 
-    root.start();
+    void root.start();
     const esClient = esServer.es.getClient();
 
     await retryAsync(

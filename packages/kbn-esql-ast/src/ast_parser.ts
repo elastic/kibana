@@ -12,10 +12,10 @@ import { getParser, ROOT_STATEMENT } from './antlr_facade';
 import { AstListener } from './ast_factory';
 import type { ESQLAst, EditorError } from './types';
 
-export async function getAstAndSyntaxErrors(text: string | undefined): Promise<{
+export function getAstAndSyntaxErrors(text: string | undefined): {
   errors: EditorError[];
   ast: ESQLAst;
-}> {
+} {
   if (text == null) {
     return { ast: [], errors: [] };
   }

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { createBrowserHistory } from 'history';
-import { getDiscoverStateContainer } from '../application/main/services/discover_state';
+import { getDiscoverStateContainer } from '../application/main/state_management/discover_state';
 import { savedSearchMockWithTimeField, savedSearchMock } from './saved_search';
 import { discoverServiceMock } from './services';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';

@@ -15,6 +15,13 @@ export const SOLUTION_NAME = i18n.translate('xpack.securitySolution.pages.common
   defaultMessage: 'Security',
 });
 
+export const ASSISTANT_MANAGEMENT_TITLE = i18n.translate(
+  'xpack.securitySolution.securityAiAssistantManagement.app.title',
+  {
+    defaultMessage: 'AI Assistant for Security',
+  }
+);
+
 export const BETA = i18n.translate('xpack.securitySolution.pages.common.beta', {
   defaultMessage: 'Beta',
 });
@@ -100,6 +107,8 @@ export const getAgentTypeName = (agentType: ResponseActionAgentType) => {
       return 'Elastic Defend';
     case 'sentinel_one':
       return 'SentinelOne';
+    case 'crowdstrike':
+      return 'Crowdstrike';
     default:
       return agentType;
   }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 
 import { useValues } from 'kea';
 
@@ -38,7 +38,7 @@ export const InferenceConfiguration: React.FC = () => {
   }
 };
 
-const InferenceConfigurationWrapper: React.FC = ({ children }) => {
+const InferenceConfigurationWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
   return (
     <>
       <EuiSpacer />

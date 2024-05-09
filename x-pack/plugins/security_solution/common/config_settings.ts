@@ -10,10 +10,6 @@ export interface ConfigSettings {
    * Index Lifecycle Management (ILM) feature enabled.
    */
   ILMEnabled: boolean;
-  /**
-   * ESQL queries enabled.
-   */
-  ESQLEnabled: boolean;
 }
 
 /**
@@ -22,7 +18,6 @@ export interface ConfigSettings {
  */
 export const defaultSettings: ConfigSettings = Object.freeze({
   ILMEnabled: true,
-  ESQLEnabled: true,
 });
 
 type ConfigSettingsKey = keyof ConfigSettings;

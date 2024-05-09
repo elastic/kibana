@@ -154,9 +154,12 @@ describe('SyntheticsService', () => {
 
   it('setup properly', async () => {
     const service = new SyntheticsService(serverMock);
-    service.setup(taskManagerSetup);
 
     expect(service.isAllowed).toEqual(false);
+
+    await service.setup(taskManagerSetup);
+
+    expect(service.isAllowed).toEqual(true);
     expect(service.locations).toEqual([]);
     expect(service.signupUrl).toEqual(null);
   });

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 
 export interface CloudStart {
   /**
    * A React component that provides a pre-wired `React.Context` which connects components to Cloud services.
    */
-  CloudContextProvider: FC<{}>;
+  CloudContextProvider: FC<PropsWithChildren<unknown>>;
   /**
    * `true` when Kibana is running on Elastic Cloud.
    */

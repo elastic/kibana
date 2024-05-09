@@ -81,7 +81,7 @@ describe('AssetCriticalityDataClient', () => {
     });
 
     it('searches in the asset criticality index', async () => {
-      subject.search({ query: { match_all: {} } });
+      await subject.search({ query: { match_all: {} } });
 
       expect(esClientMock.search).toHaveBeenCalledWith(
         expect.objectContaining({ index: '.asset-criticality.asset-criticality-default' })
@@ -89,7 +89,7 @@ describe('AssetCriticalityDataClient', () => {
     });
 
     it('requires a query parameter', async () => {
-      subject.search({ query: { match_all: {} } });
+      await subject.search({ query: { match_all: {} } });
 
       expect(esClientMock.search).toHaveBeenCalledWith(
         expect.objectContaining({ body: { query: { match_all: {} } } })
@@ -97,13 +97,13 @@ describe('AssetCriticalityDataClient', () => {
     });
 
     it('accepts a size parameter', async () => {
-      subject.search({ query: { match_all: {} }, size: 100 });
+      await subject.search({ query: { match_all: {} }, size: 100 });
 
       expect(esClientMock.search).toHaveBeenCalledWith(expect.objectContaining({ size: 100 }));
     });
 
     it('defaults to the default query size', async () => {
-      subject.search({ query: { match_all: {} } });
+      await subject.search({ query: { match_all: {} } });
       const defaultSize = 1_000;
 
       expect(esClientMock.search).toHaveBeenCalledWith(
@@ -112,14 +112,14 @@ describe('AssetCriticalityDataClient', () => {
     });
 
     it('caps the size to the maximum query size', async () => {
-      subject.search({ query: { match_all: {} }, size: 999999 });
+      await subject.search({ query: { match_all: {} }, size: 999999 });
       const maxSize = 100_000;
 
       expect(esClientMock.search).toHaveBeenCalledWith(expect.objectContaining({ size: maxSize }));
     });
 
     it('ignores an index_not_found_exception if the criticality index does not exist', async () => {
-      subject.search({ query: { match_all: {} } });
+      await subject.search({ query: { match_all: {} } });
 
       expect(esClientMock.search).toHaveBeenCalledWith(
         expect.objectContaining({ ignore_unavailable: true })

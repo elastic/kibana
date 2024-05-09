@@ -28,7 +28,9 @@ export function setupNodeEvents(on: Cypress.PluginEvents, config: Cypress.Plugin
     version: config.env.APM_PACKAGE_VERSION,
   });
 
-  synthtraceEsClient.pipeline(synthtraceEsClient.getDefaultPipeline(false));
+  synthtraceEsClient.pipeline(
+    synthtraceEsClient.getDefaultPipeline({ includeSerialization: false })
+  );
 
   initPlugin(on, config);
 

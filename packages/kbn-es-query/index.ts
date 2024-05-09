@@ -51,7 +51,6 @@ export {
   migrateFilter,
   fromCombinedFilter,
   isOfQueryType,
-  isOfEsqlQueryType,
   isOfAggregateQueryType,
   getAggregateQueryMode,
   getLanguageDisplayName,

@@ -25,7 +25,7 @@ import type { PaletteRegistry } from '@kbn/coloring';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { Query, type Filter } from '@kbn/es-query';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import {
   Embeddable,
   IContainer,
@@ -84,6 +84,7 @@ import {
 } from '../../common/constants';
 import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
 import {
+  getAnalytics,
   getCharts,
   getCoreI18n,
   getCoreOverlays,
@@ -580,13 +581,14 @@ export class MapEmbeddable
         />
       );
 
-    const I18nContext = getCoreI18n().Context;
     render(
-      <Provider store={this._savedMap.getStore()}>
-        <I18nContext>
-          <KibanaThemeProvider theme$={getTheme().theme$}>{content}</KibanaThemeProvider>
-        </I18nContext>
-      </Provider>,
+      <KibanaRenderContextProvider
+        analytics={getAnalytics()}
+        i18n={getCoreI18n()}
+        theme={getTheme()}
+      >
+        <Provider store={this._savedMap.getStore()}>{content}</Provider>
+      </KibanaRenderContextProvider>,
       this._domNode
     );
   }

@@ -94,6 +94,7 @@ const AlertOptional = rt.partial({
   'kibana.alert.last_detected': schemaDate,
   'kibana.alert.maintenance_window_ids': schemaStringArray,
   'kibana.alert.reason': schemaString,
+  'kibana.alert.rule.execution.timestamp': schemaDate,
   'kibana.alert.rule.execution.uuid': schemaString,
   'kibana.alert.rule.parameters': schemaUnknown,
   'kibana.alert.rule.tags': schemaStringArray,

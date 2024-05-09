@@ -40,6 +40,7 @@ export const useDatasetQualityTable = () => {
     timeRange,
     integrations,
     namespaces,
+    qualities,
     query,
   } = useSelector(service, (state) => state.context.filters);
 
@@ -60,10 +61,6 @@ export const useDatasetQualityTable = () => {
   );
 
   const datasets = useSelector(service, (state) => state.context.datasets);
-
-  const isDatasetQualityPageIdle = useSelector(service, (state) =>
-    state.matches('datasets.loaded.idle')
-  );
 
   const toggleInactiveDatasets = useCallback(
     () => service.send({ type: 'TOGGLE_INACTIVE_DATASETS' }),
@@ -86,7 +83,7 @@ export const useDatasetQualityTable = () => {
         return;
       }
 
-      if (isDatasetQualityPageIdle) {
+      if (!flyout?.insightsTimeRange) {
         service.send({
           type: 'OPEN_FLYOUT',
           dataset: selectedDataset,
@@ -99,7 +96,7 @@ export const useDatasetQualityTable = () => {
         dataset: selectedDataset,
       });
     },
-    [flyout?.dataset?.rawName, isDatasetQualityPageIdle, service]
+    [flyout?.dataset?.rawName, flyout?.insightsTimeRange, service]
   );
 
   const isActive = useCallback(
@@ -134,26 +131,25 @@ export const useDatasetQualityTable = () => {
       ? datasets
       : filterInactiveDatasets({ datasets, timeRange });
 
-    const filteredByIntegrations =
-      integrations.length > 0
-        ? visibleDatasets.filter((dataset) => {
-            if (!dataset.integration && integrations.includes(NONE)) {
-              return true;
-            }
+    return visibleDatasets.filter((dataset) => {
+      const passesIntegrationFilter =
+        integrations.length === 0 ||
+        (!dataset.integration && integrations.includes(NONE)) ||
+        (dataset.integration && integrations.includes(dataset.integration.name));
 
-            return dataset.integration && integrations.includes(dataset.integration.name);
-          })
-        : visibleDatasets;
+      const passesNamespaceFilter =
+        namespaces.length === 0 || namespaces.includes(dataset.namespace);
 
-    const filteredByNamespaces =
-      namespaces.length > 0
-        ? filteredByIntegrations.filter((dataset) => namespaces.includes(dataset.namespace))
-        : filteredByIntegrations;
+      const passesQualityFilter =
+        qualities.length === 0 || qualities.includes(dataset.degradedDocs.quality);
 
-    return query
-      ? filteredByNamespaces.filter((dataset) => dataset.rawName.includes(query))
-      : filteredByNamespaces;
-  }, [showInactiveDatasets, datasets, timeRange, integrations, namespaces, query]);
+      const passesQueryFilter = !query || dataset.rawName.includes(query);
+
+      return (
+        passesIntegrationFilter && passesNamespaceFilter && passesQualityFilter && passesQueryFilter
+      );
+    });
+  }, [showInactiveDatasets, datasets, timeRange, integrations, namespaces, qualities, query]);
 
   const pagination = {
     pageIndex: page,
@@ -209,6 +205,7 @@ export const useDatasetQualityTable = () => {
     sort: { sort },
     onTableChange,
     pagination,
+    filteredItems,
     renderedItems,
     columns,
     loading,

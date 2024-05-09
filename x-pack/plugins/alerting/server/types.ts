@@ -68,6 +68,7 @@ import {
 import { PublicAlertFactory } from './alert/create_alert_factory';
 import { RulesSettingsFlappingProperties } from '../common/rules_settings';
 import { PublicAlertsClient } from './alerts_client/types';
+import { GetTimeRangeResult } from './lib/get_time_range';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 export type { RuleTypeParams };
@@ -140,11 +141,12 @@ export interface RuleExecutorOptions<
   services: RuleExecutorServices<InstanceState, InstanceContext, ActionGroupIds, AlertData>;
   spaceId: string;
   startedAt: Date;
+  startedAtOverridden: boolean;
   state: State;
   namespace?: string;
   flappingSettings: RulesSettingsFlappingProperties;
   maintenanceWindowIds?: string[];
-  getTimeRange: (timeWindow?: string) => { dateStart: string; dateEnd: string };
+  getTimeRange: (timeWindow?: string) => GetTimeRangeResult;
 }
 
 export interface RuleParamsAndRefs<Params extends RuleTypeParams> {

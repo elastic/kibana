@@ -53,6 +53,7 @@ export const createDefaultAlertExecutorOptions = <
   maintenanceWindowIds?: string[];
 }): RuleExecutorOptions<Params, State, InstanceState, InstanceContext, ActionGroupIds> => ({
   startedAt,
+  startedAtOverridden: false,
   rule: {
     id: alertId,
     updatedBy: null,

@@ -49,6 +49,23 @@ export function TransformDatePickerProvider({ getService, getPageObjects }: FtrP
       await pageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     },
 
+    async assertUseFullDataButtonVisible(shouldBeVisible: boolean) {
+      const selector = 'mlDatePickerButtonUseFullData';
+      if (shouldBeVisible === true) {
+        await testSubjects.existOrFail(selector);
+      } else {
+        await testSubjects.missingOrFail(selector);
+      }
+    },
+    async assertDatePickerDataTierOptionsVisible(shouldBeVisible: boolean) {
+      const selector = 'mlDatePickerButtonDataTierOptions';
+      if (shouldBeVisible === true) {
+        await testSubjects.existOrFail(selector);
+      } else {
+        await testSubjects.missingOrFail(selector);
+      }
+    },
+
     async clickUseFullDataButton(expectedTimeConfig: { start: string; end: string }) {
       await testSubjects.existOrFail('mlDatePickerButtonUseFullData');
       await testSubjects.clickWhenNotDisabledWithoutRetry('mlDatePickerButtonUseFullData');

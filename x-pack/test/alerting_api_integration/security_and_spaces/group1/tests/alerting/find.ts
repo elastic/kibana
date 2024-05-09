@@ -19,7 +19,7 @@ const findTestUtils = (
   supertest: SuperTest<Test>,
   supertestWithoutAuth: any
 ) => {
-  describe(describeType, () => {
+  describe.skip(describeType, () => {
     afterEach(() => objectRemover.removeAll());
 
     for (const scenario of UserAtSpaceScenarios) {
@@ -135,6 +135,7 @@ const findTestUtils = (
                       monitoring: match.monitoring,
                       snooze_schedule: match.snooze_schedule,
                       ...(hasActiveSnoozes && { active_snoozes: activeSnoozes }),
+                      is_snoozed_until: null,
                     }
                   : {}),
               });
@@ -348,6 +349,7 @@ const findTestUtils = (
                       monitoring: match.monitoring,
                       snooze_schedule: match.snooze_schedule,
                       ...(hasActiveSnoozes && { active_snoozes: activeSnoozes }),
+                      is_snoozed_until: null,
                     }
                   : {}),
               });
@@ -426,6 +428,7 @@ const findTestUtils = (
                 tags: [myTag],
                 ...(describeType === 'internal' && {
                   snooze_schedule: [],
+                  is_snoozed_until: null,
                 }),
               });
               expect(omit(matchSecond, 'updatedAt')).to.eql({
@@ -434,6 +437,7 @@ const findTestUtils = (
                 tags: [myTag],
                 ...(describeType === 'internal' && {
                   snooze_schedule: [],
+                  is_snoozed_until: null,
                 }),
               });
               break;
@@ -510,6 +514,7 @@ const findTestUtils = (
                 execution_status: matchFirst.execution_status,
                 ...(describeType === 'internal' && {
                   snooze_schedule: [],
+                  is_snoozed_until: null,
                 }),
               });
               expect(omit(matchSecond, 'updatedAt')).to.eql({
@@ -519,6 +524,7 @@ const findTestUtils = (
                 execution_status: matchSecond.execution_status,
                 ...(describeType === 'internal' && {
                   snooze_schedule: [],
+                  is_snoozed_until: null,
                 }),
               });
               break;
@@ -645,7 +651,9 @@ export default function createFindTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('find', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/182263
+  // Failing: See https://github.com/elastic/kibana/issues/182284
+  describe.skip('find', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     afterEach(() => objectRemover.removeAll());

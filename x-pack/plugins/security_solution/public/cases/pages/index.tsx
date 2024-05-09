@@ -11,7 +11,7 @@ import type { CaseViewRefreshPropInterface } from '@kbn/cases-plugin/common';
 import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { DocumentDetailsRightPanelKey } from '../../flyout/document_details/right';
+import { DocumentDetailsRightPanelKey } from '../../flyout/document_details/shared/constants/panel_keys';
 import { useTourContext } from '../../common/components/guided_onboarding_tour';
 import {
   AlertsCasesTourSteps,
@@ -39,6 +39,7 @@ import { useInsertTimeline } from '../components/use_insert_timeline';
 import * as timelineMarkdownPlugin from '../../common/components/markdown_editor/plugins/timeline';
 import { DetailsPanel } from '../../timelines/components/side_panel';
 import { useFetchAlertData } from './use_fetch_alert_data';
+import { useUpsellingMessage } from '../../common/hooks/use_upselling';
 
 const TimelineDetailsPanel = () => {
   const { browserFields, runtimeMappings } = useSourcererDataView(SourcererScopeName.detections);
@@ -68,6 +69,8 @@ const CaseContainerComponent: React.FC = () => {
     (ruleId) => detectionsFormatUrl(getRuleDetailsUrl(ruleId ?? '', detectionsUrlSearch)),
     [detectionsFormatUrl, detectionsUrlSearch]
   );
+
+  const interactionsUpsellingMessage = useUpsellingMessage('investigation_guide_interactions');
 
   const showAlertDetails = useCallback(
     (alertId: string, index: string) => {
@@ -187,7 +190,7 @@ const CaseContainerComponent: React.FC = () => {
             editor_plugins: {
               parsingPlugin: timelineMarkdownPlugin.parser,
               processingPluginRenderer: timelineMarkdownPlugin.renderer,
-              uiPlugin: timelineMarkdownPlugin.plugin,
+              uiPlugin: timelineMarkdownPlugin.plugin({ interactionsUpsellingMessage }),
             },
             hooks: {
               useInsertTimeline,

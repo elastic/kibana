@@ -26,6 +26,15 @@ export const fetchDatasetDetailsFailedNotifier = (toasts: IToasts, error: Error)
   });
 };
 
+export const fetchDatasetSettingsFailedNotifier = (toasts: IToasts, error: Error) => {
+  toasts.addDanger({
+    title: i18n.translate('xpack.datasetQuality.fetchDatasetSettingsFailed', {
+      defaultMessage: "Dataset settings couldn't be loaded.",
+    }),
+    text: error.message,
+  });
+};
+
 export const fetchDegradedStatsFailedNotifier = (toasts: IToasts, error: Error) => {
   toasts.addDanger({
     title: i18n.translate('xpack.datasetQuality.fetchDegradedStatsFailed', {

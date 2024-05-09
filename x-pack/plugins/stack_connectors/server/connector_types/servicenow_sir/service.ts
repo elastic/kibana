@@ -38,7 +38,7 @@ export const createExternalService: ServiceFactory<ExternalServiceSIR> = ({
   });
 
   const _addObservable = async (data: Observable | Observable[], url: string) => {
-    snService.checkIfApplicationIsInstalled();
+    await snService.checkIfApplicationIsInstalled();
 
     const res = await request({
       axios: axiosInstance,

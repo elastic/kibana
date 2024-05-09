@@ -9,6 +9,7 @@
 import type { OpenAPIV3 } from 'openapi-types';
 import * as mutations from './mutations';
 import type { IContext } from './context';
+import { isAnyType } from './mutations/utils';
 
 interface PostProcessMutationsArgs {
   schema: OpenAPIV3.SchemaObject;
@@ -23,22 +24,32 @@ export const postProcessMutations = ({ ctx, schema }: PostProcessMutationsArgs) 
 const arrayContainers: Array<keyof OpenAPIV3.SchemaObject> = ['allOf', 'oneOf', 'anyOf'];
 
 const walkSchema = (ctx: IContext, schema: OpenAPIV3.SchemaObject): void => {
-  mutations.processAny(schema);
-  if (schema.type === 'array') {
-    walkSchema(ctx, schema.items as OpenAPIV3.SchemaObject);
-  } else if (schema.type === 'object') {
+  if (isAnyType(schema)) {
+    mutations.processAnyType(schema);
+    return;
+  }
+
+  mutations.processAllTypes(schema);
+  /* At runtime 'type' can be broader than 'NonArraySchemaObjectType', so we set it to 'string' */
+  const type: undefined | string = schema.type;
+  if (type === 'array') {
+    const items = (schema as OpenAPIV3.ArraySchemaObject).items;
+    walkSchema(ctx, items as OpenAPIV3.SchemaObject);
+  } else if (type === 'object') {
     if (schema.properties) {
       Object.values(schema.properties).forEach((value) => {
         walkSchema(ctx, value as OpenAPIV3.SchemaObject);
       });
     }
     mutations.processObject(ctx, schema);
-  } else if ((schema.type as string) === 'record') {
-    mutations.processRecord(ctx, schema);
-  } else if ((schema.type as string) === 'map') {
-    mutations.processMap(ctx, schema);
-  } else if (schema.type === 'string') {
+  } else if (type === 'string') {
     mutations.processString(schema);
+  } else if (type === 'record') {
+    mutations.processRecord(ctx, schema);
+  } else if (type === 'map') {
+    mutations.processMap(ctx, schema);
+  } else if (type === 'stream') {
+    mutations.processStream(schema);
   } else if (schema.type) {
     // Do nothing
   } else {

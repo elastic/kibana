@@ -7,7 +7,6 @@
 
 import React from 'react';
 
-import '../../mock/match_media';
 import { mockDetailItemData, mockDetailItemDataId } from '../../mock/mock_detail_item';
 import { TestProviders } from '../../mock/test_providers';
 import { EventFieldsBrowser } from './event_fields_browser';

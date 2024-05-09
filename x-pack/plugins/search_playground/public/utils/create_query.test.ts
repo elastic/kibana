@@ -23,6 +23,7 @@ describe('create_query', () => {
           dense_vector_query_fields: [],
           bm25_query_fields: [],
           source_fields: [],
+          skipped_fields: 0,
         },
       };
 
@@ -55,6 +56,7 @@ describe('create_query', () => {
           ],
           bm25_query_fields: [],
           source_fields: [],
+          skipped_fields: 0,
         },
       };
 
@@ -92,6 +94,7 @@ describe('create_query', () => {
           dense_vector_query_fields: [],
           bm25_query_fields: [],
           source_fields: [],
+          skipped_fields: 0,
         },
         index2: {
           elser_query_fields: [
@@ -100,6 +103,7 @@ describe('create_query', () => {
           dense_vector_query_fields: [],
           bm25_query_fields: [],
           source_fields: [],
+          skipped_fields: 0,
         },
       };
 
@@ -133,6 +137,7 @@ describe('create_query', () => {
           dense_vector_query_fields: [],
           bm25_query_fields: [],
           source_fields: [],
+          skipped_fields: 0,
         },
         index2: {
           elser_query_fields: [
@@ -141,6 +146,7 @@ describe('create_query', () => {
           dense_vector_query_fields: [],
           bm25_query_fields: [],
           source_fields: [],
+          skipped_fields: 0,
         },
       };
 
@@ -196,6 +202,7 @@ describe('create_query', () => {
           ],
           bm25_query_fields: [],
           source_fields: [],
+          skipped_fields: 0,
         },
       };
 
@@ -228,6 +235,7 @@ describe('create_query', () => {
           dense_vector_query_fields: [],
           bm25_query_fields: [],
           source_fields: [],
+          skipped_fields: 0,
         },
       };
 
@@ -257,6 +265,7 @@ describe('create_query', () => {
             dense_vector_query_fields: [],
             bm25_query_fields: ['content', 'title'],
             source_fields: [],
+            skipped_fields: 0,
           },
           index2: {
             elser_query_fields: [
@@ -265,6 +274,7 @@ describe('create_query', () => {
             dense_vector_query_fields: [],
             bm25_query_fields: [],
             source_fields: [],
+            skipped_fields: 0,
           },
         };
 
@@ -321,6 +331,7 @@ describe('create_query', () => {
             dense_vector_query_fields: [],
             bm25_query_fields: ['content', 'title'],
             source_fields: [],
+            skipped_fields: 0,
           },
           index2: {
             elser_query_fields: [
@@ -329,6 +340,7 @@ describe('create_query', () => {
             dense_vector_query_fields: [],
             bm25_query_fields: [],
             source_fields: [],
+            skipped_fields: 0,
           },
         };
 
@@ -390,6 +402,7 @@ describe('create_query', () => {
           ],
           bm25_query_fields: ['content', 'title'],
           source_fields: [],
+          skipped_fields: 0,
         },
         index2: {
           elser_query_fields: [
@@ -398,6 +411,7 @@ describe('create_query', () => {
           dense_vector_query_fields: [],
           bm25_query_fields: [],
           source_fields: [],
+          skipped_fields: 0,
         },
       };
 
@@ -435,6 +449,7 @@ describe('create_query', () => {
           ],
           bm25_query_fields: ['content', 'title'],
           source_fields: [],
+          skipped_fields: 0,
         },
       };
 
@@ -487,6 +502,7 @@ describe('create_query', () => {
           ],
           bm25_query_fields: [],
           source_fields: [],
+          skipped_fields: 0,
         },
       };
 
@@ -509,6 +525,7 @@ describe('create_query', () => {
           ],
           bm25_query_fields: [],
           source_fields: [],
+          skipped_fields: 0,
         },
         index2: {
           elser_query_fields: [
@@ -524,6 +541,7 @@ describe('create_query', () => {
           ],
           bm25_query_fields: [],
           source_fields: [],
+          skipped_fields: 0,
         },
       };
 
@@ -549,6 +567,7 @@ describe('create_query', () => {
           ],
           bm25_query_fields: [],
           source_fields: [],
+          skipped_fields: 0,
         },
         index2: {
           elser_query_fields: [
@@ -564,6 +583,7 @@ describe('create_query', () => {
           ],
           bm25_query_fields: [],
           source_fields: [],
+          skipped_fields: 0,
         },
       };
 
@@ -582,6 +602,7 @@ describe('create_query', () => {
           ],
           bm25_query_fields: [],
           source_fields: [],
+          skipped_fields: 0,
         },
       };
 
@@ -595,6 +616,7 @@ describe('create_query', () => {
           dense_vector_query_fields: [],
           bm25_query_fields: ['title', 'text', 'content'],
           source_fields: [],
+          skipped_fields: 0,
         },
       };
 
@@ -610,6 +632,7 @@ describe('create_query', () => {
           dense_vector_query_fields: [],
           bm25_query_fields: ['unknown1', 'unknown2'],
           source_fields: [],
+          skipped_fields: 0,
         },
       };
 
@@ -659,6 +682,7 @@ describe('create_query', () => {
             'url_path_dir2',
             'url_path_dir1',
           ],
+          skipped_fields: 0,
         },
       };
 
@@ -674,6 +698,7 @@ describe('create_query', () => {
           dense_vector_query_fields: [],
           bm25_query_fields: [],
           source_fields: [],
+          skipped_fields: 0,
         },
       };
 
@@ -691,6 +716,7 @@ describe('create_query', () => {
           dense_vector_query_fields: [],
           bm25_query_fields: [],
           source_fields: ['non_suggested_field'],
+          skipped_fields: 0,
         },
       };
 

@@ -53,17 +53,23 @@ export const transformRuleDomainToRuleAttributes = ({
     muteAll: rule.muteAll,
     mutedInstanceIds: rule.mutedInstanceIds,
     ...(meta ? { meta } : {}),
-    executionStatus: {
-      status: rule.executionStatus.status,
-      lastExecutionDate: rule.executionStatus.lastExecutionDate.toISOString(),
-      ...(rule.executionStatus.lastDuration
-        ? { lastDuration: rule.executionStatus.lastDuration }
-        : {}),
-      ...(rule.executionStatus.error !== undefined ? { error: rule.executionStatus.error } : {}),
-      ...(rule.executionStatus.warning !== undefined
-        ? { warning: rule.executionStatus.warning }
-        : {}),
-    },
+    ...(rule.executionStatus
+      ? {
+          executionStatus: {
+            status: rule.executionStatus.status,
+            lastExecutionDate: rule.executionStatus.lastExecutionDate.toISOString(),
+            ...(rule.executionStatus.lastDuration
+              ? { lastDuration: rule.executionStatus.lastDuration }
+              : {}),
+            ...(rule.executionStatus.error !== undefined
+              ? { error: rule.executionStatus.error }
+              : {}),
+            ...(rule.executionStatus.warning !== undefined
+              ? { warning: rule.executionStatus.warning }
+              : {}),
+          },
+        }
+      : {}),
     ...(rule.monitoring ? { monitoring: rule.monitoring } : {}),
     ...(rule.snoozeSchedule ? { snoozeSchedule: rule.snoozeSchedule } : {}),
     ...(rule.isSnoozedUntil !== undefined

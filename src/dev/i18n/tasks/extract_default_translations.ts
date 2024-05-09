@@ -8,7 +8,8 @@
 
 import chalk from 'chalk';
 import { createFailError } from '@kbn/dev-cli-errors';
-import { ErrorReporter, extractMessagesFromPathToMap, filterConfigPaths, I18nConfig } from '..';
+import { extractMessagesFromPathToMap, filterConfigPaths, I18nConfig } from '..';
+import { I18nCheckTaskContext } from '../types';
 
 export function extractDefaultMessages(config: I18nConfig, inputPaths: string[]) {
   const filteredPaths = filterConfigPaths(inputPaths, config) as string[];
@@ -20,10 +21,7 @@ export function extractDefaultMessages(config: I18nConfig, inputPaths: string[])
     );
   }
   return filteredPaths.map((filteredPath) => ({
-    task: async (context: {
-      messages: Map<string, { message: string }>;
-      reporter: ErrorReporter;
-    }) => {
+    task: async (context: I18nCheckTaskContext) => {
       const { messages, reporter } = context;
       const initialErrorsNumber = reporter.errors.length;
 

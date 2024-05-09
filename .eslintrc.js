@@ -1524,6 +1524,7 @@ module.exports = {
         ],
         '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
         '@kbn/i18n/strings_should_be_translated_with_formatted_message': 'warn',
+        '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'warn',
       },
     },
     /**

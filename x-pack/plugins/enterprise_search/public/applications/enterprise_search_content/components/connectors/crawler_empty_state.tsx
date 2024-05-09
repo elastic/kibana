@@ -41,6 +41,8 @@ export const CrawlerEmptyState: React.FC = () => {
         }
         actions={
           <EuiButton
+            data-test-subj="entSearchContent-crawlers-emptyState-createCrawlerButton"
+            data-telemetry-id="entSearchContent-crawlers-emptyState-createCrawlerButton"
             color="primary"
             disabled={Boolean(errorConnectingMessage)}
             fill

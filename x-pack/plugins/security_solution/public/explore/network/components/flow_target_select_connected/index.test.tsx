@@ -9,7 +9,6 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
-import '../../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock';
 import { FlowTargetSelectConnectedComponent } from '.';
 import { FlowTarget } from '../../../../../common/search_strategy';

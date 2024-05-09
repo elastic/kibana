@@ -235,7 +235,7 @@
               "\nA React component that provides a pre-wired `React.Context` which connects components to Cloud services."
             ],
             "signature": [
-              "React.FunctionComponent<{}>"
+              "React.FunctionComponent<{ children?: React.ReactNode; }>"
             ],
             "path": "x-pack/plugins/cloud/public/types.ts",
             "deprecated": false,

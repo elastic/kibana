@@ -50,8 +50,21 @@ components:
               type: string
               enum: [low_impact, medium_impact, high_impact, extreme_impact]
               description: The criticality level of the asset.
+            refresh:
+                type: string
+                enum: [wait_for]
+                description: If 'wait_for' the request will wait for the index refresh.
           required:
             - criticality_level
+    DeleteAssetCriticalityRecord:
+      allOf:
+        - $ref: '#/components/schemas/AssetCriticalityRecordIdParts'
+        - type: object
+          properties:
+            refresh:
+                type: string
+                enum: [wait_for]
+                description: If 'wait_for' the request will wait for the index refresh.
     AssetCriticalityRecord:
       allOf:
         - $ref: '#/components/schemas/CreateAssetCriticalityRecord'

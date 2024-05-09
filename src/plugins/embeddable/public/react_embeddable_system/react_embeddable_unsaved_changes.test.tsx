@@ -63,7 +63,9 @@ describe('react embeddable unsaved changes', () => {
 
     parentApi = {
       ...getMockPresentationContainer(),
-      getLastSavedStateForChild: () => ({ rawState: lastSavedState }),
+      getLastSavedStateForChild: <SerializedState extends object>() => ({
+        rawState: lastSavedState as SerializedState,
+      }),
       lastSavedState: new Subject<void>(),
     };
     return startTrackingEmbeddableUnsavedChanges('id', parentApi, comparators, deserializeState);

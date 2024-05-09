@@ -32,7 +32,7 @@ describe('create Lens panel action', () => {
         uiSettings: {
           ...core.uiSettings,
           get: (setting: string) => {
-            return setting === 'discover:enableESQL';
+            return setting === 'enableESQL';
           },
         },
       } as CoreStart;

@@ -28,7 +28,7 @@ import {
   assistantMessageSentEvent,
   assistantQuickPrompt,
 } from './ai_assistant';
-import { insightsGeneratedEvent } from './insights';
+import { insightsGeneratedEvent } from './attack_discovery';
 import { dataQualityIndexCheckedEvent, dataQualityCheckAllClickedEvent } from './data_quality';
 import {
   DocumentDetailsFlyoutOpenedEvent,

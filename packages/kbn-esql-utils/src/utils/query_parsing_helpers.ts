@@ -5,42 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { type ESQLSource, getAstAndSyntaxErrors } from '@kbn/esql-ast';
 
 const DEFAULT_ESQL_LIMIT = 500;
 
-// retrieves the index pattern from the aggregate query for SQL
-export function getIndexPatternFromSQLQuery(sqlQuery?: string): string {
-  let sql = sqlQuery?.replaceAll('"', '').replaceAll("'", '');
-  const splitFroms = sql?.split(new RegExp(/FROM\s/, 'ig'));
-  const fromsLength = splitFroms?.length ?? 0;
-  if (splitFroms && splitFroms?.length > 2) {
-    sql = `${splitFroms[fromsLength - 2]} FROM ${splitFroms[fromsLength - 1]}`;
-  }
-  // case insensitive match for the index pattern
-  const regex = new RegExp(/FROM\s+([(\w*:)?\w*-.!@$^()~;]+)/, 'i');
-  const matches = sql?.match(regex);
-  if (matches) {
-    return matches[1];
-  }
-  return '';
-}
-
-// retrieves the index pattern from the aggregate query for ES|QL
-export function getIndexPatternFromESQLQuery(esql?: string): string {
-  let fromPipe = (esql || '').split('|')[0];
-  const splitFroms = fromPipe?.split(new RegExp(/FROM\s/, 'ig'));
-  const fromsLength = splitFroms?.length ?? 0;
-  if (splitFroms && splitFroms?.length > 2) {
-    fromPipe = `${splitFroms[fromsLength - 2]} FROM ${splitFroms[fromsLength - 1]}`;
-  }
-  const parsedString = fromPipe?.replaceAll('`', '');
-  // case insensitive match for the index pattern
-  const regex = new RegExp(/FROM\s+([(\w*:)?\w*-.!@$^()~;\s]+)/, 'i');
-  const matches = parsedString?.match(regex);
-  if (matches) {
-    return matches[1]?.trim();
-  }
-  return '';
+// retrieves the index pattern from the aggregate query for ES|QL using ast parsing
+export function getIndexPatternFromESQLQuery(esql?: string) {
+  const { ast } = getAstAndSyntaxErrors(esql);
+  const fromCommand = ast.find(({ name }) => name === 'from');
+  const args = (fromCommand?.args ?? []) as ESQLSource[];
+  const indices = args.filter((arg) => arg.sourceType === 'index');
+  return indices?.map((index) => index.text).join(',');
 }
 
 export function getLimitFromESQLQuery(esql: string): number {

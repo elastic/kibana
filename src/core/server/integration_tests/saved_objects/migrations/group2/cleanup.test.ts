@@ -131,13 +131,13 @@ const setupBaseline = async () => {
 
   // inject corrupt saved objects directly using esClient
   await Promise.all(
-    savedObjects.map((savedObject) => {
+    savedObjects.map((savedObject) =>
       client.create({
         index: defaultKibanaIndex,
         refresh: 'wait_for',
         ...savedObject,
-      });
-    })
+      })
+    )
   );
 
   return client;

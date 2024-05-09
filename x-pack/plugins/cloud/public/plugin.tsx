@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import type { Logger } from '@kbn/logging';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
@@ -56,7 +56,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   private readonly config: CloudConfigType;
   private readonly isCloudEnabled: boolean;
   private readonly isServerlessEnabled: boolean;
-  private readonly contextProviders: FC[] = [];
+  private readonly contextProviders: Array<FC<PropsWithChildren<unknown>>> = [];
   private readonly logger: Logger;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -112,7 +112,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
 
     // Nest all the registered context providers under the Cloud Services Provider.
     // This way, plugins only need to require Cloud's context provider to have all the enriched Cloud services.
-    const CloudContextProvider: FC = ({ children }) => {
+    const CloudContextProvider: FC<PropsWithChildren<unknown>> = ({ children }) => {
       return (
         <>
           {this.contextProviders.reduce(

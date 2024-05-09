@@ -7,25 +7,21 @@
 
 import React from 'react';
 
-import { EuiButtonEmpty } from '@elastic/eui';
+import { useValues } from 'kea';
 
-import { i18n } from '@kbn/i18n';
+import { KibanaLogic } from '../../../shared/kibana';
 
-import { docLinks } from '../../../shared/doc_links';
 import { EndpointsHeaderAction } from '../../../shared/layout/endpoints_header_action';
 
-export const PlaygroundHeaderDocsAction: React.FC = () => (
-  <EndpointsHeaderAction>
-    <EuiButtonEmpty
-      data-telemetry-id="entSearchApplications-playground-documentationLink"
-      data-test-subj="playground-documentation-link"
-      href={docLinks.playground}
-      target="_blank"
-      iconType="documents"
-    >
-      {i18n.translate('xpack.enterpriseSearch.content.playground.header.docLink', {
-        defaultMessage: 'Playground Docs',
-      })}
-    </EuiButtonEmpty>
-  </EndpointsHeaderAction>
-);
+export const PlaygroundHeaderDocsAction: React.FC = () => {
+  const { searchPlayground } = useValues(KibanaLogic);
+
+  if (!searchPlayground) {
+    return null;
+  }
+  return (
+    <EndpointsHeaderAction>
+      <searchPlayground.PlaygroundHeaderDocs />
+    </EndpointsHeaderAction>
+  );
+};

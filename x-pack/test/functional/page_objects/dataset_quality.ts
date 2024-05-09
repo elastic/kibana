@@ -34,6 +34,8 @@ type SummaryPanelKpi = Record<
   string
 >;
 
+type FlyoutKpi = Record<'docsCountTotal' | 'size' | 'services' | 'hosts' | 'degradedDocs', string>;
+
 export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common']);
   const testSubjects = getService('testSubjects');
@@ -68,7 +70,11 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityIntegrationsSelectableButton: 'datasetQualityIntegrationsSelectableButton',
     datasetQualityNamespacesSelectable: 'datasetQualityNamespacesSelectable',
     datasetQualityNamespacesSelectableButton: 'datasetQualityNamespacesSelectableButton',
+    datasetQualityQualitiesSelectable: 'datasetQualityQualitiesSelectable',
+    datasetQualityQualitiesSelectableButton: 'datasetQualityQualitiesSelectableButton',
     datasetQualityDatasetHealthKpi: 'datasetQualityDatasetHealthKpi',
+    datasetQualityFlyoutKpiValue: 'datasetQualityFlyoutKpiValue',
+    datasetQualityFlyoutKpiLink: 'datasetQualityFlyoutKpiLink',
 
     superDatePickerToggleQuickMenuButton: 'superDatePickerToggleQuickMenuButton',
     superDatePickerApplyTimeButton: 'superDatePickerApplyTimeButton',
@@ -112,7 +118,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     },
 
     async waitUntilTableLoaded() {
-      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading', 20 * 1000);
     },
 
     async waitUntilSummaryPanelLoaded() {
@@ -175,7 +181,8 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
         'Dataset Name',
         'Namespace',
         'Size',
-        'Degraded Docs',
+        'Dataset Quality',
+        'Degraded Docs (%)',
         'Last Activity',
         'Actions',
       ]);
@@ -194,6 +201,14 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
         testSubjectSelectors.datasetQualityNamespacesSelectableButton,
         testSubjectSelectors.datasetQualityNamespacesSelectable,
         namespaces
+      );
+    },
+
+    async filterForQualities(qualities: string[]) {
+      return euiSelectable.selectOnlyOptionsWithText(
+        testSubjectSelectors.datasetQualityQualitiesSelectableButton,
+        testSubjectSelectors.datasetQualityQualitiesSelectable,
+        qualities
       );
     },
 
@@ -235,6 +250,16 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       return testSubjects.click(testSubjectSelectors.euiFlyoutCloseButton);
     },
 
+    async refreshFlyout() {
+      const flyoutContainer: WebElementWrapper = await testSubjects.find(
+        testSubjectSelectors.datasetQualityFlyoutBody
+      );
+      const refreshButton = await flyoutContainer.findByTestSubject(
+        testSubjectSelectors.superDatePickerApplyTimeButton
+      );
+      return refreshButton.click();
+    },
+
     async getFlyoutElementsByText(selector: string, text: string) {
       const flyoutContainer: WebElementWrapper = await testSubjects.find(
         testSubjectSelectors.datasetQualityFlyout
@@ -270,12 +295,46 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       return elements.length > 0;
     },
 
+    // `excludeKeys` needed to circumvent `_stats` not available in Serverless  https://github.com/elastic/kibana/issues/178954
+    // TODO: Remove `excludeKeys` when `_stats` is available in Serverless
+    async parseFlyoutKpis(excludeKeys: string[] = []): Promise<FlyoutKpi> {
+      const kpiTitleAndKeys = [
+        { title: texts.docsCountTotal, key: 'docsCountTotal' },
+        { title: texts.size, key: 'size' },
+        { title: texts.services, key: 'services' },
+        { title: texts.hosts, key: 'hosts' },
+        { title: texts.degradedDocs, key: 'degradedDocs' },
+      ].filter((item) => !excludeKeys.includes(item.key));
+
+      const kpiTexts = await Promise.all(
+        kpiTitleAndKeys.map(async ({ title, key }) => ({
+          key,
+          value: await testSubjects.getVisibleText(
+            `${testSubjectSelectors.datasetQualityFlyoutKpiValue}-${title}`
+          ),
+        }))
+      );
+
+      return kpiTexts.reduce(
+        (acc, { key, value }) => ({
+          ...acc,
+          [key]: value,
+        }),
+        {} as FlyoutKpi
+      );
+    },
+
     async setDatePickerLastXUnits(
       container: WebElementWrapper,
       timeValue: number,
       unit: TimeUnitId
     ) {
-      await testSubjects.click(testSubjectSelectors.superDatePickerToggleQuickMenuButton);
+      // Only click the menu button found under the provided container
+      const datePickerToggleQuickMenuButton = await container.findByTestSubject(
+        testSubjectSelectors.superDatePickerToggleQuickMenuButton
+      );
+      await datePickerToggleQuickMenuButton.click();
+
       const datePickerQuickMenu = await testSubjects.find(
         testSubjectSelectors.superDatePickerQuickMenu
       );
@@ -300,7 +359,9 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       await timeUnitSelect.focus();
       await timeUnitSelect.type(unit);
 
-      (await datePickerQuickMenu.findByCssSelector(selectors.superDatePickerApplyButton)).click();
+      await (
+        await datePickerQuickMenu.findByCssSelector(selectors.superDatePickerApplyButton)
+      ).click();
 
       return testSubjects.missingOrFail(testSubjectSelectors.superDatePickerQuickMenu);
     },
@@ -433,4 +494,9 @@ const texts = {
   datasetHealthGood: 'Good',
   activeDatasets: 'Active Datasets',
   estimatedData: 'Estimated Data',
+  docsCountTotal: 'Docs count (total)',
+  size: 'Size',
+  services: 'Services',
+  hosts: 'Hosts',
+  degradedDocs: 'Degraded docs',
 };

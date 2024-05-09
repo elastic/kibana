@@ -12,7 +12,7 @@ import { getUsageCollection } from '../test_utils';
 import { DataViewLazy } from '../../../../common';
 
 describe('delete runtime field', () => {
-  it('call usageCollection', () => {
+  it('call usageCollection', async () => {
     const usageCollection = getUsageCollection();
 
     dataViewsService.getDataViewLazy.mockImplementation(
@@ -23,7 +23,7 @@ describe('delete runtime field', () => {
         } as unknown as DataViewLazy)
     );
 
-    deleteRuntimeField({
+    await deleteRuntimeField({
       dataViewsService,
       counterName: 'DELETE /path',
       usageCollection,

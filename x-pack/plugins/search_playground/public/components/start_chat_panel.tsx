@@ -14,22 +14,25 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 interface StartChatPanelProps {
+  children: React.ReactNode;
   title: string;
   description: string | React.ReactNode;
   isValid?: boolean;
+  dataTestSubj: string;
 }
 
-export const StartChatPanel: React.FC<StartChatPanelProps> = ({
+export const StartChatPanel: FC<PropsWithChildren<StartChatPanelProps>> = ({
   title,
   description,
   children,
   isValid,
+  dataTestSubj,
 }) => (
-  <EuiPanel hasBorder paddingSize="l">
+  <EuiPanel hasBorder paddingSize="l" data-test-subj={dataTestSubj}>
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
       <EuiTitle size="xs">
         <h5>{title}</h5>

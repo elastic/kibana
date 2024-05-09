@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -24,7 +23,7 @@ const KEY = 'investigation';
  * Second section of the overview tab in details flyout.
  * It contains investigation guide (alerts only) and highlighted fields
  */
-export const InvestigationSection: FC = memo(() => {
+export const InvestigationSection = memo(() => {
   const { getFieldsData } = useRightPanelContext();
   const eventKind = getField(getFieldsData('event.kind'));
 

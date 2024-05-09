@@ -28,8 +28,8 @@ export default ({ getService }: FtrProviderContext) => {
   const objectRemover = new ObjectRemover(supertest);
   const configService = getService('config');
 
-  // @skipInQA tag because the simulators do not work in the QA env
-  describe('@ess @serverless @skipInQA Basic Security AI Assistant Invoke AI [non-streaming, non-LangChain]', async () => {
+  // @skipInServerlessMKI tag because the simulators do not work in the QA env
+  describe('@ess @serverless @skipInServerlessMKI Basic Security AI Assistant Invoke AI [non-streaming, non-LangChain]', async () => {
     after(() => {
       objectRemover.removeAll();
     });

@@ -57,8 +57,6 @@ export {
   VISUALIZE_ESQL_USER_INTENTIONS,
 } from '../common/functions/visualize_esql';
 
-export { getAssistantSystemMessage } from './service/get_assistant_system_message';
-
 export { isSupportedConnectorType } from '../common';
 export { FunctionVisibility } from '../common';
 

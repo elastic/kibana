@@ -41,6 +41,7 @@ import { RuleAttributes } from '../../../../data/rule/types';
 import { SavedObject } from '@kbn/core/server';
 import { bulkEditOperationsSchema } from './schemas';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 
 jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => {
   return {
@@ -112,6 +113,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   isSystemAction: jest.fn(),
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
+  backfillClient: backfillClientMock.create(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
 };
 const paramsModifier = jest.fn();

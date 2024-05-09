@@ -85,7 +85,9 @@ export const FieldEditorFlyoutContentContainer = ({
   fieldFormats,
   uiSettings,
 }: Props) => {
-  const [controller] = useState(() => new PreviewController({ dataView, search, fieldFormats }));
+  const [controller] = useState(
+    () => new PreviewController({ dataView, search, fieldFormats, fieldTypeToProcess })
+  );
   const [isSaving, setIsSaving] = useState(false);
 
   const { fields } = dataView;

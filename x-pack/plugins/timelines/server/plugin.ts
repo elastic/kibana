@@ -29,7 +29,7 @@ export class TimelinesPlugin
 
     const IndexFields = indexFieldsProvider(core.getStartServices);
     // Register search strategy
-    core.getStartServices().then(([_, depsStart]) => {
+    void core.getStartServices().then(([_, depsStart]) => {
       const TimelineSearchStrategy = timelineSearchStrategyProvider(
         depsStart.data,
         this.logger,

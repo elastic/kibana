@@ -7,8 +7,8 @@
  */
 
 import type { CoreAuthenticationService } from './authc';
-import type { CoreSecurityContract } from './api_provider';
-
+import type { CoreSecurityDelegateContract } from './api_provider';
+import type { CoreAuditService } from './audit';
 /**
  * Setup contract for Core's security service.
  *
@@ -20,7 +20,7 @@ export interface SecurityServiceSetup {
    *
    * @remark this should **exclusively** be used by the security plugin.
    */
-  registerSecurityApi(api: CoreSecurityContract): void;
+  registerSecurityDelegate(api: CoreSecurityDelegateContract): void;
 }
 
 /**
@@ -33,4 +33,8 @@ export interface SecurityServiceStart {
    * The {@link CoreAuthenticationService | authentication service}
    */
   authc: CoreAuthenticationService;
+  /**
+   * The {@link CoreAuditService | audit service}
+   */
+  audit: CoreAuditService;
 }

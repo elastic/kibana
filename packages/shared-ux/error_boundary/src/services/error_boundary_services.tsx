@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useContext, useMemo } from 'react';
+import React, { FC, PropsWithChildren, useContext, useMemo } from 'react';
 
 import { KibanaErrorBoundaryProviderDeps, KibanaErrorBoundaryServices } from '../../types';
 import { KibanaErrorService } from './error_service';
@@ -17,21 +17,20 @@ const Context = React.createContext<KibanaErrorBoundaryServices | null>(null);
  * A Context Provider for Jest and Storybooks
  * @internal
  */
-export const KibanaErrorBoundaryDepsProvider: FC<KibanaErrorBoundaryServices> = ({
-  children,
-  onClickRefresh,
-  errorService,
-}) => <Context.Provider value={{ onClickRefresh, errorService }}>{children}</Context.Provider>;
+export const KibanaErrorBoundaryDepsProvider: FC<
+  PropsWithChildren<KibanaErrorBoundaryServices>
+> = ({ children, onClickRefresh, errorService }) => (
+  <Context.Provider value={{ onClickRefresh, errorService }}>{children}</Context.Provider>
+);
 
 /**
  * Provider that uses dependencies to give context to the KibanaErrorBoundary component
  * This provider is aware if services were already created from a higher level of the component tree
  * @public
  */
-export const KibanaErrorBoundaryProvider: FC<KibanaErrorBoundaryProviderDeps> = ({
-  children,
-  analytics,
-}) => {
+export const KibanaErrorBoundaryProvider: FC<
+  PropsWithChildren<KibanaErrorBoundaryProviderDeps>
+> = ({ children, analytics }) => {
   const parentContext = useContext(Context);
   const value: KibanaErrorBoundaryServices = useMemo(() => {
     // FIXME: analytics dep is optional - know when not to overwrite

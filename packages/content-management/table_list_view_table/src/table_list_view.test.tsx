@@ -14,12 +14,13 @@ import moment, { Moment } from 'moment';
 import { act } from 'react-dom/test-utils';
 import type { ReactWrapper } from 'enzyme';
 import type { LocationDescriptor, History } from 'history';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 
 import { WithServices } from './__jest__';
 import { getTagList } from './mocks';
 import { TableListViewTable, type TableListViewTableProps } from './table_list_view_table';
 import { getActions } from './table_list_view.test.helpers';
-import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import type { Services } from './services';
 
 const mockUseEffect = useEffect;
 
@@ -75,13 +76,17 @@ describe('TableListView', () => {
     jest.useRealTimers();
   });
 
-  const setup = registerTestBed<string, TableListViewTableProps>(
-    WithServices<TableListViewTableProps>(TableListViewTable),
-    {
-      defaultProps: { ...requiredProps },
-      memoryRouter: { wrapComponent: true },
-    }
-  );
+  const setup = (
+    propsOverride?: Partial<TableListViewTableProps>,
+    serviceOverride?: Partial<Services>
+  ) =>
+    registerTestBed<string, TableListViewTableProps>(
+      WithServices<TableListViewTableProps>(TableListViewTable, serviceOverride),
+      {
+        defaultProps: { ...requiredProps },
+        memoryRouter: { wrapComponent: true },
+      }
+    )(propsOverride);
 
   describe('empty prompt', () => {
     test('render default empty prompt', async () => {
@@ -756,8 +761,10 @@ describe('TableListView', () => {
         });
       });
 
-      const { component, table, find } = testBed!;
+      const { component, table, find, exists } = testBed!;
       component.update();
+
+      expect(exists('tagFilterPopoverButton')).toBe(true);
 
       const getSearchBoxValue = () => find('tableListSearchBox').props().defaultValue;
 
@@ -850,6 +857,25 @@ describe('TableListView', () => {
       [searchTerm] = getLastCallArgsFromFindItems();
       expect(getSearchBoxValue()).toBe(expected);
       expect(searchTerm).toBe(expected);
+    });
+
+    test('should not have the tag filter if tagging is disabled', async () => {
+      let testBed: TestBed;
+      const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits });
+
+      await act(async () => {
+        testBed = await setup(
+          {
+            findItems,
+          },
+          { isTaggingEnabled: () => false }
+        );
+      });
+
+      const { component, exists } = testBed!;
+      component.update();
+
+      expect(exists('tagFilterPopoverButton')).toBe(false);
     });
   });
 

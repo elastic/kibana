@@ -153,7 +153,7 @@ describe('fetch package', () => {
 
       mockGetBundledPackageByName.mockResolvedValue(bundledPackage);
 
-      expect(() => fetchFindLatestPackageOrThrow('testpkg')).rejects.toBeInstanceOf(
+      await expect(() => fetchFindLatestPackageOrThrow('testpkg')).rejects.toBeInstanceOf(
         PackageNotFoundError
       );
     });

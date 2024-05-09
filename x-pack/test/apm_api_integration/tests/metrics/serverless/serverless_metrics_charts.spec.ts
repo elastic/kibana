@@ -21,7 +21,7 @@ function isNotNullOrZeroCoordinate(coordinate: Coordinate) {
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
@@ -77,10 +77,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     } = config;
 
     before(async () => {
-      await generateData({ start, end, synthtraceEsClient });
+      await generateData({ start, end, apmSynthtraceEsClient });
     });
 
-    after(() => synthtraceEsClient.clean());
+    after(() => apmSynthtraceEsClient.clean());
 
     describe('Python service', () => {
       let serverlessMetrics: APIReturnType<'GET /internal/apm/services/{serviceName}/metrics/serverless/charts'>;

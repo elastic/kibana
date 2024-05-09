@@ -1505,7 +1505,7 @@
         "label": "InternalApiClientProvider",
         "description": [],
         "signature": [
-          "({ apiClient, http, children }: React.PropsWithChildren<{ apiClient: ",
+          "({ apiClient, http, children }: React.PropsWithChildren<React.PropsWithChildren<{ apiClient: ",
           {
             "pluginId": "@kbn/reporting-public",
             "scope": "public",
@@ -1521,7 +1521,7 @@
             "section": "def-common.HttpSetup",
             "text": "HttpSetup"
           },
-          "; }>) => JSX.Element"
+          "; }>>) => JSX.Element"
         ],
         "path": "packages/kbn-reporting/public/context.tsx",
         "deprecated": false,
@@ -1535,7 +1535,7 @@
             "label": "{ apiClient, http, children }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<{ apiClient: ",
+              "React.PropsWithChildren<React.PropsWithChildren<{ apiClient: ",
               {
                 "pluginId": "@kbn/reporting-public",
                 "scope": "public",
@@ -1551,7 +1551,7 @@
                 "section": "def-common.HttpSetup",
                 "text": "HttpSetup"
               },
-              "; }>"
+              "; }>>"
             ],
             "path": "packages/kbn-reporting/public/context.tsx",
             "deprecated": false,

@@ -18,11 +18,13 @@ import capitalize from 'lodash/capitalize';
 import { camelCase } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { nonNullable } from '../shared/helpers';
+import { groupingFunctionDefinitions } from '../definitions/grouping';
 
 const fieldTypes = [
   'number',
   'date',
   'boolean',
+  'version',
   'ip',
   'string',
   'cartesian_point',
@@ -361,6 +363,10 @@ describe('validation logic', () => {
     type TestArgs = [string, string[], string[]?];
 
     // Make only and skip work with our custom wrapper
+    //
+    // DO NOT CHANGE THE NAME OF THIS FUNCTION WITHOUT ALSO CHANGING
+    // THE LINTER RULE IN packages/kbn-eslint-config/typescript.js
+    //
     const testErrorsAndWarnings = Object.assign(testErrorsAndWarningsFn, {
       skip: (...args: TestArgs) => {
         const warningArgs = [[]].slice(args.length - 2);
@@ -395,11 +401,9 @@ describe('validation logic', () => {
       testErrorsAndWarnings('f', [
         `SyntaxError: mismatched input 'f' expecting {'explain', 'from', 'meta', 'row', 'show'}`,
       ]);
-      testErrorsAndWarnings(`from `, [
-        "SyntaxError: missing {QUOTED_IDENTIFIER, FROM_UNQUOTED_IDENTIFIER} at '<EOF>'",
-      ]);
+      testErrorsAndWarnings(`from `, ["SyntaxError: missing FROM_UNQUOTED_IDENTIFIER at '<EOF>'"]);
       testErrorsAndWarnings(`from index,`, [
-        "SyntaxError: missing {QUOTED_IDENTIFIER, FROM_UNQUOTED_IDENTIFIER} at '<EOF>'",
+        "SyntaxError: missing FROM_UNQUOTED_IDENTIFIER at '<EOF>'",
       ]);
       testErrorsAndWarnings(`from assignment = 1`, [
         "SyntaxError: mismatched input '=' expecting <EOF>",
@@ -408,7 +412,10 @@ describe('validation logic', () => {
       testErrorsAndWarnings(`from index`, []);
       testErrorsAndWarnings(`FROM index`, []);
       testErrorsAndWarnings(`FrOm index`, []);
-      testErrorsAndWarnings('from `index`', []);
+      testErrorsAndWarnings('from `index`', [
+        "SyntaxError: token recognition error at: '`'",
+        "SyntaxError: token recognition error at: '`'",
+      ]);
 
       testErrorsAndWarnings(`from index, other_index`, []);
       testErrorsAndWarnings(`from index, missingIndex`, ['Unknown index [missingIndex]']);
@@ -543,16 +550,16 @@ describe('validation logic', () => {
       testErrorsAndWarnings('row var = "a" in ("a", "b", "c")', []);
       testErrorsAndWarnings('row var = "a" not in ("a", "b", "c")', []);
       testErrorsAndWarnings('row var = 1 in ("a", "b", "c")', [
-        'Argument of [in] must be [number[]], found value [("a", "b", "c")] type [(string, string, string)]',
+        // 'Argument of [in] must be [number[]], found value [("a", "b", "c")] type [(string, string, string)]',
       ]);
       testErrorsAndWarnings('row var = 5 in ("a", "b", "c")', [
-        'Argument of [in] must be [number[]], found value [("a", "b", "c")] type [(string, string, string)]',
+        // 'Argument of [in] must be [number[]], found value [("a", "b", "c")] type [(string, string, string)]',
       ]);
       testErrorsAndWarnings('row var = 5 not in ("a", "b", "c")', [
-        'Argument of [not_in] must be [number[]], found value [("a", "b", "c")] type [(string, string, string)]',
+        // 'Argument of [not_in] must be [number[]], found value [("a", "b", "c")] type [(string, string, string)]',
       ]);
       testErrorsAndWarnings('row var = 5 not in (1, 2, 3, "a")', [
-        'Argument of [not_in] must be [number[]], found value [(1, 2, 3, "a")] type [(number, number, number, string)]',
+        // 'Argument of [not_in] must be [number[]], found value [(1, 2, 3, "a")] type [(number, number, number, string)]',
       ]);
 
       // test that "and" and "or" accept null... not sure if this is the best place or not...
@@ -582,6 +589,7 @@ describe('validation logic', () => {
       }
 
       for (const { name, alias, signatures, ...defRest } of evalFunctionsDefinitions) {
+        if (name === 'date_diff') continue;
         for (const { params, ...signRest } of signatures) {
           const fieldMapping = getFieldMapping(params);
           const signatureStringCorrect = tweakSignatureForRowCommand(
@@ -612,11 +620,21 @@ describe('validation logic', () => {
           }
 
           // Skip functions that have only arguments of type "any", as it is not possible to pass "the wrong type".
-          // bucket and to_version functions are a bit harder to test exactly a combination of argument and predict the
+          // to_version functions are a bit harder to test exactly a combination of argument and predict the
           // the right error message
           if (
             params.every(({ type }) => type !== 'any') &&
-            !['bucket', 'to_version', 'mv_sort'].includes(name)
+            ![
+              'to_version',
+              'mv_sort',
+              // skip the date functions because the row tests always throw in
+              // a string literal and expect it to be invalid for the date functions
+              // but it's always valid because ES will parse it as a date
+              'date_diff',
+              'date_extract',
+              'date_format',
+              'date_trunc',
+            ].includes(name)
           ) {
             // now test nested functions
             const fieldMappingWithNestedFunctions = getFieldMapping(params, {
@@ -656,18 +674,39 @@ describe('validation logic', () => {
           }
         }
       }
-      for (const op of ['>', '>=', '<', '<=', '==']) {
+      for (const op of ['>', '>=', '<', '<=', '==', '!=']) {
         testErrorsAndWarnings(`row var = 5 ${op} 0`, []);
         testErrorsAndWarnings(`row var = NOT 5 ${op} 0`, []);
         testErrorsAndWarnings(`row var = (numberField ${op} 0)`, ['Unknown column [numberField]']);
         testErrorsAndWarnings(`row var = (NOT (5 ${op} 0))`, []);
-        testErrorsAndWarnings(`row var = "a" ${op} 0`, [
-          `Argument of [${op}] must be [number], found value ["a"] type [string]`,
-        ]);
+        testErrorsAndWarnings(`row var = to_ip("127.0.0.1") ${op} to_ip("127.0.0.1")`, []);
+        testErrorsAndWarnings(`row var = now() ${op} now()`, []);
+        testErrorsAndWarnings(
+          `row var = false ${op} false`,
+          ['==', '!='].includes(op)
+            ? []
+            : [
+                `Argument of [${op}] must be [number], found value [false] type [boolean]`,
+                `Argument of [${op}] must be [number], found value [false] type [boolean]`,
+              ]
+        );
+        for (const [valueTypeA, valueTypeB] of [['now()', '"2022"']]) {
+          testErrorsAndWarnings(`row var = ${valueTypeA} ${op} ${valueTypeB}`, []);
+          testErrorsAndWarnings(`row var = ${valueTypeB} ${op} ${valueTypeA}`, []);
+        }
       }
       for (const op of ['+', '-', '*', '/', '%']) {
         testErrorsAndWarnings(`row var = 1 ${op} 1`, []);
         testErrorsAndWarnings(`row var = (5 ${op} 1)`, []);
+        testErrorsAndWarnings(
+          `row var = now() ${op} now()`,
+          ['+', '-'].includes(op)
+            ? [`Argument of [${op}] must be [time_literal], found value [now()] type [date]`]
+            : [
+                `Argument of [${op}] must be [number], found value [now()] type [date]`,
+                `Argument of [${op}] must be [number], found value [now()] type [date]`,
+              ]
+        );
       }
 
       for (const op of ['like', 'rlike']) {
@@ -1064,15 +1103,24 @@ describe('validation logic', () => {
         testErrorsAndWarnings(`from a_index | where ${nValue} > 0`, []);
         testErrorsAndWarnings(`from a_index | where NOT ${nValue} > 0`, []);
       }
-      for (const op of ['>', '>=', '<', '<=', '==']) {
+      for (const op of ['>', '>=', '<', '<=', '==', '!=']) {
         testErrorsAndWarnings(`from a_index | where numberField ${op} 0`, []);
         testErrorsAndWarnings(`from a_index | where NOT numberField ${op} 0`, []);
         testErrorsAndWarnings(`from a_index | where (numberField ${op} 0)`, []);
         testErrorsAndWarnings(`from a_index | where (NOT (numberField ${op} 0))`, []);
         testErrorsAndWarnings(`from a_index | where 1 ${op} 0`, []);
-        testErrorsAndWarnings(`from a_index | eval stringField ${op} 0`, [
-          `Argument of [${op}] must be [number], found value [stringField] type [string]`,
-        ]);
+
+        for (const type of ['string', 'number', 'date', 'boolean', 'ip']) {
+          testErrorsAndWarnings(
+            `from a_index | where ${type}Field ${op} ${type}Field`,
+            type !== 'boolean' || ['==', '!='].includes(op)
+              ? []
+              : [
+                  `Argument of [${op}] must be [number], found value [${type}Field] type [${type}]`,
+                  `Argument of [${op}] must be [number], found value [${type}Field] type [${type}]`,
+                ]
+          );
+        }
       }
 
       for (const nesting of NESTED_DEPTHS) {
@@ -1491,11 +1539,11 @@ describe('validation logic', () => {
           }
 
           // Skip functions that have only arguments of type "any", as it is not possible to pass "the wrong type".
-          // bucket and to_version functions are a bit harder to test exactly a combination of argument and predict the
+          // to_version functions are a bit harder to test exactly a combination of argument and predict the
           // the right error message
           if (
             params.every(({ type }) => type !== 'any') &&
-            !['bucket', 'to_version', 'mv_sort'].includes(name)
+            !['to_version', 'mv_sort'].includes(name)
           ) {
             // now test nested functions
             const fieldMappingWithNestedFunctions = getFieldMapping(params, {
@@ -1634,20 +1682,109 @@ describe('validation logic', () => {
           'Log of a negative number results in null: -20',
         ]
       );
-      for (const op of ['>', '>=', '<', '<=', '==']) {
+      for (const op of ['>', '>=', '<', '<=', '==', '!=']) {
         testErrorsAndWarnings(`from a_index | eval numberField ${op} 0`, []);
         testErrorsAndWarnings(`from a_index | eval NOT numberField ${op} 0`, []);
         testErrorsAndWarnings(`from a_index | eval (numberField ${op} 0)`, []);
         testErrorsAndWarnings(`from a_index | eval (NOT (numberField ${op} 0))`, []);
         testErrorsAndWarnings(`from a_index | eval 1 ${op} 0`, []);
+        for (const type of ['string', 'number', 'date', 'boolean', 'ip']) {
+          testErrorsAndWarnings(
+            `from a_index | eval ${type}Field ${op} ${type}Field`,
+            type !== 'boolean' || ['==', '!='].includes(op)
+              ? []
+              : [
+                  `Argument of [${op}] must be [number], found value [${type}Field] type [${type}]`,
+                  `Argument of [${op}] must be [number], found value [${type}Field] type [${type}]`,
+                ]
+          );
+        }
+        // Implicit casting of literal values tests
+        testErrorsAndWarnings(`from a_index | eval numberField ${op} stringField`, [
+          `Argument of [${op}] must be [number], found value [stringField] type [string]`,
+        ]);
+        testErrorsAndWarnings(`from a_index | eval stringField ${op} numberField`, [
+          `Argument of [${op}] must be [number], found value [stringField] type [string]`,
+        ]);
+        testErrorsAndWarnings(`from a_index | eval numberField ${op} "2022"`, [
+          `Argument of [${op}] must be [number], found value ["2022"] type [string]`,
+        ]);
+
+        testErrorsAndWarnings(`from a_index | eval dateField ${op} stringField`, [
+          `Argument of [${op}] must be [string], found value [dateField] type [date]`,
+        ]);
+        testErrorsAndWarnings(`from a_index | eval stringField ${op} dateField`, [
+          `Argument of [${op}] must be [string], found value [dateField] type [date]`,
+        ]);
+
+        // Check that the implicit cast doesn't apply for fields
         testErrorsAndWarnings(`from a_index | eval stringField ${op} 0`, [
           `Argument of [${op}] must be [number], found value [stringField] type [string]`,
         ]);
+        testErrorsAndWarnings(`from a_index | eval stringField ${op} now()`, [
+          `Argument of [${op}] must be [string], found value [now()] type [date]`,
+        ]);
+
+        testErrorsAndWarnings(`from a_index | eval dateField ${op} "2022"`, []);
+        testErrorsAndWarnings(`from a_index | eval "2022" ${op} dateField`, []);
+
+        testErrorsAndWarnings(`from a_index | eval versionField ${op} "1.2.3"`, []);
+        testErrorsAndWarnings(`from a_index | eval "1.2.3" ${op} versionField`, []);
+
+        testErrorsAndWarnings(
+          `from a_index | eval booleanField ${op} "true"`,
+          ['==', '!='].includes(op)
+            ? []
+            : [`Argument of [${op}] must be [string], found value [booleanField] type [boolean]`]
+        );
+        testErrorsAndWarnings(
+          `from a_index | eval "true" ${op} booleanField`,
+          ['==', '!='].includes(op)
+            ? []
+            : [`Argument of [${op}] must be [string], found value [booleanField] type [boolean]`]
+        );
+
+        testErrorsAndWarnings(`from a_index | eval ipField ${op} "136.36.3.205"`, []);
+        testErrorsAndWarnings(`from a_index | eval "136.36.3.205" ${op} ipField`, []);
       }
+
+      // casting for IN for version, date, boolean, ip
+      testErrorsAndWarnings(
+        'from a_index | eval versionField in ("1.2.3", "4.5.6", to_version("2.3.2"))',
+        []
+      );
+      testErrorsAndWarnings(
+        'from a_index | eval dateField in ("2023-12-12", "2024-12-12", date_parse("yyyy-MM-dd", "2025-12-12"))',
+        []
+      );
+      testErrorsAndWarnings('from a_index | eval booleanField in ("true", "false", false)', []);
+      testErrorsAndWarnings(
+        'from a_index | eval ipField in ("136.36.3.205", "136.36.3.206", to_ip("136.36.3.207"))',
+        []
+      );
+
       for (const op of ['+', '-', '*', '/', '%']) {
         testErrorsAndWarnings(`from a_index | eval numberField ${op} 1`, []);
         testErrorsAndWarnings(`from a_index | eval (numberField ${op} 1)`, []);
         testErrorsAndWarnings(`from a_index | eval 1 ${op} 1`, []);
+        testErrorsAndWarnings(
+          `from a_index | eval now() ${op} now()`,
+          ['+', '-'].includes(op)
+            ? [`Argument of [${op}] must be [time_literal], found value [now()] type [date]`]
+            : [
+                `Argument of [${op}] must be [number], found value [now()] type [date]`,
+                `Argument of [${op}] must be [number], found value [now()] type [date]`,
+              ]
+        );
+
+        testErrorsAndWarnings(`from a_index | eval 1 ${op} "1"`, [
+          `Argument of [${op}] must be [number], found value [\"1\"] type [string]`,
+        ]);
+        testErrorsAndWarnings(`from a_index | eval "1" ${op} 1`, [
+          `Argument of [${op}] must be [number], found value [\"1\"] type [string]`,
+        ]);
+        // TODO: enable when https://github.com/elastic/elasticsearch/issues/108432 is complete
+        // testErrorsAndWarnings(`from a_index | eval "2022" ${op} 1 day`, []);
       }
       for (const divideByZeroExpr of ['1/0', 'var = 1/0', '1 + 1/0']) {
         testErrorsAndWarnings(
@@ -1695,16 +1832,16 @@ describe('validation logic', () => {
         []
       );
       testErrorsAndWarnings('from a_index | eval 1 in ("a", "b", "c")', [
-        'Argument of [in] must be [number[]], found value [("a", "b", "c")] type [(string, string, string)]',
+        // 'Argument of [in] must be [number[]], found value [("a", "b", "c")] type [(string, string, string)]',
       ]);
       testErrorsAndWarnings('from a_index | eval numberField in ("a", "b", "c")', [
-        'Argument of [in] must be [number[]], found value [("a", "b", "c")] type [(string, string, string)]',
+        // 'Argument of [in] must be [number[]], found value [("a", "b", "c")] type [(string, string, string)]',
       ]);
       testErrorsAndWarnings('from a_index | eval numberField not in ("a", "b", "c")', [
-        'Argument of [not_in] must be [number[]], found value [("a", "b", "c")] type [(string, string, string)]',
+        // 'Argument of [not_in] must be [number[]], found value [("a", "b", "c")] type [(string, string, string)]',
       ]);
       testErrorsAndWarnings('from a_index | eval numberField not in (1, 2, 3, stringField)', [
-        'Argument of [not_in] must be [number[]], found value [(1, 2, 3, stringField)] type [(number, number, number, string)]',
+        // 'Argument of [not_in] must be [number[]], found value [(1, 2, 3, stringField)] type [(number, number, number, string)]',
       ]);
 
       testErrorsAndWarnings('from a_index | eval avg(numberField)', [
@@ -1744,6 +1881,17 @@ describe('validation logic', () => {
 
       testErrorsAndWarnings(`from a_index | eval mv_sort(["a", "b"], "ASC")`, []);
       testErrorsAndWarnings(`from a_index | eval mv_sort(["a", "b"], "DESC")`, []);
+
+      testErrorsAndWarnings(`from a_index | eval result = case(false, 0, 1), round(result)`, []);
+      testErrorsAndWarnings(
+        `from a_index | eval result = case(false, 0, 1) | stats sum(result)`,
+        []
+      );
+      testErrorsAndWarnings(
+        `from a_index | eval result = case(false, 0, 1) | stats var0 = sum(result)`,
+        []
+      );
+      testErrorsAndWarnings(`from a_index | eval round(case(false, 0, 1))`, []);
 
       describe('date math', () => {
         testErrorsAndWarnings('from a_index | eval 1 anno', [
@@ -1788,30 +1936,6 @@ describe('validation logic', () => {
             ]);
           }
         }
-      });
-
-      describe('constant-only parameters', () => {
-        testErrorsAndWarnings('from index | eval bucket(dateField, abs(numberField), "", "")', [
-          'Argument of [bucket] must be a constant, received [abs(numberField)]',
-        ]);
-        testErrorsAndWarnings(
-          'from index | eval bucket(dateField, abs(length(numberField)), "", "")',
-          ['Argument of [bucket] must be a constant, received [abs(length(numberField))]']
-        );
-        testErrorsAndWarnings('from index | eval bucket(dateField, pi(), "", "")', []);
-        testErrorsAndWarnings('from index | eval bucket(dateField, 1 + 30 / 10, "", "")', []);
-        testErrorsAndWarnings(
-          'from index | eval bucket(dateField, 1 + 30 / 10, concat("", ""), "")',
-          []
-        );
-        testErrorsAndWarnings(
-          'from index | eval bucket(dateField, numberField, stringField, stringField)',
-          [
-            'Argument of [bucket] must be a constant, received [numberField]',
-            'Argument of [bucket] must be a constant, received [stringField]',
-            'Argument of [bucket] must be a constant, received [stringField]',
-          ]
-        );
       });
     });
 
@@ -2153,11 +2277,11 @@ describe('validation logic', () => {
           }
 
           // Skip functions that have only arguments of type "any", as it is not possible to pass "the wrong type".
-          // bucket and to_version functions are a bit harder to test exactly a combination of argument and predict the
+          // to_version is a bit harder to test exactly a combination of argument and predict the
           // the right error message
           if (
             params.every(({ type }) => type !== 'any') &&
-            !['bucket', 'to_version', 'mv_sort'].includes(name)
+            !['to_version', 'mv_sort'].includes(name)
           ) {
             // now test nested functions
             const fieldMappingWithNestedAggsFunctions = getFieldMapping(params, {
@@ -2240,6 +2364,63 @@ describe('validation logic', () => {
           }
         }
       }
+
+      for (const { name, alias, signatures, ...defRest } of groupingFunctionDefinitions) {
+        for (const { params, ...signRest } of signatures) {
+          const fieldMapping = getFieldMapping(params);
+
+          const correctSignature = getFunctionSignatures(
+            { name, ...defRest, signatures: [{ params: fieldMapping, ...signRest }] },
+            { withTypes: false }
+          )[0].declaration;
+          testErrorsAndWarnings(`from a_index | stats by ${correctSignature}`, []);
+
+          if (params.some(({ constantOnly }) => constantOnly)) {
+            const fieldReplacedType = params
+              .filter(({ constantOnly }) => constantOnly)
+              .map(({ type }) => type);
+            // create the mapping without the literal flag
+            // this will make the signature wrong on purpose where in place on constants
+            // the arg will be a column of the same type
+            const fieldMappingWithoutLiterals = getFieldMapping(
+              params.map(({ constantOnly, ...rest }) => rest)
+            );
+            testErrorsAndWarnings(
+              `from a_index | stats by ${
+                getFunctionSignatures(
+                  {
+                    name,
+                    ...defRest,
+                    signatures: [{ params: fieldMappingWithoutLiterals, ...signRest }],
+                  },
+                  { withTypes: false }
+                )[0].declaration
+              }`,
+              fieldReplacedType
+                // if a param of type time_literal or chrono_literal it will always be a literal
+                // so no way to test the constantOnly thing
+                .filter((type) => !['time_literal', 'chrono_literal'].includes(type))
+                .map((type) => `Argument of [${name}] must be a constant, received [${type}Field]`)
+            );
+          }
+
+          if (alias) {
+            for (const otherName of alias) {
+              const signatureStringWithAlias = getFunctionSignatures(
+                {
+                  name: otherName,
+                  ...defRest,
+                  signatures: [{ params: fieldMapping, ...signRest }],
+                },
+                { withTypes: false }
+              )[0].declaration;
+
+              testErrorsAndWarnings(`from a_index | stats by ${signatureStringWithAlias}`, []);
+            }
+          }
+        }
+      }
+
       testErrorsAndWarnings(
         `FROM index
     | EVAL numberField * 3.281
@@ -2251,6 +2432,33 @@ describe('validation logic', () => {
         `FROM index | STATS AVG(numberField) by round(numberField) + 1 | EVAL \`round(numberField) + 1\` / 2`,
         []
       );
+
+      testErrorsAndWarnings(`from a_index | stats sum(case(false, 0, 1))`, []);
+      testErrorsAndWarnings(`from a_index | stats var0 = sum( case(false, 0, 1))`, []);
+
+      describe('constant-only parameters', () => {
+        testErrorsAndWarnings('from index | stats by bucket(dateField, abs(numberField), "", "")', [
+          'Argument of [bucket] must be a constant, received [abs(numberField)]',
+        ]);
+        testErrorsAndWarnings(
+          'from index | stats by bucket(dateField, abs(length(numberField)), "", "")',
+          ['Argument of [bucket] must be a constant, received [abs(length(numberField))]']
+        );
+        testErrorsAndWarnings('from index | stats by bucket(dateField, pi(), "", "")', []);
+        testErrorsAndWarnings('from index | stats by bucket(dateField, 1 + 30 / 10, "", "")', []);
+        testErrorsAndWarnings(
+          'from index | stats by bucket(dateField, 1 + 30 / 10, concat("", ""), "")',
+          []
+        );
+        testErrorsAndWarnings(
+          'from index | stats by bucket(dateField, numberField, stringField, stringField)',
+          [
+            'Argument of [bucket] must be a constant, received [numberField]',
+            'Argument of [bucket] must be a constant, received [stringField]',
+            'Argument of [bucket] must be a constant, received [stringField]',
+          ]
+        );
+      });
     });
 
     describe('sort', () => {
@@ -2284,6 +2492,58 @@ describe('validation logic', () => {
       }
       testErrorsAndWarnings(`row a = 1 | stats COUNT(*) | sort \`COUNT(*)\``, []);
       testErrorsAndWarnings(`ROW a = 1 | STATS couNt(*) | SORT \`couNt(*)\``, []);
+
+      describe('sorting by expressions', () => {
+        // SORT accepts complex expressions
+        testErrorsAndWarnings(
+          'from a_index | sort abs(numberField) - to_long(stringField) desc nulls first',
+          []
+        );
+
+        // SORT doesn't accept agg or grouping functions
+        for (const definition of [
+          ...statsAggregationFunctionDefinitions,
+          ...groupingFunctionDefinitions,
+        ]) {
+          const {
+            name,
+            signatures: [firstSignature],
+          } = definition;
+          const fieldMapping = getFieldMapping(firstSignature.params);
+          const printedInvocation = getFunctionSignatures(
+            { ...definition, signatures: [{ ...firstSignature, params: fieldMapping }] },
+            { withTypes: false }
+          )[0].declaration;
+
+          testErrorsAndWarnings(`from a_index | sort ${printedInvocation}`, [
+            `SORT does not support function ${name}`,
+          ]);
+        }
+
+        // But does accept eval functions
+        for (const definition of evalFunctionsDefinitions) {
+          const {
+            signatures: [firstSignature],
+          } = definition;
+          const fieldMapping = getFieldMapping(firstSignature.params);
+          const printedInvocation = getFunctionSignatures(
+            { ...definition, signatures: [{ ...firstSignature, params: fieldMapping }] },
+            { withTypes: false }
+          )[0].declaration;
+
+          testErrorsAndWarnings(`from a_index | sort ${printedInvocation}`, []);
+        }
+
+        // Expression parts are also validated
+        testErrorsAndWarnings('from a_index | sort sin(stringField)', [
+          'Argument of [sin] must be [number], found value [stringField] type [string]',
+        ]);
+
+        // Expression parts are also validated
+        testErrorsAndWarnings('from a_index | sort numberField + stringField', [
+          'Argument of [+] must be [number], found value [stringField] type [string]',
+        ]);
+      });
     });
 
     describe('enrich', () => {
@@ -2584,6 +2844,52 @@ describe('validation logic', () => {
         } catch {
           fail('Should not throw');
         }
+      });
+    });
+
+    describe('functions', () => {
+      // This section will expand in time, especially with https://github.com/elastic/kibana/issues/182390
+      describe('date_diff', () => {
+        testErrorsAndWarnings(
+          `row var = date_diff("month", "2023-12-02T11:00:00.000Z", "2023-12-02T11:00:00.000Z")`,
+          []
+        );
+
+        testErrorsAndWarnings(
+          `row var = date_diff("mm", "2023-12-02T11:00:00.000Z", "2023-12-02T11:00:00.000Z")`,
+          []
+        );
+
+        testErrorsAndWarnings(
+          `row var = date_diff("bogus", "2023-12-02T11:00:00.000Z", "2023-12-02T11:00:00.000Z")`,
+          [],
+          [
+            'Invalid option ["bogus"] for date_diff. Supported options: ["year", "years", "yy", "yyyy", "quarter", "quarters", "qq", "q", "month", "months", "mm", "m", "dayofyear", "dy", "y", "day", "days", "dd", "d", "week", "weeks", "wk", "ww", "weekday", "weekdays", "dw", "hour", "hours", "hh", "minute", "minutes", "mi", "n", "second", "seconds", "ss", "s", "millisecond", "milliseconds", "ms", "microsecond", "microseconds", "mcs", "nanosecond", "nanoseconds", "ns"].',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          `from a_index | eval date_diff(stringField, "2023-12-02T11:00:00.000Z", "2023-12-02T11:00:00.000Z")`,
+          []
+        );
+
+        testErrorsAndWarnings(
+          `from a_index | eval date_diff("month", dateField, "2023-12-02T11:00:00.000Z")`,
+          []
+        );
+
+        testErrorsAndWarnings(
+          `from a_index | eval date_diff("month", "2023-12-02T11:00:00.000Z", dateField)`,
+          []
+        );
+
+        testErrorsAndWarnings(`from a_index | eval date_diff("month", stringField, dateField)`, [
+          'Argument of [date_diff] must be [date], found value [stringField] type [string]',
+        ]);
+
+        testErrorsAndWarnings(`from a_index | eval date_diff("month", dateField, stringField)`, [
+          'Argument of [date_diff] must be [date], found value [stringField] type [string]',
+        ]);
       });
     });
   });

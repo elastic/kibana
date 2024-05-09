@@ -17,14 +17,14 @@ import { KibanaRequest } from '@kbn/core-http-server';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
 import { loggerMock } from '@kbn/logging-mocks';
-import { handleStreamStorage } from './parse_stream';
+import * as ParseStream from './parse_stream';
 const request = {
   body: {
     subAction: 'invokeAI',
     message: 'hello',
   },
 } as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
-const onLlmResponse = jest.fn();
+const onLlmResponse = jest.fn(async () => {}); // We need it to be a promise, or it'll crash because of missing `.catch`
 const connectorId = 'testConnectorId';
 const mockLogger = loggerMock.create();
 const testProps: Omit<Props, 'actions'> = {
@@ -38,9 +38,8 @@ const testProps: Omit<Props, 'actions'> = {
   onLlmResponse,
   logger: mockLogger,
 };
-jest.mock('./parse_stream');
 
-const mockHandleStreamStorage = handleStreamStorage as jest.Mock;
+const handleStreamStorageSpy = jest.spyOn(ParseStream, 'handleStreamStorage');
 
 describe('executeAction', () => {
   beforeEach(() => {
@@ -83,7 +82,7 @@ describe('executeAction', () => {
       JSON.stringify(readableStream.pipe(new PassThrough()))
     );
 
-    expect(mockHandleStreamStorage).toHaveBeenCalledWith({
+    expect(handleStreamStorageSpy).toHaveBeenCalledWith({
       actionTypeId: '.bedrock',
       onMessageSent: onLlmResponse,
       logger: mockLogger,

@@ -14,7 +14,7 @@ import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { useKibana } from '../../../lib/kibana';
 import { timelineActions } from '../../../../timelines/store';
 import { ENABLE_EXPANDABLE_FLYOUT_SETTING } from '../../../../../common/constants';
-import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/right';
+import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
 import type {
   SetEventsDeleted,
   SetEventsLoading,

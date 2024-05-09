@@ -55,7 +55,9 @@ describe('getExternalAlertLensAttributes', () => {
     );
 
     expect(result?.current?.state?.visualization).toEqual(
-      expect.objectContaining({ valuesInLegend: true })
+      expect.objectContaining({
+        legend: expect.objectContaining({ legendStats: ['currentAndLastValue'] }),
+      })
     );
   });
 });

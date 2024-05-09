@@ -37,7 +37,7 @@ import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common
 import { assertUnreachable } from '../../../../../common/utility_types';
 import * as descriptionStepI18n from '../../../rule_creation_ui/components/description_step/translations';
 import { RelatedIntegrationsDescription } from '../../../../detections/components/rules/related_integrations/integrations_description';
-import { AlertSuppressionTechnicalPreviewBadge } from '../../../rule_creation_ui/components/description_step/alert_suppression_technical_preview_badge';
+import { AlertSuppressionLabel } from '../../../rule_creation_ui/components/description_step/alert_suppression_label';
 import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
 import * as threatMatchI18n from '../../../../common/components/threat_match/translations';
 import * as timelinesI18n from '../../../../timelines/components/timeline/translations';
@@ -337,14 +337,6 @@ const ThreatMapping = ({ threatMapping }: ThreatMappingProps) => {
       {description}
     </EuiText>
   );
-};
-
-interface AlertSuppressionTitleProps {
-  title: string;
-}
-
-const AlertSuppressionTitle = ({ title }: AlertSuppressionTitleProps) => {
-  return <AlertSuppressionTechnicalPreviewBadge label={title} />;
 };
 
 interface SuppressAlertsByFieldProps {
@@ -672,7 +664,10 @@ const prepareDefinitionSectionListItems = (
       definitionSectionListItems.push({
         title: (
           <span data-test-subj="alertSuppressionGroupByPropertyTitle">
-            <AlertSuppressionTitle title={i18n.SUPPRESS_ALERTS_BY_FIELD_LABEL} />
+            <AlertSuppressionLabel
+              label={i18n.SUPPRESS_ALERTS_BY_FIELD_LABEL}
+              ruleType={rule.type}
+            />
           </span>
         ),
         description: <SuppressAlertsByField fields={rule.alert_suppression.group_by} />,
@@ -682,7 +677,10 @@ const prepareDefinitionSectionListItems = (
     definitionSectionListItems.push({
       title: (
         <span data-test-subj="alertSuppressionDurationPropertyTitle">
-          <AlertSuppressionTitle title={i18n.SUPPRESS_ALERTS_DURATION_FIELD_LABEL} />
+          <AlertSuppressionLabel
+            label={i18n.SUPPRESS_ALERTS_DURATION_FIELD_LABEL}
+            ruleType={rule.type}
+          />
         </span>
       ),
       description: <SuppressAlertsDuration duration={rule.alert_suppression.duration} />,
@@ -692,7 +690,10 @@ const prepareDefinitionSectionListItems = (
       definitionSectionListItems.push({
         title: (
           <span data-test-subj="alertSuppressionMissingFieldPropertyTitle">
-            <AlertSuppressionTitle title={i18n.SUPPRESSION_FIELD_MISSING_FIELD_LABEL} />
+            <AlertSuppressionLabel
+              label={i18n.SUPPRESSION_FIELD_MISSING_FIELD_LABEL}
+              ruleType={rule.type}
+            />
           </span>
         ),
         description: (

@@ -96,6 +96,7 @@ export class ObservabilityAIAssistantAppPlugin
           },
           uiSettings: {
             client: coreStart.uiSettings.asScopedToClient(savedObjectsClient),
+            globalClient: coreStart.uiSettings.globalAsScopedToClient(savedObjectsClient),
           },
           savedObjects: {
             client: savedObjectsClient,
@@ -113,7 +114,12 @@ export class ObservabilityAIAssistantAppPlugin
       };
     };
 
-    plugins.actions.registerType(getObsAIAssistantConnectorType(initResources));
+    plugins.actions.registerType(
+      getObsAIAssistantConnectorType(
+        initResources,
+        plugins.observability.alertDetailsContextualInsightsService
+      )
+    );
     plugins.alerting.registerConnectorAdapter(getObsAIAssistantConnectorAdapter());
 
     return {};

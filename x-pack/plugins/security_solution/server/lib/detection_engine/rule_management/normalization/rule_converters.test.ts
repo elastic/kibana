@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { patchTypeSpecificSnakeToCamel, typeSpecificCamelToSnake } from './rule_converters';
 import {
+  commonParamsCamelToSnake,
+  patchTypeSpecificSnakeToCamel,
+  typeSpecificCamelToSnake,
+} from './rule_converters';
+import {
+  getBaseRuleParams,
   getEqlRuleParams,
   getMlRuleParams,
   getNewTermsRuleParams,
@@ -368,6 +373,26 @@ describe('rule_converters', () => {
           })
         );
       });
+    });
+  });
+
+  describe('commonParamsCamelToSnake', () => {
+    test('should convert rule_source params to snake case', () => {
+      const transformedParams = commonParamsCamelToSnake({
+        ...getBaseRuleParams(),
+        ruleSource: {
+          type: 'external',
+          isCustomized: false,
+        },
+      });
+      expect(transformedParams).toEqual(
+        expect.objectContaining({
+          rule_source: {
+            type: 'external',
+            is_customized: false,
+          },
+        })
+      );
     });
   });
 });

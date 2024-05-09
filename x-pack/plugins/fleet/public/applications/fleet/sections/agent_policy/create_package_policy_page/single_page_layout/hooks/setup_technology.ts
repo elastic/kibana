@@ -20,7 +20,8 @@ export const useAgentlessPolicy = () => {
   const isServerless = !!cloud?.isServerlessEnabled;
 
   const isAgentlessEnabled = agentlessExperimentalFeatureEnabled && isServerless;
-  const isAgentlessPolicyId = (id: string) => isAgentlessEnabled && id === AGENTLESS_POLICY_ID;
+  const isAgentlessPolicyId = (id: string | undefined) =>
+    isAgentlessEnabled && id === AGENTLESS_POLICY_ID;
 
   return {
     isAgentlessEnabled,
@@ -36,7 +37,7 @@ export function useSetupTechnology({
 }: {
   updateNewAgentPolicy: (policy: NewAgentPolicy) => void;
   newAgentPolicy: NewAgentPolicy;
-  updateAgentPolicy: (policy: AgentPolicy) => void;
+  updateAgentPolicy: (policy: AgentPolicy | undefined) => void;
   setSelectedPolicyTab: (tab: SelectedPolicyTab) => void;
 }) {
   const { isAgentlessEnabled } = useAgentlessPolicy();
@@ -74,8 +75,8 @@ export function useSetupTechnology({
       } else if (setupTechnology === SetupTechnology.AGENT_BASED) {
         updateNewAgentPolicy(newAgentPolicy);
         setSelectedPolicyTab(SelectedPolicyTab.NEW);
+        updateAgentPolicy(undefined);
       }
-
       setSelectedSetupTechnology(setupTechnology);
     },
     [

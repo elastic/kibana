@@ -25,7 +25,7 @@ import { ExpressionFunctionVisDimension } from '@kbn/visualizations-plugin/commo
 import type { CollapseExpressionFunction } from '../../../common/expressions';
 import type { Operation, DatasourcePublicAPI, DatasourceLayers } from '../../types';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
-import { shouldShowValuesInLegend } from './render_helpers';
+import { getLegendStats } from './render_helpers';
 import { PieLayerState, PieVisualizationState, EmptySizeRatios } from '../../../common/types';
 import {
   CategoryDisplay,
@@ -269,7 +269,7 @@ const generateWaffleVisAst: GenerateExpressionAstFunction = (...rest) => {
         layer,
         getColumnToLabelMap(layer.metrics, datasourceLayers[layer.layerId])
       ),
-      showValuesInLegend: shouldShowValuesInLegend(layer, state.shape),
+      legendStats: getLegendStats(layer, state.shape),
     }),
   ]).toAst();
 };

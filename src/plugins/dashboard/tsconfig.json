@@ -76,6 +76,9 @@
     "@kbn/managed-content-badge",
     "@kbn/core-test-helpers-model-versions",
     "@kbn/deeplinks-analytics",
+    "@kbn/core-user-profile-browser-mocks",
+    "@kbn/react-kibana-context-render",
+    "@kbn/core-i18n-browser-mocks",
   ],
   "exclude": ["target/**/*"]
 }

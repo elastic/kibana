@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ThemeServiceStart } from '@kbn/core/public';
+import { AnalyticsServiceStart, I18nStart, ThemeServiceStart } from '@kbn/core/public';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -18,6 +18,9 @@ export const [getDataActions, setDataActions] =
 export const [getFormatService, setFormatService] =
   createGetterSetter<FieldFormatsStart>('FieldFormats');
 
+export const [getAnalytics, setAnalytics] =
+  createGetterSetter<AnalyticsServiceStart>('vislib theme service');
+export const [getI18n, setI18n] = createGetterSetter<I18nStart>('vislib theme service');
 export const [getTheme, setTheme] = createGetterSetter<ThemeServiceStart>('vislib theme service');
 
 export const [getUsageCollectionStart, setUsageCollectionStart] =

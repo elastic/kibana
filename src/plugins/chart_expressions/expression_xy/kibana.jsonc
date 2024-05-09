@@ -19,8 +19,6 @@
     "optionalPlugins": [
       "usageCollection"
     ],
-    "requiredBundles": [
-      "kibanaReact"
-    ]
+    "requiredBundles": []
   }
 }

@@ -378,7 +378,7 @@ export class LensVisService {
             },
             orderDirection: 'desc',
             otherBucket: true,
-            missingBucket: false,
+            missingBucket: true,
             parentFormat: {
               id: 'terms',
             },

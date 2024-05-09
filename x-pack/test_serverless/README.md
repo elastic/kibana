@@ -209,8 +209,44 @@ node scripts/functional_test_runner.js --config test_serverless/api_integration/
 ## Run tests on MKI
 There is no need to start servers locally, you just need to create MKI project and copy urls for Elasticsearch and Kibana. Make sure to update urls with username/password and port 443 for Elasticsearch. FTR has no control over MKI and can't update your projects so make sure your `config.ts` does not specify any custom arguments for Kibana or Elasticsearch. Otherwise, it will be ignored. You can run the tests from the `x-pack` directory:
 ```
-TEST_CLOUD=1 TEST_ES_URL="https://elastic:PASSWORD@ES_HOSTNAME:443" TEST_KIBANA_URL="https://elastic:PASSWORD@KIBANA_HOSTNAME" node scripts/functional_test_runner --config test_serverless/api_integration/test_suites/search/config.ts --exclude-tag=skipMKI
+TEST_CLOUD=1 TEST_CLOUD_HOST_NAME="CLOUD_HOST_NAME" TEST_ES_URL="https://elastic:PASSWORD@ES_HOSTNAME:443" TEST_KIBANA_URL="https://elastic:PASSWORD@KIBANA_HOSTNAME" node scripts/functional_test_runner --config test_serverless/api_integration/test_suites/search/config.ts --exclude-tag=skipMKI
 ```
+
+Steps to follow to run on QA environment:
+- Go to `CLOUD_HOST_NAME` and create a project.
+- Go to `CLOUD_HOST_NAME/account/keys` and create Cloud specific API Key.
+- We need the key from step 2 to obtain basic auth credentials for ES and Kibana.
+  Make a POST request to the following endpoint.
+  ```
+  POST CLOUD_HOST_NAME/api/v1/serverless/projects/<project-type>/<project-id>/_reset-internal-credentials
+  Authorization: ApiKey <Cloud-API-key>
+  Content-Type: application/json
+  ```
+
+  In response you should get credentials.
+  ```
+  {
+    "password": "testing-internal_pwd",
+    "username": "testing-internal"
+  }
+  ```
+  We would use these credentials for `TEST_ES_URL="https://USERNAME:PASSWORD@ES_HOSTNAME:443"` and `TEST_KIBANA_URL="https://USERNAME:PASSWORD@KIBANA_HOSTNAME"`
+- Now we need to create a user with the roles we want to test. Go to members page - `CLOUD_HOST_NAME/account/members` and click `[Invite member]`.
+  - Select the access level you want to grant and your project type. For example, to create a user with viewer role, toggle `[Instanse access]`, select project (should correspond to your project type, i.e Security), select `Viewer` role.
+  - Create `.ftr/role_users.json` in the root of Kibana repo. Add record for created user.
+    ```
+    {
+      "viewer": {
+        "password": "xxxx",
+        "email": "email_of_the_elastic_cloud_account"
+      }
+    }
+    ```
+- Now run the tests from the `x-pack` directory
+```
+TEST_CLOUD=1 TEST_CLOUD_HOST_NAME="CLOUD_HOST_NAME" TEST_ES_URL="https://testing-internal:testing-internal_pwd@ES_HOSTNAME:443" TEST_KIBANA_URL="https://testing-internal:testing-internal_pwd@KIBANA_HOSTNAME:443" node scripts/functional_test_runner.js --config test_serverless/functional/test_suites/security/common_configs/config.group1.ts --exclude-tag=skipMKI
+```
+
 
 ## Skipping tests for MKI run
 The tests that are listed in the the regular `config.ts` generally should work in both Kibana CI and MKI. However some tests might not work properly against MKI projects by design.

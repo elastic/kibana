@@ -11,6 +11,7 @@
   ],
   "kbn_references": [
     "@kbn/licensing-plugin",
-    "@kbn/core-security-common"
+    "@kbn/core-security-common",
+    "@kbn/core-user-profile-common"
   ]
 }

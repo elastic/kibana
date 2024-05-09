@@ -83,9 +83,13 @@ describe('<Overview />', () => {
     const { getByRole } = render(<Overview />);
     expect(getByRole('heading', { name: 'Build your first search query' })).toBeDefined();
   });
-  test('transform data', () => {
+  test('preprocess data', () => {
     const { getByRole } = render(<Overview />);
-    expect(getByRole('heading', { name: 'Transform and enrich your data' })).toBeDefined();
+    expect(
+      getByRole('heading', {
+        name: 'Preprocess your data by enriching, transforming or filtering with pipelines',
+      })
+    ).toBeDefined();
   });
   test("what's next?", () => {
     const { getByRole } = render(<Overview />);

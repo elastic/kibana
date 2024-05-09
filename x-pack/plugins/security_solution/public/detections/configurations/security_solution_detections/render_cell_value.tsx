@@ -37,7 +37,7 @@ import { eventRenderedViewColumns, getColumns } from './columns';
  * from the TGrid
  */
 
-export const RenderCellValue: React.FC<EuiDataGridCellProps['cellContext']> = memo(
+export const RenderCellValue: React.FC<NonNullable<EuiDataGridCellProps['cellContext']>> = memo(
   function RenderCellValue(props) {
     const {
       columnId,

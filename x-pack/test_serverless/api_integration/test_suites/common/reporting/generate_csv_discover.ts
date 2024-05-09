@@ -11,7 +11,7 @@ import type { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
 import type { Filter } from '@kbn/es-query';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default ({ getService }: FtrProviderContext) => {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const reportingAPI = getService('svlReportingApi');
@@ -68,8 +68,6 @@ export default ({ getService }: FtrProviderContext) => {
    * Tests
    */
   describe('Generate CSV from SearchSource', function () {
-    // failsOnMKI, see https://github.com/elastic/kibana/issues/179456
-    this.tags(['failsOnMKI']);
     beforeEach(async () => {
       await kibanaServer.uiSettings.update({
         'csv:quoteValues': true,
@@ -84,6 +82,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       after(async () => {
+        await reportingAPI.deleteAllReports();
         await esArchiver.unload(archives.ecommerce.data);
         await kibanaServer.importExport.unload(archives.ecommerce.savedObjects);
       });
@@ -738,4 +737,4 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
   });
-};
+}

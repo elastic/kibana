@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { useNavigate, useLocation } from 'react-router-dom-v5-compat';
 import { EuiButtonEmpty, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
@@ -22,6 +22,12 @@ import { CustomLogsPanel } from './quickstart_flows/custom_logs';
 const queryClient = new QueryClient();
 
 export function ExperimentalOnboardingFlow() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
   return (
     <QueryClientProvider client={queryClient}>
       <EuiPageTemplate.Section

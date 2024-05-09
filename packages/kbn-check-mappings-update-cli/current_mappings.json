@@ -19,6 +19,33 @@
     "dynamic": false,
     "properties": {}
   },
+  "ad_hoc_run_params": {
+    "dynamic": false,
+    "properties": {
+      "apiKeyId": {
+        "type": "keyword"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "end": {
+        "type": "date"
+      },
+      "rule": {
+        "properties": {
+          "alertTypeId": {
+            "type": "keyword"
+          },
+          "consumer": {
+            "type": "keyword"
+          }
+        }
+      },
+      "start": {
+        "type": "date"
+      }
+    }
+  },
   "alert": {
     "dynamic": false,
     "properties": {
@@ -1684,6 +1711,9 @@
       "status": {
         "type": "keyword"
       },
+      "supports_agentless": {
+        "type": "boolean"
+      },
       "unenroll_timeout": {
         "type": "integer"
       },
@@ -1963,6 +1993,10 @@
       },
       "namespace": {
         "type": "keyword"
+      },
+      "overrides": {
+        "index": false,
+        "type": "flattened"
       },
       "package": {
         "properties": {

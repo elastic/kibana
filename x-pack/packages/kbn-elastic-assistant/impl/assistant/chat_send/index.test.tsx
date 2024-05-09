@@ -12,13 +12,11 @@ import { TestProviders } from '../../mock/test_providers/test_providers';
 
 jest.mock('./use_chat_send');
 
-const handleButtonSendMessage = jest.fn();
 const handleOnChatCleared = jest.fn();
 const handlePromptChange = jest.fn();
 const handleSendMessage = jest.fn();
 const handleRegenerateResponse = jest.fn();
 const testProps: Props = {
-  handleButtonSendMessage,
   handleOnChatCleared,
   handlePromptChange,
   handleSendMessage,
@@ -51,7 +49,7 @@ describe('ChatSend', () => {
     expect(getByTestId('prompt-textarea')).toHaveTextContent(promptText);
     fireEvent.click(getByTestId('submit-chat'));
     await waitFor(() => {
-      expect(handleButtonSendMessage).toHaveBeenCalledWith(promptText);
+      expect(handleSendMessage).toHaveBeenCalledWith(promptText);
     });
   });
 

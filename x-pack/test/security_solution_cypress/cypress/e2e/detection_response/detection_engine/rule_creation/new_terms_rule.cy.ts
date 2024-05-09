@@ -75,14 +75,6 @@ describe(
   'New Terms rules',
   {
     tags: ['@ess', '@serverless'],
-    env: {
-      // alertSuppressionForNewTermsRuleEnabled feature flag is also enabled in a global config
-      kbnServerArgs: [
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'alertSuppressionForNewTermsRuleEnabled',
-        ])}`,
-      ],
-    },
   },
   () => {
     describe('Detection rules, New Terms', () => {

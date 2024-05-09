@@ -312,7 +312,7 @@ describe('HostName', () => {
         params: {
           hostName: props.value,
           contextID: props.contextId,
-          scopeId: TableId.alertsOnAlertsPage,
+          scopeId: 'timeline-1',
           isDraggable: false,
         },
       });

@@ -382,19 +382,15 @@ export function ServiceList({
       <EuiFlexItem>
         <TryItButton
           isFeatureEnabled={isTableSearchBarEnabled}
-          promoLabel={i18n.translate('xpack.apm.serviceList.promoLabel', {
-            defaultMessage: 'Want to filter your services faster?',
-          })}
           linkLabel={
             isTableSearchBarEnabled
-              ? i18n.translate('xpack.apm.serviceList.turnFastFilterOff', {
-                  defaultMessage: 'Turn off Fast Filter',
+              ? i18n.translate('xpack.apm.serviceList.disableFastFilter', {
+                  defaultMessage: 'Disable fast filter',
                 })
-              : i18n.translate('xpack.apm.serviceList.turnFastFilterOn', {
-                  defaultMessage: 'Try the new Fast Filter',
+              : i18n.translate('xpack.apm.serviceList.enableFastFilter', {
+                  defaultMessage: 'Enable fast filter',
                 })
           }
-          icon="beaker"
           onClick={onChangeTableSearchBarVisibility}
           isLoading={isSavingSetting}
           popoverContent={

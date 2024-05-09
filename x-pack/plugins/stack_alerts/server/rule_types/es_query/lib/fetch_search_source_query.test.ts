@@ -59,7 +59,8 @@ const defaultParams: OnlySearchSourceRuleParams = {
   excludeHitsFromPreviousRun: true,
   aggType: 'count',
   groupBy: 'all',
-  timeField: 'time',
+  // this should be ignored when using a data view
+  timeField: 'timeFieldNotFromDataView',
 };
 
 describe('fetchSearchSourceQuery', () => {

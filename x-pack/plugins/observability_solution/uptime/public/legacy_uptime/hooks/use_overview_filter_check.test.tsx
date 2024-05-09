@@ -7,12 +7,12 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { createMemoryHistory } from 'history';
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import * as reactRedux from 'react-redux';
 import { useOverviewFilterCheck } from './use_overview_filter_check';
 import { MockRouter } from '../lib/helper/rtl_helpers';
 
-function getWrapper(customSearch?: string): React.FC {
+function getWrapper(customSearch?: string): FC<PropsWithChildren<unknown>> {
   return ({ children }) => {
     const { location, ...rest } = createMemoryHistory();
     return (

@@ -13,7 +13,7 @@ export interface ErrorAnnotation {
 
 export interface ParsedRequest {
   startOffset: number;
-  endOffset: number;
+  endOffset?: number;
   method: string;
   url: string;
   data?: Array<Record<string, unknown>>;

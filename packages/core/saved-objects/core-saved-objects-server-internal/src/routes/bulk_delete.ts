@@ -43,25 +43,26 @@ export const registerBulkDeleteRoute = (
         }),
       },
     },
-    catchAndReturnBoomErrors(async (context, req, res) => {
+    catchAndReturnBoomErrors(async (context, request, response) => {
       logWarnOnExternalRequest({
         method: 'post',
         path: '/api/saved_objects/_bulk_delete',
-        req,
+        request,
         logger,
       });
-      const { force } = req.query;
+      const { force } = request.query;
+      const types = [...new Set(request.body.map(({ type }) => type))];
+
       const usageStatsClient = coreUsageData.getClient();
-      usageStatsClient.incrementSavedObjectsBulkDelete({ request: req }).catch(() => {});
+      usageStatsClient.incrementSavedObjectsBulkDelete({ request, types }).catch(() => {});
 
       const { savedObjects } = await context.core;
 
-      const typesToCheck = [...new Set(req.body.map(({ type }) => type))];
       if (!allowHttpApiAccess) {
-        throwIfAnyTypeNotVisibleByAPI(typesToCheck, savedObjects.typeRegistry);
+        throwIfAnyTypeNotVisibleByAPI(types, savedObjects.typeRegistry);
       }
-      const statuses = await savedObjects.client.bulkDelete(req.body, { force });
-      return res.ok({ body: statuses });
+      const statuses = await savedObjects.client.bulkDelete(request.body, { force });
+      return response.ok({ body: statuses });
     })
   );
 };

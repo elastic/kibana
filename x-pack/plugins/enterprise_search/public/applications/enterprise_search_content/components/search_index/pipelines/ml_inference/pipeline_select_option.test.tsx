@@ -75,5 +75,7 @@ describe('PipelineSelectOption', () => {
       />
     );
     expect(wrapper.find(PipelineSelectOptionDisabled)).toHaveLength(1);
+    const disabledWarning = wrapper.find(PipelineSelectOptionDisabled).at(0);
+    expect(disabledWarning.render().text()).toMatch('my-reason');
   });
 });

@@ -34,7 +34,7 @@ import {
   getCriticalityModifier,
   normalize,
 } from '../asset_criticality/helpers';
-import { getAfterKeyForIdentifierType, getFieldForIdentifierAgg } from './helpers';
+import { getAfterKeyForIdentifierType, getFieldForIdentifier } from './helpers';
 import {
   buildCategoryCountDeclarations,
   buildCategoryAssignment,
@@ -177,7 +177,7 @@ const buildIdentifierTypeAggregation = ({
   alertSampleSizePerShard: number;
 }): AggregationsAggregationContainer => {
   const globalIdentifierTypeWeight = getGlobalWeightForIdentifierType({ identifierType, weights });
-  const identifierField = getFieldForIdentifierAgg(identifierType);
+  const identifierField = getFieldForIdentifier(identifierType);
 
   return {
     composite: {

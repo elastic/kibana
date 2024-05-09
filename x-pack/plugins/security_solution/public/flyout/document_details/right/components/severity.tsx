@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo } from 'react';
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
@@ -19,7 +18,7 @@ const isSeverity = (x: unknown): x is Severity =>
 /**
  * Document details severity displayed in flyout right section header
  */
-export const DocumentSeverity: FC = memo(() => {
+export const DocumentSeverity = memo(() => {
   const { getFieldsData } = useRightPanelContext();
   const fieldsData = getFieldsData(ALERT_SEVERITY);
 

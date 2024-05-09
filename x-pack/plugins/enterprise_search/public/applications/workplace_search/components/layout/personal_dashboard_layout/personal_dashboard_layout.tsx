@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 
 import { useValues } from 'kea';
@@ -36,7 +36,7 @@ interface LayoutProps {
   pageChrome?: BreadcrumbTrail;
 }
 
-export const PersonalDashboardLayout: React.FC<LayoutProps> = ({
+export const PersonalDashboardLayout: FC<PropsWithChildren<LayoutProps>> = ({
   children,
   isLoading,
   pageChrome,

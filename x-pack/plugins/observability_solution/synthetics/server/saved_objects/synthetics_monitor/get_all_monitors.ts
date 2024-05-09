@@ -50,8 +50,7 @@ export const getAllMonitors = async ({
     hits.push(...result.saved_objects);
   }
 
-  // no need to wait for it
-  finder.close();
+  finder.close().catch(() => {});
 
   return hits;
 };

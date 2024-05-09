@@ -47,6 +47,8 @@ import type { SortColumnField } from './components';
 import { useTags } from './use_tags';
 import { useInRouterContext, useUrlState } from './use_url_state';
 import { RowActions, TableItemsRowActions } from './types';
+import { UserAvatarTip } from './components/user_avatar_tip';
+import { NoUsersTip } from './components/user_missing_tip';
 
 interface ContentEditorConfig
   extends Pick<OpenContentEditorParams, 'isReadonly' | 'onSave' | 'customValidators'> {
@@ -65,6 +67,7 @@ export interface TableListViewTableProps<
   /** Add an additional custom column */
   customTableColumn?: EuiBasicTableColumn<T>;
   urlStateEnabled?: boolean;
+  createdByEnabled?: boolean;
   /**
    * Id of the heading element describing the table. This id will be used as `aria-labelledby` of the wrapper element.
    * If the table is not empty, this component renders its own h1 element using the same id.
@@ -135,10 +138,14 @@ export interface State<T extends UserContentCommonSchema = UserContentCommonSche
   selectedIds: string[];
   totalItems: number;
   hasUpdatedAtMetadata: boolean;
+  hasCreatedByMetadata: boolean;
   pagination: Pagination;
   tableSort: {
     field: SortColumnField;
     direction: Direction;
+  };
+  tableFilter: {
+    createdBy: string[];
   };
 }
 
@@ -147,6 +154,9 @@ export interface URLState {
   sort?: {
     field: SortColumnField;
     direction: Direction;
+  };
+  filter?: {
+    createdBy?: string[];
   };
 
   [key: string]: unknown;
@@ -157,6 +167,7 @@ interface URLQueryParams {
   title?: string;
   sort?: string;
   sortdir?: string;
+  created_by?: string[];
 
   [key: string]: unknown;
 }
@@ -195,6 +206,16 @@ const urlStateDeserializer = (params: URLQueryParams): URLState => {
     }
   }
 
+  if (sanitizedParams.created_by) {
+    stateFromURL.filter = {
+      createdBy: Array.isArray(sanitizedParams.created_by)
+        ? sanitizedParams.created_by
+        : [sanitizedParams.created_by],
+    };
+  } else {
+    stateFromURL.filter = { createdBy: [] };
+  }
+
   return stateFromURL;
 };
 
@@ -207,6 +228,7 @@ const urlStateDeserializer = (params: URLQueryParams): URLState => {
 const urlStateSerializer = (updated: {
   s?: string;
   sort?: { field: 'title' | 'updatedAt'; direction: Direction };
+  filter?: { createdBy?: string[] };
 }) => {
   const updatedQueryParams: Partial<URLQueryParams> = {};
 
@@ -225,6 +247,10 @@ const urlStateSerializer = (updated: {
     updatedQueryParams.title = undefined;
   }
 
+  if (updated.filter?.createdBy) {
+    updatedQueryParams.created_by = updated.filter.createdBy;
+  }
+
   return updatedQueryParams;
 };
 
@@ -236,6 +262,10 @@ const tableColumnMetadata = {
   updatedAt: {
     field: 'updatedAt',
     name: 'Last updated',
+  },
+  createdBy: {
+    field: 'createdBy',
+    name: 'Creator',
   },
 } as const;
 
@@ -264,6 +294,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   onFetchSuccess,
   refreshListBouncer,
   setPageDataTestSubject,
+  createdByEnabled = false,
 }: TableListViewTableProps<T>) {
   useEffect(() => {
     setPageDataTestSubject(`${entityName}LandingPage`);
@@ -333,6 +364,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       isDeletingItems: false,
       showDeleteModal: false,
       hasUpdatedAtMetadata: false,
+      hasCreatedByMetadata: false,
       selectedIds: [],
       searchQuery: { text: '', query: new Query(Ast.create([]), undefined, '') },
       pagination: {
@@ -344,6 +376,9 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       tableSort: {
         field: 'attributes.title' as const,
         direction: 'asc',
+      },
+      tableFilter: {
+        createdBy: [],
       },
     }),
     [initialPageSize]
@@ -363,8 +398,10 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     selectedIds,
     totalItems,
     hasUpdatedAtMetadata,
+    hasCreatedByMetadata,
     pagination,
     tableSort,
+    tableFilter,
   } = state;
 
   const showFetchError = Boolean(fetchError);
@@ -530,6 +567,26 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       columns.push(customTableColumn);
     }
 
+    if (hasCreatedByMetadata && createdByEnabled) {
+      columns.push({
+        field: tableColumnMetadata.createdBy.field,
+        name: (
+          <>
+            {i18n.translate('contentManagement.tableList.createdByColumnTitle', {
+              defaultMessage: 'Creator',
+            })}
+            <NoUsersTip />
+          </>
+        ),
+        render: (field: string, record: { createdBy?: string }) =>
+          record.createdBy ? <UserAvatarTip uid={record.createdBy} /> : null,
+        sortable:
+          false /* createdBy column is not sortable because it doesn't make sense to sort by id*/,
+        width: '100px',
+        align: 'center',
+      });
+    }
+
     if (hasUpdatedAtMetadata) {
       columns.push({
         field: tableColumnMetadata.updatedAt.field,
@@ -613,6 +670,8 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     titleColumnName,
     customTableColumn,
     hasUpdatedAtMetadata,
+    hasCreatedByMetadata,
+    createdByEnabled,
     editItem,
     contentEditor.enabled,
     listingId,
@@ -700,13 +759,14 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     [updateQuery, buildQueryFromText]
   );
 
-  const updateTableSortAndPagination = useCallback(
+  const updateTableSortFilterAndPagination = useCallback(
     (data: {
       sort?: State<T>['tableSort'];
       page?: {
         pageIndex: number;
         pageSize: number;
       };
+      filter?: Partial<State<T>['tableFilter']>;
     }) => {
       if (data.sort && urlStateEnabled) {
         setUrlState({
@@ -714,6 +774,12 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
             field: data.sort.field === 'attributes.title' ? 'title' : data.sort.field,
             direction: data.sort.direction,
           },
+        });
+      }
+
+      if (data.filter && urlStateEnabled) {
+        setUrlState({
+          filter: data.filter,
         });
       }
 
@@ -729,14 +795,23 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
 
   const onSortChange = useCallback(
     (field: SortColumnField, direction: Direction) => {
-      updateTableSortAndPagination({
+      updateTableSortFilterAndPagination({
         sort: {
           field,
           direction,
         },
       });
     },
-    [updateTableSortAndPagination]
+    [updateTableSortFilterAndPagination]
+  );
+
+  const onFilterChange = useCallback(
+    (filter: Partial<State['tableFilter']>) => {
+      updateTableSortFilterAndPagination({
+        filter,
+      });
+    },
+    [updateTableSortFilterAndPagination]
   );
 
   const onTableChange = useCallback(
@@ -770,9 +845,9 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         pageSize: criteria.page.size,
       };
 
-      updateTableSortAndPagination(data);
+      updateTableSortFilterAndPagination(data);
     },
-    [updateTableSortAndPagination]
+    [updateTableSortFilterAndPagination]
   );
 
   const deleteSelectedItems = useCallback(async () => {
@@ -911,8 +986,24 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       });
     };
 
+    const updateFilterFromURL = (filter?: URLState['filter']) => {
+      if (!filter) {
+        return;
+      }
+
+      dispatch({
+        type: 'onTableChange',
+        data: {
+          filter: {
+            createdBy: filter.createdBy ?? [],
+          },
+        },
+      });
+    };
+
     updateQueryFromURL(urlState.s);
     updateSortFromURL(urlState.sort);
+    updateFilterFromURL(urlState.filter);
   }, [urlState, buildQueryFromText, urlStateEnabled]);
 
   useEffect(() => {
@@ -996,6 +1087,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           tableColumns={tableColumns}
           hasUpdatedAtMetadata={hasUpdatedAtMetadata}
           tableSort={tableSort}
+          tableFilter={tableFilter}
           tableItemsRowActions={tableItemsRowActions}
           pagination={pagination}
           selectedIds={selectedIds}
@@ -1007,9 +1099,11 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           onTableChange={onTableChange}
           onTableSearchChange={onTableSearchChange}
           onSortChange={onSortChange}
+          onFilterChange={onFilterChange}
           addOrRemoveIncludeTagFilter={addOrRemoveIncludeTagFilter}
           addOrRemoveExcludeTagFilter={addOrRemoveExcludeTagFilter}
           clearTagSelection={clearTagSelection}
+          createdByEnabled={createdByEnabled}
         />
 
         {/* Delete modal */}

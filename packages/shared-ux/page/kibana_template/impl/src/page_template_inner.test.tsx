@@ -64,6 +64,6 @@ describe('KibanaPageTemplateInner', () => {
   test('page sidebar', () => {
     const component = shallow(<KibanaPageTemplateInner pageSideBar={<>Test</>} />);
     expect(component).toMatchSnapshot();
-    expect(component.find('EuiPageSidebar')).toHaveLength(1);
+    expect(component.find('_EuiPageSidebar')).toHaveLength(1);
   });
 });

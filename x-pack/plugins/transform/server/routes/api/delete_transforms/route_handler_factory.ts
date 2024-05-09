@@ -24,13 +24,14 @@ export const routeHandlerFactory: (
   DeleteTransformsRequestSchema,
   TransformRequestHandlerContext
 > =
-  ({ coreStart, dataViews }) =>
+  ({ getCoreStart, getDataViewsStart }) =>
   async (ctx, req, res) => {
     try {
-      const { savedObjects, elasticsearch } = coreStart;
+      const { savedObjects, elasticsearch } = await getCoreStart();
       const savedObjectsClient = savedObjects.getScopedClient(req);
       const esClient = elasticsearch.client.asScoped(req).asCurrentUser;
 
+      const dataViews = await getDataViewsStart();
       const dataViewsService = await dataViews.dataViewsServiceFactory(
         savedObjectsClient,
         esClient,

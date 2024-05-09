@@ -8,7 +8,7 @@ import { renderHook } from '@testing-library/react-hooks';
 
 import { useEsqlIndex } from './use_esql_index';
 
-const validEsqlQuery = 'from auditbeat* [metadata _id, _index, _version]';
+const validEsqlQuery = 'from auditbeat* metadata _id, _index, _version';
 describe('useEsqlIndex', () => {
   it('should return empty array if isQueryReadEnabled is undefined', () => {
     const { result } = renderHook(() => useEsqlIndex(validEsqlQuery, 'esql', undefined));

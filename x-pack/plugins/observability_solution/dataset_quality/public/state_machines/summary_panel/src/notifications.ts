@@ -8,25 +8,6 @@
 import { IToasts } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
-export const fetchDatasetsQualityFailedNotifier = (toasts: IToasts, error: Error) => {
-  toasts.addDanger({
-    title: i18n.translate('xpack.datasetQuality.fetchDatasetsQualityDetailsFailed', {
-      defaultMessage: "We couldn't get your datasets quality details. Default values are shown.",
-    }),
-    text: error.message,
-  });
-};
-
-export const fetchDatasetsActivityFailedNotifier = (toasts: IToasts, error: Error) => {
-  toasts.addDanger({
-    title: i18n.translate('xpack.datasetQuality.fetchDatasetsActivityFailed', {
-      defaultMessage:
-        "We couldn't get your active/inactive datasets details. Default values are shown.",
-    }),
-    text: error.message,
-  });
-};
-
 export const fetchDatasetsEstimatedDataFailedNotifier = (toasts: IToasts, error: Error) => {
   toasts.addDanger({
     title: i18n.translate('xpack.datasetQuality.fetchDatasetsEstimatedDataFailed', {

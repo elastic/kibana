@@ -97,7 +97,9 @@ import {
   TAGS,
   VERSION,
   ALERT_CONSECUTIVE_MATCHES,
+  ALERT_RULE_EXECUTION_TIMESTAMP,
 } from '@kbn/rule-data-utils';
+import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 
 jest.mock('uuid', () => ({
@@ -152,6 +154,8 @@ describe('Task Runner', () => {
     afterAll(() => fakeTimer.restore());
 
     const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
+    const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
+    const backfillClient = backfillClientMock.create();
     const services = alertsMock.createRuleExecutorServices();
     const actionsClient = actionsClientMock.create();
     const rulesClient = rulesClientMock.create();
@@ -195,7 +199,7 @@ describe('Task Runner', () => {
       spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
       basePathService: httpServiceMock.createBasePath(),
       eventLogger: eventLoggerMock.create(),
-      internalSavedObjectsRepository: savedObjectsRepositoryMock.create(),
+      backfillClient,
       ruleTypeRegistry,
       alertsService: mockAlertsService,
       kibanaBaseUrl: 'https://localhost:5601',
@@ -284,6 +288,7 @@ describe('Task Runner', () => {
         });
         const taskRunner = new TaskRunner({
           ruleType: ruleTypeWithAlerts,
+          internalSavedObjectsRepository,
           taskInstance: {
             ...mockedTaskInstance,
             state: {
@@ -342,9 +347,9 @@ describe('Task Runner', () => {
           'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"hasReachedAlertLimit":false,"triggeredActionsStatus":"complete"}'
         );
 
-        expect(
-          taskRunnerFactoryInitializerParams.internalSavedObjectsRepository.update
-        ).toHaveBeenCalledWith(...generateSavedObjectParams({}));
+        expect(internalSavedObjectsRepository.update).toHaveBeenCalledWith(
+          ...generateSavedObjectParams({})
+        );
 
         expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toBeCalledTimes(1);
         expect(
@@ -381,6 +386,7 @@ describe('Task Runner', () => {
 
         const taskRunner = new TaskRunner({
           ruleType: ruleTypeWithAlerts,
+          internalSavedObjectsRepository,
           taskInstance: {
             ...mockedTaskInstance,
             state: {
@@ -468,9 +474,9 @@ describe('Task Runner', () => {
           debugCall++,
           'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}'
         );
-        expect(
-          taskRunnerFactoryInitializerParams.internalSavedObjectsRepository.update
-        ).toHaveBeenCalledWith(...generateSavedObjectParams({}));
+        expect(internalSavedObjectsRepository.update).toHaveBeenCalledWith(
+          ...generateSavedObjectParams({})
+        );
         expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toBeCalledTimes(1);
         expect(
           taskRunnerFactoryInitializerParams.executionContext.withContext
@@ -525,6 +531,7 @@ describe('Task Runner', () => {
 
         const taskRunner = new TaskRunner({
           ruleType: ruleTypeWithAlerts,
+          internalSavedObjectsRepository,
           taskInstance: mockedTaskInstance,
           context: {
             ...taskRunnerFactoryInitializerParams,
@@ -567,6 +574,7 @@ describe('Task Runner', () => {
               [ALERT_RULE_CATEGORY]: 'My test rule',
               [ALERT_RULE_CONSUMER]: 'bar',
               [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+              [ALERT_RULE_EXECUTION_TIMESTAMP]: DATE_1970,
               [ALERT_RULE_NAME]: 'rule-name',
               [ALERT_RULE_PARAMETERS]: { bar: true },
               [ALERT_RULE_PRODUCER]: 'alerts',
@@ -616,6 +624,7 @@ describe('Task Runner', () => {
         });
         const taskRunner = new TaskRunner({
           ruleType: ruleTypeWithAlerts,
+          internalSavedObjectsRepository,
           taskInstance: {
             ...mockedTaskInstance,
             state: {
@@ -652,9 +661,9 @@ describe('Task Runner', () => {
         expect(logger.debug).toHaveBeenCalledTimes(5);
         expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
 
-        expect(
-          taskRunnerFactoryInitializerParams.internalSavedObjectsRepository.update
-        ).toHaveBeenCalledWith(...generateSavedObjectParams({}));
+        expect(internalSavedObjectsRepository.update).toHaveBeenCalledWith(
+          ...generateSavedObjectParams({})
+        );
 
         expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toBeCalledTimes(1);
         expect(
@@ -702,6 +711,7 @@ describe('Task Runner', () => {
         });
         const taskRunner = new TaskRunner({
           ruleType: ruleTypeWithAlerts,
+          internalSavedObjectsRepository,
           taskInstance: {
             ...mockedTaskInstance,
             state: {
@@ -736,9 +746,9 @@ describe('Task Runner', () => {
         expect(logger.debug).toHaveBeenCalledTimes(5);
         expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
 
-        expect(
-          taskRunnerFactoryInitializerParams.internalSavedObjectsRepository.update
-        ).toHaveBeenCalledWith(...generateSavedObjectParams({}));
+        expect(internalSavedObjectsRepository.update).toHaveBeenCalledWith(
+          ...generateSavedObjectParams({})
+        );
 
         expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toBeCalledTimes(1);
         expect(

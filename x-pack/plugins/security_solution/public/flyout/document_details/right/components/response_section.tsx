@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useExpandSection } from '../hooks/use_expand_section';
@@ -21,7 +20,7 @@ const KEY = 'response';
 /**
  * Most bottom section of the overview tab. It contains a summary of the response tab.
  */
-export const ResponseSection: FC = memo(() => {
+export const ResponseSection = memo(() => {
   const { isPreview, getFieldsData } = useRightPanelContext();
 
   const expanded = useExpandSection({ title: KEY, defaultValue: false });

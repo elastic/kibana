@@ -12,7 +12,7 @@ import type {
 } from '../../../../common/entity_analytics/risk_engine';
 import type { CalculateAndPersistScoresResponse } from '../types';
 
-export const getFieldForIdentifierAgg = (identifierType: IdentifierType): string =>
+export const getFieldForIdentifier = (identifierType: IdentifierType): string =>
   identifierType === 'host' ? 'host.name' : 'user.name';
 
 export const getAfterKeyForIdentifierType = ({

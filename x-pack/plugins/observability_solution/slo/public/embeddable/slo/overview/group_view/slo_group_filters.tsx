@@ -4,23 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import './slo_group_filters.scss';
-import React, { useState, useEffect, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow, EuiSelect, EuiText } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
-import { debounce } from 'lodash';
-import { EuiFormRow, EuiComboBox, EuiSelect, EuiComboBoxOptionOption, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-import { useFetchSloGroups } from '../../../../hooks/use_fetch_slo_groups';
-import { useGetSettings } from '../../../../pages/slo_settings/use_get_settings';
-
-import { SLI_OPTIONS } from '../../../../pages/slo_edit/constants';
-import { useKibana } from '../../../../utils/kibana_react';
-import { useCreateDataView } from '../../../../hooks/use_create_data_view';
-import { SLO_SUMMARY_DESTINATION_INDEX_NAME } from '../../../../../common/constants';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { debounce } from 'lodash';
+import React, { useEffect, useMemo, useState } from 'react';
 import { sloAppId } from '../../../../../common';
-import type { GroupFilters, GroupBy } from '../types';
+import { SLO_SUMMARY_DESTINATION_INDEX_NAME } from '../../../../../common/constants';
+import { useCreateDataView } from '../../../../hooks/use_create_data_view';
+import { useFetchSloGroups } from '../../../../hooks/use_fetch_slo_groups';
+import { SLI_OPTIONS } from '../../../../pages/slo_edit/constants';
+import { useGetSettings } from '../../../../pages/slo_settings/use_get_settings';
+import { useKibana } from '../../../../utils/kibana_react';
+import type { GroupBy, GroupFilters } from '../types';
+import './slo_group_filters.scss';
+
 interface Option {
   value: string;
   text: string;
@@ -171,7 +170,7 @@ export function SloGroupFilters({ selectedFilters, onSelected }: Props) {
       >
         <EuiSelect
           fullWidth
-          data-test-subj="o11ySloGroupConfigurationSelect"
+          data-test-subj="sloGroupOverviewConfigurationGroupBy"
           options={groupByOptions}
           value={selectedGroupBy}
           onChange={(e) => {
@@ -207,7 +206,7 @@ export function SloGroupFilters({ selectedFilters, onSelected }: Props) {
             defaultMessage: 'Select a {selectedGroupByLabel}',
             values: { selectedGroupByLabel },
           })}
-          data-test-subj="sloGroup"
+          data-test-subj="sloGroupOverviewConfigurationGroup"
           options={groupOptions}
           selectedOptions={selectedGroupOptions}
           async
@@ -233,6 +232,7 @@ export function SloGroupFilters({ selectedFilters, onSelected }: Props) {
         }
       >
         <SearchBar
+          dataTestSubj="sloGroupOverviewConfigurationKqlBar"
           appName={sloAppId}
           placeholder={PLACEHOLDER}
           indexPatterns={dataView ? [dataView] : []}

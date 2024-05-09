@@ -286,7 +286,7 @@ describe('UserName', () => {
         params: {
           userName: props.value,
           contextID: props.contextId,
-          scopeId: TableId.alertsOnAlertsPage,
+          scopeId: 'timeline-1',
           isDraggable: false,
         },
       });

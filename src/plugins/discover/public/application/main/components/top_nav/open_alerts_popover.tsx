@@ -20,7 +20,7 @@ import {
   STACK_ALERTS_FEATURE_ID,
 } from '@kbn/rule-data-utils';
 import { RuleTypeMetaData } from '@kbn/alerting-plugin/common';
-import { DiscoverStateContainer } from '../../services/discover_state';
+import { DiscoverStateContainer } from '../../state_management/discover_state';
 import { DiscoverServices } from '../../../../build_services';
 
 const container = document.createElement('div');
@@ -218,7 +218,7 @@ export function openAlertsPopover({
   document.body.appendChild(container);
 
   const element = (
-    <KibanaRenderContextProvider theme={services.core.theme} i18n={services.core.i18n}>
+    <KibanaRenderContextProvider {...services.core}>
       <KibanaContextProvider services={services}>
         <AlertsPopover
           onClose={closeAlertsPopover}

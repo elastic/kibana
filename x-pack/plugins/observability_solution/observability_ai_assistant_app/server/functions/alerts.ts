@@ -47,7 +47,6 @@ export function registerAlertsFunction({
   functions.registerFunction(
     {
       name: 'alerts',
-      contexts: ['core'],
       description:
         'Get alerts for Observability. Display the response in tabular format if appropriate.',
       descriptionForUser: 'Get alerts for Observability',

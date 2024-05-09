@@ -24,7 +24,7 @@ export const useActiveRoute = (routesList: MlRoute[]): MlRoute => {
   const { pathname } = useLocation();
 
   const {
-    services: { executionContext, overlays, theme, i18n },
+    services: { executionContext, overlays, ...startServices },
   } = useMlKibana();
 
   /**
@@ -78,7 +78,7 @@ export const useActiveRoute = (routesList: MlRoute[]): MlRoute => {
                 />
               </p>
             </EuiCallOut>,
-            { theme, i18n }
+            startServices
           )
         );
 
@@ -90,7 +90,7 @@ export const useActiveRoute = (routesList: MlRoute[]): MlRoute => {
         }, 15000);
       }
     },
-    [activeRoute, overlays, theme, pathname, i18n]
+    [activeRoute, overlays, pathname, startServices]
   );
 
   useExecutionContext(executionContext, {

@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { HttpSetup, NotificationsStart, ThemeServiceStart } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
+import type { StartRenderServices } from '../../../types';
 
 interface RiskyScoreApiBase {
   errorMessage?: string;
   http: HttpSetup;
-  notifications?: NotificationsStart;
   renderDocLink?: (message: string) => React.ReactNode;
   signal?: AbortSignal;
-  theme?: ThemeServiceStart;
+  startServices: StartRenderServices;
 }
 export interface CreateIngestPipeline extends RiskyScoreApiBase {
   options: {

@@ -6,20 +6,11 @@
  * Side Public License, v 1.
  */
 
-import {
-  AggregateQuery,
-  Query,
-  isOfAggregateQueryType,
-  getAggregateQueryMode,
-} from '@kbn/es-query';
-import { RecordRawType } from '../services/discover_data_state_container';
+import { AggregateQuery, Query, isOfAggregateQueryType } from '@kbn/es-query';
+import { RecordRawType } from '../state_management/discover_data_state_container';
 
 export function getRawRecordType(query?: Query | AggregateQuery) {
-  if (
-    query &&
-    isOfAggregateQueryType(query) &&
-    (getAggregateQueryMode(query) === 'sql' || getAggregateQueryMode(query) === 'esql')
-  ) {
+  if (query && isOfAggregateQueryType(query)) {
     return RecordRawType.PLAIN;
   }
 

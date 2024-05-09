@@ -186,7 +186,7 @@ describe.skip('validates saved object types when a schema is provided', () => {
   });
 
   it('is superseded by migration errors and does not run if a migration fails', async () => {
-    expect(async () => {
+    await expect(async () => {
       await savedObjectsClient.create(
         'migration-error',
         {
@@ -233,7 +233,7 @@ describe.skip('validates saved object types when a schema is provided', () => {
 
   describe('when validating with a config schema', () => {
     it('throws when an invalid attribute is provided', async () => {
-      expect(async () => {
+      await expect(async () => {
         await savedObjectsClient.create(
           'schema-using-kbn-config',
           {

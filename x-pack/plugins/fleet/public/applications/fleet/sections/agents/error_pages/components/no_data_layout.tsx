@@ -10,6 +10,7 @@ import React from 'react';
 import { withRouter } from 'react-router-dom';
 
 interface LayoutProps {
+  children: React.ReactNode;
   title: string | React.ReactNode;
   actionSection?: React.ReactNode;
 }

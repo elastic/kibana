@@ -128,6 +128,7 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
         className={'ml-app'}
         data-test-subj={'mlApp'}
         restrictWidth={false}
+        panelled
         solutionNav={
           showMLNavMenu
             ? {

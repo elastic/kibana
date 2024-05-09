@@ -171,7 +171,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
 
-  describe('@ess @brokenInServerless @skipInQA import_rules', () => {
+  describe('@ess @serverless @skipInServerlessMKI import_rules', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
     });

@@ -6,6 +6,7 @@
  */
 
 import { ALL_VALUE } from '@kbn/slo-schema';
+import { twoMinute } from '../fixtures/duration';
 import {
   createAPMTransactionDurationIndicator,
   createSLO,
@@ -27,6 +28,21 @@ describe('APM Transaction Duration Transform Generator', () => {
     const slo = createSLOWithTimeslicesBudgetingMethod({
       id: 'irrelevant',
       indicator: createAPMTransactionDurationIndicator(),
+    });
+    const transform = generator.getTransformParams(slo);
+
+    expect(transform).toMatchSnapshot();
+  });
+
+  it('returns the expected transform params for timeslices slo using a timesliceTarget = 0', () => {
+    const slo = createSLOWithTimeslicesBudgetingMethod({
+      id: 'irrelevant',
+      indicator: createAPMTransactionDurationIndicator(),
+      objective: {
+        target: 0.98,
+        timesliceTarget: 0,
+        timesliceWindow: twoMinute(),
+      },
     });
     const transform = generator.getTransformParams(slo);
 

@@ -10,7 +10,7 @@ import type { SignificantItem, SignificantItemGroup } from '@kbn/ml-agg-utils';
 import type { AiopsLogRateAnalysisApiAction } from './actions';
 import { API_ACTION_NAME } from './actions';
 
-interface StreamState {
+export interface StreamState {
   ccsWarning: boolean;
   significantItems: SignificantItem[];
   significantItemsGroups: SignificantItemGroup[];
@@ -34,7 +34,7 @@ export const initialState: StreamState = {
 
 export function streamReducer(
   state: StreamState,
-  action: AiopsLogRateAnalysisApiAction<'2'> | Array<AiopsLogRateAnalysisApiAction<'2'>>
+  action: AiopsLogRateAnalysisApiAction | AiopsLogRateAnalysisApiAction[]
 ): StreamState {
   if (Array.isArray(action)) {
     return action.reduce(streamReducer, state);

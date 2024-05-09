@@ -14,6 +14,8 @@
 // first download since the other plugins/areas of your code can directly pull from the package in their async imports.
 // See: https://docs.elastic.dev/kibana-dev-docs/key-concepts/platform-intro#public-plugin-api
 
+import type { CoreStart } from '@kbn/core/public';
+
 import { TimelinesPlugin } from './plugin';
 
 export type { TimelinesUIStart } from './types';
@@ -49,3 +51,5 @@ export function plugin() {
 }
 
 export type { AddToTimelineButtonProps } from './components/hover_actions/actions/add_to_timeline';
+
+export type TimelinesStartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;

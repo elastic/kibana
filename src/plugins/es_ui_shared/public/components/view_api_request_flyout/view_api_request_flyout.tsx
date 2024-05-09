@@ -111,7 +111,12 @@ export const ApiRequestFlyout: React.FunctionComponent<ViewApiRequestFlyoutProps
           )}
         </div>
         <EuiSpacer size="s" />
-        <EuiCodeBlock language="json" data-test-subj="apiRequestFlyoutBody">
+        <EuiCodeBlock
+          language="json"
+          data-test-subj="apiRequestFlyoutBody"
+          overflowHeight={1200}
+          isVirtualized
+        >
           {request}
         </EuiCodeBlock>
       </EuiFlyoutBody>

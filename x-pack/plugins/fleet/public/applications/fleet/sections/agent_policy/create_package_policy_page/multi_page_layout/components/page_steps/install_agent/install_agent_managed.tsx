@@ -31,7 +31,7 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
     setIsManaged,
     agentPolicy,
     enrollmentAPIKey,
-    fleetServerHosts,
+    fleetServerHost,
     fleetProxy,
     enrolledAgentIds,
   } = props;
@@ -65,7 +65,7 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
   const installManagedCommands = ManualInstructions({
     apiKey: enrollmentAPIKey.api_key,
     fleetProxy,
-    fleetServerHosts,
+    fleetServerHost,
     agentVersion: agentVersion || '',
   });
 
@@ -78,7 +78,7 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
       selectedApiKeyId: enrollmentAPIKey.id,
       isComplete: commandCopied || !!enrolledAgentIds.length,
       fullCopyButton: true,
-      fleetServerHost: fleetServerHosts?.[0],
+      fleetServerHost,
       onCopy: () => setCommandCopied(true),
     }),
   ];

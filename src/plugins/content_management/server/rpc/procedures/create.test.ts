@@ -230,16 +230,16 @@ describe('RPC -> create()', () => {
     });
 
     describe('validation', () => {
-      test('should validate that content type definition exist', () => {
+      test('should validate that content type definition exist', async () => {
         const { ctx } = setup();
-        expect(() =>
+        await expect(() =>
           fn(ctx, { contentTypeId: 'unknown', data: { title: 'Hello' } })
         ).rejects.toEqual(new Error('Content [unknown] is not registered.'));
       });
 
-      test('should throw if the request version is higher than the registered version', () => {
+      test('should throw if the request version is higher than the registered version', async () => {
         const { ctx } = setup();
-        expect(() =>
+        await expect(() =>
           fn(ctx, {
             contentTypeId: FOO_CONTENT_ID,
             data: { title: 'Hello' },
@@ -250,9 +250,9 @@ describe('RPC -> create()', () => {
     });
 
     describe('object versioning', () => {
-      test('should expose a  utility to transform and validate services objects', () => {
+      test('should expose a  utility to transform and validate services objects', async () => {
         const { ctx, storage } = setup();
-        fn(ctx, { contentTypeId: FOO_CONTENT_ID, data: { title: 'Hello' }, version: 1 });
+        await fn(ctx, { contentTypeId: FOO_CONTENT_ID, data: { title: 'Hello' }, version: 1 });
         const [[storageContext]] = storage.create.mock.calls;
 
         // getTransforms() utils should be available from context

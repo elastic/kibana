@@ -29,7 +29,7 @@
           "\nUtility component to portal a part of a react application into the provided `MountPoint`."
         ],
         "signature": [
-          "({ children, setMountPoint }: React.PropsWithChildren<",
+          "({ children, setMountPoint, }: React.PropsWithChildren<React.PropsWithChildren<",
           {
             "pluginId": "@kbn/react-kibana-mount",
             "scope": "common",
@@ -37,7 +37,7 @@
             "section": "def-common.MountPointPortalProps",
             "text": "MountPointPortalProps"
           },
-          ">) => React.ReactPortal | null"
+          ">>) => React.ReactPortal | null"
         ],
         "path": "packages/react/kibana_mount/mount_point_portal.tsx",
         "deprecated": false,
@@ -48,10 +48,10 @@
             "id": "def-common.MountPointPortal.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{ children, setMountPoint }",
+            "label": "{\n  children,\n  setMountPoint,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
+              "React.PropsWithChildren<React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/react-kibana-mount",
                 "scope": "common",
@@ -59,7 +59,7 @@
                 "section": "def-common.MountPointPortalProps",
                 "text": "MountPointPortalProps"
               },
-              ">"
+              ">>"
             ],
             "path": "packages/react/kibana_mount/mount_point_portal.tsx",
             "deprecated": false,
@@ -220,6 +220,20 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/react-kibana-mount",
+            "id": "def-common.MountPointPortalProps.children",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "children",
+            "description": [],
+            "signature": [
+              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+            ],
+            "path": "packages/react/kibana_mount/mount_point_portal.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -243,7 +257,7 @@
             "section": "def-common.I18nStart",
             "text": "I18nStart"
           },
-          "; analytics?: ",
+          "; analytics?: Pick<",
           {
             "pluginId": "@kbn/core-analytics-browser",
             "scope": "common",
@@ -251,7 +265,7 @@
             "section": "def-common.AnalyticsServiceStart",
             "text": "AnalyticsServiceStart"
           },
-          " | undefined; theme: ",
+          ", \"reportEvent\"> | undefined; theme: ",
           {
             "pluginId": "@kbn/react-kibana-context-common",
             "scope": "common",

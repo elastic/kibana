@@ -8,11 +8,11 @@ import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 
 export async function generateData({
-  synthtraceEsClient,
+  apmSynthtraceEsClient,
   start,
   end,
 }: {
-  synthtraceEsClient: ApmSynthtraceEsClient;
+  apmSynthtraceEsClient: ApmSynthtraceEsClient;
   start: number;
   end: number;
 }) {
@@ -24,7 +24,7 @@ export async function generateData({
     .service({ name: 'synth-java', environment: 'production', agentName: 'java' })
     .instance('instance-b');
 
-  await synthtraceEsClient.index(
+  await apmSynthtraceEsClient.index(
     timerange(start, end)
       .interval('1m')
       .generator((timestamp) => {

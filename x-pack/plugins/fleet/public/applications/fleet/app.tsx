@@ -7,10 +7,11 @@
 
 import React, { memo, useEffect, useState } from 'react';
 import type { AppMountParameters } from '@kbn/core/public';
-import { EuiErrorBoundary, EuiPortal } from '@elastic/eui';
+import { EuiPortal } from '@elastic/eui';
 import type { History } from 'history';
 import { Redirect, useRouteMatch } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
@@ -18,8 +19,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
-
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
@@ -68,7 +67,7 @@ const FEEDBACK_URL = 'https://ela.st/fleet-feedback';
 
 const queryClient = new QueryClient();
 
-export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
+export const WithPermissionsAndSetup = memo<{ children?: React.ReactNode }>(({ children }) => {
   useBreadcrumbs('base');
   const core = useStartServices();
   const { notifications } = core;
@@ -171,10 +170,10 @@ export const FleetAppContext: React.FC<{
   history: AppMountParameters['history'];
   kibanaVersion: string;
   extensions: UIExtensionsStorage;
-  theme$: AppMountParameters['theme$'];
   /** For testing purposes only */
   routerHistory?: History<any>;
   fleetStatus?: FleetStatusProviderProps;
+  children: React.ReactNode;
 }> = memo(
   ({
     children,
@@ -183,49 +182,41 @@ export const FleetAppContext: React.FC<{
     history,
     kibanaVersion,
     extensions,
-    routerHistory,
-    theme$,
+    routerHistory: _routerHistory,
     fleetStatus,
   }) => {
-    const darkModeObservable = useObservable(theme$);
+    const darkModeObservable = useObservable(startServices.theme.theme$);
     const isDarkMode = darkModeObservable && darkModeObservable.darkMode;
 
     return (
-      <RedirectAppLinks
-        coreStart={{
-          application: startServices.application,
-        }}
-      >
-        <startServices.i18n.Context>
-          <KibanaContextProvider services={{ ...startServices, theme: { theme$ } }}>
-            <EuiErrorBoundary>
-              <ConfigContext.Provider value={config}>
-                <KibanaVersionContext.Provider value={kibanaVersion}>
-                  <KibanaThemeProvider theme$={theme$}>
-                    <EuiThemeProvider darkMode={isDarkMode}>
-                      <QueryClientProvider client={queryClient}>
-                        <ReactQueryDevtools initialIsOpen={false} />
-                        <UIExtensionsContext.Provider value={extensions}>
-                          <FleetStatusProvider defaultFleetStatus={fleetStatus}>
-                            <Router history={history}>
-                              <PackageInstallProvider
-                                notifications={startServices.notifications}
-                                theme$={theme$}
-                              >
-                                <FlyoutContextProvider>{children}</FlyoutContextProvider>
-                              </PackageInstallProvider>
-                            </Router>
-                          </FleetStatusProvider>
-                        </UIExtensionsContext.Provider>
-                      </QueryClientProvider>
-                    </EuiThemeProvider>
-                  </KibanaThemeProvider>
-                </KibanaVersionContext.Provider>
-              </ConfigContext.Provider>
-            </EuiErrorBoundary>
+      <KibanaRenderContextProvider {...startServices}>
+        <RedirectAppLinks
+          coreStart={{
+            application: startServices.application,
+          }}
+        >
+          <KibanaContextProvider services={{ ...startServices }}>
+            <ConfigContext.Provider value={config}>
+              <KibanaVersionContext.Provider value={kibanaVersion}>
+                <EuiThemeProvider darkMode={isDarkMode}>
+                  <QueryClientProvider client={queryClient}>
+                    <ReactQueryDevtools initialIsOpen={false} />
+                    <UIExtensionsContext.Provider value={extensions}>
+                      <FleetStatusProvider defaultFleetStatus={fleetStatus}>
+                        <Router history={history}>
+                          <PackageInstallProvider startServices={startServices}>
+                            <FlyoutContextProvider>{children}</FlyoutContextProvider>
+                          </PackageInstallProvider>
+                        </Router>
+                      </FleetStatusProvider>
+                    </UIExtensionsContext.Provider>
+                  </QueryClientProvider>
+                </EuiThemeProvider>
+              </KibanaVersionContext.Provider>
+            </ConfigContext.Provider>
           </KibanaContextProvider>
-        </startServices.i18n.Context>
-      </RedirectAppLinks>
+        </RedirectAppLinks>
+      </KibanaRenderContextProvider>
     );
   }
 );

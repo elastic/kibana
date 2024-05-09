@@ -10,7 +10,7 @@ Get started with ES|QLedit
 To get started with ES|QL in Discover, open the main menu and select
 Discover. Next, from the Data views menu, select Try ES|QL.
 The ability to select ES|QL from the Data views menu can be enabled and
-disabled using the `discover:enableESQL` setting from
+disabled using the `enableESQL` setting from
 Advanced Settings.
 The query baredit
 After switching to ES|QL mode, the query bar shows a sample query. For example:
