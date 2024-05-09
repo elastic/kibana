@@ -411,6 +411,10 @@ describe('validation logic', () => {
       testErrorsAndWarnings(`from index`, []);
       testErrorsAndWarnings(`FROM index`, []);
       testErrorsAndWarnings(`FrOm index`, []);
+      testErrorsAndWarnings('from `index`', [
+        "SyntaxError: token recognition error at: '`'",
+        "SyntaxError: token recognition error at: '`'",
+      ]);
 
       testErrorsAndWarnings(`from index, other_index`, []);
       testErrorsAndWarnings(`from index, missingIndex`, ['Unknown index [missingIndex]']);
