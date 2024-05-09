@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { CoreStart, OverlayStart, ThemeServiceStart, ToastsSetup } from '@kbn/core/public';
 import { ShareMenuItem, ShowShareMenuOptions } from '../types';
@@ -36,7 +35,6 @@ export class ShareMenuManager {
        */
       toggleShareContextMenu: (options: ShowShareMenuOptions) => {
         const onClose = () => {
-          this.onClose();
           options.onClose?.();
         };
         const menuItems = shareRegistry.getShareMenuItems({ ...options, onClose });
@@ -56,11 +54,6 @@ export class ShareMenuManager {
       },
     };
   }
-
-  private onClose = () => {
-    ReactDOM.unmountComponentAtNode(this.container);
-    this.isOpen = false;
-  };
 
   private toggleShareContextMenu({
     anchorElement,
@@ -110,6 +103,7 @@ export class ShareMenuManager {
         toMountPoint(
           <ShareMenu
             shareContext={{
+              anchorElement,
               allowEmbed,
               allowShortUrl,
               objectId,
