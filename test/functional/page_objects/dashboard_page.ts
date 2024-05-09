@@ -229,9 +229,23 @@ export class DashboardPageObject extends FtrService {
     await this.expectExistsDashboardLandingPage();
   }
 
-  public async clickDuplicate() {
+  public async duplicateDashboard(
+    interactionMode: 'view' | 'edit',
+    dashboardNameOverride?: string
+  ) {
     this.log.debug('Clicking duplicate');
-    await this.testSubjects.click('dashboardDuplication');
+
+    if (interactionMode === 'edit') {
+      await this.testSubjects.click('dashboardSaveAsMenuItem');
+    } else {
+      await this.testSubjects.click('dashboardDuplication');
+    }
+
+    if (dashboardNameOverride) {
+      this.log.debug('entering dashboard duplicate override title');
+      await this.testSubjects.setValue('savedObjectTitle', dashboardNameOverride);
+    }
+
     await this.clickSave();
 
     // Confirm that the Dashboard has actually been saved
@@ -463,9 +477,12 @@ export class DashboardPageObject extends FtrService {
     await this.testSubjects.setValue('savedObjectTitle', dashboardName);
   }
 
+  /**
+   * @description opens the dashboard settings flyout to modify an existing dashboard
+   */
   public async modifyExistingDashboardDetails(
     dashboard: string,
-    saveOptions: SaveDashboardOptions = { waitDialogIsClosed: true, exitFromEditMode: true }
+    saveOptions: Pick<SaveDashboardOptions, 'storeTimeWithDashboard' | 'tags' | 'needsConfirm'> = {}
   ) {
     await this.openSettingsFlyout();
 
@@ -483,6 +500,11 @@ export class DashboardPageObject extends FtrService {
 
       this.log.debug('DashboardPage.applyCustomization');
       await this.testSubjects.click('applyCustomizeDashboardButton');
+
+      if (saveOptions.needsConfirm) {
+        await this.ensureDuplicateTitleCallout();
+        await this.testSubjects.click('applyCustomizeDashboardButton');
+      }
 
       this.log.debug('isCustomizeDashboardLoadingIndicatorVisible');
       return await this.testSubjects.exists('dashboardUnsavedChangesBadge', { timeout: 1500 });
@@ -502,16 +524,13 @@ export class DashboardPageObject extends FtrService {
     saveOptions: SaveDashboardOptions = { waitDialogIsClosed: true, exitFromEditMode: true }
   ) {
     await this.retry.try(async () => {
-      await this.enterDashboardTitleAndClickSave(dashboardName, saveOptions);
-
-      if (saveOptions.needsConfirm) {
-        await this.ensureDuplicateTitleCallout();
-        await this.clickSave();
-      }
+      await this.modifyExistingDashboardDetails(dashboardName, saveOptions);
+      await this.clickQuickSave();
 
       // Confirm that the Dashboard has actually been saved
       await this.testSubjects.existOrFail('saveDashboardSuccess');
     });
+
     const message = await this.toasts.getTitleAndDismiss();
     await this.header.waitUntilLoadingHasFinished();
     await this.common.waitForSaveModalToClose();
@@ -536,20 +555,20 @@ export class DashboardPageObject extends FtrService {
   }
 
   /**
-   *
-   * @param dashboardTitle {String}
-   * @param saveOptions {{storeTimeWithDashboard: boolean, saveAsNew: boolean, waitDialogIsClosed: boolean}}
+   * @description populates the duplicate dashboard modal
    */
-  public async enterDashboardTitleAndClickSave(
+  public async enterDashboardSaveModalApplyUpdatesAndClickSave(
     dashboardTitle: string,
     saveOptions: SaveDashboardOptions = { waitDialogIsClosed: true }
   ) {
     const isSaveModalOpen = await this.testSubjects.exists('savedObjectSaveModal', {
       timeout: 2000,
     });
+
     if (!isSaveModalOpen) {
-      await this.testSubjects.click('dashboardSaveMenuItem');
+      await this.testSubjects.click('dashboardSaveAsMenuItem');
     }
+
     const modalDialog = await this.testSubjects.find('savedObjectSaveModal');
 
     this.log.debug('entering new title');
@@ -557,11 +576,6 @@ export class DashboardPageObject extends FtrService {
 
     if (saveOptions.storeTimeWithDashboard !== undefined) {
       await this.setStoreTimeWithDashboard(saveOptions.storeTimeWithDashboard);
-    }
-
-    const saveAsNewCheckboxExists = await this.testSubjects.exists('saveAsNewCheckbox');
-    if (saveAsNewCheckboxExists) {
-      await this.setSaveAsNewCheckBox(Boolean(saveOptions.saveAsNew));
     }
 
     if (saveOptions.tags) {

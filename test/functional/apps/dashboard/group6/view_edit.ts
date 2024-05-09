@@ -63,12 +63,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(isInViewMode).to.be(false);
     });
 
-    describe('save', function () {
-      it('auto exits out of edit mode', async function () {
+    describe('save as new', () => {
+      it('keeps duplicated dashboard in edit mode', async () => {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
-        await PageObjects.dashboard.saveDashboard(dashboardName);
+        await PageObjects.dashboard.duplicateDashboard('edit');
         const isViewMode = await PageObjects.dashboard.getIsInViewMode();
-        expect(isViewMode).to.equal(true);
+        expect(isViewMode).to.equal(false);
+      });
+    });
+
+    describe('save', function () {
+      it('keeps dashboard in edit mode', async function () {
+        await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
+        await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
+        const isViewMode = await PageObjects.dashboard.getIsInViewMode();
+        expect(isViewMode).to.equal(false);
       });
     });
 

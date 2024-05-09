@@ -200,9 +200,9 @@ export const useDashboardMenuItems = ({
       saveAs: {
         description: topNavStrings.saveAs.description,
         disableButton: disableTopNav,
-        id: 'save',
+        id: 'save-as',
         emphasize: !Boolean(lastSavedId),
-        testId: 'dashboardSaveMenuItem',
+        testId: 'dashboardSaveAsMenuItem',
         iconType: Boolean(lastSavedId) ? undefined : 'save',
         label: Boolean(lastSavedId) ? topNavStrings.saveAs.label : topNavStrings.quickSave.label,
         run: () => saveDashboardAs(),

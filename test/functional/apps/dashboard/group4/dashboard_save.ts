@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName, {
+        await PageObjects.dashboard.enterDashboardSaveModalApplyUpdatesAndClickSave(dashboardName, {
           waitDialogIsClosed: false,
         });
         await PageObjects.dashboard.expectDuplicateTitleWarningDisplayed({ displayed: true });
@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('Saves on confirm duplicate title warning', async function () {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName, {
+        await PageObjects.dashboard.enterDashboardSaveModalApplyUpdatesAndClickSave(dashboardName, {
           waitDialogIsClosed: false,
         });
 
@@ -117,7 +117,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('duplication (edit mode)', () => {
       it('Warns you when you Save as New Dashboard, and the title is a duplicate', async function () {
         await PageObjects.dashboard.switchToEditMode();
-        await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName, {
+        await PageObjects.dashboard.enterDashboardSaveModalApplyUpdatesAndClickSave(dashboardName, {
           saveAsNew: true,
         });
 
@@ -134,9 +134,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('Warns when case is different', async function () {
         await PageObjects.dashboard.switchToEditMode();
-        await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName.toUpperCase(), {
-          waitDialogIsClosed: false,
-        });
+        await PageObjects.dashboard.enterDashboardSaveModalApplyUpdatesAndClickSave(
+          dashboardName.toUpperCase(),
+          {
+            waitDialogIsClosed: false,
+          }
+        );
 
         await PageObjects.dashboard.expectDuplicateTitleWarningDisplayed({ displayed: true });
 
