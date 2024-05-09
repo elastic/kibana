@@ -20,18 +20,6 @@ import {
   extractMessageValueFromNode,
 } from './utils';
 
-const i18nTranslateSources = ['i18n', 'i18n.translate'].map(
-  (callee) => `
-${callee}('plugin_1.id_1', {
-  values: {
-    key: 'value',
-  },
-  defaultMessage: 'Message text',
-  description: 'Message description'
-});
-`
-);
-
 const objectPropertySource = `
 const object = {
   id: 'value',
@@ -51,21 +39,25 @@ describe('i18n utils', () => {
     ).toMatchSnapshot();
   });
 
-  test('should detect i18n translate function call', () => {
-    let source = i18nTranslateSources[0];
-    let expressionStatementNode = [...traverseNodes(parse(source).program.body)].find((node) =>
-      isExpressionStatement(node)
-    );
+  test.each(['i18n', 'i18n.translate', 't.translate', 'kbni18n.translate', 'I18N.translate'])(
+    'should detect %s() translate function call',
+    (callee) => {
+      const source = `
+${callee}('plugin_1.id_1', {
+  values: {
+    key: 'value',
+  },
+  defaultMessage: 'Message text',
+  description: 'Message description'
+});
+`;
+      const expressionStatementNode = [...traverseNodes(parse(source).program.body)].find((node) =>
+        isExpressionStatement(node)
+      );
 
-    expect(isI18nTranslateFunction(expressionStatementNode.expression)).toBe(true);
-
-    source = i18nTranslateSources[1];
-    expressionStatementNode = [...traverseNodes(parse(source).program.body)].find((node) =>
-      isExpressionStatement(node)
-    );
-
-    expect(isI18nTranslateFunction(expressionStatementNode.expression)).toBe(true);
-  });
+      expect(isI18nTranslateFunction(expressionStatementNode.expression)).toBe(true);
+    }
+  );
 
   test('should detect object property with defined key', () => {
     const objectExpresssionNode = [...traverseNodes(parse(objectPropertySource).program.body)].find(

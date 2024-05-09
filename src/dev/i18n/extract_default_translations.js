@@ -48,7 +48,7 @@ See .i18nrc.json for the list of supported namespaces.`)
   }
 }
 
-export async function matchEntriesWithExctractors(inputPath, options = {}) {
+export async function matchEntriesWithExtractors(inputPath, options = {}) {
   const { additionalIgnore = [], mark = false, absolute = false } = options;
   const ignore = [
     '**/node_modules/**',
@@ -77,7 +77,7 @@ export async function matchEntriesWithExctractors(inputPath, options = {}) {
 }
 
 export async function extractMessagesFromPathToMap(inputPath, targetMap, config, reporter) {
-  const { entries, extractFunction } = await matchEntriesWithExctractors(inputPath);
+  const { entries, extractFunction } = await matchEntriesWithExtractors(inputPath);
 
   const files = await Promise.all(
     filterEntries(entries, config.exclude).map(async (entry) => {
