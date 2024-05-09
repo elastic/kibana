@@ -231,7 +231,8 @@ export function correctCommonEsqlMistakes(content: string, log: Logger) {
         case 'FROM':
           formattedCommand = formattedCommand
             .replaceAll(/FROM "(.*)"/g, 'FROM $1')
-            .replaceAll(/FROM '(.*)'/g, 'FROM $1');
+            .replaceAll(/FROM '(.*)'/g, 'FROM $1')
+            .replaceAll(/FROM `(.*)`/g, 'FROM $1');
           break;
 
         case 'WHERE':
