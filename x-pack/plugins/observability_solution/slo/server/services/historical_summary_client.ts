@@ -63,13 +63,12 @@ export class DefaultHistoricalSummaryClient implements HistoricalSummaryClient {
   constructor(private esClient: ElasticsearchClient) {}
 
   async fetch(params: FetchHistoricalSummaryParams): Promise<HistoricalSummaryResponse> {
-    const dateRangeBySlo = params.list.reduce<Record<SLOId, DateRange>>(
-      (acc, { sloId, timeWindow, range }) => {
-        acc[sloId] = range ?? getDateRange(timeWindow);
-        return acc;
-      },
-      {}
-    );
+    const dateRangeBySlo = params.list.reduce<
+      Record<SLOId, { range: DateRange; queryRange: DateRange }>
+    >((acc, { sloId, timeWindow, range }) => {
+      acc[sloId] = getDateRange(timeWindow, range);
+      return acc;
+    }, {});
 
     const searches = params.list.flatMap(
       ({ sloId, revision, budgetingMethod, instanceId, groupBy, timeWindow, remoteName }) => [
@@ -113,7 +112,12 @@ export class DefaultHistoricalSummaryClient implements HistoricalSummaryClient {
           historicalSummary.push({
             sloId,
             instanceId,
-            data: handleResultForRollingAndTimeslices(objective, timeWindow, buckets),
+            data: handleResultForRollingAndTimeslices(
+              objective,
+              timeWindow,
+              buckets,
+              dateRangeBySlo[sloId]
+            ),
           });
 
           continue;
@@ -123,7 +127,12 @@ export class DefaultHistoricalSummaryClient implements HistoricalSummaryClient {
           historicalSummary.push({
             sloId,
             instanceId,
-            data: handleResultForRollingAndOccurrences(objective, timeWindow, buckets),
+            data: handleResultForRollingAndOccurrences(
+              objective,
+              timeWindow,
+              buckets,
+              dateRangeBySlo[sloId]
+            ),
           });
           continue;
         }
@@ -187,10 +196,10 @@ function handleResultForCalendarAlignedAndOccurrences(
 function handleResultForCalendarAlignedAndTimeslices(
   objective: Objective,
   buckets: DailyAggBucket[],
-  dateRange: DateRange
+  dateRange: { range: DateRange; queryRange: DateRange }
 ): HistoricalSummary[] {
   const initialErrorBudget = 1 - objective.target;
-  const totalSlices = computeTotalSlicesFromDateRange(dateRange, objective.timesliceWindow!);
+  const totalSlices = computeTotalSlicesFromDateRange(dateRange.range, objective.timesliceWindow!);
 
   return buckets.map((bucket: DailyAggBucket): HistoricalSummary => {
     const good = bucket.cumulative_good?.value ?? 0;
@@ -211,73 +220,85 @@ function handleResultForCalendarAlignedAndTimeslices(
 function handleResultForRollingAndOccurrences(
   objective: Objective,
   timeWindow: TimeWindow,
-  buckets: DailyAggBucket[]
+  buckets: DailyAggBucket[],
+  dateRange: { range: DateRange; queryRange: DateRange }
 ): HistoricalSummary[] {
   const initialErrorBudget = 1 - objective.target;
-  const rollingWindowDurationInDays = moment
-    .duration(timeWindow.duration.value, toMomentUnitOfTime(timeWindow.duration.unit))
-    .asDays();
+  // const rollingWindowDurationInDays = moment
+  //   .duration(timeWindow.duration.value, toMomentUnitOfTime(timeWindow.duration.unit))
+  //   .asDays();
+  // const { bucketsPerDay } = getFixedIntervalAndBucketsPerDay(rollingWindowDurationInDays);
 
-  const { bucketsPerDay } = getFixedIntervalAndBucketsPerDay(rollingWindowDurationInDays);
+  return (
+    buckets
+      // .slice(-bucketsPerDay * rollingWindowDurationInDays)
+      .filter(
+        (bucket) =>
+          moment(bucket.key_as_string).isSameOrAfter(dateRange.range.from) &&
+          moment(bucket.key_as_string).isSameOrBefore(dateRange.range.to)
+      )
+      .map((bucket: DailyAggBucket): HistoricalSummary => {
+        const good = bucket.cumulative_good?.value ?? 0;
+        const total = bucket.cumulative_total?.value ?? 0;
 
-  return buckets
-    .slice(-bucketsPerDay * rollingWindowDurationInDays)
-    .map((bucket: DailyAggBucket): HistoricalSummary => {
-      const good = bucket.cumulative_good?.value ?? 0;
-      const total = bucket.cumulative_total?.value ?? 0;
+        const sliValue = computeSLI(good, total);
+        const consumedErrorBudget = sliValue < 0 ? 0 : (1 - sliValue) / initialErrorBudget;
+        const errorBudget = toErrorBudget(initialErrorBudget, consumedErrorBudget);
 
-      const sliValue = computeSLI(good, total);
-      const consumedErrorBudget = sliValue < 0 ? 0 : (1 - sliValue) / initialErrorBudget;
-      const errorBudget = toErrorBudget(initialErrorBudget, consumedErrorBudget);
-
-      return {
-        date: new Date(bucket.key_as_string),
-        errorBudget,
-        sliValue,
-        status: computeSummaryStatus(objective, sliValue, errorBudget),
-      };
-    });
+        return {
+          date: new Date(bucket.key_as_string),
+          errorBudget,
+          sliValue,
+          status: computeSummaryStatus(objective, sliValue, errorBudget),
+        };
+      })
+  );
 }
 
 function handleResultForRollingAndTimeslices(
   objective: Objective,
   timeWindow: TimeWindow,
-  buckets: DailyAggBucket[]
+  buckets: DailyAggBucket[],
+  dateRange: { range: DateRange; queryRange: DateRange }
 ): HistoricalSummary[] {
   const initialErrorBudget = 1 - objective.target;
-  const rollingWindowDurationInDays = moment
-    .duration(timeWindow.duration.value, toMomentUnitOfTime(timeWindow.duration.unit))
-    .asDays();
+  // const rollingWindowDurationInDays = moment
+  //   .duration(timeWindow.duration.value, toMomentUnitOfTime(timeWindow.duration.unit))
+  //   .asDays();
 
-  const { bucketsPerDay } = getFixedIntervalAndBucketsPerDay(rollingWindowDurationInDays);
+  // const { bucketsPerDay } = getFixedIntervalAndBucketsPerDay(rollingWindowDurationInDays);
+  const dateRangeDurationInSeconds = moment(dateRange.range.to).diff(
+    dateRange.range.from,
+    'seconds'
+  );
   const totalSlices = Math.ceil(
-    timeWindow.duration.asSeconds() / objective.timesliceWindow!.asSeconds()
+    dateRangeDurationInSeconds / objective.timesliceWindow!.asSeconds()
   );
 
-  return buckets
-    .slice(-bucketsPerDay * rollingWindowDurationInDays)
-    .map((bucket: DailyAggBucket): HistoricalSummary => {
-      const good = bucket.cumulative_good?.value ?? 0;
-      const total = bucket.cumulative_total?.value ?? 0;
-      const sliValue = computeSLI(good, total, totalSlices);
-      const consumedErrorBudget = sliValue < 0 ? 0 : (1 - sliValue) / initialErrorBudget;
-      const errorBudget = toErrorBudget(initialErrorBudget, consumedErrorBudget);
+  return (
+    buckets
+      // .slice(-bucketsPerDay * rollingWindowDurationInDays)
+      .filter(
+        (bucket) =>
+          moment(bucket.key_as_string).isSameOrAfter(dateRange.range.from) &&
+          moment(bucket.key_as_string).isSameOrBefore(dateRange.range.to)
+      )
+      .map((bucket: DailyAggBucket): HistoricalSummary => {
+        const good = bucket.cumulative_good?.value ?? 0;
+        const total = bucket.cumulative_total?.value ?? 0;
+        const sliValue = computeSLI(good, total, totalSlices);
+        const consumedErrorBudget = sliValue < 0 ? 0 : (1 - sliValue) / initialErrorBudget;
+        const errorBudget = toErrorBudget(initialErrorBudget, consumedErrorBudget);
 
-      return {
-        date: new Date(bucket.key_as_string),
-        errorBudget,
-        sliValue,
-        status: computeSummaryStatus(objective, sliValue, errorBudget),
-      };
-    });
+        return {
+          date: new Date(bucket.key_as_string),
+          errorBudget,
+          sliValue,
+          status: computeSummaryStatus(objective, sliValue, errorBudget),
+        };
+      })
+  );
 }
-
-export const getEsDateRange = (dateRange: DateRange) => {
-  return {
-    gte: typeof dateRange.from === 'string' ? dateRange.from : dateRange.from.toISOString(),
-    lte: typeof dateRange.to === 'string' ? dateRange.to : dateRange.to.toISOString(),
-  };
-};
 
 function generateSearchQuery({
   sloId,
@@ -292,7 +313,7 @@ function generateSearchQuery({
   sloId: string;
   groupBy: GroupBy;
   revision: number;
-  dateRange: DateRange;
+  dateRange: { range: DateRange; queryRange: DateRange };
   timeWindow: TimeWindow;
   budgetingMethod: BudgetingMethod;
 }): MsearchMultisearchBody {
@@ -316,7 +337,10 @@ function generateSearchQuery({
           { term: { 'slo.revision': revision } },
           {
             range: {
-              '@timestamp': getEsDateRange(dateRange),
+              '@timestamp': {
+                gte: dateRange.queryRange.from.toISOString(),
+                lte: dateRange.queryRange.to.toISOString(),
+              },
             },
           },
           ...extraFilterByInstanceId,
@@ -329,8 +353,8 @@ function generateSearchQuery({
           field: '@timestamp',
           fixed_interval: fixedInterval,
           extended_bounds: {
-            min: typeof dateRange.from === 'string' ? dateRange.from : dateRange.from.toISOString(),
-            max: 'now/d',
+            min: dateRange.range.from.toISOString(),
+            max: dateRange.range.to.toISOString(),
           },
         },
         aggs: {
@@ -382,26 +406,52 @@ function generateSearchQuery({
   };
 }
 
-function getDateRange(timeWindow: TimeWindow) {
+// The queryRange is used for the filter range on the query, while the range is used for storing the actual range requested
+function getDateRange(
+  timeWindow: TimeWindow,
+  range?: DateRange
+): { range: DateRange; queryRange: DateRange } {
   if (rollingTimeWindowSchema.is(timeWindow)) {
     const unit = toMomentUnitOfTime(timeWindow.duration.unit as DurationUnit);
+
+    if (range) {
+      return {
+        range,
+        queryRange: {
+          from: moment(range.from)
+            .subtract(timeWindow.duration.value, unit)
+            .startOf('day')
+            .toDate(),
+          to: moment(range.to).startOf('minute').toDate(),
+        },
+      };
+    }
+
     const now = moment();
     return {
-      from: now
-        .clone()
-        .subtract(timeWindow.duration.value * 2, unit)
-        .startOf('day')
-        .toDate(),
-      to: now.startOf('minute').toDate(),
+      range: {
+        from: now.clone().subtract(timeWindow.duration.value, unit).startOf('day').toDate(),
+        to: now.startOf('minute').toDate(),
+      },
+      queryRange: {
+        from: now
+          .clone()
+          .subtract(timeWindow.duration.value * 2, unit)
+          .startOf('day')
+          .toDate(),
+        to: now.startOf('minute').toDate(),
+      },
     };
   }
+
   if (calendarAlignedTimeWindowSchema.is(timeWindow)) {
     const now = moment();
     const unit = toCalendarAlignedTimeWindowMomentUnit(timeWindow);
     const from = moment.utc(now).startOf(unit);
     const to = moment.utc(now).endOf(unit);
 
-    return { from: from.toDate(), to: to.toDate() };
+    const calendarRange = { from: from.toDate(), to: to.toDate() };
+    return { range: calendarRange, queryRange: calendarRange };
   }
 
   assertNever(timeWindow);

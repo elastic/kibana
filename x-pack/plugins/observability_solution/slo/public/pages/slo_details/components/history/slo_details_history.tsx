@@ -42,15 +42,11 @@ export function SLODetailsHistory({ slo, isAutoRefreshing, selectedTabId }: Prop
 
   const onRefresh = (val: OnRefreshProps) => {};
 
-  const absRange = useMemo(() => {
-    const parsedStartDate = DateMath.parse(start)!.valueOf();
-    const parsedEndDate = DateMath.parse(end, { roundUp: true })!.valueOf();
-
+  const range = useMemo(() => {
+    // replace absoluteFrom usage with from.getTime()
     return {
-      from: new Date(parsedStartDate),
-      to: new Date(parsedEndDate),
-      absoluteFrom: parsedStartDate,
-      absoluteTo: parsedEndDate,
+      from: new Date(DateMath.parse(start)!.valueOf()),
+      to: new Date(DateMath.parse(end, { roundUp: true })!.valueOf()),
     };
   }, [start, end]);
 
@@ -97,10 +93,7 @@ export function SLODetailsHistory({ slo, isAutoRefreshing, selectedTabId }: Prop
             isAutoRefreshing={isAutoRefreshing}
             burnRateOptions={burnRateOptions}
             selectedTabId={selectedTabId}
-            range={{
-              from: absRange.from,
-              to: absRange.to,
-            }}
+            range={range}
             onBrushed={onBrushed}
           />
         </EuiFlexItem>
@@ -108,18 +101,15 @@ export function SLODetailsHistory({ slo, isAutoRefreshing, selectedTabId }: Prop
           slo={slo}
           selectedTabId={selectedTabId}
           isAutoRefreshing={isAutoRefreshing}
-          range={{
-            from: start,
-            to: end,
-          }}
+          range={range}
           onBrushed={onBrushed}
         />
         <EuiFlexItem>
           <EventsChartPanel
             slo={slo}
             range={{
-              start: absRange.absoluteFrom,
-              end: absRange.absoluteTo,
+              start: range.from.getTime(),
+              end: range.to.getTime(),
             }}
             selectedTabId={selectedTabId}
             onBrushed={onBrushed}

@@ -34,8 +34,8 @@ const fetchHistoricalSummaryParamsSchema = t.type({
         t.partial({
           remoteName: t.string,
           range: t.type({
-            from: t.string,
-            to: t.string,
+            from: dateType,
+            to: dateType,
           }),
         }),
       ])
