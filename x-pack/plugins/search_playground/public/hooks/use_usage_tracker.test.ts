@@ -30,15 +30,15 @@ describe('useUsageTracker', () => {
   it('returns bound functions for tracking usage', () => {
     const { result } = renderHook(() => useUsageTracker());
 
-    expect(typeof result.current.click).toBe('function');
-    expect(typeof result.current.count).toBe('function');
-    expect(typeof result.current.load).toBe('function');
+    expect(typeof result.current?.click).toBe('function');
+    expect(typeof result.current?.count).toBe('function');
+    expect(typeof result.current?.load).toBe('function');
   });
 
   it('calls reportUiCounter with correct arguments for click', () => {
     const { result } = renderHook(() => useUsageTracker());
 
-    result.current.click('button_click');
+    result.current?.click('button_click');
 
     expect(reportUiCounter).toHaveBeenCalledWith('search_playground', 'click', 'button_click');
   });
@@ -46,7 +46,7 @@ describe('useUsageTracker', () => {
   it('calls reportUiCounter with correct arguments for count', () => {
     const { result } = renderHook(() => useUsageTracker());
 
-    result.current.count('item_count');
+    result.current?.count('item_count');
 
     expect(reportUiCounter).toHaveBeenCalledWith('search_playground', 'count', 'item_count');
   });
@@ -54,8 +54,21 @@ describe('useUsageTracker', () => {
   it('calls reportUiCounter with correct arguments for load', () => {
     const { result } = renderHook(() => useUsageTracker());
 
-    result.current.load('page_loaded');
+    result.current?.load('page_loaded');
 
     expect(reportUiCounter).toHaveBeenCalledWith('search_playground', 'loaded', 'page_loaded');
+  });
+
+  it('does not  reportUiCounter if usageCollection is not loaded properly', () => {
+    reportUiCounter = jest.fn();
+    (useKibana as jest.Mock).mockReturnValue({
+      services: { usageCollection: undefined },
+    });
+
+    const { result } = renderHook(() => useUsageTracker());
+
+    result.current?.load('page_loaded');
+
+    expect(reportUiCounter).toHaveBeenCalledTimes(0);
   });
 });
