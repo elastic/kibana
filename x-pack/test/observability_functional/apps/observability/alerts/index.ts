@@ -23,7 +23,8 @@ const ENABLED_ALERTS_CHECKBOX = 2;
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
 
-  describe('Observability alerts', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/115314
+  describe.skip('Observability alerts', function () {
     this.tags('includeFirefox');
 
     const pageObjects = getPageObjects(['common']);
