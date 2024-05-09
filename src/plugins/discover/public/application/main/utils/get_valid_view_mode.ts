@@ -22,7 +22,7 @@ export const getValidViewMode = ({
 }): VIEW_MODE | undefined => {
   if (viewMode === VIEW_MODE.AGGREGATED_LEVEL && isTextBasedQueryMode) {
     // only this mode is supported for text-based languages
-    return VIEW_MODE.DOCUMENT_LEVEL;
+    return VIEW_MODE.DOCUMENT_LEVEL; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   }
 
   return viewMode;

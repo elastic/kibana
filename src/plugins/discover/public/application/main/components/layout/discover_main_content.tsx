@@ -153,15 +153,13 @@ export const DiscoverMainContent = ({
             </>
           ) : null}
           {viewMode === VIEW_MODE.PATTERN_LEVEL ? (
-            <>
-              <PatternAnalysisTab
-                dataView={dataView}
-                stateContainer={stateContainer}
-                onAddFilter={() => setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL)}
-                trackUiMetric={trackUiMetric}
-                viewModeToggle={viewModeToggle}
-              />
-            </>
+            <PatternAnalysisTab
+              dataView={dataView}
+              stateContainer={stateContainer}
+              onAddFilter={() => setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL)}
+              trackUiMetric={trackUiMetric}
+              viewModeToggle={viewModeToggle}
+            />
           ) : null}
         </EuiFlexGroup>
       </DropOverlayWrapper>
