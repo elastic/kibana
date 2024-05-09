@@ -23,9 +23,7 @@ export default function ({ getPageObjects, getService }) {
     });
 
     after(async () => {
-      await kibanaServer.uiSettings.update({
-        'courier:ignoreFilterIfFieldNotInIndex': true,
-      });
+      await kibanaServer.uiSettings.unset('courier:ignoreFilterIfFieldNotInIndex');
     });
 
     describe('Layer with invalid descriptor', () => {
