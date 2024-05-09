@@ -116,17 +116,6 @@ export const getRequiredMapsFields = (title: string): string[] => {
  */
 export const getLayerList = (indexPatternIds: IndexPatternMapping[]) => {
   return [
-    {
-      sourceDescriptor: { type: SOURCE_TYPES.EMS_TMS, isAutoSelect: true },
-      id: uuidv4(),
-      label: null,
-      minZoom: 0,
-      maxZoom: 24,
-      alpha: 1,
-      visible: true,
-      style: null,
-      type: LAYER_TYPE.EMS_VECTOR_TILE,
-    },
     ...indexPatternIds.reduce((acc: object[], { title, id }) => {
       const layerGroupDescriptor = {
         id: uuidv4(),
