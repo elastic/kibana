@@ -29,8 +29,10 @@ import type {
   FormData,
   ValidationFunc,
 } from '../../../../shared_imports';
-import type { RequiredFieldInput } from '../../../../../common/api/detection_engine/model/rule_schema/common_attributes.gen';
-import type { RequiredFieldWithOptionalEcs } from './types';
+import type {
+  RequiredField,
+  RequiredFieldInput,
+} from '../../../../../common/api/detection_engine/model/rule_schema/common_attributes.gen';
 
 const SINGLE_SELECTION_AS_PLAIN_TEXT = { asPlainText: true };
 
@@ -56,25 +58,22 @@ export const RequiredFieldRow = ({
 }: RequiredFieldRowProps) => {
   const handleRemove = useCallback(() => removeItem(item.id), [removeItem, item.id]);
 
-  const rowFieldConfig: FieldConfig<
-    RequiredFieldWithOptionalEcs,
-    RequiredFieldInput,
-    RequiredFieldInput
-  > = useMemo(
-    () => ({
-      deserializer: (value) => {
-        const rowValueWithoutEcs: RequiredFieldInput = {
-          name: value.name,
-          type: value.type,
-        };
+  const rowFieldConfig: FieldConfig<RequiredField | RequiredFieldInput, {}, RequiredFieldInput> =
+    useMemo(
+      () => ({
+        deserializer: (value) => {
+          const rowValueWithoutEcs: RequiredFieldInput = {
+            name: value.name,
+            type: value.type,
+          };
 
-        return rowValueWithoutEcs;
-      },
-      validations: [{ validator: makeValidateRequiredField(parentFieldPath) }],
-      defaultValue: { name: '', type: '' },
-    }),
-    [parentFieldPath]
-  );
+          return rowValueWithoutEcs;
+        },
+        validations: [{ validator: makeValidateRequiredField(parentFieldPath) }],
+        defaultValue: { name: '', type: '' },
+      }),
+      [parentFieldPath]
+    );
 
   return (
     <UseField

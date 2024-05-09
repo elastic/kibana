@@ -11,7 +11,6 @@ import { Form, useForm } from '../../../../shared_imports';
 
 import type { DataViewFieldBase } from '@kbn/es-query';
 import { RequiredFields } from './required_fields';
-import type { RequiredFieldWithOptionalEcs } from './types';
 import type { RequiredFieldInput } from '../../../../../common/api/detection_engine';
 
 const ADD_REQUIRED_FIELD_BUTTON_TEST_ID = 'addRequiredFieldButton';
@@ -25,7 +24,7 @@ describe('RequiredFields form part', () => {
   });
 
   it('displays previously saved required fields', () => {
-    const initialState: RequiredFieldWithOptionalEcs[] = [
+    const initialState = [
       { name: 'field1', type: 'string' },
       { name: 'field2', type: 'number' },
     ];
@@ -56,7 +55,7 @@ describe('RequiredFields form part', () => {
   });
 
   it('user can add a new required field to a previously saved form', async () => {
-    const initialState: RequiredFieldWithOptionalEcs[] = [{ name: 'field1', type: 'string' }];
+    const initialState = [{ name: 'field1', type: 'string' }];
 
     const indexPatternFields: DataViewFieldBase[] = [
       createIndexPatternField({ name: 'field2', esTypes: ['keyword'] }),
@@ -124,7 +123,7 @@ describe('RequiredFields form part', () => {
   });
 
   it('field type dropdown allows to choose from options if multiple types are available', async () => {
-    const initialState: RequiredFieldWithOptionalEcs[] = [{ name: 'field1', type: 'string' }];
+    const initialState = [{ name: 'field1', type: 'string' }];
 
     const indexPatternFields: DataViewFieldBase[] = [
       createIndexPatternField({ name: 'field1', esTypes: ['string', 'keyword'] }),
@@ -141,7 +140,7 @@ describe('RequiredFields form part', () => {
   });
 
   it('user can remove a required field', async () => {
-    const initialState: RequiredFieldWithOptionalEcs[] = [{ name: 'field1', type: 'string' }];
+    const initialState = [{ name: 'field1', type: 'string' }];
 
     const indexPatternFields: DataViewFieldBase[] = [
       createIndexPatternField({ name: 'field1', esTypes: ['string'] }),
@@ -157,7 +156,7 @@ describe('RequiredFields form part', () => {
   });
 
   it('user can not select the same field twice', async () => {
-    const initialState: RequiredFieldWithOptionalEcs[] = [{ name: 'field1', type: 'string' }];
+    const initialState = [{ name: 'field1', type: 'string' }];
 
     const indexPatternFields: DataViewFieldBase[] = [
       createIndexPatternField({ name: 'field1', esTypes: ['string'] }),
@@ -203,9 +202,7 @@ describe('RequiredFields form part', () => {
 
   describe('warnings', () => {
     it('displays a warning when a selected field name is not found within index patterns', async () => {
-      const initialState: RequiredFieldWithOptionalEcs[] = [
-        { name: 'field-that-does-not-exist', type: 'keyword' },
-      ];
+      const initialState = [{ name: 'field-that-does-not-exist', type: 'keyword' }];
 
       const indexPatternFields: DataViewFieldBase[] = [
         createIndexPatternField({ name: 'field1', esTypes: ['string'] }),
@@ -232,9 +229,7 @@ describe('RequiredFields form part', () => {
     });
 
     it('displays a warning when a selected field type is not found within index patterns', async () => {
-      const initialState: RequiredFieldWithOptionalEcs[] = [
-        { name: 'field1', type: 'type-that-does-not-exist' },
-      ];
+      const initialState = [{ name: 'field1', type: 'type-that-does-not-exist' }];
 
       const indexPatternFields: DataViewFieldBase[] = [
         createIndexPatternField({ name: 'field1', esTypes: ['string'] }),
@@ -261,7 +256,7 @@ describe('RequiredFields form part', () => {
     });
 
     it('displays a warning only for field name when both field name and type are not found within index patterns', async () => {
-      const initialState: RequiredFieldWithOptionalEcs[] = [
+      const initialState = [
         { name: 'field-that-does-not-exist', type: 'type-that-does-not-exist' },
       ];
 
@@ -290,7 +285,7 @@ describe('RequiredFields form part', () => {
     });
 
     it(`doesn't display a warning when all selected fields are found within index patterns`, async () => {
-      const initialState: RequiredFieldWithOptionalEcs[] = [{ name: 'field1', type: 'string' }];
+      const initialState = [{ name: 'field1', type: 'string' }];
 
       const indexPatternFields: DataViewFieldBase[] = [
         createIndexPatternField({ name: 'field1', esTypes: ['string'] }),
@@ -371,7 +366,7 @@ describe('RequiredFields form part', () => {
     });
 
     it('form is invalid when same field name is selected more than once', async () => {
-      const initialState: RequiredFieldWithOptionalEcs[] = [{ name: 'field1', type: 'string' }];
+      const initialState = [{ name: 'field1', type: 'string' }];
 
       const indexPatternFields: DataViewFieldBase[] = [
         createIndexPatternField({ name: 'field1', esTypes: ['string'] }),
@@ -438,7 +433,7 @@ describe('RequiredFields form part', () => {
     });
 
     it('submits undefined when all selected fields were removed', async () => {
-      const initialState: RequiredFieldWithOptionalEcs[] = [{ name: 'field1', type: 'string' }];
+      const initialState = [{ name: 'field1', type: 'string' }];
 
       const handleSubmit = jest.fn();
 
@@ -490,7 +485,7 @@ describe('RequiredFields form part', () => {
     });
 
     it('submits previously saved required fields', async () => {
-      const initialState: RequiredFieldWithOptionalEcs[] = [{ name: 'field1', type: 'string' }];
+      const initialState = [{ name: 'field1', type: 'string' }];
 
       const indexPatternFields: DataViewFieldBase[] = [
         createIndexPatternField({ name: 'field1', esTypes: ['string'] }),
@@ -515,7 +510,7 @@ describe('RequiredFields form part', () => {
     });
 
     it('submits updated required fields', async () => {
-      const initialState: RequiredFieldWithOptionalEcs[] = [{ name: 'field1', type: 'string' }];
+      const initialState = [{ name: 'field1', type: 'string' }];
 
       const indexPatternFields: DataViewFieldBase[] = [
         createIndexPatternField({ name: 'field1', esTypes: ['string'] }),
@@ -551,9 +546,7 @@ describe('RequiredFields form part', () => {
     });
 
     it('submits a form with warnings', async () => {
-      const initialState: RequiredFieldWithOptionalEcs[] = [
-        { name: 'name-that-does-not-exist', type: 'type-that-does-not-exist' },
-      ];
+      const initialState = [{ name: 'name-that-does-not-exist', type: 'type-that-does-not-exist' }];
 
       const indexPatternFields: DataViewFieldBase[] = [
         createIndexPatternField({ name: 'field1', esTypes: ['string'] }),
@@ -708,7 +701,7 @@ function submitForm(): Promise<void> {
 }
 
 interface TestFormProps {
-  initialState?: RequiredFieldWithOptionalEcs[];
+  initialState?: RequiredFieldInput[];
   onSubmit?: (args: { data: RequiredFieldInput[]; isValid: boolean }) => void;
   indexPatternFields?: DataViewFieldBase[];
   isIndexPatternLoading?: boolean;
