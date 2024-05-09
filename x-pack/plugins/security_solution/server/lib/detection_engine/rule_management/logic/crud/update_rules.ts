@@ -33,8 +33,6 @@ export const updateRules = async ({
     return null;
   }
 
-  const requiredFieldsWithEcs = addEcsToRequiredFields(ruleUpdate.required_fields);
-
   const alertActions =
     ruleUpdate.actions?.map((action) => transformRuleToAlertAction(action)) ?? [];
   const actions = transformToActionFrequency(alertActions, ruleUpdate.throttle);
@@ -62,7 +60,7 @@ export const updateRules = async ({
       meta: ruleUpdate.meta,
       maxSignals: ruleUpdate.max_signals ?? DEFAULT_MAX_SIGNALS,
       relatedIntegrations: ruleUpdate.related_integrations ?? [],
-      requiredFields: requiredFieldsWithEcs,
+      requiredFields: addEcsToRequiredFields(ruleUpdate.required_fields),
       riskScore: ruleUpdate.risk_score,
       riskScoreMapping: ruleUpdate.risk_score_mapping ?? [],
       ruleNameOverride: ruleUpdate.rule_name_override,

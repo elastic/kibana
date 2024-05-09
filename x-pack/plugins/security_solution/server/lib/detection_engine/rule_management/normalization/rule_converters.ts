@@ -499,8 +499,6 @@ export const convertCreateAPIToInternalSchema = (
   const alertActions = input.actions?.map((action) => transformRuleToAlertAction(action)) ?? [];
   const actions = transformToActionFrequency(alertActions, input.throttle);
 
-  const requiredFieldsWithEcs = addEcsToRequiredFields(input.required_fields);
-
   return {
     name: input.name,
     tags: input.tags ?? [],
@@ -536,7 +534,7 @@ export const convertCreateAPIToInternalSchema = (
       version: input.version ?? 1,
       exceptionsList: input.exceptions_list ?? [],
       relatedIntegrations: input.related_integrations ?? [],
-      requiredFields: requiredFieldsWithEcs,
+      requiredFields: addEcsToRequiredFields(input.required_fields),
       setup: input.setup ?? '',
       ...typeSpecificParams,
     },

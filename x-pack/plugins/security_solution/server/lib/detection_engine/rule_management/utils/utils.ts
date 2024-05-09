@@ -20,6 +20,7 @@ import type {
   AlertSuppression,
   AlertSuppressionCamel,
   InvestigationFields,
+  RequiredField,
   RequiredFieldInput,
   RuleResponse,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
@@ -392,7 +393,11 @@ export const migrateLegacyInvestigationFields = (
   return investigationFields;
 };
 
-export const addEcsToRequiredFields = (requiredFields?: RequiredFieldInput[]) =>
+/*
+  Computes the boolean "ecs" property value for each required field based on the ECS field map.
+  "ecs" property indicates whether the required field is an ECS field or not.
+*/
+export const addEcsToRequiredFields = (requiredFields?: RequiredFieldInput[]): RequiredField[] =>
   (requiredFields ?? []).map((requiredFieldWithoutEcs) => {
     const isEcsField = Boolean(
       ecsFieldMap[requiredFieldWithoutEcs.name]?.type === requiredFieldWithoutEcs.type
