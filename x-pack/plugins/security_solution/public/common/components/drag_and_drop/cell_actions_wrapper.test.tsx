@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { DraggableCellActions } from './draggable_cell_actions';
+import { CellActionsWrapper } from './cell_actions_wrapper';
 import { CellActionsMode, SecurityCellActionType } from '../cell_actions';
-import { TimelineId } from '../../../../common/types';
+import { TimelineId, type DataProvider } from '../../../../common/types';
 
 const MockSecurityCellActions = jest.fn(({ children }: { children: React.ReactNode }) => (
   <div data-test-subj="mockSecurityCellActions">{children}</div>
@@ -24,23 +24,24 @@ jest.mock('../../../helpers', () => ({
   getSourcererScopeId: jest.fn(() => mockSourcererScopeId),
 }));
 
-const data = [{ field: 'host.name', value: '12345' }];
+const dataProvider = { queryMatch: { field: 'host.name', value: '12345' } } as DataProvider;
+const data = { ...dataProvider.queryMatch };
 
-describe('DraggableCellActions', () => {
+describe('CellActionsWrapper', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('should render cell actions with the content', () => {
     const result = render(
-      <DraggableCellActions data={data}>{'test children'}</DraggableCellActions>
+      <CellActionsWrapper dataProvider={dataProvider}>{'test children'}</CellActionsWrapper>
     );
     expect(result.queryByTestId('mockSecurityCellActions')).toBeInTheDocument();
     expect(result.queryByText('test children')).toBeInTheDocument();
   });
 
   it('should call cell actions with the default props', () => {
-    render(<DraggableCellActions data={data}>{'test children'}</DraggableCellActions>);
+    render(<CellActionsWrapper dataProvider={dataProvider}>{'test children'}</CellActionsWrapper>);
     expect(MockSecurityCellActions).toHaveBeenCalledWith(
       expect.objectContaining({
         data,
@@ -52,12 +53,28 @@ describe('DraggableCellActions', () => {
     );
   });
 
+  describe('when dataProvider value is empty', () => {
+    it('should set an empty array value to the SecurityCellActions component', () => {
+      const emptyValueDataProvider = {
+        queryMatch: { field: 'host.name', value: '' },
+      } as DataProvider;
+      render(
+        <CellActionsWrapper dataProvider={emptyValueDataProvider}>
+          {'test children'}
+        </CellActionsWrapper>
+      );
+      expect(MockSecurityCellActions).toHaveBeenCalledWith(
+        expect.objectContaining({ data: { ...data, value: [] } })
+      );
+    });
+  });
+
   describe('when scopeId is defined', () => {
     it('should set the scopeId to the SecurityCellActions component metadata', () => {
       render(
-        <DraggableCellActions data={data} scopeId="testScopeId">
+        <CellActionsWrapper dataProvider={dataProvider} scopeId="testScopeId">
           {'test children'}
-        </DraggableCellActions>
+        </CellActionsWrapper>
       );
       expect(MockSecurityCellActions).toHaveBeenCalledWith(
         expect.objectContaining({ metadata: { scopeId: 'testScopeId' } })
@@ -66,11 +83,11 @@ describe('DraggableCellActions', () => {
   });
 
   describe('when hideTopN is true', () => {
-    it('should set the disabledActionTypes to the SecurityCellActions component metadata', () => {
+    it('should set the disabledActionTypes to the SecurityCellActions component', () => {
       render(
-        <DraggableCellActions data={data} hideTopN>
+        <CellActionsWrapper dataProvider={dataProvider} hideTopN>
           {'test children'}
-        </DraggableCellActions>
+        </CellActionsWrapper>
       );
       expect(MockSecurityCellActions).toHaveBeenCalledWith(
         expect.objectContaining({ disabledActionTypes: [SecurityCellActionType.SHOW_TOP_N] })

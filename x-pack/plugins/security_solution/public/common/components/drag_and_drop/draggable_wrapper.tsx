@@ -24,7 +24,7 @@ import type { DataProvider } from '../../../timelines/components/timeline/data_p
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../../../timelines/components/row_renderers_browser/constants';
 
 import { TruncatableText } from '../truncatable_text';
-import { DraggableCellActions } from './draggable_cell_actions';
+import { CellActionsWrapper } from './cell_actions_wrapper';
 
 import { getDraggableId, getDroppableId } from './helpers';
 import { ProviderContainer } from './provider_container';
@@ -133,11 +133,6 @@ const DraggableOnWrapper: React.FC<Props> = React.memo(
     const [providerRegistered, setProviderRegistered] = useState(false);
     const isDisabled = dataProvider.id.includes(`-${ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID}-`);
     const dispatch = useDispatch();
-
-    const data = useMemo(() => {
-      const { value, field } = dataProvider.queryMatch;
-      return { value: value || [], field };
-    }, [dataProvider.queryMatch]);
 
     const registerProvider = useCallback(() => {
       if (!isDisabled) {
@@ -262,9 +257,9 @@ const DraggableOnWrapper: React.FC<Props> = React.memo(
 
     if (isDisabled) return <>{content}</>;
     return (
-      <DraggableCellActions data={data} scopeId={scopeId} hideTopN={hideTopN}>
+      <CellActionsWrapper dataProvider={dataProvider} scopeId={scopeId} hideTopN={hideTopN}>
         {content}
-      </DraggableCellActions>
+      </CellActionsWrapper>
     );
   }
 );
@@ -272,11 +267,6 @@ DraggableOnWrapper.displayName = 'DraggableOnWrapper';
 
 export const DraggableWrapper: React.FC<Props> = React.memo(
   ({ dataProvider, isDraggable = false, render, scopeId, truncate, hideTopN }) => {
-    const data = useMemo(() => {
-      const { value, field } = dataProvider.queryMatch;
-      return { value, field };
-    }, [dataProvider.queryMatch]);
-
     const content = useMemo(
       () => (
         <div tabIndex={-1} data-provider-id={getDraggableId(dataProvider.id)}>
@@ -319,9 +309,9 @@ export const DraggableWrapper: React.FC<Props> = React.memo(
         return <>{content}</>;
       }
       return (
-        <DraggableCellActions data={data} scopeId={scopeId} hideTopN={hideTopN}>
+        <CellActionsWrapper dataProvider={dataProvider} scopeId={scopeId} hideTopN={hideTopN}>
           {content}
-        </DraggableCellActions>
+        </CellActionsWrapper>
       );
     }
     return (
