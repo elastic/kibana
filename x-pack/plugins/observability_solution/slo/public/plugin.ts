@@ -15,8 +15,6 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
-import { registerDashboardPanelPlacementSetting } from '@kbn/dashboard-plugin/public';
-import { registerReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { SloPublicPluginsSetup, SloPublicPluginsStart } from './types';
 import { PLUGIN_NAME, sloAppId } from '../common';
 import type { SloPublicSetup, SloPublicStart } from './types';
