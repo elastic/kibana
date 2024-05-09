@@ -210,7 +210,7 @@ export class SearchSource {
    * @private
    * @param newFields New field array.
    */
-  setFields(newFields: SearchSourceFields) {
+  private setFields(newFields: SearchSourceFields) {
     this.fields = newFields;
     return this;
   }
