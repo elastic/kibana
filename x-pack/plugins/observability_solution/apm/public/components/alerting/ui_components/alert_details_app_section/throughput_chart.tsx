@@ -158,7 +158,7 @@ function ThroughputChart({
               <TransactionTypeSelect
                 transactionType={transactionType}
                 transactionTypes={transactionTypes}
-                setTransactionType={setTransactionType}
+                onChange={setTransactionType}
               />
             </EuiFlexItem>
           )}

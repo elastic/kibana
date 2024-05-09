@@ -18,10 +18,10 @@ const options: Array<{ value: LatencyAggregationType; text: string }> = [
 
 export function LatencyAggregationTypeSelect({
   latencyAggregationType,
-  setLatencyAggregationType,
+  onChange,
 }: {
   latencyAggregationType: LatencyAggregationType;
-  setLatencyAggregationType: (value: LatencyAggregationType) => void;
+  onChange: (value: LatencyAggregationType) => void;
 }) {
   return (
     <EuiSelect
@@ -32,9 +32,7 @@ export function LatencyAggregationTypeSelect({
       })}
       options={options}
       value={latencyAggregationType}
-      onChange={(nextOption) =>
-        setLatencyAggregationType(nextOption.target.value as LatencyAggregationType)
-      }
+      onChange={(nextOption) => onChange(nextOption.target.value as LatencyAggregationType)}
     />
   );
 }

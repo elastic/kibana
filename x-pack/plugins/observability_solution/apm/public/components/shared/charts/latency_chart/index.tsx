@@ -127,7 +127,7 @@ export function LatencyChart({ height, kuery }: Props) {
               <EuiFlexItem grow={false}>
                 <LatencyAggregationTypeSelect
                   latencyAggregationType={latencyAggregationType as LatencyAggregationType}
-                  setLatencyAggregationType={(type) => {
+                  onChange={(type) => {
                     urlHelpers.push(history, {
                       query: {
                         latencyAggregationType: type,

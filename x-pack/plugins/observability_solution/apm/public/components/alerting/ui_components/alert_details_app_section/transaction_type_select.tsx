@@ -11,11 +11,11 @@ import React from 'react';
 export function TransactionTypeSelect({
   transactionType,
   transactionTypes,
-  setTransactionType,
+  onChange,
 }: {
   transactionType: string;
   transactionTypes: string[];
-  setTransactionType: (transactionType: string) => void;
+  onChange: (transactionType: string) => void;
 }) {
   const options = transactionTypes.map((t) => ({ text: t, value: t }));
 
@@ -27,7 +27,7 @@ export function TransactionTypeSelect({
       prepend={i18n.translate('xpack.apm.alertingVisualizations.transactionType.prepend', {
         defaultMessage: 'Transaction Type',
       })}
-      onChange={(event) => setTransactionType(event.target.value)}
+      onChange={(event) => onChange(event.target.value)}
       options={options}
       value={transactionType}
     />

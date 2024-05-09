@@ -215,7 +215,7 @@ function LatencyChart({
             <EuiFlexItem grow={false}>
               <LatencyAggregationTypeSelect
                 latencyAggregationType={latencyAggregationType}
-                setLatencyAggregationType={setLatencyAggregationType}
+                onChange={setLatencyAggregationType}
               />
             </EuiFlexItem>
           )}
@@ -224,7 +224,7 @@ function LatencyChart({
               <TransactionTypeSelect
                 transactionType={transactionType}
                 transactionTypes={transactionTypes}
-                setTransactionType={setTransactionType}
+                onChange={setTransactionType}
               />
             </EuiFlexItem>
           )}

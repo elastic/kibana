@@ -149,7 +149,7 @@ function FailedTransactionChart({
               <TransactionTypeSelect
                 transactionType={transactionType}
                 transactionTypes={transactionTypes}
-                setTransactionType={setTransactionType}
+                onChange={setTransactionType}
               />
             </EuiFlexItem>
           )}
