@@ -4,8 +4,8 @@ set -euo pipefail
 
 
 source .buildkite/scripts/common/util.sh
-source .buildkite/scripts/steps/artifacts/docker_image.sh
 
+KIBANA_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless:pr-$BUILDKITE_PULL_REQUEST-${BUILDKITE_COMMIT:0:12}"
 
 deploy() {
   PROJECT_TYPE=$1

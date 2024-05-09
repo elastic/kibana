@@ -1,11 +1,10 @@
 steps:
   - command: .buildkite/scripts/lifecycle/pre_build.sh
     label: Pre-Build
+    key: pre_build
     timeout_in_minutes: 10
     agents:
       queue: kibana-default
-
-  - wait
 
   - command: .buildkite/scripts/steps/build_kibana.sh
     label: Build Kibana Distribution and Plugins
@@ -14,6 +13,7 @@ steps:
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
     timeout_in_minutes: 60
+    depends_on: pre_build
     retry:
       automatic:
         - exit_status: '-1'
@@ -25,6 +25,7 @@ steps:
       queue: n2-2-spot
     key: quick_checks
     timeout_in_minutes: 60
+    depends_on: pre_build
     retry:
       automatic:
         - exit_status: '-1'
@@ -74,6 +75,7 @@ steps:
     label: 'Check Types'
     agents:
       queue: n2-4-spot
+    key: check_types
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -93,6 +95,7 @@ steps:
 
   - command: .buildkite/scripts/steps/checks.sh
     label: 'Checks'
+    key: checks
     agents:
       queue: n2-2-spot
     timeout_in_minutes: 60

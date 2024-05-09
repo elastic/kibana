@@ -53,6 +53,15 @@ const uploadPipeline = (pipelineContent: string | object) => {
 
     const pipeline = [];
 
+    // Start project build in parallel with quick_checks and snapshot build to reduce time to deploy
+    if (
+      GITHUB_PR_LABELS.includes('ci:project-deploy-elasticsearch') ||
+      GITHUB_PR_LABELS.includes('ci:project-deploy-observability') ||
+      GITHUB_PR_LABELS.includes('ci:project-deploy-security')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/deploy_project.yml'));
+    }
+
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
 
     if (await doAnyChangesMatch([/^packages\/kbn-handlebars/])) {
@@ -149,14 +158,6 @@ const uploadPipeline = (pipelineContent: string | object) => {
 
     if (GITHUB_PR_LABELS.includes('ci:build-docker-fips')) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/fips.yml'));
-    }
-
-    if (
-      GITHUB_PR_LABELS.includes('ci:project-deploy-elasticsearch') ||
-      GITHUB_PR_LABELS.includes('ci:project-deploy-observability') ||
-      GITHUB_PR_LABELS.includes('ci:project-deploy-security')
-    ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/deploy_project.yml'));
     }
 
     if (GITHUB_PR_LABELS.includes('ci:build-serverless-image')) {
