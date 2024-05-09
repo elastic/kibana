@@ -18,8 +18,7 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { uniq } from 'lodash/fp';
 import moment from 'moment';
-import React, { useCallback, useMemo, useState } from 'react';
-import { useLocalStorage, useSessionStorage } from 'react-use';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import * as uuid from 'uuid';
 import { useFetchAnonymizationFields } from '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields';
 
@@ -36,8 +35,10 @@ import {
 import { getAverageIntervalSeconds } from '../pages/loading_callout/countdown/last_times_popover/helpers';
 import type { CachedAttackDiscoveries } from '../pages/session_storage';
 import {
-  encodeCachedAttackDiscoveries,
-  decodeCachedAttackDiscoveries,
+  getLocalStorageGenerationIntervals,
+  getSessionStorageCachedAttackDiscoveries,
+  setLocalStorageGenerationIntervals,
+  setSessionStorageCachedAttackDiscoveries,
 } from '../pages/session_storage';
 import { ERROR_GENERATING_ATTACK_DISCOVERIES } from '../pages/translations';
 import type { AttackDiscovery, GenerationInterval } from '../types';
@@ -67,7 +68,7 @@ export const useAttackDiscovery = ({
   setLoadingConnectorId?: (loadingConnectorId: string | null) => void;
 }): UseAttackDiscovery => {
   const { reportAttackDiscoveriesGenerated } = useAttackDiscoveryTelemetry();
-  const spaceId = useSpaceId() ?? 'default';
+  const spaceId: string | undefined = useSpaceId();
 
   // get Kibana services and connectors
   const {
@@ -86,24 +87,60 @@ export const useAttackDiscovery = ({
 
   const { data: anonymizationFields } = useFetchAnonymizationFields();
 
-  // get cached attack discoveries from session storage:
-  const [sessionStorageCachedAttackDiscoveries, setSessionStorageCachedAttackDiscoveries] =
-    useSessionStorage<string>(
-      `${DEFAULT_ASSISTANT_NAMESPACE}.${ATTACK_DISCOVERY_STORAGE_KEY}.${spaceId}.${CACHED_ATTACK_DISCOVERIES_SESSION_STORAGE_KEY}`
-    );
+  const sessionStorageKey = useMemo(
+    () =>
+      spaceId != null // spaceId is undefined while the useSpaceId hook is loading
+        ? `${DEFAULT_ASSISTANT_NAMESPACE}.${ATTACK_DISCOVERY_STORAGE_KEY}.${spaceId}.${CACHED_ATTACK_DISCOVERIES_SESSION_STORAGE_KEY}`
+        : '',
+    [spaceId]
+  );
+
   const [cachedAttackDiscoveries, setCachedAttackDiscoveries] = useState<
     Record<string, CachedAttackDiscoveries>
-  >(decodeCachedAttackDiscoveries(sessionStorageCachedAttackDiscoveries) ?? {});
+  >({});
 
-  // get generation intervals from local storage:
-  const [localStorageGenerationIntervals, setLocalStorageGenerationIntervals] = useLocalStorage<
-    Record<string, GenerationInterval[]>
-  >(
-    `${DEFAULT_ASSISTANT_NAMESPACE}.${ATTACK_DISCOVERY_STORAGE_KEY}.${spaceId}.${GENERATION_INTERVALS_LOCAL_STORAGE_KEY}`
+  useEffect(() => {
+    const decoded = getSessionStorageCachedAttackDiscoveries(sessionStorageKey);
+
+    if (decoded != null) {
+      setCachedAttackDiscoveries(decoded);
+
+      const decodedAttackDiscoveries = decoded[connectorId ?? '']?.attackDiscoveries;
+      if (decodedAttackDiscoveries != null) {
+        setAttackDiscoveries(decodedAttackDiscoveries);
+      }
+
+      const decodedReplacements = decoded[connectorId ?? '']?.replacements;
+      if (decodedReplacements != null) {
+        setReplacements(decodedReplacements);
+      }
+
+      const decodedLastUpdated = decoded[connectorId ?? '']?.updated;
+      if (decodedLastUpdated != null) {
+        setLastUpdated(decodedLastUpdated);
+      }
+    }
+  }, [connectorId, sessionStorageKey]);
+
+  const localStorageKey = useMemo(
+    () =>
+      spaceId != null // spaceId is undefined while the useSpaceId hook is loading
+        ? `${DEFAULT_ASSISTANT_NAMESPACE}.${ATTACK_DISCOVERY_STORAGE_KEY}.${spaceId}.${GENERATION_INTERVALS_LOCAL_STORAGE_KEY}`
+        : '',
+    [spaceId]
   );
+
   const [generationIntervals, setGenerationIntervals] = React.useState<
     Record<string, GenerationInterval[]> | undefined
-  >(localStorageGenerationIntervals);
+  >(undefined);
+
+  useEffect(() => {
+    const decoded = getLocalStorageGenerationIntervals(localStorageKey);
+
+    if (decoded != null) {
+      setGenerationIntervals(decoded);
+    }
+  }, [localStorageKey]);
 
   // get connector intervals from generation intervals:
   const connectorIntervals = useMemo(
@@ -199,9 +236,10 @@ export const useAttackDiscovery = ({
       };
 
       setCachedAttackDiscoveries(newCachedAttackDiscoveries);
-      setSessionStorageCachedAttackDiscoveries(
-        encodeCachedAttackDiscoveries(newCachedAttackDiscoveries) ?? ''
-      );
+      setSessionStorageCachedAttackDiscoveries({
+        key: sessionStorageKey,
+        cachedAttackDiscoveries: newCachedAttackDiscoveries,
+      });
 
       // update the generation intervals with the latest timing:
       const previousConnectorIntervals: GenerationInterval[] =
@@ -227,7 +265,10 @@ export const useAttackDiscovery = ({
       // only update the generation intervals if alerts were sent as context to the LLM:
       if (newAlertsContextCount != null && newAlertsContextCount > 0) {
         setGenerationIntervals(newGenerationIntervals);
-        setLocalStorageGenerationIntervals(newGenerationIntervals);
+        setLocalStorageGenerationIntervals({
+          key: localStorageKey,
+          generationIntervals: newGenerationIntervals,
+        });
       }
 
       setReplacements(newReplacements);
@@ -266,12 +307,12 @@ export const useAttackDiscovery = ({
     generationIntervals,
     http,
     knowledgeBase,
+    localStorageKey,
     replacements,
     reportAttackDiscoveriesGenerated,
+    sessionStorageKey,
     setConnectorId,
     setLoadingConnectorId,
-    setLocalStorageGenerationIntervals,
-    setSessionStorageCachedAttackDiscoveries,
     toasts,
     traceOptions,
   ]);
