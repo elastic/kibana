@@ -8,3 +8,4 @@
 export * from './utils';
 export * from './fetch_action_responses';
 export * from './validate_action_id';
+export * from './get_action_agent_type';

@@ -6,11 +6,14 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
-import { getActionAgentType } from '../../services/actions/utils/get_action_agent_type';
 import type { EndpointActionFileDownloadParams } from '../../../../common/api/endpoint';
 import { EndpointActionFileDownloadSchema } from '../../../../common/api/endpoint';
 import type { ResponseActionsClient } from '../../services';
-import { getResponseActionsClient, NormalizedExternalConnectorClient } from '../../services';
+import {
+  getResponseActionsClient,
+  NormalizedExternalConnectorClient,
+  getActionAgentType,
+} from '../../services';
 import { errorHandler } from '../error_handler';
 import { ACTION_AGENT_FILE_DOWNLOAD_ROUTE } from '../../../../common/endpoint/constants';
 import { withEndpointAuthz } from '../with_endpoint_authz';

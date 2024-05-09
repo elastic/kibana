@@ -6,11 +6,14 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
-import { getActionAgentType } from '../../services/actions/utils/get_action_agent_type';
 import type { EndpointActionFileInfoParams } from '../../../../common/api/endpoint';
 import { EndpointActionFileInfoSchema } from '../../../../common/api/endpoint';
 import type { ResponseActionsClient } from '../../services';
-import { getResponseActionsClient, NormalizedExternalConnectorClient } from '../../services';
+import {
+  getResponseActionsClient,
+  NormalizedExternalConnectorClient,
+  getActionAgentType,
+} from '../../services';
 import { ACTION_AGENT_FILE_INFO_ROUTE } from '../../../../common/endpoint/constants';
 import type { EndpointAppContext } from '../../types';
 import type {
