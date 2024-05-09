@@ -9,8 +9,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import type { DataVisualizerStartDependencies } from '../plugin';
-
+import type { DataVisualizerStartDependencies } from './common/types/data_visualizer_plugin';
 export type StartServices = CoreStart &
   DataVisualizerStartDependencies & {
     storage: IStorageWrapper;
