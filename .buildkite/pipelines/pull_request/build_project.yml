@@ -1,4 +1,4 @@
-steps: 
+steps:
   - command: .buildkite/scripts/steps/artifacts/docker_image.sh
     label: 'Build Project Image'
     key: build_project_image
