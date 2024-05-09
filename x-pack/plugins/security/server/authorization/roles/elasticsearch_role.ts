@@ -18,13 +18,17 @@ import { getDetailedErrorMessage } from '../../errors';
 import { PrivilegeSerializer } from '../privilege_serializer';
 import { ResourceSerializer } from '../resource_serializer';
 
-export type ElasticsearchRole = Pick<Role, 'name' | 'metadata' | 'transient_metadata'> & {
+export type ElasticsearchRole = Pick<
+  Role,
+  'name' | 'description' | 'metadata' | 'transient_metadata'
+> & {
   applications: Array<{
     application: string;
     privileges: string[];
     resources: string[];
   }>;
   cluster: Role['elasticsearch']['cluster'];
+  remote_cluster: Role['elasticsearch']['remote_cluster'];
   indices: Role['elasticsearch']['indices'];
   remote_indices?: Role['elasticsearch']['remote_indices'];
   run_as: Role['elasticsearch']['run_as'];
@@ -48,10 +52,12 @@ export function transformElasticsearchRoleToRole(
   );
   return {
     name,
+    ...(elasticsearchRole.description && { description: elasticsearchRole.description }),
     metadata: elasticsearchRole.metadata,
     transient_metadata: elasticsearchRole.transient_metadata,
     elasticsearch: {
       cluster: elasticsearchRole.cluster,
+      remote_cluster: elasticsearchRole.remote_cluster,
       indices: elasticsearchRole.indices,
       remote_indices: elasticsearchRole.remote_indices,
       run_as: elasticsearchRole.run_as,

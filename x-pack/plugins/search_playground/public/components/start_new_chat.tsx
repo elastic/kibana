@@ -15,12 +15,14 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useFormContext } from 'react-hook-form';
+import { useUsageTracker } from '../hooks/use_usage_tracker';
 import { useLoadConnectors } from '../hooks/use_load_connectors';
 import { SourcesPanelForStartChat } from './sources_panel/sources_panel_for_start_chat';
 import { SetUpConnectorPanelForStartChat } from './set_up_connector_panel_for_start_chat';
 import { ChatFormFields } from '../types';
+import { AnalyticsEvents } from '../analytics/constants';
 
 const maxWidthPage = 640;
 
@@ -32,6 +34,11 @@ export const StartNewChat: React.FC<StartNewChatProps> = ({ onStartClick }) => {
   const { euiTheme } = useEuiTheme();
   const { data: connectors } = useLoadConnectors();
   const { watch } = useFormContext();
+  const usageTracker = useUsageTracker();
+
+  useEffect(() => {
+    usageTracker?.load(AnalyticsEvents.startNewChatPageLoaded);
+  }, [usageTracker]);
 
   return (
     <EuiFlexGroup justifyContent="center" className="eui-yScroll">
@@ -78,7 +85,7 @@ export const StartNewChat: React.FC<StartNewChatProps> = ({ onStartClick }) => {
           <SourcesPanelForStartChat />
         </EuiFlexItem>
 
-        <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexGroup justifyContent="flexEnd" data-test-subj="startChatButton">
           <EuiButton
             fill
             iconType="arrowRight"

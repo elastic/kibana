@@ -48,6 +48,8 @@ xpack.index_management.enableIndexStats: false
 xpack.index_management.editableIndexSettings: limited
 # Disable Storage size column in the Data streams table from Index Management UI
 xpack.index_management.enableDataStreamsStorageColumn: false
+# Disable _source field in the Mappings editor's advanced options form from Index Management UI
+xpack.index_management.enableMappingsSourceFieldSection: false
 # Disable toggle for enabling data retention in DSL form from Index Management UI
 xpack.index_management.enableTogglingDataRetention: false
 
@@ -150,6 +152,7 @@ xpack.screenshotting.enabled: false
 xpack.reporting.queue.pollInterval: 3m
 xpack.reporting.roles.enabled: false
 xpack.reporting.statefulSettings.enabled: false
+xpack.reporting.csv.maxConcurrentShardRequests: 0
 
 # Disabled Observability plugins
 xpack.ux.enabled: false
