@@ -7,10 +7,10 @@
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { firstValueFrom } from 'rxjs';
-import type { AiopsPluginStartDeps } from '../../types';
 
-export function getPatternAnalysisAvailable({ licensing }: AiopsPluginStartDeps) {
+export function getPatternAnalysisAvailable(licensing: LicensingPluginStart) {
   return async (dataView: DataView) => {
     const hasTextFields = dataView.fields.some((f) => f.esTypes?.includes(ES_FIELD_TYPES.TEXT));
     const isPlatinum = (await firstValueFrom(licensing.license$)).hasAtLeast('platinum');

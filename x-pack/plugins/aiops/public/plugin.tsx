@@ -66,7 +66,7 @@ export class AiopsPlugin
         core,
         plugins
       ),
-      patternAnalysisAvailable: getPatternAnalysisAvailable(plugins),
+      patternAnalysisAvailable: getPatternAnalysisAvailable(plugins.licensing),
       PatternAnalysisComponent: dynamic(
         async () =>
           import(
