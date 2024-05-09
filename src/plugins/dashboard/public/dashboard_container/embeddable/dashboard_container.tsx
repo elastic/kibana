@@ -57,14 +57,16 @@ import {
   DASHBOARD_UI_METRIC_ID,
   DEFAULT_PANEL_HEIGHT,
   DEFAULT_PANEL_WIDTH,
+  PanelPlacementStrategy,
 } from '../../dashboard_constants';
 import { DashboardAnalyticsService } from '../../services/analytics/types';
 import { DashboardCapabilitiesService } from '../../services/dashboard_capabilities/types';
 import { pluginServices } from '../../services/plugin_services';
-import { placePanel } from '../component/panel_placement';
-import { panelPlacementStrategies } from '../component/panel_placement/place_new_panel_strategies';
+import { placePanel } from '../panel_placement';
+import { runPanelPlacementStrategy } from '../panel_placement/place_new_panel_strategies';
 import { DashboardViewport } from '../component/viewport/dashboard_viewport';
 import { DashboardExternallyAccessibleApi } from '../external_api/dashboard_api';
+import { getDashboardPanelPlacementSetting } from '../panel_placement/panel_placement_registry';
 import { dashboardContainerReducers } from '../state/dashboard_container_reducers';
 import { getDiffingMiddleware } from '../state/diffing/dashboard_diffing_integration';
 import {
@@ -498,10 +500,20 @@ export class DashboardContainer
     }
     if (reactEmbeddableRegistryHasKey(panelPackage.panelType)) {
       const newId = v4();
-      const { newPanelPlacement, otherPanels } = panelPlacementStrategies.findTopLeftMostOpenSpace({
-        currentPanels: this.getInput().panels,
-        height: DEFAULT_PANEL_HEIGHT,
+
+      const placementSettings = {
         width: DEFAULT_PANEL_WIDTH,
+        height: DEFAULT_PANEL_HEIGHT,
+        strategy: PanelPlacementStrategy.findTopLeftMostOpenSpace,
+        ...getDashboardPanelPlacementSetting(panelPackage.panelType)?.(panelPackage.initialState),
+      };
+
+      const { width, height, strategy } = placementSettings;
+
+      const { newPanelPlacement, otherPanels } = runPanelPlacementStrategy(strategy, {
+        currentPanels: this.getInput().panels,
+        height,
+        width,
       });
       const newPanel: DashboardPanelState = {
         type: panelPackage.panelType,

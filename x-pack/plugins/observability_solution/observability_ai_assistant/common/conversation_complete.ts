@@ -103,12 +103,16 @@ export type StreamingChatResponseEvent =
   | ConversationCreateEvent
   | ConversationUpdateEvent
   | MessageAddEvent
-  | ChatCompletionErrorEvent;
+  | ChatCompletionErrorEvent
+  | TokenCountEvent;
 
 export type StreamingChatResponseEventWithoutError = Exclude<
   StreamingChatResponseEvent,
   ChatCompletionErrorEvent
 >;
+
+export type ChatEvent = ChatCompletionChunkEvent | TokenCountEvent;
+export type MessageOrChatEvent = ChatEvent | MessageAddEvent;
 
 export enum ChatCompletionErrorCode {
   InternalError = 'internalError',
@@ -125,12 +129,18 @@ interface ErrorMetaAttributes {
     tokenLimit?: number;
     tokenCount?: number;
   };
-  [ChatCompletionErrorCode.FunctionNotFoundError]: {};
+  [ChatCompletionErrorCode.FunctionNotFoundError]: {
+    name: string;
+  };
   [ChatCompletionErrorCode.FunctionLimitExceededError]: {};
 }
 
 export class ChatCompletionError<T extends ChatCompletionErrorCode> extends Error {
-  constructor(public code: T, message: string, public meta?: ErrorMetaAttributes[T]) {
+  constructor(
+    public code: T,
+    message: string,
+    public meta: ErrorMetaAttributes[T] = {} as ErrorMetaAttributes[T]
+  ) {
     super(message);
   }
 }

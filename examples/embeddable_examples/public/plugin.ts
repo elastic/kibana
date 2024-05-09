@@ -8,6 +8,7 @@
 
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -24,8 +25,9 @@ import { DATA_TABLE_ID } from './react_embeddables/data_table/constants';
 import { registerCreateDataTableAction } from './react_embeddables/data_table/create_data_table_action';
 import { EUI_MARKDOWN_ID } from './react_embeddables/eui_markdown/constants';
 import { registerCreateEuiMarkdownAction } from './react_embeddables/eui_markdown/create_eui_markdown_action';
-import { FIELD_LIST_ID } from './react_embeddables/field_list/constants';
 import { registerCreateFieldListAction } from './react_embeddables/field_list/create_field_list_action';
+import { FIELD_LIST_ID } from './react_embeddables/field_list/constants';
+import { registerFieldListPanelPlacementSetting } from './react_embeddables/field_list/register_field_list_embeddable';
 import { registerAddSearchPanelAction } from './react_embeddables/search/register_add_search_panel_action';
 import { registerSearchEmbeddable } from './react_embeddables/search/register_search_embeddable';
 
@@ -43,6 +45,7 @@ export interface StartDeps {
   data: DataPublicPluginStart;
   charts: ChartsPluginStart;
   fieldFormats: FieldFormatsStart;
+  dashboard: DashboardStart;
 }
 
 export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
@@ -58,6 +61,7 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
       );
       return getFieldListFactory(core, deps);
     });
+    registerFieldListPanelPlacementSetting(deps.dashboard);
 
     registerCreateEuiMarkdownAction(deps.uiActions);
     registerReactEmbeddableFactory(EUI_MARKDOWN_ID, async () => {

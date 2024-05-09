@@ -11,6 +11,7 @@ import type { CommonResponseActionMethodOptions } from '../../../endpoint/servic
 
 export type Alert = ParsedTechnicalFields & {
   _id: string;
+  _index: string;
   agent?: AlertAgent;
   host?: {
     name: string;

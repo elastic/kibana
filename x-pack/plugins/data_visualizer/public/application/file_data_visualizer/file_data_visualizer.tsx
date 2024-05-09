@@ -25,21 +25,20 @@ export type FileDataVisualizerSpec = typeof FileDataVisualizer;
 
 export const FileDataVisualizer: FC<Props> = ({ getAdditionalLinks, resultLinks }) => {
   const coreStart = getCoreStart();
-  const { data, maps, embeddable, discover, share, security, fileUpload, cloud, fieldFormats } =
+  const { data, maps, embeddable, share, security, fileUpload, cloud, fieldFormats } =
     getPluginsStart();
   const services = {
     ...coreStart,
     data,
     maps,
     embeddable,
-    discover,
     share,
     security,
     fileUpload,
     fieldFormats,
   };
 
-  const EmptyContext: FC<PropsWithChildren> = ({ children }) => <>{children}</>;
+  const EmptyContext: FC<PropsWithChildren<unknown>> = ({ children }) => <>{children}</>;
   const CloudContext = cloud?.CloudContextProvider || EmptyContext;
 
   return (

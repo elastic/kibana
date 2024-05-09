@@ -83,7 +83,10 @@
     "@kbn/deeplinks-analytics",
     "@kbn/shared-ux-markdown",
     "@kbn/data-view-utils",
-    "@kbn/presentation-publishing"
+    "@kbn/presentation-publishing",
+    "@kbn/observability-ai-assistant-plugin",
+    "@kbn/data-visualizer-plugin",
+    "@kbn/search-types"
   ],
   "exclude": ["target/**/*"]
 }

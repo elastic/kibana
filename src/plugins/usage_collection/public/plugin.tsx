@@ -74,7 +74,7 @@ export interface UsageCollectionSetup {
      * }
      * ```
      */
-    ApplicationUsageTrackingProvider: FC<PropsWithChildren>;
+    ApplicationUsageTrackingProvider: FC<PropsWithChildren<unknown>>;
   };
 
   /** Report whenever a UI event occurs for UI counters to report it **/
