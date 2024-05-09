@@ -30,6 +30,7 @@ import {
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { OsTypeArray, ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { getHasWrongOperator } from '@kbn/securitysolution-list-utils';
 import type {
   ExceptionsBuilderExceptionItem,
   ExceptionsBuilderReturnExceptionItem,
@@ -196,6 +197,10 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   const setExceptionItemsToAdd = useCallback(
     (items: ExceptionsBuilderReturnExceptionItem[]): void => {
       dispatch({
+        type: 'setWildcardWithWrongOperator',
+        warningExists: getHasWrongOperator(items),
+      });
+      dispatch({
         type: 'setExceptionItems',
         items,
       });
@@ -353,7 +358,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     [dispatch]
   );
 
-  const setHasWildcardWithWrongOperator = useCallback(
+  /* const setHasWildcardWithWrongOperator = useCallback(
     (warningExists: boolean, actualwarning: string): void => {
       console.log('warning is ', actualwarning === 'wrongoperator');
       dispatch({
@@ -362,7 +367,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       });
     },
     [dispatch]
-  );
+  );*/
 
   useEffect((): void => {
     if (alertData) {
@@ -511,7 +516,6 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   const exceptionFlyoutTitleId = useGeneratedHtmlId({
     prefix: 'exceptionFlyoutTitle',
   });
-  console.log('wildcardwarningexists', wildcardWarningExists);
 
   return (
     <EuiFlyout
@@ -579,7 +583,6 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
           onOsChange={setSelectedOs}
           onExceptionItemAdd={setExceptionItemsToAdd}
           onSetErrorExists={setConditionsValidationError}
-          onSetWarningExists={setHasWildcardWithWrongOperator}
           getExtendedFields={getExtendedFields}
         />
         {wildcardWarningExists && <WildCardWithWrongOperatorCallout />}

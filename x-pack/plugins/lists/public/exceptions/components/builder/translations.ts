@@ -115,10 +115,3 @@ export const WILDCARD_WITH_IS_OPERATOR_TOOLTIP = i18n.translate(
       'Using a wildcard with the "IS" operator can make an entry ineffective. Change the operator to "MATCHES" to ensure wildcards run properly.',
   }
 );
-
-export const WILDCARD_WITH_IS_OPERATOR_WARNING = i18n.translate(
-  'xpack.lists.exceptions.builder.exceptionIsOperator.warningmessage',
-  {
-    defaultMessage: 'Change the operator to matches to ensure wildcards run properly.',
-  }
-);

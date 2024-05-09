@@ -28,7 +28,6 @@ export interface State {
   exceptionsToDelete: ExceptionListItemSchema[];
   errors: EntryFieldError;
   warningExists: number;
-  warning: string;
 }
 
 export type Action =
@@ -64,8 +63,7 @@ export type Action =
   | {
       type: 'setWarningsExist';
       warningExists: boolean;
-    }
-  | { type: 'setWarning'; warning: string };
+    };
 
 export const exceptionsBuilderReducer =
   () =>
@@ -146,12 +144,6 @@ export const exceptionsBuilderReducer =
         return {
           ...state,
           warningExists: warnTotal < 0 ? 0 : warnTotal,
-        };
-      }
-      case 'setWarning': {
-        return {
-          ...state,
-          warning: action.warning,
         };
       }
       default:

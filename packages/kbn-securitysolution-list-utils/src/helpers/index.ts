@@ -7,7 +7,11 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { addIdToItem, removeIdFromItem } from '@kbn/securitysolution-utils';
+import {
+  addIdToItem,
+  removeIdFromItem,
+  validateHasWildcardWithWrongOperator,
+} from '@kbn/securitysolution-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import {
   CreateExceptionListItemSchema,
@@ -546,7 +550,6 @@ export const getEntryOnWildcardChange = (
 ): { index: number; updatedEntry: BuilderEntry } => {
   const { nested, parent, entryIndex, field, operator } = item;
 
-  console.log('do we go here');
   if (nested != null && parent != null) {
     const fieldName = field != null ? field.name.split('.').slice(-1)[0] : '';
 
@@ -1021,4 +1024,19 @@ export const getMappingConflictsInfo = (field: DataViewField): FieldConflictsInf
     });
   }
   return conflicts;
+};
+
+export const getHasWrongOperator = (items: ExceptionsBuilderReturnExceptionItem[]): boolean => {
+  let hasWrongOperator = false;
+  items[0]?.entries.forEach((e) => {
+    if (
+      validateHasWildcardWithWrongOperator({
+        operator: (e as ExceptionsBuilderReturnExceptionItem[number]).type,
+        value: (e as ExceptionsBuilderReturnExceptionItem[number]).value,
+      })
+    ) {
+      hasWrongOperator = true;
+    }
+  });
+  return hasWrongOperator;
 };

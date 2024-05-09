@@ -23,9 +23,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { EVENT_FILTERS_OPERATORS } from '@kbn/securitysolution-list-utils';
+import { EVENT_FILTERS_OPERATORS, getHasWrongOperator } from '@kbn/securitysolution-list-utils';
 import { WildCardWithWrongOperatorCallout } from '@kbn/securitysolution-exception-list-components';
-import { OperatingSystem, validateHasWildcardWithWrongOperator } from '@kbn/securitysolution-utils';
+import { OperatingSystem } from '@kbn/securitysolution-utils';
 
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { OnChangeProps } from '@kbn/lists-plugin/public';
@@ -425,17 +425,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         }
 
         // handle wildcard with wrong operator case
-        setHasWildcardWithWrongOperator(false);
-        arg.exceptionItems[0]?.entries.forEach((e) => {
-          if (
-            validateHasWildcardWithWrongOperator({
-              operator: (e as EventFilterItemEntries[number]).type,
-              value: (e as EventFilterItemEntries[number]).value,
-            })
-          ) {
-            setHasWildcardWithWrongOperator(true);
-          }
-        });
+        setHasWildcardWithWrongOperator(getHasWrongOperator(arg.exceptionItems));
 
         const updatedItem: Partial<ArtifactFormComponentProps['item']> =
           arg.exceptionItems[0] !== undefined
