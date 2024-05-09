@@ -14,7 +14,7 @@ export type EsqlKnowledgeBaseToolParams = AssistantToolParams;
 
 const toolDetails = {
   description:
-    'Call this for knowledge on how to build an ESQL query, or answer questions about the ES|QL query language. Input must always be the query on a single line, with no other text. Only output valid ES|QL queries as described above. Format ESQL correctly by surrounding it with back ticks. Do not add any additional text to describe your output.',
+    'Call this for knowledge on how to build an ESQL query, or answer questions about the ES|QL query language. Input must always be the query on a single line, with no other text. Only output valid ES|QL queries as described above. Do not add any additional text to describe your output.',
   id: 'esql-knowledge-base-tool',
   name: 'ESQLKnowledgeBaseTool',
 };
