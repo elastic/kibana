@@ -13,6 +13,7 @@ export interface ReportAttackDiscoveriesGeneratedParams {
   provider?: string;
   model?: string;
   durationMs: number;
+  alertsContextCount: number;
   alertsCount: number;
   configuredAlertsCount: number;
 }
