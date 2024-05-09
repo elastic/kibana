@@ -179,14 +179,14 @@
     {
       "query": "from ",
       "error": [
-        "SyntaxError: missing {QUOTED_IDENTIFIER, FROM_UNQUOTED_IDENTIFIER} at '<EOF>'"
+        "SyntaxError: missing FROM_UNQUOTED_IDENTIFIER at '<EOF>'"
       ],
       "warning": []
     },
     {
       "query": "from index,",
       "error": [
-        "SyntaxError: missing {QUOTED_IDENTIFIER, FROM_UNQUOTED_IDENTIFIER} at '<EOF>'"
+        "SyntaxError: missing FROM_UNQUOTED_IDENTIFIER at '<EOF>'"
       ],
       "warning": []
     },
@@ -210,11 +210,6 @@
     },
     {
       "query": "FrOm index",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from `index`",
       "error": [],
       "warning": []
     },
