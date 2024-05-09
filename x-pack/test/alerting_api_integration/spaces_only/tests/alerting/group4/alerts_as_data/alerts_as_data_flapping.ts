@@ -32,8 +32,7 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
 
   const alertsAsDataIndex = '.alerts-test.patternfiring.alerts-default';
 
-  // FLAKY: https://github.com/elastic/kibana/issues/161477
-  describe.skip('alerts as data flapping', () => {
+  describe('alerts as data flapping', () => {
     beforeEach(async () => {
       await es.deleteByQuery({
         index: alertsAsDataIndex,
@@ -407,10 +406,13 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
       await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 1 }]]));
       // Run the rule 6 more times
       for (let i = 0; i < 6; i++) {
-        const response = await supertestWithoutAuth
-          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
-          .set('kbn-xsrf', 'foo');
-        expect(response.status).to.eql(204);
+        await retry.try(async () => {
+          const response = await supertestWithoutAuth
+            .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
+            .set('kbn-xsrf', 'foo');
+          expect(response.status).to.eql(204);
+        });
+
         await waitForEventLogDocs(ruleId, new Map([['execute', { equal: ++run }]]));
       }
 
