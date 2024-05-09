@@ -218,12 +218,14 @@ export class RuleTypeRunner<
               services: {
                 alertFactory: alertsClient.factory(),
                 alertsClient: alertsClient.client(),
-                dataViews: executorServices.dataViews,
+                getDataViews: executorServices.getDataViews,
                 ruleMonitoringService: executorServices.ruleMonitoringService,
                 ruleResultService: executorServices.ruleResultService,
                 savedObjectsClient: executorServices.savedObjectsClient,
                 scopedClusterClient: executorServices.wrappedScopedClusterClient.client(),
-                searchSourceClient: executorServices.wrappedSearchSourceClient.searchSourceClient,
+                getSearchSourceClient: async () => {
+                  return (await executorServices.getWrappedSearchSourceClient()).searchSourceClient;
+                },
                 share: this.options.context.share,
                 shouldStopExecution: () => this.cancelled,
                 shouldWriteAlerts: () =>
@@ -305,7 +307,7 @@ export class RuleTypeRunner<
         );
         context.ruleRunMetricsStore.setSearchMetrics([
           executorServices.wrappedScopedClusterClient.getMetrics(),
-          executorServices.wrappedSearchSourceClient.getMetrics(),
+          // executorServices.wrappedSearchSourceClient.getMetrics(),
         ]);
 
         return {

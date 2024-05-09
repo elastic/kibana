@@ -212,7 +212,7 @@ export class AdHocTaskRunner {
       taskInstance: this.taskInstance,
     });
 
-    const executorServices = await getExecutorServices({
+    const executorServices = getExecutorServices({
       context: this.context,
       fakeRequest,
       abortController: this.searchAbortController,

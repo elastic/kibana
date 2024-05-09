@@ -39,16 +39,16 @@ interface GetExecutorServicesOpts {
 }
 
 export interface ExecutorServices {
-  dataViews: DataViewsContract;
+  getDataViews: () => Promise<DataViewsContract>;
   ruleMonitoringService: PublicRuleMonitoringService;
   ruleResultService: PublicRuleResultService;
   savedObjectsClient: SavedObjectsClientContract;
   uiSettingsClient: IUiSettingsClient;
   wrappedScopedClusterClient: WrappedScopedClusterClient;
-  wrappedSearchSourceClient: WrappedSearchSourceClient;
+  getWrappedSearchSourceClient: () => Promise<WrappedSearchSourceClient>;
 }
 
-export const getExecutorServices = async (opts: GetExecutorServicesOpts) => {
+export const getExecutorServices = (opts: GetExecutorServicesOpts): ExecutorServices => {
   const { context, abortController, fakeRequest, logger, ruleData, ruleTaskTimeout } = opts;
 
   const wrappedClientOptions = {
@@ -65,30 +65,43 @@ export const getExecutorServices = async (opts: GetExecutorServicesOpts) => {
     scopedClusterClient,
   });
 
-  const searchSourceClient = await context.data.search.searchSource.asScoped(fakeRequest);
-  const wrappedSearchSourceClient = wrapSearchSourceClient({
-    ...wrappedClientOptions,
-    searchSourceClient,
-  });
+  // const searchSourceClient = await context.data.search.searchSource.asScoped(fakeRequest);
+  // const wrappedSearchSourceClient = wrapSearchSourceClient({
+  //   ...wrappedClientOptions,
+  //   searchSourceClient,
+  // });
 
   const savedObjectsClient = context.savedObjects.getScopedClient(fakeRequest, {
     includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE, 'action'],
   });
 
-  const dataViews = await context.dataViews.dataViewsServiceFactory(
-    savedObjectsClient,
-    scopedClusterClient.asInternalUser
-  );
+  // const dataViews = await context.dataViews.dataViewsServiceFactory(
+  //   savedObjectsClient,
+  //   scopedClusterClient.asInternalUser
+  // );
 
   const uiSettingsClient = context.uiSettings.asScopedToClient(savedObjectsClient);
 
   return {
-    dataViews,
+    // dataViews,
+    getDataViews: async () => {
+      return await context.dataViews.dataViewsServiceFactory(
+        savedObjectsClient,
+        scopedClusterClient.asInternalUser
+      );
+    },
     ruleMonitoringService: opts.ruleMonitoringService.getLastRunMetricsSetters(),
     ruleResultService: opts.ruleResultService.getLastRunSetters(),
     savedObjectsClient,
     uiSettingsClient,
     wrappedScopedClusterClient,
-    wrappedSearchSourceClient,
+    // wrappedSearchSourceClient,
+    getWrappedSearchSourceClient: async () => {
+      const searchSourceClient = await context.data.search.searchSource.asScoped(fakeRequest);
+      return wrapSearchSourceClient({
+        ...wrappedClientOptions,
+        searchSourceClient,
+      });
+    },
   };
 };
