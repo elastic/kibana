@@ -6,6 +6,8 @@
  */
 
 import { useMemo } from 'react';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { inputsSelectors } from '../../../../common/store';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
@@ -14,12 +16,21 @@ import { Direction, NOT_EVENT_KIND_ASSET_FILTER } from '../../../../../common/se
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
+import { getSourcererScopeId, isActiveTimeline } from '../../../../helpers';
 
 export const useObservedUser = (
-  userName: string
+  userName: string,
+  scopeId: string
 ): Omit<ObservedEntityData<UserItem>, 'anomalies'> => {
-  const { selectedPatterns } = useSourcererDataView();
-  const { to, from, isInitializing, deleteQuery, setQuery } = useGlobalTime();
+  const timelineTime = useDeepEqualSelector((state) =>
+    inputsSelectors.timelineTimeRangeSelector(state)
+  );
+  const globalTime = useGlobalTime();
+  const isActiveTimelines = isActiveTimeline(scopeId);
+  const { to, from } = isActiveTimelines ? timelineTime : globalTime;
+  const { isInitializing, setQuery, deleteQuery } = globalTime;
+
+  const { selectedPatterns } = useSourcererDataView(getSourcererScopeId(scopeId));
 
   const [loadingObservedUser, { userDetails: observedUserDetails, inspect, refetch, id: queryId }] =
     useObservedUserDetails({
