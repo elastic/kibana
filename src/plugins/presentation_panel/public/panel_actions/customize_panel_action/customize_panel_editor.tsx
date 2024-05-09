@@ -18,7 +18,6 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiForm,
-  EuiFormControlLayout,
   EuiFormRow,
   EuiSpacer,
   EuiSuperDatePicker,
@@ -160,27 +159,23 @@ export const CustomizePanelEditor = ({
             )
           }
         >
-          <EuiFormControlLayout
-            clear={{ onClick: hideTitle ? undefined : () => setPanelTitle('') }}
-          >
-            <EuiFieldText
-              inputRef={initialFocusRef}
-              id="panelTitleInput"
-              className="panelTitleInputText"
-              data-test-subj="customEmbeddablePanelTitleInput"
-              name="title"
-              type="text"
-              disabled={hideTitle}
-              value={panelTitle ?? ''}
-              onChange={(e) => setPanelTitle(e.target.value)}
-              aria-label={i18n.translate(
-                'presentationPanel.action.customizePanel.flyout.optionsMenuForm.panelTitleInputAriaLabel',
-                {
-                  defaultMessage: 'Enter a custom title for your panel',
-                }
-              )}
-            />
-          </EuiFormControlLayout>
+          <EuiFieldText
+            inputRef={initialFocusRef}
+            id="panelTitleInput"
+            className="panelTitleInputText"
+            data-test-subj="customEmbeddablePanelTitleInput"
+            name="title"
+            type="text"
+            disabled={hideTitle}
+            value={panelTitle ?? ''}
+            onChange={(e) => setPanelTitle(e.target.value)}
+            aria-label={i18n.translate(
+              'presentationPanel.action.customizePanel.flyout.optionsMenuForm.panelTitleInputAriaLabel',
+              {
+                defaultMessage: 'Enter a custom title for your panel',
+              }
+            )}
+          />
         </EuiFormRow>
         <EuiFormRow
           label={
