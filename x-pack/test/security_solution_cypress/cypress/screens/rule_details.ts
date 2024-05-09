@@ -88,8 +88,6 @@ export const FIELDS_BROWSER_BTN =
 export const LAST_EXECUTION_STATUS_REFRESH_BUTTON =
   '[data-test-subj="ruleLastExecutionStatusRefreshButton"]';
 
-export const RULE_STATUS_FAILED_CALLOUT = '[data-test-subj="ruleStatusFailedCallOut"]';
-
 export const RULE_NAME_HEADER = '[data-test-subj="header-page-title"]';
 
 export const RULE_NAME_OVERRIDE_DETAILS = 'Rule name override';
