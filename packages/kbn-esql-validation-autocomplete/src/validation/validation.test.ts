@@ -242,11 +242,11 @@ function generateIncorrectlyTypedParameters(
       }
       const canBeFieldButNotString = Boolean(
         fieldTypes.filter((t) => t !== 'string').includes(type) &&
-          signatures.every(({ params: fnParams }) => fnParams[i].type !== 'string')
+          signatures.every(({ params: fnParams }) => fnParams[i]?.type !== 'string')
       );
       const canBeFieldButNotNumber =
         fieldTypes.filter((t) => t !== 'number').includes(type) &&
-        signatures.every(({ params: fnParams }) => fnParams[i].type !== 'number');
+        signatures.every(({ params: fnParams }) => fnParams[i]?.type !== 'number');
       const isLiteralType = /literal$/.test(type);
       // pick a field name purposely wrong
       const nameValue =
@@ -274,11 +274,11 @@ function generateIncorrectlyTypedParameters(
   // This is not future-proof...
   const misMatchesBySignature = signatures.map(({ params: fnParams }) => {
     const typeMatches = fnParams.map(({ type }, i) => {
-      if (wrongFieldMapping[i].wrong) {
+      if (wrongFieldMapping[i]?.wrong) {
         const typeFromIncorrectMapping = generatedFieldTypes[wrongFieldMapping[i].name];
         return type === typeFromIncorrectMapping;
       }
-      return type === wrongFieldMapping[i].type;
+      return wrongFieldMapping[i]?.type ? type === wrongFieldMapping[i].type : true;
     });
     return typeMatches.filter((t) => !t).length;
   })!;

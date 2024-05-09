@@ -22,6 +22,49 @@ const aliasTable = {
 };
 const aliases = new Set(Object.values(aliasTable).flat());
 
+const evalSupportedCommandsAndOptions = {
+  supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
+  supportedOptions: ['by'],
+};
+
+const excludedFunctions = new Set(['bucket', 'case']);
+
+const extraFunctions = [
+  {
+    type: 'eval',
+    name: 'case',
+    description:
+      'Accepts pairs of conditions and values. The function returns the value that belongs to the first condition that evaluates to `true`. If the number of arguments is odd, the last argument is the default value which is returned when no condition matches.',
+    ...evalSupportedCommandsAndOptions,
+    signatures: [
+      {
+        params: [
+          { name: 'condition', type: 'boolean' },
+          { name: 'value', type: 'any' },
+        ],
+        minParams: 2,
+        returnType: 'any',
+        examples: [
+          `from index | eval type = case(languages <= 1, "monolingual", languages <= 2, "bilingual", "polyglot")`,
+        ],
+      },
+    ],
+  },
+  {
+    type: 'eval',
+    name: 'now',
+    description: 'Returns current date and time.',
+    ...evalSupportedCommandsAndOptions,
+    signatures: [
+      {
+        params: [],
+        returnType: 'date',
+        examples: [`ROW current_date = NOW()`],
+      },
+    ],
+  },
+];
+
 const elasticsearchToKibanaType = (elasticsearchType) => {
   const numberType = ['double', 'unsigned_long', 'long', 'integer'];
   const stringType = ['text', 'keyword'];
@@ -32,6 +75,14 @@ const elasticsearchToKibanaType = (elasticsearchType) => {
 
   if (stringType.includes(elasticsearchType)) {
     return 'string';
+  }
+
+  if (elasticsearchType === 'datetime') {
+    return 'date';
+  }
+
+  if (elasticsearchType === 'date_period') {
+    return 'time_literal'; // TODO - consider aligning with Elasticsearch
   }
 
   return elasticsearchType;
@@ -161,18 +212,10 @@ const functionEnrichments = {
       },
     ],
   },
-  // TODO — remove this when the signature is fixed on the ES side
-  case: {
-    signatures: [
-      {
-        params: [
-          { name: 'condition', type: 'boolean' },
-          { name: 'value', type: 'any' },
-        ],
-        minParams: 2,
-        returnType: 'any',
-      },
-    ],
+  mv_sort: {
+    signatures: new Array(6).fill({
+      params: [{}, { literalOptions: ['asc', 'desc'] }],
+    }),
   },
   // TODO — reenable this when the signature is fixed on the ES side
   // auto_bucket: {
@@ -193,10 +236,7 @@ function getFunctionDefinition(ESFunctionDefinition) {
     type: ESFunctionDefinition.type,
     name: ESFunctionDefinition.name,
     ...(ESFunctionDefinition.type === 'eval'
-      ? {
-          supportedCommands: ['stats', 'eval', 'where', 'row'],
-          supportedOptions: ['by'],
-        }
+      ? evalSupportedCommandsAndOptions
       : { supportedCommands: ['stats'] }),
     description: ESFunctionDefinition.description,
     alias: aliasTable[ESFunctionDefinition.name],
@@ -285,7 +325,7 @@ import type { FunctionDefinition } from './types';
   const evalFunctionDefinitions = [];
   // const aggFunctionDefinitions = [];
   for (const ESDefinition of ESFunctionDefinitions) {
-    if (aliases.has(ESDefinition.name)) {
+    if (aliases.has(ESDefinition.name) || excludedFunctions.has(ESDefinition.name)) {
       continue;
     }
 
@@ -293,6 +333,8 @@ import type { FunctionDefinition } from './types';
 
     evalFunctionDefinitions.push(functionDefinition);
   }
+
+  evalFunctionDefinitions.push(...extraFunctions);
 
   await writeFile(
     join(__dirname, 'functions.ts'),
