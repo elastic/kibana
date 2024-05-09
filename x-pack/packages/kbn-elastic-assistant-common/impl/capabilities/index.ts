@@ -16,5 +16,4 @@ export type AssistantFeatures = { [K in keyof typeof defaultAssistantFeatures]: 
 export const defaultAssistantFeatures = Object.freeze({
   assistantKnowledgeBaseByDefault: false,
   assistantModelEvaluation: false,
-  attackDiscoveryEnabled: false,
 });

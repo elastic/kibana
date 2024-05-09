@@ -54,7 +54,6 @@ describe('AppContextService', () => {
       appContextService.start(mockAppContext);
       appContextService.registerFeatures('super', {
         assistantModelEvaluation: true,
-        attackDiscoveryEnabled: false,
       });
       appContextService.stop();
 

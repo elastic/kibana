@@ -23,12 +23,9 @@ paths:
                     type: boolean
                   assistantModelEvaluation:
                     type: boolean
-                  attackDiscoveryEnabled:
-                    type: boolean
                 required:
                   - assistantKnowledgeBaseByDefault
                   - assistantModelEvaluation
-                  - attackDiscoveryEnabled
         '400':
           description: Generic Error
           content:
