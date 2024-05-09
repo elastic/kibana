@@ -86,6 +86,7 @@ import {
 import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/common';
 import { getHighlightRequest } from '@kbn/field-formats-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { GetConfigFn } from '@kbn/data-service';
 import {
   ExpressionAstExpression,
   buildExpression,
@@ -969,7 +970,7 @@ export class SearchSource {
     query: AnyQuery | AnyQuery[];
     filters: Filter | Filter[];
     esQueryConfigs?: Record<string, any>;
-    getConfig: (key: string) => any;
+    getConfig: GetConfigFn;
     filtersInMustClause: any;
   }) {
     const esQueryConfigs = {
