@@ -466,11 +466,11 @@ export class Execution<
     input: unknown,
     args: Record<string, unknown>
   ): Observable<UnwrapReturnType<Fn['fn']>> {
-    let hash: string | undefined;
-
     return of(input).pipe(
       map((currentInput) => this.cast(currentInput, fn.inputTypes)),
-      map((normalizedInput) => {
+      switchMap((normalizedInput) => {
+        let hash: string | undefined;
+
         if (fn.allowCache && this.context.allowCache) {
           hash = calculateObjectHash([
             fn.name,
@@ -479,9 +479,7 @@ export class Execution<
             this.context.getSearchContext(),
           ]);
         }
-        return normalizedInput;
-      }),
-      switchMap((normalizedInput) => {
+
         if (hash && this.functionCache.has(hash)) {
           const cached = this.functionCache.get(hash);
           if (cached && Date.now() - cached.time < this.cacheTimeout) {
