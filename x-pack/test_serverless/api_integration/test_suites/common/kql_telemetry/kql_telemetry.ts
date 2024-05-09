@@ -23,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('telemetry API', () => {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('viewer');
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
       // TODO: Clean `kql-telemetry` before running the tests
       await kibanaServer.savedObjects.clean({ types: ['kql-telemetry'] });
       await kibanaServer.importExport.load(
