@@ -86,7 +86,7 @@ export const AgentPolicySummaryLine = memo<{
       </EuiFlexItem>
       {withDescription && description && (
         <EuiFlexItem>
-          <EuiText color="subdued" className="eui-textTruncate" title={description} size="s">
+          <EuiText color="subdued" className="eui-textTruncate" title={description} size="xs">
             {description}
           </EuiText>
         </EuiFlexItem>
