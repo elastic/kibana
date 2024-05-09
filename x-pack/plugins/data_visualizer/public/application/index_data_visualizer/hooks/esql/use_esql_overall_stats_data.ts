@@ -449,13 +449,13 @@ export const useESQLOverallStatsData = (
           setTableData({ exampleDocs });
         }
       } catch (error) {
+        setQueryHistoryStatus(false);
         // If error already handled in sub functions, no need to propogate
         if (error.name !== 'AbortError' && error.handled !== true) {
           toasts.addError(error, {
             title: fieldStatsErrorTitle,
           });
         }
-        setQueryHistoryStatus(false);
         // Log error to console for better debugging
         // eslint-disable-next-line no-console
         console.error(`${fieldStatsErrorTitle}: fetchOverallStats`, error);
