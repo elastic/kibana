@@ -10,11 +10,8 @@ import * as React from 'react';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type {
-  CreateAPIKeyParams,
-  CreateAPIKeyResult,
-  SecurityPluginStart,
-} from '@kbn/security-plugin-types-server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-public';
+import type { CreateAPIKeyParams, CreateAPIKeyResult } from '@kbn/security-plugin-types-server';
 import { once } from 'lodash';
 import { ConnectionDetailsOptsProvider } from '../context';
 import { ConnectionDetailsOpts } from '../types';
@@ -69,8 +66,8 @@ const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
           },
         };
       },
-      hasPermission: once(
-        async () => (await start.plugins?.security?.authc.apiKeys.checkPermissions()) ?? false
+      checkPermissions: once(
+        async () => (await start.plugins?.security?.authc.checkPermissions()) ?? false
       ),
     },
     ...options?.apiKeys,

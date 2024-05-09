@@ -17,6 +17,11 @@ export interface AuthenticationServiceSetup {
    * Determines if API Keys are currently enabled.
    */
   areAPIKeysEnabled: () => Promise<boolean>;
+
+  /**
+   * Determines if the user has manage_own_keys permission
+   */
+  checkPermissions: () => Promise<boolean>;
 }
 
 /**

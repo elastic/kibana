@@ -9,6 +9,7 @@
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-public';
 
 export interface ConnectionDetailsGlobalDependencies {
   start: {
@@ -23,6 +24,7 @@ export interface ConnectionDetailsGlobalDependencies {
     plugins: {
       cloud?: CloudStart;
       share?: SharePluginStart;
+      security?: SecurityPluginStart;
     };
   };
 }

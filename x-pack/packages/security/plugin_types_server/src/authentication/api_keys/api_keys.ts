@@ -69,6 +69,9 @@ export interface APIKeys {
    */
   invalidateAsInternalUser(params: InvalidateAPIKeysParams): Promise<InvalidateAPIKeyResult | null>;
 
+  /**
+   * Checks for the user to have the manage_own_api_keys permission
+   */
   checkPermissions(): Promise<boolean>;
 }
 

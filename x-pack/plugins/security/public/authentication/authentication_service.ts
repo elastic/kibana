@@ -45,6 +45,10 @@ export class AuthenticationService {
       ((await http.get('/internal/security/api_key/_enabled')) as { apiKeysEnabled: boolean })
         .apiKeysEnabled;
 
+    const checkPermissions = async () =>
+      ((await http.get('/internal/security/api_key')) as { checkPermissions: boolean })
+        .checkPermissions;
+
     accessAgreementApp.create({ application, getStartServices });
     captureURLApp.create({ application, fatalErrors, http });
     loginApp.create({ application, config, getStartServices, http });
@@ -52,6 +56,6 @@ export class AuthenticationService {
     loggedOutApp.create({ application, getStartServices, http });
     overwrittenSessionApp.create({ application, authc: { getCurrentUser }, getStartServices });
 
-    return { getCurrentUser, areAPIKeysEnabled };
+    return { getCurrentUser, areAPIKeysEnabled, checkPermissions };
   }
 }

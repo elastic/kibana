@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { defineValidPermissionRoutes } from './check_permissions';
 import { defineCreateApiKeyRoutes } from './create';
 import { defineEnabledApiKeysRoutes } from './enabled';
 import { defineGetApiKeysRoutes } from './get';
@@ -29,4 +30,5 @@ export function defineApiKeysRoutes(params: RouteDefinitionParams) {
   defineCreateApiKeyRoutes(params);
   defineUpdateApiKeyRoutes(params);
   defineInvalidateApiKeysRoutes(params);
+  defineValidPermissionRoutes(params);
 }

@@ -16,10 +16,12 @@ export const authenticationMock = {
   createSetup: (): jest.Mocked<AuthenticationServiceSetup> => ({
     getCurrentUser: jest.fn(),
     areAPIKeysEnabled: jest.fn(),
+    checkPermissions: jest.fn(),
   }),
   createStart: (): jest.Mocked<AuthenticationServiceStart> => ({
     getCurrentUser: jest.fn(),
     areAPIKeysEnabled: jest.fn(),
+    checkPermissions: jest.fn(),
   }),
 };
 

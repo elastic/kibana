@@ -32,7 +32,7 @@ const defaultOpts: ConnectionDetailsOpts = {
         },
       };
     },
-    hasPermission: async () => {
+    checkPermissions: async () => {
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       return true;
@@ -64,7 +64,7 @@ export const StoriesProviderNoKeyPermissions: React.FC = ({ children }) => {
     ...defaultOpts,
     apiKeys: {
       ...defaultOpts!.apiKeys!,
-      hasPermission: async () => {
+      checkPermissions: async () => {
         await new Promise((resolve) => setTimeout(resolve, 1000));
 
         return false;

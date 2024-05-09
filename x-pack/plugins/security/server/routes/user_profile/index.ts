@@ -6,7 +6,6 @@
  */
 
 import { defineBulkGetUserProfilesRoute } from './bulk_get';
-import { defineValidPermissionRoutes } from './check_permissions';
 import { defineGetCurrentUserProfileRoute } from './get_current';
 import { defineUpdateUserProfileDataRoute } from './update';
 import type { RouteDefinitionParams } from '..';
@@ -15,5 +14,4 @@ export function defineUserProfileRoutes(params: RouteDefinitionParams) {
   defineUpdateUserProfileDataRoute(params);
   defineGetCurrentUserProfileRoute(params);
   defineBulkGetUserProfilesRoute(params);
-  defineValidPermissionRoutes(params);
 }

@@ -6,13 +6,8 @@
  */
 
 import type { RouteDefinitionParams } from '..';
-import type { ApiKey } from '../../../common/model';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
-
-export interface ValidPermissionsResult {
-  apiKeys: ApiKey[];
-}
 
 /**
  * Response of Kibana to confirm users have permissions to generate API keys
@@ -23,17 +18,14 @@ export function defineValidPermissionRoutes({
 }: RouteDefinitionParams) {
   router.get(
     {
-      path: '/internal/security/api_key/check_permissions',
+      path: '/internal/security/api_key',
       validate: false,
-      options: {
-        access: 'internal',
-      },
     },
     // @ts-ignore undefined would return but is caught by the cache function
     createLicensedRouteHandler(async (context, request, response) => {
       try {
         const esClient = (await context.core).elasticsearch.client;
-        const authenticationService = getAuthenticationService();
+        const authenticationService = await getAuthenticationService();
 
         const [{ cluster: clusterPrivileges }, areApiKeysEnabled] = await Promise.all([
           esClient.asCurrentUser.security.hasPrivileges({

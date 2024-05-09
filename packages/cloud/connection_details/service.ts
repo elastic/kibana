@@ -20,10 +20,11 @@ export class ConnectionDetailsService {
   public readonly apiKey$ = new BehaviorSubject<ApiKey | null>(null);
   public readonly apiKeyFormat$ = new BehaviorSubject<Format>('encoded');
   public readonly apiKeyHasAccess$ = new BehaviorSubject<null | boolean>(null);
+  public readonly hasPermission$ = new BehaviorSubject<boolean>(false);
 
   constructor(public readonly opts: ConnectionDetailsOpts) {
     opts.apiKeys
-      ?.hasPermission()
+      ?.checkPermissions()
       .then((hasAccess) => {
         this.apiKeyHasAccess$.next(hasAccess);
       })
@@ -57,6 +58,20 @@ export class ConnectionDetailsService {
     }
   };
 
+  private readonly checkPermissionsAsync = async () => {
+    const checkPermissions = this.opts.apiKeys?.checkPermissions();
+
+    if (!checkPermissions) {
+      throw new Error('checkPermissions() is not implemented');
+    }
+    try {
+      const permissions = (await checkPermissions) ?? false;
+      this.hasPermission$.next(permissions);
+    } catch (error) {
+      this.apiKeyError$.next(error);
+    }
+  };
+
   private readonly createKeyAsync = async () => {
     const createKey = this.opts.apiKeys?.createKey;
 
@@ -80,6 +95,12 @@ export class ConnectionDetailsService {
 
   public readonly createKey = () => {
     this.createKeyAsync().catch((error) => {
+      this.apiKeyError$.next(error);
+    });
+  };
+
+  public readonly hasPermission = () => {
+    this.checkPermissionsAsync().catch((error) => {
       this.apiKeyError$.next(error);
     });
   };
