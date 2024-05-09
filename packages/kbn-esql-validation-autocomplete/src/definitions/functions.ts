@@ -557,7 +557,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'string' as const }],
-        returnType: 'string' as const,
+        returnType: 'version' as const,
         examples: [`from index | EVAL version = to_version(stringField)`],
       },
     ],
@@ -602,48 +602,6 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           },
           { name: 'startTimestamp', type: 'date' as const },
           { name: 'endTimestamp', type: 'date' as const },
-        ],
-        returnType: 'number' as const,
-        examples: [],
-      },
-      {
-        params: [
-          {
-            name: 'unit',
-            type: 'string' as const,
-            literalOptions: dateDiffOptions,
-            literalSuggestions: dateDiffSuggestions,
-          },
-          { name: 'startTimestamp', type: 'string' as const, constantOnly: true },
-          { name: 'endTimestamp', type: 'date' as const },
-        ],
-        returnType: 'number' as const,
-        examples: [],
-      },
-      {
-        params: [
-          {
-            name: 'unit',
-            type: 'string' as const,
-            literalOptions: dateDiffOptions,
-            literalSuggestions: dateDiffSuggestions,
-          },
-          { name: 'startTimestamp', type: 'date' as const },
-          { name: 'endTimestamp', type: 'string' as const, constantOnly: true },
-        ],
-        returnType: 'number' as const,
-        examples: [],
-      },
-      {
-        params: [
-          {
-            name: 'unit',
-            type: 'string' as const,
-            literalOptions: dateDiffOptions,
-            literalSuggestions: dateDiffSuggestions,
-          },
-          { name: 'startTimestamp', type: 'string' as const, constantOnly: true },
-          { name: 'endTimestamp', type: 'string' as const, constantOnly: true },
         ],
         returnType: 'number' as const,
         examples: [],

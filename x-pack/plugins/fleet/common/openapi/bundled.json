@@ -7602,6 +7602,10 @@
             "type": "object",
             "description": "Advanced settings stored in the agent policy, e.g. agent_limits_go_max_procs",
             "nullable": true
+          },
+          "supports_agentless": {
+            "type": "boolean",
+            "description": "Indicates whether the agent policy supports agentless integrations. Only allowed in a serverless environment."
           }
         },
         "required": [

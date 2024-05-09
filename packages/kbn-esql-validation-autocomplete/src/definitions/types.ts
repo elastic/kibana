@@ -22,9 +22,11 @@ export type FunctionParameterType =
   | 'cartesian_shape'
   | 'geo_point'
   | 'geo_shape'
+  | 'version'
   | 'number[]'
   | 'string[]'
   | 'boolean[]'
+  | 'any[]'
   | 'date[]';
 
 export type FunctionReturnType =
@@ -42,7 +44,7 @@ export type FunctionReturnType =
   | 'void';
 
 export interface FunctionDefinition {
-  type: 'builtin' | 'agg' | 'eval' | 'grouping';
+  type: 'builtin' | 'agg' | 'eval';
   ignoreAsSuggestion?: boolean;
   name: string;
   alias?: string[];

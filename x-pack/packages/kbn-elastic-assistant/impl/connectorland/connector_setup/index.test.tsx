@@ -95,6 +95,33 @@ describe('useConnectorSetup', () => {
     });
   });
 
+  it('should NOT set the api config for each conversation when a new connector is saved and updateConversationsOnSaveConnector is false', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(
+        () =>
+          useConnectorSetup({
+            ...defaultProps,
+            updateConversationsOnSaveConnector: false, // <-- don't update the conversations
+          }),
+        {
+          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        }
+      );
+      await waitForNextUpdate();
+      const { getByTestId, queryByTestId, rerender } = render(result.current.prompt, {
+        wrapper: TestProviders,
+      });
+      expect(getByTestId('connectorButton')).toBeInTheDocument();
+      expect(queryByTestId('skip-setup-button')).not.toBeInTheDocument();
+      fireEvent.click(getByTestId('connectorButton'));
+
+      rerender(result.current.prompt);
+      fireEvent.click(getByTestId('modal-mock'));
+
+      expect(setApiConfig).not.toHaveBeenCalled();
+    });
+  });
+
   it('should show skip button if message has presentation data', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(
