@@ -153,7 +153,8 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
     () => {},
     undefined,
     undefined,
-    BAR_TARGET
+    BAR_TARGET,
+    false
   );
 
   const onAddFilter = useCallback(
@@ -270,8 +271,6 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
           timeRange.useSubAgg ? additionalFilter : undefined
         ),
       ]);
-      // eslint-disable-next-line no-console
-      console.log('categorizationResult', categorizationResult);
 
       if (mounted.current !== true) {
         return;
@@ -346,8 +345,6 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
         (currentAdditionalConfigsHash !== previousAdditionalConfigsHash &&
           currentDocumentStatsHash !== null)
       ) {
-        // eslint-disable-next-line no-console
-        console.log('trigger', currentDocumentStatsHash, previousDocumentStatsHash);
         randomSampler.setDocCount(documentStats.totalCount);
         setEventRate(
           Object.entries(buckets).map(([key, docCount]) => ({
@@ -358,9 +355,6 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
         loadCategories();
         setPreviousDocumentStatsHash(currentDocumentStatsHash);
         setPreviousAdditionalConfigsHash(currentAdditionalConfigsHash);
-      } else {
-        // eslint-disable-next-line no-console
-        console.log('no trigger', currentDocumentStatsHash, previousDocumentStatsHash);
       }
     },
     [

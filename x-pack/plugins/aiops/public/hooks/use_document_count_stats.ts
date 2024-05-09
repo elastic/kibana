@@ -56,7 +56,8 @@ function displayError(toastNotifications: ToastsStart, index: string, err: any) 
 export function useDocumentCountStats<TParams extends DocumentStatsSearchStrategyParams>(
   searchParams: TParams | undefined,
   searchParamsCompare: TParams | undefined,
-  lastRefresh: number
+  lastRefresh: number,
+  changePointsByDefault = true
 ): DocumentStats {
   const {
     data,
@@ -96,7 +97,7 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
       const totalHitsResp = await lastValueFrom(
         data.search.search(
           {
-            params: getDocumentCountStatsRequest(totalHitsParams, undefined, true),
+            params: getDocumentCountStatsRequest(totalHitsParams, undefined, changePointsByDefault),
           },
           { abortSignal: abortCtrl.current.signal }
         )
@@ -116,7 +117,7 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
               { ...searchParams, trackTotalHits: false },
               randomSamplerWrapper,
               false,
-              searchParamsCompare === undefined
+              searchParamsCompare === undefined && changePointsByDefault
             ),
           },
           { abortSignal: abortCtrl.current.signal }

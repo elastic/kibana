@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, useEffect, type ReactElement } from 'react';
+import React, { useMemo, useEffect, useState, type ReactElement } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { isLegacyTableEnabled, SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { VIEW_MODE } from '../../../common/constants';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
@@ -36,15 +35,35 @@ export const DocumentViewModeToggle = ({
   dataView: DataView;
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { uiSettings, dataVisualizer: dataVisualizerService } = useDiscoverServices();
+  const {
+    uiSettings,
+    dataVisualizer: dataVisualizerService,
+    aiops: aiopsService,
+  } = useDiscoverServices();
   const isLegacy = useMemo(
     () => isLegacyTableEnabled({ uiSettings, isTextBasedQueryMode: isTextBasedQuery }),
     [uiSettings, isTextBasedQuery]
   );
+  const [showPatternAnalysisTab, setShowPatternAnalysisTab] = useState<boolean | null>(null);
+  const showFieldStatisticsTab = useMemo(
+    () => uiSettings.get(SHOW_FIELD_STATISTICS) && dataVisualizerService !== undefined,
+    [dataVisualizerService, uiSettings]
+  );
 
-  const showPatternAnalysisTab = useMemo(
-    () => dataView.fields.some((f) => f.esTypes?.includes(ES_FIELD_TYPES.TEXT)),
-    [dataView.fields]
+  useEffect(
+    function checkForPatternAnalysis() {
+      if (aiopsService === undefined) {
+        setShowPatternAnalysisTab(false);
+        return;
+      }
+      aiopsService
+        .patternAnalysisAvailable(dataView)
+        .then(setShowPatternAnalysisTab)
+        .catch(() => {
+          setShowPatternAnalysisTab(false);
+        });
+    },
+    [aiopsService, dataView]
   );
 
   useEffect(() => {
@@ -68,9 +87,6 @@ export const DocumentViewModeToggle = ({
     }
   `;
 
-  const showViewModeToggle =
-    (uiSettings.get(SHOW_FIELD_STATISTICS) && dataVisualizerService !== undefined) ?? false;
-
   return (
     <EuiFlexGroup
       direction="row"
@@ -92,7 +108,8 @@ export const DocumentViewModeToggle = ({
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
-        {isTextBasedQuery || !showViewModeToggle ? (
+        {isTextBasedQuery ||
+        (showFieldStatisticsTab === false && showPatternAnalysisTab === false) ? (
           <HitsCounter mode={HitsCounterMode.standalone} stateContainer={stateContainer} />
         ) : (
           <EuiTabs size="m" css={tabsCss} data-test-subj="dscViewModeToggle" bottomBorder={false}>
@@ -119,16 +136,18 @@ export const DocumentViewModeToggle = ({
               </EuiTab>
             ) : null}
 
-            <EuiTab
-              isSelected={viewMode === VIEW_MODE.AGGREGATED_LEVEL}
-              onClick={() => setDiscoverViewMode(VIEW_MODE.AGGREGATED_LEVEL)}
-              data-test-subj="dscViewModeFieldStatsButton"
-            >
-              <FormattedMessage
-                id="discover.viewModes.fieldStatistics.label"
-                defaultMessage="Field statistics"
-              />
-            </EuiTab>
+            {showFieldStatisticsTab ? (
+              <EuiTab
+                isSelected={viewMode === VIEW_MODE.AGGREGATED_LEVEL}
+                onClick={() => setDiscoverViewMode(VIEW_MODE.AGGREGATED_LEVEL)}
+                data-test-subj="dscViewModeFieldStatsButton"
+              >
+                <FormattedMessage
+                  id="discover.viewModes.fieldStatistics.label"
+                  defaultMessage="Field statistics"
+                />
+              </EuiTab>
+            ) : null}
           </EuiTabs>
         )}
       </EuiFlexItem>

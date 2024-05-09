@@ -17,6 +17,7 @@ import type {
   AiopsPluginStartDeps,
 } from './types';
 import { getEmbeddableChangePointChart } from './embeddable/embeddable_change_point_chart_component';
+import { getPatternAnalysisAvailable } from './components/log_categorization/log_categorization_enabled';
 
 export type AiopsCoreSetup = CoreSetup<AiopsPluginStartDeps, AiopsPluginStart>;
 
@@ -65,6 +66,7 @@ export class AiopsPlugin
         core,
         plugins
       ),
+      patternAnalysisAvailable: getPatternAnalysisAvailable(plugins),
       PatternAnalysisComponent: dynamic(
         async () =>
           import(

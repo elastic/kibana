@@ -36,6 +36,7 @@ export const useData = (
   selectedSignificantItem?: SignificantItem,
   selectedGroup: GroupTableItem | null = null,
   barTarget: number = DEFAULT_BAR_TARGET,
+  changePointsByDefault = true,
   timeRange?: { min: Moment; max: Moment }
 ) => {
   const { executionContext, uiSettings } = useAiopsAppContext();
@@ -103,7 +104,8 @@ export const useData = (
   const documentStats = useDocumentCountStats(
     overallStatsRequest,
     selectedSignificantItemStatsRequest,
-    lastRefresh
+    lastRefresh,
+    changePointsByDefault
   );
 
   useEffect(() => {
