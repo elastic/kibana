@@ -10,7 +10,7 @@
 import { useDispatch, useSelector } from 'react-redux';
 import React, { memo, useMemo, useCallback, useContext } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBadge, EuiButtonEmpty, EuiSpacer, EuiInMemoryTable } from '@elastic/eui';
+import { EuiBadge, EuiButtonEmpty, EuiSpacer, EuiInMemoryTable, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SideEffectContext } from '../side_effect_context';
 import { StyledPanel } from '../styles';
@@ -122,8 +122,11 @@ export const NodeList = memo(({ id }: { id: string }) => {
   );
   const showWarning = children === true || ancestors === true || generations === true;
   const rowProps = useMemo(() => ({ 'data-test-subj': 'resolver:node-list:item' }), []);
+
+  const PanelWrapper = id.startsWith('flyout') ? EuiPanel : StyledPanel;
+
   return (
-    <StyledPanel hasBorder>
+    <PanelWrapper hasBorder={!id.startsWith('flyout')}>
       <Breadcrumbs breadcrumbs={breadcrumbs} />
       {showWarning && <LimitWarning numberDisplayed={numberOfProcesses} />}
       <EuiSpacer size="l" />
@@ -134,7 +137,7 @@ export const NodeList = memo(({ id }: { id: string }) => {
         columns={columns}
         sorting
       />
-    </StyledPanel>
+    </PanelWrapper>
   );
 });
 

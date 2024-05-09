@@ -17,6 +17,7 @@ import {
   EuiTextColor,
   EuiLink,
   EuiInMemoryTable,
+  EuiPanel,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
@@ -59,19 +60,20 @@ export const NodeDetail = memo(function ({ id, nodeID }: { id: string; nodeID: s
   const nodeStatus = useSelector((state: State) =>
     selectors.nodeDataStatus(state.analyzer[id])(nodeID)
   );
+  const PanelWrapper = id.startsWith('flyout') ? EuiPanel : StyledPanel;
 
   return nodeStatus === 'loading' ? (
-    <StyledPanel hasBorder>
+    <PanelWrapper hasBorder={!id.startsWith('flyout')}>
       <PanelLoading id={id} />
-    </StyledPanel>
+    </PanelWrapper>
   ) : processEvent ? (
-    <StyledPanel hasBorder data-test-subj="resolver:panel:node-detail">
+    <PanelWrapper hasBorder={!id.startsWith('flyout')} data-test-subj="resolver:panel:node-detail">
       <NodeDetailView id={id} nodeID={nodeID} processEvent={processEvent} />
-    </StyledPanel>
+    </PanelWrapper>
   ) : (
-    <StyledPanel hasBorder>
+    <PanelWrapper hasBorder={!id.startsWith('flyout')}>
       <PanelContentError id={id} translatedErrorMessage={nodeDetailError} />
-    </StyledPanel>
+    </PanelWrapper>
   );
 });
 

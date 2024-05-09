@@ -242,6 +242,11 @@ export const allowedExperimentalValues = Object.freeze({
   analyzerDatePickersAndSourcererDisabled: false,
 
   /**
+   * Enables visualization: session viewer and analyzer in expandable flyout
+   */
+  visualizationInFlyoutEnabled: false,
+
+  /**
    * Enables per-field rule diffs tab in the prebuilt rule upgrade flyout
    *
    * Ticket: https://github.com/elastic/kibana/issues/166489

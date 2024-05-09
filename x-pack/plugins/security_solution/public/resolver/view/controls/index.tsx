@@ -28,11 +28,13 @@ import { DateSelectionButton } from './date_picker';
 import { StyledGraphControls, StyledGraphControlsColumn, StyledEuiRange } from './styles';
 import { NodeLegend } from './legend';
 import { SchemaInformation } from './schema';
+import { PanelButton } from './panel';
 
 export const GraphControls = React.memo(
   ({
     id,
     className,
+    databaseDocumentID,
   }: {
     /**
      * Id that identify the scope of analyzer
@@ -42,20 +44,28 @@ export const GraphControls = React.memo(
      * A className string provided by `styled`
      */
     className?: string;
+    /**
+     * The `_id` for an ES document. Used to select a process that we'll show the graph for.
+     */
+    databaseDocumentID: string;
   }) => {
     const dispatch = useDispatch();
     const scalingFactor = useSelector((state: State) =>
       selectors.scalingFactor(state.analyzer[id])
     );
+    const eventIndices = useSelector((state: State) => selectors.eventIndices(state.analyzer[id]));
     const { timestamp } = useContext(SideEffectContext);
     const isDatePickerAndSourcererDisabled = useIsExperimentalFeatureEnabled(
       'analyzerDatePickersAndSourcererDisabled'
+    );
+    const visualizationInFlyoutEnabled = useIsExperimentalFeatureEnabled(
+      'visualizationInFlyoutEnabled'
     );
     const [activePopover, setPopover] = useState<
       null | 'schemaInfo' | 'nodeLegend' | 'sourcererSelection' | 'datePicker'
     >(null);
     const colorMap = useColors();
-
+    const inFlyout = id.startsWith('flyout');
     const setActivePopover = useCallback(
       (value) => {
         if (value === activePopover) {
@@ -148,6 +158,9 @@ export const GraphControls = React.memo(
               />
             </>
           ) : null}
+          {visualizationInFlyoutEnabled && inFlyout && (
+            <PanelButton id={id} eventId={databaseDocumentID} indexName={eventIndices[0]} />
+          )}
         </StyledGraphControlsColumn>
         <StyledGraphControlsColumn>
           <EuiPanel className="panning-controls" paddingSize="none" hasBorder>
