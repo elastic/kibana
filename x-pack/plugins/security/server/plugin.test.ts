@@ -155,6 +155,7 @@ describe('Security Plugin', () => {
             "apiKeys": Object {
               "areAPIKeysEnabled": [Function],
               "areCrossClusterAPIKeysEnabled": [Function],
+              "checkPermissions": [Function],
               "create": [Function],
               "grantAsInternalUser": [Function],
               "invalidate": [Function],
