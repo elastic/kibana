@@ -20,14 +20,14 @@ import {
 } from '../../../lib/helpers/transaction_error_rate';
 import { MAX_NUMBER_OF_SERVICES } from './get_service_assets';
 
-export interface TracesMetrics {
+export interface TraceMetrics {
   latency: number | null;
   throughput: number | null;
   transactionErrorRate: number | null;
 }
 
-interface TraceServicesMetrics {
-  [serviceName: string]: TracesMetrics;
+interface AssetServicesMetricsMap {
+  [serviceName: string]: TraceMetrics;
 }
 
 export async function getServicesTransactionStats({
@@ -42,7 +42,7 @@ export async function getServicesTransactionStats({
   end: number;
   kuery: string;
   serviceNames: string[];
-}): Promise<TraceServicesMetrics> {
+}): Promise<AssetServicesMetricsMap> {
   const response = await apmEventClient.search('get_services_transaction_stats', {
     apm: {
       events: [ProcessorEvent.span, ProcessorEvent.transaction],
@@ -86,7 +86,7 @@ export async function getServicesTransactionStats({
   });
 
   return (
-    response.aggregations?.services.buckets.reduce<TraceServicesMetrics>((acc, bucket) => {
+    response.aggregations?.services.buckets.reduce<AssetServicesMetricsMap>((acc, bucket) => {
       const serviceName = bucket.key as string;
       const topTransactionTypeBucket = maybe(
         bucket.transactionType.buckets.find(({ key }) => isDefaultTransactionType(key as string)) ??

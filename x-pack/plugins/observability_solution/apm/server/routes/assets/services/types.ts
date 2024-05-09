@@ -6,7 +6,7 @@
  */
 
 import { LogsRatesMetrics } from '@kbn/logs-data-access-plugin/server';
-import { TracesMetrics } from './get_services_transaction_stats';
+import { TraceMetrics } from './get_services_transaction_stats';
 
 export interface SignalTypes {
   'asset.traces'?: boolean;
@@ -31,10 +31,11 @@ export interface ServiceAssetDocument {
   service: ServiceItem;
 }
 
+export interface AssetService {
+  asset: AssetItem;
+  service: ServiceItem;
+}
+
 export interface AssetServicesResponse {
-  services: Array<{
-    asset: AssetItem;
-    service: ServiceItem;
-    metrics: TracesMetrics & LogsRatesMetrics;
-  }>;
+  services: Array<AssetService & { metrics: TraceMetrics & LogsRatesMetrics }>;
 }

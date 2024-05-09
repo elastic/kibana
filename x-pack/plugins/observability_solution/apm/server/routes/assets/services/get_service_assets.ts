@@ -12,6 +12,7 @@ import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm
 import { AssetsESClient } from '../../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { getAssets } from '../get_assets';
+import { getServiceNamesPerSignalType } from '../utils/get_service_names_per_signal_type';
 import { getServicesTransactionStats } from './get_services_transaction_stats';
 import { ServiceAssetDocument } from './types';
 
@@ -62,12 +63,7 @@ export async function getServiceAssets({
         };
       });
 
-      const tracesServiceNames = services
-        .filter(({ asset }) => asset.signalTypes['asset.traces'])
-        .map(({ service }) => service.name);
-      const logsServiceNames = services
-        .filter(({ asset }) => asset.signalTypes['asset.logs'])
-        .map(({ service }) => service.name);
+      const { logsServiceNames, tracesServiceNames } = getServiceNamesPerSignalType(services);
 
       const [apmMetrics, logsMetrics] = await Promise.all([
         getServicesTransactionStats({
