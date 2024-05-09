@@ -78,6 +78,14 @@ export {
   getFileDataIndexName,
 } from './services';
 
+export {
+  getTemplateUrlFromPackageInfo,
+  getCloudShellUrlFromPackagePolicy,
+  getAzureArmPropsFromPackagePolicy,
+  getCloudFormationPropsFromPackagePolicy,
+  SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
+} from '../public/components/cloud_security_posture/services'
+
 export type { FleetAuthz } from './authz';
 export type {
   // Request/Response
@@ -199,3 +207,4 @@ export type {
 } from './types';
 
 export { ElasticsearchAssetType } from './types';
+
