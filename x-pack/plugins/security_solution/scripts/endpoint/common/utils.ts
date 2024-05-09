@@ -71,3 +71,26 @@ export const prefixedOutputLogger = (prefix: string, log: ToolingLog): ToolingLo
 export const dump = (content: any, depth: number = 5): string => {
   return inspect(content, { depth });
 };
+
+export interface DeferredPromiseInterface<T = void> {
+  promise: Promise<T>;
+  resolve: (data: T) => void;
+  reject: (e: Error) => void;
+}
+
+/**
+ * Returns back an interface that provide a Promise along with exposed method to resolve it and reject it
+ * from outside of the actual Promise executor
+ */
+export const getDeferredPromise = function <T = void>(): DeferredPromiseInterface<T> {
+  let resolve: DeferredPromiseInterface<T>['resolve'];
+  let reject: DeferredPromiseInterface<T>['reject'];
+
+  const promise = new Promise<T>((_resolve, _reject) => {
+    resolve = _resolve;
+    reject = _reject;
+  });
+
+  // @ts-ignore
+  return { promise, resolve, reject };
+};

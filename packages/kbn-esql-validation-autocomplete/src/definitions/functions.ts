@@ -559,7 +559,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'string' }],
-        returnType: 'string',
+        returnType: 'version',
         examples: [`from index | EVAL version = to_version(stringField)`],
       },
     ],
