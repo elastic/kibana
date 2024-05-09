@@ -49,8 +49,7 @@ const apiIsCompatible = (api: unknown): api is CopyToDashboardAPI => {
     apiHasUniqueId(api) &&
     apiHasParentApi(api) &&
     apiIsOfType(api.parentApi, DASHBOARD_CONTAINER_TYPE) &&
-    apiPublishesSavedObjectId(api.parentApi) &&
-    !(apiCanExpandPanels(api.parentApi) && api.parentApi.expandedPanelId.getValue())
+    apiPublishesSavedObjectId(api.parentApi)
   );
 };
 
