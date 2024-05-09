@@ -891,6 +891,10 @@ export const fillAlertSuppressionFields = (fields: string[]) => {
   });
 };
 
+export const clearAlertSuppressionFields = () => {
+  cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).type('{selectall}{backspace}{enter}');
+};
+
 export const selectAlertSuppressionPerInterval = () => {
   // checkbox is covered by label, force:true is a workaround
   // click on label not working, likely because it has child components

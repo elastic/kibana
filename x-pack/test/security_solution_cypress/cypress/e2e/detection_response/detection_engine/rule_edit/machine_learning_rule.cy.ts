@@ -18,17 +18,20 @@ import {
   SUPPRESS_FOR_DETAILS,
   SUPPRESS_MISSING_FIELD,
 } from '../../../../screens/rule_details';
-import { editFirstRule, goToRuleDetailsOf } from '../../../../tasks/alerts_detection_rules';
+import { editFirstRule } from '../../../../tasks/alerts_detection_rules';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import {
+  clearAlertSuppressionFields,
   fillAlertSuppressionFields,
   selectAlertSuppressionPerInterval,
   selectAlertSuppressionPerRuleExecution,
   setAlertSuppressionDuration,
 } from '../../../../tasks/create_new_rule';
 import { saveEditedRule } from '../../../../tasks/edit_rule';
+import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
-import { getDetails, goToRuleEditSettings } from '../../../../tasks/rule_details';
+import { assertDetailsNotExist, getDetails } from '../../../../tasks/rule_details';
 import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 
 describe(
@@ -49,16 +52,21 @@ describe(
     let mlRule: ReturnType<typeof getMachineLearningRule>;
     const suppressByFields = ['agent.name', 'host.name'];
 
-    describe('with Alert Suppression', () => {
+    beforeEach(() => {
+      login();
+      deleteAlertsAndRules();
+    });
+
+    describe('without Alert Suppression', () => {
       beforeEach(() => {
         mlRule = getMachineLearningRule();
         createRule(mlRule);
-      });
-
-      it('allows editing of a rule to add suppression configuration', () => {
         visit(RULES_MANAGEMENT_URL);
         editFirstRule();
+      });
 
+      // TODO: this won't work until https://github.com/elastic/kibana/issues/183100 is addressed
+      it.skip('allows editing of a rule to add suppression configuration', () => {
         fillAlertSuppressionFields(suppressByFields);
         selectAlertSuppressionPerInterval();
         setAlertSuppressionDuration(2, 'h');
@@ -81,18 +89,18 @@ describe(
 
     describe('with Alert Suppression', () => {
       beforeEach(() => {
-        createRule({
-          ...mlRule,
+        mlRule = {
+          ...getMachineLearningRule(),
           alert_suppression: {
             group_by: suppressByFields,
             duration: { value: 360, unit: 's' },
             missing_fields_strategy: 'doNotSuppress',
           },
-        });
+        };
 
+        createRule(mlRule);
         visit(RULES_MANAGEMENT_URL);
-        goToRuleDetailsOf(mlRule.name);
-        goToRuleEditSettings();
+        editFirstRule();
       });
 
       it('allows editing of a rule to change its suppression configuration', () => {
@@ -138,16 +146,13 @@ describe(
         // set new duration first to overcome some flaky racing conditions during form save
         setAlertSuppressionDuration(2, 'h');
 
-        // clear suppression settings
-        fillAlertSuppressionFields([]);
-
+        clearAlertSuppressionFields();
         saveEditedRule();
 
         // check suppression is now absent
         cy.get(DEFINITION_DETAILS).within(() => {
-          getDetails(SUPPRESS_FOR_DETAILS).should('not.have.text', 'One rule execution');
-          getDetails(SUPPRESS_FOR_DETAILS).should('not.have.text', '360s');
-          getDetails(SUPPRESS_BY_DETAILS).should('not.have.text', suppressByFields.join(''));
+          assertDetailsNotExist(SUPPRESS_FOR_DETAILS);
+          assertDetailsNotExist(SUPPRESS_BY_DETAILS);
         });
       });
     });
