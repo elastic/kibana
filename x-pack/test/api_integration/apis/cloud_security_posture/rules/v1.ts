@@ -65,6 +65,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it(`Should return 500 error code when provide both package policy id and benchmark id`, async () => {
+      // todo
       await createPackagePolicy(
         supertest,
         agentPolicyId,
