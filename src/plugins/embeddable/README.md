@@ -727,31 +727,7 @@ interface EmbeddableState extends State<Embeddable> {
 const foo = useSelector<EmbeddableState>((state) => state.foo);
 ```
 
-#### Advanced Usage
+## Documenation and examples
 
-In case when there is a need to enhance the produced store in some way (e.g., perform custom serialization or debugging), it is possible to use [parameters](https://redux-toolkit.js.org/api/configureStore#parameters) supported by the `configureStore` function.
-
-In case when custom serialization is needed, that should be done using middleware. The embeddable plugin's `createStore` function does not apply any middleware, so all the synchronization job is done outside the store.
-
-## API
-
-Please use automatically generated API reference or generated TypeDoc comments to find the complete documentation.
-
-## Examples
-
-- Multiple embeddable examples are implemented and registered [here](https://github.com/elastic/kibana/tree/HEAD/examples/embeddable_examples).
-- They can be played around with and explored in the [Embeddable Explorer](https://github.com/elastic/kibana/tree/HEAD/examples/embeddable_explorer) example plugin.
-- There is an [example](https://github.com/elastic/kibana/tree/HEAD/examples/portable_dashboards_example) of rendering a dashboard container outside the dashboard app.
-- There are storybook [stories](https://github.com/elastic/kibana/tree/HEAD/src/plugins/embeddable/public/__stories__) that demonstrate usage of the embeddable components.
-
-To run the examples plugin use the following command:
-
-```bash
-yarn start --run-examples
-```
-
-To run the storybook:
-
-```bash
-yarn storybook embeddable
-```
+Embeddable documenation and examples are bundled with Kibana and accessable by running `yarn start --run-examples`.
+Navigate to `http://localhost:5601/app/embeddablesApp`.
