@@ -104,7 +104,7 @@ export const hostDetailsTabs: Tab[] = [
 // Profiling and Logs tab would be added in next iteration
 export const containerDetailsTabs: Tab[] = [overviewTab, metadataTab];
 
-export const assetDetailsTabs = (type: string): Tab[] => {
+export const getAssetDetailsTabs = (type: string): Tab[] => {
   switch (type) {
     case 'host':
       return hostDetailsTabs;
