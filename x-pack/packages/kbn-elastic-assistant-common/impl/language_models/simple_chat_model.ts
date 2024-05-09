@@ -31,6 +31,7 @@ export interface CustomChatModelInput extends BaseChatModelParams {
   model?: string;
   temperature?: number;
   request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
+  streaming: boolean;
 }
 
 export class ActionsClientSimpleChatModel extends SimpleChatModel {
@@ -40,6 +41,7 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
   #request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
   #traceId: string;
   llmType: string;
+  streaming: boolean;
   model?: string;
   temperature?: number;
 
@@ -51,6 +53,7 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
     model,
     request,
     temperature,
+    streaming,
   }: CustomChatModelInput) {
     super({});
 
@@ -62,6 +65,7 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
     this.llmType = llmType ?? 'openai';
     this.model = model;
     this.temperature = temperature;
+    this.streaming = streaming;
   }
 
   _llmType() {
@@ -132,5 +136,17 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
     }
 
     return content; // per the contact of _call, return a string
+  }
+  async *_streamResponseChunks() {
+    console.log('heyo _streamResponseChunks');
+    return 'hi';
+  }
+  async *_streamIterator() {
+    console.log('heyo _streamIterator');
+    return 'hi';
+  }
+
+  async completionWithRetry() {
+    return 'hi';
   }
 }

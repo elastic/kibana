@@ -20,7 +20,6 @@ import { getDefaultArguments } from '@kbn/elastic-assistant-common/impl/language
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
 import { AgentExecutor } from '../executors/types';
-import { withAssistantSpan } from '../tracers/with_assistant_span';
 import { APMTracer } from '../tracers/apm_tracer';
 import { AssistantToolParams } from '../../../types';
 export const DEFAULT_AGENT_EXECUTOR_ID = 'Elastic AI Assistant Agent Executor';
@@ -70,7 +69,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     // This is where the LangSmith logs (Metadata > Invocation Params) are set
     temperature: getDefaultArguments(llmType).temperature,
     signal: abortSignal,
-    streaming: isStream,
+    streaming: true, // isStream,
     // prevents the agent from retrying on failure
     // failure could be due to bad connector, we should deliver that result to the client asap
     maxRetries: 0,
@@ -238,28 +237,69 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     return responseWithHeaders;
   }
 
-  // Wrap executor call with an APM span for instrumentation
-  const langChainResponse = await withAssistantSpan(DEFAULT_AGENT_EXECUTOR_ID, async (span) => {
-    if (span?.transaction?.ids['transaction.id'] != null && span?.ids['trace.id'] != null) {
-      traceData = {
-        // Transactions ID since this span is the parent
-        transaction_id: span.transaction.ids['transaction.id'],
-        trace_id: span.ids['trace.id'],
-      };
-      span.addLabels({ evaluationId: traceOptions?.evaluationId });
+  let currentOutput = '';
+  let finalOutputIndex = -1;
+  let streamedFinalOutput = '';
+  let streamingFinished = false;
+  const finalOutputStartToken = '"action":"FinalAnswer","action_input":"';
+  // Match unescaped quotes
+  const finalOutputStopRegex = /(?<!\\)\"/;
+  const result = await executor.invoke(
+    { input: latestMessage[0].content },
+    {
+      callbacks: [
+        {
+          handleLLMNewToken(token) {
+            if (finalOutputIndex === -1) {
+              // Remove whitespace to simplify parsing
+              currentOutput += token.replace(/\s/g, '');
+              if (currentOutput.includes(finalOutputStartToken)) {
+                finalOutputIndex = currentOutput.indexOf(finalOutputStartToken);
+              }
+            } else if (!streamingFinished) {
+              const finalOutputEndIndex = token.search(finalOutputStopRegex);
+              if (finalOutputEndIndex !== -1) {
+                const streamableOutput = token.slice(0, finalOutputEndIndex);
+                streamedFinalOutput += streamableOutput;
+                streamingFinished = true;
+                console.log('heyo streamableOutput', streamableOutput);
+              } else {
+                streamedFinalOutput += token;
+                console.log('heyo token', token);
+              }
+              streamedFinalOutput += token;
+            }
+          },
+        },
+      ],
     }
+  );
+  console.log('heyo result', result);
+  console.log('heyo streamedFinalOutput', streamedFinalOutput);
+  //
+  //
+  // // Wrap executor call with an APM span for instrumentation
+  // const langChainResponse = await withAssistantSpan(DEFAULT_AGENT_EXECUTOR_ID, async (span) => {
+  //   if (span?.transaction?.ids['transaction.id'] != null && span?.ids['trace.id'] != null) {
+  //     traceData = {
+  //       // Transactions ID since this span is the parent
+  //       transaction_id: span.transaction.ids['transaction.id'],
+  //       trace_id: span.ids['trace.id'],
+  //     };
+  //     span.addLabels({ evaluationId: traceOptions?.evaluationId });
+  //   }
+  //
+  //   return executor.call(
+  //     { input: latestMessage[0].content },
+  //     {
+  //       callbacks: [apmTracer, ...(traceOptions?.tracers ?? [])],
+  //       runName: DEFAULT_AGENT_EXECUTOR_ID,
+  //       tags: traceOptions?.tags ?? [],
+  //     }
+  //   );
+  // });
 
-    return executor.call(
-      { input: latestMessage[0].content },
-      {
-        callbacks: [apmTracer, ...(traceOptions?.tracers ?? [])],
-        runName: DEFAULT_AGENT_EXECUTOR_ID,
-        tags: traceOptions?.tags ?? [],
-      }
-    );
-  });
-
-  const langChainOutput = langChainResponse.output;
+  const langChainOutput = streamedFinalOutput; // langChainResponse.output;
   if (onLlmResponse) {
     await onLlmResponse(langChainOutput, traceData);
   }
