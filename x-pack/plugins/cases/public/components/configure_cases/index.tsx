@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 
 import type {
+  ActionConnector,
   ActionConnectorTableItem,
   CreateConnectorFlyoutProps,
   EditConnectorFlyoutProps,
@@ -72,9 +73,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
   const [connectorIsValid, setConnectorIsValid] = useState(true);
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
-  const [editedConnectorItem, setEditedConnectorItem] = useState<ActionConnectorTableItem | null>(
-    null
-  );
+  const [editedConnectorItem, setEditedConnectorItem] = useState<ActionConnector | null>(null);
   const [customFieldFlyoutVisible, setCustomFieldFlyoutVisibility] = useState<boolean>(false);
   const [customFieldToEdit, setCustomFieldToEdit] = useState<CustomFieldConfiguration | null>(null);
   const { euiTheme } = useEuiTheme();
@@ -114,8 +113,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
   const onConnectorUpdated = useCallback<
     NonNullable<EditConnectorFlyoutProps['onConnectorUpdated']>
   >(
-    async (updatedConnector) => {
-      setEditedConnectorItem(updatedConnector as ActionConnectorTableItem);
+    async (updatedConnector: ActionConnector) => {
+      setEditedConnectorItem(updatedConnector);
       refetchConnectors();
       refetchActionTypes();
       refetchCaseConfigure();

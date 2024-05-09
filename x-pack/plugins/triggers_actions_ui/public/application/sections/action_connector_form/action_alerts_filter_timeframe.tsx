@@ -18,6 +18,7 @@ import {
   EuiDatePickerRange,
   EuiDatePicker,
   EuiComboBox,
+  EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
 import { AlertsFilterTimeframe, ISO_WEEKDAYS, IsoWeekday } from '@kbn/alerting-plugin/common';
@@ -72,7 +73,9 @@ export const ActionAlertsFilterTimeframe: React.FC<ActionAlertsFilterTimeframePr
 }) => {
   const timeFormat = useTimeFormat();
   const [timeframe, setTimeframe] = useTimeframe(state);
-  const [selectedTimezone, setSelectedTimezone] = useState([{ label: timeframe.timezone }]);
+  const [selectedTimezone, setSelectedTimezone] = useState<Array<EuiComboBoxOptionOption<string>>>([
+    { label: timeframe.timezone },
+  ]);
 
   const timeframeEnabled = useMemo(() => Boolean(state), [state]);
 
@@ -130,7 +133,7 @@ export const ActionAlertsFilterTimeframe: React.FC<ActionAlertsFilterTimeframePr
   );
 
   const onChangeTimezone = useCallback(
-    (value: any) => {
+    (value: Array<EuiComboBoxOptionOption<string>>) => {
       setSelectedTimezone(value);
       if (value[0].label) updateTimeframe({ timezone: value[0].label });
     },

@@ -20,7 +20,10 @@ export const NumberField: React.FC<
   const onChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const { value } = e.target;
-      const isValid = !isNaN(Number(value)) && Number(value) >= min && Number(value) <= max;
+      const valueAsNumber = Number(value);
+
+      const isValid = !isNaN(valueAsNumber) && valueAsNumber >= min && valueAsNumber <= max;
+
       if (isValid || value === '') {
         setDisplayValue(value);
       }

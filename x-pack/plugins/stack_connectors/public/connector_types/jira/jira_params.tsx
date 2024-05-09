@@ -97,7 +97,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
     [comments, editAction, incident, index]
   );
   const editComment = useCallback(
-    (key: any, value: any) => {
+    (key: string, value: string) => {
       editSubActionProperty(key, [{ commentId: '1', comment: value }]);
     },
     [editSubActionProperty]

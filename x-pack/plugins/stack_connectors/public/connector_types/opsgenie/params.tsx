@@ -22,6 +22,7 @@ import type {
   OpsgenieActionParams,
   OpsgenieCreateAlertSubActionParams,
 } from '../../../server/connector_types';
+import { EditActionCallback } from './types';
 
 const actionOptions = [
   {
@@ -55,8 +56,8 @@ const OpsgenieParamFields: React.FC<ActionParamsProps<OpsgenieActionParams>> = (
     [editAction, index]
   );
 
-  const editOptionalSubAction = useCallback(
-    (key: any, value: any) => {
+  const editOptionalSubAction: EditActionCallback = useCallback(
+    (key, value) => {
       if (isEmpty(value)) {
         const paramsCopy = cloneDeep(subActionParams);
         unset(paramsCopy, key);
@@ -69,8 +70,8 @@ const OpsgenieParamFields: React.FC<ActionParamsProps<OpsgenieActionParams>> = (
     [editAction, index, subActionParams]
   );
 
-  const editSubAction = useCallback(
-    (key: any, value: any) => {
+  const editSubAction: EditActionCallback = useCallback(
+    (key, value) => {
       editAction('subActionParams', { ...subActionParams, [key]: value }, index);
     },
     [editAction, index, subActionParams]

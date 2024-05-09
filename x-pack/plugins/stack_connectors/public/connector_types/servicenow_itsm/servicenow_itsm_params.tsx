@@ -169,7 +169,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
   );
 
   const editComment = useCallback(
-    (key: any, value: any) => {
+    (key: string, value: string) => {
       editSubActionProperty(key, [{ commentId: '1', comment: value }]);
     },
     [editSubActionProperty]

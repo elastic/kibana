@@ -30,7 +30,7 @@ export const useGetAppInfo = ({ actionTypeId, http }: UseGetAppInfoProps): UseGe
   const abortCtrl = useRef(new AbortController());
 
   const fetchAppInfo = useCallback(
-    async (connector: any) => {
+    async (connector: ServiceNowActionConnector) => {
       try {
         if (!actionTypeId || isEmpty(actionTypeId)) {
           return;
