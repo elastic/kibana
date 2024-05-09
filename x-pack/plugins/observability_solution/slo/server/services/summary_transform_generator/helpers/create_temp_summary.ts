@@ -11,6 +11,7 @@ import * as t from 'io-ts';
 import { Indicator, IndicatorTypes, SLODefinition, Status } from '../../../domain/models';
 
 export interface EsSummaryDocument {
+  // apm specific fields
   service: {
     environment: string | null;
     name: string | null;
@@ -19,6 +20,18 @@ export interface EsSummaryDocument {
     name: string | null;
     type: string | null;
   };
+  // synthetics specific fields
+  monitor: {
+    config_id: string | null;
+    name: string | null;
+  };
+  observer: {
+    geo: {
+      name: string | null;
+    };
+    name: string | null;
+  };
+  // common fields
   slo: {
     // >= 8.14: Add indicator.params on the temporary summary as well as real summary through summary pipeline
     indicator: { type: IndicatorTypes } | Indicator;
