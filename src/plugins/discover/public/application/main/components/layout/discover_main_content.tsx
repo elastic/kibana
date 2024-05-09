@@ -63,7 +63,15 @@ export const DiscoverMainContent = ({
   panelsToggle,
   isChartAvailable,
 }: DiscoverMainContentProps) => {
-  const { trackUiMetric } = useDiscoverServices();
+  const {
+    trackUiMetric,
+    dataVisualizer: dataVisualizerService,
+    aiops: aiopsService,
+  } = useDiscoverServices();
+
+  const shouldShowViewModeToggle =
+    dataVisualizerService !== undefined || aiopsService !== undefined;
+
   const setDiscoverViewMode = useCallback(
     (mode: VIEW_MODE) => {
       stateContainer.appState.update({ viewMode: mode });
@@ -85,7 +93,7 @@ export const DiscoverMainContent = ({
 
   const viewModeToggle = useCallback(
     (patternCount?: number) => {
-      return (
+      return shouldShowViewModeToggle ? (
         <DocumentViewModeToggle
           viewMode={viewMode}
           isTextBasedQuery={isPlainRecord}
@@ -99,16 +107,19 @@ export const DiscoverMainContent = ({
               : undefined
           }
         />
+      ) : (
+        <React.Fragment />
       );
     },
     [
       viewMode,
-      setDiscoverViewMode,
       isPlainRecord,
       stateContainer,
+      setDiscoverViewMode,
+      dataView,
       panelsToggle,
       isChartAvailable,
-      dataView,
+      shouldShowViewModeToggle,
     ]
   );
 

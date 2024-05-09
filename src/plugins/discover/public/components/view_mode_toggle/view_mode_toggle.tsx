@@ -36,7 +36,7 @@ export const DocumentViewModeToggle = ({
   dataView: DataView;
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { uiSettings } = useDiscoverServices();
+  const { uiSettings, dataVisualizer: dataVisualizerService } = useDiscoverServices();
   const isLegacy = useMemo(
     () => isLegacyTableEnabled({ uiSettings, isTextBasedQueryMode: isTextBasedQuery }),
     [uiSettings, isTextBasedQuery]
@@ -68,7 +68,8 @@ export const DocumentViewModeToggle = ({
     }
   `;
 
-  const showViewModeToggle = uiSettings.get(SHOW_FIELD_STATISTICS) ?? false;
+  const showViewModeToggle =
+    (uiSettings.get(SHOW_FIELD_STATISTICS) && dataVisualizerService !== undefined) ?? false;
 
   return (
     <EuiFlexGroup
