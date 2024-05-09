@@ -8,6 +8,7 @@
 
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -40,6 +41,7 @@ export interface StartDeps {
   data: DataPublicPluginStart;
   charts: ChartsPluginStart;
   fieldFormats: FieldFormatsStart;
+  dashboard: DashboardStart;
 }
 
 export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
@@ -55,7 +57,7 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
       );
       return getFieldListFactory(core, deps);
     });
-    registerFieldListPanelPlacementSetting();
+    registerFieldListPanelPlacementSetting(deps.dashboard);
 
     registerCreateEuiMarkdownAction(deps.uiActions);
     deps.embeddable.registerReactEmbeddableFactory(EUI_MARKDOWN_ID, async () => {

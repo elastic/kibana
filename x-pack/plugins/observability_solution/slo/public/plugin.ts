@@ -16,6 +16,7 @@ import {
 } from '@kbn/core/public';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { registerDashboardPanelPlacementSetting } from '@kbn/dashboard-plugin/public';
+import { registerReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { SloPublicPluginsSetup, SloPublicPluginsStart } from './types';
 import { PLUGIN_NAME, sloAppId } from '../common';
 import type { SloPublicSetup, SloPublicStart } from './types';
@@ -94,7 +95,8 @@ export class SloPlugin
 
       const hasPlatinumLicense = license.hasAtLeast('platinum');
       if (hasPlatinumLicense) {
-        registerDashboardPanelPlacementSetting(
+        const [coreStart, pluginsStart] = await coreSetup.getStartServices();
+        pluginsStart.dashboard.registerDashboardPanelPlacementSetting(
           SLO_OVERVIEW_EMBEDDABLE_ID,
           (serializedState: SloOverviewEmbeddableState | undefined) => {
             if (serializedState?.showAllGroupByInstances || serializedState?.groupFilters) {
@@ -106,10 +108,7 @@ export class SloPlugin
         pluginsSetup.embeddable.registerReactEmbeddableFactory(
           SLO_OVERVIEW_EMBEDDABLE_ID,
           async () => {
-            const [coreStart, pluginsStart] = await coreSetup.getStartServices();
-
             const deps = { ...coreStart, ...pluginsStart };
-
             const { getOverviewEmbeddableFactory } = await import(
               './embeddable/slo/overview/slo_embeddable_factory'
             );
@@ -129,8 +128,6 @@ export class SloPlugin
         registerSloAlertsEmbeddableFactory();
 
         pluginsSetup.embeddable.registerReactEmbeddableFactory(SLO_ERROR_BUDGET_ID, async () => {
-          const [coreStart, pluginsStart] = await coreSetup.getStartServices();
-
           const deps = { ...coreStart, ...pluginsStart };
 
           const { getErrorBudgetEmbeddableFactory } = await import(
