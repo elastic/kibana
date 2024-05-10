@@ -97,7 +97,12 @@ const AttackDiscoveryTourComp = () => {
 
   const isElementAtCurrentStepMounted = useIsElementMounted(attackDiscoveryTourStepOne?.anchor);
 
+  const isTestAutomation =
+    window.Cypress != null || // TODO: temporary workaround to disable the tour when running in Cypress, because the tour breaks other projects Cypress tests
+    navigator.webdriver === true; // TODO: temporary workaround to disable the tour when running in the FTR, because the tour breaks other projects FTR tests
+
   if (
+    isTestAutomation ||
     !tourState.isTourActive ||
     (tourState.currentTourStep === 1 && !isElementAtCurrentStepMounted)
   ) {
