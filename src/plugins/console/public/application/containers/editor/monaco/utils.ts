@@ -149,7 +149,10 @@ const containsComments = (text: string) => {
  * text from the editor that contains these requests, and returns a text in which
  * the requests are auto-indented.
  */
-export const getAutoIndentedRequests = (requests: AdjustedParsedRequest[], text: string): string => {
+export const getAutoIndentedRequests = (
+  requests: AdjustedParsedRequest[],
+  text: string
+): string => {
   const textLines = text.split(`\n`);
   const formattedText: string[] = [];
 
