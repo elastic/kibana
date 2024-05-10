@@ -51,7 +51,7 @@ export function createGetLogsRatesService(params: RegisterServicesParams) {
           filter: [
             {
               exists: {
-                // For now, we don't want to count APM server logs or any other logs that don'w have the log.level field.
+                // For now, we don't want to count APM server logs or any other logs that don't have the log.level field.
                 field: 'log.level',
               },
             },
