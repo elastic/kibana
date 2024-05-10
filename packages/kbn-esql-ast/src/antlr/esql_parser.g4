@@ -118,7 +118,6 @@ fromCommand
 
 fromIdentifier
     : FROM_UNQUOTED_IDENTIFIER
-    | QUOTED_IDENTIFIER
     ;
 
 fromOptions
