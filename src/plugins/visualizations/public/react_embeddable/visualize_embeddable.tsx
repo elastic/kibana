@@ -7,7 +7,7 @@
  */
 
 import { EuiFlexGroup, EuiLoadingChart } from '@elastic/eui';
-import { EmbeddableStart, ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { EmbeddableStart, ReactEmbeddableFactory, ViewMode } from '@kbn/embeddable-plugin/public';
 import { TimeRange } from '@kbn/es-query';
 import { ExpressionRendererParams, useExpressionRenderer } from '@kbn/expressions-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -16,6 +16,7 @@ import {
   apiHasDisableTriggers,
   apiHasExecutionContext,
   apiPublishesUnifiedSearch,
+  apiPublishesViewMode,
   fetch$,
   initializeTitles,
   useStateFromPublishingSubject,
@@ -51,6 +52,10 @@ export const getVisualizeEmbeddableFactory: (
       expression: '',
     });
     const expressionAbortController$ = new BehaviorSubject<AbortController>(new AbortController());
+    const viewMode$ = apiPublishesViewMode(parentApi)
+      ? parentApi.viewMode
+      : new BehaviorSubject(ViewMode.VIEW);
+
     const executionContext = apiHasExecutionContext(parentApi)
       ? parentApi.executionContext
       : undefined;
@@ -93,7 +98,7 @@ export const getVisualizeEmbeddableFactory: (
             },
           });
         },
-        isEditingEnabled: () => true,
+        isEditingEnabled: () => viewMode$.getValue() === ViewMode.EDIT,
       },
       {
         ...titleComparators,
