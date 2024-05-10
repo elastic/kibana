@@ -82,104 +82,116 @@ export function claimAvailableTasksMget(opts: TaskClaimerOpts): Observable<Claim
 }
 
 async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershipResult> {
-  const { getCapacity, claimOwnershipUntil, batches, events$, taskStore } = opts;
-  const { definitions, unusedTypes, excludedTaskTypes, taskMaxAttempts, taskPartitioner } = opts;
-  const initialCapacity = getCapacity();
+  const apmTrans = apm.startTransaction(
+    TASK_MANAGER_MARK_AS_CLAIMED,
+    TASK_MANAGER_TRANSACTION_TYPE
+  );
 
-  const { docs, versionMap } = await searchAvailableTasks({
-    definitions,
-    excludedTaskTypes,
-    taskStore,
-    events$,
-    claimOwnershipUntil,
-    size: initialCapacity * SIZE_MULTIPLIER_FOR_TASK_FETCH,
-    taskTypes: new Set(),
-    unusedTypes,
-    taskMaxAttempts,
-    taskPartitioner,
-  });
-
-  if (docs.length === 0) return emptyClaimOwnershipResult();
-
-  const currentTasks = new Set<ConcreteTaskInstance>();
-  const staleTasks = new Set<ConcreteTaskInstance>();
-  const missingTasks = new Set<ConcreteTaskInstance>();
-
-  const docLatestVersions = await taskStore.getDocVersions(docs.map((doc) => `task:${doc.id}`));
-
-  for (const searchDoc of docs) {
-    const searchVersion = versionMap.get(searchDoc.id);
-    const latestVersion = docLatestVersions.get(`task:${searchDoc.id}`);
-    if (!searchVersion || !latestVersion) {
-      missingTasks.add(searchDoc);
-      continue;
-    }
-
-    if (
-      searchVersion.seqNo === latestVersion.seqNo &&
-      searchVersion.primaryTerm === latestVersion.primaryTerm
-    ) {
-      currentTasks.add(searchDoc);
-      continue;
-    } else {
-      staleTasks.add(searchDoc);
-      continue;
-    }
-  }
-
-  for (const doc of missingTasks) {
-    // eslint-disable-next-line no-console
-    console.log(`Task ${doc.id} is missing from the task store or something`);
-  }
-
-  for (const doc of staleTasks) {
-    // eslint-disable-next-line no-console
-    console.log(`Task ${doc.id} is stale`);
-  }
-
-  const candidateTasks = applyLimitedConcurrency(currentTasks, batches);
-  const taskUpdates: ConcreteTaskInstance[] = Array.from(candidateTasks)
-    .map((task) => {
-      if (task.retryAt != null && new Date(task.retryAt).getTime() < Date.now()) {
-        task.scheduledAt = task.retryAt;
-      } else {
-        task.scheduledAt = task.runAt;
-      }
-      task.retryAt = claimOwnershipUntil;
-      task.ownerId = taskStore.taskManagerId;
-      task.status = TaskStatus.Claiming;
-
-      return task;
-    })
-    .slice(0, initialCapacity);
-
-  const finalResults: ConcreteTaskInstance[] = [];
-  let conflicts = staleTasks.size;
   try {
-    const updateResults = await taskStore.bulkUpdate(taskUpdates, { validate: true });
-    for (const updateResult of updateResults) {
-      if (isOk(updateResult)) {
-        finalResults.push(updateResult.value);
+    const { getCapacity, claimOwnershipUntil, batches, events$, taskStore } = opts;
+    const { definitions, unusedTypes, excludedTaskTypes, taskMaxAttempts, taskPartitioner } = opts;
+    const initialCapacity = getCapacity();
+
+    const { docs, versionMap } = await searchAvailableTasks({
+      definitions,
+      excludedTaskTypes,
+      taskStore,
+      events$,
+      claimOwnershipUntil,
+      size: initialCapacity * SIZE_MULTIPLIER_FOR_TASK_FETCH,
+      taskTypes: new Set(),
+      unusedTypes,
+      taskMaxAttempts,
+      taskPartitioner,
+    });
+
+    if (docs.length === 0) return emptyClaimOwnershipResult();
+
+    const currentTasks = new Set<ConcreteTaskInstance>();
+    const staleTasks = new Set<ConcreteTaskInstance>();
+    const missingTasks = new Set<ConcreteTaskInstance>();
+
+    const docLatestVersions = await taskStore.getDocVersions(docs.map((doc) => `task:${doc.id}`));
+
+    for (const searchDoc of docs) {
+      const searchVersion = versionMap.get(searchDoc.id);
+      const latestVersion = docLatestVersions.get(`task:${searchDoc.id}`);
+      if (!searchVersion || !latestVersion) {
+        missingTasks.add(searchDoc);
+        continue;
+      }
+
+      if (
+        searchVersion.seqNo === latestVersion.seqNo &&
+        searchVersion.primaryTerm === latestVersion.primaryTerm
+      ) {
+        currentTasks.add(searchDoc);
+        continue;
       } else {
-        conflicts++;
-        const { id, type, error } = updateResult.error;
-        // eslint-disable-next-line no-console
-        console.log(`Error updating task ${id}:${type} during claim: ${error.message}`);
+        staleTasks.add(searchDoc);
+        continue;
       }
     }
-  } catch (err) {
-    // eslint-disable-next-line no-console
-    console.log(`Error updating tasks during claim: ${err}`);
-  }
 
-  return {
-    stats: {
-      tasksUpdated: finalResults.length,
-      tasksConflicted: conflicts,
-      tasksClaimed: finalResults.length,
-    },
-    docs: finalResults,
-  };
+    for (const doc of missingTasks) {
+      // eslint-disable-next-line no-console
+      console.log(`Task ${doc.id} is missing from the task store or something`);
+    }
+
+    for (const doc of staleTasks) {
+      // eslint-disable-next-line no-console
+      console.log(`Task ${doc.id} is stale`);
+    }
+
+    const candidateTasks = applyLimitedConcurrency(currentTasks, batches);
+    const taskUpdates: ConcreteTaskInstance[] = Array.from(candidateTasks)
+      .map((task) => {
+        if (task.retryAt != null && new Date(task.retryAt).getTime() < Date.now()) {
+          task.scheduledAt = task.retryAt;
+        } else {
+          task.scheduledAt = task.runAt;
+        }
+        task.retryAt = claimOwnershipUntil;
+        task.ownerId = taskStore.taskManagerId;
+        task.status = TaskStatus.Claiming;
+
+        return task;
+      })
+      .slice(0, initialCapacity);
+
+    const finalResults: ConcreteTaskInstance[] = [];
+    let conflicts = staleTasks.size;
+    try {
+      const updateResults = await taskStore.bulkUpdate(taskUpdates, { validate: true });
+      for (const updateResult of updateResults) {
+        if (isOk(updateResult)) {
+          finalResults.push(updateResult.value);
+        } else {
+          conflicts++;
+          const { id, type, error } = updateResult.error;
+          // eslint-disable-next-line no-console
+          console.log(`Error updating task ${id}:${type} during claim: ${error.message}`);
+        }
+      }
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.log(`Error updating tasks during claim: ${err}`);
+    }
+
+    apmTrans.end('success');
+
+    return {
+      stats: {
+        tasksUpdated: finalResults.length,
+        tasksConflicted: conflicts,
+        tasksClaimed: finalResults.length,
+      },
+      docs: finalResults,
+    };
+  } catch (e) {
+    apmTrans.end('failure');
+    throw e;
+  }
 }
 
 interface SearchAvailableTasksResponse {
@@ -223,24 +235,12 @@ async function searchAvailableTasks({
     filterDownBy(InactiveTasks, tasksWithPartition(partitions))
   );
 
-  const apmTrans = apm.startTransaction(
-    TASK_MANAGER_MARK_AS_CLAIMED,
-    TASK_MANAGER_TRANSACTION_TYPE
-  );
-
-  try {
-    const result = await taskStore.fetch({
-      query,
-      sort,
-      size,
-      seq_no_primary_term: true,
-    });
-    apmTrans.end('success');
-    return result;
-  } catch (err) {
-    apmTrans.end('failure');
-    throw err;
-  }
+  return await taskStore.fetch({
+    query,
+    sort,
+    size,
+    seq_no_primary_term: true,
+  });
 }
 
 function getClaimSort(definitions: TaskTypeDictionary): estypes.SortCombinations[] {
