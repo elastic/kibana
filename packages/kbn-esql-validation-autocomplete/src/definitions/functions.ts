@@ -589,7 +589,7 @@ const dateTruncDefinition: FunctionDefinition = {
       params: [
         {
           name: 'interval',
-          type: 'time_duration',
+          type: 'date',
           optional: false,
         },
         {
@@ -3552,27 +3552,7 @@ const toDoubleDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'counter_double',
-          optional: false,
-        },
-      ],
-      returnType: 'number',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'counter_integer',
-          optional: false,
-        },
-      ],
-      returnType: 'number',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'counter_long',
+          type: 'number',
           optional: false,
         },
       ],
@@ -3583,16 +3563,6 @@ const toDoubleDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'date',
-          optional: false,
-        },
-      ],
-      returnType: 'number',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'number',
           optional: false,
         },
       ],
@@ -3720,7 +3690,7 @@ const toIntegerDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'counter_integer',
+          type: 'number',
           optional: false,
         },
       ],
@@ -3731,16 +3701,6 @@ const toIntegerDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'date',
-          optional: false,
-        },
-      ],
-      returnType: 'number',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'number',
           optional: false,
         },
       ],
@@ -3821,17 +3781,7 @@ const toLongDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'counter_integer',
-          optional: false,
-        },
-      ],
-      returnType: 'number',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'counter_long',
+          type: 'number',
           optional: false,
         },
       ],
@@ -3842,16 +3792,6 @@ const toLongDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'date',
-          optional: false,
-        },
-      ],
-      returnType: 'number',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'number',
           optional: false,
         },
       ],

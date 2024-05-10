@@ -66,18 +66,25 @@ const extraFunctions = [
 ];
 
 const elasticsearchToKibanaType = (elasticsearchType) => {
-  const numberType = ['double', 'unsigned_long', 'long', 'integer'];
-  const stringType = ['text', 'keyword'];
-
-  if (numberType.includes(elasticsearchType)) {
+  if (
+    [
+      'double',
+      'unsigned_long',
+      'long',
+      'integer',
+      'counter_integer',
+      'counter_long',
+      'counter_double',
+    ].includes(elasticsearchType)
+  ) {
     return 'number';
   }
 
-  if (stringType.includes(elasticsearchType)) {
+  if (['text', 'keyword'].includes(elasticsearchType)) {
     return 'string';
   }
 
-  if (elasticsearchType === 'datetime') {
+  if (['datetime', 'time_duration'].includes(elasticsearchType)) {
     return 'date';
   }
 
