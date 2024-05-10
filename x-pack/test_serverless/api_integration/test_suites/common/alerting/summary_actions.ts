@@ -78,13 +78,13 @@ export default function ({ getService }: FtrProviderContext) {
     afterEach(async () => {
       await supertest
         .delete(`/api/actions/connector/${connectorId}`)
-        .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo')
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
         .expect(204);
       await supertest
         .delete(`/api/alerting/rule/${ruleId}`)
-        .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo')
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
         .expect(204);
       await esDeleteAllIndices([ALERT_ACTION_INDEX]);
     });
