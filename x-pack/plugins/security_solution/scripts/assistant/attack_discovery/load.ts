@@ -136,7 +136,7 @@ const createAndConfigureIndex = async ({
   log: ToolingLog;
 }) => {
   const indexNameSuffix = new Date().toISOString().slice(0, 10).replace(/-/g, '.');
-  let indexName;
+  let indexName: string;
 
   if (indexType === 'alerts') {
     indexName = `insights-alerts-ep${epNum}-${indexNameSuffix}`;
