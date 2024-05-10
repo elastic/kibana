@@ -21,7 +21,7 @@ export const createCrowdstrikeGetAgentsApiResponseMock = (
       trace_id: '4567898765-432423432432-42342342',
     },
     errors: null,
-    resources: [createCrowdstrikeAgentDetailsMock(data)],
+    resources: data,
   };
 };
 
@@ -135,9 +135,9 @@ export const createCrowdstrikeAgentDetailsMock = (
   );
 };
 
-export const createCrowdstrikeGetAgentOnlineStatusDetailsMock = (
-  overrides: Partial<CrowdstrikeGetAgentOnlineStatusResponse['resources'][number]> = {}
-): CrowdstrikeGetAgentOnlineStatusResponse['resources'][number] => {
+export const createCrowdstrikeGetAgentOnlineStatusDetailsMock: (
+  overrides: Partial<CrowdstrikeGetAgentOnlineStatusResponse['resources'][number]>
+) => CrowdstrikeGetAgentOnlineStatusResponse['resources'][number] = (overrides) => {
   return merge(
     {
       state: 'online',
