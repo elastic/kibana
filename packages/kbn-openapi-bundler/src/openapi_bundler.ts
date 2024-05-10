@@ -136,9 +136,10 @@ async function writeDocuments(
 
 function getVersionedOutputFilePath(outputFilePath: string, version: string): string {
   const hasVersionPlaceholder = outputFilePath.indexOf('{version}') > -1;
+  const snakeCasedVersion = version.replaceAll(/[^\w\d]+/g, '_');
 
   if (hasVersionPlaceholder) {
-    return outputFilePath.replace('{version}', version);
+    return outputFilePath.replace('{version}', snakeCasedVersion);
   }
 
   const filename = basename(outputFilePath);
