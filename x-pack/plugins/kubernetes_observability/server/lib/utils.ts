@@ -17,8 +17,9 @@ export type Event = {
 export type Pod = {
     name: string;
     namespace: string;
-    memory_availabe: number;
-    memory_usage: number;
+    memory_availabe: number | undefined;
+    memory_usage: number | undefined;
+    cpu_utilization: number| undefined;
 };
 
 export function extractFieldValue<T>(maybeArray: T | T[] | undefined): T {
@@ -80,7 +81,7 @@ export function median(arr: number[]): number | undefined {
 };
 
 export function checkDefaultNamespace(namespace: string| undefined): string {
-    if (namespace == null || namespace == undefined) {
+    if (namespace == null || namespace == undefined || namespace == '') {
         return namespace = "default"
     } else {
         return namespace

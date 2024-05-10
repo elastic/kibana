@@ -34,7 +34,7 @@ export const registerPodsRoute = (router: IRouter, logger: Logger) => {
       },
       async (context, request, response) => {
         var namespace = checkDefaultNamespace(request.query.namespace);
-
+        console.log("namespace:"+namespace)
         const client = (await context.core).elasticsearch.client.asCurrentUser;
         const musts = [
             {

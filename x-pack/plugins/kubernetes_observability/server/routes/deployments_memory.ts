@@ -75,8 +75,13 @@ export const registerDeploymentsMemoryRoute = (router: IRouter, logger: Logger) 
         const esResponsePods = await client.search(dslPods);
         //console.log(esResponsePods);
         if (esResponsePods.hits.hits.length > 0) {
-          var reasons = new Array();
-          var messages = new Array();
+          var pod_reasons = new Array();
+          var pod_messages = new Array();
+          var pods_medium = new Array();
+          var pods_high = new Array();
+          var messages = '';
+          var reasons = '';
+          var memory = '';
           const hitsPods = esResponsePods.hits.hits[0];
           const { fields = {} } = hitsPods;
           const hitsPodsAggs = esResponsePods.aggregations!.unique_values['buckets'];
@@ -88,16 +93,47 @@ export const registerDeploymentsMemoryRoute = (router: IRouter, logger: Logger) 
             const dslPodsCpu = defineQueryForAllPodsMemoryUtilisation(podName, namespace, client)
             const esResponsePodsCpu = await client.search(dslPodsCpu);
             const [reason, message] = calulcateAllPodsMemoryUtilisation(podName, namespace, esResponsePodsCpu)
-            reasons.push(reason);
-            messages.push(message);
-            console.log("reason:" + reason, "message:" + message);
+            pod_reasons.push(reason);
+            pod_messages.push(message);
+
+            //Create overall message for deployment
+            for (var pod_reason of pod_reasons) {
+              if (pod_reason.value == "Medium") {
+                pods_medium.push(pod_reason.name)
+              } else if (pod_reason.value == "High") {
+                pods_high.push(pod_reason.name)
+              }
+            }
+            if (pods_medium.length > 0) {
+              messages = "Deployment has Medium Memory utilisation in following Pods:" + pods_medium.join(" , ");
+            }
+            if (pods_high.length > 0) {
+              messages = messages + "Deployment has High Memory utilisation in following Pods:" + pods_high.join(" , ");
+            } else {
+              messages = "Deployment has Lom Memory utilisation in all Pods";
+            }
+
+            if (pods_medium.length > 0 && pods_high.length > 0) {
+              memory = "Medium";
+              reasons = "Medium memory utilisation";
+            }
+            if (pods_high.length > 0) {
+              memory = "High"
+              reasons = "High memory utilisation";
+            } else {
+              memory = "Low"
+              reasons = "Low memory utilisation";
+            }
+            //End of Create overall message for deployment
           }
           return response.ok({
             body: {
               time: time,
-              message: messages,
               name: request.query.name,
               namespace: namespace,
+              pod: { reasons: pod_reasons, messages: pod_messages },
+              memory: memory,
+              message: messages,
               reason: reasons,
             },
           });

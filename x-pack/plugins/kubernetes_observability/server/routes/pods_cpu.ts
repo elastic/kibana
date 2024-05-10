@@ -5,15 +5,15 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { estypes } from '@elastic/elasticsearch';
 // import { transformError } from '@kbn/securitysolution-es-utils';
 // import type { ElasticsearchClient } from '@kbn/core/server';
 import { extractFieldValue, round, checkDefaultNamespace } from '../lib/utils';
+import { calulcateAllPodsCpuUtilisation, defineQueryForAllPodsCpuUtilisation } from '../lib/pods_cpu_utils';
+
 import { IRouter, Logger } from '@kbn/core/server';
 import {
   POD_CPU_ROUTE,
 } from '../../common/constants';
-import { double } from '@elastic/elasticsearch/lib/api/types';
 
 export const registerPodsCpuRoute = (router: IRouter, logger: Logger) => {
   router.versioned
@@ -37,71 +37,30 @@ export const registerPodsCpuRoute = (router: IRouter, logger: Logger) => {
         var namespace = checkDefaultNamespace(request.query.namespace);
 
         const client = (await context.core).elasticsearch.client.asCurrentUser;
-        const musts = [
-          {
-            term: {
-              'resource.attributes.k8s.pod.name': request.query.name,
-            },
-          },
-          {
-            term: {
-              'resource.attributes.k8s.namespace.name': namespace,
-            },
-          },
-          { exists: { field: 'metrics.k8s.pod.cpu.utilization' } }
-        ];
-        const dsl: estypes.SearchRequest = {
-          index: ["metrics-otel.*"],
-          size: 1,
-          sort: [{ '@timestamp': 'desc' }],
-          _source: false,
-          fields: [
-            '@timestamp',
-            'metrics.k8s.pod.cpu.utilization',
-            'resource.attributes.k8s.*',
-          ],
-          query: {
-            bool: {
-              must: musts,
-            },
-          },
-        };
-
-        console.log(musts);
+        const dsl = defineQueryForAllPodsCpuUtilisation(request.query.name, namespace, client);
         console.log(dsl);
         const esResponse = await client.search(dsl);
+        var message = undefined;
+        var reason = undefined;
+        var cpu_utilization = undefined;
+        var cpu_utilization_median = undefined;
         console.log(esResponse);
         if (esResponse.hits.hits.length > 0) {
-          type Limits = {
-            [key: string]: double;
-          };
-          const limits: Limits = {
-            medium: 0.7,
-            high: 0.9,
-          };
-
           const hit = esResponse.hits.hits[0];
           const { fields = {} } = hit;
-          const podCpuUtilization = round(extractFieldValue(fields['metrics.k8s.pod.cpu.utilization']),3);
-          var message = '';
-          var reason = '';
           const time = extractFieldValue(fields['@timestamp']);
-          if (podCpuUtilization < limits["medium"]) {
-            reason = "Low"
-          } else if (podCpuUtilization >= limits["medium"] && podCpuUtilization < limits["high"]) {
-            reason = "Medium"
-          } else {
-            reason = "High"
-          }
 
-          message = `Pod ${namespace}/${request.query.name} has CPU utilisation ${podCpuUtilization}%`;
+          [reason, message, cpu_utilization, cpu_utilization_median ] = calulcateAllPodsCpuUtilisation(request.query.name, namespace, esResponseAll)
+
           return response.ok({
             body: {
               time: time,
-              message: message,
               name: request.query.name,
               namespace: namespace,
-              reason: reason + " cpu utilisation",
+              cpu_utilization: cpu_utilization,
+              cpu_utilization_median: cpu_utilization_median,  
+              message: message,
+              reason: reason 
             },
           });
         } else {

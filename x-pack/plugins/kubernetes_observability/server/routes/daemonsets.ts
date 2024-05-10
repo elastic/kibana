@@ -39,7 +39,7 @@ export const registerDaemonsetsRoute = (router: IRouter, logger: Logger) => {
         const musts = [
             {
                 term: {
-                  'resource.attributes.k8s.daemonset.name': request.query.daemonset_name,
+                  'resource.attributes.k8s.daemonset.name': request.query.name,
                 },
             },
             {
@@ -80,14 +80,14 @@ export const registerDaemonsetsRoute = (router: IRouter, logger: Logger) => {
             var reason = '';
             const time = extractFieldValue(fields['@timestamp']);
             if (readyNodes == desiredNodes) {
-                message = `Daemonset ${namespace}/${request.query.daemonset_name} has as many ready nodes as desired`;
+                message = `Daemonset ${namespace}/${request.query.name} has as many ready nodes as desired`;
                 return response.ok({
                     body: {
                     time: time,
                     message: message,
                     readyNodes: readyNodes,
                     desiredNodes: desiredNodes,
-                    name: request.query.daemonset_name,
+                    name: request.query.name,
                     namespace: namespace,
                     reason: reason,
                     },
@@ -97,7 +97,7 @@ export const registerDaemonsetsRoute = (router: IRouter, logger: Logger) => {
                 const musts = [
                     {
                         term: {
-                        'resource.attributes.k8s.daemonset.name': request.query.daemonset_name,
+                        'resource.attributes.k8s.daemonset.name': request.query.name,
                         },
                     },
                     {
@@ -137,7 +137,7 @@ export const registerDaemonsetsRoute = (router: IRouter, logger: Logger) => {
                     const { fields = {} } = hit;
                     const podPhase = extractFieldValue(fields['metrics.k8s.pod.phase']);
                     const podName = extractFieldValue(fields['resource.attributes.k8s.pod.name']);
-                    message = `Daemonset ${namespace}/${request.query.daemonset_name} has ${desiredNodes} desired nodes desired but ${readyNodes} are ready`;
+                    message = `Daemonset ${namespace}/${request.query.name} has ${desiredNodes} desired nodes desired but ${readyNodes} are ready`;
                     if (podPhase !== 2 && podPhase !== 3) {
                         console.log(podName);
                         console.log(podPhase);
@@ -170,7 +170,7 @@ export const registerDaemonsetsRoute = (router: IRouter, logger: Logger) => {
                     message: message,
                     readyNodes: readyNodes,
                     desiredNodes: desiredNodes,
-                    name: request.query.daemonset_name,
+                    name: request.query.name,
                     namespace: namespace,
                     reason: reasons.join(" & "),
                     events: events,
@@ -178,12 +178,12 @@ export const registerDaemonsetsRoute = (router: IRouter, logger: Logger) => {
                 });
             }
         } else {
-            message =  `Daemonset ${namespace}/${request.query.daemonset_name} not found`
+            message =  `Daemonset ${namespace}/${request.query.name} not found`
             return response.ok({
                 body: {
                 time: '',
                 message: message,
-                name: request.query.daemonset_name,
+                name: request.query.name,
                 namespace: namespace,
                 reason: "Not found",
                 },

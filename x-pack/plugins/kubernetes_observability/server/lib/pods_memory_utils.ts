@@ -151,7 +151,7 @@ export function calulcateAllPodsMemoryUtilisation(podName: string, namespace: st
                 'namespace': namespace,
                 'memory_availabe': memory_availabe,
                 'memory_usage': memory_usage,
-
+                'cpu_utilization': undefined
             };
             pods.push(pod);
         }
@@ -188,11 +188,11 @@ export function calulcateAllPodsMemoryUtilisation(podName: string, namespace: st
             } else {
                 alarm = "High"
             }
-            reason = { 'Pod': podName, 'Reason': alarm, 'Desc': ' Memory utilisation' };
-            message = { 'Pod': podName, 'memory_available': memory_available, 'memory_usage': memory_usage, 'memory_utilisation': memory_utilization, 'memory_usage_median': memory_usage_median, 'Desc': '% - Percentage of Memory utilisation' };
+            reason = { 'pod': podName, 'value': alarm, 'desc': ' Memory utilisation' };
+            message = { 'pod': podName, 'memory_available': memory_available, 'memory_usage': memory_usage, 'memory_utilisation': memory_utilization, 'memory_usage_median': memory_usage_median, 'Desc': '% - Percentage of Memory utilisation' };
         } else {
-            reason = { 'Pod': podName, 'Reason': undefined, 'Desc': ' No memory limit defined ' };
-            message = { 'Pod': podName, 'memory_usage': memory_usage, 'memory_usage_median': memory_usage_median, 'Desc': ' Pod Memory usage in  Bytes' };
+            reason = { 'pod': podName, 'value': undefined, 'desc': ' No memory limit defined ' };
+            message = { 'pod': podName, 'memory_usage': memory_usage, 'memory_usage_median': memory_usage_median, 'desc': ' Pod Memory usage in  Bytes' };
         }
     }
     return [reason, message, memory_available, memory_usage, memory_utilization, memory_usage_median]
