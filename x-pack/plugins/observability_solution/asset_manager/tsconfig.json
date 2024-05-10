@@ -27,6 +27,8 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/core-saved-objects-api-server",
     "@kbn/core-saved-objects-api-server-mocks",
-    "@kbn/oam-schema"
+    "@kbn/oam-schema",
+    "@kbn/es-query",
+    "@kbn/zod-helpers"
   ]
 }
