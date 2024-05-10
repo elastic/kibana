@@ -1432,6 +1432,7 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/test/security_solution_cypress/cypress/tasks/hosts @elastic/security-threat-hunting-explore
 /x-pack/test/security_solution_cypress/cypress/tasks/network @elastic/security-threat-hunting-explore
 
+/x-pack/plugins/security_solution/public/app/actions @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/guided_onboarding_tour @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/charts @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/detections/components/alerts_table/grouping_settings @elastic/security-threat-hunting-explore

@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { MlPluginStart } from '@kbn/ml-plugin/public';
+import { useCallback } from 'react';
+import { MlPluginStart, TrainedModelConfigResponse } from '@kbn/ml-plugin/public';
 import React, { useEffect, useState } from 'react';
 import { useComponentTemplatesContext } from '../../../../../../component_templates/component_templates_context';
 import { useDispatch, useMappingsState } from '../../../../../mappings_state_context';
@@ -64,7 +65,56 @@ export function useSemanticText(props: UseSemanticTextProps) {
     }
   }, [form, inferenceId, inferenceToModelIdMap]);
 
-  const handleSemanticText = (data: Field) => {
+  const isModelDownloaded = useCallback(
+    async (modelId: string) => {
+      try {
+        const response: TrainedModelConfigResponse[] | undefined =
+          await ml?.mlApi?.trainedModels.getTrainedModels(modelId, {
+            include: 'definition_status',
+          });
+        return !!response?.[0]?.fully_defined;
+      } catch (error) {
+        if (error.body.statusCode !== 404) {
+          throw error;
+        }
+      }
+      return false;
+    },
+    [ml?.mlApi?.trainedModels]
+  );
+
+  const createInferenceEndpoint = (
+    trainedModelId: string,
+    defaultInferenceEndpoint: boolean,
+    data: Field
+  ) => {
+    if (data.inferenceId === undefined) {
+      throw new Error(
+        i18n.translate('xpack.idxMgmt.mappingsEditor.createField.undefinedInferenceIdError', {
+          defaultMessage: 'InferenceId is undefined while creating the inference endpoint.',
+        })
+      );
+    }
+
+    if (trainedModelId && defaultInferenceEndpoint) {
+      const modelConfig = {
+        service: 'elasticsearch',
+        service_settings: {
+          num_allocations: 1,
+          num_threads: 1,
+          model_id: trainedModelId,
+        },
+      };
+
+      ml?.mlApi?.inferenceModels?.createInferenceEndpoint(
+        data.inferenceId,
+        'text_embedding',
+        modelConfig
+      );
+    }
+  };
+
+  const handleSemanticText = async (data: Field) => {
     data.inferenceId = inferenceValue;
     if (data.inferenceId === undefined) {
       return;
@@ -78,37 +128,22 @@ export function useSemanticText(props: UseSemanticTextProps) {
 
     const { trainedModelId, defaultInferenceEndpoint, isDeployed, isDeployable } = inferenceData;
 
-    if (trainedModelId && defaultInferenceEndpoint) {
-      const modelConfig = {
-        service: 'elasticsearch',
-        service_settings: {
-          num_allocations: 1,
-          num_threads: 1,
-          model_id: trainedModelId,
-        },
-      };
+    if (isDeployable && trainedModelId) {
       try {
-        ml?.mlApi?.inferenceModels?.createInferenceEndpoint(
-          data.inferenceId,
-          'text_embedding',
-          modelConfig
-        );
-      } catch (error) {
-        setErrorsInTrainedModelDeployment?.((prevItems) => [...prevItems, trainedModelId]);
-        toasts?.addError(error.body && error.body.message ? new Error(error.body.message) : error, {
-          title: i18n.translate(
-            'xpack.idxMgmt.mappingsEditor.createField.inferenceEndpointCreationErrorTitle',
-            {
-              defaultMessage: 'Inference endpoint creation failed',
-            }
-          ),
-        });
-      }
-    }
+        const modelDownloaded: boolean = await isModelDownloaded(trainedModelId);
 
-    if (isDeployable && trainedModelId && !isDeployed) {
-      try {
-        ml?.mlApi?.trainedModels.startModelAllocation(trainedModelId);
+        if (isDeployed) {
+          createInferenceEndpoint(trainedModelId, defaultInferenceEndpoint, data);
+        } else if (modelDownloaded) {
+          ml?.mlApi?.trainedModels
+            .startModelAllocation(trainedModelId)
+            .then(() => createInferenceEndpoint(trainedModelId, defaultInferenceEndpoint, data));
+        } else {
+          ml?.mlApi?.trainedModels
+            .installElasticTrainedModelConfig(trainedModelId)
+            .then(() => ml?.mlApi?.trainedModels.startModelAllocation(trainedModelId))
+            .then(() => createInferenceEndpoint(trainedModelId, defaultInferenceEndpoint, data));
+        }
         toasts?.addSuccess({
           title: i18n.translate(
             'xpack.idxMgmt.mappingsEditor.createField.modelDeploymentStartedNotification',
