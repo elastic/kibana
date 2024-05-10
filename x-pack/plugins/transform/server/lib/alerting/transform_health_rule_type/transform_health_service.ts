@@ -46,6 +46,8 @@ type Transform = estypes.TransformGetTransformTransformSummary & {
 
 type TransformWithAlertingRules = Transform & { alerting_rules: TransformHealthAlertRule[] };
 
+const maxPathComponentLength = 2000;
+
 export function transformHealthServiceProvider({
   esClient,
   rulesClient,
@@ -103,8 +105,6 @@ export function transformHealthServiceProvider({
 
   const getTransformStats = memoize(
     async (transformIds: Set<string>): Promise<TransformStats[]> => {
-      // Result list of transform IDs can be too long, so we need to split them into chunks.
-      const maxPathComponentLength = 2000;
       const transformIdsString = Array.from(transformIds).join(',');
 
       if (transformIdsString.length < maxPathComponentLength) {
