@@ -47,12 +47,7 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
-import {
-  EmbeddableSetup,
-  EmbeddableStart,
-  registerReactEmbeddableFactory,
-  registerSavedObjectToPanelMethod,
-} from '@kbn/embeddable-plugin/public';
+import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
@@ -396,6 +391,12 @@ export class VisualizationsPlugin
     uiActions.registerTrigger(dashboardVisualizationPanelTrigger);
     const editInLensAction = new EditInLensAction(data.query.timefilter.timefilter);
     uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', editInLensAction);
+    embeddable.registerReactEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, async () => {
+      const [, pluginsStart] = await core.getStartServices();
+
+      const { getVisualizeEmbeddableFactory } = await import('./react_embeddable');
+      return getVisualizeEmbeddableFactory(pluginsStart.embeddable);
+    });
 
     contentManagement.registry.register({
       id: CONTENT_ID,
@@ -405,36 +406,36 @@ export class VisualizationsPlugin
       name: 'Visualize Library',
     });
 
-    registerSavedObjectToPanelMethod<VisualizationSavedObjectAttributes, VisualizeByValueInput>(
-      CONTENT_ID,
-      (savedObject) => {
-        const visState = savedObject.attributes.visState;
+    embeddable.registerSavedObjectToPanelMethod<
+      VisualizationSavedObjectAttributes,
+      VisualizeByValueInput
+    >(CONTENT_ID, (savedObject) => {
+      const visState = savedObject.attributes.visState;
 
-        // not sure if visState actually is ever undefined, but following the type
-        if (!savedObject.managed || !visState) {
-          return {
-            savedObjectId: savedObject.id,
-          };
-        }
-
-        // data is not always defined, so I added a default value since the extract
-        // routine in the embeddable factory expects it to be there
-        const savedVis = JSON.parse(visState) as Omit<SerializedVis, 'data'> & {
-          data?: SerializedVisData;
-        };
-
-        if (!savedVis.data) {
-          savedVis.data = {
-            searchSource: {},
-            aggs: [],
-          };
-        }
-
+      // not sure if visState actually is ever undefined, but following the type
+      if (!savedObject.managed || !visState) {
         return {
-          savedVis: savedVis as SerializedVis, // now we're sure we have "data" prop
+          savedObjectId: savedObject.id,
         };
       }
-    );
+
+      // data is not always defined, so I added a default value since the extract
+      // routine in the embeddable factory expects it to be there
+      const savedVis = JSON.parse(visState) as Omit<SerializedVis, 'data'> & {
+        data?: SerializedVisData;
+      };
+
+      if (!savedVis.data) {
+        savedVis.data = {
+          searchSource: {},
+          aggs: [],
+        };
+      }
+
+      return {
+        savedVis: savedVis as SerializedVis, // now we're sure we have "data" prop
+      };
+    });
 
     return {
       ...this.types.setup(),
@@ -484,11 +485,6 @@ export class VisualizationsPlugin
     setSavedObjectsManagement(savedObjectsManagement);
     setContentManagement(contentManagement);
     setSavedSearch(savedSearch);
-
-    registerReactEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, async () => {
-      const { getVisualizeEmbeddableFactory } = await import('./react_embeddable');
-      return getVisualizeEmbeddableFactory(embeddable);
-    });
 
     if (spaces) {
       setSpaces(spaces);

@@ -35,9 +35,7 @@ import type { VisualizeApi, VisualizeSerializedState } from './types';
 
 export const getVisualizeEmbeddableFactory: (
   embeddableStart: EmbeddableStart
-) => ReactEmbeddableFactory<VisualizeSerializedState, VisualizeApi> = (
-  embeddableStart: EmbeddableStart
-) => ({
+) => ReactEmbeddableFactory<VisualizeSerializedState, VisualizeApi> = (embeddableStart) => ({
   type: VISUALIZE_EMBEDDABLE_TYPE,
   deserializeState,
   buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
