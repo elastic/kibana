@@ -42,10 +42,10 @@ export function fetchEsql(
     time: timeRange,
     dataView,
     inputQuery,
-    titleForInspector: i18n.translate('discover.inspectorTextBasedRequestTitle', {
+    titleForInspector: i18n.translate('discover.inspectorEsqlRequestTitle', {
       defaultMessage: 'Table',
     }),
-    descriptionForInspector: i18n.translate('discover.inspectorTextBasedRequestDescription', {
+    descriptionForInspector: i18n.translate('discover.inspectorEsqlRequestDescription', {
       defaultMessage: 'This request queries Elasticsearch to fetch results for the table.',
     }),
   })

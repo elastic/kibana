@@ -62,7 +62,7 @@ export const TableRowDetails = ({
                 <h4>
                   {isEsqlMode && (
                     <FormattedMessage
-                      id="discover.grid.tableRow.textBasedDetailHeading"
+                      id="discover.grid.tableRow.esqlDetailHeading"
                       defaultMessage="Expanded result"
                     />
                   )}

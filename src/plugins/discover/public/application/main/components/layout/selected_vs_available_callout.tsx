@@ -32,11 +32,11 @@ export const SelectedVSAvailableCallout = ({
             color="primary"
             data-test-subj="dscSelectedColumnsCallout"
             iconType="iInCircle"
-            title={i18n.translate('discover.textBasedMode.selectedColumnsCallout', {
+            title={i18n.translate('discover.esqlMode.selectedColumnsCallout', {
               defaultMessage:
-                'Displaying {selectedColumnsNumber} of {textBasedQueryColumnsNumber} fields. Add more from the Available fields list.',
+                'Displaying {selectedColumnsNumber} of {esqlQueryColumnsNumber} fields. Add more from the Available fields list.',
               values: {
-                textBasedQueryColumnsNumber: esqlQueryColumns.length,
+                esqlQueryColumnsNumber: esqlQueryColumns.length,
                 selectedColumnsNumber: selectedColumns.length,
               },
             })}

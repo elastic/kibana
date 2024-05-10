@@ -209,7 +209,7 @@ export function DiscoverGridFlyout({
   );
 
   const defaultFlyoutTitle = isEsqlQuery
-    ? i18n.translate('discover.grid.tableRow.docViewerTextBasedDetailHeading', {
+    ? i18n.translate('discover.grid.tableRow.docViewerEsqlDetailHeading', {
         defaultMessage: 'Result',
       })
     : i18n.translate('discover.grid.tableRow.docViewerDetailHeading', {
