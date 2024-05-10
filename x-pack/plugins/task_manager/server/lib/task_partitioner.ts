@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
+import {
+  ISavedObjectsRepository,
+  SavedObjectsFindResponse,
+} from '@kbn/core-saved-objects-api-server';
 import * as k8s from '@kubernetes/client-node';
 import { rendezvousHash } from './rendezvous_hash';
 
@@ -21,6 +24,32 @@ function range(start: number, end: number) {
 const SHARD_1 = '0';
 const SHARD_2 = 'c';
 const SHARD_3 = 'f';
+
+const cacheExpiry = 10000;
+let lastGet = Date.now();
+let _allPodNames: string[];
+async function getAllPodNamesFromCache(
+  savedObjectsRepository: ISavedObjectsRepository
+): Promise<string[]> {
+  if (_allPodNames && _allPodNames.length > 0 && lastGet > Date.now() - cacheExpiry) {
+    return _allPodNames;
+  }
+  const promise = savedObjectsRepository.find<{ podNames: string[] }>({
+    type: 'all_pods',
+    perPage: 1,
+    sortField: 'created_at',
+    sortOrder: 'desc',
+  });
+  const result = await promise;
+  if (result.saved_objects.length === 0) {
+    throw new Error('No pods found');
+  } else {
+    const { podNames } = result.saved_objects[0].attributes;
+    _allPodNames = podNames;
+  }
+  lastGet = Date.now();
+  return _allPodNames;
+}
 
 export class TaskPartitioner {
   private readonly enabled: boolean;
@@ -92,19 +121,25 @@ export class TaskPartitioner {
 
   private async getAllPodNames(): Promise<string[]> {
     if (this.manuallyProvidePodNames) {
-      const result = await this.savedObjectsRepository.find<{ podNames: string[] }>({
-        type: 'all_pods',
-        perPage: 1,
-        sortField: 'created_at',
-        sortOrder: 'desc',
-      });
-      if (result.saved_objects.length === 0) {
-        throw new Error('No pods found');
-      } else {
-        const { podNames } = result.saved_objects[0].attributes;
-        // eslint-disable-next-line no-console
-        console.log('Pods found:', JSON.stringify(podNames));
-        return podNames;
+      // const result = await this.savedObjectsRepository.find<{ podNames: string[] }>({
+      //   type: 'all_pods',
+      //   perPage: 1,
+      //   sortField: 'created_at',
+      //   sortOrder: 'desc',
+      // });
+      // if (result.saved_objects.length === 0) {
+      //   throw new Error('No pods found');
+      // } else {
+      //   const { podNames } = result.saved_objects[0].attributes;
+      //   // eslint-disable-next-line no-console
+      //   console.log('Pods found:', JSON.stringify(podNames));
+      //   return podNames;
+      // }
+      try {
+        return await getAllPodNamesFromCache(this.savedObjectsRepository);
+      } catch (e) {
+        console.log('Failed to get all pod names', e);
+        throw e;
       }
     }
 
