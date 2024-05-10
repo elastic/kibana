@@ -49,7 +49,7 @@ export function defineRoleMappingFeatureCheckRoute({ router, logger }: RouteDefi
       const esClient = (await context.core).elasticsearch.client;
       const { has_all_requested: canManageRoleMappings } =
         await esClient.asCurrentUser.security.hasPrivileges({
-          body: { cluster: ['manage_security'] },
+          body: { cluster: ['read_security'] },
         });
 
       if (!canManageRoleMappings) {

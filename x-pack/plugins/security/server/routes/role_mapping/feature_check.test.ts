@@ -222,7 +222,7 @@ describe('GET role mappings feature check', () => {
     },
   });
 
-  getFeatureCheckTest('indicates canManageRoleMappings=false for users without `manage_security`', {
+  getFeatureCheckTest('indicates canManageRoleMappings=false for users without `read_security`', {
     canManageRoleMappings: false,
     asserts: {
       statusCode: 200,
