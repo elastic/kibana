@@ -19,11 +19,15 @@ import { useCasesToast } from '../../../common/use_cases_toast';
 import { alertComment } from '../../../containers/mock';
 import { useCreateAttachments } from '../../../containers/use_create_attachments';
 import { CasesContext } from '../../cases_context';
-import { CasesContextStoreActionsList } from '../../cases_context/cases_context_reducer';
+import {
+  CasesContextStoreActionsList,
+  getInitialCasesContextState,
+} from '../../cases_context/cases_context_reducer';
 import { ExternalReferenceAttachmentTypeRegistry } from '../../../client/attachment_framework/external_reference_registry';
 import type { AddToExistingCaseModalProps } from './use_cases_add_to_existing_case_modal';
 import { useCasesAddToExistingCaseModal } from './use_cases_add_to_existing_case_modal';
 import { PersistableStateAttachmentTypeRegistry } from '../../../client/attachment_framework/persistable_state_registry';
+import { BehaviorSubject } from 'rxjs';
 
 jest.mock('../../../common/use_cases_toast');
 jest.mock('../../../common/lib/kibana/use_application');
@@ -77,8 +81,7 @@ describe('use cases add to existing case modal hook', () => {
           dispatch,
           features: { alerts: { sync: true, enabled: true, isExperimental: false }, metrics: [] },
           releasePhase: 'ga',
-          isCreateCaseFlyoutOpen: false,
-          isSelectCaseModalOpen: false,
+          casesContextState$: new BehaviorSubject(getInitialCasesContextState()),
         }}
       >
         {children}

@@ -5,26 +5,31 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react-hooks';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import { useKibana } from '../../common/lib/kibana';
-import CasesProvider from '../cases_context';
-import { useCasesAddToExistingCaseModal } from './selector_modal/use_cases_add_to_existing_case_modal';
-import { allCasesPermissions } from '../../common/mock';
-import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
-import { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
+import { useKibana } from '../../../common/lib/kibana';
+import CasesProvider from '..';
+import { useCasesAddToExistingCaseModal } from '../../all_cases/selector_modal/use_cases_add_to_existing_case_modal';
+import { allCasesPermissions } from '../../../common/mock';
+import { ExternalReferenceAttachmentTypeRegistry } from '../../../client/attachment_framework/external_reference_registry';
+import { PersistableStateAttachmentTypeRegistry } from '../../../client/attachment_framework/persistable_state_registry';
 import { useIsAddToCaseOpen } from './use_is_add_to_case_open';
-import { act } from 'react-dom/test-utils';
-import { useApplication } from '../../common/lib/kibana/use_application';
-import { of } from 'rxjs';
-import { useCasesToast } from '../../common/use_cases_toast';
+import { useApplication } from '../../../common/lib/kibana/use_application';
+import { BehaviorSubject, of } from 'rxjs';
+import { useCasesToast } from '../../../common/use_cases_toast';
 import type { PublicAppInfo } from '@kbn/core/public';
+import { getInitialCasesContextState } from '../cases_context_reducer';
 
-jest.mock('../../common/use_cases_toast');
-jest.mock('../../common/lib/kibana');
-jest.mock('../../common/lib/kibana/use_application');
-jest.mock('../../common/use_cases_toast');
+jest.mock('../../../common/use_cases_toast');
+jest.mock('../../../common/lib/kibana');
+jest.mock('../../../common/lib/kibana/use_application');
+jest.mock('../../../common/use_cases_toast');
+jest.mock('../../all_cases/selector_modal/all_cases_selector_modal', () => {
+  return {
+    AllCasesSelectorModal: jest.fn(),
+  };
+});
 
 const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
 const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
@@ -64,6 +69,7 @@ describe('use is add to existing case modal open hook', () => {
             features: { alerts: { sync: true, enabled: true, isExperimental: false }, metrics: [] },
             releasePhase: 'ga',
             getFilesClient: jest.fn(),
+            casesContextState$: new BehaviorSubject(getInitialCasesContextState()),
           }}
         >
           {children}
@@ -81,8 +87,8 @@ describe('use is add to existing case modal open hook', () => {
     );
   });
 
-  it('should return open modal status', () => {
-    const { result } = renderHook(
+  it('should return open modal status', async () => {
+    const { result, rerender } = renderHook(
       () => {
         return {
           modal: useCasesAddToExistingCaseModal(),
@@ -97,7 +103,7 @@ describe('use is add to existing case modal open hook', () => {
     act(() => {
       result.current.modal.open();
     });
-
+    rerender();
     expect(result.current.isOpen).toEqual(true);
   });
 });

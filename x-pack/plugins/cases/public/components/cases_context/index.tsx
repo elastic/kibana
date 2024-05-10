@@ -60,6 +60,7 @@ export interface CasesContextProps
   features?: CasesFeatures;
   releasePhase?: ReleasePhase;
   getFilesClient: (scope: string) => ScopedFilesClient;
+  casesContextState$: Observable<CasesContextState>;
 }
 
 export const CasesContext = React.createContext<CasesContextValue | undefined>(undefined);
@@ -97,7 +98,6 @@ export const CasesProvider: FC<
 
   const value: CasesContextValue = useMemo(
     () => {
-      console.log('refresh context');
       return {
         externalReferenceAttachmentTypeRegistry,
         persistableStateAttachmentTypeRegistry,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCasesContextState } from './utils/use_cases_context_state';
+import { useCasesContextState } from './use_cases_context_state';
 
 export type UseIsAddToCaseOpen = () => boolean;
 
