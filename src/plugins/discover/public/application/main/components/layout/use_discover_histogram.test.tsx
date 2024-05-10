@@ -172,6 +172,8 @@ describe('useDiscoverHistogram', () => {
     });
 
     it('should return the isChartLoading params for ES|QL mode', async () => {
+      const stateContainer = getStateContainer();
+      stateContainer.appState.update({ query: { esql: 'from *' } });
       const { hook } = await renderUseDiscoverHistogram();
       const isChartLoading = hook.result.current.isChartLoading;
       expect(isChartLoading).toBe(false);
@@ -386,6 +388,7 @@ describe('useDiscoverHistogram', () => {
         searchSessionId: string;
       }>();
       const stateContainer = getStateContainer();
+      stateContainer.appState.update({ query: { esql: 'from *' } });
       stateContainer.dataState.fetch$ = fetch$;
       const { hook } = await renderUseDiscoverHistogram({ stateContainer });
       act(() => {

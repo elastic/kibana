@@ -89,7 +89,7 @@ export function fetchAll(
 
     // Mark all subjects as loading
     sendLoadingMsg(dataSubjects.main$);
-    sendLoadingMsg(dataSubjects.documents$);
+    sendLoadingMsg(dataSubjects.documents$, { query });
 
     // histogram for data view mode will send `loading` for totalHits$
     if (isEsqlQuery) {

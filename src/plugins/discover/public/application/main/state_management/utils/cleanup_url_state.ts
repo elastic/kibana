@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { DiscoverAppState, AppStateUrl } from '../discover_app_state_container';
 import { migrateLegacyQuery } from '../../../../utils/migrate_legacy_query';
@@ -21,8 +21,11 @@ export function cleanupUrlState(
   appStateFromUrl: AppStateUrl,
   uiSettings: IUiSettingsClient
 ): DiscoverAppState {
-  if (isOfQueryType(appStateFromUrl.query) && !appStateFromUrl.query.language) {
-    appStateFromUrl.query = migrateLegacyQuery(appStateFromUrl.query);
+  const query = appStateFromUrl.query;
+  const isEsqlQuery = isOfAggregateQueryType(query);
+
+  if (!isEsqlQuery && query && !query.language) {
+    appStateFromUrl.query = migrateLegacyQuery(query);
   }
 
   if (typeof appStateFromUrl.sort?.[0] === 'string') {
@@ -47,8 +50,6 @@ export function cleanupUrlState(
     // remove the param if it's invalid
     delete appStateFromUrl.rowsPerPage;
   }
-
-  const isEsqlQuery = isOfAggregateQueryType(appStateFromUrl.query);
 
   if (
     appStateFromUrl.sampleSize &&
