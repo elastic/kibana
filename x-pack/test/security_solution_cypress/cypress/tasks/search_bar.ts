@@ -21,6 +21,10 @@ import {
   EDIT_AS_QUERY_DSL,
   KIBANA_CODE_EDITOR,
 } from '../screens/search_bar';
+export const waitForSavedQueryLoaded = () => {
+  cy.intercept({ method: 'GET', url: '/internal/saved_query/_count' }).as('savedQuery');
+  cy.wait(['@savedQuery']);
+};
 
 export const openAddFilterPopover = () => {
   cy.get(GLOBAL_SEARCH_BAR_SUBMIT_BUTTON).should('be.enabled');

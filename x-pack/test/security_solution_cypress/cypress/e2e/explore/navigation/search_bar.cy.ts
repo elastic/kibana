@@ -12,6 +12,7 @@ import {
   fillAddFilterForm,
   openKqlQueryBar,
   fillKqlQueryBar,
+  waitForSavedQueryLoaded,
 } from '../../../tasks/search_bar';
 import {
   AUTO_SUGGEST_AGENT_NAME,
@@ -31,6 +32,7 @@ describe('SearchBar', { tags: ['@ess', '@serverless'] }, () => {
     visitWithTimeRange(hostsUrl('allHosts'));
     waitForAllHostsToBeLoaded();
     waitForPageToBeLoaded();
+    waitForSavedQueryLoaded();
   });
 
   it('adds correctly a filter to the global search bar', () => {
