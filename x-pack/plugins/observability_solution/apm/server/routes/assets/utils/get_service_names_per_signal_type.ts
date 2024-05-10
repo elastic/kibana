@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { AssetService } from '../services/types';
+import { AssetService, SignalType } from '../services/types';
 
 export function getServiceNamesPerSignalType(serviceAssets: AssetService[]) {
   const tracesServiceNames = serviceAssets
-    .filter(({ asset }) => asset.signalTypes['asset.traces'])
+    .filter(({ asset }) => asset.signalTypes[SignalType.ASSET_TRACES])
     .map(({ service }) => service.name);
 
   const logsServiceNames = serviceAssets
-    .filter(({ asset }) => asset.signalTypes['asset.logs'])
+    .filter(({ asset }) => asset.signalTypes[SignalType.ASSET_LOGS])
     .map(({ service }) => service.name);
 
   return { tracesServiceNames, logsServiceNames };
