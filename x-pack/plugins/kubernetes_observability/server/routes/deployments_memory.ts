@@ -84,7 +84,7 @@ export const registerDeploymentsMemoryRoute = (router: IRouter, logger: Logger) 
           var memory = '';
           const hitsPods = esResponsePods.hits.hits[0];
           const { fields = {} } = hitsPods
-          const hitsPodsAggs = esResponsePods.aggregations.unique_values.buckets;
+          const hitsPodsAggs = esResponsePods.aggregations.unique_values["buckets"];
           //console.log("hitspods:"+hitsPodsAggs);
           const time = extractFieldValue(fields['@timestamp']);
           for (var entries of hitsPodsAggs) {
