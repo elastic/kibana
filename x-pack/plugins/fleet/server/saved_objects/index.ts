@@ -164,6 +164,7 @@ export const getSavedObjectTypes = (
           overrides: { type: 'flattened', index: false },
           keep_monitoring_alive: { type: 'boolean' },
           advanced_settings: { type: 'flattened', index: false },
+          supports_agentless: { type: 'boolean' },
         },
       },
       migrations: {
@@ -180,6 +181,16 @@ export const getSavedObjectTypes = (
               type: 'mappings_addition',
               addedMappings: {
                 advanced_settings: { type: 'flattened', index: false },
+              },
+            },
+          ],
+        },
+        '2': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                supports_agentless: { type: 'boolean' },
               },
             },
           ],
