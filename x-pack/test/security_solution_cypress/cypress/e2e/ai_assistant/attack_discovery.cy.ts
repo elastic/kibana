@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable-file @kbn/imports/no_unresolvable_imports */
+
 import { login } from '../../tasks/login';
 import { visitWithTimeRange } from '../../tasks/navigation';
 import { ATTACK_DISCOVERY_URL } from '../../urls/navigation';

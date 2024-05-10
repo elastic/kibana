@@ -32,7 +32,6 @@ export default defineCypressConfig({
   screenshotsFolder: '../../../target/kibana-security-solution/cypress/screenshots',
   trashAssetsBeforeRuns: false,
   video: true,
-  videoCompression: 15,
   videosFolder: '../../../../target/kibana-security-solution/cypress/videos',
   viewportHeight: 946,
   viewportWidth: 1680,
