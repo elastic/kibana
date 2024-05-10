@@ -10,14 +10,7 @@ import { getSavedQuerySecurityUtils } from '../utils/saved_query_security';
 
 type AppName = 'discover' | 'dashboard' | 'maps' | 'visualize';
 
-const apps: AppName[] = [
-  'discover',
-  'dashboard',
-  // Commenting out maps to due to test flakiness, re-enable to resolve
-  // https://github.com/elastic/kibana/issues/183066
-  // 'maps',
-  'visualize',
-];
+const apps: AppName[] = ['discover', 'dashboard', 'maps', 'visualize'];
 
 export default function (ctx: FtrProviderContext) {
   const { getPageObjects, getService } = ctx;
