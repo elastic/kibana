@@ -7,7 +7,7 @@
 
 // FIXME: Once/if we have the ability to get page count directly from Chrome/puppeteer
 // we should get rid of this lib.
-import * as PDFJS from 'pdfjs-dist/legacy/build/pdf.mjs';
+import * as PDFJS from 'pdfjs-dist';
 
 import type { PackageInfo } from '@kbn/core/server';
 import { groupBy } from 'lodash';
