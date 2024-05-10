@@ -47,7 +47,6 @@ export type ReactEmbeddableApiRegistration<
  *
  * Embeddables are React components that manage their own state, can be serialized and
  * deserialized, and return an API that can be used to interact with them imperatively.
- * provided by the parent, and will not save any state to an external store.
  **/
 export interface ReactEmbeddableFactory<
   SerializedState extends object = object,

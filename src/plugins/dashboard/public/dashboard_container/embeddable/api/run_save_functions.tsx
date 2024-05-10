@@ -9,11 +9,7 @@
 import { Reference } from '@kbn/content-management-utils';
 import type { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import {
-  EmbeddableInput,
-  isReferenceOrValueEmbeddable,
-  reactEmbeddableRegistryHasKey,
-} from '@kbn/embeddable-plugin/public';
+import { EmbeddableInput, isReferenceOrValueEmbeddable } from '@kbn/embeddable-plugin/public';
 import { apiHasSerializableState, SerializedPanelState } from '@kbn/presentation-containers';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { cloneDeep } from 'lodash';
@@ -35,6 +31,9 @@ import { DashboardSaveModal } from './overlays/save_modal';
 const serializeAllPanelState = async (
   dashboard: DashboardContainer
 ): Promise<{ panels: DashboardContainerInput['panels']; references: Reference[] }> => {
+  const {
+    embeddable: { reactEmbeddableRegistryHasKey },
+  } = pluginServices.getServices();
   const references: Reference[] = [];
   const panels = cloneDeep(dashboard.getInput().panels);
 
