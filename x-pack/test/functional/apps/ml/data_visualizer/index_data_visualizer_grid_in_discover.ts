@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const endTime = 'Nov 1, 2020 @ 00:00:00.000';
 
   function runTestsWhenDisabled(testData: TestData) {
-    it('should not show view mode toggle or Field stats table', async function () {
+    it('should show view mode toggle but not Field stats tab', async function () {
       await PageObjects.common.navigateToApp('discover');
       if (testData.isSavedSearch) {
         await retry.tryForTime(2 * 1000, async () => {
@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.timePicker.setAbsoluteRange(startTime, endTime);
 
-      await PageObjects.discover.assertViewModeToggleNotExists();
+      await PageObjects.discover.assertViewModeToggleExists();
       await PageObjects.discover.assertFieldStatsTableNotExists();
     });
   }

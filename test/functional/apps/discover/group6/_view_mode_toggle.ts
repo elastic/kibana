@@ -99,15 +99,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.existOrFail('dscViewModeToggle');
         });
 
-        it('should show Patterns tab', async () => {
+        it('should not show Patterns tab (basic license)', async () => {
           await testSubjects.click('dscViewModePatternAnalysisButton');
 
           await retry.try(async () => {
             const fieldStatsTab = await testSubjects.find('dscViewModePatternAnalysisButton');
-            expect(await fieldStatsTab.getAttribute('aria-selected')).to.be('true');
+            expect(await fieldStatsTab.getAttribute('aria-selected')).to.be('false');
           });
 
-          await testSubjects.existOrFail('dscViewModeToggle');
+          await testSubjects.missingOrFail('dscViewModeToggle');
         });
 
         it('should not show view mode toggle for text-based searches', async () => {
