@@ -1,7 +1,12 @@
 import { estypes } from '@elastic/elasticsearch';
-import { extractFieldValue, toEntries, round, Pod, median } from './utils';
-import { double } from '@elastic/elasticsearch/lib/api/types';
+import { extractFieldValue, toEntries, round, Pod, Limits, median } from './utils';
 import { ElasticsearchClient } from '@kbn/core/server';
+
+// Define the global CPU limits to categorise memory utilisation
+const limits: Limits = {
+    medium: 0.7,
+    high: 0.9,
+};
 
 export function defineQueryForAllPodsCpuUtilisation(podName: string, namespace: string, client: ElasticsearchClient) {
     const mustsPodsCpu = [
@@ -32,7 +37,7 @@ export function defineQueryForAllPodsCpuUtilisation(podName: string, namespace: 
         _source: false,
         fields: [
             '@timestamp',
-            'metrics.k8s.pod.memory.*',
+            'metrics.k8s.pod.cpu.utilization',
             'resource.attributes.k8s.*',
         ],
         query: {
@@ -77,24 +82,16 @@ export function calulcateAllPodsCpuUtilisation(podName: string, namespace: strin
         }
 
         for (var pod1 of pods) {
-            //console.log("Name: " + pod1.name, "Available: " + pod1.cpu_utilization);
+            console.log("Name: " + pod1.name, "Available: " + pod1.cpu_utilization);
             cpu_utilizations.push(pod1.cpu_utilization);
         }
         const total_cpu_utilization = cpu_utilizations.reduce((accumulator, currentValue) => accumulator + currentValue);
 
         // console.log("Sum" + total_cpu_utilization)
-        
+
         cpu_utilization = total_cpu_utilization / pods.length
         cpu_utilization_median = median(cpu_utilizations)
         cpu_utilization = round(cpu_utilization, 3);
-
-        type Limits = {
-            [key: string]: double;
-        };
-        const limits: Limits = {
-            medium: 0.7,
-            high: 0.9,
-        };
         if (cpu_utilization < limits["medium"]) {
             alarm = "Low"
         } else if (cpu_utilization >= limits["medium"] && cpu_utilization < limits["high"]) {
@@ -102,7 +99,7 @@ export function calulcateAllPodsCpuUtilisation(podName: string, namespace: strin
         } else {
             alarm = "High"
         }
-        reason = { 'pod': podName, 'value': alarm, 'desc': ' Memory utilisation' };
+        reason = { 'pod': podName, 'value': alarm, 'desc': ' Cpu utilisation' };
         message = { 'pod': podName, 'cpu_utilization': cpu_utilization, 'cpu_utilization_median': cpu_utilization_median, 'Desc': '% - Percentage of Cpu utilisation' };
     }
 

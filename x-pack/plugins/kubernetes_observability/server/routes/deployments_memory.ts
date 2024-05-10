@@ -14,7 +14,8 @@ import { IRouter, Logger } from '@kbn/core/server';
 import {
   DEPLOYMENT_MEMORY_ROUTE,
 } from '../../common/constants';
-
+const resource = "deployment"
+const type = "memory"
 export const registerDeploymentsMemoryRoute = (router: IRouter, logger: Logger) => {
   router.versioned
     .get({
@@ -56,7 +57,6 @@ export const registerDeploymentsMemoryRoute = (router: IRouter, logger: Logger) 
           _source: false,
           fields: [
             '@timestamp',
-            'metrics.k8s.pod.phase',
             'resource.attributes.k8s.*',
           ],
           query: {
@@ -105,24 +105,24 @@ export const registerDeploymentsMemoryRoute = (router: IRouter, logger: Logger) 
               }
             }
             if (pods_medium.length > 0) {
-              messages = "Deployment has Medium Memory utilisation in following Pods:" + pods_medium.join(" , ");
+              messages = "${resource} has Medium ${type} utilisation in following Pods:" + pods_medium.join(" , ");
             }
             if (pods_high.length > 0) {
-              messages = messages + "Deployment has High Memory utilisation in following Pods:" + pods_high.join(" , ");
+              messages = messages + `${resource} has High ${type} utilisation in following Pods:` + pods_high.join(" , ");
             } else {
-              messages = "Deployment has Lom Memory utilisation in all Pods";
+              messages = `${resource} has Low ${type} utilisation in all Pods`;
             }
 
             if (pods_medium.length > 0 && pods_high.length > 0) {
               memory = "Medium";
-              reasons = "Medium memory utilisation";
+              reasons = "Medium "+type+" utilisation";
             }
             if (pods_high.length > 0) {
               memory = "High"
-              reasons = "High memory utilisation";
+              reasons = "High "+type+" utilisation";
             } else {
               memory = "Low"
-              reasons = "Low memory utilisation";
+              reasons = "Low "+type+" utilisation";
             }
             //End of Create overall message for deployment
           }

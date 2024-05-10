@@ -57,7 +57,7 @@ export const registerPodsMemoryRoute = (router: IRouter, logger: Logger) => {
           const { fields = {} } = hits;
           const time = extractFieldValue(fields['@timestamp']);
           
-          [reason, message, memory_available, memory_usage, memory_utilization, memory_usage_median ] = calulcateAllPodsMemoryUtilisation(request.query.name, namespace, esResponseAll)
+          [reason, message, , memory_usage, memory_usage_median, memory_available, memory_utilization ] = calulcateAllPodsMemoryUtilisation(request.query.name, namespace, esResponseAll)
           return response.ok({
             body: {
               time: time,

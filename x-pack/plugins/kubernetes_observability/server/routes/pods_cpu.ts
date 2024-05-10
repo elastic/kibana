@@ -7,7 +7,7 @@
 import { schema } from '@kbn/config-schema';
 // import { transformError } from '@kbn/securitysolution-es-utils';
 // import type { ElasticsearchClient } from '@kbn/core/server';
-import { extractFieldValue, round, checkDefaultNamespace } from '../lib/utils';
+import { extractFieldValue, checkDefaultNamespace } from '../lib/utils';
 import { calulcateAllPodsCpuUtilisation, defineQueryForAllPodsCpuUtilisation } from '../lib/pods_cpu_utils';
 
 import { IRouter, Logger } from '@kbn/core/server';
@@ -50,7 +50,7 @@ export const registerPodsCpuRoute = (router: IRouter, logger: Logger) => {
           const { fields = {} } = hit;
           const time = extractFieldValue(fields['@timestamp']);
 
-          [reason, message, cpu_utilization, cpu_utilization_median ] = calulcateAllPodsCpuUtilisation(request.query.name, namespace, esResponseAll)
+          [reason, message, cpu_utilization, cpu_utilization_median] = calulcateAllPodsCpuUtilisation(request.query.name, namespace, esResponse)
 
           return response.ok({
             body: {
@@ -58,9 +58,9 @@ export const registerPodsCpuRoute = (router: IRouter, logger: Logger) => {
               name: request.query.name,
               namespace: namespace,
               cpu_utilization: cpu_utilization,
-              cpu_utilization_median: cpu_utilization_median,  
+              cpu_utilization_median: cpu_utilization_median,
               message: message,
-              reason: reason 
+              reason: reason
             },
           });
         } else {

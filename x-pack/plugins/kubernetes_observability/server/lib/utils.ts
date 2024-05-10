@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { double } from "@elastic/elasticsearch/lib/api/types";
+
 export type Event = {
     note: string;
     reason: string;
@@ -20,6 +22,10 @@ export type Pod = {
     memory_availabe: number | undefined;
     memory_usage: number | undefined;
     cpu_utilization: number| undefined;
+};
+
+export type Limits = {
+    [key: string]: double;
 };
 
 export function extractFieldValue<T>(maybeArray: T | T[] | undefined): T {
