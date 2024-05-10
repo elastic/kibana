@@ -1106,12 +1106,16 @@ async function getFunctionArgsSuggestions(
     new Set(
       fnDefinition.signatures.reduce<string[]>((acc, signature) => {
         const p = signature.params[argIndex];
-        const _suggestions: string[] =
-          p && p.literalSuggestions
-            ? p.literalSuggestions
-            : p && p.literalOptions
-            ? p.literalOptions
-            : [];
+        if (!p) {
+          return acc;
+        }
+
+        const _suggestions: string[] = p.literalSuggestions
+          ? p.literalSuggestions
+          : p.literalOptions
+          ? p.literalOptions
+          : [];
+
         return acc.concat(_suggestions);
       }, [] as string[])
     )

@@ -16,9 +16,15 @@ interface ShowOptions {
   output?: string;
 }
 
-export function show(keystore: Keystore, key: string, options: ShowOptions = {}): number | void {
+export async function show(
+  keystore: Keystore,
+  key: string,
+  options: ShowOptions = {}
+): Promise<number | void> {
   const { silent, output } = options;
   const logger = new Logger({ silent });
+
+  await keystore.load();
 
   if (!keystore.exists()) {
     logger.error("ERROR: Kibana keystore not found. Use 'create' command to create one.");
@@ -56,7 +62,7 @@ export function showCli(program: any, keystore: Keystore) {
     )
     .option('-s, --silent', 'prevent all logging')
     .option('-o, --output <file>', 'output value to a file')
-    .action((key: string, options: ShowOptions) => {
-      process.exitCode = show(keystore, key, options) || 0;
+    .action(async (key: string, options: ShowOptions) => {
+      process.exitCode = (await show(keystore, key, options)) || 0;
     });
 }
