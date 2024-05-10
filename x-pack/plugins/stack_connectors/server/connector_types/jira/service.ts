@@ -34,6 +34,7 @@ import {
 import { escapeJqlSpecialCharacters } from './utils';
 
 import * as i18n from './translations';
+import { getBasicAuthHeader } from '../lib/get_basic_auth_header';
 
 const VERSION = '2';
 const BASE_URL = `rest/api/${VERSION}`;
@@ -66,7 +67,7 @@ export const createExternalService = (
   const searchUrl = `${urlWithoutTrailingSlash}/${BASE_URL}/search`;
 
   const axiosInstance = axios.create({
-    auth: { username: email, password: apiToken },
+    headers: getBasicAuthHeader({ username: email, password: apiToken }),
   });
 
   const getIncidentViewURL = (key: string) => {
