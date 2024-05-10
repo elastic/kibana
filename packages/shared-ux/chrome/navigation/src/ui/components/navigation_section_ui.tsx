@@ -183,10 +183,8 @@ const nodeToEuiCollapsibleNavProps = (
 } => {
   const { navNode, isItem, hasChildren, hasLink } = serializeNavNode(_navNode);
   const isActive = isActiveFromUrl(navNode.path, activeNodes);
-
-  const { id, path, href, renderAs } = navNode;
+  const { id, path, href, renderAs, onClick: customOnClick } = navNode;
   const isExternal = Boolean(href) && !navNode.isElasticInternalLink && isAbsoluteLink(href!);
-
   const isAccordion = hasChildren && !isItem;
   const isAccordionExpanded =
     (itemsAccordionState[path]?.isCollapsed ?? DEFAULT_IS_COLLAPSED) === false;
@@ -255,11 +253,17 @@ const nodeToEuiCollapsibleNavProps = (
     ? {
         href,
         external: isExternal,
-        onClick: (e: React.MouseEvent) => {
+        onClick: (e) => {
           // TODO: here we might want to toggle the accordion (if we "renderAs: 'accordion'")
           // Will be done in following PR
-          e.preventDefault();
           e.stopPropagation();
+
+          if (customOnClick) {
+            customOnClick(e);
+            return;
+          }
+
+          e.preventDefault();
           if (href) {
             navigateToUrl(href);
           }
@@ -318,6 +322,12 @@ const nodeToEuiCollapsibleNavProps = (
   return { items, isVisible };
 };
 
+const isAccordionNode = (
+  node: Pick<ChromeProjectNavigationNode, 'renderAs' | 'defaultIsCollapsed' | 'isCollapsible'>
+) =>
+  node.renderAs === 'accordion' ||
+  ['defaultIsCollapsed', 'isCollapsible'].some((prop) => node.hasOwnProperty(prop));
+
 const className = css`
   .euiAccordion__childWrapper {
     transition: none; // Remove the transition as it does not play well with dynamic links added to the accordion
@@ -364,7 +374,7 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
 
   const [itemsAccordionState, setItemsAccordionState] = useState<AccordionItemsState>(() => {
     return Object.entries(navNodesById).reduce<AccordionItemsState>((acc, [_id, node]) => {
-      if (node.children) {
+      if (isAccordionNode(node)) {
         let isCollapsed = DEFAULT_IS_COLLAPSED;
         let doCollapseFromActiveState = true;
 
@@ -379,6 +389,7 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
           doCollapseFromActiveState,
         };
       }
+
       return acc;
     }, {});
   });
@@ -387,14 +398,19 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
 
   const toggleAccordion = useCallback((id: string) => {
     setItemsAccordionState((prev) => {
-      // if (prev[id]?.isCollapsed === undefined) return prev;
-      const prevValue = prev[id]?.isCollapsed ?? DEFAULT_IS_COLLAPSED;
+      const prevState = prev[id];
+      const prevValue = prevState?.isCollapsed ?? DEFAULT_IS_COLLAPSED;
       return {
         ...prev,
         [id]: {
           ...prev[id],
           isCollapsed: !prevValue,
-          doCollapseFromActiveState: false, // once we manually toggle we don't want to auto-close it when URL changes
+          doCollapseFromActiveState:
+            prevState.isCollapsible === false
+              ? // if the accordion is not collapsible we do want to auto-close it when URL changes
+                prevState.doCollapseFromActiveState
+              : // otherwise, once we manually toggle, we don't want to auto-close it when URL changes
+                false,
         },
       };
     });
@@ -470,8 +486,7 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
           const prevState = prev[_id];
 
           if (
-            node.children &&
-            node.renderAs !== 'item' &&
+            isAccordionNode(node) &&
             (!prevState || prevState.doCollapseFromActiveState === true)
           ) {
             let nextIsActive = false;

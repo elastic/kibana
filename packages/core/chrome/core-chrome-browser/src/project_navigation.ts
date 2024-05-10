@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ComponentType } from 'react';
+import type { ComponentType, MouseEventHandler } from 'react';
 import type { Location } from 'history';
 import type { EuiThemeSizes, IconType } from '@elastic/eui';
 import type { Observable } from 'rxjs';
@@ -128,6 +128,10 @@ interface NodeDefinitionBase {
    * href for absolute links only. Internal links should use "link".
    */
   href?: string;
+  /**
+   * Custom handler to execute when clicking on the node. Not compatible with the "link" or "href" props.
+   */
+  onClick?: MouseEventHandler<HTMLButtonElement | HTMLElement>;
   /**
    * Optional status to indicate if the breadcrumb should be hidden when this node is active.
    * @default 'visible'
