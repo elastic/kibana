@@ -541,6 +541,37 @@ describe('<EditRolePage />', () => {
       expectSaveFormButtons(wrapper);
     });
 
+    it('can render a user defined role with description', async () => {
+      const wrapper = mountWithIntl(
+        <KibanaContextProvider services={coreStart}>
+          <EditRolePage
+            {...getProps({
+              action: 'edit',
+              spacesEnabled: false,
+              role: {
+                description: 'my custom role description',
+                name: 'my custom role',
+                metadata: {},
+                elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
+                kibana: [],
+              },
+            })}
+          />
+        </KibanaContextProvider>
+      );
+
+      await waitForRender(wrapper);
+
+      expect(wrapper.find('input[data-test-subj="roleFormDescriptionInput"]').prop('value')).toBe(
+        'my custom role description'
+      );
+      expect(
+        wrapper.find('input[data-test-subj="roleFormDescriptionInput"]').prop('disabled')
+      ).toBe(false);
+
+      expectSaveFormButtons(wrapper);
+    });
+
     it('can render when creating a new role', async () => {
       const wrapper = mountWithIntl(
         <KibanaContextProvider services={coreStart}>

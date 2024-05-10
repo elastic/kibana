@@ -261,9 +261,9 @@ export class RolesGridPage extends Component<Props, State> {
         }),
         sortable: true,
         truncateText: { lines: 2 },
-        render: (description: string) => {
+        render: (description: string, record: Role) => {
           return (
-            <EuiText color="subdued" size="s">
+            <EuiText color="subdued" size="s" data-test-subj={`roleRowDescription-${record.name}`}>
               {description}
             </EuiText>
           );
