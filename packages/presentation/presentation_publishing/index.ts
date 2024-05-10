@@ -119,7 +119,6 @@ export {
   type PublishesPanelTitle,
   type PublishesWritablePanelTitle,
 } from './interfaces/titles/publishes_panel_title';
-export { apiPublishesSettings, type PublishesSettings } from './interfaces/publishes_settings';
 export { initializeTitles, type SerializedTitles } from './interfaces/titles/titles_api';
 export {
   useBatchedOptionalPublishingSubjects,

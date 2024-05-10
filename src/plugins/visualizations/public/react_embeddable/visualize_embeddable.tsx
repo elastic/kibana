@@ -15,12 +15,12 @@ import {
   apiHasAppContext,
   apiHasDisableTriggers,
   apiHasExecutionContext,
-  apiPublishesSettings,
   apiPublishesUnifiedSearch,
   fetch$,
   initializeTitles,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
+import { apiPublishesSettings } from '@kbn/presentation-containers';
 import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { isEqual } from 'lodash';
 import React, { useRef } from 'react';
