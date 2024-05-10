@@ -357,6 +357,35 @@ export default ({ getService }: FtrProviderContext): void => {
         );
       });
 
+      it("should not update a configuration with templates with custom fields that don't exist in the configuration", async () => {
+        const configuration = await createConfiguration(supertest);
+
+        await updateConfiguration(
+          supertest,
+          configuration.id,
+          {
+            version: configuration.version,
+            templates: [
+              {
+                key: 'test_template_1',
+                name: 'First test template',
+                description: 'This is a first test template',
+                caseFields: {
+                  customFields: [
+                    {
+                      key: 'random_key',
+                      type: CustomFieldTypes.TEXT,
+                      value: 'Test',
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          400
+        );
+      });
+
       it('should not patch a configuration with duplicated template keys', async () => {
         const configuration = await createConfiguration(supertest);
         await updateConfiguration(

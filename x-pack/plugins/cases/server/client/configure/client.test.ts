@@ -552,43 +552,6 @@ describe('client', () => {
         );
       });
 
-      it('throws when there are invalid template keys in the request', async () => {
-        clientArgs.services.caseConfigureService.get.mockResolvedValue({
-          // @ts-ignore: these are all the attributes needed for the test
-          attributes: {
-            templates: [
-              {
-                key: 'template_1',
-                name: 'template 1',
-                description: 'this is test description',
-                caseFields: null,
-              },
-            ],
-          },
-        });
-
-        await expect(
-          update(
-            'test-id',
-            {
-              version: 'test-version',
-              templates: [
-                {
-                  key: 'template_2',
-                  name: 'template 2',
-                  description: 'this is test description',
-                  caseFields: null,
-                },
-              ],
-            },
-            clientArgs,
-            casesClientInternal
-          )
-        ).rejects.toThrow(
-          'Failed to get patch configure in route: Error: Invalid template keys: template_2'
-        );
-      });
-
       describe('customFields', () => {
         it('throws when there are no customFields in configure and template has customField in the request', async () => {
           clientArgs.services.caseConfigureService.get.mockResolvedValue({

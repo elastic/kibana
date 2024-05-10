@@ -7,13 +7,9 @@
 
 import * as rt from 'io-ts';
 import { CaseConnectorRt, ConnectorMappingsRt } from '../connector/v1';
-import { CaseAssigneesRt, UserRt } from '../user/v1';
-import {
-  CaseCustomFieldsRt,
-  CustomFieldTextTypeRt,
-  CustomFieldToggleTypeRt,
-} from '../custom_field/v1';
-import { CaseSeverityRt } from '../case/v1';
+import { UserRt } from '../user/v1';
+import { CustomFieldTextTypeRt, CustomFieldToggleTypeRt } from '../custom_field/v1';
+import { CaseBaseOptionalFieldsRt } from '../case/v1';
 
 export const ClosureTypeRt = rt.union([
   rt.literal('close-by-user'),
@@ -62,44 +58,6 @@ export const CustomFieldConfigurationRt = rt.union([
 
 export const CustomFieldsConfigurationRt = rt.array(CustomFieldConfigurationRt);
 
-const caseFieldsRt = rt.exact(
-  rt.partial({
-    /**
-     * The description of the case
-     */
-    description: rt.string,
-    /**
-     * The identifying strings for filter a case
-     */
-    tags: rt.array(rt.string),
-    /**
-     * The title of a case
-     */
-    title: rt.string,
-    /**
-     * The external system that the case can be synced with
-     */
-    connector: CaseConnectorRt,
-    /**
-     * The severity of the case
-     */
-    severity: CaseSeverityRt,
-    /**
-     * The users assigned to this case
-     */
-    assignees: CaseAssigneesRt,
-    /**
-     * The category of the case.
-     */
-    category: rt.union([rt.string, rt.null]),
-    /**
-     * An array containing the possible,
-     * user-configured custom fields.
-     */
-    customFields: CaseCustomFieldsRt,
-  })
-);
-
 export const TemplateConfigurationRt = rt.strict({
   /**
    * key of template
@@ -116,7 +74,7 @@ export const TemplateConfigurationRt = rt.strict({
   /**
    * case fields of template
    */
-  caseFields: rt.union([rt.null, caseFieldsRt]),
+  caseFields: rt.union([rt.null, CaseBaseOptionalFieldsRt]),
 });
 
 export const TemplatesConfigurationRt = rt.array(TemplateConfigurationRt);

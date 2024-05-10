@@ -58,7 +58,7 @@ export const CaseRequestCustomFieldsRt = limitedArraySchema({
   max: MAX_CUSTOM_FIELDS_PER_CASE,
 });
 
-export const CaseFieldsRt = rt.exact(
+export const CaseBaseOptionalFieldsRequestRt = rt.exact(
   rt.partial({
     /**
      * The description of the case
@@ -109,11 +109,15 @@ export const CaseFieldsRt = rt.exact(
      * Custom fields of the case
      */
     customFields: CaseRequestCustomFieldsRt,
+    /**
+     * The alert sync settings
+     */
+    settings: CaseSettingsRt,
   })
 );
 
 export const CaseRequestFieldsRt = rt.intersection([
-  CaseFieldsRt,
+  CaseBaseOptionalFieldsRequestRt,
   rt.exact(
     rt.partial({
       /**
@@ -121,10 +125,6 @@ export const CaseRequestFieldsRt = rt.intersection([
        */
       status: CaseStatusRt,
 
-      /**
-       * The alert sync settings
-       */
-      settings: CaseSettingsRt,
       /**
        * The plugin owner of the case
        */
@@ -431,22 +431,6 @@ export const CasesBulkGetResponseRt = rt.strict({
  * Update cases
  */
 export const CasePatchRequestRt = rt.intersection([
-  rt.exact(
-    rt.partial({
-      /**
-       * The current status of the case (open, closed, in-progress)
-       */
-      status: CaseStatusRt,
-      /**
-       * The alert sync settings
-       */
-      settings: CaseSettingsRt,
-      /**
-       * The plugin owner of the case
-       */
-      owner: rt.string,
-    })
-  ),
   CaseRequestFieldsRt,
   /**
    * The saved object ID and version

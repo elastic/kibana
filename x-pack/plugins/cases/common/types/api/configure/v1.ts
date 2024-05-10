@@ -11,6 +11,7 @@ import {
   MAX_CUSTOM_FIELD_KEY_LENGTH,
   MAX_CUSTOM_FIELD_LABEL_LENGTH,
   MAX_TEMPLATES_LENGTH,
+  MAX_TEMPLATE_DESCRIPTION_LENGTH,
   MAX_TEMPLATE_KEY_LENGTH,
   MAX_TEMPLATE_NAME_LENGTH,
 } from '../../../constants';
@@ -19,7 +20,7 @@ import { CustomFieldTextTypeRt, CustomFieldToggleTypeRt } from '../../domain';
 import type { Configurations, Configuration } from '../../domain/configure/v1';
 import { ConfigurationBasicWithoutOwnerRt, ClosureTypeRt } from '../../domain/configure/v1';
 import { CaseConnectorRt } from '../../domain/connector/v1';
-import { CaseFieldsRt } from '../case/v1';
+import { CaseBaseOptionalFieldsRequestRt } from '../case/v1';
 import { CaseCustomFieldTextWithValidationValueRt } from '../custom_field/v1';
 
 export const CustomFieldConfigurationWithoutTypeRt = rt.strict({
@@ -84,11 +85,15 @@ export const TemplateConfigurationRt = rt.strict({
   /**
    * description of templates
    */
-  description: rt.string,
+  description: limitedStringSchema({
+    fieldName: 'description',
+    min: 1,
+    max: MAX_TEMPLATE_DESCRIPTION_LENGTH,
+  }),
   /**
    * case fields
    */
-  caseFields: rt.union([rt.null, CaseFieldsRt]),
+  caseFields: rt.union([rt.null, CaseBaseOptionalFieldsRequestRt]),
 });
 
 export const TemplatesConfigurationRt = limitedArraySchema({
@@ -116,10 +121,6 @@ export const ConfigurationRequestRt = rt.intersection([
   rt.exact(
     rt.partial({
       customFields: CustomFieldsConfigurationRt,
-    })
-  ),
-  rt.exact(
-    rt.partial({
       templates: TemplatesConfigurationRt,
     })
   ),
