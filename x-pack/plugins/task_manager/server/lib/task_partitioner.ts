@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  ISavedObjectsRepository,
-  SavedObjectsFindResponse,
-} from '@kbn/core-saved-objects-api-server';
+import { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import * as k8s from '@kubernetes/client-node';
 import { rendezvousHash } from './rendezvous_hash';
 
