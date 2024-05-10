@@ -6,6 +6,7 @@
  */
 
 import { double } from "@elastic/elasticsearch/lib/api/types";
+import { object } from "joi";
 
 export type Event = {
     note: string;
@@ -93,3 +94,4 @@ export function checkDefaultNamespace(namespace: string| undefined): string {
         return namespace
     }
 }
+
