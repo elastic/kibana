@@ -10,11 +10,13 @@ import {
   DataStreamDegradedDocsStatServiceResponse,
   DataStreamStatServiceResponse,
   GetDataStreamsDegradedDocsStatsQuery,
-  GetDataStreamsStatsQuery,
   GetDataStreamsEstimatedDataInBytesParams,
   GetDataStreamsEstimatedDataInBytesResponse,
+  GetDataStreamsStatsQuery,
   GetIntegrationsParams,
+  GetNonAggregatableDataStreamsParams,
   IntegrationsResponse,
+  NonAggregatableDatasetsResponse,
 } from '../../../common/data_streams_stats';
 
 export type DataStreamsStatsServiceSetup = void;
@@ -36,4 +38,7 @@ export interface IDataStreamsStatsClient {
     params: GetDataStreamsEstimatedDataInBytesParams
   ): Promise<GetDataStreamsEstimatedDataInBytesResponse>;
   getIntegrations(params: GetIntegrationsParams['query']): Promise<IntegrationsResponse>;
+  getNonAggregatableDatasets(
+    params: GetNonAggregatableDataStreamsParams
+  ): Promise<NonAggregatableDatasetsResponse>;
 }

@@ -22,6 +22,7 @@ import { getDataStreams } from './get_data_streams';
 import { getDataStreamsStats } from './get_data_streams_stats';
 import { getDegradedDocsPaginated } from './get_degraded_docs';
 import { getEstimatedDataInBytes } from './get_estimated_data_in_bytes';
+import { getNonAggregatableDataStreams } from './get_non_aggregatable_data_streams';
 
 const statsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/stats',
@@ -91,6 +92,39 @@ const degradedDocsRoute = createDatasetQualityServerRoute({
 
     return {
       degradedDocs,
+    };
+  },
+});
+
+const nonAggregatableDatasetsRoute = createDatasetQualityServerRoute({
+  endpoint: 'GET /internal/dataset_quality/data_streams/non_aggregatable',
+  params: t.type({
+    query: t.intersection([
+      rangeRt,
+      typeRt,
+      t.partial({
+        datasetQuery: t.string,
+      }),
+    ]),
+  }),
+  options: {
+    tags: [],
+  },
+  async handler(resources): Promise<{
+    datasets: string[];
+  }> {
+    const { context, params } = resources;
+    const coreContext = await context.core;
+
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+
+    const datasets = await getNonAggregatableDataStreams({
+      esClient,
+      ...params.query,
+    });
+
+    return {
+      datasets: datasets as string[],
     };
   },
 });
@@ -200,6 +234,7 @@ const estimatedDataInBytesRoute = createDatasetQualityServerRoute({
 export const dataStreamsRouteRepository = {
   ...statsRoute,
   ...degradedDocsRoute,
+  ...nonAggregatableDatasetsRoute,
   ...dataStreamDetailsRoute,
   ...dataStreamSettingsRoute,
   ...estimatedDataInBytesRoute,

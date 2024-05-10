@@ -17,6 +17,7 @@ import {
   DataStreamDetails,
   GetDataStreamsStatsQuery,
   GetIntegrationsParams,
+  GetNonAggregatableDataStreamsParams,
 } from '../../../../common/data_streams_stats';
 import { DegradedDocsStat } from '../../../../common/data_streams_stats/malformed_docs_stat';
 import { DataStreamType } from '../../../../common/types';
@@ -32,6 +33,7 @@ import {
   fetchIntegrationDashboardsFailedNotifier,
   fetchIntegrationsFailedNotifier,
   noDatasetSelected,
+  fetchNonAggregatableDatasetsFailedNotifier,
 } from './notifications';
 import {
   DatasetQualityControllerContext,
@@ -170,6 +172,33 @@ export const createPureDatasetQualityControllerStateMachine = (
             },
             UPDATE_QUERY: {
               actions: ['storeQuery'],
+            },
+          },
+        },
+        nonAggregatableDatasets: {
+          initial: 'fetching',
+          states: {
+            fetching: {
+              invoke: {
+                src: 'loadNonAggregatableDatasets',
+                onDone: {
+                  target: 'loaded',
+                  actions: ['storeNonAggregatableDatasets'],
+                },
+                onError: {
+                  target: 'loaded',
+                  actions: ['notifyFetchNonAggregatableDatasetsFailed'],
+                },
+              },
+            },
+            loaded: {},
+          },
+          on: {
+            UPDATE_TIME_RANGE: {
+              target: 'nonAggregatableDatasets.fetching',
+            },
+            REFRESH_DATA: {
+              target: 'nonAggregatableDatasets.fetching',
             },
           },
         },
@@ -402,6 +431,13 @@ export const createPureDatasetQualityControllerStateMachine = (
               }
             : {};
         }),
+        storeNonAggregatableDatasets: assign((_context, event) => {
+          return 'data' in event
+            ? {
+                nonAggregatableDatasets: event.data as string[],
+              }
+            : {};
+        }),
         storeDataStreamSettings: assign((context, event) => {
           return 'data' in event
             ? {
@@ -484,6 +520,8 @@ export const createDatasetQualityControllerStateMachine = ({
         fetchDatasetStatsFailedNotifier(toasts, event.data),
       notifyFetchDegradedStatsFailed: (_context, event: DoneInvokeEvent<Error>) =>
         fetchDegradedStatsFailedNotifier(toasts, event.data),
+      notifyFetchNonAggregatableDatasetsFailed: (_context, event: DoneInvokeEvent<Error>) =>
+        fetchNonAggregatableDatasetsFailedNotifier(toasts, event.data),
       notifyFetchDatasetSettingsFailed: (_context, event: DoneInvokeEvent<Error>) =>
         fetchDatasetSettingsFailedNotifier(toasts, event.data),
       notifyFetchDatasetDetailsFailed: (_context, event: DoneInvokeEvent<Error>) =>
@@ -512,6 +550,15 @@ export const createDatasetQualityControllerStateMachine = ({
       loadIntegrations: (context) => {
         return dataStreamStatsClient.getIntegrations({
           type: context.type as GetIntegrationsParams['query']['type'],
+        });
+      },
+      loadNonAggregatableDatasets: (context) => {
+        const { startDate: start, endDate: end } = getDateISORange(context.filters.timeRange);
+
+        return dataStreamStatsClient.getNonAggregatableDatasets({
+          type: context.type as GetNonAggregatableDataStreamsParams['type'],
+          start,
+          end,
         });
       },
       loadDataStreamSettings: (context) => {

@@ -20,6 +20,7 @@ import {
   IntegrationsResponse,
   DataStreamStat,
   DataStreamStatType,
+  NonAggregatableDatasetsResponse,
 } from '../../../../common/data_streams_stats';
 
 export type FlyoutDataset = Omit<
@@ -76,6 +77,10 @@ export interface WithDegradedDocs {
   degradedDocStats: DegradedDocsStat[];
 }
 
+export interface WithNonAggregatableDatasets {
+  nonAggregatableDatasets: string[];
+}
+
 export interface WithDatasets {
   datasets: DataStreamStat[];
 }
@@ -90,6 +95,7 @@ export type DefaultDatasetQualityControllerState = { type: string } & WithTableO
   WithFlyoutOptions &
   WithDatasets &
   WithFilters &
+  WithNonAggregatableDatasets &
   Partial<WithIntegrations>;
 
 type DefaultDatasetQualityStateContext = DefaultDatasetQualityControllerState &
@@ -118,6 +124,10 @@ export type DatasetQualityControllerTypeState =
     }
   | {
       value: 'integrations.fetching';
+      context: DefaultDatasetQualityStateContext;
+    }
+  | {
+      value: 'nonAggregatableDatasets.fetching';
       context: DefaultDatasetQualityStateContext;
     }
   | {
@@ -189,6 +199,7 @@ export type DatasetQualityControllerEvent =
       query: string;
     }
   | DoneInvokeEvent<DataStreamDegradedDocsStatServiceResponse>
+  | DoneInvokeEvent<NonAggregatableDatasetsResponse>
   | DoneInvokeEvent<DashboardType>
   | DoneInvokeEvent<DataStreamDetails>
   | DoneInvokeEvent<DataStreamSettings>

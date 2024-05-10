@@ -7,26 +7,29 @@
 
 import { HttpStart } from '@kbn/core/public';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import { Integration } from '../../../common/data_streams_stats/integration';
 import {
   getDataStreamsDegradedDocsStatsResponseRt,
-  getDataStreamsStatsResponseRt,
   getDataStreamsEstimatedDataInBytesResponseRt,
+  getDataStreamsStatsResponseRt,
   getIntegrationsResponseRt,
+  getNonAggregatableDataStreamsResponseRt,
 } from '../../../common/api_types';
 import { DEFAULT_DATASET_TYPE } from '../../../common/constants';
 import {
   DataStreamStatServiceResponse,
   GetDataStreamsDegradedDocsStatsQuery,
   GetDataStreamsDegradedDocsStatsResponse,
+  GetDataStreamsEstimatedDataInBytesParams,
+  GetDataStreamsEstimatedDataInBytesResponse,
   GetDataStreamsStatsError,
   GetDataStreamsStatsQuery,
   GetDataStreamsStatsResponse,
-  GetDataStreamsEstimatedDataInBytesParams,
-  GetDataStreamsEstimatedDataInBytesResponse,
   GetIntegrationsParams,
+  GetNonAggregatableDataStreamsParams,
+  GetNonAggregatableDataStreamsResponse,
   IntegrationsResponse,
 } from '../../../common/data_streams_stats';
+import { Integration } from '../../../common/data_streams_stats/integration';
 import { IDataStreamsStatsClient } from './types';
 
 export class DataStreamsStatsClient implements IDataStreamsStatsClient {
@@ -76,6 +79,30 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
     )(response);
 
     return degradedDocs;
+  }
+
+  public async getNonAggregatableDatasets(params: GetNonAggregatableDataStreamsParams) {
+    const response = await this.http
+      .get<GetNonAggregatableDataStreamsResponse>(
+        '/internal/dataset_quality/data_streams/non_aggregatable',
+        {
+          query: {
+            ...params,
+            type: DEFAULT_DATASET_TYPE,
+          },
+        }
+      )
+      .catch((error) => {
+        throw new GetDataStreamsStatsError(`Failed to fetch non aggregatable datasets: ${error}`);
+      });
+
+    const { datasets } = decodeOrThrow(
+      getNonAggregatableDataStreamsResponseRt,
+      (message: string) =>
+        new GetDataStreamsStatsError(`Failed to fetch non aggregatable datasets: ${message}`)
+    )(response);
+
+    return datasets;
   }
 
   public async getDataStreamsEstimatedDataInBytes(
