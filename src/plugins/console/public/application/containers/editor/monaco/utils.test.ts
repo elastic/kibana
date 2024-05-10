@@ -275,15 +275,25 @@ describe('monaco editor utils', () => {
   });
 
   describe('getAutoIndentedRequests', () => {
+    const mockRequestParams = {
+      // Required properties in the AdjustedParsedRequest type
+      startLineNumber: 1,
+      endLineNumber: 1,
+      startOffset: 1,
+      endOffset: 1,
+    };
+
     const TEST_REQUEST_1 = {
+      ...mockRequestParams,
       method: 'GET',
       url: '_search',
-      data: ['{\n  "query": {\n    "match_all": {}\n  }\n}'],
+      data: [{ query: { match_all: {} } }],
       // Non-formatted text
       text: 'GET    _search   \n{    \n  "query":     {\n    "match_all":    {   }\n    }\n}',
     };
 
     const TEST_REQUEST_2 = {
+      ...mockRequestParams,
       method: 'GET',
       url: '_all',
       data: [],
@@ -292,47 +302,41 @@ describe('monaco editor utils', () => {
     };
 
     const TEST_REQUEST_3 = {
+      ...mockRequestParams,
       method: 'POST',
       url: '/_bulk',
-      data: ['{\n  "index": {\n    "_index": "books"\n  }\n}', '{\n  "name": "1984"\n}'],
+      // Multi-data
+      data: [{ index: { _index: 'books' } }, { name: '1984' }, { name: 'Atomic habits' }],
       // Non-formatted text
-      text: 'POST   /_bulk\n{\n"index":{\n"_index":"books"\n}\n}\n{\n"name":"1984"\n}',
+      text: 'POST   /_bulk\n{\n"index":{\n"_index":"books"\n}\n}\n{\n"name":"1984"\n}{"name":"Atomic habits"}',
     };
 
     const TEST_REQUEST_4 = {
+      ...mockRequestParams,
       method: 'GET',
       url: '_search',
-      data: ['{\n  "query": {\n    "match_all": {}\n  }\n}'],
+      data: [{ query: { match_all: {} } }],
       // Non-formatted text with comments
-      text: 'GET    _search  // test \n{    \n  "query":     {\n    "match_all":    {   } // some comment\n    }\n}',
+      text: 'GET    _search  // test comment \n{    \n  "query":     {\n    "match_all":    {   } // comment\n    }\n}',
     };
 
     it('correctly auto-indents a single request with data', () => {
-      const formattedData = getAutoIndentedRequests(
-        [TEST_REQUEST_1],
-        [...TEST_REQUEST_1.text.split('\n')]
-      );
+      const formattedData = getAutoIndentedRequests([TEST_REQUEST_1], TEST_REQUEST_1.text);
       const expectedResult = 'GET _search\n{\n  "query": {\n    "match_all": {}\n  }\n}';
       expect(formattedData).toBe(expectedResult);
     });
 
     it('correctly auto-indents a single request with no data', () => {
-      const formattedData = getAutoIndentedRequests(
-        [TEST_REQUEST_2],
-        [...TEST_REQUEST_2.text.split('\n')]
-      );
+      const formattedData = getAutoIndentedRequests([TEST_REQUEST_2], TEST_REQUEST_2.text);
       const expectedResult = 'GET _all';
 
       expect(formattedData).toBe(expectedResult);
     });
 
     it('correctly auto-indents a single request with multiple data', () => {
-      const formattedData = getAutoIndentedRequests(
-        [TEST_REQUEST_3],
-        [...TEST_REQUEST_3.text.split('\n')]
-      );
+      const formattedData = getAutoIndentedRequests([TEST_REQUEST_3], TEST_REQUEST_3.text);
       const expectedResult =
-        'POST /_bulk\n{\n  "index": {\n    "_index": "books"\n  }\n}\n{\n  "name": "1984"\n}';
+        'POST /_bulk\n{\n  "index": {\n    "_index": "books"\n  }\n}\n{\n  "name": "1984"\n}\n{\n  "name": "Atomic habits"\n}';
 
       expect(formattedData).toBe(expectedResult);
     });
@@ -340,16 +344,10 @@ describe('monaco editor utils', () => {
     it('correctly auto-indents multiple request', () => {
       const formattedData = getAutoIndentedRequests(
         [TEST_REQUEST_1, TEST_REQUEST_2, TEST_REQUEST_3],
-        [
-          ...TEST_REQUEST_1.text.split('\n'),
-          '',
-          ...TEST_REQUEST_2.text.split('\n'),
-          '',
-          ...TEST_REQUEST_3.text.split('\n'),
-        ]
+        TEST_REQUEST_1.text + '\n\n' + TEST_REQUEST_2.text + '\n\n' + TEST_REQUEST_3.text
       );
       const expectedResult =
-        'GET _search\n{\n  "query": {\n    "match_all": {}\n  }\n}\n\nGET _all\n\nPOST /_bulk\n{\n  "index": {\n    "_index": "books"\n  }\n}\n{\n  "name": "1984"\n}';
+        'GET _search\n{\n  "query": {\n    "match_all": {}\n  }\n}\n\nGET _all\n\nPOST /_bulk\n{\n  "index": {\n    "_index": "books"\n  }\n}\n{\n  "name": "1984"\n}\n{\n  "name": "Atomic habits"\n}';
 
       expect(formattedData).toBe(expectedResult);
     });
@@ -357,29 +355,20 @@ describe('monaco editor utils', () => {
     it('auto-indents multiple request with comments in between', () => {
       const formattedData = getAutoIndentedRequests(
         [TEST_REQUEST_1, TEST_REQUEST_2, TEST_REQUEST_3],
-        [
-          ...TEST_REQUEST_1.text.split('\n'),
-          '',
-          '// test comment',
-          ...TEST_REQUEST_2.text.split('\n'),
-          '',
-          '/*',
-          ' some comment',
-          '*/',
-          ...TEST_REQUEST_3.text.split('\n'),
-        ]
+        TEST_REQUEST_1.text +
+          '\n\n// single comment\n' +
+          TEST_REQUEST_2.text +
+          '\n\n/*\n multi-line comment\n*/\n' +
+          TEST_REQUEST_3.text
       );
       const expectedResult =
-        'GET _search\n{\n  "query": {\n    "match_all": {}\n  }\n}\n\n// test comment\nGET _all\n\n/*\n some comment\n*/\nPOST /_bulk\n{\n  "index": {\n    "_index": "books"\n  }\n}\n{\n  "name": "1984"\n}';
+        'GET _search\n{\n  "query": {\n    "match_all": {}\n  }\n}\n\n// single comment\nGET _all\n\n/*\n multi-line comment\n*/\nPOST /_bulk\n{\n  "index": {\n    "_index": "books"\n  }\n}\n{\n  "name": "1984"\n}\n{\n  "name": "Atomic habits"\n}';
 
       expect(formattedData).toBe(expectedResult);
     });
 
     it('does not auto-indent a request with comments', () => {
-      const formattedData = getAutoIndentedRequests(
-        [TEST_REQUEST_4],
-        [...TEST_REQUEST_4.text.split('\n')]
-      );
+      const formattedData = getAutoIndentedRequests([TEST_REQUEST_4], TEST_REQUEST_4.text);
       const expectedResult = TEST_REQUEST_4.text;
       expect(formattedData).toBe(expectedResult);
     });
