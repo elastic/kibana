@@ -608,7 +608,6 @@ const endpointExceptionsSubFeature: SubFeatureConfig = {
  * regardless of the product type.
  */
 export const getSecurityBaseKibanaSubFeatureIds = (
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   { experimentalFeatures }: SecurityFeatureParams // currently un-used, but left here as a convenience for possible future use
 ): SecuritySubFeatureId[] => [SecuritySubFeatureId.hostIsolation];
 
