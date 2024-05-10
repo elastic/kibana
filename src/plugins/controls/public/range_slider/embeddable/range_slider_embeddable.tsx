@@ -455,7 +455,7 @@ export class RangeSliderEmbeddable
     );
   };
 
-  public isChained = () => true;
-
-  public isEditingEnabled = () => true;
+  public isChained() {
+    return true;
+  }
 }

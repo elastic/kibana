@@ -94,10 +94,11 @@ type ControlGroupReduxEmbeddableTools = ReduxEmbeddableTools<
   typeof controlGroupReducers
 >;
 
-export class ControlGroupContainer
-  extends Container<ControlInput, ControlGroupInput, ControlGroupOutput>
-  implements ControlGroupApi
-{
+export class ControlGroupContainer extends Container<
+  ControlInput,
+  ControlGroupInput,
+  ControlGroupOutput
+> {
   public readonly type = CONTROL_GROUP_TYPE;
   public readonly anyControlOutputConsumerLoading$: Subject<boolean> = new Subject();
 
@@ -130,10 +131,6 @@ export class ControlGroupContainer
   /** This currently reports the **entire** persistable control group input on unsaved changes */
   public unsavedChanges = new BehaviorSubject<PersistableControlGroupInput | undefined>(undefined);
   public fieldFilterPredicate: FieldFilterPredicate | undefined;
-
-  /** TODO */
-  public defaultGrow$: BehaviorSubject<boolean>;
-  public defaultWidth$: BehaviorSubject<ControlWidth>;
 
   constructor(
     reduxToolsPackage: ReduxToolsPackage,
@@ -177,29 +174,6 @@ export class ControlGroupContainer
     this.cleanupStateTools = reduxEmbeddableTools.cleanup;
     this.onStateChange = reduxEmbeddableTools.onStateChange;
 
-    this.defaultGrow$ = new BehaviorSubject<boolean>(initialInput.grow || DEFAULT_CONTROL_GROW);
-    this.defaultWidth$ = new BehaviorSubject<ControlWidth>(
-      initialInput.width || DEFAULT_CONTROL_WIDTH
-    );
-
-    /** TODO */
-    // this.subscriptions.add(
-    //   this.getInput$()
-    //     .pipe(
-    //       skip(1),
-    //       distinctUntilChanged((prev, current) => {
-    //         return deepEqual(prev.panels, current.panels);
-    //       })
-    //     )
-    //     .subscribe(({ grow, width }) => {
-    //       console.log('FIRE', { grow, width });
-    //       // this.grow$.next(grow);
-    //       // this.width$.next(width);
-    //       this.defaultGrow$.next(grow);
-    //       this.defaultWidth$.next(width);
-    //     })
-    // );
-
     this.store = reduxEmbeddableTools.store;
 
     this.invalidSelectionsState = this.getChildIds().reduce((prev, id) => {
@@ -219,23 +193,11 @@ export class ControlGroupContainer
         }
       );
 
-      // const children: Array<ControlEmbeddable & DefaultControlApi> = Object.values(
-      //   this.children$.getValue()
-      // );
-      // children.forEach((child) => {
-      //   console.log('child', child);
-      //   child.grow$ = new BehaviorSubject<boolean | undefined>(child.getInput().grow);
-      // });
-
       this.initialized$.next(true);
     });
 
     this.fieldFilterPredicate = fieldFilterPredicate;
   }
-
-  public setDefaultControlGrow = (grow: boolean) => this.defaultGrow$.next(grow);
-
-  public setDefaultControlWidth = (width: ControlWidth) => this.defaultWidth$.next(width);
 
   public canShowInvalidSelectionsWarning = () =>
     this.storageService.getShowInvalidSelectionWarning() ?? true;
@@ -361,11 +323,6 @@ export class ControlGroupContainer
   public getPersistableInput: () => PersistableControlGroupInput & { id: string } = () => {
     const input = this.getInput();
     return pick(input, [...persistableControlGroupInputKeys, 'id']);
-  };
-
-  /** TODO */
-  public serializeState = () => {
-    return { rawState: {} };
   };
 
   public updateInputAndReinitialize = (newInput: Partial<ControlGroupInput>) => {
