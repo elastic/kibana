@@ -15,6 +15,7 @@ export interface CheckRoleMappingFeaturesResponse {
   canUseStoredScripts: boolean;
   hasCompatibleRealms: boolean;
   canUseRemoteIndices: boolean;
+  canUseRemoteClusters: boolean;
 }
 
 type DeleteRoleMappingsResponse = Array<{

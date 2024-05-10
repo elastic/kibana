@@ -6484,12 +6484,12 @@
                 "label": "meta",
                 "description": [],
                 "signature": [
-                  "ErrorMetaAttributes[T] | undefined"
+                  "ErrorMetaAttributes[T]"
                 ],
                 "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": false
+                "isRequired": true
               }
             ],
             "returnComment": []

@@ -25,6 +25,9 @@ describe('correctCommonEsqlMistakes', () => {
 
   it('replaces aliasing via the AS keyword with the = operator', () => {
     expectQuery(`FROM logs-* | STATS COUNT() AS count`, 'FROM logs-*\n| STATS count = COUNT()');
+
+    expectQuery(`FROM logs-* | STATS COUNT() as count`, 'FROM logs-*\n| STATS count = COUNT()');
+
     expectQuery(
       `FROM logs-* | STATS AVG(transaction.duration.histogram) AS avg_request_latency, PERCENTILE(transaction.duration.histogram, 95) AS p95`,
       `FROM logs-*
@@ -42,9 +45,31 @@ describe('correctCommonEsqlMistakes', () => {
   });
 
   it(`replaces " or ' escaping in FROM statements with backticks`, () => {
-    expectQuery(`FROM "logs-*" | LIMIT 10`, 'FROM `logs-*`\n| LIMIT 10');
-    expectQuery(`FROM 'logs-*' | LIMIT 10`, 'FROM `logs-*`\n| LIMIT 10');
+    expectQuery(`FROM "logs-*" | LIMIT 10`, 'FROM logs-*\n| LIMIT 10');
+    expectQuery(`FROM 'logs-*' | LIMIT 10`, 'FROM logs-*\n| LIMIT 10');
     expectQuery(`FROM logs-* | LIMIT 10`, 'FROM logs-*\n| LIMIT 10');
+  });
+
+  it('replaces = as equal operator with ==', () => {
+    expectQuery(
+      `FROM logs-*\n| WHERE service.name = "foo"`,
+      `FROM logs-*\n| WHERE service.name == "foo"`
+    );
+
+    expectQuery(
+      `FROM logs-*\n| WHERE service.name = "foo" AND service.environment = "bar"`,
+      `FROM logs-*\n| WHERE service.name == "foo" AND service.environment == "bar"`
+    );
+
+    expectQuery(
+      `FROM logs-*\n| WHERE (service.name = "foo" AND service.environment = "bar") OR agent.name = "baz"`,
+      `FROM logs-*\n| WHERE (service.name == "foo" AND service.environment == "bar") OR agent.name == "baz"`
+    );
+
+    expectQuery(
+      `FROM logs-*\n| WHERE \`what=ever\` = "foo=bar"`,
+      `FROM logs-*\n| WHERE \`what=ever\` == "foo=bar"`
+    );
   });
 
   it('replaces single-quote escaped strings with double-quote escaped strings', () => {
@@ -102,7 +127,7 @@ describe('correctCommonEsqlMistakes', () => {
       | EVAL "@timestamp" = TO_DATETIME(timestamp)
       | WHERE statement LIKE 'SELECT%'
       | STATS avg_duration = AVG(duration)`,
-      `FROM \`postgres-logs*\`
+      `FROM postgres-logs*
     | GROK message "%{TIMESTAMP_ISO8601:timestamp} %{TZ} \[%{NUMBER:process_id}\]: \[%{NUMBER:log_line}\] user=%{USER:user},db=%{USER:database},app=\[%{DATA:application}\],client=%{IP:client_ip} LOG:  duration: %{NUMBER:duration:float} ms  statement: %{GREEDYDATA:statement}"
     | EVAL @timestamp = TO_DATETIME(timestamp)
     | WHERE statement LIKE "SELECT%"
