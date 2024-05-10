@@ -17,7 +17,7 @@
         "is_hidden": true
       }
     },
-    "index": ".ml-anomalies-custom-linux_anomalous_network_activity_ecs",
+    "index": ".ml-anomalies-custom-v3_linux_anomalous_network_activity",
     "mappings": {
       "_meta": {
         "version": "8.0.0"
