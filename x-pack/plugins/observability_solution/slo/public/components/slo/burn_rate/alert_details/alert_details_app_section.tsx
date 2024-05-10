@@ -13,7 +13,6 @@ import { AlertSummaryField, TopAlert } from '@kbn/observability-plugin/public';
 import { useKibana } from '../../../../utils/kibana_react';
 import { useFetchSloDetails } from '../../../../hooks/use_fetch_slo_details';
 import { BurnRateRuleParams } from '../../../../typings/slo';
-import { AlertsHistoryPanel } from './components/alerts_history/alerts_history_panel';
 import { ErrorRatePanel } from './components/error_rate/error_rate_panel';
 import { CustomAlertDetailsPanel } from './components/custom_panels/custom_panels';
 
@@ -74,7 +73,6 @@ export default function AlertDetailsAppSection({
     <EuiFlexGroup direction="column" data-test-subj="overviewSection">
       <ErrorRatePanel alert={alert} slo={slo} isLoading={isLoading} />
       <CustomAlertDetailsPanel alert={alert} slo={slo} rule={rule} />
-      <AlertsHistoryPanel alert={alert} rule={rule} slo={slo} isLoading={isLoading} />
     </EuiFlexGroup>
   );
 }
