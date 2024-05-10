@@ -44,15 +44,7 @@ const rule = getNewTermsRule();
 describe(
   'Detection rules, New terms, Edit',
   {
-    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
-    env: {
-      // alertSuppressionForNewTermsRuleEnabled feature flag is also enabled in a global config
-      kbnServerArgs: [
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'alertSuppressionForNewTermsRuleEnabled',
-        ])}`,
-      ],
-    },
+    tags: ['@ess', '@serverless'],
   },
   () => {
     beforeEach(() => {

@@ -85,6 +85,11 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
       ],
       strict: true,
     },
+    legendStats: {
+      types: ['string'],
+      multi: true,
+      help: strings.getLegendStatsArgHelp(),
+    },
     truncateLegend: {
       types: ['boolean'],
       help: strings.getTruncateLegendArgHelp(),
@@ -103,11 +108,6 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
       types: [PARTITION_LABELS_VALUE],
       help: strings.getLabelsArgHelp(),
       default: `{${PARTITION_LABELS_FUNCTION}}`,
-    },
-    showValuesInLegend: {
-      types: ['boolean'],
-      help: strings.getShowValuesInLegendArgHelp(),
-      default: false,
     },
     ariaLabel: {
       types: ['string'],

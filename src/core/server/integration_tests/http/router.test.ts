@@ -333,15 +333,15 @@ describe('Options', () => {
         let i = 0;
         const intervalId = setInterval(() => {
           if (i < body.length) {
-            request.write(body[i++]);
+            void request.write(body[i++]);
           } else {
             clearInterval(intervalId);
-            request.end((err, res) => {
+            void request.end((err, res) => {
               resolve(res);
             });
           }
         }, interval);
-        request.on('error', (err) => {
+        void request.on('error', (err) => {
           clearInterval(intervalId);
           reject(err);
         });
@@ -1405,7 +1405,7 @@ describe('Response factory', () => {
             },
             response: {
               200: {
-                body: runtimeValidation,
+                body: () => runtimeValidation,
               },
             },
           },

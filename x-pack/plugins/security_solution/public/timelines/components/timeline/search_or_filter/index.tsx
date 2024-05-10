@@ -31,6 +31,7 @@ import { timelineDefaults } from '../../../store/defaults';
 import { dispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
 import { SearchOrFilter } from './search_or_filter';
 import { setDataProviderVisibility } from '../../../store/actions';
+import { getNonDropAreaFilters } from '../helpers';
 import * as i18n from './translations';
 
 const FilterItemsContainer = styled(EuiFlexGroup)``;
@@ -110,19 +111,37 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
 
     const arrDataView = useMemo(() => (dataView != null ? [dataView] : []), [dataView]);
 
+    // Keep filter manager in sync with redux filters
+    useEffect(() => {
+      if (!deepEqual(filterManager.getFilters(), filters)) {
+        filterManager.setFilters(filters);
+      }
+    }, [filterManager, filters]);
+
+    // When a filter update comes in through the filter manager, update redux
+    useEffect(() => {
+      const subscription = filterManager.getUpdates$().subscribe(() => {
+        const filtersWithoutDropArea = getNonDropAreaFilters(filterManager.getFilters());
+        if (!deepEqual(filtersWithoutDropArea, filters)) {
+          setFilters({
+            id: timelineId,
+            filters: filtersWithoutDropArea,
+          });
+        }
+      });
+      return () => {
+        subscription.unsubscribe();
+      };
+    }, [filterManager, timelineId, setFilters, filters]);
+
+    // Sync redux filters with updated from <FilterItems />
     const onFiltersUpdated = useCallback(
       (newFilters: Filter[]) => {
-        filterManager.setFilters(newFilters);
-      },
-      [filterManager]
-    );
-
-    const setFiltersInTimeline = useCallback(
-      (newFilters: Filter[]) =>
         setFilters({
           id: timelineId,
           filters: newFilters,
-        }),
+        });
+      },
       [timelineId, setFilters]
     );
 
@@ -180,7 +199,6 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
                 kqlMode={kqlMode}
                 refreshInterval={refreshInterval}
                 savedQueryId={savedQueryId}
-                setFilters={setFiltersInTimeline}
                 setSavedQueryId={setSavedQueryInTimeline}
                 timelineId={timelineId}
                 to={to}

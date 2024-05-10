@@ -386,6 +386,7 @@ export class Server {
     const analyticsStart = this.analytics.start();
     const securityStart = this.security.start();
     const userProfileStart = this.userProfile.start();
+    this.userSettingsService.start({ userProfile: userProfileStart });
     const executionContextStart = this.executionContext.start();
     const docLinkStart = this.docLinks.start();
 

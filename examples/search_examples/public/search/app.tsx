@@ -26,17 +26,14 @@ import {
 } from '@elastic/eui';
 import { CoreStart } from '@kbn/core/public';
 import { IInspectorInfo } from '@kbn/data-plugin/common';
-import {
-  DataPublicPluginStart,
-  IKibanaSearchResponse,
-  isRunningResponse,
-} from '@kbn/data-plugin/public';
+import { DataPublicPluginStart, isRunningResponse } from '@kbn/data-plugin/public';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import React, { useEffect, useState } from 'react';
@@ -44,9 +41,8 @@ import { lastValueFrom } from 'rxjs';
 import { PLUGIN_ID, PLUGIN_NAME, SERVER_SEARCH_ROUTE_PATH } from '../../common';
 import { IMyStrategyResponse } from '../../common/types';
 
-interface SearchExamplesAppDeps {
-  notifications: CoreStart['notifications'];
-  http: CoreStart['http'];
+interface SearchExamplesAppDeps
+  extends Pick<CoreStart, 'notifications' | 'http' | 'analytics' | 'i18n' | 'theme'> {
   navigation: NavigationPublicPluginStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
@@ -86,6 +82,7 @@ export const SearchExamplesApp = ({
   navigation,
   data,
   unifiedSearch,
+  ...startServices
 }: SearchExamplesAppDeps) => {
   const { IndexPatternSelect } = unifiedSearch.ui;
   const [getCool, setGetCool] = useState<boolean>(false);
@@ -234,7 +231,7 @@ export const SearchExamplesApp = ({
             notifications.toasts.addSuccess(
               {
                 title: 'Query result',
-                text: toMountPoint(message),
+                text: toMountPoint(message, startServices),
               },
               {
                 toastLifeTimeMs: 300000,
@@ -243,7 +240,7 @@ export const SearchExamplesApp = ({
             if (res.warning) {
               notifications.toasts.addWarning({
                 title: 'Warning',
-                text: toMountPoint(res.warning),
+                text: toMountPoint(res.warning, startServices),
               });
             }
           }
@@ -337,7 +334,7 @@ export const SearchExamplesApp = ({
       notifications.toasts.addSuccess(
         {
           title: 'Query result',
-          text: toMountPoint(message),
+          text: toMountPoint(message, startServices),
         },
         {
           toastLifeTimeMs: 300000,

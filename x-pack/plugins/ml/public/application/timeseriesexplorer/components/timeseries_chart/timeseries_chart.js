@@ -254,7 +254,7 @@ class TimeseriesChartIntl extends Component {
     }
 
     this.rowMouseenterSubscriber = mlTableService.rowMouseenter$.subscribe(
-      tableRecordMousenterListener
+      tableRecordMousenterListener.bind(this)
     );
     this.rowMouseleaveSubscriber = mlTableService.rowMouseleave$.subscribe(
       tableRecordMouseleaveListener

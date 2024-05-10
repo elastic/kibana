@@ -9,31 +9,31 @@ import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { getDefaultSingleMetricViewerPanelTitle } from './single_metric_viewer_embeddable';
-import type { SingleMetricViewerEmbeddableInput } from '..';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { SingleMetricViewerEmbeddableUserInput, SingleMetricViewerEmbeddableInput } from '..';
 import { resolveJobSelection } from '../common/resolve_job_selection';
 import { SingleMetricViewerInitializer } from './single_metric_viewer_initializer';
-import type { MlStartDependencies } from '../../plugin';
 import type { MlApiServices } from '../../application/services/ml_api_service';
+import { getDefaultSingleMetricViewerPanelTitle } from './get_default_panel_title';
 
 export async function resolveEmbeddableSingleMetricViewerUserInput(
   coreStart: CoreStart,
-  pluginStart: MlStartDependencies,
+  data: DataPublicPluginStart,
   mlApiServices: MlApiServices,
-  input?: SingleMetricViewerEmbeddableInput
-): Promise<Partial<SingleMetricViewerEmbeddableInput>> {
+  input?: Partial<SingleMetricViewerEmbeddableInput>
+): Promise<Partial<SingleMetricViewerEmbeddableUserInput>> {
   const { overlays, ...startServices } = coreStart;
-  const timefilter = pluginStart.data.query.timefilter.timefilter;
+  const timefilter = data.query.timefilter.timefilter;
 
   return new Promise(async (resolve, reject) => {
     try {
       const { jobIds } = await resolveJobSelection(
         coreStart,
-        pluginStart.data.dataViews,
+        data.dataViews,
         input?.jobIds ? input.jobIds : undefined,
         true
       );
-      const title = input?.title ?? getDefaultSingleMetricViewerPanelTitle(jobIds);
+      const title = input?.title ?? getDefaultSingleMetricViewerPanelTitle(jobIds[0]);
       const { jobs } = await mlApiServices.getJobs({ jobId: jobIds.join(',') });
 
       const modalSession = overlays.openModal(
@@ -45,7 +45,7 @@ export async function resolveEmbeddableSingleMetricViewerUserInput(
             }}
           >
             <SingleMetricViewerInitializer
-              bounds={timefilter.getActiveBounds()!}
+              bounds={timefilter.getBounds()!}
               defaultTitle={title}
               initialInput={input}
               job={jobs[0]}

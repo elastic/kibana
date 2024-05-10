@@ -1711,6 +1711,9 @@
       "status": {
         "type": "keyword"
       },
+      "supports_agentless": {
+        "type": "boolean"
+      },
       "unenroll_timeout": {
         "type": "integer"
       },
@@ -1990,6 +1993,10 @@
       },
       "namespace": {
         "type": "keyword"
+      },
+      "overrides": {
+        "index": false,
+        "type": "flattened"
       },
       "package": {
         "properties": {

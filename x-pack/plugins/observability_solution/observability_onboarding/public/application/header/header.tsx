@@ -13,7 +13,7 @@ export const Header = () => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
-        <EuiTitle size="l">
+        <EuiTitle size="l" data-test-subj="obltOnboardingHomeTitle">
           <h1>
             {i18n.translate(
               'xpack.observability_onboarding.experimentalOnboardingFlow.addObservabilityDataTitleLabel',

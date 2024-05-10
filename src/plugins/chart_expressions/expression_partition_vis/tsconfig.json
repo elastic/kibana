@@ -25,11 +25,11 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/test-jest-helpers",
     "@kbn/i18n-react",
-    "@kbn/kibana-react-plugin",
     "@kbn/analytics",
     "@kbn/chart-icons",
     "@kbn/chart-expressions-common",
     "@kbn/cell-actions",
+    "@kbn/react-kibana-context-render",
   ],
   "exclude": [
     "target/**/*",

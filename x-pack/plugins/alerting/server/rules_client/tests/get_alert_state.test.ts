@@ -80,6 +80,10 @@ describe('getAlertState()', () => {
         params: {
           bar: true,
         },
+        executionStatus: {
+          status: 'unknown',
+          lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+        },
         actions: [
           {
             group: 'default',
@@ -116,11 +120,12 @@ describe('getAlertState()', () => {
     await rulesClient.getAlertState({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
-                                                                                                                  Array [
-                                                                                                                    "alert",
-                                                                                                                    "1",
-                                                                                                                  ]
-                                                                            `);
+      Array [
+        "alert",
+        "1",
+        undefined,
+      ]
+    `);
   });
 
   test('gets the underlying task from TaskManager', async () => {
@@ -136,6 +141,10 @@ describe('getAlertState()', () => {
         schedule: { interval: '10s' },
         params: {
           bar: true,
+        },
+        executionStatus: {
+          status: 'unknown',
+          lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
         },
         actions: [
           {
@@ -195,6 +204,10 @@ describe('getAlertState()', () => {
         params: {
           bar: true,
         },
+        executionStatus: {
+          status: 'unknown',
+          lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+        },
         actions: [],
         enabled: true,
         scheduledTaskId,
@@ -208,8 +221,7 @@ describe('getAlertState()', () => {
 
     await rulesClient.getAlertState({ id: '1' });
 
-    expect(rulesClientParams.logger.warn).toHaveBeenCalledTimes(1);
-    expect(rulesClientParams.logger.warn).toHaveBeenCalledWith('Task (task-123) not found');
+    expect(rulesClientParams.logger.warn).toHaveBeenNthCalledWith(2, 'Task (task-123) not found');
   });
 
   test('logs a warning if the taskManager throws an error', async () => {
@@ -226,6 +238,10 @@ describe('getAlertState()', () => {
         params: {
           bar: true,
         },
+        executionStatus: {
+          status: 'unknown',
+          lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+        },
         actions: [],
         enabled: true,
         scheduledTaskId,
@@ -239,8 +255,8 @@ describe('getAlertState()', () => {
 
     await rulesClient.getAlertState({ id: '1' });
 
-    expect(rulesClientParams.logger.warn).toHaveBeenCalledTimes(1);
-    expect(rulesClientParams.logger.warn).toHaveBeenCalledWith(
+    expect(rulesClientParams.logger.warn).toHaveBeenNthCalledWith(
+      2,
       'An error occurred when getting the task state for (task-123): Bad Request'
     );
   });
@@ -256,6 +272,11 @@ describe('getAlertState()', () => {
           schedule: { interval: '10s' },
           params: {
             bar: true,
+          },
+          enabled: true,
+          executionStatus: {
+            status: 'unknown',
+            lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
           },
           actions: [
             {

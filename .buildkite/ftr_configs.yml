@@ -192,6 +192,7 @@ enabled:
   - x-pack/test/api_integration/apis/asset_manager/config_when_disabled.ts
   - x-pack/test/api_integration/apis/asset_manager/config_when_enabled.ts
   - x-pack/test/api_integration/apis/cases/config.ts
+  - x-pack/test/api_integration/apis/content_management/config.ts
   - x-pack/test/api_integration/apis/cloud_security_posture/config.ts
   - x-pack/test/api_integration/apis/console/config.ts
   - x-pack/test/api_integration/apis/es/config.ts
@@ -320,8 +321,10 @@ enabled:
   - x-pack/test/functional/apps/saved_objects_management/config.ts
   - x-pack/test/functional/apps/saved_query_management/config.ts
   - x-pack/test/functional/apps/security/config.ts
+  - x-pack/test/functional/apps/slo/embeddables/config.ts
   - x-pack/test/functional/apps/snapshot_restore/config.ts
   - x-pack/test/functional/apps/spaces/config.ts
+  - x-pack/test/functional/apps/spaces/in_solution_navigation/config.ts
   - x-pack/test/functional/apps/status_page/config.ts
   - x-pack/test/functional/apps/transform/creation/index_pattern/config.ts
   - x-pack/test/functional/apps/transform/creation/runtime_mappings_saved_search/config.ts

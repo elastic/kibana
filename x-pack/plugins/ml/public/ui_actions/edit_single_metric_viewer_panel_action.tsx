@@ -6,8 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { EmbeddableApiContext, ViewMode } from '@kbn/presentation-publishing';
-import { apiPublishesViewMode } from '@kbn/presentation-publishing';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { isSingleMetricViewerEmbeddableContext } from './open_in_single_metric_viewer_action';
@@ -43,7 +42,7 @@ export function createEditSingleMetricViewerPanelAction(
         throw new IncompatibleActionError();
       }
 
-      const [coreStart, pluginStart] = await getStartServices();
+      const [coreStart, { data }] = await getStartServices();
 
       try {
         const { resolveEmbeddableSingleMetricViewerUserInput } = await import(
@@ -58,7 +57,7 @@ export function createEditSingleMetricViewerPanelAction(
 
         const result = await resolveEmbeddableSingleMetricViewerUserInput(
           coreStart,
-          pluginStart,
+          data,
           mlApiServices,
           {
             jobIds: jobIds.getValue(),
@@ -68,18 +67,17 @@ export function createEditSingleMetricViewerPanelAction(
           } as SingleMetricViewerEmbeddableInput
         );
 
-        context.embeddable.updateUserInput(result);
+        context.embeddable.updateUserInput(result as SingleMetricViewerEmbeddableInput);
         context.embeddable.setPanelTitle(result.panelTitle);
       } catch (e) {
         return Promise.reject();
       }
     },
     async isCompatible(context: EmbeddableApiContext) {
-      let viewMode: ViewMode | undefined;
-      if (apiPublishesViewMode(context.embeddable)) {
-        viewMode = context.embeddable.viewMode.getValue();
-      }
-      return isSingleMetricViewerEmbeddableContext(context) && viewMode === 'edit';
+      return (
+        isSingleMetricViewerEmbeddableContext(context) &&
+        context.embeddable.parentApi?.viewMode?.getValue() === 'edit'
+      );
     },
   };
 }

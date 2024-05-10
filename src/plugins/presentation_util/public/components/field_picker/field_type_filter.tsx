@@ -9,17 +9,18 @@
 import React, { useState } from 'react';
 
 import {
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiFilterButton,
+  EuiFilterButtonProps,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInputPopover,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
-  EuiFilterButton,
-  EuiFilterButtonProps,
 } from '@elastic/eui';
-import { FieldIcon } from '@kbn/react-field';
+import { getFieldTypeName } from '@kbn/field-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { FieldIcon } from '@kbn/react-field';
 
 export interface Props {
   onFieldTypesChange: (value: string[]) => void;
@@ -94,7 +95,7 @@ export function FieldTypeFilter({
                 <EuiFlexItem grow={false}>
                   <FieldIcon type={type} label={type} />
                 </EuiFlexItem>
-                <EuiFlexItem>{type}</EuiFlexItem>
+                <EuiFlexItem>{getFieldTypeName(type)}</EuiFlexItem>
               </EuiFlexGroup>
             </EuiContextMenuItem>
           ))}

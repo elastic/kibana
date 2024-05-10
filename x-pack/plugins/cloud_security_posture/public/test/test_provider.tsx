@@ -28,6 +28,7 @@ interface CspAppDeps {
   core: CoreStart;
   deps: Partial<CspClientPluginStartDeps>;
   params: AppMountParameters;
+  children: React.ReactNode;
 }
 
 export const TestProvider: React.FC<Partial<CspAppDeps>> = ({

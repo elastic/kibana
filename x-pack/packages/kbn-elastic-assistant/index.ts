@@ -77,7 +77,7 @@ export { AssistantAvatar } from './impl/assistant/assistant_avatar/assistant_ava
 export { ConnectorSelectorInline } from './impl/connectorland/connector_selector_inline/connector_selector_inline';
 
 export {
-  AI_INSIGHTS_STORAGE_KEY,
+  ATTACK_DISCOVERY_STORAGE_KEY,
   DEFAULT_ASSISTANT_NAMESPACE,
   DEFAULT_LATEST_ALERTS,
   KNOWLEDGE_BASE_LOCAL_STORAGE_KEY,

@@ -551,7 +551,7 @@ export class TaskRunner<
           // Most likely a 409 conflict error, which is ok, we'll try again at the next rule run
           this.logger.debug(`Failed to clear expired snoozes: ${e.message}`);
         }
-      })();
+      })().catch(() => {});
 
       return runRuleParams;
     });
@@ -687,18 +687,16 @@ export class TaskRunner<
       const { errors: errorsFromLastRun } = this.ruleResult.getLastRunResults();
       if (errorsFromLastRun.length > 0) {
         const isUserError = !errorsFromLastRun.some((lastRunError) => !lastRunError.userError);
+        const errorSource = isUserError ? TaskErrorSource.USER : TaskErrorSource.FRAMEWORK;
         const lasRunErrorMessages = errorsFromLastRun
           .map((lastRunError) => lastRunError.message)
           .join(',');
         const errorMessage = `Executing Rule ${this.ruleType.id}:${ruleId} has resulted in the following error(s): ${lasRunErrorMessages}`;
         this.logger.error(errorMessage, {
-          tags: [this.ruleType.id, ruleId, 'rule-run-failed'],
+          tags: [this.ruleType.id, ruleId, 'rule-run-failed', `${errorSource}-error`],
         });
         return {
-          taskRunError: createTaskRunError(
-            new Error(errorMessage),
-            isUserError ? TaskErrorSource.USER : TaskErrorSource.FRAMEWORK
-          ),
+          taskRunError: createTaskRunError(new Error(errorMessage), errorSource),
         };
       }
 
@@ -711,11 +709,15 @@ export class TaskRunner<
         (ruleRunStateWithMetrics: RuleTaskStateAndMetrics) =>
           transformRunStateToTaskState(ruleRunStateWithMetrics),
         (err: ElasticsearchError) => {
+          const errorSource = `${getErrorSource(err)}-error`;
+
           if (isAlertSavedObjectNotFoundError(err, ruleId)) {
             const message = `Executing Rule ${spaceId}:${
               this.ruleType.id
             }:${ruleId} has resulted in Error: ${getEsErrorMessage(err)}`;
-            this.logger.debug(message);
+            this.logger.debug(message, {
+              tags: [this.ruleType.id, ruleId, 'rule-run-failed', errorSource],
+            });
           } else {
             const error = this.stackTraceLog ? this.stackTraceLog.message : err;
             const stack = this.stackTraceLog ? this.stackTraceLog.stackTrace : err.stack;
@@ -723,7 +725,7 @@ export class TaskRunner<
               this.ruleType.id
             }:${ruleId} has resulted in Error: ${getEsErrorMessage(error)} - ${stack ?? ''}`;
             this.logger.error(message, {
-              tags: [this.ruleType.id, ruleId, 'rule-run-failed'],
+              tags: [this.ruleType.id, ruleId, 'rule-run-failed', errorSource],
               error: { stack_trace: stack },
             });
           }

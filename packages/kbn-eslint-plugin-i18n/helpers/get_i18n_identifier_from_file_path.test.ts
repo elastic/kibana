@@ -30,7 +30,7 @@ const testMap = [
 
 describe('Get i18n Identifier for file', () => {
   test.each(testMap)(
-    'should get the right i18n identifier for a file inside an x-pack plugin',
+    'should get the right i18n identifier for a file inside a Kibana plugin',
     (path, expectedValue) => {
       const appName = getI18nIdentifierFromFilePath(`${SYSTEMPATH}/${path}`, SYSTEMPATH);
       expect(appName).toBe(expectedValue);

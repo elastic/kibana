@@ -8,13 +8,13 @@
 import { IToasts } from '@kbn/core/public';
 import { getDateISORange } from '@kbn/timerange';
 import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from 'xstate';
+import { DataStreamStat } from '../../../../common/api_types';
 import { Integration } from '../../../../common/data_streams_stats/integration';
 import { IDataStreamDetailsClient } from '../../../services/data_stream_details';
 import {
   DashboardType,
   DataStreamSettings,
   DataStreamDetails,
-  DataStreamStat,
   GetDataStreamsStatsQuery,
   GetIntegrationsParams,
 } from '../../../../common/data_streams_stats';
@@ -163,6 +163,10 @@ export const createPureDatasetQualityControllerStateMachine = (
             UPDATE_NAMESPACES: {
               target: 'integrations.loaded',
               actions: ['storeNamespaces'],
+            },
+            UPDATE_QUALITIES: {
+              target: 'integrations.loaded',
+              actions: ['storeQualities'],
             },
             UPDATE_QUERY: {
               actions: ['storeQuery'],
@@ -338,6 +342,16 @@ export const createPureDatasetQualityControllerStateMachine = (
                 filters: {
                   ...context.filters,
                   namespaces: event.namespaces,
+                },
+              }
+            : {};
+        }),
+        storeQualities: assign((context, event) => {
+          return 'qualities' in event
+            ? {
+                filters: {
+                  ...context.filters,
+                  qualities: event.qualities,
                 },
               }
             : {};

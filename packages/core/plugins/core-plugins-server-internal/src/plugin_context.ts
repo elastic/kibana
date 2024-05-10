@@ -272,9 +272,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       registerGlobal: deps.uiSettings.registerGlobal,
       setAllowlist: deps.uiSettings.setAllowlist,
     },
-    userSettings: {
-      setUserProfileSettings: deps.userSettings.setUserProfileSettings,
-    },
+    userSettings: {},
     getStartServices: () => plugin.startDependencies,
     deprecations: deps.deprecations.getRegistry(plugin.name),
     coreUsageData: {
@@ -369,6 +367,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     },
     security: {
       authc: deps.security.authc,
+      audit: deps.security.audit,
     },
     userProfile: deps.userProfile,
   };

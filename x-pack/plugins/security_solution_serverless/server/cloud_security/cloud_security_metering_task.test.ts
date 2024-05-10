@@ -203,7 +203,6 @@ describe('getSearchQueryByCloudSecuritySolution', () => {
           {
             terms: {
               'resource.sub_type': [
-                'aws-ebs',
                 'aws-ec2',
                 'aws-s3',
                 'aws-rds',

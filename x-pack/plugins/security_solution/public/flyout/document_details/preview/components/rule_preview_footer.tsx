@@ -16,7 +16,7 @@ import { useRuleDetailsLink } from '../../shared/hooks/use_rule_details_link';
 /**
  * Footer in rule preview panel
  */
-export const RulePreviewFooter: React.FC = memo(() => {
+export const RulePreviewFooter = memo(() => {
   const { ruleId } = usePreviewPanelContext();
   const href = useRuleDetailsLink({ ruleId });
 

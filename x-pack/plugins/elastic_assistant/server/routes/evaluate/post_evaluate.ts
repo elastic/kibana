@@ -63,7 +63,7 @@ export const postEvaluateRoute = (
           },
           response: {
             200: {
-              body: buildRouteValidationWithZod(PostEvaluateResponse),
+              body: { custom: buildRouteValidationWithZod(PostEvaluateResponse) },
             },
           },
         },
