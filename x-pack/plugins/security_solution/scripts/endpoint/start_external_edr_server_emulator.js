@@ -5,10 +5,5 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
-
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('system', function () {
-    loadTestFile(require.resolve('./field_caps'));
-  });
-}
+require('../../../../../src/setup_node_env');
+require('./api_emulator').cli();
