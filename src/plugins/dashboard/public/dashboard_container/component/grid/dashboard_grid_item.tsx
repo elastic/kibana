@@ -21,6 +21,7 @@ import { DashboardPanelState } from '../../../../common';
 import { getReferencesForPanelId } from '../../../../common/dashboard_container/persistable_state/dashboard_container_references';
 import { pluginServices } from '../../../services/plugin_services';
 import { useDashboardContainer } from '../../embeddable/dashboard_container';
+import { useDashboardSettingsDraftValue } from '../../embeddable/dashboard_settings_draft';
 
 type DivProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'className' | 'style' | 'children'>;
 
@@ -71,6 +72,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       // eslint-disable-next-line @typescript-eslint/naming-convention
       printViewport__vis: container.getInput().viewMode === ViewMode.PRINT,
     });
+    const dashboardSettingsDraft = useDashboardSettingsDraftValue();
 
     useLayoutEffect(() => {
       if (typeof ref !== 'function' && ref?.current) {
@@ -105,7 +107,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
 
       const panelProps = {
         showBadges: true,
-        showBorder: useMargins,
+        showBorder: dashboardSettingsDraft?.useMargins ?? useMargins,
         showNotifications: true,
         showShadow: false,
       };
@@ -134,7 +136,16 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
           {...panelProps}
         />
       );
-    }, [id, container, type, index, useMargins, onPanelStatusChange, panel.explicitInput]);
+    }, [
+      id,
+      container,
+      dashboardSettingsDraft?.useMargins,
+      useMargins,
+      type,
+      index,
+      onPanelStatusChange,
+      panel.explicitInput,
+    ]);
 
     return (
       <div

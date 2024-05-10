@@ -110,9 +110,7 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
   );
 
   const classes = classNames({
-    'dshLayout-withoutMargins': dashboardSettingsDraft
-      ? !dashboardSettingsDraft?.useMargins
-      : !useMargins,
+    'dshLayout-withoutMargins': !(dashboardSettingsDraft?.useMargins ?? useMargins),
     'dshLayout--viewing': viewMode === ViewMode.VIEW,
     'dshLayout--editing': viewMode !== ViewMode.VIEW,
     'dshLayout--noAnimation': !animatePanelTransforms || delayedIsPanelExpanded,
@@ -138,7 +136,7 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
       isDraggable={!expandedPanelId && !focusedPanelId}
       rowHeight={DASHBOARD_GRID_HEIGHT}
       margin={
-        dashboardSettingsDraft?.useMargins || useMargins
+        dashboardSettingsDraft?.useMargins ?? useMargins
           ? [DASHBOARD_MARGIN_SIZE, DASHBOARD_MARGIN_SIZE]
           : [0, 0]
       }

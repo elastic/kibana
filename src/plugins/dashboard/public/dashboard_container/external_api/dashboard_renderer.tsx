@@ -171,9 +171,7 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
       {
         [css`
           background: ${euiTheme.colors.emptyShade};
-        `]: dashboardSettingsDraft
-          ? !dashboardSettingsDraft.useMargins
-          : !dashboardContainer?.getInput().useMargins,
+        `]: !(dashboardSettingsDraft?.useMargins ?? dashboardContainer?.getInput().useMargins),
       }
     );
 
