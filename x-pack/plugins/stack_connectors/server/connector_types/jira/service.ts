@@ -15,6 +15,7 @@ import {
   throwIfResponseIsNotValid,
 } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
 import {
   CreateCommentParams,
   CreateIncidentParams,
@@ -34,7 +35,6 @@ import {
 import { escapeJqlSpecialCharacters } from './utils';
 
 import * as i18n from './translations';
-import { getBasicAuthHeader } from '../lib/get_basic_auth_header';
 
 const VERSION = '2';
 const BASE_URL = `rest/api/${VERSION}`;

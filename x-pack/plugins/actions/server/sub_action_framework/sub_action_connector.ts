@@ -30,6 +30,7 @@ import { SubAction, SubActionRequestParams } from './types';
 import { ServiceParams } from './types';
 import * as i18n from './translations';
 import { request } from '../lib/axios_utils';
+import { getBasicAuthHeader } from '../lib';
 
 const isObject = (value: unknown): value is Record<string, unknown> => {
   return isPlainObject(value);
@@ -95,9 +96,7 @@ export abstract class SubActionConnector<Config, Secrets> {
     const headersWithBasicAuth =
       auth != null
         ? {
-            Authorization: `Basic ${Buffer.from(`${auth.username}:${auth.password}`).toString(
-              'base64'
-            )}`,
+            ...getBasicAuthHeader({ username: auth.username, password: auth.password }),
             ...headers,
           }
         : headers;

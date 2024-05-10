@@ -13,7 +13,7 @@ import { ExternalService } from './types';
 import { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
-import { getBasicAuthHeader } from '../lib/get_basic_auth_header';
+import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 interface ResponseError extends Error {

@@ -7,7 +7,7 @@
 
 import { AxiosError } from 'axios';
 import { omitBy, isNil } from 'lodash/fp';
-import { CaseConnector, ServiceParams } from '@kbn/actions-plugin/server';
+import { CaseConnector, getBasicAuthHeader, ServiceParams } from '@kbn/actions-plugin/server';
 import { schema, Type } from '@kbn/config-schema';
 import { getErrorMessage } from '@kbn/actions-plugin/server/lib/axios_utils';
 import {
@@ -33,7 +33,6 @@ import {
   GetIncidentResponseSchema,
 } from './schema';
 import { formatUpdateRequest } from './utils';
-import { getBasicAuthHeader } from '../lib/get_basic_auth_header';
 
 const VIEW_INCIDENT_URL = `#incidents`;
 

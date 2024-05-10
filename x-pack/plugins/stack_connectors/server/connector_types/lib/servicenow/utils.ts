@@ -11,6 +11,7 @@ import { addTimeZoneToDate, getErrorMessage } from '@kbn/actions-plugin/server/l
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { ConnectorTokenClientContract } from '@kbn/actions-plugin/server/types';
 import { getOAuthJwtAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_jwt_access_token';
+import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
 import {
   ExternalServiceCredentials,
   Incident,
@@ -22,7 +23,6 @@ import {
 } from './types';
 import { FIELD_PREFIX } from './config';
 import * as i18n from './translations';
-import { getBasicAuthHeader } from '../get_basic_auth_header';
 
 export const prepareIncident = (useOldApi: boolean, incident: PartialIncident): PartialIncident =>
   useOldApi
