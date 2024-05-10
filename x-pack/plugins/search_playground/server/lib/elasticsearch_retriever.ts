@@ -83,10 +83,15 @@ export class ElasticsearchRetriever extends BaseRetriever {
 
       // default elasticsearch doc to LangChain doc
       let mapper: HitDocMapper = (hit: SearchHit<any>) => {
-        const pageContentFieldKey =
+        let pageContentFieldKey =
           typeof this.content_field === 'string'
             ? this.content_field
-            : this.content_field[hit._index as string][0];
+            : this.content_field[hit._index as string];
+
+        // field values can be a single item array or plain text, that is why needed to check the types before accessing the field
+        pageContentFieldKey = Array.isArray(pageContentFieldKey)
+          ? pageContentFieldKey[0]
+          : pageContentFieldKey;
 
         // we need to iterate over the _source object to get the value of complex key definition such as metadata.source
         const valueForSelectedField = getValueForSelectedField(hit._source, pageContentFieldKey);
