@@ -63,9 +63,10 @@ const parseSearchBarQuery = (query: Query): QueryContainer => {
     parsedQuery = EuiSearchBar.Query.parse(`${subQuery} expiration<=${moment.now()}`);
   } else if (query.text.includes('expired:false')) {
     const subQuery = query.text.replace('expired:false', '');
-    parsedQuery = EuiSearchBar.Query.parse(subQuery).addSimpleFieldValue('invalidated', false);
+    parsedQuery = EuiSearchBar.Query.parse(subQuery);
+    const queryContainer = EuiSearchBar.Query.toESQuery(parsedQuery);
 
-    const qdsl = {
+    const activeKeysQueryDSL = {
       bool: {
         must: [
           {
@@ -78,7 +79,9 @@ const parseSearchBarQuery = (query: Query): QueryContainer => {
               should: [
                 {
                   range: {
-                    expiration: 'now',
+                    expiration: {
+                      gt: 'now',
+                    },
                   },
                 },
                 {
@@ -98,7 +101,10 @@ const parseSearchBarQuery = (query: Query): QueryContainer => {
       },
     };
 
-    return qdsl as QueryContainer;
+    const merged = {
+      bool: { must: [queryContainer, activeKeysQueryDSL] },
+    };
+    return merged as QueryContainer;
   }
 
   parsedQuery = parsedQuery.addSimpleFieldValue('invalidated', false);
