@@ -91,6 +91,7 @@ export type VisualizeSavedObjectAttributes = SavedObjectAttributes & {
 export type VisualizeByValueInput = { attributes: VisualizeSavedObjectAttributes } & VisualizeInput;
 export type VisualizeByReferenceInput = SavedObjectEmbeddableInput & VisualizeInput;
 
+/** @deprecated Use react_embeddable/visualize_embeddable */
 export class VisualizeEmbeddable
   extends Embeddable<VisualizeInput, VisualizeOutput>
   implements

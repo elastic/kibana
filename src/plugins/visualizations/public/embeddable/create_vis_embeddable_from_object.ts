@@ -21,6 +21,7 @@ import { urlFor } from '../utils/saved_visualize_utils';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { createVisualizeEmbeddableAsync } from './visualize_embeddable_async';
 
+/** @deprecated Use react_embeddable/visualize_embeddable */
 export const createVisEmbeddableFromObject =
   (deps: VisualizeEmbeddableFactoryDeps) =>
   async (

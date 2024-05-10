@@ -105,6 +105,7 @@ export interface VisualizeServices extends CoreStart {
   visualizeCapabilities: Record<string, boolean | Record<string, boolean>>;
   dashboardCapabilities: Record<string, boolean | Record<string, boolean>>;
   setActiveUrl: (newUrl: string) => void;
+  /** @deprecated Use react_embeddable/visualize_embeddable.tsx */
   createVisEmbeddableFromObject: ReturnType<typeof createVisEmbeddableFromObject>;
   restorePreviousUrl: () => void;
   scopedHistory: ScopedHistory;

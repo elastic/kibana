@@ -70,6 +70,7 @@ export interface VisualizeEmbeddableFactoryDeps {
   >;
 }
 
+/** @deprecated use react_embeddable/visualize_embeddable */
 export class VisualizeEmbeddableFactory
   implements
     EmbeddableFactoryDefinition<

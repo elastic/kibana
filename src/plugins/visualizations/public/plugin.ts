@@ -84,11 +84,7 @@ import { xyDimension as xyDimensionExpressionFunction } from '../common/expressi
 import { visDimension as visDimensionExpressionFunction } from '../common/expression_functions/vis_dimension';
 import { range as rangeExpressionFunction } from '../common/expression_functions/range';
 import { TypesService } from './vis_types/types_service';
-import {
-  createVisEmbeddableFromObject,
-  VISUALIZE_EMBEDDABLE_TYPE,
-  VisualizeEmbeddableFactory,
-} from './embeddable';
+import { createVisEmbeddableFromObject, VISUALIZE_EMBEDDABLE_TYPE } from './embeddable';
 import {
   setUISettings,
   setTypes,
@@ -400,8 +396,6 @@ export class VisualizationsPlugin
     uiActions.registerTrigger(dashboardVisualizationPanelTrigger);
     const editInLensAction = new EditInLensAction(data.query.timefilter.timefilter);
     uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', editInLensAction);
-    // const embeddableFactory = new VisualizeEmbeddableFactory({ start });
-    // embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
 
     contentManagement.registry.register({
       id: CONTENT_ID,

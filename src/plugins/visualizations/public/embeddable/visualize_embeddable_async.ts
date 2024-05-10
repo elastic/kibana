@@ -8,6 +8,7 @@
 
 import type { VisualizeEmbeddable as VisualizeEmbeddableType } from './visualize_embeddable';
 
+/** @deprecated use react_embeddable/visualize_embeddable */
 export const createVisualizeEmbeddableAsync = async (
   ...args: ConstructorParameters<typeof VisualizeEmbeddableType>
 ) => {
