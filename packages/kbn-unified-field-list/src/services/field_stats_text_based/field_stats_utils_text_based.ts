@@ -80,7 +80,7 @@ export async function getStringTopValues(
   const esqlQuery = appendToESQLQuery(
     esqlBaseQuery,
     `| WHERE ${safeEsqlFieldName} IS NOT NULL
-    | STATS ${safeEsqlFieldNameTerms} = count(${safeEsqlFieldName}) BY ${safeEsqlFieldName}
+    | STATS ${safeEsqlFieldNameTerms} = count(mv_min(${safeEsqlFieldName})) BY ${safeEsqlFieldName}
     | SORT ${safeEsqlFieldNameTerms} DESC
     | LIMIT ${size}`
   );
@@ -92,7 +92,7 @@ export async function getStringTopValues(
     return {};
   }
 
-  const sampledValues = values?.reduce((acc: number, row) => acc + row[0], 0);
+  const sampledDocuments = values?.reduce((acc: number, row) => acc + row[0], 0);
 
   const topValues = {
     buckets: values.map((value) => ({
@@ -102,9 +102,9 @@ export async function getStringTopValues(
   };
 
   return {
-    totalDocuments: sampledValues,
-    sampledDocuments: sampledValues,
-    sampledValues,
+    totalDocuments: sampledDocuments,
+    sampledDocuments,
+    sampledValues: sampledDocuments,
     topValues,
   };
 }

@@ -76,7 +76,7 @@ describe('fieldStatsUtilsTextBased', function () {
       expect(searchHandler).toHaveBeenCalledWith(
         expect.objectContaining({
           query:
-            'from logs* | limit 1000\n| WHERE `message` IS NOT NULL\n    | STATS `message_terms` = count(`message`) BY `message`\n    | SORT `message_terms` DESC\n    | LIMIT 10',
+            'from logs* | limit 1000\n| WHERE `message` IS NOT NULL\n    | STATS `message_terms` = count(mv_min(`message`)) BY `message`\n    | SORT `message_terms` DESC\n    | LIMIT 10',
         })
       );
     });

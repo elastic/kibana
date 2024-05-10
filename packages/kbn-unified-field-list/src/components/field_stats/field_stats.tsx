@@ -567,7 +567,7 @@ function getCountsElement(
 ): JSX.Element {
   const dataTestSubjDocsCount = 'unifiedFieldStats-statsFooter-docsCount';
   const { fieldFormats } = services;
-  const { totalDocuments, sampledValues, sampledDocuments, topValues } = state;
+  const { totalDocuments, sampledDocuments } = state;
 
   if (!totalDocuments) {
     return <></>;
@@ -576,7 +576,7 @@ function getCountsElement(
   let labelElement;
 
   if (isTextBased) {
-    labelElement = topValues?.areExamples ? (
+    labelElement = (
       <FormattedMessage
         id="unifiedFieldList.fieldStats.calculatedFromSampleRecordsLabel"
         defaultMessage="Calculated from {sampledDocumentsFormatted} sample {sampledDocuments, plural, one {record} other {records}}."
@@ -587,21 +587,6 @@ function getCountsElement(
               {fieldFormats
                 .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
                 .convert(sampledDocuments)}
-            </strong>
-          ),
-        }}
-      />
-    ) : (
-      <FormattedMessage
-        id="unifiedFieldList.fieldStats.calculatedFromSampleValuesLabel"
-        defaultMessage="Calculated from {sampledValuesFormatted} sample {sampledValues, plural, one {value} other {values}}."
-        values={{
-          sampledValues,
-          sampledValuesFormatted: (
-            <strong data-test-subj={dataTestSubjDocsCount}>
-              {fieldFormats
-                .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-                .convert(sampledValues)}
             </strong>
           ),
         }}
