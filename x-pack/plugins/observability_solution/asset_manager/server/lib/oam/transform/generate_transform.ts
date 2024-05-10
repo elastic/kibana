@@ -12,8 +12,10 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 import { getElasticsearchQueryOrThrow } from '../helpers/get_elasticsearch_query_or_throw';
 import { generateMetricAggregations } from './generate_metric_aggregations';
-import { OAM_BASE_PREFIX, OAM_TRANSFORM_PREFIX } from '../../../../common/constants_oam';
+import { OAM_BASE_PREFIX } from '../../../../common/constants_oam';
 import { generateMetadataAggregations } from './generate_metadata_aggregations';
+import { generateTransformId } from './generate_transform_id';
+import { generateIngestPipelineId } from '../ingest_pipeline/generate_ingest_pipeline_id';
 
 export function generateTransform(definition: OAMDefinition): TransformPutTransformRequest {
   const filter: QueryDslQueryContainer[] = [
@@ -31,7 +33,7 @@ export function generateTransform(definition: OAMDefinition): TransformPutTransf
   }
 
   return {
-    transform_id: `${OAM_TRANSFORM_PREFIX}-${definition.id}`,
+    transform_id: generateTransformId(definition),
     defer_validation: true,
     source: {
       index: definition.indexPatterns,
@@ -43,7 +45,7 @@ export function generateTransform(definition: OAMDefinition): TransformPutTransf
     },
     dest: {
       index: `${OAM_BASE_PREFIX}.noop`,
-      pipeline: `${OAM_BASE_PREFIX}.${definition.id}`,
+      pipeline: generateIngestPipelineId(definition),
     },
     frequency: definition.settings?.frequency || '1m',
     sync: {
