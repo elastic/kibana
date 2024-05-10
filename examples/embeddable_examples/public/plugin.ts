@@ -73,7 +73,10 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
       return getDataTableFactory(coreStart, deps);
     });
 
-    registerSearchEmbeddable(embeddable, startServicesPromise);
+    registerSearchEmbeddable(
+      embeddable,
+      new Promise((resolve) => startServicesPromise.then(([_, startDeps]) => resolve(startDeps)))
+    );
   }
 
   public start(core: CoreStart, deps: StartDeps) {
