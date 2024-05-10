@@ -2,9 +2,9 @@ MV_ZIP
 
 Syntax
 Parameters
-mvLeft
+string1
 Multivalue expression.
-mvRight
+string2
 Multivalue expression.
 delim
 Delimiter. Optional; if omitted, , is used as a default delimiter.
