@@ -15,6 +15,7 @@ import axios, {
   AxiosRequestHeaders,
   AxiosHeaders,
   AxiosHeaderValue,
+  AxiosBasicCredentials,
 } from 'axios';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
@@ -87,8 +88,21 @@ export abstract class SubActionConnector<Config, Secrets> {
     }
   }
 
-  private getHeaders(headers?: AxiosRequestHeaders): Record<string, AxiosHeaderValue> {
-    return { 'Content-Type': 'application/json', ...headers };
+  private getHeaders(
+    auth?: AxiosBasicCredentials,
+    headers?: AxiosRequestHeaders
+  ): Record<string, AxiosHeaderValue> {
+    const headersWithBasicAuth =
+      auth != null
+        ? {
+            Authorization: `Basic ${Buffer.from(`${auth.username}:${auth.password}`).toString(
+              'base64'
+            )}`,
+            ...headers,
+          }
+        : headers;
+
+    return { 'Content-Type': 'application/json', ...headersWithBasicAuth };
   }
 
   private validateResponse(responseSchema: Type<unknown>, data: unknown) {
@@ -137,15 +151,17 @@ export abstract class SubActionConnector<Config, Secrets> {
         `Request to external service. Connector Id: ${this.connector.id}. Connector type: ${this.connector.type} Method: ${method}. URL: ${normalizedURL}`
       );
 
+      const { auth, ...restConfig } = config;
+
       const res = await request({
-        ...config,
+        ...restConfig,
         axios: this.axiosInstance,
         url: normalizedURL,
         logger: this.logger,
         method,
         data: this.normalizeData(data),
         configurationUtilities: this.configurationUtilities,
-        headers: this.getHeaders(headers as AxiosHeaders),
+        headers: this.getHeaders(auth, headers as AxiosHeaders),
         timeout,
       });
 
