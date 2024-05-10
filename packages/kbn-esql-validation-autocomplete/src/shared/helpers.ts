@@ -214,14 +214,18 @@ export function getCommandOption(optionName: CommandOptionsDefinition['name']) {
   );
 }
 
-function compareLiteralType(argTypes: string, item: ESQLLiteral) {
+function compareLiteralType(argType: string, item: ESQLLiteral) {
   if (item.literalType !== 'string') {
-    return argTypes === item.literalType;
+    if (argType === item.literalType) {
+      return true;
+    }
+    return false;
   }
-  if (argTypes === 'chrono_literal') {
+  if (argType === 'chrono_literal') {
     return chronoLiterals.some(({ name }) => name === item.text);
   }
-  return argTypes === item.literalType;
+  // date-type parameters accept string literals because of ES auto-casting
+  return ['string', 'date'].includes(argType);
 }
 
 export function getColumnHit(

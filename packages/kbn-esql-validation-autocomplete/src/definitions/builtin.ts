@@ -91,7 +91,22 @@ function createComparisonDefinition(
         ],
         returnType: 'boolean',
       },
-      ...['date', 'number'].flatMap((type) => [
+      {
+        params: [
+          { name: 'left', type: 'version' },
+          { name: 'right', type: 'version' },
+        ],
+        returnType: 'boolean',
+      },
+      // constant strings okay because of implicit casting for
+      // string to version and ip
+      //
+      // boolean casting is handled on the specific comparison function
+      // that support booleans
+      //
+      // date casting is handled in the validation routine since it's a
+      // general rule. Look in compareLiteralType()
+      ...['ip', 'version'].flatMap((type) => [
         {
           params: [
             { name: 'left', type },
@@ -214,6 +229,21 @@ export const builtinFunctions: FunctionDefinition[] = [
           ],
           returnType: 'boolean',
         },
+        // constant strings okay because of implicit casting
+        {
+          params: [
+            { name: 'left', type: 'boolean' },
+            { name: 'right', type: 'string', constantOnly: true },
+          ],
+          returnType: 'boolean',
+        },
+        {
+          params: [
+            { name: 'right', type: 'string', constantOnly: true },
+            { name: 'right', type: 'boolean' },
+          ],
+          returnType: 'boolean',
+        },
       ],
     },
     {
@@ -228,6 +258,21 @@ export const builtinFunctions: FunctionDefinition[] = [
         {
           params: [
             { name: 'left', type: 'boolean' },
+            { name: 'right', type: 'boolean' },
+          ],
+          returnType: 'boolean',
+        },
+        // constant strings okay because of implicit casting
+        {
+          params: [
+            { name: 'left', type: 'boolean' },
+            { name: 'right', type: 'string', constantOnly: true },
+          ],
+          returnType: 'boolean',
+        },
+        {
+          params: [
+            { name: 'right', type: 'string', constantOnly: true },
             { name: 'right', type: 'boolean' },
           ],
           returnType: 'boolean',
@@ -318,6 +363,15 @@ export const builtinFunctions: FunctionDefinition[] = [
     },
     { name: 'not_in', description: '' },
   ].map<FunctionDefinition>(({ name, description }) => ({
+    // set all arrays to type "any" for now
+    // this only applies to the "in" operator
+    // e.g. "foo" in ( "foo", "bar" )
+    //
+    // we did this because the "in" operator now supports
+    // mixed-type arrays like ( "1.2.3", versionVar )
+    // because of implicit casting.
+    //
+    // we need to revisit with more robust validation
     type: 'builtin',
     ignoreAsSuggestion: /not/.test(name),
     name,
@@ -327,28 +381,43 @@ export const builtinFunctions: FunctionDefinition[] = [
       {
         params: [
           { name: 'left', type: 'number' },
-          { name: 'right', type: 'number[]' },
+
+          { name: 'right', type: 'any[]' },
         ],
         returnType: 'boolean',
       },
       {
         params: [
           { name: 'left', type: 'string' },
-          { name: 'right', type: 'string[]' },
+          { name: 'right', type: 'any[]' },
         ],
         returnType: 'boolean',
       },
       {
         params: [
           { name: 'left', type: 'boolean' },
-          { name: 'right', type: 'boolean[]' },
+          { name: 'right', type: 'any[]' },
         ],
         returnType: 'boolean',
       },
       {
         params: [
           { name: 'left', type: 'date' },
-          { name: 'right', type: 'date[]' },
+          { name: 'right', type: 'any[]' },
+        ],
+        returnType: 'boolean',
+      },
+      {
+        params: [
+          { name: 'left', type: 'version' },
+          { name: 'right', type: 'any[]' },
+        ],
+        returnType: 'boolean',
+      },
+      {
+        params: [
+          { name: 'left', type: 'ip' },
+          { name: 'right', type: 'any[]' },
         ],
         returnType: 'boolean',
       },

@@ -384,7 +384,7 @@
         "label": "getAllFunctions",
         "description": [],
         "signature": [
-          "(options: { type: \"grouping\" | \"agg\" | \"builtin\" | \"eval\" | (\"grouping\" | \"agg\" | \"builtin\" | \"eval\")[]; } | undefined) => ",
+          "(options: { type: \"agg\" | \"builtin\" | \"eval\" | (\"agg\" | \"builtin\" | \"eval\")[]; } | undefined) => ",
           {
             "pluginId": "@kbn/esql-validation-autocomplete",
             "scope": "common",
@@ -417,7 +417,7 @@
                 "label": "type",
                 "description": [],
                 "signature": [
-                  "\"grouping\" | \"agg\" | \"builtin\" | \"eval\" | (\"grouping\" | \"agg\" | \"builtin\" | \"eval\")[]"
+                  "\"agg\" | \"builtin\" | \"eval\" | (\"agg\" | \"builtin\" | \"eval\")[]"
                 ],
                 "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
                 "deprecated": false,
@@ -3149,7 +3149,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"grouping\" | \"agg\" | \"builtin\" | \"eval\""
+              "\"agg\" | \"builtin\" | \"eval\""
             ],
             "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
             "deprecated": false,
