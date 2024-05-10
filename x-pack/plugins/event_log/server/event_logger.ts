@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+// import { schema } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
 import { merge } from 'lodash';
 
@@ -16,13 +16,13 @@ import { EventLogService } from './event_log_service';
 import { millisToNanos } from '../common';
 import {
   IEvent,
-  IValidatedEvent,
+  // IValidatedEvent,
   IEventLogger,
-  IEventLogService,
+  // IEventLogService,
   ECS_VERSION,
-  EventSchema,
+  // EventSchema,
 } from './types';
-import { SAVED_OBJECT_REL_PRIMARY } from './types';
+// import { SAVED_OBJECT_REL_PRIMARY } from './types';
 import { Doc } from './es/cluster_client_adapter';
 
 type SystemLogger = Plugin['systemLogger'];
@@ -86,17 +86,17 @@ export class EventLogger implements IEventLogger {
     // merge the initial properties and event properties
     merge(event, defaultProperties, this.initialProperties, eventProperties, fixedProperties);
 
-    let validatedEvent: IValidatedEvent;
-    try {
-      validatedEvent = validateEvent(this.eventLogService, event);
-    } catch (err) {
-      this.systemLogger.warn(`invalid event logged: ${err.message}; ${JSON.stringify(event)})`);
-      return;
-    }
+    // let validatedEvent: IValidatedEvent;
+    // try {
+    //   validatedEvent = validateEvent(this.eventLogService, event);
+    // } catch (err) {
+    //   this.systemLogger.warn(`invalid event logged: ${err.message}; ${JSON.stringify(event)})`);
+    //   return;
+    // }
 
     const doc: Doc = {
       index: this.esContext.esNames.dataStream,
-      body: validatedEvent,
+      body: event,
     };
 
     if (this.eventLogService.isIndexingEntries()) {
@@ -116,44 +116,44 @@ function getEventStart(event: IEvent): number | null {
   return Date.parse(event.event.start);
 }
 
-const RequiredEventSchema = schema.object({
-  provider: schema.string({ minLength: 1 }),
-  action: schema.string({ minLength: 1 }),
-});
+// const RequiredEventSchema = schema.object({
+//   provider: schema.string({ minLength: 1 }),
+//   action: schema.string({ minLength: 1 }),
+// });
 
-const ValidSavedObjectRels = new Set([undefined, SAVED_OBJECT_REL_PRIMARY]);
+// const ValidSavedObjectRels = new Set([undefined, SAVED_OBJECT_REL_PRIMARY]);
 
-function validateEvent(eventLogService: IEventLogService, event: IEvent): IValidatedEvent {
-  if (event?.event == null) {
-    throw new Error(`no "event" property`);
-  }
+// function validateEvent(eventLogService: IEventLogService, event: IEvent): IValidatedEvent {
+//   if (event?.event == null) {
+//     throw new Error(`no "event" property`);
+//   }
 
-  // ensure there are provider/action properties in event as strings
-  const requiredProps = {
-    provider: event.event.provider,
-    action: event.event.action,
-  };
+//   // ensure there are provider/action properties in event as strings
+//   const requiredProps = {
+//     provider: event.event.provider,
+//     action: event.event.action,
+//   };
 
-  // will throw an error if structure doesn't validate
-  const { provider, action } = RequiredEventSchema.validate(requiredProps);
+//   // will throw an error if structure doesn't validate
+//   const { provider, action } = RequiredEventSchema.validate(requiredProps);
 
-  if (!eventLogService.isProviderActionRegistered(provider, action)) {
-    throw new Error(`unregistered provider/action: "${provider}" / "${action}"`);
-  }
+//   if (!eventLogService.isProviderActionRegistered(provider, action)) {
+//     throw new Error(`unregistered provider/action: "${provider}" / "${action}"`);
+//   }
 
-  // could throw an error
-  const result = EventSchema.validate(event);
+//   // could throw an error
+//   const result = EventSchema.validate(event);
 
-  if (result?.kibana?.saved_objects?.length) {
-    for (const so of result?.kibana?.saved_objects) {
-      if (!ValidSavedObjectRels.has(so.rel)) {
-        throw new Error(`invalid rel property in saved_objects: "${so.rel}"`);
-      }
-    }
-  }
+//   if (result?.kibana?.saved_objects?.length) {
+//     for (const so of result?.kibana?.saved_objects) {
+//       if (!ValidSavedObjectRels.has(so.rel)) {
+//         throw new Error(`invalid rel property in saved_objects: "${so.rel}"`);
+//       }
+//     }
+//   }
 
-  return result;
-}
+//   return result;
+// }
 
 export const EVENT_LOGGED_PREFIX = `event logged: `;
 
