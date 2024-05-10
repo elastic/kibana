@@ -318,7 +318,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
     // remove duplicated steps
     console.log([...new Set(pipeline)].join('\n'));
   } catch (ex) {
-    console.error('PR pipeline generation error', ex.message);
+    console.error('Error while generating the pipeline steps: ' + ex.message, ex);
     process.exit(1);
   }
 })();
