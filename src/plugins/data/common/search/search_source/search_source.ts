@@ -948,7 +948,6 @@ export class SearchSource {
     // if items that are in the docvalueFields are provided, we should
     // inject the format from the computed fields if one isn't given
     const docvaluesIndex = keyBy(filteredDocvalueFields, 'field');
-    const docValuesIndexKeys = new Set(Object.keys(docvaluesIndex));
 
     const uniqueFieldNames = new Set();
     const uniqueFields = [];
@@ -958,7 +957,7 @@ export class SearchSource {
         continue;
       }
       uniqueFieldNames.add(fieldName);
-      if (docValuesIndexKeys.has(fieldName)) {
+      if (Object.keys(docvaluesIndex).includes(fieldName)) {
         // either provide the field object from computed docvalues,
         // or merge the user-provided field with the one in docvalues
         uniqueFields.push(
