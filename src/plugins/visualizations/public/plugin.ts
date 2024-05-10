@@ -392,10 +392,12 @@ export class VisualizationsPlugin
     const editInLensAction = new EditInLensAction(data.query.timefilter.timefilter);
     uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', editInLensAction);
     embeddable.registerReactEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, async () => {
-      const [, pluginsStart] = await core.getStartServices();
+      const {
+        plugins: { embeddable: embeddableStart },
+      } = start();
 
       const { getVisualizeEmbeddableFactory } = await import('./react_embeddable');
-      return getVisualizeEmbeddableFactory(pluginsStart.embeddable);
+      return getVisualizeEmbeddableFactory(embeddableStart);
     });
 
     contentManagement.registry.register({
