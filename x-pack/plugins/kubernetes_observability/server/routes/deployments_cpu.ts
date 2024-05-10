@@ -77,7 +77,7 @@ export const registerDeploymentsCpuRoute = (router: IRouter, logger: Logger) => 
         if (esResponsePods.hits.hits.length > 0) {
           const hitsPods = esResponsePods.hits.hits[0];
           const { fields = {} } = hitsPods;
-          const hitsPodsAggs = esResponsePods.aggregations!.unique_values['buckets'];
+          const hitsPodsAggs = esResponsePods.aggregations.unique_values['buckets'];
           // console.log(hitsPods);
           // console.log(hitsPodsAggs);
           const time = extractFieldValue(fields['@timestamp']);
@@ -90,17 +90,17 @@ export const registerDeploymentsCpuRoute = (router: IRouter, logger: Logger) => 
           var cpu = '';
           for (const entries of hitsPodsAggs) {
             const podName = entries.key;
-            const dslPodsCpu = defineQueryForAllPodsCpuUtilisation(podName, namespace, client)
+            const dslPodsCpu = defineQueryForAllPodsCpuUtilisation(podName, namespace, client);
             const esResponsePodsCpu = await client.search(dslPodsCpu);
-            const [reason, message] = calulcateAllPodsCpuUtilisation(podName, namespace, esResponsePodsCpu)
+            const [reason, message] = calulcateAllPodsCpuUtilisation(podName, namespace, esResponsePodsCpu);
             pod_reasons.push(reason);
             pod_messages.push(message);
             //Create overall message for deployment
             for (var pod_reason of pod_reasons) {
               if (pod_reason.value == "Medium") {
-                pods_medium.push(pod_reason.name)
+                pods_medium.push(pod_reason.name);
               } else if (pod_reason.value == "High") {
-                pods_high.push(pod_reason.name)
+                pods_high.push(pod_reason.name);
               }
             }
             if (pods_medium.length > 0) {
@@ -117,10 +117,10 @@ export const registerDeploymentsCpuRoute = (router: IRouter, logger: Logger) => 
               reasons = "Medium "+type+" utilisation";
             }
             if (pods_high.length > 0) {
-              cpu = "High"
+              cpu = "High";
               reasons = "High "+type+" utilisation";
             } else {
-              cpu = "Low"
+              cpu = "Low";
               reasons = "Low "+type+" utilisation";
             }
             //End of Create overall message for deployment

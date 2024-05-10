@@ -86,24 +86,24 @@ export const registerDaemonsetsMemoryRoute = (router: IRouter, logger: Logger) =
           var memory = '';
           const hitsPods = esResponsePods.hits.hits[0];
           const { fields = {} } = hitsPods;
-          const hitsPodsAggs = esResponsePods.aggregations!.unique_values['buckets'];
+          const hitsPodsAggs = esResponsePods.aggregations.unique_values['buckets'];
           //console.log("hitspods:"+hitsPodsAggs);
           const time = extractFieldValue(fields['@timestamp']);
           for (const entries of hitsPodsAggs) {
             const podName = entries.key;
             console.log(podName);
-            const dslPodsCpu = defineQueryForAllPodsMemoryUtilisation(podName, namespace, client)
+            const dslPodsCpu = defineQueryForAllPodsMemoryUtilisation(podName, namespace, client);
             const esResponsePodsCpu = await client.search(dslPodsCpu);
-            const [reason, message] = calulcateAllPodsMemoryUtilisation(podName, namespace, esResponsePodsCpu)
+            const [reason, message] = calulcateAllPodsMemoryUtilisation(podName, namespace, esResponsePodsCpu);
             pod_reasons.push(reason);
             pod_messages.push(message);
 
             //Create overall message for deployment
             for (var pod_reason of pod_reasons) {
               if (pod_reason.value == "Medium") {
-                pods_medium.push(pod_reason.name)
+                pods_medium.push(pod_reason.name);
               } else if (pod_reason.value == "High") {
-                pods_high.push(pod_reason.name)
+                pods_high.push(pod_reason.name);
               }
             }
             if (pods_medium.length > 0) {
@@ -120,10 +120,10 @@ export const registerDaemonsetsMemoryRoute = (router: IRouter, logger: Logger) =
               reasons = "Medium "+type+" utilisation";
             }
             if (pods_high.length > 0) {
-              memory = "High"
+              memory = "High";
               reasons = "High "+type+" utilisation";
             } else {
-              memory = "Low"
+              memory = "Low";
               reasons = "Low "+type+" utilisation";
             }
             //End of Create overall message for deployment

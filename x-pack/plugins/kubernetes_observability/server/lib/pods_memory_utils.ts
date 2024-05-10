@@ -90,30 +90,28 @@ export function calulcateAllPodsMemoryUtilisation(podName: string, namespace: st
             memories_available.push(pod1.memory_available);
         }
         const total_memory_usage = memories_usage.reduce((accumulator, currentValue) => accumulator + currentValue);
-        memory_usage = total_memory_usage / pods.length
-        memory_usage_median = median(memories_usage)
+        memory_usage = total_memory_usage / pods.length;
+        memory_usage_median = median(memories_usage);
         const total_memory_available = memories_available.reduce((accumulator, currentValue) => accumulator + currentValue);
 
         if (isNaN(total_memory_available)) {
             reason = { 'pod': podName, 'value': undefined, 'desc': ' No memory limit defined ' };
             message = { 'pod': podName, 'memory_usage': memory_usage, 'memory_usage_median': memory_usage_median, 'desc': ' Pod Memory usage in  Bytes' };
-            return [reason, message, memory_usage, memory_usage_median]
-
         } else {
-            memory_available = total_memory_available / pods.length
+            memory_available = total_memory_available / pods.length;
             memory_utilization = round(memory_usage / memory_available, 3);
 
             if (memory_utilization < limits["medium"]) {
-                alarm = "Low"
+                alarm = "Low";
             } else if (memory_utilization >= limits["medium"] && memory_utilization < limits["high"]) {
-                alarm = "Medium"
+                alarm = "Medium";
             } else {
-                alarm = "High"
+                alarm = "High";
             }
             reason = { 'pod': podName, 'value': alarm, 'desc': ' Memory utilisation' };
             message = { 'pod': podName, 'memory_available': memory_available, 'memory_usage': memory_usage, 'memory_utilisation': memory_utilization, 'memory_usage_median': memory_usage_median, 'Desc': '% - Percentage of Memory utilisation' };
-            return [reason, message, memory_usage, memory_usage_median, memory_available, memory_utilization]
 
         }
     }
+    return [reason, message, memory_usage, memory_usage_median, memory_available, memory_utilization];
 }

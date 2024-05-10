@@ -81,7 +81,7 @@ export const registerDaemonsetsCpuRoute = (router: IRouter, logger: Logger) => {
         if (esResponsePods.hits.hits.length > 0) {
           const hitsPods = esResponsePods.hits.hits[0];
           const { fields = {} } = hitsPods;
-          const hitsPodsAggs = esResponsePods.aggregations!.unique_values['buckets'];
+          const hitsPodsAggs = esResponsePods.aggregations.unique_values['buckets'];
 
           const time = extractFieldValue(fields['@timestamp']);
           var messages = '';
@@ -95,17 +95,17 @@ export const registerDaemonsetsCpuRoute = (router: IRouter, logger: Logger) => {
           for (const entries of hitsPodsAggs) {
             const podName = entries.key;
             console.log(podName);
-            const dslPodsCpu = defineQueryForAllPodsCpuUtilisation(podName, namespace, client)
+            const dslPodsCpu = defineQueryForAllPodsCpuUtilisation(podName, namespace, client);
             const esResponsePodsCpu = await client.search(dslPodsCpu);
-            const [reason, message] = calulcateAllPodsCpuUtilisation(podName, namespace, esResponsePodsCpu)
+            const [reason, message] = calulcateAllPodsCpuUtilisation(podName, namespace, esResponsePodsCpu);
             pod_reasons.push(reason);
             pod_messages.push(message);
             //Create overall message for daemonset
             for (var pod_reason of pod_reasons) {
               if (pod_reason.value == "Medium") {
-                pods_medium.push(pod_reason.name)
+                pods_medium.push(pod_reason.name);
               } else if (pod_reason.value == "High") {
-                pods_high.push(pod_reason.name)
+                pods_high.push(pod_reason.name);
               }
             }
             if (pods_medium.length > 0) {

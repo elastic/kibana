@@ -50,8 +50,8 @@ export const registerPodsMemoryRoute = (router: IRouter, logger: Logger) => {
         var reason = undefined;
         var memory_available = undefined;
         var memory_usage = undefined;
-        var memory_utilization = undefined
-        var memory_usage_median = undefined
+        var memory_utilization = undefined;
+        var memory_usage_median = undefined;
         if (esResponseAll.hits.hits.length > 0) {
           const hits = esResponseAll.hits.hits[0];
           const { fields = {} } = hits;

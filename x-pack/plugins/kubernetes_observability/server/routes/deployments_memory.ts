@@ -99,9 +99,9 @@ export const registerDeploymentsMemoryRoute = (router: IRouter, logger: Logger) 
             //Create overall message for deployment
             for (var pod_reason of pod_reasons) {
               if (pod_reason.value == "Medium") {
-                pods_medium.push(pod_reason.name)
+                pods_medium.push(pod_reason.name);
               } else if (pod_reason.value == "High") {
-                pods_high.push(pod_reason.name)
+                pods_high.push(pod_reason.name);
               }
             }
             if (pods_medium.length > 0) {
@@ -118,10 +118,10 @@ export const registerDeploymentsMemoryRoute = (router: IRouter, logger: Logger) 
               reasons = "Medium "+type+" utilisation";
             }
             if (pods_high.length > 0) {
-              memory = "High"
+              memory = "High";
               reasons = "High "+type+" utilisation";
             } else {
-              memory = "Low"
+              memory = "Low";
               reasons = "Low "+type+" utilisation";
             }
             //End of Create overall message for deployment

@@ -89,19 +89,19 @@ export function calulcateAllPodsCpuUtilisation(podName: string, namespace: strin
 
         // console.log("Sum" + total_cpu_utilization)
 
-        cpu_utilization = total_cpu_utilization / pods.length
-        cpu_utilization_median = median(cpu_utilizations)
+        cpu_utilization = total_cpu_utilization / pods.length;
+        cpu_utilization_median = median(cpu_utilizations);
         cpu_utilization = round(cpu_utilization, 3);
         if (cpu_utilization < limits["medium"]) {
-            alarm = "Low"
+            alarm = "Low";
         } else if (cpu_utilization >= limits["medium"] && cpu_utilization < limits["high"]) {
-            alarm = "Medium"
+            alarm = "Medium";
         } else {
-            alarm = "High"
+            alarm = "High";
         }
         reason = { 'pod': podName, 'value': alarm, 'desc': ' Cpu utilisation' };
         message = { 'pod': podName, 'cpu_utilization': cpu_utilization, 'cpu_utilization_median': cpu_utilization_median, 'Desc': '% - Percentage of Cpu utilisation' };
     }
 
-    return [reason, message, cpu_utilization, cpu_utilization_median]
+    return [reason, message, cpu_utilization, cpu_utilization_median];
 }
