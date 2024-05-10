@@ -75,8 +75,6 @@
     "@kbn/alerts-as-data-utils",
     "@kbn/code-editor",
     "@kbn/rule-data-utils",
-    "@kbn/react-kibana-context-render",
-    "@kbn/search-types",
     "@kbn/core-elasticsearch-server-mocks"
   ],
   "exclude": [
