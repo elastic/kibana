@@ -10,7 +10,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { waitFor } from '@testing-library/react';
 import { DataViewsContract } from '@kbn/data-plugin/public';
 import { discoverServiceMock } from '../../../__mocks__/services';
-import { useEsqlMode } from './use_text_based_query_language';
+import { useEsqlMode } from './use_esql_mode';
 import { FetchStatus } from '../../types';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { AggregateQuery, Query } from '@kbn/es-query';

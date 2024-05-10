@@ -18,7 +18,7 @@ import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { SEARCH_FIELDS_FROM_SOURCE, SEARCH_ON_PAGE_LOAD_SETTING } from '@kbn/discover-utils';
-import { getEsqlDataView } from './utils/get_data_view_by_text_based_query_lang';
+import { getEsqlDataView } from './utils/get_esql_data_view';
 import { DiscoverAppState } from './discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
 import { DiscoverSearchSessionManager } from './discover_search_session';

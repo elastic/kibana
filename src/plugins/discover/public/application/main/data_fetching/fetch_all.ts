@@ -27,7 +27,7 @@ import { fetchDocuments } from './fetch_documents';
 import { FetchStatus } from '../../types';
 import { DataMsg, SavedSearchData } from '../state_management/discover_data_state_container';
 import { DiscoverServices } from '../../../build_services';
-import { fetchEsql } from './fetch_text_based';
+import { fetchEsql } from './fetch_esql';
 import { InternalState } from '../state_management/discover_internal_state_container';
 
 export interface FetchDeps {

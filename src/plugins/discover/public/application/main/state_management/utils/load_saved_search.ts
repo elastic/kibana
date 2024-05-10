@@ -9,7 +9,7 @@
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { cloneDeep, isEqual } from 'lodash';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { getEsqlDataView } from './get_data_view_by_text_based_query_lang';
+import { getEsqlDataView } from './get_esql_data_view';
 import { loadAndResolveDataView } from './resolve_data_view';
 import { DiscoverInternalStateContainer } from '../discover_internal_state_container';
 import { DiscoverDataStateContainer } from '../discover_data_state_container';

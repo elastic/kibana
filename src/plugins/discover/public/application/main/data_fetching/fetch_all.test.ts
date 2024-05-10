@@ -21,7 +21,7 @@ import {
   SavedSearchData,
 } from '../state_management/discover_data_state_container';
 import { fetchDocuments } from './fetch_documents';
-import { fetchEsql } from './fetch_text_based';
+import { fetchEsql } from './fetch_esql';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
 import { searchResponseIncompleteWarningLocalCluster } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
@@ -30,7 +30,7 @@ jest.mock('./fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue([]),
 }));
 
-jest.mock('./fetch_text_based', () => ({
+jest.mock('./fetch_esql', () => ({
   fetchEsql: jest.fn().mockResolvedValue([]),
 }));
 

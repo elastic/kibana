@@ -67,7 +67,7 @@ import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_compon
 import { handleSourceColumnState } from '../utils/state_helpers';
 import { updateSearchSource } from './utils/update_search_source';
 import { FieldStatisticsTable } from '../application/main/components/field_stats_table';
-import { fetchEsql } from '../application/main/data_fetching/fetch_text_based';
+import { fetchEsql } from '../application/main/data_fetching/fetch_esql';
 import { getValidViewMode } from '../application/main/utils/get_valid_view_mode';
 import { ADHOC_DATA_VIEW_RENDER_EVENT } from '../constants';
 import { getDiscoverLocatorParams } from './get_discover_locator_params';
