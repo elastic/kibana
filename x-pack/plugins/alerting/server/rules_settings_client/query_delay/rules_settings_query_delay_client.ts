@@ -44,6 +44,28 @@ export interface RulesSettingsQueryDelayClientConstructorOptions {
   readonly getModificationMetadata: () => Promise<RulesSettingsModificationMetadata>;
 }
 
+const cacheExpiry = 10000;
+let lastGet = Date.now();
+let settingsPromise: Promise<SavedObject<RulesSettings>> | undefined;
+let settings: SavedObject<RulesSettings>;
+async function getSettingsFromCache(savedObjectsClient: SavedObjectsClientContract) {
+  if (settingsPromise) {
+    return settingsPromise;
+  } else if (settings && lastGet > Date.now() - cacheExpiry) {
+    return settings;
+  }
+  const promise = savedObjectsClient.get<RulesSettings>(
+    RULES_SETTINGS_SAVED_OBJECT_TYPE,
+    RULES_SETTINGS_QUERY_DELAY_SAVED_OBJECT_ID
+  );
+  settingsPromise = promise;
+  const result = await promise;
+  settings = result;
+  lastGet = Date.now();
+  settingsPromise = undefined;
+  return result;
+}
+
 export class RulesSettingsQueryDelayClient {
   private readonly logger: Logger;
   private readonly savedObjectsClient: SavedObjectsClientContract;
@@ -87,7 +109,7 @@ export class RulesSettingsQueryDelayClient {
       throw e;
     }
 
-    const { attributes, version } = await this.getOrCreate();
+    const { attributes, version } = await this.getOrCreate(true);
     if (!attributes.queryDelay) {
       throw new Error('Query delay settings are undefined');
     }
@@ -121,11 +143,14 @@ export class RulesSettingsQueryDelayClient {
     }
   }
 
-  private async getSettings(): Promise<SavedObject<RulesSettings>> {
-    return await this.savedObjectsClient.get<RulesSettings>(
-      RULES_SETTINGS_SAVED_OBJECT_TYPE,
-      RULES_SETTINGS_QUERY_DELAY_SAVED_OBJECT_ID
-    );
+  private async getSettings(noCache: boolean = false): Promise<SavedObject<RulesSettings>> {
+    if (noCache) {
+      return await this.savedObjectsClient.get<RulesSettings>(
+        RULES_SETTINGS_SAVED_OBJECT_TYPE,
+        RULES_SETTINGS_QUERY_DELAY_SAVED_OBJECT_ID
+      );
+    }
+    return getSettingsFromCache(this.savedObjectsClient);
   }
 
   private async createSettings(): Promise<SavedObject<RulesSettings>> {
@@ -159,9 +184,9 @@ export class RulesSettingsQueryDelayClient {
    * Helper function to ensure that a rules-settings saved object always exists.
    * Ensures the creation of the saved object is done lazily during retrieval.
    */
-  private async getOrCreate(): Promise<SavedObject<RulesSettings>> {
+  private async getOrCreate(noCache: boolean = false): Promise<SavedObject<RulesSettings>> {
     try {
-      return await this.getSettings();
+      return await this.getSettings(noCache);
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         this.logger.info('Creating new default query delay rules settings for current space.');
