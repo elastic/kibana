@@ -82,13 +82,9 @@ export async function loadAction({
   // a single stream that emits records from all archive files, in
   // order, so that createIndexStream can track the state of indexes
   // across archives and properly skip docs from existing indexes
-  const isRelevant = files.some((filename) => filename.includes('security_solution/anomalies'));
   const recordStream = concatStreamProviders(
     files.map((filename) => () => {
       log.info('[%s] Loading %j', name, filename);
-      if (isRelevant) {
-        console.log('Loading file', name, filename);
-      }
 
       return pipeline(
         createReadStream(resolve(inputDir, filename)),

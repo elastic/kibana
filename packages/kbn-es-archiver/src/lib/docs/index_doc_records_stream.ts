@@ -29,37 +29,23 @@ export function createIndexDocRecordsStream(
     const operation = useCreate === true ? BulkOperation.Create : BulkOperation.Index;
     const ops = new WeakMap<any, any>();
     const errors: string[] = [];
-    let isRelevant = false;
-
-    const concurrency = performance?.concurrency || DEFAULT_PERFORMANCE_OPTIONS.concurrency;
-    const datasource = docs.map((doc) => {
-      const body = doc.source;
-      const op = doc.data_stream ? BulkOperation.Create : operation;
-      const index = doc.data_stream || doc.index;
-      if (index.startsWith('.ml-anomalies-custom')) {
-        isRelevant = true;
-      }
-
-      ops.set(body, {
-        [op]: {
-          _index: index,
-          _id: doc.id,
-        },
-      });
-      return body;
-    });
-
-    if (isRelevant) {
-      console.log('datasource:', JSON.stringify(datasource, null, 2));
-      console.log('ops:', JSON.stringify(ops, null, 2));
-      console.log('concurrency', concurrency);
-    }
 
     await client.helpers.bulk(
       {
         retries: 5,
-        concurrency,
-        datasource,
+        concurrency: performance?.concurrency || DEFAULT_PERFORMANCE_OPTIONS.concurrency,
+        datasource: docs.map((doc) => {
+          const body = doc.source;
+          const op = doc.data_stream ? BulkOperation.Create : operation;
+          const index = doc.data_stream || doc.index;
+          ops.set(body, {
+            [op]: {
+              _index: index,
+              _id: doc.id,
+            },
+          });
+          return body;
+        }),
         onDocument(doc) {
           return ops.get(doc);
         },
