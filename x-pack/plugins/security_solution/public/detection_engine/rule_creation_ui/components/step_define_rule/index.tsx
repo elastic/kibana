@@ -23,7 +23,7 @@ import React, { memo, useCallback, useState, useEffect, useMemo, useRef } from '
 
 import styled from 'styled-components';
 import { i18n as i18nCore } from '@kbn/i18n';
-import { isEqual, isEmpty, omit } from 'lodash';
+import { isEqual, isEmpty } from 'lodash';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import usePrevious from 'react-use/lib/usePrevious';
 import type { BrowserFields } from '@kbn/timelines-plugin/common';
@@ -683,7 +683,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               <CommonUseField
                 path="index"
                 config={{
-                  ...omit(schema.index, 'label'),
+                  ...schema.index,
                   labelAppend: indexModified ? (
                     <MyLabelButton onClick={handleResetIndices} iconType="refresh">
                       {i18n.RESET_DEFAULT_INDEX}

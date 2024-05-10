@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IKibanaSearchResponse } from '@kbn/data-plugin/common';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { LogsEndpointActionResponse } from '../../../endpoint/types';
 import type { SortOrder, Inspect, Maybe, RequestBasicOptions } from './types';

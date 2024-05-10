@@ -85,6 +85,8 @@ describe('Timeline', () => {
       start: startDate,
       timelineId: TimelineId.test,
       timerangeKind: 'absolute',
+      pinnedEventIds: {},
+      eventIdToNoteIds: {},
     };
   });
 
