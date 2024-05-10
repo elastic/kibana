@@ -23,7 +23,7 @@ import { FormattedMessage, FormattedDate } from '@kbn/i18n-react';
 import { useHistory } from 'react-router-dom';
 
 import type { AgentPolicy } from '../../../types';
-import { AGENTS_PREFIX, AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../constants';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
   useAuthz,
   usePagination,
@@ -140,7 +140,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
                   count={agentPolicy.unprivileged_agents || 0}
                   agentPolicyId={agentPolicy.id}
                   showAgentText={false}
-                  additionalKuery={`${AGENTS_PREFIX}.local_metadata.elastic.agent.unprivileged: true`}
+                  privilegeMode="unprivileged"
                 />
               </EuiToolTip>
             </EuiFlexItem>
@@ -158,7 +158,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
                   count={agents - (agentPolicy.unprivileged_agents || 0)}
                   agentPolicyId={agentPolicy.id}
                   showAgentText={false}
-                  additionalKuery={`not ${AGENTS_PREFIX}.local_metadata.elastic.agent.unprivileged: true`}
+                  privilegeMode="privileged"
                 />
               </EuiToolTip>
             </EuiFlexItem>

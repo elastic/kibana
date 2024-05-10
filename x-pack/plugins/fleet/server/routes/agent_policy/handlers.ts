@@ -20,7 +20,7 @@ import { HTTPAuthorizationHeader } from '../../../common/http_authorization_head
 import { fullAgentPolicyToYaml } from '../../../common/services';
 import { appContextService, agentPolicyService } from '../../services';
 import { getAgentsByKuery, getLatestAvailableAgentVersion } from '../../services/agents';
-import { AGENTS_PREFIX } from '../../constants';
+import { AGENTS_PREFIX, UNPRIVILEGED_AGENT_KUERY } from '../../constants';
 import type {
   GetAgentPoliciesRequestSchema,
   GetOneAgentPolicyRequestSchema,
@@ -73,7 +73,7 @@ export async function populateAssignedAgentsCount(
         showInactive: false,
         perPage: 0,
         page: 1,
-        kuery: `${AGENTS_PREFIX}.policy_id:${agentPolicy.id} and ${AGENTS_PREFIX}.local_metadata.elastic.agent.unprivileged : true`,
+        kuery: `${AGENTS_PREFIX}.policy_id:${agentPolicy.id} and ${UNPRIVILEGED_AGENT_KUERY}`,
       }).then(({ total }) => (agentPolicy.unprivileged_agents = total));
       return Promise.all([totalAgents, unprivilegedAgents]);
     },
