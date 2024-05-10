@@ -92,7 +92,7 @@ export const renderApp = (
   const productAccess = access || noProductAccess;
   const productFeatures = features ?? { ...DEFAULT_PRODUCT_FEATURES };
 
-  const EmptyContext: FC<PropsWithChildren> = ({ children }) => <>{children}</>;
+  const EmptyContext: FC<PropsWithChildren<unknown>> = ({ children }) => <>{children}</>;
   const CloudContext = cloud?.CloudContextProvider || EmptyContext;
 
   resetContext({ createStore: true });

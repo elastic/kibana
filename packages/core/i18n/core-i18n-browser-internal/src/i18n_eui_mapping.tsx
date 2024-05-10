@@ -195,6 +195,18 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       'core.euiCollapsibleNavButton.ariaLabelOpen',
       { defaultMessage: 'Open navigation' }
     ),
+    'euiCollapsibleNavKibanaSolution.switcherTitle': i18n.translate(
+      'core.euiCollapsibleNavKibanaSolution.switcherTitle',
+      { defaultMessage: 'Solution view' }
+    ),
+    'euiCollapsibleNavKibanaSolution.switcherAriaLabel': i18n.translate(
+      'core.euiCollapsibleNavKibanaSolution.switcherAriaLabel',
+      { defaultMessage: '- click to switch to another solution' }
+    ),
+    'euiCollapsibleNavKibanaSolution.groupLabel': i18n.translate(
+      'core.euiCollapsibleNavKibanaSolution.groupLabel',
+      { defaultMessage: 'Navigate to solution' }
+    ),
     'euiColorPicker.alphaLabel': i18n.translate('core.euiColorPicker.alphaLabel', {
       defaultMessage: 'Alpha channel (opacity) value',
       description: 'Label describing color alpha channel',
@@ -1377,11 +1389,13 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       'core.euiDatePopoverContent.nowTabButtonEnd',
       { defaultMessage: 'Set end date and time to now' }
     ),
-    'euiAbsoluteTab.dateFormatError': ({ dateFormat }: EuiValues) =>
-      i18n.translate('core.euiAbsoluteTab.dateFormatError', {
-        defaultMessage: 'Allowed formats: {dateFormat}, ISO 8601, RFC 2822, or Unix timestamp.',
-        values: { dateFormat },
-      }),
+    'euiAbsoluteTab.dateFormatError': ({ dateFormat }: EuiValues) => (
+      <FormattedMessage
+        id="core.euiAbsoluteTab.dateFormatError"
+        defaultMessage="Allowed formats: {dateFormat}, ISO 8601, RFC 2822, or Unix timestamp."
+        values={{ dateFormat }}
+      />
+    ),
     'euiRelativeTab.fullDescription': ({ unit }: EuiValues) =>
       i18n.translate('core.euiRelativeTab.fullDescription', {
         defaultMessage: 'The unit is changeable. Currently set to {unit}.',

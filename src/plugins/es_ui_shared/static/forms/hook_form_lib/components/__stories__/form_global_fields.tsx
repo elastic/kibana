@@ -48,7 +48,7 @@ const useGlobalFields = () => {
   return ctx;
 };
 
-const FormGlobalFields: FC<PropsWithChildren> = ({ children }) => {
+const FormGlobalFields: FC<PropsWithChildren<unknown>> = ({ children }) => {
   return (
     <UseMultiFields fields={globalFields}>
       {(fields) => {
@@ -170,7 +170,7 @@ const useGlobalFields = () => {
   return ctx;
 };
 
-const FormGlobalFields: FC<PropsWithChildren> = ({ children }) => {
+const FormGlobalFields: FC<PropsWithChildren<unknown>> = ({ children }) => {
   return (
     <UseMultiFields fields={globalFields}>
       {(fields) => {

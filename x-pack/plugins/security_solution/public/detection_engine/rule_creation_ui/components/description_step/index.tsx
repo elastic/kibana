@@ -342,6 +342,9 @@ export const getDescriptionItem = (
     return get('isBuildingBlock', data)
       ? [{ title: i18n.BUILDING_BLOCK_LABEL, description: i18n.BUILDING_BLOCK_DESCRIPTION }]
       : [];
+  } else if (field === 'maxSignals') {
+    const value: number | undefined = get(field, data);
+    return value ? [{ title: label, description: value }] : [];
   }
 
   const description: string = get(field, data);

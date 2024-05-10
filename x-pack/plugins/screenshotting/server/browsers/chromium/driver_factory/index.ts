@@ -226,7 +226,7 @@ export class HeadlessChromiumDriverFactory {
         observer.add(() => {
           if (page.isClosed()) return; // avoid emitting a log unnecessarily
           logger.debug(`It looks like the browser is no longer being used. Closing the browser...`);
-          childProcess.kill(); // ignore async
+          void childProcess.kill(); // ignore async
         });
 
         // make the observer subscribe to terminate$
@@ -272,7 +272,7 @@ export class HeadlessChromiumDriverFactory {
             logger.error(error);
           });
         });
-      })();
+      })().catch(() => {});
     });
   }
 

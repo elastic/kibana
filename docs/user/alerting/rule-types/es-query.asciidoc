@@ -12,7 +12,8 @@ The {es} query rule type runs a user-configured query, compares the number of
 matches to a configured threshold, and schedules actions to run when the 
 threshold condition is met.
 
-In *{stack-manage-app}* > *{rules-ui}*, click *Create rule*, fill in the name and optional tags, then select *{es} query*.
+In *{stack-manage-app}* > *{rules-ui}*, click *Create rule*.
+Select the *{es} query* rule type then fill in the name and optional tags.
 An {es} query rule can be defined using {es} Query Domain Specific Language (DSL), {es} Query Language (ES|QL), {kib} Query Language (KQL), or Lucene.
 
 [float]

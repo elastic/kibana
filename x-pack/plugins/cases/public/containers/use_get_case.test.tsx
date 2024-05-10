@@ -17,7 +17,7 @@ import { useToasts } from '../common/lib/kibana';
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
-const wrapper: FC<PropsWithChildren> = ({ children }) => {
+const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {

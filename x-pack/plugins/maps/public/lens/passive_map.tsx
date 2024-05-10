@@ -9,16 +9,15 @@ import React, { Component, RefObject } from 'react';
 import { Subscription } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { EuiLoadingChart } from '@elastic/eui';
-import { EmbeddableFactory, ViewMode } from '@kbn/embeddable-plugin/public';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { LayerDescriptor } from '../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../common';
-import { MapEmbeddable, MapEmbeddableInput, MapEmbeddableOutput } from '../embeddable';
+import { MapEmbeddable } from '../embeddable';
 import { createBasemapLayerDescriptor } from '../classes/layers/create_basemap_layer_descriptor';
 
-interface Props {
-  factory: EmbeddableFactory<MapEmbeddableInput, MapEmbeddableOutput>;
+export interface Props {
   passiveLayer: LayerDescriptor;
-  onRenderComplete: () => void;
+  onRenderComplete?: () => void;
 }
 
 interface State {
@@ -65,36 +64,39 @@ export class PassiveMap extends Component<Props, State> {
   async _setupEmbeddable() {
     const basemapLayerDescriptor = createBasemapLayerDescriptor();
     const intialLayers = basemapLayerDescriptor ? [basemapLayerDescriptor] : [];
-    const mapEmbeddable = (await this.props.factory.create({
-      id: uuidv4(),
-      attributes: {
-        title: '',
-        layerListJSON: JSON.stringify([...intialLayers, this.props.passiveLayer]),
+    const mapEmbeddable = new MapEmbeddable(
+      {
+        editable: false,
       },
-      filters: [],
-      hidePanelTitles: true,
-      viewMode: ViewMode.VIEW,
-      isLayerTOCOpen: false,
-      hideFilterActions: true,
-      mapSettings: {
-        disableInteractive: false,
-        hideToolbarOverlay: false,
-        hideLayerControl: false,
-        hideViewControl: false,
-        initialLocation: INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS, // this will startup based on data-extent
-        autoFitToDataBounds: true, // this will auto-fit when there are changes to the filter and/or query
-      },
-    })) as MapEmbeddable | undefined;
-
-    if (!mapEmbeddable) {
-      return;
-    }
-
-    this._onRenderSubscription = mapEmbeddable.getOnRenderComplete$().subscribe(() => {
-      if (this._isMounted) {
-        this.props.onRenderComplete();
+      {
+        id: uuidv4(),
+        attributes: {
+          title: '',
+          layerListJSON: JSON.stringify([...intialLayers, this.props.passiveLayer]),
+        },
+        filters: [],
+        hidePanelTitles: true,
+        viewMode: ViewMode.VIEW,
+        isLayerTOCOpen: false,
+        hideFilterActions: true,
+        mapSettings: {
+          disableInteractive: false,
+          hideToolbarOverlay: false,
+          hideLayerControl: false,
+          hideViewControl: false,
+          initialLocation: INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS, // this will startup based on data-extent
+          autoFitToDataBounds: true, // this will auto-fit when there are changes to the filter and/or query
+        },
       }
-    });
+    );
+
+    if (this.props.onRenderComplete) {
+      this._onRenderSubscription = mapEmbeddable.getOnRenderComplete$().subscribe(() => {
+        if (this._isMounted && this.props.onRenderComplete) {
+          this.props.onRenderComplete();
+        }
+      });
+    }
 
     if (this._isMounted) {
       mapEmbeddable.setIsSharable(false);

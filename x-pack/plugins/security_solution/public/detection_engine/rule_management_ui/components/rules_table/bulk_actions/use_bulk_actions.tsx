@@ -12,6 +12,7 @@ import type { Toast } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useCallback } from 'react';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { convertRulesFilterToKQL } from '../../../../../../common/detection_engine/rule_management/rule_filtering';
 import { DuplicateOptions } from '../../../../../../common/detection_engine/rule_management/constants';
@@ -81,6 +82,10 @@ export const useBulkActions = ({
     state: { isAllSelected, rules, loadingRuleIds, selectedRuleIds },
     actions: { clearRulesSelection, setIsPreflightInProgress },
   } = rulesTableContext;
+
+  const isBulkCustomHighlightedFieldsEnabled = useIsExperimentalFeatureEnabled(
+    'bulkCustomHighlightedFieldsEnabled'
+  );
 
   const getBulkItemsPopoverContent = useCallback(
     (closePopover: () => void): EuiContextMenuPanelDescriptor[] => {
@@ -331,6 +336,17 @@ export const useBulkActions = ({
               disabled: isEditDisabled,
               panel: 1,
             },
+            ...(isBulkCustomHighlightedFieldsEnabled
+              ? [
+                  {
+                    key: i18n.BULK_ACTION_INVESTIGATION_FIELDS,
+                    name: i18n.BULK_ACTION_INVESTIGATION_FIELDS,
+                    'data-test-subj': 'investigationFieldsBulkEditRule',
+                    disabled: isEditDisabled,
+                    panel: 3,
+                  },
+                ]
+              : []),
             {
               key: i18n.BULK_ACTION_ADD_RULE_ACTIONS,
               name: i18n.BULK_ACTION_ADD_RULE_ACTIONS,
@@ -461,6 +477,34 @@ export const useBulkActions = ({
             },
           ],
         },
+        {
+          id: 3,
+          title: i18n.BULK_ACTION_MENU_TITLE,
+          items: [
+            {
+              key: i18n.BULK_ACTION_ADD_INVESTIGATION_FIELDS,
+              name: i18n.BULK_ACTION_ADD_INVESTIGATION_FIELDS,
+              'data-test-subj': 'addInvestigationFieldsBulkEditRule',
+              onClick: handleBulkEdit(BulkActionEditTypeEnum.add_investigation_fields),
+              disabled: isEditDisabled,
+              toolTipContent: missingActionPrivileges
+                ? i18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES
+                : undefined,
+              toolTipProps: { position: 'right' },
+            },
+            {
+              key: i18n.BULK_ACTION_DELETE_INVESTIGATION_FIELDS,
+              name: i18n.BULK_ACTION_DELETE_INVESTIGATION_FIELDS,
+              'data-test-subj': 'deleteInvestigationFieldsBulkEditRule',
+              onClick: handleBulkEdit(BulkActionEditTypeEnum.delete_investigation_fields),
+              disabled: isEditDisabled,
+              toolTipContent: missingActionPrivileges
+                ? i18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES
+                : undefined,
+              toolTipProps: { position: 'right' },
+            },
+          ],
+        },
       ];
     },
     [
@@ -468,6 +512,7 @@ export const useBulkActions = ({
       selectedRuleIds,
       hasActionsPrivileges,
       isAllSelected,
+      isBulkCustomHighlightedFieldsEnabled,
       loadingRuleIds,
       startTransaction,
       hasMlPermissions,

@@ -20,7 +20,7 @@ import { PseudoLocaleWrapper } from './pseudo_locale_wrapper';
  * IntlProvider should wrap react app's root component (inside each react render method).
  */
 
-export const I18nProvider: FC<PropsWithChildren> = ({ children }) => (
+export const I18nProvider: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <IntlProvider
     locale={i18n.getLocale()}
     messages={i18n.getTranslation().messages}

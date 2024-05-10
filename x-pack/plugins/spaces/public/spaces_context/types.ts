@@ -21,7 +21,7 @@ export interface SpacesReactContextValue<Services extends Partial<CoreStart>> {
 
 export interface SpacesReactContext<Services extends Partial<CoreStart>> {
   value: SpacesReactContextValue<Services>;
-  Provider: React.FC<React.PropsWithChildren>;
+  Provider: React.FC<React.PropsWithChildren<unknown>>;
   Consumer: React.Consumer<SpacesReactContextValue<Services>>;
 }
 

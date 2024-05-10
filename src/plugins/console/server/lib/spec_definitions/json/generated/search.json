@@ -79,7 +79,8 @@
         "10"
       ],
       "from": "",
-      "sort": []
+      "sort": [],
+      "force_synthetic_source": "__flag__"
     },
     "methods": [
       "GET",

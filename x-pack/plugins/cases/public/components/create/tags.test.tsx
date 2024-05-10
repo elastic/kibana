@@ -29,7 +29,7 @@ describe('Tags', () => {
   let globalForm: FormHook;
   let appMockRender: AppMockRenderer;
 
-  const MockHookWrapperComponent: FC<PropsWithChildren> = ({ children }) => {
+  const MockHookWrapperComponent: FC<PropsWithChildren<unknown>> = ({ children }) => {
     const { form } = useForm<FormProps>({
       defaultValue: { tags: [] },
       schema: {

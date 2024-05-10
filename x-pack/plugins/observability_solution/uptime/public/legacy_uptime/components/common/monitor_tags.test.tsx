@@ -165,7 +165,7 @@ describe('MonitorTags component', () => {
 
   it('expand tag show tags on click', () => {
     summaryPing.state.summaryPings[0].tags = ['red', 'green', 'blue', 'black', 'purple', 'yellow'];
-    const Wrapper: FC<PropsWithChildren> = ({ children }) => (
+    const Wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
       <MemoryRouter>{children}</MemoryRouter>
     );
     render(<MonitorTags ping={summaryPing.state.summaryPings[0]} />, { wrapper: Wrapper });

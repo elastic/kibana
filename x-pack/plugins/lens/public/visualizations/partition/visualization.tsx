@@ -53,11 +53,7 @@ import { checkTableForContainsSmallValues } from './render_helpers';
 import { DatasourcePublicAPI } from '../..';
 import { nonNullable, getColorMappingDefaults } from '../../utils';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
-import {
-  PersistedPieVisualizationState,
-  convertToPersistable,
-  convertToRuntime,
-} from './persistence';
+import { PersistedPieVisualizationState, convertToRuntime } from './persistence';
 
 const metricLabel = i18n.translate('xpack.lens.pie.groupMetricLabelSingular', {
   defaultMessage: 'Metric',
@@ -181,10 +177,6 @@ export const getPieVisualization = ({
       ],
       palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
     };
-  },
-
-  getPersistableState(state) {
-    return { savedObjectReferences: [], state: convertToPersistable(state) };
   },
 
   getMainPalette: (state) => {

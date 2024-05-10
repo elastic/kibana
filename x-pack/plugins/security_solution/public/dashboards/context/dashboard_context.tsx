@@ -19,7 +19,7 @@ export interface DashboardContextType {
 
 const DashboardContext = React.createContext<DashboardContextType | null>({ securityTags: null });
 
-export const DashboardContextProvider: FC<PropsWithChildren> = ({ children }) => {
+export const DashboardContextProvider: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const { tags, isLoading } = useFetchSecurityTags();
   const securityTags = isLoading || !tags ? null : tags;
 

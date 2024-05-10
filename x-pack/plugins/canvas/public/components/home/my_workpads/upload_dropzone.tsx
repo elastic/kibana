@@ -15,7 +15,7 @@ import { UploadDropzone as Component } from './upload_dropzone.component';
 
 const { WorkpadDropzone: errors } = ErrorStrings;
 
-export const UploadDropzone: FC<PropsWithChildren> = ({ children }) => {
+export const UploadDropzone: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const notify = useNotifyService();
   const uploadWorkpad = useImportWorkpad();
   const [isDisabled, setIsDisabled] = useState(false);

@@ -19,7 +19,7 @@ import { schema } from './schema';
 describe('SyncAlertsToggle', () => {
   let globalForm: FormHook;
 
-  const MockHookWrapperComponent: FC<PropsWithChildren> = ({ children }) => {
+  const MockHookWrapperComponent: FC<PropsWithChildren<unknown>> = ({ children }) => {
     const { form } = useForm<FormProps>({
       defaultValue: { syncAlerts: true },
       schema: {

@@ -32,7 +32,7 @@ interface MinimalSaveModalProps {
 
 export function showSaveModal(
   saveModal: React.ReactElement<MinimalSaveModalProps>,
-  Wrapper?: FC<PropsWithChildren>
+  Wrapper?: FC<PropsWithChildren<unknown>>
 ) {
   const container = document.createElement('div');
   const closeModal = () => {

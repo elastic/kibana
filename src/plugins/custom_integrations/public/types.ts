@@ -15,7 +15,7 @@ export interface CustomIntegrationsSetup {
 }
 
 export interface CustomIntegrationsStart {
-  ContextProvider: FC<PropsWithChildren>;
+  ContextProvider: FC<PropsWithChildren<unknown>>;
   languageClientsUiComponents: Record<string, FC>;
 }
 

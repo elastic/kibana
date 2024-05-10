@@ -24,7 +24,7 @@ jest.mock('./api', () => ({
   fetchActiveMaintenanceWindows: jest.fn(() => Promise.resolve([])),
 }));
 
-const TestProviders: FC<PropsWithChildren> = ({ children }) => {
+const TestProviders: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const queryClient = new QueryClient();
   return (
     <I18nProvider>
@@ -231,7 +231,7 @@ describe('MaintenanceWindowCallout', () => {
           warn: console.warn,
         },
       });
-      const wrapper: FC<PropsWithChildren> = ({ children }) => (
+      const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
         <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
       );
       return wrapper;

@@ -20,11 +20,10 @@ import {
 } from '@kbn/core/server';
 import type { AuthenticatedUser, SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { defer } from '@kbn/kibana-utils-plugin/common';
+import type { IKibanaSearchRequest, ISearchOptions } from '@kbn/search-types';
 import { debounce } from 'lodash';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
-  IKibanaSearchRequest,
-  ISearchOptions,
   SEARCH_SESSION_TYPE,
   SearchSessionRequestInfo,
   SearchSessionSavedObjectAttributes,

@@ -12,7 +12,7 @@ import * as reactRedux from 'react-redux';
 import { useOverviewFilterCheck } from './use_overview_filter_check';
 import { MockRouter } from '../lib/helper/rtl_helpers';
 
-function getWrapper(customSearch?: string): FC<PropsWithChildren> {
+function getWrapper(customSearch?: string): FC<PropsWithChildren<unknown>> {
   return ({ children }) => {
     const { location, ...rest } = createMemoryHistory();
     return (

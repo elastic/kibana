@@ -354,8 +354,7 @@ export class SyntheticsMonitorClient {
       });
     }
 
-    // no need to wait here
-    finder.close();
+    finder.close().catch(() => {});
 
     return monitors;
   }

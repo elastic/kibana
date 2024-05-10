@@ -318,7 +318,7 @@ export class AIAssistantService {
 
       if (!anonymizationFieldsIndexName) {
         await this.anonymizationFieldsDataStream.installSpace(spaceId);
-        this.createDefaultAnonymizationFields(spaceId);
+        await this.createDefaultAnonymizationFields(spaceId);
       }
     } catch (error) {
       this.options.logger.error(

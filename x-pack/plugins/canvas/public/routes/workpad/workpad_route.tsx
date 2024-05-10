@@ -110,7 +110,7 @@ const ExportWorkpadRouteComponent: FC<{ route: WorkpadRouteProps }> = ({ route: 
   );
 };
 
-export const ExportRouteManager: FC<PropsWithChildren> = ({ children }) => {
+export const ExportRouteManager: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const params = useParams<WorkpadPageRouteParams>();
   usePageSync();
 
@@ -123,7 +123,7 @@ export const ExportRouteManager: FC<PropsWithChildren> = ({ children }) => {
   return <>{children}</>;
 };
 
-export const WorkpadHistoryManager: FC<PropsWithChildren> = ({ children }) => {
+export const WorkpadHistoryManager: FC<PropsWithChildren<unknown>> = ({ children }) => {
   useRestoreHistory();
   useWorkpadHistory();
   usePageSync();

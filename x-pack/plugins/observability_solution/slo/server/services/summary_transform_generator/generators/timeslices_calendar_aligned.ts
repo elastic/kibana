@@ -98,9 +98,10 @@ export function generateSummaryTransformForTimeslicesAndCalendarAligned(
             buckets_path: {
               goodEvents: 'goodEvents',
               totalEvents: 'totalEvents',
+              totalSlicesInPeriod: '_totalSlicesInPeriod',
             },
             script:
-              'if (params.totalEvents == 0) { return -1 } else if (params.goodEvents >= params.totalEvents) { return 1 } else { return params.goodEvents / params.totalEvents }',
+              'if (params.totalEvents == 0) { return -1 } else if (params.goodEvents >= params.totalEvents) { return 1 } else { return 1 - (params.totalEvents - params.goodEvents) / params.totalSlicesInPeriod }',
           },
         },
         errorBudgetInitial: {
@@ -112,13 +113,11 @@ export function generateSummaryTransformForTimeslicesAndCalendarAligned(
         errorBudgetConsumed: {
           bucket_script: {
             buckets_path: {
-              goodEvents: 'goodEvents',
-              totalEvents: 'totalEvents',
-              totalSlicesInPeriod: '_totalSlicesInPeriod',
+              sliValue: 'sliValue',
               errorBudgetInitial: 'errorBudgetInitial',
             },
             script:
-              'if (params.totalEvents == 0) { return 0 } else { return (params.totalEvents - params.goodEvents) / (params.totalSlicesInPeriod * params.errorBudgetInitial) }',
+              'if (params.sliValue == -1) { return 0 } else { return (1 - params.sliValue) / params.errorBudgetInitial }',
           },
         },
         errorBudgetRemaining: {

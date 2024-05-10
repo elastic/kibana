@@ -33,7 +33,7 @@ export const createStorybookChatService = (): ObservabilityAIAssistantChatServic
     '@timestamp': new Date().toISOString(),
     message: {
       role: MessageRole.System,
-      content: '',
+      content: 'System',
     },
   }),
 });

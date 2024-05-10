@@ -31,7 +31,7 @@ const getMockedContext = (context: any) =>
 
 const getContextWrapper =
   (context: WorkpadRoutingContextType) =>
-  ({ children }: PropsWithChildren) =>
+  ({ children }: PropsWithChildren<unknown>) =>
     <WorkpadRoutingContext.Provider value={context}>{children}</WorkpadRoutingContext.Provider>;
 
 describe('useRefreshHelper', () => {
