@@ -266,4 +266,31 @@ describe('dashboard renderer', () => {
       wrapper!.find('#superParent').getDOMNode().classList.contains('dshDashboardViewportWrapper')
     ).toBe(true);
   });
+
+  test('adds a class to apply default background color when dashboard has use margin option set to false', async () => {
+    const mockUseMarginFalseEmbeddable = {
+      ...mockDashboardContainer,
+      getInput: jest.fn().mockResolvedValue({ useMargins: false }),
+    } as unknown as DashboardContainer;
+
+    const mockUseMarginFalseFactory = {
+      create: jest.fn().mockReturnValue(mockUseMarginFalseEmbeddable),
+    } as unknown as DashboardContainerFactory;
+    pluginServices.getServices().embeddable.getEmbeddableFactory = jest
+      .fn()
+      .mockReturnValue(mockUseMarginFalseFactory);
+
+    let wrapper: ReactWrapper;
+    await act(async () => {
+      wrapper = await mountWithIntl(
+        <div id="superParent">
+          <DashboardRenderer savedObjectId="saved_object_kibanana" />
+        </div>
+      );
+    });
+
+    expect(
+      wrapper!.find('#superParent').getDOMNode().querySelector('.dashboardViewport--defaultBg')
+    ).not.toBe(null);
+  });
 });

@@ -11,6 +11,10 @@
   align-items: center;
 }
 
+.dashboardViewport--defaultBg {
+  background: $euiColorEmptyShade;
+}
+
 .dshEmptyPromptParent {
   flex-grow: 1;
   display: flex;
