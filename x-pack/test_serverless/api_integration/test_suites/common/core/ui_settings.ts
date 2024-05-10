@@ -25,7 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('ui settings service', () => {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForDefaultRole();
+      roleAuthc = await svlUserManager.createApiKeyForRole('developer');
       // Creating a test setting
       await supertestWithoutAuth
         .post(`/internal/kibana/settings/${TEST_SETTING}`)
