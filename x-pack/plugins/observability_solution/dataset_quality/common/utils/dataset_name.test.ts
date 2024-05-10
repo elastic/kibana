@@ -9,6 +9,7 @@ import {
   dataStreamPartsToIndexName,
   streamPartsToIndexPattern,
   indexNameToDataStreamParts,
+  extractIndexNameFromBackingIndex,
 } from './dataset_name';
 
 describe('dataset_name', () => {
@@ -50,6 +51,32 @@ describe('dataset_name', () => {
         dataset: 'heartbeat-8',
         namespace: 'default',
       });
+    });
+  });
+
+  describe('extractIndexNameFromBackingIndex', () => {
+    it('returns the correct index name if backing index provieded', () => {
+      expect(
+        extractIndexNameFromBackingIndex(
+          '.ds-logs-apm.app.adservice-default-2024.04.29-000001',
+          'logs'
+        )
+      ).toEqual('logs-apm.app.adservice-default');
+    });
+
+    it('returns the correct index name if index name is passed', () => {
+      expect(extractIndexNameFromBackingIndex('logs-nginx.access-default', 'logs')).toEqual(
+        'logs-nginx.access-default'
+      );
+    });
+
+    it('handles different types', () => {
+      expect(
+        extractIndexNameFromBackingIndex(
+          '.ds-metrics-apm.app.adservice-default-2024.04.29-000001',
+          'metrics'
+        )
+      ).toEqual('metrics-apm.app.adservice-default');
     });
   });
 });
