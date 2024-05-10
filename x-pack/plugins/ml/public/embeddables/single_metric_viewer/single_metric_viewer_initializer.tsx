@@ -56,7 +56,9 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
 }) => {
   const isMounted = useMountedState();
   const newJobUrl = useMlLink({ page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB });
-  const [jobIds, setJobIds] = useState(initialInput?.jobIds ?? []);
+  const [jobId, setJobId] = useState<string | undefined>(
+    initialInput?.jobIds && initialInput?.jobIds[0]
+  );
   const titleManuallyChanged = useRef(!!initialInput?.title);
 
   const [job, setJob] = useState<MlJob | undefined>();
@@ -77,7 +79,7 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
   useEffect(
     function setUpPanel() {
       async function fetchJob() {
-        const { jobs } = await mlApiServices.getJobs({ jobId: jobIds.join(',') });
+        const { jobs } = await mlApiServices.getJobs({ jobId });
 
         if (isMounted() && jobs.length === 1) {
           setJob(jobs[0]);
@@ -85,12 +87,12 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
         }
       }
 
-      if (jobIds.length === 1) {
+      if (jobId) {
         if (!titleManuallyChanged.current) {
-          setPanelTitle(getDefaultSingleMetricViewerPanelTitle(jobIds[0]));
+          setPanelTitle(getDefaultSingleMetricViewerPanelTitle(jobId));
         }
         // Fetch job if a jobId has been selected and if there is no corresponding fetched job or the job selection has changed
-        if (mlApiServices && jobIds.length === 1 && jobIds[0] !== job?.job_id) {
+        if (mlApiServices && jobId && jobId !== job?.job_id) {
           fetchJob().catch((error) => {
             const errorMsg = extractErrorMessage(error);
             setErrorMessage(errorMsg);
@@ -98,7 +100,7 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
         }
       }
     },
-    [isMounted, jobIds, mlApiServices, panelTitle, job?.job_id]
+    [isMounted, jobId, mlApiServices, panelTitle, job?.job_id]
   );
 
   const handleStateUpdate = (
@@ -138,9 +140,9 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
           <JobSelectorControl
             adJobsApiService={mlApiServices.jobs}
             createJobUrl={newJobUrl}
-            jobsAndGroupIds={jobIds}
+            jobsAndGroupIds={jobId ? [jobId] : undefined}
             onChange={(update) => {
-              setJobIds([...(update?.jobIds ?? []), ...(update?.groupIds ?? [])]);
+              setJobId(update?.jobIds && update?.jobIds[0]);
               // Reset values when selected job has changed
               setSelectedDetectorIndex(0);
               setSelectedEntities(undefined);
@@ -172,9 +174,9 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
             />
           </EuiFormRow>
           <EuiSpacer />
-          {job?.job_id && jobIds.length && jobIds[0] === job.job_id ? (
+          {job?.job_id && jobId && jobId === job.job_id ? (
             <SeriesControls
-              selectedJobId={jobIds[0]}
+              selectedJobId={jobId}
               job={job}
               direction="column"
               appStateHandler={handleStateUpdate}
@@ -203,11 +205,9 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
           <EuiFlexItem grow={false}>
             <EuiButton
               data-test-subj="mlSingleMetricViewerInitializerConfirmButton"
-              isDisabled={
-                !isPanelTitleValid || errorMessage !== undefined || !jobIds.length || !job
-              }
+              isDisabled={!isPanelTitleValid || errorMessage !== undefined || !jobId || !job}
               onClick={onCreate.bind(null, {
-                jobIds,
+                jobIds: jobId ? [jobId] : [],
                 functionDescription,
                 panelTitle,
                 selectedDetectorIndex,
