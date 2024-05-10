@@ -10,7 +10,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { waitFor } from '@testing-library/react';
 import { DataViewsContract } from '@kbn/data-plugin/public';
 import { discoverServiceMock } from '../../../__mocks__/services';
-import { useTextBasedQueryLanguage } from './use_text_based_query_language';
+import { useEsqlMode } from './use_text_based_query_language';
 import { FetchStatus } from '../../types';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { AggregateQuery, Query } from '@kbn/es-query';
@@ -89,13 +89,13 @@ const renderHookWithContext = (
     });
   }
 
-  renderHook(() => useTextBasedQueryLanguage(props), {
+  renderHook(() => useEsqlMode(props), {
     wrapper: getHookContext(props.stateContainer),
   });
   return props;
 };
 
-describe('useTextBasedQueryLanguage', () => {
+describe('useEsqlMode', () => {
   test('a text based query should change state when loading and finished', async () => {
     const { replaceUrlState, stateContainer } = renderHookWithContext(true);
 
@@ -398,7 +398,7 @@ describe('useTextBasedQueryLanguage', () => {
     const documents$ = stateContainer.dataState.data$.documents$;
     props.stateContainer.actions.setDataView(dataViewMock);
 
-    renderHook(() => useTextBasedQueryLanguage(props), { wrapper: getHookContext(stateContainer) });
+    renderHook(() => useEsqlMode(props), { wrapper: getHookContext(stateContainer) });
 
     documents$.next(msgComplete);
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));

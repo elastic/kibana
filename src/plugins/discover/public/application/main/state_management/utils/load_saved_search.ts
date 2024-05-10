@@ -9,7 +9,7 @@
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { cloneDeep, isEqual } from 'lodash';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { getDataViewByTextBasedQueryLang } from './get_data_view_by_text_based_query_lang';
+import { getEsqlDataView } from './get_data_view_by_text_based_query_lang';
 import { loadAndResolveDataView } from './resolve_data_view';
 import { DiscoverInternalStateContainer } from '../discover_internal_state_container';
 import { DiscoverDataStateContainer } from '../discover_data_state_container';
@@ -212,7 +212,7 @@ const getStateDataView = async (
   }
 
   if (isEsqlQuery) {
-    return await getDataViewByTextBasedQueryLang(query, dataView, services);
+    return await getEsqlDataView(query, dataView, services);
   }
 
   const result = await loadAndResolveDataView(
@@ -220,7 +220,7 @@ const getStateDataView = async (
       id: dataViewId,
       dataViewSpec,
       savedSearch,
-      isTextBasedQuery: isEsqlQuery,
+      isEsqlMode: isEsqlQuery,
     },
     { services, internalStateContainer }
   );

@@ -102,7 +102,7 @@ export function getStateDefaults({
   if (savedSearch.viewMode) {
     defaultState.viewMode = getValidViewMode({
       viewMode: savedSearch.viewMode,
-      isTextBasedQueryMode: isEsqlQuery,
+      isEsqlMode: isEsqlQuery,
     });
   }
   if (savedSearch.hideAggregatedPreview) {

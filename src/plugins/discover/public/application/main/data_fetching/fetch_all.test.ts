@@ -21,7 +21,7 @@ import {
   SavedSearchData,
 } from '../state_management/discover_data_state_container';
 import { fetchDocuments } from './fetch_documents';
-import { fetchTextBased } from './fetch_text_based';
+import { fetchEsql } from './fetch_text_based';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
 import { searchResponseIncompleteWarningLocalCluster } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
@@ -31,11 +31,11 @@ jest.mock('./fetch_documents', () => ({
 }));
 
 jest.mock('./fetch_text_based', () => ({
-  fetchTextBased: jest.fn().mockResolvedValue([]),
+  fetchEsql: jest.fn().mockResolvedValue([]),
 }));
 
 const mockFetchDocuments = fetchDocuments as unknown as jest.MockedFunction<typeof fetchDocuments>;
-const mockfetchTextBased = fetchTextBased as unknown as jest.MockedFunction<typeof fetchTextBased>;
+const mockfetchEsql = fetchEsql as unknown as jest.MockedFunction<typeof fetchEsql>;
 
 function subjectCollector<T>(subject: Subject<T>): () => Promise<T[]> {
   const promise = firstValueFrom(
@@ -89,7 +89,7 @@ describe('test fetchAll', () => {
     };
 
     mockFetchDocuments.mockReset().mockResolvedValue({ records: [] });
-    mockfetchTextBased.mockReset().mockResolvedValue({ records: [] });
+    mockfetchEsql.mockReset().mockResolvedValue({ records: [] });
   });
 
   test('changes of fetchStatus when starting with FetchStatus.UNINITIALIZED', async () => {
@@ -243,9 +243,9 @@ describe('test fetchAll', () => {
       { _id: '2', _index: 'logs' },
     ];
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
-    mockfetchTextBased.mockResolvedValue({
+    mockfetchEsql.mockResolvedValue({
       records: documents,
-      textBasedQueryColumns: [{ id: '1', name: 'test1', meta: { type: 'number' } }],
+      esqlQueryColumns: [{ id: '1', name: 'test1', meta: { type: 'number' } }],
     });
     const query = { esql: 'from foo' };
     deps = {
@@ -276,7 +276,7 @@ describe('test fetchAll', () => {
       {
         fetchStatus: FetchStatus.PARTIAL,
         result: documents,
-        textBasedQueryColumns: [{ id: '1', name: 'test1', meta: { type: 'number' } }],
+        esqlQueryColumns: [{ id: '1', name: 'test1', meta: { type: 'number' } }],
         query,
       },
     ]);
@@ -364,7 +364,7 @@ describe('test fetchAll', () => {
 
     test('should swallow abort errors', async () => {
       const collect = subjectCollector(subjects.documents$);
-      mockfetchTextBased.mockRejectedValue({ msg: 'The query was aborted' });
+      mockfetchEsql.mockRejectedValue({ msg: 'The query was aborted' });
       const query = { esql: 'from foo' };
       deps = {
         abortController: new AbortController(),

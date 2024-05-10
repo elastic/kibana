@@ -23,7 +23,7 @@ const TRANSFORMATIONAL_COMMANDS = ['stats', 'keep'];
  * Hook to take care of text based query language state transformations when a new result is returned
  * If necessary this is setting displayed columns and selected data view
  */
-export function useTextBasedQueryLanguage({
+export function useEsqlMode({
   dataViews,
   stateContainer,
 }: {
@@ -66,7 +66,7 @@ export function useTextBasedQueryLanguage({
           };
           const { viewMode } = stateContainer.appState.getState();
           let nextColumns: string[] = [];
-          const isTextBasedQueryLang = isOfAggregateQueryType(query);
+          const isEsqlQuery = isOfAggregateQueryType(query);
           const hasResults = Boolean(next.result?.length);
           let queryHasTransformationalCommands = false;
           if ('esql' in query) {
@@ -78,7 +78,7 @@ export function useTextBasedQueryLanguage({
             });
           }
 
-          if (isTextBasedQueryLang) {
+          if (isEsqlQuery) {
             const language = getAggregateQueryMode(query);
             if (next.fetchStatus !== FetchStatus.PARTIAL) {
               return;
@@ -100,8 +100,7 @@ export function useTextBasedQueryLanguage({
             }
             const addColumnsToState = !isEqual(nextColumns, prev.current.columns);
             const queryChanged = query[language] !== prev.current.query;
-            const changeViewMode =
-              viewMode !== getValidViewMode({ viewMode, isTextBasedQueryMode: true });
+            const changeViewMode = viewMode !== getValidViewMode({ viewMode, isEsqlMode: true });
             if (!queryChanged || (!addColumnsToState && !changeViewMode)) {
               sendComplete();
               return;

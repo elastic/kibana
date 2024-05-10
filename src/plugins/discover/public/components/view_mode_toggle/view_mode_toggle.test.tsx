@@ -23,7 +23,7 @@ describe('Document view mode toggle component', () => {
   const mountComponent = ({
     showFieldStatistics = true,
     viewMode = VIEW_MODE.DOCUMENT_LEVEL,
-    isTextBasedQuery = false,
+    isEsqlMode = false,
     setDiscoverViewMode = jest.fn(),
   } = {}) => {
     const services = {
@@ -43,7 +43,7 @@ describe('Document view mode toggle component', () => {
       <KibanaContextProvider services={services}>
         <DocumentViewModeToggle
           viewMode={viewMode}
-          isTextBasedQuery={isTextBasedQuery}
+          isEsqlMode={isEsqlMode}
           stateContainer={stateContainer}
           setDiscoverViewMode={setDiscoverViewMode}
         />
@@ -64,7 +64,7 @@ describe('Document view mode toggle component', () => {
   });
 
   it('should not render if text-based', () => {
-    const component = mountComponent({ isTextBasedQuery: true });
+    const component = mountComponent({ isEsqlMode: true });
     expect(findTestSubject(component, 'dscViewModeToggle').exists()).toBe(false);
     expect(findTestSubject(component, 'discoverQueryTotalHits').exists()).toBe(true);
   });

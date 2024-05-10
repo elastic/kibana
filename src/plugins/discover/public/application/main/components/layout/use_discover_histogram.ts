@@ -226,23 +226,23 @@ export const useDiscoverHistogram = ({
   // columns only when documents are done fetching so the Lens suggestions
   // don't frequently change, such as when the user modifies the table
   // columns, which would trigger unnecessary refetches.
-  const textBasedFetchComplete$ = useMemo(
+  const esqlFetchComplete$ = useMemo(
     () => createFetchCompleteObservable(stateContainer),
     [stateContainer]
   );
 
-  const [initialTextBasedProps] = useState(() =>
-    getUnifiedHistogramPropsForTextBased({
+  const [initialEsqlProps] = useState(() =>
+    getUnifiedHistogramPropsForEsql({
       documentsValue: savedSearchData$.documents$.getValue(),
       savedSearch: stateContainer.savedSearchState.getState(),
     })
   );
 
   const {
-    dataView: textBasedDataView,
-    query: textBasedQuery,
-    columns: textBasedColumns,
-  } = useObservable(textBasedFetchComplete$, initialTextBasedProps);
+    dataView: esqlDataView,
+    query: esqlQuery,
+    columns: esqlColumns,
+  } = useObservable(esqlFetchComplete$, initialEsqlProps);
 
   useEffect(() => {
     if (!isEsqlMode) {
@@ -254,7 +254,7 @@ export const useDiscoverHistogram = ({
         setIsSuggestionLoading(true);
       }
     });
-    const fetchComplete = textBasedFetchComplete$.subscribe(() => {
+    const fetchComplete = esqlFetchComplete$.subscribe(() => {
       setIsSuggestionLoading(false);
     });
 
@@ -262,7 +262,7 @@ export const useDiscoverHistogram = ({
       fetchStart.unsubscribe();
       fetchComplete.unsubscribe();
     };
-  }, [isEsqlMode, stateContainer.dataState.fetch$, textBasedFetchComplete$]);
+  }, [isEsqlMode, stateContainer.dataState.fetch$, esqlFetchComplete$]);
 
   /**
    * Data fetching
@@ -298,7 +298,7 @@ export const useDiscoverHistogram = ({
     if (isEsqlMode) {
       fetch$ = merge(
         createCurrentSuggestionObservable(unifiedHistogram.state$).pipe(map(() => 'lens')),
-        textBasedFetchComplete$.pipe(map(() => 'discover'))
+        esqlFetchComplete$.pipe(map(() => 'discover'))
       ).pipe(debounceTime(50));
     } else {
       fetch$ = stateContainer.dataState.fetch$.pipe(
@@ -325,7 +325,7 @@ export const useDiscoverHistogram = ({
     return () => {
       subscription.unsubscribe();
     };
-  }, [isEsqlMode, stateContainer.dataState.fetch$, textBasedFetchComplete$, unifiedHistogram]);
+  }, [isEsqlMode, stateContainer.dataState.fetch$, esqlFetchComplete$, unifiedHistogram]);
 
   const dataView = useInternalStateSelector((state) => state.dataView!);
 
@@ -382,12 +382,12 @@ export const useDiscoverHistogram = ({
     ref,
     getCreationOptions,
     services,
-    dataView: isEsqlMode ? textBasedDataView : dataView,
-    query: isEsqlMode ? textBasedQuery : query,
+    dataView: isEsqlMode ? esqlDataView : dataView,
+    query: isEsqlMode ? esqlQuery : query,
     filters: filtersMemoized,
     timeRange: timeRangeMemoized,
     relativeTimeRange,
-    columns: isEsqlMode ? textBasedColumns : undefined,
+    columns: isEsqlMode ? esqlColumns : undefined,
     onFilter: histogramCustomization?.onFilter,
     onBrushEnd: histogramCustomization?.onBrushEnd,
     withDefaultActions: histogramCustomization?.withDefaultActions,
@@ -474,7 +474,7 @@ const createFetchCompleteObservable = (stateContainer: DiscoverStateContainer) =
     distinctUntilChanged((prev, curr) => prev.fetchStatus === curr.fetchStatus),
     filter(({ fetchStatus }) => [FetchStatus.COMPLETE, FetchStatus.ERROR].includes(fetchStatus)),
     map((documentsValue) => {
-      return getUnifiedHistogramPropsForTextBased({
+      return getUnifiedHistogramPropsForEsql({
         documentsValue,
         savedSearch: stateContainer.savedSearchState.getState(),
       });
@@ -496,14 +496,14 @@ const createCurrentSuggestionObservable = (state$: Observable<UnifiedHistogramSt
   );
 };
 
-function getUnifiedHistogramPropsForTextBased({
+function getUnifiedHistogramPropsForEsql({
   documentsValue,
   savedSearch,
 }: {
   documentsValue: DataDocumentsMsg | undefined;
   savedSearch: SavedSearch;
 }) {
-  const columns = documentsValue?.textBasedQueryColumns || EMPTY_TEXT_BASED_COLUMNS;
+  const columns = documentsValue?.esqlQueryColumns || EMPTY_TEXT_BASED_COLUMNS;
 
   const nextProps = {
     dataView: savedSearch.searchSource.getField('index')!,

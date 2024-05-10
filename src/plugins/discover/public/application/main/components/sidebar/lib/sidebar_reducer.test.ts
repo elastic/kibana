@@ -51,13 +51,13 @@ describe('sidebar reducer', function () {
         status: DiscoverSidebarReducerStatus.PROCESSING,
       })
     );
-    const resultForTextBasedQuery = discoverSidebarReducer(state, {
+    const resultForEsqlQuery = discoverSidebarReducer(state, {
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING,
       payload: {
         isEsqlMode: true,
       },
     });
-    expect(resultForTextBasedQuery).toEqual(
+    expect(resultForEsqlQuery).toEqual(
       expect.objectContaining({
         dataView,
         allFields: null,
@@ -96,13 +96,13 @@ describe('sidebar reducer', function () {
       status: DiscoverSidebarReducerStatus.COMPLETED,
     });
 
-    const resultForTextBasedQuery = discoverSidebarReducer(state, {
+    const resultForEsqlQuery = discoverSidebarReducer(state, {
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
       payload: {
         isEsqlMode: true,
         dataView: stubDataViewWithoutTimeField,
         fieldCounts: {},
-        textBasedQueryColumns: [
+        esqlQueryColumns: [
           {
             id: '1',
             name: 'text1',
@@ -122,7 +122,7 @@ describe('sidebar reducer', function () {
         ] as DatatableColumn[],
       },
     });
-    expect(resultForTextBasedQuery).toStrictEqual({
+    expect(resultForEsqlQuery).toStrictEqual({
       dataView: stubDataViewWithoutTimeField,
       allFields: [
         new DataViewField({

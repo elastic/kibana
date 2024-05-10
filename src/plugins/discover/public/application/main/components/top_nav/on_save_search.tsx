@@ -126,7 +126,7 @@ export async function onSaveSearch({
     savedSearch.timeRestore = newTimeRestore;
     savedSearch.rowsPerPage = isLegacyTableEnabled({
       uiSettings,
-      isTextBasedQueryMode: isOfAggregateQueryType(savedSearch.searchSource.getField('query')),
+      isEsqlMode: isOfAggregateQueryType(savedSearch.searchSource.getField('query')),
     })
       ? currentRowsPerPage
       : state.appState.getState().rowsPerPage;

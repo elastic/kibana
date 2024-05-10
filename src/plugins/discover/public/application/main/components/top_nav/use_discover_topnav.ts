@@ -55,7 +55,7 @@ export const useDiscoverTopNav = ({
         services,
         state: stateContainer,
         onOpenInspector,
-        isTextBased: isEsqlMode,
+        isEsqlMode,
         adHocDataViews,
         topNavCustomization,
       }),

@@ -29,8 +29,8 @@ import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 export interface DiscoverTopNavProps {
   savedQuery?: string;
   stateContainer: DiscoverStateContainer;
-  textBasedLanguageModeErrors?: Error;
-  textBasedLanguageModeWarning?: string;
+  esqlModeErrors?: Error;
+  esqlModeWarning?: string;
   onFieldEdited: () => Promise<void>;
   isLoading?: boolean;
   onCancelClick?: () => void;
@@ -39,8 +39,8 @@ export interface DiscoverTopNavProps {
 export const DiscoverTopNav = ({
   savedQuery,
   stateContainer,
-  textBasedLanguageModeErrors,
-  textBasedLanguageModeWarning,
+  esqlModeErrors,
+  esqlModeWarning,
   onFieldEdited,
   isLoading,
   onCancelClick,
@@ -150,7 +150,7 @@ export const DiscoverTopNav = ({
     }
   };
 
-  const onTextBasedSavedAndExit = useCallback(
+  const onEsqlSavedAndExit = useCallback(
     ({ onSave, onCancel }) => {
       onSaveSearch({
         savedSearch: stateContainer.savedSearchState.getState(),
@@ -256,11 +256,9 @@ export const DiscoverTopNav = ({
         shouldHideDefaultDataviewPicker ? undefined : dataViewPickerProps
       }
       displayStyle="detached"
-      textBasedLanguageModeErrors={
-        textBasedLanguageModeErrors ? [textBasedLanguageModeErrors] : undefined
-      }
-      textBasedLanguageModeWarning={textBasedLanguageModeWarning}
-      onTextBasedSavedAndExit={onTextBasedSavedAndExit}
+      textBasedLanguageModeErrors={esqlModeErrors ? [esqlModeErrors] : undefined}
+      textBasedLanguageModeWarning={esqlModeWarning}
+      onTextBasedSavedAndExit={onEsqlSavedAndExit}
       prependFilterBar={
         searchBarCustomization?.PrependFilterBar ? (
           <searchBarCustomization.PrependFilterBar />

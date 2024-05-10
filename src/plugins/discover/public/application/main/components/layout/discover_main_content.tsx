@@ -85,7 +85,7 @@ export const DiscoverMainContent = ({
     return shouldShowViewModeToggle ? (
       <DocumentViewModeToggle
         viewMode={viewMode}
-        isTextBasedQuery={isEsqlMode}
+        isEsqlMode={isEsqlMode}
         stateContainer={stateContainer}
         setDiscoverViewMode={setDiscoverViewMode}
         prepend={

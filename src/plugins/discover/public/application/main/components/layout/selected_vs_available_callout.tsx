@@ -13,11 +13,11 @@ import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 
 interface SelectedVSAvailableCallout {
   selectedColumns: string[];
-  textBasedQueryColumns?: DatatableColumn[];
+  esqlQueryColumns?: DatatableColumn[];
 }
 
 export const SelectedVSAvailableCallout = ({
-  textBasedQueryColumns,
+  esqlQueryColumns,
   selectedColumns,
 }: SelectedVSAvailableCallout) => {
   const isEsqlMode = useIsEsqlMode();
@@ -25,9 +25,9 @@ export const SelectedVSAvailableCallout = ({
   return (
     <>
       {isEsqlMode &&
-        textBasedQueryColumns &&
+        esqlQueryColumns &&
         selectedColumns.length > 0 &&
-        selectedColumns.length < textBasedQueryColumns.length && (
+        selectedColumns.length < esqlQueryColumns.length && (
           <EuiCallOut
             color="primary"
             data-test-subj="dscSelectedColumnsCallout"
@@ -36,7 +36,7 @@ export const SelectedVSAvailableCallout = ({
               defaultMessage:
                 'Displaying {selectedColumnsNumber} of {textBasedQueryColumnsNumber} fields. Add more from the Available fields list.',
               values: {
-                textBasedQueryColumnsNumber: textBasedQueryColumns.length,
+                textBasedQueryColumnsNumber: esqlQueryColumns.length,
                 selectedColumnsNumber: selectedColumns.length,
               },
             })}

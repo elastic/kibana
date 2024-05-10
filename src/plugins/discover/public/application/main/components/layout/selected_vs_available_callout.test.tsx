@@ -15,7 +15,7 @@ describe('SelectedVSAvailableCallout', () => {
   it('should render the callout if in ES|QL mode and the selected columns are less than the available ones', async () => {
     const component = mountWithIntl(
       <SelectedVSAvailableCallout
-        textBasedQueryColumns={
+        esqlQueryColumns={
           [
             { id: '1', name: 'extension', meta: { type: 'text' } },
             { id: '2', name: 'bytes', meta: { type: 'number' } },
@@ -30,7 +30,7 @@ describe('SelectedVSAvailableCallout', () => {
 
   it('should not render the callout if not in ES|QL mode', async () => {
     const component = mountWithIntl(
-      <SelectedVSAvailableCallout textBasedQueryColumns={undefined} selectedColumns={['bytes']} />
+      <SelectedVSAvailableCallout esqlQueryColumns={undefined} selectedColumns={['bytes']} />
     );
     expect(component.find('[data-test-subj="dscSelectedColumnsCallout"]').exists()).toBe(false);
   });
@@ -38,7 +38,7 @@ describe('SelectedVSAvailableCallout', () => {
   it('should not render the callout if in ES|QL mode but the selected columns are equal with the available ones', async () => {
     const component = mountWithIntl(
       <SelectedVSAvailableCallout
-        textBasedQueryColumns={
+        esqlQueryColumns={
           [{ id: '2', name: 'bytes', meta: { type: 'number' } }] as DatatableColumn[]
         }
         selectedColumns={['bytes']}

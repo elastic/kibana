@@ -125,7 +125,7 @@ function DiscoverDocumentsComponent({
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
   const hideAnnouncements = useMemo(() => uiSettings.get(HIDE_ANNOUNCEMENTS), [uiSettings]);
   const isLegacy = useMemo(
-    () => isLegacyTableEnabled({ uiSettings, isTextBasedQueryMode: isEsqlMode }),
+    () => isLegacyTableEnabled({ uiSettings, isEsqlMode }),
     [uiSettings, isEsqlMode]
   );
   const documentState = useDataState(documents$);
@@ -149,7 +149,6 @@ function DiscoverDocumentsComponent({
   const rows = useMemo(() => documentState.result || [], [documentState.result]);
 
   const { isMoreDataLoading, totalHits, onFetchMoreRecords } = useFetchMoreRecords({
-    isTextBasedQuery: isEsqlMode,
     stateContainer,
   });
 
@@ -225,10 +224,10 @@ function DiscoverDocumentsComponent({
 
   const columnsMeta: DataTableColumnsMeta | undefined = useMemo(
     () =>
-      documentState.textBasedQueryColumns
-        ? getTextBasedColumnsMeta(documentState.textBasedQueryColumns)
+      documentState.esqlQueryColumns
+        ? getTextBasedColumnsMeta(documentState.esqlQueryColumns)
         : undefined,
-    [documentState.textBasedQueryColumns]
+    [documentState.esqlQueryColumns]
   );
 
   const renderDocumentView = useCallback(
@@ -269,13 +268,13 @@ function DiscoverDocumentsComponent({
     () => (
       <>
         <SelectedVSAvailableCallout
-          textBasedQueryColumns={documents?.textBasedQueryColumns}
+          esqlQueryColumns={documents?.esqlQueryColumns}
           selectedColumns={currentColumns}
         />
         <SearchResponseWarningsCallout warnings={documentState.interceptedWarnings ?? []} />
       </>
     ),
-    [currentColumns, documents?.textBasedQueryColumns, documentState.interceptedWarnings]
+    [currentColumns, documents?.esqlQueryColumns, documentState.interceptedWarnings]
   );
 
   const gridAnnouncementCallout = useMemo(() => {
@@ -284,7 +283,7 @@ function DiscoverDocumentsComponent({
     }
 
     return !isEsqlMode ? (
-      <DiscoverTourProvider isEsqlMode={isEsqlMode}>
+      <DiscoverTourProvider>
         <DocumentExplorerUpdateCallout />
       </DiscoverTourProvider>
     ) : null;

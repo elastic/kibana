@@ -212,13 +212,13 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const contentCentered = resultState === 'uninitialized' || resultState === 'none';
   const documentState = useDataState(stateContainer.dataState.data$.documents$);
 
-  const textBasedLanguageModeWarning = useMemo(() => {
+  const esqlModeWarning = useMemo(() => {
     if (isEsqlMode) {
-      return documentState.textBasedHeaderWarning;
+      return documentState.esqlHeaderWarning;
     }
-  }, [documentState.textBasedHeaderWarning, isEsqlMode]);
+  }, [documentState.esqlHeaderWarning, isEsqlMode]);
 
-  const textBasedLanguageModeErrors = useMemo(() => {
+  const esqlModeErrors = useMemo(() => {
     if (isEsqlMode) {
       return dataState.error;
     }
@@ -327,8 +327,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       <TopNavMemoized
         savedQuery={savedQuery}
         stateContainer={stateContainer}
-        textBasedLanguageModeErrors={textBasedLanguageModeErrors}
-        textBasedLanguageModeWarning={textBasedLanguageModeWarning}
+        esqlModeErrors={esqlModeErrors}
+        esqlModeWarning={esqlModeWarning}
         onFieldEdited={onFieldEdited}
         isLoading={isLoading}
         onCancelClick={onCancelClick}

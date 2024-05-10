@@ -100,7 +100,7 @@ export const buildStateSubscribe =
         : undefined;
 
       const { dataView: nextDataView, fallback } = await loadAndResolveDataView(
-        { id: dataViewId, savedSearch, isTextBasedQuery: isEsqlMode },
+        { id: dataViewId, savedSearch, isEsqlMode },
         { internalStateContainer: internalState, services }
       );
 

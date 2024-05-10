@@ -27,7 +27,7 @@ import { fetchDocuments } from './fetch_documents';
 import { FetchStatus } from '../../types';
 import { DataMsg, SavedSearchData } from '../state_management/discover_data_state_container';
 import { DiscoverServices } from '../../../build_services';
-import { fetchTextBased } from './fetch_text_based';
+import { fetchEsql } from './fetch_text_based';
 import { InternalState } from '../state_management/discover_internal_state_container';
 
 export interface FetchDeps {
@@ -85,22 +85,22 @@ export function fetchAll(
       });
     }
 
-    const shouldFetchTextBased = isEsqlQuery && !!query;
+    const shouldFetchEsql = isEsqlQuery && !!query;
 
     // Mark all subjects as loading
     sendLoadingMsg(dataSubjects.main$);
     sendLoadingMsg(dataSubjects.documents$);
 
     // histogram for data view mode will send `loading` for totalHits$
-    if (shouldFetchTextBased) {
+    if (shouldFetchEsql) {
       sendLoadingMsg(dataSubjects.totalHits$, {
         result: dataSubjects.totalHits$.getValue().result,
       });
     }
 
     // Start fetching all required requests
-    const response = shouldFetchTextBased
-      ? fetchTextBased(
+    const response = shouldFetchEsql
+      ? fetchEsql(
           query,
           dataView,
           data,
@@ -109,11 +109,11 @@ export function fetchAll(
           abortController.signal
         )
       : fetchDocuments(searchSource, fetchDeps);
-    const fetchType = shouldFetchTextBased ? 'fetchTextBased' : 'fetchDocuments';
+    const fetchType = shouldFetchEsql ? 'fetchTextBased' : 'fetchDocuments';
     const startTime = window.performance.now();
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response
-      .then(({ records, textBasedQueryColumns, interceptedWarnings, textBasedHeaderWarning }) => {
+      .then(({ records, esqlQueryColumns, interceptedWarnings, esqlHeaderWarning }) => {
         if (services.analytics) {
           const duration = window.performance.now() - startTime;
           reportPerformanceMetricEvent(services.analytics, {
@@ -123,7 +123,7 @@ export function fetchAll(
           });
         }
 
-        if (shouldFetchTextBased) {
+        if (shouldFetchEsql) {
           dataSubjects.totalHits$.next({
             fetchStatus: FetchStatus.COMPLETE,
             result: records.length,
@@ -142,7 +142,7 @@ export function fetchAll(
         }
         /**
          * The partial state for text based query languages is necessary in case the query has changed
-         * In the follow up useTextBasedQueryLanguage hook in this case new columns are added to AppState
+         * In the follow up useEsqlMode hook in this case new columns are added to AppState
          * So the data table shows the new columns of the table. The partial state was introduced to prevent
          * To frequent change of state causing the table to re-render to often, which causes race conditions
          * So it takes too long, a bad user experience, also a potential flakniess in tests
@@ -155,8 +155,8 @@ export function fetchAll(
         dataSubjects.documents$.next({
           fetchStatus,
           result: records,
-          textBasedQueryColumns,
-          textBasedHeaderWarning,
+          esqlQueryColumns,
+          esqlHeaderWarning,
           interceptedWarnings,
           query,
         });

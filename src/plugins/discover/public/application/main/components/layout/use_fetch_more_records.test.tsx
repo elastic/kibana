@@ -48,7 +48,6 @@ describe('useFetchMoreRecords', () => {
       result: { current },
     } = renderHook((props) => useFetchMoreRecords(props), {
       initialProps: {
-        isTextBasedQuery: false,
         stateContainer: getStateContainer({
           fetchStatus: FetchStatus.COMPLETE,
           loadedRecordsCount: 3,
@@ -67,7 +66,6 @@ describe('useFetchMoreRecords', () => {
       result: { current },
     } = renderHook((props) => useFetchMoreRecords(props), {
       initialProps: {
-        isTextBasedQuery: false,
         stateContainer: getStateContainer({
           fetchStatus: FetchStatus.COMPLETE,
           loadedRecordsCount: 3,
@@ -85,7 +83,6 @@ describe('useFetchMoreRecords', () => {
       result: { current },
     } = renderHook((props) => useFetchMoreRecords(props), {
       initialProps: {
-        isTextBasedQuery: false,
         stateContainer: getStateContainer({
           fetchStatus: FetchStatus.COMPLETE,
           loadedRecordsCount: 0,
@@ -103,7 +100,6 @@ describe('useFetchMoreRecords', () => {
       result: { current },
     } = renderHook((props) => useFetchMoreRecords(props), {
       initialProps: {
-        isTextBasedQuery: false,
         stateContainer: getStateContainer({
           fetchStatus: FetchStatus.LOADING_MORE,
           loadedRecordsCount: 3,
@@ -121,7 +117,6 @@ describe('useFetchMoreRecords', () => {
       result: { current },
     } = renderHook((props) => useFetchMoreRecords(props), {
       initialProps: {
-        isTextBasedQuery: true,
         stateContainer: getStateContainer({
           fetchStatus: FetchStatus.COMPLETE,
           loadedRecordsCount: 3,
