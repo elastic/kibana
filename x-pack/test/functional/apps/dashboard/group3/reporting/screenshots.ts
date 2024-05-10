@@ -201,12 +201,13 @@ export default function ({
         await PageObjects.dashboard.loadSavedDashboard('[K7.6-eCommerce] Revenue Dashboard');
 
         await PageObjects.reporting.openExportTab();
+        await testSubjects.click('pngV2-radioOption');
         await PageObjects.reporting.forceSharedItemsContainerSize({ width: 1405 });
         await PageObjects.reporting.clickGenerateReportButton();
         await PageObjects.reporting.removeForceSharedItemsContainerSize();
 
         const url = await PageObjects.reporting.getReportURL(60000);
-        const reportData = await PageObjects.reporting.getRawPdfReportData(url ?? '');
+        const reportData = await PageObjects.reporting.getRawReportData(url ?? '');
         sessionReportPath = await PageObjects.reporting.writeSessionReport(
           reportFileName,
           'png',
@@ -227,7 +228,7 @@ export default function ({
         );
       });
 
-      xit('PNG file matches the baseline image', async function () {
+      it('PNG file matches the baseline image', async function () {
         this.timeout(300000);
         const percentDiff = await png.compareAgainstBaseline(
           sessionReportPath,
