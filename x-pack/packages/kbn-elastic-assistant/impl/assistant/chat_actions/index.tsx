@@ -13,7 +13,6 @@ interface OwnProps {
   isDisabled: boolean;
   isLoading: boolean;
   promptValue?: string;
-  onChatCleared: () => void;
   onSendMessage: () => void;
 }
 
@@ -25,7 +24,6 @@ type Props = OwnProps;
 export const ChatActions: React.FC<Props> = ({
   isDisabled,
   isLoading,
-  onChatCleared,
   onSendMessage,
   promptValue,
 }) => {

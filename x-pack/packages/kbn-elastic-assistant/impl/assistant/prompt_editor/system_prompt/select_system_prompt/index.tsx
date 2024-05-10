@@ -34,7 +34,6 @@ export interface Props {
   conversation?: Conversation;
   selectedPrompt: Prompt | undefined;
   clearSelectedSystemPrompt?: () => void;
-  isClearable?: boolean;
   isDisabled?: boolean;
   isOpen?: boolean;
   isSettingsModalVisible: boolean;
@@ -51,7 +50,6 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
   conversation,
   selectedPrompt,
   clearSelectedSystemPrompt,
-  isClearable = false,
   isDisabled = false,
   isOpen = false,
   isSettingsModalVisible,
@@ -62,7 +60,6 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
   const { setSelectedSettingsTab } = useAssistantContext();
   const { setApiConfig } = useConversation();
 
-  const [isEditing, setIsEditing] = React.useState<boolean>(false);
   const [isOpenLocal, setIsOpenLocal] = useState<boolean>(isOpen);
   const [valueOfSelected, setValueOfSelected] = useState<string | undefined>(
     selectedPrompt?.id ?? allSystemPrompts?.[0]?.id
@@ -125,12 +122,10 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
         setSelectedSystemPrompt(allSystemPrompts.find((sp) => sp.id === selectedSystemPromptId));
       }
       setValueOfSelected(selectedSystemPromptId);
-      setIsEditing?.(false);
     },
     [
       allSystemPrompts,
       onSystemPromptSelectionChange,
-      setIsEditing,
       setIsSettingsModalVisible,
       setSelectedSettingsTab,
       setSelectedSystemPrompt,
@@ -139,15 +134,9 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
 
   const clearSystemPrompt = useCallback(() => {
     setSelectedSystemPrompt(undefined);
-    setIsEditing?.(false);
     clearSelectedSystemPrompt?.();
     setValueOfSelected(undefined);
-  }, [clearSelectedSystemPrompt, setIsEditing, setSelectedSystemPrompt]);
-
-  const onShowSelectSystemPrompt = useCallback(() => {
-    setIsEditing?.(true);
-    setIsOpenLocal(true);
-  }, [setIsEditing]);
+  }, [clearSelectedSystemPrompt, setSelectedSystemPrompt]);
 
   return (
     <EuiFlexGroup
@@ -163,45 +152,43 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
           max-width: 100%;
         `}
       >
-        {isEditing && (
-          <EuiFormRow
+        <EuiFormRow
+          css={css`
+            min-width: 100%;
+          `}
+        >
+          <EuiSuperSelect
+            // Limits popover z-index to prevent it from getting too high and covering tooltips.
+            // If the z-index is not defined, when a popover is opened, it sets the target z-index + 2000
+            popoverProps={{ zIndex: euiThemeVars.euiZLevel8 }}
+            compressed={compressed}
+            data-test-subj={TEST_IDS.PROMPT_SUPERSELECT}
+            fullWidth
+            hasDividers
+            itemLayoutAlign="top"
+            disabled={isDisabled}
+            isOpen={isOpenLocal && !isSettingsModalVisible}
+            onChange={onChange}
+            onBlur={handleOnBlur}
+            options={[...options, addNewSystemPrompt]}
+            placeholder={i18n.SELECT_A_SYSTEM_PROMPT}
+            valueOfSelected={valueOfSelected}
+            prepend={!isSettingsModalVisible ? PROMPT_CONTEXT_SELECTOR_PREFIX : undefined}
             css={css`
-              min-width: 100%;
+              padding-right: 56px !important;
             `}
-          >
-            <EuiSuperSelect
-              // Limits popover z-index to prevent it from getting too high and covering tooltips.
-              // If the z-index is not defined, when a popover is opened, it sets the target z-index + 2000
-              popoverProps={{ zIndex: euiThemeVars.euiZLevel8 }}
-              compressed={compressed}
-              data-test-subj={TEST_IDS.PROMPT_SUPERSELECT}
-              fullWidth
-              hasDividers
-              itemLayoutAlign="top"
-              disabled={isDisabled}
-              isOpen={isOpenLocal && !isSettingsModalVisible}
-              onChange={onChange}
-              onBlur={handleOnBlur}
-              options={[...options, addNewSystemPrompt]}
-              placeholder={i18n.SELECT_A_SYSTEM_PROMPT}
-              valueOfSelected={valueOfSelected}
-              prepend={!isSettingsModalVisible ? PROMPT_CONTEXT_SELECTOR_PREFIX : undefined}
-              css={css`
-                padding-right: 56px !important;
-              `}
-            />
-          </EuiFormRow>
-        )}
+          />
+        </EuiFormRow>
       </EuiFlexItem>
 
-      <EuiFlexItem
-        grow={false}
-        css={css`
-          position: absolute;
-          right: 36px;
-        `}
-      >
-        {isEditing && isClearable && selectedPrompt && (
+      {selectedPrompt && (
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            position: absolute;
+            right: 36px;
+          `}
+        >
           <EuiToolTip content={i18n.CLEAR_SYSTEM_PROMPT}>
             <EuiButtonIcon
               aria-label={i18n.CLEAR_SYSTEM_PROMPT}
@@ -232,18 +219,8 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
               }
             />
           </EuiToolTip>
-        )}
-        {!isEditing && (
-          <EuiToolTip content={i18n.ADD_SYSTEM_PROMPT_TOOLTIP}>
-            <EuiButtonIcon
-              aria-label={i18n.ADD_SYSTEM_PROMPT_TOOLTIP}
-              data-test-subj="addSystemPrompt"
-              iconType="plus"
-              onClick={onShowSelectSystemPrompt}
-            />
-          </EuiToolTip>
-        )}
-      </EuiFlexItem>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

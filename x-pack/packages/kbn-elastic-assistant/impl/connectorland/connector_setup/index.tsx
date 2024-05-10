@@ -69,7 +69,6 @@ export const useConnectorSetup = ({
           onConversationUpdate({ cId: updatedConversation.id, cTitle: updatedConversation.title });
 
           refetchConnectors?.();
-          setIsConnectorModalVisible(false);
         }
       } else {
         refetchConnectors?.();

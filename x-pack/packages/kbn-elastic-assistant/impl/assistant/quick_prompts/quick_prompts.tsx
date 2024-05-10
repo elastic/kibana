@@ -139,6 +139,7 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
                       color={'primary'}
                       iconType={'boxesHorizontal'}
                       onClick={toggleOverflowPopover}
+                      aria-label={i18n.QUICK_PROMPT_OVERFLOW_ARIA}
                     />
                   }
                   isOpen={isOverflowPopoverOpen}

@@ -5,145 +5,256 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
-  EuiSpacer,
-  EuiSwitch,
+  EuiPopover,
+  EuiContextMenu,
+  EuiButtonIcon,
+  EuiPanel,
+  EuiConfirmModal,
   EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { isEmpty } from 'lodash';
-import { AIConnector } from '../../connectorland/connector_selector';
 import { Conversation } from '../../..';
 import { AssistantTitle } from '../assistant_title';
-import { ConversationSelector } from '../conversations/conversation_selector';
+import { ConnectorSelectorInline } from '../../connectorland/connector_selector_inline/connector_selector_inline';
+import { FlyoutNavigation } from '../assistant_overlay/flyout_navigation';
 import { AssistantSettingsButton } from '../settings/assistant_settings_button';
 import * as i18n from './translations';
+import { AIConnector } from '../../connectorland/connector_selector';
 
-interface OwnProps {
-  currentConversation?: Conversation;
+export interface AssistantHeaderProps {
+  selectedConversation: Conversation | undefined;
   defaultConnector?: AIConnector;
   isDisabled: boolean;
   isSettingsModalVisible: boolean;
-  onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
-  onConversationDeleted: (conversationId: string) => void;
   onToggleShowAnonymizedValues: () => void;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  shouldDisableKeyboardShortcut?: () => boolean;
   showAnonymizedValues: boolean;
-  title: string;
+  onChatCleared: () => void;
+  onCloseFlyout?: () => void;
+  chatHistoryVisible?: boolean;
+  setChatHistoryVisible?: React.Dispatch<React.SetStateAction<boolean>>;
+  onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
   conversations: Record<string, Conversation>;
   refetchConversationsState: () => Promise<void>;
+  onConversationCreate: () => Promise<void>;
 }
 
-type Props = OwnProps;
 /**
  * Renders the header of the Elastic AI Assistant.
  * Provide a user interface for selecting and managing conversations,
  * toggling the display of anonymized values, and accessing the assistant settings.
  */
-export const AssistantHeader: React.FC<Props> = ({
-  currentConversation,
+export const AssistantHeader: React.FC<AssistantHeaderProps> = ({
+  selectedConversation,
   defaultConnector,
   isDisabled,
   isSettingsModalVisible,
-  onConversationSelected,
-  onConversationDeleted,
   onToggleShowAnonymizedValues,
   setIsSettingsModalVisible,
-  shouldDisableKeyboardShortcut,
   showAnonymizedValues,
-  title,
+  onChatCleared,
+  chatHistoryVisible,
+  setChatHistoryVisible,
+  onCloseFlyout,
+  onConversationSelected,
   conversations,
   refetchConversationsState,
+  onConversationCreate,
 }) => {
   const showAnonymizedValuesChecked = useMemo(
     () =>
-      currentConversation?.replacements != null &&
-      Object.keys(currentConversation?.replacements).length > 0 &&
+      selectedConversation?.replacements != null &&
+      Object.keys(selectedConversation?.replacements).length > 0 &&
       showAnonymizedValues,
-    [currentConversation?.replacements, showAnonymizedValues]
+    [selectedConversation?.replacements, showAnonymizedValues]
   );
 
-  const selectedConversationId = useMemo(
-    () =>
-      !isEmpty(currentConversation?.id) ? currentConversation?.id : currentConversation?.title,
-    [currentConversation?.id, currentConversation?.title]
+  const selectedConnectorId = useMemo(
+    () => selectedConversation?.apiConfig?.connectorId,
+    [selectedConversation?.apiConfig?.connectorId]
   );
+
+  const [isPopoverOpen, setPopover] = useState(false);
+
+  const onButtonClick = useCallback(() => {
+    setPopover(!isPopoverOpen);
+  }, [isPopoverOpen]);
+
+  const closePopover = useCallback(() => {
+    setPopover(false);
+  }, []);
+
+  const [isResetConversationModalVisible, setIsResetConversationModalVisible] = useState(false);
+
+  const closeDestroyModal = useCallback(() => setIsResetConversationModalVisible(false), []);
+  const showDestroyModal = useCallback(() => setIsResetConversationModalVisible(true), []);
+
+  const onConversationChange = useCallback(
+    (updatedConversation) => {
+      onConversationSelected({
+        cId: updatedConversation.id,
+        cTitle: updatedConversation.title,
+      });
+    },
+    [onConversationSelected]
+  );
+
+  const panels = useMemo(
+    () => [
+      {
+        id: 0,
+        items: [
+          {
+            name: i18n.RESET_CONVERSATION,
+            css: css`
+              color: ${euiThemeVars.euiColorDanger};
+            `,
+            onClick: showDestroyModal,
+            icon: 'refresh',
+          },
+        ],
+      },
+    ],
+    [showDestroyModal]
+  );
+
+  const handleReset = useCallback(() => {
+    onChatCleared();
+    closeDestroyModal();
+    closePopover();
+  }, [onChatCleared, closeDestroyModal, closePopover]);
 
   return (
     <>
-      <EuiFlexGroup
-        css={css`
-          width: 100%;
-        `}
-        alignItems={'center'}
-        justifyContent={'spaceBetween'}
+      <FlyoutNavigation
+        isExpanded={!!chatHistoryVisible}
+        setIsExpanded={setChatHistoryVisible}
+        onConversationCreate={onConversationCreate}
       >
-        <EuiFlexItem grow={false}>
-          <AssistantTitle
-            selectedConversation={currentConversation}
-            title={title}
-            refetchConversationsState={refetchConversationsState}
-          />
-        </EuiFlexItem>
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <AssistantSettingsButton
+              defaultConnector={defaultConnector}
+              isDisabled={isDisabled}
+              isSettingsModalVisible={isSettingsModalVisible}
+              selectedConversationId={
+                !isEmpty(selectedConversation?.id)
+                  ? selectedConversation?.id
+                  : selectedConversation?.title
+              }
+              setIsSettingsModalVisible={setIsSettingsModalVisible}
+              onConversationSelected={onConversationSelected}
+              conversations={conversations}
+              refetchConversationsState={refetchConversationsState}
+            />
+          </EuiFlexItem>
 
-        <EuiFlexItem
-          grow={false}
-          css={css`
-            width: 335px;
-          `}
-        >
-          <ConversationSelector
-            defaultConnector={defaultConnector}
-            selectedConversationId={selectedConversationId}
-            onConversationSelected={onConversationSelected}
-            shouldDisableKeyboardShortcut={shouldDisableKeyboardShortcut}
-            isDisabled={isDisabled}
-            conversations={conversations}
-            onConversationDeleted={onConversationDeleted}
-          />
+          {onCloseFlyout && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                aria-label="xxx"
+                iconType="cross"
+                color="text"
+                size="xs"
+                onClick={onCloseFlyout}
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </FlyoutNavigation>
+      <EuiPanel
+        hasShadow={false}
+        paddingSize="m"
+        css={css`
+          padding-top: ${euiThemeVars.euiSizeS};
+          padding-bottom: ${euiThemeVars.euiSizeS};
+        `}
+      >
+        <EuiFlexGroup alignItems={'center'} justifyContent={'spaceBetween'} gutterSize="s">
+          <EuiFlexItem
+            css={css`
+              overflow: hidden;
+            `}
+          >
+            <AssistantTitle
+              title={selectedConversation?.title}
+              selectedConversation={selectedConversation}
+              refetchConversationsState={refetchConversationsState}
+            />
+          </EuiFlexItem>
 
-          <>
-            <EuiSpacer size={'s'} />
-            <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="xs" alignItems={'center'}>
+              <EuiFlexItem>
+                <ConnectorSelectorInline
+                  isDisabled={isDisabled || selectedConversation === undefined}
+                  selectedConnectorId={selectedConnectorId}
+                  selectedConversation={selectedConversation}
+                  onConnectorSelected={onConversationChange}
+                />
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiToolTip
-                  content={i18n.SHOW_ANONYMIZED_TOOLTIP}
-                  position="left"
-                  repositionOnScroll={true}
+                  content={
+                    showAnonymizedValuesChecked ? i18n.SHOW_REAL_VALUES : i18n.SHOW_ANONYMIZED
+                  }
                 >
-                  <EuiSwitch
+                  <EuiButtonIcon
+                    css={css`
+                      border-radius: 50%;
+                    `}
+                    display="base"
                     data-test-subj="showAnonymizedValues"
-                    checked={showAnonymizedValuesChecked}
-                    compressed={true}
-                    disabled={isEmpty(currentConversation?.replacements)}
-                    label={i18n.SHOW_ANONYMIZED}
-                    onChange={onToggleShowAnonymizedValues}
+                    isSelected={showAnonymizedValuesChecked}
+                    aria-label={
+                      showAnonymizedValuesChecked ? i18n.SHOW_ANONYMIZED : i18n.SHOW_REAL_VALUES
+                    }
+                    iconType={showAnonymizedValuesChecked ? 'eye' : 'eyeClosed'}
+                    onClick={onToggleShowAnonymizedValues}
+                    isDisabled={isEmpty(selectedConversation?.replacements)}
                   />
                 </EuiToolTip>
               </EuiFlexItem>
-
-              <EuiFlexItem grow={false}>
-                <AssistantSettingsButton
-                  defaultConnector={defaultConnector}
-                  isDisabled={isDisabled}
-                  isSettingsModalVisible={isSettingsModalVisible}
-                  selectedConversationId={selectedConversationId}
-                  setIsSettingsModalVisible={setIsSettingsModalVisible}
-                  onConversationSelected={onConversationSelected}
-                  conversations={conversations}
-                  refetchConversationsState={refetchConversationsState}
-                />
+              <EuiFlexItem>
+                <EuiPopover
+                  button={
+                    <EuiButtonIcon
+                      aria-label="test"
+                      iconType="boxesVertical"
+                      onClick={onButtonClick}
+                    />
+                  }
+                  isOpen={isPopoverOpen}
+                  closePopover={closePopover}
+                  panelPaddingSize="none"
+                  anchorPosition="downLeft"
+                >
+                  <EuiContextMenu initialPanelId={0} panels={panels} />
+                </EuiPopover>
               </EuiFlexItem>
             </EuiFlexGroup>
-          </>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiHorizontalRule margin={'m'} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+      {isResetConversationModalVisible && (
+        <EuiConfirmModal
+          title={i18n.RESET_CONVERSATION}
+          onCancel={closeDestroyModal}
+          onConfirm={handleReset}
+          cancelButtonText={i18n.CANCEL_BUTTON_TEXT}
+          confirmButtonText={i18n.RESET_BUTTON_TEXT}
+          buttonColor="danger"
+          defaultFocusedButton="confirm"
+        >
+          <p>{i18n.CLEAR_CHAT_CONFIRMATION}</p>
+        </EuiConfirmModal>
+      )}
     </>
   );
 };

@@ -81,7 +81,7 @@ export const QuickPromptSettings: React.FC<Props> = React.memo<Props>(
     );
 
     const handleColorChange = useCallback<EuiSetColorMethod>(
-      (color, { hex, isValid }) => {
+      (color) => {
         if (selectedQuickPrompt != null) {
           setUpdatedQuickPromptSettings((prev) => {
             const alreadyExists = prev.some((qp) => qp.title === selectedQuickPrompt.title);

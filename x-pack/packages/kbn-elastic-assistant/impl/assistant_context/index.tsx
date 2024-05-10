@@ -255,9 +255,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   /**
    * Global Assistant Overlay actions
    */
-  const [showAssistantOverlay, setShowAssistantOverlay] = useState<ShowAssistantOverlay>(
-    (showAssistant) => {}
-  );
+  const [showAssistantOverlay, setShowAssistantOverlay] = useState<ShowAssistantOverlay>(() => {});
 
   /**
    * Settings State

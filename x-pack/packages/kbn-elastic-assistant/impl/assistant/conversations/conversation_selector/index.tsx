@@ -32,7 +32,6 @@ interface Props {
   selectedConversationId: string | undefined;
   onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
   onConversationDeleted: (conversationId: string) => void;
-  shouldDisableKeyboardShortcut?: () => boolean;
   isDisabled?: boolean;
   conversations: Record<string, Conversation>;
 }
@@ -61,7 +60,6 @@ export const ConversationSelector: React.FC<Props> = React.memo(
     defaultConnector,
     onConversationSelected,
     onConversationDeleted,
-    shouldDisableKeyboardShortcut = () => false,
     isDisabled = false,
     conversations,
   }) => {
@@ -192,9 +190,8 @@ export const ConversationSelector: React.FC<Props> = React.memo(
 
     const renderOption: (
       option: ConversationSelectorOption,
-      searchValue: string,
-      OPTION_CONTENT_CLASSNAME: string
-    ) => React.ReactNode = (option, searchValue, contentClassName) => {
+      searchValue: string
+    ) => React.ReactNode = (option, searchValue) => {
       const { label, id, value } = option;
 
       return (

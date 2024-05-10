@@ -57,7 +57,7 @@ import { ConversationSidePanel } from './conversations/conversation_sidepanel';
 import { NEW_CHAT } from './conversations/conversation_sidepanel/translations';
 import { SystemPrompt } from './prompt_editor/system_prompt';
 import { SelectedPromptContexts } from './prompt_editor/selected_prompt_contexts';
-import { AssistantHeaderFlyout } from './assistant_header/assistant_header_flyout';
+import { AssistantHeader } from './assistant_header';
 import * as i18n from './translations';
 
 export const CONVERSATION_SIDE_PANEL_WIDTH = 220;
@@ -81,10 +81,8 @@ import { useFetchAnonymizationFields } from './api/anonymization_fields/use_fetc
 
 export interface Props {
   conversationTitle?: string;
-  embeddedLayout?: boolean;
   promptContextId?: string;
   shouldRefocusPrompt?: boolean;
-  showTitle?: boolean;
   setConversationTitle?: Dispatch<SetStateAction<string>>;
   onCloseFlyout?: () => void;
   chatHistoryVisible?: boolean;
@@ -98,10 +96,8 @@ export interface Props {
  */
 const AssistantComponent: React.FC<Props> = ({
   conversationTitle,
-  embeddedLayout = false,
   promptContextId = '',
   shouldRefocusPrompt = false,
-  showTitle = true,
   setConversationTitle,
   onCloseFlyout,
   chatHistoryVisible,
@@ -112,7 +108,6 @@ const AssistantComponent: React.FC<Props> = ({
     assistantTelemetry,
     augmentMessageCodeBlocks,
     assistantAvailability: { isAssistantEnabled },
-    docLinks,
     getComments,
     http,
     knowledgeBase: { isEnabledKnowledgeBase, isEnabledRAGAlerts },
@@ -801,10 +796,9 @@ const AssistantComponent: React.FC<Props> = ({
               `}
             >
               <EuiFlyoutHeader hasBorder>
-                <AssistantHeaderFlyout
+                <AssistantHeader
                   selectedConversation={currentConversation}
                   defaultConnector={defaultConnector}
-                  docLinks={docLinks}
                   isDisabled={isDisabled || isLoadingChatSend}
                   isSettingsModalVisible={isSettingsModalVisible}
                   onToggleShowAnonymizedValues={onToggleShowAnonymizedValues}

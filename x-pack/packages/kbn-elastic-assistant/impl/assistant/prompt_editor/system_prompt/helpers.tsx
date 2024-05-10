@@ -24,7 +24,7 @@ export const getOptionFromPrompt = ({
   name,
 }: Prompt & { showTitles?: boolean }): EuiSuperSelectOption<string> => ({
   value: id,
-  inputDisplay: name,
+  inputDisplay: <span data-test-subj="systemPromptText">{name}</span>,
   dropdownDisplay: (
     <>
       <Strong data-test-subj="name">{name}</Strong>

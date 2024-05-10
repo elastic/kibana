@@ -25,7 +25,6 @@ describe('ChatActions', () => {
   });
   it('the component renders with all props', () => {
     const { getByTestId } = render(<ChatActions {...testProps} />);
-    expect(getByTestId('clear-chat')).toHaveAttribute('aria-label', 'Clear chat');
     expect(getByTestId('submit-chat')).toHaveAttribute('aria-label', 'Submit message');
   });
 

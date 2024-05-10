@@ -51,7 +51,6 @@ const SystemPromptComponent: React.FC<Props> = ({
       clearSelectedSystemPrompt={handleClearSystemPrompt}
       conversation={conversation}
       data-test-subj="systemPrompt"
-      isClearable={true}
       isSettingsModalVisible={isSettingsModalVisible}
       onSystemPromptSelectionChange={onSystemPromptSelectionChange}
       selectedPrompt={selectedPrompt}

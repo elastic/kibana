@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 
 import { SelectedPromptContext } from '../assistant/prompt_context/types';
 import { TestProviders } from '../mock/test_providers/test_providers';
@@ -37,20 +36,6 @@ describe('DataAnonymizationEditor', () => {
     promptContextId: 'test-id',
     rawData: 'test-raw-data',
   };
-
-  it('renders stats', () => {
-    render(
-      <TestProviders>
-        <DataAnonymizationEditor
-          selectedPromptContext={mockSelectedPromptContext}
-          setSelectedPromptContexts={jest.fn()}
-          currentReplacements={{}}
-        />
-      </TestProviders>
-    );
-
-    expect(screen.getByTestId('stats')).toBeInTheDocument();
-  });
 
   describe('when rawData is a string (non-anonymized data)', () => {
     it('renders the ReadOnlyContextViewer when rawData is (non-anonymized data)', () => {
@@ -107,18 +92,12 @@ describe('DataAnonymizationEditor', () => {
       );
     });
 
-    it('renders the ContextEditor when rawData is anonymized data', () => {
-      expect(screen.getByTestId('contextEditor')).toBeInTheDocument();
+    it('renders the SelectedPromptContextPreview when rawData is anonymized data', () => {
+      expect(screen.getByTestId('selectedPromptContextPreview')).toBeInTheDocument();
     });
 
     it('does NOT render the ReadOnlyContextViewer when rawData is anonymized data', () => {
       expect(screen.queryByTestId('readOnlyContextViewer')).not.toBeInTheDocument();
-    });
-
-    it('calls setSelectedPromptContexts when a field is toggled', () => {
-      userEvent.click(screen.getAllByTestId('allowed')[0]); // toggle the first field
-
-      expect(setSelectedPromptContexts).toBeCalled();
     });
   });
 });

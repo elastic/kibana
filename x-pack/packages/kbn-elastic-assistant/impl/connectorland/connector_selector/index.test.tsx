@@ -63,14 +63,13 @@ describe('Connector selector', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  it('renders empty selection if no selected connector is provided', () => {
+  it('renders add new connector button if no selected connector is provided', () => {
     const { getByTestId } = render(
       <TestProviders>
         <ConnectorSelector {...defaultProps} selectedConnectorId={undefined} />
       </TestProviders>
     );
-    expect(getByTestId('connector-selector')).toBeInTheDocument();
-    expect(getByTestId('connector-selector')).toHaveTextContent('');
+    expect(getByTestId('addNewConnectorButton')).toBeInTheDocument();
   });
   it('renders with provided selected connector', () => {
     const { getByTestId } = render(
