@@ -7,7 +7,7 @@
 
 // FIXME: Once/if we have the ability to get page count directly from Chrome/puppeteer
 // we should get rid of this lib.
-import { getDocument } from 'pdfjs-dist';
+import * as PDFJS from 'pdfjs-dist/legacy/build/pdf.mjs';
 
 import type { PackageInfo } from '@kbn/core/server';
 import { groupBy } from 'lodash';
@@ -130,7 +130,7 @@ export async function toPdf(
     }
   } else {
     buffer = results[0].screenshots[0].data; // This buffer is already the PDF
-    pages = await getDocument({ data: buffer }).promise.then(async (doc) => {
+    pages = await PDFJS.getDocument({ data: buffer }).promise.then(async (doc) => {
       const numPages = doc.numPages;
       await doc.destroy();
       return numPages;
