@@ -13,9 +13,10 @@ import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { chronoLiterals, timeLiterals } from '../definitions/literals';
 import { commandDefinitions } from '../definitions/commands';
 import { getUnitDuration, TRIGGER_SUGGESTION_COMMAND } from './factories';
-import { camelCase } from 'lodash';
+import { camelCase, partition } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { groupingFunctionDefinitions } from '../definitions/grouping';
+import { FunctionArgSignature } from '../definitions/types';
 
 const triggerCharacters = [',', '(', '=', ' '];
 
@@ -108,6 +109,8 @@ function getFunctionSignaturesByReturnType(
   const list = [];
   if (agg) {
     list.push(...statsAggregationFunctionDefinitions);
+    // right now all grouping functions are agg functions too
+    list.push(...groupingFunctionDefinitions);
   }
   if (grouping) {
     list.push(...groupingFunctionDefinitions);
@@ -119,7 +122,10 @@ function getFunctionSignaturesByReturnType(
   if (builtin) {
     list.push(...builtinFunctions.filter(({ name }) => (skipAssign ? name !== '=' : true)));
   }
-  return list
+
+  const deduped = Array.from(new Set(list));
+
+  return deduped
     .filter(({ signatures, ignoreAsSuggestion, supportedCommands, supportedOptions, name }) => {
       if (ignoreAsSuggestion) {
         return false;
@@ -731,7 +737,7 @@ describe('autocomplete', () => {
     testSuggestions(
       'from a | stats round(',
       [
-        ...getFunctionSignaturesByReturnType('stats', 'number', { agg: true }),
+        ...getFunctionSignaturesByReturnType('stats', 'number', { agg: true, grouping: true }),
         ...getFieldNamesByType('number'),
         ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }, undefined, [
           'round',
@@ -1115,26 +1121,35 @@ describe('autocomplete', () => {
                 i + 1 < (signature.minParams ?? 0) ||
                 signature.params.filter(({ optional }, j) => !optional && j > i).length > 0;
 
-              const allPossibleParamTypes = Array.from(
-                new Set(fn.signatures.map((s) => s.params[i].type))
+              const allParamDefs = fn.signatures.map((s) => s.params[i]);
+
+              // get all possible types for this param
+              const [constantOnlyParamDefs, acceptsFieldParamDefs] = partition(
+                allParamDefs,
+                (p) => p.constantOnly || /_literal/.test(param.type)
               );
+
+              const getTypesFromParamDefs = (paramDefs: FunctionArgSignature[]) =>
+                Array.from(new Set(paramDefs.map((p) => p.type)));
+
+              const suggestedConstants = param.literalSuggestions || param.literalOptions;
 
               testSuggestions(
                 `from a | eval ${fn.name}(${Array(i).fill('field').join(', ')}${i ? ',' : ''} )`,
-                param.literalOptions?.length
-                  ? param.literalOptions.map((option) => `"${option}"${canHaveMoreArgs ? ',' : ''}`)
+                suggestedConstants?.length
+                  ? suggestedConstants.map((option) => `"${option}"${canHaveMoreArgs ? ',' : ''}`)
                   : [
-                      ...getFieldNamesByType(allPossibleParamTypes).map((f) =>
-                        canHaveMoreArgs ? `${f},` : f
+                      ...getFieldNamesByType(getTypesFromParamDefs(acceptsFieldParamDefs)).map(
+                        (f) => (canHaveMoreArgs ? `${f},` : f)
                       ),
                       ...getFunctionSignaturesByReturnType(
                         'eval',
-                        allPossibleParamTypes,
+                        getTypesFromParamDefs(acceptsFieldParamDefs),
                         { evalMath: true },
                         undefined,
                         [fn.name]
                       ).map((l) => (canHaveMoreArgs ? `${l},` : l)),
-                      ...getLiteralsByType(allPossibleParamTypes).map((d) =>
+                      ...getLiteralsByType(getTypesFromParamDefs(constantOnlyParamDefs)).map((d) =>
                         canHaveMoreArgs ? `${d},` : d
                       ),
                     ]
@@ -1143,20 +1158,20 @@ describe('autocomplete', () => {
                 `from a | eval var0 = ${fn.name}(${Array(i).fill('field').join(', ')}${
                   i ? ',' : ''
                 } )`,
-                param.literalOptions?.length
-                  ? param.literalOptions.map((option) => `"${option}"${canHaveMoreArgs ? ',' : ''}`)
+                suggestedConstants?.length
+                  ? suggestedConstants.map((option) => `"${option}"${canHaveMoreArgs ? ',' : ''}`)
                   : [
-                      ...getFieldNamesByType(allPossibleParamTypes).map((f) =>
-                        canHaveMoreArgs ? `${f},` : f
+                      ...getFieldNamesByType(getTypesFromParamDefs(acceptsFieldParamDefs)).map(
+                        (f) => (canHaveMoreArgs ? `${f},` : f)
                       ),
                       ...getFunctionSignaturesByReturnType(
                         'eval',
-                        allPossibleParamTypes,
+                        getTypesFromParamDefs(acceptsFieldParamDefs),
                         { evalMath: true },
                         undefined,
                         [fn.name]
                       ).map((l) => (canHaveMoreArgs ? `${l},` : l)),
-                      ...getLiteralsByType(allPossibleParamTypes).map((d) =>
+                      ...getLiteralsByType(getTypesFromParamDefs(constantOnlyParamDefs)).map((d) =>
                         canHaveMoreArgs ? `${d},` : d
                       ),
                     ]

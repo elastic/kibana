@@ -6,9 +6,10 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
+import type { AuditLogger, CoreSecurityDelegateContract } from '@kbn/core-security-server';
 import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-server';
 
+import { auditServiceMock } from './audit/mocks';
 import { authenticationServiceMock } from './authentication/authentication_service.mock';
 import { buildSecurityApi, buildUserProfileApi } from './build_delegate_apis';
 import { securityMock } from './mocks';
@@ -16,11 +17,13 @@ import { userProfileServiceMock } from './user_profile/user_profile_service.mock
 
 describe('buildSecurityApi', () => {
   let authc: ReturnType<typeof authenticationServiceMock.createStart>;
+  let auditService: ReturnType<typeof auditServiceMock.create>;
   let api: CoreSecurityDelegateContract;
 
   beforeEach(() => {
     authc = authenticationServiceMock.createStart();
-    api = buildSecurityApi({ getAuthc: () => authc });
+    auditService = auditServiceMock.create();
+    api = buildSecurityApi({ getAuthc: () => authc, audit: auditService });
   });
 
   describe('authc.getCurrentUser', () => {
@@ -41,6 +44,25 @@ describe('buildSecurityApi', () => {
       const currentUser = api.authc.getCurrentUser(request);
 
       expect(currentUser).toBe(delegateReturn);
+    });
+  });
+
+  describe('audit.asScoped', () => {
+    let auditLogger: AuditLogger;
+    it('properly delegates to the service', () => {
+      const request = httpServerMock.createKibanaRequest();
+      auditLogger = api.audit.asScoped(request);
+      auditLogger.log({ message: 'an event' });
+      expect(auditService.asScoped).toHaveBeenCalledTimes(1);
+      expect(auditService.asScoped).toHaveBeenCalledWith(request);
+    });
+
+    it('returns the result from the service', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      auditLogger = api.audit.asScoped(request);
+      auditLogger.log({ message: 'an event' });
+      expect(auditService.asScoped(request).log).toHaveBeenCalledTimes(1);
+      expect(auditService.asScoped(request).log).toHaveBeenCalledWith({ message: 'an event' });
     });
   });
 });

@@ -20,10 +20,11 @@ import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
 import type { OverlayFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-browser';
-import type { UserProfile } from '@kbn/core-user-profile-common';
+import type { UserProfile } from '@kbn/user-profile-components';
 import type { FormattedRelative } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { RedirectAppLinksKibanaProvider } from '@kbn/shared-ux-link-redirect-app';
+import { createBatcher } from './utils/batcher';
 
 import { TAG_MANAGEMENT_APP_URL } from './constants';
 import type { Tag } from './types';
@@ -61,6 +62,8 @@ export interface Services {
   /** Handler to retrieve the list of available tags */
   getTagList: () => Tag[];
   TagList: FC<TagListProps>;
+  /** Predicate to indicate if tagging features is enabled */
+  isTaggingEnabled: () => boolean;
   /** Predicate function to indicate if some of the saved object references are tags */
   itemHasTags: (references: SavedObjectsReference[]) => boolean;
   /** Handler to return the url to navigate to the kibana tags management */
@@ -68,6 +71,7 @@ export interface Services {
   getTagIdsFromReferences: (references: SavedObjectsReference[]) => string[];
   /** resolve user profiles for the user filter and creator functionality */
   bulkGetUserProfiles: (uids: string[]) => Promise<UserProfile[]>;
+  getUserProfile: (uid: string) => Promise<UserProfile>;
 }
 
 const TableListViewContext = React.createContext<Services | null>(null);
@@ -234,6 +238,13 @@ export const TableListViewKibanaProvider: FC<
     [core.userProfile]
   );
 
+  const getUserProfile = useMemo(() => {
+    return createBatcher({
+      fetcher: bulkGetUserProfiles,
+      resolver: (users, id) => users.find((u) => u.uid === id)!,
+    }).fetch;
+  }, [bulkGetUserProfiles]);
+
   return (
     <RedirectAppLinksKibanaProvider coreStart={core}>
       <ContentEditorKibanaProvider core={core} savedObjectsTagging={savedObjectsTagging}>
@@ -251,12 +262,14 @@ export const TableListViewKibanaProvider: FC<
           DateFormatterComp={(props) => <FormattedRelative {...props} />}
           currentAppId$={application.currentAppId$}
           navigateToUrl={application.navigateToUrl}
+          isTaggingEnabled={() => Boolean(savedObjectsTagging)}
           getTagList={getTagList}
           TagList={TagList}
           itemHasTags={itemHasTags}
           getTagIdsFromReferences={getTagIdsFromReferences}
           getTagManagementUrl={() => core.http.basePath.prepend(TAG_MANAGEMENT_APP_URL)}
           bulkGetUserProfiles={bulkGetUserProfiles}
+          getUserProfile={getUserProfile}
         >
           {children}
         </TableListViewProvider>

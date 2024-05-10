@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { FunctionDefinition } from './types';
+import type { FunctionDefinition, FunctionParameterType } from './types';
 
 function createNumericAggDefinition({
   name,
@@ -16,7 +16,12 @@ function createNumericAggDefinition({
 }: {
   name: string;
   description: string;
-  args?: Array<{ name: string; type: string; value: string; constantOnly?: boolean }>;
+  args?: Array<{
+    name: string;
+    type: FunctionParameterType;
+    value: string;
+    constantOnly?: boolean;
+  }>;
 }): FunctionDefinition {
   const extraParamsExample = args.length ? `, ${args.map(({ value }) => value).join(',')}` : '';
   return {
@@ -82,7 +87,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
         defaultMessage: 'Returns the n percentile of a field.',
       }
     ),
-    args: [{ name: 'percentile', type: 'number', value: '90', constantOnly: true }],
+    args: [{ name: 'percentile', type: 'number' as const, value: '90', constantOnly: true }],
   },
 ]
   .map(createNumericAggDefinition)

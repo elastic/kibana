@@ -6,23 +6,31 @@
  */
 
 import { useMemo } from 'react';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { useKibana } from '../../lib/kibana';
 import { useIsExperimentalFeatureEnabled } from '../use_experimental_features';
 
+/**
+ * This hook combines the checks for esql availability within the security solution
+ * If the advanced setting is disabled, ESQL will not be accessible in the UI for any new timeline or new rule creation workflows
+ * The feature flags are still available to provide users an escape hatch in case of any esql related performance issues
+ */
 export const useEsqlAvailability = () => {
   const { uiSettings } = useKibana().services;
-  const isEsqlAdvancedSettingEnabled = uiSettings?.get('discover:enableESQL');
+  const isEsqlAdvancedSettingEnabled = uiSettings?.get(ENABLE_ESQL);
+
+  const isTimelineEsqlFeatureFlagDisabled =
+    useIsExperimentalFeatureEnabled('timelineEsqlTabDisabled');
+
   const isEsqlRuleTypeEnabled =
     !useIsExperimentalFeatureEnabled('esqlRulesDisabled') && isEsqlAdvancedSettingEnabled;
-  const isESQLTabInTimelineEnabled =
-    !useIsExperimentalFeatureEnabled('timelineEsqlTabDisabled') && isEsqlAdvancedSettingEnabled;
 
   return useMemo(
     () => ({
       isEsqlAdvancedSettingEnabled,
       isEsqlRuleTypeEnabled,
-      isESQLTabInTimelineEnabled,
+      isTimelineEsqlEnabledByFeatureFlag: !isTimelineEsqlFeatureFlagDisabled,
     }),
-    [isESQLTabInTimelineEnabled, isEsqlAdvancedSettingEnabled, isEsqlRuleTypeEnabled]
+    [isEsqlAdvancedSettingEnabled, isTimelineEsqlFeatureFlagDisabled, isEsqlRuleTypeEnabled]
   );
 };

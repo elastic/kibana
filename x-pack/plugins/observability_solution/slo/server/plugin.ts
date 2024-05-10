@@ -37,7 +37,7 @@ import { registerBurnRateRule } from './lib/rules/register_burn_rate_rule';
 import { SloConfig } from '.';
 import { registerRoutes } from './routes/register_routes';
 import { getSloServerRouteRepository } from './routes/get_slo_server_route_repository';
-import { sloSettings } from './saved_objects/slo_settings';
+import { sloSettings, SO_SLO_SETTINGS_TYPE } from './saved_objects/slo_settings';
 
 export type SloPluginSetup = ReturnType<SloPlugin['setup']>;
 
@@ -73,7 +73,7 @@ export class SloPlugin implements Plugin<SloPluginSetup> {
     const config = this.initContext.config.get<SloConfig>();
     const alertsLocator = plugins.share.url.locators.create(new AlertsLocatorDefinition());
 
-    const savedObjectTypes = [SO_SLO_TYPE];
+    const savedObjectTypes = [SO_SLO_TYPE, SO_SLO_SETTINGS_TYPE];
 
     plugins.features.registerKibanaFeature({
       id: sloFeatureId,
