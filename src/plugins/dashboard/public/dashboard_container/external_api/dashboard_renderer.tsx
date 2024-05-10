@@ -20,8 +20,9 @@ import React, {
 } from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
 import { v4 as uuidv4 } from 'uuid';
+import { css } from '@emotion/css';
 
-import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingElastic, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import { ErrorEmbeddable, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 
@@ -29,6 +30,7 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 import { DASHBOARD_CONTAINER_TYPE } from '..';
 import { DashboardContainerInput } from '../../../common';
 import type { DashboardContainer } from '../embeddable/dashboard_container';
+import { useDashboardSettingsDraftValue } from '../embeddable/dashboard_settings_draft';
 import {
   DashboardContainerFactory,
   DashboardContainerFactoryDefinition,
@@ -54,11 +56,13 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
   ({ savedObjectId, getCreationOptions, dashboardRedirect, showPlainSpinner, locator }, ref) => {
     const dashboardRoot = useRef(null);
     const dashboardViewport = useRef(null);
+    const { euiTheme } = useEuiTheme();
     const [loading, setLoading] = useState(true);
     const [screenshotMode, setScreenshotMode] = useState(false);
     const [dashboardContainer, setDashboardContainer] = useState<DashboardContainer>();
     const [fatalError, setFatalError] = useState<ErrorEmbeddable | undefined>();
     const [dashboardMissing, setDashboardMissing] = useState(false);
+    const dashboardSettingsDraft = useDashboardSettingsDraftValue();
 
     useImperativeHandle(
       ref,
@@ -163,7 +167,12 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
     const viewportClasses = classNames(
       'dashboardViewport',
       { 'dashboardViewport--screenshotMode': screenshotMode },
-      { 'dashboardViewport--loading': loading }
+      { 'dashboardViewport--loading': loading },
+      {
+        [css`
+          background: ${euiTheme.colors.emptyShade};
+        `]: !(dashboardSettingsDraft?.useMargins ?? dashboardContainer?.getInput().useMargins),
+      }
     );
 
     const loadingSpinner = showPlainSpinner ? (
