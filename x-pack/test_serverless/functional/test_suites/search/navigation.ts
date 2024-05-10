@@ -15,6 +15,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlCommonPage = getPageObject('svlCommonPage');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const header = getPageObject('header');
 
   describe('navigation', function () {
     before(async () => {
@@ -71,11 +72,11 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     });
 
     it('navigate to playground from side nav', async () => {
+      await header.waitUntilLoadingHasFinished();
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'searchPlayground' });
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Build', 'Playground']);
 
       await svlCommonNavigation.sidenav.expectLinkActive({ deepLinkId: 'searchPlayground' });
-
       expect(await browser.getCurrentUrl()).contain('/app/search_playground/chat');
     });
 
