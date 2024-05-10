@@ -22,7 +22,7 @@ export async function resolveAnomalySwimlaneUserInput(
   const {
     http,
     overlays,
-    application: { currentAppId$ },
+    application: { currentLocation$ },
     ...startServices
   } = coreStart;
 
@@ -60,7 +60,7 @@ export async function resolveAnomalySwimlaneUserInput(
       );
 
       // Close the flyout when user navigates out of the current plugin
-      currentAppId$
+      currentLocation$
         .pipe(skip(1), takeUntil(from(flyoutSession.onClose)), distinctUntilChanged())
         .subscribe(() => {
           flyoutSession.close();

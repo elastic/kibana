@@ -202,6 +202,7 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="mlSingleMetricViewerInitializerConfirmButton"
               isDisabled={
                 !isPanelTitleValid || errorMessage !== undefined || !jobIds.length || !job
               }
