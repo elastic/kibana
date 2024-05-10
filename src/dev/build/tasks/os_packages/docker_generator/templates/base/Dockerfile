@@ -17,6 +17,9 @@ RUN {{packageManager}} install -y findutils tar gzip
 {{#ubuntu}}
 RUN {{packageManager}} update && DEBIAN_FRONTEND=noninteractive {{packageManager}} install -y curl
 {{/ubuntu}}
+{{#chainguard}}
+RUN apk --no-cache add curl
+{{/chainguard}}
 
 {{#usePublicArtifact}}
 RUN cd /tmp && \
@@ -32,8 +35,8 @@ COPY {{artifactTarball}} /tmp/kibana.tar.gz
 RUN mkdir /usr/share/kibana
 WORKDIR /usr/share/kibana
 RUN tar \
-# Exclude serverless.yml disabled assets
 {{#serverless}}
+# Exclude serverless.yml disabled assets
   --exclude=screenshotting-plugin/chromium \
   --exclude=screenshotting-plugin/server/assets \
 {{/serverless}}
@@ -86,6 +89,11 @@ RUN for iter in {1..10}; do \
     done; \
     (exit $exit_code)
 {{/ubuntu}}
+{{#chainguard}}
+RUN apk update && \
+  apk --no-cache upgrade && \
+  apk --no-cache add bash curl fontconfig libstdc++ freetype nss findutils shadow
+{{/chainguard}}
 
 # Add an init process, check the checksum to make sure it's a match
 RUN set -e ; \
@@ -107,7 +115,7 @@ RUN set -e ; \
   mv "${TINI_BIN}" /bin/tini ; \
   chmod +x /bin/tini
 
-RUN mkdir /usr/share/fonts/local
+RUN mkdir -p /usr/share/fonts/local
 RUN curl --retry 8 -S -L -o /usr/share/fonts/local/NotoSansCJK-Regular.ttc https://github.com/googlefonts/noto-cjk/raw/NotoSansV2.001/NotoSansCJK-Regular.ttc
 RUN echo "5dcd1c336cc9344cb77c03a0cd8982ca8a7dc97d620fd6c9c434e02dcb1ceeb3  /usr/share/fonts/local/NotoSansCJK-Regular.ttc" | sha256sum -c -
 RUN fc-cache -v

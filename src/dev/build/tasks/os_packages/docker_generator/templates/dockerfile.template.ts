@@ -15,8 +15,21 @@ import { TemplateContext } from '../template_context';
 function generator(options: TemplateContext) {
   const dir = options.ironbank ? 'ironbank' : 'base';
   const template = readFileSync(resolve(__dirname, dir, './Dockerfile'));
+  let packageManager = null;
+  switch (options.baseImage) {
+    case 'ubi':
+      packageManager = 'microdnf';
+      break;
+    case 'ubuntu':
+      packageManager = 'apt-get';
+      break;
+    case 'chainguard':
+      packageManager = 'apk';
+      break;
+  }
   return Mustache.render(template.toString(), {
-    packageManager: options.baseImage === 'ubi' ? 'microdnf' : 'apt-get',
+    packageManager,
+    chainguard: options.baseImage === 'chainguard',
     ubi: options.baseImage === 'ubi',
     ubuntu: options.baseImage === 'ubuntu',
     opensslLegacyProvider: !(options.cloud || options.serverless || options.fips),
