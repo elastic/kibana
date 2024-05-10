@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { pick, reduce } from 'lodash';
+import { difference, intersection, map, pick, reduce, uniq } from 'lodash';
+import { PackagePolicy } from '../../../../fleet/common';
 import { convertECSMappingToArray, convertECSMappingToObject } from '../utils';
 
 // @ts-expect-error update types
@@ -40,3 +41,17 @@ export const convertSOQueriesToPack = (queries) =>
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     {} as Record<string, any>
   );
+
+export const getInitialPolicies = (
+  packagePolicies: PackagePolicy[] | never[],
+  policyIds: string[] = []
+): { policiesList: string[]; invalidPolicies?: string[] } => {
+  const supportedPackagePolicyIds = uniq(map(packagePolicies, 'policy_id'));
+  const policiesList = intersection(uniq(policyIds), supportedPackagePolicyIds);
+  const invalidPolicies = difference(uniq(policyIds), policiesList);
+
+  return {
+    policiesList,
+    ...(invalidPolicies.length && { invalidPolicies }),
+  };
+};
