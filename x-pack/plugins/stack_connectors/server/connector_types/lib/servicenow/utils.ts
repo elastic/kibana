@@ -22,6 +22,7 @@ import {
 } from './types';
 import { FIELD_PREFIX } from './config';
 import * as i18n from './translations';
+import { getBasicAuthHeader } from '../get_basic_auth_header';
 
 export const prepareIncident = (useOldApi: boolean, incident: PartialIncident): PartialIncident =>
   useOldApi
@@ -115,7 +116,7 @@ export const getAxiosInstance = ({
 
   if (!isOAuth && username && password) {
     axiosInstance = axios.create({
-      auth: { username, password },
+      headers: getBasicAuthHeader({ username, password }),
     });
   } else {
     axiosInstance = axios.create();
