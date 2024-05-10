@@ -72,8 +72,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     });
 
     it('navigate to playground from side nav', async () => {
-      await header.waitUntilLoadingHasFinished();
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'searchPlayground' });
+      await header.waitUntilLoadingHasFinished();
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Build', 'Playground']);
 
       await svlCommonNavigation.sidenav.expectLinkActive({ deepLinkId: 'searchPlayground' });
