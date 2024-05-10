@@ -46,8 +46,11 @@ export class AuthenticationService {
         .apiKeysEnabled;
 
     const checkPermissions = async () =>
-      ((await http.get('/internal/security/api_key')) as { checkPermissions: boolean })
-        .checkPermissions;
+      (
+        (await http.get('/internal/security/api_key/check_permissions')) as {
+          checkPermissions: boolean;
+        }
+      ).checkPermissions;
 
     accessAgreementApp.create({ application, getStartServices });
     captureURLApp.create({ application, fatalErrors, http });

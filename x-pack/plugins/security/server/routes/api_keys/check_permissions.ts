@@ -18,7 +18,7 @@ export function defineValidPermissionRoutes({
 }: RouteDefinitionParams) {
   router.get(
     {
-      path: '/internal/security/api_key',
+      path: '/internal/security/api_key/check_permissions',
       validate: false,
     },
     // @ts-ignore undefined would return but is caught by the cache function
