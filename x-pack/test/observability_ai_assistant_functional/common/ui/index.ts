@@ -33,6 +33,7 @@ const pages = {
     chatInput: 'observabilityAiAssistantChatPromptEditorTextArea',
     retryButton: 'observabilityAiAssistantWelcomeMessageSetUpKnowledgeBaseButton',
     conversationLink: 'observabilityAiAssistantConversationsLink',
+    positiveFeedbackButton: 'observabilityAiAssistantFeedbackButtonsPositiveButton',
   },
   createConnectorFlyout: {
     flyout: 'create-connector-flyout',

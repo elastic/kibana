@@ -26,8 +26,7 @@ import { deleteAllLoadedEndpointData } from '../../../tasks/delete_all_endpoint_
 
 const AGENT_BEAT_FILE_PATH_SUFFIX = '/components/agentbeat';
 
-// FLAKY: https://github.com/elastic/kibana/issues/170563
-describe.skip('Response console', { tags: ['@ess', '@serverless'] }, () => {
+describe('Response console', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
   beforeEach(() => {
     login();
   });

@@ -58,7 +58,7 @@ describe('SummaryClient', () => {
                 { term: { 'slo.revision': slo.revision } },
                 {
                   range: {
-                    '@timestamp': { gte: expect.anything(), lt: expect.anything() },
+                    '@timestamp': { gte: expect.anything(), lte: expect.anything() },
                   },
                 },
               ],
@@ -94,7 +94,7 @@ describe('SummaryClient', () => {
                   range: {
                     '@timestamp': {
                       gte: expect.anything(),
-                      lt: expect.anything(),
+                      lte: expect.anything(),
                     },
                   },
                 },
@@ -136,7 +136,7 @@ describe('SummaryClient', () => {
                 { term: { 'slo.revision': slo.revision } },
                 {
                   range: {
-                    '@timestamp': { gte: expect.anything(), lt: expect.anything() },
+                    '@timestamp': { gte: expect.anything(), lte: expect.anything() },
                   },
                 },
               ],
@@ -188,7 +188,7 @@ describe('SummaryClient', () => {
                   range: {
                     '@timestamp': {
                       gte: expect.anything(),
-                      lt: expect.anything(),
+                      lte: expect.anything(),
                     },
                   },
                 },

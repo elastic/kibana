@@ -165,14 +165,14 @@ describe('files service', () => {
   });
 
   describe('#updateFilesStatus()', () => {
-    it('calls esClient.updateByQuery with expected values', () => {
+    it('calls esClient.updateByQuery with expected values', async () => {
       const FAKE_INTEGRATION_METADATA_INDEX = getFileMetadataIndexName('someintegration');
       const files = {
         [ENDPOINT_FILE_METADATA_INDEX]: new Set(['delete1', 'delete2']),
         [FAKE_INTEGRATION_METADATA_INDEX]: new Set(['delete2', 'delete3']),
       };
       const status = 'DELETED';
-      updateFilesStatus(esClientMock, abortController, files, status);
+      await updateFilesStatus(esClientMock, abortController, files, status);
 
       expect(esClientMock.updateByQuery).toHaveBeenNthCalledWith(
         1,

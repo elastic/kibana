@@ -120,12 +120,18 @@ describe('get_all_stats', () => {
         hits: {
           hits: [
             {
+              _index: '.monitoring-logstash-8-test', // legacy
               _source: {
                 cluster_uuid: 'a',
                 logstash_stats: {
                   logstash: {
                     version: '2.3.4-beta2',
                   },
+                  pipelines: [
+                    {
+                      ephemeral_id: 'abcd1234-1234-1234-1234-abcd1234abcd',
+                    },
+                  ],
                 },
               },
             },
@@ -168,13 +174,15 @@ describe('get_all_stats', () => {
         .onCall(1)
         .returns(Promise.resolve(kibanaStatsResponse))
         .onCall(2)
-        .returns(Promise.resolve(logstashStatsResponse))
+        .returns(Promise.resolve(logstashStatsResponse)) // to define if it is internal monitoring or not
         .returns(Promise.resolve(logstashStatsResponse))
         .onCall(3)
         .returns(Promise.resolve({})) // Beats stats
         .onCall(4)
         .returns(Promise.resolve({})) // Beats state
         .onCall(5)
+        .returns(Promise.resolve(logstashStatsResponse)) // Logstash stats
+        .onCall(6)
         .returns(Promise.resolve({})); // Logstash state
 
       expect(await getAllStats(['a'], callCluster, timestamp, 1)).toStrictEqual(allClusters);

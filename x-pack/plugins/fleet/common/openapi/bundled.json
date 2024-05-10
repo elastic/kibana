@@ -6295,33 +6295,33 @@
         "type": "object",
         "deprecated": true,
         "properties": {
-          "response": {
+          "items": {
             "type": "array",
             "items": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "type": "string"
-                  },
-                  "type": {
-                    "$ref": "#/components/schemas/saved_object_type"
-                  },
-                  "updatedAt": {
-                    "type": "string"
-                  },
-                  "attributes": {
-                    "type": "object",
-                    "properties": {
-                      "title": {
-                        "type": "string"
-                      },
-                      "description": {
-                        "type": "string"
-                      }
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "type": {
+                  "$ref": "#/components/schemas/saved_object_type"
+                },
+                "updatedAt": {
+                  "type": "string"
+                },
+                "attributes": {
+                  "type": "object",
+                  "properties": {
+                    "title": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
                     }
                   }
+                },
+                "appLink": {
+                  "type": "string"
                 }
               }
             }
@@ -7454,6 +7454,9 @@
           },
           "description": {
             "type": "string"
+          },
+          "overrides": {
+            "type": "object"
           }
         },
         "required": [
@@ -7599,6 +7602,10 @@
             "type": "object",
             "description": "Advanced settings stored in the agent policy, e.g. agent_limits_go_max_procs",
             "nullable": true
+          },
+          "supports_agentless": {
+            "type": "boolean",
+            "description": "Indicates whether the agent policy supports agentless integrations. Only allowed in a serverless environment."
           }
         },
         "required": [
@@ -8163,6 +8170,16 @@
                 }
               }
             }
+          },
+          "overrides": {
+            "type": "object",
+            "properties": {
+              "inputs": {
+                "type": "object"
+              }
+            },
+            "description": "Override settings that are defined in the package policy. The override option should be used only in unusual circumstances and not as a routine procedure.",
+            "nullable": true
           },
           "force": {
             "type": "boolean",

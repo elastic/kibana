@@ -580,15 +580,17 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       ]),
     });
 
-    this.eventLogService!.isEsContextReady().then(() => {
-      scheduleActionsTelemetry(this.telemetryLogger, plugins.taskManager);
-    });
+    this.eventLogService!.isEsContextReady()
+      .then(() => {
+        scheduleActionsTelemetry(this.telemetryLogger, plugins.taskManager);
+      })
+      .catch(() => {});
 
     if (this.actionsConfig.preconfiguredAlertHistoryEsIndex) {
       createAlertHistoryIndexTemplate({
         client: core.elasticsearch.client.asInternalUser,
         logger: this.logger,
-      });
+      }).catch(() => {});
     }
 
     this.validateEnabledConnectorTypes(plugins);

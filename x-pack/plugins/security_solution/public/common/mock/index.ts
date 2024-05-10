@@ -19,3 +19,4 @@ export * from './test_providers';
 export * from './timeline_results';
 export * from './utils';
 export * from './create_store';
+export * from './create_react_query_wrapper';

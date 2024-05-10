@@ -433,7 +433,7 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
 
       customizations.set({
         id: 'flyout',
-        size: '60%',
+        size: 650,
         title: 'Example custom flyout',
         actions: {
           getActionItems: () =>

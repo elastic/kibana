@@ -30,7 +30,8 @@ export default ({ getService }: FtrProviderContext) => {
     return body;
   }
 
-  describe('field_caps', () => {
+  // Failing ES Promotion: https://github.com/elastic/kibana/issues/182514
+  describe.skip('field_caps', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
     });

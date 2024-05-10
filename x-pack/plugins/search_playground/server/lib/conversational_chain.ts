@@ -16,11 +16,13 @@ import {
   Message as VercelChatMessage,
 } from 'ai';
 import { BaseLanguageModel } from '@langchain/core/language_models/base';
+import { BaseMessage } from '@langchain/core/messages';
 import { ElasticsearchRetriever } from './elasticsearch_retriever';
 import { renderTemplate } from '../utils/render_template';
 
 import { AssistClient } from '../utils/assist';
 import { getCitations } from '../utils/get_citations';
+import { getTokenEstimate, getTokenEstimateFromMessages } from './token_tracking';
 
 interface RAGOptions {
   index: string;
@@ -60,6 +62,21 @@ const formatVercelMessages = (chatHistory: VercelChatMessage[]) => {
   return formattedDialogueTurns.join('\n');
 };
 
+const buildContext = (docs: Document[]) => {
+  const serializedDocs = docs.map((doc, i) =>
+    renderTemplate(
+      `
+position: ${i + 1}
+{pageContent}`,
+      {
+        pageContent: doc.pageContent,
+        ...doc.metadata,
+      }
+    )
+  );
+  return serializedDocs.join('\n');
+};
+
 class ConversationalChainFn {
   options: ConversationalChainOptions;
 
@@ -87,23 +104,6 @@ class ConversationalChainFn {
         k: this.options.rag.size ?? 3,
       });
 
-      const buildContext = (docs: Document[]) => {
-        const template = this.options.rag?.doc_context ?? `{pageContent}`;
-
-        const serializedDocs = docs.map((doc, i) =>
-          renderTemplate(
-            `
-  position: ${i + 1}
-  ${template}`,
-            {
-              pageContent: doc.pageContent,
-              ...doc.metadata,
-            }
-          )
-        );
-        return serializedDocs.join('\n');
-      };
-
       retrievalChain = retriever.pipe(buildContext);
     }
 
@@ -114,7 +114,11 @@ class ConversationalChainFn {
         condenseQuestionPrompt,
         this.options.model,
         new StringOutputParser(),
-      ]);
+      ]).withConfig({
+        metadata: {
+          type: 'standalone_question',
+        },
+      });
     }
 
     const prompt = ChatPromptTemplate.fromTemplate(this.options.prompt);
@@ -136,7 +140,11 @@ class ConversationalChainFn {
       },
       answerChain,
       new BytesOutputParser(),
-    ]);
+    ]).withConfig({
+      metadata: {
+        type: 'conversational_retrieval_qa',
+      },
+    });
 
     const stream = await conversationalRetrievalQAChain.stream(
       {
@@ -146,11 +154,31 @@ class ConversationalChainFn {
       {
         callbacks: [
           {
+            handleChatModelStart(
+              llm,
+              msg: BaseMessage[][],
+              runId,
+              parentRunId,
+              extraParams,
+              tags,
+              metadata: Record<string, string>
+            ) {
+              if (metadata?.type === 'conversational_retrieval_qa') {
+                data.appendMessageAnnotation({
+                  type: 'prompt_token_count',
+                  count: getTokenEstimateFromMessages(msg),
+                });
+              }
+            },
             handleRetrieverEnd(documents) {
               retrievedDocs.push(...documents);
               data.appendMessageAnnotation({
                 type: 'retrieved_docs',
                 documents: documents as any,
+              });
+              data.appendMessageAnnotation({
+                type: 'context_token_count',
+                count: getTokenEstimate(buildContext(documents)),
               });
             },
             handleChainEnd(outputs, runId, parentRunId) {
@@ -167,7 +195,7 @@ class ConversationalChainFn {
 
               // check that main chain (without parent) is finished:
               if (parentRunId == null) {
-                data.close();
+                data.close().catch(() => {});
               }
             },
           },

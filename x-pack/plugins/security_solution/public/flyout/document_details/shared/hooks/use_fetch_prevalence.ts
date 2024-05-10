@@ -6,7 +6,7 @@
  */
 
 import { buildEsQuery } from '@kbn/es-query';
-import type { IEsSearchRequest } from '@kbn/data-plugin/public';
+import type { IEsSearchRequest } from '@kbn/search-types';
 import { useQuery } from '@tanstack/react-query';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { createFetchData } from '../utils/fetch_data';

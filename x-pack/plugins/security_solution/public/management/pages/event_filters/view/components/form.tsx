@@ -19,6 +19,7 @@ import {
   EuiHorizontalRule,
   EuiTextArea,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
@@ -196,7 +197,11 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           item,
           isValid: isFormValid && areConditionsValid,
           confirmModalLabels: hasWildcardWithWrongOperator
-            ? CONFIRM_WARNING_MODAL_LABELS
+            ? CONFIRM_WARNING_MODAL_LABELS(
+                i18n.translate('xpack.securitySolution.eventFilter.flyoutForm.confirmModal.name', {
+                  defaultMessage: 'event filter',
+                })
+              )
             : undefined,
         });
       },

@@ -17,13 +17,11 @@ import {
 } from '../../../../common/es_fields/apm';
 import { getTypedSearch } from '../../../utils/create_typed_es_client';
 
-export type LogCategories =
-  | Array<{
-      errorCategory: string;
-      docCount: number;
-      sampleMessage: string;
-    }>
-  | undefined;
+export interface LogCategory {
+  errorCategory: string;
+  docCount: number;
+  sampleMessage: string;
+}
 
 export async function getLogCategories({
   esClient,
@@ -31,7 +29,7 @@ export async function getLogCategories({
   arguments: args,
 }: {
   esClient: ElasticsearchClient;
-  coreContext: CoreRequestHandlerContext;
+  coreContext: Pick<CoreRequestHandlerContext, 'uiSettings'>;
   arguments: {
     start: string;
     end: string;
@@ -40,7 +38,7 @@ export async function getLogCategories({
     'container.id'?: string;
     'kubernetes.pod.name'?: string;
   };
-}): Promise<LogCategories> {
+}): Promise<LogCategory[] | undefined> {
   const start = datemath.parse(args.start)?.valueOf()!;
   const end = datemath.parse(args.end)?.valueOf()!;
 

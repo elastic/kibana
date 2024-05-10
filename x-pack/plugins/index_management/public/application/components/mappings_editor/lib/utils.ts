@@ -19,6 +19,7 @@ import {
   NormalizedField,
   NormalizedFields,
   NormalizedRuntimeFields,
+  State,
   ParameterName,
   RuntimeFields,
   SubType,
@@ -601,4 +602,86 @@ export const deNormalizeRuntimeFields = (fields: NormalizedRuntimeFields): Runti
       [name]: rest,
     };
   }, {} as RuntimeFields);
+};
+
+/**
+ * get all the fields from given state which matches selected DataTypes from filter
+ *
+ * @param state The state that we are using depending on the context (when adding new fields, static state is used)
+ * @param filteredDataTypes data types array from which fields are filtered from given state
+ */
+
+export const getFieldsMatchingFilterFromState = (
+  state: State,
+  filteredDataTypes: string[]
+): {
+  [id: string]: NormalizedField;
+} => {
+  return Object.fromEntries(
+    Object.entries(state.fields.byId).filter(([_, fieldId]) =>
+      filteredDataTypes.includes(TYPE_DEFINITION[state.fields.byId[fieldId.id].source.type].label)
+    )
+  );
+};
+
+/** accepts Generics argument and returns value, if value is not null or undefined
+ * @param value
+ */
+function isNotNullish<T>(value: T | null | undefined): value is T {
+  return value !== null && value !== undefined;
+}
+
+/** returns normalized field that matches the dataTypes from the filteredDataTypes array
+ * @param normalizedFields fields that we are using, depending on the context (when adding new fields, static state is used)
+ * @param filteredDataTypes data types array from which fields are filtered from given state. When there are no filter selected, array would be undefined
+ */
+export const getFieldsFromState = (
+  normalizedFields: NormalizedFields,
+  filteredDataTypes?: string[]
+): NormalizedField[] => {
+  const getField = (fieldId: string) => {
+    if (filteredDataTypes) {
+      if (
+        filteredDataTypes.includes(
+          TYPE_DEFINITION[normalizedFields.byId[fieldId].source.type].label
+        )
+      ) {
+        return normalizedFields.byId[fieldId];
+      }
+    } else {
+      return normalizedFields.byId[fieldId];
+    }
+  };
+  const fields: Array<NormalizedField | undefined> = filteredDataTypes
+    ? Object.entries(normalizedFields.byId).map(([key, _]) => getField(key))
+    : normalizedFields.rootLevelFields.map((id) => getField(id));
+  return fields.filter(isNotNullish);
+};
+/**
+ * returns true if given value is first occurence of array
+ * useful when filtering unique values of an array
+ */
+function filterUnique<T>(value: T, index: number, array: T[]) {
+  return array.indexOf(value) === index;
+}
+/**
+ * returns array consisting of all field types from state's fields including nested fields
+ * @param fields
+ */
+const getallFieldsIncludingNestedFields = (fields: Fields, fieldsArray: DataType[]) => {
+  const fieldsValue = Object.values(fields);
+  for (const field of fieldsValue) {
+    if (field.type) fieldsArray.push(field.type);
+    if (field.fields) getallFieldsIncludingNestedFields(field.fields, fieldsArray);
+    if (field.properties) getallFieldsIncludingNestedFields(field.properties, fieldsArray);
+  }
+  return fieldsArray;
+};
+
+/** returns all field types from the fields, including multifield and child fields
+ * @param allFields fields from state
+ */
+export const getAllFieldTypesFromState = (allFields: Fields): DataType[] => {
+  const fields: DataType[] = [];
+  return getallFieldsIncludingNestedFields(allFields, fields).filter(filterUnique);
 };

@@ -20,7 +20,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
   const apmApiClient = getService('apmApiClient');
 
   const log = getService('log');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const archiveName = 'apm_8.0.0';
 
@@ -416,13 +416,13 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
     describe('when there are agent config metrics for this etag', () => {
       before(async () => {
         await addAgentConfigEtagMetric({
-          synthtraceEsClient,
+          apmSynthtraceEsClient,
           timestamp: Date.now(),
           etag: agentConfiguration.etag,
         });
       });
 
-      after(() => synthtraceEsClient.clean());
+      after(() => apmSynthtraceEsClient.clean());
 
       it(`should have 'applied_by_agent=true' when getting a config from all configurations`, async () => {
         const {
