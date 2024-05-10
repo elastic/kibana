@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { registerReactEmbeddableSavedObject } from '@kbn/embeddable-plugin/public';
+import { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 
 const MY_EMBEDDABLE_TYPE = 'myEmbeddableType';
 const MY_SAVED_OBJECT_TYPE = 'mySavedObjectType';
 const APP_ICON = 'logoKibana';
 
-export const registerMyEmbeddableSavedObject = () =>
-  registerReactEmbeddableSavedObject({
+export const registerMyEmbeddableSavedObject = (embeddableSetup: EmbeddableSetup) =>
+  embeddableSetup.registerReactEmbeddableSavedObject({
     onAdd: (container, savedObject) => {
       container.addNewPanel({
         panelType: MY_EMBEDDABLE_TYPE,
