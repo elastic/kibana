@@ -44,11 +44,6 @@ Vagrant.configure("2") do |config|
       vb.cpus = 2
     end
     fips.vm.box = 'ubuntu/jammy64'
-    fips.vm.provision "shell", inline: <<-SHELL
-      echo "export OPENSSL_MODULES=/usr/share/kibana/openssl/lib/ossl-modules" >> /etc/profile.d/kibana-fips-env.sh
-      echo "export TEST_BROWSER_HEADLESS=1" >> /etc/profile.d/kibana-fips-env.sh
-      echo "export FTR_DISABLE_ES_TMPDIR=true" >> /etc/profile.d/kibana-fips-env.sh
-    SHELL
     fips.vm.provision "ansible" do |ansible|
       ansible.playbook = "fips.yml"
     end

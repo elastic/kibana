@@ -6,6 +6,17 @@
       - "processor_cores"
   when: ansible_processor_vcpus is not defined
 
+- name: setup env variables
+  blockinfile:
+    path: "/home/vagrant/.profile"
+    block: |
+      export OPENSSL_MODULES=/usr/share/kibana/openssl/lib/ossl-modules
+      export TEST_BROWSER_HEADLESS=1
+      export FTR_DISABLE_ES_TMPDIR=true
+    owner: vagrant
+    group: vagrant
+    mode: '0644'
+
 - name: add chrome apt signing key
   become: yes
   apt_key:
@@ -39,7 +50,7 @@
 - name: install nvm
   shell:
     chdir: "$HOME"
-    cmd: curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v{{ nvm_ver }}/install.sh | bash
+    cmd: curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v{{ nvm_ver }}/install.sh | PROFILE=/home/vagrant/.profile bash
 
 - name: install kibana node version
   shell:
