@@ -9,11 +9,14 @@
 import { i18n } from '@kbn/i18n';
 import { ControlFactory } from './types';
 
-const registry: { [key: string]: () => Promise<ControlFactory<any>> } = {};
+const registry: { [key: string]: ControlFactory<any> } = {};
 
-export const registerControlFactory = <State extends object = object>(
+export const registerControlFactory = async <
+  State extends object = object,
+  Factory extends ControlFactory<State> = ControlFactory<State>
+>(
   type: string,
-  getFactory: () => Promise<ControlFactory<State>>
+  getFactory: () => Promise<Factory>
 ) => {
   if (registry[type] !== undefined)
     throw new Error(
@@ -22,12 +25,16 @@ export const registerControlFactory = <State extends object = object>(
         values: { key: type },
       })
     );
-  registry[type] = getFactory;
+  registry[type] = await getFactory();
 };
 
-export const getControlFactory = <State extends object = object>(
+export const getControlFactory = <
+  State extends object = object,
+  Factory extends ControlFactory<State> = ControlFactory<State>
+>(
   key: string
-): Promise<ControlFactory<State>> => {
+): Factory => {
+  console.log('registry', registry);
   if (registry[key] === undefined)
     throw new Error(
       i18n.translate('controlFactoryRegistry.factoryNotFoundError', {
@@ -35,5 +42,9 @@ export const getControlFactory = <State extends object = object>(
         values: { key },
       })
     );
-  return registry[key]();
+  return registry[key];
+};
+
+export const getAllControlTypes = () => {
+  return Object.keys(registry);
 };

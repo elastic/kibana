@@ -6,155 +6,112 @@
  * Side Public License, v 1.
  */
 
+import { isEqual } from 'lodash';
 import React from 'react';
 
+import { EmbeddableFactoryNotFoundError } from '@kbn/embeddable-plugin/public';
+
 import {
-  useBatchedOptionalPublishingSubjects,
-  useBatchedPublishingSubjects,
-} from '@kbn/presentation-publishing';
+  DataControlInput,
+  ControlEmbeddable,
+  IEditableControlFactory,
+  DataControlEditorChanges,
+} from '../../types';
 import { pluginServices } from '../../services';
-import { ControlWidth, DataControlEditorChanges, DefaultControlApi } from '../../types';
 import { ControlGroupStrings } from '../control_group_strings';
+import { useControlGroupContainer } from '../embeddable/control_group_container';
 import { ControlEditor } from '../editor/control_editor';
-import { BehaviorSubject } from 'rxjs';
 
 export const EditControlFlyout = ({
-  api,
+  embeddable,
   closeFlyout,
   removeControl,
 }: {
-  api: DefaultControlApi;
+  embeddable: ControlEmbeddable<DataControlInput>;
   closeFlyout: () => void;
   removeControl: () => void;
 }) => {
-  console.log('hjere2');
   // Controls Services Context
   const {
     overlays: { openConfirm },
     controls: { getControlFactory },
   } = pluginServices.getServices();
+  // Redux embeddable container Context
+  const controlGroup = useControlGroupContainer();
 
-  const controlGroup = api.parentApi;
+  // current state
+  const panels = controlGroup.select((state) => state.explicitInput.panels);
+  const panel = panels[embeddable.id];
 
-  const [lastUsedDataViewId] = useBatchedOptionalPublishingSubjects(
-    controlGroup.lastUsedDataViewId
-  );
-
-  const [
-    controlWidth,
-    controlGrow,
-    controlSettings,
-    panelTitle,
-    dataView,
-    controlField,
-    defaultControlWidth,
-    defaultControlGrow,
-    controlGroupDataViews,
-  ] = useBatchedPublishingSubjects(
-    api.width$,
-    api.grow$,
-    api.settings,
-    api.panelTitle,
-    api.dataView,
-    api.fieldName$,
-    controlGroup.defaultWidth$,
-    controlGroup.defaultGrow$,
-    controlGroup.dataViews
-  );
-
-  /**
-   * We are only applying these changes on save - so, duplicate everything into state manager which will store
-   * the current editor state, and these changes will only be applied to the actual control state on save
-   */
-  const stateManager = {
-    dataViewId$: new BehaviorSubject<string | undefined>(
-      dataView?.id ?? lastUsedDataViewId ?? controlGroupDataViews?.[0].id
-    ),
-    fieldName$: new BehaviorSubject<string | undefined>(controlField),
-    grow: new BehaviorSubject<boolean | undefined>(
-      controlGrow === undefined ? defaultControlGrow : controlGrow
-    ),
-    width: new BehaviorSubject<ControlWidth | undefined>(controlWidth ?? defaultControlWidth),
-    settings: new BehaviorSubject<object | undefined>(controlSettings),
+  const onCancel = (changes: DataControlEditorChanges) => {
+    if (
+      isEqual(panel.explicitInput, {
+        ...panel.explicitInput,
+        ...changes.input,
+      }) &&
+      changes.grow === panel.grow &&
+      changes.width === panel.width
+    ) {
+      closeFlyout();
+      return;
+    }
+    openConfirm(ControlGroupStrings.management.discardChanges.getSubtitle(), {
+      confirmButtonText: ControlGroupStrings.management.discardChanges.getConfirm(),
+      cancelButtonText: ControlGroupStrings.management.discardChanges.getCancel(),
+      title: ControlGroupStrings.management.discardChanges.getTitle(),
+      buttonColor: 'danger',
+    }).then((confirmed) => {
+      if (confirmed) {
+        closeFlyout();
+      }
+    });
   };
 
-  // const [defaultPanelTitle] = useBatchedOptionalPublishingSubjects(embeddable.defaultPanelTitle);
+  const onSave = async (changes: DataControlEditorChanges, type?: string) => {
+    if (!type) {
+      closeFlyout();
+      return;
+    }
+    const factory = getControlFactory(type) as IEditableControlFactory;
+    if (!factory) throw new EmbeddableFactoryNotFoundError(type);
+    let inputToReturn = changes.input;
+    if (factory.presaveTransformFunction) {
+      inputToReturn = factory.presaveTransformFunction(inputToReturn, embeddable);
+    }
 
-  // const onCancel = (changes: DataControlEditorChanges) => {
-  //   if (
-  //     dataView?.id === changes.input.dataViewId &&
-  //     controlField === changes.input.fieldName &&
-  //     panelTitle === changes.input.title &&
-  //     controlGrow === changes.grow &&
-  //     controlWidth === changes.width
-  //   ) {
-  //     closeFlyout();
-  //     return;
-  //   }
-  //   openConfirm(ControlGroupStrings.management.discardChanges.getSubtitle(), {
-  //     confirmButtonText: ControlGroupStrings.management.discardChanges.getConfirm(),
-  //     cancelButtonText: ControlGroupStrings.management.discardChanges.getCancel(),
-  //     title: ControlGroupStrings.management.discardChanges.getTitle(),
-  //     buttonColor: 'danger',
-  //   }).then((confirmed) => {
-  //     if (confirmed) {
-  //       closeFlyout();
-  //     }
-  //   });
-  // };
+    if (changes.width && changes.width !== panel.width)
+      controlGroup.dispatch.setControlWidth({
+        width: changes.width,
+        embeddableId: embeddable.id,
+      });
+    if (changes.grow !== undefined && changes.grow !== panel.grow) {
+      controlGroup.dispatch.setControlGrow({
+        grow: changes.grow,
+        embeddableId: embeddable.id,
+      });
+    }
 
-  // const onSave = async (changes: DataControlEditorChanges, type?: string) => {
-  //   if (!type) {
-  //     closeFlyout();
-  //     return;
-  //   }
-
-  //   if (changes.width && changes.width !== controlWidth) {
-  //     embeddable.setWidth(changes.width);
-  //   }
-  //   if (changes.grow !== undefined && changes.grow !== controlGrow) {
-  //     embeddable.setGrow(changes.grow);
-  //   }
-
-  //   /**
-  //    * TODO: Once the embeddable refactor is complete, we could make this more efficient by only replacing the panel
-  //    * if the type changed - otherwise, we could simply change the individual state as needed
-  //    */
-  //   // const factory = getControlFactory(type) as IEditableControlFactory;
-  //   // let inputToReturn = { ...embeddable.getExplicitInput(), ...changes.input };
-  //   // if (factory && factory.presaveTransformFunction) {
-  //   //   inputToReturn = factory.presaveTransformFunction(inputToReturn, embeddable);
-  //   // }
-
-  //   if (
-  //     type !== embeddable.type ||
-  //     changes.input.fieldName !== controlField ||
-  //     changes.input.dataViewId !== dataView?.id
-  //   ) {
-  //     controlGroup.replacePanel(embeddable.uuid, { panelType: type, initialState: changes.input });
-  //   } else {
-  //     console.log('here');
-  //   }
-
-  //   closeFlyout();
-  // };
+    closeFlyout();
+    if (panel.type === type) {
+      controlGroup.updateInputForChild(embeddable.id, inputToReturn);
+    } else {
+      await controlGroup.replaceEmbeddable(embeddable.id, inputToReturn, type);
+    }
+  };
 
   return (
     <ControlEditor
-      api={api}
-      parentApi={controlGroup}
-      stateManager={stateManager}
-      // isCreate={false}
-      // width={controlWidth ?? defaultControlWidth}
-      // grow={controlGrow === undefined ? defaultControlGrow : controlGrow}
-      // embeddable={embeddable}
-      // onCancel={onCancel}
-      // setLastUsedDataViewId={(lastUsed) => controlGroup.setLastUsedDataViewId(lastUsed)}
-      // onSave={onSave}
-      // removeControl={() => {
-      //   closeFlyout();
-      //   removeControl();
-      // }}
+      isCreate={false}
+      width={panel.width}
+      grow={panel.grow}
+      embeddable={embeddable}
+      onCancel={onCancel}
+      setLastUsedDataViewId={(lastUsed) => controlGroup.setLastUsedDataViewId(lastUsed)}
+      onSave={onSave}
+      removeControl={() => {
+        closeFlyout();
+        removeControl();
+      }}
     />
   );
 };

@@ -9,75 +9,47 @@
 import React from 'react';
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
-import { apiIsPresentationContainer, PresentationContainer } from '@kbn/presentation-containers';
-import {
-  apiCanAccessViewMode,
-  apiHasParentApi,
-  apiHasType,
-  apiHasUniqueId,
-  apiIsOfType,
-  EmbeddableApiContext,
-  getInheritedViewMode,
-  hasEditCapabilities,
-  HasEditCapabilities,
-  HasParentApi,
-  HasType,
-  HasUniqueId,
-  PublishesWritablePanelTitle,
-  PublishingSubject,
-} from '@kbn/presentation-publishing';
-import { PublishesDataView } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
-import { ACTION_EDIT_CONTROL, ControlGroupContainer, CONTROL_GROUP_TYPE } from '..';
+import { ACTION_EDIT_CONTROL, ControlGroupContainer } from '..';
 import { pluginServices } from '../../services';
-import { ControlWidth, DefaultControlApi, PublishesControlDisplaySettings } from '../../types';
+import { ControlEmbeddable, DataControlInput } from '../../types';
 import { ControlGroupStrings } from '../control_group_strings';
 import { ControlGroupContainerContext, setFlyoutRef } from '../embeddable/control_group_container';
+import { isControlGroup } from '../embeddable/control_group_helpers';
 import { DeleteControlAction } from './delete_control_action';
 import { EditControlFlyout } from './edit_control_flyout';
-import { ControlEditor } from '../editor/control_editor';
-import { BehaviorSubject } from 'rxjs';
 
-export type EditControlActionApi = DefaultControlApi;
+export interface EditControlActionContext {
+  embeddable: ControlEmbeddable<DataControlInput>;
+}
 
-const isApiCompatible = (api: unknown | null): api is EditControlActionApi =>
-  Boolean(
-    apiHasType(api) &&
-      apiHasUniqueId(api) &&
-      hasEditCapabilities(api) &&
-      apiHasParentApi(api) &&
-      apiCanAccessViewMode(api.parentApi) &&
-      apiIsOfType(api.parentApi, CONTROL_GROUP_TYPE) &&
-      apiIsPresentationContainer(api.parentApi)
-  );
-
-export class EditControlAction implements Action<EmbeddableApiContext> {
+export class EditControlAction implements Action<EditControlActionContext> {
   public readonly type = ACTION_EDIT_CONTROL;
   public readonly id = ACTION_EDIT_CONTROL;
   public order = 2;
 
+  private getEmbeddableFactory;
   private openFlyout;
   private theme;
   private i18n;
-  private dataViewsService;
 
   constructor(private deleteControlAction: DeleteControlAction) {
     ({
+      embeddable: { getEmbeddableFactory: this.getEmbeddableFactory },
       overlays: { openFlyout: this.openFlyout },
       core: { theme: this.theme, i18n: this.i18n },
-      dataViews: this.dataViewsService,
     } = pluginServices.getServices());
   }
 
-  public readonly MenuItem = ({ context }: { context: EmbeddableApiContext }) => {
-    if (!isApiCompatible(context.embeddable)) throw new IncompatibleActionError();
+  public readonly MenuItem = ({ context }: { context: EditControlActionContext }) => {
+    const { embeddable } = context;
     return (
       <EuiToolTip content={this.getDisplayName(context)}>
         <EuiButtonIcon
-          data-test-subj={`control-action-${context.embeddable.uuid}-edit`}
+          data-test-subj={`control-action-${embeddable.id}-edit`}
           aria-label={this.getDisplayName(context)}
           iconType={this.getIconType(context)}
           onClick={() => this.execute(context)}
@@ -87,75 +59,52 @@ export class EditControlAction implements Action<EmbeddableApiContext> {
     );
   };
 
-  public getDisplayName({ embeddable }: EmbeddableApiContext) {
-    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
+  public getDisplayName({ embeddable }: EditControlActionContext) {
+    if (!embeddable.parent || !isControlGroup(embeddable.parent)) {
+      throw new IncompatibleActionError();
+    }
     return ControlGroupStrings.floatingActions.getEditButtonTitle();
   }
 
-  public getIconType({ embeddable }: EmbeddableApiContext) {
-    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
+  public getIconType({ embeddable }: EditControlActionContext) {
+    if (!embeddable.parent || !isControlGroup(embeddable.parent)) {
+      throw new IncompatibleActionError();
+    }
     return 'pencil';
   }
 
-  public async isCompatible({ embeddable }: EmbeddableApiContext) {
-    return (
-      isApiCompatible(embeddable) &&
-      getInheritedViewMode(embeddable.parentApi) === ViewMode.EDIT &&
-      embeddable.isEditingEnabled()
+  public async isCompatible({ embeddable }: EditControlActionContext) {
+    if (isErrorEmbeddable(embeddable)) return false;
+    const controlGroup = embeddable.parent;
+    const factory = this.getEmbeddableFactory(embeddable.type);
+
+    return Boolean(
+      controlGroup &&
+        isControlGroup(controlGroup) &&
+        controlGroup.getInput().viewMode === ViewMode.EDIT &&
+        factory &&
+        (await factory.isEditable())
     );
   }
 
-  public async execute({ embeddable }: EmbeddableApiContext) {
-    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-
-    const selectedDataViewId: string | undefined =
-      embeddable.dataView.getValue()?.id ??
-      embeddable.parentApi.lastUsedDataViewId?.getValue() ??
-      embeddable.parentApi.dataViews.getValue()?.[0].id ??
-      (await this.dataViewsService.getDefaultId()) ??
-      undefined; // getDefaultId returns null rather than undefined, so catch that
-    const controlGrow = embeddable.grow$.getValue();
-
-    const stateManager = {
-      dataViewId$: new BehaviorSubject<string | undefined>(selectedDataViewId),
-      fieldName$: new BehaviorSubject<string | undefined>(embeddable.fieldName$.getValue()),
-      grow: new BehaviorSubject<boolean | undefined>(
-        controlGrow === undefined ? embeddable.parentApi.defaultGrow$.getValue() : controlGrow
-      ),
-      width: new BehaviorSubject<ControlWidth | undefined>(
-        embeddable.width$.getValue() ?? embeddable.parentApi.defaultWidth$.getValue()
-      ),
-      settings: new BehaviorSubject<object | undefined>(embeddable.settings),
-    };
-
-    console.log('stateManager', stateManager);
+  public async execute({ embeddable }: EditControlActionContext) {
+    if (!embeddable.parent || !isControlGroup(embeddable.parent)) {
+      throw new IncompatibleActionError();
+    }
+    const controlGroup = embeddable.parent as ControlGroupContainer;
 
     const flyoutInstance = this.openFlyout(
       toMountPoint(
-        <ControlEditor
-          api={embeddable}
-          parentApi={embeddable.parentApi}
-          stateManager={stateManager}
-          // isCreate={false}
-          // width={controlWidth ?? defaultControlWidth}
-          // grow={controlGrow === undefined ? defaultControlGrow : controlGrow}
-          // embeddable={embeddable}
-          // onCancel={onCancel}
-          // setLastUsedDataViewId={(lastUsed) => controlGroup.setLastUsedDataViewId(lastUsed)}
-          // onSave={onSave}
-          // removeControl={() => {
-          //   closeFlyout();
-          //   removeControl();
-          // }}
-        />,
-        // <EditControlFlyout
-        //   api={embeddable}
-        //   removeControl={() => this.deleteControlAction.execute({ embeddable })}
-        //   closeFlyout={() => {
-        //     setFlyoutRef(undefined);
-        //     flyoutInstance.close();
-        //   }}
-        // />,
+        <ControlGroupContainerContext.Provider value={controlGroup}>
+          <EditControlFlyout
+            embeddable={embeddable}
+            removeControl={() => this.deleteControlAction.execute({ embeddable })}
+            closeFlyout={() => {
+              setFlyoutRef(undefined);
+              flyoutInstance.close();
+            }}
+          />
+        </ControlGroupContainerContext.Provider>,
 
         { theme: this.theme, i18n: this.i18n }
       ),

@@ -7,7 +7,6 @@
  */
 
 import { ReactNode } from 'react';
-import { BehaviorSubject } from 'rxjs';
 
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewField, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -18,57 +17,13 @@ import {
   EmbeddableStart,
   IEmbeddable,
 } from '@kbn/embeddable-plugin/public';
-import {
-  HasEditCapabilities,
-  HasParentApi,
-  HasType,
-  HasUniqueId,
-  PublishesBlockingError,
-  PublishesDataLoading,
-  PublishesDisabledActionIds,
-  PublishesFilter,
-  PublishesTimeslice,
-  PublishesUnsavedChanges,
-  PublishesWritablePanelTitle,
-  PublishingSubject,
-} from '@kbn/presentation-publishing';
-import { PublishesDataView } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
-import { PublishesWritableSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
 import { ControlInput, ControlWidth, DataControlInput } from '../common/types';
 import { EditControlActionApi } from './control_group/actions/edit_control_action';
-import { ControlGroupApi, ControlGroupFilterOutput } from './control_group/types';
+import { ControlGroupFilterOutput } from './control_group/types';
 import { ControlsServiceType } from './services/controls/types';
-
-export interface PublishesControlDisplaySettings {
-  grow$: PublishingSubject<boolean | undefined>;
-  width$: PublishingSubject<ControlWidth | undefined>;
-}
-
-/** This is the stuff the control group cares about */
-export type DefaultControlApi = PublishesDataLoading &
-  PublishesBlockingError &
-  PublishesUnsavedChanges &
-  PublishesDisabledActionIds &
-  PublishesWritablePanelTitle &
-  PublishesControlDisplaySettings & {
-    settings: PublishingSubject<object>;
-    fieldName$: PublishingSubject<string | undefined>;
-  } & PublishesDataView &
-  Partial<PublishesFilter & PublishesTimeslice> & // can publish either filters or timeslice
-  HasType &
-  HasUniqueId &
-  HasEditCapabilities &
-  HasParentApi<ControlGroupApi>;
-
-// /** This is the stuff for managing the internal state - the control group doesn't care about this */
-// export type DefaultControlInternalApi = PublishesControlDisplaySettings & {
-//   setGrow: (grow: boolean) => void;
-//   setWidth: (width: ControlWidth) => void;
-//   fieldName$: BehaviorSubject<string | undefined>;
-// };
 
 export type CommonControlOutput = ControlGroupFilterOutput & {
   dataViewId?: string;

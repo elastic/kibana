@@ -12,7 +12,7 @@ import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/publ
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { PLUGIN_ID } from './constants';
 import { registerControlFactory } from './controls/control_factory_registry';
-import { SEARCH_CONTROL_TYPE } from './controls/search_control/types';
+import { SearchControlState, SEARCH_CONTROL_TYPE } from './controls/search_control/types';
 import img from './control_group_image.png';
 
 interface SetupDeps {
@@ -35,7 +35,7 @@ export class ControlsExamplePlugin
       async mount(params: AppMountParameters) {
         const [, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./app/app');
-        return renderApp(depsStart, params);
+        return renderApp(core, depsStart, params);
       },
     });
 
@@ -47,12 +47,13 @@ export class ControlsExamplePlugin
     });
   }
 
-  public start(core: CoreStart) {
-    registerControlFactory(SEARCH_CONTROL_TYPE, async () => {
+  public start(core: CoreStart, deps: ControlsExampleStartDeps) {
+    // core.overlays.
+    registerControlFactory<SearchControlState>(SEARCH_CONTROL_TYPE, async () => {
       const { getSearchEmbeddableFactory } = await import(
         './controls/search_control/get_search_control_factory'
       );
-      return getSearchEmbeddableFactory();
+      return getSearchEmbeddableFactory({ dataViewsService: deps.data.dataViews });
     });
 
     // registerReactEmbeddableFactory(EUI_MARKDOWN_ID, async () => {

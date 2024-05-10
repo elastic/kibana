@@ -9,13 +9,12 @@
 import { EuiFormControlLayout, EuiFormLabel, htmlIdGenerator } from '@elastic/eui';
 // import { ControlError } from '@kbn/controls-plugin/public/control_group/component/control_error_component';
 import { isPromise } from '@kbn/std';
-
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { PresentationPanelProps } from '@kbn/presentation-panel-plugin/public/panel_component/types';
 import {
   apiHasParentApi,
   apiPublishesViewMode,
   useBatchedOptionalPublishingSubjects,
-  ViewMode,
 } from '@kbn/presentation-publishing';
 import { FloatingActions } from '@kbn/presentation-util-plugin/public';
 import React, { useMemo, useState } from 'react';
@@ -68,7 +67,7 @@ export const ControlPanel = <State extends object>({
     api?.defaultPanelTitle,
     viewModeSubject
   );
-  const viewMode: ViewMode = rawViewMode ?? 'view';
+  const viewMode = (rawViewMode ?? ViewMode.VIEW) as ViewMode;
 
   const [initialLoadComplete, setInitialLoadComplete] = useState(!dataLoading);
   if (!initialLoadComplete && (dataLoading === false || (api && !api.dataLoading))) {
@@ -90,7 +89,7 @@ export const ControlPanel = <State extends object>({
     >
       {blockingError || !ControlComponent ? (
         <EuiFormControlLayout>
-          <>{error}</>
+          <>{error ?? 'here'}</>
           {/* <ControlError
         error={
           blockingError ??
@@ -105,7 +104,7 @@ export const ControlPanel = <State extends object>({
       ) : (
         <EuiFormControlLayout
           fullWidth
-          isLoading={loading || dataLoading}
+          isLoading={loading || Boolean(dataLoading)}
           prepend={<EuiFormLabel>{panelTitle || defaultPanelTitle}</EuiFormLabel>}
         >
           <ControlComponent

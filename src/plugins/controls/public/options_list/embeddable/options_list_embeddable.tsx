@@ -55,8 +55,8 @@ import {
   ControlEmbeddable,
   DataControlInput,
   DefaultControlApi,
-  DefaultControlInternalApi,
   IClearableControl,
+  legacyControlToApi,
 } from '../../types';
 import { OptionsListControl } from '../components/options_list_control';
 import { getDefaultComponentState, optionsListReducers } from '../options_list_reducers';
@@ -72,43 +72,6 @@ const diffDataFetchProps = (
   if (!deepEqual(currentWithoutFilters, lastWithoutFilters)) return false;
   if (!compareFilters(lastFilters ?? [], currentFilters ?? [], COMPARE_ALL_OPTIONS)) return false;
   return true;
-};
-
-const legacyControlToApi = (
-  embeddable: ControlEmbeddable<DataControlInput>
-): ControlEmbeddable<DataControlInput> &
-  Omit<DefaultControlApi, 'parentApi'> &
-  DefaultControlInternalApi => {
-  const input = embeddable.getExplicitInput();
-  const grow$ = new BehaviorSubject<boolean | undefined>(input.grow);
-  const width$ = new BehaviorSubject<ControlWidth | undefined>(input.width);
-  const dataView = new BehaviorSubject<DataView | undefined>(undefined);
-  const fieldName$ = new BehaviorSubject<string | undefined>(input.fieldName);
-
-  return {
-    ...embeddable,
-    unsavedChanges: new BehaviorSubject<object | undefined>(undefined),
-    resetUnsavedChanges: () => {},
-    grow$,
-    width$,
-    dataView,
-    fieldName$,
-    // settings,
-    setGrow: (grow) => {
-      grow$.next(grow);
-      (embeddable.parent as ControlGroupContainer)?.dispatch.setControlGrow({
-        grow,
-        embeddableId: embeddable.uuid,
-      });
-    },
-    setWidth: (width) => {
-      width$.next(width);
-      (embeddable.parent as ControlGroupContainer)?.dispatch.setControlWidth({
-        width,
-        embeddableId: embeddable.uuid,
-      });
-    },
-  };
 };
 
 interface OptionsListDataFetchProps {
@@ -205,13 +168,7 @@ export class OptionsListEmbeddable
     this.dispatch = reduxEmbeddableTools.dispatch;
     this.cleanupStateTools = reduxEmbeddableTools.cleanup;
     this.onStateChange = reduxEmbeddableTools.onStateChange;
-    ({
-      grow$: this.grow$,
-      width$: this.width$,
-      setGrow: this.setGrow,
-      setWidth: this.setWidth,
-      fieldName$: this.fieldName$,
-    } = legacyControlToApi(this));
+    ({ grow$: this.grow$, width$: this.width$ } = legacyControlToApi(this));
 
     this.parentApi = this.parentApi as ControlGroupContainer;
 
