@@ -26,7 +26,7 @@ async function main() {
   // Calculate success
   const jobs = buildkiteBuild.jobs;
   const testSuiteRuns = jobs.filter((step) => {
-    return step.step_key.includes('ftr-suite') || step.step_key.includes('cypress-suite');
+    return step.step_key?.includes('ftr-suite') || step.step_key?.includes('cypress-suite');
   });
   const testSuiteGroups = groupBy('name', testSuiteRuns);
 
