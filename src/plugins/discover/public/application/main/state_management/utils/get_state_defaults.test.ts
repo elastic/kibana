@@ -91,14 +91,14 @@ describe('getStateDefaults', () => {
     });
     expect(actualForUndefinedViewMode.viewMode).toBeUndefined();
 
-    const actualForTextBasedWithInvalidViewMode = getStateDefaults({
+    const actualForTextBasedWithAggregatedViewMode = getStateDefaults({
       services: discoverServiceMock,
       savedSearch: {
         ...savedSearchMockWithESQL,
         viewMode: VIEW_MODE.AGGREGATED_LEVEL,
       },
     });
-    expect(actualForTextBasedWithInvalidViewMode.viewMode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
+    expect(actualForTextBasedWithAggregatedViewMode.viewMode).toBe(VIEW_MODE.AGGREGATED_LEVEL);
 
     const actualForTextBasedWithValidViewMode = getStateDefaults({
       services: discoverServiceMock,

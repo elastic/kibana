@@ -65,7 +65,7 @@ describe('Document view mode toggle component', () => {
 
   it('should not render if text-based', () => {
     const component = mountComponent({ isTextBasedQuery: true });
-    expect(findTestSubject(component, 'dscViewModeToggle').exists()).toBe(false);
+    expect(findTestSubject(component, 'dscViewModeToggle').exists()).toBe(true);
     expect(findTestSubject(component, 'discoverQueryTotalHits').exists()).toBe(true);
   });
 

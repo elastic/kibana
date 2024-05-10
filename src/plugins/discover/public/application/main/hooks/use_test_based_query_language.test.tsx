@@ -112,10 +112,7 @@ describe('useTextBasedQueryLanguage', () => {
       viewMode: VIEW_MODE.AGGREGATED_LEVEL,
     });
 
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
-    expect(replaceUrlState).toHaveBeenCalledWith({
-      viewMode: undefined,
-    });
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
   });
   test('changing a text based query with different result columns should change state when loading and finished', async () => {
     const { replaceUrlState, stateContainer } = renderHookWithContext(false);

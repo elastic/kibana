@@ -28,18 +28,15 @@ const EmbeddableESQLFieldStatsTableWrapper = dynamic(
 const EmbeddableFieldStatsTableWrapper = dynamic(() => import('./embeddable_field_stats_table'));
 
 function isESQLFieldStatisticTableEmbeddableState(
-  input: unknown
+  input: FieldStatisticTableEmbeddableProps
 ): input is ESQLDataVisualizerGridEmbeddableState {
   return isPopulatedObject(input, ['esql']) && input.esql === true;
 }
 
 function isFieldStatisticTableEmbeddableState(
-  input: unknown
+  input: FieldStatisticTableEmbeddableProps
 ): input is Required<FieldStatisticTableEmbeddableProps, 'dataView'> {
-  return (
-    isPopulatedObject(input, ['dataView']) &&
-    (!isPopulatedObject(input, ['esql']) || input.esql === false)
-  );
+  return isPopulatedObject(input, ['dataView']) && Boolean(input.esql) === false;
 }
 
 const FieldStatisticsWrapperContent = (props: FieldStatisticTableEmbeddableProps) => {

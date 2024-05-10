@@ -53,6 +53,6 @@ describe('getValidViewMode', () => {
         viewMode: VIEW_MODE.AGGREGATED_LEVEL,
         isTextBasedQueryMode: true,
       })
-    ).toBe(VIEW_MODE.DOCUMENT_LEVEL);
+    ).toBe(VIEW_MODE.AGGREGATED_LEVEL);
   });
 });
