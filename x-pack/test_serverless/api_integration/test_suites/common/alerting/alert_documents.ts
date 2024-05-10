@@ -80,6 +80,10 @@ export default function ({ getService }: FtrProviderContext) {
       );
     });
 
+    after(async () => {
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+    });
+
     it('should generate an alert document for an active alert', async () => {
       const createdRule = await createEsQueryRule({
         supertestWithoutAuth,
