@@ -600,6 +600,7 @@ src/plugins/newsfeed @elastic/kibana-core
 test/common/plugins/newsfeed @elastic/kibana-core
 src/plugins/no_data_page @elastic/appex-sharedux
 x-pack/plugins/notifications @elastic/appex-sharedux
+x-pack/packages/kbn-oam-schema @elastic/obs-knowledge-team
 packages/kbn-object-versioning @elastic/appex-sharedux
 x-pack/plugins/observability_solution/observability_ai_assistant_app @elastic/obs-ai-assistant
 x-pack/plugins/observability_solution/observability_ai_assistant_management @elastic/obs-ai-assistant
