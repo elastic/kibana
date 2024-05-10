@@ -17,7 +17,7 @@ import { X_MODIFY } from '../known_custom_props';
  */
 export function createModifyPartialProcessor(): DocumentNodeProcessor {
   return {
-    ref(node, resolvedRef) {
+    onRefNodeLeave(node, resolvedRef) {
       if (!hasProp(node, X_MODIFY, 'partial')) {
         return;
       }
@@ -27,7 +27,7 @@ export function createModifyPartialProcessor(): DocumentNodeProcessor {
 
       delete node.required;
     },
-    leave(node) {
+    onNodeLeave(node) {
       if (!hasProp(node, X_MODIFY, 'partial')) {
         return;
       }
