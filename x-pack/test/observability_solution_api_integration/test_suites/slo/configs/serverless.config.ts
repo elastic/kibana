@@ -6,8 +6,14 @@
  */
 
 import { createTestConfig } from '../../../config/serverless/config.base';
+import { AlertingApiProvider } from '../../../services/alerting_api';
+import { SloApiProvider } from '../../../services/slo_api';
 
 export default createTestConfig({
+  services: {
+    alertingApi: AlertingApiProvider,
+    sloApi: SloApiProvider,
+  },
   testFiles: [require.resolve('..')],
   junit: {
     reportName: 'SLO - Integration Tests - Serverless Env',

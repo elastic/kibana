@@ -17,6 +17,9 @@ export default function ({ getService }: FtrProviderContext) {
   const alertingApi = getService('alertingApi');
   const dataViewApi = getService('dataViewApi');
   const sloApi = getService('sloApi');
+  const config = getService('config');
+  const isServerless = config.get('serverless');
+  const expectedConsumer = isServerless ? 'observability' : 'slo';
 
   describe('@serverless @ess Burn rate rule', () => {
     const RULE_TYPE_ID = 'slo.rules.burnRate';
@@ -114,7 +117,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const dependencyRule = await alertingApi.createRule({
           tags: ['observability'],
-          consumer: 'observability',
+          consumer: expectedConsumer,
           name: 'SLO Burn Rate rule - Dependency',
           ruleTypeId: RULE_TYPE_ID,
           schedule: {
@@ -186,7 +189,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const createdRule = await alertingApi.createRule({
           tags: ['observability'],
-          consumer: 'observability',
+          consumer: expectedConsumer,
           name: 'SLO Burn Rate rule',
           ruleTypeId: RULE_TYPE_ID,
           schedule: {
@@ -288,7 +291,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should find the created rule with correct information about the consumer', async () => {
         const match = await alertingApi.findRule(ruleId);
         expect(match).not.to.be(undefined);
-        expect(match.consumer).to.be('observability');
+        expect(match.consumer).to.be(expectedConsumer);
       });
     });
   });

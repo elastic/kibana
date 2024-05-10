@@ -16,7 +16,10 @@ export function createTestConfig(options) {
     return {
       ...xPackApiIntegrationTestsConfig.getAll(),
       testFiles: options.testFiles,
-      services,
+      services: {
+        ...services,
+        ...options.services,
+      },
       junit: {
         reportName: 'X-Pack Οbservability Solution API Integration Tests',
       },

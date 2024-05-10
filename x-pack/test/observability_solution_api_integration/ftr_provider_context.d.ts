@@ -6,6 +6,6 @@
  */
 import { GenericFtrProviderContext } from '@kbn/test';
 
-import { services } from '../../test_serverless/api_integration/services';
+import { services } from '../api_integration/services';
 
 export type FtrProviderContext = GenericFtrProviderContext<typeof services, {}>;
