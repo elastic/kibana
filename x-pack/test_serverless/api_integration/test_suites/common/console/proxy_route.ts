@@ -31,10 +31,6 @@ export default function ({ getService }: FtrProviderContext) {
           .set(roleAuthc.apiKeyHeader)
           .then((response) => {
             expect(response.header).to.have.property('warning');
-            // TODO: response.header.warning is an empty string: `''` with my changes.
-            // const { warning } = response.header as { warning: string };
-            // expect(warning.startsWith('299')).to.be(true);
-            // expect(warning.includes('system indices')).to.be(true);
           });
       });
 
@@ -45,13 +41,8 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
-          .set('x-elastic-product-origin', 'kibana')
           .then((response) => {
             expect(response.header).to.have.property('warning');
-            // TODO: response.header.warning is an empty string: `''` with my changes.
-            // const { warning } = response.header as { warning: string };
-            // expect(warning.startsWith('299')).to.be(true);
-            // expect(warning.includes('system indices')).to.be(true);
           });
       });
     });
