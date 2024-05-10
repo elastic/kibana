@@ -22,6 +22,7 @@ import {
   type RiskScore,
   getRiskLevel,
   RiskCategories,
+  RiskWeightTypes,
 } from '../../../../common/entity_analytics/risk_engine';
 import { withSecuritySpan } from '../../../utils/with_security_span';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
@@ -32,7 +33,6 @@ import {
   normalize,
 } from '../asset_criticality/helpers';
 import { getAfterKeyForIdentifierType, getFieldForIdentifier } from './helpers';
-import { getGlobalWeightForIdentifierType } from './risk_weights';
 import type {
   CalculateRiskScoreAggregations,
   CalculateScoresParams,
@@ -122,7 +122,7 @@ const buildIdentifierTypeAggregation = ({
   alertSampleSizePerShard: number;
   scriptedMetricPainless: PainlessScripts;
 }): AggregationsAggregationContainer => {
-  const globalIdentifierTypeWeight = getGlobalWeightForIdentifierType({ identifierType, weights });
+  const globalIdentifierTypeWeight = getGlobalWeightForIdentifierType(identifierType, weights);
   const identifierField = getFieldForIdentifier(identifierType);
 
   return {
@@ -212,6 +212,12 @@ const processScores = async ({
     return formatForResponse({ bucket, criticality, identifierField, now, includeNewFields: true });
   });
 };
+
+export const getGlobalWeightForIdentifierType = (
+  identifierType: IdentifierType,
+  weights?: RiskWeights
+): number | undefined =>
+  weights?.find((weight) => weight.type === RiskWeightTypes.global)?.[identifierType];
 
 export const calculateRiskScores = async ({
   afterKeys: userAfterKeys,
