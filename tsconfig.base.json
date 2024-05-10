@@ -1194,6 +1194,8 @@
       "@kbn/no-data-page-plugin/*": ["src/plugins/no_data_page/*"],
       "@kbn/notifications-plugin": ["x-pack/plugins/notifications"],
       "@kbn/notifications-plugin/*": ["x-pack/plugins/notifications/*"],
+      "@kbn/oam-schema": ["x-pack/packages/kbn-oam-schema"],
+      "@kbn/oam-schema/*": ["x-pack/packages/kbn-oam-schema/*"],
       "@kbn/object-versioning": ["packages/kbn-object-versioning"],
       "@kbn/object-versioning/*": ["packages/kbn-object-versioning/*"],
       "@kbn/observability-ai-assistant-app-plugin": ["x-pack/plugins/observability_solution/observability_ai_assistant_app"],

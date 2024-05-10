@@ -14,16 +14,23 @@ import { hostsRoutes } from './assets/hosts';
 import { servicesRoutes } from './assets/services';
 import { containersRoutes } from './assets/containers';
 import { podsRoutes } from './assets/pods';
+import { createOAMDefinitionRoute } from './oam/create';
+import { deleteOAMDefinitionRoute } from './oam/delete';
+import { resetOAMDefinitionRoute } from './oam/reset';
 
 export function setupRoutes<T extends RequestHandlerContext>({
   router,
   assetClient,
+  logger,
 }: SetupRouteOptions<T>) {
-  pingRoute<T>({ router, assetClient });
-  sampleAssetsRoutes<T>({ router, assetClient });
-  assetsRoutes<T>({ router, assetClient });
-  hostsRoutes<T>({ router, assetClient });
-  servicesRoutes<T>({ router, assetClient });
-  containersRoutes<T>({ router, assetClient });
-  podsRoutes<T>({ router, assetClient });
+  pingRoute<T>({ router, assetClient, logger });
+  sampleAssetsRoutes<T>({ router, assetClient, logger });
+  assetsRoutes<T>({ router, assetClient, logger });
+  hostsRoutes<T>({ router, assetClient, logger });
+  servicesRoutes<T>({ router, assetClient, logger });
+  containersRoutes<T>({ router, assetClient, logger });
+  podsRoutes<T>({ router, assetClient, logger });
+  createOAMDefinitionRoute<T>({ router, assetClient, logger });
+  deleteOAMDefinitionRoute<T>({ router, assetClient, logger });
+  resetOAMDefinitionRoute<T>({ router, assetClient, logger });
 }

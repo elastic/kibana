@@ -5438,6 +5438,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/oam-schema@link:x-pack/packages/kbn-oam-schema":
+  version "0.0.0"
+  uid ""
+
 "@kbn/object-versioning@link:packages/kbn-object-versioning":
   version "0.0.0"
   uid ""

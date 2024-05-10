@@ -15,12 +15,17 @@ import {
   Logger,
 } from '@kbn/core/server';
 
-import { upsertTemplate } from './lib/manage_index_templates';
+import { upsertComponent, upsertTemplate } from './lib/manage_index_templates';
 import { setupRoutes } from './routes';
 import { assetsIndexTemplateConfig } from './templates/assets_template';
 import { AssetClient } from './lib/asset_client';
 import { AssetManagerPluginSetupDependencies, AssetManagerPluginStartDependencies } from './types';
 import { AssetManagerConfig, configSchema, exposeToBrowserConfig } from '../common/config';
+import { oamBaseComponentTemplateConfig } from './templates/components/base';
+import { oamAssetComponentTemplateConfig } from './templates/components/asset';
+import { oamEventComponentTemplateConfig } from './templates/components/event';
+import { oamIndexTemplateConfig } from './templates/oam_template';
+import { oamDefinition } from './saved_objects';
 
 export type AssetManagerServerPluginSetup = ReturnType<AssetManagerServerPlugin['setup']>;
 export type AssetManagerServerPluginStart = ReturnType<AssetManagerServerPlugin['start']>;
@@ -56,6 +61,8 @@ export class AssetManagerServerPlugin
 
     this.logger.info('Server is enabled');
 
+    core.savedObjects.registerType(oamDefinition);
+
     const assetClient = new AssetClient({
       sourceIndices: this.config.sourceIndices,
       getApmIndices: plugins.apmDataAccess.getApmIndices,
@@ -63,7 +70,7 @@ export class AssetManagerServerPlugin
     });
 
     const router = core.http.createRouter();
-    setupRoutes<RequestHandlerContext>({ router, assetClient });
+    setupRoutes<RequestHandlerContext>({ router, assetClient, logger: this.logger });
 
     return {
       assetClient,
@@ -76,11 +83,31 @@ export class AssetManagerServerPlugin
       return;
     }
 
+    const esClient = core.elasticsearch.client.asInternalUser;
     upsertTemplate({
-      esClient: core.elasticsearch.client.asInternalUser,
+      esClient,
       template: assetsIndexTemplateConfig,
       logger: this.logger,
     }).catch(() => {}); // it shouldn't reject, but just in case
+
+    // Install OAM compoent templates and index template
+    Promise.all([
+      upsertComponent({ esClient, logger: this.logger, component: oamBaseComponentTemplateConfig }),
+      upsertComponent({
+        esClient,
+        logger: this.logger,
+        component: oamEventComponentTemplateConfig,
+      }),
+      upsertComponent({
+        esClient,
+        logger: this.logger,
+        component: oamAssetComponentTemplateConfig,
+      }),
+    ])
+      .then(() =>
+        upsertTemplate({ esClient, logger: this.logger, template: oamIndexTemplateConfig })
+      )
+      .catch(() => {});
 
     return {};
   }

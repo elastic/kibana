@@ -621,6 +621,7 @@
     "@kbn/newsfeed-test-plugin": "link:test/common/plugins/newsfeed",
     "@kbn/no-data-page-plugin": "link:src/plugins/no_data_page",
     "@kbn/notifications-plugin": "link:x-pack/plugins/notifications",
+    "@kbn/oam-schema": "link:x-pack/packages/kbn-oam-schema",
     "@kbn/object-versioning": "link:packages/kbn-object-versioning",
     "@kbn/observability-ai-assistant-app-plugin": "link:x-pack/plugins/observability_solution/observability_ai_assistant_app",
     "@kbn/observability-ai-assistant-management-plugin": "link:x-pack/plugins/observability_solution/observability_ai_assistant_management",
