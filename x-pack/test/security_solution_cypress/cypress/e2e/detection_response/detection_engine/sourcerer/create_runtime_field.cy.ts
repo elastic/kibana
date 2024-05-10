@@ -26,7 +26,8 @@ import { deleteRuntimeField } from '../../../../tasks/api_calls/sourcerer';
 const alertRunTimeField = 'field.name.alert.page';
 const timelineRuntimeField = 'field.name.timeline';
 
-describe('Create DataView runtime field', { tags: ['@ess', '@serverless'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/183104
+describe.skip('Create DataView runtime field', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     deleteRuntimeField('security-solution-default', alertRunTimeField);
