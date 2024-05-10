@@ -296,8 +296,9 @@ function generateSearchQuery({
   const unit = toMomentUnitOfTime(timeWindow.duration.unit);
   const timeWindowDurationInDays = moment.duration(timeWindow.duration.value, unit).asDays();
 
+  const queryRangeDurationInDays = moment(dateRange.range.to).diff(dateRange.range.from, 'days');
   const { fixedInterval, bucketsPerDay } =
-    getFixedIntervalAndBucketsPerDay(timeWindowDurationInDays);
+    getFixedIntervalAndBucketsPerDay(queryRangeDurationInDays);
 
   const extraFilterByInstanceId =
     !!groupBy && ![groupBy].flat().includes(ALL_VALUE) && instanceId !== ALL_VALUE
@@ -437,6 +438,9 @@ export function getFixedIntervalAndBucketsPerDay(durationInDays: number): {
   fixedInterval: string;
   bucketsPerDay: number;
 } {
+  if (durationInDays <= 3) {
+    return { fixedInterval: '20m', bucketsPerDay: 72 };
+  }
   if (durationInDays <= 7) {
     return { fixedInterval: '1h', bucketsPerDay: 24 };
   }

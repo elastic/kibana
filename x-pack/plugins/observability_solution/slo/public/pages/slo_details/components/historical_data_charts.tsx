@@ -21,6 +21,7 @@ export interface Props {
   range?: { from: Date; to: Date };
   onBrushed?: (timeBounds: TimeBounds) => void;
 }
+
 export function HistoricalDataCharts({
   slo,
   range,
