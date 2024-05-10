@@ -459,7 +459,6 @@ export class VisualizationsPlugin
       savedObjectsManagement,
       contentManagement,
       savedSearch,
-      dataViews,
     }: VisualizationsStartDeps
   ): VisualizationsStart {
     const types = this.types.start();
