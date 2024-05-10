@@ -10,10 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { isTimeComparison } from '../../time_comparison/get_comparison_options';
-import {
-  getLatencyAggregationType,
-  LatencyAggregationType,
-} from '../../../../../common/latency_aggregation_types';
+import { getLatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useLicenseContext } from '../../../../context/license/use_license_context';
 import { useTransactionLatencyChartsFetcher } from '../../../../hooks/use_transaction_latency_chart_fetcher';
@@ -126,7 +123,7 @@ export function LatencyChart({ height, kuery }: Props) {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <LatencyAggregationTypeSelect
-                  latencyAggregationType={latencyAggregationType as LatencyAggregationType}
+                  latencyAggregationType={latencyAggregationType}
                   onChange={(type) => {
                     urlHelpers.push(history, {
                       query: {
