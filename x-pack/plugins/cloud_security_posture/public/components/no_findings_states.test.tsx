@@ -13,13 +13,12 @@ import {
   cspmStatusNotInstalled,
   cspmStatusCspmNotDeployed,
 } from '../test/handlers/cspm_status_handlers';
-import { getMockServerCoreSetup, setupMockServiceWorker } from '../test/mock_server';
+import { getMockServerServicesSetup, setupMockServiceWorker } from '../test/mock_server';
 
 const server = setupMockServiceWorker();
 
 const renderWrapper = (children: React.ReactNode) => {
-  const core = getMockServerCoreSetup();
-  return render(<TestProvider core={core}>{children}</TestProvider>);
+  return render(<TestProvider {...getMockServerServicesSetup()}>{children}</TestProvider>);
 };
 
 describe('NoFindingsStates', () => {
