@@ -148,32 +148,32 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = ({
       }
       body={body}
       actions={
-        !isTextBasedQuery(query) &&
-        isTimeBased &&
-        [
-          TimeRangeExtendingStatus.initial,
-          TimeRangeExtendingStatus.loading,
-          TimeRangeExtendingStatus.timedOut,
-          TimeRangeExtendingStatus.failed,
-        ].includes(timeRangeExtendingStatus) ? (
+        !isTextBasedQuery(query) && isTimeBased ? (
           <div
             css={css`
               min-block-size: ${euiTheme.size.xxl};
             `}
           >
-            <EuiButton
-              color="primary"
-              fill
-              onClick={extendTimeRange}
-              disabled={timeRangeExtendingStatus === TimeRangeExtendingStatus.loading}
-              isLoading={timeRangeExtendingStatus === TimeRangeExtendingStatus.loading}
-              data-test-subj="discoverNoResultsViewAllMatches"
-            >
-              <FormattedMessage
-                id="discover.noResults.suggestion.searchAllMatchesButtonText"
-                defaultMessage="Search entire time range"
-              />
-            </EuiButton>
+            {[
+              TimeRangeExtendingStatus.initial,
+              TimeRangeExtendingStatus.loading,
+              TimeRangeExtendingStatus.timedOut,
+              TimeRangeExtendingStatus.failed,
+            ].includes(timeRangeExtendingStatus) && (
+              <EuiButton
+                color="primary"
+                fill
+                onClick={extendTimeRange}
+                disabled={timeRangeExtendingStatus === TimeRangeExtendingStatus.loading}
+                isLoading={timeRangeExtendingStatus === TimeRangeExtendingStatus.loading}
+                data-test-subj="discoverNoResultsViewAllMatches"
+              >
+                <FormattedMessage
+                  id="discover.noResults.suggestion.searchAllMatchesButtonText"
+                  defaultMessage="Search entire time range"
+                />
+              </EuiButton>
+            )}
           </div>
         ) : undefined
       }
