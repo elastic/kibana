@@ -39,15 +39,14 @@ export const query = async (
     },
   };
   const hasGroupBy = Array.isArray(options.groupBy) && options.groupBy.length > 0;
-  const groupInstanceFilter: Array<Record<string, any>> = [];
-  options.groupInstance?.map((group, index) => {
-    const key = options.groupBy?.[index];
-    if (typeof key === 'string' && group) {
-      groupInstanceFilter.push({
-        term: { [key]: group },
-      });
-    }
-  });
+  const groupInstanceFilter =
+    options.groupInstance?.reduce<Array<Record<string, any>>>((acc, group, index) => {
+      const key = options.groupBy?.[index];
+      if (typeof key === 'string' && group) {
+        acc.push({ term: { [key]: group } });
+      }
+      return acc;
+    }, []) ?? [];
   const filter: Array<Record<string, any>> = [
     {
       range: {
