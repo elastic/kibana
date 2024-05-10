@@ -107,7 +107,7 @@ export const CreateDockerServerless: Task = {
   async run(config, log, build) {
     await runDockerGenerator(config, log, build, {
       architecture: 'x64',
-      baseImage: 'ubuntu',
+      baseImage: 'chainguard',
       context: false,
       serverless: true,
       image: true,
@@ -115,7 +115,7 @@ export const CreateDockerServerless: Task = {
     });
     await runDockerGenerator(config, log, build, {
       architecture: 'aarch64',
-      baseImage: 'ubuntu',
+      baseImage: 'chainguard',
       context: false,
       serverless: true,
       image: true,
@@ -206,7 +206,7 @@ export const CreateDockerContexts: Task = {
       image: false,
     });
     await runDockerGenerator(config, log, build, {
-      baseImage: 'ubuntu',
+      baseImage: 'chainguard',
       serverless: true,
       context: true,
       image: false,
