@@ -8,26 +8,26 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { keyBy, memoize, partition } from 'lodash';
+import { chunk, keyBy, memoize, partition } from 'lodash';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import type { TransformStats } from '../../../../common/types/transform_stats';
-import { TRANSFORM_HEALTH_STATUS } from '../../../../common/constants';
-import type { TransformHealthRuleParams } from './schema';
 import {
-  mapEsHealthStatus2TransformHealthStatus,
   ALL_TRANSFORMS_SELECTION,
+  mapEsHealthStatus2TransformHealthStatus,
   TRANSFORM_HEALTH_CHECK_NAMES,
+  TRANSFORM_HEALTH_STATUS,
   TRANSFORM_NOTIFICATIONS_INDEX,
   TRANSFORM_RULE_TYPE,
   TRANSFORM_STATE,
 } from '../../../../common/constants';
+import type { TransformHealthRuleParams } from './schema';
 import { getResultTestConfig } from '../../../../common/utils/alerts';
 import type {
   ErrorMessagesTransformResponse,
-  TransformStateReportResponse,
   TransformHealthAlertContext,
+  TransformStateReportResponse,
 } from './register_transform_health_rule_type';
 import type { TransformHealthAlertRule } from '../../../../common/types/alerting';
 import { isContinuousTransform } from '../../../../common/types/transform';
@@ -58,7 +58,7 @@ export function transformHealthServiceProvider({
   const transformsDict = new Map<string, Transform>();
 
   /**
-   * Resolves result transform selection.
+   * Resolves result transform selection. Only continuously running transforms are included.
    * @param includeTransforms
    * @param excludeTransforms
    * @param skipIDsCheck
@@ -86,6 +86,7 @@ export function transformHealthServiceProvider({
 
       transformsResponse.forEach((t) => {
         transformsDict.set(t.id, t);
+        // Include only continuously running transforms.
         if (t.sync) {
           resultTransformIds.push(t.id);
         }
@@ -101,11 +102,19 @@ export function transformHealthServiceProvider({
   };
 
   const getTransformStats = memoize(async (transformIds: string[]): Promise<TransformStats[]> => {
+    // Result list of transform IDs can be too long, so we need to split them into chunks.
+    const chunkSize = 30;
     return (
-      await esClient.transform.getTransformStats({
-        transform_id: transformIds.join(','),
-      })
-    ).transforms as TransformStats[];
+      await Promise.all(
+        chunk(transformIds, chunkSize).map(async (ids) => {
+          return (
+            await esClient.transform.getTransformStats({
+              transform_id: ids.join(','),
+            })
+          ).transforms as TransformStats[];
+        })
+      )
+    ).flat();
   });
 
   function baseTransformAlertResponseFormatter(
@@ -212,11 +221,7 @@ export function transformHealthServiceProvider({
       });
 
       // If transform contains errors, it's in a failed state
-      const transformsStats = (
-        await esClient.transform.getTransformStats({
-          transform_id: transformIds.join(','),
-        })
-      ).transforms;
+      const transformsStats = await getTransformStats(transformIds);
       const failedTransforms = new Set(
         transformsStats.filter((t) => t.state === TRANSFORM_STATE.FAILED).map((t) => t.id)
       );
