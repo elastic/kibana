@@ -28,6 +28,7 @@ import {
   getNormalizedDataStreams,
 } from '.';
 import { packageHasNoPolicyTemplates } from './policy_template';
+import { isValidDataset } from './is_valid_namespace';
 
 type Errors = string[] | null;
 
@@ -47,11 +48,6 @@ export type PackagePolicyValidationResults = {
   namespace: Errors;
   inputs: Record<PackagePolicyInput['type'], PackagePolicyInputValidationResults> | null;
 } & PackagePolicyConfigValidationResults;
-
-export const DATASET_REGEX = /^(?![_\.])[a-z0-9_\.]+$/;
-export const REGEX_ERROR = i18n.translate('xpack.fleet.datasetValidation.invalidDatasetError', {
-  defaultMessage: 'Dataset name must contain only lowercase letters, numbers, dots and underscores',
-});
 
 /*
  * Returns validation information for a given package policy and package info
@@ -376,8 +372,9 @@ export const validatePackagePolicyConfig = (
     packageType === 'input' &&
     parsedValue?.dataset !== undefined
   ) {
-    if (!parsedValue.dataset?.match(DATASET_REGEX)) {
-      errors.push(REGEX_ERROR);
+    const { valid, error } = isValidDataset(parsedValue.dataset, false);
+    if (!valid && error) {
+      errors.push(error);
     }
   }
 

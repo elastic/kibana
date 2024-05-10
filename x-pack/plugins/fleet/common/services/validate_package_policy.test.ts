@@ -1081,8 +1081,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
   });
 
   describe('Dataset', () => {
-    const datasetError =
-      'Dataset name must contain only lowercase letters, numbers, dots and underscores';
+    const datasetError = 'Dataset contains invalid characters';
 
     const validateDataset = (dataset: string) => {
       return validatePackagePolicyConfig(
@@ -1109,19 +1108,19 @@ describe('Fleet - validatePackagePolicyConfig', () => {
     it('should return an error message if the value has uppercase letter', () => {
       const res = validateDataset('Test');
 
-      expect(res).toEqual([datasetError]);
+      expect(res).toEqual(['Dataset must be lowercase']);
     });
 
     it('should return an error message if the value has _ in the beginning', () => {
       const res = validateDataset('_test');
 
-      expect(res).toEqual([datasetError]);
+      expect(res).toEqual(['Dataset cannot start with an underscore or dot']);
     });
 
     it('should return an error message if the value has . in the beginning', () => {
       const res = validateDataset('.test');
 
-      expect(res).toEqual([datasetError]);
+      expect(res).toEqual(['Dataset cannot start with an underscore or dot']);
     });
 
     it('should not return an error message if the value is valid', () => {

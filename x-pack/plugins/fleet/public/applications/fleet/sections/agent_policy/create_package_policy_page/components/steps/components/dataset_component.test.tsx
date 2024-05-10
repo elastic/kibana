@@ -42,9 +42,7 @@ describe('DatasetComponent', () => {
     fireEvent.change(inputEl, { target: { value: 'generic*' } });
     fireEvent.keyDown(inputEl, { key: 'Enter', code: 'Enter' });
 
-    utils.getByText(
-      'Dataset name must contain only lowercase letters, numbers, dots and underscores'
-    );
+    utils.getByText('Dataset contains invalid characters');
   });
 
   it('should not show validation error if dataset is valid', () => {
@@ -54,11 +52,7 @@ describe('DatasetComponent', () => {
     fireEvent.change(inputEl, { target: { value: 'test' } });
     fireEvent.keyDown(inputEl, { key: 'Enter', code: 'Enter' });
 
-    expect(
-      utils.queryByText(
-        'Dataset name must contain only lowercase letters, numbers, dots and underscores'
-      )
-    ).toBeNull();
+    expect(utils.queryByText('Dataset contains invalid characters')).toBeNull();
   });
 
   it('should not show validation error if valid dataset selected from select', () => {
@@ -71,11 +65,7 @@ describe('DatasetComponent', () => {
     const option = utils.getByText('fleet_server.test_ds');
     fireEvent.click(option);
 
-    expect(
-      utils.queryByText(
-        'Dataset name must contain only lowercase letters, numbers, dots and underscores'
-      )
-    ).toBeNull();
+    expect(utils.queryByText('Dataset contains invalid characters')).toBeNull();
     expect(mockOnChange).toHaveBeenCalledWith({ dataset: 'fleet_server.test_ds', package: 'log' });
   });
 });
