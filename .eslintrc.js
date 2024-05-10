@@ -1077,17 +1077,6 @@ module.exports = {
       ],
       rules: {
         '@typescript-eslint/no-non-null-assertion': 'error',
-        '@typescript-eslint/no-unused-vars': [
-          'error',
-          {
-            args: 'all',
-            argsIgnorePattern: '^_',
-            caughtErrors: 'none',
-            destructuredArrayIgnorePattern: '^_',
-            varsIgnorePattern: '^_',
-            ignoreRestSiblings: true,
-          },
-        ],
       },
     },
     {

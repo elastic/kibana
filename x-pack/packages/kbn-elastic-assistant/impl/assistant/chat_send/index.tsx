@@ -14,7 +14,7 @@ import { ChatActions } from '../chat_actions';
 import { PromptTextArea } from '../prompt_textarea';
 import { useAutosizeTextArea } from './use_autosize_textarea';
 
-export interface Props extends Omit<UseChatSend, 'abortStream'> {
+export interface Props extends Omit<UseChatSend, 'abortStream' | 'handleOnChatCleared'> {
   isDisabled: boolean;
   shouldRefocusPrompt: boolean;
   userPrompt: string | null;
@@ -25,7 +25,6 @@ export interface Props extends Omit<UseChatSend, 'abortStream'> {
  * Allows the user to clear the chat and switch between different system prompts.
  */
 export const ChatSend: React.FC<Props> = ({
-  handleOnChatCleared,
   handlePromptChange,
   handleSendMessage,
   isDisabled,
@@ -84,7 +83,6 @@ export const ChatSend: React.FC<Props> = ({
         grow={false}
       >
         <ChatActions
-          onChatCleared={handleOnChatCleared}
           isDisabled={isDisabled}
           isLoading={isLoading}
           onSendMessage={onSendMessage}

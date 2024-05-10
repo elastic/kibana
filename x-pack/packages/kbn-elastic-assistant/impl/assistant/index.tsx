@@ -909,7 +909,6 @@ const AssistantComponent: React.FC<Props> = ({
                         isDisabled={isSendingDisabled}
                         shouldRefocusPrompt={shouldRefocusPrompt}
                         userPrompt={userPrompt}
-                        handleOnChatCleared={handleOnChatCleared}
                         handlePromptChange={handlePromptChange}
                         handleSendMessage={handleChatSend}
                         handleRegenerateResponse={handleRegenerateResponse}
