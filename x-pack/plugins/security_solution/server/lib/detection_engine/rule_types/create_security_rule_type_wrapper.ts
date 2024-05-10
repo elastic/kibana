@@ -26,6 +26,7 @@ import {
   hasTimestampFields,
   isMachineLearningParams,
   isEsqlParams,
+  getDisabledActionsWarningText,
 } from './utils/utils';
 import { DEFAULT_MAX_SIGNALS, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
 import type { CreateSecurityRuleTypeWrapper } from './types';
@@ -473,7 +474,18 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               };
             }
 
+            const disabledActions = rule.actions.filter(
+              (action) => !actions.isActionTypeEnabled(action.actionTypeId)
+            );
+
             if (result.warningMessages.length) {
+              if (disabledActions.length > 0) {
+                // includes the disabled actions warning message
+                // in the list of warnings displayed
+                result.warningMessages.push(
+                  getDisabledActionsWarningText({ alertsCreated: true, disabledActions })
+                );
+              }
               await ruleExecutionLogger.logStatusChange({
                 newStatus: RuleExecutionStatusEnum['partial failure'],
                 message: truncateList(result.warningMessages).join(', '),
@@ -499,7 +511,12 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 }`
               );
 
-              if (!hasError && !wroteWarningStatus && !result.warning) {
+              if (
+                !hasError &&
+                !wroteWarningStatus &&
+                !result.warning &&
+                disabledActions.length === 0
+              ) {
                 await ruleExecutionLogger.logStatusChange({
                   newStatus: RuleExecutionStatusEnum.succeeded,
                   message: 'Rule execution completed successfully',
@@ -512,22 +529,28 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               } else if (wroteWarningStatus && !hasError && !result.warning) {
                 await ruleExecutionLogger.logStatusChange({
                   newStatus: RuleExecutionStatusEnum['partial failure'],
-                  message: warningMessage,
+                  message:
+                    disabledActions.length > 0
+                      ? [
+                          warningMessage,
+                          getDisabledActionsWarningText({ alertsCreated: true, disabledActions }),
+                        ].join(', ')
+                      : warningMessage,
                   metrics: {
                     searchDurations: result.searchAfterTimes,
                     indexingDurations: result.bulkCreateTimes,
                     enrichmentDurations: result.enrichmentTimes,
                   },
                 });
-              }
-
-              const disabledAction = rule.actions.find(
-                (action) => !actions.isActionTypeEnabled(action.actionTypeId)
-              );
-              if (disabledAction) {
+              } else if (
+                !wroteWarningStatus &&
+                !hasError &&
+                !result.warning &&
+                disabledActions.length > 0
+              ) {
                 await ruleExecutionLogger.logStatusChange({
                   newStatus: RuleExecutionStatusEnum['partial failure'],
-                  message: `Alerts created but the registered action ${disabledAction.actionTypeId} is disabled. Please check your license / tier and ensure the connector is enabled for your given license / tier`,
+                  message: getDisabledActionsWarningText({ alertsCreated: true, disabledActions }),
                   metrics: {
                     searchDurations: result.searchAfterTimes,
                     indexingDurations: result.bulkCreateTimes,
@@ -536,6 +559,13 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 });
               }
             } else {
+              if (disabledActions.length > 0) {
+                // includes the disabled actions warning message
+                // in the list of errors displayed
+                result.errors.push(
+                  getDisabledActionsWarningText({ alertsCreated: true, disabledActions })
+                );
+              }
               await ruleExecutionLogger.logStatusChange({
                 newStatus: RuleExecutionStatusEnum.failed,
                 message: `An error occurred during rule execution: message: "${truncateList(

@@ -31,6 +31,7 @@ import type {
 } from '@kbn/alerting-plugin/server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
 import type { ExceptionListClient, ListClient, ListPluginSetup } from '@kbn/lists-plugin/server';
+import type { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
 import type { TimestampOverride } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { Privilege } from '../../../../../common/api/detection_engine';
 import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
@@ -1006,3 +1007,20 @@ export const getMaxSignalsWarning = (): string => {
 export const getSuppressionMaxSignalsWarning = (): string => {
   return `This rule reached the maximum alert limit for the rule execution. Some alerts were not created or suppressed.`;
 };
+
+export const getDisabledActionsWarningText = ({
+  alertsCreated,
+  disabledActions,
+}: {
+  alertsCreated: boolean;
+  disabledActions: SanitizedRuleAction[];
+}) =>
+  `${alertsCreated ? 'Alerts created but the r' : 'R'}egistered action${
+    disabledActions.length > 1 ? 's' : '' // action(s)
+  } ${disabledActions.map((action) => action.actionTypeId)} ${
+    disabledActions.length > 1 ? 'are' : 'is' // are / is
+  } disabled. Please check your license / tier and ensure the connector${
+    disabledActions.length > 1 ? 's' : '' // action(s)
+  } ${disabledActions.map((action) => action.actionTypeId)} ${
+    disabledActions.length > 1 ? 'are' : 'is' // are / is
+  } enabled for your given license / tier`;
