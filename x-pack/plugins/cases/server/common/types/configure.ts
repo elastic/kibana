@@ -58,6 +58,7 @@ export interface CaseFieldsAttributes {
   tags?: string[];
   category?: string | null;
   customFields?: CaseCustomFields;
+  settings?: { syncAlerts: boolean };
 }
 
 export type ConfigurationTransformedAttributes = ConfigurationAttributes;
