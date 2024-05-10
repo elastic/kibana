@@ -19,11 +19,6 @@ describe('telemetry events', () => {
         if (!propertyTypes[item]) {
           propertyTypes[item] = eventType;
         } else {
-          console.log('does not match!!', {
-            item,
-            type: eventType,
-            recordedType: propertyTypes[item],
-          });
           expect(propertyTypes[item]).toEqual(eventType);
         }
       });
