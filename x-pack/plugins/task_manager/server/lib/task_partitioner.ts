@@ -135,6 +135,7 @@ export class TaskPartitioner {
       try {
         return await getAllPodNamesFromCache(this.savedObjectsRepository);
       } catch (e) {
+        // eslint-disable-next-line no-console
         console.log('Failed to get all pod names', e);
         throw e;
       }
