@@ -78,7 +78,6 @@ export function DiscoverMainRoute({
     customizationContext,
     stateStorageContainer,
   });
-
   const { customizationService, isInitialized: isCustomizationServiceInitialized } =
     useDiscoverCustomizationService({
       customizationCallbacks,

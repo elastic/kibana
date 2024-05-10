@@ -88,12 +88,6 @@ export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<Disco
    *
    * */
   getAppStateFromSavedSearch: (newSavedSearch: SavedSearch) => DiscoverAppState;
-
-  /**
-   * Check the current data source type
-   * @param type
-   */
-  isDataSource: (type: DataSourceType) => boolean;
 }
 
 export interface DiscoverAppState {
@@ -305,9 +299,6 @@ export const getDiscoverAppStateContainer = ({
 
   const getPrevious = () => previousState;
 
-  const isDataSource = (type: DataSourceType) =>
-    isDataSourceType(enhancedAppContainer.getState().dataSource, type);
-
   return {
     ...enhancedAppContainer,
     isEmptyURL,
@@ -320,7 +311,6 @@ export const getDiscoverAppStateContainer = ({
     syncState: startAppStateUrlSync,
     update,
     getAppStateFromSavedSearch,
-    isDataSource,
   };
 };
 

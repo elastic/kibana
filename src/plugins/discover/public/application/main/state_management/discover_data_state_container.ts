@@ -155,8 +155,7 @@ export function getDataStateContainer({
   const { data, uiSettings, toastNotifications } = services;
   const { timefilter } = data.query.timefilter;
   const inspectorAdapters = { requests: new RequestAdapter() };
-  const appState = getAppState();
-  const isEsqlQuery = isOfAggregateQueryType(appState.query);
+
   /**
    * The observable to trigger data fetching in UI
    * By refetch$.next('reset') rows and fieldcounts are reset to allow e.g. editing of runtime fields
