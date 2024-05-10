@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-import { services as apiServices } from '../../../api_integration/services';
-import { clusterClientProvider } from './cluster_client';
-
-export const services = {
-  ...apiServices,
-  cluster_client: clusterClientProvider,
-};
+export * from '../../../../../common/services/security_solution/roles_users_utils';
