@@ -176,7 +176,6 @@ export class SyntheticsService {
               const { state } = taskInstance;
               service.logger.debug(`Running synthetics monitors sync task.`);
               service.checkMissingSchedule(state);
-              state.lastRunAt = new Date().toISOString();
               try {
                 await service.registerServiceLocations();
 
@@ -664,29 +663,33 @@ export class SyntheticsService {
     return this.formatConfigs(configDataList) as MonitorFields[];
   }
   checkMissingSchedule(state: Record<string, string>) {
-    const lastRunAt = state.lastRunAt;
-    const current = moment();
+    try {
+      const lastRunAt = state.lastRunAt;
+      const current = moment();
 
-    if (lastRunAt) {
-      // log if it has missed last schedule
-      const diff = moment(lastRunAt).diff(current, 'minutes');
-      const syncInterval = Number((this.config.syncInterval ?? '5m').split('m')[0]);
-      if (diff > syncInterval) {
-        const message = `Synthetics monitor sync task has missed its schedule, it last ran ${diff} ago.`;
-        this.logger.warn(message);
-        sendErrorTelemetryEvents(this.logger, this.server.telemetry, {
-          message,
-          reason: 'Failed to run synthetics sync task on schedule',
-          type: 'syncTaskMissedSchedule',
-          stackVersion: this.server.stackVersion,
-        });
-      } else {
-        this.logger.debug(
-          `Synthetics monitor sync task is running as expected, it last ran ${diff} minutes ago.`
-        );
+      if (lastRunAt) {
+        // log if it has missed last schedule
+        const diff = moment(lastRunAt).diff(current, 'minutes');
+        const syncInterval = Number((this.config.syncInterval ?? '5m').split('m')[0]);
+        if (diff > syncInterval) {
+          const message = `Synthetics monitor sync task has missed its schedule, it last ran ${diff} ago.`;
+          this.logger.warn(message);
+          sendErrorTelemetryEvents(this.logger, this.server.telemetry, {
+            message,
+            reason: 'Failed to run synthetics sync task on schedule',
+            type: 'syncTaskMissedSchedule',
+            stackVersion: this.server.stackVersion,
+          });
+        } else {
+          this.logger.debug(
+            `Synthetics monitor sync task is running as expected, it last ran ${diff} minutes ago.`
+          );
+        }
       }
+      state.lastRunAt = current.toISOString();
+    } catch (e) {
+      this.logger.error(e);
     }
-    state.lastRunAt = current.toISOString();
   }
 }
 
