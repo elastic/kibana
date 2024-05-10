@@ -32,7 +32,7 @@ import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/pub
 import { SharePluginStart } from '@kbn/share-plugin/public';
 
 import { ClientConfigType, ProductAccess, ProductFeatures } from '../../../../common/types';
-import { ESConfig } from '../../../plugin';
+import { ESConfig, UpdateSideNavDefinitionFn } from '../../../plugin';
 
 import { HttpLogic } from '../http';
 import { createHref, CreateHrefOptions } from '../react_router_helpers';
@@ -67,6 +67,7 @@ export interface KibanaLogicProps {
   setDocTitle(title: string): void;
   share?: SharePluginStart;
   uiSettings?: IUiSettingsClient;
+  updateSideNavDefinition: UpdateSideNavDefinitionFn;
   user: AuthenticatedUser | null;
 }
 
@@ -98,6 +99,7 @@ export interface KibanaValues {
   setDocTitle(title: string): void;
   share: SharePluginStart | null;
   uiSettings: IUiSettingsClient | null;
+  updateSideNavDefinition: UpdateSideNavDefinitionFn;
   user: AuthenticatedUser | null;
 }
 
@@ -137,6 +139,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     setDocTitle: [props.setDocTitle, {}],
     share: [props.share || null, {}],
     uiSettings: [props.uiSettings, {}],
+    updateSideNavDefinition: [props.updateSideNavDefinition, {}],
     user: [props.user || null, {}],
   }),
   selectors: ({ selectors }) => ({

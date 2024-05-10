@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { firstValueFrom } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
@@ -64,7 +64,7 @@ import {
 } from './applications/enterprise_search_content/routes';
 
 import { docLinks } from './applications/shared/doc_links';
-import { getNavigationTreeDefinition } from './navigation_tree';
+import { DynamicSideNavItems, getNavigationTreeDefinition } from './navigation_tree';
 
 export interface ClientData extends InitialAppData {
   errorConnectingMessage?: string;
@@ -101,6 +101,8 @@ export interface PluginsStart {
 export interface ESConfig {
   elasticsearch_host: string;
 }
+
+export type UpdateSideNavDefinitionFn = (items: Partial<DynamicSideNavItems>) => void;
 
 const contentLinks: AppDeepLink[] = [
   {
@@ -208,7 +210,13 @@ export class EnterpriseSearchPlugin implements Plugin {
       this.isSidebarEnabled = style === 'classic';
     });
 
-    return { core: coreStart, isSidebarEnabled: this.isSidebarEnabled, params, plugins };
+    return {
+      core: coreStart,
+      isSidebarEnabled: this.isSidebarEnabled,
+      params,
+      plugins,
+      updateSideNavDefinition: this.updateSideNavDefinition.bind(this),
+    };
   }
 
   private getPluginData() {
@@ -525,7 +533,9 @@ export class EnterpriseSearchPlugin implements Plugin {
     }
   }
 
-  public start(core: CoreStart) {
+  private readonly sideNavDynamicItems$ = new BehaviorSubject<DynamicSideNavItems>({});
+
+  public start(core: CoreStart, plugins: PluginsStart) {
     if (!this.config.ui?.enabled) {
       return;
     }
@@ -533,7 +543,9 @@ export class EnterpriseSearchPlugin implements Plugin {
     // race conditions with our apps' `routes.ts` being initialized before `renderApp()`
     docLinks.setDocLinks(core.docLinks);
 
-    plugins.navigation.addSolutionNavigation(getNavigationTreeDefinition());
+    plugins.navigation.addSolutionNavigation(
+      getNavigationTreeDefinition({ dynamicItems$: this.sideNavDynamicItems$ })
+    );
 
     // Return empty start contract rather than void in order for plugins
     // that depend on the enterprise search plugin to determine whether it is enabled or not
@@ -541,4 +553,8 @@ export class EnterpriseSearchPlugin implements Plugin {
   }
 
   public stop() {}
+
+  private updateSideNavDefinition = (items: Partial<DynamicSideNavItems>) => {
+    this.sideNavDynamicItems$.next({ ...this.sideNavDynamicItems$.getValue(), ...items });
+  };
 }
