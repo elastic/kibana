@@ -13,9 +13,9 @@ import {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
-import { concat } from 'lodash';
+import { flatten } from 'lodash';
 
-export const observabilityAlertDetailsContextRt = t.intersection([
+export const alertDetailsContextRt = t.intersection([
   t.type({
     alert_started_at: t.string,
   }),
@@ -33,9 +33,7 @@ export const observabilityAlertDetailsContextRt = t.intersection([
   }),
 ]);
 
-export type AlertDetailsContextualInsightsHandlerQuery = t.TypeOf<
-  typeof observabilityAlertDetailsContextRt
->;
+export type AlertDetailsContextualInsightsHandlerQuery = t.TypeOf<typeof alertDetailsContextRt>;
 
 export interface AlertDetailsContextualInsight {
   key: string;
@@ -77,11 +75,21 @@ export class AlertDetailsContextualInsightsService {
     context: AlertDetailsContextualInsightsRequestContext,
     query: AlertDetailsContextualInsightsHandlerQuery
   ): Promise<AlertDetailsContextualInsight[]> {
-    if (this.handlers.length === 0) return [];
+    if (this.handlers.length === 0) {
+      return [];
+    }
 
-    return Promise.all(this.handlers.map((handler) => handler(context, query))).then((results) => {
-      const [head, ...rest] = results;
-      return concat(head, ...rest);
-    });
+    const results = await Promise.all(
+      this.handlers.map(async (handler) => {
+        try {
+          return await handler(context, query);
+        } catch (error) {
+          console.error(`Error: Could not get alert context from handler`, error);
+          return [];
+        }
+      })
+    );
+
+    return flatten(results);
   }
 }

@@ -154,7 +154,7 @@ $BUILDKITE_PULL_REQUEST
 
 ### Further details
 
-Caused by @$GITHUB_PR_TRIGGER_USER using the github label in https://github.com/elastic/kibana/pull/$BUILDKITE_PULL_REQUEST
+Caused by the GitHub label 'ci:project-deploy-observability' in https://github.com/elastic/kibana/pull/$BUILDKITE_PULL_REQUEST
 EOF
 
   GH_TOKEN="$GITHUB_TOKEN" \
@@ -162,8 +162,7 @@ EOF
     --title "[Deploy Serverless Kibana] for user $GITHUB_PR_TRIGGER_USER with PR kibana@pr-$BUILDKITE_PULL_REQUEST" \
     --body-file "${GITHUB_ISSUE}" \
     --label 'deploy-custom-kibana-serverless' \
-    --repo 'elastic/observability-test-environments' \
-    --assignee "$GITHUB_PR_OWNER"
+    --repo 'elastic/observability-test-environments'
 }
 
 is_pr_with_label "ci:project-deploy-elasticsearch" && deploy "elasticsearch"

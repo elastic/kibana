@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/dashboard-plugin/public';
-import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
-import { IProvidesPanelPlacementSettings } from '@kbn/dashboard-plugin/public/dashboard_container/component/panel_placement/types';
+import { DASHBOARD_GRID_COLUMN_COUNT, PanelPlacementStrategy } from '@kbn/dashboard-plugin/public';
+import type { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
+import { IProvidesLegacyPanelPlacementSettings } from '@kbn/dashboard-plugin/public';
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import {
   EmbeddableFactory,
@@ -46,7 +46,9 @@ const isLinksAttributes = (attributes?: unknown): attributes is LinksAttributes 
 };
 
 export class LinksFactoryDefinition
-  implements EmbeddableFactoryDefinition<LinksInput>, IProvidesPanelPlacementSettings<LinksInput>
+  implements
+    EmbeddableFactoryDefinition<LinksInput>,
+    IProvidesLegacyPanelPlacementSettings<LinksInput>
 {
   latestVersion?: string | undefined;
   telemetry?:
@@ -64,10 +66,10 @@ export class LinksFactoryDefinition
     getIconForSavedObject: () => APP_ICON,
   };
 
-  public getPanelPlacementSettings: IProvidesPanelPlacementSettings<
+  public getLegacyPanelPlacementSettings: IProvidesLegacyPanelPlacementSettings<
     LinksInput,
     LinksAttributes | unknown
-  >['getPanelPlacementSettings'] = (input, attributes) => {
+  >['getLegacyPanelPlacementSettings'] = (input, attributes) => {
     if (!isLinksAttributes(attributes) || !attributes.layout) {
       // if we have no information about the layout of this links panel defer to default panel size and placement.
       return {};
@@ -76,7 +78,7 @@ export class LinksFactoryDefinition
     const isHorizontal = attributes.layout === 'horizontal';
     const width = isHorizontal ? DASHBOARD_GRID_COLUMN_COUNT : 8;
     const height = isHorizontal ? 4 : (attributes.links?.length ?? 1 * 3) + 4;
-    return { width, height, strategy: 'placeAtTop' };
+    return { width, height, strategy: PanelPlacementStrategy.placeAtTop };
   };
 
   public async isEditable() {

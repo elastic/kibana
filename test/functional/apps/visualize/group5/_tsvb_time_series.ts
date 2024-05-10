@@ -157,7 +157,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await visualBuilder.clickPanelOptions('timeSeries');
             await visualBuilder.setBackgroundColor('#FFFFFF');
 
-            expect(await visualBuilder.checkTimeSeriesIsLight()).to.be(true);
+            await retry.try(async () => {
+              expect(await visualBuilder.checkTimeSeriesIsLight()).to.be(true);
+            });
           });
 
           after(async () => {

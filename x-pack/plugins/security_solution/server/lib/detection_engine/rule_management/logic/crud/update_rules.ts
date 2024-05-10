@@ -57,7 +57,7 @@ export const updateRules = async ({
       timelineTitle: ruleUpdate.timeline_title,
       meta: ruleUpdate.meta,
       maxSignals: ruleUpdate.max_signals ?? DEFAULT_MAX_SIGNALS,
-      relatedIntegrations: existingRule.params.relatedIntegrations,
+      relatedIntegrations: ruleUpdate.related_integrations ?? [],
       requiredFields: existingRule.params.requiredFields,
       riskScore: ruleUpdate.risk_score,
       riskScoreMapping: ruleUpdate.risk_score_mapping ?? [],

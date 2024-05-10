@@ -72,6 +72,8 @@ export const getStoryServices = (params: Params, action: ActionFn = () => {}) =>
     getTagManagementUrl: () => '',
     getTagIdsFromReferences: () => [],
     bulkGetUserProfiles: () => Promise.resolve([]),
+    getUserProfile: jest.fn(),
+    isTaggingEnabled: () => true,
     ...params,
   };
 

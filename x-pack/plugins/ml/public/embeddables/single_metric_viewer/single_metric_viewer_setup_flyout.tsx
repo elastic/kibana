@@ -33,7 +33,7 @@ export async function resolveEmbeddableSingleMetricViewerUserInput(
         input?.jobIds ? input.jobIds : undefined,
         true
       );
-      const title = input?.title ?? getDefaultSingleMetricViewerPanelTitle(jobIds);
+      const title = input?.title ?? getDefaultSingleMetricViewerPanelTitle(jobIds[0]);
       const { jobs } = await mlApiServices.getJobs({ jobId: jobIds.join(',') });
 
       const modalSession = overlays.openModal(

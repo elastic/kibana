@@ -78,7 +78,7 @@ export const initRoutes = (
   previewRuleDataClient: IRuleDataClient,
   previewTelemetryReceiver: ITelemetryReceiver
 ) => {
-  registerFleetIntegrationsRoutes(router, logger);
+  registerFleetIntegrationsRoutes(router);
   registerLegacyRuleActionsRoutes(router, logger);
   registerPrebuiltRulesRoutes(router, security);
   registerRuleExceptionsRoutes(router);

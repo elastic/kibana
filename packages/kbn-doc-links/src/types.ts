@@ -355,6 +355,7 @@ export interface DocLinks {
     readonly privileges: string;
     readonly manageDetectionRules: string;
     readonly createEsqlRuleType: string;
+    readonly ruleUiAdvancedParams: string;
     readonly entityAnalytics: {
       readonly riskScorePrerequisites: string;
       readonly hostRiskScore: string;

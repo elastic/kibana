@@ -125,6 +125,10 @@ describe('conversational chain', () => {
           ],
           type: 'retrieved_docs',
         },
+        {
+          count: 15,
+          type: 'context_token_count',
+        },
       ],
       [
         {
@@ -165,6 +169,10 @@ describe('conversational chain', () => {
           ],
           type: 'retrieved_docs',
         },
+        {
+          count: 15,
+          type: 'context_token_count',
+        },
       ],
       [
         {
@@ -204,6 +212,10 @@ describe('conversational chain', () => {
             { metadata: { _id: '1', _index: 'website' }, pageContent: 'value2' },
           ],
           type: 'retrieved_docs',
+        },
+        {
+          count: 15,
+          type: 'context_token_count',
         },
       ],
       [

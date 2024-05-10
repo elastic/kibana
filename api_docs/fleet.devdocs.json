@@ -1554,6 +1554,20 @@
             "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.NewPackagePolicy.overrides",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "overrides",
+            "description": [],
+            "signature": [
+              "{ inputs?: { [key: string]: any; } | undefined; } | null | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2788,7 +2802,7 @@
                         "section": "def-common.PackagePolicyConfigRecord",
                         "text": "PackagePolicyConfigRecord"
                       },
-                      " | undefined; elasticsearch?: { privileges?: { cluster?: string[] | undefined; } | undefined; } | undefined; }"
+                      " | undefined; elasticsearch?: { privileges?: { cluster?: string[] | undefined; } | undefined; } | undefined; overrides?: { inputs?: { [key: string]: any; } | undefined; } | null | undefined; }"
                     ],
                     "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
                     "deprecated": false,
@@ -22699,6 +22713,20 @@
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.NewAgentPolicy.supports_agentless",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "supports_agentless",
+            "description": [],
+            "signature": [
+              "boolean | null | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -22875,6 +22903,20 @@
             "description": [],
             "signature": [
               "{ privileges?: { cluster?: string[] | undefined; } | undefined; } | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.NewPackagePolicy.overrides",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "overrides",
+            "description": [],
+            "signature": [
+              "{ inputs?: { [key: string]: any; } | undefined; } | null | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
             "deprecated": false,

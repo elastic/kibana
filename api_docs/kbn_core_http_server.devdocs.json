@@ -282,6 +282,39 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server",
+        "id": "def-common.isKibanaResponse",
+        "type": "Function",
+        "tags": [],
+        "label": "isKibanaResponse",
+        "description": [],
+        "signature": [
+          "(response: Record<string, any>) => boolean"
+        ],
+        "path": "packages/core/http/core-http-server/src/router/response.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.isKibanaResponse.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "response",
+            "description": [],
+            "signature": [
+              "Record<string, any>"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/response.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -12489,7 +12522,7 @@
             "tags": [],
             "label": "description",
             "description": [
-              "Human-friendly description of this endpoint"
+              "A short, human-friendly description of this endpoint"
             ],
             "signature": [
               "string | undefined"
@@ -12993,10 +13026,10 @@
             "id": "def-common.RouteValidatorFullConfigResponse.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[statusCode: number]: { body: LazyValidator; }",
+            "label": "[statusCode: number]: { bodyContentType?: string | undefined; body: LazyValidator; }",
             "description": [],
             "signature": [
-              "[statusCode: number]:  { body: ",
+              "[statusCode: number]:  { bodyContentType?: string | undefined; body: ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
@@ -14417,6 +14450,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/agent/agent_status_handler.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/fleet_integrations/api/get_all_integrations/route.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -16485,10 +16522,10 @@
             "id": "def-common.VersionedRouteResponseValidation.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[statusCode: number]: { body: VersionedResponseBodyValidation; }",
+            "label": "[statusCode: number]: { bodyContentType?: string | undefined; body: VersionedResponseBodyValidation; }",
             "description": [],
             "signature": [
-              "[statusCode: number]:  { body: ",
+              "[statusCode: number]:  { bodyContentType?: string | undefined; body: ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",

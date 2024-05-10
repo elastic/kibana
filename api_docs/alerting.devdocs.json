@@ -310,6 +310,22 @@
             }
           ],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "alerting",
+          "id": "def-public.PluginStartContract.getMaxAlertsPerRun",
+          "type": "Function",
+          "tags": [],
+          "label": "getMaxAlertsPerRun",
+          "description": [],
+          "signature": [
+            "() => number"
+          ],
+          "path": "x-pack/plugins/alerting/public/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",
@@ -3806,22 +3822,6 @@
                 "path": "x-pack/plugins/observability_solution/synthetics/server/alert_rules/status_rule/monitor_status_rule.ts"
               },
               {
-                "plugin": "uptime",
-                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/lib/alerts/common.ts"
-              },
-              {
-                "plugin": "uptime",
-                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/lib/alerts/status_check.ts"
-              },
-              {
-                "plugin": "uptime",
-                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/lib/alerts/tls.ts"
-              },
-              {
-                "plugin": "uptime",
-                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/lib/alerts/duration_anomaly.ts"
-              },
-              {
                 "plugin": "ruleRegistry",
                 "path": "x-pack/plugins/rule_registry/server/utils/rule_executor.test_helpers.ts"
               },
@@ -4864,7 +4864,7 @@
         "label": "AlertingRulesConfig",
         "description": [],
         "signature": [
-          "Pick<Readonly<{ overwriteProducer?: \"siem\" | \"observability\" | \"stackAlerts\" | undefined; } & { minimumScheduleInterval: Readonly<{} & { value: string; enforce: boolean; }>; maxScheduledPerMinute: number; run: Readonly<{ timeout?: string | undefined; ruleTypeOverrides?: Readonly<{ timeout?: string | undefined; } & { id: string; }>[] | undefined; } & { actions: Readonly<{ connectorTypeOverrides?: Readonly<{ max?: number | undefined; } & { id: string; }>[] | undefined; } & { max: number; }>; alerts: Readonly<{} & { max: number; }>; }>; }>, \"minimumScheduleInterval\" | \"maxScheduledPerMinute\"> & { isUsingSecurity: boolean; }"
+          "Pick<Readonly<{ overwriteProducer?: \"siem\" | \"observability\" | \"stackAlerts\" | undefined; } & { minimumScheduleInterval: Readonly<{} & { value: string; enforce: boolean; }>; maxScheduledPerMinute: number; run: Readonly<{ timeout?: string | undefined; ruleTypeOverrides?: Readonly<{ timeout?: string | undefined; } & { id: string; }>[] | undefined; } & { actions: Readonly<{ connectorTypeOverrides?: Readonly<{ max?: number | undefined; } & { id: string; }>[] | undefined; } & { max: number; }>; alerts: Readonly<{} & { max: number; }>; }>; }>, \"minimumScheduleInterval\" | \"maxScheduledPerMinute\" | \"run\"> & { isUsingSecurity: boolean; }"
         ],
         "path": "x-pack/plugins/alerting/server/config.ts",
         "deprecated": false,
@@ -5395,10 +5395,10 @@
           },
           "; getAuditLogger: () => ",
           {
-            "pluginId": "@kbn/security-plugin-types-server",
-            "scope": "server",
-            "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-            "section": "def-server.AuditLogger",
+            "pluginId": "@kbn/core-security-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSecurityServerPluginApi",
+            "section": "def-common.AuditLogger",
             "text": "AuditLogger"
           },
           " | undefined; getTags: (params: Readonly<{ search?: string | undefined; perPage?: number | undefined; } & { page: number; }>) => Promise<Readonly<{} & { page: number; perPage: number; total: number; data: string[]; }>>; getScheduleFrequency: () => Promise<Readonly<{} & { totalScheduledPerMinute: number; remainingSchedulesPerMinute: number; }>>; getAlertFromRaw: (params: ",
@@ -6395,6 +6395,54 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.validateBackfillSchedule",
+        "type": "Function",
+        "tags": [],
+        "label": "validateBackfillSchedule",
+        "description": [],
+        "signature": [
+          "(start: string, end: string | undefined) => string | void"
+        ],
+        "path": "x-pack/plugins/alerting/common/lib/validate_backfill_schedule.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.validateBackfillSchedule.$1",
+            "type": "string",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/alerting/common/lib/validate_backfill_schedule.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.validateBackfillSchedule.$2",
+            "type": "string",
+            "tags": [],
+            "label": "end",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/lib/validate_backfill_schedule.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],

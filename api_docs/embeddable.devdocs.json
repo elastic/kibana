@@ -10482,12 +10482,12 @@
           {
             "parentPluginId": "embeddable",
             "id": "def-public.EmbeddableEditorState.valueInput",
-            "type": "Unknown",
+            "type": "Uncategorized",
             "tags": [],
             "label": "valueInput",
             "description": [],
             "signature": [
-              "unknown"
+              "object | undefined"
             ],
             "path": "src/plugins/embeddable/public/lib/state_transfer/types.ts",
             "deprecated": false,
@@ -11368,12 +11368,12 @@
           {
             "parentPluginId": "embeddable",
             "id": "def-public.EmbeddablePackageState.input",
-            "type": "Unknown",
+            "type": "Uncategorized",
             "tags": [],
             "label": "input",
             "description": [],
             "signature": [
-              "unknown"
+              "object"
             ],
             "path": "src/plugins/embeddable/public/lib/state_transfer/types.ts",
             "deprecated": false,

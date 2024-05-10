@@ -575,6 +575,19 @@
           },
           {
             "parentPluginId": "security",
+            "id": "def-public.SecurityLicenseFeatures.allowRemoteClusterPrivileges",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowRemoteClusterPrivileges",
+            "description": [
+              "\nIndicates whether we allow users to define remote cluster privileges in roles."
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
             "id": "def-public.SecurityLicenseFeatures.allowRbac",
             "type": "boolean",
             "tags": [],
@@ -1905,7 +1918,7 @@
                 "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, unknown, any>, createParams: Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { name: string; role_descriptors: Record<string, Readonly<{} & {}>>; }> | Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { name: string; kibana_role_descriptors: Record<string, Readonly<{} & { kibana: Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]; elasticsearch: Readonly<{ cluster?: string[] | undefined; indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined; remote_indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined; run_as?: string[] | undefined; } & {}>; }>>; }>) => Promise<",
+              "<unknown, unknown, unknown, any>, createParams: Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { name: string; role_descriptors: Record<string, Readonly<{} & {}>>; }> | Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { name: string; kibana_role_descriptors: Record<string, Readonly<{} & { kibana: Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]; elasticsearch: Readonly<{ cluster?: string[] | undefined; indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined; remote_cluster?: Readonly<{} & { privileges: string[]; clusters: string[]; }>[] | undefined; remote_indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined; run_as?: string[] | undefined; } & {}>; }>>; }>) => Promise<",
               {
                 "pluginId": "@kbn/security-plugin-types-server",
                 "scope": "server",
@@ -1953,7 +1966,7 @@
                   "Create operation parameters."
                 ],
                 "signature": [
-                  "Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { name: string; role_descriptors: Record<string, Readonly<{} & {}>>; }> | Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { name: string; kibana_role_descriptors: Record<string, Readonly<{} & { kibana: Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]; elasticsearch: Readonly<{ cluster?: string[] | undefined; indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined; remote_indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined; run_as?: string[] | undefined; } & {}>; }>>; }>"
+                  "Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { name: string; role_descriptors: Record<string, Readonly<{} & {}>>; }> | Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { name: string; kibana_role_descriptors: Record<string, Readonly<{} & { kibana: Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]; elasticsearch: Readonly<{ cluster?: string[] | undefined; indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined; remote_cluster?: Readonly<{} & { privileges: string[]; clusters: string[]; }>[] | undefined; remote_indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined; run_as?: string[] | undefined; } & {}>; }>>; }>"
                 ],
                 "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
                 "deprecated": false,
@@ -2221,10 +2234,10 @@
         ],
         "signature": [
           {
-            "pluginId": "@kbn/security-plugin-types-server",
-            "scope": "server",
-            "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-            "section": "def-server.AuditEvent",
+            "pluginId": "@kbn/core-security-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSecurityServerPluginApi",
+            "section": "def-common.AuditEvent",
             "text": "AuditEvent"
           },
           " extends ",
@@ -2236,7 +2249,7 @@
             "text": "LogMeta"
           }
         ],
-        "path": "x-pack/packages/security/plugin_types_server/src/audit/audit_events.ts",
+        "path": "packages/core/security/core-security-server/src/audit_logging/audit_events.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2249,7 +2262,7 @@
             "description": [
               "\nLog message"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/audit/audit_events.ts",
+            "path": "packages/core/security/core-security-server/src/audit_logging/audit_events.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2264,15 +2277,15 @@
             ],
             "signature": [
               {
-                "pluginId": "@kbn/security-plugin-types-server",
-                "scope": "server",
-                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-                "section": "def-server.AuditKibana",
+                "pluginId": "@kbn/core-security-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-common.AuditKibana",
                 "text": "AuditKibana"
               },
               " | undefined"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/audit/audit_events.ts",
+            "path": "packages/core/security/core-security-server/src/audit_logging/audit_events.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2287,15 +2300,15 @@
             ],
             "signature": [
               {
-                "pluginId": "@kbn/security-plugin-types-server",
-                "scope": "server",
-                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-                "section": "def-server.AuditHttp",
+                "pluginId": "@kbn/core-security-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-common.AuditHttp",
                 "text": "AuditHttp"
               },
               " | undefined"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/audit/audit_events.ts",
+            "path": "packages/core/security/core-security-server/src/audit_logging/audit_events.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2313,16 +2326,16 @@
         ],
         "signature": [
           {
-            "pluginId": "@kbn/security-plugin-types-server",
-            "scope": "server",
-            "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-            "section": "def-server.AuditHttp",
+            "pluginId": "@kbn/core-security-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSecurityServerPluginApi",
+            "section": "def-common.AuditHttp",
             "text": "AuditHttp"
           },
           " extends ",
           "EcsHttp"
         ],
-        "path": "x-pack/packages/security/plugin_types_server/src/audit/audit_events.ts",
+        "path": "packages/core/security/core-security-server/src/audit_logging/audit_events.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2337,15 +2350,15 @@
             ],
             "signature": [
               {
-                "pluginId": "@kbn/security-plugin-types-server",
-                "scope": "server",
-                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-                "section": "def-server.AuditRequest",
+                "pluginId": "@kbn/core-security-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-common.AuditRequest",
                 "text": "AuditRequest"
               },
               " | undefined"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/audit/audit_events.ts",
+            "path": "packages/core/security/core-security-server/src/audit_logging/audit_events.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2361,7 +2374,7 @@
         "description": [
           "\nAudit kibana schema using ECS format"
         ],
-        "path": "x-pack/packages/security/plugin_types_server/src/audit/audit_events.ts",
+        "path": "packages/core/security/core-security-server/src/audit_logging/audit_events.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2377,7 +2390,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/audit/audit_events.ts",
+            "path": "packages/core/security/core-security-server/src/audit_logging/audit_events.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2393,7 +2406,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/audit/audit_events.ts",
+            "path": "packages/core/security/core-security-server/src/audit_logging/audit_events.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2409,7 +2422,7 @@
             "signature": [
               "{ type: string; id: string; name?: string | undefined; } | undefined"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/audit/audit_events.ts",
+            "path": "packages/core/security/core-security-server/src/audit_logging/audit_events.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2425,7 +2438,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/audit/audit_events.ts",
+            "path": "packages/core/security/core-security-server/src/audit_logging/audit_events.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2441,7 +2454,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/audit/audit_events.ts",
+            "path": "packages/core/security/core-security-server/src/audit_logging/audit_events.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2457,7 +2470,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/audit/audit_events.ts",
+            "path": "packages/core/security/core-security-server/src/audit_logging/audit_events.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2473,7 +2486,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/audit/audit_events.ts",
+            "path": "packages/core/security/core-security-server/src/audit_logging/audit_events.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2489,7 +2502,7 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/audit/audit_events.ts",
+            "path": "packages/core/security/core-security-server/src/audit_logging/audit_events.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2505,7 +2518,7 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/audit/audit_events.ts",
+            "path": "packages/core/security/core-security-server/src/audit_logging/audit_events.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2521,7 +2534,7 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/audit/audit_events.ts",
+            "path": "packages/core/security/core-security-server/src/audit_logging/audit_events.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2537,7 +2550,7 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/audit/audit_events.ts",
+            "path": "packages/core/security/core-security-server/src/audit_logging/audit_events.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2551,7 +2564,7 @@
         "tags": [],
         "label": "AuditLogger",
         "description": [],
-        "path": "x-pack/packages/security/plugin_types_server/src/audit/audit_logger.ts",
+        "path": "packages/core/security/core-security-server/src/audit_logging/audit_logger.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2567,15 +2580,15 @@
             "signature": [
               "(event: ",
               {
-                "pluginId": "@kbn/security-plugin-types-server",
-                "scope": "server",
-                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-                "section": "def-server.AuditEvent",
+                "pluginId": "@kbn/core-security-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-common.AuditEvent",
                 "text": "AuditEvent"
               },
               " | undefined) => void"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/audit/audit_logger.ts",
+            "path": "packages/core/security/core-security-server/src/audit_logging/audit_logger.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2588,15 +2601,15 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@kbn/security-plugin-types-server",
-                    "scope": "server",
-                    "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-                    "section": "def-server.AuditEvent",
+                    "pluginId": "@kbn/core-security-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSecurityServerPluginApi",
+                    "section": "def-common.AuditEvent",
                     "text": "AuditEvent"
                   },
                   " | undefined"
                 ],
-                "path": "x-pack/packages/security/plugin_types_server/src/audit/audit_logger.ts",
+                "path": "packages/core/security/core-security-server/src/audit_logging/audit_logger.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2613,7 +2626,7 @@
             "description": [
               "\nIndicates whether audit logging is enabled or not.\n\nUseful for skipping resource-intense operations that don't need to be performed when audit\nlogging is disabled."
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/audit/audit_logger.ts",
+            "path": "packages/core/security/core-security-server/src/audit_logging/audit_logger.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2631,15 +2644,15 @@
         ],
         "signature": [
           {
-            "pluginId": "@kbn/security-plugin-types-server",
-            "scope": "server",
-            "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-            "section": "def-server.AuditRequest",
+            "pluginId": "@kbn/core-security-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSecurityServerPluginApi",
+            "section": "def-common.AuditRequest",
             "text": "AuditRequest"
           },
           " extends { body?: { bytes?: number | undefined; content?: string | undefined; } | undefined; bytes?: number | undefined; id?: string | undefined; method?: string | undefined; mime_type?: string | undefined; referrer?: string | undefined; }"
         ],
-        "path": "x-pack/packages/security/plugin_types_server/src/audit/audit_events.ts",
+        "path": "packages/core/security/core-security-server/src/audit_logging/audit_events.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2655,7 +2668,7 @@
             "signature": [
               "{ 'x-forwarded-for'?: string | undefined; } | undefined"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/audit/audit_events.ts",
+            "path": "packages/core/security/core-security-server/src/audit_logging/audit_events.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2693,10 +2706,10 @@
               },
               "<unknown, unknown, unknown, any>) => ",
               {
-                "pluginId": "@kbn/security-plugin-types-server",
-                "scope": "server",
-                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-                "section": "def-server.AuditLogger",
+                "pluginId": "@kbn/core-security-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-common.AuditLogger",
                 "text": "AuditLogger"
               }
             ],
@@ -2740,10 +2753,10 @@
             ],
             "signature": [
               {
-                "pluginId": "@kbn/security-plugin-types-server",
-                "scope": "server",
-                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-                "section": "def-server.AuditLogger",
+                "pluginId": "@kbn/core-security-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-common.AuditLogger",
                 "text": "AuditLogger"
               }
             ],
@@ -5025,7 +5038,7 @@
         "label": "CreateAPIKeyParams",
         "description": [],
         "signature": [
-          "Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { name: string; role_descriptors: Record<string, Readonly<{} & {}>>; }> | Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { name: string; kibana_role_descriptors: Record<string, Readonly<{} & { kibana: Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]; elasticsearch: Readonly<{ cluster?: string[] | undefined; indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined; remote_indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined; run_as?: string[] | undefined; } & {}>; }>>; }> | Readonly<{ metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { type: \"cross_cluster\"; name: string; access: Readonly<{ search?: Readonly<{} & { names: string[]; }>[] | undefined; replication?: Readonly<{} & { names: string[]; }>[] | undefined; } & {}>; }>"
+          "Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { name: string; role_descriptors: Record<string, Readonly<{} & {}>>; }> | Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { name: string; kibana_role_descriptors: Record<string, Readonly<{} & { kibana: Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]; elasticsearch: Readonly<{ cluster?: string[] | undefined; indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined; remote_cluster?: Readonly<{} & { privileges: string[]; clusters: string[]; }>[] | undefined; remote_indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined; run_as?: string[] | undefined; } & {}>; }>>; }> | Readonly<{ metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { type: \"cross_cluster\"; name: string; access: Readonly<{ search?: Readonly<{} & { names: string[]; }>[] | undefined; replication?: Readonly<{} & { names: string[]; }>[] | undefined; } & {}>; }>"
         ],
         "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
         "deprecated": false,
@@ -5087,7 +5100,7 @@
         "label": "CreateRestAPIKeyWithKibanaPrivilegesParams",
         "description": [],
         "signature": [
-          "{ readonly type?: \"rest\" | undefined; readonly metadata?: Readonly<{} & {}> | undefined; readonly expiration?: string | undefined; readonly name: string; readonly kibana_role_descriptors: Record<string, Readonly<{} & { kibana: Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]; elasticsearch: Readonly<{ cluster?: string[] | undefined; indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined; remote_indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined; run_as?: string[] | undefined; } & {}>; }>>; }"
+          "{ readonly type?: \"rest\" | undefined; readonly metadata?: Readonly<{} & {}> | undefined; readonly expiration?: string | undefined; readonly name: string; readonly kibana_role_descriptors: Record<string, Readonly<{} & { kibana: Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]; elasticsearch: Readonly<{ cluster?: string[] | undefined; indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined; remote_cluster?: Readonly<{} & { privileges: string[]; clusters: string[]; }>[] | undefined; remote_indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined; run_as?: string[] | undefined; } & {}>; }>>; }"
         ],
         "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
         "deprecated": false,
@@ -5102,7 +5115,7 @@
         "label": "ElasticsearchPrivilegesType",
         "description": [],
         "signature": [
-          "{ readonly cluster?: string[] | undefined; readonly indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined; readonly remote_indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined; readonly run_as?: string[] | undefined; }"
+          "{ readonly cluster?: string[] | undefined; readonly indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined; readonly remote_cluster?: Readonly<{} & { privileges: string[]; clusters: string[]; }>[] | undefined; readonly remote_indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined; readonly run_as?: string[] | undefined; }"
         ],
         "path": "x-pack/packages/security/plugin_types_server/src/authorization/role_schema.ts",
         "deprecated": false,
@@ -5830,6 +5843,20 @@
             "path": "x-pack/plugins/security/common/model/builtin_es_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.BuiltinESPrivileges.remote_cluster",
+            "type": "Array",
+            "tags": [],
+            "label": "remote_cluster",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/security/common/model/builtin_es_privileges.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -6290,7 +6317,15 @@
             "label": "elasticsearch",
             "description": [],
             "signature": [
-              "{ cluster: string[]; indices: ",
+              "{ cluster: string[]; remote_cluster?: ",
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.RoleRemoteClusterPrivilege",
+                "text": "RoleRemoteClusterPrivilege"
+              },
+              "[] | undefined; indices: ",
               {
                 "pluginId": "@kbn/security-plugin-types-common",
                 "scope": "common",
@@ -6639,6 +6674,48 @@
       },
       {
         "parentPluginId": "security",
+        "id": "def-common.RoleRemoteClusterPrivilege",
+        "type": "Interface",
+        "tags": [],
+        "label": "RoleRemoteClusterPrivilege",
+        "description": [],
+        "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-common.RoleRemoteClusterPrivilege.clusters",
+            "type": "Array",
+            "tags": [],
+            "label": "clusters",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.RoleRemoteClusterPrivilege.privileges",
+            "type": "Array",
+            "tags": [],
+            "label": "privileges",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/authorization/role.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
         "id": "def-common.RoleRemoteIndexPrivilege",
         "type": "Interface",
         "tags": [],
@@ -6947,6 +7024,19 @@
             "label": "allowRoleRemoteIndexPrivileges",
             "description": [
               "\nIndicates whether we allow users to define remote index privileges in roles."
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.SecurityLicenseFeatures.allowRemoteClusterPrivileges",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowRemoteClusterPrivileges",
+            "description": [
+              "\nIndicates whether we allow users to define remote cluster privileges in roles."
             ],
             "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
             "deprecated": false,

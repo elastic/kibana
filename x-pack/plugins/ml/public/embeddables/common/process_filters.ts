@@ -8,7 +8,6 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { isOfEsqlQueryType } from '@kbn/es-query';
 import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
 import { getDefaultQuery } from '@kbn/data-plugin/public';
 
@@ -22,7 +21,7 @@ export function processFilters(
 
   // We do not support esql yet
   let inputQuery: estypes.QueryDslQueryContainer = {};
-  if (!isOfEsqlQueryType(query) && !isOfAggregateQueryType(query)) {
+  if (!isOfAggregateQueryType(query)) {
     inputQuery =
       query.language === 'kuery'
         ? toElasticsearchQuery(fromKueryExpression(query.query as string))

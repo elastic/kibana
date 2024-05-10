@@ -8636,6 +8636,21 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-server.APIEndpoint",
+        "type": "Type",
+        "tags": [],
+        "label": "APIEndpoint",
+        "description": [],
+        "signature": [
+          "\"GET /internal/observability/assistant/alert_details_contextual_insights\" | \"GET /api/observability/rules/alerts/dynamic_index_pattern 2023-10-31\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability/server/routes/get_global_observability_server_route_repository.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-server.Mappings",
         "type": "Type",
         "tags": [],
@@ -8702,6 +8717,48 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
+          "; \"GET /internal/observability/assistant/alert_details_contextual_insights\": { endpoint: \"GET /internal/observability/assistant/alert_details_contextual_insights\"; params?: ",
+          "TypeC",
+          "<{ query: ",
+          "IntersectionC",
+          "<[",
+          "TypeC",
+          "<{ alert_started_at: ",
+          "StringC",
+          "; }>, ",
+          "PartialC",
+          "<{ 'service.name': ",
+          "StringC",
+          "; 'service.environment': ",
+          "StringC",
+          "; 'transaction.type': ",
+          "StringC",
+          "; 'transaction.name': ",
+          "StringC",
+          "; 'host.name': ",
+          "StringC",
+          "; 'container.id': ",
+          "StringC",
+          "; 'kubernetes.pod.name': ",
+          "StringC",
+          "; }>]>; }> | undefined; handler: ({}: ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          " & { params: { query: { alert_started_at: string; } & { 'service.name'?: string | undefined; 'service.environment'?: string | undefined; 'transaction.type'?: string | undefined; 'transaction.name'?: string | undefined; 'host.name'?: string | undefined; 'container.id'?: string | undefined; 'kubernetes.pod.name'?: string | undefined; }; }; }) => Promise<{ alertContext: ",
+          "AlertDetailsContextualInsight",
+          "[]; }>; } & ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
           "; }[TEndpoint] extends { endpoint: any; params?: any; handler: ({}: any) => Promise<infer TReturnType>; } & ",
           "ServerRouteCreateOptions",
           " ? TReturnType : never"
@@ -8753,6 +8810,48 @@
             "text": "ObservabilityRouteHandlerResources"
           },
           " & { params: { query: { registrationContexts: string[]; namespace: string; }; }; }) => Promise<string[]>; } & ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "; \"GET /internal/observability/assistant/alert_details_contextual_insights\": { endpoint: \"GET /internal/observability/assistant/alert_details_contextual_insights\"; params?: ",
+          "TypeC",
+          "<{ query: ",
+          "IntersectionC",
+          "<[",
+          "TypeC",
+          "<{ alert_started_at: ",
+          "StringC",
+          "; }>, ",
+          "PartialC",
+          "<{ 'service.name': ",
+          "StringC",
+          "; 'service.environment': ",
+          "StringC",
+          "; 'transaction.type': ",
+          "StringC",
+          "; 'transaction.name': ",
+          "StringC",
+          "; 'host.name': ",
+          "StringC",
+          "; 'container.id': ",
+          "StringC",
+          "; 'kubernetes.pod.name': ",
+          "StringC",
+          "; }>]>; }> | undefined; handler: ({}: ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          " & { params: { query: { alert_started_at: string; } & { 'service.name'?: string | undefined; 'service.environment'?: string | undefined; 'transaction.type'?: string | undefined; 'transaction.name'?: string | undefined; 'host.name'?: string | undefined; 'container.id'?: string | undefined; 'kubernetes.pod.name'?: string | undefined; }; }; }) => Promise<{ alertContext: ",
+          "AlertDetailsContextualInsight",
+          "[]; }>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -10493,6 +10592,118 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmEnableTableSearchBar.type",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "\"boolean\""
+                ],
+                "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.uiSettings.apmEnableMultiSignal",
+            "type": "Object",
+            "tags": [],
+            "label": "[apmEnableMultiSignal]",
+            "description": [],
+            "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableMultiSignal.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableMultiSignal.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableMultiSignal.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableMultiSignal.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<boolean>"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableMultiSignal.value",
+                "type": "boolean",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableMultiSignal.requiresPageReload",
+                "type": "boolean",
+                "tags": [],
+                "label": "requiresPageReload",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableMultiSignal.type",
                 "type": "string",
                 "tags": [],
                 "label": "type",
