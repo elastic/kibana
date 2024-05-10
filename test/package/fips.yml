@@ -9,6 +9,6 @@
     openssl_src_path: "{{ kibana_dist_path }}/openssl-{{ openssl_ver }}"
     openssl_path: "{{ kibana_dist_path }}/openssl"
   roles:
-    - upgrade_yum_packages
+    - upgrade_apt_packages
     - install_kibana_fips
     - assert_fips_enabled

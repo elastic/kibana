@@ -6,13 +6,26 @@
       - "processor_cores"
   when: ansible_processor_vcpus is not defined
 
-- name: fix /var/log permissions for kibana
+- name: add chrome apt signing key
   become: yes
-  file:
-    path: /var/log
-    state: directory
-    recurse: true
-    mode: "0777"
+  apt_key:
+    url: https://dl.google.com/linux/linux_signing_key.pub
+    state: present
+
+- name: add chrome apt repository
+  become: yes
+  apt_repository:
+    repo: deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main
+    state: present
+
+- name: install apt packages
+  become: yes
+  apt:
+    pkg:
+      - build-essential
+      - google-chrome-stable
+      - unzip
+    state: latest
 
 - name: slurp kibana node version
   slurp:
@@ -128,6 +141,14 @@
     owner: vagrant
     group: vagrant
     recurse: yes
+
+- name: fix /var/log permissions for kibana
+  become: yes
+  file:
+    path: /var/log
+    state: directory
+    recurse: true
+    mode: "0777"
 
 - name: increase vm.max_map_count for ES
   become: yes
