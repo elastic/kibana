@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   EuiPage,
   EuiPageBody,
@@ -16,6 +16,7 @@ import {
   EuiForm,
   EuiTextArea,
   EuiFormRow,
+  EuiButton,
 } from '@elastic/eui';
 
 import type { CoreStart } from '@kbn/core/public';
@@ -26,15 +27,16 @@ import type { StartDependencies } from './plugin';
 
 export const App = (props: { core: CoreStart; plugins: StartDependencies }) => {
   const [currentErrors, setErrors] = useState<EditorError[]>([]);
-  const [currentQuery, _setQuery] = useState(
+  const [currentQuery, setQuery] = useState(
     'from index1 | eval var0 = round(numberField, 2) | stats by stringField'
   );
 
+  const inputRef = useRef<HTMLTextAreaElement | null>(null);
+
   const [ast, setAST] = useState<ESQLAst>(getAstAndSyntaxErrors(currentQuery).ast);
 
-  const setQuery = (query: string) => {
+  const parseQuery = (query: string) => {
     const { ast: _ast, errors } = getAstAndSyntaxErrors(query);
-    _setQuery(query);
     setErrors(errors);
     setAST(_ast);
   };
@@ -56,6 +58,9 @@ export const App = (props: { core: CoreStart; plugins: StartDependencies }) => {
               error={currentErrors.map((error) => error.message)}
             >
               <EuiTextArea
+                inputRef={(node) => {
+                  inputRef.current = node;
+                }}
                 isInvalid={Boolean(currentErrors.length)}
                 fullWidth
                 value={currentQuery}
@@ -64,6 +69,11 @@ export const App = (props: { core: CoreStart; plugins: StartDependencies }) => {
                   height: '5em',
                 }}
               />
+            </EuiFormRow>
+            <EuiFormRow fullWidth>
+              <EuiButton fullWidth onClick={() => parseQuery(inputRef.current?.value ?? '')}>
+                Parse
+              </EuiButton>
             </EuiFormRow>
           </EuiForm>
           <EuiSpacer />
