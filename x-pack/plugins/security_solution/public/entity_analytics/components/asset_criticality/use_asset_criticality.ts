@@ -46,9 +46,11 @@ export const useAssetCriticalityPrivileges = (
 export const useAssetCriticalityData = ({
   entity,
   enabled = true,
+  onChange,
 }: {
   entity: Entity;
   enabled?: boolean;
+  onChange?: () => void;
 }): State => {
   const QC = useQueryClient();
   const QUERY_KEY = [ASSET_CRITICALITY_KEY, entity.name];
@@ -71,18 +73,24 @@ export const useAssetCriticalityData = ({
   >({
     mutationFn: (params: Params) => {
       if (params.criticalityLevel === 'unassigned') {
-        return deleteAssetCriticality({ idField: params.idField, idValue: params.idValue });
+        return deleteAssetCriticality({
+          idField: params.idField,
+          idValue: params.idValue,
+          refresh: 'wait_for',
+        });
       }
 
       return createAssetCriticality({
         idField: params.idField,
         idValue: params.idValue,
         criticalityLevel: params.criticalityLevel,
+        refresh: 'wait_for',
       });
     },
     onSuccess: (data) => {
       const queryData = 'deleted' in data ? null : data;
       QC.setQueryData(QUERY_KEY, queryData);
+      onChange?.();
     },
   });
 
