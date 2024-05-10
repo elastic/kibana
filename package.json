@@ -914,7 +914,7 @@
     "@langchain/core": "^0.1.53",
     "@langchain/openai": "^0.0.25",
     "@langtrase/trace-attributes": "^3.0.8",
-    "@langtrase/typescript-sdk": "^2.1.0",
+    "@langtrase/typescript-sdk": "^2.2.1",
     "@loaders.gl/core": "^3.4.7",
     "@loaders.gl/json": "^3.4.7",
     "@loaders.gl/shapefile": "^3.4.7",

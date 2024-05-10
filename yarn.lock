@@ -6791,10 +6791,10 @@
   dependencies:
     ncp "^2.0.0"
 
-"@langtrase/typescript-sdk@^2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@langtrase/typescript-sdk/-/typescript-sdk-2.1.0.tgz#50bc311194a1a530bc13b6a2cfd31c97a8c8f397"
-  integrity sha512-UvFYJ1kbOpxUOlEkAmi4Ziq/P/RuCz6ukWvRfBhawoeC7IfdFFKXL3NdOJN9+5P/ET4U2oXgRj7eqhn6egSL6A==
+"@langtrase/typescript-sdk@^2.2.1":
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/@langtrase/typescript-sdk/-/typescript-sdk-2.2.1.tgz#8ec60290b9882e161bc42bd51cf0a72396438633"
+  integrity sha512-CRzhOcGMLv68ICvENDBQ/PWIHyBNlc6lNBaqF9EM/s+HUusSPnBmvQ+nGObqpPR+uo7m9hDRRUmUXOlAooj0PQ==
   dependencies:
     "@langtrase/trace-attributes" "^3.0.8"
     "@opentelemetry/api" "^1.7.0"
