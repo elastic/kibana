@@ -165,7 +165,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const topValuesRows = await testSubjects.findAll('dscFieldStats-topValues-bucket');
         expect(topValuesRows.length).to.eql(10);
         expect(await testSubjects.getVisibleText('dscFieldStats-statsFooter')).to.contain(
-          '42 sample values'
+          '42 sample records'
         );
 
         await PageObjects.unifiedFieldList.clickFieldListPlusFilter('bytes', '0');
@@ -186,7 +186,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.missingOrFail('unifiedFieldStats-buttonGroup');
         await testSubjects.missingOrFail('unifiedFieldStats-histogram');
         expect(await testSubjects.getVisibleText('dscFieldStats-statsFooter')).to.contain(
-          '500 sample values'
+          '500 sample records'
         );
 
         await PageObjects.unifiedFieldList.clickFieldListPlusFilter('extension.raw', 'css');
@@ -208,7 +208,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.missingOrFail('unifiedFieldStats-buttonGroup');
         await testSubjects.missingOrFail('unifiedFieldStats-histogram');
         expect(await testSubjects.getVisibleText('dscFieldStats-statsFooter')).to.contain(
-          '32 sample values'
+          '32 sample records'
         );
 
         await PageObjects.unifiedFieldList.clickFieldListPlusFilter('clientip', '216.126.255.31');
@@ -230,7 +230,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.missingOrFail('unifiedFieldStats-buttonGroup');
         await testSubjects.missingOrFail('unifiedFieldStats-histogram');
         expect(await testSubjects.getVisibleText('dscFieldStats-statsFooter')).to.contain(
-          '500 sample values'
+          '500 sample records'
         );
         await PageObjects.unifiedFieldList.closeFieldPopover();
       });
@@ -310,7 +310,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const topValuesRows = await testSubjects.findAll('dscFieldStats-topValues-bucket');
         expect(topValuesRows.length).to.eql(3);
         expect(await testSubjects.getVisibleText('dscFieldStats-statsFooter')).to.contain(
-          '3 sample values'
+          '3 sample records'
         );
 
         await PageObjects.unifiedFieldList.clickFieldListPlusFilter('avg(bytes)', '5453');
@@ -339,7 +339,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'true\n100%'
         );
         expect(await testSubjects.getVisibleText('dscFieldStats-statsFooter')).to.contain(
-          '1 sample value'
+          '1 sample record'
         );
 
         await PageObjects.unifiedFieldList.clickFieldListMinusFilter('enabled', 'true');
