@@ -9,21 +9,22 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 
 interface SelectedVSAvailableCallout {
-  isPlainRecord: boolean;
   selectedColumns: string[];
   textBasedQueryColumns?: DatatableColumn[];
 }
 
 export const SelectedVSAvailableCallout = ({
-  isPlainRecord,
   textBasedQueryColumns,
   selectedColumns,
 }: SelectedVSAvailableCallout) => {
+  const isEsqlMode = useIsEsqlMode();
+
   return (
     <>
-      {isPlainRecord &&
+      {isEsqlMode &&
         textBasedQueryColumns &&
         selectedColumns.length > 0 &&
         selectedColumns.length < textBasedQueryColumns.length && (

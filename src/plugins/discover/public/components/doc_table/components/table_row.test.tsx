@@ -128,7 +128,7 @@ describe('Doc table row component', () => {
     it('should hide the single/surrounding views for text based languages', () => {
       const props = {
         ...defaultProps,
-        isPlainRecord: true,
+        isEsqlMode: true,
       };
       const component = mountComponent(props);
       const toggleButton = findTestSubject(component, 'docTableExpandToggleColumn');

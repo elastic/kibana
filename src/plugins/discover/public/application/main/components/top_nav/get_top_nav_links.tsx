@@ -54,7 +54,7 @@ export const getTopNavLinks = ({
         services,
         stateContainer: state,
         adHocDataViews,
-        isPlainRecord: isTextBased,
+        isEsqlMode: isTextBased,
       });
     },
     testId: 'discoverAlertsButton',

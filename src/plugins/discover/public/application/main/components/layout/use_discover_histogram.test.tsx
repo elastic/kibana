@@ -109,18 +109,15 @@ describe('useDiscoverHistogram', () => {
     stateContainer = getStateContainer(),
     inspectorAdapters = { requests: new RequestAdapter() },
     hideChart = false,
-    isPlainRecord = false,
   }: {
     stateContainer?: DiscoverStateContainer;
     inspectorAdapters?: InspectorAdapters;
     hideChart?: boolean;
-    isPlainRecord?: boolean;
   } = {}) => {
     const initialProps = {
       stateContainer,
       inspectorAdapters,
       hideChart,
-      isPlainRecord,
     };
 
     const Wrapper: WrapperComponent<UseDiscoverHistogramProps> = ({ children }) => (
@@ -174,8 +171,8 @@ describe('useDiscoverHistogram', () => {
       ]);
     });
 
-    it('should return the isChartLoading params for text based languages', async () => {
-      const { hook } = await renderUseDiscoverHistogram({ isPlainRecord: true });
+    it('should return the isChartLoading params for ES|QL mode', async () => {
+      const { hook } = await renderUseDiscoverHistogram();
       const isChartLoading = hook.result.current.isChartLoading;
       expect(isChartLoading).toBe(false);
     });
@@ -390,7 +387,7 @@ describe('useDiscoverHistogram', () => {
       }>();
       const stateContainer = getStateContainer();
       stateContainer.dataState.fetch$ = fetch$;
-      const { hook } = await renderUseDiscoverHistogram({ stateContainer, isPlainRecord: true });
+      const { hook } = await renderUseDiscoverHistogram({ stateContainer });
       act(() => {
         fetch$.next({
           options: { reset: false, fetchMore: false },

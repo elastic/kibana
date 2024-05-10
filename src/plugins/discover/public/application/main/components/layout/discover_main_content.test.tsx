@@ -38,13 +38,11 @@ import { createDataViewDataSource } from '../../../../../common/data_sources';
 
 const mountComponent = async ({
   hideChart = false,
-  isPlainRecord = false,
   isChartAvailable,
   viewMode = VIEW_MODE.DOCUMENT_LEVEL,
   storage,
 }: {
   hideChart?: boolean;
-  isPlainRecord?: boolean;
   isChartAvailable?: boolean;
   viewMode?: VIEW_MODE;
   storage?: Storage;
@@ -103,7 +101,6 @@ const mountComponent = async ({
   });
 
   const props: DiscoverMainContentProps = {
-    isPlainRecord,
     dataView,
     stateContainer,
     onFieldEdited: jest.fn(),
@@ -145,13 +142,13 @@ const mountComponent = async ({
 
 describe('Discover main content component', () => {
   describe('DocumentViewModeToggle', () => {
-    it('should show DocumentViewModeToggle when isPlainRecord is false', async () => {
+    it('should show DocumentViewModeToggle when not in ES|QL mode', async () => {
       const component = await mountComponent();
       expect(component.find(DiscoverDocuments).prop('viewModeToggle')).toBeDefined();
     });
 
-    it('should include DocumentViewModeToggle when isPlainRecord is true', async () => {
-      const component = await mountComponent({ isPlainRecord: true });
+    it('should include DocumentViewModeToggle when in ES|QL mode', async () => {
+      const component = await mountComponent();
       expect(component.find(DiscoverDocuments).prop('viewModeToggle')).toBeDefined();
     });
 

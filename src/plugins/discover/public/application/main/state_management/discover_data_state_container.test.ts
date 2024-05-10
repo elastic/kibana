@@ -10,7 +10,6 @@ import { waitFor } from '@testing-library/react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
 import { discoverServiceMock } from '../../../__mocks__/services';
-import { savedSearchMockWithESQL } from '../../../__mocks__/saved_search';
 import { FetchStatus } from '../../types';
 import { DataDocuments$ } from './discover_data_state_container';
 import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
@@ -97,14 +96,6 @@ describe('test getDataStateContainer', () => {
       expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.LOADING);
     });
     unsubscribe();
-  });
-
-  test('useSavedSearch returns plain record raw type', async () => {
-    const stateContainer = getDiscoverStateMock({
-      savedSearch: savedSearchMockWithESQL,
-    });
-    stateContainer.savedSearchState.load = jest.fn().mockResolvedValue(savedSearchMockWithESQL);
-    await stateContainer.actions.loadSavedSearch({ savedSearchId: savedSearchMockWithESQL.id });
   });
 
   test('refetch$ accepts "fetch_more" signal', (done) => {

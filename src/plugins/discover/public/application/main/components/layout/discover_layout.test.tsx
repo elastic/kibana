@@ -50,7 +50,6 @@ async function mountComponent(
   prevSidebarClosed?: boolean,
   mountOptions: { attachTo?: HTMLElement } = {},
   query?: Query | AggregateQuery,
-  isPlainRecord?: boolean,
   main$: DataMain$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
     foundDocuments: true,
@@ -180,7 +179,6 @@ describe('Discover component', () => {
   it('shows the no results error display', async () => {
     const component = await mountComponent(
       dataViewWithTimefieldMock,
-      undefined,
       undefined,
       undefined,
       undefined,

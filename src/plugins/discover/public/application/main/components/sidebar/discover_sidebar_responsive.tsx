@@ -187,7 +187,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
           dispatchSidebarStateAction({
             type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING,
             payload: {
-              isPlainRecord: isEsqlMode,
+              isEsqlMode,
             },
           });
           break;
@@ -198,7 +198,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
               dataView: selectedDataViewRef.current,
               fieldCounts: isEsqlMode ? EMPTY_FIELD_COUNTS : calcFieldCounts(documentState.result),
               textBasedQueryColumns: documentState.textBasedQueryColumns,
-              isPlainRecord: isEsqlMode,
+              isEsqlMode,
             },
           });
           break;
@@ -208,7 +208,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             payload: {
               dataView: selectedDataViewRef.current,
               fieldCounts: EMPTY_FIELD_COUNTS,
-              isPlainRecord: isEsqlMode,
+              isEsqlMode,
             },
           });
           break;

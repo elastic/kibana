@@ -33,7 +33,7 @@ type DiscoverSidebarReducerAction =
   | {
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING;
       payload: {
-        isPlainRecord: boolean;
+        isEsqlMode: boolean;
       };
     }
   | {
@@ -41,7 +41,7 @@ type DiscoverSidebarReducerAction =
       payload: {
         fieldCounts: DiscoverSidebarReducerState['fieldCounts'];
         textBasedQueryColumns?: DatatableColumn[]; // from text-based searches
-        isPlainRecord: boolean;
+        isEsqlMode: boolean;
         dataView: DataView | null | undefined;
       };
     };
@@ -92,11 +92,11 @@ export function discoverSidebarReducer(
       return {
         ...state,
         fieldCounts: null,
-        allFields: action.payload.isPlainRecord ? null : state.allFields,
+        allFields: action.payload.isEsqlMode ? null : state.allFields,
         status: DiscoverSidebarReducerStatus.PROCESSING,
       };
     case DiscoverSidebarReducerActionType.DOCUMENTS_LOADED:
-      const mappedAndUnmappedFields = action.payload.isPlainRecord
+      const mappedAndUnmappedFields = action.payload.isEsqlMode
         ? getTextBasedQueryFieldList(action.payload.textBasedQueryColumns)
         : getDataViewFieldList(action.payload.dataView, action.payload.fieldCounts);
       return {

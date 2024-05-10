@@ -262,7 +262,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     return (
       <>
         <DiscoverHistogramLayout
-          isPlainRecord={isEsqlMode}
           dataView={dataView}
           stateContainer={stateContainer}
           columns={currentColumns}
@@ -278,7 +277,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     );
   }, [
     resultState,
-    isEsqlMode,
     dataView,
     stateContainer,
     currentColumns,

@@ -19,7 +19,7 @@ describe('Discover tour', () => {
   const mountComponent = (innerContent: JSX.Element) => {
     return mountWithIntl(
       <KibanaContextProvider services={discoverServiceMock}>
-        <DiscoverTourProvider isPlainRecord={false}>{innerContent}</DiscoverTourProvider>
+        <DiscoverTourProvider>{innerContent}</DiscoverTourProvider>
       </KibanaContextProvider>
     );
   };

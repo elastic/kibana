@@ -51,12 +51,12 @@ function getStateContainer(savedSearch?: SavedSearch) {
 }
 
 const mountComponent = async ({
-  isPlainRecord = false,
+  isEsqlMode = false,
   storage,
   savedSearch = savedSearchMockWithTimeField,
   searchSessionId = '123',
 }: {
-  isPlainRecord?: boolean;
+  isEsqlMode?: boolean;
   isTimeBased?: boolean;
   storage?: Storage;
   savedSearch?: SavedSearch;
@@ -119,7 +119,6 @@ const mountComponent = async ({
   stateContainer.actions.undoSavedSearchChanges = jest.fn();
 
   const props: DiscoverHistogramLayoutProps = {
-    isPlainRecord,
     dataView,
     stateContainer,
     onFieldEdited: jest.fn(),
@@ -174,8 +173,8 @@ describe('Discover histogram layout component', () => {
       expect(component.isEmptyRender()).toBe(false);
     }, 10000);
 
-    it('should not render null if there is no search session, but isPlainRecord is true', async () => {
-      const { component } = await mountComponent({ isPlainRecord: true });
+    it('should not render null if there is no search session, but isEsqlMode is true', async () => {
+      const { component } = await mountComponent({ isEsqlMode: true });
       expect(component.isEmptyRender()).toBe(false);
     });
 

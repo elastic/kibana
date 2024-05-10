@@ -37,7 +37,7 @@ export function SavedSearchEmbeddableComponent({
       <DiscoverDocTableEmbeddableMemoized
         {...searchProps}
         sampleSizeState={fetchedSampleSize}
-        isPlainRecord={isEsqlMode}
+        isEsqlMode={isEsqlMode}
       />
     );
   }

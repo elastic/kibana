@@ -15,6 +15,7 @@ import { useDiscoverHistogram } from './use_discover_histogram';
 import { type DiscoverMainContentProps, DiscoverMainContent } from './discover_main_content';
 import { useAppStateSelector } from '../../state_management/discover_app_state_container';
 import { FetchStatus } from '../../../types';
+import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 
 export interface DiscoverHistogramLayoutProps extends DiscoverMainContentProps {
   container: HTMLElement | null;
@@ -25,7 +26,6 @@ const histogramLayoutCss = css`
 `;
 
 export const DiscoverHistogramLayout = ({
-  isPlainRecord,
   dataView,
   stateContainer,
   container,
@@ -35,11 +35,11 @@ export const DiscoverHistogramLayout = ({
   const { dataState } = stateContainer;
   const searchSessionId = useObservable(stateContainer.searchSessionManager.searchSessionId$);
   const hideChart = useAppStateSelector((state) => state.hideChart);
+  const isEsqlMode = useIsEsqlMode();
   const unifiedHistogramProps = useDiscoverHistogram({
     stateContainer,
     inspectorAdapters: dataState.inspectorAdapters,
     hideChart,
-    isPlainRecord,
   });
 
   const datatable = useObservable(dataState.data$.documents$);
@@ -53,7 +53,7 @@ export const DiscoverHistogramLayout = ({
 
   const table: Datatable | undefined = useMemo(() => {
     if (
-      isPlainRecord &&
+      isEsqlMode &&
       datatable &&
       [FetchStatus.PARTIAL, FetchStatus.COMPLETE].includes(datatable.fetchStatus)
     ) {
@@ -63,11 +63,11 @@ export const DiscoverHistogramLayout = ({
         columns: datatable.textBasedQueryColumns || [],
       };
     }
-  }, [datatable, isPlainRecord]);
+  }, [datatable, isEsqlMode]);
 
   // Initialized when the first search has been requested or
   // when in text-based mode since search sessions are not supported
-  if (!searchSessionId && !isPlainRecord) {
+  if (!searchSessionId && !isEsqlMode) {
     return null;
   }
 
@@ -86,7 +86,6 @@ export const DiscoverHistogramLayout = ({
         {...mainContentProps}
         stateContainer={stateContainer}
         dataView={dataView}
-        isPlainRecord={isPlainRecord}
         panelsToggle={panelsToggle}
       />
     </UnifiedHistogramContainer>

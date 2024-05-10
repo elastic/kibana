@@ -269,19 +269,13 @@ function DiscoverDocumentsComponent({
     () => (
       <>
         <SelectedVSAvailableCallout
-          isPlainRecord={isEsqlMode}
           textBasedQueryColumns={documents?.textBasedQueryColumns}
           selectedColumns={currentColumns}
         />
         <SearchResponseWarningsCallout warnings={documentState.interceptedWarnings ?? []} />
       </>
     ),
-    [
-      isEsqlMode,
-      currentColumns,
-      documents?.textBasedQueryColumns,
-      documentState.interceptedWarnings,
-    ]
+    [currentColumns, documents?.textBasedQueryColumns, documentState.interceptedWarnings]
   );
 
   const gridAnnouncementCallout = useMemo(() => {
@@ -290,7 +284,7 @@ function DiscoverDocumentsComponent({
     }
 
     return !isEsqlMode ? (
-      <DiscoverTourProvider isPlainRecord={isEsqlMode}>
+      <DiscoverTourProvider isEsqlMode={isEsqlMode}>
         <DocumentExplorerUpdateCallout />
       </DiscoverTourProvider>
     ) : null;
@@ -364,7 +358,7 @@ function DiscoverDocumentsComponent({
                   isLoading={isDataLoading}
                   searchDescription={savedSearch.description}
                   sharedItemTitle={savedSearch.title}
-                  isPlainRecord={isEsqlMode}
+                  isEsqlMode={isEsqlMode}
                   onAddColumn={onAddColumn}
                   onFilter={onAddFilter as DocViewFilterFn}
                   onMoveColumn={onMoveColumn}
