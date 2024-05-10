@@ -72,6 +72,7 @@ export const navigationTree: NavigationTreeDefinition = {
         {
           id: 'aiops',
           title: 'AIOps',
+          link: 'ml:anomalyDetection',
           renderAs: 'accordion',
           spaceBefore: null,
           children: [
@@ -124,6 +125,7 @@ export const navigationTree: NavigationTreeDefinition = {
           title: i18n.translate('xpack.serverlessObservability.nav.applications', {
             defaultMessage: 'Applications',
           }),
+          link: 'apm:services',
           renderAs: 'accordion',
           children: [
             {
@@ -156,6 +158,7 @@ export const navigationTree: NavigationTreeDefinition = {
           title: i18n.translate('xpack.serverlessObservability.nav.infrastructure', {
             defaultMessage: 'Infrastructure',
           }),
+          link: 'metrics:inventory',
           renderAs: 'accordion',
           children: [
             {
