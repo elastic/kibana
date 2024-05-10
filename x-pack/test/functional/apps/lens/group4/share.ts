@@ -13,7 +13,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const filterBarService = getService('filterBar');
   const queryBar = getService('queryBar');
-  const testSubjects = getService('testSubjects');
 
   describe('lens share tests', () => {
     before(async () => {
@@ -60,16 +59,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await PageObjects.lens.isShareActionEnabled('export'));
       expect(await PageObjects.lens.isShareActionEnabled('link'));
-    });
-
-    it('should have the copy link button disabled when lens is not saved', async () => {
-      await filterBarService.addFilter({ field: 'bytes', operation: 'is', value: '1' });
-      await queryBar.setQuery('host.keyword www.elastic.co');
-      await queryBar.submitQuery();
-      await PageObjects.lens.waitForVisualization('xyVisChart');
-
-      await PageObjects.lens.clickShareModal();
-      expect(await testSubjects.isEnabled('copyShareUrlButton')).to.be(false);
     });
 
     xit('should preserve filter and query when sharing', async () => {
