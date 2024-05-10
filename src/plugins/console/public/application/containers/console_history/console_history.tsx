@@ -23,6 +23,7 @@ import {
 
 import { useServicesContext } from '../../contexts';
 import { HistoryViewer } from './history_viewer';
+import { HistoryViewer as HistoryViewerMonaco } from './history_viewer_monaco';
 import { useEditorReadContext } from '../../contexts/editor_context';
 import { useRestoreRequestFromHistory } from '../../hooks';
 
@@ -182,7 +183,11 @@ export function ConsoleHistory({ close }: Props) {
 
           <div className="conHistory__body__spacer" />
 
-          {isMonacoEnabled ? null : <HistoryViewer settings={readOnlySettings} req={viewingReq} />}
+          {isMonacoEnabled ? (
+            <HistoryViewerMonaco settings={readOnlySettings} req={viewingReq} />
+          ) : (
+            <HistoryViewer settings={readOnlySettings} req={viewingReq} />
+          )}
         </div>
 
         <EuiSpacer size="s" />

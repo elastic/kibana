@@ -399,4 +399,45 @@ export class MonacoEditorActionsProvider {
   ): monaco.languages.ProviderResult<monaco.languages.CompletionList> {
     return this.getSuggestions(model, position, context);
   }
+
+  public async restoreRequestFromHistory(request: string) {
+    let position = this.editor.getPosition() as monaco.IPosition;
+    const requests = await this.getSelectedParsedRequests();
+    // if there are requests at the cursor/selection, insert either before or after
+    if (requests.length > 0) {
+      // if on the 1st line of the 1st request, insert before
+      if (position && position.lineNumber === requests[0].startLineNumber) {
+        position = { column: 1, lineNumber: position.lineNumber < 2 ? 1 : position.lineNumber - 1 };
+      } else {
+        // otherwise insert after
+        position = { column: 1, lineNumber: requests[requests.length - 1].endLineNumber + 1 };
+      }
+    } else {
+      if (!position) {
+        // if no cursor/selection, insert at the beginning
+        position = { lineNumber: 1, column: 1 };
+      }
+    }
+    let prefix = '\n';
+    let suffix = '\n';
+    if (position.lineNumber === 1) {
+      // if inserting at the beginning, remove the prefix new line
+      prefix = '';
+    }
+    if (position.lineNumber === this.editor.getModel()?.getLineCount()) {
+      // if inserting at the end, remove the suffix new line
+      suffix = '';
+    }
+    const edit: monaco.editor.IIdentifiedSingleEditOperation = {
+      range: {
+        startLineNumber: position.lineNumber,
+        startColumn: position.column,
+        endLineNumber: position.lineNumber,
+        endColumn: position.column,
+      },
+      text: prefix + request + suffix,
+      forceMoveMarkers: true,
+    };
+    this.editor.executeEdits('restoreFromHistory', [edit]);
+  }
 }

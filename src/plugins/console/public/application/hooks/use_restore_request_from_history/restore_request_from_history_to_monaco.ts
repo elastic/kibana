@@ -6,6 +6,19 @@
  * Side Public License, v 1.
  */
 
+import { formatRequestBodyDoc } from '../../../lib/utils';
+import { MonacoEditorActionsProvider } from '../../containers/editor/monaco/monaco_editor_actions_provider';
 import { ESRequest } from '../../../types';
 
-export function restoreRequestFromHistoryToMonaco(req: ESRequest) {}
+export async function restoreRequestFromHistoryToMonaco(
+  provider: MonacoEditorActionsProvider,
+  req: ESRequest
+) {
+  let s = req.method + ' ' + req.endpoint;
+  if (req.data) {
+    const indent = true;
+    const formattedData = formatRequestBodyDoc([req.data], indent);
+    s += '\n' + formattedData.data;
+  }
+  await provider.restoreRequestFromHistory(s);
+}

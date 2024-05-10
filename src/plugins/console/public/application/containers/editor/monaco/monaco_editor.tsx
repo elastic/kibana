@@ -27,7 +27,6 @@ import {
 } from './hooks';
 import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
 import { getSuggestionProvider } from './monaco_editor_suggestion_provider';
-import { SenseEditor } from '../../../models';
 
 export interface EditorProps {
   initialTextValue: string;
@@ -52,9 +51,10 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
   const setInputEditor = useSetInputEditor();
   const editorDidMountCallback = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
-      actionsProvider.current = new MonacoEditorActionsProvider(editor, setEditorActionsCss);
+      const provider = new MonacoEditorActionsProvider(editor, setEditorActionsCss);
+      actionsProvider.current = provider;
       setupResizeChecker(divRef.current!, editor);
-      setInputEditor({} as unknown as SenseEditor);
+      setInputEditor(provider);
     },
     [setInputEditor, setupResizeChecker]
   );
