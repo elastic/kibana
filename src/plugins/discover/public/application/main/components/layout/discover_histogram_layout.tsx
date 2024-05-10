@@ -66,7 +66,7 @@ export const DiscoverHistogramLayout = ({
   }, [datatable, isEsqlMode]);
 
   // Initialized when the first search has been requested or
-  // when in text-based mode since search sessions are not supported
+  // when in ES|QL mode since search sessions are not supported
   if (!searchSessionId && !isEsqlMode) {
     return null;
   }

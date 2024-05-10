@@ -33,7 +33,7 @@ describe('getValidViewMode', () => {
     ).toBe(VIEW_MODE.AGGREGATED_LEVEL);
   });
 
-  test('should work correctly for text-based mode', () => {
+  test('should work correctly for ES|QL mode', () => {
     expect(
       getValidViewMode({
         viewMode: undefined,

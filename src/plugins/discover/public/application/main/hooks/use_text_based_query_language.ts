@@ -20,7 +20,7 @@ const MAX_NUM_OF_COLUMNS = 50;
 const TRANSFORMATIONAL_COMMANDS = ['stats', 'keep'];
 
 /**
- * Hook to take care of text based query language state transformations when a new result is returned
+ * Hook to take care of ES|QL state transformations when a new result is returned
  * If necessary this is setting displayed columns and selected data view
  */
 export function useEsqlMode({
@@ -42,7 +42,7 @@ export function useEsqlMode({
 
   const cleanup = useCallback(() => {
     if (prev.current.query) {
-      // cleanup when it's not a text based query lang
+      // cleanup when it's not an ES|QL query
       prev.current = {
         columns: [],
         query: '',

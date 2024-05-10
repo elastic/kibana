@@ -112,7 +112,7 @@ describe('useFetchMoreRecords', () => {
     expect(current.totalHits).toBe(5);
   });
 
-  it('should not be allowed for text-based queries', async () => {
+  it('should not be allowed for ES|QL queries', async () => {
     const {
       result: { current },
     } = renderHook((props) => useFetchMoreRecords(props), {

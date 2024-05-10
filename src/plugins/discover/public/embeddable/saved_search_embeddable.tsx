@@ -305,7 +305,7 @@ export class SavedSearchEmbeddable
     const isEsqlMode = this.isEsqlMode(savedSearch);
 
     try {
-      // Request text based data
+      // Request ES|QL data
       if (isEsqlMode && query) {
         const result = await fetchEsql(
           savedSearch.searchSource.getField('query')!,

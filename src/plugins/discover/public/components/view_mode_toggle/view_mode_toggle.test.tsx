@@ -63,7 +63,7 @@ describe('Document view mode toggle component', () => {
     expect(findTestSubject(component, 'discoverQueryTotalHits').exists()).toBe(true);
   });
 
-  it('should not render if text-based', () => {
+  it('should not render if ES|QL', () => {
     const component = mountComponent({ isEsqlMode: true });
     expect(findTestSubject(component, 'dscViewModeToggle').exists()).toBe(false);
     expect(findTestSubject(component, 'discoverQueryTotalHits').exists()).toBe(true);

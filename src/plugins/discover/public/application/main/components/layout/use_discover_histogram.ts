@@ -45,7 +45,7 @@ import { DataDocumentsMsg } from '../../state_management/discover_data_state_con
 import { useSavedSearch } from '../../state_management/discover_state_provider';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 
-const EMPTY_TEXT_BASED_COLUMNS: DatatableColumn[] = [];
+const EMPTY_ESQL_COLUMNS: DatatableColumn[] = [];
 const EMPTY_FILTERS: Filter[] = [];
 
 export interface UseDiscoverHistogramProps {
@@ -222,7 +222,7 @@ export const useDiscoverHistogram = ({
     timefilter.getTime()
   );
 
-  // When in text based language mode, update the data view, query, and
+  // When in ES|QL mode, update the data view, query, and
   // columns only when documents are done fetching so the Lens suggestions
   // don't frequently change, such as when the user modifies the table
   // columns, which would trigger unnecessary refetches.
@@ -288,7 +288,7 @@ export const useDiscoverHistogram = ({
 
     let fetch$: Observable<string>;
 
-    // When in text based language mode, we refetch under two conditions:
+    // When in ES|QL mode, we refetch under two conditions:
     // 1. When the current Lens suggestion changes. This syncs the visualization
     //    with the user's selection.
     // 2. When the documents are done fetching. This is necessary because we don't
@@ -503,7 +503,7 @@ function getUnifiedHistogramPropsForEsql({
   documentsValue: DataDocumentsMsg | undefined;
   savedSearch: SavedSearch;
 }) {
-  const columns = documentsValue?.esqlQueryColumns || EMPTY_TEXT_BASED_COLUMNS;
+  const columns = documentsValue?.esqlQueryColumns || EMPTY_ESQL_COLUMNS;
 
   const nextProps = {
     dataView: savedSearch.searchSource.getField('index')!,
@@ -511,7 +511,7 @@ function getUnifiedHistogramPropsForEsql({
     columns,
   };
 
-  addLog('[UnifiedHistogram] delayed next props for text-based', nextProps);
+  addLog('[UnifiedHistogram] delayed next props for ES|QL', nextProps);
 
   return nextProps;
 }

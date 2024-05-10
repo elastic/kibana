@@ -16,8 +16,8 @@ export type SortInput = SortPair | SortPair[];
 
 export function isSortable(fieldName: string, dataView: DataView, isEsqlMode: boolean): boolean {
   if (isEsqlMode) {
-    // in-memory sorting is used for text-based queries
-    // would be great to have a way to determine if a text-based column is sortable
+    // in-memory sorting is used for ES|QL queries
+    // would be great to have a way to determine if a ES|QL column is sortable
     return fieldName !== '_source';
   }
   const field = dataView.getFieldByName(fieldName);

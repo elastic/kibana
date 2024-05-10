@@ -62,7 +62,7 @@ export const DiscoverTopNav = ({
   const savedSearch = useSavedSearchInitial();
   const isEsqlMode = useIsEsqlMode();
   const showDatePicker = useMemo(() => {
-    // always show the timepicker for text based languages
+    // always show the timepicker for ES|QL mode
     return (
       isEsqlMode || (!isEsqlMode && dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP)
     );

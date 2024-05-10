@@ -77,7 +77,7 @@ export function updateSavedSearch({
     savedSearch.breakdownField = state.breakdownField || undefined; // `undefined` instead of an empty string
     savedSearch.hideAggregatedPreview = state.hideAggregatedPreview;
 
-    // add a flag here to identify text based language queries
+    // add a flag here to identify ES|QL queries
     // these should be filtered out from the visualize editor
     const isEsqlMode = isDataSourceType(state.dataSource, DataSourceType.Esql);
     if (savedSearch.isTextBasedQuery || isEsqlMode) {

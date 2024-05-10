@@ -126,7 +126,7 @@ export function resolveDataView(
     return ownDataView;
   }
 
-  // no warnings for text based mode
+  // no warnings for ES|QL mode
   if (stateVal && !stateValFound && !Boolean(isEsqlMode)) {
     const warningTitle = i18n.translate('discover.valueIsNotConfiguredDataViewIDWarningTitle', {
       defaultMessage: '{stateVal} is not a configured data view ID',

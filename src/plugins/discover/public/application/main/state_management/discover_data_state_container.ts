@@ -64,7 +64,7 @@ export interface DataMainMsg extends DataMsg {
 
 export interface DataDocumentsMsg extends DataMsg {
   result?: DataTableRecord[];
-  esqlQueryColumns?: DatatableColumn[]; // columns from text-based request
+  esqlQueryColumns?: DatatableColumn[]; // columns from ES|QL request
   esqlHeaderWarning?: string;
   interceptedWarnings?: SearchResponseWarning[]; // warnings (like shard failures)
 }

@@ -40,7 +40,7 @@ type DiscoverSidebarReducerAction =
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED;
       payload: {
         fieldCounts: DiscoverSidebarReducerState['fieldCounts'];
-        esqlQueryColumns?: DatatableColumn[]; // from text-based searches
+        esqlQueryColumns?: DatatableColumn[]; // from ES|QL searches
         isEsqlMode: boolean;
         dataView: DataView | null | undefined;
       };

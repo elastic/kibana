@@ -134,7 +134,7 @@ function DiscoverDocumentsComponent({
     documentState.fetchStatus === FetchStatus.PARTIAL;
 
   // This is needed to prevent EuiDataGrid pushing onSort because the data view has been switched.
-  // It's just necessary for non-text-based query lang requests since they don't have a partial result state, that's
+  // It's just necessary for non ES|QL requests since they don't have a partial result state, that's
   // considered as loading state in the Component.
   // 1. When switching the data view, the sorting in the URL is reset to the default sorting of the selected data view.
   // 2. The new sort param is already available in this component and propagated to the EuiDataGrid.

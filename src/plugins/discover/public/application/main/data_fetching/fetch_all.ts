@@ -141,7 +141,7 @@ export function fetchAll(
           }
         }
         /**
-         * The partial state for text based query languages is necessary in case the query has changed
+         * The partial state for ES|QL mode is necessary in case the query has changed
          * In the follow up useEsqlMode hook in this case new columns are added to AppState
          * So the data table shows the new columns of the table. The partial state was introduced to prevent
          * To frequent change of state causing the table to re-render to often, which causes race conditions

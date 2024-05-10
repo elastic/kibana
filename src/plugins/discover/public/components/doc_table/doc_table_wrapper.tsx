@@ -62,7 +62,7 @@ export interface DocTableProps {
   filters?: Filter[];
   /**
    * Flag which identifies if Discover operates
-   * in text based mode (ESQL)
+   * in ES|QL mode
    */
   isEsqlMode?: boolean;
   /**

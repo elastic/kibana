@@ -96,7 +96,7 @@ const renderHookWithContext = (
 };
 
 describe('useEsqlMode', () => {
-  test('a text based query should change state when loading and finished', async () => {
+  test('an ES|QL query should change state when loading and finished', async () => {
     const { replaceUrlState, stateContainer } = renderHookWithContext(true);
 
     replaceUrlState.mockReset();
@@ -114,7 +114,7 @@ describe('useEsqlMode', () => {
       viewMode: undefined,
     });
   });
-  test('changing a text based query with different result columns should change state when loading and finished', async () => {
+  test('changing an ES|QL query with different result columns should change state when loading and finished', async () => {
     const { replaceUrlState, stateContainer } = renderHookWithContext(false);
     const documents$ = stateContainer.dataState.data$.documents$;
     stateContainer.dataState.data$.documents$.next(msgComplete);
@@ -141,7 +141,7 @@ describe('useEsqlMode', () => {
     });
   });
 
-  test('changing a text based query with same result columns should not change state when loading and finished', async () => {
+  test('changing an ES|QL query with same result columns should not change state when loading and finished', async () => {
     const { replaceUrlState, stateContainer } = renderHookWithContext(false);
     const documents$ = stateContainer.dataState.data$.documents$;
     stateContainer.dataState.data$.documents$.next(msgComplete);
@@ -160,7 +160,7 @@ describe('useEsqlMode', () => {
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
   });
 
-  test('only changing a text based query with same result columns should not change columns', async () => {
+  test('only changing an ES|QL query with same result columns should not change columns', async () => {
     const { replaceUrlState, stateContainer } = renderHookWithContext(false);
 
     const documents$ = stateContainer.dataState.data$.documents$;
@@ -202,7 +202,7 @@ describe('useEsqlMode', () => {
 
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
   });
-  test('if its not a text based query coming along, it should be ignored', async () => {
+  test('if its not an ES|QL query coming along, it should be ignored', async () => {
     const { replaceUrlState, stateContainer } = renderHookWithContext(false);
     const documents$ = stateContainer.dataState.data$.documents$;
 
@@ -392,7 +392,7 @@ describe('useEsqlMode', () => {
     });
   });
 
-  test('changing a text based query with an index pattern that not corresponds to a dataview should return results', async () => {
+  test('changing an ES|QL query with an index pattern that not corresponds to a dataview should return results', async () => {
     const props = getHookProps(query, discoverServiceMock.dataViews);
     const { stateContainer, replaceUrlState } = props;
     const documents$ = stateContainer.dataState.data$.documents$;

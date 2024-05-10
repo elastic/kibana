@@ -21,7 +21,7 @@ export const getValidViewMode = ({
   isEsqlMode: boolean;
 }): VIEW_MODE | undefined => {
   if (viewMode === VIEW_MODE.AGGREGATED_LEVEL && isEsqlMode) {
-    // only this mode is supported for text-based languages
+    // only this mode is supported for ES|QL languages
     return VIEW_MODE.DOCUMENT_LEVEL;
   }
 

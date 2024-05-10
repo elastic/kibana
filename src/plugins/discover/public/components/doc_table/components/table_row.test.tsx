@@ -125,7 +125,7 @@ describe('Doc table row component', () => {
       expect(findTestSubject(component, 'docTableRowDetailsTitle').exists()).toBeTruthy();
     });
 
-    it('should hide the single/surrounding views for text based languages', () => {
+    it('should hide the single/surrounding views for ES|QL mode', () => {
       const props = {
         ...defaultProps,
         isEsqlMode: true,
