@@ -98,7 +98,7 @@ steps:
       queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
-    parallelism: 2
+    parallelism: 3
     retry:
       automatic:
         - exit_status: '-1'
@@ -146,7 +146,7 @@ steps:
       queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
-    parallelism: 2
+    parallelism: 1
     retry:
       automatic:
         - exit_status: '-1'
@@ -266,7 +266,7 @@ steps:
       queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
-    parallelism: 3
+    parallelism: 2
     retry:
       automatic:
         - exit_status: '-1'
@@ -278,7 +278,7 @@ steps:
       queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
-    parallelism: 7
+    parallelism: 6
     retry:
       automatic:
         - exit_status: '-1'
