@@ -295,8 +295,8 @@ function generateSearchQuery({
 }): MsearchMultisearchBody {
   const unit = toMomentUnitOfTime(timeWindow.duration.unit);
   const timeWindowDurationInDays = moment.duration(timeWindow.duration.value, unit).asDays();
-
   const queryRangeDurationInDays = moment(dateRange.range.to).diff(dateRange.range.from, 'days');
+
   const { fixedInterval, bucketsPerDay } =
     getFixedIntervalAndBucketsPerDay(queryRangeDurationInDays);
 
@@ -439,7 +439,7 @@ export function getFixedIntervalAndBucketsPerDay(durationInDays: number): {
   bucketsPerDay: number;
 } {
   if (durationInDays <= 3) {
-    return { fixedInterval: '20m', bucketsPerDay: 72 };
+    return { fixedInterval: '30m', bucketsPerDay: 48 };
   }
   if (durationInDays <= 7) {
     return { fixedInterval: '1h', bucketsPerDay: 24 };

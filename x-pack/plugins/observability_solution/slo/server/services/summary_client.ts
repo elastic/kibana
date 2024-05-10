@@ -75,7 +75,10 @@ export class DefaultSummaryClient implements SummaryClient {
             { term: { 'slo.revision': slo.revision } },
             {
               range: {
-                '@timestamp': { gte: dateRange.from.toISOString(), lt: dateRange.to.toISOString() },
+                '@timestamp': {
+                  gte: dateRange.from.toISOString(),
+                  lte: dateRange.to.toISOString(),
+                },
               },
             },
             ...instanceIdFilter,
