@@ -10,6 +10,7 @@ import { type CoreSetup } from '@kbn/core/public';
 import { firstValueFrom } from 'rxjs';
 import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '@kbn/aiops-change-point-detection/constants';
 import { dynamic } from '@kbn/shared-ux-utility';
+
 import type {
   AiopsPluginSetup,
   AiopsPluginSetupDeps,
@@ -17,7 +18,6 @@ import type {
   AiopsPluginStartDeps,
 } from './types';
 import { getEmbeddableChangePointChart } from './embeddable/embeddable_change_point_chart_component';
-import { getPatternAnalysisAvailable } from './components/log_categorization/log_categorization_enabled';
 
 export type AiopsCoreSetup = CoreSetup<AiopsPluginStartDeps, AiopsPluginStart>;
 
@@ -66,7 +66,12 @@ export class AiopsPlugin
         core,
         plugins
       ),
-      patternAnalysisAvailable: getPatternAnalysisAvailable(plugins.licensing),
+      getPatternAnalysisAvailable: async () => {
+        const { getPatternAnalysisAvailable } = await import(
+          './components/log_categorization/log_categorization_enabled'
+        );
+        return getPatternAnalysisAvailable(plugins.licensing);
+      },
       PatternAnalysisComponent: dynamic(
         async () =>
           import(

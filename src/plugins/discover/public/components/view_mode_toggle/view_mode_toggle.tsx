@@ -57,11 +57,13 @@ export const DocumentViewModeToggle = ({
         return;
       }
       aiopsService
-        .patternAnalysisAvailable(dataView)
-        .then(setShowPatternAnalysisTab)
-        .catch(() => {
-          setShowPatternAnalysisTab(false);
-        });
+        .getPatternAnalysisAvailable()
+        .then((patternAnalysisAvailable) => {
+          patternAnalysisAvailable(dataView)
+            .then(setShowPatternAnalysisTab)
+            .catch(() => setShowPatternAnalysisTab(false));
+        })
+        .catch(() => setShowPatternAnalysisTab(false));
     },
     [aiopsService, dataView]
   );

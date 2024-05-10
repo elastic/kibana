@@ -48,6 +48,6 @@ export interface AiopsPluginStartDeps {
 export type AiopsPluginSetup = void;
 export interface AiopsPluginStart {
   EmbeddableChangePointChart: React.ComponentType<EmbeddableChangePointChartInput>;
-  patternAnalysisAvailable: (dataView: DataView) => Promise<boolean>;
+  getPatternAnalysisAvailable: () => Promise<(dataView: DataView) => Promise<boolean>>;
   PatternAnalysisComponent: React.ComponentType<LogCategorizationEmbeddableWrapperProps>;
 }
