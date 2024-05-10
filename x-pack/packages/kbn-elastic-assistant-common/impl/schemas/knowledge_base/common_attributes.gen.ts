@@ -16,35 +16,16 @@ import { z } from 'zod';
  *   version: not applicable
  */
 
-/**
- * A string that is not empty and does not contain only whitespace
- */
-export type NonEmptyString = z.infer<typeof NonEmptyString>;
-export const NonEmptyString = z
-  .string()
-  .min(1)
-  .regex(/^(?! *$).+$/);
+import { NonEmptyString, UUID, User } from '../common_attributes.gen';
 
-/**
- * A universally unique identifier
- */
-export type UUID = z.infer<typeof UUID>;
-export const UUID = z.string().uuid();
-
-/**
- * Could be any string, not necessarily a UUID
- */
-export type User = z.infer<typeof User>;
-export const User = z.object({
-  /**
-   * User id
-   */
-  id: z.string().optional(),
-  /**
-   * User name
-   */
-  name: z.string().optional(),
-});
+export type KnowledgeBaseEntryErrorSchema = z.infer<typeof KnowledgeBaseEntryErrorSchema>;
+export const KnowledgeBaseEntryErrorSchema = z
+  .object({
+    statusCode: z.number(),
+    error: z.string(),
+    message: z.string(),
+  })
+  .strict();
 
 /**
  * Metadata about an Knowledge Base Entry
@@ -56,7 +37,7 @@ export const Metadata = z.object({
    */
   kbResource: z.string(),
   /**
-   * Original text content
+   * Original text content source
    */
   source: z.string(),
   /**
@@ -66,7 +47,7 @@ export const Metadata = z.object({
 });
 
 /**
- * Object containing Metadata.source embeddings and modelId used to create the embeddings
+ * Object containing Knowledge Base Entry text embeddings and modelId used to create the embeddings
  */
 export type Vector = z.infer<typeof Vector>;
 export const Vector = z.object({
@@ -79,15 +60,6 @@ export const Vector = z.object({
    */
   tokens: z.object({}).catchall(z.number()),
 });
-
-export type ErrorSchema = z.infer<typeof ErrorSchema>;
-export const ErrorSchema = z
-  .object({
-    statusCode: z.number(),
-    error: z.string(),
-    message: z.string(),
-  })
-  .strict();
 
 export type KnowledgeBaseEntryResponse = z.infer<typeof KnowledgeBaseEntryResponse>;
 export const KnowledgeBaseEntryResponse = z.object({
@@ -118,6 +90,10 @@ export const KnowledgeBaseEntryResponse = z.object({
    * Kibana space
    */
   namespace: z.string(),
+  /**
+   * Knowledge Base Entry content
+   */
+  text: z.string(),
   vector: Vector.optional(),
 });
 
@@ -136,4 +112,8 @@ export const KnowledgeBaseEntryCreateProps = z.object({
    * Metadata about the Knowledge Base Entry
    */
   metadata: Metadata,
+  /**
+   * Knowledge Base Entry content
+   */
+  text: z.string(),
 });

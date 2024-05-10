@@ -16,35 +16,7 @@ import { z } from 'zod';
  *   version: not applicable
  */
 
-/**
- * A string that is not empty and does not contain only whitespace
- */
-export type NonEmptyString = z.infer<typeof NonEmptyString>;
-export const NonEmptyString = z
-  .string()
-  .min(1)
-  .regex(/^(?! *$).+$/);
-
-/**
- * A universally unique identifier
- */
-export type UUID = z.infer<typeof UUID>;
-export const UUID = z.string().uuid();
-
-/**
- * Could be any string, not necessarily a UUID
- */
-export type User = z.infer<typeof User>;
-export const User = z.object({
-  /**
-   * User id.
-   */
-  id: z.string().optional(),
-  /**
-   * User name.
-   */
-  name: z.string().optional(),
-});
+import { NonEmptyString, UUID, User } from '../common_attributes.gen';
 
 /**
  * trace Data

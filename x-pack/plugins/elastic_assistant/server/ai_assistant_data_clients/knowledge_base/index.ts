@@ -12,17 +12,24 @@ import {
 import { AuthenticatedUser } from '@kbn/core-security-common';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { Document } from 'langchain/document';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { KnowledgeBaseEntryResponse } from '@kbn/elastic-assistant-common';
 import { AIAssistantDataClient, AIAssistantDataClientParams } from '..';
 import { ElasticsearchStore } from '../../lib/langchain/elasticsearch_store/elasticsearch_store';
 import { loadESQL } from '../../lib/langchain/content_loaders/esql_loader';
 import { GetElser } from '../../types';
+import { transformToCreateSchema } from './create_knowledge_base_entry';
+import { EsKnowledgeBaseEntrySchema } from './types';
+import { transformESSearchToKnowledgeBaseEntry } from './transforms';
+import { ESQL_DOCS_LOADED_QUERY } from '../../routes/knowledge_base/constants';
 
 interface KnowledgeBaseDataClientParams extends AIAssistantDataClientParams {
   ml: MlPluginSetup;
   getElserId: GetElser;
 }
 export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
+  // @ts-ignore
   private isInstallingElser: boolean = false;
 
   constructor(public readonly options: KnowledgeBaseDataClientParams) {
@@ -76,32 +83,35 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   }: {
     esStore: ElasticsearchStore;
   }): Promise<void> => {
-    if (this.isInstallingElser) {
-      return;
-    }
     // TODO: Before automatically installing ELSER in the background, we should perform deployment resource checks
     // Note: ESS only, as Serverless can always auto-install if `productTier === complete`
     // See ml-team issue for providing 'dry run' flag to perform these checks: https://github.com/elastic/ml-team/issues/1208
-    this.isInstallingElser = true;
     const elserId = await this.options.getElserId();
     const isInstalled = await this.isModelInstalled(elserId);
 
     if (isInstalled) {
-      this.options.logger.debug(`ELSER model '${elserId}' is already installed`);
-      this.options.logger.debug(`Loading KB docs!`);
-      const loadedKnowledgeBase = await loadESQL(esStore, this.options.logger);
-      this.options.logger.debug(`${loadedKnowledgeBase}`);
       this.isInstallingElser = false;
+      this.options.logger.debug(`ELSER model '${elserId}' is already installed`);
+
+      const esqlExists = (await esStore.similaritySearch(ESQL_DOCS_LOADED_QUERY)).length > 0;
+      if (esqlExists) {
+        this.options.logger.debug(`Kb docs already loaded!`);
+        return;
+      } else {
+        this.options.logger.debug(`Loading KB docs!`);
+        const loadedKnowledgeBase = await loadESQL(esStore, this.options.logger);
+        this.options.logger.debug(`${loadedKnowledgeBase}`);
+        this.isInstallingElser = false;
+      }
 
       return;
     }
 
     try {
+      this.isInstallingElser = true;
       const elserResponse = await this.options.ml
         .trainedModelsProvider({} as KibanaRequest, {} as SavedObjectsClientContract)
         .installElasticModel(elserId);
-
-      // const esClient = await this.options.elasticsearchClientPromise;
 
       this.options.logger.debug(`elser response:\n: ${JSON.stringify(elserResponse, null, 2)}`);
     } catch (e) {
@@ -109,11 +119,47 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     }
   };
 
-  public addKnowledgeBaseResource = async ({
-    document,
+  /**
+   * Adds LangChain Documents to the knowledge base
+   *
+   * @param documents
+   * @param authenticatedUser
+   */
+  public addKnowledgeBaseDocuments = async ({
+    documents,
     authenticatedUser,
   }: {
-    document: Document;
+    documents: Document[];
     authenticatedUser: AuthenticatedUser;
-  }): Promise<void> => {};
+  }): Promise<KnowledgeBaseEntryResponse[]> => {
+    const writer = await this.getWriter();
+    const changedAt = new Date().toISOString();
+    // @ts-ignore
+    const { errors, docs_created: docsCreated } = await writer.bulk({
+      documentsToCreate: documents.map((doc) =>
+        transformToCreateSchema(changedAt, this.spaceId, authenticatedUser, {
+          // TODO: Update the LangChain Document Metadata type extension
+          metadata: {
+            kbResource: doc.metadata.kbResourcer ?? 'unknown',
+            required: doc.metadata.required ?? false,
+            source: doc.metadata.source ?? 'unknown',
+          },
+          text: doc.pageContent,
+        })
+      ),
+      authenticatedUser,
+    });
+    const created =
+      docsCreated.length > 0
+        ? await this.findDocuments<EsKnowledgeBaseEntrySchema>({
+            page: 1,
+            perPage: 100,
+            filter: docsCreated.map((c) => `_id:${c}`).join(' OR '),
+          })
+        : undefined;
+    this.options.logger.debug(`created: ${created}`);
+    this.options.logger.debug(`errors: ${errors}`);
+
+    return created?.data ? transformESSearchToKnowledgeBaseEntry(created?.data) : [];
+  };
 }

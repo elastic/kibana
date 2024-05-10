@@ -7,6 +7,21 @@ components:
   x-codegen-enabled: true
   schemas:
 
+    KnowledgeBaseEntryErrorSchema:
+      type: object
+      required:
+        - statusCode
+        - error
+        - message
+      additionalProperties: false
+      properties:
+        statusCode:
+          type: number
+        error:
+          type: string
+        message:
+          type: string
+
     Metadata:
       type: object
       description: Metadata about an Knowledge Base Entry
@@ -20,14 +35,14 @@ components:
           description: Knowledge Base resource name
         source:
           type: string
-          description: Original text content
+          description: Original text content source
         required:
           type: boolean
           description: Whether or not this resource should always be included
 
     Vector:
       type: object
-      description: Object containing Metadata.source embeddings and modelId used to create the embeddings
+      description: Object containing Knowledge Base Entry text embeddings and modelId used to create the embeddings
       required:
         - 'modelId'
         - 'tokens'
@@ -48,6 +63,7 @@ components:
         - createdAt
         - users
         - namespace
+        - text
       properties:
         'timestamp':
           $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
@@ -77,6 +93,9 @@ components:
         namespace:
           type: string
           description: Kibana space
+        text:
+          type: string
+          description: Knowledge Base Entry content
         vector:
           $ref: '#/components/schemas/Vector'
 
@@ -97,9 +116,13 @@ components:
       type: object
       required:
         - metadata
+        - text
       properties:
         metadata:
           $ref: '#/components/schemas/Metadata'
           description: Metadata about the Knowledge Base Entry
+        text:
+          type: string
+          description: Knowledge Base Entry content
 
 

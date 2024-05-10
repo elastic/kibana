@@ -72,6 +72,11 @@ export const knowledgeBaseFieldMap: FieldMap = {
     array: false,
     required: false,
   },
+  text: {
+    type: 'text',
+    array: false,
+    required: true,
+  },
   vector: {
     type: 'object',
     array: false,

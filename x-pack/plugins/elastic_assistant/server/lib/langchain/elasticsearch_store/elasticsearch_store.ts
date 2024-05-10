@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { type AnalyticsServiceSetup, ElasticsearchClient, Logger } from '@kbn/core/server';
+import {
+  type AnalyticsServiceSetup,
+  AuthenticatedUser,
+  ElasticsearchClient,
+  Logger,
+} from '@kbn/core/server';
 import {
   MappingTypeMapping,
   MlTrainedModelDeploymentNodesStats,
@@ -34,6 +39,7 @@ import {
   KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT,
   KNOWLEDGE_BASE_EXECUTION_SUCCESS_EVENT,
 } from '../../telemetry/event_based_telemetry';
+import { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_data_clients/knowledge_base';
 
 interface CreatePipelineParams {
   id?: string;
@@ -64,8 +70,9 @@ export const TERMS_QUERY_SIZE = 10000;
 export class ElasticsearchStore extends VectorStore {
   declare FilterType: QueryDslQueryContainer;
 
-  // Note: convert to { Client } from '@elastic/elasticsearch' for langchain contribution (removing Kibana dependency)
+  private readonly authenticatedUser: AuthenticatedUser | undefined;
   private readonly esClient: ElasticsearchClient;
+  private readonly kbDataClient: AIAssistantKnowledgeBaseDataClient | undefined;
   private readonly index: string;
   private readonly logger: Logger;
   private readonly telemetry: AnalyticsServiceSetup;
@@ -82,15 +89,21 @@ export class ElasticsearchStore extends VectorStore {
     logger: Logger,
     telemetry: AnalyticsServiceSetup,
     model?: string,
-    kbResource?: string | undefined
+    kbResource?: string | undefined,
+    kbDataClient?: AIAssistantKnowledgeBaseDataClient,
+    authenticatedUser?: AuthenticatedUser
   ) {
     super(new ElasticsearchEmbeddings(logger), { esClient, index });
     this.esClient = esClient;
-    this.index = index ?? KNOWLEDGE_BASE_INDEX_PATTERN;
+    this.index = kbDataClient
+      ? kbDataClient.options.indexPatternsResourceName
+      : index ?? KNOWLEDGE_BASE_INDEX_PATTERN;
     this.logger = logger;
     this.telemetry = telemetry;
     this.model = model ?? '.elser_model_2';
     this.kbResource = kbResource ?? ESQL_RESOURCE;
+    this.kbDataClient = kbDataClient;
+    this.authenticatedUser = authenticatedUser;
   }
 
   /**
@@ -105,6 +118,12 @@ export class ElasticsearchStore extends VectorStore {
     documents: Document[],
     options?: Record<string, never>
   ): Promise<string[]> => {
+    // Code path for when `assistantKnowledgeBaseByDefault` FF is enabled
+    // Once removed replace addDocuments() w/ addDocumentsViaDataClient()
+    if (this.kbDataClient != null) {
+      return this.addDocumentsViaDataClient(documents, options);
+    }
+
     const pipelineExists = await this.pipelineExists();
     if (!pipelineExists) {
       await this.createPipeline();
@@ -129,6 +148,27 @@ export class ElasticsearchStore extends VectorStore {
       return response.items.flatMap((i) =>
         i.index?._id != null && i.index.error == null ? [i.index._id] : []
       );
+    } catch (e) {
+      this.logger.error(`Error loading data into KB\n ${e}`);
+      return [];
+    }
+  };
+
+  addDocumentsViaDataClient = async (
+    documents: Document[],
+    options?: Record<string, never>
+  ): Promise<string[]> => {
+    if (!this.kbDataClient || !this.authenticatedUser) {
+      this.logger.error('No kbDataClient or authenticatedUser provided');
+      return [];
+    }
+
+    try {
+      const response = await this.kbDataClient.addKnowledgeBaseDocuments({
+        documents,
+        authenticatedUser: this.authenticatedUser,
+      });
+      return response.map((doc) => doc.id);
     } catch (e) {
       this.logger.error(`Error loading data into KB\n ${e}`);
       return [];

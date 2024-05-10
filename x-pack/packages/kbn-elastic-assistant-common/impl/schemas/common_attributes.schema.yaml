@@ -28,17 +28,3 @@ components:
           type: string
           description: User name
 
-    ErrorSchema:
-      type: object
-      required:
-        - statusCode
-        - error
-        - message
-      additionalProperties: false
-      properties:
-        statusCode:
-          type: number
-        error:
-          type: string
-        message:
-          type: string

@@ -19,9 +19,9 @@ import { z } from 'zod';
 import {
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
-  UUID,
   KnowledgeBaseEntryUpdateProps,
 } from './common_attributes.gen';
+import { UUID } from '../common_attributes.gen';
 
 export type CreateKnowledgeBaseEntryRequestBody = z.infer<
   typeof CreateKnowledgeBaseEntryRequestBody

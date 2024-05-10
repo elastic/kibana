@@ -59,6 +59,15 @@ export const postKnowledgeBaseRoute = (
         const logger = assistantContext.logger;
         const telemetry = assistantContext.telemetry;
         const elserId = await getElser();
+        const core = await context.core;
+        const esClient = core.elasticsearch.client.asInternalUser;
+        const authenticatedUser = assistantContext.getCurrentUser();
+        if (authenticatedUser == null) {
+          return response.custom({
+            body: `Authenticated user not found`,
+            statusCode: 401,
+          });
+        }
 
         const pluginName = getPluginNameFromRequest({
           request,
@@ -68,33 +77,33 @@ export const postKnowledgeBaseRoute = (
         const enableKnowledgeBaseByDefault =
           assistantContext.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
 
+        // Code path for when `assistantKnowledgeBaseByDefault` FF is enabled
         if (enableKnowledgeBaseByDefault) {
-          // Go ahead and do that now, right here's the place :)
           const knowledgeBaseDataClient =
             await assistantContext.getAIAssistantKnowledgeBaseDataClient(true);
-          // Temporarily get esClient for current user until `kibana_system` user has `inference_admin` role
-          // See https://github.com/elastic/elasticsearch/pull/108262
-          const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+          if (!knowledgeBaseDataClient) {
+            return response.custom({ body: { success: false }, statusCode: 500 });
+          }
 
-          //
+          // Continue to use esStore for loading esql docs until `semantic_text` is available and we can test the new chunking strategy
           const esStore = new ElasticsearchStore(
             esClient,
-            `.kibana-elastic-ai-assistant-knowledge-base-default`,
+            knowledgeBaseDataClient.options.indexPatternsResourceName,
             logger,
             telemetry,
             elserId,
-            getKbResource(request)
+            getKbResource(request),
+            knowledgeBaseDataClient,
+            authenticatedUser
           );
           //
 
-          await knowledgeBaseDataClient?.setupKnowledgeBase({ esStore });
+          await knowledgeBaseDataClient.setupKnowledgeBase({ esStore });
 
           return response.ok({ body: { success: true } });
         }
 
         try {
-          const core = await context.core;
-          const esClient = core.elasticsearch.client.asInternalUser;
           const kbResource = getKbResource(request);
           const esStore = new ElasticsearchStore(
             esClient,

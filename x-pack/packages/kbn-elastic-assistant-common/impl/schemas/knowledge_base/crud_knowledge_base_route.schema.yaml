@@ -29,7 +29,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '../common_attributes.schema.yaml#/components/schemas/ErrorSchema'
+                $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryErrorSchema'
 
   /api/elastic_assistant/knowledge_base/entries/{id}:
     get:
@@ -58,7 +58,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '../common_attributes.schema.yaml#/components/schemas/ErrorSchema'
+                $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryErrorSchema'
     put:
       operationId: UpdateKnowledgeBaseEntry
       x-codegen-enabled: true
@@ -91,7 +91,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '../common_attributes.schema.yaml#/components/schemas/ErrorSchema'
+                $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryErrorSchema'
     delete:
       operationId: DeleteKnowledgeBaseEntry
       x-codegen-enabled: true
@@ -118,5 +118,5 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '../common_attributes.schema.yaml#/components/schemas/ErrorSchema'
+                $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryErrorSchema'
 

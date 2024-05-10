@@ -17,13 +17,38 @@ export interface EsKnowledgeBaseEntrySchema {
     name?: string;
   }>;
   metadata?: {
-    kbResource?: string;
-    source?: string;
-    required?: boolean;
+    kbResource: string;
+    source: string;
+    required: boolean;
   };
   namespace: string;
+  text: string;
   vector?: {
-    tokens?: number[];
-    model_id?: string;
+    tokens: Record<string, number>;
+    model_id: string;
+  };
+}
+
+export interface CreateKnowledgeBaseEntrySchema {
+  '@timestamp'?: string;
+  id?: string | undefined;
+  created_at: string;
+  created_by: string;
+  updated_at: string;
+  updated_by: string;
+  users: Array<{
+    id?: string;
+    name?: string;
+  }>;
+  metadata?: {
+    kbResource: string;
+    source: string;
+    required: boolean;
+  };
+  namespace: string;
+  text: string;
+  vector?: {
+    tokens: Record<string, number>;
+    model_id: string;
   };
 }
