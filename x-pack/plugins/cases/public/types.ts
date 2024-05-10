@@ -32,6 +32,7 @@ import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverle
 
 import type { UseCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import type { UseCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
+import type { UseIsAddToCaseOpen } from './components/all_cases/use_is_add_to_case_open';
 import type { canUseCases } from './client/helpers/can_use_cases';
 import type { getRuleIdFromEvent } from './client/helpers/get_rule_id_from_event';
 import type { GetCasesContextProps } from './client/ui/get_cases_context';
@@ -60,8 +61,6 @@ import type {
   ExternalReferenceNoSOAttachmentPayload,
   ExternalReferenceSOAttachmentPayload,
 } from '../common/types/domain';
-import type { UseIsAddToNewCaseFlyoutOpen } from './components/create/flyout/use_is_add_to_new_case_flyout_open';
-import type { UseIsAddToExistingCaseModalOpen } from './components/all_cases/selector_modal/use_is_add_to_existing_case_modal_open';
 
 export interface CasesPublicSetupDependencies {
   files: FilesSetup;
@@ -156,8 +155,7 @@ export interface CasesPublicStart {
   hooks: {
     useCasesAddToNewCaseFlyout: UseCasesAddToNewCaseFlyout;
     useCasesAddToExistingCaseModal: UseCasesAddToExistingCaseModal;
-    useIsAddToNewCaseFlyoutOpen: UseIsAddToNewCaseFlyoutOpen;
-    useIsAddToExistingCaseModalOpen: UseIsAddToExistingCaseModalOpen;
+    useIsAddToCaseOpen: UseIsAddToCaseOpen;
   };
   helpers: {
     /**

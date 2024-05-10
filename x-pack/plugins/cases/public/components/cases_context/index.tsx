@@ -8,14 +8,15 @@
 import type { Dispatch, ReactNode, FC, PropsWithChildren } from 'react';
 
 import { merge } from 'lodash';
-import React, { useCallback, useMemo, useReducer } from 'react';
+import { BehaviorSubject, type Observable } from 'rxjs';
+import React, { useCallback, useMemo, useReducer, useEffect } from 'react';
 
 import type { ScopedFilesClient } from '@kbn/files-plugin/public';
 import { FilesContext } from '@kbn/shared-ux-file-context';
 
 import type { QueryClient } from '@tanstack/react-query';
 import { QueryClientProvider } from '@tanstack/react-query';
-import type { CasesContextStoreAction } from './cases_context_reducer';
+import type { CasesContextState, CasesContextStoreAction } from './cases_context_reducer';
 import type {
   CasesFeaturesAllRequired,
   CasesFeatures,
@@ -34,7 +35,7 @@ import { isRegisteredOwner } from '../../files';
 import { casesQueryClient } from './query_client';
 
 type CasesContextValueDispatch = Dispatch<CasesContextStoreAction>;
-
+type CasesContextState$ = Observable<CasesContextState | undefined>;
 export interface CasesContextValue {
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
@@ -44,8 +45,7 @@ export interface CasesContextValue {
   features: CasesFeaturesAllRequired;
   releasePhase: ReleasePhase;
   dispatch: CasesContextValueDispatch;
-  isCreateCaseFlyoutOpen: boolean;
-  isSelectCaseModalOpen: boolean;
+  casesContextState$: CasesContextState$;
 }
 
 export interface CasesContextProps
@@ -85,36 +85,48 @@ export const CasesProvider: FC<
 }) => {
   const [state, dispatch] = useReducer(casesContextReducer, getInitialCasesContextState());
 
+  // The state behavior subject wil be created only once so it won't trigger a context rerender
+  const casesContextState$ = useMemo(
+    () => new BehaviorSubject<CasesContextState | undefined>(undefined),
+    []
+  );
+  useEffect(() => {
+    casesContextState$.next(state);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state]);
+
   const value: CasesContextValue = useMemo(
-    () => ({
-      externalReferenceAttachmentTypeRegistry,
-      persistableStateAttachmentTypeRegistry,
-      owner,
-      permissions: {
-        all: permissions.all,
-        connectors: permissions.connectors,
-        create: permissions.create,
-        delete: permissions.delete,
-        push: permissions.push,
-        read: permissions.read,
-        settings: permissions.settings,
-        update: permissions.update,
-      },
-      basePath,
-      /**
-       * The empty object at the beginning avoids the mutation
-       * of the DEFAULT_FEATURES object
-       */
-      features: merge<object, CasesFeaturesAllRequired, CasesFeatures>(
-        {},
-        DEFAULT_FEATURES,
-        features
-      ),
-      releasePhase,
-      dispatch,
-      isCreateCaseFlyoutOpen: state.createCaseFlyout.isFlyoutOpen,
-      isSelectCaseModalOpen: state.selectCaseModal.isModalOpen,
-    }),
+    () => {
+      console.log('refresh context');
+      return {
+        externalReferenceAttachmentTypeRegistry,
+        persistableStateAttachmentTypeRegistry,
+        owner,
+        permissions: {
+          all: permissions.all,
+          connectors: permissions.connectors,
+          create: permissions.create,
+          delete: permissions.delete,
+          push: permissions.push,
+          read: permissions.read,
+          settings: permissions.settings,
+          update: permissions.update,
+        },
+        basePath,
+        /**
+         * The empty object at the beginning avoids the mutation
+         * of the DEFAULT_FEATURES object
+         */
+        features: merge<object, CasesFeaturesAllRequired, CasesFeatures>(
+          {},
+          DEFAULT_FEATURES,
+          features
+        ),
+        releasePhase,
+        dispatch,
+        casesContextState$: casesContextState$.asObservable(),
+      };
+    },
     /**
      * We want to trigger a rerender only when the permissions will change.
      * The registries, the owner, and the rest of the values should
@@ -130,8 +142,8 @@ export const CasesProvider: FC<
       permissions.read,
       permissions.settings,
       permissions.update,
-      state.createCaseFlyout.isFlyoutOpen,
-      state.selectCaseModal.isModalOpen,
+      // state.createCaseFlyout.isFlyoutOpen,
+      // state.selectCaseModal.isModalOpen,
     ]
   );
 

@@ -16,6 +16,7 @@ import { APP_ID, APP_PATH } from '../common/constants';
 import { APP_TITLE, APP_DESC } from './common/translations';
 import { useCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import { useCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
+import { useIsAddToCaseOpen } from './components/all_cases/use_is_add_to_case_open';
 import { createClientAPI } from './client/api';
 import { canUseCases } from './client/helpers/can_use_cases';
 import { getRuleIdFromEvent } from './client/helpers/get_rule_id_from_event';
@@ -37,8 +38,6 @@ import type {
   CasesPublicStartDependencies,
 } from './types';
 import { registerSystemActions } from './components/system_actions';
-import { useIsAddToNewCaseFlyoutOpen } from './components/create/flyout/use_is_add_to_new_case_flyout_open';
-import { useIsAddToExistingCaseModalOpen } from './components/all_cases/selector_modal/use_is_add_to_existing_case_modal_open';
 
 /**
  * @public
@@ -192,8 +191,7 @@ export class CasesUiPlugin
       hooks: {
         useCasesAddToNewCaseFlyout,
         useCasesAddToExistingCaseModal,
-        useIsAddToNewCaseFlyoutOpen,
-        useIsAddToExistingCaseModalOpen,
+        useIsAddToCaseOpen,
       },
       helpers: {
         canUseCases: canUseCases(core.application.capabilities),

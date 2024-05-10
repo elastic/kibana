@@ -161,15 +161,15 @@ export const GuidedOnboardingTourStep = ({
   hidden = false,
   ...props
 }: GuidedOnboardingTourStep) => {
-  const { cases } = useKibana().services;
+  const { useIsAddToCaseOpen } = useKibana().services.cases.hooks;
   const { hidden: allStepsHidden } = useTourContext();
-  const isCasesFlyoutModalOpen =
-    cases.hooks.useIsAddToNewCaseFlyoutOpen() || cases.hooks.useIsAddToExistingCaseModalOpen();
+
+  const isAddToCaseOpen = useIsAddToCaseOpen();
+  console.log('isAddToCaseOpen', isAddToCaseOpen);
 
   const hiddenWhenCasesModalFlyoutExpanded = useMemo(
-    () =>
-      isCasesFlyoutModalOpen && hiddenWhenCaseFlyoutExpanded[props.tourId]?.includes(props.step),
-    [isCasesFlyoutModalOpen, props.tourId, props.step]
+    () => isAddToCaseOpen && hiddenWhenCaseFlyoutExpanded[props.tourId]?.includes(props.step),
+    [isAddToCaseOpen, props.tourId, props.step]
   );
 
   return isTourAnchor && !hidden && !allStepsHidden && !hiddenWhenCasesModalFlyoutExpanded ? (
