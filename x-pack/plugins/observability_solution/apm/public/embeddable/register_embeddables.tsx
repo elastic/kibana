@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { CoreSetup } from '@kbn/core/public';
-import { registerReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 
 import { ApmPluginStartDeps, ApmPluginStart } from '../plugin';
 import { EmbeddableDeps } from './types';
@@ -14,7 +13,9 @@ export async function registerEmbeddables(
   deps: Omit<EmbeddableDeps, 'coreStart' | 'pluginsStart'>
 ) {
   const coreSetup = deps.coreSetup as CoreSetup<ApmPluginStartDeps, ApmPluginStart>;
+  const pluginsSetup = deps.pluginsSetup;
   const [coreStart, pluginsStart] = await coreSetup.getStartServices();
+  const registerReactEmbeddableFactory = pluginsSetup.embeddable.registerReactEmbeddableFactory;
   const registerApmAlertingLatencyChartEmbeddable = async () => {
     const { getApmAlertingLatencyChartEmbeddableFactory, APM_ALERTING_LATENCY_CHART_EMBEDDABLE } =
       await import('./alerting/alerting_latency_chart/react_embeddable_factory');
