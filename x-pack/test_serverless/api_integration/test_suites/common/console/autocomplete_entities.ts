@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { RoleCredentials } from '../../../../shared/services';
+import { InternalRequestHeader } from '../../../../shared/services/svl_common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const svlCommonApi = getService('svlCommonApi');
@@ -15,7 +16,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  let internalRequestHeader: Record<string, string>;
+  let internalRequestHeader: InternalRequestHeader;
   let roleAuthc: RoleCredentials;
 
   const sendRequest = async (query: object) => {
