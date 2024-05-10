@@ -1,0 +1,13 @@
+{
+  "author": "Elastic",
+  "name": "@kbn/observability_solution_api_integration",
+  "version": "1.0.0",
+  "private": true,
+  "license": "Elastic License 2.0",
+  "scripts": {
+    "slo:server:serverless": "node ../../../scripts/functional_tests_server.js --config ./test_suites/slo/configs/serverless.config.ts",
+    "slo:runner:serverless": "node ../../../scripts/functional_test_runner --config=test_suites/slo/configs/serverless.config.ts --grep @serverless --grep  @skipInServerless --invert",
+    "slo:server:ess": "node ../../../scripts/functional_tests_server.js --config ./test_suites/slo/configs/ess.config.ts",
+    "slo:runner:ess": "node ../../../scripts/functional_test_runner --config=test_suites/slo/configs/ess.config.ts --grep @ess --grep  @skipInEss --invert"
+  }
+}
