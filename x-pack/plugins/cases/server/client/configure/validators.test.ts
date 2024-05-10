@@ -8,7 +8,6 @@
 import { CustomFieldTypes } from '../../../common/types/domain';
 import {
   validateCustomFieldTypesInRequest,
-  validateTemplateKeysAgainstConfiguration,
   validateTemplatesCustomFieldsInRequest,
 } from './validators';
 
@@ -77,93 +76,6 @@ describe('validators', () => {
     });
   });
 
-  describe('validateTemplateKeysAgainstConfiguration', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
-
-    it('does not throw if all templates are in configuration', () => {
-      expect(() =>
-        validateTemplateKeysAgainstConfiguration({
-          requestTemplateFields: [
-            {
-              key: 'template_key_1',
-              name: 'first template',
-              description: 'this is a first template value',
-              caseFields: null,
-            },
-            {
-              key: 'template_key_2',
-              name: 'second template',
-              description: 'this is a second template value',
-              caseFields: {
-                title: 'Case title with template 2',
-              },
-            },
-          ],
-          templatesConfiguration: [
-            {
-              key: 'template_key_1',
-              name: 'first template',
-              description: 'this is a first template value',
-              caseFields: {
-                tags: ['first-template'],
-              },
-            },
-            {
-              key: 'template_key_2',
-              name: 'second template',
-              description: 'this is a second template value',
-              caseFields: null,
-            },
-          ],
-        })
-      ).not.toThrow();
-    });
-
-    it('throws if there are invalid template keys', () => {
-      expect(() =>
-        validateTemplateKeysAgainstConfiguration({
-          requestTemplateFields: [
-            {
-              key: 'invalid_key',
-              name: 'first template',
-              description: 'this is a first template value',
-              caseFields: null,
-            },
-          ],
-
-          templatesConfiguration: [
-            {
-              key: 'template_key_2',
-              name: 'second template',
-              description: 'this is a second template value',
-              caseFields: null,
-            },
-          ],
-        })
-      ).toThrowErrorMatchingInlineSnapshot(`"Invalid template keys: invalid_key"`);
-    });
-
-    it('throws if configuration is missing and request has templates', () => {
-      expect(() =>
-        validateTemplateKeysAgainstConfiguration({
-          requestTemplateFields: [
-            {
-              key: 'template_key_2',
-              name: 'second template',
-              description: 'this is a second template value',
-              caseFields: null,
-            },
-          ],
-
-          // @ts-expect-error
-          templatesConfiguration: undefined,
-        })
-      ).toThrowErrorMatchingInlineSnapshot(`"No templates configured."`);
-    });
-  });
-
   describe('validateTemplatesCustomFieldsInRequest', () => {
     beforeEach(() => {
       jest.clearAllMocks();
@@ -228,9 +140,9 @@ describe('validators', () => {
 
     it('does not throw if no custom fields are in request', () => {
       expect(() =>
-        validateTemplateKeysAgainstConfiguration({
-          requestTemplateFields: undefined,
-          templatesConfiguration: [
+        validateTemplatesCustomFieldsInRequest({
+          customFieldsConfiguration: undefined,
+          templates: [
             {
               key: 'template_key_1',
               name: 'first template',
@@ -252,9 +164,9 @@ describe('validators', () => {
 
     it('does not throw if no configuration found but no templates are in request', () => {
       expect(() =>
-        validateTemplateKeysAgainstConfiguration({
-          requestTemplateFields: undefined,
-          templatesConfiguration: [],
+        validateTemplatesCustomFieldsInRequest({
+          customFieldsConfiguration: undefined,
+          templates: [],
         })
       ).not.toThrow();
     });
@@ -286,186 +198,180 @@ describe('validators', () => {
       ).toThrowErrorMatchingInlineSnapshot(`"No custom fields configured."`);
     });
 
-    describe('validateCaseCustomFieldTypesInRequest', () => {
-      it('throws for a single invalid type', () => {
-        expect(() =>
-          validateTemplatesCustomFieldsInRequest({
-            templates: [
-              {
-                key: 'template_key_1',
-                name: 'first template',
-                description: 'this is a first template value',
-                caseFields: {
-                  customFields: [
-                    {
-                      key: 'first_key',
-                      type: CustomFieldTypes.TOGGLE,
-                      value: null,
-                    },
-                    {
-                      key: 'second_key',
-                      type: CustomFieldTypes.TOGGLE,
-                      value: true,
-                    },
-                  ],
-                },
+    it('throws for a single invalid type', () => {
+      expect(() =>
+        validateTemplatesCustomFieldsInRequest({
+          templates: [
+            {
+              key: 'template_key_1',
+              name: 'first template',
+              description: 'this is a first template value',
+              caseFields: {
+                customFields: [
+                  {
+                    key: 'first_key',
+                    type: CustomFieldTypes.TOGGLE,
+                    value: null,
+                  },
+                  {
+                    key: 'second_key',
+                    type: CustomFieldTypes.TOGGLE,
+                    value: true,
+                  },
+                ],
               },
-            ],
-            customFieldsConfiguration: [
-              {
-                key: 'first_key',
-                type: CustomFieldTypes.TEXT,
-                label: 'first label',
-                required: false,
-              },
-              {
-                key: 'second_key',
-                type: CustomFieldTypes.TOGGLE,
-                label: 'foo',
-                required: false,
-              },
-            ],
-          })
-        ).toThrowErrorMatchingInlineSnapshot(
-          `"The following custom fields have the wrong type in the request: \\"first label\\""`
-        );
-      });
-
-      it('throws for multiple custom fields with invalid types', () => {
-        expect(() =>
-          validateTemplatesCustomFieldsInRequest({
-            templates: [
-              {
-                key: 'template_key_1',
-                name: 'first template',
-                description: 'this is a first template value',
-                caseFields: {
-                  customFields: [
-                    {
-                      key: 'first_key',
-                      type: CustomFieldTypes.TOGGLE,
-                      value: null,
-                    },
-                    {
-                      key: 'second_key',
-                      type: CustomFieldTypes.TOGGLE,
-                      value: true,
-                    },
-                    {
-                      key: 'third_key',
-                      type: CustomFieldTypes.TEXT,
-                      value: 'abc',
-                    },
-                  ],
-                },
-              },
-            ],
-
-            customFieldsConfiguration: [
-              {
-                key: 'first_key',
-                type: CustomFieldTypes.TEXT,
-                label: 'first label',
-                required: false,
-              },
-              {
-                key: 'second_key',
-                type: CustomFieldTypes.TEXT,
-                label: 'second label',
-                required: false,
-              },
-              {
-                key: 'third_key',
-                type: CustomFieldTypes.TOGGLE,
-                label: 'third label',
-                required: false,
-              },
-            ],
-          })
-        ).toThrowErrorMatchingInlineSnapshot(
-          `"The following custom fields have the wrong type in the request: \\"first label\\", \\"second label\\", \\"third label\\""`
-        );
-      });
+            },
+          ],
+          customFieldsConfiguration: [
+            {
+              key: 'first_key',
+              type: CustomFieldTypes.TEXT,
+              label: 'first label',
+              required: false,
+            },
+            {
+              key: 'second_key',
+              type: CustomFieldTypes.TOGGLE,
+              label: 'foo',
+              required: false,
+            },
+          ],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"The following custom fields have the wrong type in the request: \\"first label\\""`
+      );
     });
 
-    describe('validateCustomFieldKeysAgainstConfiguration', () => {
-      it('throws if there are invalid custom field keys', () => {
-        expect(() =>
-          validateTemplatesCustomFieldsInRequest({
-            templates: [
-              {
-                key: 'template_key_1',
-                name: 'first template',
-                description: 'this is a first template value',
-                caseFields: {
-                  customFields: [
-                    {
-                      key: 'invalid_key',
-                      type: CustomFieldTypes.TOGGLE,
-                      value: null,
-                    },
-                  ],
-                },
+    it('throws for multiple custom fields with invalid types', () => {
+      expect(() =>
+        validateTemplatesCustomFieldsInRequest({
+          templates: [
+            {
+              key: 'template_key_1',
+              name: 'first template',
+              description: 'this is a first template value',
+              caseFields: {
+                customFields: [
+                  {
+                    key: 'first_key',
+                    type: CustomFieldTypes.TOGGLE,
+                    value: null,
+                  },
+                  {
+                    key: 'second_key',
+                    type: CustomFieldTypes.TOGGLE,
+                    value: true,
+                  },
+                  {
+                    key: 'third_key',
+                    type: CustomFieldTypes.TEXT,
+                    value: 'abc',
+                  },
+                ],
               },
-            ],
-            customFieldsConfiguration: [
-              {
-                key: 'first_key',
-                type: CustomFieldTypes.TEXT,
-                label: 'foo',
-                required: false,
-              },
-            ],
-          })
-        ).toThrowErrorMatchingInlineSnapshot(`"Invalid custom field keys: invalid_key"`);
-      });
+            },
+          ],
+
+          customFieldsConfiguration: [
+            {
+              key: 'first_key',
+              type: CustomFieldTypes.TEXT,
+              label: 'first label',
+              required: false,
+            },
+            {
+              key: 'second_key',
+              type: CustomFieldTypes.TEXT,
+              label: 'second label',
+              required: false,
+            },
+            {
+              key: 'third_key',
+              type: CustomFieldTypes.TOGGLE,
+              label: 'third label',
+              required: false,
+            },
+          ],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"The following custom fields have the wrong type in the request: \\"first label\\", \\"second label\\", \\"third label\\""`
+      );
     });
 
-    describe('validateDuplicatedKeysInRequest', () => {
-      it('throws if template has duplicated custom field keys', () => {
-        expect(() =>
-          validateTemplatesCustomFieldsInRequest({
-            templates: [
-              {
-                key: 'template_key_1',
-                name: 'first template',
-                description: 'this is a first template value',
-                caseFields: {
-                  customFields: [
-                    {
-                      key: 'first_key',
-                      type: CustomFieldTypes.TEXT,
-                      value: 'this is a text field value',
-                    },
-                    {
-                      key: 'first_key',
-                      type: CustomFieldTypes.TOGGLE,
-                      value: null,
-                    },
-                  ],
-                },
+    it('throws if there are invalid custom field keys', () => {
+      expect(() =>
+        validateTemplatesCustomFieldsInRequest({
+          templates: [
+            {
+              key: 'template_key_1',
+              name: 'first template',
+              description: 'this is a first template value',
+              caseFields: {
+                customFields: [
+                  {
+                    key: 'invalid_key',
+                    type: CustomFieldTypes.TOGGLE,
+                    value: null,
+                  },
+                ],
               },
-            ],
+            },
+          ],
+          customFieldsConfiguration: [
+            {
+              key: 'first_key',
+              type: CustomFieldTypes.TEXT,
+              label: 'foo',
+              required: false,
+            },
+          ],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`"Invalid custom field keys: invalid_key"`);
+    });
 
-            customFieldsConfiguration: [
-              {
-                key: 'first_key',
-                type: CustomFieldTypes.TEXT,
-                label: 'foo',
-                required: false,
+    it('throws if template has duplicated custom field keys', () => {
+      expect(() =>
+        validateTemplatesCustomFieldsInRequest({
+          templates: [
+            {
+              key: 'template_key_1',
+              name: 'first template',
+              description: 'this is a first template value',
+              caseFields: {
+                customFields: [
+                  {
+                    key: 'first_key',
+                    type: CustomFieldTypes.TEXT,
+                    value: 'this is a text field value',
+                  },
+                  {
+                    key: 'first_key',
+                    type: CustomFieldTypes.TOGGLE,
+                    value: null,
+                  },
+                ],
               },
-              {
-                key: 'second_key',
-                type: CustomFieldTypes.TOGGLE,
-                label: 'foo',
-                required: false,
-              },
-            ],
-          })
-        ).toThrowErrorMatchingInlineSnapshot(
-          `"Invalid duplicated templates[0]'s customFields keys in request: first_key"`
-        );
-      });
+            },
+          ],
+
+          customFieldsConfiguration: [
+            {
+              key: 'first_key',
+              type: CustomFieldTypes.TEXT,
+              label: 'foo',
+              required: false,
+            },
+            {
+              key: 'second_key',
+              type: CustomFieldTypes.TOGGLE,
+              label: 'foo',
+              required: false,
+            },
+          ],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid duplicated templates[0]'s customFields keys in request: first_key"`
+      );
     });
   });
 });

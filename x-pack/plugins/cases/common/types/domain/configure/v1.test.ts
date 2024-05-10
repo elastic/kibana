@@ -71,6 +71,9 @@ describe('configure', () => {
         type: ConnectorTypes.none,
         fields: null,
       },
+      settings: {
+        syncAlerts: true,
+      },
     },
   };
 

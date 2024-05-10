@@ -18,6 +18,8 @@ import type {
   ConfigurationAttributes,
   Configurations,
   ConnectorMappings,
+  CustomFieldsConfiguration,
+  TemplatesConfiguration,
 } from '../../../common/types/domain';
 import type {
   ConfigurationPatchRequest,
@@ -51,7 +53,6 @@ import { validateDuplicatedKeysInRequest } from '../validators';
 import {
   validateCustomFieldTypesInRequest,
   validateTemplatesCustomFieldsInRequest,
-  validateTemplateKeysAgainstConfiguration,
 } from './validators';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 
@@ -95,6 +96,52 @@ export interface ConfigureSubClient {
    */
   create(configuration: ConfigurationRequest): Promise<Configuration>;
 }
+
+/**
+ * validate templates in configuration
+ */
+const validateTemplates = async ({
+  templates,
+  clientArgs,
+  customFields,
+}: {
+  templates: TemplatesConfiguration | undefined;
+  clientArgs: CasesClientArgs;
+  customFields: CustomFieldsConfiguration | undefined;
+}) => {
+  const { licensingService } = clientArgs.services;
+
+  validateDuplicatedKeysInRequest({
+    requestFields: templates,
+    fieldName: 'templates',
+  });
+
+  if (templates && templates.length) {
+    const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
+
+    templates.forEach((template, index) => {
+      /**
+       * Assign users to a template is only available to Platinum+
+       */
+
+      const hasAssigneesInTemplate =
+        template.caseFields?.assignees && template.caseFields?.assignees.length > 0;
+
+      if (hasAssigneesInTemplate && !hasPlatinumLicenseOrGreater) {
+        throw Boom.forbidden(
+          'In order to assign users to cases, you must be subscribed to an Elastic Platinum license'
+        );
+      }
+
+      licensingService.notifyUsage(LICENSING_CASE_ASSIGNMENT_FEATURE);
+    });
+
+    validateTemplatesCustomFieldsInRequest({
+      templates,
+      customFieldsConfiguration: customFields,
+    });
+  }
+};
 
 /**
  * These functions should not be exposed on the plugin contract. They are for internal use to support the CRUD of
@@ -246,7 +293,7 @@ export async function update(
   casesClientInternal: CasesClientInternal
 ): Promise<Configuration> {
   const {
-    services: { caseConfigureService, licensingService },
+    services: { caseConfigureService },
     logger,
     unsecuredSavedObjectsClient,
     user,
@@ -261,11 +308,6 @@ export async function update(
       fieldName: 'customFields',
     });
 
-    validateDuplicatedKeysInRequest({
-      requestFields: request.templates,
-      fieldName: 'templates',
-    });
-
     const { version, templates, ...queryWithoutVersion } = request;
 
     const configuration = await caseConfigureService.get({
@@ -278,34 +320,11 @@ export async function update(
       originalCustomFields: configuration.attributes.customFields,
     });
 
-    validateTemplateKeysAgainstConfiguration({
-      requestTemplateFields: templates,
-      templatesConfiguration: configuration.attributes.templates,
-    });
-
-    validateTemplatesCustomFieldsInRequest({
+    await validateTemplates({
       templates,
-      customFieldsConfiguration: configuration.attributes.customFields,
+      clientArgs,
+      customFields: configuration.attributes.customFields,
     });
-
-    /**
-     * Assign users to a template is only available to Platinum+
-     */
-    if (templates && templates.length) {
-      const hasAssigneesInTemplate = templates.find(
-        (template) => template.caseFields?.assignees && template.caseFields?.assignees.length > 0
-      );
-
-      const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
-
-      if (hasAssigneesInTemplate && !hasPlatinumLicenseOrGreater) {
-        throw Boom.forbidden(
-          'In order to assign users to cases, you must be subscribed to an Elastic Platinum license'
-        );
-      }
-
-      licensingService.notifyUsage(LICENSING_CASE_ASSIGNMENT_FEATURE);
-    }
 
     await authorization.ensureAuthorized({
       operation: Operations.updateConfiguration,
@@ -397,7 +416,7 @@ export async function create(
 ): Promise<Configuration> {
   const {
     unsecuredSavedObjectsClient,
-    services: { caseConfigureService, licensingService },
+    services: { caseConfigureService },
     logger,
     user,
     authorization,
@@ -412,36 +431,11 @@ export async function create(
       fieldName: 'customFields',
     });
 
-    validateDuplicatedKeysInRequest({
-      requestFields: validatedConfigurationRequest.templates,
-      fieldName: 'templates',
+    await validateTemplates({
+      templates: validatedConfigurationRequest.templates,
+      clientArgs,
+      customFields: validatedConfigurationRequest.customFields,
     });
-
-    if (validatedConfigurationRequest.templates && validatedConfigurationRequest.templates.length) {
-      const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
-
-      validatedConfigurationRequest.templates.forEach((template, index) => {
-        /**
-         * Assign users to a template is only available to Platinum+
-         */
-
-        const hasAssigneesInTemplate =
-          template.caseFields?.assignees && template.caseFields?.assignees.length > 0;
-
-        if (hasAssigneesInTemplate && !hasPlatinumLicenseOrGreater) {
-          throw Boom.forbidden(
-            'In order to assign users to cases, you must be subscribed to an Elastic Platinum license'
-          );
-        }
-
-        licensingService.notifyUsage(LICENSING_CASE_ASSIGNMENT_FEATURE);
-      });
-
-      validateTemplatesCustomFieldsInRequest({
-        templates: validatedConfigurationRequest.templates,
-        customFieldsConfiguration: validatedConfigurationRequest.customFields,
-      });
-    }
 
     let error = null;
 

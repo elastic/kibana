@@ -18,6 +18,7 @@ import {
   MAX_LENGTH_PER_TAG,
   MAX_TAGS_PER_CASE,
   MAX_TEMPLATES_LENGTH,
+  MAX_TEMPLATE_DESCRIPTION_LENGTH,
   MAX_TEMPLATE_KEY_LENGTH,
   MAX_TEMPLATE_NAME_LENGTH,
   MAX_TITLE_LENGTH,
@@ -583,6 +584,16 @@ describe('configure', () => {
       expect(
         PathReporter.report(TemplateConfigurationRt.decode({ ...defaultRequest, name: longName }))
       ).toContain('The length of the name is too long. The maximum length is 50.');
+    });
+
+    it('limits description to 1000 characters', () => {
+      const longDesc = 'x'.repeat(MAX_TEMPLATE_DESCRIPTION_LENGTH + 1);
+
+      expect(
+        PathReporter.report(
+          TemplateConfigurationRt.decode({ ...defaultRequest, description: longDesc })
+        )
+      ).toContain('The length of the description is too long. The maximum length is 1000.');
     });
 
     describe('caseFields', () => {
