@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -94,7 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           panels[0]
         )
       ).to.be(true);
-      await dashboardPanelActions.legacyUnlinkFromLibary(panels[0]);
+      await dashboardPanelActions.legacyUnlinkFromLibrary(panels[0]);
       await testSubjects.existOrFail('unlinkPanelSuccess');
       panels = await testSubjects.findAll('embeddablePanel');
       expect(panels.length).to.be(1);

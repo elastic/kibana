@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import type { FittingFunction, XYCurveType } from '@kbn/lens-plugin/public';
 import { DebugState } from '@elastic/charts';
@@ -746,7 +746,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       redirectToOrigin?: boolean,
       saveToLibrary?: boolean,
       addToDashboard?: 'new' | 'existing' | null,
-      dashboardId?: string
+      dashboardId?: string,
+      description?: string
     ) {
       await PageObjects.timeToVisualize.setSaveModalValues(title, {
         saveAsNew,
@@ -754,6 +755,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         addToDashboard: addToDashboard ? addToDashboard : null,
         dashboardId,
         saveToLibrary,
+        description,
       });
 
       await testSubjects.click('confirmSaveSavedObjectButton');
@@ -774,7 +776,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       redirectToOrigin?: boolean,
       saveToLibrary?: boolean,
       addToDashboard?: 'new' | 'existing' | null,
-      dashboardId?: string
+      dashboardId?: string,
+      description?: string
     ) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click('lnsApp_saveButton');
@@ -785,7 +788,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         redirectToOrigin,
         saveToLibrary,
         addToDashboard,
-        dashboardId
+        dashboardId,
+        description
       );
     },
 

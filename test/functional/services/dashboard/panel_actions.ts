@@ -91,7 +91,17 @@ export class DashboardPanelActionsService extends FtrService {
     await this.clickContextMenuMoreItem();
   }
 
-  private async navigateToEditorFromFlyout() {
+  async clickContextMenuItem(itemSelector: string, parent?: WebElementWrapper) {
+    await this.openContextMenu(parent);
+    const exists = await this.testSubjects.exists(itemSelector);
+    if (!exists) {
+      await this.clickContextMenuMoreItem();
+    }
+    await this.testSubjects.click(itemSelector);
+  }
+
+  async navigateToEditorFromFlyout() {
+    await this.openContextMenu();
     await this.testSubjects.clickWhenNotDisabledWithoutRetry(INLINE_EDIT_PANEL_DATA_TEST_SUBJ);
     await this.header.waitUntilLoadingHasFinished();
     await this.testSubjects.click(EDIT_IN_LENS_EDITOR_DATA_TEST_SUBJ);
@@ -253,22 +263,12 @@ export class DashboardPanelActionsService extends FtrService {
   }
 
   async openInspector(parent?: WebElementWrapper) {
-    await this.openContextMenu(parent);
-    const exists = await this.testSubjects.exists(OPEN_INSPECTOR_TEST_SUBJ);
-    if (!exists) {
-      await this.clickContextMenuMoreItem();
-    }
-    await this.testSubjects.click(OPEN_INSPECTOR_TEST_SUBJ);
+    await this.clickContextMenuItem(OPEN_INSPECTOR_TEST_SUBJ, parent);
   }
 
-  async legacyUnlinkFromLibary(parent?: WebElementWrapper) {
+  async legacyUnlinkFromLibrary(parent?: WebElementWrapper) {
     this.log.debug('legacyUnlinkFromLibrary');
-    await this.openContextMenu(parent);
-    const exists = await this.testSubjects.exists(LEGACY_UNLINK_FROM_LIBRARY_TEST_SUBJ);
-    if (!exists) {
-      await this.clickContextMenuMoreItem();
-    }
-    await this.testSubjects.click(LEGACY_UNLINK_FROM_LIBRARY_TEST_SUBJ);
+    await this.clickContextMenuItem(LEGACY_UNLINK_FROM_LIBRARY_TEST_SUBJ, parent);
     await this.testSubjects.waitForDeleted(
       'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION'
     );
@@ -276,12 +276,7 @@ export class DashboardPanelActionsService extends FtrService {
 
   async unlinkFromLibary(parent?: WebElementWrapper) {
     this.log.debug('unlinkFromLibrary');
-    await this.openContextMenu(parent);
-    const exists = await this.testSubjects.exists(UNLINK_FROM_LIBRARY_TEST_SUBJ);
-    if (!exists) {
-      await this.clickContextMenuMoreItem();
-    }
-    await this.testSubjects.click(UNLINK_FROM_LIBRARY_TEST_SUBJ);
+    await this.clickContextMenuItem(UNLINK_FROM_LIBRARY_TEST_SUBJ, parent);
     await this.testSubjects.waitForDeleted(
       'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION'
     );
@@ -289,12 +284,7 @@ export class DashboardPanelActionsService extends FtrService {
 
   async legacySaveToLibrary(newTitle: string, parent?: WebElementWrapper) {
     this.log.debug('legacySaveToLibrary');
-    await this.openContextMenu(parent);
-    const exists = await this.testSubjects.exists(LEGACY_SAVE_TO_LIBRARY_TEST_SUBJ);
-    if (!exists) {
-      await this.clickContextMenuMoreItem();
-    }
-    await this.testSubjects.click(LEGACY_SAVE_TO_LIBRARY_TEST_SUBJ);
+    await this.clickContextMenuItem(LEGACY_SAVE_TO_LIBRARY_TEST_SUBJ, parent);
     await this.testSubjects.setValue('savedObjectTitle', newTitle, {
       clearWithKeyboard: true,
     });
@@ -308,12 +298,7 @@ export class DashboardPanelActionsService extends FtrService {
 
   async saveToLibrary(newTitle: string, parent?: WebElementWrapper) {
     this.log.debug('saveToLibrary');
-    await this.openContextMenu(parent);
-    const exists = await this.testSubjects.exists(SAVE_TO_LIBRARY_TEST_SUBJ);
-    if (!exists) {
-      await this.clickContextMenuMoreItem();
-    }
-    await this.testSubjects.click(SAVE_TO_LIBRARY_TEST_SUBJ);
+    await this.clickContextMenuItem(SAVE_TO_LIBRARY_TEST_SUBJ, parent);
     await this.testSubjects.setValue('savedObjectTitle', newTitle, {
       clearWithKeyboard: true,
     });
