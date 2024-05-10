@@ -17,6 +17,7 @@ export {
   appendToESQLQuery,
   appendWhereClauseToESQLQuery,
   getESQLQueryColumns,
+  getESQLQueryColumnsRaw,
   TextBasedLanguages,
 } from './src';
 
