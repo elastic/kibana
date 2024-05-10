@@ -165,7 +165,6 @@ export const GuidedOnboardingTourStep = ({
   const { hidden: allStepsHidden } = useTourContext();
 
   const isAddToCaseOpen = useIsAddToCaseOpen();
-  console.log('isAddToCaseOpen', isAddToCaseOpen);
 
   const hiddenWhenCasesModalFlyoutExpanded = useMemo(
     () => isAddToCaseOpen && hiddenWhenCaseFlyoutExpanded[props.tourId]?.includes(props.step),

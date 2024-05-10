@@ -35,8 +35,7 @@ const hooksMock: jest.Mocked<CasesPublicStart['hooks']> = {
   useCasesAddToExistingCaseModal: jest.fn().mockImplementation(() => ({
     open: openAddToExistingCaseModalMock,
   })),
-  useIsAddToExistingCaseModalOpen: jest.fn(),
-  useIsAddToNewCaseFlyoutOpen: jest.fn(),
+  useIsAddToCaseOpen: jest.fn(),
 };
 
 const helpersMock: jest.Mocked<CasesPublicStart['helpers']> = {

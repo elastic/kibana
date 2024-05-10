@@ -8,7 +8,7 @@
 import type { Dispatch, ReactNode, FC, PropsWithChildren } from 'react';
 
 import { merge } from 'lodash';
-import { BehaviorSubject, type Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import React, { useCallback, useMemo, useReducer, useEffect } from 'react';
 
 import type { ScopedFilesClient } from '@kbn/files-plugin/public';
@@ -60,7 +60,6 @@ export interface CasesContextProps
   features?: CasesFeatures;
   releasePhase?: ReleasePhase;
   getFilesClient: (scope: string) => ScopedFilesClient;
-  casesContextState$: Observable<CasesContextState>;
 }
 
 export const CasesContext = React.createContext<CasesContextValue | undefined>(undefined);

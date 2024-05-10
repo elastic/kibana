@@ -28,11 +28,9 @@ import { useKibana } from '../../../../common/lib/kibana';
  * Guided tour for the right panel in details flyout
  */
 export const RightPanelTour = memo(() => {
-  const { cases } = useKibana().services;
-  const isAddToNewCaseFlyoutOpen = cases.hooks.useIsAddToNewCaseFlyoutOpen();
-  const isAddToExistingCaseModalOpen = cases.hooks.useIsAddToExistingCaseModalOpen();
+  const { useIsAddToCaseOpen } = useKibana().services.cases.hooks;
 
-  const casesFlyoutExpanded = isAddToNewCaseFlyoutOpen || isAddToExistingCaseModalOpen;
+  const casesFlyoutExpanded = useIsAddToCaseOpen();
 
   const { isTourShown: isGuidedOnboardingTourShown } = useTourContext();
 

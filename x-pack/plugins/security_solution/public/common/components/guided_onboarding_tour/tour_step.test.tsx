@@ -76,8 +76,7 @@ describe('GuidedOnboardingTourStep', () => {
           ...casesServiceMock,
           hooks: {
             ...casesServiceMock.hooks,
-            useIsAddToNewCaseFlyoutOpen: jest.fn(() => true),
-            useIsAddToExistingCaseModalOpen: jest.fn(() => true),
+            useIsAddToCaseOpen: jest.fn(() => true),
           },
         },
       },

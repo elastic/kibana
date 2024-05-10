@@ -16,10 +16,9 @@ import { ExternalReferenceAttachmentTypeRegistry } from '../../../client/attachm
 import { PersistableStateAttachmentTypeRegistry } from '../../../client/attachment_framework/persistable_state_registry';
 import { useIsAddToCaseOpen } from './use_is_add_to_case_open';
 import { useApplication } from '../../../common/lib/kibana/use_application';
-import { BehaviorSubject, of } from 'rxjs';
+import { of } from 'rxjs';
 import { useCasesToast } from '../../../common/use_cases_toast';
 import type { PublicAppInfo } from '@kbn/core/public';
-import { getInitialCasesContextState } from '../cases_context_reducer';
 
 jest.mock('../../../common/use_cases_toast');
 jest.mock('../../../common/lib/kibana');
@@ -69,7 +68,6 @@ describe('use is add to existing case modal open hook', () => {
             features: { alerts: { sync: true, enabled: true, isExperimental: false }, metrics: [] },
             releasePhase: 'ga',
             getFilesClient: jest.fn(),
-            casesContextState$: new BehaviorSubject(getInitialCasesContextState()),
           }}
         >
           {children}

@@ -12,7 +12,6 @@ import { find, getOr } from 'lodash/fp';
 import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import { tableDefaults, dataTableSelectors } from '@kbn/securitysolution-data-table';
 import type { TableId } from '@kbn/securitysolution-data-table';
-import { useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import { useLicense } from '../../../common/hooks/use_license';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
@@ -55,6 +54,7 @@ export const RenderCellValue: React.FC<NonNullable<EuiDataGridCellProps['cellCon
       isExpandable,
       isDraggable = false,
       isExpanded,
+      isLeftExpandableFlyoutExpanded,
       colIndex,
       eventId,
       setCellProps,
@@ -118,16 +118,14 @@ export const RenderCellValue: React.FC<NonNullable<EuiDataGridCellProps['cellCon
         ?.value?.[0] as number | undefined;
       return ecsSuppressionCount ? parseInt(ecsSuppressionCount, 10) : dataSuppressionCount;
     }, [ecsData, data]);
-    const panels = useExpandableFlyoutState();
-    const isExpandableFlyoutExpanded: boolean = !!panels.left;
 
     const hiddenWhenLeftExpandableFlyoutOpened = useMemo(
       () =>
-        isExpandableFlyoutExpanded &&
+        isLeftExpandableFlyoutExpanded &&
         hiddenWhenLeftExpandableFlyoutExpanded[SecurityStepId.alertsCases]?.includes(
           AlertsCasesTourSteps.pointToAlertName
         ),
-      [isExpandableFlyoutExpanded]
+      [isLeftExpandableFlyoutExpanded]
     );
 
     const Renderer = useMemo(() => {
