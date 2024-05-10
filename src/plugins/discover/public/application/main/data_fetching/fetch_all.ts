@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { Adapters } from '@kbn/inspector-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject, filter, firstValueFrom, map, merge, scan } from 'rxjs';
@@ -71,6 +72,7 @@ export function fetchAll(
     const query = getAppState().query;
     const prevQuery = dataSubjects.documents$.getValue().query;
     const isEsqlQuery = isOfAggregateQueryType(query);
+
     if (reset) {
       sendResetMsg(dataSubjects, initialFetchStatus);
     }
@@ -85,21 +87,19 @@ export function fetchAll(
       });
     }
 
-    const shouldFetchEsql = isEsqlQuery && !!query;
-
     // Mark all subjects as loading
     sendLoadingMsg(dataSubjects.main$);
     sendLoadingMsg(dataSubjects.documents$);
 
     // histogram for data view mode will send `loading` for totalHits$
-    if (shouldFetchEsql) {
+    if (isEsqlQuery) {
       sendLoadingMsg(dataSubjects.totalHits$, {
         result: dataSubjects.totalHits$.getValue().result,
       });
     }
 
     // Start fetching all required requests
-    const response = shouldFetchEsql
+    const response = isEsqlQuery
       ? fetchEsql(
           query,
           dataView,
@@ -109,8 +109,9 @@ export function fetchAll(
           abortController.signal
         )
       : fetchDocuments(searchSource, fetchDeps);
-    const fetchType = shouldFetchEsql ? 'fetchTextBased' : 'fetchDocuments';
+    const fetchType = isEsqlQuery ? 'fetchTextBased' : 'fetchDocuments';
     const startTime = window.performance.now();
+
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response
       .then(({ records, esqlQueryColumns, interceptedWarnings, esqlHeaderWarning }) => {
@@ -123,7 +124,7 @@ export function fetchAll(
           });
         }
 
-        if (shouldFetchEsql) {
+        if (isEsqlQuery) {
           dataSubjects.totalHits$.next({
             fetchStatus: FetchStatus.COMPLETE,
             result: records.length,
@@ -140,6 +141,7 @@ export function fetchAll(
             });
           }
         }
+
         /**
          * The partial state for ES|QL mode is necessary in case the query has changed
          * In the follow up useEsqlMode hook in this case new columns are added to AppState
@@ -201,7 +203,6 @@ export async function fetchMoreDocuments(
   try {
     const { getAppState, getInternalState, services, savedSearch } = fetchDeps;
     const searchSource = savedSearch.searchSource.createChild();
-
     const dataView = searchSource.getField('index')!;
     const query = getAppState().query;
     const isEsqlQuery = isOfAggregateQueryType(query);

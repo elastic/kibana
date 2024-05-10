@@ -21,11 +21,7 @@ import { DiscoverAppState } from '../discover_app_state_container';
 import { DiscoverServices } from '../../../../build_services';
 import { getDefaultSort, getSortArray } from '../../../../utils/sorting';
 import { getValidViewMode } from '../../utils/get_valid_view_mode';
-import {
-  createDataViewDataSource,
-  createEsqlDataSource,
-  DiscoverDataSource,
-} from '../../../../../common/data_sources';
+import { createDataViewDataSource, createEsqlDataSource } from '../../../../../common/data_sources';
 
 function getDefaultColumns(savedSearch: SavedSearch, uiSettings: IUiSettingsClient) {
   if (savedSearch.columns && savedSearch.columns.length > 0) {
@@ -55,7 +51,7 @@ export function getStateDefaults({
   const sort = getSortArray(savedSearch.sort ?? [], dataView!, isEsqlQuery);
   const columns = getDefaultColumns(savedSearch, uiSettings);
   const chartHidden = getChartHidden(storage, 'discover');
-  const dataSource: DiscoverDataSource | undefined = isEsqlQuery
+  const dataSource = isEsqlQuery
     ? createEsqlDataSource()
     : dataView?.id
     ? createDataViewDataSource({ dataViewId: dataView.id })

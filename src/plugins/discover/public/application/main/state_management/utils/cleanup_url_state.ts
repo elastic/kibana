@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { isOfAggregateQueryType } from '@kbn/es-query';
+
+import { isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { DiscoverAppState, AppStateUrl } from '../discover_app_state_container';
 import { migrateLegacyQuery } from '../../../../utils/migrate_legacy_query';
@@ -20,11 +21,7 @@ export function cleanupUrlState(
   appStateFromUrl: AppStateUrl,
   uiSettings: IUiSettingsClient
 ): DiscoverAppState {
-  if (
-    appStateFromUrl.query &&
-    !isOfAggregateQueryType(appStateFromUrl.query) &&
-    !appStateFromUrl.query.language
-  ) {
+  if (isOfQueryType(appStateFromUrl.query) && !appStateFromUrl.query.language) {
     appStateFromUrl.query = migrateLegacyQuery(appStateFromUrl.query);
   }
 
@@ -51,9 +48,11 @@ export function cleanupUrlState(
     delete appStateFromUrl.rowsPerPage;
   }
 
+  const isEsqlQuery = isOfAggregateQueryType(appStateFromUrl.query);
+
   if (
     appStateFromUrl.sampleSize &&
-    (isOfAggregateQueryType(appStateFromUrl.query) || // not supported yet for ES|QL
+    (isEsqlQuery || // not supported yet for ES|QL
       !(
         typeof appStateFromUrl.sampleSize === 'number' &&
         appStateFromUrl.sampleSize > 0 &&
@@ -67,7 +66,7 @@ export function cleanupUrlState(
   if (appStateFromUrl.index) {
     if (!appStateFromUrl.dataSource) {
       // Convert the provided index to a data source
-      appStateFromUrl.dataSource = isOfAggregateQueryType(appStateFromUrl.query)
+      appStateFromUrl.dataSource = isEsqlQuery
         ? createEsqlDataSource()
         : createDataViewDataSource({ dataViewId: appStateFromUrl.index });
     }

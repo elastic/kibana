@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import './discover_layout.scss';
 import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -23,7 +24,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { useDragDropContext } from '@kbn/dom-drag-drop';
-import { DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
+import { DataViewType } from '@kbn/data-views-plugin/public';
 import {
   SEARCH_FIELDS_FROM_SOURCE,
   SHOW_FIELD_STATISTICS,
@@ -145,8 +146,11 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     });
   }, [dataView, isEsqlMode, observabilityAIAssistant?.service]);
 
-  const onAddFilter = useCallback(
-    (field: DataViewField | string, values: unknown, operation: '+' | '-') => {
+  const onAddFilter = useCallback<DocViewFilterFn>(
+    (field, values, operation) => {
+      if (!field) {
+        return;
+      }
       const fieldName = typeof field === 'string' ? field : field.name;
       popularizeField(dataView, fieldName, dataViews, capabilities);
       const newFilters = generateFilters(filterManager, field, values, operation, dataView);
@@ -158,36 +162,35 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     [filterManager, dataView, dataViews, trackUiMetric, capabilities]
   );
 
-  const onPopulateWhereClause = useCallback(
-    (field: DataViewField | string, values: unknown, operation: '+' | '-') => {
-      if (query && isOfAggregateQueryType(query) && 'esql' in query) {
-        const fieldName = typeof field === 'string' ? field : field.name;
-        // send the field type for casting
-        const fieldType = typeof field !== 'string' ? field.type : undefined;
-        // weird existence logic from Discover components
-        // in the field it comes the operator _exists_ and in the value the field
-        // I need to take care of it here but I think it should be handled on the fieldlist instead
-        const updatedQuery = appendWhereClauseToESQLQuery(
-          query.esql,
-          fieldName === '_exists_' ? String(values) : fieldName,
-          fieldName === '_exists_' ? undefined : values,
-          fieldName === '_exists_' ? '_exists_' : operation,
-          fieldType
-        );
-        data.query.queryString.setQuery({
-          esql: updatedQuery,
-        });
-        if (trackUiMetric) {
-          trackUiMetric(METRIC_TYPE.CLICK, 'esql_filter_added');
-        }
+  const onPopulateWhereClause = useCallback<DocViewFilterFn>(
+    (field, values, operation) => {
+      if (!field || !isOfAggregateQueryType(query)) {
+        return;
+      }
+      const fieldName = typeof field === 'string' ? field : field.name;
+      // send the field type for casting
+      const fieldType = typeof field !== 'string' ? field.type : undefined;
+      // weird existence logic from Discover components
+      // in the field it comes the operator _exists_ and in the value the field
+      // I need to take care of it here but I think it should be handled on the fieldlist instead
+      const updatedQuery = appendWhereClauseToESQLQuery(
+        query.esql,
+        fieldName === '_exists_' ? String(values) : fieldName,
+        fieldName === '_exists_' ? undefined : values,
+        fieldName === '_exists_' ? '_exists_' : operation,
+        fieldType
+      );
+      data.query.queryString.setQuery({
+        esql: updatedQuery,
+      });
+      if (trackUiMetric) {
+        trackUiMetric(METRIC_TYPE.CLICK, 'esql_filter_added');
       }
     },
     [data.query.queryString, query, trackUiMetric]
   );
 
-  const onFilter = isEsqlMode
-    ? (onPopulateWhereClause as DocViewFilterFn)
-    : (onAddFilter as DocViewFilterFn);
+  const onFilter = isEsqlMode ? onPopulateWhereClause : onAddFilter;
 
   const onFieldEdited = useCallback(
     async ({ removedFieldName }: { removedFieldName?: string } = {}) => {
