@@ -83,14 +83,18 @@ class DashboardBackupService implements DashboardBackupServiceType {
         this.sessionStorage.get(DASHBOARD_STATE_SESSION_KEY)?.[this.activeSpaceId] ?? {};
       if (dashboardStateStorage[id]) {
         delete dashboardStateStorage[id];
-        this.sessionStorage.set(DASHBOARD_STATE_SESSION_KEY, dashboardStateStorage);
+        this.sessionStorage.set(DASHBOARD_STATE_SESSION_KEY, {
+          [this.activeSpaceId]: dashboardStateStorage,
+        });
       }
 
       const panelsStorage =
         this.sessionStorage.get(DASHBOARD_PANELS_SESSION_KEY)?.[this.activeSpaceId] ?? {};
       if (panelsStorage[id]) {
         delete panelsStorage[id];
-        this.sessionStorage.set(DASHBOARD_PANELS_SESSION_KEY, panelsStorage);
+        this.sessionStorage.set(DASHBOARD_PANELS_SESSION_KEY, {
+          [this.activeSpaceId]: panelsStorage,
+        });
       }
     } catch (e) {
       this.notifications.toasts.addDanger({
