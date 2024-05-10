@@ -12,7 +12,6 @@ import {
   EmbeddablePanel,
   IEmbeddable,
   isErrorEmbeddable,
-  reactEmbeddableRegistryHasKey,
   ReactEmbeddableRenderer,
 } from '@kbn/embeddable-plugin/public';
 import { PresentationContainer } from '@kbn/presentation-containers';
@@ -21,6 +20,7 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React, { FC } from 'react';
 import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
+import { pluginServices } from '../../../public/services';
 import { CANVAS_APP, CANVAS_EMBEDDABLE_CLASSNAME } from '../../../common/lib';
 import { RendererStrings } from '../../../i18n';
 import {
@@ -121,12 +121,13 @@ export const embeddableRendererFactory = (
     help: strings.getHelpDescription(),
     reuseDomNode: true,
     render: async (domNode, { input, embeddableType, canvasApi }, handlers) => {
+      const { embeddables } = pluginServices.getServices();
       const uniqueId = handlers.getElementId();
       const isByValueEnabled = plugins.presentationUtil.labsService.isProjectEnabled(
         'labs:canvas:byValueEmbeddable'
       );
 
-      if (reactEmbeddableRegistryHasKey(embeddableType)) {
+      if (embeddables.reactEmbeddableRegistryHasKey(embeddableType)) {
         /**
          * Prioritize React embeddables
          */
