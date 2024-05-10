@@ -8,7 +8,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexGrid } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { DockerCharts } from '../../../charts/container_charts';
+import { DockerCharts } from '../../../charts/docker_charts';
 import { INTEGRATIONS } from '../../../constants';
 import { useIntegrationCheck } from '../../../hooks/use_integration_check';
 import { KubernetesContainerCharts } from '../../../charts/kubernetes_charts';

@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexGrid } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useTabSwitcherContext } from '../../../hooks/use_tab_switcher';
-import { HostCharts, KubernetesCharts } from '../../../charts';
+import { HostCharts, KubernetesNodeCharts } from '../../../charts';
 import { ContentTabIds } from '../../../types';
 
 interface Props {
@@ -33,7 +33,7 @@ export const HostMetrics = (props: Props) => {
         <HostCharts {...props} metric="network" onShowAll={onClick} overview />
       </EuiFlexGrid>
       <HostCharts {...props} metric="disk" onShowAll={onClick} overview />
-      <KubernetesCharts {...props} onShowAll={onClick} overview />
+      <KubernetesNodeCharts {...props} onShowAll={onClick} overview />
     </EuiFlexGroup>
   );
 };
