@@ -27,10 +27,10 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
   {
     name: 'agent.limits.go_max_procs',
     title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.goMaxProcsTitle', {
-      defaultMessage: 'GO_MAX_PROCS',
+      defaultMessage: 'Limit CPU usage',
     }),
     description: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.goMaxProcsDescription', {
-      defaultMessage: 'Limits the maximum number of CPUs that can be executing simultaneously',
+      defaultMessage: 'Limits the maximum number of CPUs that can be executing simultaneously.',
     }),
     learnMoreLink:
       'https://www.elastic.co/guide/en/fleet/current/enable-custom-policy-settings.html#limit-cpu-usage',
@@ -48,7 +48,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     description: i18n.translate(
       'xpack.fleet.settings.agentPolicyAdvanced.downloadTimeoutDescription',
       {
-        defaultMessage: 'Timeout for downloading the agent binary',
+        defaultMessage: 'Timeout for downloading the agent binary.',
       }
     ),
     learnMoreLink:
@@ -73,7 +73,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     description: i18n.translate(
       'xpack.fleet.settings.agentPolicyAdvanced.agentDownloadTargetDirectoryDescription',
       {
-        defaultMessage: 'The disk path to which the agent binary will be downloaded',
+        defaultMessage: 'The disk path to which the agent binary will be downloaded.',
       }
     ),
     learnMoreLink:
@@ -95,7 +95,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     description: i18n.translate(
       'xpack.fleet.settings.agentPolicyAdvanced.agentLoggingMetricsPeriodDescription',
       {
-        defaultMessage: 'The frequency of agent metrics logging',
+        defaultMessage: 'The frequency of logging the internal Elastic Agent metrics.',
       }
     ),
     learnMoreLink:
@@ -114,7 +114,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     description: i18n.translate(
       'xpack.fleet.settings.agentPolicyAdvanced.agentMonitoringHttpDescription',
       {
-        defaultMessage: 'Agent HTTP monitoring settings',
+        defaultMessage: 'Agent HTTP monitoring settings.',
       }
     ),
     learnMoreLink:
@@ -138,7 +138,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
       'xpack.fleet.settings.agentPolicyAdvanced.agentLoggingLevelDescription',
       {
         defaultMessage:
-          'Sets the log level for all the agents on the policy. The default log level is "info"',
+          'Sets the log level for all the agents on the policy. The default log level is "info".',
       }
     ),
     api_field: {
