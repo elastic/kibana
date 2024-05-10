@@ -157,7 +157,6 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
 
     return {
       registerReactEmbeddableFactory,
-      reactEmbeddableRegistryHasKey,
       registerSavedObjectToPanelMethod,
       registerReactEmbeddableSavedObject,
 
