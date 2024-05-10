@@ -33,6 +33,7 @@ if is_pr_with_label "ci:build-cloud-image"; then
   --skip-docker-ubi \
   --skip-docker-fips \
   --skip-docker-ubuntu \
+  --skip-docker-chainguard \
   --skip-docker-serverless \
   --skip-docker-contexts
   docker logout docker.elastic.co
