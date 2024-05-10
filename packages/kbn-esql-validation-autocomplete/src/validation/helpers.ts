@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { ESQLAst } from '@kbn/esql-ast';
-import type { ESQLPolicy } from './types';
+import type { ESQLAst, ESQLAstItem, ESQLMessage, ESQLSingleAstItem } from '@kbn/esql-ast';
+import { getAllArrayTypes, getAllArrayValues } from '../shared/helpers';
+import { getMessageFromId } from './errors';
+import type { ESQLPolicy, ReferenceMaps } from './types';
 
 export function buildQueryForFieldsFromSource(queryString: string, ast: ESQLAst) {
   const firstCommand = ast[0];
@@ -34,4 +36,41 @@ export function buildQueryForFieldsForStringSources(queryString: string, ast: ES
     return customQuery.substring(0, customQuery.length - 1);
   }
   return customQuery;
+}
+
+/**
+ * We only want to report one message when any number of the elements in an array argument is of the wrong type
+ */
+export function collapseWrongArgumentTypeMessages(
+  messages: ESQLMessage[],
+  arg: ESQLAstItem[],
+  funcName: string,
+  argType: string,
+  parentCommand: string,
+  references: ReferenceMaps
+) {
+  if (!messages.some(({ code }) => code === 'wrongArgumentType')) {
+    return messages;
+  }
+
+  // Replace the individual "wrong argument type" messages with a single one for the whole array
+  messages = messages.filter(({ code }) => code !== 'wrongArgumentType');
+
+  messages.push(
+    getMessageFromId({
+      messageId: 'wrongArgumentType',
+      values: {
+        name: funcName,
+        argType,
+        value: `(${getAllArrayValues(arg).join(', ')})`,
+        givenType: `(${getAllArrayTypes(arg, parentCommand, references).join(', ')})`,
+      },
+      locations: {
+        min: (arg[0] as ESQLSingleAstItem).location.min,
+        max: (arg[arg.length - 1] as ESQLSingleAstItem).location.max,
+      },
+    })
+  );
+
+  return messages;
 }

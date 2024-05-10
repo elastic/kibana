@@ -7,6 +7,7 @@
 
 import moment from 'moment';
 import { assertNever } from '@kbn/std';
+import { BrushEvent } from '@elastic/charts';
 import { Duration, DurationUnit } from '../../typings';
 
 export function toDuration(duration: string): Duration {
@@ -41,4 +42,11 @@ export function toCalendarAlignedMomentUnitOfTime(unit: string): moment.unitOfTi
     case 'M':
       return 'months';
   }
+}
+
+export function getBrushData(e: BrushEvent) {
+  const [from, to] = [Number(e.x?.[0]), Number(e.x?.[1])];
+  const [fromUtc, toUtc] = [moment(from).format(), moment(to).format()];
+
+  return { from, to, fromUtc, toUtc };
 }

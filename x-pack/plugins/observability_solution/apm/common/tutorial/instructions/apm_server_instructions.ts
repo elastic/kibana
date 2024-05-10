@@ -122,41 +122,32 @@ export function createWindowsServerInstructions() {
   return [
     {
       title: createDownloadServerTitle(),
-      textPre: i18n.translate(
-        'xpack.apm.tutorial.windowsServerInstructions.textPre',
-        {
-          defaultMessage:
-            '1. Download the APM Server Windows zip file from the \
+      textPre: i18n.translate('xpack.apm.tutorial.windowsServerInstructions.textPre', {
+        defaultMessage:
+          '1. Download the APM Server Windows zip file from the \
 [Download page]({downloadPageLink}).\n2. Extract the contents of \
 the zip file into {zipFileExtractFolder}.\n3. Rename the {apmServerDirectory} \
 directory to `APM-Server`.\n4. Open a PowerShell prompt as an Administrator \
 (right-click the PowerShell icon and select \
 **Run As Administrator**). If you are running Windows XP, you might need to download and install \
 PowerShell.\n5. From the PowerShell prompt, run the following commands to install APM Server as a Windows service:',
-          values: {
-            downloadPageLink: 'https://www.elastic.co/downloads/apm/apm-server',
-            zipFileExtractFolder: '`C:\\Program Files`',
-            apmServerDirectory: '`apm-server-{config.kibana.version}-windows`',
-          },
-        }
-      ),
-      commands: [
-        `cd 'C:\\Program Files\\APM-Server'`,
-        `.\\install-service-apm-server.ps1`,
-      ],
-      textPost: i18n.translate(
-        'xpack.apm.tutorial.windowsServerInstructions.textPost',
-        {
-          defaultMessage:
-            'Note: If script execution is disabled on your system, \
+        values: {
+          downloadPageLink: 'https://www.elastic.co/downloads/apm/apm-server',
+          zipFileExtractFolder: '`C:\\Program Files`',
+          apmServerDirectory: '`apm-server-{config.kibana.version}-windows`',
+        },
+      }),
+      commands: [`cd 'C:\\Program Files\\APM-Server'`, `.\\install-service-apm-server.ps1`],
+      textPost: i18n.translate('xpack.apm.tutorial.windowsServerInstructions.textPost', {
+        defaultMessage:
+          'Note: If script execution is disabled on your system, \
 you need to set the execution policy for the current session \
 to allow the script to run. For example: {command}.',
-          values: {
-            command:
-              '`PowerShell.exe -ExecutionPolicy UnRestricted -File .\\install-service-apm-server.ps1`',
-          },
-        }
-      ),
+        values: {
+          command:
+            '`PowerShell.exe -ExecutionPolicy UnRestricted -File .\\install-service-apm-server.ps1`',
+        },
+      }),
     },
     createEditConfig(),
     {

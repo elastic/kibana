@@ -9,16 +9,7 @@ import { EuiCodeBlock } from '@elastic/eui';
 import React from 'react';
 import { ChatForm } from '../../../types';
 import { Prompt } from '../../../../common/prompt';
-
-const getESQuery = (query: any) => {
-  try {
-    return JSON.stringify(query, null, 2).replace('"${query}"', 'f"${query}"');
-  } catch (e) {
-    // eslint-disable-next-line no-console
-    console.error('Error parsing ES query', e);
-    return '{}';
-  }
-};
+import { getESQuery } from './utils';
 
 export const LANGCHAIN_PYTHON = (formValues: ChatForm, clientDetails: string) => (
   <EuiCodeBlock language="py" isCopyable overflowHeight="100%">
@@ -33,30 +24,28 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import format_document
 from langchain.prompts.prompt import PromptTemplate
 import os
-
 ${clientDetails}
 
 def build_query(query):
   return ${getESQuery(formValues.elasticsearch_query)}
 
+index_source_fields = ${JSON.stringify(formValues.source_fields, null, 2)}
+
 retriever = ElasticsearchRetriever(
-  index_name="{formValues.indices.join(',')}",
+  index_name="${formValues.indices.join(',')}",
   body_func=build_query,
-  content_field="text",
+  content_field=index_source_fields,
   es_client=es_client
 )
 
-model = ChatOpenAI(openai_api_key=os.environ["OPENAI_API_KEY"], model_name="${
-      formValues.summarization_model
-    }")
-
+model = ChatOpenAI(openai_api_key=os.environ["OPENAI_API_KEY"], model_name="gpt-3.5-turbo")
 
 ANSWER_PROMPT = ChatPromptTemplate.from_template(
-    f"""${Prompt(formValues.prompt, {
-      context: true,
-      citations: formValues.citations,
-      type: 'openai',
-    })}"""
+  f"""${Prompt(formValues.prompt, {
+    context: true,
+    citations: formValues.citations,
+    type: 'openai',
+  })}"""
 )
 
 DEFAULT_DOCUMENT_PROMPT = PromptTemplate.from_template(template="{page_content}")

@@ -29,8 +29,13 @@ import { AlertingAuthorizationClientFactory } from './alerting_authorization_cli
 import { AlertingRulesConfig } from './config';
 import { GetAlertIndicesAlias } from './lib';
 import { AlertsService } from './alerts_service/alerts_service';
+import { BackfillClient } from './backfill_client/backfill_client';
+import {
+  AD_HOC_RUN_SAVED_OBJECT_TYPE,
+  API_KEY_PENDING_INVALIDATION_TYPE,
+  RULE_SAVED_OBJECT_TYPE,
+} from './saved_objects';
 import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
-import { RULE_SAVED_OBJECT_TYPE } from './saved_objects';
 export interface RulesClientFactoryOpts {
   logger: Logger;
   taskManager: TaskManagerStartContract;
@@ -50,6 +55,7 @@ export interface RulesClientFactoryOpts {
   maxScheduledPerMinute: AlertingRulesConfig['maxScheduledPerMinute'];
   getAlertIndicesAlias: GetAlertIndicesAlias;
   alertsService: AlertsService | null;
+  backfillClient: BackfillClient;
   connectorAdapterRegistry: ConnectorAdapterRegistry;
   uiSettings: CoreStart['uiSettings'];
 }
@@ -74,6 +80,7 @@ export class RulesClientFactory {
   private maxScheduledPerMinute!: AlertingRulesConfig['maxScheduledPerMinute'];
   private getAlertIndicesAlias!: GetAlertIndicesAlias;
   private alertsService!: AlertsService | null;
+  private backfillClient!: BackfillClient;
   private connectorAdapterRegistry!: ConnectorAdapterRegistry;
   private uiSettings!: CoreStart['uiSettings'];
 
@@ -100,6 +107,7 @@ export class RulesClientFactory {
     this.maxScheduledPerMinute = options.maxScheduledPerMinute;
     this.getAlertIndicesAlias = options.getAlertIndicesAlias;
     this.alertsService = options.alertsService;
+    this.backfillClient = options.backfillClient;
     this.connectorAdapterRegistry = options.connectorAdapterRegistry;
     this.uiSettings = options.uiSettings;
   }
@@ -122,7 +130,11 @@ export class RulesClientFactory {
       maxScheduledPerMinute: this.maxScheduledPerMinute,
       unsecuredSavedObjectsClient: savedObjects.getScopedClient(request, {
         excludedExtensions: [SECURITY_EXTENSION_ID],
-        includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE, 'api_key_pending_invalidation'],
+        includedHiddenTypes: [
+          RULE_SAVED_OBJECT_TYPE,
+          API_KEY_PENDING_INVALIDATION_TYPE,
+          AD_HOC_RUN_SAVED_OBJECT_TYPE,
+        ],
       }),
       authorization: this.authorization.create(request),
       actionsAuthorization: actions.getActionsAuthorizationWithRequest(request),
@@ -132,6 +144,7 @@ export class RulesClientFactory {
       auditLogger: securityPluginSetup?.audit.asScoped(request),
       getAlertIndicesAlias: this.getAlertIndicesAlias,
       alertsService: this.alertsService,
+      backfillClient: this.backfillClient,
       connectorAdapterRegistry: this.connectorAdapterRegistry,
       uiSettings: this.uiSettings,
 

@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { FunctionDefinition } from './types';
+import type { FunctionDefinition, FunctionParameterType } from './types';
 
 function createNumericAggDefinition({
   name,
@@ -16,7 +16,12 @@ function createNumericAggDefinition({
 }: {
   name: string;
   description: string;
-  args?: Array<{ name: string; type: string; value: string; literalOnly?: boolean }>;
+  args?: Array<{
+    name: string;
+    type: FunctionParameterType;
+    value: string;
+    constantOnly?: boolean;
+  }>;
 }): FunctionDefinition {
   const extraParamsExample = args.length ? `, ${args.map(({ value }) => value).join(',')}` : '';
   return {
@@ -28,11 +33,11 @@ function createNumericAggDefinition({
       {
         params: [
           { name: 'column', type: 'number', noNestingFunctions: true },
-          ...args.map(({ name: paramName, type, literalOnly }) => ({
+          ...args.map(({ name: paramName, type, constantOnly }) => ({
             name: paramName,
             type,
             noNestingFunctions: true,
-            literalOnly,
+            constantOnly,
           })),
         ],
         returnType: 'number',
@@ -50,18 +55,6 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
     name: 'avg',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.avgDoc', {
       defaultMessage: 'Returns the average of the values in a field',
-    }),
-  },
-  {
-    name: 'max',
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.maxDoc', {
-      defaultMessage: 'Returns the maximum value in a field.',
-    }),
-  },
-  {
-    name: 'min',
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.minDoc', {
-      defaultMessage: 'Returns the minimum value in a field.',
     }),
   },
   {
@@ -94,10 +87,52 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
         defaultMessage: 'Returns the n percentile of a field.',
       }
     ),
-    args: [{ name: 'percentile', type: 'number', value: '90', literalOnly: true }],
+    args: [{ name: 'percentile', type: 'number' as const, value: '90', constantOnly: true }],
   },
 ]
   .map(createNumericAggDefinition)
+  .concat([
+    {
+      name: 'max',
+      description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.maxDoc', {
+        defaultMessage: 'Returns the maximum value in a field.',
+      }),
+      type: 'agg',
+      supportedCommands: ['stats'],
+      signatures: [
+        {
+          params: [{ name: 'column', type: 'number', noNestingFunctions: true }],
+          returnType: 'number',
+          examples: [`from index | stats result = max(field)`, `from index | stats max(field)`],
+        },
+        {
+          params: [{ name: 'column', type: 'date', noNestingFunctions: true }],
+          returnType: 'number',
+          examples: [`from index | stats result = max(field)`, `from index | stats max(field)`],
+        },
+      ],
+    },
+    {
+      name: 'min',
+      description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.minDoc', {
+        defaultMessage: 'Returns the minimum value in a field.',
+      }),
+      type: 'agg',
+      supportedCommands: ['stats'],
+      signatures: [
+        {
+          params: [{ name: 'column', type: 'number', noNestingFunctions: true }],
+          returnType: 'number',
+          examples: [`from index | stats result = min(field)`, `from index | stats min(field)`],
+        },
+        {
+          params: [{ name: 'column', type: 'date', noNestingFunctions: true }],
+          returnType: 'number',
+          examples: [`from index | stats result = min(field)`, `from index | stats min(field)`],
+        },
+      ],
+    },
+  ])
   .concat([
     {
       name: 'count',

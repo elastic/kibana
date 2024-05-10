@@ -62,11 +62,7 @@ export const FIELDS_TO_ADD_AS_CANDIDATE = new Set([
   'process.args',
   'http.response.status_code',
 ]);
-export const FIELD_PREFIX_TO_ADD_AS_CANDIDATE = [
-  'cloud.',
-  'labels.',
-  'user_agent.',
-];
+export const FIELD_PREFIX_TO_ADD_AS_CANDIDATE = ['cloud.', 'labels.', 'user_agent.'];
 
 /**
  * Other constants

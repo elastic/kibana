@@ -38,8 +38,7 @@ export function EnvironmentsContextProvider({
 
   const serviceName = 'serviceName' in path ? path.serviceName : undefined;
   const environment =
-    ('environment' in query && (query.environment as Environment)) ||
-    ENVIRONMENT_ALL.value;
+    ('environment' in query && (query.environment as Environment)) || ENVIRONMENT_ALL.value;
 
   const queryRangeFrom = 'rangeFrom' in query ? query.rangeFrom : undefined;
   const queryRangeTo = 'rangeTo' in query ? query.rangeTo : undefined;

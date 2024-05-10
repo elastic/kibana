@@ -6,12 +6,7 @@
  */
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import {
-  kqlQuery,
-  rangeQuery,
-  termQuery,
-  termsQuery,
-} from '@kbn/observability-plugin/server';
+import { kqlQuery, rangeQuery, termQuery, termsQuery } from '@kbn/observability-plugin/server';
 import { keyBy } from 'lodash';
 import {
   AGENT_NAME,
@@ -142,10 +137,7 @@ export async function getTopDependencySpans({
     })
   ).hits.hits.map((hit) => hit._source);
 
-  const transactionsById = keyBy(
-    transactions,
-    (transaction) => transaction.transaction.id
-  );
+  const transactionsById = keyBy(transactions, (transaction) => transaction.transaction.id);
 
   return spans.map((span): DependencySpan => {
     const transaction = maybe(transactionsById[span.transaction!.id]);

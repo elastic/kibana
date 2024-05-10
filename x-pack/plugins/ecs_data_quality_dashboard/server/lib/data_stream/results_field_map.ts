@@ -24,9 +24,9 @@ export const resultsFieldMap: FieldMap = {
   unallowedMappingFields: { type: 'keyword', required: true, array: true },
   unallowedValueFields: { type: 'keyword', required: true, array: true },
   sizeInBytes: { type: 'long', required: true },
-  ilmPhase: { type: 'keyword', required: true },
+  ilmPhase: { type: 'keyword', required: false },
   markdownComments: { type: 'text', required: true, array: true },
   ecsVersion: { type: 'keyword', required: true },
-  indexId: { type: 'keyword', required: true },
+  indexId: { type: 'keyword', required: false },
   error: { type: 'text', required: false },
 };

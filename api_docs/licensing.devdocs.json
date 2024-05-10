@@ -2187,12 +2187,12 @@
               "path": "x-pack/plugins/aiops/server/plugin.ts"
             },
             {
-              "plugin": "ml",
-              "path": "x-pack/plugins/ml/server/plugin.ts"
-            },
-            {
               "plugin": "remoteClusters",
               "path": "x-pack/plugins/remote_clusters/server/plugin.ts"
+            },
+            {
+              "plugin": "ml",
+              "path": "x-pack/plugins/ml/server/plugin.ts"
             },
             {
               "plugin": "graph",
@@ -2212,6 +2212,10 @@
             },
             {
               "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_is_alert_suppression_active.ts"
+            },
+            {
+              "plugin": "securitySolution",
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/indicator_match/threat_mapping/create_threat_signals.ts"
             },
             {
@@ -2221,10 +2225,6 @@
             {
               "plugin": "securitySolution",
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/threshold/threshold.ts"
-            },
-            {
-              "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_is_alert_suppression_active.ts"
             },
             {
               "plugin": "painlessLab",
@@ -2261,6 +2261,18 @@
             {
               "plugin": "upgradeAssistant",
               "path": "x-pack/plugins/upgrade_assistant/server/lib/reindexing/reindex_service.test.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_is_alert_suppression_active.test.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_is_alert_suppression_active.test.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_is_alert_suppression_active.test.ts"
             },
             {
               "plugin": "actions",

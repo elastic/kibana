@@ -44,18 +44,17 @@ export async function getOverallLatencyDistribution({
     const overallLatencyDistribution: OverallLatencyDistributionResponse = {};
 
     // #1: get 95th percentile to be displayed as a marker in the log log chart
-    overallLatencyDistribution.percentileThresholdValue =
-      await getPercentileThresholdValue({
-        chartType,
-        apmEventClient,
-        start,
-        end,
-        environment,
-        kuery,
-        query,
-        percentileThreshold,
-        searchMetrics,
-      });
+    overallLatencyDistribution.percentileThresholdValue = await getPercentileThresholdValue({
+      chartType,
+      apmEventClient,
+      start,
+      end,
+      environment,
+      kuery,
+      query,
+      percentileThreshold,
+      searchMetrics,
+    });
 
     // finish early if we weren't able to identify the percentileThresholdValue.
     if (!overallLatencyDistribution.percentileThresholdValue) {
@@ -63,19 +62,18 @@ export async function getOverallLatencyDistribution({
     }
 
     // #2: get histogram range steps
-    const { durationMin, durationMax, rangeSteps } =
-      await fetchDurationHistogramRangeSteps({
-        chartType,
-        apmEventClient,
-        start,
-        end,
-        environment,
-        kuery,
-        query,
-        searchMetrics,
-        durationMinOverride,
-        durationMaxOverride,
-      });
+    const { durationMin, durationMax, rangeSteps } = await fetchDurationHistogramRangeSteps({
+      chartType,
+      apmEventClient,
+      start,
+      end,
+      environment,
+      kuery,
+      query,
+      searchMetrics,
+      durationMinOverride,
+      durationMaxOverride,
+    });
 
     if (!rangeSteps) {
       return overallLatencyDistribution;

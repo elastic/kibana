@@ -1217,7 +1217,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await testSubjects.click(`lns_colorEditing_trigger`);
         // wait for the UI to settle
         await PageObjects.common.sleep(100);
-        await testSubjects.existOrFail('lns-indexPattern-SettingWithSiblingFlyout', {
+        await testSubjects.existOrFail('lns-palettePanelFlyout', {
           timeout: 2500,
         });
       });

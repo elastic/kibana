@@ -375,38 +375,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
       });
 
-      // Failing: See https://github.com/elastic/kibana/issues/138776
-      it.skip('should show trusted apps card and link should go back to policy', async () => {
-        await testSubjects.existOrFail('trustedApps-fleet-integration-card');
-        await (await testSubjects.find('trustedApps-link-to-exceptions')).click();
-        await (await testSubjects.find('confirmModalConfirmButton')).click(); // Fleet show a confirm modal on unsaved changes
-        await testSubjects.existOrFail('policyDetailsPage');
-        await (await testSubjects.find('policyDetailsBackLink')).click();
-        await testSubjects.existOrFail('endpointIntegrationPolicyForm');
-      });
-      it.skip('should show event filters card and link should go back to policy', async () => {
-        await testSubjects.existOrFail('eventFilters-fleet-integration-card');
-        const eventFiltersCard = await testSubjects.find('eventFilters-fleet-integration-card');
-        await pageObjects.ingestManagerCreatePackagePolicy.scrollToCenterOfWindow(eventFiltersCard);
-        await (await testSubjects.find('eventFilters-link-to-exceptions')).click();
-        await (await testSubjects.find('confirmModalConfirmButton')).click(); // Fleet show a confirm modal on unsaved changes
-        await testSubjects.existOrFail('policyDetailsPage');
-        await (await testSubjects.find('policyDetailsBackLink')).click();
-        await testSubjects.existOrFail('endpointIntegrationPolicyForm');
-      });
-      it.skip('should show blocklists card and link should go back to policy', async () => {
-        await testSubjects.existOrFail('blocklists-fleet-integration-card');
-        const blocklistsCard = await testSubjects.find('blocklists-fleet-integration-card');
-        await pageObjects.ingestManagerCreatePackagePolicy.scrollToCenterOfWindow(blocklistsCard);
-        await (await testSubjects.find('blocklists-link-to-exceptions')).click();
-        await (await testSubjects.find('confirmModalConfirmButton')).click(); // Fleet show a confirm modal on unsaved changes
-        await testSubjects.existOrFail('policyDetailsPage');
-        await (await testSubjects.find('policyDetailsBackLink')).click();
-        await testSubjects.existOrFail('endpointIntegrationPolicyForm');
-      });
-      it.skip('should not show host isolation exceptions card because no entries', async () => {
-        await testSubjects.missingOrFail('hostIsolationExceptions-fleet-integration-card');
-      });
+      ['trustedApps', 'eventFilters', 'blocklists', 'hostIsolationExceptions'].forEach(
+        (cardName) => {
+          it(`should show ${cardName} card and link should go back to policy`, async () => {
+            await testSubjects.existOrFail(`${cardName}-fleet-integration-card`);
+
+            const card = await testSubjects.find(`${cardName}-fleet-integration-card`);
+            await pageObjects.ingestManagerCreatePackagePolicy.scrollToCenterOfWindow(card);
+            await (await testSubjects.find(`${cardName}-link-to-exceptions`)).click();
+
+            await testSubjects.existOrFail('policyDetailsPage');
+
+            await (await testSubjects.find('policyDetailsBackLink')).click();
+            await testSubjects.existOrFail('endpointIntegrationPolicyForm');
+          });
+        }
+      );
     });
   });
 }

@@ -468,6 +468,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:apmEnableMultiSignal': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'observability:apmAWSLambdaPriceFactor': {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },
@@ -539,7 +543,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'discover:enableESQL': {
+  enableESQL: {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -669,6 +673,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'aiAssistant:preferredAIAssistantType': {
     type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:profilingFetchTopNFunctionsFromStacktraces': {
+    type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
 };

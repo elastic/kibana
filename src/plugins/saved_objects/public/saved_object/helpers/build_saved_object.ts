@@ -17,6 +17,7 @@ import {
   SavedObjectConfig,
   SavedObjectKibanaServices,
   SavedObjectSaveOpts,
+  StartServices,
 } from '../../types';
 import { applyESResp } from './apply_es_resp';
 import { saveSavedObject } from './save_saved_object';
@@ -37,6 +38,7 @@ export function buildSavedObject(
   savedObject: SavedObject,
   config: SavedObjectConfig,
   services: SavedObjectKibanaServices,
+  startServices: StartServices,
   decorators: SavedObjectDecorator[] = []
 ) {
   applyDecorators(savedObject, config, decorators);
@@ -110,7 +112,7 @@ export function buildSavedObject(
 
   savedObject.save = async (opts: SavedObjectSaveOpts) => {
     try {
-      const result = await saveSavedObject(savedObject, config, opts, services);
+      const result = await saveSavedObject(savedObject, config, opts, services, startServices);
       return Promise.resolve(result);
     } catch (e) {
       return Promise.reject(e);

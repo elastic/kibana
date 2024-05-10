@@ -13,16 +13,15 @@ import {
   SERVICE_NAME,
   CONTAINER_ID,
   HOST_NAME,
+  KUBERNETES_POD_NAME,
 } from '../../../../common/es_fields/apm';
 import { getTypedSearch } from '../../../utils/create_typed_es_client';
 
-export type LogCategories =
-  | Array<{
-      key: string;
-      docCount: number;
-      sampleMessage: string;
-    }>
-  | undefined;
+export interface LogCategory {
+  errorCategory: string;
+  docCount: number;
+  sampleMessage: string;
+}
 
 export async function getLogCategories({
   esClient,
@@ -30,15 +29,16 @@ export async function getLogCategories({
   arguments: args,
 }: {
   esClient: ElasticsearchClient;
-  coreContext: CoreRequestHandlerContext;
+  coreContext: Pick<CoreRequestHandlerContext, 'uiSettings'>;
   arguments: {
     start: string;
     end: string;
     'service.name'?: string;
     'host.name'?: string;
     'container.id'?: string;
+    'kubernetes.pod.name'?: string;
   };
-}): Promise<LogCategories> {
+}): Promise<LogCategory[] | undefined> {
   const start = datemath.parse(args.start)?.valueOf()!;
   const end = datemath.parse(args.end)?.valueOf()!;
 
@@ -46,12 +46,10 @@ export async function getLogCategories({
     { field: SERVICE_NAME, value: args[SERVICE_NAME] },
     { field: CONTAINER_ID, value: args[CONTAINER_ID] },
     { field: HOST_NAME, value: args[HOST_NAME] },
+    { field: KUBERNETES_POD_NAME, value: args[KUBERNETES_POD_NAME] },
   ]);
 
-  const index =
-    (await coreContext.uiSettings.client.get<string>(
-      aiAssistantLogsIndexPattern
-    )) ?? 'logs-*';
+  const index = await coreContext.uiSettings.client.get<string>(aiAssistantLogsIndexPattern);
 
   const search = getTypedSearch(esClient);
 
@@ -79,7 +77,8 @@ export async function getLogCategories({
     query,
   });
   const totalDocCount = hitCountRes.hits.total.value;
-  const samplingProbability = Math.min(100_000 / totalDocCount, 1);
+  const rawSamplingProbability = Math.min(100_000 / totalDocCount, 1);
+  const samplingProbability = rawSamplingProbability < 0.5 ? rawSamplingProbability : 1;
 
   const categorizedLogsRes = await search({
     index,
@@ -114,9 +113,8 @@ export async function getLogCategories({
 
   return categorizedLogsRes.aggregations?.sampling.categories?.buckets.map(
     ({ doc_count: docCount, key, sample }) => {
-      const sampleMessage = (sample.hits.hits[0]._source as { message: string })
-        .message;
-      return { key: key as string, docCount, sampleMessage };
+      const sampleMessage = (sample.hits.hits[0]._source as { message: string }).message;
+      return { errorCategory: key as string, docCount, sampleMessage };
     }
   );
 }

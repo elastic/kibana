@@ -10,7 +10,7 @@ import { of, throwError } from 'rxjs';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { useFetchAlerts, FetchAlertsArgs, FetchAlertResp } from './use_fetch_alerts';
 import { useKibana } from '../../../../common/lib/kibana';
-import { IKibanaSearchResponse } from '@kbn/data-plugin/public';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useState } from 'react';
 
@@ -83,7 +83,6 @@ const expectedResponse: FetchAlertResp = {
   refetch: expect.anything(),
   isInitializing: true,
   totalAlerts: -1,
-  updatedAt: 0,
   oldAlertsData: [],
   ecsAlertsData: [],
 };
@@ -162,7 +161,6 @@ describe('useFetchAlerts', () => {
         ],
         totalAlerts: 2,
         isInitializing: false,
-        updatedAt: 1609502400000,
         getInspectQuery: expect.anything(),
         refetch: expect.anything(),
         ecsAlertsData: [
@@ -281,7 +279,6 @@ describe('useFetchAlerts', () => {
         refetch: expect.anything(),
         isInitializing: true,
         totalAlerts: -1,
-        updatedAt: 0,
       },
     ]);
   });
@@ -300,7 +297,6 @@ describe('useFetchAlerts', () => {
         refetch: expect.anything(),
         isInitializing: true,
         totalAlerts: -1,
-        updatedAt: 0,
       },
     ]);
 
@@ -321,7 +317,6 @@ describe('useFetchAlerts', () => {
         refetch: expect.anything(),
         isInitializing: true,
         totalAlerts: -1,
-        updatedAt: 0,
       },
     ]);
   });
@@ -432,7 +427,6 @@ describe('useFetchAlerts', () => {
         refetch: expect.anything(),
         isInitializing: true,
         totalAlerts: -1,
-        updatedAt: 0,
       },
     ]);
   });

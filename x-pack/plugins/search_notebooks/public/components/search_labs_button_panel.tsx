@@ -13,7 +13,7 @@ export const SearchLabsButtonPanel = () => {
     <EuiPanel hasShadow={false}>
       <EuiFlexGroup justifyContent="center">
         <EuiButton
-          href="https://github.com/elastic/elasticsearch-labs"
+          href="https://github.com/elastic/elasticsearch-labs/tree/main/notebooks"
           target="_blank"
           iconSide="right"
           iconType="popout"
@@ -21,7 +21,7 @@ export const SearchLabsButtonPanel = () => {
           data-telemetry-id="console-notebooks-search-labs-btn"
         >
           {i18n.translate('xpack.searchNotebooks.searchLabsLink', {
-            defaultMessage: 'See more at Elastic Search Labs',
+            defaultMessage: 'Browse all our notebooks',
           })}
         </EuiButton>
       </EuiFlexGroup>

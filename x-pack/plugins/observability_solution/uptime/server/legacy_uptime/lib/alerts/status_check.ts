@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
+import { AlertsClientError, GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import { min } from 'lodash';
 import moment from 'moment';
 
@@ -160,6 +160,7 @@ export const getMonitorSummary = (
     checkedAt,
     monitorUrl: monitorInfo.url?.full,
     monitorId: monitorInfo.monitor?.id,
+    configId: monitorInfo.config_id,
     monitorName: monitorInfo.monitor?.name ?? monitorInfo.monitor?.id,
     monitorType: monitorInfo.monitor?.type,
     latestErrorMessage: monitorInfo.error?.message,
@@ -204,6 +205,7 @@ export const getReasonMessage = ({
 
 export const getMonitorAlertDocument = (monitorSummary: Record<string, string | undefined>) => ({
   'monitor.id': monitorSummary.monitorId,
+  configId: monitorSummary.configId,
   'monitor.type': monitorSummary.monitorType,
   'monitor.name': monitorSummary.monitorName,
   'url.full': monitorSummary.monitorUrl,
@@ -352,18 +354,14 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
     rule: {
       schedule: { interval },
     },
-    services: {
-      alertFactory,
-      alertWithLifecycle,
-      getAlertStartedDate,
-      getAlertUuid,
-      savedObjectsClient,
-      scopedClusterClient,
-    },
+    services: { alertsClient, savedObjectsClient, scopedClusterClient },
     spaceId,
     state,
     startedAt,
   }) {
+    if (!alertsClient) {
+      throw new AlertsClientError();
+    }
     const {
       stackVersion = '8.9.0',
       availability,
@@ -431,13 +429,23 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
         const statusMessage = getStatusMessage(monitorStatusMessageParams);
         const monitorSummary = getMonitorSummary(monitorInfo, statusMessage);
         const alertId = getInstanceId(monitorInfo, monitorLoc.location);
-        const alert = alertWithLifecycle({
-          id: alertId,
-          fields: getMonitorAlertDocument(monitorSummary),
-        });
-        const indexedStartedAt = getAlertStartedDate(alertId) ?? startedAt.toISOString();
-        const alertUuid = getAlertUuid(alertId);
+        const context = {
+          ...monitorSummary,
+          statusMessage,
+        };
 
+        const { uuid, start } = alertsClient.report({
+          id: alertId,
+          actionGroup: MONITOR_STATUS.id,
+          payload: getMonitorAlertDocument(monitorSummary),
+          state: {
+            ...state,
+            ...context,
+            ...updateState(state, true),
+          },
+        });
+
+        const indexedStartedAt = start ?? startedAt.toISOString();
         const relativeViewInAppUrl = getMonitorRouteFromMonitorId({
           monitorId: monitorSummary.monitorId,
           dateRangeEnd: 'now',
@@ -447,37 +455,27 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
           },
         });
 
-        const context = {
-          ...monitorSummary,
-          statusMessage,
-        };
-
-        alert.replaceState({
-          ...state,
-          ...context,
-          ...updateState(state, true),
-        });
-
-        alert.scheduleActions(MONITOR_STATUS.id, {
-          [ALERT_DETAILS_URL]: await getAlertUrl(
-            alertUuid,
-            spaceId,
-            indexedStartedAt,
-            alertsLocator,
-            basePath.publicBaseUrl
-          ),
-          [VIEW_IN_APP_URL]: getViewInAppUrl(basePath, spaceId, relativeViewInAppUrl),
-          ...context,
+        alertsClient.setAlertData({
+          id: alertId,
+          context: {
+            [ALERT_DETAILS_URL]: await getAlertUrl(
+              uuid,
+              spaceId,
+              indexedStartedAt,
+              alertsLocator,
+              basePath.publicBaseUrl
+            ),
+            [VIEW_IN_APP_URL]: getViewInAppUrl(basePath, spaceId, relativeViewInAppUrl),
+            ...context,
+          },
         });
       }
 
-      await setRecoveredAlertsContext({
-        alertFactory,
+      await setRecoveredAlertsContext<ActionGroupIds>({
+        alertsClient,
         alertsLocator,
         basePath,
         defaultStartedAt: startedAt.toISOString(),
-        getAlertStartedDate,
-        getAlertUuid,
         spaceId,
       });
 
@@ -526,23 +524,22 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
       );
       const monitorSummary = getMonitorSummary(monitorInfo, statusMessage);
       const alertId = getInstanceId(monitorInfo, monIdByLoc);
-      const alert = alertWithLifecycle({
-        id: alertId,
-        fields: getMonitorAlertDocument(monitorSummary),
-      });
-      const alertUuid = getAlertUuid(alertId);
-      const indexedStartedAt = getAlertStartedDate(alertId) ?? startedAt.toISOString();
-
       const context = {
         ...monitorSummary,
         statusMessage,
       };
 
-      alert.replaceState({
-        ...updateState(state, true),
-        ...context,
+      const { uuid, start } = alertsClient.report({
+        id: alertId,
+        actionGroup: MONITOR_STATUS.id,
+        payload: getMonitorAlertDocument(monitorSummary),
+        state: {
+          ...updateState(state, true),
+          ...context,
+        },
       });
 
+      const indexedStartedAt = start ?? startedAt.toISOString();
       const relativeViewInAppUrl = getMonitorRouteFromMonitorId({
         monitorId: monitorSummary.monitorId,
         dateRangeEnd: 'now',
@@ -552,26 +549,27 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
         },
       });
 
-      alert.scheduleActions(MONITOR_STATUS.id, {
-        [ALERT_DETAILS_URL]: await getAlertUrl(
-          alertUuid,
-          spaceId,
-          indexedStartedAt,
-          alertsLocator,
-          basePath.publicBaseUrl
-        ),
-        [VIEW_IN_APP_URL]: getViewInAppUrl(basePath, spaceId, relativeViewInAppUrl),
-        ...context,
+      alertsClient.setAlertData({
+        id: alertId,
+        context: {
+          [ALERT_DETAILS_URL]: await getAlertUrl(
+            uuid,
+            spaceId,
+            indexedStartedAt,
+            alertsLocator,
+            basePath.publicBaseUrl
+          ),
+          [VIEW_IN_APP_URL]: getViewInAppUrl(basePath, spaceId, relativeViewInAppUrl),
+          ...context,
+        },
       });
     });
 
     await setRecoveredAlertsContext({
-      alertFactory,
+      alertsClient,
       alertsLocator,
       basePath,
       defaultStartedAt: startedAt.toISOString(),
-      getAlertStartedDate,
-      getAlertUuid,
       spaceId,
     });
 

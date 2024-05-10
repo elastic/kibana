@@ -944,7 +944,6 @@ export const RulesListTable = (props: RulesListTableProps) => {
             }
           }}
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-          isExpandable={true}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

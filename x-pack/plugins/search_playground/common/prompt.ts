@@ -32,13 +32,26 @@ const MistralPrompt = (systemInstructions: string) => {
   `;
 };
 
+// https://docs.anthropic.com/claude/docs/use-xml-tags
+const AnthropicPrompt = (systemInstructions: string) => {
+  return `
+  <instructions>${systemInstructions}</instructions>
+
+  <context>
+  {context}
+  </context>
+
+  <input>{question}</input>
+  `;
+};
+
 interface PromptTemplateOptions {
   citations?: boolean;
   context?: boolean;
-  type?: 'openai' | 'mistral';
+  type?: 'openai' | 'mistral' | 'anthropic';
 }
 
-export const Prompt = (instructions: string, options: PromptTemplateOptions) => {
+export const Prompt = (instructions: string, options: PromptTemplateOptions): string => {
   const systemInstructions = `
   - ${instructions}
   ${
@@ -59,5 +72,6 @@ export const Prompt = (instructions: string, options: PromptTemplateOptions) => 
   return {
     openai: OpenAIPrompt,
     mistral: MistralPrompt,
+    anthropic: AnthropicPrompt,
   }[options.type || 'openai'](systemInstructions);
 };

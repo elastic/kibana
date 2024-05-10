@@ -20,14 +20,8 @@ import {
   ApmDataAccessPluginStart,
 } from '@kbn/apm-data-access-plugin/server';
 
-import {
-  SpacesPluginSetup,
-  SpacesPluginStart,
-} from '@kbn/spaces-plugin/server';
-import {
-  HomeServerPluginSetup,
-  HomeServerPluginStart,
-} from '@kbn/home-plugin/server';
+import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { HomeServerPluginSetup, HomeServerPluginStart } from '@kbn/home-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { ActionsPlugin } from '@kbn/actions-plugin/server';
 import { AlertingPlugin } from '@kbn/alerting-plugin/server';
@@ -36,16 +30,10 @@ import {
   PluginSetupContract as FeaturesPluginSetup,
   PluginStartContract as FeaturesPluginStart,
 } from '@kbn/features-plugin/server';
-import {
-  LicensingPluginSetup,
-  LicensingPluginStart,
-} from '@kbn/licensing-plugin/server';
+import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/server';
 import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
-import {
-  SecurityPluginSetup,
-  SecurityPluginStart,
-} from '@kbn/security-plugin/server';
+import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,

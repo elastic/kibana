@@ -282,7 +282,6 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
         columns={columns}
         search={searchConfig}
         sorting={sorting}
-        isSelectable={true}
         selection={selectionConfig}
         pagination={pagination}
         rowProps={() => ({

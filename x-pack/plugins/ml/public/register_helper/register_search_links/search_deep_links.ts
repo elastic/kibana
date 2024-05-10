@@ -15,7 +15,8 @@ import { ML_PAGES } from '../../../common/constants/locator';
 function createDeepLinks(
   mlCapabilities: MlCapabilities,
   isFullLicense: boolean,
-  isServerless: boolean
+  isServerless: boolean,
+  esqlEnabled?: boolean
 ) {
   return {
     getOverviewLinkDeepLink: (): AppDeepLink<LinkId> | null => {
@@ -238,7 +239,8 @@ function createDeepLinks(
       };
     },
 
-    getESQLDataVisualizerDeepLink: (): AppDeepLink<LinkId> => {
+    getESQLDataVisualizerDeepLink: (): AppDeepLink<LinkId> | null => {
+      if (!esqlEnabled) return null;
       return {
         id: 'esqlDataVisualizer',
         title: i18n.translate('xpack.ml.deepLink.esqlDataVisualizer', {
@@ -263,9 +265,10 @@ function createDeepLinks(
 export function getDeepLinks(
   isFullLicense: boolean,
   mlCapabilities: MlCapabilities,
-  isServerless: boolean
+  isServerless: boolean,
+  esqlEnabled?: boolean
 ): Array<AppDeepLink<LinkId>> {
-  const links = createDeepLinks(mlCapabilities, isFullLicense, isServerless);
+  const links = createDeepLinks(mlCapabilities, isFullLicense, isServerless, esqlEnabled);
   return Object.values(links)
     .map((link) => link())
     .filter((link): link is AppDeepLink<LinkId> => link !== null);

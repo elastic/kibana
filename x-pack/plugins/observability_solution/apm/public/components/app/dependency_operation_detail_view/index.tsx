@@ -72,27 +72,16 @@ export function DependencyOperationDetailView() {
         },
       });
     },
-    [
-      dependencyName,
-      spanName,
-      start,
-      end,
-      environment,
-      kuery,
-      sampleRangeFrom,
-      sampleRangeTo,
-    ]
+    [dependencyName, spanName, start, end, environment, kuery, sampleRangeFrom, sampleRangeTo]
   );
 
   const samples = useMemo(() => {
     return (
-      orderBy(spanFetch.data?.spans ?? [], sortField, sortDirection).map(
-        (span) => ({
-          spanId: span.spanId,
-          traceId: span.traceId,
-          transactionId: span.transactionId,
-        })
-      ) || []
+      orderBy(spanFetch.data?.spans ?? [], sortField, sortDirection).map((span) => ({
+        spanId: span.spanId,
+        traceId: span.traceId,
+        transactionId: span.transactionId,
+      })) || []
     );
   }, [spanFetch.data?.spans, sortField, sortDirection]);
 
@@ -133,10 +122,9 @@ export function DependencyOperationDetailView() {
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
         <DetailViewHeader
-          backLabel={i18n.translate(
-            'xpack.apm.dependecyOperationDetailView.header.backLinkLabel',
-            { defaultMessage: 'All operations' }
-          )}
+          backLabel={i18n.translate('xpack.apm.dependecyOperationDetailView.header.backLinkLabel', {
+            defaultMessage: 'All operations',
+          })}
           backHref={router.link('/dependencies/operations', {
             query: queryWithoutSpanName,
           })}
@@ -172,10 +160,7 @@ export function DependencyOperationDetailView() {
                   },
                 });
               }}
-              serviceName={
-                waterfallFetch.waterfall.entryWaterfallTransaction?.doc.service
-                  .name
-              }
+              serviceName={waterfallFetch.waterfall.entryWaterfallTransaction?.doc.service.name}
               waterfallItemId={waterfallItemId}
               detailTab={detailTab}
               selectedSample={selectedSample || null}

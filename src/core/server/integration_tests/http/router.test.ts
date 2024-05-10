@@ -17,7 +17,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { Router } from '@kbn/core-http-router-server-internal';
-import { createHttpServer } from '@kbn/core-http-server-mocks';
+import { createHttpService } from '@kbn/core-http-server-mocks';
 import type { HttpService } from '@kbn/core-http-server-internal';
 import { loggerMock } from '@kbn/logging-mocks';
 
@@ -32,7 +32,7 @@ const setupDeps = {
 
 beforeEach(async () => {
   logger = loggingSystemMock.create();
-  server = createHttpServer({ logger });
+  server = createHttpService({ logger });
   await server.preboot({ context: contextServiceMock.createPrebootContract() });
 });
 
@@ -333,15 +333,15 @@ describe('Options', () => {
         let i = 0;
         const intervalId = setInterval(() => {
           if (i < body.length) {
-            request.write(body[i++]);
+            void request.write(body[i++]);
           } else {
             clearInterval(intervalId);
-            request.end((err, res) => {
+            void request.end((err, res) => {
               resolve(res);
             });
           }
         }, interval);
-        request.on('error', (err) => {
+        void request.on('error', (err) => {
           clearInterval(intervalId);
           reject(err);
         });
@@ -1405,7 +1405,7 @@ describe('Response factory', () => {
             },
             response: {
               200: {
-                body: runtimeValidation,
+                body: () => runtimeValidation,
               },
             },
           },

@@ -579,7 +579,7 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
 
           return cy.get('tbody .euiTableRow > td:nth-child(5)').invoke('text');
         },
-        (response) => response !== 'Docs-',
+        (response) => response !== '-',
         {
           timeout: 300000,
           post: () => {

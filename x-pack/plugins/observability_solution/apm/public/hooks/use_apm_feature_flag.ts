@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import {
-  ApmFeatureFlagName,
-  ValueOfApmFeatureFlag,
-} from '../../common/apm_feature_flags';
+import { ApmFeatureFlagName, ValueOfApmFeatureFlag } from '../../common/apm_feature_flags';
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
 
-export function useApmFeatureFlag<
-  TApmFeatureFlagName extends ApmFeatureFlagName
->(
+export function useApmFeatureFlag<TApmFeatureFlagName extends ApmFeatureFlagName>(
   featureFlag: TApmFeatureFlagName
 ): ValueOfApmFeatureFlag<TApmFeatureFlagName> {
   const { config } = useApmPluginContext();

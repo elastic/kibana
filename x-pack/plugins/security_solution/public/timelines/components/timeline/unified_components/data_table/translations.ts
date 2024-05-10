@@ -64,3 +64,11 @@ export const LOADING_EVENTS = i18n.translate(
     defaultMessage: 'Loading Events',
   }
 );
+
+export const TIMELINE_UNIFIED_DATA_TABLE_CONTEXT_ERROR = i18n.translate(
+  'xpack.securitySolution.timeline.dataTable.timelineContextError',
+  {
+    defaultMessage:
+      'Incorrect Usage of Unified Data Table Context. Must be used inside components or hooks called inside UnifiedDataTable ',
+  }
+);

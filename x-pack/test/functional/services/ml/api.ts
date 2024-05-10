@@ -620,6 +620,56 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return response;
     },
 
+    async getAnomalyDetectionJobsKibana(jobId?: string, space?: string) {
+      const { body, status } = await kbnSupertest
+        .get(
+          `${space ? `/s/${space}` : ''}/internal/ml/anomaly_detectors${
+            jobId !== undefined ? `/${jobId}` : ''
+          }`
+        )
+        .set(getCommonRequestHeader('1'));
+      this.assertResponseStatusCode(200, status, body);
+      return body;
+    },
+
+    async getAnomalyDetectionDatafeedsKibana(datafeedId?: string, space?: string) {
+      const { body, status } = await kbnSupertest
+        .get(
+          `${space ? `/s/${space}` : ''}/internal/ml/datafeeds${
+            datafeedId !== undefined ? `/${datafeedId}` : ''
+          }`
+        )
+        .set(getCommonRequestHeader('1'));
+      this.assertResponseStatusCode(200, status, body);
+      return body;
+    },
+
+    async adJobsExistsInSpace(jobIds: string[], space?: string) {
+      const { jobs }: { jobs: Job[] } = await this.getAnomalyDetectionJobsKibana(
+        jobIds.join(','),
+        space
+      );
+      const existingJobIds = jobs.map((job) => job.job_id);
+      if (jobIds.every((id) => existingJobIds.includes(id)) === false) {
+        throw new Error(
+          `Expected jobs ${jobIds} to exist in space ${space}, got ${existingJobIds}`
+        );
+      }
+      return true;
+    },
+
+    async datafeedsExistsInSpace(datafeedIds: string[], space?: string) {
+      const { datafeeds }: { datafeeds: Datafeed[] } =
+        await this.getAnomalyDetectionDatafeedsKibana(datafeedIds.join(','), space);
+      const existingDatafeedIds = datafeeds.map((datafeed) => datafeed.datafeed_id);
+      if (datafeedIds.every((id) => existingDatafeedIds.includes(id)) === false) {
+        throw new Error(
+          `Expected datafeeds ${datafeedIds} to exist in space ${space}, got ${existingDatafeedIds}`
+        );
+      }
+      return true;
+    },
+
     async hasNotifications(query: object) {
       const body = await es.search({
         index: '.ml-notifications*',

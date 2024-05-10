@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiHorizontalRule,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiHorizontalRule, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { default as React, useCallback, useEffect, useState } from 'react';
@@ -28,15 +22,8 @@ import {
   ElasticAgentPlatform,
   getElasticAgentSetupCommand,
 } from '../../shared/get_elastic_agent_setup_command';
-import {
-  InstallElasticAgentSteps,
-  EuiStepStatus,
-} from '../../shared/install_elastic_agent_steps';
-import {
-  StepPanel,
-  StepPanelContent,
-  StepPanelFooter,
-} from '../../shared/step_panel';
+import { InstallElasticAgentSteps, EuiStepStatus } from '../../shared/install_elastic_agent_steps';
+import { StepPanel, StepPanelContent, StepPanelFooter } from '../../shared/step_panel';
 import { ApiKeyBanner } from './api_key_banner';
 import { BackButton } from '../../shared/back_button';
 import { WindowsInstallStep } from '../../shared/windows_install_step';
@@ -50,24 +37,17 @@ export function InstallElasticAgent() {
   } = useKibana<ObservabilityOnboardingPluginSetupDeps>();
 
   const singleDatasetLocator =
-    share.url.locators.get<SingleDatasetLocatorParams>(
-      SINGLE_DATASET_LOCATOR_ID
-    );
+    share.url.locators.get<SingleDatasetLocatorParams>(SINGLE_DATASET_LOCATOR_ID);
 
   const { goBack, getState, setState } = useWizard();
   const wizardState = getState();
-  const {
-    integrationName: integration,
-    datasetName: dataset,
-    autoDownloadConfig,
-  } = wizardState;
+  const { integrationName: integration, datasetName: dataset, autoDownloadConfig } = wizardState;
 
   const [elasticAgentPlatform, setElasticAgentPlatform] =
     useState<ElasticAgentPlatform>('linux-tar');
 
   const enforcedDatasetName =
-    (integration === dataset ? dataset : `${integration}.${dataset}`) ??
-    defaultDatasetName;
+    (integration === dataset ? dataset : `${integration}.${dataset}`) ?? defaultDatasetName;
 
   async function onContinue() {
     await singleDatasetLocator!.navigate({
@@ -84,21 +64,14 @@ export function InstallElasticAgent() {
     }));
   }
 
-  const { data: monitoringRole, status: monitoringRoleStatus } = useFetcher(
-    (callApi) => {
-      if (!hasAlreadySavedFlow(getState())) {
-        return callApi(
-          'GET /internal/observability_onboarding/logs/setup/privileges'
-        );
-      }
-    },
-    []
-  );
+  const { data: monitoringRole, status: monitoringRoleStatus } = useFetcher((callApi) => {
+    if (!hasAlreadySavedFlow(getState())) {
+      return callApi('GET /internal/observability_onboarding/logs/setup/privileges');
+    }
+  }, []);
 
   const { data: setup } = useFetcher((callApi) => {
-    return callApi(
-      'GET /internal/observability_onboarding/logs/setup/environment'
-    );
+    return callApi('GET /internal/observability_onboarding/logs/setup/environment');
   }, []);
 
   const {
@@ -107,18 +80,9 @@ export function InstallElasticAgent() {
     error,
   } = useFetcher(
     (callApi) => {
-      const {
-        datasetName,
-        serviceName,
-        namespace,
-        customConfigurations,
-        logFilePaths,
-      } = getState();
-      if (
-        !hasAlreadySavedFlow(getState()) &&
-        monitoringRole?.hasPrivileges &&
-        datasetName
-      ) {
+      const { datasetName, serviceName, namespace, customConfigurations, logFilePaths } =
+        getState();
+      if (!hasAlreadySavedFlow(getState()) && monitoringRole?.hasPrivileges && datasetName) {
         return callApi('POST /internal/observability_onboarding/logs/flow', {
           params: {
             body: {
@@ -149,23 +113,20 @@ export function InstallElasticAgent() {
       logFilePaths,
     } = getState();
     if (onboardingId) {
-      return callApi(
-        'PUT /internal/observability_onboarding/flow/{onboardingId}',
-        {
-          params: {
-            path: { onboardingId },
-            body: {
-              state: {
-                datasetName,
-                serviceName,
-                namespace,
-                customConfigurations,
-                logFilePaths,
-              },
+      return callApi('PUT /internal/observability_onboarding/flow/{onboardingId}', {
+        params: {
+          path: { onboardingId },
+          body: {
+            state: {
+              datasetName,
+              serviceName,
+              namespace,
+              customConfigurations,
+              logFilePaths,
             },
           },
-        }
-      );
+        },
+      });
     }
   }, []);
 
@@ -174,20 +135,13 @@ export function InstallElasticAgent() {
   const { data: yamlConfig = '', status: yamlConfigStatus } = useFetcher(
     (callApi) => {
       if (apiKeyEncoded && onboardingId) {
-        return callApi(
-          'GET /internal/observability_onboarding/elastic_agent/config',
-          {
-            headers: { authorization: `ApiKey ${apiKeyEncoded}` },
-            params: { query: { onboardingId } },
-          }
-        );
+        return callApi('GET /internal/observability_onboarding/elastic_agent/config', {
+          headers: { authorization: `ApiKey ${apiKeyEncoded}` },
+          params: { query: { onboardingId } },
+        });
       }
     },
-    [
-      apiKeyEncoded,
-      onboardingId,
-      saveOnboardingStateDataStatus === FETCH_STATUS.SUCCESS,
-    ]
+    [apiKeyEncoded, onboardingId, saveOnboardingStateDataStatus === FETCH_STATUS.SUCCESS]
   );
 
   useEffect(() => {
@@ -202,10 +156,9 @@ export function InstallElasticAgent() {
   } = useFetcher(
     (callApi) => {
       if (onboardingId) {
-        return callApi(
-          'GET /internal/observability_onboarding/flow/{onboardingId}/progress',
-          { params: { path: { onboardingId } } }
-        );
+        return callApi('GET /internal/observability_onboarding/flow/{onboardingId}/progress', {
+          params: { path: { onboardingId } },
+        });
       }
     },
     [onboardingId]
@@ -246,10 +199,9 @@ export function InstallElasticAgent() {
   }, [progressData?.progress]);
 
   const isInstallStarted = progressData?.progress['ea-download'] !== undefined;
-  const isInstallCompleted =
-    progressData?.progress?.['ea-status']?.status === 'complete';
-  const autoDownloadConfigStatus = (progressData?.progress?.['ea-config']
-    ?.status ?? 'incomplete') as EuiStepStatus;
+  const isInstallCompleted = progressData?.progress?.['ea-status']?.status === 'complete';
+  const autoDownloadConfigStatus = (progressData?.progress?.['ea-config']?.status ??
+    'incomplete') as EuiStepStatus;
 
   return (
     <StepPanel
@@ -264,10 +216,9 @@ export function InstallElasticAgent() {
               iconType="magnifyWithPlus"
               onClick={onContinue}
             >
-              {i18n.translate(
-                'xpack.observability_onboarding.steps.exploreLogs',
-                { defaultMessage: 'Explore logs' }
-              )}
+              {i18n.translate('xpack.observability_onboarding.steps.exploreLogs', {
+                defaultMessage: 'Explore logs',
+              })}
             </EuiButton>,
           ]}
         />
@@ -276,13 +227,10 @@ export function InstallElasticAgent() {
       <StepPanelContent>
         <EuiText color="subdued">
           <p>
-            {i18n.translate(
-              'xpack.observability_onboarding.installElasticAgent.description',
-              {
-                defaultMessage:
-                  'To collect the data from your system and stream it to Elastic, you first need to install a shipping tool on the machine generating the logs. In this case, the shipping tool is an agent developed by Elastic.',
-              }
-            )}
+            {i18n.translate('xpack.observability_onboarding.installElasticAgent.description', {
+              defaultMessage:
+                'To collect the data from your system and stream it to Elastic, you first need to install a shipping tool on the machine generating the logs. In this case, the shipping tool is an agent developed by Elastic.',
+            })}
           </p>
         </EuiText>
         <EuiSpacer size="m" />
@@ -374,16 +322,11 @@ export function InstallElasticAgent() {
           showInstallProgressSteps={isInstallStarted}
           installProgressSteps={
             (progressData?.progress ?? {}) as Partial<
-              Record<
-                EaInstallProgressStepId,
-                { status: EuiStepStatus; message?: string }
-              >
+              Record<EaInstallProgressStepId, { status: EuiStepStatus; message?: string }>
             >
           }
           configureAgentStatus={
-            yamlConfigStatus === FETCH_STATUS.LOADING
-              ? 'loading'
-              : autoDownloadConfigStatus
+            yamlConfigStatus === FETCH_STATUS.LOADING ? 'loading' : autoDownloadConfigStatus
           }
           configureAgentYaml={yamlConfig}
           appendedSteps={[getCheckLogsStep()]}

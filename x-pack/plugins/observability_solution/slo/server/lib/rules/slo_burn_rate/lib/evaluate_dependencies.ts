@@ -12,12 +12,12 @@ import { ALL_VALUE } from '@kbn/slo-schema';
 import { Dependency } from '../../../../../common/types';
 import { KibanaSavedObjectsSLORepository } from '../../../../services';
 import { BurnRateRuleParams } from '../types';
-import { SLO } from '../../../../domain/models';
+import { SLODefinition } from '../../../../domain/models';
 import { evaluate } from './evaluate';
 
 export interface ActiveRule {
   rule: Rule<BurnRateRuleParams>;
-  slo: SLO;
+  slo: SLODefinition;
   instanceIdsToSuppress: string[];
   suppressAll: boolean;
 }

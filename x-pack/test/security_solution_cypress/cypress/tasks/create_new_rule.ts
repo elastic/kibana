@@ -125,6 +125,9 @@ import {
   ALERTS_INDEX_BUTTON,
   INVESTIGATIONS_INPUT,
   QUERY_BAR_ADD_FILTER,
+  MAX_SIGNALS_INPUT,
+  SETUP_GUIDE_TEXTAREA,
+  RELATED_INTEGRATION_COMBO_BOX_INPUT,
 } from '../screens/create_new_rule';
 import {
   INDEX_SELECTOR,
@@ -147,7 +150,7 @@ import { ruleFields } from '../data/detection_engine';
 import { waitForAlerts } from './alerts';
 import { refreshPage } from './security_header';
 import { EMPTY_ALERT_TABLE } from '../screens/alerts';
-import { TOOLTIP } from '../screens/common';
+import { COMBO_BOX_OPTION, TOOLTIP } from '../screens/common';
 
 export const createAndEnableRule = () => {
   cy.get(CREATE_AND_ENABLE_BTN).click();
@@ -196,11 +199,25 @@ export const expandAdvancedSettings = () => {
   cy.get(ADVANCED_SETTINGS_BTN).click({ force: true });
 };
 
+export const fillMaxSignals = (maxSignals: number = ruleFields.maxSignals) => {
+  cy.get(MAX_SIGNALS_INPUT).clear({ force: true });
+  cy.get(MAX_SIGNALS_INPUT).type(maxSignals.toString());
+
+  return maxSignals;
+};
+
 export const fillNote = (note: string = ruleFields.investigationGuide) => {
   cy.get(INVESTIGATION_NOTES_TEXTAREA).clear({ force: true });
   cy.get(INVESTIGATION_NOTES_TEXTAREA).type(note, { force: true });
 
   return note;
+};
+
+export const fillSetup = (setup: string = ruleFields.setup) => {
+  cy.get(SETUP_GUIDE_TEXTAREA).clear({ force: true });
+  cy.get(SETUP_GUIDE_TEXTAREA).type(setup);
+
+  return setup;
 };
 
 export const fillMitre = (mitreAttacks: Threat[]) => {
@@ -272,10 +289,25 @@ export const importSavedQuery = (timelineId: string) => {
   removeAlertsIndex();
 };
 
+export const fillRelatedIntegrations = (): void => {
+  addFirstIntegration();
+  addFirstIntegration();
+};
+
+const addFirstIntegration = (): void => {
+  cy.get('button').contains('Add integration').click();
+  cy.get(RELATED_INTEGRATION_COMBO_BOX_INPUT).last().should('be.enabled').click();
+  cy.get(COMBO_BOX_OPTION).first().click();
+};
+
 export const fillRuleName = (ruleName: string = ruleFields.ruleName) => {
   cy.get(RULE_NAME_INPUT).clear({ force: true });
   cy.get(RULE_NAME_INPUT).type(ruleName, { force: true });
   return ruleName;
+};
+
+export const fillCustomQueryInput = (ruleQuery: string = ruleFields.ruleQuery) => {
+  getCustomQueryInput().type(ruleQuery);
 };
 
 export const fillDescription = (description: string = ruleFields.ruleDescription) => {
@@ -524,7 +556,7 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRuleCreateProp
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 };
 
-export const fillDefineEqlRuleAndContinue = (rule: EqlRuleCreateProps) => {
+export const fillDefineEqlRule = (rule: EqlRuleCreateProps) => {
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('exist');
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('be.visible');
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).type(rule.query);
@@ -540,7 +572,10 @@ export const fillDefineEqlRuleAndContinue = (rule: EqlRuleCreateProps) => {
       }
     });
   cy.get(TOAST_ERROR).should('not.exist');
+};
 
+export const fillDefineEqlRuleAndContinue = (rule: EqlRuleCreateProps) => {
+  fillDefineEqlRule(rule);
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 };
 

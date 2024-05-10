@@ -83,6 +83,7 @@ export const AgentPolicyBaseSchema = {
     )
   ),
   ...getSettingsAPISchema('AGENT_POLICY_ADVANCED_SETTINGS'),
+  supports_agentless: schema.maybe(schema.boolean({ defaultValue: false })),
 };
 
 export const NewAgentPolicySchema = schema.object({

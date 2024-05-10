@@ -16,5 +16,4 @@ export const getFilename = (path?: string) => {
   return replaceSpecialChars(filenameParts[0]);
 };
 
-export const replaceSpecialChars = (filename: string) =>
-  filename.replaceAll(/[^a-zA-Z0-9_]/g, '_');
+export const replaceSpecialChars = (filename: string) => filename.replaceAll(/[^a-zA-Z0-9_]/g, '_');

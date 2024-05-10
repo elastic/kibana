@@ -108,15 +108,51 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
 
   const timeRange = {
     min: alertStart.clone().subtract(15 * intervalFactor, 'minutes'),
-    max: alertEnd ? alertEnd.clone().add(1 * intervalFactor, 'minutes') : moment(new Date()),
+    max: getTimeRangeEnd(),
   };
+
+  function getTimeRangeEnd() {
+    if (alertEnd) {
+      if (
+        alertStart
+          .clone()
+          .add(15 * intervalFactor, 'minutes')
+          .isAfter(alertEnd)
+      )
+        return alertEnd.clone().add(1 * intervalFactor, 'minutes');
+      else {
+        return alertStart.clone().add(15 * intervalFactor, 'minutes');
+      }
+    } else if (
+      alertStart
+        .clone()
+        .add(15 * intervalFactor, 'minutes')
+        .isAfter(moment(new Date()))
+    ) {
+      return moment(new Date());
+    } else {
+      return alertStart.clone().add(15 * intervalFactor, 'minutes');
+    }
+  }
 
   function getDeviationMax() {
     if (alertEnd) {
-      return alertEnd
-        .clone()
-        .subtract(1 * intervalFactor, 'minutes')
-        .valueOf();
+      if (
+        alertStart
+          .clone()
+          .add(10 * intervalFactor, 'minutes')
+          .isAfter(alertEnd)
+      )
+        return alertEnd
+          .clone()
+          .subtract(1 * intervalFactor, 'minutes')
+          .valueOf();
+      else {
+        return alertStart
+          .clone()
+          .add(10 * intervalFactor, 'minutes')
+          .valueOf();
+      }
     } else if (
       alertStart
         .clone()

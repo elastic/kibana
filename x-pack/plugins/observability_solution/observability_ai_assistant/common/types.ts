@@ -94,6 +94,8 @@ export interface UserInstruction {
   text: string;
 }
 
+export type UserInstructionOrPlainText = string | UserInstruction;
+
 export interface ObservabilityAIAssistantScreenContextRequest {
   screenDescription?: string;
   data?: Array<{

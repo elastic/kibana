@@ -240,7 +240,7 @@ describe('LensVisService attributes', () => {
                         "label": "Top 3 values of extension",
                         "operationType": "terms",
                         "params": Object {
-                          "missingBucket": false,
+                          "missingBucket": true,
                           "orderBy": Object {
                             "columnId": "count_column",
                             "type": "column",
@@ -763,7 +763,8 @@ describe('LensVisService attributes', () => {
 
   it('should use the correct histogram query when no suggestion passed', async () => {
     const histogramQuery = {
-      esql: 'from logstash-* | limit 10 | EVAL timestamp=DATE_TRUNC(10 minute, @timestamp) | stats results = count(*) by timestamp | rename timestamp as `@timestamp every 10 minute`',
+      esql: `from logstash-* | limit 10
+| EVAL timestamp=DATE_TRUNC(10 minute, @timestamp) | stats results = count(*) by timestamp | rename timestamp as \`@timestamp every 10 minute\``,
     };
     const lensVis = await getLensVisMock({
       filters,

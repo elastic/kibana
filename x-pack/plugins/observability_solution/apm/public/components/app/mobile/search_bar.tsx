@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexGroupProps,
-  EuiFlexItem,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexGroupProps, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { TimeComparison } from '../../shared/time_comparison';
@@ -45,11 +40,7 @@ export function MobileSearchBar({
 
   return (
     <>
-      <EuiFlexGroup
-        gutterSize="s"
-        responsive={false}
-        direction={searchBarDirection}
-      >
+      <EuiFlexGroup gutterSize="s" responsive={false} direction={searchBarDirection}>
         <EuiFlexGroup
           direction={isLarge ? 'columnReverse' : 'row'}
           gutterSize="s"

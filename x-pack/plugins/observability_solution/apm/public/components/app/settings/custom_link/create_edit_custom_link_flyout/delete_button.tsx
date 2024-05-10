@@ -44,10 +44,7 @@ export function DeleteButton({ onDelete, customLinkId }: Props) {
   );
 }
 
-async function deleteConfig(
-  customLinkId: string,
-  toasts: NotificationsStart['toasts']
-) {
+async function deleteConfig(customLinkId: string, toasts: NotificationsStart['toasts']) {
   try {
     await callApmApi('DELETE /internal/apm/settings/custom_links/{id}', {
       signal: null,

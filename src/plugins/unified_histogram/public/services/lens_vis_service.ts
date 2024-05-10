@@ -8,7 +8,7 @@
 
 import { BehaviorSubject, distinctUntilChanged, map, Observable } from 'rxjs';
 import { isEqual } from 'lodash';
-import { removeDropCommandsFromESQLQuery } from '@kbn/esql-utils';
+import { removeDropCommandsFromESQLQuery, appendToESQLQuery } from '@kbn/esql-utils';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type {
   CountIndexPatternColumn,
@@ -378,7 +378,7 @@ export class LensVisService {
             },
             orderDirection: 'desc',
             otherBucket: true,
-            missingBucket: false,
+            missingBucket: true,
             parentFormat: {
               id: 'terms',
             },
@@ -513,7 +513,10 @@ export class LensVisService {
     const queryInterval = interval ?? computeInterval(timeRange, this.services.data);
     const language = getAggregateQueryMode(query);
     const safeQuery = removeDropCommandsFromESQLQuery(query[language]);
-    return `${safeQuery} | EVAL timestamp=DATE_TRUNC(${queryInterval}, ${dataView.timeFieldName}) | stats results = count(*) by timestamp | rename timestamp as \`${dataView.timeFieldName} every ${queryInterval}\``;
+    return appendToESQLQuery(
+      safeQuery,
+      `| EVAL timestamp=DATE_TRUNC(${queryInterval}, ${dataView.timeFieldName}) | stats results = count(*) by timestamp | rename timestamp as \`${dataView.timeFieldName} every ${queryInterval}\``
+    );
   };
 
   private getAllSuggestions = ({ queryParams }: { queryParams: QueryParams }): Suggestion[] => {

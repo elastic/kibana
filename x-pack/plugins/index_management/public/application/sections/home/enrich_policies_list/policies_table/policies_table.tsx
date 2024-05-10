@@ -169,7 +169,6 @@ export const PoliciesTable: FunctionComponent<Props> = ({
       search={search}
       pagination={pagination}
       sorting={true}
-      isSelectable={false}
     />
   );
 };

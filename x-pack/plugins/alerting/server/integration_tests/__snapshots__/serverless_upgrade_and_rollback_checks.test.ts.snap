@@ -899,6 +899,9 @@ Object {
       },
       "metas": Array [
         Object {
+          "x-oas-any-type": true,
+        },
+        Object {
           "x-oas-optional": true,
         },
       ],
@@ -1116,6 +1119,9 @@ Object {
         "presence": "optional",
       },
       "metas": Array [
+        Object {
+          "x-oas-any-type": true,
+        },
         Object {
           "x-oas-optional": true,
         },
@@ -1944,6 +1950,11 @@ Object {
                             "flags": Object {
                               "error": [Function],
                             },
+                            "metas": Array [
+                              Object {
+                                "x-oas-any-type": true,
+                              },
+                            ],
                             "type": "any",
                           },
                         },
@@ -2227,6 +2238,11 @@ Object {
                             "flags": Object {
                               "error": [Function],
                             },
+                            "metas": Array [
+                              Object {
+                                "x-oas-any-type": true,
+                              },
+                            ],
                             "type": "any",
                           },
                         },
@@ -2508,6 +2524,11 @@ Object {
                             "flags": Object {
                               "error": [Function],
                             },
+                            "metas": Array [
+                              Object {
+                                "x-oas-any-type": true,
+                              },
+                            ],
                             "type": "any",
                           },
                         },
@@ -3452,6 +3473,11 @@ Object {
                           "flags": Object {
                             "error": [Function],
                           },
+                          "metas": Array [
+                            Object {
+                              "x-oas-any-type": true,
+                            },
+                          ],
                           "type": "any",
                         },
                       },
@@ -3495,6 +3521,11 @@ Object {
                           "flags": Object {
                             "error": [Function],
                           },
+                          "metas": Array [
+                            Object {
+                              "x-oas-any-type": true,
+                            },
+                          ],
                           "type": "any",
                         },
                       },
@@ -3763,6 +3794,9 @@ Object {
                                 },
                                 "metas": Array [
                                   Object {
+                                    "x-oas-any-type": true,
+                                  },
+                                  Object {
                                     "x-oas-optional": true,
                                   },
                                 ],
@@ -3973,6 +4007,9 @@ Object {
                                     },
                                     "metas": Array [
                                       Object {
+                                        "x-oas-any-type": true,
+                                      },
+                                      Object {
                                         "x-oas-optional": true,
                                       },
                                     ],
@@ -4132,6 +4169,9 @@ Object {
                                                 "presence": "optional",
                                               },
                                               "metas": Array [
+                                                Object {
+                                                  "x-oas-any-type": true,
+                                                },
                                                 Object {
                                                   "x-oas-optional": true,
                                                 },
@@ -4443,6 +4483,9 @@ Object {
                                                             "presence": "optional",
                                                           },
                                                           "metas": Array [
+                                                            Object {
+                                                              "x-oas-any-type": true,
+                                                            },
                                                             Object {
                                                               "x-oas-optional": true,
                                                             },
@@ -5053,6 +5096,9 @@ Object {
                                           },
                                           "metas": Array [
                                             Object {
+                                              "x-oas-any-type": true,
+                                            },
+                                            Object {
                                               "x-oas-optional": true,
                                             },
                                           ],
@@ -5363,6 +5409,9 @@ Object {
                                                         "presence": "optional",
                                                       },
                                                       "metas": Array [
+                                                        Object {
+                                                          "x-oas-any-type": true,
+                                                        },
                                                         Object {
                                                           "x-oas-optional": true,
                                                         },
@@ -6043,6 +6092,40 @@ Object {
         "ruleNameOverride": Object {
           "type": "string",
         },
+        "ruleSource": Object {
+          "anyOf": Array [
+            Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "is_customized": Object {
+                  "type": "boolean",
+                },
+                "type": Object {
+                  "const": "external",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+                "is_customized",
+              ],
+              "type": "object",
+            },
+            Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "type": Object {
+                  "const": "internal",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+              ],
+              "type": "object",
+            },
+          ],
+        },
         "setup": Object {
           "type": "string",
         },
@@ -6208,6 +6291,52 @@ Object {
     },
     Object {
       "properties": Object {
+        "alertSuppression": Object {
+          "additionalProperties": false,
+          "properties": Object {
+            "duration": Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "unit": Object {
+                  "enum": Array [
+                    "s",
+                    "m",
+                    "h",
+                  ],
+                  "type": "string",
+                },
+                "value": Object {
+                  "minimum": 1,
+                  "type": "integer",
+                },
+              },
+              "required": Array [
+                "value",
+                "unit",
+              ],
+              "type": "object",
+            },
+            "groupBy": Object {
+              "items": Object {
+                "type": "string",
+              },
+              "maxItems": 3,
+              "minItems": 1,
+              "type": "array",
+            },
+            "missingFieldsStrategy": Object {
+              "enum": Array [
+                "doNotSuppress",
+                "suppress",
+              ],
+              "type": "string",
+            },
+          },
+          "required": Array [
+            "groupBy",
+          ],
+          "type": "object",
+        },
         "dataViewId": Object {
           "type": "string",
         },
@@ -6461,6 +6590,40 @@ Object {
         },
         "ruleNameOverride": Object {
           "type": "string",
+        },
+        "ruleSource": Object {
+          "anyOf": Array [
+            Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "is_customized": Object {
+                  "type": "boolean",
+                },
+                "type": Object {
+                  "const": "external",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+                "is_customized",
+              ],
+              "type": "object",
+            },
+            Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "type": Object {
+                  "const": "internal",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+              ],
+              "type": "object",
+            },
+          ],
         },
         "setup": Object {
           "type": "string",
@@ -6990,6 +7153,40 @@ Object {
         "ruleNameOverride": Object {
           "type": "string",
         },
+        "ruleSource": Object {
+          "anyOf": Array [
+            Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "is_customized": Object {
+                  "type": "boolean",
+                },
+                "type": Object {
+                  "const": "external",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+                "is_customized",
+              ],
+              "type": "object",
+            },
+            Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "type": Object {
+                  "const": "internal",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+              ],
+              "type": "object",
+            },
+          ],
+        },
         "setup": Object {
           "type": "string",
         },
@@ -7389,6 +7586,40 @@ Object {
         },
         "ruleNameOverride": Object {
           "type": "string",
+        },
+        "ruleSource": Object {
+          "anyOf": Array [
+            Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "is_customized": Object {
+                  "type": "boolean",
+                },
+                "type": Object {
+                  "const": "external",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+                "is_customized",
+              ],
+              "type": "object",
+            },
+            Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "type": Object {
+                  "const": "internal",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+              ],
+              "type": "object",
+            },
+          ],
         },
         "setup": Object {
           "type": "string",
@@ -7895,6 +8126,40 @@ Object {
         },
         "ruleNameOverride": Object {
           "type": "string",
+        },
+        "ruleSource": Object {
+          "anyOf": Array [
+            Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "is_customized": Object {
+                  "type": "boolean",
+                },
+                "type": Object {
+                  "const": "external",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+                "is_customized",
+              ],
+              "type": "object",
+            },
+            Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "type": Object {
+                  "const": "internal",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+              ],
+              "type": "object",
+            },
+          ],
         },
         "setup": Object {
           "type": "string",
@@ -8574,6 +8839,40 @@ Object {
         "ruleNameOverride": Object {
           "type": "string",
         },
+        "ruleSource": Object {
+          "anyOf": Array [
+            Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "is_customized": Object {
+                  "type": "boolean",
+                },
+                "type": Object {
+                  "const": "external",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+                "is_customized",
+              ],
+              "type": "object",
+            },
+            Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "type": Object {
+                  "const": "internal",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+              ],
+              "type": "object",
+            },
+          ],
+        },
         "setup": Object {
           "type": "string",
         },
@@ -9251,6 +9550,40 @@ Object {
         },
         "ruleNameOverride": Object {
           "type": "string",
+        },
+        "ruleSource": Object {
+          "anyOf": Array [
+            Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "is_customized": Object {
+                  "type": "boolean",
+                },
+                "type": Object {
+                  "const": "external",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+                "is_customized",
+              ],
+              "type": "object",
+            },
+            Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "type": Object {
+                  "const": "internal",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+              ],
+              "type": "object",
+            },
+          ],
         },
         "setup": Object {
           "type": "string",

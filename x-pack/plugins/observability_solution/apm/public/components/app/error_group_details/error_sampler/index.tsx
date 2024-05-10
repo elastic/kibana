@@ -9,11 +9,7 @@ import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
-import {
-  FETCH_STATUS,
-  isPending,
-  useFetcher,
-} from '../../../../hooks/use_fetcher';
+import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { ErrorSampleDetails } from './error_sample_detail';
@@ -25,11 +21,7 @@ interface Props {
   occurrencesCount: number;
 }
 
-export function ErrorSampler({
-  errorSampleIds,
-  errorSamplesFetchStatus,
-  occurrencesCount,
-}: Props) {
+export function ErrorSampler({ errorSampleIds, errorSamplesFetchStatus, occurrencesCount }: Props) {
   const history = useHistory();
 
   const { serviceName } = useApmServiceContext();

@@ -50,9 +50,7 @@ export class SelectableService extends FtrService {
         `selectableBodyTestSubjectId: ${selectableBodyTestSubjectId}, textsToSelect: ${textsToSelect}`
     );
 
-    // Open the selectable
-    await this.testSubjects.click(buttonTestSubjectId);
-    await this.common.sleep(500);
+    await this.ensureOpened(buttonTestSubjectId, selectableBodyTestSubjectId);
 
     const selectableBodyContainer = await this.testSubjects.find(selectableBodyTestSubjectId);
     const listContainer = await selectableBodyContainer.findByClassName('euiSelectableList');
@@ -85,6 +83,39 @@ export class SelectableService extends FtrService {
 
   public async clearSelection(buttonTestSubjectId: string, selectableBodyTestSubjectId: string) {
     return this.selectOnlyOptionsWithText(buttonTestSubjectId, selectableBodyTestSubjectId, []);
+  }
+
+  public async searchAndSelectOption(
+    buttonTestSubjectId: string,
+    selectableBodyTestSubjectId: string,
+    searchInputTestSubjectId: string,
+    searchText: string,
+    optionText: string
+  ) {
+    await this.ensureOpened(buttonTestSubjectId, selectableBodyTestSubjectId);
+
+    // Clear and set search text
+    await this.testSubjects.setValue(searchInputTestSubjectId, searchText, {
+      clearWithKeyboard: true,
+      typeCharByChar: true,
+    });
+    await this.common.sleep(500);
+
+    // Select options
+    return this.selectOnlyOptionsWithText(buttonTestSubjectId, selectableBodyTestSubjectId, [
+      optionText,
+    ]);
+  }
+
+  private async ensureOpened(buttonTestSubjectId: string, selectableBodyTestSubjectId: string) {
+    // Open the selectable if `selectableBodyTestSubjectId` doesn't exist
+    const isSelectableOpen = await this.testSubjects.exists(selectableBodyTestSubjectId);
+
+    if (!isSelectableOpen) {
+      await this.testSubjects.click(buttonTestSubjectId);
+    }
+
+    await this.testSubjects.existOrFail(selectableBodyTestSubjectId);
   }
 }
 

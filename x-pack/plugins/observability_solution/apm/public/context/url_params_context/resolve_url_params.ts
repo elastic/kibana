@@ -9,13 +9,7 @@ import { Location } from 'history';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 import { toQuery } from '../../components/shared/links/url_helpers';
-import {
-  getDateRange,
-  removeUndefinedProps,
-  toBoolean,
-  toNumber,
-  toString,
-} from './helpers';
+import { getDateRange, removeUndefinedProps, toBoolean, toNumber, toString } from './helpers';
 import { UrlParams } from './types';
 
 type TimeUrlParams = Pick<UrlParams, 'start' | 'end' | 'rangeFrom' | 'rangeTo'>;
@@ -79,9 +73,7 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     searchTerm: toString(searchTerm),
     percentile: toNumber(percentile),
     latencyAggregationType: latencyAggregationType as LatencyAggregationType,
-    comparisonEnabled: comparisonEnabled
-      ? toBoolean(comparisonEnabled)
-      : undefined,
+    comparisonEnabled: comparisonEnabled ? toBoolean(comparisonEnabled) : undefined,
     offset,
   });
 }

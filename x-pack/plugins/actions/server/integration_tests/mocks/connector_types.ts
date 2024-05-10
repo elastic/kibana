@@ -20,7 +20,6 @@ export const connectorTypes: string[] = [
   '.servicenow-sir',
   '.servicenow-itom',
   '.jira',
-  '.resilient',
   '.teams',
   '.torq',
   '.opsgenie',
@@ -28,7 +27,8 @@ export const connectorTypes: string[] = [
   '.gen-ai',
   '.bedrock',
   '.d3security',
+  '.resilient',
   '.sentinelone',
-  '.observability-ai-assistant',
   '.cases',
+  '.observability-ai-assistant',
 ];

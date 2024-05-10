@@ -16,24 +16,15 @@ type StepsProgress = Partial<
   Record<LogsFlowProgressStepId, { status: EuiStepStatus; message?: string }>
 >;
 
-const TRACKED_STEPS: LogsFlowProgressStepId[] = [
-  'ea-download',
-  'ea-status',
-  'logs-ingest',
-];
+const TRACKED_STEPS: LogsFlowProgressStepId[] = ['ea-download', 'ea-status', 'logs-ingest'];
 const TRACKED_STATUSES: EuiStepStatus[] = ['danger', 'warning', 'complete'];
 
-export function useFlowProgressTelemetry(
-  progress: StepsProgress | undefined,
-  flowId: string
-) {
+export function useFlowProgressTelemetry(progress: StepsProgress | undefined, flowId: string) {
   const {
     services: { analytics },
   } = useKibana();
   const experimentalOnboardingFlowEnabled = useExperimentalOnboardingFlag();
-  const [previousReportedSteps] = useState<
-    Map<LogsFlowProgressStepId, EuiStepStatus>
-  >(new Map());
+  const [previousReportedSteps] = useState<Map<LogsFlowProgressStepId, EuiStepStatus>>(new Map());
 
   useEffect(() => {
     if (!progress) {
@@ -51,23 +42,14 @@ export function useFlowProgressTelemetry(
         return;
       }
 
-      analytics.reportEvent(
-        OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT.eventType,
-        {
-          uses_legacy_onboarding_page: !experimentalOnboardingFlowEnabled,
-          flow: flowId,
-          step: stepId,
-          step_status: step.status,
-          step_message: step.message,
-        }
-      );
+      analytics.reportEvent(OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT.eventType, {
+        uses_legacy_onboarding_page: !experimentalOnboardingFlowEnabled,
+        flow: flowId,
+        step: stepId,
+        step_status: step.status,
+        step_message: step.message,
+      });
       previousReportedSteps.set(stepId, step.status);
     });
-  }, [
-    analytics,
-    experimentalOnboardingFlowEnabled,
-    flowId,
-    progress,
-    previousReportedSteps,
-  ]);
+  }, [analytics, experimentalOnboardingFlowEnabled, flowId, progress, previousReportedSteps]);
 }

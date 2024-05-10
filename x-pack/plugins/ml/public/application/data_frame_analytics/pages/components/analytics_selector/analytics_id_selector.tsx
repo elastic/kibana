@@ -238,7 +238,6 @@ export function AnalyticsIdSelector({
           pagination={pagination}
           sorting={true}
           selection={selectionValue}
-          isSelectable={true}
         />
       ),
     },
@@ -259,7 +258,6 @@ export function AnalyticsIdSelector({
           pagination={pagination}
           sorting={true}
           selection={selectionValue}
-          isSelectable={true}
         />
       ),
     });

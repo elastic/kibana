@@ -10,7 +10,7 @@ import React, { type FC } from 'react';
 import { TabbedModal } from '@kbn/shared-ux-tabbed-modal';
 
 import { ShareTabsContext, useShareTabsContext, type IShareContext } from './context';
-import { linkTab, embedTab } from './tabs';
+import { linkTab, embedTab, exportTab } from './tabs';
 
 export const ShareMenuV2: FC<{ shareContext: IShareContext }> = ({ shareContext }) => {
   return (
@@ -28,20 +28,28 @@ export const ShareMenuTabs = () => {
     return null;
   }
 
-  const { allowEmbed, objectType, onClose } = shareContext;
+  const { allowEmbed, objectType, onClose, shareMenuItems } = shareContext;
   const tabs = [];
+
   tabs.push(linkTab);
+
+  if (shareMenuItems.length > 0) {
+    tabs.push(exportTab);
+  }
 
   if (allowEmbed) {
     tabs.push(embedTab);
   }
 
+  const formattedTitle =
+    objectType === 'lens' ? `Share this Lens visualization` : `Share this ${objectType}`;
+
   return (
     <TabbedModal
       tabs={tabs}
-      modalWidth={483}
+      modalWidth={498}
       onClose={onClose}
-      modalTitle={`Share this ${objectType}`}
+      modalTitle={formattedTitle}
       defaultSelectedTabId="link"
     />
   );

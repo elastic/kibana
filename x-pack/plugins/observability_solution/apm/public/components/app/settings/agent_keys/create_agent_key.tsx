@@ -80,18 +80,15 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
         privileges.push(PrivilegeType.AGENT_CONFIG);
       }
 
-      const { agentKey } = await callApmApi(
-        'POST /api/apm/agent_keys 2023-10-31',
-        {
-          signal: null,
-          params: {
-            body: {
-              name,
-              privileges,
-            },
+      const { agentKey } = await callApmApi('POST /api/apm/agent_keys 2023-10-31', {
+        signal: null,
+        params: {
+          body: {
+            name,
+            privileges,
           },
-        }
-      );
+        },
+      });
 
       onSuccess(agentKey);
     } catch (error) {
@@ -111,27 +108,20 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
         <EuiForm isInvalid={isFormInvalid} error={formError}>
           {currentUser && (
             <EuiFormRow
-              label={i18n.translate(
-                'xpack.apm.settings.agentKeys.createKeyFlyout.userTitle',
-                { defaultMessage: 'User' }
-              )}
+              label={i18n.translate('xpack.apm.settings.agentKeys.createKeyFlyout.userTitle', {
+                defaultMessage: 'User',
+              })}
             >
               <EuiText>{currentUser?.username}</EuiText>
             </EuiFormRow>
           )}
           <EuiFormRow
-            label={i18n.translate(
-              'xpack.apm.settings.agentKeys.createKeyFlyout.nameTitle',
-              {
-                defaultMessage: 'Name',
-              }
-            )}
-            helpText={i18n.translate(
-              'xpack.apm.settings.agentKeys.createKeyFlyout.nameHelpText',
-              {
-                defaultMessage: 'What is this key used for?',
-              }
-            )}
+            label={i18n.translate('xpack.apm.settings.agentKeys.createKeyFlyout.nameTitle', {
+              defaultMessage: 'Name',
+            })}
+            helpText={i18n.translate('xpack.apm.settings.agentKeys.createKeyFlyout.nameHelpText', {
+              defaultMessage: 'What is this key used for?',
+            })}
             isInvalid={isFormInvalid}
             error={formError}
           >
@@ -144,9 +134,7 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
                   defaultMessage: 'e.g. apm-key',
                 }
               )}
-              onChange={(e) =>
-                setAgentKeyBody((state) => ({ ...state, name: e.target.value }))
-              }
+              onChange={(e) => setAgentKeyBody((state) => ({ ...state, name: e.target.value }))}
               isInvalid={isFormInvalid}
               onBlur={() => setFormTouched(true)}
             />
@@ -166,8 +154,7 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
               helpText={i18n.translate(
                 'xpack.apm.settings.agentKeys.createKeyFlyout.agentConfigHelpText',
                 {
-                  defaultMessage:
-                    'Required for agents to read agent configuration remotely.',
+                  defaultMessage: 'Required for agents to read agent configuration remotely.',
                 }
               )}
             >
@@ -212,16 +199,10 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="apmCreateAgentKeyFlyoutCancelButton"
-              onClick={onCancel}
-            >
-              {i18n.translate(
-                'xpack.apm.settings.agentKeys.createKeyFlyout.cancelButton',
-                {
-                  defaultMessage: 'Cancel',
-                }
-              )}
+            <EuiButtonEmpty data-test-subj="apmCreateAgentKeyFlyoutCancelButton" onClick={onCancel}>
+              {i18n.translate('xpack.apm.settings.agentKeys.createKeyFlyout.cancelButton', {
+                defaultMessage: 'Cancel',
+              })}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

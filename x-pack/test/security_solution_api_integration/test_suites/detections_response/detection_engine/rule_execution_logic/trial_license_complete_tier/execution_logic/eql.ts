@@ -76,7 +76,7 @@ export default ({ getService }: FtrProviderContext) => {
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const auditPath = dataPathBuilder.getPath('auditbeat/hosts');
 
-  describe('@ess @serverless EQL type rules', () => {
+  describe('@ess @serverless @serverlessQA EQL type rules', () => {
     const { indexListOfDocuments } = dataGeneratorFactory({
       es,
       index: 'ecs_compliant',
@@ -206,7 +206,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    it('classifies verification_exception errors as user errors', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/180641
+    it.skip('classifies verification_exception errors as user errors', async () => {
       await getMetricsRequest(request, true);
       const rule: EqlRuleCreateProps = {
         ...getEqlRuleForAlertTesting(['auditbeat-*']),

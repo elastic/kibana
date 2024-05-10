@@ -37,6 +37,7 @@ interface Props {
   barColor?: 'primary' | 'success' | 'danger' | 'subdued' | 'accent';
   compressed?: boolean;
   onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
+  showSampledValues?: boolean;
 }
 
 function getPercentLabel(percent: number): string {
@@ -47,7 +48,20 @@ function getPercentLabel(percent: number): string {
   }
 }
 
-export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed, onAddFilter }) => {
+export const TopValues: FC<Props> = ({
+  stats,
+  fieldFormat,
+  barColor,
+  compressed,
+  onAddFilter,
+  /** Top values by default show % of time a value exist in sampled records/rows (i.e. value A exists in 10% of sampled records)
+   * showSampledValues: true shows % of times a value exist in all arrays of values that have been flattened
+   * Example for 4 records: ["a", "a", "b"], ["b", "b", "c"], "d", "e"
+   * "a" exists in 1/4 records (50% - showSampledValues: false),
+   * "a" exists in 2/8 sampled values (25% - showSampledValues: true).
+   */
+  showSampledValues = false,
+}) => {
   const {
     services: {
       data: { fieldFormats },
@@ -55,10 +69,71 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
   } = useDataVisualizerKibana();
 
   if (stats === undefined || !stats.topValues) return null;
-  const { topValues: originalTopValues, fieldName, sampleCount } = stats;
+  const { fieldName, sampleCount } = stats;
 
+  const originalTopValues = (showSampledValues ? stats.sampledValues : stats.topValues) ?? [];
   if (originalTopValues?.length === 0) return null;
-  const totalDocuments = Math.min(sampleCount ?? 0, stats.totalDocuments ?? 0);
+  const totalDocuments = showSampledValues
+    ? stats.topValuesSampleSize ?? 0
+    : Math.min(sampleCount ?? Infinity, stats.totalDocuments ?? Infinity);
+
+  const getMessage = () => {
+    if (showSampledValues && stats.topValuesSampleSize !== undefined) {
+      return (
+        <FormattedMessage
+          id="xpack.dataVisualizer.dataGrid.field.topValues.calculatedFromSampleValuesLabel"
+          defaultMessage="Calculated from {sampledDocumentsFormatted} sample {sampledDocuments, plural, one {value} other {values}}."
+          values={{
+            sampledDocuments: stats.topValuesSampleSize,
+            sampledDocumentsFormatted: (
+              <strong>
+                {fieldFormats
+                  .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
+                  .convert(stats.topValuesSampleSize)}
+              </strong>
+            ),
+          }}
+        />
+      );
+    }
+
+    return totalDocuments > (sampleCount ?? 0) ? (
+      <FormattedMessage
+        id="xpack.dataVisualizer.dataGrid.field.topValues.calculatedFromSampleRecordsLabel"
+        defaultMessage="Calculated from {sampledDocumentsFormatted} sample {sampledDocuments, plural, one {record} other {records}}."
+        values={{
+          sampledDocuments: sampleCount,
+          sampledDocumentsFormatted: (
+            <strong>
+              {fieldFormats
+                .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
+                .convert(sampleCount)}
+            </strong>
+          ),
+        }}
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.dataVisualizer.dataGrid.field.topValues.calculatedFromTotalRecordsLabel"
+        defaultMessage="Calculated from {totalDocumentsFormatted} {totalDocuments, plural, one {record} other {records}}."
+        values={{
+          totalDocuments,
+          totalDocumentsFormatted: (
+            <strong>
+              {fieldFormats
+                .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
+                .convert(totalDocuments ?? 0)}
+            </strong>
+          ),
+        }}
+      />
+    );
+  };
+  const countsElement = (
+    <EuiText color="subdued" size="xs">
+      {getMessage()}
+    </EuiText>
+  );
 
   const topValues = originalTopValues.map((bucket) => ({
     ...bucket,
@@ -70,52 +145,23 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
     1 - (topValues ? topValues.reduce((acc, bucket) => acc + bucket.percent, 0) : 0);
   const topValuesOtherCount = Math.floor(topValuesOtherCountPercent * (sampleCount ?? 0));
 
-  const countsElement = (
-    <EuiText color="subdued" size="xs">
-      {totalDocuments > (sampleCount ?? 0) ? (
-        <FormattedMessage
-          id="xpack.dataVisualizer.dataGrid.field.topValues.calculatedFromSampleRecordsLabel"
-          defaultMessage="Calculated from {sampledDocumentsFormatted} sample {sampledDocuments, plural, one {record} other {records}}."
-          values={{
-            sampledDocuments: sampleCount,
-            sampledDocumentsFormatted: (
-              <strong>
-                {fieldFormats
-                  .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-                  .convert(sampleCount)}
-              </strong>
-            ),
-          }}
-        />
-      ) : (
-        <FormattedMessage
-          id="xpack.dataVisualizer.dataGrid.field.topValues.calculatedFromTotalRecordsLabel"
-          defaultMessage="Calculated from {totalDocumentsFormatted} {totalDocuments, plural, one {record} other {records}}."
-          values={{
-            totalDocuments,
-            totalDocumentsFormatted: (
-              <strong>
-                {fieldFormats
-                  .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-                  .convert(totalDocuments ?? 0)}
-              </strong>
-            ),
-          }}
-        />
-      )}
-    </EuiText>
-  );
-
   return (
     <ExpandedRowPanel
       dataTestSubj={'dataVisualizerFieldDataTopValues'}
       className={classNames('dvPanel__wrapper', compressed ? 'dvPanel--compressed' : undefined)}
     >
       <ExpandedRowFieldHeader>
-        <FormattedMessage
-          id="xpack.dataVisualizer.dataGrid.field.topValuesLabel"
-          defaultMessage="Top values"
-        />
+        {showSampledValues ? (
+          <FormattedMessage
+            id="xpack.dataVisualizer.dataGrid.field.topSampledValuesLabel"
+            defaultMessage="Top sampled values"
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.dataVisualizer.dataGrid.field.topValuesLabel"
+            defaultMessage="Top values"
+          />
+        )}
       </ExpandedRowFieldHeader>
 
       <div

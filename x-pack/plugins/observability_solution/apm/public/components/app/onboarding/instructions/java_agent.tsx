@@ -10,16 +10,11 @@ import { EuiMarkdownFormat, EuiSpacer } from '@elastic/eui';
 import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import React from 'react';
 import { AgentConfigInstructions } from '../agent_config_instructions';
-import {
-  INSTRUCTION_VARIANT,
-  AgentInstructions,
-} from '../instruction_variants';
+import { INSTRUCTION_VARIANT, AgentInstructions } from '../instruction_variants';
 import { ApiKeyCallout } from './api_key_callout';
 import { agentStatusCheckInstruction } from '../agent_status_instructions';
 
-export const createJavaAgentInstructions = (
-  commonOptions: AgentInstructions
-): EuiStepProps[] => {
+export const createJavaAgentInstructions = (commonOptions: AgentInstructions): EuiStepProps[] => {
   const {
     baseUrl,
     apmServerUrl,
@@ -48,28 +43,22 @@ export const createJavaAgentInstructions = (
       ),
     },
     {
-      title: i18n.translate(
-        'xpack.apm.onboarding.java.startApplication.title',
-        {
-          defaultMessage: 'Start your application with the javaagent flag',
-        }
-      ),
+      title: i18n.translate('xpack.apm.onboarding.java.startApplication.title', {
+        defaultMessage: 'Start your application with the javaagent flag',
+      }),
       children: (
         <>
           <EuiMarkdownFormat>
-            {i18n.translate(
-              'xpack.apm.onboarding.java.startApplication.textPre',
-              {
-                defaultMessage:
-                  'Add the `-javaagent` flag and configure the agent with system properties.\n\n \
+            {i18n.translate('xpack.apm.onboarding.java.startApplication.textPre', {
+              defaultMessage:
+                'Add the `-javaagent` flag and configure the agent with system properties.\n\n \
 * Set the required service name (allowed characters: a-z, A-Z, 0-9, -, _, and space)\n \
 * Set the custom APM Server URL (default: {customApmServerUrl})\n \
 * Set the APM Server secret token\n \
 * Set the service environment\n \
 * Set the base package of your application',
-                values: { customApmServerUrl: 'http://localhost:8200' },
-              }
-            )}
+              values: { customApmServerUrl: 'http://localhost:8200' },
+            })}
           </EuiMarkdownFormat>
           <EuiSpacer />
 
@@ -93,17 +82,14 @@ export const createJavaAgentInstructions = (
           />
           <EuiSpacer />
           <EuiMarkdownFormat>
-            {i18n.translate(
-              'xpack.apm.onboarding.java.startApplication.textPost',
-              {
-                defaultMessage:
-                  'See the [documentation]({documentationLink}) for configuration options and advanced \
+            {i18n.translate('xpack.apm.onboarding.java.startApplication.textPost', {
+              defaultMessage:
+                'See the [documentation]({documentationLink}) for configuration options and advanced \
         usage.',
-                values: {
-                  documentationLink: `${baseUrl}guide/en/apm/agent/java/current/index.html`,
-                },
-              }
-            )}
+              values: {
+                documentationLink: `${baseUrl}guide/en/apm/agent/java/current/index.html`,
+              },
+            })}
           </EuiMarkdownFormat>
         </>
       ),

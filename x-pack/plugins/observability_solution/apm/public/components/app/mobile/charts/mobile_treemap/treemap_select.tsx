@@ -6,13 +6,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-  EuiSuperSelect,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSuperSelect, EuiText } from '@elastic/eui';
 import type { EuiSuperSelectOption } from '@elastic/eui';
 
 export enum TreemapTypes {
@@ -23,28 +17,19 @@ export enum TreemapTypes {
 const options: Array<EuiSuperSelectOption<TreemapTypes>> = [
   {
     value: TreemapTypes.Devices,
-    label: i18n.translate(
-      'xpack.apm.transactionOverview.treemap.dropdown.devices',
-      {
-        defaultMessage: 'Devices',
-      }
-    ),
-    description: i18n.translate(
-      'xpack.apm.transactionOverview.treemap.dropdown.devices.subtitle',
-      {
-        defaultMessage:
-          'This treemap view allows for easy and faster visual way the most used devices',
-      }
-    ),
+    label: i18n.translate('xpack.apm.transactionOverview.treemap.dropdown.devices', {
+      defaultMessage: 'Devices',
+    }),
+    description: i18n.translate('xpack.apm.transactionOverview.treemap.dropdown.devices.subtitle', {
+      defaultMessage:
+        'This treemap view allows for easy and faster visual way the most used devices',
+    }),
   },
   {
     value: TreemapTypes.Versions,
-    label: i18n.translate(
-      'xpack.apm.transactionOverview.treemap.versions.devices',
-      {
-        defaultMessage: 'Versions',
-      }
-    ),
+    label: i18n.translate('xpack.apm.transactionOverview.treemap.versions.devices', {
+      defaultMessage: 'Versions',
+    }),
     description: i18n.translate(
       'xpack.apm.transactionOverview.treemap.dropdown.versions.subtitle',
       {
@@ -73,8 +58,7 @@ export function TreemapSelect({
   selectedTreemap: TreemapTypes;
   onChange: (value: TreemapTypes) => void;
 }) {
-  const currentTreemap =
-    options.find(({ value }) => value === selectedTreemap) ?? options[0];
+  const currentTreemap = options.find(({ value }) => value === selectedTreemap) ?? options[0];
 
   return (
     <EuiFlexGroup justifyContent="spaceBetween">
@@ -89,8 +73,7 @@ export function TreemapSelect({
         </EuiTitle>
         <EuiText size="s" color="subdued">
           {i18n.translate('xpack.apm.transactionOverview.treemap.subtitle', {
-            defaultMessage:
-              'Treemap showing the total and most used {currentTreemap}',
+            defaultMessage: 'Treemap showing the total and most used {currentTreemap}',
             values: { currentTreemap: currentTreemap.value },
           })}
         </EuiText>

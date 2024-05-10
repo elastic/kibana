@@ -85,10 +85,9 @@ export const RiskScorePreviewTable = ({
       data-test-subj={
         type === RiskScoreEntity.host ? 'host-risk-preview-table' : 'user-risk-preview-table'
       }
-      responsive={false}
+      responsiveBreakpoint={false}
       items={items}
       columns={columns}
-      loading={false}
     />
   );
 };

@@ -13,6 +13,7 @@ import { createRoot } from '@kbn/core-test-helpers-kbn-server';
 const previouslyRegisteredTypes = [
   'action',
   'action_task_params',
+  'ad_hoc_run_params',
   'alert',
   'api_key_pending_invalidation',
   'apm-custom-dashboards',
@@ -120,6 +121,7 @@ const previouslyRegisteredTypes = [
   'siem-ui-timeline-note',
   'siem-ui-timeline-pinned-event',
   'slo',
+  'slo-settings',
   'space',
   'spaces-usage-stats',
   'synthetics-monitor',
@@ -147,9 +149,9 @@ const previouslyRegisteredTypes = [
 describe('SO type registrations', () => {
   let root: ReturnType<typeof createRoot>;
 
-  afterEach(() => {
+  afterEach(async () => {
     try {
-      root?.shutdown();
+      await root?.shutdown();
     } catch (e) {
       /* trap */
     }

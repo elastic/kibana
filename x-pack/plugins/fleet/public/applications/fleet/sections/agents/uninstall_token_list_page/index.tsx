@@ -215,7 +215,6 @@ export const UninstallTokenListPage = () => {
         }}
         onChange={handleTablePagination}
         noItemsMessage={<NoItemsMessage isLoading={isLoading} />}
-        hasActions={true}
       />
 
       <EuiSpacer size="xl" />

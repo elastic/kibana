@@ -19,11 +19,13 @@ import {
   EuiHorizontalRule,
   EuiTextArea,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EVENT_FILTERS_OPERATORS } from '@kbn/securitysolution-list-utils';
-import { OperatingSystem } from '@kbn/securitysolution-utils';
+import { WildCardWithWrongOperatorCallout } from '@kbn/securitysolution-exception-list-components';
+import { OperatingSystem, validateHasWildcardWithWrongOperator } from '@kbn/securitysolution-utils';
 
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { OnChangeProps } from '@kbn/lists-plugin/public';
@@ -55,7 +57,7 @@ import {
   OS_LABEL,
   RULE_NAME,
 } from '../event_filters_list';
-import { OS_TITLES } from '../../../../common/translations';
+import { OS_TITLES, CONFIRM_WARNING_MODAL_LABELS } from '../../../../common/translations';
 import { ENDPOINT_EVENT_FILTERS_LIST_ID, EVENT_FILTER_LIST_TYPE } from '../../constants';
 
 import type { EffectedPolicySelection } from '../../../../components/effected_policy_select';
@@ -143,8 +145,9 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
       [exception]
     );
     const [wasByPolicy, setWasByPolicy] = useState(!isGlobalPolicyEffected(exception?.tags));
-
     const [hasDuplicateFields, setHasDuplicateFields] = useState<boolean>(false);
+    const [hasWildcardWithWrongOperator, setHasWildcardWithWrongOperator] =
+      useState<boolean>(false);
     // This value has to be memoized to avoid infinite useEffect loop on useFetchIndex
     const indexNames = useMemo(() => [eventsIndexPattern], []);
     const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(
@@ -193,9 +196,16 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         onChange({
           item,
           isValid: isFormValid && areConditionsValid,
+          confirmModalLabels: hasWildcardWithWrongOperator
+            ? CONFIRM_WARNING_MODAL_LABELS(
+                i18n.translate('xpack.securitySolution.eventFilter.flyoutForm.confirmModal.name', {
+                  defaultMessage: 'event filter',
+                })
+              )
+            : undefined,
         });
       },
-      [areConditionsValid, exception, isFormValid, onChange]
+      [areConditionsValid, exception, isFormValid, onChange, hasWildcardWithWrongOperator]
     );
 
     // set initial state of `wasByPolicy` that checks
@@ -413,6 +423,20 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           if (!hasFormChanged) setHasFormChanged(true);
           return;
         }
+
+        // handle wildcard with wrong operator case
+        setHasWildcardWithWrongOperator(false);
+        arg.exceptionItems[0]?.entries.forEach((e) => {
+          if (
+            validateHasWildcardWithWrongOperator({
+              operator: (e as EventFilterItemEntries[number]).type,
+              value: (e as EventFilterItemEntries[number]).value,
+            })
+          ) {
+            setHasWildcardWithWrongOperator(true);
+          }
+        });
+
         const updatedItem: Partial<ArtifactFormComponentProps['item']> =
           arg.exceptionItems[0] !== undefined
             ? {
@@ -563,13 +587,14 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         {detailsSection}
         <EuiHorizontalRule />
         {criteriaSection}
+        {hasWildcardWithWrongOperator && <WildCardWithWrongOperatorCallout />}
         {hasDuplicateFields && (
           <>
             <EuiSpacer size="xs" />
             <EuiText color="subdued" size="xs" data-test-subj="duplicate-fields-warning-message">
               <FormattedMessage
                 id="xpack.securitySolution.eventFilters.warningMessage.duplicateFields"
-                defaultMessage="Using multiples of the same filed values can degrade Endpoint performance and/or create ineffective rules"
+                defaultMessage="Using multiples of the same field values can degrade Endpoint performance and/or create ineffective rules"
               />
             </EuiText>
           </>

@@ -364,6 +364,14 @@ test('handles optional properties', () => {
   });
 });
 
+test('handles lazy schemas', () => {
+  const lazySchema = () => schema.object({ foo: schema.string() });
+  type SchemaType = TypeOf<typeof lazySchema>;
+  expectType<SchemaType>({
+    foo: 'bar',
+  });
+});
+
 describe('#extends', () => {
   it('allows to extend an existing schema by adding new properties', () => {
     const origin = schema.object({

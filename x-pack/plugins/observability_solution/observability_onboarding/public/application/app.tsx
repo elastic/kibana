@@ -7,11 +7,7 @@
 
 import { EuiErrorBoundary } from '@elastic/eui';
 import { Theme, ThemeProvider } from '@emotion/react';
-import {
-  AppMountParameters,
-  APP_WRAPPER_CLASS,
-  CoreStart,
-} from '@kbn/core/public';
+import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import {
   KibanaContextProvider,
@@ -65,9 +61,7 @@ function App() {
             return handler();
           };
 
-          return (
-            <Route key={path} path={path} exact={exact} component={Wrapper} />
-          );
+          return <Route key={path} path={path} exact={exact} component={Wrapper} />;
         })}
         <Route exact path={customLogRoutesPaths}>
           <CustomLogs>
@@ -78,14 +72,7 @@ function App() {
                 return handler();
               };
 
-              return (
-                <Route
-                  key={path}
-                  path={path}
-                  exact={exact}
-                  component={Wrapper}
-                />
-              );
+              return <Route key={path} path={path} exact={exact} component={Wrapper} />;
             })}
           </CustomLogs>
         </Route>
@@ -98,14 +85,7 @@ function App() {
                 return handler();
               };
 
-              return (
-                <Route
-                  key={path}
-                  path={path}
-                  exact={exact}
-                  component={Wrapper}
-                />
-              );
+              return <Route key={path} path={path} exact={exact} component={Wrapper} />;
             })}
           </SystemLogs>
         </Route>
@@ -147,12 +127,9 @@ export function ObservabilityOnboardingAppRoot({
 
   const renderFeedbackLinkAsPortal = !config.serverless.enabled;
 
-  core.analytics.reportEvent(
-    OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT.eventType,
-    {
-      uses_legacy_onboarding_page: !experimentalOnboardingFlowEnabled,
-    }
-  );
+  core.analytics.reportEvent(OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT.eventType, {
+    uses_legacy_onboarding_page: !experimentalOnboardingFlowEnabled,
+  });
 
   return (
     <div className={APP_WRAPPER_CLASS}>
@@ -183,10 +160,7 @@ export function ObservabilityOnboardingAppRoot({
               <Router history={history}>
                 <EuiErrorBoundary>
                   {renderFeedbackLinkAsPortal && (
-                    <HeaderMenuPortal
-                      setHeaderActionMenu={setHeaderActionMenu}
-                      theme$={theme$}
-                    >
+                    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
                       <ObservabilityOnboardingHeaderActionMenu />
                     </HeaderMenuPortal>
                   )}

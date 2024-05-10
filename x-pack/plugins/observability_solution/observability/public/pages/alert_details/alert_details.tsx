@@ -240,6 +240,7 @@ export function AlertDetails() {
           >
             <HeaderActions
               alert={alertDetail?.formatted ?? null}
+              alertIndex={alertDetail?.raw._index}
               alertStatus={alertStatus}
               onUntrackAlert={onUntrackAlert}
             />
@@ -274,14 +275,10 @@ export function getScreenDescription(alertDetail: AlertData) {
       : ''
   }
 
-  The alert details are:
+  Use the following alert fields as background information for generating a response. Do not list them as bullet points in the response.
   ${Object.entries(getRelevantAlertFields(alertDetail))
     .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
     .join('\n')}  
-
-  Do not repeat this information to the user, unless it is relevant for them to know. 
-  Please suggestion root causes if possible.
-  Suggest next steps for the user to take.
   `);
 }
 

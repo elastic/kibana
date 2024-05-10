@@ -26,11 +26,7 @@ export const DiagnosticsContext = React.createContext<{
   refetch: () => undefined,
 });
 
-export function DiagnosticsContextProvider({
-  children,
-}: {
-  children: React.ReactChild;
-}) {
+export function DiagnosticsContextProvider({ children }: { children: React.ReactChild }) {
   const {
     query: { kuery, rangeFrom, rangeTo },
   } = useApmParams('/diagnostics/*');
@@ -74,13 +70,7 @@ export function DiagnosticsContextProvider({
       status,
       isImported: false,
     };
-  }, [
-    importedDiagnosticsBundle,
-    setImportedDiagnosticsBundle,
-    status,
-    data,
-    refetch,
-  ]);
+  }, [importedDiagnosticsBundle, setImportedDiagnosticsBundle, status, data, refetch]);
 
   return <DiagnosticsContext.Provider value={value} children={children} />;
 }

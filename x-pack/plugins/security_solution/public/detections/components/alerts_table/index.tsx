@@ -26,6 +26,7 @@ import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useLicense } from '../../../common/hooks/use_license';
 import { VIEW_SELECTION } from '../../../../common/constants';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
+import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { eventsDefaultModel } from '../../../common/components/events_viewer/default_model';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
 import {
@@ -255,6 +256,15 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     [dispatch, tableId, alertTableRefreshHandlerRef, setQuery]
   );
 
+  const cellContext = useMemo(() => {
+    return {
+      rowRenderers: defaultRowRenderers,
+      isDetails: false,
+      truncate: true,
+      isDraggable: false,
+    };
+  }, []);
+
   const alertStateProps: AlertsTableStateProps = useMemo(
     () => ({
       alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
@@ -269,6 +279,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       columns: finalColumns,
       browserFields: finalBrowserFields,
       onUpdate: onAlertTableUpdate,
+      cellContext,
       runtimeMappings,
       toolbarVisibility: {
         showColumnSelector: !isEventRenderedView,
@@ -288,6 +299,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       onAlertTableUpdate,
       runtimeMappings,
       isEventRenderedView,
+      cellContext,
     ]
   );
 

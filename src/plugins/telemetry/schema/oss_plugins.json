@@ -8017,6 +8017,24 @@
           "properties": {
             "memory": {
               "properties": {
+                "arrayBuffersBytes": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Memory allocated for array buffers. This is also included in the external value."
+                  }
+                },
+                "externalBytes": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Memory usage of C++ objects bound to JavaScript objects managed by V8."
+                  }
+                },
+                "residentSetSizeBytes": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Node RSS."
+                  }
+                },
                 "heapSizeLimit": {
                   "type": "long",
                   "_meta": {
@@ -10149,6 +10167,12 @@
             "description": "Non-default value of setting."
           }
         },
+        "observability:apmEnableMultiSignal": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "observability:apmAWSLambdaPriceFactor": {
           "type": "text",
           "_meta": {
@@ -10159,15 +10183,6 @@
           "type": "integer",
           "_meta": {
             "description": "Non-default value of setting."
-          }
-        },
-        "observability:logsExplorer:allowedDataViews": {
-          "type": "array",
-          "items": {
-            "type": "keyword",
-            "_meta": {
-              "description": "Non-default value of setting."
-            }
           }
         },
         "observability:aiAssistantLogsIndexPattern": {
@@ -10186,6 +10201,15 @@
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
+          }
+        },
+        "observability:logsExplorer:allowedDataViews": {
+          "type": "array",
+          "items": {
+            "type": "keyword",
+            "_meta": {
+              "description": "Non-default value of setting."
+            }
           }
         },
         "banners:placement": {
@@ -10254,7 +10278,7 @@
             "description": "Non-default value of setting."
           }
         },
-        "discover:enableESQL": {
+        "enableESQL": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
@@ -10448,6 +10472,12 @@
         },
         "aiAssistant:preferredAIAssistantType": {
           "type": "keyword",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "observability:profilingFetchTopNFunctionsFromStacktraces": {
+          "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
           }

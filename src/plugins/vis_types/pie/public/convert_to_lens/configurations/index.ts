@@ -7,6 +7,7 @@
  */
 
 import { LegendDisplay, PartitionVisParams } from '@kbn/expression-partition-vis-plugin/common';
+import { PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import {
   CategoryDisplayTypes,
   NumberDisplayTypes,
@@ -26,8 +27,9 @@ const getLayers = (
 
   const showValuesInLegend =
     vis.params.labels.values ??
-    vis.params.showValuesInLegend ??
-    vis.type.visConfig.defaults.showValuesInLegend;
+    (vis.params.legendStats
+      ? vis.params.legendStats?.[0] === PartitionLegendValue.Value
+      : vis.type.visConfig.defaults.showValuesInLegend);
 
   return [
     {
@@ -48,7 +50,7 @@ const getLayers = (
         vis.params.legendDisplay ??
         vis.type.visConfig.defaults.legendDisplay,
       legendPosition: vis.params.legendPosition ?? vis.type.visConfig.defaults.legendPosition,
-      showValuesInLegend,
+      legendStats: showValuesInLegend ? [PartitionLegendValue.Value] : undefined,
       nestedLegend: vis.params.nestedLegend ?? vis.type.visConfig.defaults.nestedLegend,
       percentDecimals:
         vis.params.labels.percentDecimals ?? vis.type.visConfig.defaults.labels.percentDecimals,

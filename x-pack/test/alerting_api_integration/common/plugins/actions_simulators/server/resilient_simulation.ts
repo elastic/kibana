@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import http from 'http';
 import {
   RequestHandlerContext,
   KibanaRequest,
@@ -12,6 +13,55 @@ import {
   IKibanaResponse,
   IRouter,
 } from '@kbn/core/server';
+import { ProxyArgs, Simulator } from './simulator';
+
+export const resilientFailedResponse = {
+  errors: {
+    message: 'failed',
+  },
+};
+
+export class ResilientSimulator extends Simulator {
+  private readonly returnError: boolean;
+
+  constructor({ returnError = false, proxy }: { returnError?: boolean; proxy?: ProxyArgs }) {
+    super(proxy);
+
+    this.returnError = returnError;
+  }
+
+  public async handler(
+    request: http.IncomingMessage,
+    response: http.ServerResponse,
+    data: Record<string, unknown>
+  ) {
+    if (this.returnError) {
+      return ResilientSimulator.sendErrorResponse(response);
+    }
+    return ResilientSimulator.sendResponse(request, response);
+  }
+
+  private static sendResponse(request: http.IncomingMessage, response: http.ServerResponse) {
+    response.statusCode = 202;
+    response.setHeader('Content-Type', 'application/json');
+    response.end(
+      JSON.stringify(
+        {
+          id: '123',
+          create_date: 1589391874472,
+        },
+        null,
+        4
+      )
+    );
+  }
+
+  private static sendErrorResponse(response: http.ServerResponse) {
+    response.statusCode = 422;
+    response.setHeader('Content-Type', 'application/json;charset=UTF-8');
+    response.end(JSON.stringify(resilientFailedResponse, null, 4));
+  }
+}
 
 export function initPlugin(router: IRouter, path: string) {
   router.post(

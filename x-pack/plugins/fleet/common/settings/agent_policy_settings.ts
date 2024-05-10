@@ -136,12 +136,13 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     description: i18n.translate(
       'xpack.fleet.settings.agentPolicyAdvanced.agentLoggingLevelDescription',
       {
-        defaultMessage: 'Set the Agent log level. The default log level is "info".',
+        defaultMessage:
+          'Sets the log level for all the agents on the policy. The default log level is "info"',
       }
     ),
     api_field: {
       name: 'agent_logging_level',
     },
-    schema: z.nativeEnum(agentLoggingLevels),
+    schema: z.nativeEnum(agentLoggingLevels).default(agentLoggingLevels.Info),
   },
 ];

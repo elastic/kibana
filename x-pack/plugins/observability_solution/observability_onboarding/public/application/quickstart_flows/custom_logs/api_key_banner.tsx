@@ -20,8 +20,7 @@ import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
 import { APIReturnType } from '../../../services/rest/create_call_api';
 
-type ApiKeyPayload =
-  APIReturnType<'POST /internal/observability_onboarding/logs/flow'>;
+type ApiKeyPayload = APIReturnType<'POST /internal/observability_onboarding/logs/flow'>;
 
 export type HasPrivileges = boolean;
 
@@ -44,12 +43,9 @@ export function ApiKeyBanner({
             <EuiLoadingSpinner size="m" />
           </EuiFlexItem>
           <EuiFlexItem>
-            {i18n.translate(
-              'xpack.observability_onboarding.apiKeyBanner.loading',
-              {
-                defaultMessage: 'Creating API Key',
-              }
-            )}
+            {i18n.translate('xpack.observability_onboarding.apiKeyBanner.loading', {
+              defaultMessage: 'Creating API Key',
+            })}
           </EuiFlexItem>
         </EuiFlexGroup>
       }
@@ -60,35 +56,26 @@ export function ApiKeyBanner({
 
   const apiKeySuccessCallout = (
     <EuiCallOut
-      title={i18n.translate(
-        'xpack.observability_onboarding.apiKeyBanner.created',
-        {
-          defaultMessage: 'API Key created.',
-        }
-      )}
+      title={i18n.translate('xpack.observability_onboarding.apiKeyBanner.created', {
+        defaultMessage: 'API Key created.',
+      })}
       color="success"
       iconType="check"
       data-test-subj="obltOnboardingLogsApiKeyCreated"
     >
       <p>
-        {i18n.translate(
-          'xpack.observability_onboarding.apiKeyBanner.created.description',
-          {
-            defaultMessage:
-              'Remember to store this information in a safe place. It won’t be displayed anymore after you continue.',
-          }
-        )}
+        {i18n.translate('xpack.observability_onboarding.apiKeyBanner.created.description', {
+          defaultMessage:
+            'Remember to store this information in a safe place. It won’t be displayed anymore after you continue.',
+        })}
       </p>
       <EuiFieldText
         data-test-subj="apmAgentKeyCallOutFieldText"
         readOnly
         value={payload?.apiKeyEncoded}
-        aria-label={i18n.translate(
-          'xpack.observability_onboarding.apiKeyBanner.field.label',
-          {
-            defaultMessage: 'Api Key',
-          }
-        )}
+        aria-label={i18n.translate('xpack.observability_onboarding.apiKeyBanner.field.label', {
+          defaultMessage: 'Api Key',
+        })}
         append={
           <EuiCopy textToCopy={payload?.apiKeyEncoded ?? ''}>
             {(copy) => (
@@ -118,55 +105,43 @@ export function ApiKeyBanner({
 
   const apiKeyFailureCallout = (
     <EuiCallOut
-      title={i18n.translate(
-        'xpack.observability_onboarding.apiKeyBanner.failed',
-        {
-          defaultMessage: 'Failed to create API key.',
-        }
-      )}
+      title={i18n.translate('xpack.observability_onboarding.apiKeyBanner.failed', {
+        defaultMessage: 'Failed to create API key.',
+      })}
       color="danger"
       iconType="error"
       data-test-subj="obltOnboardingLogsApiKeyCreationFailed"
     >
       <p>
-        {i18n.translate(
-          'xpack.observability_onboarding.apiKeyBanner.failed.description',
-          {
-            defaultMessage: 'Something went wrong: {message}',
-            values: {
-              message: error?.body?.message,
-            },
-          }
-        )}
+        {i18n.translate('xpack.observability_onboarding.apiKeyBanner.failed.description', {
+          defaultMessage: 'Something went wrong: {message}',
+          values: {
+            message: error?.body?.message,
+          },
+        })}
       </p>
     </EuiCallOut>
   );
 
   const noPermissionsCallout = (
     <EuiCallOut
-      title={i18n.translate(
-        'xpack.observability_onboarding.apiKeyBanner.noPermissions',
-        {
-          defaultMessage: 'User does not have permissions to create API key.',
-        }
-      )}
+      title={i18n.translate('xpack.observability_onboarding.apiKeyBanner.noPermissions', {
+        defaultMessage: 'User does not have permissions to create API key.',
+      })}
       color="warning"
       iconType="warning"
       data-test-subj="obltOnboardingLogsApiKeyCreationNoPrivileges"
     >
       <p>
-        {i18n.translate(
-          'xpack.observability_onboarding.apiKeyBanner.noPermissions.description',
-          {
-            defaultMessage:
-              'Required cluster privileges are {requiredClusterPrivileges} and required index privileges are {requiredIndexPrivileges} for indices {indices}, please add all required privileges to the role of the authenticated user.',
-            values: {
-              requiredClusterPrivileges: "['monitor', 'manage_own_api_key']",
-              requiredIndexPrivileges: "['auto_configure', 'create_doc']",
-              indices: "['logs-*-*', 'metrics-*-*']",
-            },
-          }
-        )}
+        {i18n.translate('xpack.observability_onboarding.apiKeyBanner.noPermissions.description', {
+          defaultMessage:
+            'Required cluster privileges are {requiredClusterPrivileges} and required index privileges are {requiredIndexPrivileges} for indices {indices}, please add all required privileges to the role of the authenticated user.',
+          values: {
+            requiredClusterPrivileges: "['monitor', 'manage_own_api_key']",
+            requiredIndexPrivileges: "['auto_configure', 'create_doc']",
+            indices: "['logs-*-*', 'metrics-*-*']",
+          },
+        })}
       </p>
     </EuiCallOut>
   );

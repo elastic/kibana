@@ -36,10 +36,7 @@ interface Props extends APMLinkExtendProps {
   overflowCount?: number;
 }
 
-const persistedFilters: Array<keyof APMQueryParams> = [
-  'transactionResult',
-  'serviceVersion',
-];
+const persistedFilters: Array<keyof APMQueryParams> = ['transactionResult', 'serviceVersion'];
 
 export function TransactionDetailLink({
   serviceName,
@@ -81,13 +78,7 @@ export function TransactionDetailLink({
     return (
       <TruncateWithTooltip
         text={transactionName}
-        content={
-          <EuiLink
-            data-test-subj="apmTransactionDetailLinkLink"
-            href={href}
-            {...rest}
-          />
-        }
+        content={<EuiLink data-test-subj="apmTransactionDetailLinkLink" href={href} {...rest} />}
       />
     );
   }

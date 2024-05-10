@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 
 import {
   EuiCollapsibleNavBeta,
@@ -16,7 +16,7 @@ import {
   EuiPageTemplate,
 } from '@elastic/eui';
 
-export const Template: FC = ({ children }) => {
+export const Template: FC<PropsWithChildren<unknown>> = ({ children }) => {
   return (
     <>
       <EuiHeader position="fixed">

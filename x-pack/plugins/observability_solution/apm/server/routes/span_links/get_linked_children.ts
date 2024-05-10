@@ -39,35 +39,29 @@ async function fetchLinkedChildrenOfSpan({
     end,
   });
 
-  const response = await apmEventClient.search(
-    'fetch_linked_children_of_span',
-    {
-      apm: {
-        events: [ProcessorEvent.span, ProcessorEvent.transaction],
-      },
-      _source: [SPAN_LINKS, TRACE_ID, SPAN_ID, PROCESSOR_EVENT, TRANSACTION_ID],
-      body: {
-        track_total_hits: false,
-        size: 1000,
-        query: {
-          bool: {
-            filter: [
-              ...rangeQuery(startWithBuffer, endWithBuffer),
-              { term: { [SPAN_LINKS_TRACE_ID]: traceId } },
-              ...(spanId ? [{ term: { [SPAN_LINKS_SPAN_ID]: spanId } }] : []),
-            ],
-          },
+  const response = await apmEventClient.search('fetch_linked_children_of_span', {
+    apm: {
+      events: [ProcessorEvent.span, ProcessorEvent.transaction],
+    },
+    _source: [SPAN_LINKS, TRACE_ID, SPAN_ID, PROCESSOR_EVENT, TRANSACTION_ID],
+    body: {
+      track_total_hits: false,
+      size: 1000,
+      query: {
+        bool: {
+          filter: [
+            ...rangeQuery(startWithBuffer, endWithBuffer),
+            { term: { [SPAN_LINKS_TRACE_ID]: traceId } },
+            ...(spanId ? [{ term: { [SPAN_LINKS_SPAN_ID]: spanId } }] : []),
+          ],
         },
       },
-    }
-  );
+    },
+  });
   // Filter out documents that don't have any span.links that match the combination of traceId and spanId
   return response.hits.hits.filter(({ _source: source }) => {
     const spanLinks = source.span?.links?.filter((spanLink) => {
-      return (
-        spanLink.trace.id === traceId &&
-        (spanId ? spanLink.span.id === spanId : true)
-      );
+      return spanLink.trace.id === traceId && (spanId ? spanLink.span.id === spanId : true);
     });
     return !isEmpty(spanLinks);
   });
@@ -96,18 +90,15 @@ export async function getSpanLinksCountById({
     start,
     end,
   });
-  return linkedChildren.reduce<Record<string, number>>(
-    (acc, { _source: source }) => {
-      source.span?.links?.forEach((link) => {
-        // Ignores span links that don't belong to this trace
-        if (link.trace.id === traceId) {
-          acc[link.span.id] = (acc[link.span.id] || 0) + 1;
-        }
-      });
-      return acc;
-    },
-    {}
-  );
+  return linkedChildren.reduce<Record<string, number>>((acc, { _source: source }) => {
+    source.span?.links?.forEach((link) => {
+      // Ignores span links that don't belong to this trace
+      if (link.trace.id === traceId) {
+        acc[link.span.id] = (acc[link.span.id] || 0) + 1;
+      }
+    });
+    return acc;
+  }, {});
 }
 
 export async function getLinkedChildrenOfSpan({

@@ -59,6 +59,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         hasTimeField: true,
       });
       await dataViews.waitForSwitcherToBe(`${initialPattern}*`);
+      await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
       expect(await PageObjects.discover.getHitCountInt()).to.be(1);
@@ -106,6 +107,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         hasTimeField: true,
       });
       await dataViews.waitForSwitcherToBe(`${initialPattern}*`);
+      await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
       expect(await PageObjects.discover.getHitCountInt()).to.be(1);

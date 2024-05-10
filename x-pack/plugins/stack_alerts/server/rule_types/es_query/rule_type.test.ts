@@ -633,6 +633,7 @@ describe('ruleType', () => {
       toSpec: () => {
         return { id: 'test-id', title: 'test-title', timeFieldName: 'timestamp', fields: [] };
       },
+      getTimeField: () => dataViewMock.fields[1],
     };
     const defaultParams: OnlySearchSourceRuleParams = {
       size: 100,
@@ -701,12 +702,12 @@ describe('ruleType', () => {
 
       (searchSourceInstanceMock.getField as jest.Mock).mockImplementationOnce((name: string) => {
         if (name === 'index') {
-          return { dataViewMock, timeFieldName: undefined };
+          return { dataViewMock, getTimeField: () => undefined, id: 1234 };
         }
       });
 
       await expect(invokeExecutor({ params, ruleServices })).rejects.toThrow(
-        'Invalid data view without timeFieldName.'
+        'Data view with ID 1234 no longer contains a time field.'
       );
     });
 
@@ -717,6 +718,7 @@ describe('ruleType', () => {
       (ruleServices.dataViews.create as jest.Mock).mockResolvedValueOnce({
         ...dataViewMock.toSpec(),
         toSpec: () => dataViewMock.toSpec(),
+        getTimeField: () => dataViewMock.fields[1],
         toMinimalSpec: () => dataViewMock.toSpec(),
       });
       (searchSourceInstanceMock.getField as jest.Mock).mockImplementation((name: string) => {
@@ -905,6 +907,7 @@ async function invokeExecutor({
   return await ruleType.executor({
     executionId: uuidv4(),
     startedAt: new Date(),
+    startedAtOverridden: false,
     previousStartedAt: new Date(),
     services: ruleServices as unknown as RuleExecutorServices<
       EsQueryRuleState,

@@ -21,11 +21,7 @@ import {
   EuiIconProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  StepPanel,
-  StepPanelContent,
-  StepPanelFooter,
-} from '../../shared/step_panel';
+import { StepPanel, StepPanelContent, StepPanelFooter } from '../../shared/step_panel';
 import { useWizard } from '.';
 import { useKibanaNavigation } from '../../../hooks/use_kibana_navigation';
 
@@ -39,12 +35,9 @@ export function SelectLogs() {
 
   return (
     <StepPanel
-      title={i18n.translate(
-        'xpack.observability_onboarding.selectLogs.chooseType',
-        {
-          defaultMessage: 'What logs do you want to collect?',
-        }
-      )}
+      title={i18n.translate('xpack.observability_onboarding.selectLogs.chooseType', {
+        defaultMessage: 'What logs do you want to collect?',
+      })}
       panelFooter={
         <StepPanelFooter
           items={[
@@ -66,12 +59,9 @@ export function SelectLogs() {
         <EuiFlexGroup>
           <EuiFlexItem grow={false} style={{ width: '50%' }}>
             <OptionCard
-              title={i18n.translate(
-                'xpack.observability_onboarding.selectLogs.streamLogFiles',
-                {
-                  defaultMessage: 'Stream log files',
-                }
-              )}
+              title={i18n.translate('xpack.observability_onboarding.selectLogs.streamLogFiles', {
+                defaultMessage: 'Stream log files',
+              })}
               iconType="desktop"
               onClick={() => {
                 setState((state) => ({ ...state, logsType: 'log-file' }));
@@ -88,29 +78,22 @@ export function SelectLogs() {
         </EuiFlexGroup>
         <EuiHorizontalRule margin="l" />
         <LogsTypeSection
-          title={i18n.translate(
-            'xpack.observability_onboarding.selectLogs.networkStreamingLogs',
-            {
-              defaultMessage: 'Network streaming logs',
-            }
-          )}
+          title={i18n.translate('xpack.observability_onboarding.selectLogs.networkStreamingLogs', {
+            defaultMessage: 'Network streaming logs',
+          })}
         >
           <EuiFlexGroup>
             <EuiFlexItem>
               <OptionCard
-                title={i18n.translate(
-                  'xpack.observability_onboarding.selectLogs.sysLog',
-                  {
-                    defaultMessage: 'TCP/UDP/Syslog',
-                  }
-                )}
+                title={i18n.translate('xpack.observability_onboarding.selectLogs.sysLog', {
+                  defaultMessage: 'TCP/UDP/Syslog',
+                })}
                 iconType="documents"
                 onClick={() => {}}
                 description={i18n.translate(
                   'xpack.observability_onboarding.selectLogs.sysLog.description',
                   {
-                    defaultMessage:
-                      'Stream logs over TCP or UDP ports or from your syslog server.',
+                    defaultMessage: 'Stream logs over TCP or UDP ports or from your syslog server.',
                   }
                 )}
               />
@@ -128,8 +111,7 @@ export function SelectLogs() {
                 description={i18n.translate(
                   'xpack.observability_onboarding.selectLogs.httpEndpointLogs.description',
                   {
-                    defaultMessage:
-                      'Collect JSON data from listening HTTP port.',
+                    defaultMessage: 'Collect JSON data from listening HTTP port.',
                   }
                 )}
               />
@@ -138,22 +120,16 @@ export function SelectLogs() {
         </LogsTypeSection>
         <EuiHorizontalRule margin="l" />
         <LogsTypeSection
-          title={i18n.translate(
-            'xpack.observability_onboarding.selectLogs.other',
-            {
-              defaultMessage: 'Other',
-            }
-          )}
+          title={i18n.translate('xpack.observability_onboarding.selectLogs.other', {
+            defaultMessage: 'Other',
+          })}
         >
           <EuiFlexGroup>
             <EuiFlexItem>
               <OptionCard
-                title={i18n.translate(
-                  'xpack.observability_onboarding.selectLogs.uploadLogFiles',
-                  {
-                    defaultMessage: 'Upload log files',
-                  }
-                )}
+                title={i18n.translate('xpack.observability_onboarding.selectLogs.uploadLogFiles', {
+                  defaultMessage: 'Upload log files',
+                })}
                 iconType="exportAction"
                 onClick={() => {}}
                 description={i18n.translate(
@@ -167,12 +143,9 @@ export function SelectLogs() {
             </EuiFlexItem>
             <EuiFlexItem>
               <OptionCard
-                title={i18n.translate(
-                  'xpack.observability_onboarding.selectLogs.useOwnShipper',
-                  {
-                    defaultMessage: 'Get an API key',
-                  }
-                )}
+                title={i18n.translate('xpack.observability_onboarding.selectLogs.useOwnShipper', {
+                  defaultMessage: 'Get an API key',
+                })}
                 iconType="package"
                 onClick={() => {}}
                 description={i18n.translate(
@@ -195,12 +168,9 @@ export function SelectLogs() {
               navigateToAppUrl('/integrations/browse/observability');
             }}
           >
-            {i18n.translate(
-              'xpack.observability_onboarding.exploreOtherIntegrations',
-              {
-                defaultMessage: 'Explore other integrations',
-              }
-            )}
+            {i18n.translate('xpack.observability_onboarding.exploreOtherIntegrations', {
+              defaultMessage: 'Explore other integrations',
+            })}
           </EuiLink>
         </LogsTypeSection>
       </StepPanelContent>
@@ -208,10 +178,7 @@ export function SelectLogs() {
   );
 }
 
-function LogsTypeSection({
-  title,
-  children,
-}: PropsWithChildren<{ title: string }>) {
+function LogsTypeSection({ title, children }: PropsWithChildren<{ title: string }>) {
   return (
     <>
       <EuiTitle size="s">

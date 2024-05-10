@@ -21,6 +21,7 @@ export function PalettePanelContainer(props: {
   return (
     <SettingWithSiblingFlyout
       {...props}
+      dataTestSubj="lns-palettePanelFlyout"
       SettingTrigger={({ onClick }: { onClick: () => void }) => (
         <>
           <EuiFlexItem>

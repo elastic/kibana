@@ -53,8 +53,7 @@ export function joinByKey<
 export function joinByKey(
   items: Array<Record<string, any>>,
   key: string | string[],
-  mergeFn: Function = (a: Record<string, any>, b: Record<string, any>) =>
-    merge({}, a, b)
+  mergeFn: Function = (a: Record<string, any>, b: Record<string, any>) => merge({}, a, b)
 ) {
   const keys = castArray(key);
   // Create a map to quickly query the key of group.

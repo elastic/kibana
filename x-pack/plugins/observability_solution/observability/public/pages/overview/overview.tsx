@@ -54,7 +54,7 @@ export function OverviewPage() {
     kibanaVersion,
   } = useKibana().services;
 
-  const { ObservabilityPageTemplate } = usePluginContext();
+  const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
 
   useBreadcrumbs([
     {
@@ -244,6 +244,7 @@ export function OverviewPage() {
               pageSize={ALERTS_PER_PAGE}
               query={esQuery}
               showAlertStatusWithFlapping
+              cellContext={{ observabilityRuleTypeRegistry }}
             />
           </SectionContainer>
         </EuiFlexItem>

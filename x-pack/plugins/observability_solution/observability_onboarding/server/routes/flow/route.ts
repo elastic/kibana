@@ -7,10 +7,7 @@
 
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
-import {
-  getObservabilityOnboardingFlow,
-  saveObservabilityOnboardingFlow,
-} from '../../lib/state';
+import { getObservabilityOnboardingFlow, saveObservabilityOnboardingFlow } from '../../lib/state';
 import {
   ElasticAgentStepPayload,
   ObservabilityOnboardingFlow,
@@ -79,19 +76,15 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
     } = resources;
 
     const coreStart = await core.start();
-    const savedObjectsClient =
-      coreStart.savedObjects.createInternalRepository();
+    const savedObjectsClient = coreStart.savedObjects.createInternalRepository();
 
-    const savedObservabilityOnboardingState =
-      await getObservabilityOnboardingFlow({
-        savedObjectsClient,
-        savedObjectId: id,
-      });
+    const savedObservabilityOnboardingState = await getObservabilityOnboardingFlow({
+      savedObjectsClient,
+      savedObjectId: id,
+    });
 
     if (!savedObservabilityOnboardingState) {
-      throw Boom.notFound(
-        'Unable to report setup progress - onboarding session not found.'
-      );
+      throw Boom.notFound('Unable to report setup progress - onboarding session not found.');
     }
 
     const {
@@ -120,8 +113,7 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
 });
 
 const getProgressRoute = createObservabilityOnboardingServerRoute({
-  endpoint:
-    'GET /internal/observability_onboarding/flow/{onboardingId}/progress',
+  endpoint: 'GET /internal/observability_onboarding/flow/{onboardingId}/progress',
   options: { tags: [] },
   params: t.type({
     path: t.type({
@@ -140,22 +132,18 @@ const getProgressRoute = createObservabilityOnboardingServerRoute({
     } = resources;
     const coreStart = await core.start();
     const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
-    const savedObservabilityOnboardingState =
-      await getObservabilityOnboardingFlow({
-        savedObjectsClient,
-        savedObjectId: onboardingId,
-      });
+    const savedObservabilityOnboardingState = await getObservabilityOnboardingFlow({
+      savedObjectsClient,
+      savedObjectId: onboardingId,
+    });
 
     if (!savedObservabilityOnboardingState) {
-      throw Boom.notFound(
-        'Unable to report setup progress - onboarding session not found.'
-      );
+      throw Boom.notFound('Unable to report setup progress - onboarding session not found.');
     }
 
     const progress = { ...savedObservabilityOnboardingState?.progress };
 
-    const esClient =
-      coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
+    const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
 
     const type = savedObservabilityOnboardingState.type;
 
