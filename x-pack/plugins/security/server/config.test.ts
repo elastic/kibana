@@ -2004,7 +2004,7 @@ describe('createConfig()', () => {
     ).toThrow('[audit.appender.1.layout]: expected at least one defined value but got [undefined]');
   });
 
-  it('allows filtering audit eventstion', () => {
+  it('allows filtering audit events', () => {
     expect(
       ConfigSchema.validate({
         audit: {

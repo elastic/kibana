@@ -385,10 +385,10 @@ xpack.security.audit.ignore_filters[].outcomes[] {ess-icon}::
 List of values matched against the `event.outcome` field of an audit event. Refer to https://www.elastic.co/guide/en/ecs/1.5/ecs-allowed-values-event-outcome.html[ECS outcome field] for allowed values.
 
 xpack.security.audit.ignore_filters[].spaces[] {ess-icon}::
-List of values matched against the `event.kibana.space_id` field of an audit event. This represents the space id in which the event took place.
+List of values matched against the `kibana.space_id` field of an audit event. This represents the space id in which the event took place.
 
 xpack.security.audit.ignore_filters[].types[] {ess-icon}::
 List of values matched against the `event.type` field of an audit event. Refer to https://www.elastic.co/guide/en/ecs/1.5/ecs-allowed-values-event-type.html[ECS type field] for allowed values.
 
 xpack.security.audit.ignore_filters[].users[] {ess-icon}::
-List of values matched against the `event.user.name` field of an audit event. This represents the `username` associated with the audit event.
+List of values matched against the `user.name` field of an audit event. This represents the `username` associated with the audit event.
