@@ -21,6 +21,7 @@ export interface FetchConnectorsApiLogicArgs {
 export interface FetchConnectorsApiLogicResponse {
   connectors: Connector[];
   counts: Record<string, number>;
+  indexExists: Record<string, boolean>;
   isInitialRequest: boolean;
   meta: Meta;
 }

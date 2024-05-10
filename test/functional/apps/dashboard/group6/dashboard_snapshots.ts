@@ -31,6 +31,7 @@ export default function ({
   const dashboardAddPanel = getService('dashboardAddPanel');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const toasts = getService('toasts');
 
   describe('dashboard snapshots', function describeIndexTests() {
     before(async function () {
@@ -58,7 +59,7 @@ export default function ({
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.timePicker.setLogstashDataRange();
       await dashboardAddPanel.addVisualization('Rendering Test: tsvb-ts');
-      await PageObjects.common.closeToastIfExists();
+      await toasts.dismissIfExists();
 
       await PageObjects.dashboard.saveDashboard('tsvb');
       await PageObjects.dashboard.clickFullScreenMode();
@@ -80,7 +81,7 @@ export default function ({
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.timePicker.setLogstashDataRange();
       await dashboardAddPanel.addVisualization('Rendering Test: area with not filter');
-      await PageObjects.common.closeToastIfExists();
+      await toasts.dismissIfExists();
 
       await PageObjects.dashboard.saveDashboard('area');
       await PageObjects.dashboard.clickFullScreenMode();

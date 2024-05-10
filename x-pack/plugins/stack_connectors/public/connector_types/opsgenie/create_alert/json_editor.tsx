@@ -83,10 +83,11 @@ const JsonEditorComponent: React.FC<JsonEditorProps> = ({
       messageVariables={messageVariables}
       paramsProperty={'subActionParams'}
       inputTargetValue={jsonEditorValue}
-      aria-label={i18n.JSON_EDITOR_ARIA}
+      ariaLabel={i18n.JSON_EDITOR_ARIA}
       onDocumentsChange={onAdvancedEditorChange}
       errors={jsonEditorErrors}
       label={i18n.ALERT_FIELDS_LABEL}
+      dataTestSubj="actionJsonEditor"
     />
   );
 };

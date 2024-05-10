@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 import type { EuiBadgeGroupProps } from '@elastic/eui';
 import { EuiBadgeGroup, EuiBadge } from '@elastic/eui';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 
 interface TagsProps {
   tags: string[];
@@ -16,18 +16,21 @@ interface TagsProps {
   gutterSize?: EuiBadgeGroupProps['gutterSize'];
 }
 
-const MyEuiBadge = styled(EuiBadge)`
-  max-width: 200px;
-`;
-
 const TagsComponent: React.FC<TagsProps> = ({ tags, color = 'default', gutterSize }) => (
   <>
     {tags.length > 0 && (
       <EuiBadgeGroup gutterSize={gutterSize}>
         {tags.map((tag) => (
-          <MyEuiBadge data-test-subj={`tag-${tag}`} color={color} key={tag}>
+          <EuiBadge
+            data-test-subj={`tag-${tag}`}
+            color={color}
+            key={tag}
+            css={css`
+              max-width: 200px;
+            `}
+          >
             {tag}
-          </MyEuiBadge>
+          </EuiBadge>
         ))}
       </EuiBadgeGroup>
     )}

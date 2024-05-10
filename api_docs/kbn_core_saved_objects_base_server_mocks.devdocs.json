@@ -18,7 +18,33 @@
   },
   "common": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-mocks",
+        "id": "def-common.createDocumentMigratorMock",
+        "type": "Function",
+        "tags": [],
+        "label": "createDocumentMigratorMock",
+        "description": [],
+        "signature": [
+          "() => jest.Mocked<",
+          {
+            "pluginId": "@kbn/core-saved-objects-base-server-internal",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsBaseServerInternalPluginApi",
+            "section": "def-common.IDocumentMigrator",
+            "text": "IDocumentMigrator"
+          },
+          ">"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-base-server-mocks/src/document_migrator.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [],
     "enums": [],
     "misc": [],

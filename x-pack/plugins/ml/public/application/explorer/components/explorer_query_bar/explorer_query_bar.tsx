@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiCode, EuiInputPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
 import type { Query } from '@kbn/es-query';
-import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { QueryErrorMessage } from '@kbn/ml-error-utils';
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
@@ -111,14 +111,9 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
   const { anomalyExplorerCommonStateService } = useAnomalyExplorerContext();
   const { services } = useMlKibana();
   const {
-    unifiedSearch,
-    data,
-    storage,
-    notifications,
-    http,
-    docLinks,
-    uiSettings,
-    dataViews: dataViewsService,
+    unifiedSearch: {
+      ui: { QueryStringInput },
+    },
   } = services;
 
   // The internal state of the input query bar updated on every key stroke.
@@ -163,7 +158,7 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
 
   return (
     <EuiInputPopover
-      css={{ 'max-width': '100%' }}
+      css={{ maxWidth: '100%' }}
       closePopover={setQueryErrorMessage.bind(null, undefined)}
       input={
         <QueryStringInput
@@ -177,16 +172,6 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
           dataTestSubj="explorerQueryInput"
           languageSwitcherPopoverAnchorPosition="rightDown"
           appName={PLUGIN_ID}
-          deps={{
-            unifiedSearch,
-            notifications,
-            http,
-            docLinks,
-            uiSettings,
-            data,
-            storage,
-            dataViews: dataViewsService,
-          }}
         />
       }
       isOpen={queryErrorMessage?.query === searchInput.query && queryErrorMessage?.message !== ''}

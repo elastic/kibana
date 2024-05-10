@@ -6,18 +6,29 @@
  * Side Public License, v 1.
  */
 
+import type { BrowserLoggingConfig } from '@kbn/core-logging-common-internal';
+import { unsafeConsole } from '@kbn/security-hardening';
 import { BrowserLoggingSystem } from './logging_system';
 
-describe('', () => {
+describe('BrowserLoggingSystem', () => {
   const timestamp = new Date(Date.UTC(2012, 1, 1, 14, 33, 22, 11));
 
   let mockConsoleLog: jest.SpyInstance;
   let loggingSystem: BrowserLoggingSystem;
 
+  const createLoggingConfig = (parts: Partial<BrowserLoggingConfig> = {}): BrowserLoggingConfig => {
+    return {
+      root: {
+        level: 'warn',
+      },
+      ...parts,
+    };
+  };
+
   beforeEach(() => {
-    mockConsoleLog = jest.spyOn(global.console, 'log').mockReturnValue(undefined);
+    mockConsoleLog = jest.spyOn(unsafeConsole, 'log').mockReturnValue(undefined);
     jest.spyOn<any, any>(global, 'Date').mockImplementation(() => timestamp);
-    loggingSystem = new BrowserLoggingSystem({ logLevel: 'warn' });
+    loggingSystem = new BrowserLoggingSystem(createLoggingConfig());
   });
 
   afterEach(() => {
@@ -69,6 +80,38 @@ describe('', () => {
           ],
           Array [
             "[2012-01-31T18:33:22.011-05:00][FATAL][foo.bar] some fatal message",
+          ],
+        ]
+      `);
+    });
+
+    it('allows to override the root logger level', () => {
+      loggingSystem = new BrowserLoggingSystem(createLoggingConfig({ root: { level: 'debug' } }));
+
+      const logger = loggingSystem.get('foo.bar');
+      logger.trace('some trace message');
+      logger.debug('some debug message');
+      logger.info('some info message');
+      logger.warn('some warn message');
+      logger.error('some error message');
+      logger.fatal('some fatal message');
+
+      expect(mockConsoleLog.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "[2012-01-31T13:33:22.011-05:00][DEBUG][foo.bar] some debug message",
+          ],
+          Array [
+            "[2012-01-31T08:33:22.011-05:00][INFO ][foo.bar] some info message",
+          ],
+          Array [
+            "[2012-01-31T03:33:22.011-05:00][WARN ][foo.bar] some warn message",
+          ],
+          Array [
+            "[2012-01-30T22:33:22.011-05:00][ERROR][foo.bar] some error message",
+          ],
+          Array [
+            "[2012-01-30T17:33:22.011-05:00][FATAL][foo.bar] some fatal message",
           ],
         ]
       `);

@@ -41,6 +41,7 @@ export type TypeMetaRestResponse = {
 
 export type FieldAttrSetRestResponse = {
   customLabel?: string;
+  customDescription?: string;
   count?: number;
 };
 
@@ -94,6 +95,7 @@ export type FieldSpecRestResponse = DataViewFieldBaseRestResponse & {
   readFromDocValues?: boolean;
   indexed?: boolean;
   customLabel?: string;
+  customDescription?: string;
   runtimeField?: RuntimeFieldSpecRestResponse;
   fixedInterval?: string[];
   timeZone?: string[];

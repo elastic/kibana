@@ -15,6 +15,9 @@ import {
   SavedObjectsFindResult,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
+import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
+import { RuleAction, RuleSystemAction } from '../../../../../common';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { BulkActionSkipResult } from '../../../../../common/bulk_edit';
 import { RuleTypeRegistry } from '../../../../types';
 import {
@@ -31,10 +34,10 @@ import {
   retryIfBulkEditConflicts,
   applyBulkEditOperation,
   buildKueryNodeFilter,
-  injectReferencesIntoActions,
   getBulkSnooze,
   getBulkUnsnooze,
   verifySnoozeScheduleLimit,
+  injectReferencesIntoActions,
 } from '../../../../rules_client/common';
 import {
   alertingAuthorizationFilterOpts,
@@ -55,6 +58,7 @@ import {
   RuleBulkOperationAggregation,
   RulesClientContext,
   NormalizedAlertActionWithGeneratedValues,
+  NormalizedAlertAction,
 } from '../../../../rules_client/types';
 import { migrateLegacyActions } from '../../../../rules_client/lib';
 import {
@@ -67,7 +71,7 @@ import {
 } from './types';
 import { RawRuleAction, RawRule, SanitizedRule } from '../../../../types';
 import { ruleNotifyWhen } from '../../constants';
-import { ruleDomainSchema } from '../../schemas';
+import { actionRequestSchema, ruleDomainSchema, systemActionRequestSchema } from '../../schemas';
 import { RuleParams, RuleDomain, RuleSnoozeSchedule } from '../../types';
 import { findRulesSo, bulkCreateRulesSo } from '../../../../data/rule';
 import { RuleAttributes, RuleActionAttributes } from '../../../../data/rule/types';
@@ -116,6 +120,7 @@ export async function bulkEditRules<Params extends RuleParams>(
 ): Promise<BulkEditResult<Params>> {
   const queryFilter = (options as BulkEditOptionsFilter<Params>).filter;
   const ids = (options as BulkEditOptionsIds<Params>).ids;
+  const actionsClient = await context.getActionsClient();
 
   if (ids && queryFilter) {
     throw Boom.badRequest(
@@ -230,13 +235,17 @@ export async function bulkEditRules<Params extends RuleParams>(
     // fix the type cast from SavedObjectsBulkUpdateObject to SavedObjectsBulkUpdateObject
     // when we are doing the bulk create and this should fix itself
     const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
-    const ruleDomain = transformRuleAttributesToRuleDomain<Params>(attributes as RuleAttributes, {
-      id,
-      logger: context.logger,
-      ruleType,
-      references,
-      omitGeneratedValues: false,
-    });
+    const ruleDomain = transformRuleAttributesToRuleDomain<Params>(
+      attributes as RuleAttributes,
+      {
+        id,
+        logger: context.logger,
+        ruleType,
+        references,
+        omitGeneratedValues: false,
+      },
+      (connectorId: string) => actionsClient.isSystemAction(connectorId)
+    );
     try {
       ruleDomainSchema.validate(ruleDomain);
     } catch (e) {
@@ -279,7 +288,7 @@ async function bulkEditRulesOcc<Params extends RuleParams>(
     await context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RuleAttributes>(
       {
         filter,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         perPage: 100,
         ...(context.namespace ? { namespaces: [context.namespace] } : undefined),
       }
@@ -357,7 +366,6 @@ async function bulkEditRulesOcc<Params extends RuleParams>(
       skipped: [],
     };
   }
-
   const { result, apiKeysToInvalidate } =
     rules.length > 0
       ? await saveBulkUpdatedRules({
@@ -477,7 +485,8 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
         logger: context.logger,
         ruleType: context.ruleTypeRegistry.get(rule.attributes.alertTypeId),
         references: rule.references,
-      }
+      },
+      context.isSystemAction
     );
 
     const {
@@ -489,7 +498,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
       context,
       operations,
       rule: ruleDomain,
-      ruleActions: ruleActions as RuleDomain['actions'], // TODO (http-versioning) Remove this cast once we fix injectReferencesIntoActions
+      ruleActions,
       ruleType,
     });
 
@@ -531,9 +540,9 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
     );
 
     const {
-      actions: rawAlertActions,
       references,
       params: updatedParams,
+      actions: actionsWithRefs,
     } = await extractReferences(
       context,
       ruleType,
@@ -541,10 +550,13 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
       validatedMutatedAlertTypeParams
     );
 
-    const ruleAttributes = transformRuleDomainToRuleAttributes(updatedRule, {
-      legacyId: rule.attributes.legacyId,
-      actionsWithRefs: rawAlertActions,
-      paramsWithRefs: updatedParams as RuleAttributes['params'],
+    const ruleAttributes = transformRuleDomainToRuleAttributes({
+      actionsWithRefs,
+      rule: updatedRule,
+      params: {
+        legacyId: rule.attributes.legacyId,
+        paramsWithRefs: updatedParams as RuleAttributes['params'],
+      },
     });
 
     const { apiKeyAttributes } = await prepareApiKeys(
@@ -562,7 +574,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
       ruleAttributes,
       apiKeyAttributes,
       updatedParams,
-      rawAlertActions,
+      ruleAttributes.actions,
       username
     );
 
@@ -620,9 +632,11 @@ async function getUpdatedAttributesFromOperations<Params extends RuleParams>({
   context: RulesClientContext;
   operations: BulkEditOperation[];
   rule: RuleDomain<Params>;
-  ruleActions: RuleDomain['actions'];
+  ruleActions: RuleDomain['actions'] | RuleDomain['systemActions'];
   ruleType: RuleType;
 }) {
+  const actionsClient = await context.getActionsClient();
+
   let updatedRule = cloneDeep(rule);
   let updatedRuleActions = ruleActions;
   let hasUpdateApiKeyOperation = false;
@@ -635,21 +649,56 @@ async function getUpdatedAttributesFromOperations<Params extends RuleParams>({
     // the `isAttributesUpdateSkipped` flag to false.
     switch (operation.field) {
       case 'actions': {
+        const systemActions = operation.value.filter((action): action is RuleSystemAction =>
+          actionsClient.isSystemAction(action.id)
+        );
+        const actions = operation.value.filter(
+          (action): action is RuleAction => !actionsClient.isSystemAction(action.id)
+        );
+
+        systemActions.forEach((systemAction) => {
+          try {
+            systemActionRequestSchema.validate(systemAction);
+          } catch (error) {
+            throw Boom.badRequest(`Error validating bulk edit rules operations - ${error.message}`);
+          }
+        });
+
+        actions.forEach((action) => {
+          try {
+            actionRequestSchema.validate(action);
+          } catch (error) {
+            throw Boom.badRequest(`Error validating bulk edit rules operations - ${error.message}`);
+          }
+        });
+
+        const { actions: genActions, systemActions: genSystemActions } =
+          await addGeneratedActionValues(actions, systemActions, context);
         const updatedOperation = {
           ...operation,
-          value: addGeneratedActionValues(operation.value),
+          value: [...genActions, ...genSystemActions],
         };
+
+        await validateAndAuthorizeSystemActions({
+          actionsClient,
+          actionsAuthorization: context.actionsAuthorization,
+          connectorAdapterRegistry: context.connectorAdapterRegistry,
+          systemActions: genSystemActions,
+          rule: { consumer: updatedRule.consumer, producer: ruleType.producer },
+        });
 
         try {
           await validateActions(context, ruleType, {
             ...updatedRule,
-            actions: updatedOperation.value,
+            actions: genActions,
+            systemActions: genSystemActions,
           });
         } catch (e) {
           // If validateActions fails on the first attempt, it may be because of legacy rule-level frequency params
           updatedRule = await attemptToMigrateLegacyFrequency(
             context,
-            updatedOperation,
+            operation.field,
+            genActions,
             updatedRule,
             ruleType
           );
@@ -668,23 +717,27 @@ async function getUpdatedAttributesFromOperations<Params extends RuleParams>({
 
         break;
       }
+
       case 'snoozeSchedule': {
         if (operation.operation === 'set') {
           const snoozeAttributes = getBulkSnooze<Params>(
             updatedRule,
             operation.value as RuleSnoozeSchedule
           );
+
           try {
             verifySnoozeScheduleLimit(snoozeAttributes.snoozeSchedule);
           } catch (error) {
             throw Error(`Error updating rule: could not add snooze - ${error.message}`);
           }
+
           updatedRule = {
             ...updatedRule,
             muteAll: snoozeAttributes.muteAll,
             snoozeSchedule: snoozeAttributes.snoozeSchedule as RuleDomain['snoozeSchedule'],
           };
         }
+
         if (operation.operation === 'delete') {
           const idsToDelete = operation.value && [...operation.value];
           if (idsToDelete?.length === 0) {
@@ -701,18 +754,25 @@ async function getUpdatedAttributesFromOperations<Params extends RuleParams>({
             snoozeSchedule: snoozeAttributes.snoozeSchedule as RuleDomain['snoozeSchedule'],
           };
         }
+
         isAttributesUpdateSkipped = false;
         break;
       }
+
       case 'apiKey': {
         hasUpdateApiKeyOperation = true;
         isAttributesUpdateSkipped = false;
         break;
       }
+
       default: {
         if (operation.field === 'schedule') {
-          validateScheduleOperation(operation.value, updatedRule.actions, rule.id);
+          const defaultActions = updatedRule.actions.filter(
+            (action) => !actionsClient.isSystemAction(action.id)
+          );
+          validateScheduleOperation(operation.value, defaultActions, rule.id);
         }
+
         const { modifiedAttributes, isAttributeModified } = applyBulkEditOperation(
           operation,
           updatedRule
@@ -922,18 +982,19 @@ async function saveBulkUpdatedRules({
 
 async function attemptToMigrateLegacyFrequency<Params extends RuleParams>(
   context: RulesClientContext,
-  operation: BulkEditOperation,
+  operationField: BulkEditOperation['field'],
+  actions: NormalizedAlertAction[],
   rule: RuleDomain<Params>,
   ruleType: RuleType
 ) {
-  if (operation.field !== 'actions')
+  if (operationField !== 'actions')
     throw new Error('Can only perform frequency migration on an action operation');
   // Try to remove the rule-level frequency params, and then validate actions
   if (typeof rule.notifyWhen !== 'undefined') rule.notifyWhen = undefined;
   if (rule.throttle) rule.throttle = undefined;
   await validateActions(context, ruleType, {
     ...rule,
-    actions: operation.value,
+    actions,
   });
   return rule;
 }

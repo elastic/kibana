@@ -48,11 +48,10 @@ export class IndexLifecycleManagementPlugin
         id: PLUGIN.ID,
         title: PLUGIN.TITLE,
         order: 2,
-        mount: async ({ element, history, setBreadcrumbs, theme$ }) => {
+        mount: async ({ element, history, setBreadcrumbs }) => {
           const [coreStart, { licensing }] = await getStartServices();
           const {
             chrome: { docTitle },
-            i18n: { Context: I18nContext },
             application,
             docLinks,
             executionContext,
@@ -66,13 +65,12 @@ export class IndexLifecycleManagementPlugin
           const { renderApp } = await import('./application');
 
           const unmountAppCallback = renderApp(
+            coreStart,
             element,
-            I18nContext,
             history,
             application,
             this.breadcrumbService,
             license,
-            theme$,
             docLinks,
             executionContext,
             cloud

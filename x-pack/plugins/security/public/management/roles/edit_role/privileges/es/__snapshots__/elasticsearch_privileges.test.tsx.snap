@@ -1,5 +1,163 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`it renders correctly in serverless mode 1`] = `
+<CollapsiblePanel
+  iconType="logoElasticsearch"
+  title="Elasticsearch"
+>
+  <EuiDescribedFormGroup
+    description={
+      <p>
+        <FormattedMessage
+          defaultMessage="Manage the actions this role can perform against your cluster. "
+          id="xpack.security.management.editRole.elasticSearchPrivileges.manageRoleActionsDescription"
+          values={Object {}}
+        />
+        <EuiLink
+          className="editRole__learnMore"
+          href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-privileges.html#privileges-list-cluster"
+          target="_blank"
+        >
+          <FormattedMessage
+            defaultMessage="Learn more"
+            id="xpack.security.management.editRole.elasticSearchPrivileges.learnMoreLinkText"
+            values={Object {}}
+          />
+        </EuiLink>
+      </p>
+    }
+    title={
+      <h3>
+        <FormattedMessage
+          defaultMessage="Cluster privileges"
+          id="xpack.security.management.editRole.elasticSearchPrivileges.clusterPrivilegesTitle"
+          values={Object {}}
+        />
+      </h3>
+    }
+  >
+    <EuiFormRow
+      describedByIds={Array []}
+      display="row"
+      fullWidth={true}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={true}
+      labelType="label"
+    >
+      <ClusterPrivileges
+        builtinClusterPrivileges={
+          Array [
+            "all",
+            "manage",
+            "monitor",
+          ]
+        }
+        editable={true}
+        onChange={[Function]}
+        role={
+          Object {
+            "elasticsearch": Object {
+              "cluster": Array [],
+              "indices": Array [],
+              "remote_cluster": Array [],
+              "run_as": Array [],
+            },
+            "kibana": Array [],
+            "name": "",
+          }
+        }
+      />
+    </EuiFormRow>
+  </EuiDescribedFormGroup>
+  <EuiSpacer />
+  <EuiTitle
+    size="xs"
+  >
+    <h3>
+      <FormattedMessage
+        defaultMessage="Index privileges"
+        id="xpack.security.management.editRole.elasticSearchPrivileges.indexPrivilegesTitle"
+        values={Object {}}
+      />
+    </h3>
+  </EuiTitle>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiText
+    color="subdued"
+    size="s"
+  >
+    <p>
+      <FormattedMessage
+        defaultMessage="Control access to the data in your cluster. "
+        id="xpack.security.management.editRole.elasticSearchPrivileges.controlAccessToClusterDataDescription"
+        values={Object {}}
+      />
+      <EuiLink
+        className="editRole__learnMore"
+        href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-privileges.html#privileges-list-indices"
+        target="_blank"
+      >
+        <FormattedMessage
+          defaultMessage="Learn more"
+          id="xpack.security.management.editRole.elasticSearchPrivileges.learnMoreLinkText"
+          values={Object {}}
+        />
+      </EuiLink>
+    </p>
+  </EuiText>
+  <IndexPrivileges
+    availableIndexPrivileges={
+      Array [
+        "all",
+        "read",
+        "write",
+        "index",
+      ]
+    }
+    editable={true}
+    indexPatterns={Array []}
+    indexType="indices"
+    indicesAPIClient={
+      Object {
+        "getFields": [MockFunction],
+      }
+    }
+    license={
+      Object {
+        "features$": Observable {
+          "_subscribe": [Function],
+        },
+        "getFeatures": [MockFunction],
+        "getUnavailableReason": [MockFunction],
+        "hasAtLeast": [MockFunction],
+        "isEnabled": [MockFunction],
+        "isLicenseAvailable": [MockFunction],
+      }
+    }
+    onChange={[MockFunction]}
+    role={
+      Object {
+        "elasticsearch": Object {
+          "cluster": Array [],
+          "indices": Array [],
+          "remote_cluster": Array [],
+          "run_as": Array [],
+        },
+        "kibana": Array [],
+        "name": "",
+      }
+    }
+    validator={
+      RoleValidator {
+        "shouldValidate": undefined,
+      }
+    }
+  />
+</CollapsiblePanel>
+`;
+
 exports[`it renders without crashing 1`] = `
 <CollapsiblePanel
   iconType="logoElasticsearch"
@@ -59,6 +217,7 @@ exports[`it renders without crashing 1`] = `
             "elasticsearch": Object {
               "cluster": Array [],
               "indices": Array [],
+              "remote_cluster": Array [],
               "run_as": Array [],
             },
             "kibana": Array [],
@@ -109,6 +268,7 @@ exports[`it renders without crashing 1`] = `
       isDisabled={false}
       onChange={[Function]}
       onCreateOption={[Function]}
+      optionMatcher={[Function]}
       options={Array []}
       placeholder="Add a user…"
       selectedOptions={Array []}
@@ -177,6 +337,7 @@ exports[`it renders without crashing 1`] = `
           "_subscribe": [Function],
         },
         "getFeatures": [MockFunction],
+        "getUnavailableReason": [MockFunction],
         "hasAtLeast": [MockFunction],
         "isEnabled": [MockFunction],
         "isLicenseAvailable": [MockFunction],
@@ -188,6 +349,7 @@ exports[`it renders without crashing 1`] = `
         "elasticsearch": Object {
           "cluster": Array [],
           "indices": Array [],
+          "remote_cluster": Array [],
           "run_as": Array [],
         },
         "kibana": Array [],

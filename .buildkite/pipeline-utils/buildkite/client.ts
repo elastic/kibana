@@ -29,15 +29,24 @@ export interface BuildkiteGroup {
   steps: BuildkiteStep[];
 }
 
-export type BuildkiteStep = BuildkiteCommandStep | BuildkiteInputStep;
+export type BuildkiteStep = BuildkiteCommandStep | BuildkiteInputStep | BuildkiteTriggerStep;
 
 export interface BuildkiteCommandStep {
   command: string;
   label: string;
   parallelism?: number;
-  agents: {
-    queue: string;
-  };
+  agents:
+    | {
+        queue: string;
+      }
+    | {
+        provider?: string;
+        image?: string;
+        imageProject?: string;
+        machineType?: string;
+        minCpuPlatform?: string;
+        preemptible?: boolean;
+      };
   timeout_in_minutes?: number;
   key?: string;
   depends_on?: string | string[];
@@ -92,6 +101,25 @@ export interface BuildkiteInputStep {
     }>;
   };
   env?: { [key: string]: string };
+}
+
+export interface BuildkiteTriggerStep {
+  trigger: string;
+  label?: string;
+  build?: {
+    message?: string; // The message for the build. Supports emoji.
+    commit?: string; // The commit hash for the build.
+    branch?: string; // The branch for the build.
+    meta_data?: string; // A map of meta-data for the build.
+    env?: Record<string, string>; // A map of environment variables for the build.
+  };
+  async?: boolean;
+  branches?: string;
+  if?: string;
+  allow_dependency_failure?: boolean;
+  soft_fail?: boolean;
+  depends_on?: string | string[];
+  skip?: string;
 }
 
 export interface BuildkiteTriggerBuildParams {

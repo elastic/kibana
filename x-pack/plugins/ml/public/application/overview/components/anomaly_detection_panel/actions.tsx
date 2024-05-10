@@ -6,11 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Action } from '@elastic/eui/src/components/basic_table/action_types';
+import type { Action } from '@elastic/eui/src/components/basic_table/action_types';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { useMlLocator, useNavigateToPath } from '../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../common/constants/locator';
-import { Group } from './anomaly_detection_panel';
+import type { Group } from './anomaly_detection_panel';
 
 export function useGroupActions(): Array<Action<Group>> {
   const locator = useMlLocator();

@@ -8,21 +8,9 @@
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import BedrockParamsFields from './params';
-import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
 import { DEFAULT_BEDROCK_URL, SUB_ACTION } from '../../../common/bedrock/constants';
 import { I18nProvider } from '@kbn/i18n-react';
 
-const kibanaReactPath = '../../../../../../src/plugins/kibana_react/public';
-
-jest.mock(kibanaReactPath, () => {
-  const original = jest.requireActual(kibanaReactPath);
-  return {
-    ...original,
-    CodeEditor: (props: any) => {
-      return <MockCodeEditor {...props} />;
-    },
-  };
-});
 const messageVariables = [
   {
     name: 'myVar',
@@ -139,6 +127,35 @@ describe('Bedrock Params Fields renders', () => {
     );
     const jsonEditor = getByTestId('bodyJsonEditor');
     fireEvent.change(jsonEditor, { target: { value: '{"new_key": "new_value"}' } });
+    expect(editAction).toHaveBeenCalledWith(
+      'subActionParams',
+      { body: '{"new_key": "new_value"}' },
+      0
+    );
+  });
+
+  it('removes trailing spaces from the body argument', () => {
+    const editAction = jest.fn();
+    const errors = {};
+    const { getByTestId } = render(
+      <BedrockParamsFields
+        actionParams={{
+          subAction: SUB_ACTION.RUN,
+          subActionParams: {
+            body: '{"key": "value"}',
+          },
+        }}
+        editAction={editAction}
+        index={0}
+        messageVariables={messageVariables}
+        errors={errors}
+      />,
+      {
+        wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
+      }
+    );
+    const jsonEditor = getByTestId('bodyJsonEditor');
+    fireEvent.change(jsonEditor, { target: { value: '{"new_key": "new_value"} ' } });
     expect(editAction).toHaveBeenCalledWith(
       'subActionParams',
       { body: '{"new_key": "new_value"}' },

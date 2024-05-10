@@ -45,7 +45,7 @@ import {
 import type { LegacyAlertsClientParams, AlertRuleData } from '../alerts_client';
 import { AlertsClient } from '../alerts_client';
 import { IAlertsClient } from '../alerts_client/types';
-import { setAlertsToUntracked, SetAlertsToUntrackedOpts } from './lib/set_alerts_to_untracked';
+import { setAlertsToUntracked, SetAlertsToUntrackedParams } from './lib/set_alerts_to_untracked';
 
 export const TOTAL_FIELDS_LIMIT = 2500;
 const LEGACY_ALERT_CONTEXT = 'legacy-alert';
@@ -283,7 +283,7 @@ export class AlertsService implements IAlertsService {
       return;
     }
 
-    this.options.logger.info(`Registering resources for context "${context}".`);
+    this.options.logger.debug(`Registering resources for context "${context}".`);
     this.registeredContexts.set(context, opts);
 
     // When a context is registered, we install resources in the default namespace by default
@@ -466,7 +466,7 @@ export class AlertsService implements IAlertsService {
     }
   }
 
-  public async setAlertsToUntracked(opts: SetAlertsToUntrackedOpts) {
+  public async setAlertsToUntracked(opts: SetAlertsToUntrackedParams) {
     return setAlertsToUntracked({
       logger: this.options.logger,
       esClient: await this.options.elasticsearchClientPromise,

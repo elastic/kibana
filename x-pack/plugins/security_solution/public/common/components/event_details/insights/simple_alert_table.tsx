@@ -11,7 +11,7 @@ import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { EuiBasicTable, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
 
 import { PreferenceFormattedDate } from '../../formatted_date';
-import { SeverityBadge } from '../../../../detections/components/rules/severity_badge';
+import { SeverityBadge } from '../../severity_badge';
 import { useAlertsByIds } from '../../../containers/alerts/use_alerts_by_ids';
 import { SIMPLE_ALERT_TABLE_ERROR, SIMPLE_ALERT_TABLE_LIMITED } from './translations';
 

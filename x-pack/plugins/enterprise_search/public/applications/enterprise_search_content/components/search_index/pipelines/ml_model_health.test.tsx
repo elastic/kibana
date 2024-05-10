@@ -34,13 +34,13 @@ describe('TrainedModelHealth', () => {
   it('renders model downloading', () => {
     const wrapper = shallow(<TrainedModelHealth modelState={MlModelDeploymentState.Downloading} />);
     const health = wrapper.find(EuiHealth);
-    expect(health.prop('children')).toEqual('Downloading');
+    expect(health.prop('children')).toEqual('Deploying');
     expect(health.prop('color')).toEqual('warning');
   });
   it('renders model downloaded', () => {
     const wrapper = shallow(<TrainedModelHealth modelState={MlModelDeploymentState.Downloaded} />);
     const health = wrapper.find(EuiHealth);
-    expect(health.prop('children')).toEqual('Downloaded');
+    expect(health.prop('children')).toEqual('Deployed');
     expect(health.prop('color')).toEqual('subdued');
   });
   it('renders model started', () => {
@@ -67,6 +67,14 @@ describe('TrainedModelHealth', () => {
     const health = wrapper.find(EuiHealth);
     expect(health.prop('children')).toEqual('Not started');
     expect(health.prop('color')).toEqual('danger');
+  });
+  it('renders model not downloaded for downloadable models', () => {
+    const wrapper = shallow(
+      <TrainedModelHealth modelState={MlModelDeploymentState.NotDeployed} isDownloadable />
+    );
+    const health = wrapper.find(EuiHealth);
+    expect(health.prop('children')).toEqual('Not deployed');
+    expect(health.prop('color')).toEqual('subdued');
   });
   it('renders model stopping', () => {
     const pipeline: InferencePipeline = {

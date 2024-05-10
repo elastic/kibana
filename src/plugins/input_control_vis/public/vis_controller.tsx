@@ -61,7 +61,7 @@ export const createInputControlVisController = (
           }
         });
 
-      this.isDarkMode = deps.core.uiSettings.get('theme:darkMode');
+      this.isDarkMode = deps.core.theme.getTheme().darkMode;
     }
 
     async render(visParams: InputControlVisParams) {

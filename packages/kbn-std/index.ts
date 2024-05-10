@@ -16,6 +16,8 @@ export { pick } from './src/pick';
 export { withTimeout, isPromise } from './src/promise';
 export type { URLMeaningfulParts } from './src/url';
 export { isRelativeUrl, modifyUrl, getUrlOrigin } from './src/url';
+export { isInternalURL } from './src/is_internal_url';
+export { parseNextURL } from './src/parse_next_url';
 export { unset } from './src/unset';
 export { getFlattenedObject } from './src/get_flattened_object';
 export { ensureNoUnsafeProperties } from './src/ensure_no_unsafe_properties';
@@ -27,6 +29,6 @@ export {
   asyncForEach,
   asyncForEachWithLimit,
 } from './src/iteration';
-export { ensureDeepObject } from './src/ensure_deep_object';
+export { ensureDeepObject, ensureValidObjectPath } from './src/ensure_deep_object';
 export { Semaphore } from './src/semaphore';
 export { stripVersionQualifier } from './src/strip_version_qualifier';

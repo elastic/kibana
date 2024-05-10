@@ -22,6 +22,10 @@ import { wrapErrorIfNeeded } from '../../utils';
 import { EndpointError } from '../../../../common/endpoint/errors';
 
 export const ManifestTaskConstants = {
+  /**
+   * No longer used. Timeout value now comes from `xpack.securitySolution.packagerTaskTimeout`
+   * @deprecated
+   */
   TIMEOUT: '1m',
   TYPE: 'endpoint:user-artifact-packager',
   VERSION: '1.0.0',
@@ -44,22 +48,37 @@ export class ManifestTask {
   constructor(setupContract: ManifestTaskSetupContract) {
     this.endpointAppContext = setupContract.endpointAppContext;
     this.logger = this.endpointAppContext.logFactory.get(this.getTaskId());
+    const { packagerTaskInterval, packagerTaskTimeout, packagerTaskPackagePolicyUpdateBatchSize } =
+      this.endpointAppContext.serverConfig;
+
+    this.logger.info(
+      `Registering ${ManifestTaskConstants.TYPE} task with timeout of [${packagerTaskTimeout}], interval of [${packagerTaskInterval}] and policy update batch size of [${packagerTaskPackagePolicyUpdateBatchSize}]`
+    );
 
     setupContract.taskManager.registerTaskDefinitions({
       [ManifestTaskConstants.TYPE]: {
         title: 'Security Solution Endpoint Exceptions Handler',
-        timeout: ManifestTaskConstants.TIMEOUT,
+        timeout: packagerTaskTimeout,
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {
             run: async () => {
-              const taskInterval = (await this.endpointAppContext.config()).packagerTaskInterval;
-              const startTime = new Date().getTime();
+              const taskInterval = packagerTaskInterval;
+              const startTime = new Date();
+
+              this.logger.debug(`Started. Checking for changes to endpoint artifacts`);
+
               await this.runTask(taskInstance.id);
+
               const endTime = new Date().getTime();
+
               this.logger.debug(
-                `${ManifestTaskConstants.TYPE} task run took ${endTime - startTime}ms`
+                `Complete. Task run took ${
+                  endTime - startTime.getTime()
+                }ms [ stated: ${startTime.toISOString()} ]`
               );
+
               const nextRun = new Date();
+
               if (taskInterval.endsWith('s')) {
                 const seconds = parseInt(taskInterval.slice(0, -1), 10);
                 nextRun.setSeconds(nextRun.getSeconds() + seconds);
@@ -70,12 +89,20 @@ export class ManifestTask {
                 this.logger.error(`Invalid task interval: ${taskInterval}`);
                 return;
               }
+
               return {
                 state: {},
                 runAt: nextRun,
               };
             },
-            cancel: async () => {},
+            cancel: async () => {
+              // TODO:PT add support for AbortController to Task manager
+              this.logger.warn(
+                'Task run was canceled. Packaging of endpoint artifacts may be taking longer due to the ' +
+                  'amount of policies/artifacts. Consider increasing the `xpack.securitySolution.packagerTaskTimeout` ' +
+                  'server configuration setting if this continues'
+              );
+            },
           };
         },
       },
@@ -91,7 +118,7 @@ export class ManifestTask {
         taskType: ManifestTaskConstants.TYPE,
         scope: ['securitySolution'],
         schedule: {
-          interval: (await this.endpointAppContext.config()).packagerTaskInterval,
+          interval: this.endpointAppContext.serverConfig.packagerTaskInterval,
         },
         state: {},
         params: { version: ManifestTaskConstants.VERSION },
@@ -127,22 +154,28 @@ export class ManifestTask {
     }
 
     try {
-      let oldManifest: Manifest | null;
+      let oldManifest: Manifest | null = null;
 
       try {
         // Last manifest we computed, which was saved to ES
         oldManifest = await manifestManager.getLastComputedManifest();
       } catch (e) {
+        this.logger.error(e);
+
         // Lets recover from a failure in getting the internal manifest map by creating an empty default manifest
         if (e instanceof InvalidInternalManifestError) {
-          this.logger.error(e);
-          this.logger.info('recovering from invalid internal manifest');
+          this.logger.warn('recovering from invalid internal manifest');
           oldManifest = ManifestManager.createDefaultManifest();
+        } else {
+          this.logger.error(
+            `unable to recover from error while attempting to retrieve last computed manifest`
+          );
+
+          return;
         }
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      if (oldManifest! == null) {
+      if (!oldManifest) {
         this.logger.debug('Last computed manifest not available yet');
         return;
       }
@@ -152,10 +185,17 @@ export class ManifestTask {
 
       const diff = newManifest.diff(oldManifest);
 
+      this.logger.debug(
+        `New -vs- old manifest diff counts: ${Object.entries(diff).map(
+          ([diffType, diffItems]) => `${diffType}: ${diffItems.length}`
+        )}`
+      );
+
       const persistErrors = await manifestManager.pushArtifacts(
         diff.additions as InternalArtifactCompleteSchema[],
         newManifest
       );
+
       if (persistErrors.length) {
         reportErrors(this.logger, persistErrors);
         throw new Error('Unable to persist new artifacts.');
@@ -167,8 +207,9 @@ export class ManifestTask {
         await manifestManager.commit(newManifest);
       }
 
-      // Try dispatching to ingest-manager package policies
+      // Dispatch updates to Fleet integration policies with new manifest info
       const dispatchErrors = await manifestManager.tryDispatch(newManifest);
+
       if (dispatchErrors.length) {
         reportErrors(this.logger, dispatchErrors);
         throw new Error('Error dispatching manifest.');
@@ -178,9 +219,11 @@ export class ManifestTask {
       const deleteErrors = await manifestManager.deleteArtifacts(
         diff.removals.map((artifact) => getArtifactId(artifact))
       );
+
       if (deleteErrors.length) {
         reportErrors(this.logger, deleteErrors);
       }
+
       await manifestManager.cleanup(newManifest);
     } catch (err) {
       this.logger.error(wrapErrorIfNeeded(err));

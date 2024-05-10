@@ -26,4 +26,4 @@ export const plugin = async (initializerContext: PluginInitializerContext) => {
   return new CasePlugin(initializerContext);
 };
 
-export type { CasesSetup, CasesStart } from './types';
+export type { CasesServerSetup, CasesServerStart } from './types';

@@ -646,6 +646,7 @@ describe('fieldStatsUtils', function () {
           "sampledDocuments": 2,
           "sampledValues": 2,
           "topValues": Object {
+            "areExamples": true,
             "buckets": Array [
               Object {
                 "count": 1,

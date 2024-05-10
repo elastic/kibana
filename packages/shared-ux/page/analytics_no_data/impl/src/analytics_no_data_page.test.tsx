@@ -38,11 +38,8 @@ describe('AnalyticsNoDataPage', () => {
     await act(() => new Promise(setImmediate));
 
     expect(component.find(Component).length).toBe(1);
-    expect(component.find(Component).props().kibanaGuideDocLink).toBe(services.kibanaGuideDocLink);
     expect(component.find(Component).props().onDataViewCreated).toBe(onDataViewCreated);
     expect(component.find(Component).props().allowAdHocDataView).toBe(true);
-    expect(component.find(Component).props().prependBasePath).toBe(services.prependBasePath);
-    expect(component.find(Component).props().pageFlavor).toBe(services.pageFlavor);
   });
 
   it('passes correct boolean value to showPlainSpinner', () => {

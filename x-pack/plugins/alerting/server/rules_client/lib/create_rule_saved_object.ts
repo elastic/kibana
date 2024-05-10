@@ -17,6 +17,7 @@ import { updateMeta } from './update_meta';
 import { scheduleTask } from './schedule_task';
 import { getAlertFromRaw } from './get_alert_from_raw';
 import { createRuleSo, deleteRuleSo, updateRuleSo } from '../../data/rule';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 interface CreateRuleSavedObjectParams {
   intervalInMs: number;
@@ -56,7 +57,7 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
     ruleAuditEvent({
       action: RuleAuditAction.CREATE,
       outcome: 'unknown',
-      savedObject: { type: 'alert', id: ruleId },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId },
     })
   );
 
@@ -107,7 +108,7 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
       } catch (err) {
         // Skip the cleanup error and throw the task manager error to avoid confusion
         context.logger.error(
-          `Failed to cleanup alert "${createdAlert.id}" after scheduling task failed. Error: ${err.message}`
+          `Failed to cleanup rule "${createdAlert.id}" after scheduling task failed. Error: ${err.message}`
         );
       }
       throw e;

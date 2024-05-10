@@ -10,12 +10,11 @@ import { i18n } from '@kbn/i18n';
 import {
   updateLoadingStateAction,
   setZeroDocsFallback,
-} from '../../../../common/api/log_rate_analysis/actions';
-import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '../../../../common/api/log_rate_analysis/schema';
+} from '@kbn/aiops-log-rate-analysis/api/actions';
+import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '@kbn/aiops-log-rate-analysis/api/schema';
+import { isRequestAbortedError } from '@kbn/aiops-common/is_request_aborted_error';
 
-import { isRequestAbortedError } from '../../../lib/is_request_aborted_error';
-
-import { fetchIndexInfo } from '../queries/fetch_index_info';
+import { fetchIndexInfo } from '@kbn/aiops-log-rate-analysis/queries/fetch_index_info';
 
 import type { ResponseStreamFetchOptions } from '../response_stream_factory';
 import { LOADED_FIELD_CANDIDATES } from '../response_stream_utils/constants';
@@ -38,7 +37,6 @@ export const indexInfoHandlerFactory =
 
     const textFieldCandidates: string[] = [];
 
-    let totalDocCount = 0;
     let zeroDocsFallback = false;
 
     if (!requestBody.overrides?.remainingFieldCandidates) {
@@ -64,10 +62,12 @@ export const indexInfoHandlerFactory =
           abortSignal
         );
 
+        logDebugMessage(`Baseline document count: ${indexInfo.baselineTotalDocCount}`);
+        logDebugMessage(`Deviation document count: ${indexInfo.deviationTotalDocCount}`);
+
         fieldCandidates.push(...indexInfo.fieldCandidates);
         fieldCandidatesCount = fieldCandidates.length;
         textFieldCandidates.push(...indexInfo.textFieldCandidates);
-        totalDocCount = indexInfo.deviationTotalDocCount;
         zeroDocsFallback = indexInfo.zeroDocsFallback;
       } catch (e) {
         if (!isRequestAbortedError(e)) {
@@ -77,8 +77,6 @@ export const indexInfoHandlerFactory =
         responseStream.end();
         return;
       }
-
-      logDebugMessage(`Total document count: ${totalDocCount}`);
 
       stateHandler.loaded(LOADED_FIELD_CANDIDATES, false);
 

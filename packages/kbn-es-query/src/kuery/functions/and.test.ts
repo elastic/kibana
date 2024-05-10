@@ -13,8 +13,6 @@ import * as and from './and';
 import { DataViewBase } from '../../es_query';
 import { KqlAndFunctionNode } from './and';
 
-jest.mock('../grammar');
-
 const childNode1 = nodeTypes.function.buildNode('is', 'machine.os', 'osx');
 const childNode2 = nodeTypes.function.buildNode('is', 'extension', 'jpg');
 

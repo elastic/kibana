@@ -35,13 +35,13 @@ exports[`NotFoundErrors component renders correctly for index-pattern type 1`] =
       >
         Saved objects APIs
         <span
-          class="emotion-euiLink__externalIcon"
+          class="emotion-EuiExternalLinkIcon"
           data-euiicon-type="popout"
         >
           External link
         </span>
         <span
-          class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+          class="emotion-euiScreenReaderOnly"
         >
           (opens in a new tab or window)
         </span>
@@ -87,13 +87,13 @@ exports[`NotFoundErrors component renders correctly for index-pattern-field type
       >
         Saved objects APIs
         <span
-          class="emotion-euiLink__externalIcon"
+          class="emotion-EuiExternalLinkIcon"
           data-euiicon-type="popout"
         >
           External link
         </span>
         <span
-          class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+          class="emotion-euiScreenReaderOnly"
         >
           (opens in a new tab or window)
         </span>
@@ -139,13 +139,13 @@ exports[`NotFoundErrors component renders correctly for search type 1`] = `
       >
         Saved objects APIs
         <span
-          class="emotion-euiLink__externalIcon"
+          class="emotion-EuiExternalLinkIcon"
           data-euiicon-type="popout"
         >
           External link
         </span>
         <span
-          class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+          class="emotion-euiScreenReaderOnly"
         >
           (opens in a new tab or window)
         </span>
@@ -189,13 +189,13 @@ exports[`NotFoundErrors component renders correctly for unknown type 1`] = `
       >
         Saved objects APIs
         <span
-          class="emotion-euiLink__externalIcon"
+          class="emotion-EuiExternalLinkIcon"
           data-euiicon-type="popout"
         >
           External link
         </span>
         <span
-          class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+          class="emotion-euiScreenReaderOnly"
         >
           (opens in a new tab or window)
         </span>

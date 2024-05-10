@@ -9,7 +9,6 @@ import { act } from '@testing-library/react';
 import { noop } from 'lodash';
 
 import type { AppUnmount } from '@kbn/core/public';
-import { AppNavLinkStatus } from '@kbn/core/public';
 import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
 
 import { accountManagementApp } from './account_management_app';
@@ -42,7 +41,7 @@ describe('accountManagementApp', () => {
       expect.objectContaining({
         id: 'security_account',
         appRoute: '/security/account',
-        navLinkStatus: AppNavLinkStatus.hidden,
+        visibleIn: [],
         mount: expect.any(Function),
       })
     );

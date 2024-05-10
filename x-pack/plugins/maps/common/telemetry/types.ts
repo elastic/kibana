@@ -27,6 +27,7 @@ export enum LAYER_KEYS {
   ES_AGG_HEXAGONS = 'es_agg_hexagons',
   ES_AGG_HEATMAP = 'es_agg_heatmap',
   ES_ML_ANOMALIES = 'es_ml_anomalies',
+  ESQL = 'esql',
   EMS_REGION = 'ems_region',
   EMS_BASEMAP = 'ems_basemap',
   KBN_TMS_RASTER = 'kbn_tms_raster',

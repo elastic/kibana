@@ -9,7 +9,8 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import { StepCreateForm, StepCreateFormProps } from './step_create_form';
+import type { StepCreateFormProps } from './step_create_form';
+import { StepCreateForm } from './step_create_form';
 
 jest.mock('../../../../../shared_imports');
 jest.mock('../../../../app_dependencies');

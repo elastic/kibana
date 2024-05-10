@@ -11,11 +11,12 @@ import {
   SESSIONS_TAB,
   UNCOMMON_PROCESSES_TAB,
 } from '../../screens/hosts/main';
+import { waitForTabToBeLoaded } from '../common';
 
-export const openAllHosts = () => cy.get(ALL_HOSTS_TAB).click({ force: true });
+export const openAllHosts = () => waitForTabToBeLoaded(ALL_HOSTS_TAB);
 
-export const openEvents = () => cy.get(EVENTS_TAB).click({ force: true });
+export const openEvents = () => waitForTabToBeLoaded(EVENTS_TAB);
 
-export const openUncommonProcesses = () => cy.get(UNCOMMON_PROCESSES_TAB).click({ force: true });
+export const openUncommonProcesses = () => waitForTabToBeLoaded(UNCOMMON_PROCESSES_TAB);
 
-export const openSessions = () => cy.get(SESSIONS_TAB).click({ force: true });
+export const openSessions = () => waitForTabToBeLoaded(SESSIONS_TAB);

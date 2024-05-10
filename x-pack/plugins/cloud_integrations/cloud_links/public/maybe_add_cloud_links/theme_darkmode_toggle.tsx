@@ -19,7 +19,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { UserProfilesKibanaProvider } from '@kbn/user-profile-components';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import { useThemeDarkmodeToggle } from './theme_darkmode_hook';
 

@@ -6,31 +6,26 @@
  * Side Public License, v 1.
  */
 
-import React, { Ref, ComponentProps } from 'react';
+import React from 'react';
 import { EuiDualRange, EuiRangeTick } from '@elastic/eui';
-import type { EuiDualRangeClass } from '@elastic/eui/src/components/form/range/dual_range';
-
-// Unfortunately, wrapping EuiDualRange in `withEuiTheme` has created a super annoying/verbose typing
-export type EuiDualRangeRef = EuiDualRangeClass & ComponentProps<typeof EuiDualRange>;
+import { TimeSlice } from '../../../common/types';
 
 interface Props {
-  value: [number, number];
-  onChange: (value?: [number, number]) => void;
+  value: TimeSlice;
+  onChange: (value?: TimeSlice) => void;
   stepSize: number;
   ticks: EuiRangeTick[];
   timeRangeMin: number;
   timeRangeMax: number;
-  rangeRef?: Ref<EuiDualRangeRef>;
 }
 
 export function TimeSliderSlidingWindowRange(props: Props) {
   function onChange(value?: [number | string, number | string]) {
-    props.onChange(value as [number, number]);
+    props.onChange(value as TimeSlice);
   }
 
   return (
     <EuiDualRange
-      ref={props.rangeRef}
       fullWidth={true}
       value={props.value}
       onChange={onChange}

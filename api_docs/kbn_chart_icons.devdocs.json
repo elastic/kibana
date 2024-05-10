@@ -841,6 +841,117 @@
       },
       {
         "parentPluginId": "@kbn/chart-icons",
+        "id": "def-common.IconChartGaugeArc",
+        "type": "Function",
+        "tags": [],
+        "label": "IconChartGaugeArc",
+        "description": [],
+        "signature": [
+          "({ title, titleId, ...props }: Omit<",
+          "EuiIconProps",
+          ", \"type\">) => JSX.Element"
+        ],
+        "path": "packages/kbn-chart-icons/src/assets/chart_gauge_arc.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-icons",
+            "id": "def-common.IconChartGaugeArc.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ title, titleId, ...props }",
+            "description": [],
+            "signature": [
+              "Omit<",
+              "EuiIconProps",
+              ", \"type\">"
+            ],
+            "path": "packages/kbn-chart-icons/src/assets/chart_gauge_arc.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-icons",
+        "id": "def-common.IconChartGaugeCircle",
+        "type": "Function",
+        "tags": [],
+        "label": "IconChartGaugeCircle",
+        "description": [],
+        "signature": [
+          "({ title, titleId, ...props }: Omit<",
+          "EuiIconProps",
+          ", \"type\">) => JSX.Element"
+        ],
+        "path": "packages/kbn-chart-icons/src/assets/chart_gauge_circle.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-icons",
+            "id": "def-common.IconChartGaugeCircle.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ title, titleId, ...props }",
+            "description": [],
+            "signature": [
+              "Omit<",
+              "EuiIconProps",
+              ", \"type\">"
+            ],
+            "path": "packages/kbn-chart-icons/src/assets/chart_gauge_circle.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-icons",
+        "id": "def-common.IconChartGaugeSemiCircle",
+        "type": "Function",
+        "tags": [],
+        "label": "IconChartGaugeSemiCircle",
+        "description": [],
+        "signature": [
+          "({ title, titleId, ...props }: Omit<",
+          "EuiIconProps",
+          ", \"type\">) => JSX.Element"
+        ],
+        "path": "packages/kbn-chart-icons/src/assets/chart_gauge_semi_circle.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-icons",
+            "id": "def-common.IconChartGaugeSemiCircle.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  title,\n  titleId,\n  ...props\n}",
+            "description": [],
+            "signature": [
+              "Omit<",
+              "EuiIconProps",
+              ", \"type\">"
+            ],
+            "path": "packages/kbn-chart-icons/src/assets/chart_gauge_semi_circle.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-icons",
         "id": "def-common.IconChartHeatmap",
         "type": "Function",
         "tags": [],

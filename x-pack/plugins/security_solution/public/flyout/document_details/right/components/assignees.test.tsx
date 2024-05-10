@@ -8,7 +8,11 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 
-import { ASSIGNEES_ADD_BUTTON_TEST_ID, ASSIGNEES_TITLE_TEST_ID } from './test_ids';
+import {
+  ASSIGNEES_ADD_BUTTON_TEST_ID,
+  ASSIGNEES_TITLE_TEST_ID,
+  ASSIGNEES_HEADER_TEST_ID,
+} from './test_ids';
 import { Assignees } from './assignees';
 
 import { useGetCurrentUserProfile } from '../../../../common/components/user_profiles/use_get_current_user_profile';
@@ -44,7 +48,8 @@ const mockUserProfiles = [
 const renderAssignees = (
   eventId = 'event-1',
   alertAssignees = ['user-id-1'],
-  onAssigneesUpdated = jest.fn()
+  onAssigneesUpdated = jest.fn(),
+  isPreview = false
 ) => {
   const assignedProfiles = mockUserProfiles.filter((user) => alertAssignees.includes(user.uid));
   (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
@@ -57,6 +62,7 @@ const renderAssignees = (
         eventId={eventId}
         assignedUserIds={alertAssignees}
         onAssigneesUpdated={onAssigneesUpdated}
+        isPreview={isPreview}
       />
     </TestProviders>
   );
@@ -162,5 +168,18 @@ describe('<Assignees />', () => {
 
     expect(getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID)).toBeDisabled();
+  });
+
+  it('should render empty tag in preview mode', () => {
+    const assignees = ['user-id-1', 'user-id-2'];
+    const { getByTestId, queryByTestId } = renderAssignees(
+      'test-event',
+      assignees,
+      jest.fn(),
+      true
+    );
+
+    expect(queryByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId(ASSIGNEES_HEADER_TEST_ID)).toHaveTextContent('Assignees—');
   });
 });

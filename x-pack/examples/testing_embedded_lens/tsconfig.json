@@ -23,5 +23,6 @@
     "@kbn/ui-actions-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/core-ui-settings-browser",
+    "@kbn/code-editor",
   ]
 }

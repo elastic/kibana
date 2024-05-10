@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { FC, useState, useMemo, useCallback, FormEventHandler } from 'react';
+import type { FC, FormEventHandler } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
-import { EuiSpacer, EuiButton, EuiTabs, EuiTab, EuiForm } from '@elastic/eui';
+import { EuiFlexGroup, EuiSpacer, EuiTabs, EuiTab, EuiForm } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
@@ -18,6 +19,7 @@ import type { InferrerType } from '..';
 import { OutputLoadingContent } from '../../output_loading';
 import { RUNNING_STATE } from '../inference_base';
 import { RawOutput } from '../raw_output';
+import { InputFormControls } from './input_form_controls';
 
 interface Props {
   inferrer: InferrerType;
@@ -57,17 +59,15 @@ export const TextInputForm: FC<Props> = ({ inferrer }) => {
       <>{inputComponent}</>
       <EuiSpacer size="m" />
       <div>
-        <EuiButton
-          disabled={runningState === RUNNING_STATE.RUNNING || isValid === false}
-          fullWidth={false}
-          data-test-subj={'mlTestModelTestButton'}
-          type="submit"
-        >
-          <FormattedMessage
-            id="xpack.ml.trainedModels.testModelsFlyout.inferenceInputForm.runButton"
-            defaultMessage="Test"
+        <EuiFlexGroup>
+          <InputFormControls
+            testButtonDisabled={runningState === RUNNING_STATE.RUNNING || isValid === false}
+            createPipelineButtonDisabled={
+              runningState === RUNNING_STATE.RUNNING || isValid === false
+            }
+            inferrer={inferrer}
           />
-        </EuiButton>
+        </EuiFlexGroup>
       </div>
       {runningState !== RUNNING_STATE.STOPPED ? (
         <>

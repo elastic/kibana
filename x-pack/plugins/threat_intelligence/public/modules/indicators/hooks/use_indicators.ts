@@ -64,10 +64,7 @@ export const useIndicators = ({
       data: { search: searchService },
     },
   } = useKibana();
-  const {
-    sourcererDataView: { selectedPatterns },
-  } = useSourcererDataView();
-
+  const { selectedPatterns } = useSourcererDataView();
   const { inspectorAdapters } = useInspector();
 
   const onChangeItemsPerPage = useCallback(

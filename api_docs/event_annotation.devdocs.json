@@ -804,14 +804,6 @@
             "section": "def-common.Adapters",
             "text": "Adapters"
           },
-          ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          },
           ">>"
         ],
         "path": "src/plugins/event_annotation/common/event_annotation_group/index.ts",
@@ -1093,7 +1085,7 @@
         "signature": [
           "{ item: ",
           "EventAnnotationGroupSavedObject",
-          "; }"
+          "; meta?: undefined; }"
         ],
         "path": "src/plugins/event_annotation/common/content_management/v1/types.ts",
         "deprecated": false,

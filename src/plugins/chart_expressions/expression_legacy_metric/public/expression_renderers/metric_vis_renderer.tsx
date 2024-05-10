@@ -9,7 +9,7 @@
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import {
   ExpressionValueVisDimension,
   VisualizationContainer,
@@ -21,7 +21,11 @@ import {
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
-import { extractContainerType, extractVisualizationType } from '@kbn/chart-expressions-common';
+import {
+  ChartSizeEvent,
+  extractContainerType,
+  extractVisualizationType,
+} from '@kbn/chart-expressions-common';
 import { ExpressionLegacyMetricPluginStart } from '../plugin';
 import { EXPRESSION_METRIC_NAME, MetricVisRenderConfig, VisParams } from '../../common';
 
@@ -92,8 +96,20 @@ export const getMetricVisRenderer: (
       handlers.done();
     };
 
+    const chartSizeEvent: ChartSizeEvent = {
+      name: 'chartSize',
+      data: {
+        maxDimensions: {
+          x: { value: 100, unit: 'percentage' },
+          y: { value: 100, unit: 'percentage' },
+        },
+      },
+    };
+
+    handlers.event(chartSizeEvent);
+
     render(
-      <KibanaThemeProvider theme$={core.theme.theme$}>
+      <KibanaRenderContextProvider {...core}>
         <VisualizationContainer
           data-test-subj="legacyMtrVis"
           className="legacyMtrVis"
@@ -109,7 +125,7 @@ export const getMetricVisRenderer: (
             filterable={filterable}
           />
         </VisualizationContainer>
-      </KibanaThemeProvider>,
+      </KibanaRenderContextProvider>,
       domNode
     );
   },

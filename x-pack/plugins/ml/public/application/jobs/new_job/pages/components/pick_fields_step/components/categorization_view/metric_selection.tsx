@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useContext, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 import {
   CATEGORY_EXAMPLES_VALIDATION_STATUS,
@@ -15,7 +16,7 @@ import {
 import { getToastNotificationService } from '../../../../../../../services/toast_notification_service';
 
 import { JobCreatorContext } from '../../../job_creator_context';
-import { CategorizationJobCreator } from '../../../../../common/job_creator';
+import type { CategorizationJobCreator } from '../../../../../common/job_creator';
 import { CategorizationField } from '../categorization_field';
 import { CategorizationDetector } from '../categorization_detector';
 import { CategorizationPerPartitionField } from '../categorization_partition_field';

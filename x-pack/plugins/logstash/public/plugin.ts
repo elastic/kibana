@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { Subscription, Subject, combineLatest } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 import { once } from 'lodash';
 
 import { Capabilities, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';

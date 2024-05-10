@@ -66,6 +66,7 @@ describe('DataTableColumnHeader', function () {
         columnName="bytes"
         columnDisplayName="bytesDisplayName"
         dataView={stubLogstashDataView}
+        showColumnTokens
       />
     );
     expect(component.text()).toBe('NumberbytesDisplayName');
@@ -77,10 +78,14 @@ describe('DataTableColumnHeader', function () {
       <DataTableColumnHeader
         columnName="bytes"
         columnDisplayName="bytesDisplayName"
-        columnTypes={{
-          bytes: 'keyword',
+        columnsMeta={{
+          bytes: {
+            type: 'string',
+            esType: 'keyword',
+          },
         }}
         dataView={stubLogstashDataView}
+        showColumnTokens
       />
     );
     expect(component.text()).toBe('KeywordbytesDisplayName');
@@ -93,6 +98,7 @@ describe('DataTableColumnHeader', function () {
         columnName="_source"
         columnDisplayName="Document"
         dataView={stubLogstashDataView}
+        showColumnTokens
       />
     );
     expect(component.text()).toBe('Document');
@@ -105,6 +111,7 @@ describe('DataTableColumnHeader', function () {
         columnName="nested_user"
         columnDisplayName="Nested User"
         dataView={stubDataViewWithNested}
+        showColumnTokens
       />
     );
     expect(component.text()).toBe('NestedNested User');

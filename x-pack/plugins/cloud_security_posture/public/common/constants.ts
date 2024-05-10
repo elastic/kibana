@@ -49,6 +49,11 @@ export const LOCAL_STORAGE_DASHBOARD_BENCHMARK_SORT_KEY =
   'cloudPosture:complianceDashboard:benchmarkSort';
 export const LOCAL_STORAGE_FINDINGS_LAST_SELECTED_TAB_KEY = 'cloudPosture:findings:lastSelectedTab';
 
+export const LOCAL_STORAGE_VULNERABILITIES_GROUPING_KEY = 'cspLatestVulnerabilitiesGrouping';
+export const LOCAL_STORAGE_FINDINGS_GROUPING_KEY = 'cspLatestFindingsGrouping';
+
+export const SESSION_STORAGE_FIELDS_MODAL_SHOW_SELECTED = 'cloudPosture:fieldsModal:showSelected';
+
 export type CloudPostureIntegrations = Record<
   CloudSecurityPolicyTemplate,
   CloudPostureIntegrationProps
@@ -132,6 +137,7 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
           defaultMessage: 'CIS Kubernetes',
         }),
         icon: 'logoKubernetes',
+        testId: 'cisK8sTestId',
       },
       {
         type: CLOUDBEAT_EKS,
@@ -145,6 +151,7 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
         tooltip: i18n.translate('xpack.csp.kspmIntegration.eksOption.tooltipContent', {
           defaultMessage: 'Elastic Kubernetes Service',
         }),
+        testId: 'cisEksTestId',
       },
       {
         type: CLOUDBEAT_AKS,
@@ -223,3 +230,12 @@ export const NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS = 10000;
 
 export const DETECTION_ENGINE_RULES_KEY = 'detection_engine_rules';
 export const DETECTION_ENGINE_ALERTS_KEY = 'detection_engine_alerts';
+
+export const DEFAULT_GROUPING_TABLE_HEIGHT = 512;
+
+export const FINDINGS_GROUPING_OPTIONS = {
+  RESOURCE_NAME: 'resource.name',
+  RULE_NAME: 'rule.name',
+  CLOUD_ACCOUNT_NAME: 'cloud.account.name',
+  ORCHESTRATOR_CLUSTER_NAME: 'orchestrator.cluster.name',
+};

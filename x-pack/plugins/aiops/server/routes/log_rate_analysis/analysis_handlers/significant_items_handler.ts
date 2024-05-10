@@ -9,21 +9,18 @@ import { queue } from 'async';
 
 import { SIGNIFICANT_ITEM_TYPE, type SignificantItem } from '@kbn/ml-agg-utils';
 import { i18n } from '@kbn/i18n';
-
 import {
   addSignificantItemsAction,
   updateLoadingStateAction,
-} from '../../../../common/api/log_rate_analysis/actions';
-
-import { isRequestAbortedError } from '../../../lib/is_request_aborted_error';
-
-import { fetchSignificantCategories } from '../queries/fetch_significant_categories';
-import { fetchSignificantTermPValues } from '../queries/fetch_significant_term_p_values';
-
+} from '@kbn/aiops-log-rate-analysis/api/actions';
 import type {
   AiopsLogRateAnalysisSchema,
   AiopsLogRateAnalysisApiVersion as ApiVersion,
-} from '../../../../common/api/log_rate_analysis/schema';
+} from '@kbn/aiops-log-rate-analysis/api/schema';
+import { isRequestAbortedError } from '@kbn/aiops-common/is_request_aborted_error';
+
+import { fetchSignificantCategories } from '@kbn/aiops-log-rate-analysis/queries/fetch_significant_categories';
+import { fetchSignificantTermPValues } from '@kbn/aiops-log-rate-analysis/queries/fetch_significant_term_p_values';
 
 import {
   LOADED_FIELD_CANDIDATES,
@@ -41,7 +38,6 @@ export const significantItemsHandlerFactory =
     requestBody,
     responseStream,
     stateHandler,
-    version,
   }: ResponseStreamFetchOptions<T>) =>
   async ({
     fieldCandidates,
@@ -57,21 +53,11 @@ export const significantItemsHandlerFactory =
 
     const significantCategories: SignificantItem[] = [];
 
-    if (version === '1') {
-      significantCategories.push(
-        ...((requestBody as AiopsLogRateAnalysisSchema<'1'>).overrides?.significantTerms?.filter(
-          (d) => d.type === SIGNIFICANT_ITEM_TYPE.LOG_PATTERN
-        ) ?? [])
-      );
-    }
-
-    if (version === '2') {
-      significantCategories.push(
-        ...((requestBody as AiopsLogRateAnalysisSchema<'2'>).overrides?.significantItems?.filter(
-          (d) => d.type === SIGNIFICANT_ITEM_TYPE.LOG_PATTERN
-        ) ?? [])
-      );
-    }
+    significantCategories.push(
+      ...((requestBody as AiopsLogRateAnalysisSchema<'2'>).overrides?.significantItems?.filter(
+        (d) => d.type === SIGNIFICANT_ITEM_TYPE.LOG_PATTERN
+      ) ?? [])
+    );
 
     // Get significant categories of text fields
     if (textFieldCandidates.length > 0) {
@@ -88,27 +74,17 @@ export const significantItemsHandlerFactory =
       );
 
       if (significantCategories.length > 0) {
-        responseStream.push(addSignificantItemsAction(significantCategories, version));
+        responseStream.push(addSignificantItemsAction(significantCategories));
       }
     }
 
     const significantTerms: SignificantItem[] = [];
 
-    if (version === '1') {
-      significantTerms.push(
-        ...((requestBody as AiopsLogRateAnalysisSchema<'1'>).overrides?.significantTerms?.filter(
-          (d) => d.type === SIGNIFICANT_ITEM_TYPE.KEYWORD
-        ) ?? [])
-      );
-    }
-
-    if (version === '2') {
-      significantTerms.push(
-        ...((requestBody as AiopsLogRateAnalysisSchema<'2'>).overrides?.significantItems?.filter(
-          (d) => d.type === SIGNIFICANT_ITEM_TYPE.KEYWORD
-        ) ?? [])
-      );
-    }
+    significantTerms.push(
+      ...((requestBody as AiopsLogRateAnalysisSchema<'2'>).overrides?.significantItems?.filter(
+        (d) => d.type === SIGNIFICANT_ITEM_TYPE.KEYWORD
+      ) ?? [])
+    );
 
     const fieldsToSample = new Set<string>();
 
@@ -160,7 +136,7 @@ export const significantItemsHandlerFactory =
         });
         significantTerms.push(...pValues);
 
-        responseStream.push(addSignificantItemsAction(pValues, version));
+        responseStream.push(addSignificantItemsAction(pValues));
       }
 
       responseStream.push(

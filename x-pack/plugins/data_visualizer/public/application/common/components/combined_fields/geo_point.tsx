@@ -8,8 +8,10 @@
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { ChangeEvent, Component, Fragment } from 'react';
+import type { ChangeEvent } from 'react';
+import React, { Component, Fragment } from 'react';
 
+import type { EuiSelectOption } from '@elastic/eui';
 import {
   EuiFormRow,
   EuiFieldText,
@@ -17,12 +19,11 @@ import {
   EuiSpacer,
   EuiButton,
   EuiSelect,
-  EuiSelectOption,
   EuiFormErrorText,
 } from '@elastic/eui';
 
-import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
-import { CombinedField } from './types';
+import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import type { CombinedField } from './types';
 import {
   createGeoPointCombinedField,
   isWithinLatRange,

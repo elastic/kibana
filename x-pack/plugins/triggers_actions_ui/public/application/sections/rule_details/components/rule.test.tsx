@@ -22,7 +22,13 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { useBulkGetMaintenanceWindows } from '../../alerts_table/hooks/use_bulk_get_maintenance_windows';
 import { getMaintenanceWindowMockMap } from '../../alerts_table/maintenance_windows/index.mock';
 
-jest.mock('../../../../common/lib/kibana');
+const mockUseKibanaReturnValue = createStartServicesMock();
+jest.mock('../../../../common/lib/kibana', () => ({
+  __esModule: true,
+  useKibana: jest.fn(() => ({
+    services: mockUseKibanaReturnValue,
+  })),
+}));
 jest.mock('../../../../common/get_experimental_features', () => ({
   getIsExperimentalFeatureEnabled: jest.fn(),
 }));
@@ -55,6 +61,7 @@ const ruleTypeRegistry = ruleTypeRegistryMock.create();
 
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { waitFor } from '@testing-library/react';
+import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 
 const fakeNow = new Date('2020-02-09T23:15:41.941Z');
 const fake2MinutesAgo = new Date('2020-02-09T23:13:41.941Z');

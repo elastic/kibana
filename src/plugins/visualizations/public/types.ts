@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsMigrationVersion, ResolvedSimpleSavedObject } from '@kbn/core/public';
+import type {
+  CoreStart,
+  SavedObjectsMigrationVersion,
+  ResolvedSimpleSavedObject,
+} from '@kbn/core/public';
 import {
   IAggConfigs,
   SerializedSearchSourceFields,
@@ -20,6 +24,16 @@ import type { TableListTab } from '@kbn/content-management-tabbed-table-list-vie
 import type { Vis } from './vis';
 import type { PersistedState } from './persisted_state';
 import type { VisParams, SerializedVis } from '../common';
+
+export type StartServices = Pick<
+  CoreStart,
+  // used extensively in visualizations
+  | 'overlays'
+  // used for react rendering utilities
+  | 'analytics'
+  | 'i18n'
+  | 'theme'
+>;
 
 export type { Vis, SerializedVis, VisParams };
 export interface SavedVisState {
@@ -55,6 +69,7 @@ export interface VisSavedObject extends ISavedVis {
   searchSource?: ISearchSource;
   version?: string;
   tags?: string[];
+  managed: boolean;
 }
 
 export interface SaveVisOptions {
@@ -79,7 +94,7 @@ export interface VisToExpressionAstParams {
   abortSignal?: AbortSignal;
 }
 
-export type VisToExpressionAst<TVisParams = VisParams> = (
+export type VisToExpressionAst<TVisParams extends VisParams = VisParams> = (
   vis: Vis<TVisParams>,
   params: VisToExpressionAstParams
 ) => Promise<ExpressionAstExpression> | ExpressionAstExpression;

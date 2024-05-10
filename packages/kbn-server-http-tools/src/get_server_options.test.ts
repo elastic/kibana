@@ -25,6 +25,7 @@ const createConfig = (parts: Partial<IHttpConfig>): IHttpConfig => ({
   port: 5601,
   socketTimeout: 120000,
   keepaliveTimeout: 120000,
+  payloadTimeout: 20000,
   shutdownTimeout: moment.duration(30, 'seconds'),
   maxPayload: ByteSizeValue.parse('1048576b'),
   ...parts,
@@ -121,5 +122,13 @@ describe('getServerOptions', () => {
       origin: ['*'],
       headers: ['Accept', 'Authorization', 'Content-Type', 'If-None-Match', 'kbn-xsrf'],
     });
+  });
+
+  it('properly configures `routes.payload.timeout`', () => {
+    const httpConfig = createConfig({
+      payloadTimeout: 9007,
+    });
+
+    expect(getServerOptions(httpConfig).routes!.payload!.timeout).toEqual(9007);
   });
 });

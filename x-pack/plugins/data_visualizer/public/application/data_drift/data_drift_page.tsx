@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState, FC, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
@@ -17,41 +18,42 @@ import {
   EuiSpacer,
   EuiPageHeader,
   EuiHorizontalRule,
+  EuiBadge,
 } from '@elastic/eui';
 
-import type { WindowParameters } from '@kbn/aiops-utils';
+import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
 import type { Filter, Query } from '@kbn/es-query';
 import { useUrlState, usePageUrlState } from '@kbn/ml-url-state';
 import type { DataSeriesDatum } from '@elastic/charts/dist/chart_types/xy_chart/utils/series';
 import { useStorage } from '@kbn/ml-local-storage';
+import type { FullTimeRangeSelectorProps } from '@kbn/ml-date-picker';
 import {
   DatePickerWrapper,
   FROZEN_TIER_PREFERENCE,
   FullTimeRangeSelector,
-  FullTimeRangeSelectorProps,
   useTimefilter,
 } from '@kbn/ml-date-picker';
 import moment from 'moment';
 import { css } from '@emotion/react';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { i18n } from '@kbn/i18n';
+import { cloneDeep } from 'lodash';
+import type { SingleBrushWindowParameters } from './document_count_chart_single_brush/single_brush';
 import type { InitialSettings } from './use_data_drift_result';
 import { useDataDriftStateManagerContext } from './use_state_manager';
 import { useData } from '../common/hooks/use_data';
-import {
-  DV_FROZEN_TIER_PREFERENCE,
-  DVKey,
-  DVStorageMapped,
-} from '../index_data_visualizer/types/storage';
+import type { DVKey, DVStorageMapped } from '../index_data_visualizer/types/storage';
+import { DV_FROZEN_TIER_PREFERENCE } from '../index_data_visualizer/types/storage';
 import { useCurrentEuiTheme } from '../common/hooks/use_current_eui_theme';
-import { DataComparisonFullAppState, getDefaultDataComparisonState } from './types';
+import type { DataComparisonFullAppState } from './types';
+import { getDefaultDataComparisonState } from './types';
 import { useDataSource } from '../common/hooks/data_source_context';
 import { useDataVisualizerKibana } from '../kibana_context';
 import { DataDriftView } from './data_drift_view';
 import { COMPARISON_LABEL, REFERENCE_LABEL } from './constants';
 import { SearchPanelContent } from '../index_data_visualizer/components/search_panel/search_bar';
 import { useSearch } from '../common/hooks/use_search';
-import { DocumentCountWithDualBrush } from './document_count_with_dual_brush';
+import { DocumentCountWithBrush } from './document_count_with_brush';
 
 const dataViewTitleHeader = css({
   minWidth: '300px',
@@ -88,8 +90,8 @@ export const PageHeader: FC = () => {
   );
 
   const hasValidTimeField = useMemo(
-    () => dataView.timeFieldName !== undefined && dataView.timeFieldName !== '',
-    [dataView.timeFieldName]
+    () => dataView && dataView.timeFieldName !== undefined && dataView.timeFieldName !== '',
+    [dataView]
   );
 
   return (
@@ -126,16 +128,23 @@ export const PageHeader: FC = () => {
   );
 };
 
-const getDataDriftDataLabel = (label: string, indexPattern?: string) =>
-  i18n.translate('xpack.dataVisualizer.dataDrift.dataLabel', {
-    defaultMessage: '{label} data',
-    values: { label },
-  }) + (indexPattern ? `: ${indexPattern}` : '');
-
+const getDataDriftDataLabel = (label: string, indexPattern?: string) => (
+  <>
+    <EuiBadge>{label}</EuiBadge>
+    {' ' +
+      i18n.translate('xpack.dataVisualizer.dataDrift.dataLabel', {
+        defaultMessage: 'data',
+      }) +
+      (indexPattern ? `: ${indexPattern}` : '')}
+  </>
+);
 interface Props {
   initialSettings: InitialSettings;
 }
 
+const isBarBetween = (start: number, end: number, min: number, max: number) => {
+  return start >= min && end <= max;
+};
 export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
   const {
     services: { data: dataService },
@@ -248,49 +257,92 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
   const colors = {
     referenceColor: euiTheme.euiColorVis2,
     comparisonColor: euiTheme.euiColorVis1,
+    overlapColor: '#490771',
   };
 
-  const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
+  const [brushRanges, setBrushRanges] = useState<WindowParameters | undefined>();
+
+  // Ref to keep track of previous values
+  const brushRangesRef = useRef<Partial<WindowParameters>>({});
+
   const [initialAnalysisStart, setInitialAnalysisStart] = useState<
-    number | WindowParameters | undefined
+    number | SingleBrushWindowParameters | undefined
   >();
   const [isBrushCleared, setIsBrushCleared] = useState(true);
 
-  function brushSelectionUpdate(d: WindowParameters, force: boolean) {
-    if (!isBrushCleared || force) {
-      setWindowParameters(d);
-    }
-    if (force) {
-      setIsBrushCleared(false);
-    }
-  }
+  const referenceBrushSelectionUpdate = useCallback(
+    function referenceBrushSelectionUpdate(d: SingleBrushWindowParameters, force: boolean) {
+      if (!isBrushCleared || force) {
+        const clone = cloneDeep(brushRangesRef.current);
+        clone.baselineMin = d.min;
+        clone.baselineMax = d.max;
+        brushRangesRef.current = clone;
+        setBrushRanges(clone as WindowParameters);
+      }
+      if (force) {
+        setIsBrushCleared(false);
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [brushRanges, isBrushCleared]
+  );
+
+  const comparisonBrushSelectionUpdate = useCallback(
+    function comparisonBrushSelectionUpdate(d: SingleBrushWindowParameters, force: boolean) {
+      if (!isBrushCleared || force) {
+        const clone = cloneDeep(brushRangesRef.current);
+        clone.deviationMin = d.min;
+        clone.deviationMax = d.max;
+
+        brushRangesRef.current = clone;
+
+        setBrushRanges(clone as WindowParameters);
+      }
+      if (force) {
+        setIsBrushCleared(false);
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [brushRanges, isBrushCleared]
+  );
 
   function clearSelection() {
-    setWindowParameters(undefined);
+    setBrushRanges(undefined);
     setIsBrushCleared(true);
     setInitialAnalysisStart(undefined);
   }
 
   const barStyleAccessor = useCallback(
     (datum: DataSeriesDatum) => {
-      if (!windowParameters) return null;
+      if (!brushRanges) return null;
 
-      const start = datum.x;
-      const end =
-        (typeof datum.x === 'string' ? parseInt(datum.x, 10) : datum.x) +
-        (documentCountStats?.interval ?? 0);
+      const start = typeof datum.x === 'string' ? parseInt(datum.x, 10) : datum.x;
+      const end = start + (documentCountStats?.interval ?? 0);
 
-      if (start >= windowParameters.baselineMin && end <= windowParameters.baselineMax) {
-        return colors.referenceColor;
-      }
-      if (start >= windowParameters.deviationMin && end <= windowParameters.deviationMax) {
-        return colors.comparisonColor;
-      }
+      const isBetweenReference = isBarBetween(
+        start,
+        end,
+        brushRanges.baselineMin,
+        brushRanges.baselineMax
+      );
+      const isBetweenDeviation = isBarBetween(
+        start,
+        end,
+        brushRanges.deviationMin,
+        brushRanges.deviationMax
+      );
+      if (isBetweenReference && isBetweenDeviation) return colors.overlapColor;
+      if (isBetweenReference) return colors.referenceColor;
+      if (isBetweenDeviation) return colors.comparisonColor;
 
       return null;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [JSON.stringify({ windowParameters, colors })]
+    [JSON.stringify({ brushRanges, colors })]
+  );
+  const hasValidTimeField = useMemo(
+    () => dataView && dataView.timeFieldName !== undefined && dataView.timeFieldName !== '',
+    [dataView]
   );
 
   const referenceIndexPatternLabel = initialSettings?.reference
@@ -317,12 +369,12 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiPanel paddingSize="m">
-              <DocumentCountWithDualBrush
+              <DocumentCountWithBrush
                 id={REFERENCE_LABEL}
                 label={referenceIndexPatternLabel}
                 randomSampler={randomSampler}
                 reload={forceRefresh}
-                brushSelectionUpdateHandler={brushSelectionUpdate}
+                brushSelectionUpdateHandler={referenceBrushSelectionUpdate}
                 documentCountStats={documentCountStats}
                 documentCountStatsSplit={documentCountStatsCompare}
                 isBrushCleared={isBrushCleared}
@@ -331,7 +383,7 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
                 sampleProbability={sampleProbability}
                 initialAnalysisStart={initialAnalysisStart}
                 barStyleAccessor={barStyleAccessor}
-                baselineBrush={{
+                brush={{
                   label: REFERENCE_LABEL,
                   annotationStyle: {
                     strokeWidth: 0,
@@ -341,24 +393,15 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
                   },
                   badgeWidth: 80,
                 }}
-                deviationBrush={{
-                  label: COMPARISON_LABEL,
-                  annotationStyle: {
-                    strokeWidth: 0,
-                    stroke: colors.comparisonColor,
-                    fill: colors.comparisonColor,
-                    opacity: 0.5,
-                  },
-                  badgeWidth: 90,
-                }}
                 stateManager={referenceStateManager}
               />
               <EuiHorizontalRule />
-              <DocumentCountWithDualBrush
+              <DocumentCountWithBrush
                 id={COMPARISON_LABEL}
                 label={comparisonIndexPatternLabel}
                 randomSampler={randomSamplerProd}
                 reload={forceRefresh}
+                brushSelectionUpdateHandler={comparisonBrushSelectionUpdate}
                 documentCountStats={documentStatsProd.documentCountStats}
                 documentCountStatsSplit={documentStatsProd.documentCountStatsCompare}
                 isBrushCleared={isBrushCleared}
@@ -367,17 +410,7 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
                 sampleProbability={documentStatsProd.sampleProbability}
                 initialAnalysisStart={initialAnalysisStart}
                 barStyleAccessor={barStyleAccessor}
-                baselineBrush={{
-                  label: REFERENCE_LABEL,
-                  annotationStyle: {
-                    strokeWidth: 0,
-                    stroke: colors.referenceColor,
-                    fill: colors.referenceColor,
-                    opacity: 0.5,
-                  },
-                  badgeWidth: 80,
-                }}
-                deviationBrush={{
+                brush={{
                   label: COMPARISON_LABEL,
                   annotationStyle: {
                     strokeWidth: 0,
@@ -398,12 +431,13 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
                 initialSettings={initialSettings}
                 isBrushCleared={isBrushCleared}
                 onReset={clearSelection}
-                windowParameters={windowParameters}
+                windowParameters={brushRanges}
                 dataView={dataView}
                 searchString={searchString ?? ''}
                 searchQueryLanguage={searchQueryLanguage}
                 lastRefresh={lastRefresh}
                 onRefresh={forceRefresh}
+                hasValidTimeField={hasValidTimeField}
               />
             </EuiPanel>
           </EuiFlexItem>

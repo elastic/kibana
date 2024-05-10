@@ -15,18 +15,18 @@ import { TriggersAndActionsUiServices } from '../..';
 import { fetchAlertIndexNames } from '../lib/rule_api/alert_index';
 import { fetchAlertFields } from '../lib/rule_api/alert_fields';
 
-export interface UserAlertDataView {
-  dataviews?: DataView[];
+export interface UserAlertDataViews {
+  dataViews?: DataView[];
   loading: boolean;
 }
 
-export function useAlertDataView(featureIds: ValidFeatureId[]): UserAlertDataView {
+export function useAlertDataViews(featureIds: ValidFeatureId[]): UserAlertDataViews {
   const {
     http,
     data: dataService,
     notifications: { toasts },
   } = useKibana<TriggersAndActionsUiServices>().services;
-  const [dataviews, setDataviews] = useState<DataView[] | undefined>(undefined);
+  const [dataViews, setDataViews] = useState<DataView[] | undefined>(undefined);
   const features = featureIds.sort().join(',');
   const isOnlySecurity = featureIds.length === 1 && featureIds.includes(AlertConsumers.SIEM);
 
@@ -80,12 +80,12 @@ export function useAlertDataView(featureIds: ValidFeatureId[]): UserAlertDataVie
 
   useEffect(() => {
     return () => {
-      dataviews?.map((dv) => {
+      dataViews?.map((dv) => {
         dataService.dataViews.clearInstanceCache(dv.id);
       });
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataviews]);
+  }, [dataViews]);
 
   // FUTURE ENGINEER this useEffect is for security solution user since
   // we are using the user privilege to access the security alert index
@@ -95,7 +95,7 @@ export function useAlertDataView(featureIds: ValidFeatureId[]): UserAlertDataVie
         title: (indexNames ?? []).join(','),
         allowNoIndex: true,
       });
-      setDataviews([localDataview]);
+      setDataViews([localDataview]);
     }
 
     if (isOnlySecurity && isIndexNameSuccess) {
@@ -113,7 +113,7 @@ export function useAlertDataView(featureIds: ValidFeatureId[]): UserAlertDataVie
       isAlertFieldsSuccess &&
       isIndexNameSuccess
     ) {
-      setDataviews([
+      setDataViews([
         {
           title: (indexNames ?? []).join(','),
           fieldFormatMap: {},
@@ -137,7 +137,7 @@ export function useAlertDataView(featureIds: ValidFeatureId[]): UserAlertDataVie
 
   return useMemo(
     () => ({
-      dataviews,
+      dataViews,
       loading:
         featureIds.length === 0 || hasSecurityAndO11yFeatureIds
           ? false
@@ -149,7 +149,7 @@ export function useAlertDataView(featureIds: ValidFeatureId[]): UserAlertDataVie
             isAlertFieldsLoading,
     }),
     [
-      dataviews,
+      dataViews,
       featureIds.length,
       hasSecurityAndO11yFeatureIds,
       isOnlySecurity,

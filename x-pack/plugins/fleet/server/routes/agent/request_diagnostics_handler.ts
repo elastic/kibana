@@ -21,7 +21,7 @@ import { getAgentById } from '../../services/agents';
 export const requestDiagnosticsHandler: RequestHandler<
   TypeOf<typeof PostRequestDiagnosticsActionRequestSchema.params>,
   undefined,
-  undefined
+  TypeOf<typeof PostRequestDiagnosticsActionRequestSchema.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
@@ -38,7 +38,11 @@ export const requestDiagnosticsHandler: RequestHandler<
       });
     }
 
-    const result = await AgentService.requestDiagnostics(esClient, request.params.agentId);
+    const result = await AgentService.requestDiagnostics(
+      esClient,
+      request.params.agentId,
+      request.body?.additional_metrics
+    );
 
     return response.ok({ body: { actionId: result.actionId } });
   } catch (error) {
@@ -61,6 +65,7 @@ export const bulkRequestDiagnosticsHandler: RequestHandler<
     const result = await AgentService.bulkRequestDiagnostics(esClient, soClient, {
       ...agentOptions,
       batchSize: request.body.batchSize,
+      additionalMetrics: request.body.additional_metrics,
     });
 
     return response.ok({ body: { actionId: result.actionId } });

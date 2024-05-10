@@ -17,4 +17,4 @@ export type {
   InternalHttpServiceSetupMock,
   InternalHttpServiceStartMock,
 } from './src/http_service.mock';
-export { createCoreContext, createHttpServer, createConfigService } from './src/test_utils';
+export { createCoreContext, createHttpService, createConfigService } from './src/test_utils';

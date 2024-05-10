@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { PivotAggsConfigDict, PivotGroupByConfigDict } from '../../../../../common';
-import { SearchItems } from '../../../../../hooks/use_search_items';
+import type { PivotAggsConfigDict, PivotGroupByConfigDict } from '../../../../../common';
+import type { SearchItems } from '../../../../../hooks/use_search_items';
 
 import { defaultSearch, QUERY_LANGUAGE_KUERY } from './constants';
-import { StepDefineExposedState } from './types';
+import type { StepDefineExposedState } from './types';
 import { TRANSFORM_FUNCTION } from '../../../../../../../common/constants';
-import { LatestFunctionConfigUI } from '../../../../../../../common/types/transform';
+import type { LatestFunctionConfigUI } from '../../../../../../../common/types/transform';
 
 export function getDefaultStepDefineState(searchItems: SearchItems): StepDefineExposedState {
   return {

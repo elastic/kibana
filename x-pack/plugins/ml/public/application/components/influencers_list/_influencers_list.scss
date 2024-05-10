@@ -28,7 +28,7 @@
     }
 
     .progress-bar {
-      height: $euiSizeXS / 2;
+      height: calc($euiSizeXS / 2);
       margin-top: $euiSizeM;
       text-align: right;
       line-height: 18px; // SASSTODO: Calc proper value
@@ -96,7 +96,7 @@
     font-size: 11px;
     line-height: 14px;
     border-radius: $euiBorderRadius;
-    padding: $euiSizeXS / 2;
+    padding: calc($euiSizeXS / 2);
     margin-top: $euiSizeXS;
     display: inline-block;
     border: $euiBorderThin;

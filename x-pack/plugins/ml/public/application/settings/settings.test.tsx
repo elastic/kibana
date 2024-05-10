@@ -18,7 +18,7 @@ jest.mock('../components/help_menu', () => ({
 jest.mock('../contexts/kibana', () => ({
   useNotifications: () => {
     return {
-      toasts: { addDanger: jest.fn() },
+      toasts: { addDanger: jest.fn(), addError: jest.fn() },
     };
   },
   useMlKibana: () => {

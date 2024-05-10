@@ -7,7 +7,7 @@
 
 import type { BulkOperationContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import type { IdentifierType, RiskScore } from '../../../../common/risk_engine';
+import type { IdentifierType, RiskScore } from '../../../../common/entity_analytics/risk_engine';
 
 interface WriterBulkResponse {
   errors: string[];
@@ -18,6 +18,7 @@ interface WriterBulkResponse {
 interface BulkParams {
   host?: RiskScore[];
   user?: RiskScore[];
+  refresh?: 'wait_for';
 }
 
 export interface RiskEngineDataWriter {
@@ -42,6 +43,7 @@ export class RiskEngineDataWriter implements RiskEngineDataWriter {
 
       const { errors, items, took } = await this.options.esClient.bulk({
         operations: this.buildBulkOperations(params),
+        refresh: params.refresh ?? false,
       });
 
       return {

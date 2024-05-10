@@ -15,6 +15,7 @@ const { setup } = pageHelpers.componentTemplateDetails;
 
 const COMPONENT_TEMPLATE: ComponentTemplateDeserialized = {
   name: 'comp-1',
+  deprecated: true,
   template: {
     mappings: { properties: { ip_address: { type: 'ip' } } },
     aliases: { mydata: {} },
@@ -61,6 +62,9 @@ describe('<ComponentTemplateDetails />', () => {
 
       // Verify footer does not display since "actions" prop was not provided
       expect(exists('footer')).toBe(false);
+
+      // Verify the deprecated badge is displayed
+      expect(exists('deprecatedComponentTemplateBadge')).toBe(true);
 
       // Verify tabs exist
       expect(exists('settingsTab')).toBe(true);

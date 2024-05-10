@@ -20,7 +20,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const ENRICH_INDEX_NAME = 'test-policy-1';
   const ENRICH_POLICY_NAME = 'test-policy-1';
 
-  describe('Enrich policies tab', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/178962
+  describe.skip('Enrich policies tab', function () {
     before(async () => {
       await log.debug('Creating required index and enrich policy');
       try {
@@ -90,7 +91,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.indexManagement.clickExecuteEnrichPolicyAt(0);
       await pageObjects.indexManagement.clickConfirmModalButton();
 
-      const successToast = await toasts.getToastElement(1);
+      const successToast = await toasts.getElementByIndex(1);
       expect(await successToast.getVisibleText()).to.contain(`Executed ${ENRICH_POLICY_NAME}`);
     });
 
@@ -98,7 +99,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.indexManagement.clickDeleteEnrichPolicyAt(0);
       await pageObjects.indexManagement.clickConfirmModalButton();
 
-      const successToast = await toasts.getToastElement(2);
+      const successToast = await toasts.getElementByIndex(2);
       expect(await successToast.getVisibleText()).to.contain(`Deleted ${ENRICH_POLICY_NAME}`);
     });
   });

@@ -100,7 +100,7 @@ export default function ({ getService }: FtrProviderContext) {
         const startDate = new Date().toISOString();
 
         const connectorId = 'system-connector-test.system-action-kibana-privileges';
-        const name = 'System action: test.system-action-kibana-privileges';
+        const name = 'Test system action with kibana privileges';
         const reference = `actions-enqueue-${scenario.id}:${space.id}:${connectorId}`;
 
         const response = await supertestWithoutAuth
@@ -133,7 +133,8 @@ export default function ({ getService }: FtrProviderContext) {
               connectorId,
               outcome: 'failure',
               message: `action execution failure: test.system-action-kibana-privileges:${connectorId}: ${name}`,
-              errorMessage: 'Unauthorized to execute actions',
+              errorMessage:
+                'Unauthorized to execute a "test.system-action-kibana-privileges" action',
               startDate,
             });
             break;

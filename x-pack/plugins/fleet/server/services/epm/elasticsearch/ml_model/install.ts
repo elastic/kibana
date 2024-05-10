@@ -8,15 +8,16 @@
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 
-import { getPathParts } from '../../archive';
-import { ElasticsearchAssetType } from '../../../../../common/types/models';
-import type { EsAssetReference, InstallablePackage } from '../../../../../common/types/models';
+import { getAssetFromAssetsMap, getPathParts } from '../../archive';
+import {
+  ElasticsearchAssetType,
+  type PackageInstallContext,
+} from '../../../../../common/types/models';
+import type { EsAssetReference } from '../../../../../common/types/models';
 
 import { retryTransientEsErrors } from '../retry';
 
-import { updateEsAssetReferences } from '../../packages/install';
-
-import { getAsset } from './common';
+import { updateEsAssetReferences } from '../../packages/es_assets_reference';
 
 interface MlModelInstallation {
   installationName: string;
@@ -24,17 +25,18 @@ interface MlModelInstallation {
 }
 
 export const installMlModel = async (
-  installablePackage: InstallablePackage,
-  paths: string[],
+  packageInstallContext: PackageInstallContext,
   esClient: ElasticsearchClient,
   savedObjectsClient: SavedObjectsClientContract,
   logger: Logger,
   esReferences: EsAssetReference[]
 ) => {
-  const mlModelPath = paths.find((path) => isMlModel(path));
+  const mlModelPath = packageInstallContext.paths.find((path) => isMlModel(path));
 
   if (mlModelPath !== undefined) {
-    const content = getAsset(mlModelPath).toString('utf-8');
+    const content = getAssetFromAssetsMap(packageInstallContext.assetsMap, mlModelPath).toString(
+      'utf-8'
+    );
     const pathParts = mlModelPath.split('/');
     const modelId = pathParts[pathParts.length - 1].replace('.json', '');
 
@@ -46,7 +48,7 @@ export const installMlModel = async (
     // get and save ml model refs before installing ml model
     esReferences = await updateEsAssetReferences(
       savedObjectsClient,
-      installablePackage.name,
+      packageInstallContext.packageInfo.name,
       esReferences,
       { assetsToAdd: [mlModelRef] }
     );

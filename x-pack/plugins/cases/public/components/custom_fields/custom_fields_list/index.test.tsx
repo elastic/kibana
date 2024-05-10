@@ -44,14 +44,14 @@ describe('CustomFieldsList', () => {
         `custom-field-${customFieldsConfigurationMock[0].key}-${customFieldsConfigurationMock[0].type}`
       )
     ).toBeInTheDocument();
-    expect(await screen.findByText('Text')).toBeInTheDocument();
-    expect(await screen.findByText('Required')).toBeInTheDocument();
+    expect((await screen.findAllByText('Text')).length).toBe(2);
+    expect((await screen.findAllByText('Required')).length).toBe(2);
     expect(
       await screen.findByTestId(
         `custom-field-${customFieldsConfigurationMock[1].key}-${customFieldsConfigurationMock[1].type}`
       )
     ).toBeInTheDocument();
-    expect(await screen.findByText('Toggle')).toBeInTheDocument();
+    expect((await screen.findAllByText('Toggle')).length).toBe(2);
   });
 
   it('shows single CustomFieldsList correctly', async () => {

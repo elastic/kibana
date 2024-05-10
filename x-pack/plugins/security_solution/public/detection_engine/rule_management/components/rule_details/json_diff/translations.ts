@@ -17,24 +17,24 @@ export const EXPAND_UNCHANGED_LINES = (linesCount: number) =>
     }
   );
 
-export const BASE_VERSION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.upgradeRules.baseVersionLabel',
+export const CURRENT_RULE_VERSION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.currentVersionLabel',
   {
-    defaultMessage: 'Base version',
+    defaultMessage: 'Current rule',
   }
 );
 
-export const BASE_VERSION_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.upgradeRules.baseVersionDescriptionLabel',
+export const CURRENT_VERSION_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.currentVersionDescriptionLabel',
   {
     defaultMessage: 'Shows currently installed rule',
   }
 );
 
-export const UPDATED_VERSION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.upgradeRules.updatedVersionLabel',
+export const ELASTIC_UPDATE_VERSION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.elasticUpdateVersionLabel',
   {
-    defaultMessage: 'Update',
+    defaultMessage: 'Elastic update',
   }
 );
 

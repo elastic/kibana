@@ -5,22 +5,16 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash/fp';
 import type { FC } from 'react';
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 
 import { EuiButton } from '@elastic/eui';
-import { UserProfilesSelectable } from '@kbn/user-profile-components';
-
-import { isEmpty } from 'lodash';
-import { useGetCurrentUserProfile } from '../user_profiles/use_get_current_user_profile';
+import type { AlertAssignees } from '../../../../common/api/detection_engine';
 import * as i18n from './translations';
-import type { AssigneesIdsSelection, AssigneesProfilesSelection } from './types';
-import { NO_ASSIGNEES_VALUE } from './constants';
-import { useSuggestUsers } from '../user_profiles/use_suggest_users';
-import { useBulkGetUserProfiles } from '../user_profiles/use_bulk_get_user_profiles';
-import { bringCurrentUserToFrontAndSort, removeNoAssigneesSelection } from './utils';
+import type { AssigneesIdsSelection } from './types';
+import { removeNoAssigneesSelection } from './utils';
 import { ASSIGNEES_APPLY_BUTTON_TEST_ID, ASSIGNEES_APPLY_PANEL_TEST_ID } from './test_ids';
+import { AssigneesSelectable } from './assignees_selectable';
 
 export interface AssigneesApplyPanelProps {
   /**
@@ -29,125 +23,67 @@ export interface AssigneesApplyPanelProps {
   searchInputId?: string;
 
   /**
-   * Ids of the users assigned to the alert
+   * The array of ids of the users assigned to the alert
    */
-  assignedUserIds: AssigneesIdsSelection[];
+  assignedUserIds: string[];
 
   /**
-   * Show "Unassigned" option if needed
+   * A callback function that will be called on apply button click
    */
-  showUnassignedOption?: boolean;
-
-  /**
-   * Callback to handle changing of the assignees selection
-   */
-  onSelectionChange?: (users: AssigneesIdsSelection[]) => void;
-
-  /**
-   * Callback to handle applying assignees. If provided will show "Apply assignees" button
-   */
-  onAssigneesApply?: (selectedAssignees: AssigneesIdsSelection[]) => void;
+  onApply: (updatedAssignees: AlertAssignees) => void;
 }
 
 /**
  * The popover to allow selection of users from a list
  */
 export const AssigneesApplyPanel: FC<AssigneesApplyPanelProps> = memo(
-  ({
-    searchInputId,
-    assignedUserIds,
-    showUnassignedOption,
-    onSelectionChange,
-    onAssigneesApply,
-  }) => {
-    const { data: currentUserProfile } = useGetCurrentUserProfile();
-    const existingIds = useMemo(
-      () => new Set(removeNoAssigneesSelection(assignedUserIds)),
-      [assignedUserIds]
-    );
-    const { isLoading: isLoadingAssignedUsers, data: assignedUsers } = useBulkGetUserProfiles({
-      uids: existingIds,
-    });
+  ({ searchInputId, assignedUserIds, onApply }) => {
+    /**
+     * We use `selectedUserIds` to keep track of currently selected user ids,
+     * whereas `assignedUserIds` holds actually assigned user ids.
+     */
+    const [selectedUserIds, setSelectedUserIds] =
+      useState<AssigneesIdsSelection[]>(assignedUserIds);
 
-    const [searchTerm, setSearchTerm] = useState('');
-    const { isLoading: isLoadingSuggestedUsers, data: userProfiles } = useSuggestUsers({
-      searchTerm,
-    });
+    const assigneesToUpdate = useMemo<AlertAssignees>(() => {
+      const updatedIds = removeNoAssigneesSelection(selectedUserIds);
+      const assigneesToAddArray = updatedIds.filter((uid) => !assignedUserIds.includes(uid));
+      const assigneesToRemoveArray = assignedUserIds.filter((uid) => !updatedIds.includes(uid));
+      return {
+        add: assigneesToAddArray,
+        remove: assigneesToRemoveArray,
+      };
+    }, [assignedUserIds, selectedUserIds]);
 
-    const searchResultProfiles = useMemo(() => {
-      const sortedUsers = bringCurrentUserToFrontAndSort(currentUserProfile, userProfiles) ?? [];
-
-      if (showUnassignedOption && isEmpty(searchTerm)) {
-        return [NO_ASSIGNEES_VALUE, ...sortedUsers];
-      }
-
-      return sortedUsers;
-    }, [currentUserProfile, searchTerm, showUnassignedOption, userProfiles]);
-
-    const [selectedAssignees, setSelectedAssignees] = useState<AssigneesProfilesSelection[]>([]);
-    useEffect(() => {
-      if (isLoadingAssignedUsers || !assignedUsers) {
-        return;
-      }
-      const hasNoAssigneesSelection = assignedUserIds.find((uid) => uid === NO_ASSIGNEES_VALUE);
-      const newAssignees =
-        hasNoAssigneesSelection !== undefined
-          ? [NO_ASSIGNEES_VALUE, ...assignedUsers]
-          : assignedUsers;
-      setSelectedAssignees(newAssignees);
-    }, [assignedUserIds, assignedUsers, isLoadingAssignedUsers]);
-
-    const handleSelectedAssignees = useCallback(
-      (newAssignees: AssigneesProfilesSelection[]) => {
-        if (!isEqual(newAssignees, selectedAssignees)) {
-          setSelectedAssignees(newAssignees);
-          onSelectionChange?.(newAssignees.map((assignee) => assignee?.uid ?? NO_ASSIGNEES_VALUE));
-        }
-      },
-      [onSelectionChange, selectedAssignees]
+    const isDirty = useMemo(
+      () => assigneesToUpdate.add.length || assigneesToUpdate.remove.length,
+      [assigneesToUpdate]
     );
 
-    const handleApplyButtonClick = useCallback(() => {
-      const selectedIds = selectedAssignees.map((assignee) => assignee?.uid ?? NO_ASSIGNEES_VALUE);
-      onAssigneesApply?.(selectedIds);
-    }, [onAssigneesApply, selectedAssignees]);
+    const handleSelectionChange = useCallback((userIds: AssigneesIdsSelection[]) => {
+      setSelectedUserIds(userIds);
+    }, []);
 
-    const selectedStatusMessage = useCallback(
-      (total: number) => i18n.ASSIGNEES_SELECTION_STATUS_MESSAGE(total),
-      []
-    );
-
-    const isLoading = isLoadingAssignedUsers || isLoadingSuggestedUsers;
+    const handleApplyButtonClick = useCallback(async () => {
+      onApply(assigneesToUpdate);
+    }, [assigneesToUpdate, onApply]);
 
     return (
       <div data-test-subj={ASSIGNEES_APPLY_PANEL_TEST_ID}>
-        <UserProfilesSelectable
+        <AssigneesSelectable
           searchInputId={searchInputId}
-          onSearchChange={(term: string) => {
-            setSearchTerm(term);
-          }}
-          onChange={handleSelectedAssignees}
-          selectedStatusMessage={selectedStatusMessage}
-          options={searchResultProfiles}
-          selectedOptions={selectedAssignees}
-          isLoading={isLoading}
-          height={'full'}
-          singleSelection={false}
-          searchPlaceholder={i18n.ASSIGNEES_SEARCH_USERS}
-          clearButtonLabel={i18n.ASSIGNEES_CLEAR_FILTERS}
-          nullOptionLabel={i18n.ASSIGNEES_NO_ASSIGNEES}
+          assignedUserIds={assignedUserIds}
+          onSelectionChange={handleSelectionChange}
         />
-        {onAssigneesApply && (
-          <EuiButton
-            data-test-subj={ASSIGNEES_APPLY_BUTTON_TEST_ID}
-            fullWidth
-            size="s"
-            onClick={handleApplyButtonClick}
-            isDisabled={isLoading}
-          >
-            {i18n.ASSIGNEES_APPLY_BUTTON}
-          </EuiButton>
-        )}
+        <EuiButton
+          data-test-subj={ASSIGNEES_APPLY_BUTTON_TEST_ID}
+          fullWidth
+          size="s"
+          onClick={handleApplyButtonClick}
+          isDisabled={!isDirty}
+        >
+          {i18n.ASSIGNEES_APPLY_BUTTON}
+        </EuiButton>
       </div>
     );
   }

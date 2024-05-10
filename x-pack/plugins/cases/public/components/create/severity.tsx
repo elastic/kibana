@@ -8,10 +8,10 @@
 import { EuiFormRow } from '@elastic/eui';
 import React, { memo } from 'react';
 import {
+  getFieldValidityAndErrorMessage,
   UseField,
-  useFormContext,
-  useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { isEmpty } from 'lodash';
 import { CaseSeverity } from '../../../common/types/domain';
 import { SeveritySelector } from '../severity/selector';
 import { SEVERITY_TITLE } from '../severity/translations';
@@ -20,33 +20,38 @@ interface Props {
   isLoading: boolean;
 }
 
-const SeverityFieldFormComponent = ({ isLoading }: { isLoading: boolean }) => {
-  const { setFieldValue } = useFormContext();
-  const [{ severity }] = useFormData({ watch: ['severity'] });
-  const onSeverityChange = (newSeverity: CaseSeverity) => {
-    setFieldValue('severity', newSeverity);
-  };
-  return (
-    <EuiFormRow data-test-subj="caseSeverity" fullWidth={true} label={SEVERITY_TITLE}>
-      <SeveritySelector
-        isLoading={isLoading}
-        isDisabled={isLoading}
-        selectedSeverity={severity ?? CaseSeverity.LOW}
-        onSeverityChange={onSeverityChange}
-      />
-    </EuiFormRow>
-  );
-};
-SeverityFieldFormComponent.displayName = 'SeverityFieldForm';
-
 const SeverityComponent: React.FC<Props> = ({ isLoading }) => (
-  <UseField
+  <UseField<CaseSeverity>
     path={'severity'}
-    component={SeverityFieldFormComponent}
     componentProps={{
       isLoading,
     }}
-  />
+  >
+    {(field) => {
+      const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+
+      const onChange = (newSeverity: CaseSeverity) => {
+        field.setValue(newSeverity);
+      };
+
+      return (
+        <EuiFormRow
+          data-test-subj="caseSeverity"
+          fullWidth
+          label={SEVERITY_TITLE}
+          error={errorMessage}
+          isInvalid={isInvalid}
+        >
+          <SeveritySelector
+            isLoading={isLoading}
+            isDisabled={isLoading}
+            selectedSeverity={isEmpty(field.value) ? CaseSeverity.LOW : field.value}
+            onSeverityChange={onChange}
+          />
+        </EuiFormRow>
+      );
+    }}
+  </UseField>
 );
 
 SeverityComponent.displayName = 'SeverityComponent';

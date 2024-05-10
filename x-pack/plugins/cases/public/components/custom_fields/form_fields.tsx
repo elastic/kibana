@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useState } from 'react';
-import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import React, { memo, useMemo } from 'react';
+import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   TextField,
   SelectField,
   HiddenField,
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { EuiSelectOption } from '@elastic/eui';
-import { CustomFieldTypes } from '../../../common/types/domain';
+import type { CustomFieldTypes } from '../../../common/types/domain';
 import { builderMap } from './builder';
 
 interface FormFieldsProps {
@@ -33,17 +33,10 @@ const fieldTypeSelectOptions = (): EuiSelectOption[] => {
 };
 
 const FormFieldsComponent: React.FC<FormFieldsProps> = ({ isSubmitting, isEditMode }) => {
-  const [selectedType, setSelectedType] = useState<CustomFieldTypes>(CustomFieldTypes.TEXT);
-
-  const handleTypeChange = useCallback(
-    (e) => {
-      setSelectedType(e.target.value);
-    },
-    [setSelectedType]
-  );
+  const [{ type }] = useFormData<{ type: CustomFieldTypes }>();
 
   const builtCustomField = useMemo(() => {
-    const builder = builderMap[selectedType];
+    const builder = builderMap[type];
 
     if (builder == null) {
       return null;
@@ -52,7 +45,7 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({ isSubmitting, isEditMo
     const customFieldBuilder = builder();
 
     return customFieldBuilder.build();
-  }, [selectedType]);
+  }, [type]);
 
   const Configure = builtCustomField?.Configure;
   const options = fieldTypeSelectOptions();
@@ -82,7 +75,6 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({ isSubmitting, isEditMo
             isLoading: isSubmitting,
             disabled: isEditMode,
           },
-          onChange: handleTypeChange,
         }}
       />
       {Configure ? <Configure /> : null}

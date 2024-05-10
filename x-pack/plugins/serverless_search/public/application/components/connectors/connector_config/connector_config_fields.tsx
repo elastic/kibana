@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle, EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { Connector, ConnectorConfigurationComponent } from '@kbn/search-connectors';
 import { useQueryClient } from '@tanstack/react-query';
 import React, { useEffect } from 'react';
+import { docLinks } from '../../../../../common/doc_links';
 import { useConnector } from '../../../hooks/api/use_connector';
 import { useEditConnectorConfiguration } from '../../../hooks/api/use_connector_configuration';
 
@@ -54,6 +56,30 @@ export const ConnectorConfigFields: React.FC<ConnectorConfigFieldsProps> = ({ co
           isLoading={isLoading}
           saveConfig={mutate}
         />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiText color="subdued">
+          <FormattedMessage
+            id="xpack.serverlessSearch.searchConnectors.configurationConnector.config.documentation.description"
+            defaultMessage="This connector supports several authentication methods. Ask your administrator for the correct connection credentials. {documentationUrl}"
+            values={{
+              documentationUrl: (
+                <EuiLink
+                  target="_blank"
+                  data-test-subj="serverlessSearchConnectorConfigFieldsDocumentationLink"
+                  href={docLinks.connectorClientAvailableConnectors}
+                >
+                  {i18n.translate(
+                    'xpack.serverlessSearch.searchConnectors.configurationConnector.config.documentation.link',
+                    {
+                      defaultMessage: 'Documentation',
+                    }
+                  )}
+                </EuiLink>
+              ),
+            }}
+          />
+        </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

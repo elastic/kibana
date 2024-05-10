@@ -69,6 +69,7 @@ $ curl -X POST api/osquery/packs \
     "my_query": {
       "query": "SELECT * FROM listening_ports;",
       "interval": 60,
+      "timeout": 120,
       "ecs_mapping": {
         "client.port": {
           "field": "port"

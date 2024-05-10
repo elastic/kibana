@@ -21,8 +21,8 @@ import { useKibana } from '../../../common/lib/kibana';
 import { isDetectionsPath, isDashboardViewPath } from '../../../helpers';
 import { Sourcerer } from '../../../common/components/sourcerer';
 import { TimelineId } from '../../../../common/types/timeline';
-import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
-import { timelineSelectors } from '../../../timelines/store/timeline';
+import { timelineDefaults } from '../../../timelines/store/defaults';
+import { timelineSelectors } from '../../../timelines/store';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { getScopeFromPath, showSourcererByPath } from '../../../common/containers/sourcerer';
 import { useAddIntegrationsUrl } from '../../../common/hooks/use_add_integrations_url';
@@ -53,22 +53,24 @@ export const GlobalHeader = React.memo(() => {
   const { href, onClick } = useAddIntegrationsUrl();
 
   useEffect(() => {
-    setHeaderActionMenu((element) => {
-      const mount = toMountPoint(<OutPortal node={portalNode} />, {
-        theme,
-        i18n: kibanaServiceI18n,
+    if (setHeaderActionMenu) {
+      setHeaderActionMenu((element) => {
+        const mount = toMountPoint(<OutPortal node={portalNode} />, {
+          theme,
+          i18n: kibanaServiceI18n,
+        });
+        return mount(element);
       });
-      return mount(element);
-    });
 
-    return () => {
-      /* Dashboard mounts an edit toolbar, it should be restored when leaving dashboard editing page */
-      if (dashboardViewPath) {
-        return;
-      }
-      portalNode.unmount();
-      setHeaderActionMenu(undefined);
-    };
+      return () => {
+        /* Dashboard mounts an edit toolbar, it should be restored when leaving dashboard editing page */
+        if (dashboardViewPath) {
+          return;
+        }
+        portalNode.unmount();
+        setHeaderActionMenu(undefined);
+      };
+    }
   }, [portalNode, setHeaderActionMenu, theme, kibanaServiceI18n, dashboardViewPath]);
 
   return (

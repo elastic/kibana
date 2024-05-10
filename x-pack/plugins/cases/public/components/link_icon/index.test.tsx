@@ -12,9 +12,11 @@ import { TestProviders } from '../../common/mock';
 import { LinkIcon } from '.';
 
 describe('LinkIcon', () => {
+  const onClick = jest.fn;
+
   test('it renders', () => {
     const wrapper = shallow(
-      <LinkIcon href="#" iconSide="right" iconSize="xxl" iconType="warning">
+      <LinkIcon onClick={onClick} iconSide="right" iconSize="xxl" iconType="warning">
         {'Test link'}
       </LinkIcon>
     );
@@ -34,22 +36,12 @@ describe('LinkIcon', () => {
     expect(wrapper.find('button').first().exists()).toBe(true);
   });
 
-  test('it renders an action link when href is provided', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <LinkIcon href="#" iconType="warning">
-          {'Test link'}
-        </LinkIcon>
-      </TestProviders>
-    );
-
-    expect(wrapper.find('a').first().exists()).toBe(true);
-  });
-
   test('it renders an icon', () => {
     const wrapper = mount(
       <TestProviders>
-        <LinkIcon iconType="warning">{'Test link'}</LinkIcon>
+        <LinkIcon onClick={onClick} iconType="warning">
+          {'Test link'}
+        </LinkIcon>
       </TestProviders>
     );
 
@@ -59,34 +51,33 @@ describe('LinkIcon', () => {
   test('it positions the icon to the right when iconSide is right', () => {
     const wrapper = mount(
       <TestProviders>
-        <LinkIcon iconSide="right" iconType="warning">
+        <LinkIcon onClick={onClick} iconSide="right" iconType="warning">
           {'Test link'}
         </LinkIcon>
       </TestProviders>
     );
 
-    expect(wrapper.find('.casesLinkIcon').at(1)).toHaveStyleRule('flex-direction', 'row-reverse');
+    expect(wrapper.find('[iconSide="right"]').exists()).toBeTruthy();
   });
 
   test('it positions the icon to the left when iconSide is left (or not provided)', () => {
     const wrapper = mount(
       <TestProviders>
-        <LinkIcon iconSide="left" iconType="warning">
+        <LinkIcon onClick={onClick} iconSide="left" iconType="warning">
           {'Test link'}
         </LinkIcon>
       </TestProviders>
     );
 
-    expect(wrapper.find('.casesLinkIcon').at(1)).not.toHaveStyleRule(
-      'flex-direction',
-      'row-reverse'
-    );
+    expect(wrapper.find('[iconSide="left"]').exists()).toBeTruthy();
   });
 
   test('it renders a label', () => {
     const wrapper = mount(
       <TestProviders>
-        <LinkIcon iconType="warning">{'Test link'}</LinkIcon>
+        <LinkIcon onClick={onClick} iconType="warning">
+          {'Test link'}
+        </LinkIcon>
       </TestProviders>
     );
 

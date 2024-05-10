@@ -34,7 +34,9 @@ describe('<KibanaErrorBoundaryProvider>', () => {
 
     expect(reportEventSpy).toBeCalledWith('fatal-error-react', {
       component_name: 'BadComponent',
+      component_stack: expect.any(String),
       error_message: 'Error: This is an error to show the test user!',
+      error_stack: expect.any(String),
     });
   });
 
@@ -61,7 +63,9 @@ describe('<KibanaErrorBoundaryProvider>', () => {
     expect(reportEventSpy2).not.toBeCalled();
     expect(reportEventSpy1).toBeCalledWith('fatal-error-react', {
       component_name: 'BadComponent',
+      component_stack: expect.any(String),
       error_message: 'Error: This is an error to show the test user!',
+      error_stack: expect.any(String),
     });
   });
 });

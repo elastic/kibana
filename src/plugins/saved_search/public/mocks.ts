@@ -7,7 +7,8 @@
  */
 
 import { of } from 'rxjs';
-import { SearchSource, IKibanaSearchResponse } from '@kbn/data-plugin/public';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
+import { SearchSource } from '@kbn/data-plugin/public';
 import { SearchSourceDependencies } from '@kbn/data-plugin/common/search';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedSearchPublicPluginStart } from './plugin';
@@ -57,6 +58,7 @@ const savedSearchStartMock = (): SavedSearchPublicPluginStart => ({
         id,
         title: result.attributes.title,
         searchSource: createEmptySearchSource(),
+        managed: false,
       })
     ),
   },

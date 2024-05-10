@@ -15,20 +15,18 @@ import {
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
-import { AttachmentType } from '@kbn/cases-plugin/common';
+import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
+import { AttachmentType, APP_ID as CASE_APP_ID } from '@kbn/cases-plugin/common';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
 import type { AlertActionsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { useMlKibana } from '../../application/contexts/kibana';
-
-const CASES_ACTIONS_ENABLED = false;
 
 export function AlertActions(props: AlertActionsProps) {
   const { alert, refresh } = props;
   const { cases, triggersActionsUi } = useMlKibana().services;
-  const casesPrivileges = cases?.helpers.canUseCases();
+  const casesPrivileges = cases?.helpers.canUseCases([CASE_APP_ID]);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
@@ -64,8 +62,8 @@ export function AlertActions(props: AlertActionsProps) {
     refresh();
   }, [refresh]);
 
-  const createCaseFlyout = cases!.hooks.useCasesAddToNewCaseFlyout({ onSuccess });
-  const selectCaseModal = cases!.hooks.useCasesAddToExistingCaseModal({ onSuccess });
+  const createCaseFlyout = cases?.hooks?.useCasesAddToNewCaseFlyout({ onSuccess });
+  const selectCaseModal = cases?.hooks?.useCasesAddToExistingCaseModal({ onSuccess });
 
   const closeActionsPopover = () => {
     setIsPopoverOpen(false);
@@ -76,12 +74,12 @@ export function AlertActions(props: AlertActionsProps) {
   };
 
   const handleAddToNewCaseClick = () => {
-    createCaseFlyout.open({ attachments: caseAttachments });
+    createCaseFlyout?.open({ attachments: caseAttachments });
     closeActionsPopover();
   };
 
   const handleAddToExistingCaseClick = () => {
-    selectCaseModal.open({ getAttachments: () => caseAttachments });
+    selectCaseModal?.open({ getAttachments: () => caseAttachments });
     closeActionsPopover();
   };
 
@@ -101,7 +99,7 @@ export function AlertActions(props: AlertActionsProps) {
   );
 
   const actionsMenuItems = [
-    ...(CASES_ACTIONS_ENABLED && casesPrivileges?.create && casesPrivileges.read
+    ...(casesPrivileges && casesPrivileges?.create && casesPrivileges.read
       ? [
           <EuiContextMenuItem
             data-test-subj="add-to-existing-case-action"

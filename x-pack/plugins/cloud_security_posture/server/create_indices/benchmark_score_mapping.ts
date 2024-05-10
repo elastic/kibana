@@ -47,5 +47,8 @@ export const benchmarkScoreMapping: MappingTypeMapping = {
     low: {
       type: 'long',
     },
+    is_enabled_rules_score: {
+      type: 'boolean',
+    },
   },
 };

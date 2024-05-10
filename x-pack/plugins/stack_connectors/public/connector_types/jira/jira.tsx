@@ -11,6 +11,7 @@ import type {
   GenericValidationResult,
   ActionTypeModel as ConnectorTypeModel,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { MAX_OTHER_FIELDS_LENGTH } from '../../../common/jira/constants';
 import { JiraConfig, JiraSecrets, JiraActionParams } from './types';
 
 export const JIRA_DESC = i18n.translate('xpack.stackConnectors.components.jira.selectMessageText', {
@@ -38,6 +39,7 @@ export function getConnectorType(): ConnectorTypeModel<JiraConfig, JiraSecrets, 
       const errors = {
         'subActionParams.incident.summary': new Array<string>(),
         'subActionParams.incident.labels': new Array<string>(),
+        'subActionParams.incident.otherFields': new Array<string>(),
       };
       const validationResult = {
         errors,
@@ -54,6 +56,20 @@ export function getConnectorType(): ConnectorTypeModel<JiraConfig, JiraSecrets, 
         // Jira do not allows empty spaces on labels. If the label includes a whitespace show an error.
         if (actionParams.subActionParams.incident.labels.some((label) => label.match(/\s/g)))
           errors['subActionParams.incident.labels'].push(translations.LABELS_WHITE_SPACES);
+      }
+
+      try {
+        const otherFields = actionParams.subActionParams?.incident?.otherFields;
+        if (otherFields) {
+          const parsedOtherFields = JSON.parse(otherFields);
+          if (Object.keys(parsedOtherFields).length > MAX_OTHER_FIELDS_LENGTH) {
+            errors['subActionParams.incident.otherFields'] = [
+              translations.OTHER_FIELDS_LENGTH_ERROR(MAX_OTHER_FIELDS_LENGTH),
+            ];
+          }
+        }
+      } catch (error) {
+        errors['subActionParams.incident.otherFields'] = [translations.INVALID_JSON_FORMAT];
       }
       return validationResult;
     },

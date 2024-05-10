@@ -51,6 +51,11 @@ post:
               type: string
             is_default:
               type: boolean
+            is_internal:
+              type: boolean
+            proxy_id:
+              description: The ID of the proxy to use for this fleet server host. See the proxies API for more information.
+              type: string
             host_urls:
               type: array
               items:

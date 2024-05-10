@@ -145,7 +145,7 @@
             "label": "hideLinksTo",
             "description": [],
             "signature": [
-              "(\"transform\" | \"tags\" | \"maintenanceWindows\" | \"settings\" | \"dataViews\" | \"filesManagement\" | \"reporting\" | \"api_keys\" | \"index_management\" | \"ingest_pipelines\" | \"jobsListLink\" | \"objects\" | \"pipelines\" | \"triggersActions\" | \"triggersActionsConnectors\")[] | undefined"
+              "(\"transform\" | \"tags\" | \"maintenanceWindows\" | \"settings\" | \"dataViews\" | \"filesManagement\" | \"roles\" | \"reporting\" | \"api_keys\" | \"index_management\" | \"ingest_pipelines\" | \"jobsListLink\" | \"objects\" | \"pipelines\" | \"triggersActions\" | \"triggersActionsConnectors\")[] | undefined"
             ],
             "path": "packages/kbn-management/cards_navigation/src/types.ts",
             "deprecated": false,
@@ -160,7 +160,13 @@
             "description": [],
             "signature": [
               "Record<string, ",
-              "CardNavExtensionDefinition",
+              {
+                "pluginId": "@kbn/management-cards-navigation",
+                "scope": "common",
+                "docId": "kibKbnManagementCardsNavigationPluginApi",
+                "section": "def-common.CardNavExtensionDefinition",
+                "text": "CardNavExtensionDefinition"
+              },
               "> | undefined"
             ],
             "path": "packages/kbn-management/cards_navigation/src/types.ts",
@@ -196,7 +202,23 @@
         "label": "AppId",
         "description": [],
         "signature": [
-          "\"transform\" | \"tags\" | \"maintenanceWindows\" | \"settings\" | \"dataViews\" | \"filesManagement\" | \"reporting\" | \"api_keys\" | \"index_management\" | \"ingest_pipelines\" | \"jobsListLink\" | \"objects\" | \"pipelines\" | \"triggersActions\" | \"triggersActionsConnectors\""
+          "\"transform\" | \"tags\" | \"maintenanceWindows\" | \"settings\" | \"dataViews\" | \"filesManagement\" | \"roles\" | \"reporting\" | \"api_keys\" | \"index_management\" | \"ingest_pipelines\" | \"jobsListLink\" | \"objects\" | \"pipelines\" | \"triggersActions\" | \"triggersActionsConnectors\""
+        ],
+        "path": "packages/kbn-management/cards_navigation/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-cards-navigation",
+        "id": "def-common.CardNavExtensionDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "CardNavExtensionDefinition",
+        "description": [],
+        "signature": [
+          "AppDefinition",
+          " & ({ skipValidation?: false | undefined; } | { skipValidation: true; href: string; title: string; })"
         ],
         "path": "packages/kbn-management/cards_navigation/src/types.ts",
         "deprecated": false,
@@ -204,6 +226,22 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/management-cards-navigation",
+        "id": "def-common.appCategories",
+        "type": "Object",
+        "tags": [],
+        "label": "appCategories",
+        "description": [],
+        "signature": [
+          "{ readonly DATA: \"data\"; readonly ACCESS: \"access\"; readonly ALERTS: \"alerts\"; readonly CONTENT: \"content\"; readonly OTHER: \"other\"; }"
+        ],
+        "path": "packages/kbn-management/cards_navigation/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }

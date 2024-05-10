@@ -30,11 +30,11 @@ import {
 } from './test_subjects';
 import { CloudPosturePage, PACKAGE_NOT_INSTALLED_TEST_SUBJECT } from './cloud_posture_page';
 import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
-import type { IndexDetails, PostureTypes } from '../../common/types_old';
-import { cspIntegrationDocsNavigation } from '../common/navigation/constants';
+import type { IndexDetails, PostureTypes, CspStatusCode } from '../../common/types_old';
 import noDataIllustration from '../assets/illustrations/no_data_illustration.svg';
 import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_link';
 import { NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS } from '../common/constants';
+import { cspIntegrationDocsNavigation } from '../common/navigation/constants';
 
 const NotDeployed = ({ postureType }: { postureType: PostureTypes }) => {
   const integrationPoliciesLink = useCISIntegrationPoliciesLink({
@@ -169,7 +169,7 @@ const Unprivileged = ({ unprivilegedIndices }: { unprivilegedIndices: string[] }
   />
 );
 
-const ConfigurationFindingsInstalledEmptyPrompt = ({
+const EmptySecurityFindingsPrompt = ({
   kspmIntegrationLink,
   cspmIntegrationLink,
 }: {
@@ -179,7 +179,7 @@ const ConfigurationFindingsInstalledEmptyPrompt = ({
   return (
     <EuiEmptyPrompt
       data-test-subj={PACKAGE_NOT_INSTALLED_TEST_SUBJECT}
-      icon={<EuiImage size="fullWidth" src={noDataIllustration} alt="no-data-illustration" />}
+      icon={<EuiImage size="fullWidth" src={noDataIllustration} alt="" role="presentation" />}
       title={
         <h2>
           <FormattedMessage
@@ -242,21 +242,17 @@ const ConfigurationFindingsInstalledEmptyPrompt = ({
   );
 };
 
-/**
- * This component will return the render states based on cloud posture setup status API
- * since 'not-installed' is being checked globally by CloudPosturePage and 'indexed' is the pass condition, those states won't be handled here
- * */
-export const NoFindingsStates = ({ posturetype }: { posturetype: PostureTypes }) => {
-  const getSetupStatus = useCspSetupStatusApi({
-    refetchInterval: NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS,
-  });
-  const statusKspm = getSetupStatus.data?.kspm?.status;
-  const statusCspm = getSetupStatus.data?.cspm?.status;
-  const indicesStatus = getSetupStatus.data?.indicesDetails;
-  const status = posturetype === 'cspm' ? statusCspm : statusKspm;
-  const showConfigurationInstallPrompt =
-    getSetupStatus.data?.kspm?.status === 'not-installed' &&
-    getSetupStatus.data?.cspm?.status === 'not-installed';
+const NoFindingsStatesNotification = ({
+  postureType,
+  status,
+  indicesStatus,
+  isNotInstalled,
+}: {
+  postureType: PostureTypes;
+  status?: CspStatusCode;
+  indicesStatus?: IndexDetails[];
+  isNotInstalled: boolean;
+}) => {
   const kspmIntegrationLink = useCspIntegrationLink(KSPM_POLICY_TEMPLATE);
   const cspmIntegrationLink = useCspIntegrationLink(CSPM_POLICY_TEMPLATE);
 
@@ -266,24 +262,47 @@ export const NoFindingsStates = ({ posturetype }: { posturetype: PostureTypes })
       .filter((idxDetails) => idxDetails.status === 'unprivileged')
       .map((idxDetails: IndexDetails) => idxDetails.index)
       .sort((a, b) => a.localeCompare(b));
-  const render = () => {
-    if (status === 'not-deployed') return <NotDeployed postureType={posturetype} />; // integration installed, but no agents added
-    if (status === 'indexing' || status === 'waiting_for_results') return <Indexing />; // agent added, index timeout hasn't passed since installation
-    if (status === 'index-timeout') return <IndexTimeout />; // agent added, index timeout has passed
-    if (status === 'unprivileged')
-      return <Unprivileged unprivilegedIndices={unprivilegedIndices || []} />; // user has no privileges for our indices
-    if (showConfigurationInstallPrompt)
-      return (
-        <ConfigurationFindingsInstalledEmptyPrompt
-          kspmIntegrationLink={kspmIntegrationLink}
-          cspmIntegrationLink={cspmIntegrationLink}
-        />
-      );
-  };
+
+  if (status === 'unprivileged')
+    return <Unprivileged unprivilegedIndices={unprivilegedIndices || []} />;
+  if (status === 'indexing' || status === 'waiting_for_results') return <Indexing />;
+  if (status === 'index-timeout') return <IndexTimeout />;
+  if (isNotInstalled)
+    return (
+      <EmptySecurityFindingsPrompt
+        kspmIntegrationLink={kspmIntegrationLink}
+        cspmIntegrationLink={cspmIntegrationLink}
+      />
+    );
+  if (status === 'not-deployed') return <NotDeployed postureType={postureType} />;
+
+  return null;
+};
+
+/**
+ * This component will return the render states based on cloud posture setup status API
+ * since 'not-installed' is being checked globally by CloudPosturePage and 'indexed' is the pass condition, those states won't be handled here
+ * */
+export const NoFindingsStates = ({ postureType }: { postureType: PostureTypes }) => {
+  const getSetupStatus = useCspSetupStatusApi({
+    refetchInterval: NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS,
+  });
+  const statusKspm = getSetupStatus.data?.kspm?.status;
+  const statusCspm = getSetupStatus.data?.cspm?.status;
+  const indicesStatus = getSetupStatus.data?.indicesDetails;
+  const status = postureType === 'cspm' ? statusCspm : statusKspm;
+  const isNotInstalled = statusKspm === 'not-installed' && statusCspm === 'not-installed';
 
   return (
     <CloudPosturePage query={getSetupStatus}>
-      <FullSizeCenteredPage>{render()}</FullSizeCenteredPage>
+      <FullSizeCenteredPage>
+        <NoFindingsStatesNotification
+          postureType={postureType}
+          status={status}
+          indicesStatus={indicesStatus}
+          isNotInstalled={isNotInstalled}
+        />
+      </FullSizeCenteredPage>
     </CloudPosturePage>
   );
 };

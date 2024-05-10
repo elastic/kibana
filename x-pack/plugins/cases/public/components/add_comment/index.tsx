@@ -13,8 +13,8 @@ import React, {
   useEffect,
   useState,
 } from 'react';
+import { css } from '@emotion/react';
 import { EuiButton, EuiFlexItem, EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
-import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
 import {
@@ -37,12 +37,6 @@ import { schema } from './schema';
 import { InsertTimeline } from '../insert_timeline';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { MAX_COMMENT_LENGTH } from '../../../common/constants';
-
-const MySpinner = styled(EuiLoadingSpinner)`
-  position: absolute;
-  top: 50%;
-  left: 50%;
-`;
 
 const initialCommentValue: AddCommentFormSchema = {
   comment: '',
@@ -73,9 +67,13 @@ export const AddComment = React.memo(
     ) => {
       const editorRef = useRef<EuiMarkdownEditorRef>(null);
       const [focusOnContext, setFocusOnContext] = useState(false);
-      const { permissions, owner, appId } = useCasesContext();
+      const { permissions, owner } = useCasesContext();
       const { isLoading, mutate: createAttachments } = useCreateAttachments();
-      const draftStorageKey = getMarkdownEditorStorageKey(appId, caseId, id);
+      const draftStorageKey = getMarkdownEditorStorageKey({
+        appId: owner[0],
+        caseId,
+        commentId: id,
+      });
 
       const { form } = useForm<AddCommentFormSchema>({
         defaultValue: initialCommentValue,
@@ -182,7 +180,17 @@ export const AddComment = React.memo(
 
       return (
         <span id="add-comment-permLink">
-          {isLoading && showLoading && <MySpinner data-test-subj="loading-spinner" size="xl" />}
+          {isLoading && showLoading && (
+            <EuiLoadingSpinner
+              css={css`
+                position: absolute;
+                top: 50%;
+                left: 50%;
+              `}
+              data-test-subj="loading-spinner"
+              size="xl"
+            />
+          )}
           {permissions.create && (
             <Form form={form}>
               <UseField

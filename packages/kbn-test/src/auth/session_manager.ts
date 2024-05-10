@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { SERVERLESS_ROLES_ROOT_PATH } from '@kbn/es';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import { resolve } from 'path';
@@ -26,6 +27,7 @@ export interface HostOptions {
 export interface SamlSessionManagerOptions {
   hostOptions: HostOptions;
   isCloud: boolean;
+  supportedRoles?: string[];
   log: ToolingLog;
 }
 
@@ -33,17 +35,23 @@ export interface SamlSessionManagerOptions {
  * Manages cookies associated with user roles
  */
 export class SamlSessionManager {
+  private readonly DEFAULT_ROLES_FILE_NAME: string = 'role_users.json';
   private readonly isCloud: boolean;
   private readonly kbnHost: string;
   private readonly kbnClient: KbnClient;
   private readonly log: ToolingLog;
   private readonly roleToUserMap: Map<Role, User>;
   private readonly sessionCache: Map<Role, Session>;
-  private readonly userRoleFilePath = resolve(REPO_ROOT, '.ftr', 'role_users.json');
+  private readonly supportedRoles: string[];
+  private readonly userRoleFilePath: string;
 
-  constructor(options: SamlSessionManagerOptions) {
+  constructor(options: SamlSessionManagerOptions, rolesFilename?: string) {
     this.isCloud = options.isCloud;
     this.log = options.log;
+    // if the rolesFilename is provided, respect it. Otherwise use DEFAULT_ROLES_FILE_NAME.
+    const rolesFile = rolesFilename ? rolesFilename : this.DEFAULT_ROLES_FILE_NAME;
+    this.log.info(`Using the file ${rolesFile} for the role users`);
+    this.userRoleFilePath = resolve(REPO_ROOT, '.ftr', rolesFile);
     const hostOptionsWithoutAuth = {
       protocol: options.hostOptions.protocol,
       hostname: options.hostOptions.hostname,
@@ -59,6 +67,7 @@ export class SamlSessionManager {
     });
     this.sessionCache = new Map<Role, Session>();
     this.roleToUserMap = new Map<Role, User>();
+    this.supportedRoles = options.supportedRoles ?? [];
   }
 
   /**
@@ -87,6 +96,15 @@ export class SamlSessionManager {
   private getSessionByRole = async (role: string) => {
     if (this.sessionCache.has(role)) {
       return this.sessionCache.get(role)!;
+    }
+
+    // Validate role before creating SAML session
+    if (this.supportedRoles.length && !this.supportedRoles.includes(role)) {
+      throw new Error(
+        `Role '${role}' is not defined in the supported list: ${this.supportedRoles.join(
+          ', '
+        )}. Update roles resource file in ${SERVERLESS_ROLES_ROOT_PATH} to enable it for testing`
+      );
     }
 
     let session: Session;

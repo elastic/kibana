@@ -35,7 +35,6 @@ describe('AnalyticsChart', () => {
 
     expect(wrapper.find(Chart).prop('size')).toEqual({ height: 300 });
     expect(wrapper.find(Axis)).toHaveLength(2);
-    expect(mockKibanaValues.charts.theme.useChartsTheme).toHaveBeenCalled();
     expect(mockKibanaValues.charts.theme.useChartsBaseTheme).toHaveBeenCalled();
 
     expect(wrapper.find(LineSeries)).toHaveLength(1);

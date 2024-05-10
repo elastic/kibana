@@ -6,8 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { CaseMetricsFeature } from '../../../../common/types/api';
 import type { SingleCaseMetrics, SingleCaseMetricsFeature } from '../../../../common/ui';
 import {
@@ -21,6 +21,7 @@ import {
 export const CaseViewMetricItems = React.memo(
   ({ metrics, features }: { metrics: SingleCaseMetrics; features: SingleCaseMetricsFeature[] }) => {
     const metricItems = useGetTitleValueMetricItems(metrics, features);
+    const { euiTheme } = useEuiTheme();
 
     return (
       <>
@@ -28,7 +29,14 @@ export const CaseViewMetricItems = React.memo(
           <EuiFlexItem key={title} data-test-subj={`case-metrics-totals-${id}`}>
             <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
               <EuiFlexItem>{title}</EuiFlexItem>
-              <MetricValue>{value}</MetricValue>
+              <EuiFlexItem
+                css={css`
+                  font-size: ${euiTheme.size.l};
+                  font-weight: bold;
+                `}
+              >
+                {value}
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
         ))}
@@ -37,11 +45,6 @@ export const CaseViewMetricItems = React.memo(
   }
 );
 CaseViewMetricItems.displayName = 'CaseViewMetricItems';
-
-const MetricValue = euiStyled(EuiFlexItem)`
-  font-size: ${({ theme }) => theme.eui.euiSizeL};
-  font-weight: bold;
-`;
 
 interface MetricItem {
   id: string;

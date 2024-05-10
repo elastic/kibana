@@ -9,7 +9,7 @@
 import { debounce } from 'lodash';
 import React, { FC, useState, useMemo, useEffect, useCallback, useRef } from 'react';
 
-import { EuiRangeTick, EuiDualRange, EuiDualRangeProps } from '@elastic/eui';
+import { EuiRangeTick, EuiDualRange, EuiDualRangeProps, EuiToken, EuiToolTip } from '@elastic/eui';
 
 import { RangeValue } from '../../../common/range_slider/types';
 import { useRangeSlider } from '../embeddable/range_slider_embeddable';
@@ -18,6 +18,7 @@ import { ControlError } from '../../control_group/component/control_error_compon
 import './range_slider.scss';
 import { MIN_POPOVER_WIDTH } from '../../constants';
 import { useFieldFormatter } from '../../hooks/use_field_formatter';
+import { RangeSliderStrings } from './range_slider_strings';
 
 export const RangeSliderControl: FC = () => {
   /** Controls Services Context */
@@ -27,8 +28,9 @@ export const RangeSliderControl: FC = () => {
   // Embeddable explicit input
   const id = rangeSlider.select((state) => state.explicitInput.id);
   const value = rangeSlider.select((state) => state.explicitInput.value);
+  const step = rangeSlider.select((state) => state.explicitInput.step);
 
-  // Embeddable cmponent state
+  // Embeddable component state
   const min = rangeSlider.select((state) => state.componentState.min);
   const max = rangeSlider.select((state) => state.componentState.max);
   const error = rangeSlider.select((state) => state.componentState.error);
@@ -62,8 +64,14 @@ export const RangeSliderControl: FC = () => {
       selectedValue[0] === '' ? min : parseFloat(selectedValue[0]),
       selectedValue[1] === '' ? max : parseFloat(selectedValue[1]),
     ];
-    return [Math.min(selectedMin, min), Math.max(selectedMax, max ?? Infinity)];
-  }, [min, max, value]);
+
+    if (!step) return [Math.min(selectedMin, min), Math.max(selectedMax, max ?? Infinity)];
+
+    const minTick = Math.floor(Math.min(selectedMin, min) / step) * step;
+    const maxTick = Math.ceil(Math.max(selectedMax, max) / step) * step;
+
+    return [Math.min(selectedMin, min, minTick), Math.max(selectedMax, max ?? Infinity, maxTick)];
+  }, [min, max, value, step]);
 
   /**
    * The following `useEffect` ensures that the changes to the value that come from the embeddable (for example,
@@ -75,20 +83,33 @@ export const RangeSliderControl: FC = () => {
 
   const ticks: EuiRangeTick[] = useMemo(() => {
     return [
-      { value: min ?? -Infinity, label: fieldFormatter(String(min)) },
-      { value: max ?? Infinity, label: fieldFormatter(String(max)) },
+      { value: displayedMin ?? -Infinity, label: fieldFormatter(String(displayedMin)) },
+      { value: displayedMax ?? Infinity, label: fieldFormatter(String(displayedMax)) },
     ];
-  }, [min, max, fieldFormatter]);
+  }, [displayedMin, displayedMax, fieldFormatter]);
 
   const levels = useMemo(() => {
+    if (!step || min === undefined || max === undefined) {
+      return [
+        {
+          min: min ?? -Infinity,
+          max: max ?? Infinity,
+          color: 'success',
+        },
+      ];
+    }
+
+    const roundedMin = Math.floor(min / step) * step;
+    const roundedMax = Math.ceil(max / step) * step;
+
     return [
       {
-        min: min ?? -Infinity,
-        max: max ?? Infinity,
+        min: roundedMin,
+        max: roundedMax,
         color: 'success',
       },
     ];
-  }, [min, max]);
+  }, [step, min, max]);
 
   const disablePopover = useMemo(
     () =>
@@ -110,15 +131,20 @@ export const RangeSliderControl: FC = () => {
       placeholder: string;
     }) => {
       return {
-        isInvalid,
+        isInvalid: undefined, // disabling this prop to handle our own validation styling
         placeholder,
         readOnly: false, // overwrites `canOpenPopover` to ensure that the inputs are always clickable
-        className: 'rangeSliderAnchor__fieldNumber',
+        className: `rangeSliderAnchor__fieldNumber ${
+          isInvalid
+            ? 'rangeSliderAnchor__fieldNumber--invalid'
+            : 'rangeSliderAnchor__fieldNumber--valid'
+        }`,
         'data-test-subj': `rangeSlider__${testSubj}`,
         value: inputValue === placeholder ? '' : inputValue,
+        title: !isInvalid && step ? '' : undefined, // overwrites native number input validation error when the value falls between two steps
       };
     },
-    [isInvalid]
+    [isInvalid, step]
   );
 
   return error ? (
@@ -130,6 +156,7 @@ export const RangeSliderControl: FC = () => {
         id={id}
         fullWidth
         showTicks
+        step={step}
         ticks={ticks}
         levels={levels}
         min={displayedMin}
@@ -138,6 +165,27 @@ export const RangeSliderControl: FC = () => {
         inputPopoverProps={{
           panelMinWidth: MIN_POPOVER_WIDTH,
         }}
+        append={
+          isInvalid ? (
+            <div className="rangeSlider__invalidToken">
+              <EuiToolTip
+                position="top"
+                content={RangeSliderStrings.control.getInvalidSelectionWarningLabel()}
+                delay="long"
+              >
+                <EuiToken
+                  tabIndex={0}
+                  iconType="alert"
+                  size="s"
+                  color="euiColorVis5"
+                  shape="square"
+                  fill="dark"
+                  title={RangeSliderStrings.control.getInvalidSelectionWarningLabel()}
+                />
+              </EuiToolTip>
+            </div>
+          ) : undefined
+        }
         onMouseUp={() => {
           // when the pin is dropped (on mouse up), cancel any pending debounced changes and force the change
           // in value to happen instantly (which, in turn, will re-calculate the min/max for the slider due to

@@ -7,7 +7,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { skip } from 'rxjs/operators';
+import { skip } from 'rxjs';
 import deepFreeze from 'deep-freeze-strict';
 import {
   PureTransitionsToTransitions,

@@ -154,7 +154,8 @@ describe('blocklist form', () => {
 
   it('should correctly default OS to windows', () => {
     render();
-    expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Windows');
+    // Note: the trailing `, ` comes from screen-reader-only text
+    expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Windows, ');
   });
 
   it('should allow user to select between 3 OSs', () => {
@@ -182,12 +183,12 @@ describe('blocklist form', () => {
 
   it('should correctly default field to hash', () => {
     render();
-    expect(screen.getByTestId('blocklist-form-field-select').textContent).toEqual('Hash');
+    expect(screen.getByTestId('blocklist-form-field-select').textContent).toEqual('Hash, ');
   });
 
   it('should allow all 3 fields when Windows OS is selected', () => {
     render();
-    expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Windows');
+    expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Windows, ');
 
     userEvent.click(screen.getByTestId('blocklist-form-field-select'));
     expect(screen.queryAllByRole('option').length).toEqual(3);
@@ -198,7 +199,7 @@ describe('blocklist form', () => {
 
   it('should only allow hash and path fields when Linux OS is selected', () => {
     render(createProps({ item: createItem({ os_types: [OperatingSystem.LINUX] }) }));
-    expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Linux');
+    expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Linux, ');
 
     userEvent.click(screen.getByTestId('blocklist-form-field-select'));
     expect(screen.queryAllByRole('option').length).toEqual(2);
@@ -209,7 +210,7 @@ describe('blocklist form', () => {
 
   it('should only allow hash and path fields when Mac OS is selected', () => {
     render(createProps({ item: createItem({ os_types: [OperatingSystem.MAC] }) }));
-    expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Mac');
+    expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Mac, ');
 
     userEvent.click(screen.getByTestId('blocklist-form-field-select'));
     expect(screen.queryAllByRole('option').length).toEqual(2);
@@ -233,7 +234,7 @@ describe('blocklist form', () => {
 
   it('should correctly create `file.path.caseless` when Mac OS is selected', async () => {
     render(createProps({ item: createItem({ os_types: [OperatingSystem.MAC] }) }));
-    expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Mac');
+    expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Mac, ');
 
     userEvent.click(screen.getByTestId('blocklist-form-field-select'));
     await waitForEuiPopoverOpen();
@@ -249,7 +250,7 @@ describe('blocklist form', () => {
 
   it('should correctly create `file.path` when Linux is selected', async () => {
     render(createProps({ item: createItem({ os_types: [OperatingSystem.LINUX] }) }));
-    expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Linux');
+    expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Linux, ');
 
     userEvent.click(screen.getByTestId('blocklist-form-field-select'));
     await waitForEuiPopoverOpen();
@@ -368,7 +369,7 @@ describe('blocklist form', () => {
 
   it('should default to global policy', () => {
     render();
-    expect(screen.getByTestId('globalPolicy')).toBeEnabled();
+    expect(screen.getByTestId('blocklist-form-effectedPolicies-global')).toBeEnabled();
   });
 
   it('should correctly edit policies', () => {
@@ -383,7 +384,7 @@ describe('blocklist form', () => {
       },
     ] as PolicyData[];
     render(createProps({ policies }));
-    const byPolicyButton = screen.getByTestId('perPolicy');
+    const byPolicyButton = screen.getByTestId('blocklist-form-effectedPolicies-perPolicy');
     userEvent.click(byPolicyButton);
     expect(byPolicyButton).toBeEnabled();
 
@@ -408,9 +409,9 @@ describe('blocklist form', () => {
       },
     ] as PolicyData[];
     render(createProps({ policies, item: createItem({ tags: [`policy:${policies[1].id}`] }) }));
-    expect(screen.getByTestId('globalPolicy')).toBeEnabled();
+    expect(screen.getByTestId('blocklist-form-effectedPolicies-global')).toBeEnabled();
 
-    const byPolicyButton = screen.getByTestId('perPolicy');
+    const byPolicyButton = screen.getByTestId('blocklist-form-effectedPolicies-perPolicy');
     userEvent.click(byPolicyButton);
     expect(byPolicyButton).toBeEnabled();
     userEvent.click(screen.getByText(policies[0].name));

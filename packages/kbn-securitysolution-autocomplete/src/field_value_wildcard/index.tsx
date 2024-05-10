@@ -46,6 +46,7 @@ interface AutocompleteFieldWildcardProps {
   onError: (arg: boolean) => void;
   onWarning: (arg: boolean) => void;
   warning?: Warning;
+  'aria-label'?: string;
 }
 
 export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildcardProps> = memo(
@@ -65,6 +66,7 @@ export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildc
     onError,
     onWarning,
     warning,
+    'aria-label': ariaLabel,
   }): JSX.Element => {
     const [searchQuery, setSearchQuery] = useState('');
     const [touched, setIsTouched] = useState(false);
@@ -252,26 +254,28 @@ export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildc
             style={fieldInputWidth ? { width: `${fieldInputWidth}px` } : {}}
             fullWidth
             async
+            aria-label={ariaLabel}
           />
         </EuiFormRow>
       );
     }, [
-      comboOptions,
-      error,
-      fieldInputWidth,
-      handleCreateOption,
-      handleSearchChange,
-      handleValuesChange,
-      inputPlaceholder,
-      isClearable,
-      isDisabled,
-      isLoadingState,
       rowLabel,
-      selectedComboOptions,
-      selectedField,
-      setIsTouchedValue,
+      error,
       warning,
       showSpacesWarning,
+      selectedField,
+      inputPlaceholder,
+      isDisabled,
+      isLoadingState,
+      isClearable,
+      comboOptions,
+      selectedComboOptions,
+      handleValuesChange,
+      handleSearchChange,
+      handleCreateOption,
+      setIsTouchedValue,
+      fieldInputWidth,
+      ariaLabel,
     ]);
 
     return defaultInput;

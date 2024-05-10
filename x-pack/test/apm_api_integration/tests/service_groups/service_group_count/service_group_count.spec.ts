@@ -22,7 +22,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
   const supertest = getService('supertest');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
   const es = getService('es');
   const log = getService('log');
   const start = Date.now() - 24 * 60 * 60 * 1000;
@@ -45,13 +45,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   }
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177655
   registry.when('Service group counts', { config: 'basic', archives: [] }, () => {
     let synthbeansServiceGroupId: string;
     let opbeansServiceGroupId: string;
     before(async () => {
       const [, { body: synthbeansServiceGroup }, { body: opbeansServiceGroup }] = await Promise.all(
         [
-          generateData({ start, end, synthtraceEsClient }),
+          generateData({ start, end, apmSynthtraceEsClient }),
           createServiceGroupApi({
             apmApiClient,
             groupName: 'synthbeans',
@@ -70,7 +71,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     after(async () => {
       await deleteAllServiceGroups(apmApiClient);
-      await synthtraceEsClient.clean();
+      await apmSynthtraceEsClient.clean();
     });
 
     it('returns the correct number of services', async () => {

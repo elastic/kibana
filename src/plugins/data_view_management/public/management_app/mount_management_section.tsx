@@ -21,7 +21,11 @@ import {
   EditIndexPatternContainer,
   CreateEditFieldContainer,
 } from '../components';
-import { IndexPatternManagementStartDependencies, IndexPatternManagementStart } from '../plugin';
+import {
+  IndexPatternManagementStartDependencies,
+  IndexPatternManagementStart,
+  IndexPatternManagementSetupDependencies,
+} from '../plugin';
 import { IndexPatternManagmentContext } from '../types';
 
 const readOnlyBadge = {
@@ -36,6 +40,7 @@ const readOnlyBadge = {
 
 export async function mountManagementSection(
   getStartServices: StartServicesAccessor<IndexPatternManagementStartDependencies>,
+  { noDataPage }: Pick<IndexPatternManagementSetupDependencies, 'noDataPage'>,
   params: ManagementAppMountParams
 ) {
   const [
@@ -48,8 +53,7 @@ export async function mountManagementSection(
       overlays,
       http,
       docLinks,
-      theme,
-      i18n: coreI18n,
+      ...startServices
     },
     {
       data,
@@ -88,8 +92,9 @@ export async function mountManagementSection(
     IndexPatternEditor: dataViewEditor.IndexPatternEditorComponent,
     fieldFormats,
     spaces: spaces?.hasOnlyDefaultSpace ? undefined : spaces,
-    theme,
     savedObjectsManagement,
+    noDataPage,
+    ...startServices,
   };
 
   const editPath = '/dataView/:id/field/:fieldName';
@@ -97,7 +102,7 @@ export async function mountManagementSection(
   const createEditPath = dataViews.scriptedFieldsEnabled ? [editPath, createPath] : [editPath];
 
   ReactDOM.render(
-    <KibanaRenderContextProvider theme={theme} i18n={coreI18n}>
+    <KibanaRenderContextProvider {...startServices}>
       <KibanaContextProvider services={deps}>
         <Router history={params.history}>
           <Routes>

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   isDataFrameAnalyticsConfigs,
   type DataFrameAnalyticsConfig,
 } from '@kbn/ml-data-frame-analytics-utils';
-import { Job, isAnomalyDetectionJob } from '../../../../../common/types/anomaly_detection_jobs';
+import type { Job } from '../../../../../common/types/anomaly_detection_jobs';
+import { isAnomalyDetectionJob } from '../../../../../common/types/anomaly_detection_jobs';
 import { getQueryEntityFieldNames, getSupportedFieldNames } from './utils';
 
 export function getDropDownOptions(

@@ -6,95 +6,59 @@
  * Side Public License, v 1.
  */
 
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { I18nProvider } from '@kbn/i18n-react';
+import { ViewMode } from '@kbn/presentation-publishing';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { EuiPopover } from '@elastic/eui';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { findTestSubject } from '@elastic/eui/lib/test';
-
+import { BehaviorSubject } from 'rxjs';
+import { LibraryNotificationPopover } from './library_notification_popover';
 import {
-  ContactCardEmbeddable,
-  ContactCardEmbeddableFactory,
-  ContactCardEmbeddableInput,
-  ContactCardEmbeddableOutput,
-  CONTACT_CARD_EMBEDDABLE,
-} from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
-import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+  LegacyUnlinkFromLibraryAction,
+  LegacyUnlinkPanelFromLibraryActionApi,
+} from './legacy_unlink_from_library_action';
 
-import {
-  LibraryNotificationPopover,
-  LibraryNotificationProps,
-} from './library_notification_popover';
-import { buildMockDashboard } from '../mocks';
-import { pluginServices } from '../services/plugin_services';
-import { DashboardContainer } from '../dashboard_container/embeddable/dashboard_container';
+const mockUnlinkFromLibraryAction = {
+  execute: jest.fn(),
+  isCompatible: jest.fn().mockResolvedValue(true),
+  getDisplayName: jest.fn().mockReturnValue('Test Unlink'),
+} as unknown as LegacyUnlinkFromLibraryAction;
 
-describe('LibraryNotificationPopover', () => {
-  const mockEmbeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
-  pluginServices.getServices().embeddable.getEmbeddableFactory = jest
-    .fn()
-    .mockReturnValue(mockEmbeddableFactory);
-
-  let container: DashboardContainer;
-  let defaultProps: LibraryNotificationProps;
+describe('library notification popover', () => {
+  let api: LegacyUnlinkPanelFromLibraryActionApi;
 
   beforeEach(async () => {
-    container = buildMockDashboard();
-
-    const contactCardEmbeddable = await container.addNewEmbeddable<
-      ContactCardEmbeddableInput,
-      ContactCardEmbeddableOutput,
-      ContactCardEmbeddable
-    >(CONTACT_CARD_EMBEDDABLE, {
-      firstName: 'Kibanana',
-    });
-
-    if (isErrorEmbeddable(contactCardEmbeddable)) {
-      throw new Error('Failed to create embeddable');
-    }
-
-    defaultProps = {
-      unlinkAction: {
-        execute: jest.fn(),
-        getDisplayName: () => 'test unlink',
-      } as unknown as LibraryNotificationProps['unlinkAction'],
-      displayName: 'test display',
-      context: { embeddable: contactCardEmbeddable },
-      icon: 'testIcon',
-      id: 'testId',
+    api = {
+      viewMode: new BehaviorSubject<ViewMode>('edit'),
+      canUnlinkFromLibrary: jest.fn().mockResolvedValue(true),
+      unlinkFromLibrary: jest.fn(),
+      canLinkToLibrary: jest.fn().mockResolvedValue(true),
+      linkToLibrary: jest.fn(),
     };
   });
 
-  function mountComponent(props?: Partial<LibraryNotificationProps>) {
-    return mountWithIntl(<LibraryNotificationPopover {...{ ...defaultProps, ...props }} />);
-  }
+  const renderAndOpenPopover = async () => {
+    render(
+      <I18nProvider>
+        <LibraryNotificationPopover api={api} unlinkAction={mockUnlinkFromLibraryAction} />
+      </I18nProvider>
+    );
+    await userEvent.click(
+      await screen.findByTestId('embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION')
+    );
+    await waitForEuiPopoverOpen();
+  };
 
-  test('click library notification badge should open and close popover', () => {
-    const component = mountComponent();
-    const btn = findTestSubject(component, `embeddablePanelNotification-${defaultProps.id}`);
-    btn.simulate('click');
-    let popover = component.find(EuiPopover);
-    expect(popover.prop('isOpen')).toBe(true);
-    btn.simulate('click');
-    popover = component.find(EuiPopover);
-    expect(popover.prop('isOpen')).toBe(false);
+  it('renders the unlink button', async () => {
+    await renderAndOpenPopover();
+    expect(await screen.findByText('Test Unlink')).toBeInTheDocument();
   });
 
-  test('popover should contain button with unlink action display name', () => {
-    const component = mountComponent();
-    const btn = findTestSubject(component, `embeddablePanelNotification-${defaultProps.id}`);
-    btn.simulate('click');
-    const popover = component.find(EuiPopover);
-    const unlinkButton = findTestSubject(popover, 'libraryNotificationUnlinkButton');
-    expect(unlinkButton.text()).toEqual('test unlink');
-  });
-
-  test('clicking unlink executes unlink action', () => {
-    const component = mountComponent();
-    const btn = findTestSubject(component, `embeddablePanelNotification-${defaultProps.id}`);
-    btn.simulate('click');
-    const popover = component.find(EuiPopover);
-    const unlinkButton = findTestSubject(popover, 'libraryNotificationUnlinkButton');
-    unlinkButton.simulate('click');
-    expect(defaultProps.unlinkAction.execute).toHaveBeenCalled();
+  it('calls the unlink action execute method on click', async () => {
+    await renderAndOpenPopover();
+    const button = await screen.findByTestId('libraryNotificationUnlinkButton');
+    await userEvent.click(button);
+    expect(mockUnlinkFromLibraryAction.execute).toHaveBeenCalled();
   });
 });

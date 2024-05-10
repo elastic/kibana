@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 import { XJsonLang } from '@kbn/monaco';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
 

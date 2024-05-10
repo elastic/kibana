@@ -14,6 +14,13 @@ export const INSTALL_ALL = i18n.translate(
   }
 );
 
+export const INSTALL_ALL_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.addRules.installAllButtonAriaLabel',
+  {
+    defaultMessage: 'Install all Elastic rules',
+  }
+);
+
 export const INSTALL_SELECTED_RULES = (numberOfSelectedRules: number) => {
   return i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.addRules.installSelectedRules',

@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardSettings.clickApplyButton();
       await retry.try(async () => {
         const titles = await PageObjects.dashboard.getPanelTitles();
-        expect(titles[0]).to.eql('');
+        expect(titles[0]).to.eql(undefined);
       });
     });
 

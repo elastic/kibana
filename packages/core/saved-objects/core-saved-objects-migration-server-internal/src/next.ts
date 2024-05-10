@@ -15,7 +15,7 @@ import type { WaitGroup } from './kibana_migrator_utils';
 import type {
   AllActionStates,
   CalculateExcludeFiltersState,
-  CheckTargetMappingsState,
+  CheckTargetTypesMappingsState,
   CheckUnknownDocumentsState,
   CleanupUnknownAndExcluded,
   CleanupUnknownAndExcludedWaitForTaskState,
@@ -85,16 +85,15 @@ export const nextActionMap = (
       Actions.fetchIndices({ client, indices: [state.currentAlias, state.versionAlias] }),
     WAIT_FOR_YELLOW_SOURCE: (state: WaitForYellowSourceState) =>
       Actions.waitForIndexStatus({ client, index: state.sourceIndex.value, status: 'yellow' }),
-    UPDATE_SOURCE_MAPPINGS_PROPERTIES: ({
-      sourceIndex,
-      sourceIndexMappings,
-      targetIndexMappings,
-    }: UpdateSourceMappingsPropertiesState) =>
+    UPDATE_SOURCE_MAPPINGS_PROPERTIES: (state: UpdateSourceMappingsPropertiesState) =>
       Actions.updateSourceMappingsProperties({
         client,
-        sourceIndex: sourceIndex.value,
-        sourceMappings: sourceIndexMappings.value,
-        targetMappings: targetIndexMappings,
+        indexTypes: state.indexTypes,
+        sourceIndex: state.sourceIndex.value,
+        indexMappings: state.sourceIndexMappings.value,
+        appMappings: state.targetIndexMappings,
+        latestMappingsVersions: state.latestMappingsVersions,
+        hashToVersionMap: state.hashToVersionMap,
       }),
     CLEANUP_UNKNOWN_AND_EXCLUDED: (state: CleanupUnknownAndExcluded) =>
       Actions.cleanupUnknownAndExcluded({
@@ -204,10 +203,13 @@ export const nextActionMap = (
       }),
     REFRESH_TARGET: (state: RefreshTarget) =>
       Actions.refreshIndex({ client, index: state.targetIndex }),
-    CHECK_TARGET_MAPPINGS: (state: CheckTargetMappingsState) =>
-      Actions.checkTargetMappings({
-        actualMappings: Option.toUndefined(state.sourceIndexMappings),
-        expectedMappings: state.targetIndexMappings,
+    CHECK_TARGET_MAPPINGS: (state: CheckTargetTypesMappingsState) =>
+      Actions.checkTargetTypesMappings({
+        indexTypes: state.indexTypes,
+        indexMappings: Option.toUndefined(state.sourceIndexMappings),
+        appMappings: state.targetIndexMappings,
+        latestMappingsVersions: state.latestMappingsVersions,
+        hashToVersionMap: state.hashToVersionMap,
       }),
     UPDATE_TARGET_MAPPINGS_PROPERTIES: (state: UpdateTargetMappingsPropertiesState) =>
       Actions.updateAndPickupMappings({

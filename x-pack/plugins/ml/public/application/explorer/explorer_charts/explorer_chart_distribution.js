@@ -14,7 +14,6 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import d3 from 'd3';
-import $ from 'jquery';
 import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
@@ -24,6 +23,7 @@ import {
   getSeverityWithLow,
 } from '@kbn/ml-anomaly-utils';
 import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
+import { context } from '@kbn/kibana-react-plugin/public';
 
 import { formatValue } from '../../formatters/format_value';
 import {
@@ -34,7 +34,6 @@ import {
   chartExtendedLimits,
 } from '../../util/chart_utils';
 import { LoadingIndicator } from '../../components/loading_indicator/loading_indicator';
-import { mlFieldFormatService } from '../../services/field_format_service';
 
 import { CHART_TYPE } from '../explorer_constants';
 import { TRANSPARENT_BACKGROUND } from './constants';
@@ -49,6 +48,8 @@ const CONTENT_WRAPPER_HEIGHT = 215;
 const Y_AXIS_LABEL_THRESHOLD = 10;
 
 export class ExplorerChartDistribution extends React.Component {
+  static contextType = context;
+
   static propTypes = {
     seriesConfig: PropTypes.object,
     severity: PropTypes.number,
@@ -83,7 +84,10 @@ export class ExplorerChartDistribution extends React.Component {
       return;
     }
 
-    const fieldFormat = mlFieldFormatService.getFieldFormat(config.jobId, config.detectorIndex);
+    const fieldFormat = this.context.services.mlServices.mlFieldFormatService.getFieldFormat(
+      config.jobId,
+      config.detectorIndex
+    );
 
     let vizWidth = 0;
     const chartHeight = 170;
@@ -112,14 +116,12 @@ export class ExplorerChartDistribution extends React.Component {
     drawRareChart(filteredChartData);
 
     function init({ chartData, functionDescription }) {
-      const $el = $('.ml-explorer-chart');
-
       // Clear any existing elements from the visualization,
       // then build the svg elements for the chart.
       const chartElement = d3.select(element).select('.content-wrapper');
       chartElement.select('svg').remove();
 
-      const svgWidth = $el.width();
+      const svgWidth = element.clientWidth;
       const svgHeight = chartHeight + margin.top + margin.bottom;
 
       const svg = chartElement
@@ -326,9 +328,9 @@ export class ExplorerChartDistribution extends React.Component {
           return `M${xPosition},${chartHeight} ${xPosition},0`;
         })
         // Use elastic chart's cursor line style if possible
-        .style('stroke', `${chartTheme.crosshair.line.stroke ?? 'black'}`)
-        .style('stroke-width', `${chartTheme.crosshair.line.strokeWidth ?? '1'}px`)
-        .style('stroke-dasharray', chartTheme.crosshair.line.dash ?? '4,4');
+        .style('stroke', chartTheme.crosshair.line.stroke)
+        .style('stroke-width', `${chartTheme.crosshair.line.strokeWidth}px`)
+        .style('stroke-dasharray', chartTheme.crosshair.line.dash?.join(',') ?? '4,4');
 
       cursorMouseLine.exit().remove();
     }

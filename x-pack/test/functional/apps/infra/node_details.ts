@@ -7,6 +7,12 @@
 
 import moment from 'moment';
 import expect from '@kbn/expect';
+import { enableInfrastructureProfilingIntegration } from '@kbn/observability-plugin/common';
+import {
+  ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_RECOVERED,
+  ALERT_STATUS_UNTRACKED,
+} from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES, NODE_DETAILS_PATH, DATE_PICKER_FORMAT } from './constants';
 
@@ -67,6 +73,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await browser.refresh();
   };
 
+  const setInfrastructureProfilingIntegrationUiSetting = async (value: boolean = true) => {
+    await kibanaServer.uiSettings.update({ [enableInfrastructureProfilingIntegration]: value });
+    await browser.refresh();
+    await pageObjects.header.waitUntilLoadingHasFinished();
+  };
+
   describe('Node Details', () => {
     describe('#With Asset Details', () => {
       before(async () => {
@@ -104,29 +116,34 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.assetDetails.clickOverviewTab();
         });
 
-        [{ tab: 'metadata' }, { tab: 'processes' }, { tab: 'logs' }, { tab: 'anomalies' }].forEach(
-          ({ tab }) => {
-            it(`should keep the same date range across tabs: ${tab}`, async () => {
-              const clickFuncs: Record<string, () => void> = {
-                metadata: pageObjects.assetDetails.clickMetadataTab,
-                processes: pageObjects.assetDetails.clickProcessesTab,
-                logs: pageObjects.assetDetails.clickLogsTab,
-                anomalies: pageObjects.assetDetails.clickAnomaliesTab,
-              };
+        [
+          { tab: 'metadata' },
+          { tab: 'processes' },
+          { tab: 'metrics' },
+          { tab: 'logs' },
+          { tab: 'anomalies' },
+        ].forEach(({ tab }) => {
+          it(`should keep the same date range across tabs: ${tab}`, async () => {
+            const clickFuncs: Record<string, () => void> = {
+              metadata: pageObjects.assetDetails.clickMetadataTab,
+              processes: pageObjects.assetDetails.clickProcessesTab,
+              logs: pageObjects.assetDetails.clickLogsTab,
+              anomalies: pageObjects.assetDetails.clickAnomaliesTab,
+              metrics: pageObjects.assetDetails.clickMetricsTab,
+            };
 
-              await clickFuncs[tab]();
+            await clickFuncs[tab]();
 
-              const datePickerValue = await pageObjects.timePicker.getTimeConfig();
-              expect(await pageObjects.timePicker.timePickerExists()).to.be(true);
-              expect(datePickerValue.start).to.equal(
-                START_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT)
-              );
-              expect(datePickerValue.end).to.equal(
-                END_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT)
-              );
-            });
-          }
-        );
+            const datePickerValue = await pageObjects.timePicker.getTimeConfig();
+            expect(await pageObjects.timePicker.timePickerExists()).to.be(true);
+            expect(datePickerValue.start).to.equal(
+              START_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT)
+            );
+            expect(datePickerValue.end).to.equal(
+              END_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT)
+            );
+          });
+        });
 
         it('preserves selected date range between page reloads', async () => {
           const start = moment.utc(START_HOST_ALERTS_DATE).format(DATE_PICKER_FORMAT);
@@ -181,14 +198,130 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             });
           });
 
-          it('should render 12 charts in the Metrics section', async () => {
-            const hosts = await pageObjects.assetDetails.getAssetDetailsMetricsCharts();
-            expect(hosts.length).to.equal(12);
+          [
+            { metric: 'cpu', chartsCount: 2 },
+            { metric: 'memory', chartsCount: 1 },
+            { metric: 'disk', chartsCount: 2 },
+            { metric: 'network', chartsCount: 1 },
+          ].forEach(({ metric, chartsCount }) => {
+            it(`should render ${chartsCount} ${metric} chart(s) in the Metrics section`, async () => {
+              const hosts = await pageObjects.assetDetails.getOverviewTabHostMetricCharts(metric);
+              expect(hosts.length).to.equal(chartsCount);
+            });
+          });
+
+          it('should show all section as collapsable', async () => {
+            await pageObjects.assetDetails.metadataSectionCollapsibleExist();
+            await pageObjects.assetDetails.alertsSectionCollapsibleExist();
+            await pageObjects.assetDetails.metricsSectionCollapsibleExist();
+            await pageObjects.assetDetails.servicesSectionCollapsibleExist();
           });
 
           it('should show alerts', async () => {
             await pageObjects.header.waitUntilLoadingHasFinished();
             await pageObjects.assetDetails.overviewAlertsTitleExists();
+          });
+
+          it('should show / hide alerts section with no alerts and show / hide closed section content', async () => {
+            await pageObjects.assetDetails.alertsSectionCollapsibleExist();
+            // Collapsed by default
+            await pageObjects.assetDetails.alertsSectionClosedContentNoAlertsExist();
+            // Expand
+            await pageObjects.assetDetails.alertsSectionCollapsibleClick();
+            await pageObjects.assetDetails.alertsSectionClosedContentNoAlertsMissing();
+          });
+
+          it('shows the CPU Profiling prompt if UI setting for Profiling integration is enabled', async () => {
+            await setInfrastructureProfilingIntegrationUiSetting(true);
+            await pageObjects.assetDetails.cpuProfilingPromptExists();
+          });
+
+          it('hides the CPU Profiling prompt if UI setting for Profiling integration is disabled', async () => {
+            await setInfrastructureProfilingIntegrationUiSetting(false);
+            await pageObjects.assetDetails.cpuProfilingPromptMissing();
+          });
+
+          describe('Alerts Section with alerts', () => {
+            const ACTIVE_ALERTS = 2;
+            const RECOVERED_ALERTS = 2;
+            const ALL_ALERTS = ACTIVE_ALERTS + RECOVERED_ALERTS;
+            const COLUMNS = 11;
+            before(async () => {
+              await navigateToNodeDetails('demo-stack-apache-01', 'demo-stack-apache-01');
+              await pageObjects.header.waitUntilLoadingHasFinished();
+
+              await pageObjects.timePicker.setAbsoluteRange(
+                START_HOST_ALERTS_DATE.format(DATE_PICKER_FORMAT),
+                END_HOST_ALERTS_DATE.format(DATE_PICKER_FORMAT)
+              );
+
+              await pageObjects.assetDetails.clickOverviewTab();
+            });
+
+            after(async () => {
+              await navigateToNodeDetails('Jennys-MBP.fritz.box', 'Jennys-MBP.fritz.box');
+              await pageObjects.header.waitUntilLoadingHasFinished();
+
+              await pageObjects.timePicker.setAbsoluteRange(
+                START_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT),
+                END_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT)
+              );
+            });
+
+            it('should show / hide alerts section with active alerts and show / hide closed section content', async () => {
+              await pageObjects.assetDetails.alertsSectionCollapsibleExist();
+              // Expanded by default
+              await pageObjects.assetDetails.alertsSectionClosedContentMissing();
+              // Collapse
+              await pageObjects.assetDetails.alertsSectionCollapsibleClick();
+              await pageObjects.assetDetails.alertsSectionClosedContentExist();
+              // Expand
+              await pageObjects.assetDetails.alertsSectionCollapsibleClick();
+              await pageObjects.assetDetails.alertsSectionClosedContentMissing();
+            });
+
+            it('should show alert summary ', async () => {
+              await pageObjects.assetDetails.setAlertStatusFilter();
+              await retry.try(async () => {
+                const cells = await observability.alerts.common.getTableCells();
+                expect(cells.length).to.be(ALL_ALERTS * COLUMNS);
+              });
+            });
+
+            it('can be filtered to only show "all" alerts using the filter button', async () => {
+              await pageObjects.assetDetails.setAlertStatusFilter();
+              await retry.try(async () => {
+                const tableRows = await observability.alerts.common.getTableCellsInRows();
+                expect(tableRows.length).to.be(ALL_ALERTS);
+              });
+            });
+
+            it('can be filtered to only show "active" alerts using the filter button', async () => {
+              await pageObjects.assetDetails.setAlertStatusFilter(ALERT_STATUS_ACTIVE);
+              await retry.try(async () => {
+                const tableRows = await observability.alerts.common.getTableCellsInRows();
+                expect(tableRows.length).to.be(ACTIVE_ALERTS);
+              });
+              const pageUrl = await browser.getCurrentUrl();
+              expect(pageUrl).to.contain('alertStatus%3Aactive');
+            });
+
+            it('can be filtered to only show "recovered" alerts using the filter button', async () => {
+              await pageObjects.assetDetails.setAlertStatusFilter(ALERT_STATUS_RECOVERED);
+              await retry.try(async () => {
+                const tableRows = await observability.alerts.common.getTableCellsInRows();
+                expect(tableRows.length).to.be(RECOVERED_ALERTS);
+              });
+              const pageUrl = await browser.getCurrentUrl();
+              expect(pageUrl).to.contain('alertStatus%3Arecovered');
+            });
+
+            it('can be filtered to only show "untracked" alerts using the filter button', async () => {
+              await pageObjects.assetDetails.setAlertStatusFilter(ALERT_STATUS_UNTRACKED);
+              await observability.alerts.common.getNoDataStateOrFail();
+              const pageUrl = await browser.getCurrentUrl();
+              expect(pageUrl).to.contain('alertStatus%3Auntracked');
+            });
           });
         });
 
@@ -233,6 +366,29 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               expect(await searchInput.getAttribute('value')).to.be('test');
             });
             await searchInput.clearValue();
+          });
+        });
+
+        describe('Metrics Tab', () => {
+          before(async () => {
+            await pageObjects.assetDetails.clickMetricsTab();
+          });
+
+          [
+            { metric: 'cpu', chartsCount: 4 },
+            { metric: 'memory', chartsCount: 2 },
+            { metric: 'disk', chartsCount: 3 },
+            { metric: 'network', chartsCount: 1 },
+            { metric: 'log', chartsCount: 1 },
+          ].forEach(({ metric, chartsCount }) => {
+            it(`should render ${chartsCount} ${metric} chart(s)`, async () => {
+              const charts = await pageObjects.assetDetails.getMetricsTabHostCharts(metric);
+              expect(charts.length).to.equal(chartsCount);
+            });
+
+            it(`should render a quick access for ${metric} in the side panel`, async () => {
+              await pageObjects.assetDetails.quickAccessItemExists(metric);
+            });
           });
         });
 
@@ -284,7 +440,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           it('should render logs tab', async () => {
-            await testSubjects.existOrFail('infraAssetDetailsLogsTabContent');
+            await pageObjects.assetDetails.logsExists();
           });
 
           it('preserves search term between page reloads', async () => {
@@ -312,6 +468,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
         });
 
+        describe('Profiling tab', () => {
+          it('shows the Profiling tab if Profiling integration UI setting is enabled', async () => {
+            await setInfrastructureProfilingIntegrationUiSetting(true);
+            await pageObjects.assetDetails.profilingTabExists();
+          });
+
+          it('hides the Profiling tab if Profiling integration UI setting is disabled', async () => {
+            await setInfrastructureProfilingIntegrationUiSetting(false);
+            await pageObjects.assetDetails.profilingTabMissing();
+          });
+        });
+
         describe('Host with alerts and no processes', () => {
           before(async () => {
             await navigateToNodeDetails('demo-stack-mysql-01', 'demo-stack-mysql-01');
@@ -324,7 +492,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           it('should render alerts count for a host inside a flyout', async () => {
             await pageObjects.assetDetails.clickOverviewTab();
 
-            retry.tryForTime(30 * 1000, async () => {
+            await retry.tryForTime(30 * 1000, async () => {
               await observability.components.alertSummaryWidget.getFullSizeComponentSelectorOrFail();
             });
 
@@ -378,14 +546,53 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               });
             });
 
-            it('should render 12 charts in the Metrics section', async () => {
-              const hosts = await pageObjects.assetDetails.getAssetDetailsMetricsCharts();
-              expect(hosts.length).to.equal(12);
+            [
+              { metric: 'cpu', chartsCount: 2 },
+              { metric: 'memory', chartsCount: 1 },
+              { metric: 'disk', chartsCount: 2 },
+              { metric: 'network', chartsCount: 1 },
+              { metric: 'kubernetes', chartsCount: 2 },
+            ].forEach(({ metric, chartsCount }) => {
+              it(`should render ${chartsCount} ${metric} chart`, async () => {
+                await retry.try(async () => {
+                  const charts = await (metric === 'kubernetes'
+                    ? pageObjects.assetDetails.getOverviewTabKubernetesMetricCharts()
+                    : pageObjects.assetDetails.getOverviewTabHostMetricCharts(metric));
+
+                  expect(charts.length).to.equal(chartsCount);
+                });
+              });
+            });
+          });
+
+          describe('Metrics Tab', () => {
+            before(async () => {
+              await pageObjects.assetDetails.clickMetricsTab();
             });
 
-            it('should render 4 charts in the Kubernetes Metrics section', async () => {
-              const hosts = await pageObjects.assetDetails.getAssetDetailsKubernetesMetricsCharts();
-              expect(hosts.length).to.equal(4);
+            [
+              { metric: 'cpu', chartsCount: 4 },
+              { metric: 'memory', chartsCount: 2 },
+              { metric: 'disk', chartsCount: 3 },
+              { metric: 'network', chartsCount: 1 },
+              { metric: 'log', chartsCount: 1 },
+              { metric: 'kubernetes', chartsCount: 4 },
+            ].forEach(({ metric, chartsCount }) => {
+              it(`should render ${chartsCount} ${metric} chart(s)`, async () => {
+                retry.try(async () => {
+                  const charts = await (metric === 'kubernetes'
+                    ? pageObjects.assetDetails.getMetricsTabKubernetesCharts()
+                    : pageObjects.assetDetails.getMetricsTabHostCharts(metric));
+
+                  expect(charts.length).to.equal(chartsCount);
+                });
+              });
+
+              it(`should render a quick access for ${metric} in the side panel`, async () => {
+                await retry.try(async () => {
+                  await pageObjects.assetDetails.quickAccessItemExists(metric);
+                });
+              });
             });
           });
         });

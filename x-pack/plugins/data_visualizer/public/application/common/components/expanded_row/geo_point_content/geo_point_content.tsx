@@ -5,19 +5,24 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
-import { Feature, Point } from 'geojson';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
+import type { Feature, Point } from 'geojson';
 import type { FieldDataRowProps } from '../../stats_table/types/field_data_row';
 import { DocumentStatsTable } from '../../stats_table/components/field_data_expanded_row/document_stats';
-import { EmbeddedMapComponent } from '../../embedded_map';
 import { convertWKTGeoToLonLat, getGeoPointsLayer } from './format_utils';
 import { ExpandedRowContent } from '../../stats_table/components/field_data_expanded_row/expanded_row_content';
 import { ExamplesList } from '../../examples_list';
 import { ExpandedRowPanel } from '../../stats_table/components/field_data_expanded_row/expanded_row_panel';
+import { useDataVisualizerKibana } from '../../../../kibana_context';
 
 export const DEFAULT_GEO_REGEX = RegExp('(?<lat>.+) (?<lon>.+)');
 
 export const GeoPointContent: FC<FieldDataRowProps> = ({ config }) => {
+  const {
+    services: { maps: mapsService },
+  } = useDataVisualizerKibana();
+
   const formattedResults = useMemo(() => {
     const { stats } = config;
 
@@ -53,7 +58,7 @@ export const GeoPointContent: FC<FieldDataRowProps> = ({ config }) => {
       if (geoPointsFeatures.length > 0) {
         return {
           examples: formattedExamples,
-          layerList: [getGeoPointsLayer(geoPointsFeatures)],
+          pointsLayer: getGeoPointsLayer(geoPointsFeatures),
         };
       }
     }
@@ -61,12 +66,10 @@ export const GeoPointContent: FC<FieldDataRowProps> = ({ config }) => {
   return (
     <ExpandedRowContent dataTestSubj={'dataVisualizerGeoPointContent'}>
       <DocumentStatsTable config={config} />
-      {formattedResults && Array.isArray(formattedResults.examples) && (
-        <ExamplesList examples={formattedResults.examples} />
-      )}
-      {formattedResults && Array.isArray(formattedResults.layerList) && (
+      {formattedResults?.examples && <ExamplesList examples={formattedResults.examples} />}
+      {mapsService && formattedResults?.pointsLayer && (
         <ExpandedRowPanel className={'dvPanel__wrapper dvMap__wrapper'} grow={true}>
-          <EmbeddedMapComponent layerList={formattedResults.layerList} />
+          <mapsService.PassiveMap passiveLayer={formattedResults.pointsLayer} />
         </ExpandedRowPanel>
       )}
     </ExpandedRowContent>

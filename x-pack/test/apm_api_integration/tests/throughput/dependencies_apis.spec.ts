@@ -14,7 +14,7 @@ import { roundNumber } from '../../utils';
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
@@ -93,7 +93,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   let throughputValues: Awaited<ReturnType<typeof getThroughputValues>>;
 
-  registry.when('Dependencies throughput value', { config: 'basic', archives: [] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/177536
+  registry.when.skip('Dependencies throughput value', { config: 'basic', archives: [] }, () => {
     describe('when data is loaded', () => {
       const GO_PROD_RATE = 75;
       const JAVA_PROD_RATE = 25;
@@ -105,7 +106,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .service({ name: 'synth-java', environment: 'development', agentName: 'java' })
           .instance('instance-c');
 
-        await synthtraceEsClient.index([
+        await apmSynthtraceEsClient.index([
           timerange(start, end)
             .interval('1m')
             .rate(GO_PROD_RATE)
@@ -173,7 +174,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ]);
       });
 
-      after(() => synthtraceEsClient.clean());
+      after(() => apmSynthtraceEsClient.clean());
 
       describe('verify top dependencies', () => {
         before(async () => {

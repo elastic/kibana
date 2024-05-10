@@ -6,17 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { ColorMapping } from '../../config';
 import { getPalette } from '../../palettes';
 import { ColorSwatch } from '../color_picker/color_swatch';
 import { updateSpecialAssignmentColor } from '../../state/color_mapping';
+import { ColorCode, CategoricalColor } from '../../config/types';
 
 export function SpecialAssignment({
-  assignment,
+  assignmentColor,
   index,
   palette,
   getPaletteFn,
@@ -25,55 +24,31 @@ export function SpecialAssignment({
 }: {
   isDarkMode: boolean;
   index: number;
-  assignment: ColorMapping.Config['specialAssignments'][number];
+  assignmentColor: CategoricalColor | ColorCode;
   palette: ColorMapping.CategoricalPalette;
   getPaletteFn: ReturnType<typeof getPalette>;
   total: number;
 }) {
   const dispatch = useDispatch();
-  const canPickColor = true;
   return (
-    <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-      <EuiFlexItem grow={0}>
-        <ColorSwatch
-          forType="specialAssignment"
-          canPickColor={canPickColor}
-          colorMode={{ type: 'categorical' }}
-          assignmentColor={assignment.color}
-          getPaletteFn={getPaletteFn}
-          index={index}
-          palette={palette}
-          total={total}
-          swatchShape="square"
-          isDarkMode={isDarkMode}
-          onColorChange={(color) => {
-            dispatch(
-              updateSpecialAssignmentColor({
-                assignmentIndex: index,
-                color,
-              })
-            );
-          }}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem
-        style={{
-          marginRight: 32,
-        }}
-      >
-        <EuiFieldText
-          compressed
-          fullWidth
-          disabled={true}
-          placeholder={i18n.translate('coloring.colorMapping.assignments.unassignedPlaceholder', {
-            defaultMessage: 'Unassigned terms',
-          })}
-          aria-label={i18n.translate('coloring.colorMapping.assignments.unassignedAriaLabel', {
-            defaultMessage:
-              'Assign this color to every unassigned not described in the assignment list',
-          })}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <ColorSwatch
+      forType="specialAssignment"
+      colorMode={{ type: 'categorical' }}
+      assignmentColor={assignmentColor}
+      getPaletteFn={getPaletteFn}
+      index={index}
+      palette={palette}
+      total={total}
+      swatchShape="square"
+      isDarkMode={isDarkMode}
+      onColorChange={(color) => {
+        dispatch(
+          updateSpecialAssignmentColor({
+            assignmentIndex: index,
+            color,
+          })
+        );
+      }}
+    />
   );
 }

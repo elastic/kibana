@@ -34,6 +34,8 @@ describe('NoDataConfigPage', () => {
       </NoDataConfigPageProvider>
     );
     expect(component.find('h1').html()).toContain('Welcome to Elastic Solution!');
-    expect(component.find('button').html()).toContain('Click me');
+    expect(component.find('a[data-test-subj="noDataDefaultFooterAction"]').html()).toContain(
+      'Click me'
+    );
   });
 });

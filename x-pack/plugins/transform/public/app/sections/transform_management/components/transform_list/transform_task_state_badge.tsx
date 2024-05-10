@@ -9,7 +9,7 @@ import React, { type FC } from 'react';
 
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 
-import { TransformStats } from '../../../../../../common/types/transform_stats';
+import type { TransformStats } from '../../../../../../common/types/transform_stats';
 import { TRANSFORM_STATE } from '../../../../../../common/constants';
 
 // reflects https://github.com/elastic/elasticsearch/blob/master/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/transform/transforms/TransformStats.java#L250

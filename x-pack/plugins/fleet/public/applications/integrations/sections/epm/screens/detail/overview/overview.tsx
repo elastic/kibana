@@ -107,7 +107,7 @@ const UnverifiedCallout: React.FC = () => {
   );
 };
 
-const PrereleaseCallout: React.FC<{
+export const PrereleaseCallout: React.FC<{
   packageName: string;
   latestGAVersion?: string;
   packageTitle: string;
@@ -214,6 +214,8 @@ export const OverviewPage: React.FC<Props> = memo(
           isSelected: selectedItemId === id,
           onClick: () => selectItem(id),
           ...options,
+          // skip rendering empty items while preserving the header hierarchy
+          renderItem: name === '' ? () => null : undefined,
         };
       },
       [selectedItemId]
@@ -328,7 +330,7 @@ export const OverviewPage: React.FC<Props> = memo(
               </EuiFlexItem>
             ) : null}
             <EuiFlexItem className="eui-textBreakWord">
-              <Details packageInfo={packageInfo} />
+              <Details packageInfo={packageInfo} integrationInfo={integrationInfo} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

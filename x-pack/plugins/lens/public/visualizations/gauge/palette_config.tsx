@@ -17,7 +17,7 @@ import chroma from 'chroma-js';
 import { defaultPaletteParams as sharedDefaultParams } from '../../shared_components';
 
 export const DEFAULT_PALETTE_NAME = 'gray';
-export const DEFAULT_COLOR_STEPS = 3;
+export const DEFAULT_COLOR_STEPS = 4;
 export const DEFAULT_MIN_STOP = 0;
 export const DEFAULT_MAX_STOP = 100;
 

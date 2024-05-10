@@ -32,6 +32,7 @@ export function WithServices<P>(Comp: ComponentType<P>, overrides: Partial<Servi
     const services = getMockServices(overrides);
     return (
       <ContentEditorProvider {...services}>
+        {/* @ts-expect-error upgrade typescript v4.9.5*/}
         <Comp {...props} />
       </ContentEditorProvider>
     );

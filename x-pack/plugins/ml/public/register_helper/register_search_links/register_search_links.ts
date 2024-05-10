@@ -6,17 +6,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 
 import type { AppUpdater } from '@kbn/core/public';
+import type { MlCapabilities } from '../../../common/types/capabilities';
 import { getDeepLinks } from './search_deep_links';
-import type { MlCapabilities } from '../../shared';
 
 export function registerSearchLinks(
   appUpdater: BehaviorSubject<AppUpdater>,
   isFullLicense: boolean,
   mlCapabilities: MlCapabilities,
-  showMLNavMenu: boolean
+  isServerless: boolean,
+  isEsqlEnabled?: boolean
 ) {
   appUpdater.next(() => ({
     keywords: [
@@ -24,6 +25,6 @@ export function registerSearchLinks(
         defaultMessage: 'ML',
       }),
     ],
-    deepLinks: getDeepLinks(isFullLicense, mlCapabilities, showMLNavMenu),
+    deepLinks: getDeepLinks(isFullLicense, mlCapabilities, isServerless, isEsqlEnabled),
   }));
 }

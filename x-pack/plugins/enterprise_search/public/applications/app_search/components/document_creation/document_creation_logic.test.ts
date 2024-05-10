@@ -404,7 +404,7 @@ describe('DocumentCreationLogic', () => {
           DocumentCreationLogic.actions.onSubmitJson();
 
           expect(DocumentCreationLogic.actions.setErrors).toHaveBeenCalledWith([
-            'Unexpected token i in JSON at position 0',
+            `Unexpected token 'i', "invalid JSON" is not valid JSON`,
           ]);
           expect(DocumentCreationLogic.actions.uploadDocuments).not.toHaveBeenCalled();
         });

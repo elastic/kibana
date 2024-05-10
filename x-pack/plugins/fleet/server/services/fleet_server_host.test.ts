@@ -6,6 +6,10 @@
  */
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
+
+import type { Logger } from '@kbn/core/server';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 import {
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
@@ -13,9 +17,25 @@ import {
   DEFAULT_FLEET_SERVER_HOST_ID,
 } from '../constants';
 
+import { appContextService } from './app_context';
+
 import { migrateSettingsToFleetServerHost } from './fleet_server_host';
 
+jest.mock('./app_context');
+
+const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
+  ...securityMock.createSetup(),
+}));
+
+let mockedLogger: jest.Mocked<Logger>;
+
 describe('migrateSettingsToFleetServerHost', () => {
+  beforeEach(() => {
+    mockedLogger = loggerMock.create();
+    mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
+  });
+
   it('should not migrate settings if a default fleet server policy config exists', async () => {
     const soClient = savedObjectsClientMock.create();
     soClient.find.mockImplementation(({ type }) => {

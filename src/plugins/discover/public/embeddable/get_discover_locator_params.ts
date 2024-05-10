@@ -7,34 +7,31 @@
  */
 
 import type { Filter } from '@kbn/es-query';
-import type { SavedSearch } from '@kbn/saved-search-plugin/common';
-import type { SearchByReferenceInput } from '@kbn/saved-search-plugin/public';
+import { PublishesUnifiedSearch, PublishesSavedObjectId } from '@kbn/presentation-publishing';
 import type { DiscoverAppLocatorParams } from '../../common';
-import type { SearchInput } from './types';
+import { HasSavedSearch } from './types';
 
-export const getDiscoverLocatorParams = ({
-  input,
-  savedSearch,
-}: {
-  input: SearchInput;
-  savedSearch: SavedSearch;
-}) => {
-  const dataView = savedSearch.searchSource.getField('index');
-  const savedObjectId = (input as SearchByReferenceInput).savedObjectId;
+export const getDiscoverLocatorParams = (
+  api: HasSavedSearch & Partial<PublishesSavedObjectId & PublishesUnifiedSearch>
+) => {
+  const savedSearch = api.getSavedSearch();
+
+  const dataView = savedSearch?.searchSource.getField('index');
+  const savedObjectId = api.savedObjectId?.getValue();
   const locatorParams: DiscoverAppLocatorParams = savedObjectId
     ? { savedSearchId: savedObjectId }
     : {
         dataViewId: dataView?.id,
         dataViewSpec: dataView?.toMinimalSpec(),
-        timeRange: savedSearch.timeRange,
-        refreshInterval: savedSearch.refreshInterval,
-        filters: savedSearch.searchSource.getField('filter') as Filter[],
-        query: savedSearch.searchSource.getField('query'),
-        columns: savedSearch.columns,
-        sort: savedSearch.sort,
-        viewMode: savedSearch.viewMode,
-        hideAggregatedPreview: savedSearch.hideAggregatedPreview,
-        breakdownField: savedSearch.breakdownField,
+        timeRange: savedSearch?.timeRange,
+        refreshInterval: savedSearch?.refreshInterval,
+        filters: savedSearch?.searchSource.getField('filter') as Filter[],
+        query: savedSearch?.searchSource.getField('query'),
+        columns: savedSearch?.columns,
+        sort: savedSearch?.sort,
+        viewMode: savedSearch?.viewMode,
+        hideAggregatedPreview: savedSearch?.hideAggregatedPreview,
+        breakdownField: savedSearch?.breakdownField,
       };
 
   return locatorParams;

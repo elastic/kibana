@@ -34,6 +34,9 @@ export function getAppName(fileName: string, cwd: string) {
       if (!relativePathArray[1]) return '';
 
       if (relativePathArray[1] === 'x-pack') {
+        if (relativePathArray[3] === 'observability_solution') {
+          return relativePathArray[4];
+        }
         return relativePathArray[3];
       }
 

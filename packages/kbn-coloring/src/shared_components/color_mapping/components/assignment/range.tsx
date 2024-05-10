@@ -12,9 +12,8 @@ import { ColorMapping } from '../../config';
 
 export const Range: React.FC<{
   rule: ColorMapping.RuleRange;
-  editable: boolean;
   updateValue: (min: number, max: number, minInclusive: boolean, maxInclusive: boolean) => void;
-}> = ({ rule, updateValue, editable }) => {
+}> = ({ rule, updateValue }) => {
   const minValid = rule.min <= rule.max;
   const maxValid = rule.max >= rule.min;
 
@@ -34,7 +33,6 @@ export const Range: React.FC<{
           placeholder="min"
           value={rule.min}
           isInvalid={!minValid}
-          disabled={!editable}
           onChange={(e) =>
             updateValue(+e.currentTarget.value, rule.max, rule.minInclusive, rule.maxInclusive)
           }
@@ -54,7 +52,6 @@ export const Range: React.FC<{
             </EuiButtonEmpty>
           }
           placeholder="max"
-          disabled={!editable}
           value={rule.max}
           onChange={(e) =>
             updateValue(rule.min, +e.currentTarget.value, rule.minInclusive, rule.maxInclusive)

@@ -12,13 +12,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { DataStream } from '../../../../../../../../../common/types';
+import { GENERIC_DATASET_NAME } from '../../../../../../../../../common/constants';
 
 interface SelectedDataset {
   dataset: string;
   package: string;
 }
-
-const GENERIC_DATASET_NAME = 'generic';
 
 export const DatasetComboBox: React.FC<{
   value?: SelectedDataset | string;

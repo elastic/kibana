@@ -42,7 +42,7 @@ export const useHostDetails = ({
   id = ID,
   skip = false,
   startDate,
-}: UseHostDetails): [boolean, HostDetailsArgs] => {
+}: UseHostDetails): [boolean, HostDetailsArgs, inputsModel.Refetch] => {
   const {
     loading,
     result: response,
@@ -91,5 +91,5 @@ export const useHostDetails = ({
     }
   }, [hostDetailsRequest, search, skip]);
 
-  return [loading, hostDetailsResponse];
+  return [loading, hostDetailsResponse, refetch];
 };

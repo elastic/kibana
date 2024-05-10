@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test';
 import { upperFirst } from 'lodash';
 
-import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { MlCommonUI } from './common_ui';
 import { MappedInputParams, MappedOutput, ModelType, TrainedModelsActions } from './trained_models';
@@ -52,6 +52,7 @@ export function TrainedModelsTableProvider(
           description: string;
           modelTypes: string[];
           createdAt: string;
+          state: string;
         } = {
           id: $tr
             .findTestSubject('mlModelsTableColumnId')
@@ -64,6 +65,11 @@ export function TrainedModelsTableProvider(
             .text()
             .trim(),
           modelTypes,
+          state: $tr
+            .findTestSubject('mlModelsTableColumnDeploymentState')
+            .find('.euiTableCellContent')
+            .text()
+            .trim(),
           createdAt: $tr
             .findTestSubject('mlModelsTableColumnCreatedAt')
             .find('.euiTableCellContent')
@@ -193,12 +199,17 @@ export function TrainedModelsTableProvider(
 
     public async toggleActionsContextMenu(modelId: string, expectOpen = true) {
       await testSubjects.click(this.rowSelector(modelId, 'euiCollapsedItemActionsButton'));
-      const panelElement = await find.byCssSelector('.euiContextMenuPanel');
-      const isDisplayed = await panelElement.isDisplayed();
-      expect(isDisplayed).to.eql(
-        expectOpen,
-        `Expected the action context menu for '${modelId}' to be ${expectOpen ? 'open' : 'closed'}`
-      );
+
+      await retry.tryForTime(5 * 1000, async () => {
+        const panelElement = await find.byCssSelector('.euiContextMenuPanel');
+        const isDisplayed = await panelElement.isDisplayed();
+        expect(isDisplayed).to.eql(
+          expectOpen,
+          `Expected the action context menu for '${modelId}' to be ${
+            expectOpen ? 'open' : 'closed'
+          }`
+        );
+      });
     }
 
     public async assertModelDeleteActionButtonExists(modelId: string, expectedValue: boolean) {
@@ -510,14 +521,18 @@ export function TrainedModelsTableProvider(
     public async setPriority(value: 'low' | 'normal') {
       await mlCommonUI.selectButtonGroupValue(
         'mlModelsStartDeploymentModalPriority',
-        value.toString()
+        value.toString(),
+        value === 'normal'
+          ? 'mlModelsStartDeploymentModalNormalPriority'
+          : 'mlModelsStartDeploymentModalLowPriority'
       );
     }
 
     public async setThreadsPerAllocation(value: number) {
       await mlCommonUI.selectButtonGroupValue(
         'mlModelsStartDeploymentModalThreadsPerAllocation',
-        value.toString()
+        value.toString(),
+        `mlModelsStartDeploymentModalThreadsPerAllocation_${value}`
       );
     }
 
@@ -540,6 +555,25 @@ export function TrainedModelsTableProvider(
         `Deployment for "${modelId}" has been started successfully.`
       );
       await this.waitForModelsToLoad();
+
+      await retry.tryForTime(
+        5 * 1000,
+        async () => {
+          await this.assertModelState(modelId, 'Deployed');
+        },
+        async () => {
+          await this.refreshModelsTable();
+        }
+      );
+    }
+
+    public async assertModelState(modelId: string, expectedValue = 'Deployed') {
+      const rows = await this.parseModelsTable();
+      const modelRow = rows.find((row) => row.id === modelId);
+      expect(modelRow?.state).to.eql(
+        expectedValue,
+        `Expected trained model row state to be '${expectedValue}' (got '${modelRow?.state!}')`
+      );
     }
 
     public async stopDeployment(modelId: string) {
@@ -548,6 +582,7 @@ export function TrainedModelsTableProvider(
       await mlCommonUI.assertLastToastHeader(
         `Deployment for "${modelId}" has been stopped successfully.`
       );
+      await mlCommonUI.waitForRefreshButtonEnabled();
     }
 
     public async openStartDeploymentModal(modelId: string) {
@@ -633,6 +668,12 @@ export function TrainedModelsTableProvider(
       await retry.tryForTime(5 * 1000, async () => {
         await testSubjects.clickWhenNotDisabled('analyzeDataDriftWithoutSavingButton');
         await testSubjects.existOrFail('mlDataDriftTable');
+      });
+    }
+
+    public async assertSpaceAwareWarningMessage(): Promise<void> {
+      await testSubjects.existOrFail('mlDeleteSpaceAwareItemCheckModalOverlay', {
+        timeout: 3_000,
       });
     }
   })();

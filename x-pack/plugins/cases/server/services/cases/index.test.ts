@@ -21,6 +21,7 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type {
   SavedObject,
   SavedObjectReference,
+  SavedObjectsBulkResponse,
   SavedObjectsCreateOptions,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
@@ -1847,7 +1848,9 @@ describe('CasesService', () => {
           ],
         });
 
-        const res = await service.getCases({ caseIds: ['a'] });
+        const res = (await service.getCases({
+          caseIds: ['a'],
+        })) as SavedObjectsBulkResponse<CaseTransformedAttributes>;
 
         expect(res.saved_objects[0].attributes.connector.id).toMatchInlineSnapshot(`"1"`);
         expect(
@@ -1882,7 +1885,10 @@ describe('CasesService', () => {
           ],
         });
 
-        const res = await service.getCases({ caseIds: ['a'] });
+        const res = (await service.getCases({
+          caseIds: ['a'],
+        })) as SavedObjectsBulkResponse<CaseTransformedAttributes>;
+
         expect(res.saved_objects[0].attributes.severity).toEqual(CaseSeverity.LOW);
         expect(res.saved_objects[1].attributes.severity).toEqual(CaseSeverity.MEDIUM);
         expect(res.saved_objects[2].attributes.severity).toEqual(CaseSeverity.HIGH);
@@ -1907,7 +1913,10 @@ describe('CasesService', () => {
           ],
         });
 
-        const res = await service.getCases({ caseIds: ['a'] });
+        const res = (await service.getCases({
+          caseIds: ['a'],
+        })) as SavedObjectsBulkResponse<CaseTransformedAttributes>;
+
         expect(res.saved_objects[0].attributes.status).toEqual(CaseStatuses.open);
         expect(res.saved_objects[1].attributes.status).toEqual(CaseStatuses['in-progress']);
         expect(res.saved_objects[2].attributes.status).toEqual(CaseStatuses.closed);
@@ -1922,7 +1931,10 @@ describe('CasesService', () => {
           ],
         });
 
-        const res = await service.getCases({ caseIds: ['a'] });
+        const res = (await service.getCases({
+          caseIds: ['a'],
+        })) as SavedObjectsBulkResponse<CaseTransformedAttributes>;
+
         expect(res.saved_objects[0].attributes).not.toHaveProperty('total_alerts');
         expect(res.saved_objects[0].attributes).not.toHaveProperty('total_comments');
         expect(res.saved_objects[1].attributes).not.toHaveProperty('total_alerts');

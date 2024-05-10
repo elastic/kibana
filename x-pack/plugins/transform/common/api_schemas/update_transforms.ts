@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
-import { TransformPivotConfig } from '../types/transform';
+import type { TransformPivotConfig } from '../types/transform';
 
 import { retentionPolicySchema, settingsSchema, sourceSchema, syncSchema } from './transforms';
 

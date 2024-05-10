@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useRef } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useCommonChartProps } from './use_common_chart_props';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';

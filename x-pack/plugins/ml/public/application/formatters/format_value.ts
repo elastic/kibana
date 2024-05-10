@@ -13,7 +13,7 @@
  */
 
 import moment from 'moment';
-import { MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
+import type { MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
 
 const SIGFIGS_IF_ROUNDING = 3; // Number of sigfigs to use for values < 10
 

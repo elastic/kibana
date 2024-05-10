@@ -53,6 +53,7 @@ export class StorybookMock extends AbstractStorybookMock<
       },
       pageFlavor: 'kibana',
       prependBasePath: (path) => path,
+      getHttp: <T>() => Promise.resolve({} as T),
       ...kibanaNoDataMock.getServices(params),
     };
   }

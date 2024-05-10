@@ -27,7 +27,7 @@ const toggleDeletePhase = async (testBed: TestBed) => {
     if (action === 'disable') {
       button.simulate('click');
     } else {
-      button.find('input').simulate('change');
+      button.find('button').simulate('click');
     }
   });
   component.update();

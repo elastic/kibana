@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { distinctUntilChanged, map, shareReplay, filter } from 'rxjs/operators';
+import type { Observable, Subscription } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import { distinctUntilChanged, map, shareReplay, filter } from 'rxjs';
 import { isEqual } from 'lodash';
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import type { ExplorerJob } from './explorer_utils';

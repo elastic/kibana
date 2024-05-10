@@ -21,7 +21,7 @@ import { UserActionPersistedAttributesRt } from '../../../common/types/user_acti
 import { CASE_SAVED_OBJECT, CASE_USER_ACTION_SAVED_OBJECT } from '../../../../common/constants';
 import { arraysDifference } from '../../../client/utils';
 import { isUserActionType } from '../../../../common/utils/user_actions';
-import { decodeOrThrow } from '../../../../common/api';
+import { decodeOrThrow } from '../../../common/runtime_types';
 import { BuilderFactory } from '../builder_factory';
 import type {
   BuildUserActionsDictParams,

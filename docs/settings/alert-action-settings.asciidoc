@@ -142,6 +142,15 @@ A list of action types that are enabled. It defaults to `["*"]`, enabling all ty
 +
 Disabled action types will not appear as an option when creating new connectors, but existing connectors and actions of that type will remain in {kib} and will not function.
 
+`xpack.actions.microsoftExchangeUrl`::
+The URL for the Microsoft Azure Active Directory endpoint to use for MS Exchange email authentication. Default: `https://login.microsoftonline.com`.
+
+`xpack.actions.microsoftGraphApiUrl`::
+The URL for the Microsoft Graph API endpoint to use for MS Exchange email authentication. Default: `https://graph.microsoft.com/v1.0`.
+
+`xpack.actions.microsoftGraphApiScope`::
+The URL for the Microsoft Graph API scope endpoint to use for MS Exchange email authentication. Default: `https://graph.microsoft.com/.default`.
+
 `xpack.actions.proxyUrl` {ess-icon}::
 Specifies the proxy URL to use, if using a proxy for actions. By default, no proxy is used.
 +
@@ -331,7 +340,7 @@ For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a string f
 The default model to use for requests, which varies by connector:
 +
 --
-* For an <<bedrock-action-type,{bedrock} connector>>, current support is for the Anthropic Claude models. Defaults to `anthropic.claude-v2`.
+* For an <<bedrock-action-type,{bedrock} connector>>, current support is for the Anthropic Claude models. Defaults to `anthropic.claude-3-sonnet-20240229-v1:0`.
 * For a <<openai-action-type,OpenAI connector>>, it is optional and applicable only when `xpack.actions.preconfigured.<connector-id>.config.apiProvider` is `OpenAI`.
 --
 
@@ -581,7 +590,7 @@ Specifies whether to skip writing alerts and scheduling actions if rule
 processing was cancelled due to a timeout. Default: `true`. This setting can be
 overridden by individual rule types.
 
-`xpack.alerting.rules.maxScheduledPerMinute` {ess-icon}::
+`xpack.alerting.rules.maxScheduledPerMinute`::
 Specifies the maximum number of rules to run per minute. Default: 10000
 
 `xpack.alerting.rules.minimumScheduleInterval.value` {ess-icon}::

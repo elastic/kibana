@@ -1,0 +1,94 @@
+{
+  "id": "@kbn/apm-data-view",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/apm-data-view",
+        "id": "def-common.getStaticDataViewId",
+        "type": "Function",
+        "tags": [],
+        "label": "getStaticDataViewId",
+        "description": [],
+        "signature": [
+          "(spaceId: string) => string"
+        ],
+        "path": "packages/kbn-apm-data-view/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-data-view",
+            "id": "def-common.getStaticDataViewId.$1",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-apm-data-view/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-data-view",
+        "id": "def-common.isAPMDataView",
+        "type": "Function",
+        "tags": [],
+        "label": "isAPMDataView",
+        "description": [],
+        "signature": [
+          "(dataViewId: string) => boolean"
+        ],
+        "path": "packages/kbn-apm-data-view/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-data-view",
+            "id": "def-common.isAPMDataView.$1",
+            "type": "string",
+            "tags": [],
+            "label": "dataViewId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-apm-data-view/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

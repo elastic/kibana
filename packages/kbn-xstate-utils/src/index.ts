@@ -7,6 +7,6 @@
  */
 
 export * from './actions';
+export * from './dev_tools';
 export * from './notification_channel';
 export * from './types';
-export * from './dev_tools';

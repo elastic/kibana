@@ -292,3 +292,13 @@ export const WARM_PATTERN_TOOLTIP = ({ indices, pattern }: { indices: number; pa
     defaultMessage:
       '{indices} {indices, plural, =1 {index} other {indices}} matching the {pattern} pattern {indices, plural, =1 {is} other {are}} warm. Warm indices are no longer being updated but are still being queried.',
   });
+
+export const POST_RESULT_ERROR_TITLE = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.postResultErrorTitle',
+  { defaultMessage: 'Error writing saved data quality check results' }
+);
+
+export const GET_RESULTS_ERROR_TITLE = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.getResultErrorTitle',
+  { defaultMessage: 'Error reading saved data quality check results' }
+);

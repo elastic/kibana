@@ -14,11 +14,11 @@ import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
+
 import {
   DEFAULT_APP_REFRESH_INTERVAL,
   DEFAULT_APP_TIME_RANGE,
   DEFAULT_BYTES_FORMAT,
-  DEFAULT_DARK_MODE,
   DEFAULT_DATE_FORMAT,
   DEFAULT_DATE_FORMAT_TZ,
   DEFAULT_FROM,
@@ -53,6 +53,11 @@ import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
 import { contractStartServicesMock } from '../../../mocks';
 import { getDefaultConfigSettings } from '../../../../common/config_settings';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-plugin/public/mocks';
+import { UpsellingService } from '@kbn/security-solution-upselling/service';
+import { calculateBounds } from '@kbn/data-plugin/common';
+import { alertingPluginMock } from '@kbn/alerting-plugin/public/mocks';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
@@ -69,7 +74,6 @@ const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_BYTES_FORMAT]: '0,0.[0]b',
   [DEFAULT_DATE_FORMAT_TZ]: 'UTC',
   [DEFAULT_DATE_FORMAT]: 'MMM D, YYYY @ HH:mm:ss.SSS',
-  [DEFAULT_DARK_MODE]: false,
   [DEFAULT_RULES_TABLE_REFRESH_SETTING]: {
     on: DEFAULT_RULE_REFRESH_INTERVAL_ON,
     value: DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
@@ -123,6 +127,26 @@ export const createStartServicesMock = (
   const guidedOnboarding = guidedOnboardingMock.createStart();
   const cloud = cloudMock.createStart();
   const mockSetHeaderActionMenu = jest.fn();
+  const timelineDataService = dataPluginMock.createStartContract();
+  const alerting = alertingPluginMock.createStartContract();
+
+  /*
+   * Below mocks are needed by unified field list
+   * when data service is passed through as a prop
+   *
+   * */
+  timelineDataService.query.timefilter.timefilter.getAbsoluteTime = jest.fn(() => ({
+    from: '2021-08-31T22:00:00.000Z',
+    to: '2022-09-01T09:16:29.553Z',
+  }));
+  timelineDataService.query.timefilter.timefilter.getTime = jest.fn(() => {
+    return { from: 'now-15m', to: 'now' };
+  });
+  timelineDataService.query.timefilter.timefilter.getRefreshInterval = jest.fn(() => {
+    return { pause: true, value: 1000 };
+  });
+  timelineDataService.query.timefilter.timefilter.calculateBounds = jest.fn(calculateBounds);
+  /** ************************************************* */
 
   return {
     ...core,
@@ -136,30 +160,22 @@ export const createStartServicesMock = (
     dataViews: dataViewServiceMock,
     data: {
       ...data,
-      dataViews: {
-        create: jest.fn(),
-        getIdsWithTitle: jest.fn(),
-        get: jest.fn(),
-        getIndexPattern: jest.fn(),
-        getFieldsForWildcard: jest.fn(),
-        getRuntimeMappings: jest.fn(),
-      },
+      dataViews: dataViewServiceMock,
       query: {
         ...data.query,
         savedQueries: {
           ...data.query.savedQueries,
-          getAllSavedQueries: jest.fn(() =>
-            Promise.resolve({
-              id: '123',
-              attributes: {
-                total: 123,
-              },
-            })
-          ),
           findSavedQueries: jest.fn(() =>
             Promise.resolve({
               total: 123,
-              queries: [],
+              queries: [
+                {
+                  id: '123',
+                  attributes: {
+                    total: 123,
+                  },
+                },
+              ],
             })
           ),
         },
@@ -199,15 +215,22 @@ export const createStartServicesMock = (
       locator,
     },
     telemetry: {},
-    theme: {
-      theme$: themeServiceMock.createTheme$(),
-    },
+    theme: themeServiceMock.createSetupContract(),
     timelines: {
       getLastUpdated: jest.fn(),
       getFieldBrowser: jest.fn(),
       getHoverActions: jest.fn().mockReturnValue({
         getAddToTimelineButton: jest.fn(),
       }),
+      getUseAddToTimeline: jest.fn().mockReturnValue(
+        jest.fn().mockReturnValue({
+          startDragToTimeline: jest.fn(),
+          beginDrag: jest.fn(),
+          dragLocation: jest.fn(),
+          endDrag: jest.fn(),
+          cancelDrag: jest.fn(),
+        })
+      ),
     },
     osquery: {
       OsqueryResults: jest.fn().mockReturnValue(null),
@@ -224,6 +247,11 @@ export const createStartServicesMock = (
     uiActions: uiActionsPluginMock.createStartContract(),
     savedSearch: savedSearchPluginMock.createStartContract(),
     setHeaderActionMenu: mockSetHeaderActionMenu,
+    fieldFormats: fieldFormatsMock,
+    dataViewFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
+    upselling: new UpsellingService(),
+    timelineDataService,
+    alerting,
   } as unknown as StartServices;
 };
 
@@ -240,10 +268,16 @@ export const createKibanaContextProviderMock = () => {
   const services = createStartServicesMock();
 
   // eslint-disable-next-line react/display-name
-  return ({ children }: { children: React.ReactNode }) =>
+  return ({
+    children,
+    startServices: startServicesMock,
+  }: {
+    children: React.ReactNode;
+    startServices?: StartServices;
+  }) =>
     React.createElement(
       KibanaContextProvider,
-      { services },
+      { services: startServicesMock || services },
       React.createElement(NavigationProvider, { core: services }, children)
     );
 };

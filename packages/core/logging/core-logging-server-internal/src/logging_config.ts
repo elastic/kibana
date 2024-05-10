@@ -47,6 +47,12 @@ export const loggerSchema = schema.object({
   level: levelSchema,
 });
 
+const browserConfig = schema.object({
+  root: schema.object({
+    level: levelSchema,
+  }),
+});
+
 export const config = {
   path: 'logging',
   schema: schema.object({
@@ -63,6 +69,7 @@ export const config = {
       }),
       level: levelSchema,
     }),
+    browser: browserConfig,
   }),
 };
 
@@ -70,6 +77,10 @@ export const config = {
 export type LoggingConfigType = Pick<TypeOf<typeof config.schema>, 'loggers' | 'root'> & {
   appenders: Map<string, AppenderConfigType>;
 };
+
+/** @internal */
+export type LoggingConfigWithBrowserType = LoggingConfigType &
+  Pick<TypeOf<typeof config.schema>, 'browser'>;
 
 /**
  * Config schema for validating the inputs to the {@link LoggingServiceStart.configure} API.

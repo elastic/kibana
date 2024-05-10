@@ -243,19 +243,19 @@ describe('TelemetryManagementSectionComponent', () => {
       />
     );
     try {
-      const toggleOptInComponent = component.find('Field');
+      const toggleOptInComponent = component.find('FieldRow');
       await expect(
-        toggleOptInComponent.prop<TelemetryManagementSection['toggleOptIn']>('handleChange')()
+        toggleOptInComponent.prop<TelemetryManagementSection['toggleOptIn']>('onFieldChange')()
       ).resolves.toBe(true);
       // TODO: Fix `mountWithIntl` types in @kbn/test-jest-helpers to make testing easier
       expect((component.state() as { enabled: boolean }).enabled).toBe(true);
       await expect(
-        toggleOptInComponent.prop<TelemetryManagementSection['toggleOptIn']>('handleChange')()
+        toggleOptInComponent.prop<TelemetryManagementSection['toggleOptIn']>('onFieldChange')()
       ).resolves.toBe(true);
       expect((component.state() as { enabled: boolean }).enabled).toBe(false);
       telemetryService.setOptIn = jest.fn().mockRejectedValue(Error('test-error'));
       await expect(
-        toggleOptInComponent.prop<TelemetryManagementSection['toggleOptIn']>('handleChange')()
+        toggleOptInComponent.prop<TelemetryManagementSection['toggleOptIn']>('onFieldChange')()
       ).rejects.toStrictEqual(Error('test-error'));
     } finally {
       component.unmount();

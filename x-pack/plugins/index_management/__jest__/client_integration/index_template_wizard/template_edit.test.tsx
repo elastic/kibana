@@ -27,8 +27,8 @@ const MAPPING = {
   },
 };
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/code-editor', () => {
+  const original = jest.requireActual('@kbn/code-editor');
   return {
     ...original,
     // Mocking CodeEditor, which uses React Monaco under the hood
@@ -145,7 +145,7 @@ describe('<TemplateEdit />', () => {
             name: 'test',
             indexPatterns: ['myPattern*'],
             version: 1,
-            allowAutoCreate: false,
+            allowAutoCreate: 'NO_OVERWRITE',
             dataStream: {
               hidden: true,
               anyUnknownKey: 'should_be_kept',
@@ -210,7 +210,7 @@ describe('<TemplateEdit />', () => {
         await actions.completeStepOne({
           indexPatterns: UPDATED_INDEX_PATTERN,
           priority: 3,
-          allowAutoCreate: true,
+          allowAutoCreate: 'TRUE',
         });
         // Component templates
         await actions.completeStepTwo();
@@ -265,7 +265,7 @@ describe('<TemplateEdit />', () => {
               indexPatterns: UPDATED_INDEX_PATTERN,
               priority: 3,
               version: templateToEdit.version,
-              allowAutoCreate: true,
+              allowAutoCreate: 'TRUE',
               _kbnMeta: {
                 type: 'default',
                 hasDatastream: false,

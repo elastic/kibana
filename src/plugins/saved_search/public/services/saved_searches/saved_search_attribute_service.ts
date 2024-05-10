@@ -9,6 +9,8 @@
 import type { AttributeService, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
+import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
+import { SavedSearchAttributes } from '../../../common';
 import type {
   SavedSearch,
   SavedSearchByValueAttributes,
@@ -26,6 +28,7 @@ import { createGetSavedSearchDeps } from './create_get_saved_search_deps';
 
 export interface SavedSearchUnwrapMetaInfo {
   sharingSavedObjectProps: SavedSearch['sharingSavedObjectProps'];
+  managed: boolean | undefined;
 }
 
 export interface SavedSearchUnwrapResult {
@@ -39,6 +42,13 @@ export type SavedSearchAttributeService = AttributeService<
   SearchByReferenceInput,
   SavedSearchUnwrapMetaInfo
 >;
+
+export const savedObjectToEmbeddableAttributes = (
+  savedObject: SavedObjectCommon<SavedSearchAttributes>
+) => ({
+  ...savedObject.attributes,
+  references: savedObject.references,
+});
 
 export function getSavedSearchAttributeService(
   services: SavedSearchesServiceDeps & {
@@ -66,12 +76,10 @@ export function getSavedSearchAttributeService(
       const so = await getSearchSavedObject(savedObjectId, createGetSavedSearchDeps(services));
 
       return {
-        attributes: {
-          ...so.item.attributes,
-          references: so.item.references,
-        },
+        attributes: savedObjectToEmbeddableAttributes(so.item),
         metaInfo: {
           sharingSavedObjectProps: so.meta,
+          managed: so.item.managed,
         },
       };
     },
@@ -91,13 +99,14 @@ export const toSavedSearch = async (
   result: SavedSearchUnwrapResult,
   services: SavedSearchesServiceDeps
 ) => {
-  const { sharingSavedObjectProps } = result.metaInfo ?? {};
+  const { sharingSavedObjectProps, managed } = result.metaInfo ?? {};
 
   return await convertToSavedSearch(
     {
       ...splitReferences(result.attributes),
       savedSearchId: id,
       sharingSavedObjectProps,
+      managed,
     },
     createGetSavedSearchDeps(services)
   );

@@ -153,6 +153,46 @@ export const internals: JoiRoot = Joi.extend(
       }
       return { value };
     },
+    rules: {
+      min: {
+        args: [
+          {
+            name: 'limit',
+            assert: Joi.alternatives([Joi.number(), Joi.string()]).required(),
+          },
+        ],
+        method(limit) {
+          return this.$_addRule({ name: 'min', args: { limit } });
+        },
+        validate(value, { error }, args) {
+          const limit = ensureDuration(args.limit);
+          if (value.asMilliseconds() < limit.asMilliseconds()) {
+            return error('duration.min', { value, limit });
+          }
+
+          return value;
+        },
+      },
+      max: {
+        args: [
+          {
+            name: 'limit',
+            assert: Joi.alternatives([Joi.number(), Joi.string()]).required(),
+          },
+        ],
+        method(limit) {
+          return this.$_addRule({ name: 'max', args: { limit } });
+        },
+        validate(value, { error }, args) {
+          const limit = ensureDuration(args.limit);
+          if (value.asMilliseconds() > limit.asMilliseconds()) {
+            return error('duration.max', { value, limit });
+          }
+
+          return value;
+        },
+      },
+    },
   },
   {
     type: 'number',

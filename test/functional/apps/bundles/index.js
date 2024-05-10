@@ -14,38 +14,38 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
 
   describe('bundle compression', function () {
-    let buildNum;
+    let buildHash;
     before(async () => {
       const resp = await supertest.get('/api/status').expect(200);
-      buildNum = resp.body.version.build_number;
+      buildHash = resp.body.version.build_hash.slice(0, 12);
     });
 
     it('returns gzip files when client only supports gzip', () =>
       supertest
         // We use the kbn-ui-shared-deps for these tests since they are always built with br compressed outputs,
         // even in dev. Bundles built by @kbn/optimizer are only built with br compression in dist mode.
-        .get(`/${buildNum}/bundles/kbn-ui-shared-deps-npm/kbn-ui-shared-deps-npm.dll.js`)
+        .get(`/${buildHash}/bundles/kbn-ui-shared-deps-npm/kbn-ui-shared-deps-npm.dll.js`)
         .set('Accept-Encoding', 'gzip')
         .expect(200)
         .expect('Content-Encoding', 'gzip'));
 
     it('returns br files when client only supports br', () =>
       supertest
-        .get(`/${buildNum}/bundles/kbn-ui-shared-deps-npm/kbn-ui-shared-deps-npm.dll.js`)
+        .get(`/${buildHash}/bundles/kbn-ui-shared-deps-npm/kbn-ui-shared-deps-npm.dll.js`)
         .set('Accept-Encoding', 'br')
         .expect(200)
         .expect('Content-Encoding', 'br'));
 
     it('returns br files when client only supports gzip and br', () =>
       supertest
-        .get(`/${buildNum}/bundles/kbn-ui-shared-deps-npm/kbn-ui-shared-deps-npm.dll.js`)
+        .get(`/${buildHash}/bundles/kbn-ui-shared-deps-npm/kbn-ui-shared-deps-npm.dll.js`)
         .set('Accept-Encoding', 'gzip, br')
         .expect(200)
         .expect('Content-Encoding', 'br'));
 
     it('returns gzip files when client prefers gzip', () =>
       supertest
-        .get(`/${buildNum}/bundles/kbn-ui-shared-deps-npm/kbn-ui-shared-deps-npm.dll.js`)
+        .get(`/${buildHash}/bundles/kbn-ui-shared-deps-npm/kbn-ui-shared-deps-npm.dll.js`)
         .set('Accept-Encoding', 'gzip;q=1.0, br;q=0.5')
         .expect(200)
         .expect('Content-Encoding', 'gzip'));

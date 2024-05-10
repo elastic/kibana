@@ -8,9 +8,9 @@
 
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { EuiButtonIcon, EuiDataGridCellValueElementProps, EuiToolTip } from '@elastic/eui';
-import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import { UnifiedDataTableContext } from '../table_context';
+import { DataTableRowControl } from './data_table_row_control';
 
 /**
  * Button to expand a given row
@@ -26,13 +26,11 @@ export const ExpandButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
   useEffect(() => {
     if (current.isAnchor) {
       setCellProps({
-        className: 'dscDocsGrid__cell--highlight',
+        className: 'unifiedDataTable__cell--highlight',
       });
     } else if (expanded && current && expanded.id === current.id) {
       setCellProps({
-        style: {
-          backgroundColor: isDarkMode ? themeDark.euiColorHighlight : themeLight.euiColorHighlight,
-        },
+        className: 'unifiedDataTable__cell--expanded',
       });
     } else {
       setCellProps({ style: undefined });
@@ -62,7 +60,7 @@ export const ExpandButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
   }
 
   return (
-    <div className="unifiedDataTable__rowControl">
+    <DataTableRowControl>
       <EuiToolTip content={buttonLabel} delay="long" ref={toolTipRef}>
         <EuiButtonIcon
           id={rowIndex === 0 ? tourStep : undefined}
@@ -81,6 +79,6 @@ export const ExpandButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
           isSelected={isCurrentRowExpanded}
         />
       </EuiToolTip>
-    </div>
+    </DataTableRowControl>
   );
 };

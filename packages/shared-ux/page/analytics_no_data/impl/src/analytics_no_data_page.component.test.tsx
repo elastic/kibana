@@ -21,6 +21,7 @@ import { getAnalyticsNoDataPageServicesMock } from '@kbn/shared-ux-page-analytic
 
 describe('AnalyticsNoDataPageComponent', () => {
   const services = getAnalyticsNoDataPageServicesMock();
+  services.kibanaGuideDocLink = 'http://www.test.com';
   const onDataViewCreated = jest.fn();
 
   it('renders correctly', async () => {
@@ -28,10 +29,9 @@ describe('AnalyticsNoDataPageComponent', () => {
       // Include context so composed components will have access to their services.
       <AnalyticsNoDataPageProvider {...services}>
         <AnalyticsNoDataPage
+          {...services}
           onDataViewCreated={onDataViewCreated}
-          kibanaGuideDocLink={'http://www.test.com'}
           showPlainSpinner={false}
-          prependBasePath={(path: string) => path}
         />
       </AnalyticsNoDataPageProvider>
     );
@@ -52,11 +52,10 @@ describe('AnalyticsNoDataPageComponent', () => {
     const component = mountWithIntl(
       <AnalyticsNoDataPageProvider {...services}>
         <AnalyticsNoDataPage
+          {...services}
           onDataViewCreated={onDataViewCreated}
-          kibanaGuideDocLink={'http://www.test.com'}
           allowAdHocDataView={true}
           showPlainSpinner={false}
-          prependBasePath={(path: string) => path}
         />
       </AnalyticsNoDataPageProvider>
     );
@@ -74,17 +73,16 @@ describe('AnalyticsNoDataPageComponent', () => {
           <I18nProvider>
             <AnalyticsNoDataPageProvider {...{ ...services, hasESData: async () => false }}>
               <AnalyticsNoDataPage
+                {...services}
                 onDataViewCreated={onDataViewCreated}
-                kibanaGuideDocLink={'http://www.test.com'}
                 showPlainSpinner={false}
-                prependBasePath={(path: string) => path}
               />
             </AnalyticsNoDataPageProvider>
           </I18nProvider>
         );
 
         await screen.findByTestId('kbnOverviewAddIntegrations');
-        await screen.getAllByText('Add integrations');
+        screen.getAllByText('Add integrations');
       });
 
       it('renders disabled add integrations card when fleet is not available', async () => {
@@ -94,71 +92,72 @@ describe('AnalyticsNoDataPageComponent', () => {
               {...{ ...services, hasESData: async () => false, canAccessFleet: false }}
             >
               <AnalyticsNoDataPage
+                {...services}
                 onDataViewCreated={onDataViewCreated}
-                kibanaGuideDocLink={'http://www.test.com'}
                 showPlainSpinner={false}
-                prependBasePath={(path: string) => path}
               />
             </AnalyticsNoDataPageProvider>
           </I18nProvider>
         );
 
         await screen.findByTestId('kbnOverviewAddIntegrations');
-        await screen.getByText('Contact your administrator');
+        screen.getByText('Contact your administrator');
       });
     });
 
     describe('serverless_search flavor', () => {
-      it('renders getting started card', async () => {
+      beforeEach(() => {
+        services.pageFlavor = 'serverless_search';
+      });
+
+      it('renders Add Data card', async () => {
         render(
           <I18nProvider>
             <AnalyticsNoDataPageProvider {...{ ...services, hasESData: async () => false }}>
               <AnalyticsNoDataPage
-                pageFlavor={'serverless_search'}
+                {...services}
                 onDataViewCreated={onDataViewCreated}
-                kibanaGuideDocLink={'http://www.test.com'}
                 showPlainSpinner={false}
-                prependBasePath={(path: string) => path}
               />
             </AnalyticsNoDataPageProvider>
           </I18nProvider>
         );
 
-        await screen.findByTestId('kbnOverviewElasticsearchGettingStarted');
+        await screen.findByTestId('kbnOverviewElasticsearchAddData');
       });
 
-      it('renders the same getting started card when fleet is not available', async () => {
+      it('renders the same Add Data card when fleet is not available', async () => {
         render(
           <I18nProvider>
             <AnalyticsNoDataPageProvider
               {...{ ...services, hasESData: async () => false, canAccessFleet: false }}
             >
               <AnalyticsNoDataPage
+                {...services}
                 onDataViewCreated={onDataViewCreated}
-                kibanaGuideDocLink={'http://www.test.com'}
                 showPlainSpinner={false}
-                prependBasePath={(path: string) => path}
-                pageFlavor={'serverless_search'}
               />
             </AnalyticsNoDataPageProvider>
           </I18nProvider>
         );
 
-        await screen.findByTestId('kbnOverviewElasticsearchGettingStarted');
+        await screen.findByTestId('kbnOverviewElasticsearchAddData');
       });
     });
 
     describe('serverless_observability flavor', () => {
-      it('renders getting started card', async () => {
+      beforeEach(() => {
+        services.pageFlavor = 'serverless_observability';
+      });
+
+      it('renders Add Data card', async () => {
         render(
           <I18nProvider>
             <AnalyticsNoDataPageProvider {...{ ...services, hasESData: async () => false }}>
               <AnalyticsNoDataPage
-                pageFlavor={'serverless_observability'}
+                {...services}
                 onDataViewCreated={onDataViewCreated}
-                kibanaGuideDocLink={'http://www.test.com'}
                 showPlainSpinner={false}
-                prependBasePath={(path: string) => path}
               />
             </AnalyticsNoDataPageProvider>
           </I18nProvider>

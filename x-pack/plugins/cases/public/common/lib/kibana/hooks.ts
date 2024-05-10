@@ -30,8 +30,6 @@ export const useTimeZone = (): string => {
   return timeZone === 'Browser' ? moment.tz.guess() : timeZone;
 };
 
-export const useBasePath = (): string => useKibana().services.http.basePath.get();
-
 export const useToasts = (): StartServices['notifications']['toasts'] =>
   useKibana().services.notifications.toasts;
 
@@ -116,12 +114,12 @@ export const useCurrentUser = (): AuthenticatedElasticUser | null => {
  * Returns a full URL to the provided page path by using
  * kibana's `getUrlForApp()`
  */
-export const useAppUrl = (appId: string) => {
+export const useAppUrl = (appId?: string) => {
   const { getUrlForApp } = useKibana().services.application;
 
   const getAppUrl = useCallback(
     (options?: { deepLinkId?: string; path?: string; absolute?: boolean }) =>
-      getUrlForApp(appId, options),
+      getUrlForApp(appId ?? '', options),
     [appId, getUrlForApp]
   );
   return { getAppUrl };
@@ -131,7 +129,7 @@ export const useAppUrl = (appId: string) => {
  * Navigate to any app using kibana's `navigateToApp()`
  * or by url using `navigateToUrl()`
  */
-export const useNavigateTo = (appId: string) => {
+export const useNavigateTo = (appId?: string) => {
   const { navigateToApp, navigateToUrl } = useKibana().services.application;
 
   const navigateTo = useCallback(
@@ -144,7 +142,7 @@ export const useNavigateTo = (appId: string) => {
       if (url) {
         navigateToUrl(url);
       } else {
-        navigateToApp(appId, options);
+        navigateToApp(appId ?? '', options);
       }
     },
     [appId, navigateToApp, navigateToUrl]
@@ -156,7 +154,7 @@ export const useNavigateTo = (appId: string) => {
  * Returns navigateTo and getAppUrl navigation hooks
  *
  */
-export const useNavigation = (appId: string) => {
+export const useNavigation = (appId?: string) => {
   const { navigateTo } = useNavigateTo(appId);
   const { getAppUrl } = useAppUrl(appId);
   return { navigateTo, getAppUrl };

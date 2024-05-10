@@ -6,19 +6,20 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import { combineLatest, Observable, of, Subject } from 'rxjs';
-import { catchError, debounceTime, skipWhile, startWith, switchMap, tap } from 'rxjs/operators';
-import { CoreStart } from '@kbn/core/public';
+import type { Observable } from 'rxjs';
+import { combineLatest, of, Subject } from 'rxjs';
+import { catchError, debounceTime, skipWhile, startWith, switchMap, tap } from 'rxjs';
+import type { CoreStart } from '@kbn/core/public';
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
-import { MlStartDependencies } from '../../plugin';
+import type { MlStartDependencies } from '../../plugin';
+import type { AppStateSelectedCells } from '../../application/explorer/explorer_utils';
 import {
-  AppStateSelectedCells,
   getSelectionInfluencers,
   getSelectionJobIds,
   getSelectionTimeRange,
 } from '../../application/explorer/explorer_utils';
 import { OVERALL_LABEL, SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
-import {
+import type {
   AnomalyChartsEmbeddableInput,
   AnomalyChartsEmbeddableOutput,
   AnomalyChartsServices,

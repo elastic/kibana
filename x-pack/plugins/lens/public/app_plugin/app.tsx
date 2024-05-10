@@ -30,6 +30,7 @@ import {
   updateIndexPatterns,
   selectActiveDatasourceId,
   selectFramePublicAPI,
+  selectIsManaged,
 } from '../state_management';
 import { SaveModalContainer, runSaveLensVisualization } from './save_modal_container';
 import { LensInspector } from '../lens_inspector_service';
@@ -41,6 +42,7 @@ import {
 } from '../data_views_service/service';
 import { replaceIndexpattern } from '../state_management/lens_slice';
 import { useApplicationUserMessages } from './get_application_user_messages';
+import { trackUiCounterEvents } from '../lens_ui_telemetry';
 
 export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
   returnToOrigin: boolean;
@@ -65,9 +67,7 @@ export function App({
   contextOriginatingApp,
   topNavMenuEntryGenerators,
   initialContext,
-  theme$,
   coreStart,
-  savedObjectStore,
 }: LensAppProps) {
   const lensAppServices = useKibana<LensAppServices>().services;
 
@@ -85,8 +85,6 @@ export function App({
     http,
     notifications,
     executionContext,
-    // Temporarily required until the 'by value' paradigm is default.
-    dashboardFeatureFlag,
     locator,
     share,
     serverless,
@@ -111,6 +109,10 @@ export function App({
     visualization,
     annotationGroups,
   } = useLensSelector((state) => state.lens);
+
+  const activeVisualization = visualization.activeId
+    ? visualizationMap[visualization.activeId]
+    : undefined;
 
   const selectorDependencies = useMemo(
     () => ({
@@ -161,12 +163,8 @@ export function App({
   }, [setIndicateNoData, indicateNoData, searchSessionId]);
 
   const getIsByValueMode = useCallback(
-    () =>
-      Boolean(
-        // Temporarily required until the 'by value' paradigm is default.
-        dashboardFeatureFlag.allowByValueEmbeddables && isLinkedToOriginatingApp && !savedObjectId
-      ),
-    [dashboardFeatureFlag.allowByValueEmbeddables, isLinkedToOriginatingApp, savedObjectId]
+    () => Boolean(isLinkedToOriginatingApp && !savedObjectId),
+    [isLinkedToOriginatingApp, savedObjectId]
   );
 
   useEffect(() => {
@@ -298,7 +296,6 @@ export function App({
       chrome.setBreadcrumbs(breadcrumbs);
     }
   }, [
-    dashboardFeatureFlag.allowByValueEmbeddables,
     getOriginatingAppName,
     redirectToOrigin,
     getIsByValueMode,
@@ -319,6 +316,17 @@ export function App({
   const runSave = useCallback(
     (saveProps: SaveProps, options: { saveToLibrary: boolean }) => {
       dispatch(applyChanges());
+      const prevVisState =
+        persistedDoc?.visualizationType === visualization.activeId
+          ? persistedDoc?.state.visualization
+          : undefined;
+      const telemetryEvents = activeVisualization?.getTelemetryEventsOnSave?.(
+        visualization.state,
+        prevVisState
+      );
+      if (telemetryEvents && telemetryEvents.length) {
+        trackUiCounterEvents(telemetryEvents);
+      }
       return runSaveLensVisualization(
         {
           lastKnownDoc,
@@ -351,6 +359,9 @@ export function App({
       );
     },
     [
+      visualization.activeId,
+      visualization.state,
+      activeVisualization,
       dispatch,
       lastKnownDoc,
       getIsByValueMode,
@@ -460,7 +471,7 @@ export function App({
     [dataViews, uiActions, http, notifications, uiSettings, initialContext, dispatch]
   );
 
-  const onTextBasedSavedAndExit = useCallback(async ({ onSave, onCancel }) => {
+  const onTextBasedSavedAndExit = useCallback(async ({ onSave, onCancel: _onCancel }) => {
     setIsSaveModalVisible(true);
     setShouldCloseAndSaveTextBasedQuery(true);
     saveAndExit.current = () => {
@@ -489,6 +500,8 @@ export function App({
     },
     [locator, shortUrls]
   );
+
+  const isManaged = useLensSelector(selectIsManaged);
 
   const returnToOriginSwitchLabelForContext =
     initialContext &&
@@ -520,7 +533,7 @@ export function App({
         ? datasourceMap[activeDatasourceId]
         : null,
     dispatch,
-    visualization: visualization.activeId ? visualizationMap[visualization.activeId] : undefined,
+    visualization: activeVisualization,
     visualizationType: visualization.activeId,
     visualizationState: visualization,
   });
@@ -557,11 +570,11 @@ export function App({
           initialContextIsEmbedded={initialContextIsEmbedded}
           topNavMenuEntryGenerators={topNavMenuEntryGenerators}
           initialContext={initialContext}
-          theme$={theme$}
           indexPatternService={indexPatternService}
           onTextBasedSavedAndExit={onTextBasedSavedAndExit}
           getUserMessages={getUserMessages}
           shortUrlService={shortUrlService}
+          startServices={coreStart}
         />
         {getLegacyUrlConflictCallout()}
         {(!isLoading || persistedDoc) && (
@@ -595,6 +608,7 @@ export function App({
           initialInput={initialInput}
           redirectTo={redirectTo}
           redirectToOrigin={redirectToOrigin}
+          managed={isManaged}
           initialContext={initialContext}
           returnToOriginSwitchLabel={
             returnToOriginSwitchLabelForContext ??

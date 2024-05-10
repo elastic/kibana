@@ -11,7 +11,7 @@ import { getPreviewTransformRequestBody } from '../../../../../common';
 
 import { getDefaultStepDefineState } from '../common';
 
-import { StepDefineFormProps } from '../step_define_form';
+import type { StepDefineFormProps } from '../step_define_form';
 
 import { useAdvancedPivotEditor } from './use_advanced_pivot_editor';
 import { useAdvancedSourceEditor } from './use_advanced_source_editor';

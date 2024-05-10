@@ -13,6 +13,7 @@ import { docLinksServiceMock, uiSettingsServiceMock } from '@kbn/core/public/moc
 import { MAJOR_VERSION } from '../../../../../../../common';
 import { MappingsEditorProvider } from '../../../mappings_editor_context';
 import { createKibanaReactContext } from '../../../shared_imports';
+import { AppContextProvider } from '../../../../../app_context';
 import { Props as MappingsEditorProps } from '../../../mappings_editor';
 
 export const kibanaVersion = new SemVer(MAJOR_VERSION);
@@ -47,8 +48,8 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/code-editor', () => {
+  const original = jest.requireActual('@kbn/code-editor');
 
   const CodeEditorMock = (props: any) => (
     <input
@@ -83,14 +84,16 @@ const defaultProps: MappingsEditorProps = {
 };
 
 export const WithAppDependencies =
-  (Comp: MemoExoticComponent<ComponentType<MappingsEditorProps>>) =>
+  (Comp: MemoExoticComponent<ComponentType<MappingsEditorProps>>, appDependencies?: any) =>
   (props: Partial<MappingsEditorProps>) =>
     (
       <KibanaReactContextProvider>
-        <MappingsEditorProvider>
-          <GlobalFlyoutProvider>
-            <Comp {...defaultProps} {...props} />
-          </GlobalFlyoutProvider>
-        </MappingsEditorProvider>
+        <AppContextProvider value={appDependencies}>
+          <MappingsEditorProvider>
+            <GlobalFlyoutProvider>
+              <Comp {...defaultProps} {...props} />
+            </GlobalFlyoutProvider>
+          </MappingsEditorProvider>
+        </AppContextProvider>
       </KibanaReactContextProvider>
     );

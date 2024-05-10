@@ -11,5 +11,5 @@ module.exports = {
   roots: ['<rootDir>/x-pack/plugins/aiops'],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/aiops',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/x-pack/plugins/aiops/{common,public,server}/**/*.{js,ts,tsx}'],
+  collectCoverageFrom: ['<rootDir>/x-pack/plugins/aiops/{public,server}/**/*.{js,ts,tsx}'],
 };

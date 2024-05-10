@@ -31,7 +31,8 @@ export const FlyoutWrapper = ({
   isScrollable,
   displayFlyoutHeader,
   language,
-  attributesChanged,
+  isNewPanel,
+  isSaveable,
   onCancel,
   navigateToLensEditor,
   onApply,
@@ -49,16 +50,21 @@ export const FlyoutWrapper = ({
         >
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiTitle size="xs">
+              <EuiTitle size="xs" data-test-subj="inlineEditingFlyoutLabel">
                 <h2>
-                  {i18n.translate('xpack.lens.config.editVisualizationLabel', {
-                    defaultMessage: 'Edit {lang} visualization',
-                    values: { lang: language },
-                  })}
+                  {isNewPanel
+                    ? i18n.translate('xpack.lens.config.createVisualizationLabel', {
+                        defaultMessage: 'Create {lang} visualization',
+                        values: { lang: language },
+                      })
+                    : i18n.translate('xpack.lens.config.editVisualizationLabel', {
+                        defaultMessage: 'Edit {lang} visualization',
+                        values: { lang: language },
+                      })}
                   <EuiToolTip
-                    content={i18n.translate('xpack.lens.config.experimentalLabel', {
+                    content={i18n.translate('xpack.lens.config.experimentalLabelDataview', {
                       defaultMessage:
-                        'Technical preview, ES|QL currently offers limited configuration options',
+                        'Technical preview, inline editing currently offers limited configuration options',
                     })}
                   >
                     <EuiBetaBadge
@@ -119,6 +125,7 @@ export const FlyoutWrapper = ({
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
+                id="lnsCancelEditOnFlyFlyout"
                 onClick={onCancel}
                 flush="left"
                 aria-label={i18n.translate('xpack.lens.config.cancelFlyoutAriaLabel', {
@@ -139,7 +146,7 @@ export const FlyoutWrapper = ({
                 aria-label={i18n.translate('xpack.lens.config.applyFlyoutAriaLabel', {
                   defaultMessage: 'Apply changes',
                 })}
-                disabled={!attributesChanged}
+                disabled={Boolean(isNewPanel) ? false : !isSaveable}
                 iconType="check"
                 data-test-subj="applyFlyoutButton"
               >

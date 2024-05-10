@@ -18,5 +18,6 @@
   "kbn_references": [
     "@kbn/management-settings-types",
     "@kbn/i18n",
+    "@kbn/core-ui-settings-common",
   ]
 }

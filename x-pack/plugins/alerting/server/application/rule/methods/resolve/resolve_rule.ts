@@ -7,6 +7,7 @@
 import Boom from '@hapi/boom';
 import { withSpan } from '@kbn/apm-utils';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { resolveRuleSavedObject } from '../../../../rules_client/lib';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { RuleTypeParams } from '../../../../types';
@@ -52,7 +53,7 @@ Promise<ResolvedSanitizedRule<Params>> {
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.RESOLVE,
-        savedObject: { type: 'alert', id },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
         error,
       })
     );
@@ -61,17 +62,21 @@ Promise<ResolvedSanitizedRule<Params>> {
   context.auditLogger?.log(
     ruleAuditEvent({
       action: RuleAuditAction.RESOLVE,
-      savedObject: { type: 'alert', id },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
     })
   );
 
-  const ruleDomain = transformRuleAttributesToRuleDomain(result.attributes, {
-    id: result.id,
-    logger: context.logger,
-    ruleType: context.ruleTypeRegistry.get(result.attributes.alertTypeId),
-    references: result.references,
-    includeSnoozeData,
-  });
+  const ruleDomain = transformRuleAttributesToRuleDomain(
+    result.attributes,
+    {
+      id: result.id,
+      logger: context.logger,
+      ruleType: context.ruleTypeRegistry.get(result.attributes.alertTypeId),
+      references: result.references,
+      includeSnoozeData,
+    },
+    context.isSystemAction
+  );
 
   const rule = transformRuleDomainToRule(ruleDomain);
 

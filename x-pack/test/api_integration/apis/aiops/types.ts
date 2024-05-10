@@ -8,7 +8,7 @@
 import type {
   AiopsLogRateAnalysisSchema,
   AiopsLogRateAnalysisApiVersion as ApiVersion,
-} from '@kbn/aiops-plugin/common/api/log_rate_analysis/schema';
+} from '@kbn/aiops-log-rate-analysis/api/schema';
 import type { SignificantItem, SignificantItemGroup } from '@kbn/ml-agg-utils';
 
 import type { LogRateAnalysisDataGenerator } from '../../../functional/services/aiops/log_rate_analysis_data_generator';
@@ -19,10 +19,6 @@ export interface TestData<T extends ApiVersion> {
   dataGenerator?: LogRateAnalysisDataGenerator;
   requestBody: AiopsLogRateAnalysisSchema<T>;
   expected: {
-    chunksLength: number;
-    chunksLengthGroupOnly: number;
-    actionsLength: number;
-    actionsLengthGroupOnly: number;
     noIndexChunksLength: number;
     noIndexActionsLength: number;
     significantItems: SignificantItem[];

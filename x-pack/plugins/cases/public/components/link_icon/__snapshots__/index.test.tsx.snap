@@ -1,11 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`LinkIcon it renders 1`] = `
-<Link
+<EuiLink
   aria-label="Test link"
   className="casesLinkIcon"
-  href="#"
-  iconSide="right"
+  onClick={[Function]}
 >
   <EuiIcon
     size="xxl"
@@ -16,5 +15,5 @@ exports[`LinkIcon it renders 1`] = `
   >
     Test link
   </span>
-</Link>
+</EuiLink>
 `;

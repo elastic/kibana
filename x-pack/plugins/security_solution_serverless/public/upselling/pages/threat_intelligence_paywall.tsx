@@ -8,11 +8,11 @@
 import React from 'react';
 import { EuiEmptyPrompt, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { AppFeatureKeyType } from '@kbn/security-solution-features';
+import type { ProductFeatureKeyType } from '@kbn/security-solution-features';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { getProductTypeByPLI } from '../hooks/use_product_type_by_pli';
 
-const ThreatIntelligencePaywall: React.FC<{ requiredPLI: AppFeatureKeyType }> = React.memo(
+const ThreatIntelligencePaywall: React.FC<{ requiredPLI: ProductFeatureKeyType }> = React.memo(
   function PaywallComponent({ requiredPLI }) {
     const productTypeRequired = getProductTypeByPLI(requiredPLI);
 

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type {
   DateHistogramIndexPatternColumn,
   GenericIndexPatternColumn,
@@ -18,7 +18,7 @@ import type {
 } from '@kbn/lens-plugin/public';
 import { DOCUMENT_FIELD_NAME as RECORDS_FIELD } from '@kbn/lens-plugin/common/constants';
 import type { CombinedQuery } from '../../../../index_data_visualizer/types/combined_query';
-import { FieldVisConfig } from '../../stats_table/types';
+import type { FieldVisConfig } from '../../stats_table/types';
 import { SUPPORTED_FIELD_TYPES } from '../../../../../../common/constants';
 
 interface ColumnsAndLayer {

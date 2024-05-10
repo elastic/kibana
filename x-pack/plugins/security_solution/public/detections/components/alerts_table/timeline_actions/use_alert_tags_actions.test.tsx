@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { TestProviders } from '@kbn/timelines-plugin/public/mock';
 import { renderHook } from '@testing-library/react-hooks';
 import type { UseAlertTagsActionsProps } from './use_alert_tags_actions';
 import { useAlertTagsActions } from './use_alert_tags_actions';
@@ -15,6 +14,7 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiPopover, EuiContextMenu } from '@elastic/eui';
+import { TestProviders } from '../../../../common/mock';
 import { useSetAlertTags } from '../../../../common/components/toolbar/bulk_actions/use_set_alert_tags';
 import { useUiSetting$ } from '../../../../common/lib/kibana';
 

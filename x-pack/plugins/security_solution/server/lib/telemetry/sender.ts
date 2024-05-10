@@ -18,14 +18,17 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { exhaustMap, Subject, takeUntil, timer } from 'rxjs';
 import type { ITelemetryReceiver } from './receiver';
 import { copyAllowlistedFields, filterList } from './filterlists';
 import { createTelemetryTaskConfigs } from './tasks';
-import { createUsageCounterLabel, tlog } from './helpers';
-import type { TelemetryEvent } from './types';
+import { copyLicenseFields, createUsageCounterLabel, tlog } from './helpers';
+import type { TelemetryChannel, TelemetryEvent } from './types';
 import type { SecurityTelemetryTaskConfig } from './task';
 import { SecurityTelemetryTask } from './task';
 import { telemetryConfiguration } from './configuration';
+import type { IAsyncTelemetryEventsSender, QueueConfig } from './async_sender.types';
+import { TaskMetricsService } from './task_metrics';
 
 const usageLabelPrefix: string[] = ['security_telemetry', 'sender'];
 
@@ -34,7 +37,8 @@ export interface ITelemetryEventsSender {
     telemetryReceiver: ITelemetryReceiver,
     telemetrySetup?: TelemetryPluginSetup,
     taskManager?: TaskManagerSetupContract,
-    telemetryUsageCounter?: UsageCounter
+    telemetryUsageCounter?: UsageCounter,
+    asyncTelemetrySender?: IAsyncTelemetryEventsSender
   ): void;
 
   getTelemetryUsageCluster(): UsageCounter | undefined;
@@ -47,6 +51,9 @@ export interface ITelemetryEventsSender {
   ): void;
 
   stop(): void;
+  /**
+   * @deprecated Use `sendAsync` instead.
+   */
   queueTelemetryEvents(events: TelemetryEvent[]): void;
   isTelemetryOptedIn(): Promise<boolean>;
   isTelemetryServicesReachable(): Promise<boolean>;
@@ -54,16 +61,42 @@ export interface ITelemetryEventsSender {
   processEvents(events: TelemetryEvent[]): TelemetryEvent[];
   sendOnDemand(channel: string, toSend: unknown[], axiosInstance?: AxiosInstance): Promise<void>;
   getV3UrlFromV2(v2url: string, channel: string): string;
+
+  // As a transition to the new sender, `IAsyncTelemetryEventsSender`, we wrap
+  // its "public API" here to expose a single Sender interface to the rest
+  // of the code. The `queueTelemetryEvents` is deprecated in favor of
+  // `sendAsync`.
+
+  /**
+   * Sends events to a given telemetry channel asynchronously.
+   */
+  sendAsync: (channel: TelemetryChannel, events: unknown[]) => void;
+
+  /**
+   * Simulates sending events to a given telemetry channel asynchronously
+   * and returns the request that should be sent to the server
+   */
+  simulateSendAsync: (channel: TelemetryChannel, events: unknown[]) => string[];
+
+  /**
+   * Updates the queue configuration for a given channel.
+   */
+  updateQueueConfig: (channel: TelemetryChannel, config: QueueConfig) => void;
+
+  /**
+   * Updates the default queue configuration.
+   */
+  updateDefaultQueueConfig: (config: QueueConfig) => void;
 }
 
 export class TelemetryEventsSender implements ITelemetryEventsSender {
   private readonly initialCheckDelayMs = 10 * 1000;
   private readonly checkIntervalMs = 60 * 1000;
   private readonly logger: Logger;
+  private readonly stop$ = new Subject<void>();
   private maxQueueSize = telemetryConfiguration.telemetry_max_buffer_size;
   private telemetryStart?: TelemetryPluginStart;
   private telemetrySetup?: TelemetryPluginSetup;
-  private intervalId?: NodeJS.Timeout;
   private isSending = false;
   private receiver: ITelemetryReceiver | undefined;
   private queue: TelemetryEvent[] = [];
@@ -75,6 +108,8 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
   private telemetryUsageCounter?: UsageCounter;
   private telemetryTasks?: SecurityTelemetryTask[];
 
+  private asyncTelemetrySender?: IAsyncTelemetryEventsSender;
+
   constructor(logger: Logger) {
     this.logger = logger.get('telemetry_events');
   }
@@ -83,19 +118,28 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
     telemetryReceiver: ITelemetryReceiver,
     telemetrySetup?: TelemetryPluginSetup,
     taskManager?: TaskManagerSetupContract,
-    telemetryUsageCounter?: UsageCounter
+    telemetryUsageCounter?: UsageCounter,
+    asyncTelemetrySender?: IAsyncTelemetryEventsSender
   ) {
     this.telemetrySetup = telemetrySetup;
     this.telemetryUsageCounter = telemetryUsageCounter;
     if (taskManager) {
+      const taskMetricsService = new TaskMetricsService(this.logger, this);
       this.telemetryTasks = createTelemetryTaskConfigs().map(
         (config: SecurityTelemetryTaskConfig) => {
-          const task = new SecurityTelemetryTask(config, this.logger, this, telemetryReceiver);
+          const task = new SecurityTelemetryTask(
+            config,
+            this.logger,
+            this,
+            telemetryReceiver,
+            taskMetricsService
+          );
           task.register(taskManager);
           return task;
         }
       );
     }
+    this.asyncTelemetrySender = asyncTelemetrySender;
   }
 
   public getTelemetryUsageCluster(): UsageCounter | undefined {
@@ -119,16 +163,16 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
     }
 
     tlog(this.logger, `Starting local task`);
-    setTimeout(() => {
-      this.sendIfDue();
-      this.intervalId = setInterval(() => this.sendIfDue(), this.checkIntervalMs);
-    }, this.initialCheckDelayMs);
+    timer(this.initialCheckDelayMs, this.checkIntervalMs)
+      .pipe(
+        takeUntil(this.stop$),
+        exhaustMap(() => this.sendIfDue())
+      )
+      .subscribe();
   }
 
   public stop() {
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
-    }
+    this.stop$.next();
   }
 
   public queueTelemetryEvents(events: TelemetryEvent[]) {
@@ -274,7 +318,7 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
 
       const toSend: TelemetryEvent[] = cloneDeep(this.queue).map((event) => ({
         ...event,
-        ...(licenseInfo ? { license: this.receiver?.copyLicenseFields(licenseInfo) } : {}),
+        ...(licenseInfo ? { license: copyLicenseFields(licenseInfo) } : {}),
         cluster_uuid: clusterInfo?.cluster_uuid,
         cluster_name: clusterInfo?.cluster_name,
       }));
@@ -363,6 +407,29 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
       url.pathname = `/v3-dev/send/${channel}`;
     }
     return url.toString();
+  }
+
+  public sendAsync(channel: TelemetryChannel, events: unknown[]): void {
+    this.getAsyncTelemetrySender().send(channel, events);
+  }
+
+  public simulateSendAsync(channel: TelemetryChannel, events: unknown[]): string[] {
+    return this.getAsyncTelemetrySender().simulateSend(channel, events);
+  }
+
+  public updateQueueConfig(channel: TelemetryChannel, config: QueueConfig): void {
+    this.getAsyncTelemetrySender().updateQueueConfig(channel, config);
+  }
+
+  public updateDefaultQueueConfig(config: QueueConfig): void {
+    this.getAsyncTelemetrySender().updateDefaultQueueConfig(config);
+  }
+
+  private getAsyncTelemetrySender(): IAsyncTelemetryEventsSender {
+    if (!this.asyncTelemetrySender) {
+      throw new Error('Telemetry Sender V2 not initialized');
+    }
+    return this.asyncTelemetrySender;
   }
 
   private async fetchTelemetryPingUrl(): Promise<string> {

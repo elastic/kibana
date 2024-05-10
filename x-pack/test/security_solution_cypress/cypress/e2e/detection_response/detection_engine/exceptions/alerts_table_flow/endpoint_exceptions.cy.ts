@@ -43,14 +43,14 @@ import {
 // See https://github.com/elastic/kibana/issues/163967
 describe.skip(
   'Endpoint Exceptions workflows from Alert',
-  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  { tags: ['@ess', '@serverless', '@skipInServerless'] },
   () => {
     const ITEM_NAME = 'Sample Exception List Item';
     const ITEM_NAME_EDIT = 'Sample Exception List Item';
     const ADDITIONAL_ENTRY = 'host.hostname';
 
     beforeEach(() => {
-      cy.task('esArchiverUnload', 'endpoint');
+      cy.task('esArchiverUnload', { archiveName: 'endpoint' });
       login();
       deleteAlertsAndRules();
 
@@ -62,7 +62,7 @@ describe.skip(
     });
 
     after(() => {
-      cy.task('esArchiverUnload', 'endpoint');
+      cy.task('esArchiverUnload', { archiveName: 'endpoint' });
     });
 
     it('Should be able to create and close single Endpoint exception from overflow menu', () => {

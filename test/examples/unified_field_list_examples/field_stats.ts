@@ -54,7 +54,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
     describe('field distribution', () => {
       before(async () => {
-        await PageObjects.unifiedFieldList.toggleSidebarSection('empty'); // it will allow to render more fields in Available fields section
+        await PageObjects.unifiedFieldList.toggleSidebarSection('meta'); // it will allow to render more fields in Available fields section
       });
 
       it('should return an auto histogram for numbers and top values', async () => {

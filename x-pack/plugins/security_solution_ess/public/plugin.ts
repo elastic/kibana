@@ -6,9 +6,8 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { subscribeBreadcrumbs } from './breadcrumbs';
+import { startNavigation } from './navigation';
 import { createServices } from './common/services';
-import { getSecurityGetStartedComponent } from './get_started';
 import { registerUpsellings } from './upselling/register_upsellings';
 import type {
   SecuritySolutionEssPluginSetup,
@@ -16,6 +15,7 @@ import type {
   SecuritySolutionEssPluginSetupDeps,
   SecuritySolutionEssPluginStartDeps,
 } from './types';
+import { setOnboardingSettings } from './onboarding';
 
 export class SecuritySolutionEssPlugin
   implements
@@ -40,15 +40,12 @@ export class SecuritySolutionEssPlugin
     const { securitySolution, licensing } = startDeps;
     const services = createServices(core, startDeps);
 
+    startNavigation(services);
+    setOnboardingSettings(services);
+
     licensing.license$.subscribe((license) => {
       registerUpsellings(securitySolution.getUpselling(), license, services);
     });
-
-    securitySolution.setComponents({
-      GetStarted: getSecurityGetStartedComponent(services),
-    });
-
-    subscribeBreadcrumbs(services);
 
     return {};
   }

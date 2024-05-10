@@ -19,8 +19,6 @@ Welcome to the serverless project navigation documentation. Our tools help teams
         - [`NavigationTreeDefinition`](#navigationtreedefinition)
         - [`GroupDefinition`](#groupdefinition)
         - [`RecentlyAccessedDefinition`](#recentlyaccesseddefinition)
-    - [React components](#react-components)
-      - [`unstyled`](#unstyled)
     - [Important concepts](#important-concepts)
       - [Deep links](#deep-links)
       - [Cloud link](#cloud-links)
@@ -50,26 +48,7 @@ In the following sections, we will explore each of these building blocks in deta
 
 The left side navigation is a primary way for users to navigate through different sections of the project. It consists of a tree of navigation items that can be expanded/collapsed or opened in a side panel. Apart from the navigation tree it also supports special pre-built blocks like recently accessed items. The main part of the navigation tree is project's navigation: this is fully configured and supported by the project teams (e.g. Observability). We also provide pre-configured platform sections as presets that solutions can use as part of their navigation (e.g. `ml`, `analytics`). Solutions can customize those sections to their needs.
 
-There are two approaches to building the side navigation:
-
-1. **Navigation tree definition**: Developers provide a navigation tree definition. ~~This approach is recommended if the use case works with the existing building blocks.~~ :warning: We are planing in deprecating this approach, use the React components instead.
-
-2. **React components**: Alternatively, we provide a set of pre-built components that can be used to construct the left side navigation. These components include:
-
-`<Navigation />`: The parent component that encapsulates the entire navigation area.
-`<Navigation.Group />`: A component representing a group of navigation items.
-`<Navigation.Item />`: A component representing an individual navigation item.
-`<Navigation.Footer />`: A component for displaying additional content at the bottom of the navigation.
-`<Navigation.RecentlyAccessed />`: A component for displaying a list of recently accessed items.
-
-By leveraging these components, you can create a customized left side navigation for a serverless project.
-
-> **Note**
-> Both approaches have an identical set of properties that can be passed. Some of those properties will be documented in the tree definition section below.
-
 ### Navigation Tree Definition
-
-:warning: **Soon to be deprecated** :warning: - Use the React components instead.
 
 Use the `NavigationTreeDefinition` interface to create your left side navigation using a tree definition. This interface allows you to define the complete navigation tree, including the **body** and **footer** of the navigation.
 
@@ -127,8 +106,8 @@ const navigationTree: NavigationTreeDefinition = {
       ],
     },
     {
-      type: 'navGroup',
-      ...getPresets('ml'), // Insert all the machine learning links, learn more in #preconfigured-navigation-presets section
+      type: 'preset',
+      preset: 'ml', // Insert all the machine learning links, learn more in #preconfigured-navigation-presets section
     },
   ],
   footer: [
@@ -165,33 +144,25 @@ const navigationTree: NavigationTreeDefinition = {
 
 Once the navigation tree is defined we need to
 
-1. Pass it to the `<DefaultNavigation />` component
-2. Set your navigation component in the `serverless` plugin
+1. Convert it to an `Observable`
+2. Initiate the navigation in the `serverless` plugin
 
 ```tsx
-import { DefaultNavigation, NavigationKibanaProvider } from '@kbn/shared-ux-chrome-navigation';
-
-const createServerlessSearchSideNavComponent =
-  (
-    core: CoreStart,
-    { serverless, cloud }: { serverless: ServerlessPluginStart; cloud: CloudStart }
-  ) =>
-  () => {
-    return (
-      <NavigationKibanaProvider core={core} serverless={serverless} cloud={cloud}>
-        <DefaultNavigation navigationTree={navigationTree} dataTestSubj="svlSearchSideNav" />
-      </NavigationKibanaProvider>
-    );
-  };
+import { of } from 'rxjs';
 
 // plugin.ts (public) "start()"
-serverless.setSideNavComponent(createComponent(core, { serverless, cloud }));
+const navigationTree$ = of(navigationTree);
+
+serverless.initNavigation(navigationTree$, /* optional */ {
+  // Optional: pass a test subject for the navigation
+  dataTestSubj: 'myNavigation'
+});
 ```
 
 #### Navigation tree API
 
 > **Warning**
-> The API reference is manually maintained and might be out of date. Please refer [to the source](https://github.com/elastic/kibana/blob/2c4f8b76c520f2ffd0516a29601c03db9b09d221/packages/shared-ux/chrome/navigation/src/ui/types.ts#L83-L124) for the most up-to-date information, until we have automated the API reference.
+> The API reference is manually maintained and might be out of date. Please refer [to the source](https://github.com/elastic/kibana/blob/main/packages/core/chrome/core-chrome-browser/src/project_navigation.ts) for the most up-to-date information, until we have automated the API reference.
 
 ##### `NavigationTreeDefinition`
 
@@ -323,100 +294,10 @@ const panelContentProvider: PanelContentProvider = (id: string) => {
   // All other nodes content ids that haven't match will be auto-generated
 };
 
-// 2. Pass it to the <Navigation /> or <DefaultNavigation /> components
-// --------------------------------------------------------------------
+// 2. Provide it when initiating the navigation
+// -----------------------------------------
 
-<Navigation panelContentProvider={panelContentProvider}>
-  <Navigation.Group id="group1" title="Group 1">
-    {...}
-  </Navigation.Group>
-</Navigation>;
-
-// or using <DefaultNavigation />
-<DefaultNavigation panelContentProvider={panelContentProvider} {...otherProps} />;
-```
-
-### React components
-
-If you need other navigation sections in your navigation you will need to use our React components. They have the same properties as seen above except the `unstyled` prop that we will detail below.
-
-```tsx
-import { NavigationKibanaProvider, Navigation } from '@kbn/shared-ux-chrome-navigation';
-
-const createServerlessSearchSideNavComponent =
-  (
-    core: CoreStart,
-    { serverless, cloud }: { serverless: ServerlessPluginStart; cloud: CloudStart }
-  ) =>
-  () => {
-    return (
-      <NavigationKibanaProvider core={core} serverless={serverless} cloud={cloud}>
-        <Navigation>
-          <Navigation.Group id="group1" title="Group 1" defaultIsCollapsed={false}>
-            <Navigation.Item id="item1" title="Item 1" />
-            <Navigation.Item id="item2" title="Item 2" />
-            <Navigation.Item id="item3" title="Item 3" />
-          </Navigation.Group>
-
-          <div>
-            <p>Any other section you might need</p>
-          </div>
-
-          <Navigation.Group id="group2" title="Group 2">
-            <Navigation.Item id="item1">
-              <EuiText color="blue">Title can also be a React node</EuiText>
-            </Navigation.Item>
-
-            <Navigation.Group id="nestedGroup" title="Group can be nested">
-              <Navigation.Item id="item1" title="Item 1" />
-            </Navigation.Group>
-          </Navigation.Group>
-          <Navigation.Footer>
-            <Navigation.Group preset="devtools" />
-          </Navigation.Footer>
-        </Navigation>
-      </NavigationKibanaProvider>
-    );
-  };
-```
-
-And as with the tree definition above you will have to set the navigation component on the `serverless` plugin.
-
-```ts
-// plugin.ts (public) "start()"
-serverless.setSideNavComponent(createComponent(core, { serverless, cloud }));
-```
-
-#### `unstyled`
-
-If you want to have a completely customized UI, without the Shared UX components, but also want the benefits of self-updating breadcrumbs (see the [#breadcrumbs](#breadcrumbs) section), just declare your navigation tree and pass the `unstyled` property to your `<Navigation />`.
-
-```tsx
-/**
- * This JSX will correctly declare your tree structure but will not have any UI applied.
- Tree generated:
-[{
-  id: 'my-group',
-  title: "My Group,
-  children: [{
-    id: 'item-1',
-    title: 'Item 1',
-  }, {
-    id: 'item-2',
-    title: 'Item 2',
-  }]
-}]
- */
-<Navigation unstyled>
-  <Navigation.Group id="my-group" title="My group">
-    <Navigation.Item id="item-1" title="Item 1">
-      <div>Your custom UI</div>
-    </Navigation.Item>
-    <Navigation.Item id="item-2" title="Item 2">
-      <div>Your custom UI</div>
-    </Navigation.Item>
-  </Navigation.Group>
-</Navigation>
+serverless.initNavigation(navigationTree$, { panelContentProvider });
 ```
 
 ### Important Concepts
@@ -473,39 +354,14 @@ import { type NavigationTreeDefinition, getPresets } from '@kbn/shared-ux-chrome
 const navigationTree: NavigationTreeDefinition = {
   body: [
     {
-      type: 'navGroup',
-      ...getPresets('ml'), // Insert all the machine learning links
+      type: 'preset',
+      preset: 'ml', // Insert all the machine learning links
     },
   ],
 };
 ```
 
 The benefit of using the preset instead of building the platform sections manually is that the team who owns the platform area can update the preset as they see fit.
-
-You can also customize the preset like so:
-
-```ts
-import type { NodeDefinition } from '@kbn/core-chrome-browser';
-import { type NavigationTreeDefinition, getPresets } from '@kbn/shared-ux-chrome-navigation';
-
-const navigationTree: NavigationTreeDefinition = {
-  body: [
-    {
-      type: 'navGroup',
-      // And specific links from analytics
-      ...getPresets('analytics'),
-      title: 'My analytics', // Change the title
-      children: getPresets('analytics').children.map((child) => ({
-        ...child,
-        children: child.children?.filter((item) => {
-          // force remove discover and dashboard
-          return item.link !== 'discover' && item.link !== 'dashboards';
-        }),
-      })) as NonEmptyArray<NodeDefinition>,
-    },
-  ],
-};
-```
 
 #### Active Navigation Path
 
@@ -530,12 +386,6 @@ const navigationTree: NavigationTreeDefinition = {
 ```
 
 Technically, multiple paths can be active simultaneously and multiple nodes can be highlighted in the side navigation. However, this is not recommended as it can be confusing for the user.
-
-You can programmatically access the active paths using the `getActiveNavigationNodes$` method:
-
-```ts
-const activesNodes$ = pluginsStart.serverless.getActiveNavigationNodes$();
-```
 
 ## Breadcrumbs
 
@@ -566,12 +416,22 @@ Most of the applications are already setting the complete breadcrumb path for st
 
 For example, consider the navigation tree:
 
-```tsx
-<Navigation>
-  <Navigation.Group id="aiops" title="AI Ops">
-    <Navigation.Item id="ml:anomalyexplorer" link="ml:anomalyexplorer" title="Anomaly Explorer" />
-  </Navigation.Group>
-</Navigation>
+```ts
+const navigationTree: NavigationTreeDefinition = {
+  body: [
+    {
+      type: 'navGroup',
+      id: 'aiops',
+      title: 'AI Ops',
+      children: [
+        {
+          link: 'ml:anomalyexplorer',
+          title: 'Anomaly Explorer',
+        },
+      ],
+    },
+  ],
+};
 ```
 
 When on `ml:anomalyexplorer` page, the project navigation breadcrumbs will be:

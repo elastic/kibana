@@ -19,6 +19,7 @@ export const labelsSchema = schema.object(
     ciBuildJobId: schema.maybe(schema.string()),
     ciBuildId: schema.maybe(schema.string()),
     ciBuildNumber: schema.maybe(schema.number()),
+    environment: schema.maybe(schema.string()),
     ftrConfig: schema.maybe(schema.string()),
     gitRev: schema.maybe(schema.string()),
     isPr: schema.maybe(schema.boolean()),

@@ -7,7 +7,7 @@
  */
 
 import { combineLatest, Observable, timer, of } from 'rxjs';
-import { map, catchError, filter, mergeMap, tap } from 'rxjs/operators';
+import { map, catchError, filter, mergeMap, tap } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { FetchResult, NewsfeedPluginBrowserConfig } from '../types';
 import { NewsfeedApiDriver } from './driver';

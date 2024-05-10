@@ -9,6 +9,8 @@
 import { CoreStart } from '@kbn/core/public';
 
 export interface ControlsCoreService {
+  analytics: CoreStart['analytics'];
   i18n: CoreStart['i18n'];
   theme: CoreStart['theme'];
+  notifications: CoreStart['notifications'];
 }

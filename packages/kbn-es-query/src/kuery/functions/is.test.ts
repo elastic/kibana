@@ -16,8 +16,6 @@ import { KQL_NODE_TYPE_WILDCARD } from '../node_types/wildcard';
 import { KQL_NODE_TYPE_LITERAL } from '../node_types/literal';
 import { KqlIsFunctionNode } from './is';
 
-jest.mock('../grammar');
-
 describe('kuery functions', () => {
   describe('is', () => {
     let indexPattern: DataViewBase;
@@ -249,6 +247,29 @@ describe('kuery functions', () => {
           'win*'
         ) as KqlIsFunctionNode;
         const result = is.toElasticsearchQuery(node, indexPattern, { caseInsensitive: true });
+
+        expect(result).toEqual(expected);
+      });
+
+      test('should create a wildcard query with backslashes properly escaped', () => {
+        const expected = {
+          bool: {
+            should: [
+              {
+                wildcard: {
+                  'machine.os.keyword': { value: '*\\\\*' },
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        };
+        const node = nodeTypes.function.buildNode(
+          'is',
+          'machine.os.keyword',
+          '*\\\\*'
+        ) as KqlIsFunctionNode;
+        const result = is.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toEqual(expected);
       });

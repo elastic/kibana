@@ -11,17 +11,17 @@ import { useActions, useValues } from 'kea';
 
 import { EuiSelectable, useEuiTheme, useIsWithinMaxBreakpoint } from '@elastic/eui';
 
-import { MLInferenceLogic, MLInferencePipelineOption } from './ml_inference_logic';
+import { MLInferencePipelineOption, PipelineSelectLogic } from './pipeline_select_logic';
 import { PipelineSelectOption, PipelineSelectOptionProps } from './pipeline_select_option';
 
 export const PipelineSelect: React.FC = () => {
   const {
-    addInferencePipelineModal: { configuration },
+    addInferencePipelineModal: {
+      configuration: { pipelineName },
+    },
     existingInferencePipelines,
-  } = useValues(MLInferenceLogic);
-  const { selectExistingPipeline } = useActions(MLInferenceLogic);
-
-  const { pipelineName } = configuration;
+  } = useValues(PipelineSelectLogic);
+  const { selectExistingPipeline } = useActions(PipelineSelectLogic);
 
   const { euiTheme } = useEuiTheme();
   const largeScreenRowHeight = euiTheme.base * 6;

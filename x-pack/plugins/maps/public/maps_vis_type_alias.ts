@@ -39,7 +39,7 @@ export function getMapsVisTypeAlias() {
         searchFields: ['title^3'],
         client: getMapClient,
         toListItem(mapItem: MapItem) {
-          const { id, type, updatedAt, attributes } = mapItem;
+          const { id, type, updatedAt, attributes, managed } = mapItem;
           const { title, description } = attributes;
 
           return {
@@ -47,6 +47,7 @@ export function getMapsVisTypeAlias() {
             title,
             description,
             updatedAt,
+            managed,
             editor: {
               editUrl: getEditPath(id),
               editApp: APP_ID,

@@ -18,7 +18,7 @@ export default function ServiceAlerts({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
   const supertest = getService('supertest');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
   const es = getService('es');
   const dayInMs = 24 * 60 * 60 * 1000;
   const start = Date.now() - dayInMs;
@@ -64,6 +64,7 @@ export default function ServiceAlerts({ getService }: FtrProviderContext) {
     });
   }
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177512
   registry.when('Service alerts', { config: 'basic', archives: [] }, () => {
     before(async () => {
       const synthServices = [
@@ -72,7 +73,7 @@ export default function ServiceAlerts({ getService }: FtrProviderContext) {
           .instance('instance-1'),
       ];
 
-      await synthtraceEsClient.index(
+      await apmSynthtraceEsClient.index(
         synthServices.map((service) =>
           timerange(start, end)
             .interval('5m')
@@ -113,7 +114,7 @@ export default function ServiceAlerts({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await synthtraceEsClient.clean();
+      await apmSynthtraceEsClient.clean();
     });
 
     describe('with alerts', () => {

@@ -87,7 +87,7 @@ const RuleSourceFilterComponent = ({
       `}
     >
       <EuiPopover
-        id="ruleActivityFilterPopover"
+        id="ruleSourceFilterPopover"
         button={button}
         isOpen={isPopoverOpen}
         closePopover={closePopover}

@@ -12,8 +12,10 @@ import { register as registerEsQuery } from './es_query';
 
 export * from './constants';
 
-export function registerBuiltInRuleTypes(params: RegisterRuleTypesParams) {
+export function registerBuiltInRuleTypes(params: RegisterRuleTypesParams, isServerless: boolean) {
   registerIndexThreshold(params);
-  registerGeoContainment(params);
-  registerEsQuery(params);
+  if (!isServerless) {
+    registerGeoContainment(params);
+  }
+  registerEsQuery(params, isServerless);
 }

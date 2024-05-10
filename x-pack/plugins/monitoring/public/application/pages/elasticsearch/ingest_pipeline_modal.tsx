@@ -6,13 +6,12 @@
  */
 
 import React, { useState } from 'react';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import type { CoreStart } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
-import { DashboardStart } from '@kbn/dashboard-plugin/public';
-import { FleetStart, KibanaSavedObjectType } from '@kbn/fleet-plugin/public';
+import { KibanaSavedObjectType } from '@kbn/fleet-plugin/public';
+import { MonitoringStartServices } from '../../../types';
 
 const INGEST_PIPELINE_DASHBOARD_ID = 'elasticsearch-metrics-ingest-pipelines';
 
@@ -22,9 +21,7 @@ const INGEST_PIPELINE_DASHBOARD_ID = 'elasticsearch-metrics-ingest-pipelines';
  * @param services
  * @returns
  */
-export const ingestPipelineTabOnClick = async (
-  services: Partial<CoreStart & { dashboard: DashboardStart; fleet: FleetStart }>
-) => {
+export const ingestPipelineTabOnClick = async (services: MonitoringStartServices) => {
   const response = await services.fleet?.hooks.epm.getBulkAssets({
     assetIds: [
       {
@@ -43,7 +40,10 @@ export const ingestPipelineTabOnClick = async (
     });
 
   if (!dashboardFound) {
-    const installPackage = () => services.http!.post('/api/fleet/epm/packages/elasticsearch');
+    const installPackage = () =>
+      services.http!.post('/api/fleet/epm/packages/elasticsearch', {
+        headers: { 'Elastic-Api-Version': '2023-10-31' },
+      });
 
     const ref = services.overlays!.openModal(
       toMountPoint(
@@ -53,9 +53,7 @@ export const ingestPipelineTabOnClick = async (
           canInstallPackages={!!services.fleet?.authz.integrations.installPackages}
           closeModal={() => ref.close()}
         />,
-        {
-          theme$: services.theme?.theme$,
-        }
+        services
       )
     );
 

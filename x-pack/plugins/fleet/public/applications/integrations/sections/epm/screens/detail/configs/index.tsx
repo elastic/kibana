@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React from 'react';
+import styled from 'styled-components';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,6 +24,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { PackageInfo } from '../../../../../types';
 
 import { useGetInputsTemplatesQuery, useStartServices } from '../../../../../hooks';
+import { PrereleaseCallout } from '../overview/overview';
+
+import { isPackagePrerelease } from '../../../../../../../../common/services';
+
+const FlexItemWithMaxWidth = styled(EuiFlexItem)`
+  max-width: 1000px;
+`;
 
 interface ConfigsProps {
   packageInfo: PackageInfo;
@@ -33,11 +41,15 @@ export const Configs: React.FC<ConfigsProps> = ({ packageInfo }) => {
   const { name: pkgName, version: pkgVersion, title: pkgTitle } = packageInfo;
   const notInstalled = packageInfo.status !== 'installing';
 
+  const isPrerelease = isPackagePrerelease(packageInfo.version);
   const {
     data: configs,
     error,
     isLoading,
-  } = useGetInputsTemplatesQuery({ pkgName, pkgVersion }, { format: 'yaml' });
+  } = useGetInputsTemplatesQuery(
+    { pkgName, pkgVersion },
+    { format: 'yaml', prerelease: isPrerelease }
+  );
 
   if (error) {
     notifications.toasts.addError(error, {
@@ -50,11 +62,20 @@ export const Configs: React.FC<ConfigsProps> = ({ packageInfo }) => {
   return (
     <EuiFlexGroup data-test-subj="epm.Configs" alignItems="flexStart">
       <EuiFlexItem grow={1} />
-      <EuiFlexItem grow={6}>
+      <FlexItemWithMaxWidth grow={6}>
         {isLoading && !configs ? (
           <EuiSkeletonText lines={10} />
         ) : (
           <>
+            {isPrerelease && (
+              <>
+                <EuiSpacer size="s" />
+                <PrereleaseCallout
+                  packageName={packageInfo.name}
+                  packageTitle={packageInfo.title}
+                />
+              </>
+            )}
             <EuiText>
               <p>
                 <FormattedMessage
@@ -82,7 +103,7 @@ export const Configs: React.FC<ConfigsProps> = ({ packageInfo }) => {
             </EuiText>
             {notInstalled && (
               <>
-                <EuiSpacer size="m" />
+                <EuiSpacer size="s" />
                 <EuiCallOut
                   title={
                     <FormattedMessage
@@ -95,13 +116,13 @@ export const Configs: React.FC<ConfigsProps> = ({ packageInfo }) => {
                 />
               </>
             )}
-            <EuiSpacer size="m" />
+            <EuiSpacer size="s" />
             <EuiCodeBlock language="yaml" isCopyable={true} paddingSize="s" overflowHeight={1000}>
               {configs}
             </EuiCodeBlock>
           </>
         )}
-      </EuiFlexItem>
+      </FlexItemWithMaxWidth>
     </EuiFlexGroup>
   );
 };

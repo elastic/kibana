@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   ML_DETECTOR_RULE_ACTION,
   ML_DETECTOR_RULE_FILTER_TYPE,
   ML_DETECTOR_RULE_APPLIES_TO,

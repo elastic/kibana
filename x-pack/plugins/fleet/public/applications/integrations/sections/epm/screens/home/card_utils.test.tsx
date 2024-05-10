@@ -9,8 +9,9 @@ import React from 'react';
 
 import { createIntegrationsTestRendererMock } from '../../../../../../mock';
 import type { PackageListItem } from '../../../../types';
+import { ExperimentalFeaturesService } from '../../../../services';
 
-import { getIntegrationLabels } from './card_utils';
+import { getIntegrationLabels, mapToCard } from './card_utils';
 
 function renderIntegrationLabels(item: Partial<PackageListItem>) {
   const renderer = createIntegrationsTestRendererMock();
@@ -18,7 +19,73 @@ function renderIntegrationLabels(item: Partial<PackageListItem>) {
   return renderer.render(<>{getIntegrationLabels(item as any)}</>);
 }
 
+const addBasePath = (s: string) => s;
+const getHref = (k: string) => k;
+
 describe('Card utils', () => {
+  describe('mapToCard', () => {
+    beforeEach(() => {
+      ExperimentalFeaturesService.init({});
+    });
+
+    it('should use the installed version if available, without prelease', () => {
+      const cardItem = mapToCard({
+        item: {
+          id: 'test',
+          version: '2.0.0-preview-1',
+          installationInfo: {
+            version: '1.0.0',
+          },
+        },
+        addBasePath,
+        getHref,
+      } as any);
+
+      expect(cardItem).toMatchObject({
+        release: 'ga',
+        version: '1.0.0',
+        isUpdateAvailable: true,
+        extraLabelsBadges: undefined,
+      });
+    });
+
+    it('should use the installed version if available, with prelease ', () => {
+      const cardItem = mapToCard({
+        item: {
+          id: 'test',
+          version: '2.0.0',
+          installationInfo: {
+            version: '1.0.0-preview-1',
+          },
+        },
+        addBasePath,
+        getHref,
+      } as any);
+
+      expect(cardItem).toMatchObject({
+        release: 'preview',
+        version: '1.0.0-preview-1',
+        isUpdateAvailable: true,
+      });
+    });
+
+    it('should use the registry version if no installation is available ', () => {
+      const cardItem = mapToCard({
+        item: {
+          id: 'test',
+          version: '2.0.0-preview-1',
+        },
+        addBasePath,
+        getHref,
+      } as any);
+
+      expect(cardItem).toMatchObject({
+        release: 'preview',
+        version: '2.0.0-preview-1',
+        isUpdateAvailable: false,
+      });
+    });
+  });
   describe('getIntegrationLabels', () => {
     it('should return an empty list for an integration without errors', () => {
       const res = renderIntegrationLabels({

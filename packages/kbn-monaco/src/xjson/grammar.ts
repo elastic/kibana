@@ -6,23 +6,7 @@
  * Side Public License, v 1.
  */
 
-export enum AnnoTypes {
-  error = 'error',
-  warning = 'warning',
-}
-
-export type Parser = ReturnType<typeof createParser>;
-
-export interface Annotation {
-  name?: string;
-  type: AnnoTypes;
-  text: string;
-  at: number;
-}
-
-export interface ParseResult {
-  annotations: Annotation[];
-}
+import { AnnoTypes } from '../ace_migration/types';
 
 /* eslint-disable prettier/prettier,no-var,prefer-const,no-throw-literal,@typescript-eslint/no-shadow,one-var,@typescript-eslint/no-unused-expressions,object-shorthand,eqeqeq */
 

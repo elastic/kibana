@@ -43,7 +43,7 @@ const getIndexStatusByName = (
 interface Props {
   index: Index;
   reloadIndexDetails: () => Promise<void>;
-  navigateToAllIndices: () => void;
+  navigateToIndicesList: () => void;
 }
 
 /**
@@ -55,7 +55,7 @@ interface Props {
 export const ManageIndexButton: FunctionComponent<Props> = ({
   index,
   reloadIndexDetails,
-  navigateToAllIndices,
+  navigateToIndicesList,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -212,12 +212,12 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
           values: { indexNames: indexNames.join(', ') },
         })
       );
-      navigateToAllIndices();
+      navigateToIndicesList();
     } catch (error) {
       setIsLoading(false);
       notificationService.showDangerToast(error.body.message);
     }
-  }, [navigateToAllIndices, indexNames]);
+  }, [navigateToIndicesList, indexNames]);
 
   const performExtensionAction = useCallback(
     async (

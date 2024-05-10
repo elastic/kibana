@@ -22,14 +22,20 @@ describe('TaskOverdueMetricsAggregator', () => {
 
   test('should correctly initialize', () => {
     expect(taskOverdueMetricsAggregator.collect()).toEqual({
-      overall: { overdue_by: { counts: [], values: [] } },
+      overall: {
+        overdue_by: { counts: [], values: [] },
+        overdue_by_values: [],
+      },
       by_type: {},
     });
   });
 
   test('should correctly return initialMetrics', () => {
     expect(taskOverdueMetricsAggregator.initialMetric()).toEqual({
-      overall: { overdue_by: { counts: [], values: [] } },
+      overall: {
+        overdue_by: { counts: [], values: [] },
+        overdue_by_values: [],
+      },
       by_type: {},
     });
   });
@@ -50,9 +56,15 @@ describe('TaskOverdueMetricsAggregator', () => {
       })
     );
     expect(taskOverdueMetricsAggregator.collect()).toEqual({
-      overall: { overdue_by: { counts: [1, 0, 1], values: [10, 20, 30] } },
+      overall: {
+        overdue_by: { counts: [1, 0, 1], values: [10, 20, 30] },
+        overdue_by_values: [0, 20],
+      },
       by_type: {
-        telemetry: { overdue_by: { counts: [1, 0, 1], values: [10, 20, 30] } },
+        telemetry: {
+          overdue_by: { counts: [1, 0, 1], values: [10, 20, 30] },
+          overdue_by_values: [0, 20],
+        },
       },
     });
   });
@@ -66,7 +78,10 @@ describe('TaskOverdueMetricsAggregator', () => {
       })
     );
     expect(taskOverdueMetricsAggregator.collect()).toEqual({
-      overall: { overdue_by: { counts: [], values: [] } },
+      overall: {
+        overdue_by: { counts: [], values: [] },
+        overdue_by_values: [],
+      },
       by_type: {},
     });
   });
@@ -95,9 +110,15 @@ describe('TaskOverdueMetricsAggregator', () => {
       })
     );
     expect(taskOverdueMetricsAggregator.collect()).toEqual({
-      overall: { overdue_by: { counts: [0, 0, 0, 0, 1], values: [10, 20, 30, 40, 50] } },
+      overall: {
+        overdue_by: { counts: [0, 0, 0, 0, 1], values: [10, 20, 30, 40, 50] },
+        overdue_by_values: [40],
+      },
       by_type: {
-        telemetry: { overdue_by: { counts: [0, 0, 0, 0, 1], values: [10, 20, 30, 40, 50] } },
+        telemetry: {
+          overdue_by: { counts: [0, 0, 0, 0, 1], values: [10, 20, 30, 40, 50] },
+          overdue_by_values: [40],
+        },
       },
     });
   });
@@ -129,6 +150,7 @@ describe('TaskOverdueMetricsAggregator', () => {
           counts: [3, 0, 2, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
           values: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130],
         },
+        overdue_by_values: [0, 0, 0, 20, 20, 40, 120],
       },
       by_type: {
         'alerting:example': {
@@ -136,36 +158,42 @@ describe('TaskOverdueMetricsAggregator', () => {
             counts: [0, 0, 0, 0, 1],
             values: [10, 20, 30, 40, 50],
           },
+          overdue_by_values: [40],
         },
         'alerting:__index-threshold': {
           overdue_by: {
             counts: [0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
             values: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130],
           },
+          overdue_by_values: [20, 20, 120],
         },
         alerting: {
           overdue_by: {
             counts: [0, 0, 2, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
             values: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130],
           },
+          overdue_by_values: [40, 20, 20, 120],
         },
         'actions:webhook': {
           overdue_by: {
             counts: [2],
             values: [10],
           },
+          overdue_by_values: [0, 0],
         },
         'actions:__email': {
           overdue_by: {
             counts: [1],
             values: [10],
           },
+          overdue_by_values: [0],
         },
         actions: {
           overdue_by: {
             counts: [3],
             values: [10],
           },
+          overdue_by_values: [0, 0, 0],
         },
       },
     });
@@ -198,44 +226,50 @@ describe('TaskOverdueMetricsAggregator', () => {
           counts: [3, 0, 2, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
           values: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130],
         },
+        overdue_by_values: [0, 0, 0, 20, 20, 40, 120],
       },
       by_type: {
         'alerting:example': {
           overdue_by: {
             counts: [0, 0, 0, 0, 1],
-
             values: [10, 20, 30, 40, 50],
           },
+          overdue_by_values: [40],
         },
         'alerting:__index-threshold': {
           overdue_by: {
             counts: [0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
             values: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130],
           },
+          overdue_by_values: [20, 20, 120],
         },
         alerting: {
           overdue_by: {
             counts: [0, 0, 2, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
             values: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130],
           },
+          overdue_by_values: [40, 20, 20, 120],
         },
         'actions:webhook': {
           overdue_by: {
             counts: [2],
             values: [10],
           },
+          overdue_by_values: [0, 0],
         },
         'actions:__email': {
           overdue_by: {
             counts: [1],
             values: [10],
           },
+          overdue_by_values: [0],
         },
         actions: {
           overdue_by: {
             counts: [3],
             values: [10],
           },
+          overdue_by_values: [0, 0, 0],
         },
       },
     });

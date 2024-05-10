@@ -16,7 +16,7 @@
     "@kbn/dev-utils",
     "@kbn/dev-proc-runner",
     "@kbn/ci-stats-reporter",
-    "@kbn/mock-idp-plugin",
+    "@kbn/mock-idp-utils",
     "@kbn/jest-serializers",
     "@kbn/repo-info"
   ]

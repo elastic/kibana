@@ -1,5 +1,5 @@
 {
   "type": "shared-common",
   "id": "@kbn/serverless-security-settings",
-  "owner": "@elastic/security-solution @elastic/platform-deployment-management"
+  "owner": "@elastic/security-solution @elastic/kibana-management"
 }

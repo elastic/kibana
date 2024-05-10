@@ -7,8 +7,14 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
+import {
+  SavedObjectsErrorHelpers,
+  type SavedObjectUnsanitizedDoc,
+  type AuthorizationTypeMap,
+  type SavedObject,
+} from '@kbn/core-saved-objects-server';
 import type { IKibanaMigrator } from '@kbn/core-saved-objects-base-server-internal';
+import type { IEncryptionHelper } from './encryption';
 
 export type IMigrationHelper = PublicMethodsOf<MigrationHelper>;
 
@@ -17,9 +23,17 @@ export type IMigrationHelper = PublicMethodsOf<MigrationHelper>;
  */
 export class MigrationHelper {
   private migrator: IKibanaMigrator;
+  private encryptionHelper: IEncryptionHelper;
 
-  constructor({ migrator }: { migrator: IKibanaMigrator }) {
+  constructor({
+    migrator,
+    encryptionHelper,
+  }: {
+    migrator: IKibanaMigrator;
+    encryptionHelper: IEncryptionHelper;
+  }) {
     this.migrator = migrator;
+    this.encryptionHelper = encryptionHelper;
   }
 
   /**
@@ -38,5 +52,42 @@ export class MigrationHelper {
    */
   migrateStorageDocument(document: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc {
     return this.migrator.migrateDocument(document, { allowDowngrade: true });
+  }
+
+  async migrateAndDecryptStorageDocument<T, A extends string>({
+    document,
+    typeMap,
+    originalAttributes,
+  }: {
+    document: SavedObjectUnsanitizedDoc<T> | SavedObject<T>;
+    typeMap: AuthorizationTypeMap<A> | undefined;
+    originalAttributes?: T;
+  }): Promise<SavedObject<T>> {
+    const downgrade = this.migrator.getDocumentMigrator().isDowngradeRequired(document);
+
+    const migrate = (doc: SavedObjectUnsanitizedDoc | SavedObject) => {
+      try {
+        return this.migrator.migrateDocument(doc, { allowDowngrade: true }) as SavedObject<T>;
+      } catch (error) {
+        throw SavedObjectsErrorHelpers.decorateGeneralError(
+          error,
+          'Failed to migrate document to the latest version.'
+        );
+      }
+    };
+
+    const decrypt = (doc: SavedObjectUnsanitizedDoc | SavedObject) => {
+      return this.encryptionHelper.optionallyDecryptAndRedactSingleResult(
+        doc as SavedObject<T>,
+        typeMap,
+        originalAttributes
+      );
+    };
+
+    if (downgrade) {
+      return migrate(await decrypt(document));
+    } else {
+      return await decrypt(migrate(document));
+    }
   }
 }

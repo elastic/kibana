@@ -6,24 +6,26 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { isEmpty } from 'lodash';
 import {
   EuiFormRow,
   EuiSelect,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiText,
   EuiTitle,
   EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { ActionConnectorMode, ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,
   useKibana,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { Choice, Fields } from '../lib/servicenow/types';
-import { ServiceNowITSMActionParams } from './types';
+import { ServiceNowITSMActionParams, EventAction } from './types';
 import { useGetChoices } from '../lib/servicenow/use_get_choices';
 import {
   ACTION_GROUP_RECOVERED,
@@ -44,16 +46,24 @@ const defaultFields: Fields = {
 };
 
 const CorrelationIdField: React.FunctionComponent<
-  Pick<ActionParamsProps<ServiceNowITSMActionParams>, 'index' | 'messageVariables'> & {
+  Pick<ActionParamsProps<ServiceNowITSMActionParams>, 'index' | 'messageVariables' | 'errors'> & {
     correlationId: string | null;
     editSubActionProperty: (key: string, value: any) => void;
+    isRequired?: boolean;
   }
-> = ({ index, messageVariables, correlationId, editSubActionProperty }) => {
+> = ({ index, messageVariables, correlationId, editSubActionProperty, isRequired, errors }) => {
   const { docLinks } = useKibana().services;
   return (
     <EuiFormRow
       fullWidth
       label={i18n.CORRELATION_ID}
+      error={errors['subActionParams.incident.correlation_id']}
+      isInvalid={
+        errors['subActionParams.incident.correlation_id'] !== undefined &&
+        errors['subActionParams.incident.correlation_id'].length > 0 &&
+        !correlationId &&
+        isRequired
+      }
       helpText={
         <EuiLink href={docLinks.links.alerting.serviceNowAction} target="_blank">
           <FormattedMessage
@@ -62,6 +72,11 @@ const CorrelationIdField: React.FunctionComponent<
           />
         </EuiLink>
       }
+      labelAppend={
+        <EuiText size="xs" color="subdued">
+          {isRequired ? i18n.REQUIRED_LABEL : i18n.OPTIONAL_LABEL}
+        </EuiText>
+      }
     >
       <TextFieldWithMessageVariables
         index={index}
@@ -69,15 +84,28 @@ const CorrelationIdField: React.FunctionComponent<
         messageVariables={messageVariables}
         paramsProperty={'correlation_id'}
         inputTargetValue={correlationId ?? undefined}
+        errors={errors['subActionParams.incident.correlation_id'] as string[]}
       />
     </EuiFormRow>
   );
 };
 
+const eventActionOptions = [
+  {
+    value: EventAction.TRIGGER,
+    text: i18n.EVENT_ACTION_TRIGGER,
+  },
+  {
+    value: EventAction.RESOLVE,
+    text: i18n.EVENT_ACTION_RESOLVE,
+  },
+];
+
 const ServiceNowParamsFields: React.FunctionComponent<
   ActionParamsProps<ServiceNowITSMActionParams>
 > = (props) => {
   const {
+    executionMode,
     actionConnector,
     actionParams,
     editAction,
@@ -92,19 +120,39 @@ const ServiceNowParamsFields: React.FunctionComponent<
   } = useKibana().services;
 
   const isDeprecatedActionConnector = actionConnector?.isDeprecated;
+  const [choices, setChoices] = useState<Fields>(defaultFields);
+  const [eventAction, setEventAction] = useState<EventAction>(EventAction.TRIGGER);
+
+  const isTestTriggerAction =
+    executionMode === ActionConnectorMode.Test && eventAction === EventAction.TRIGGER;
+  const isTestResolveAction =
+    executionMode === ActionConnectorMode.Test && eventAction === EventAction.RESOLVE;
 
   const actionConnectorRef = useRef(actionConnector?.id ?? '');
+
+  const showAllIncidentDetails =
+    (selectedActionGroupId && selectedActionGroupId !== ACTION_GROUP_RECOVERED) ||
+    isTestTriggerAction;
+  const showOnlyCorrelationId =
+    (selectedActionGroupId && selectedActionGroupId === ACTION_GROUP_RECOVERED) ||
+    isTestResolveAction;
+
+  if (isTestTriggerAction && !actionParams.subAction) {
+    editAction('subAction', 'pushToService', index);
+  }
+
   const { incident, comments } = useMemo(
     () =>
       actionParams.subActionParams ??
       ({
         incident: {},
-        comments: selectedActionGroupId !== ACTION_GROUP_RECOVERED ? [] : undefined,
+        comments:
+          selectedActionGroupId && selectedActionGroupId !== ACTION_GROUP_RECOVERED
+            ? []
+            : undefined,
       } as unknown as ServiceNowITSMActionParams['subActionParams']),
     [actionParams.subActionParams, selectedActionGroupId]
   );
-
-  const [choices, setChoices] = useState<Fields>(defaultFields);
 
   const editSubActionProperty = useCallback(
     (key: string, value: any) => {
@@ -162,6 +210,24 @@ const ServiceNowParamsFields: React.FunctionComponent<
     onSuccess: onChoicesSuccess,
   });
 
+  const handleEventActionChange = useCallback(
+    (value: EventAction) => {
+      if (!value) {
+        return;
+      }
+
+      setEventAction(value);
+
+      if (value === EventAction.RESOLVE) {
+        editAction('subAction', 'closeIncident', index);
+        return;
+      }
+
+      editAction('subAction', 'pushToService', index);
+    },
+    [setEventAction, editAction, index]
+  );
+
   useEffect(() => {
     if (actionConnector != null && actionConnectorRef.current !== actionConnector.id) {
       actionConnectorRef.current = actionConnector.id;
@@ -184,16 +250,38 @@ const ServiceNowParamsFields: React.FunctionComponent<
         index
       );
     }
+
+    if (
+      (isTestResolveAction || isTestTriggerAction) &&
+      (!isEmpty(actionParams.subActionParams?.incident) ||
+        actionParams.subActionParams?.comments?.length)
+    ) {
+      editAction('subActionParams', { incident: {}, comments: undefined }, index);
+      return;
+    }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionConnector]);
+  }, [actionConnector, isTestResolveAction, isTestTriggerAction]);
 
   return (
     <>
+      {executionMode === ActionConnectorMode.Test ? (
+        <EuiFormRow fullWidth label={i18n.EVENT_ACTION_LABEL}>
+          <EuiSelect
+            fullWidth
+            data-test-subj="eventActionSelect"
+            options={eventActionOptions}
+            value={eventAction}
+            onChange={(e) => handleEventActionChange(e.target.value as EventAction)}
+          />
+        </EuiFormRow>
+      ) : null}
+      <EuiSpacer size="m" />
       <EuiTitle size="s">
         <h3>{i18n.INCIDENT}</h3>
       </EuiTitle>
       <EuiSpacer size="m" />
-      {selectedActionGroupId !== ACTION_GROUP_RECOVERED ? (
+      {showAllIncidentDetails && (
         <>
           <EuiFormRow fullWidth label={i18n.URGENCY_LABEL}>
             <EuiSelect
@@ -291,10 +379,20 @@ const ServiceNowParamsFields: React.FunctionComponent<
                     messageVariables={messageVariables}
                     correlationId={incident.correlation_id}
                     editSubActionProperty={editSubActionProperty}
+                    isRequired={showOnlyCorrelationId}
+                    errors={errors}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <EuiFormRow fullWidth label={i18n.CORRELATION_DISPLAY}>
+                  <EuiFormRow
+                    fullWidth
+                    label={i18n.CORRELATION_DISPLAY}
+                    labelAppend={
+                      <EuiText size="xs" color="subdued">
+                        {i18n.OPTIONAL_LABEL}
+                      </EuiText>
+                    }
+                  >
                     <TextFieldWithMessageVariables
                       index={index}
                       editAction={editSubActionProperty}
@@ -319,6 +417,11 @@ const ServiceNowParamsFields: React.FunctionComponent<
                   incident.short_description !== undefined
                 }
                 label={i18n.SHORT_DESCRIPTION_LABEL}
+                labelAppend={
+                  <EuiText size="xs" color="subdued">
+                    {i18n.REQUIRED_LABEL}
+                  </EuiText>
+                }
               >
                 <TextFieldWithMessageVariables
                   index={index}
@@ -349,12 +452,15 @@ const ServiceNowParamsFields: React.FunctionComponent<
             label={i18n.COMMENTS_LABEL}
           />
         </>
-      ) : (
+      )}
+      {showOnlyCorrelationId && (
         <CorrelationIdField
           index={index}
           messageVariables={messageVariables}
           correlationId={incident.correlation_id}
           editSubActionProperty={editSubActionProperty}
+          isRequired={showOnlyCorrelationId}
+          errors={errors}
         />
       )}
     </>

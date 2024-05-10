@@ -1,0 +1,30 @@
+{
+  "type": "plugin",
+  "id": "@kbn/search-playground",
+  "owner": "@elastic/enterprise-search-frontend",
+  "plugin": {
+    "id": "searchPlayground",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "searchPlayground"
+    ],
+    "requiredPlugins": [
+      "actions",
+      "encryptedSavedObjects",
+      "navigation",
+      "share",
+      "security",
+      "stackConnectors",
+      "triggersActionsUi",
+    ],
+    "optionalPlugins": [
+      "cloud",
+      "usageCollection",
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
+  }
+}

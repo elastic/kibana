@@ -7,7 +7,6 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import type { ClusterDetails } from '@kbn/es-types';
 
 /**
  * A warning object for a search response with incomplete ES results
@@ -31,7 +30,7 @@ export interface SearchResponseIncompleteWarning {
   /**
    * clusters: cluster details.
    */
-  clusters: Record<string, ClusterDetails>;
+  clusters: Record<string, estypes.ClusterDetails>;
   /**
    * openInInspector: callback to open warning in inspector
    */

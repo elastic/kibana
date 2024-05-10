@@ -20,6 +20,7 @@ describe('interpreter/functions#kibana', () => {
   beforeEach(() => {
     input = { timeRange: { from: '0', to: '1' } };
     search = {
+      now: 0,
       type: 'kibana_context',
       query: { language: 'lucene', query: 'geo.src:US' },
       filters: [

@@ -145,7 +145,7 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
       <EuiSpacer size="s" />
       {hasLoaded &&
         (!!fieldsCount ? (
-          <ul className="unifiedFieldList__fieldsAccordion__fieldItems">
+          <ul>
             {paginatedFields &&
               paginatedFields.map((field, index) => (
                 <Fragment key={getFieldKey(field)}>

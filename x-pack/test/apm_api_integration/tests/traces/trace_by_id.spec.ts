@@ -13,7 +13,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const start = new Date('2022-01-01T00:00:00.000Z').getTime();
   const end = new Date('2022-01-01T00:15:00.000Z').getTime() - 1;
@@ -46,6 +46,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177545
   registry.when('Trace exists', { config: 'basic', archives: [] }, () => {
     let entryTransactionId: string;
     let serviceATraceId: string;
@@ -89,10 +90,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       entryTransactionId = serialized[0]['transaction.id']!;
       serviceATraceId = serialized[0]['trace.id']!;
 
-      await synthtraceEsClient.index(Readable.from(unserialized));
+      await apmSynthtraceEsClient.index(Readable.from(unserialized));
     });
 
-    after(() => synthtraceEsClient.clean());
+    after(() => apmSynthtraceEsClient.clean());
 
     describe('return trace', () => {
       let traces: APIReturnType<'GET /internal/apm/traces/{traceId}'>;

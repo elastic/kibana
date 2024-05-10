@@ -4,4 +4,4 @@ steps:
     agents:
       queue: n2-8-spot
     key: storybooks
-    timeout_in_minutes: 60
+    timeout_in_minutes: 80

@@ -15,6 +15,7 @@ export interface BucketedAggregation<KeyType = string> {
     key: KeyType;
     count: number;
   }>;
+  areExamples?: boolean; // whether `topValues` holds examples in buckets rather than top values
 }
 
 export interface NumberSummary {
@@ -58,6 +59,7 @@ export enum FieldsGroupNames {
   EmptyFields = 'EmptyFields',
   MetaFields = 'MetaFields',
   UnmappedFields = 'UnmappedFields',
+  SmartFields = 'SmartFields',
 }
 
 export interface FieldsGroupDetails {

@@ -21,7 +21,8 @@ import {
 } from '@kbn/ml-anomaly-utils';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { IndexPatternTitle } from '../../../../../../common/types/kibana';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { IndexPatternTitle } from '../../../../../../common/types/kibana';
 import { getQueryFromSavedSearchObject } from '../../../../util/index_utils';
 import type {
   Job,
@@ -36,11 +37,8 @@ import { combineFieldsAndAggs } from '../../../../../../common/util/fields_utils
 import { createEmptyJob, createEmptyDatafeed } from './util/default_configs';
 import { mlJobService } from '../../../../services/job_service';
 import { JobRunner, type ProgressSubscriber } from '../job_runner';
-import {
-  JOB_TYPE,
-  CREATED_BY_LABEL,
-  SHARED_RESULTS_INDEX_NAME,
-} from '../../../../../../common/constants/new_job';
+import type { CREATED_BY_LABEL } from '../../../../../../common/constants/new_job';
+import { JOB_TYPE, SHARED_RESULTS_INDEX_NAME } from '../../../../../../common/constants/new_job';
 import { collectAggs } from './util/general';
 import { filterRuntimeMappings } from './util/filter_runtime_mappings';
 import { parseInterval } from '../../../../../../common/util/parse_interval';
@@ -330,11 +328,18 @@ export class JobCreator {
 
   public set modelMemoryLimit(mml: string | null) {
     if (mml !== null) {
-      this._job_config.analysis_limits = {
-        model_memory_limit: mml,
-      };
+      if (this._job_config.analysis_limits === undefined) {
+        this._job_config.analysis_limits = {};
+      }
+      this._job_config.analysis_limits.model_memory_limit = mml;
     } else {
-      delete this._job_config.analysis_limits;
+      if (this._job_config.analysis_limits !== undefined) {
+        delete this._job_config.analysis_limits.model_memory_limit;
+
+        if (isPopulatedObject(this._job_config.analysis_limits) === false) {
+          delete this._job_config.analysis_limits;
+        }
+      }
     }
   }
 

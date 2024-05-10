@@ -41,23 +41,23 @@ export const getSupportedActionConnectors = async ({
 
 export const getCaseConfigure = async ({
   signal,
-  owner,
-}: ApiProps & { owner: string[] }): Promise<CasesConfigurationUI | null> => {
+}: ApiProps): Promise<CasesConfigurationUI[] | null> => {
   const response = await KibanaServices.get().http.fetch<GetConfigureResponse>(CASE_CONFIGURE_URL, {
     method: 'GET',
     signal,
-    query: { ...(owner.length > 0 ? { owner } : {}) },
   });
 
   if (!isEmpty(response)) {
     const decodedConfigs = decodeCaseConfigurationsResponse(response);
     if (Array.isArray(decodedConfigs) && decodedConfigs.length > 0) {
-      const configuration = convertToCamelCase<
-        GetConfigureResponse[number],
-        SnakeToCamelCase<GetConfigureResponse[number]>
-      >(decodedConfigs[0]);
+      return decodedConfigs.map((decodedConfig) => {
+        const configuration = convertToCamelCase<
+          GetConfigureResponse[number],
+          SnakeToCamelCase<GetConfigureResponse[number]>
+        >(decodedConfig);
 
-      return convertConfigureResponseToCasesConfigure(configuration);
+        return convertConfigureResponseToCasesConfigure(configuration);
+      });
     }
   }
 
@@ -115,7 +115,7 @@ export const fetchActionTypes = async ({ signal }: ApiProps): Promise<ActionType
 const convertConfigureResponseToCasesConfigure = (
   configuration: SnakeToCamelCase<Configuration>
 ): CasesConfigurationUI => {
-  const { id, version, mappings, customFields, closureType, connector } = configuration;
+  const { id, version, mappings, customFields, closureType, connector, owner } = configuration;
 
-  return { id, version, mappings, customFields, closureType, connector };
+  return { id, version, mappings, customFields, closureType, connector, owner };
 };

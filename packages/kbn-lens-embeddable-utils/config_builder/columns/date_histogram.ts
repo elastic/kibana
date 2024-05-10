@@ -26,8 +26,7 @@ export const getHistogramColumn = ({
     label: '@timestamp',
     operationType: 'date_histogram',
     scale: 'interval',
-    sourceField: '@timestamp',
-    ...options,
+    sourceField: options?.sourceField ?? '@timestamp',
     params: { interval, ...rest },
   };
 };

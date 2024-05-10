@@ -11,6 +11,7 @@ import type { Observable } from 'rxjs';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 import {
   DataViewBase,
   EsQueryConfig,
@@ -20,11 +21,12 @@ import {
   TimeRange,
   isOfQueryType,
   getAggregateQueryMode,
+  ExecutionContextSearch,
+  getLanguageDisplayName,
 } from '@kbn/es-query';
 import type { PaletteOutput } from '@kbn/coloring';
 import {
   DataPublicPluginStart,
-  ExecutionContextSearch,
   TimefilterContract,
   FilterManager,
   getEsQueryConfig,
@@ -34,11 +36,16 @@ import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 
 import { merge, Subscription, switchMap } from 'rxjs';
 import { toExpression } from '@kbn/interpreter';
-import { DefaultInspectorAdapters, ErrorLike, RenderMode } from '@kbn/expressions-plugin/common';
-import { map, distinctUntilChanged, skip, debounceTime } from 'rxjs/operators';
+import {
+  Datatable,
+  DefaultInspectorAdapters,
+  ErrorLike,
+  RenderMode,
+} from '@kbn/expressions-plugin/common';
+import { map, distinctUntilChanged, skip, debounceTime } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,
@@ -68,7 +75,6 @@ import type {
   IBasePath,
   IUiSettingsClient,
   KibanaExecutionContext,
-  ThemeServiceStart,
 } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import {
@@ -77,8 +83,9 @@ import {
   MultiClickTriggerEvent,
 } from '@kbn/charts-plugin/public';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useEuiFontSize, useEuiTheme, EuiEmptyPrompt } from '@elastic/eui';
+import { canTrackContentfulRender } from '@kbn/presentation-containers';
 import { getExecutionContextEvents, trackUiCounterEvents } from '../lens_ui_telemetry';
 import { Document } from '../persistence';
 import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
@@ -136,11 +143,13 @@ import type { LensPluginStartDependencies } from '../plugin';
 import { EmbeddableFeatureBadge } from './embeddable_info_badges';
 import { getDatasourceLayers } from '../state_management/utils';
 import type { EditLensConfigurationProps } from '../app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
+import { TextBasedPersistedState } from '../datasources/text_based/types';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
 export interface LensUnwrapMetaInfo {
   sharingSavedObjectProps?: SharingSavedObjectProps;
+  managed?: boolean;
 }
 
 export interface LensUnwrapResult {
@@ -176,6 +185,7 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
   onTableRowClick?: (
     data: Simplify<LensTableRowContextMenuEvent['data'] & PreventableEvent>
   ) => void;
+  abortController?: AbortController;
 }
 
 export type LensByValueInput = {
@@ -226,7 +236,6 @@ export interface LensEmbeddableDeps {
   coreStart: CoreStart;
   usageCollection?: UsageCollectionSetup;
   spaces?: SpacesPluginStart;
-  theme: ThemeServiceStart;
   uiSettings: IUiSettingsClient;
 }
 
@@ -444,7 +453,7 @@ export class Embeddable
 
   private activeData?: TableInspectorAdapter;
 
-  private dataViews: DataView[] = [];
+  private internalDataViews: DataView[] = [];
 
   private viewUnderlyingDataArgs?: ViewUnderlyingDataArgs;
 
@@ -485,7 +494,7 @@ export class Embeddable
           distinctUntilChanged((a, b) => fastIsEqual(a, b)),
           skip(1)
         )
-        .subscribe((input) => {
+        .subscribe((_input) => {
           this.reload();
         })
     );
@@ -502,7 +511,7 @@ export class Embeddable
           distinctUntilChanged(),
           skip(1)
         )
-        .subscribe((input) => {
+        .subscribe((_input) => {
           // only reload if drilldowns are set
           if (this.getInput().enhancements?.dynamicActions) {
             this.reload();
@@ -740,7 +749,7 @@ export class Embeddable
     }
     const query = this.savedVis?.state.query as unknown as AggregateQuery;
     const language = getAggregateQueryMode(query);
-    return String(language).toUpperCase();
+    return getLanguageDisplayName(language).toUpperCase();
   }
 
   /**
@@ -844,7 +853,11 @@ export class Embeddable
     this.updateInput({ attributes: attrs, savedObjectId });
   }
 
-  async openConfingPanel(startDependencies: LensPluginStartDependencies) {
+  async openConfingPanel(
+    startDependencies: LensPluginStartDependencies,
+    isNewPanel?: boolean,
+    deletePanel?: () => void
+  ) {
     const { getEditLensConfiguration } = await import('../async_services');
     const Component = await getEditLensConfiguration(
       this.deps.coreStart,
@@ -872,8 +885,10 @@ export class Embeddable
           navigateToLensEditor={
             !this.isTextBasedLanguage() ? this.navigateToLensEditor.bind(this) : undefined
           }
-          displayFlyoutHeader={true}
+          displayFlyoutHeader
           canEditTextBasedQuery={this.isTextBasedLanguage()}
+          isNewPanel={isNewPanel}
+          deletePanel={deletePanel}
         />
       );
     }
@@ -898,6 +913,12 @@ export class Embeddable
       type: this.type,
       savedObjectId: (input as LensByReferenceInput)?.savedObjectId,
     };
+
+    if (this.isTextBasedLanguage()) {
+      this.updateInput({
+        disabledActions: ['OPEN_FLYOUT_ADD_DRILLDOWN'],
+      });
+    }
 
     try {
       const { ast, indexPatterns, indexPatternRefs, activeVisualizationState } =
@@ -1021,6 +1042,7 @@ export class Embeddable
     });
 
     trackUiCounterEvents(events, executionContext);
+    this.trackContentfulRender();
 
     this.renderComplete.dispatchComplete();
     this.updateOutput({
@@ -1090,10 +1112,23 @@ export class Embeddable
 
     const input = this.getInput();
 
+    const getInternalTables = (states: Record<string, unknown>) => {
+      const result: Record<string, Datatable> = {};
+      if ('textBased' in states) {
+        const layers = (states.textBased as TextBasedPersistedState).layers;
+        for (const layer in layers) {
+          if (layers[layer] && layers[layer].table) {
+            result[layer] = layers[layer].table!;
+          }
+        }
+      }
+      return result;
+    };
+
     if (this.expression && !blockingErrors.length) {
       render(
         <>
-          <KibanaThemeProvider theme$={this.deps.theme.theme$}>
+          <KibanaRenderContextProvider {...this.deps.coreStart}>
             <ExpressionWrapper
               ExpressionRenderer={this.expressionRenderer}
               expression={this.expression || null}
@@ -1103,6 +1138,7 @@ export class Embeddable
                 embeddableTitle: this.getTitle(),
                 ...(input.palette ? { theme: { palette: input.palette } } : {}),
                 ...('overrides' in input ? { overrides: input.overrides } : {}),
+                ...getInternalTables(this.savedVis.state.datasourceStates),
               }}
               searchSessionId={this.getInput().searchSessionId}
               handleEvent={this.handleEvent}
@@ -1118,15 +1154,15 @@ export class Embeddable
               className={input.className}
               style={input.style}
               executionContext={this.getExecutionContext()}
+              abortController={this.input.abortController}
               addUserMessages={(messages) => this.addUserMessages(messages)}
-              onRuntimeError={(message) => {
-                this.updateOutput({ error: new Error(message) });
+              onRuntimeError={(error) => {
+                this.updateOutput({ error });
                 this.logError('runtime');
               }}
               noPadding={this.visDisplayOptions.noPadding}
-              docLinks={this.deps.coreStart.docLinks}
             />
-          </KibanaThemeProvider>
+          </KibanaRenderContextProvider>
           <MessagesBadge
             onMount={(el) => {
               this.badgeDomNode = el;
@@ -1141,6 +1177,25 @@ export class Embeddable
     this.renderUserMessages();
   }
 
+  private trackContentfulRender() {
+    if (!this.activeData || !canTrackContentfulRender(this.parent)) {
+      return;
+    }
+
+    const hasData = Object.values(this.activeData).some((table) => {
+      if (table.meta?.statistics?.totalCount != null) {
+        // if totalCount is set, refer to total count
+        return table.meta.statistics.totalCount > 0;
+      }
+      // if not, fall back to check the rows of the table
+      return table.rows.length > 0;
+    });
+
+    if (hasData) {
+      this.parent.trackContentfulRender();
+    }
+  }
+
   private renderUserMessages() {
     const errors = this.getUserMessages(['visualization', 'visualizationOnEmbeddable'], {
       severity: 'error',
@@ -1149,14 +1204,12 @@ export class Embeddable
     if (errors.length && this.domNode) {
       render(
         <>
-          <KibanaThemeProvider theme$={this.deps.theme.theme$}>
-            <I18nProvider>
-              <VisualizationErrorPanel
-                errors={errors}
-                canEdit={this.getIsEditable() && this.input.viewMode === 'edit'}
-              />
-            </I18nProvider>
-          </KibanaThemeProvider>
+          <KibanaRenderContextProvider {...this.deps.coreStart}>
+            <VisualizationErrorPanel
+              errors={errors}
+              canEdit={this.getIsEditable() && this.input.viewMode === 'edit'}
+            />
+          </KibanaRenderContextProvider>
           <MessagesBadge
             onMount={(el) => {
               this.badgeDomNode = el;
@@ -1188,10 +1241,10 @@ export class Embeddable
 
     if (this.badgeDomNode) {
       render(
-        <KibanaThemeProvider theme$={this.deps.theme.theme$}>
+        <KibanaRenderContextProvider {...this.deps.coreStart}>
           <EmbeddableMessagesPopover messages={warningOrErrorMessages} />
           <EmbeddableFeatureBadge messages={infoMessages} />
-        </KibanaThemeProvider>,
+        </KibanaRenderContextProvider>,
         this.badgeDomNode
       );
     }
@@ -1253,6 +1306,7 @@ export class Embeddable
 
     const input = this.getInput();
     const context: ExecutionContextSearch = {
+      now: this.deps.data.nowProvider.get().getTime(),
       timeRange:
         input.timeslice !== undefined
           ? {
@@ -1399,7 +1453,7 @@ export class Embeddable
       activeVisualization: this.activeVisualization,
       activeVisualizationState: this.activeVisualizationState,
       activeData: this.activeData,
-      dataViews: this.dataViews,
+      dataViews: this.internalDataViews,
       capabilities: this.deps.capabilities,
       query: mergedSearchContext.query,
       filters: mergedSearchContext.filters || [],
@@ -1445,7 +1499,7 @@ export class Embeddable
       )
     ).forEach((dataView) => indexPatterns.push(dataView));
 
-    this.dataViews = uniqBy(indexPatterns, 'id');
+    this.internalDataViews = uniqBy(indexPatterns, 'id');
 
     // passing edit url and index patterns to the output of this embeddable for
     // the container to pick them up and use them to configure filter bar and
@@ -1453,7 +1507,9 @@ export class Embeddable
     const input = this.getInput();
 
     // if at least one indexPattern is time based, then the Lens embeddable requires the timeRange prop
+    // this is necessary for the dataview embeddable but not the ES|QL one
     if (
+      !Boolean(this.isTextBasedLanguage()) &&
       input.timeRange == null &&
       indexPatterns.some((indexPattern) => indexPattern.isTimeBased())
     ) {
@@ -1495,11 +1551,15 @@ export class Embeddable
       description,
       editPath: getEditPath(savedObjectId),
       editUrl: this.deps.basePath.prepend(`/app/lens${getEditPath(savedObjectId)}`),
-      indexPatterns: this.dataViews,
+      indexPatterns: this.internalDataViews,
     });
   }
 
   public getIsEditable() {
+    // for ES|QL, editing is allowed only if the advanced setting is on
+    if (Boolean(this.isTextBasedLanguage()) && !this.deps.uiSettings.get(ENABLE_ESQL)) {
+      return false;
+    }
     return (
       this.deps.capabilities.canSaveVisualizations ||
       (!this.inputIsRefType(this.getInput()) &&
@@ -1529,25 +1589,41 @@ export class Embeddable
    * Gets the Lens embeddable's local filters
    * @returns Local/panel-level array of filters for Lens embeddable
    */
-  public async getFilters() {
-    return mapAndFlattenFilters(
-      this.deps.injectFilterReferences(
-        this.savedVis?.state.filters ?? [],
-        this.savedVis?.references ?? []
-      )
-    );
+  public getFilters() {
+    try {
+      return mapAndFlattenFilters(
+        this.deps.injectFilterReferences(
+          this.savedVis?.state.filters ?? [],
+          this.savedVis?.references ?? []
+        )
+      );
+    } catch (e) {
+      // if we can't parse the filters, we publish an empty array.
+      return [];
+    }
   }
 
   /**
    * Gets the Lens embeddable's local query
    * @returns Local/panel-level query for Lens embeddable
    */
-  public async getQuery() {
+  public getQuery() {
     return this.savedVis?.state.query;
   }
 
-  public getSavedVis(): Readonly<Document | undefined> {
-    return this.savedVis;
+  public getSavedVis(): Readonly<LensSavedObjectAttributes | undefined> {
+    if (!this.savedVis) {
+      return;
+    }
+
+    // Why are 'type' and 'savedObjectId' keys being removed?
+    // Prior to removing them,
+    // this method returned 'Readonly<Document | undefined>' while consumers typed the results as 'LensSavedObjectAttributes'.
+    // Removing 'type' and 'savedObjectId' keys to align method results with consumer typing.
+    const savedVis = { ...this.savedVis };
+    delete savedVis.type;
+    delete savedVis.savedObjectId;
+    return savedVis;
   }
 
   destroy() {

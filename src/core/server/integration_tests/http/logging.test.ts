@@ -8,12 +8,13 @@
 
 import { schema } from '@kbn/config-schema';
 import { createRoot, request } from '@kbn/core-test-helpers-kbn-server';
+import { unsafeConsole } from '@kbn/security-hardening';
 
 describe('request logging', () => {
   let mockConsoleLog: jest.SpyInstance;
 
   beforeAll(() => {
-    mockConsoleLog = jest.spyOn(global.console, 'log');
+    mockConsoleLog = jest.spyOn(unsafeConsole, 'log');
   });
 
   afterEach(() => {

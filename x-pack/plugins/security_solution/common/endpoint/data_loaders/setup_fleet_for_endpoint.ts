@@ -104,7 +104,7 @@ export const setupFleetForEndpoint = usageTracker.track(
 export const installOrUpgradeEndpointFleetPackage = usageTracker.track(
   'installOrUpgradeEndpointFleetPackage',
   async (kbnClient: KbnClient, logger: ToolingLog): Promise<BulkInstallPackageInfo> => {
-    logger.info(`installOrUpgradeEndpointFleetPackage(): starting`);
+    logger.debug(`installOrUpgradeEndpointFleetPackage(): starting`);
 
     const updatePackages = async () => {
       const installEndpointPackageResp = (await kbnClient

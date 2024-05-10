@@ -25,6 +25,7 @@ import { DashboardDataViewEditorService } from './data_view_editor/types';
 import { DashboardDocumentationLinksService } from './documentation_links/types';
 import { DashboardEmbeddableService } from './embeddable/types';
 import { DashboardHTTPService } from './http/types';
+import { DashboardI18nService } from './i18n/types';
 import { DashboardInitializerContextService } from './initializer_context/types';
 import { DashboardNavigationService } from './navigation/types';
 import { DashboardNotificationsService } from './notifications/types';
@@ -39,6 +40,8 @@ import { DashboardUsageCollectionService } from './usage_collection/types';
 import { DashboardVisualizationsService } from './visualizations/types';
 import { DashboardServerlessService } from './serverless/types';
 import { NoDataPageService } from './no_data_page/types';
+import { DashboardUiActionsService } from './ui_actions/types';
+import { DashboardUserProfileService } from './user_profile/types';
 
 export type DashboardPluginServiceParams = KibanaPluginServiceParams<DashboardStartDependencies> & {
   initContext: PluginInitializerContext; // need a custom type so that initContext is a required parameter for initializerContext
@@ -57,6 +60,7 @@ export interface DashboardServices {
   documentationLinks: DashboardDocumentationLinksService;
   embeddable: DashboardEmbeddableService;
   http: DashboardHTTPService;
+  i18n: DashboardI18nService;
   initializerContext: DashboardInitializerContextService;
   navigation: DashboardNavigationService;
   notifications: DashboardNotificationsService;
@@ -74,4 +78,6 @@ export interface DashboardServices {
   contentManagement: ContentManagementPublicStart;
   serverless: DashboardServerlessService; // TODO: make this optional in follow up
   noDataPage: NoDataPageService;
+  uiActions: DashboardUiActionsService;
+  userProfile: DashboardUserProfileService;
 }

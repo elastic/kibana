@@ -8,17 +8,16 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiLink } from '@elastic/eui';
-import type { Observable } from 'rxjs';
-import type { CoreTheme } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Legacy } from '../../legacy_shims';
+import { MonitoringStartServices } from '../../types';
 
 export interface EnableAlertResponse {
   isSufficientlySecure?: boolean;
   hasPermanentEncryptionKey?: boolean;
 }
 
-const showApiKeyAndEncryptionError = (theme$?: Observable<CoreTheme>) => {
+const showApiKeyAndEncryptionError = (services: MonitoringStartServices) => {
   const settingsUrl = Legacy.shims.docLinks.links.alerting.generalSettings;
 
   Legacy.shims.toastNotifications.addWarning({
@@ -40,7 +39,7 @@ const showApiKeyAndEncryptionError = (theme$?: Observable<CoreTheme>) => {
           })}
         </EuiLink>
       </div>,
-      { theme$ }
+      services
     ),
   });
 };
@@ -58,11 +57,14 @@ const showAlertsCreatedConfirmation = () => {
   });
 };
 
-export const showAlertsToast = (response: EnableAlertResponse, theme$?: Observable<CoreTheme>) => {
+export const showAlertsToast = (
+  response: EnableAlertResponse,
+  services: MonitoringStartServices
+) => {
   const { isSufficientlySecure, hasPermanentEncryptionKey } = response;
 
   if (isSufficientlySecure === false || hasPermanentEncryptionKey === false) {
-    showApiKeyAndEncryptionError(theme$);
+    showApiKeyAndEncryptionError(services);
   } else {
     showAlertsCreatedConfirmation();
   }

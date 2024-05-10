@@ -168,7 +168,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "recommended",
-            "description": [],
+            "description": [
+              "Indicates if model version is recommended for deployment based on the cluster configuration"
+            ],
             "signature": [
               "boolean | undefined"
             ],
@@ -196,7 +198,25 @@
             "type": "string",
             "tags": [],
             "label": "license",
-            "description": [],
+            "description": [
+              "Software license of a model, e.g. MIT"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-trained-models-utils",
+            "id": "def-common.ModelDefinition.licenseUrl",
+            "type": "string",
+            "tags": [],
+            "label": "licenseUrl",
+            "description": [
+              "Link to the external license/documentation page"
+            ],
             "signature": [
               "string | undefined"
             ],
@@ -358,6 +378,22 @@
       },
       {
         "parentPluginId": "@kbn/ml-trained-models-utils",
+        "id": "def-common.InferenceAPIConfigResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "InferenceAPIConfigResponse",
+        "description": [],
+        "signature": [
+          "{ model_id: string; task_type: \"sparse_embedding\" | \"text_embedding\"; task_settings: { model?: string | undefined; }; } & ",
+          "InferenceServiceSettings"
+        ],
+        "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-trained-models-utils",
         "id": "def-common.ModelDefinitionResponse",
         "type": "Type",
         "tags": [],
@@ -401,7 +437,7 @@
         "label": "SupportedPytorchTasksType",
         "description": [],
         "signature": [
-          "\"text_expansion\" | \"ner\" | \"question_answering\" | \"zero_shot_classification\" | \"text_classification\" | \"text_embedding\" | \"fill_mask\""
+          "\"text_embedding\" | \"text_expansion\" | \"ner\" | \"question_answering\" | \"zero_shot_classification\" | \"text_classification\" | \"fill_mask\""
         ],
         "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
         "deprecated": false,
@@ -416,7 +452,7 @@
         "label": "TrainedModelType",
         "description": [],
         "signature": [
-          "\"pytorch\" | \"tree_ensemble\" | \"lang_ident\""
+          "\"tree_ensemble\" | \"lang_ident\" | \"pytorch\""
         ],
         "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
         "deprecated": false,

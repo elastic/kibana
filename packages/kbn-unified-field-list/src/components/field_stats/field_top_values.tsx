@@ -14,8 +14,8 @@ import FieldTopValuesBucket from './field_top_values_bucket';
 import type { OverrideFieldTopValueBarCallback } from './field_top_values_bucket';
 
 export interface FieldTopValuesProps {
-  areExamples: boolean; // real top values or only examples
-  buckets: BucketedAggregation<number | string>['buckets'];
+  areExamples: boolean | undefined; // real top values or only examples distributed in buckets
+  buckets: BucketedAggregation<number | string | boolean>['buckets'];
   dataView: DataView;
   field: DataViewField;
   sampledValuesCount: number;
@@ -58,7 +58,7 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
           const formatted = formatter.convert(fieldValue);
 
           return (
-            <Fragment key={fieldValue}>
+            <Fragment key={String(fieldValue)}>
               {index > 0 && <EuiSpacer size="s" />}
               <FieldTopValuesBucket
                 field={field}
@@ -122,7 +122,7 @@ export const getProgressValue = (currentValue: number, totalCount: number): numb
 };
 
 export const getBucketsValuesCount = (
-  buckets?: BucketedAggregation<number | string>['buckets']
+  buckets?: BucketedAggregation<number | string | boolean>['buckets']
 ): number => {
   return buckets?.reduce((prev, bucket) => bucket.count + prev, 0) || 0;
 };

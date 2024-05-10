@@ -14,16 +14,17 @@ describe('validators', () => {
       expect(() =>
         validateCustomFieldTypesInRequest({
           requestCustomFields: [
-            { key: '1', type: CustomFieldTypes.TOGGLE },
-            { key: '2', type: CustomFieldTypes.TEXT },
+            { key: '1', type: CustomFieldTypes.TOGGLE, label: 'label 1' },
+            { key: '2', type: CustomFieldTypes.TEXT, label: 'label 2' },
           ],
+
           originalCustomFields: [
             { key: '1', type: CustomFieldTypes.TEXT },
             { key: '2', type: CustomFieldTypes.TOGGLE },
           ],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid custom field types in request for the following keys: 1,2"`
+        `"Invalid custom field types in request for the following labels: \\"label 1\\", \\"label 2\\""`
       );
     });
 
@@ -31,16 +32,17 @@ describe('validators', () => {
       expect(() =>
         validateCustomFieldTypesInRequest({
           requestCustomFields: [
-            { key: '1', type: CustomFieldTypes.TOGGLE },
-            { key: '2', type: CustomFieldTypes.TOGGLE },
+            { key: '1', type: CustomFieldTypes.TOGGLE, label: 'label 1' },
+            { key: '2', type: CustomFieldTypes.TOGGLE, label: 'label 2' },
           ],
+
           originalCustomFields: [
             { key: '1', type: CustomFieldTypes.TEXT },
             { key: '2', type: CustomFieldTypes.TOGGLE },
           ],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid custom field types in request for the following keys: 1"`
+        `"Invalid custom field types in request for the following labels: \\"label 1\\""`
       );
     });
 
@@ -59,8 +61,8 @@ describe('validators', () => {
       expect(() =>
         validateCustomFieldTypesInRequest({
           requestCustomFields: [
-            { key: '1', type: CustomFieldTypes.TOGGLE },
-            { key: '2', type: CustomFieldTypes.TEXT },
+            { key: '1', type: CustomFieldTypes.TOGGLE, label: 'label 1' },
+            { key: '2', type: CustomFieldTypes.TEXT, label: 'label 2' },
           ],
           originalCustomFields: [],
         })

@@ -7,9 +7,10 @@
 
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
-import { RouteInitialization } from '../types';
+import type { RouteInitialization } from '../types';
 import { createFilterSchema, filterIdSchema, updateFilterSchema } from './schemas/filters_schema';
-import { FilterManager, FormFilter, UpdateFilter } from '../models/filter';
+import type { FormFilter, UpdateFilter } from '../models/filter';
+import { FilterManager } from '../models/filter';
 import type { MlClient } from '../lib/ml_client';
 
 // TODO - add function for returning a list of just the filter IDs.

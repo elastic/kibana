@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 
 import { MultiMetricDetectors } from './metric_selection';

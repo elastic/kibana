@@ -7,7 +7,7 @@
 
 import { createSelector } from 'reselect';
 import { TimelineTabs } from '../../../../../../../common/types/timeline';
-import { selectTimeline } from '../../../../../store/timeline/selectors';
+import { selectTimeline } from '../../../../../store/selectors';
 
 export const isEqlOnSelector = () =>
   createSelector(selectTimeline, (timeline) => timeline?.activeTab === TimelineTabs.eql);

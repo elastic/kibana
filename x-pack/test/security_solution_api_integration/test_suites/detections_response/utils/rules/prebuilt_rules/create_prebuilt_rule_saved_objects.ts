@@ -21,10 +21,7 @@ import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-se
  * @returns Created rule asset saved object
  */
 export const createRuleAssetSavedObject = (overrideParams: Partial<PrebuiltRuleAsset>) => ({
-  'security-rule': {
-    ...getPrebuiltRuleMock(),
-    ...overrideParams,
-  },
+  'security-rule': getPrebuiltRuleMock(overrideParams),
   type: 'security-rule',
   references: [],
   coreMigrationVersion: '8.6.0',

@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import type { SuperTest, Test } from 'supertest';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -13,6 +14,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('List connectors', () => {
+    before(async () => {
+      await deleteAllActionConnectors(supertest);
+    });
+
+    after(async () => {
+      await deleteAllActionConnectors(supertest);
+    });
+
     it('Returns a 2xx for enterprise license', async () => {
       await observabilityAIAssistantAPIClient
         .readUser({
@@ -60,4 +69,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         .expect(204);
     });
   });
+}
+
+export async function deleteAllActionConnectors(supertest: SuperTest<Test>): Promise<any> {
+  const res = await supertest.get(`/api/actions/connectors`);
+
+  const body = res.body as Array<{ id: string; connector_type_id: string; name: string }>;
+  return Promise.all(
+    body.map(({ id }) => {
+      return supertest.delete(`/api/actions/connector/${id}`).set('kbn-xsrf', 'foo');
+    })
+  );
 }

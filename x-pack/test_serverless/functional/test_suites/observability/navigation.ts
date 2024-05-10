@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
-  const svlObltOnboardingPage = getPageObject('svlObltOnboardingPage');
   const svlObltNavigation = getService('svlObltNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
@@ -32,7 +31,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       // check serverless search side nav exists
       await svlCommonNavigation.expectExists();
       await svlCommonNavigation.breadcrumbs.expectExists();
-      await svlObltOnboardingPage.assertQuickstartBadgeExists();
 
       // check side nav links
       await svlCommonNavigation.sidenav.expectSectionOpen('observability_project_nav');
@@ -41,11 +39,15 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       });
       await svlCommonNavigation.sidenav.expectSectionClosed('project_settings_project_nav');
 
-      // navigate to discover
-      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'discover' });
-      await svlCommonNavigation.sidenav.expectLinkActive({ deepLinkId: 'discover' });
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ deepLinkId: 'discover' });
-      expect(await browser.getCurrentUrl()).contain('/app/discover');
+      // navigate to the logs explorer tab by default
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-logs-explorer' });
+      await svlCommonNavigation.sidenav.expectLinkActive({
+        deepLinkId: 'observability-logs-explorer',
+      });
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
+        deepLinkId: 'observability-logs-explorer',
+      });
+      expect(await browser.getCurrentUrl()).contain('/app/observability-logs-explorer');
 
       // check the aiops subsection
       await svlCommonNavigation.sidenav.openSection('observability_project_nav.aiops'); // open ai ops subsection

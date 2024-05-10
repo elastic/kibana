@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
@@ -13,20 +12,27 @@ import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { groupBy } from 'lodash';
+
 import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { appContextService, agentPolicyService } from '..';
 import type { AgentStatus, FleetServerAgent } from '../../../common/types';
 import { SO_SEARCH_LIMIT } from '../../../common/constants';
-import { isAgentUpgradeable } from '../../../common/services';
+import { isAgentUpgradeAvailable } from '../../../common/services';
 import { AGENTS_INDEX } from '../../constants';
-import { FleetError, isESClientError, AgentNotFoundError } from '../../errors';
+import {
+  FleetError,
+  isESClientError,
+  AgentNotFoundError,
+  FleetUnauthorizedError,
+} from '../../errors';
 
 import { auditLoggingService } from '../audit_logging';
 
 import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
 
 import { buildAgentStatusRuntimeField } from './build_status_runtime_field';
-import { getLatestAvailableVersion } from './versions';
+import { getLatestAvailableAgentVersion } from './versions';
 
 const INACTIVE_AGENT_CONDITION = `status:inactive OR status:unenrolled`;
 const ACTIVE_AGENT_CONDITION = `NOT (${INACTIVE_AGENT_CONDITION})`;
@@ -328,7 +334,7 @@ export async function getAgentsByKuery(
   // filtering for a range on the version string will not work,
   // nor does filtering on a flattened field (local_metadata), so filter here
   if (showUpgradeable) {
-    const latestAgentVersion = await getLatestAvailableVersion();
+    const latestAgentVersion = await getLatestAvailableAgentVersion();
     // fixing a bug where upgradeable filter was not returning right results https://github.com/elastic/kibana/issues/117329
     // query all agents, then filter upgradeable, and return the requested page and correct total
     // if there are more than SO_SEARCH_LIMIT agents, the logic falls back to same as before
@@ -336,19 +342,29 @@ export async function getAgentsByKuery(
       const response = await queryAgents(0, SO_SEARCH_LIMIT);
       agents = response.hits.hits
         .map(searchHitToAgent)
-        .filter((agent) => isAgentUpgradeable(agent, latestAgentVersion));
+        .filter((agent) => isAgentUpgradeAvailable(agent, latestAgentVersion));
       total = agents.length;
       const start = (page - 1) * perPage;
       agents = agents.slice(start, start + perPage);
     } else {
-      agents = agents.filter((agent) => isAgentUpgradeable(agent, latestAgentVersion));
+      agents = agents.filter((agent) => isAgentUpgradeAvailable(agent, latestAgentVersion));
     }
   }
 
   if (getStatusSummary) {
-    res.aggregations?.status.buckets.forEach((bucket) => {
-      statusSummary[bucket.key] = bucket.doc_count;
-    });
+    if (showUpgradeable) {
+      // when showUpgradeable is selected, calculate the summary status manually from the upgradeable agents above
+      // the bucket count doesn't take in account the upgradeable agents
+      agents.forEach((agent) => {
+        if (!agent?.status) return;
+        if (!statusSummary[agent.status]) statusSummary[agent.status] = 0;
+        statusSummary[agent.status]++;
+      });
+    } else {
+      res.aggregations?.status.buckets.forEach((bucket) => {
+        statusSummary[bucket.key] = bucket.doc_count;
+      });
+    }
   }
 
   return {
@@ -474,21 +490,22 @@ export async function getAgentsById(
 // this is used to get all fleet server versions
 export async function getAgentVersionsForAgentPolicyIds(
   esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
   agentPolicyIds: string[]
-): Promise<Record<string, number>> {
-  const versionCount: Record<string, number> = {};
+): Promise<Array<{ policyId: string; versionCounts: Record<string, number> }>> {
+  const result: Array<{ policyId: string; versionCounts: Record<string, number> }> = [];
 
   if (!agentPolicyIds.length) {
-    return versionCount;
+    return result;
   }
 
   try {
-    const res = esClient.search<
+    const {
+      hits: { hits },
+    } = await esClient.search<
       FleetServerAgent,
       Record<'agent_versions', { buckets: Array<{ key: string; doc_count: number }> }>
     >({
-      size: 0,
-      track_total_hits: false,
       body: {
         query: {
           bool: {
@@ -501,25 +518,27 @@ export async function getAgentVersionsForAgentPolicyIds(
             ],
           },
         },
-        aggs: {
-          agent_versions: {
-            terms: {
-              field: 'local_metadata.elastic.agent.version.keyword',
-              size: 1000,
-            },
-          },
-        },
       },
       index: AGENTS_INDEX,
       ignore_unavailable: true,
     });
 
-    const { aggregations } = await res;
+    const groupedHits = groupBy(hits, (hit) => hit._source?.policy_id);
 
-    if (aggregations && aggregations.agent_versions) {
-      aggregations.agent_versions.buckets.forEach((bucket) => {
-        versionCount[bucket.key] = bucket.doc_count;
-      });
+    for (const [policyId, policyHits] of Object.entries(groupedHits)) {
+      const versionCounts: Record<string, number> = {};
+
+      for (const hit of policyHits) {
+        const agentVersion = hit._source?.local_metadata?.elastic?.agent?.version;
+
+        if (!agentVersion) {
+          continue;
+        }
+
+        versionCounts[agentVersion] = (versionCounts[agentVersion] || 0) + 1;
+      }
+
+      result.push({ policyId, versionCounts });
     }
   } catch (error) {
     if (error.statusCode !== 404) {
@@ -527,7 +546,7 @@ export async function getAgentVersionsForAgentPolicyIds(
     }
   }
 
-  return versionCount;
+  return result;
 }
 
 export async function getAgentByAccessAPIKeyId(
@@ -548,10 +567,10 @@ export async function getAgentByAccessAPIKeyId(
     throw new AgentNotFoundError('Agent not found');
   }
   if (agent.access_api_key_id !== accessAPIKeyId) {
-    throw new Error('Agent api key id is not matching');
+    throw new FleetError('Agent api key id is not matching');
   }
   if (!agent.active) {
-    throw Boom.forbidden('Agent inactive');
+    throw new FleetUnauthorizedError('Agent inactive');
   }
 
   return agent;

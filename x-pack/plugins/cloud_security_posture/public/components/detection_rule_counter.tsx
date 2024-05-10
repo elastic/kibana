@@ -16,7 +16,7 @@ import { useFetchDetectionRulesAlertsStatus } from '../common/api/use_fetch_dete
 import { useFetchDetectionRulesByTags } from '../common/api/use_fetch_detection_rules_by_tags';
 import { RuleResponse } from '../common/types';
 import { useKibana } from '../common/hooks/use_kibana';
-import { showSuccessToast } from './take_action';
+import { showCreateDetectionRuleSuccessToast } from './take_action';
 import { DETECTION_ENGINE_ALERTS_KEY, DETECTION_ENGINE_RULES_KEY } from '../common/constants';
 
 const RULES_PAGE_PATH = '/rules/management';
@@ -36,14 +36,14 @@ export const DetectionRuleCounter = ({ tags, createRuleFn }: DetectionRuleCounte
   const [isCreateRuleLoading, setIsCreateRuleLoading] = useState(false);
 
   const queryClient = useQueryClient();
-  const { http, notifications } = useKibana().services;
+  const { http, notifications, analytics, i18n, theme } = useKibana().services;
 
   const history = useHistory();
 
   const [, setRulesTable] = useSessionStorage(RULES_TABLE_SESSION_STORAGE_KEY);
 
   const rulePageNavigation = useCallback(async () => {
-    await setRulesTable({
+    setRulesTable({
       tags,
     });
     history.push({
@@ -58,14 +58,15 @@ export const DetectionRuleCounter = ({ tags, createRuleFn }: DetectionRuleCounte
   }, [history]);
 
   const createDetectionRuleOnClick = useCallback(async () => {
+    const startServices = { analytics, notifications, i18n, theme };
     setIsCreateRuleLoading(true);
     const ruleResponse = await createRuleFn(http);
     setIsCreateRuleLoading(false);
-    showSuccessToast(notifications, http, ruleResponse);
+    showCreateDetectionRuleSuccessToast(startServices, http, ruleResponse);
     // Triggering a refetch of rules and alerts to update the UI
     queryClient.invalidateQueries([DETECTION_ENGINE_RULES_KEY]);
     queryClient.invalidateQueries([DETECTION_ENGINE_ALERTS_KEY]);
-  }, [createRuleFn, http, notifications, queryClient]);
+  }, [createRuleFn, http, analytics, notifications, i18n, theme, queryClient]);
 
   return (
     <EuiSkeletonText

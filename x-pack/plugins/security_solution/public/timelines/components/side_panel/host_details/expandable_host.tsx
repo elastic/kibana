@@ -21,7 +21,6 @@ import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/a
 import { hostToCriteria } from '../../../../common/components/ml/criteria/host_to_criteria';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
 import { useHostDetails, ID } from '../../../../explore/hosts/containers/hosts/details';
-import { getSourcererScopeId } from '../../../../helpers';
 
 interface ExpandableHostProps {
   hostName: string;
@@ -35,7 +34,7 @@ const StyledTitle = styled.h4`
 
 export const ExpandableHostDetailsTitle = ({ hostName }: ExpandableHostProps) => (
   <EuiTitle size="s">
-    <StyledTitle>
+    <StyledTitle data-test-subj="host-details-header">
       {i18n.translate('xpack.securitySolution.timeline.sidePanel.hostDetails.title', {
         defaultMessage: 'Host details',
       })}
@@ -100,7 +99,7 @@ export const ExpandableHostDetails = ({
       {({ isLoadingAnomaliesData, anomaliesData, jobNameById }) => (
         <HostOverview
           contextID={contextID}
-          sourcererScopeId={getSourcererScopeId(scopeId)}
+          scopeId={scopeId}
           id={ID}
           isInDetailsSidePanel
           data={hostOverview as HostItem}

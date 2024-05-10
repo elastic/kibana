@@ -34,6 +34,7 @@ import {
   SNOOZE_SUCCESS_MESSAGE,
   UNSNOOZE_SUCCESS_MESSAGE,
 } from './notify_badge';
+import { UntrackAlertsModal } from '../../common/components/untrack_alerts_modal';
 
 export type ComponentOpts = {
   item: RuleTableItem;
@@ -70,6 +71,8 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [isDisabled, setIsDisabled] = useState<boolean>(!item.enabled);
+  const [isUntrackAlertsModalOpen, setIsUntrackAlertsModalOpen] = useState<boolean>(false);
+
   useEffect(() => {
     setIsDisabled(!item.enabled);
   }, [item.enabled]);
@@ -179,6 +182,42 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
     ];
   }, [isDisabled, item, snoozedButtonText]);
 
+  const onDisableModalOpen = useCallback(() => {
+    setIsUntrackAlertsModalOpen(true);
+  }, []);
+
+  const onDisableModalClose = useCallback(() => {
+    setIsUntrackAlertsModalOpen(false);
+  }, []);
+
+  const onEnable = useCallback(async () => {
+    asyncScheduler.schedule(async () => {
+      await bulkEnableRules({ ids: [item.id] });
+      onRuleChanged();
+    }, 10);
+    setIsDisabled(false);
+    setIsPopoverOpen(false);
+  }, [bulkEnableRules, onRuleChanged, item.id]);
+
+  const onDisable = useCallback(
+    async (untrack: boolean) => {
+      onDisableModalClose();
+      await bulkDisableRules({ ids: [item.id], untrack });
+      onRuleChanged();
+      setIsDisabled(true);
+      setIsPopoverOpen(false);
+    },
+    [onDisableModalClose, bulkDisableRules, onRuleChanged, item.id]
+  );
+
+  const onDisableClick = useCallback(() => {
+    if (isDisabled) {
+      onEnable();
+    } else {
+      onDisableModalOpen();
+    }
+  }, [isDisabled, onEnable, onDisableModalOpen]);
+
   const panels = [
     {
       id: 0,
@@ -191,19 +230,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
         {
           disabled: !item.isEditable || !item.enabledInLicense,
           'data-test-subj': 'disableButton',
-          onClick: async () => {
-            const enabled = !isDisabled;
-            asyncScheduler.schedule(async () => {
-              if (enabled) {
-                await bulkDisableRules({ ids: [item.id] });
-              } else {
-                await bulkEnableRules({ ids: [item.id] });
-              }
-              onRuleChanged();
-            }, 10);
-            setIsDisabled(!isDisabled);
-            setIsPopoverOpen(!isPopoverOpen);
-          },
+          onClick: onDisableClick,
           name: isDisabled
             ? i18n.translate(
                 'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.enableTitle',
@@ -310,22 +337,27 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   ];
 
   return (
-    <EuiPopover
-      button={button}
-      isOpen={isPopoverOpen}
-      closePopover={() => setIsPopoverOpen(false)}
-      ownFocus
-      panelPaddingSize="none"
-      data-test-subj="collapsedItemActions"
-    >
-      <EuiContextMenu
-        initialPanelId={0}
-        panels={panels}
-        className="actCollapsedItemActions"
-        data-test-subj="collapsedActionPanel"
-        data-testid="collapsedActionPanel"
-      />
-    </EuiPopover>
+    <>
+      <EuiPopover
+        button={button}
+        isOpen={isPopoverOpen}
+        closePopover={() => setIsPopoverOpen(false)}
+        ownFocus
+        panelPaddingSize="none"
+        data-test-subj="collapsedItemActions"
+      >
+        <EuiContextMenu
+          initialPanelId={0}
+          panels={panels}
+          className="actCollapsedItemActions"
+          data-test-subj="collapsedActionPanel"
+          data-testid="collapsedActionPanel"
+        />
+      </EuiPopover>
+      {isUntrackAlertsModalOpen && (
+        <UntrackAlertsModal onCancel={onDisableModalClose} onConfirm={onDisable} />
+      )}
+    </>
   );
 };
 

@@ -22,6 +22,8 @@ import type { AgentPolicy, NewPackagePolicy, Output, DownloadSource } from '../t
 
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 
+import { appContextService } from './app_context';
+
 import * as agentPolicy from './agent_policy';
 
 import {
@@ -30,7 +32,7 @@ import {
 } from './preconfiguration';
 import { packagePolicyService } from './package_policy';
 import { getBundledPackages } from './epm/packages/bundled_packages';
-import type { InstallPackageParams } from './epm/packages/install';
+import { installPackage, type InstallPackageParams } from './epm/packages/install';
 
 jest.mock('./agent_policy_update');
 jest.mock('./output');
@@ -144,44 +146,46 @@ jest.mock('./epm/registry', () => ({
 }));
 
 jest.mock('./epm/packages/install', () => ({
-  async installPackage(args: InstallPackageParams): Promise<InstallResult | undefined> {
-    if (args.installSource === 'registry') {
-      const [pkgName, pkgVersion] = args.pkgkey.split('-');
-      const installError = mockInstallPackageErrors.get(pkgName);
-      if (installError) {
+  installPackage: jest.fn(
+    async (args: InstallPackageParams): Promise<InstallResult | undefined> => {
+      if (args.installSource === 'registry') {
+        const [pkgName, pkgVersion] = args.pkgkey.split('-');
+        const installError = mockInstallPackageErrors.get(pkgName);
+        if (installError) {
+          return {
+            error: new Error(installError),
+            installType: 'install',
+            installSource: 'registry',
+          };
+        }
+
+        const installedPackage = mockInstalledPackages.get(pkgName);
+        if (installedPackage) {
+          if (installedPackage.version === pkgVersion) return installedPackage;
+        }
+
+        const packageInstallation = { name: pkgName, version: pkgVersion, title: pkgName };
+        mockInstalledPackages.set(pkgName, packageInstallation);
+
         return {
-          error: new Error(installError),
+          status: 'installed',
           installType: 'install',
           installSource: 'registry',
         };
+      } else if (args.installSource === 'upload') {
+        const { archiveBuffer } = args;
+
+        // Treat the buffer value passed in tests as the package's name for simplicity
+        const pkgName = archiveBuffer.toString('utf8');
+
+        // Just install every bundled package at version '1.0.0'
+        const packageInstallation = { name: pkgName, version: '1.0.0', title: pkgName };
+        mockInstalledPackages.set(pkgName, packageInstallation);
+
+        return { status: 'installed', installType: 'install', installSource: 'upload' };
       }
-
-      const installedPackage = mockInstalledPackages.get(pkgName);
-      if (installedPackage) {
-        if (installedPackage.version === pkgVersion) return installedPackage;
-      }
-
-      const packageInstallation = { name: pkgName, version: pkgVersion, title: pkgName };
-      mockInstalledPackages.set(pkgName, packageInstallation);
-
-      return {
-        status: 'installed',
-        installType: 'install',
-        installSource: 'registry',
-      };
-    } else if (args.installSource === 'upload') {
-      const { archiveBuffer } = args;
-
-      // Treat the buffer value passed in tests as the package's name for simplicity
-      const pkgName = archiveBuffer.toString('utf8');
-
-      // Just install every bundled package at version '1.0.0'
-      const packageInstallation = { name: pkgName, version: '1.0.0', title: pkgName };
-      mockInstalledPackages.set(pkgName, packageInstallation);
-
-      return { status: 'installed', installType: 'install', installSource: 'upload' };
     }
-  },
+  ),
   ensurePackagesCompletedInstall() {
     return [];
   },
@@ -231,6 +235,22 @@ jest.mock('./epm/packages/get', () => ({
     return {
       status: 'installed',
       ...installedPackage,
+      policy_templates: [
+        {
+          name: 'test_template',
+          inputs: [
+            {
+              type: 'foo',
+              vars: [
+                {
+                  name: 'bar',
+                  type: 'text',
+                },
+              ],
+            },
+          ],
+        },
+      ],
     };
   },
   getInstallation({ pkgName }: { pkgName: string }) {
@@ -280,6 +300,11 @@ jest.mock('./app_context', () => ({
       ),
     getUninstallTokenService: () => ({
       generateTokenForPolicyId: jest.fn(),
+    }),
+    getExternalCallbacks: jest.fn(),
+    getCloud: jest.fn(),
+    getExperimentalFeatures: jest.fn().mockReturnValue({
+      agentless: false,
     }),
   },
 }));
@@ -376,7 +401,73 @@ describe('policy preconfiguration', () => {
       expect(nonFatalErrors.length).toBe(0);
     });
 
-    it('should install prelease packages if needed', async () => {
+    it('should install packages and configure agent policies successfully if using simplified package policy', async () => {
+      const soClient = getPutPreconfiguredPackagesMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const { policies, packages, nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
+        soClient,
+        esClient,
+        [
+          {
+            name: 'Test policy',
+            namespace: 'default',
+            id: 'test-id',
+            package_policies: [
+              {
+                id: 'test-1',
+                name: 'Test package',
+                namespace: 'default',
+                description: 'test',
+                package: { name: 'test_package' },
+                inputs: {
+                  'test_template-foo': {
+                    vars: {
+                      bar: 'test',
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        ] as PreconfiguredAgentPolicy[],
+        [{ name: 'test_package', version: '3.0.0' }],
+        mockDefaultOutput,
+        mockDefaultDownloadService,
+        DEFAULT_SPACE_ID
+      );
+
+      expect(policies.length).toEqual(1);
+      expect(policies[0].id).toBe('test-id');
+      expect(packages).toEqual(expect.arrayContaining(['test_package-3.0.0']));
+      expect(nonFatalErrors.length).toBe(0);
+
+      expect(mockedPackagePolicyService.create).toBeCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({
+          description: 'test',
+          enabled: true,
+          inputs: [
+            {
+              enabled: true,
+              policy_template: 'test_template',
+              streams: [],
+              type: 'foo',
+              vars: { bar: { type: 'text', value: 'test' } },
+            },
+          ],
+          name: 'Test package',
+          namespace: 'default',
+          package: { name: 'test_package', title: 'test_package', version: '3.0.0' },
+          policy_id: 'test-id',
+          vars: undefined,
+        }),
+        expect.objectContaining({ id: 'test-1' })
+      );
+    });
+
+    it('should install prerelease packages if needed', async () => {
       const soClient = getPutPreconfiguredPackagesMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
@@ -393,6 +484,30 @@ describe('policy preconfiguration', () => {
       expect(policies.length).toEqual(0);
       expect(packages).toEqual(expect.arrayContaining(['test_package-3.0.1-beta.1']));
       expect(nonFatalErrors.length).toBe(0);
+    });
+
+    it('should pass skipDatastreamRollover flag if configured', async () => {
+      const soClient = getPutPreconfiguredPackagesMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const { policies, packages, nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
+        soClient,
+        esClient,
+        [] as PreconfiguredAgentPolicy[],
+        [{ name: 'test_package', version: 'latest', skipDataStreamRollover: true }],
+        mockDefaultOutput,
+        mockDefaultDownloadService,
+        DEFAULT_SPACE_ID
+      );
+
+      expect(policies.length).toEqual(0);
+      expect(packages).toEqual(expect.arrayContaining(['test_package-1.0.0']));
+      expect(nonFatalErrors.length).toBe(0);
+      expect(jest.mocked(installPackage)).toBeCalledWith(
+        expect.objectContaining({
+          skipDataStreamRollover: true,
+        })
+      );
     });
 
     it('should not add new package policy to existing non managed policies', async () => {
@@ -504,6 +619,130 @@ describe('policy preconfiguration', () => {
       );
     });
 
+    it('should update keep_monitoring_enabled for existing managed policies', async () => {
+      const soClient = getPutPreconfiguredPackagesMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([
+        { name: 'test_package1' } as PackagePolicy,
+      ]);
+
+      mockConfiguredPolicies.set('test-id', {
+        name: 'Test policy',
+        description: 'Test policy description',
+        unenroll_timeout: 120,
+        namespace: 'default',
+        id: 'test-id',
+        is_managed: true,
+        package_policies: [
+          {
+            name: 'test_package1',
+          },
+        ],
+      } as PreconfiguredAgentPolicy);
+
+      await ensurePreconfiguredPackagesAndPolicies(
+        soClient,
+        esClient,
+        [
+          {
+            name: 'Test policy',
+            namespace: 'default',
+            id: 'test-id',
+            is_managed: true,
+            keep_monitoring_alive: true,
+            package_policies: [
+              {
+                package: { name: 'test_package' },
+                name: 'test_package1',
+              },
+            ],
+          },
+        ] as PreconfiguredAgentPolicy[],
+        [{ name: 'test_package', version: '3.0.0' }],
+        mockDefaultOutput,
+        mockDefaultDownloadService,
+        DEFAULT_SPACE_ID
+      );
+
+      expect(spyAgentPolicyServiceUpdate).toBeCalled();
+      expect(spyAgentPolicyServiceUpdate).toBeCalledWith(
+        expect.anything(), // soClient
+        expect.anything(), // esClient
+        'test-id',
+        expect.objectContaining({
+          download_source_id: 'ds-test-id',
+          is_managed: true,
+          keep_monitoring_alive: true,
+          name: 'Test policy',
+        }),
+        {
+          force: true,
+        }
+      );
+    });
+
+    it('should update keep_monitoring_enabled for existing managed policies (even is the SO is out-of-sync)', async () => {
+      const soClient = getPutPreconfiguredPackagesMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([
+        { name: 'test_package1' } as PackagePolicy,
+      ]);
+
+      mockConfiguredPolicies.set('test-id', {
+        name: 'Test policy',
+        description: 'Test policy description',
+        unenroll_timeout: 120,
+        namespace: 'default',
+        id: 'test-id',
+        is_managed: false, // SO out-of-sync and mark the policy as not managed
+        package_policies: [
+          {
+            name: 'test_package1',
+          },
+        ],
+      } as PreconfiguredAgentPolicy);
+
+      await ensurePreconfiguredPackagesAndPolicies(
+        soClient,
+        esClient,
+        [
+          {
+            name: 'Test policy',
+            namespace: 'default',
+            id: 'test-id',
+            is_managed: true,
+            keep_monitoring_alive: true,
+            package_policies: [
+              {
+                package: { name: 'test_package' },
+                name: 'test_package1',
+              },
+            ],
+          },
+        ] as PreconfiguredAgentPolicy[],
+        [{ name: 'test_package', version: '3.0.0' }],
+        mockDefaultOutput,
+        mockDefaultDownloadService,
+        DEFAULT_SPACE_ID
+      );
+
+      expect(spyAgentPolicyServiceUpdate).toBeCalled();
+      expect(spyAgentPolicyServiceUpdate).toBeCalledWith(
+        expect.anything(), // soClient
+        expect.anything(), // esClient
+        'test-id',
+        expect.objectContaining({
+          download_source_id: 'ds-test-id',
+          is_managed: true,
+          keep_monitoring_alive: true,
+          name: 'Test policy',
+        }),
+        {
+          force: true,
+        }
+      );
+    });
+
     it('should not try to recreate preconfigure package policy that has been renamed', async () => {
       const soClient = getPutPreconfiguredPackagesMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -612,6 +851,7 @@ describe('policy preconfiguration', () => {
     it('should not create a policy and throw an error if package is not installed for an unknown reason', async () => {
       const soClient = getPutPreconfiguredPackagesMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
       const policies: PreconfiguredAgentPolicy[] = [
         {
           name: 'Test policy',
@@ -639,6 +879,113 @@ describe('policy preconfiguration', () => {
         )
       ).rejects.toThrow(
         '[Test policy] could not be added. [test_package] is not installed, add [test_package] to [xpack.fleet.packages] or remove it from [Test package].'
+      );
+    });
+
+    it('should return a non fatal error if support_agentless is defined in stateful', async () => {
+      const soClient = getPutPreconfiguredPackagesMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      jest.mocked(appContextService.getExperimentalFeatures).mockReturnValue({
+        agentless: true,
+      } as any);
+
+      jest
+        .spyOn(appContextService, 'getCloud')
+        .mockReturnValue({ isServerlessEnabled: false } as any);
+
+      const policies: PreconfiguredAgentPolicy[] = [
+        {
+          name: 'Test policy',
+          namespace: 'default',
+          id: 'test-id',
+          supports_agentless: true,
+          package_policies: [],
+        },
+      ];
+
+      const { nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
+        soClient,
+        esClient,
+        policies,
+        [{ name: 'CANNOT_MATCH', version: 'x.y.z' }],
+        mockDefaultOutput,
+        mockDefaultDownloadService,
+        DEFAULT_SPACE_ID
+      );
+      // @ts-ignore-next-line
+      expect(nonFatalErrors[0].error.toString()).toEqual(
+        'FleetError: `supports_agentless` is only allowed in serverless environments that support the agentless feature'
+      );
+    });
+
+    it('should not return an error if support_agentless is defined in serverless and agentless is enabled', async () => {
+      const soClient = getPutPreconfiguredPackagesMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      jest.mocked(appContextService.getExperimentalFeatures).mockReturnValue({
+        agentless: true,
+      } as any);
+
+      jest
+        .spyOn(appContextService, 'getCloud')
+        .mockReturnValue({ isServerlessEnabled: true } as any);
+
+      const policies: PreconfiguredAgentPolicy[] = [
+        {
+          name: 'Test policy',
+          namespace: 'default',
+          id: 'test-id',
+          supports_agentless: true,
+          package_policies: [],
+        },
+      ];
+
+      const { policies: resPolicies, nonFatalErrors } =
+        await ensurePreconfiguredPackagesAndPolicies(
+          soClient,
+          esClient,
+          policies,
+          [{ name: 'CANNOT_MATCH', version: 'x.y.z' }],
+          mockDefaultOutput,
+          mockDefaultDownloadService,
+          DEFAULT_SPACE_ID
+        );
+      expect(nonFatalErrors.length).toBe(0);
+      expect(resPolicies[0].id).toEqual('test-id');
+    });
+
+    it('should return an error if agentless feature flag is disabled on serverless', async () => {
+      const soClient = getPutPreconfiguredPackagesMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      jest.mocked(appContextService.getExperimentalFeatures).mockReturnValue({
+        agentless: false,
+      } as any);
+
+      jest
+        .spyOn(appContextService, 'getCloud')
+        .mockReturnValue({ isServerlessEnabled: true } as any);
+
+      const policies: PreconfiguredAgentPolicy[] = [
+        {
+          name: 'Test policy',
+          namespace: 'default',
+          id: 'test-id',
+          supports_agentless: true,
+          package_policies: [],
+        },
+      ];
+
+      const { nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
+        soClient,
+        esClient,
+        policies,
+        [{ name: 'CANNOT_MATCH', version: 'x.y.z' }],
+        mockDefaultOutput,
+        mockDefaultDownloadService,
+        DEFAULT_SPACE_ID
+      );
+      // @ts-ignore-next-line
+      expect(nonFatalErrors[0].error.toString()).toEqual(
+        'FleetError: `supports_agentless` is only allowed in serverless environments that support the agentless feature'
       );
     });
 
@@ -842,7 +1189,9 @@ describe('policy preconfiguration', () => {
           const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
           // Install an older version of a test package
-          mockInstalledPackages.set('test_package', { version: '0.9.0' });
+          mockInstalledPackages.set('test_package', {
+            version: '0.9.0',
+          });
 
           const { policies, packages, nonFatalErrors } =
             await ensurePreconfiguredPackagesAndPolicies(

@@ -14,11 +14,8 @@ import { PLUGIN_ICON, PLUGIN_ID, ML_APP_NAME } from '../../../common/constants/a
 import { HttpService } from '../../application/services/http_service';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
 import type { MlDependencies } from '../../application/app';
-import {
-  ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
-  AnomalyChartsEmbeddableInput,
-  AnomalyChartsEmbeddableServices,
-} from '..';
+import type { AnomalyChartsEmbeddableInput, AnomalyChartsEmbeddableServices } from '..';
+import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '..';
 import { AnomalyExplorerChartsService } from '../../application/services/anomaly_explorer_charts_service';
 
 export class AnomalyChartsEmbeddableFactory
@@ -55,42 +52,66 @@ export class AnomalyChartsEmbeddableFactory
   }
 
   public async getExplicitInput(): Promise<Partial<AnomalyChartsEmbeddableInput>> {
-    const [coreStart] = await this.getServices();
+    const [coreStart, deps] = await this.getServices();
 
     try {
       const { resolveEmbeddableAnomalyChartsUserInput } = await import(
         './anomaly_charts_setup_flyout'
       );
-      return await resolveEmbeddableAnomalyChartsUserInput(coreStart);
+      return await resolveEmbeddableAnomalyChartsUserInput(coreStart, deps.data.dataViews);
     } catch (e) {
       return Promise.reject();
     }
   }
 
   private async getServices(): Promise<AnomalyChartsEmbeddableServices> {
-    const [coreStart, pluginsStart] = await this.getStartServices();
-
-    const { AnomalyDetectorService } = await import(
-      '../../application/services/anomaly_detector_service'
-    );
-    const { mlApiServicesProvider } = await import('../../application/services/ml_api_service');
-    const { mlResultsServiceProvider } = await import('../../application/services/results_service');
+    const [
+      [coreStart, pluginsStart],
+      { AnomalyDetectorService },
+      { fieldFormatServiceFactory },
+      { indexServiceFactory },
+      { mlApiServicesProvider },
+      { mlResultsServiceProvider },
+    ] = await Promise.all([
+      await this.getStartServices(),
+      await import('../../application/services/anomaly_detector_service'),
+      await import('../../application/services/field_format_service_factory'),
+      await import('../../application/util/index_service'),
+      await import('../../application/services/ml_api_service'),
+      await import('../../application/services/results_service'),
+    ]);
 
     const httpService = new HttpService(coreStart.http);
     const anomalyDetectorService = new AnomalyDetectorService(httpService);
     const mlApiServices = mlApiServicesProvider(httpService);
     const mlResultsService = mlResultsServiceProvider(mlApiServices);
-
     const anomalyExplorerService = new AnomalyExplorerChartsService(
       pluginsStart.data.query.timefilter.timefilter,
       mlApiServices,
       mlResultsService
     );
 
+    // Note on the following services:
+    // - `mlIndexUtils` is just instantiated here to be passed on to `mlFieldFormatService`,
+    //   but it's not being made available as part of global services. Since it's just
+    //   some stateless utils `useMlIndexUtils()` should be used from within components.
+    // - `mlFieldFormatService` is a stateful legacy service that relied on "dependency cache",
+    //   so because of its own state it needs to be made available as a global service.
+    //   In the long run we should again try to get rid of it here and make it available via
+    //   its own context or possibly without having a singleton like state at all, since the
+    //   way this manages its own state right now doesn't consider React component lifecycles.
+    const mlIndexUtils = indexServiceFactory(pluginsStart.data.dataViews);
+    const mlFieldFormatService = fieldFormatServiceFactory(mlApiServices, mlIndexUtils);
+
     return [
       coreStart,
       pluginsStart as MlDependencies,
-      { anomalyDetectorService, anomalyExplorerService, mlResultsService },
+      {
+        anomalyDetectorService,
+        anomalyExplorerService,
+        mlFieldFormatService,
+        mlResultsService,
+      },
     ];
   }
 

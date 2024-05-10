@@ -45,5 +45,6 @@ export const reloadPageToast = (theme: ThemeServiceStart, i18nStart: I18nStart):
       { i18n: i18nStart, theme }
     ),
     color: 'success',
+    toastLifeTimeMs: 15000,
   };
 };

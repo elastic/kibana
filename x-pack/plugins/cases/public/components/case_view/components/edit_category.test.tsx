@@ -242,7 +242,7 @@ describe('EditCategory ', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('categories-list')).toBeInTheDocument();
-      expect(screen.getByText('My category')).toBeInTheDocument();
+      expect(screen.getByTestId('comboBoxSearchInput')).toHaveValue('My category');
     });
 
     expect(screen.getByTestId('edit-category-submit')).toBeDisabled();
@@ -265,7 +265,7 @@ describe('EditCategory ', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('categories-list')).toBeInTheDocument();
-      expect(screen.getByText('My category')).toBeInTheDocument();
+      expect(screen.getByTestId('comboBoxSearchInput')).toHaveValue('My category');
     });
 
     userEvent.click(screen.getByTestId('edit-category-cancel'));
@@ -276,7 +276,7 @@ describe('EditCategory ', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('categories-list')).toBeInTheDocument();
-      expect(screen.getByText('category from the API')).toBeInTheDocument();
+      expect(screen.getByTestId('comboBoxSearchInput')).toHaveValue('category from the API');
     });
   });
 

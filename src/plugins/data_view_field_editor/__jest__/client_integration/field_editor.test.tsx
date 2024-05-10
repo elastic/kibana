@@ -81,7 +81,7 @@ describe('<FieldEditor />', () => {
   test('initial state should have "set custom label", "set value" and "set format" turned off', async () => {
     testBed = await setup();
 
-    ['customLabel', 'value', 'format'].forEach((row) => {
+    ['customLabel', 'customDescription', 'value', 'format'].forEach((row) => {
       const testSubj = `${row}Row.toggle`;
       const toggle = testBed.find(testSubj);
       const isOn = toggle.props()['aria-checked'];

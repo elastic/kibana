@@ -6,7 +6,7 @@
  */
 
 import { kibanaPackageJson } from '@kbn/repo-info';
-import { Block } from '../types';
+import type { Block } from '../types';
 
 /**
  * Post Filter parsed results.

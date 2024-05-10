@@ -4,31 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { timerange, observer } from '@kbn/apm-synthtrace-client';
+import { observer } from '@kbn/apm-synthtrace-client';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { Readable } from 'stream';
 
-export async function addAgentConfigMetrics({
-  synthtraceEsClient,
-  start,
-  end,
+export function addAgentConfigEtagMetric({
+  apmSynthtraceEsClient,
+  timestamp,
   etag,
 }: {
-  synthtraceEsClient: ApmSynthtraceEsClient;
-  start: number;
-  end: number;
-  etag?: string;
+  apmSynthtraceEsClient: ApmSynthtraceEsClient;
+  timestamp: number;
+  etag: string;
 }) {
-  const agentConfigEvents = [
-    timerange(start, end)
-      .interval('1m')
-      .rate(1)
-      .generator((timestamp) =>
-        observer()
-          .agentConfig()
-          .etag(etag ?? 'test-etag')
-          .timestamp(timestamp)
-      ),
-  ];
-
-  await synthtraceEsClient.index(agentConfigEvents);
+  const agentConfigMetric = observer().agentConfig().etag(etag).timestamp(timestamp);
+  return apmSynthtraceEsClient.index(Readable.from([agentConfigMetric]));
 }

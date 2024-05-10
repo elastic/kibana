@@ -62,12 +62,19 @@ export interface LensBaseConfig {
 export interface LensBaseLayer {
   label?: string;
   filter?: string;
-  format?: 'bytes' | 'currency' | 'duration' | 'number' | 'percent' | 'string';
+  format?: 'bits' | 'bytes' | 'currency' | 'duration' | 'number' | 'percent' | 'string';
+  decimals?: number;
+  normalizeByUnit?: 's' | 'm' | 'h' | 'd';
+  compactValues?: boolean;
   randomSampling?: number;
   useGlobalFilter?: boolean;
   seriesColor?: string;
-  dataset?: LensDataset;
   value: LensLayerQuery;
+}
+
+export interface LensBaseXYLayer {
+  dataset?: LensDataset;
+  yAxis: LensBaseLayer[];
 }
 
 export type LensConfig =
@@ -91,6 +98,16 @@ export interface LensConfigOptions {
   query?: Query;
 }
 
+export interface LensAxisTitleVisibilityConfig {
+  showXAxisTitle?: boolean;
+  showYAxisTitle?: boolean;
+}
+
+export interface LensYBoundsConfig {
+  mode: 'full' | 'custom' | 'dataBounds';
+  lowerBound?: number;
+  upperBound?: number;
+}
 export interface LensLegendConfig {
   show?: boolean;
   position?: 'top' | 'left' | 'bottom' | 'right';
@@ -140,6 +157,7 @@ export interface LensMetricConfigBase {
   /** field name to apply breakdown based on field type or full breakdown configuration */
   breakdown?: LensBreakdownConfig;
   trendLine?: boolean;
+  subtitle?: string;
 }
 
 export type LensMetricConfig = Identity<LensBaseConfig & LensBaseLayer & LensMetricConfigBase>;
@@ -222,10 +240,10 @@ export interface LensReferenceLineLayerBase {
   lineThickness?: number;
   color?: string;
   fill?: 'none' | 'above' | 'below';
-  value?: number;
+  value?: string;
 }
 
-export type LensReferenceLineLayer = LensReferenceLineLayerBase & LensBaseLayer;
+export type LensReferenceLineLayer = LensReferenceLineLayerBase & LensBaseXYLayer;
 
 export interface LensAnnotationLayerBaseProps {
   name: string;
@@ -234,7 +252,7 @@ export interface LensAnnotationLayerBaseProps {
 }
 
 export type LensAnnotationLayer = Identity<
-  LensBaseLayer & {
+  LensBaseXYLayer & {
     type: 'annotation';
     events: Array<
       | Identity<
@@ -253,7 +271,7 @@ export type LensAnnotationLayer = Identity<
 >;
 
 export type LensSeriesLayer = Identity<
-  LensBaseLayer & {
+  LensBaseXYLayer & {
     type: 'series';
     breakdown?: LensBreakdownConfig;
     xAxis: LensBreakdownConfig;
@@ -265,10 +283,38 @@ export interface LensXYConfigBase {
   chartType: 'xy';
   layers: Array<LensSeriesLayer | LensAnnotationLayer | LensReferenceLineLayer>;
   legend?: Identity<LensLegendConfig>;
+  axisTitleVisibility?: Identity<LensAxisTitleVisibilityConfig>;
+  emphasizeFitting?: boolean;
+  fittingFunction?: 'None' | 'Zero' | 'Linear' | 'Carry' | 'Lookahead' | 'Average' | 'Nearest';
+  yBounds?: LensYBoundsConfig;
 }
 export interface BuildDependencies {
   dataViewsAPI: DataViewsPublicPluginStart;
-  formulaAPI: FormulaPublicApi;
+  formulaAPI?: FormulaPublicApi;
 }
 
 export type LensXYConfig = Identity<LensBaseConfig & LensXYConfigBase>;
+
+type LensFormula = Parameters<FormulaPublicApi['insertOrReplaceFormulaColumn']>[1];
+
+export type FormulaValueConfig = LensFormula & {
+  color?: string;
+};
+
+interface ChartTypeLensMap {
+  gauge: LensGaugeConfig;
+  metric: LensMetricConfig;
+  pie: LensPieConfig;
+  donut: LensPieConfig;
+  treemap: LensTreeMapConfig;
+  tagcloud: LensTagCloudConfig;
+  regionmap: LensRegionMapConfig;
+  mosaic: LensMosaicConfig;
+  table: LensTableConfig;
+  heatmap: LensHeatmapConfig;
+  xy: LensXYConfig;
+}
+
+export type ChartTypeLensConfig<T extends ChartType> = T extends keyof ChartTypeLensMap
+  ? ChartTypeLensMap[T]
+  : never;

@@ -1,6 +1,5 @@
 superuser:elastic_serverless
 system_indices_superuser:system_indices_superuser
-
 t1_analyst:t1_analyst
 t2_analyst:t2_analyst
 t3_analyst:t3_analyst

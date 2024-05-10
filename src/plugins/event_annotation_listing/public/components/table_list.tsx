@@ -239,7 +239,7 @@ export const EventAnnotationGroupTableList = ({
         entityNamePlural={i18n.translate('eventAnnotationListing.tableList.entityNamePlural', {
           defaultMessage: 'annotation groups',
         })}
-        onClickTitle={editItem}
+        getOnClickTitle={(item) => () => editItem(item)}
         {...parentProps}
       />
       {flyout}

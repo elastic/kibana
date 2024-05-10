@@ -19,7 +19,7 @@ import { generateErrorData } from './generate_data';
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
 
@@ -70,13 +70,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   });
 
   registry.when(`with data loaded`, { config: 'basic', archives: [] }, () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/176977
     describe('transaction_error_rate', () => {
       before(async () => {
-        await generateErrorData({ serviceName: 'synth-go', start, end, synthtraceEsClient });
-        await generateErrorData({ serviceName: 'synth-java', start, end, synthtraceEsClient });
+        await generateErrorData({ serviceName: 'synth-go', start, end, apmSynthtraceEsClient });
+        await generateErrorData({ serviceName: 'synth-java', start, end, apmSynthtraceEsClient });
       });
 
-      after(() => synthtraceEsClient.clean());
+      after(() => apmSynthtraceEsClient.clean());
 
       it('with data', async () => {
         const options = getOptions();
@@ -328,13 +329,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   });
 
   registry.when(`with data loaded and using KQL filter`, { config: 'basic', archives: [] }, () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/176983
     describe('transaction_error_rate', () => {
       before(async () => {
-        await generateErrorData({ serviceName: 'synth-go', start, end, synthtraceEsClient });
-        await generateErrorData({ serviceName: 'synth-java', start, end, synthtraceEsClient });
+        await generateErrorData({ serviceName: 'synth-go', start, end, apmSynthtraceEsClient });
+        await generateErrorData({ serviceName: 'synth-java', start, end, apmSynthtraceEsClient });
       });
 
-      after(() => synthtraceEsClient.clean());
+      after(() => apmSynthtraceEsClient.clean());
 
       it('with data', async () => {
         const options = getOptionsWithFilterQuery();

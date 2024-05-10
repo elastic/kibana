@@ -11,7 +11,15 @@ import { PluginInitializerContext } from '@kbn/core/public';
 
 import { ConsoleUIPlugin } from './plugin';
 
-export type { ConsoleUILocatorParams, ConsolePluginSetup } from './types';
+export type {
+  AppSetupUIPluginDependencies,
+  AppStartUIPluginDependencies,
+  ConsoleUILocatorParams,
+  ConsolePluginSetup,
+  ConsolePluginStart,
+  EmbeddedConsoleView,
+  EmbeddedConsoleViewButtonProps,
+} from './types';
 
 export { ConsoleUIPlugin as Plugin };
 

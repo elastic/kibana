@@ -96,8 +96,6 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
   } = useKibana().services;
   const {
     rulesSettings: {
-      show,
-      save,
       writeFlappingSettingsUI,
       readFlappingSettingsUI,
       writeQueryDelaySettingsUI,
@@ -156,10 +154,10 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
   // In the future when we have more settings sub-features, we should
   // disassociate the rule settings capabilities (save, show) from the
   // sub-feature capabilities (writeXSettingsUI).
-  const canWriteFlappingSettings = save && writeFlappingSettingsUI && !hasFlappingError;
-  const canShowFlappingSettings = show && readFlappingSettingsUI;
-  const canWriteQueryDelaySettings = save && writeQueryDelaySettingsUI && !hasQueryDelayError;
-  const canShowQueryDelaySettings = show && readQueryDelaySettingsUI;
+  const canWriteFlappingSettings = writeFlappingSettingsUI && !hasFlappingError;
+  const canShowFlappingSettings = readFlappingSettingsUI;
+  const canWriteQueryDelaySettings = writeQueryDelaySettingsUI && !hasQueryDelayError;
+  const canShowQueryDelaySettings = readQueryDelaySettingsUI;
 
   const handleSettingsChange = (
     setting: keyof RulesSettingsProperties,

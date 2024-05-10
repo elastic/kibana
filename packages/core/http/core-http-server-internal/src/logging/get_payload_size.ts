@@ -81,7 +81,7 @@ export function getResponsePayloadBytes(response: Response, log: Logger): number
     // We intentionally swallow any errors as this information is
     // only a nicety for logging purposes, and should not cause the
     // server to crash if it cannot be determined.
-    log.warn('Failed to calculate response payload bytes.', e);
+    log.warn(`Failed to calculate response payload bytes: ${e.message}`);
   }
 
   return undefined;

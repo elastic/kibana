@@ -6,6 +6,7 @@
  */
 
 import { parseAggregationResults } from '@kbn/triggers-actions-ui-plugin/common';
+import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { OnlyEsqlQueryRuleParams } from '../types';
@@ -44,7 +45,7 @@ export async function fetchEsqlQuery({
 
   const response = await esClient.transport.request<EsqlTable>({
     method: 'POST',
-    path: '/_esql',
+    path: '/_query',
     body: query,
   });
 
@@ -63,6 +64,8 @@ export async function fetchEsqlQuery({
         hits: toEsQueryHits(response),
       },
       resultLimit: alertLimit,
+      sourceFieldsParams: params.sourceFields,
+      generateSourceFieldsFromHits: true,
     }),
     index: null,
   };
@@ -88,6 +91,7 @@ export const getEsqlQuery = (
 
   const query = {
     query: alertLimit ? `${params.esqlQuery.esql} | limit ${alertLimit}` : params.esqlQuery.esql,
+    version: ESQL_LATEST_VERSION,
     filter: {
       bool: {
         filter: rangeFilter,

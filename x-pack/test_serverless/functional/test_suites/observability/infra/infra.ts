@@ -89,7 +89,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await retry.try(async () => {
               const documentTitle = await browser.getTitle();
               expect(documentTitle).to.contain(
-                'demo-stack-redis-01 - Infrastructure - Observability - Elastic'
+                'demo-stack-redis-01 - Inventory - Infrastructure - Observability - Elastic'
               );
             });
 
@@ -97,14 +97,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           it('Should redirect to Node Details page', async () => {
-            await pageObjects.infraHome.goToTime(DATE_WITH_POD_WITH_DATA);
             await pageObjects.infraHome.goToPods();
+            await pageObjects.infraHome.goToTime(DATE_WITH_POD_WITH_DATA);
             await pageObjects.infraHome.clickOnFirstNode();
             await pageObjects.infraHome.clickOnGoToNodeDetails();
 
             await retry.try(async () => {
               const documentTitle = await browser.getTitle();
-              expect(documentTitle).to.contain('pod-0 - Infrastructure - Observability - Elastic');
+              expect(documentTitle).to.contain(
+                'pod-0 - Inventory - Infrastructure - Observability - Elastic'
+              );
             });
 
             await returnTo(INVENTORY_PATH);

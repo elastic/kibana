@@ -12,8 +12,8 @@ import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import { uuidRegexp } from '@kbn/core-base-server-internal';
 import type { ICspConfig, IExternalUrlConfig } from '@kbn/core-http-server';
 
-import { hostname } from 'os';
-import url from 'url';
+import { hostname, EOL } from 'node:os';
+import url, { URL } from 'node:url';
 
 import type { Duration } from 'moment';
 import type { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
@@ -24,7 +24,9 @@ import {
   securityResponseHeadersSchema,
   parseRawSecurityResponseHeadersConfig,
 } from './security_response_headers_config';
-import { CdnConfig } from './cdn';
+import { CdnConfig } from './cdn_config';
+
+const SECOND = 1000;
 
 const validBasePathRegex = /^\/.*[^\/]$/;
 
@@ -38,6 +40,24 @@ const RESPONSE_HEADER_DENY_LIST = ['location', 'refresh'];
 const validHostName = () => {
   // see https://github.com/elastic/kibana/issues/139730
   return hostname().replace(/[^\x00-\x7F]/g, '');
+};
+
+/**
+ * We assume the URL does not contain anything after the pathname so that
+ * we can safely append values to the pathname at runtime.
+ */
+export const validateCdnURL = (urlString: string) => {
+  const cdnURL = new URL(urlString);
+  const errors: string[] = [];
+  if (cdnURL.hash.length) {
+    errors.push(`URL fragment not allowed, but found "${cdnURL.hash}"`);
+  }
+  if (cdnURL.search.length) {
+    errors.push(`URL query string not allowed, but found "${cdnURL.search}"`);
+  }
+  if (errors.length) {
+    return `CDN URL "${cdnURL.href}" is invalid:${EOL}${errors.join(EOL)}`;
+  }
 };
 
 const configSchema = schema.object(
@@ -60,7 +80,10 @@ const configSchema = schema.object(
       },
     }),
     cdn: schema.object({
-      url: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
+      url: schema.maybe(schema.uri({ scheme: ['http', 'https'], validate: validateCdnURL })),
+    }),
+    oas: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
     }),
     cors: schema.object(
       {
@@ -111,10 +134,13 @@ const configSchema = schema.object(
     rewriteBasePath: schema.boolean({ defaultValue: false }),
     ssl: sslSchema,
     keepaliveTimeout: schema.number({
-      defaultValue: 120000,
+      defaultValue: 120 * SECOND,
     }),
     socketTimeout: schema.number({
-      defaultValue: 120000,
+      defaultValue: 120 * SECOND,
+    }),
+    payloadTimeout: schema.number({
+      defaultValue: 20 * SECOND,
     }),
     compression: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
@@ -203,6 +229,12 @@ const configSchema = schema.object(
        * same-build browsers can access the Kibana server.
        */
       strictClientVersionCheck: schema.boolean({ defaultValue: true }),
+
+      /** This should not be configurable in serverless */
+      useVersionResolutionStrategyForInternalPaths: offeringBasedSchema({
+        traditional: schema.arrayOf(schema.string(), { defaultValue: [] }),
+        serverless: schema.never(),
+      }),
     }),
   },
   {
@@ -254,11 +286,15 @@ export class HttpConfig implements IHttpConfig {
   public host: string;
   public keepaliveTimeout: number;
   public socketTimeout: number;
+  public payloadTimeout: number;
   public port: number;
   public cors: {
     enabled: boolean;
     allowCredentials: boolean;
     allowOrigin: string[];
+  };
+  public oas: {
+    enabled: boolean;
   };
   public securityResponseHeaders: Record<string, string | string[]>;
   public customResponseHeaders: Record<string, string | string[]>;
@@ -280,6 +316,7 @@ export class HttpConfig implements IHttpConfig {
   public versioned: {
     versionResolution: HandlerResolutionStrategy;
     strictClientVersionCheck: boolean;
+    useVersionResolutionStrategyForInternalPaths: string[];
   };
   public shutdownTimeout: Duration;
   public restrictInternalApis: boolean;
@@ -317,6 +354,7 @@ export class HttpConfig implements IHttpConfig {
     this.publicBaseUrl = rawHttpConfig.publicBaseUrl;
     this.keepaliveTimeout = rawHttpConfig.keepaliveTimeout;
     this.socketTimeout = rawHttpConfig.socketTimeout;
+    this.payloadTimeout = rawHttpConfig.payloadTimeout;
     this.rewriteBasePath = rawHttpConfig.rewriteBasePath;
     this.ssl = new SslConfig(rawHttpConfig.ssl || {});
     this.compression = rawHttpConfig.compression;
@@ -331,6 +369,7 @@ export class HttpConfig implements IHttpConfig {
     this.restrictInternalApis = rawHttpConfig.restrictInternalApis ?? false;
     this.eluMonitor = rawHttpConfig.eluMonitor;
     this.versioned = rawHttpConfig.versioned;
+    this.oas = rawHttpConfig.oas;
   }
 }
 

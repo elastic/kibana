@@ -18,6 +18,8 @@ import type { InternalSavedObjectsServiceStart } from '@kbn/core-saved-objects-s
 import type { InternalUiSettingsServiceStart } from '@kbn/core-ui-settings-server-internal';
 import type { CoreUsageDataStart } from '@kbn/core-usage-data-server';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-server';
+import type { InternalSecurityServiceStart } from '@kbn/core-security-server-internal';
+import type { InternalUserProfileServiceStart } from '@kbn/core-user-profile-server-internal';
 
 /**
  * @internal
@@ -35,4 +37,6 @@ export interface InternalCoreStart {
   executionContext: InternalExecutionContextStart;
   deprecations: InternalDeprecationsServiceStart;
   customBranding: CustomBrandingStart;
+  security: InternalSecurityServiceStart;
+  userProfile: InternalUserProfileServiceStart;
 }

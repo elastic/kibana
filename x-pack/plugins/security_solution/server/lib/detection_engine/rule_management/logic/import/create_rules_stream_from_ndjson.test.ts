@@ -234,7 +234,9 @@ describe('create_rules_stream_from_ndjson', () => {
         type: 'query',
         immutable: false,
       });
-      expect(resultOrError[1].message).toEqual('Unexpected token , in JSON at position 1');
+      expect(resultOrError[1].message).toEqual(
+        `Expected property name or '}' in JSON at position 1`
+      );
       expect(resultOrError[2]).toEqual({
         rule_id: 'rule-2',
         output_index: '.siem-signals',

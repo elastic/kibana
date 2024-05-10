@@ -5,43 +5,13 @@
  * 2.0.
  */
 
-import {
-  HealthStatus,
-  IndexName,
-  IndicesStatsIndexMetadataState,
-  Uuid,
-} from '@elastic/elasticsearch/lib/api/types';
-
-import { Connector } from '@kbn/search-connectors';
+import { Connector, ConnectorIndex, ElasticsearchIndex } from '@kbn/search-connectors';
 
 import { Crawler } from './crawler';
 
 export interface AlwaysShowPattern {
   alias_pattern: string;
   index_pattern: string;
-}
-export interface ElasticsearchIndex {
-  count: number; // Elasticsearch _count
-  has_in_progress_syncs?: boolean; // these default to false if not a connector or crawler
-  has_pending_syncs?: boolean;
-  health?: HealthStatus;
-  hidden: boolean;
-  name: IndexName;
-  status?: IndicesStatsIndexMetadataState;
-  total: {
-    docs: {
-      count: number; // Lucene count (includes nested documents)
-      deleted: number;
-    };
-    store: {
-      size_in_bytes: string;
-    };
-  };
-  uuid?: Uuid;
-}
-
-export interface ConnectorIndex extends ElasticsearchIndex {
-  connector: Connector;
 }
 
 export interface CrawlerIndex extends ElasticsearchIndex {

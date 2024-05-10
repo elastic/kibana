@@ -14,7 +14,6 @@ import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-p
 import { indexPatternEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
-import { dashboardPluginMock } from '@kbn/dashboard-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
@@ -31,7 +30,6 @@ import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { presentationUtilPluginMock } from '@kbn/presentation-util-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import type { LensAttributeService } from '../lens_attribute_service';
 import type {
   LensByValueInput,
@@ -138,23 +136,16 @@ export function makeDefaultServices(
   }
 
   return {
-    http: core.http,
+    ...startMock,
     chrome: core.chrome,
-    overlays: core.overlays,
-    uiSettings: core.uiSettings,
-    settings: settingsServiceMock.createStartContract(),
-    executionContext: core.executionContext,
     navigation: navigationStartMock,
-    notifications: core.notifications,
     attributeService: makeAttributeService(),
     inspector: {
       adapters: getLensInspectorService(inspectorPluginMock.createStartContract()).adapters,
       inspect: jest.fn(),
       close: jest.fn(),
     },
-    dashboard: dashboardPluginMock.createStartContract(),
     presentationUtil: presentationUtilPluginMock.createStartContract(core),
-    dashboardFeatureFlag: { allowByValueEmbeddables: false },
     savedObjectStore: {
       load: jest.fn(),
       search: jest.fn(),
@@ -185,7 +176,6 @@ export function makeDefaultServices(
     dataViewFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
     dataViewEditor: indexPatternEditorPluginMock.createStartContract(),
     unifiedSearch: unifiedSearchPluginMock.createStartContract(),
-    docLinks: startMock.docLinks,
     contentManagement: contentManagementMock.createStartContract(),
     eventAnnotationService: {} as EventAnnotationServiceType,
   };

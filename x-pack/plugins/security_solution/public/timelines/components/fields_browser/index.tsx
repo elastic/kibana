@@ -7,6 +7,7 @@
 
 import type { MutableRefObject } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import type {
   CreateFieldComponent,
@@ -14,9 +15,9 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type { ColumnHeaderOptions } from '../../../../common/types';
 import { useDataView } from '../../../common/containers/source/use_data_view';
-import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { useKibana } from '../../../common/lib/kibana';
 import { sourcererSelectors } from '../../../common/store';
+import type { State } from '../../../common/store';
 import type { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/constants';
@@ -57,11 +58,12 @@ export const useFieldBrowserOptions: UseFieldBrowserOptions = ({
     dataViewFieldEditor,
     data: { dataViews },
   } = useKibana().services;
-
-  const scopeIdSelector = useMemo(() => sourcererSelectors.scopeIdSelector(), []);
-  const { missingPatterns, selectedDataViewId } = useDeepEqualSelector((state) =>
-    scopeIdSelector(state, sourcererScope)
-  );
+  const missingPatterns = useSelector((state: State) => {
+    return sourcererSelectors.sourcererScopeMissingPatterns(state, sourcererScope);
+  });
+  const selectedDataViewId = useSelector((state: State) => {
+    return sourcererSelectors.sourcererScopeSelectedDataViewId(state, sourcererScope);
+  });
   useEffect(() => {
     let ignore = false;
     const fetchAndSetDataView = async (dataViewId: string) => {

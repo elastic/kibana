@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { SwitchModal } from '../switch_modal';
 import { defaultSearch } from '../step_define';
 
-import { StepDefineFormHook } from '../step_define';
+import type { StepDefineFormHook } from '../step_define';
 
 export const AdvancedQueryEditorSwitch: FC<StepDefineFormHook> = ({
   advancedSourceEditor: {

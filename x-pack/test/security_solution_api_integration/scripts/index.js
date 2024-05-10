@@ -7,9 +7,9 @@
 
 const { spawn } = require('child_process');
 
-const [, , type, area, licenseFolder, folder, projectType, environment, ...args] = process.argv;
+const [, , type, area, licenseFolder, domain, projectType, environment, ...args] = process.argv;
 
-const configPath = `./test_suites/${area}/${licenseFolder}/${folder}/configs/${projectType}.config.ts`;
+const configPath = `./test_suites/${area}/${domain}/${licenseFolder}/configs/${projectType}.config.ts`;
 
 const command =
   type === 'server'
@@ -21,15 +21,19 @@ let grepArgs = [];
 if (type !== 'server') {
   switch (environment) {
     case 'serverlessEnv':
-      grepArgs = ['--grep', '/^(?!.*@brokenInServerless).*@serverless.*/'];
+      grepArgs = ['--grep', '/^(?!.*@skipInServerless).*@serverless.*/'];
       break;
 
     case 'essEnv':
-      grepArgs = ['--grep', '/^(?!.*@brokenInEss).*@ess.*/'];
+      grepArgs = ['--grep', '/^(?!.*@skipInEss).*@ess.*/'];
+      break;
+
+    case 'qaPeriodicEnv':
+      grepArgs = ['--grep', '/^(?!.*@skipInServerless|.*@skipInServerlessMKI).*@serverless.*/'];
       break;
 
     case 'qaEnv':
-      grepArgs = ['--grep', '/^(?!.*@brokenInServerless|.*@skipInQA).*@serverless.*/'];
+      grepArgs = ['--grep', '/^(?!.*@skipInServerless|.*@skipInServerlessMKI).*@serverlessQA.*/'];
       break;
 
     default:
@@ -43,5 +47,11 @@ const child = spawn('node', [command, '--config', configPath, ...grepArgs, ...ar
 });
 
 child.on('close', (code) => {
-  console.log(`child process exited with code ${code}`);
+  console.log(`[index.js] child process closed with code ${code}`);
+});
+
+// Listen for process exit
+child.on('exit', (code) => {
+  console.log(`[index.js] child process exited with code ${code}`);
+  process.exit(code);
 });

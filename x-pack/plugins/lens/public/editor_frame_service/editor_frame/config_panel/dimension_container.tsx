@@ -15,9 +15,9 @@ export function DimensionContainer({
   ...props
 }: {
   isOpen: boolean;
-  handleClose: () => boolean;
+  handleClose: () => void;
   panel: React.ReactElement | null;
-  groupLabel: string;
+  label: string;
   isFullscreen: boolean;
   panelRef: (el: HTMLDivElement) => void;
   isInlineEditing?: boolean;

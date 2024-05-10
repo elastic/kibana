@@ -7,7 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { pluck } from 'rxjs/operators';
+import { pluck } from 'rxjs';
 import { CoreSetup, Plugin, HttpResponsePayload } from '@kbn/core/server';
 import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import { ExpressionsServerStart } from '@kbn/expressions-plugin/server';

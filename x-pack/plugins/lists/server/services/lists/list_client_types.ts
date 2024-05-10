@@ -23,6 +23,7 @@ import type {
   NameOrUndefined,
   Page,
   PerPage,
+  RefreshWithWaitFor,
   SerializerOrUndefined,
   SortFieldOrUndefined,
   SortOrderOrUndefined,
@@ -73,6 +74,7 @@ export interface DeleteListOptions {
 export interface DeleteListItemOptions {
   /** The id of the list to delete from */
   id: Id;
+  refresh?: boolean;
 }
 
 /**
@@ -135,6 +137,7 @@ export interface DeleteListItemByValueOptions {
   value: string;
   /** The type of list such as "boolean", "double", "text", "keyword", etc... */
   type: Type;
+  refresh?: boolean;
 }
 
 /**
@@ -181,6 +184,8 @@ export interface ImportListItemsToStreamOptions {
   meta: MetaOrUndefined;
   /** Version number of the list, typically this should be 1 unless you are re-creating a list you deleted or something unusual. */
   version: Version;
+  /** If true refresh index after import list items */
+  refresh?: RefreshWithWaitFor;
 }
 
 /**
@@ -202,6 +207,7 @@ export interface CreateListItemOptions {
   value: string;
   /** Additional meta data to associate with the list items as an object of "key/value" pairs. You can set this to "undefined" for no meta values. */
   meta: MetaOrUndefined;
+  refresh?: RefreshWithWaitFor;
 }
 
 /**
@@ -217,6 +223,7 @@ export interface UpdateListItemOptions {
   value: string | null | undefined;
   /** Additional meta data to associate with the list items as an object of "key/value" pairs. You can set this to "undefined" to not update meta values. */
   meta: MetaOrUndefined;
+  refresh?: boolean;
 }
 
 /**
@@ -334,4 +341,13 @@ export interface SearchListItemByValuesOptions {
   listId: string;
   /** The value to search for list items based off. */
   value: unknown[];
+}
+
+/**
+ * ListClient.getImportFilename
+ * {@link ListClient.getImportFilename}
+ */
+export interface GetImportFilename {
+  /** The stream to pull the import from */
+  stream: Readable;
 }

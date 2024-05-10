@@ -7,11 +7,11 @@
 
 import { addInternalBasePath } from '../../../../common/constants';
 
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 
 import { routeHandlerFactory } from './route_handler_factory';
 
-export function registerRoute({ router, license }: RouteDependencies) {
+export function registerRoute({ router, getLicense }: RouteDependencies) {
   /**
    * @apiGroup Transform Nodes
    *
@@ -29,6 +29,13 @@ export function registerRoute({ router, license }: RouteDependencies) {
         version: '1',
         validate: false,
       },
-      license.guardApiRoute<undefined, undefined, undefined>(routeHandlerFactory(license))
+      async (ctx, request, response) => {
+        const license = await getLicense();
+        return license.guardApiRoute<undefined, undefined, undefined>(routeHandlerFactory(license))(
+          ctx,
+          request,
+          response
+        );
+      }
     );
 }

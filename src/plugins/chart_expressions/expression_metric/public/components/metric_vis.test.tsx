@@ -22,7 +22,6 @@ import {
 import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
 import type { IUiSettingsClient } from '@kbn/core/public';
-import { HtmlAttributes } from 'csstype';
 import { CustomPaletteState } from '@kbn/charts-plugin/common/expressions/palette/types';
 import { DimensionsVisParam } from '../../common';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -208,7 +207,7 @@ const defaultProps = {
   filterable: true,
   renderMode: 'view',
   uiSettings: {} as unknown as IUiSettingsClient,
-} as Pick<MetricVisComponentProps, 'renderComplete' | 'fireEvent' | 'filterable' | 'renderMode'>;
+} as Pick<MetricVisComponentProps, 'renderComplete' | 'fireEvent' | 'filterable'>;
 
 describe('MetricVisComponent', function () {
   afterEach(() => {
@@ -239,7 +238,7 @@ describe('MetricVisComponent', function () {
 
       expect(visConfig).toMatchInlineSnapshot(`
         Object {
-          "color": "#f5f7fa",
+          "color": "#ffffff",
           "extra": <span />,
           "icon": [Function],
           "subtitle": undefined,
@@ -299,7 +298,7 @@ describe('MetricVisComponent', function () {
 
       expect(configWithPrefix).toMatchInlineSnapshot(`
         Object {
-          "color": "#f5f7fa",
+          "color": "#ffffff",
           "extra": <span>
             secondary prefix
              number-13.6328125
@@ -348,7 +347,7 @@ describe('MetricVisComponent', function () {
 
       expect(configWithProgress).toMatchInlineSnapshot(`
         Object {
-          "color": "#f5f7fa",
+          "color": "#ffffff",
           "domainMax": 28.984375,
           "extra": <span />,
           "icon": [Function],
@@ -425,7 +424,7 @@ describe('MetricVisComponent', function () {
       expect(visConfig).toMatchInlineSnapshot(`
         Array [
           Object {
-            "color": "#f5f7fa",
+            "color": "#ffffff",
             "extra": <span />,
             "icon": undefined,
             "subtitle": "Median products.base_price",
@@ -434,7 +433,7 @@ describe('MetricVisComponent', function () {
             "valueFormatter": [Function],
           },
           Object {
-            "color": "#f5f7fa",
+            "color": "#ffffff",
             "extra": <span />,
             "icon": undefined,
             "subtitle": "Median products.base_price",
@@ -443,7 +442,7 @@ describe('MetricVisComponent', function () {
             "valueFormatter": [Function],
           },
           Object {
-            "color": "#f5f7fa",
+            "color": "#ffffff",
             "extra": <span />,
             "icon": undefined,
             "subtitle": "Median products.base_price",
@@ -452,7 +451,7 @@ describe('MetricVisComponent', function () {
             "valueFormatter": [Function],
           },
           Object {
-            "color": "#f5f7fa",
+            "color": "#ffffff",
             "extra": <span />,
             "icon": undefined,
             "subtitle": "Median products.base_price",
@@ -461,7 +460,7 @@ describe('MetricVisComponent', function () {
             "valueFormatter": [Function],
           },
           Object {
-            "color": "#f5f7fa",
+            "color": "#ffffff",
             "extra": <span />,
             "icon": undefined,
             "subtitle": "Median products.base_price",
@@ -590,7 +589,7 @@ describe('MetricVisComponent', function () {
         Array [
           Array [
             Object {
-              "color": "#f5f7fa",
+              "color": "#ffffff",
               "extra": <span />,
               "icon": undefined,
               "subtitle": "Median products.base_price",
@@ -599,7 +598,7 @@ describe('MetricVisComponent', function () {
               "valueFormatter": [Function],
             },
             Object {
-              "color": "#f5f7fa",
+              "color": "#ffffff",
               "extra": <span />,
               "icon": undefined,
               "subtitle": "Median products.base_price",
@@ -608,7 +607,7 @@ describe('MetricVisComponent', function () {
               "valueFormatter": [Function],
             },
             Object {
-              "color": "#f5f7fa",
+              "color": "#ffffff",
               "extra": <span />,
               "icon": undefined,
               "subtitle": "Median products.base_price",
@@ -617,7 +616,7 @@ describe('MetricVisComponent', function () {
               "valueFormatter": [Function],
             },
             Object {
-              "color": "#f5f7fa",
+              "color": "#ffffff",
               "extra": <span />,
               "icon": undefined,
               "subtitle": "Median products.base_price",
@@ -626,7 +625,7 @@ describe('MetricVisComponent', function () {
               "valueFormatter": [Function],
             },
             Object {
-              "color": "#f5f7fa",
+              "color": "#ffffff",
               "extra": <span />,
               "icon": undefined,
               "subtitle": "Median products.base_price",
@@ -637,7 +636,7 @@ describe('MetricVisComponent', function () {
           ],
           Array [
             Object {
-              "color": "#f5f7fa",
+              "color": "#ffffff",
               "extra": <span />,
               "icon": undefined,
               "subtitle": "Median products.base_price",
@@ -678,7 +677,7 @@ describe('MetricVisComponent', function () {
         Array [
           Array [
             Object {
-              "color": "#f5f7fa",
+              "color": "#ffffff",
               "domainMax": 28.984375,
               "extra": <span />,
               "icon": undefined,
@@ -689,7 +688,7 @@ describe('MetricVisComponent', function () {
               "valueFormatter": [Function],
             },
             Object {
-              "color": "#f5f7fa",
+              "color": "#ffffff",
               "domainMax": 28.984375,
               "extra": <span />,
               "icon": undefined,
@@ -700,7 +699,7 @@ describe('MetricVisComponent', function () {
               "valueFormatter": [Function],
             },
             Object {
-              "color": "#f5f7fa",
+              "color": "#ffffff",
               "domainMax": 25.984375,
               "extra": <span />,
               "icon": undefined,
@@ -711,7 +710,7 @@ describe('MetricVisComponent', function () {
               "valueFormatter": [Function],
             },
             Object {
-              "color": "#f5f7fa",
+              "color": "#ffffff",
               "domainMax": 25.784375,
               "extra": <span />,
               "icon": undefined,
@@ -722,7 +721,7 @@ describe('MetricVisComponent', function () {
               "valueFormatter": [Function],
             },
             Object {
-              "color": "#f5f7fa",
+              "color": "#ffffff",
               "domainMax": 25.348011363636363,
               "extra": <span />,
               "icon": undefined,
@@ -735,7 +734,7 @@ describe('MetricVisComponent', function () {
           ],
           Array [
             Object {
-              "color": "#f5f7fa",
+              "color": "#ffffff",
               "domainMax": 24.984375,
               "extra": <span />,
               "icon": undefined,
@@ -849,124 +848,60 @@ describe('MetricVisComponent', function () {
     });
   });
 
-  describe('rendering with no data', () => {});
-
   it('should constrain dimensions in edit mode', () => {
-    const getContainerStyles = (editMode: boolean, multipleTiles: boolean) =>
-      (
-        shallow(
-          <MetricVis
-            data={table}
-            config={{
-              metric: {
-                progressDirection: 'vertical',
-                maxCols: 5,
-              },
-              dimensions: {
-                metric: basePriceColumnId,
-                breakdownBy: multipleTiles ? dayOfWeekColumnId : undefined,
-              },
-            }}
-            {...defaultProps}
-            renderMode={editMode ? 'edit' : 'view'}
-          />
-        )
-          .find('div')
-          .at(0)
-          .props() as HtmlAttributes & { css: { styles: string } }
-      ).css.styles;
+    const getDimensionsRequest = (multipleTiles: boolean) => {
+      const fireEvent = jest.fn();
+      const wrapper = shallow(
+        <MetricVis
+          data={table}
+          config={{
+            metric: {
+              progressDirection: 'vertical',
+              maxCols: 5,
+            },
+            dimensions: {
+              metric: basePriceColumnId,
+              breakdownBy: multipleTiles ? dayOfWeekColumnId : undefined,
+            },
+          }}
+          {...defaultProps}
+          fireEvent={fireEvent}
+        />
+      );
 
-    expect(getContainerStyles(false, false)).toMatchInlineSnapshot(`
-      "
-              height: 100%;
-              width: 100%;
-              max-height: 100%;
-              max-width: 100%;
-              overflow-y: auto;
-              scrollbar-width: thin;
+      wrapper.find(Settings).props().onWillRender!();
 
-          &::-webkit-scrollbar {
-            inline-size: 16px;
-            block-size: 16px;
-          }
+      return fireEvent.mock.calls[0][0].data;
+    };
 
-          &::-webkit-scrollbar-thumb {
-            background-color: rgba(105,112,125,0.5);
-            background-clip: content-box;
-            border-radius: 16px;
-            border: calc(8px * 0.75) solid transparent;
-          }
-
-          &::-webkit-scrollbar-corner,
-          &::-webkit-scrollbar-track {
-            background-color: transparent;
-          }
-
-          scrollbar-color: rgba(105,112,125,0.5) transparent;
-        
-            "
+    expect(getDimensionsRequest(false)).toMatchInlineSnapshot(`
+      Object {
+        "maxDimensions": Object {
+          "x": Object {
+            "unit": "pixels",
+            "value": 300,
+          },
+          "y": Object {
+            "unit": "pixels",
+            "value": 300,
+          },
+        },
+      }
     `);
 
-    expect(getContainerStyles(true, false)).toMatchInlineSnapshot(`
-      "
-              height: 300px;
-              width: 300px;
-              max-height: 100%;
-              max-width: 100%;
-              overflow-y: auto;
-              scrollbar-width: thin;
-
-          &::-webkit-scrollbar {
-            inline-size: 16px;
-            block-size: 16px;
-          }
-
-          &::-webkit-scrollbar-thumb {
-            background-color: rgba(105,112,125,0.5);
-            background-clip: content-box;
-            border-radius: 16px;
-            border: calc(8px * 0.75) solid transparent;
-          }
-
-          &::-webkit-scrollbar-corner,
-          &::-webkit-scrollbar-track {
-            background-color: transparent;
-          }
-
-          scrollbar-color: rgba(105,112,125,0.5) transparent;
-        
-            "
-    `);
-
-    expect(getContainerStyles(true, true)).toMatchInlineSnapshot(`
-      "
-              height: 400px;
-              width: 1000px;
-              max-height: 100%;
-              max-width: 100%;
-              overflow-y: auto;
-              scrollbar-width: thin;
-
-          &::-webkit-scrollbar {
-            inline-size: 16px;
-            block-size: 16px;
-          }
-
-          &::-webkit-scrollbar-thumb {
-            background-color: rgba(105,112,125,0.5);
-            background-clip: content-box;
-            border-radius: 16px;
-            border: calc(8px * 0.75) solid transparent;
-          }
-
-          &::-webkit-scrollbar-corner,
-          &::-webkit-scrollbar-track {
-            background-color: transparent;
-          }
-
-          scrollbar-color: rgba(105,112,125,0.5) transparent;
-        
-            "
+    expect(getDimensionsRequest(true)).toMatchInlineSnapshot(`
+      Object {
+        "maxDimensions": Object {
+          "x": Object {
+            "unit": "pixels",
+            "value": 1000,
+          },
+          "y": Object {
+            "unit": "pixels",
+            "value": 400,
+          },
+        },
+      }
     `);
   });
 
@@ -1308,7 +1243,7 @@ describe('MetricVisComponent', function () {
 
         const [[datum]] = component.find(Metric).props().data!;
 
-        expect(datum!.color).toBe(euiThemeVars.euiColorLightestShade);
+        expect(datum!.color).toBe(euiThemeVars.euiColorEmptyShade);
         expect(mockGetColorForValue).not.toHaveBeenCalled();
       });
     });

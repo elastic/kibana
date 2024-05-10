@@ -1,0 +1,15 @@
+CONCAT
+
+Syntax
+Parameters
+string1
+Strings to concatenate.
+string2
+Strings to concatenate.
+DescriptionConcatenates two or more strings.Supported types
+Example
+```esql
+FROM employees
+| KEEP first_name, last_name
+| EVAL fullname = CONCAT(first_name, " ", last_name)
+```

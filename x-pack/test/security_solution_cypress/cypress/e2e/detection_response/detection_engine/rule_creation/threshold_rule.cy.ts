@@ -42,6 +42,7 @@ import {
   THRESHOLD_DETAILS,
   TIMELINE_TEMPLATE_DETAILS,
   SUPPRESS_FOR_DETAILS,
+  INTERVAL_ABBR_VALUE,
 } from '../../../../screens/rule_details';
 import { expectNumberOfRules, goToRuleDetailsOf } from '../../../../tasks/alerts_detection_rules';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
@@ -72,15 +73,6 @@ describe(
   'Threshold rules',
   {
     tags: ['@ess', '@serverless'],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'alertSuppressionForThresholdRuleEnabled',
-          ])}`,
-        ],
-      },
-    },
   },
   () => {
     const rule = getNewThresholdRule();
@@ -143,12 +135,16 @@ describe(
         assertDetailsNotExist(SUPPRESS_FOR_DETAILS);
       });
       cy.get(SCHEDULE_DETAILS).within(() => {
-        getDetails(RUNS_EVERY_DETAILS).should('have.text', `${rule.interval}`);
+        getDetails(RUNS_EVERY_DETAILS)
+          .find(INTERVAL_ABBR_VALUE)
+          .should('have.text', `${rule.interval}`);
         const humanizedDuration = getHumanizedDuration(
           rule.from ?? 'now-6m',
           rule.interval ?? '5m'
         );
-        getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should('have.text', `${humanizedDuration}`);
+        getDetails(ADDITIONAL_LOOK_BACK_DETAILS)
+          .find(INTERVAL_ABBR_VALUE)
+          .should('have.text', `${humanizedDuration}`);
       });
 
       waitForTheRuleToBeExecuted();
@@ -163,6 +159,10 @@ describe(
 
       enablesAndPopulatesThresholdSuppression(5, 'h');
       fillDefineThresholdRuleAndContinue(rule);
+      // ensures duration displayed on define step in preview mode
+      cy.get(DEFINITION_DETAILS).within(() => {
+        getDetails(SUPPRESS_FOR_DETAILS).should('have.text', '5h');
+      });
 
       fillAboutRuleMinimumAndContinue(rule);
       skipScheduleRuleAction();

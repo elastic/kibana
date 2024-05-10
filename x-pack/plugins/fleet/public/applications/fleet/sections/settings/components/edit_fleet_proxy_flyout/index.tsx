@@ -25,7 +25,7 @@ import { FLYOUT_MAX_WIDTH } from '../../constants';
 import type { FleetProxy } from '../../../../types';
 import { TextInput, TextAreaInput } from '../form';
 
-import { useFleetProxyForm } from './user_fleet_proxy_form';
+import { useFleetProxyForm } from './use_fleet_proxy_form';
 
 export interface FleetProxyFlyoutProps {
   onClose: () => void;

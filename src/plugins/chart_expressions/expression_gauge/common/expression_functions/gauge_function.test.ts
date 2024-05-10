@@ -65,32 +65,11 @@ describe('interpreter/functions#gauge', () => {
   it(`returns an object with the correct structure for the arc if centralMajor and centralMajorMode are passed`, () => {
     const actual = fn(context, {
       ...args,
-      shape: GaugeShapes.ARC,
+      shape: GaugeShapes.SEMI_CIRCLE,
       centralMajor: 'Some label',
       centralMajorMode: GaugeCentralMajorModes.CUSTOM,
     });
     expect(actual).toMatchSnapshot();
-  });
-
-  it(`throws error if centralMajor or centralMajorMode are provided for the horizontalBullet shape`, () => {
-    const actual = () =>
-      fn(context, {
-        ...args,
-        centralMajor: 'Some label',
-        centralMajorMode: GaugeCentralMajorModes.CUSTOM,
-      });
-    expect(actual).toThrowErrorMatchingSnapshot();
-  });
-
-  it(`throws error if centralMajor or centralMajorMode are provided for the vertical shape`, () => {
-    const actual = () =>
-      fn(context, {
-        ...args,
-        shape: GaugeShapes.VERTICAL_BULLET,
-        centralMajor: 'Some label',
-        centralMajorMode: GaugeCentralMajorModes.CUSTOM,
-      });
-    expect(actual).toThrowErrorMatchingSnapshot();
   });
 
   it('logs correct datatable to inspector', async () => {

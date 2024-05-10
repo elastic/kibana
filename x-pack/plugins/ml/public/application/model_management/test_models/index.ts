@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { TestTrainedModelFlyout } from './test_flyout';
+export { TestModelAndPipelineCreationFlyout } from './test_model_and_pipeline_creation_flyout';
 export { isTestable, isDfaTrainedModel } from './utils';

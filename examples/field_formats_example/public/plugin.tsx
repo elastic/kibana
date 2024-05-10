@@ -8,13 +8,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import {
-  AppMountParameters,
-  AppNavLinkStatus,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-} from '@kbn/core/public';
+import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import {
@@ -77,7 +71,7 @@ export class FieldFormatsExamplePlugin implements Plugin<void, void, SetupDeps, 
     core.application.register({
       id: 'fieldFormatsExample',
       title: 'Field formats example',
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       async mount({ element }: AppMountParameters) {
         const [, plugins] = await core.getStartServices();
         ReactDOM.render(

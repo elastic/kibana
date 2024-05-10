@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState, FC } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { isEqual, uniq } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -21,29 +22,31 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import type { DataView } from '@kbn/data-views-plugin/public';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { ProgressControls } from '@kbn/aiops-components';
 import { useFetchStream } from '@kbn/ml-response-stream/client';
 import {
   LOG_RATE_ANALYSIS_TYPE,
   type LogRateAnalysisType,
   type WindowParameters,
-} from '@kbn/aiops-utils';
+} from '@kbn/aiops-log-rate-analysis';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SignificantItem, SignificantItemGroup } from '@kbn/ml-agg-utils';
+import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
+import { initialState, streamReducer } from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
+import type { AiopsLogRateAnalysisSchema } from '@kbn/aiops-log-rate-analysis/api/schema';
+import type { AiopsLogRateAnalysisSchemaSignificantItem } from '@kbn/aiops-log-rate-analysis/api/schema_v2';
+import { useLogRateAnalysisStateContext } from '@kbn/aiops-components';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
-import { initialState, streamReducer } from '../../../common/api/stream_reducer';
-import type { AiopsLogRateAnalysisSchema } from '../../../common/api/log_rate_analysis/schema';
-import type { AiopsLogRateAnalysisSchemaSignificantItem } from '../../../common/api/log_rate_analysis/schema_v2';
-import { AIOPS_TELEMETRY_ID } from '../../../common/constants';
+import { useDataSource } from '../../hooks/use_data_source';
+
 import {
   getGroupTableItems,
   LogRateAnalysisResultsTable,
   LogRateAnalysisResultsGroupsTable,
 } from '../log_rate_analysis_results_table';
-import { useLogRateAnalysisResultsTableRowContext } from '../log_rate_analysis_results_table/log_rate_analysis_results_table_row_provider';
 
 import { FieldFilterPopover } from './field_filter_popover';
 import { LogRateAnalysisTypeCallOut } from './log_rate_analysis_type_callout';
@@ -91,8 +94,6 @@ export interface LogRateAnalysisResultsData {
  * LogRateAnalysis props require a data view.
  */
 interface LogRateAnalysisResultsProps {
-  /** The data view to analyze. */
-  dataView: DataView;
   /** The type of analysis, whether it's a spike or dip */
   analysisType?: LogRateAnalysisType;
   /** Start timestamp filter */
@@ -121,7 +122,6 @@ interface LogRateAnalysisResultsProps {
 }
 
 export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
-  dataView,
   analysisType = LOG_RATE_ANALYSIS_TYPE.SPIKE,
   earliest,
   isBrushCleared,
@@ -136,9 +136,14 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   onAnalysisCompleted,
   embeddingOrigin,
 }) => {
-  const { http } = useAiopsAppContext();
+  const { analytics, http } = useAiopsAppContext();
+  const { dataView } = useDataSource();
 
-  const { clearAllRowState } = useLogRateAnalysisResultsTableRowContext();
+  // Store the performance metric's start time using a ref
+  // to be able to track it across rerenders.
+  const analysisStartTime = useRef<number | undefined>(window.performance.now());
+
+  const { clearAllRowState } = useLogRateAnalysisStateContext();
 
   const [currentAnalysisType, setCurrentAnalysisType] = useState<LogRateAnalysisType | undefined>();
   const [currentAnalysisWindowParameters, setCurrentAnalysisWindowParameters] = useState<
@@ -231,13 +236,29 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
           remainingFieldCandidates,
           significantItems: data.significantItems as AiopsLogRateAnalysisSchemaSignificantItem[],
         });
-      } else {
+      } else if (loaded > 0) {
+        // Reset all overrides.
         setOverrides(undefined);
+
+        // If provided call the `onAnalysisCompleted` callback with the analysis results.
         if (onAnalysisCompleted) {
           onAnalysisCompleted({
             analysisType,
             significantItems: data.significantItems,
             significantItemsGroups: data.significantItemsGroups,
+          });
+        }
+
+        // Track performance metric
+        if (analysisStartTime.current !== undefined) {
+          const analysisDuration = window.performance.now() - analysisStartTime.current;
+
+          // Set this to undefined so reporting the metric gets triggered only once.
+          analysisStartTime.current = undefined;
+
+          reportPerformanceMetricEvent(analytics, {
+            eventName: 'aiopsLogRateAnalysisCompleted',
+            duration: analysisDuration,
           });
         }
       }
@@ -463,7 +484,6 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
             significantItems={data.significantItems}
             groupTableItems={groupTableItems}
             loading={isRunning}
-            dataView={dataView}
             timeRangeMs={timeRangeMs}
             searchQuery={searchQuery}
             barColorOverride={barColorOverride}
@@ -475,7 +495,6 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
           <LogRateAnalysisResultsTable
             significantItems={data.significantItems}
             loading={isRunning}
-            dataView={dataView}
             timeRangeMs={timeRangeMs}
             searchQuery={searchQuery}
             barColorOverride={barColorOverride}

@@ -8,19 +8,24 @@
 import { EuiButton, EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment, PureComponent } from 'react';
-import { Job } from '../../lib/job';
-import { ListingProps } from '..';
+import { Job } from '@kbn/reporting-public';
 
 type DeleteFn = () => Promise<void>;
-type Props = { jobsToDelete: Job[]; performDelete: DeleteFn } & ListingProps;
+
+interface Props {
+  jobsToDelete: Job[];
+  performDelete: DeleteFn;
+}
+
 interface State {
+  isDeleting: boolean;
   showConfirm: boolean;
 }
 
 export class ReportDeleteButton extends PureComponent<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = { showConfirm: false };
+    this.state = { isDeleting: false, showConfirm: false };
   }
 
   private hideConfirm() {
@@ -31,13 +36,27 @@ export class ReportDeleteButton extends PureComponent<Props, State> {
     this.setState({ showConfirm: true });
   }
 
+  private performDelete() {
+    this.setState({ isDeleting: true });
+    this.props
+      .performDelete()
+      .then(() => {
+        this.setState({ isDeleting: false });
+      })
+      .catch((err) => {
+        // eslint-disable-next-line no-console
+        console.error(err);
+        this.setState({ isDeleting: false });
+      });
+  }
+
   private renderConfirm() {
     const { jobsToDelete } = this.props;
 
     const title =
       jobsToDelete.length > 1
         ? i18n.translate('xpack.reporting.listing.table.deleteNumConfirmTitle', {
-            defaultMessage: `Delete {num} reports?`,
+            defaultMessage: `Delete the {num} selected reports?`,
             values: { num: jobsToDelete.length },
           })
         : i18n.translate('xpack.reporting.listing.table.deleteConfirmTitle', {
@@ -58,11 +77,13 @@ export class ReportDeleteButton extends PureComponent<Props, State> {
       <EuiConfirmModal
         title={title}
         onCancel={() => this.hideConfirm()}
-        onConfirm={() => this.props.performDelete()}
+        onConfirm={() => this.performDelete()}
         confirmButtonText={confirmButtonText}
+        confirmButtonDisabled={this.state.isDeleting}
         cancelButtonText={cancelButtonText}
         defaultFocusedButton="confirm"
         buttonColor="danger"
+        data-test-subj="deleteReportConfirm"
       >
         {message}
       </EuiConfirmModal>
@@ -80,6 +101,7 @@ export class ReportDeleteButton extends PureComponent<Props, State> {
           iconType="trash"
           color={'danger'}
           data-test-subj="deleteReportButton"
+          disabled={this.state.showConfirm}
         >
           {i18n.translate('xpack.reporting.listing.table.deleteReportButton', {
             defaultMessage: `Delete {num, plural, one {report} other {reports} }`,

@@ -7,11 +7,20 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { Job } from '../../../../../common/types/anomaly_detection_jobs';
+import type { Job } from '../../../../../common/types/anomaly_detection_jobs';
 
-import { CustomUrlList, CustomUrlListProps } from './list';
+import type { CustomUrlListProps } from './list';
+import { CustomUrlList } from './list';
 
 jest.mock('../../../contexts/kibana');
+
+jest.mock('../../../services/toast_notification_service', () => ({
+  useToastNotificationService: () => {
+    return {
+      displayErrorToast: jest.fn(),
+    };
+  },
+}));
 
 function prepareTest(setCustomUrlsFn: jest.Mock) {
   const customUrls = [

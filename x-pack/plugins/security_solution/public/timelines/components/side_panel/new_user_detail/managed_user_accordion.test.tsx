@@ -12,16 +12,15 @@ import { ManagedUserAccordion } from './managed_user_accordion';
 import { mockEntraUserFields } from './__mocks__';
 import { UserAssetTableType } from '../../../../explore/users/store/model';
 
-describe('useManagedUserItems', () => {
+describe('ManagedUserAccordion', () => {
   it('it renders children', () => {
     const { getByTestId } = render(
       <TestProviders>
         <ManagedUserAccordion
           title="test title"
           managedUser={mockEntraUserFields}
-          indexName="test-index"
-          eventId="123"
           tableType={UserAssetTableType.assetEntra}
+          openDetailsPanel={() => {}}
         >
           <div data-test-subj="test-children" />
         </ManagedUserAccordion>

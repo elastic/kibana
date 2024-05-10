@@ -39,12 +39,12 @@ export interface IndicesTestBed extends TestBed<TestSubjects> {
     clickIncludeHiddenIndicesToggle: () => void;
     clickDataStreamAt: (index: number) => Promise<void>;
     dataStreamLinkExistsAt: (index: number) => boolean;
-    clickManageContextMenuButton: () => void;
-    clickContextMenuOption: (optionDataTestSubject: string) => void;
-    clickModalConfirm: () => void;
-    clickCreateIndexButton: () => void;
-    clickCreateIndexCancelButton: () => void;
-    clickCreateIndexSaveButton: () => void;
+    clickManageContextMenuButton: () => Promise<void>;
+    clickContextMenuOption: (optionDataTestSubject: string) => Promise<void>;
+    clickModalConfirm: () => Promise<void>;
+    clickCreateIndexButton: () => Promise<void>;
+    clickCreateIndexCancelButton: () => Promise<void>;
+    clickCreateIndexSaveButton: () => Promise<void>;
   };
   findDataStreamDetailPanel: () => ReactWrapper;
   findDataStreamDetailPanelTitle: () => string;
@@ -74,7 +74,7 @@ export const setup = async (
 
   const clickIncludeHiddenIndicesToggle = () => {
     const { find } = testBed;
-    find('indexTableIncludeHiddenIndicesToggle').simulate('click');
+    find('checkboxToggles-includeHiddenIndices').simulate('click');
   };
 
   const clickManageContextMenuButton = async () => {
@@ -88,7 +88,7 @@ export const setup = async (
 
   const getIncludeHiddenIndicesToggleStatus = () => {
     const { find } = testBed;
-    const props = find('indexTableIncludeHiddenIndicesToggle').props();
+    const props = find('checkboxToggles-includeHiddenIndices').props();
     return Boolean(props['aria-checked']);
   };
 

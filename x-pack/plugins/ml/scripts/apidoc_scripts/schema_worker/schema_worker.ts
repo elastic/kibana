@@ -7,7 +7,8 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { DocEntry, extractDocumentation } from '../schema_extractor';
+import type { DocEntry } from '../schema_extractor';
+import { extractDocumentation } from '../schema_extractor';
 import type { ApiParameter, Block } from '../types';
 
 export function postProcess(parsedFiles: any[]): void {

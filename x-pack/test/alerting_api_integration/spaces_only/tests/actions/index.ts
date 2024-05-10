@@ -17,8 +17,10 @@ export default function actionsTests({ loadTestFile, getService }: FtrProviderCo
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./get_all'));
+    loadTestFile(require.resolve('./get_all_system'));
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./connector_types'));
+    loadTestFile(require.resolve('./connector_types_system'));
     loadTestFile(require.resolve('./update'));
     loadTestFile(require.resolve('./monitoring_collection'));
     loadTestFile(require.resolve('./execute'));
@@ -30,6 +32,8 @@ export default function actionsTests({ loadTestFile, getService }: FtrProviderCo
     loadTestFile(require.resolve('./connector_types/stack/preconfigured_alert_history_connector'));
     loadTestFile(require.resolve('./type_not_enabled'));
     loadTestFile(require.resolve('./schedule_unsecured_action'));
+    loadTestFile(require.resolve('./execute_unsecured_action'));
+    loadTestFile(require.resolve('./get_all_unsecured_actions'));
     loadTestFile(require.resolve('./check_registered_connector_types'));
     loadTestFile(require.resolve('./max_queued_actions_circuit_breaker'));
 

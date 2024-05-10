@@ -17,9 +17,12 @@ export type ServerlessExperimentalFeatures = Record<
  */
 export const allowedExperimentalValues = Object.freeze({
   /**
-   * Enables the use of the of the product navigation from shared-ux package in the Security Solution app
+   * <Add a description of the feature here>
+   *
+   * [This is a fake feature key to showcase how to add a new serverless-specific experimental flag.
+   * It also prevents `allowedExperimentalValues` from being empty. It should be removed once a real feature is added.]
    */
-  platformNavEnabled: true,
+  _serverlessFeatureEnabled: false,
 });
 
 type ServerlessExperimentalConfigKeys = Array<keyof ServerlessExperimentalFeatures>;

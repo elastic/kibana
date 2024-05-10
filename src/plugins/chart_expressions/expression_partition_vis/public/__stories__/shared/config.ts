@@ -129,5 +129,4 @@ export const waffleConfig: PartitionVisParams = {
       },
     ],
   },
-  showValuesInLegend: false,
 };

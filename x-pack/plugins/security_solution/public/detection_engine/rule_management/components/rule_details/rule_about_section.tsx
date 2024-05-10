@@ -27,10 +27,10 @@ import type {
 import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 import { requiredOptional } from '@kbn/zod-helpers';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
-import { SeverityBadge } from '../../../../detections/components/rules/severity_badge';
+import { SeverityBadge } from '../../../../common/components/severity_badge';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { filterEmptyThreats } from '../../../rule_creation_ui/pages/rule_creation/helpers';
-import { ThreatEuiFlexGroup } from '../../../../detections/components/rules/description_step/threat_description';
+import { ThreatEuiFlexGroup } from '../../../rule_creation_ui/components/description_step/threat_description';
 
 import { BadgeList } from './badge_list';
 import { DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
@@ -240,6 +240,16 @@ const TimestampOverride = ({ timestampOverride }: TimestampOverrideProps) => (
   </EuiText>
 );
 
+interface MaxSignalsProps {
+  maxSignals: number;
+}
+
+const MaxSignals = ({ maxSignals }: MaxSignalsProps) => (
+  <EuiText size="s" data-test-subj="maxSignalsPropertyValue">
+    {maxSignals}
+  </EuiText>
+);
+
 interface TagsProps {
   tags: string[];
 }
@@ -411,6 +421,13 @@ const prepareAboutSectionListItems = (
         </span>
       ),
       description: <TimestampOverride timestampOverride={rule.timestamp_override} />,
+    });
+  }
+
+  if (rule.max_signals) {
+    aboutSectionListItems.push({
+      title: <span data-test-subj="maxSignalsPropertyTitle">{i18n.MAX_SIGNALS_FIELD_LABEL}</span>,
+      description: <MaxSignals maxSignals={rule.max_signals} />,
     });
   }
 

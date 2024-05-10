@@ -52,6 +52,7 @@ export const IndexPipelinesConfigurationsLogic = kea<
   },
   events: ({ actions, values }) => ({
     afterMount: () => {
+      // @ts-expect-error upgrade typescript v4.9.5
       if (!values.indexPipelinesData || values.indexPipelinesData.length === 0) {
         return;
       }

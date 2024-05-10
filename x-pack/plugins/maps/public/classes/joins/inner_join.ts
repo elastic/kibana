@@ -153,14 +153,6 @@ export class InnerJoin {
     return await this.getRightJoinSource().getTooltipProperties(properties, executionContext);
   }
 
-  getIndexPatternIds() {
-    return this.getRightJoinSource().getIndexPatternIds();
-  }
-
-  getQueryableIndexPatternIds() {
-    return this.getRightJoinSource().getQueryableIndexPatternIds();
-  }
-
   getWhereQuery(): Query | undefined {
     return this.getRightJoinSource().getWhereQuery();
   }

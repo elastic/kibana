@@ -40,6 +40,7 @@ export const SeverityFilter: React.FC<Props> = ({ selectedOptionKeys, onChange }
       options={options}
       renderOption={renderOption}
       selectedOptionKeys={selectedOptionKeys}
+      isLoading={false}
     />
   );
 };

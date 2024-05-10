@@ -13,7 +13,7 @@ import { CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID } from './test_ids';
 
 export interface RelatedAlertsByAncestryProps {
   /**
-   * Value of the kibana.alert.ancestors.id field
+   * Id of the document
    */
   documentId: string;
   /**
@@ -24,20 +24,15 @@ export interface RelatedAlertsByAncestryProps {
    * Maintain backwards compatibility // TODO remove when possible
    */
   scopeId: string;
-  /**
-   * Id of the document
-   */
-  eventId: string;
 }
 
 /**
  * Show related alerts by ancestry in an expandable panel with a table
  */
-export const RelatedAlertsByAncestry: React.VFC<RelatedAlertsByAncestryProps> = ({
+export const RelatedAlertsByAncestry: React.FC<RelatedAlertsByAncestryProps> = ({
   documentId,
   indices,
   scopeId,
-  eventId,
 }) => {
   const { loading, error, data, dataCount } = useFetchRelatedAlertsByAncestry({
     documentId,
@@ -61,7 +56,7 @@ export const RelatedAlertsByAncestry: React.VFC<RelatedAlertsByAncestryProps> = 
       loading={loading}
       alertIds={data}
       scopeId={scopeId}
-      eventId={eventId}
+      eventId={documentId}
       noItemsMessage={
         <FormattedMessage
           id="xpack.securitySolution.flyout.left.insights.correlations.ancestryAlertsNoDataDescription"

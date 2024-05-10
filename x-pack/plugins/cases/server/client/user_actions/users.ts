@@ -9,7 +9,7 @@ import { isString } from 'lodash';
 import type { UserProfileAvatarData, UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { GetCaseUsersResponse } from '../../../common/types/api';
 import { GetCaseUsersResponseRt } from '../../../common/types/api';
-import { decodeOrThrow } from '../../../common/api';
+import { decodeOrThrow } from '../../common/runtime_types';
 import type { OwnerEntity } from '../../authorization';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';

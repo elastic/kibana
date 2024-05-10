@@ -811,7 +811,7 @@
             "label": "pre",
             "description": [],
             "signature": [
-              "React.ReactElement<any, any> | undefined"
+              "React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined"
             ],
             "path": "packages/kbn-typed-react-router-config/src/types/index.ts",
             "deprecated": false,

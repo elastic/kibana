@@ -3,9 +3,11 @@ steps:
     label: 'Rules, Alerts and Exceptions ResponseOps Cypress Tests on Security Solution'
     agents:
       queue: n2-4-spot
-    depends_on: build
+    depends_on:
+      - build
+      - quick_checks
     timeout_in_minutes: 120
-    parallelism: 4
+    parallelism: 9
     retry:
       automatic:
         - exit_status: '*'

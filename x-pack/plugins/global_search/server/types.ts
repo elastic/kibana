@@ -13,6 +13,7 @@ import type {
   Capabilities,
   IRouter,
   CustomRequestHandlerContext,
+  IScopedClusterClient,
 } from '@kbn/core/server';
 import {
   GlobalSearchBatchedResults,
@@ -92,6 +93,11 @@ export interface GlobalSearchFindOptions {
    * If/when provided and emitting, no further result emission will be performed and the result observable will be completed.
    */
   aborted$?: Observable<void>;
+  /**
+   * A ES client of type IScopedClusterClient is passed to the `find` call.
+   * When performing calls to ES, the interested provider can utilize this parameter to identify the specific cluster.
+   */
+  client?: IScopedClusterClient;
 }
 
 /**

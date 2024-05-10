@@ -284,6 +284,7 @@ describe('Jira service', () => {
         issueType: '10006',
         priority: 'High',
         parent: 'RJ-107',
+        otherFields: null,
       },
     };
 
@@ -357,6 +358,7 @@ describe('Jira service', () => {
           priority: 'High',
           issueType: null,
           parent: null,
+          otherFields: null,
         },
       });
 
@@ -421,6 +423,7 @@ describe('Jira service', () => {
           priority: 'High',
           issueType: null,
           parent: null,
+          otherFields: null,
         },
       });
 
@@ -505,6 +508,46 @@ describe('Jira service', () => {
         '[Action][Jira]: Unable to create incident. Error: Response is missing at least one of the expected fields: id. Reason: unknown: errorResponse was null'
       );
     });
+
+    describe('otherFields', () => {
+      test('it should call request with correct arguments', async () => {
+        const otherFields = { foo0: 'bar', foo1: true, foo2: 2 };
+
+        requestMock.mockImplementation(() =>
+          createAxiosResponse({
+            data: {
+              id: '1',
+              key: 'CK-1',
+              fields: { created: '2020-04-27T10:59:46.202Z' },
+            },
+          })
+        );
+
+        await service.createIncident({
+          incident: { ...incident.incident, otherFields },
+        });
+
+        expect(requestMock).toHaveBeenCalledWith({
+          axios,
+          url: 'https://coolsite.net/rest/api/2/issue',
+          logger,
+          method: 'post',
+          configurationUtilities,
+          data: {
+            fields: {
+              summary: 'title',
+              description: 'desc',
+              project: { key: 'CK' },
+              issuetype: { id: '10006' },
+              labels: [],
+              priority: { name: 'High' },
+              parent: { key: 'RJ-107' },
+              ...otherFields,
+            },
+          },
+        });
+      });
+    });
   });
 
   describe('updateIncident', () => {
@@ -517,6 +560,7 @@ describe('Jira service', () => {
         issueType: '10006',
         priority: 'High',
         parent: 'RJ-107',
+        otherFields: null,
       },
     };
 
@@ -594,6 +638,47 @@ describe('Jira service', () => {
       await expect(service.updateIncident(incident)).rejects.toThrow(
         '[Action][Jira]: Unable to update incident with id 1. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json. Reason: unknown: errorResponse was null'
       );
+    });
+
+    describe('otherFields', () => {
+      const otherFields = { foo0: 'bar', foo1: true, foo2: 2 };
+
+      test('it should call request with correct arguments', async () => {
+        requestMock.mockImplementation(() =>
+          createAxiosResponse({
+            data: {
+              id: '1',
+              key: 'CK-1',
+              fields: { updated: '2020-04-27T10:59:46.202Z' },
+            },
+          })
+        );
+
+        await service.updateIncident({
+          ...incident,
+          incident: { ...incident.incident, otherFields },
+        });
+
+        expect(requestMock).toHaveBeenCalledWith({
+          axios,
+          logger,
+          method: 'put',
+          configurationUtilities,
+          url: 'https://coolsite.net/rest/api/2/issue/1',
+          data: {
+            fields: {
+              summary: 'title',
+              description: 'desc',
+              labels: [],
+              priority: { name: 'High' },
+              issuetype: { id: '10006' },
+              project: { key: 'CK' },
+              parent: { key: 'RJ-107' },
+              ...otherFields,
+            },
+          },
+        });
+      });
     });
   });
 

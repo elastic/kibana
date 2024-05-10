@@ -8,12 +8,17 @@
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
-import { timelineActions } from '../../../../timelines/store/timeline';
-import { ENABLE_EXPANDABLE_FLYOUT_SETTING } from '../../../../../common/constants';
-import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/right';
+import { useRouteSpy } from '../../../utils/route/use_route_spy';
+import { useKibana } from '../../../lib/kibana';
+import { timelineActions } from '../../../../timelines/store';
+import {
+  ENABLE_EXPANDABLE_FLYOUT_SETTING,
+  SecurityPageName,
+} from '../../../../../common/constants';
+import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
 import type {
   SetEventsDeleted,
   SetEventsLoading,
@@ -69,10 +74,11 @@ const RowActionComponent = ({
   refetch,
 }: Props) => {
   const { data: timelineNonEcsData, ecs: ecsData, _id: eventId, _index: indexName } = data ?? {};
-
-  const { openFlyout } = useExpandableFlyoutContext();
+  const { telemetry } = useKibana().services;
+  const { openFlyout } = useExpandableFlyoutApi();
 
   const dispatch = useDispatch();
+  const [{ pageName }] = useRouteSpy();
   const [isSecurityFlyoutEnabled] = useUiSetting$<boolean>(ENABLE_EXPANDABLE_FLYOUT_SETTING);
   const isExpandableFlyoutInCreateRuleEnabled = useIsExperimentalFeatureEnabled(
     'expandableFlyoutInCreateRuleEnabled'
@@ -94,7 +100,11 @@ const RowActionComponent = ({
   );
 
   let showExpandableFlyout: boolean;
-  if (tableId === TableId.rulePreview) {
+
+  // disable the old flyout on attack discovery page
+  if (pageName === SecurityPageName.attackDiscovery) {
+    showExpandableFlyout = true;
+  } else if (tableId === TableId.rulePreview) {
     showExpandableFlyout = isSecurityFlyoutEnabled && isExpandableFlyoutInCreateRuleEnabled;
   } else {
     showExpandableFlyout = isSecurityFlyoutEnabled;
@@ -120,6 +130,10 @@ const RowActionComponent = ({
           },
         },
       });
+      telemetry.reportDetailsFlyoutOpened({
+        location: tableId,
+        panel: 'right',
+      });
     }
     // TODO remove when https://github.com/elastic/security-team/issues/7462 is merged
     // support of old flyout in cases page
@@ -142,7 +156,7 @@ const RowActionComponent = ({
         })
       );
     }
-  }, [dispatch, eventId, indexName, openFlyout, tabType, tableId, showExpandableFlyout]);
+  }, [dispatch, eventId, indexName, openFlyout, tabType, tableId, showExpandableFlyout, telemetry]);
 
   const Action = controlColumn.rowCellRender;
 

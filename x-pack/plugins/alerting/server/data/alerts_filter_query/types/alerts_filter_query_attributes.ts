@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FilterStateStore } from '../constants';
+import { FilterStateStore } from '@kbn/es-query';
 
 export interface AlertsFilterAttributes {
   query?: Record<string, unknown>;
@@ -18,5 +18,5 @@ export interface AlertsFilterAttributes {
 export interface AlertsFilterQueryAttributes {
   kql: string;
   filters: AlertsFilterAttributes[];
-  dsl?: string;
+  dsl: string;
 }

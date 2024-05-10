@@ -7,12 +7,12 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import type { ExpandableFlyoutContextValue } from '@kbn/expandable-flyout/src/context';
-import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
+import { useExpandableFlyoutApi, type ExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { RightPanelContext } from '../context';
 import { TestProviders } from '../../../../common/mock';
 import { ThreatIntelligenceOverview } from './threat_intelligence_overview';
-import { LeftPanelInsightsTab, DocumentDetailsLeftPanelKey } from '../../left';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import { LeftPanelInsightsTab } from '../../left';
 import { useFetchThreatIntelligence } from '../hooks/use_fetch_threat_intelligence';
 import { THREAT_INTELLIGENCE_TAB_ID } from '../../left/components/threat_intelligence_details';
 import { INSIGHTS_THREAT_INTELLIGENCE_TEST_ID } from './test_ids';
@@ -48,6 +48,11 @@ const panelContextValue = {
   dataFormattedForFieldBrowser: [],
 } as unknown as RightPanelContext;
 
+jest.mock('@kbn/expandable-flyout', () => ({
+  useExpandableFlyoutApi: jest.fn(),
+  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
+}));
+
 const renderThreatIntelligenceOverview = (contextValue: RightPanelContext) => (
   <TestProviders>
     <RightPanelContext.Provider value={contextValue}>
@@ -56,7 +61,15 @@ const renderThreatIntelligenceOverview = (contextValue: RightPanelContext) => (
   </TestProviders>
 );
 
+const flyoutContextValue = {
+  openLeftPanel: jest.fn(),
+} as unknown as ExpandableFlyoutApi;
+
 describe('<ThreatIntelligenceOverview />', () => {
+  beforeAll(() => {
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
+  });
+
   it('should render wrapper component', () => {
     (useFetchThreatIntelligence as jest.Mock).mockReturnValue({
       loading: false,
@@ -146,17 +159,11 @@ describe('<ThreatIntelligenceOverview />', () => {
       threatMatchesCount: 1,
       threatEnrichmentsCount: 1,
     });
-    const flyoutContextValue = {
-      openLeftPanel: jest.fn(),
-    } as unknown as ExpandableFlyoutContextValue;
-
     const { getByTestId } = render(
       <TestProviders>
-        <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
-          <RightPanelContext.Provider value={panelContextValue}>
-            <ThreatIntelligenceOverview />
-          </RightPanelContext.Provider>
-        </ExpandableFlyoutContext.Provider>
+        <RightPanelContext.Provider value={panelContextValue}>
+          <ThreatIntelligenceOverview />
+        </RightPanelContext.Provider>
       </TestProviders>
     );
 

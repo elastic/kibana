@@ -41,7 +41,7 @@ export const PRECONFIGURED_CONNECTOR = i18n.translate(
 export const CONNECTOR_SELECTOR_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.connectors.connectorSelector.ariaLabel',
   {
-    defaultMessage: 'Conversation Selector',
+    defaultMessage: 'Connector Selector',
   }
 );
 
@@ -49,6 +49,13 @@ export const ADD_NEW_CONNECTOR = i18n.translate(
   'xpack.elasticAssistant.assistant.connectors.connectorSelector.newConnectorOptions',
   {
     defaultMessage: 'Add new Connector...',
+  }
+);
+
+export const ADD_CONNECTOR = i18n.translate(
+  'xpack.elasticAssistant.assistant.connectors.connectorSelector.addConnectorButtonLabel',
+  {
+    defaultMessage: 'Add connector',
   }
 );
 

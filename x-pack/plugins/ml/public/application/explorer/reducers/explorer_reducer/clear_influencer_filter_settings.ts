@@ -7,7 +7,7 @@
 
 import { getClearedSelectedAnomaliesState } from '../../explorer_utils';
 
-import { ExplorerState } from './state';
+import type { ExplorerState } from './state';
 
 export function clearInfluencerFilterSettings(state: ExplorerState): ExplorerState {
   return {

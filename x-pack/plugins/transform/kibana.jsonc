@@ -36,7 +36,6 @@
       "alerting"
     ],
     "requiredBundles": [
-      "unifiedSearch",
       "esUiShared",
       "discover",
       "kibanaUtils",

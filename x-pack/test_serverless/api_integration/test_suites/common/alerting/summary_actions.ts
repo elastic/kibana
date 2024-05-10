@@ -54,12 +54,14 @@ export default function ({ getService }: FtrProviderContext) {
       'kibana.alert.maintenance_window_ids',
       'kibana.alert.reason',
       'kibana.alert.rule.execution.uuid',
+      'kibana.alert.rule.execution.timestamp',
       'kibana.alert.rule.duration',
       'kibana.alert.start',
       'kibana.alert.time_range',
       'kibana.alert.uuid',
       'kibana.alert.url',
       'kibana.version',
+      'kibana.alert.consecutive_matches',
     ];
 
     afterEach(async () => {

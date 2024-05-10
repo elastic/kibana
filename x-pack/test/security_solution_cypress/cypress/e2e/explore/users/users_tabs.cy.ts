@@ -17,7 +17,8 @@ import { RISK_SCORE_TAB, RISK_SCORE_TAB_CONTENT } from '../../../screens/users/u
 import { login } from '../../../tasks/login';
 import { visitUserDetailsPage, visitWithTimeRange } from '../../../tasks/navigation';
 
-import { USERS_URL } from '../../../urls/navigation';
+import { usersUrl } from '../../../urls/navigation';
+import { waitForTabToBeLoaded } from '../../../tasks/common';
 
 describe('Users stats and tables', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
@@ -28,12 +29,12 @@ describe('Users stats and tables', { tags: ['@ess', '@serverless'] }, () => {
 
   beforeEach(() => {
     login();
-    visitWithTimeRange(USERS_URL);
+    visitWithTimeRange(usersUrl('allUsers'));
   });
 
   after(() => {
-    cy.task('esArchiverUnload', 'users');
-    cy.task('esArchiverUnload', 'risk_users');
+    cy.task('esArchiverUnload', { archiveName: 'users' });
+    cy.task('esArchiverUnload', { archiveName: 'risk_users' });
   });
 
   describe('Users page tabs', () => {
@@ -48,7 +49,7 @@ describe('Users stats and tables', { tags: ['@ess', '@serverless'] }, () => {
     it(`renders all authentications`, () => {
       const totalUsers = 1;
 
-      cy.get(AUTHENTICATIONS_TAB).click();
+      waitForTabToBeLoaded(AUTHENTICATIONS_TAB);
 
       cy.get(AUTHENTICATIONS_TABLE)
         .find(HEADER_SUBTITLE)
@@ -56,19 +57,19 @@ describe('Users stats and tables', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     it(`renders anomalies tab`, () => {
-      cy.get(ANOMALIES_TAB).click({ force: true });
+      waitForTabToBeLoaded(ANOMALIES_TAB);
 
       cy.get(ANOMALIES_TAB_CONTENT).should('exist');
     });
 
     it(`renders events tab`, () => {
-      cy.get(EVENTS_TAB).click({ force: true });
+      waitForTabToBeLoaded(EVENTS_TAB);
 
       cy.get(EVENTS_TAB_CONTENT).should('exist');
     });
 
     it(`renders users risk tab`, () => {
-      cy.get(RISK_SCORE_TAB).click({ force: true });
+      waitForTabToBeLoaded(RISK_SCORE_TAB);
 
       cy.get(RISK_SCORE_TAB_CONTENT).should('exist');
     });

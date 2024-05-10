@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { ComponentType } from 'react';
+import { ComponentType, ReactElement } from 'react';
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
-import type { Capabilities } from '@kbn/core/public';
+import type { Capabilities, ThemeServiceSetup, ToastsSetup } from '@kbn/core/public';
 import type { UrlService, LocatorPublic } from '../common/url_service';
 import type { BrowserShortUrlClientFactoryCreateParams } from './url_service/short_urls/short_url_client_factory';
 import type { BrowserShortUrlClient } from './url_service/short_urls/short_url_client';
@@ -51,6 +51,7 @@ export interface ShareContext {
   onClose: () => void;
   showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
   disabledShareUrl?: boolean;
+  toasts: ToastsSetup;
 }
 
 /**
@@ -71,10 +72,27 @@ export interface ShareContextMenuPanelItem
  * directly in the context menu. If the item is clicked, the `panel` is shown.
  * */
 export interface ShareMenuItem {
-  shareMenuItem: ShareContextMenuPanelItem;
-  panel: EuiContextMenuPanelDescriptor;
+  shareMenuItem?: ShareContextMenuPanelItem;
+  // needed for Canvas
+  panel?: EuiContextMenuPanelDescriptor;
+  label?: 'PDF' | 'CSV' | 'PNG';
+  reportType?: string;
+  requiresSavedState?: boolean;
+  helpText?: ReactElement;
+  copyURLButton?: { id: string; dataTestSubj: string; label: string };
+  generateReportButton?: ReactElement;
+  generateReport?: Function;
+  generateReportForPrinting?: Function;
+  theme?: ThemeServiceSetup;
+  downloadCSVLens?: Function;
+  renderLayoutOptionSwitch?: boolean;
+  layoutOption?: 'print';
+  absoluteUrl?: string;
+  generateCopyUrl?: URL;
+  renderCopyURLButton?: boolean;
 }
 
+type ShareMenuItemType = Omit<ShareMenuItem, 'intl'>;
 /**
  * @public
  * A source for additional menu items shown in the share context menu. Any provider
@@ -84,8 +102,7 @@ export interface ShareMenuItem {
  * */
 export interface ShareMenuProvider {
   readonly id: string;
-
-  getShareMenuItems: (context: ShareContext) => ShareMenuItem[];
+  getShareMenuItems: (context: ShareContext) => ShareMenuItemType[];
 }
 
 interface UrlParamExtensionProps {
@@ -106,4 +123,8 @@ export interface ShowShareMenuOptions extends Omit<ShareContext, 'onClose'> {
   snapshotShareWarning?: string;
   onClose?: () => void;
   objectTypeTitle?: string;
+}
+
+export interface ClientConfigType {
+  new_version: { enabled: boolean };
 }

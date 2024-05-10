@@ -8,14 +8,15 @@
 import React, { useEffect, useState } from 'react';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiButtonEmpty, EuiCodeBlock, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import { EuiButtonEmpty, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import { createEsError } from '@kbn/search-errors';
 import type { TileError } from '../../../common/descriptor_types';
-import { getInspector } from '../../kibana_services';
+import { getApplication, getDocLinks, getInspector } from '../../kibana_services';
 import { RESPONSE_VIEW_ID } from '../../inspector/vector_tile_adapter/components/vector_tile_inspector';
 
 interface Props {
   inspectorAdapters: Adapters;
-  isESSource: boolean;
+  isESVectorTileSource: boolean;
   layerId: string;
   tileErrors: TileError[];
 }
@@ -57,6 +58,41 @@ export function TileErrorsList(props: Props) {
     },
   ];
 
+  function renderError(tileError: TileError) {
+    if (!props.isESVectorTileSource || !tileError.error) {
+      return tileError.message;
+    }
+
+    const esError = createEsError(
+      {
+        statusCode: 400,
+        message: tileError.message,
+        attributes: {
+          error: tileError.error,
+        },
+      },
+      () => {
+        getInspector().open(props.inspectorAdapters, {
+          options: {
+            initialLayerId: props.layerId,
+            initialTileKey: tileError.tileKey,
+            initialTab: [RESPONSE_VIEW_ID],
+          },
+        });
+      },
+      {
+        application: getApplication(),
+        docLinks: getDocLinks(),
+      }
+    );
+    return (
+      <>
+        {esError.getErrorMessage()}
+        {esError.getActions()}
+      </>
+    );
+  }
+
   return (
     <>
       <EuiPopover
@@ -81,28 +117,7 @@ export function TileErrorsList(props: Props) {
       >
         <EuiContextMenu initialPanelId={0} panels={panels} size="s" />
       </EuiPopover>
-      <EuiCodeBlock isCopyable={true} paddingSize="s">
-        {getDescription(selectedTileError)}
-      </EuiCodeBlock>
-      {props.isESSource && (
-        <EuiButton
-          color="primary"
-          onClick={() => {
-            getInspector().open(props.inspectorAdapters, {
-              options: {
-                initialLayerId: props.layerId,
-                initialTileKey: selectedTileError?.tileKey,
-                initialTab: [RESPONSE_VIEW_ID],
-              },
-            });
-          }}
-          size="s"
-        >
-          {i18n.translate('xpack.maps.tileError.viewDetailsButtonLabel', {
-            defaultMessage: 'View details',
-          })}
-        </EuiButton>
-      )}
+      {renderError(selectedTileError)}
     </>
   );
 }
@@ -112,16 +127,4 @@ function getTitle(tileKey: string) {
     defaultMessage: `tile {tileKey}`,
     values: { tileKey },
   });
-}
-
-function getDescription(tileError: TileError) {
-  if (tileError.error?.root_cause?.[0]?.reason) {
-    return tileError.error.root_cause[0].reason;
-  }
-
-  if (tileError.error?.reason) {
-    return tileError.error.reason;
-  }
-
-  return tileError.message;
 }

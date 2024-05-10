@@ -16,11 +16,14 @@ import type {
 } from '@kbn/core-http-server-internal';
 import type { InternalElasticsearchServiceSetup } from '@kbn/core-elasticsearch-server-internal';
 import type { InternalStatusServiceSetup } from '@kbn/core-status-server-internal';
+import type { DarkModeValue } from '@kbn/core-ui-settings-common';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import type { InternalCustomBrandingSetup } from '@kbn/core-custom-branding-server-internal';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { InternalUserSettingsServiceSetup } from '@kbn/core-user-settings-server-internal';
+import type { I18nServiceSetup } from '@kbn/core-i18n-server';
+import type { InternalI18nServicePreboot } from '@kbn/core-i18n-server-internal';
 
 /** @internal */
 export interface RenderingMetadata {
@@ -29,9 +32,10 @@ export interface RenderingMetadata {
   bootstrapScriptUrl: string;
   i18n: typeof i18n.translate;
   locale: string;
-  darkMode: boolean;
   themeVersion: ThemeVersion;
+  darkMode: DarkModeValue;
   stylesheetPaths: string[];
+  scriptPaths: string[];
   injectedMetadata: InjectedMetadata;
   customBranding: CustomBranding;
 }
@@ -40,6 +44,7 @@ export interface RenderingMetadata {
 export interface RenderingPrebootDeps {
   http: InternalHttpServicePreboot;
   uiPlugins: UiPlugins;
+  i18n: InternalI18nServicePreboot;
 }
 
 /** @internal */
@@ -50,6 +55,7 @@ export interface RenderingSetupDeps {
   uiPlugins: UiPlugins;
   customBranding: InternalCustomBrandingSetup;
   userSettings: InternalUserSettingsServiceSetup;
+  i18n: I18nServiceSetup;
 }
 
 /** @internal */

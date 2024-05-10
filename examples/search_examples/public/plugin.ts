@@ -6,13 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  AppMountParameters,
-  AppNavLinkStatus,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-} from '@kbn/core/public';
+import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import {
   AppPluginSetupDependencies,
   AppPluginStartDependencies,
@@ -40,7 +34,7 @@ export class SearchExamplesPlugin
     core.application.register({
       id: 'searchExamples',
       title: PLUGIN_NAME,
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       mount: async (params: AppMountParameters) => {
         // Load application bundle
         const { renderApp } = await import('./application');

@@ -18,36 +18,32 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { UnlinkFromLibraryAction } from './unlink_from_library_action';
-import { LibraryNotificationActionContext } from './library_notification_action';
+import {
+  LegacyUnlinkFromLibraryAction,
+  LegacyUnlinkPanelFromLibraryActionApi,
+} from './legacy_unlink_from_library_action';
 import { dashboardLibraryNotificationStrings } from './_dashboard_actions_strings';
+import {
+  UnlinkFromLibraryAction,
+  UnlinkPanelFromLibraryActionApi,
+} from './unlink_from_library_action';
 
 export interface LibraryNotificationProps {
-  context: LibraryNotificationActionContext;
-  unlinkAction: UnlinkFromLibraryAction;
-  displayName: string;
-  icon: string;
-  id: string;
+  api: UnlinkPanelFromLibraryActionApi | LegacyUnlinkPanelFromLibraryActionApi;
+  unlinkAction: UnlinkFromLibraryAction | LegacyUnlinkFromLibraryAction;
 }
 
-export function LibraryNotificationPopover({
-  unlinkAction,
-  displayName,
-  context,
-  icon,
-  id,
-}: LibraryNotificationProps) {
+export function LibraryNotificationPopover({ unlinkAction, api }: LibraryNotificationProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const { embeddable } = context;
 
   return (
     <EuiPopover
       button={
         <EuiButtonIcon
           color="text"
-          iconType={icon}
+          iconType={'folderCheck'}
           onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-          data-test-subj={`embeddablePanelNotification-${id}`}
+          data-test-subj={'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION'}
           aria-label={dashboardLibraryNotificationStrings.getPopoverAriaLabel()}
         />
       }
@@ -55,7 +51,7 @@ export function LibraryNotificationPopover({
       closePopover={() => setIsPopoverOpen(false)}
       anchorPosition="upCenter"
     >
-      <EuiPopoverTitle>{displayName}</EuiPopoverTitle>
+      <EuiPopoverTitle>{dashboardLibraryNotificationStrings.getDisplayName()}</EuiPopoverTitle>
       <div style={{ width: '300px' }}>
         <EuiText>
           <p>{dashboardLibraryNotificationStrings.getTooltip()}</p>
@@ -74,9 +70,9 @@ export function LibraryNotificationPopover({
               data-test-subj={'libraryNotificationUnlinkButton'}
               size="s"
               fill
-              onClick={() => unlinkAction.execute({ embeddable })}
+              onClick={() => unlinkAction.execute({ embeddable: api })}
             >
-              {unlinkAction.getDisplayName({ embeddable })}
+              {unlinkAction.getDisplayName({ embeddable: api })}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

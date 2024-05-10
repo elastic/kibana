@@ -10,6 +10,7 @@ import type {
   LayoutParams,
   PerformanceMetrics as ScreenshotMetrics,
 } from '@kbn/screenshotting-plugin/common';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { JOB_STATUS } from './constants';
 import type { LocatorParams } from './url';
 
@@ -42,20 +43,33 @@ export interface TaskRunResult {
   error_code?: string;
 }
 
+export interface ExecutionError {
+  name: string;
+  message: string;
+  stack: string;
+  cause: string;
+}
+
 export interface ReportOutput extends TaskRunResult {
   content: string | null;
   size: number;
 }
 
 /**
+ * @see also {@link packages/kbn-reporting/common/types.ts}
+ */
+export type CsvPagingStrategy = 'pit' | 'scroll';
+
+/**
  * @deprecated
  */
 export interface BaseParams {
-  layout?: LayoutParams;
+  browserTimezone: string; // to format dates in the user's time zone
   objectType: string;
   title: string;
-  browserTimezone: string; // to format dates in the user's time zone
   version: string; // to handle any state migrations
+  layout?: LayoutParams; // png & pdf only
+  pagingStrategy?: CsvPagingStrategy; // csv only
 }
 
 /**
@@ -74,6 +88,11 @@ export interface BasePayload extends BaseParams {
   spaceId?: string;
   isDeprecated?: boolean;
 }
+
+/**
+ * Timestamp metrics about the task lifecycle
+ */
+export type TaskInstanceFields = Pick<ConcreteTaskInstance, 'startedAt' | 'retryAt'>;
 
 export type JobId = string;
 
@@ -136,6 +155,10 @@ export interface ReportSource {
    * `output` is only populated if the report job is completed or failed.
    */
   output: ReportOutput | null;
+  /**
+   * Execution error during one of the execute task runs.
+   */
+  error?: ExecutionError | unknown;
 
   /*
    * Optional fields: populated when the job is claimed to execute, and after

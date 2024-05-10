@@ -64,6 +64,18 @@ export interface KibanaRedirectionResponseFactory {
 /**
  * @public
  */
+export interface KibanaNotModifiedResponseFactory {
+  /**
+   * Content not modified.
+   * Status code: `304`.
+   * @param options - {@link HttpResponseOptions} configures HTTP response body & headers.
+   */
+  notModified(options: HttpResponseOptions): IKibanaResponse;
+}
+
+/**
+ * @public
+ */
 export interface KibanaErrorResponseFactory {
   /**
    * The server cannot process the request due to something that is perceived to be a client error.
@@ -200,6 +212,7 @@ export interface KibanaErrorResponseFactory {
  */
 export type KibanaResponseFactory = KibanaSuccessResponseFactory &
   KibanaRedirectionResponseFactory &
+  KibanaNotModifiedResponseFactory &
   KibanaErrorResponseFactory & {
     /**
      * Creates a response with defined status code and payload.

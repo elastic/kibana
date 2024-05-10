@@ -45,6 +45,10 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
       return await testSubjects.find('apiKeyNameInput');
     },
 
+    async isApiKeyNamePresent() {
+      return await testSubjects.exists('apiKeyNameInput');
+    },
+
     async setApiKeyCustomExpiration(expirationTime: string) {
       return await testSubjects.setValue('apiKeyCustomExpirationInput', expirationTime);
     },

@@ -11,7 +11,7 @@ import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
-import { Annotation } from '../../../../../common/types/annotations';
+import type { Annotation } from '../../../../../common/types/annotations';
 import { AnnotationUpdatesService } from '../../../services/annotations_service';
 
 import { AnnotationFlyout } from '.';

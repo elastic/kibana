@@ -6,17 +6,28 @@
  */
 
 import type { EuiCommentProps } from '@elastic/eui';
-import type { Conversation, Message } from '@kbn/elastic-assistant';
+import type { Conversation, ClientMessage } from '@kbn/elastic-assistant';
 import { EuiAvatar, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 
 import { AssistantAvatar } from '@kbn/elastic-assistant';
-import { getMessageContentWithReplacements } from '../helpers';
+import type { Replacements } from '@kbn/elastic-assistant-common';
+import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
+import styled from '@emotion/styled';
+import type { UserAvatar } from '@kbn/elastic-assistant/impl/assistant_context';
 import { StreamComment } from './stream';
 import { CommentActions } from '../comment_actions';
 import * as i18n from './translations';
 
-export interface ContentMessage extends Message {
+// Matches EuiAvatar L
+const SpinnerWrapper = styled.div`
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+`;
+
+export interface ContentMessage extends ClientMessage {
   content: string;
 }
 const transformMessageWithReplacements = ({
@@ -25,62 +36,72 @@ const transformMessageWithReplacements = ({
   showAnonymizedValues,
   replacements,
 }: {
-  message: Message;
+  message: ClientMessage;
   content: string;
   showAnonymizedValues: boolean;
-  replacements?: Record<string, string>;
+  replacements: Replacements;
 }): ContentMessage => {
   return {
     ...message,
-    content:
-      showAnonymizedValues || !replacements
-        ? content
-        : getMessageContentWithReplacements({
-            messageContent: content,
-            replacements,
-          }),
+    content: showAnonymizedValues
+      ? content
+      : replaceAnonymizedValuesWithOriginalValues({
+          messageContent: content,
+          replacements,
+        }),
   };
 };
 
 export const getComments = ({
-  amendMessage,
+  abortStream,
   currentConversation,
+  isEnabledLangChain,
   isFetchingResponse,
+  refetchCurrentConversation,
   regenerateMessage,
   showAnonymizedValues,
+  isFlyoutMode,
+  currentUserAvatar,
+  setIsStreaming,
 }: {
-  amendMessage: ({ conversationId, content }: { conversationId: string; content: string }) => void;
-  currentConversation: Conversation;
+  abortStream: () => void;
+  currentConversation?: Conversation;
+  isEnabledLangChain: boolean;
   isFetchingResponse: boolean;
+  refetchCurrentConversation: () => void;
   regenerateMessage: (conversationId: string) => void;
   showAnonymizedValues: boolean;
+  isFlyoutMode: boolean;
+  currentUserAvatar?: UserAvatar;
+  setIsStreaming: (isStreaming: boolean) => void;
 }): EuiCommentProps[] => {
-  const amendMessageOfConversation = (content: string) => {
-    amendMessage({
-      conversationId: currentConversation.id,
-      content,
-    });
-  };
+  if (!currentConversation) return [];
 
   const regenerateMessageOfConversation = () => {
     regenerateMessage(currentConversation.id);
   };
-
-  const connectorTypeTitle = currentConversation.apiConfig.connectorTypeTitle ?? '';
+  // should only happen when no apiConfig is present
+  const actionTypeId = currentConversation.apiConfig?.actionTypeId ?? '';
 
   const extraLoadingComment = isFetchingResponse
     ? [
         {
           username: i18n.ASSISTANT,
-          timelineAvatar: <EuiLoadingSpinner size="xl" />,
+          timelineAvatar: (
+            <SpinnerWrapper>
+              <EuiLoadingSpinner size="xl" />
+            </SpinnerWrapper>
+          ),
           timestamp: '...',
           children: (
             <StreamComment
-              amendMessage={amendMessageOfConversation}
-              connectorTypeTitle={connectorTypeTitle}
+              abortStream={abortStream}
+              actionTypeId={actionTypeId}
               content=""
+              refetchCurrentConversation={refetchCurrentConversation}
               regenerateMessage={regenerateMessageOfConversation}
-              isLastComment
+              isEnabledLangChain={isEnabledLangChain}
+              setIsStreaming={setIsStreaming}
               transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
               isFetching
               // we never need to append to a code block in the loading comment, which is what this index is used for
@@ -91,6 +112,23 @@ export const getComments = ({
       ]
     : [];
 
+  const UserAvatar = () => {
+    if (currentUserAvatar) {
+      return (
+        <EuiAvatar
+          name="user"
+          size="l"
+          color={currentUserAvatar?.color ?? 'subdued'}
+          {...(currentUserAvatar?.imageUrl
+            ? { imageUrl: currentUserAvatar.imageUrl as string }
+            : { initials: currentUserAvatar?.initials })}
+        />
+      );
+    }
+
+    return <EuiAvatar name="user" size="l" color="subdued" iconType="userAvatar" />;
+  };
+
   return [
     ...currentConversation.messages.map((message, index) => {
       const isLastComment = index === currentConversation.messages.length - 1;
@@ -99,16 +137,20 @@ export const getComments = ({
 
       const messageProps = {
         timelineAvatar: isUser ? (
-          <EuiAvatar name="user" size="l" color="subdued" iconType="userAvatar" />
+          <UserAvatar />
         ) : (
           <EuiAvatar name="machine" size="l" color="subdued" iconType={AssistantAvatar} />
         ),
         timestamp: i18n.AT(
-          message.timestamp.length === 0 ? new Date().toLocaleString() : message.timestamp
+          message.timestamp.length === 0
+            ? new Date().toLocaleString()
+            : new Date(message.timestamp).toLocaleString()
         ),
         username: isUser ? i18n.YOU : i18n.ASSISTANT,
         eventColor: message.isError ? 'danger' : undefined,
       };
+
+      const isControlsEnabled = isLastComment && !isUser;
 
       const transformMessage = (content: string) =>
         transformMessageWithReplacements({
@@ -124,13 +166,16 @@ export const getComments = ({
           ...messageProps,
           children: (
             <StreamComment
-              amendMessage={amendMessageOfConversation}
-              connectorTypeTitle={connectorTypeTitle}
+              abortStream={abortStream}
+              actionTypeId={actionTypeId}
               index={index}
-              isLastComment={isLastComment}
+              isControlsEnabled={isControlsEnabled}
+              isEnabledLangChain={isEnabledLangChain}
               isError={message.isError}
               reader={message.reader}
+              refetchCurrentConversation={refetchCurrentConversation}
               regenerateMessage={regenerateMessageOfConversation}
+              setIsStreaming={setIsStreaming}
               transformMessage={transformMessage}
             />
           ),
@@ -142,17 +187,20 @@ export const getComments = ({
 
       return {
         ...messageProps,
-        actions: <CommentActions message={transformedMessage} />,
+        actions: <CommentActions message={transformedMessage} isFlyoutMode={isFlyoutMode} />,
         children: (
           <StreamComment
-            amendMessage={amendMessageOfConversation}
-            connectorTypeTitle={connectorTypeTitle}
+            actionTypeId={actionTypeId}
+            abortStream={abortStream}
             content={transformedMessage.content}
             index={index}
-            isLastComment={isLastComment}
+            isControlsEnabled={isControlsEnabled}
+            isEnabledLangChain={isEnabledLangChain}
             // reader is used to determine if streaming controls are shown
             reader={transformedMessage.reader}
             regenerateMessage={regenerateMessageOfConversation}
+            refetchCurrentConversation={refetchCurrentConversation}
+            setIsStreaming={setIsStreaming}
             transformMessage={transformMessage}
           />
         ),

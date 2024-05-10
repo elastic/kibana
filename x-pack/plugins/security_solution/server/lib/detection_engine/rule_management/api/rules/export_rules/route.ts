@@ -21,6 +21,7 @@ import { getNonPackagedRulesCount } from '../../../logic/search/get_existing_pre
 import { getExportByObjectIds } from '../../../logic/export/get_export_by_object_ids';
 import { getExportAll } from '../../../logic/export/get_export_all';
 import { buildSiemResponse } from '../../../../routes/utils';
+import { RULE_MANAGEMENT_IMPORT_EXPORT_SOCKET_TIMEOUT_MS } from '../../timeouts';
 
 export const exportRulesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -33,6 +34,9 @@ export const exportRulesRoute = (
       path: `${DETECTION_ENGINE_RULES_URL}/_export`,
       options: {
         tags: ['access:securitySolution'],
+        timeout: {
+          idleSocket: RULE_MANAGEMENT_IMPORT_EXPORT_SOCKET_TIMEOUT_MS,
+        },
       },
     })
     .addVersion(
@@ -51,11 +55,7 @@ export const exportRulesRoute = (
         const exceptionsClient = (await context.lists)?.getExceptionListClient();
         const actionsClient = (await context.actions)?.getActionsClient();
 
-        const {
-          getExporter,
-          getClient,
-          client: savedObjectsClient,
-        } = (await context.core).savedObjects;
+        const { getExporter, getClient } = (await context.core).savedObjects;
 
         const client = getClient({ includedHiddenTypes: ['action'] });
         const actionsExporter = getExporter(client);
@@ -83,9 +83,7 @@ export const exportRulesRoute = (
               ? await getExportByObjectIds(
                   rulesClient,
                   exceptionsClient,
-                  savedObjectsClient,
-                  request.body.objects,
-                  logger,
+                  request.body.objects.map((obj) => obj.rule_id),
                   actionsExporter,
                   request,
                   actionsClient
@@ -93,8 +91,6 @@ export const exportRulesRoute = (
               : await getExportAll(
                   rulesClient,
                   exceptionsClient,
-                  savedObjectsClient,
-                  logger,
                   actionsExporter,
                   request,
                   actionsClient

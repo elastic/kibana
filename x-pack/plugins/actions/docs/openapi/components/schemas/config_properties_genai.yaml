@@ -1,32 +1,10 @@
 title: Connector request properties for an OpenAI connector
 description: Defines properties for connectors when type is `.gen-ai`.
 oneOf:
-  - type: object
-    required:
-      - apiProvider
-      - apiUrl
-    properties:
-      apiProvider:
-        type: string
-        description: The OpenAI API provider.
-        enum: ['Azure OpenAI']
-      apiUrl:
-        type: string
-        description: The OpenAI API endpoint.
-  - type: object
-    required:
-      - apiProvider
-      - apiUrl
-    properties:
-      apiProvider:
-        type: string
-        description: The OpenAI API provider.
-        enum: ['OpenAI']
-      apiUrl:
-        type: string
-        description: The OpenAI API endpoint.
-      defaultModel:
-        type: string
-        description: The default model to use for requests.
+  - $ref: 'config_properties_genai_azure.yaml'
+  - $ref: 'config_properties_genai_openai.yaml'
 discriminator:
   propertyName: apiProvider
+  mapping:
+    Azure OpenAI: 'config_properties_genai_azure.yaml'
+    OpenAI: 'config_properties_genai_openai.yaml'

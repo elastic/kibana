@@ -6,17 +6,10 @@
  */
 
 import React from 'react';
-import {
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-  TestProviders,
-} from '../../mock';
+import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { useSignalHelpers } from './use_signal_helpers';
 import type { State } from '../../store';
-import { createStore } from '../../store';
 import { createSourcererDataView } from './create_sourcerer_data_view';
 
 const mockCreateSourcererDataView = jest.fn(() => {
@@ -76,8 +69,7 @@ describe('useSignalHelpers', () => {
         ],
       },
     };
-    const { storage } = createSecuritySolutionStorageMock();
-    const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    const store = createMockStore(state);
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useSignalHelpers(), {
         wrapper: ({ children }) => <TestProviders store={store}>{children}</TestProviders>,
@@ -106,8 +98,7 @@ describe('useSignalHelpers', () => {
         ],
       },
     };
-    const { storage } = createSecuritySolutionStorageMock();
-    const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    const store = createMockStore(state);
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useSignalHelpers(), {
         wrapper: ({ children }) => <TestProviders store={store}>{children}</TestProviders>,
@@ -138,8 +129,7 @@ describe('useSignalHelpers', () => {
         ],
       },
     };
-    const { storage } = createSecuritySolutionStorageMock();
-    const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    const store = createMockStore(state);
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useSignalHelpers(), {
         wrapper: ({ children }) => <TestProviders store={store}>{children}</TestProviders>,
@@ -173,8 +163,7 @@ describe('useSignalHelpers', () => {
         ],
       },
     };
-    const { storage } = createSecuritySolutionStorageMock();
-    const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    const store = createMockStore(state);
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useSignalHelpers(), {
         wrapper: ({ children }) => <TestProviders store={store}>{children}</TestProviders>,

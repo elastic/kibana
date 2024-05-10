@@ -8,16 +8,105 @@
 
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { run } from '@kbn/dev-cli-runner';
+import { ProcRunner } from '@kbn/dev-proc-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs';
 import path from 'path';
-import { JOURNEY_APM_CONFIG } from '@kbn/journeys';
 
-const JOURNEY_BASE_PATH = 'x-pack/performance/journeys';
+const JOURNEY_BASE_PATH = 'x-pack/performance/journeys_e2e';
 
 export interface Journey {
   name: string;
   path: string;
+}
+
+interface EsRunProps {
+  procRunner: ProcRunner;
+  log: ToolingLog;
+  logsDir?: string;
+}
+
+interface TestRunProps extends EsRunProps {
+  journey: Journey;
+  phase: 'TEST' | 'WARMUP';
+  ingestEsData: boolean;
+  kibanaInstallDir: string | undefined;
+}
+
+const readFilesRecursively = (dir: string, callback: Function) => {
+  const files = fs.readdirSync(dir);
+  files.forEach((file) => {
+    const filePath = path.join(dir, file);
+    const stat = fs.statSync(filePath);
+    if (stat.isDirectory()) {
+      readFilesRecursively(filePath, callback);
+    } else if (stat.isFile()) {
+      callback(filePath);
+    }
+  });
+};
+
+async function startEs(props: EsRunProps) {
+  const { procRunner, log, logsDir } = props;
+  await procRunner.run('es', {
+    cmd: 'node',
+    args: [
+      'scripts/es',
+      'snapshot',
+      '--license=trial',
+      // Temporarily disabling APM
+      // ...(JOURNEY_APM_CONFIG.active
+      //   ? [
+      //       '-E',
+      //       'tracing.apm.enabled=true',
+      //       '-E',
+      //       'tracing.apm.agent.transaction_sample_rate=1.0',
+      //       '-E',
+      //       `tracing.apm.agent.server_url=${JOURNEY_APM_CONFIG.serverUrl}`,
+      //       '-E',
+      //       `tracing.apm.agent.secret_token=${JOURNEY_APM_CONFIG.secretToken}`,
+      //       '-E',
+      //       `tracing.apm.agent.environment=${JOURNEY_APM_CONFIG.environment}`,
+      //     ]
+      //   : []),
+      `--writeLogsToPath=${logsDir}/es-cluster.log`,
+    ],
+    cwd: REPO_ROOT,
+    wait: /kbn\/es setup complete/,
+  });
+
+  log.info(`✅ ES is ready and will run in the background`);
+}
+
+async function runFunctionalTest(props: TestRunProps) {
+  const { procRunner, journey, phase, kibanaInstallDir, logsDir, ingestEsData } = props;
+  await procRunner.run('functional-tests', {
+    cmd: 'node',
+    args: [
+      'scripts/functional_tests',
+      ['--config', journey.path],
+      kibanaInstallDir ? ['--kibana-install-dir', kibanaInstallDir] : [],
+      // save Kibana logs in file instead of console output; only for "warmup" phase
+      logsDir ? ['--writeLogsToPath', logsDir] : [],
+      '--debug',
+      '--bail',
+    ].flat(),
+    cwd: REPO_ROOT,
+    wait: true,
+    env: {
+      // Reset all the ELASTIC APM env vars to undefined, FTR config might set it's own values.
+      ...Object.fromEntries(
+        Object.keys(process.env).flatMap((k) =>
+          k.startsWith('ELASTIC_APM_') ? [[k, undefined]] : []
+        )
+      ),
+      TEST_PERFORMANCE_PHASE: phase,
+      TEST_ES_URL: 'http://elastic:changeme@localhost:9200',
+      TEST_ES_DISABLE_STARTUP: 'true',
+      TEST_INGEST_ES_DATA: ingestEsData.toString(),
+    },
+  });
 }
 
 run(
@@ -34,19 +123,23 @@ run(
       throw createFlagError('--journey-path must be an existing path');
     }
 
-    let journeys: Journey[] = [];
+    const journeys: Journey[] = [];
 
-    if (journeyPath) {
-      journeys = fs.statSync(journeyPath).isDirectory()
-        ? fs.readdirSync(journeyPath).map((fileName) => {
-            return { name: fileName, path: path.resolve(journeyPath, fileName) };
-          })
-        : [{ name: path.parse(journeyPath).name, path: journeyPath }];
+    if (journeyPath && fs.statSync(journeyPath).isFile()) {
+      journeys.push({ name: path.parse(journeyPath).name, path: journeyPath });
     } else {
-      const journeyBasePath = path.resolve(REPO_ROOT, JOURNEY_BASE_PATH);
-      journeys = fs.readdirSync(journeyBasePath).map((name) => {
-        return { name, path: path.join(journeyBasePath, name) };
-      });
+      // default dir is x-pack/performance/journeys_e2e
+      const dir = journeyPath ?? path.resolve(REPO_ROOT, JOURNEY_BASE_PATH);
+      readFilesRecursively(dir, (filePath: string) =>
+        journeys.push({
+          name: path.parse(filePath).name,
+          path: path.resolve(dir, filePath),
+        })
+      );
+    }
+
+    if (journeys.length === 0) {
+      throw new Error('No journeys found');
     }
 
     log.info(
@@ -57,97 +150,37 @@ run(
 
     for (const journey of journeys) {
       try {
-        await startEs();
+        // create folder to store ES/Kibana server logs
+        const logsDir = path.resolve(REPO_ROOT, `.ftr/journey_server_logs/${journey.name}`);
+        fs.mkdirSync(logsDir, { recursive: true });
+        process.stdout.write(`--- Running journey: ${journey.name} [start ES, warmup run]\n`);
+        await startEs({ procRunner, log, logsDir });
         if (!skipWarmup) {
-          await runWarmup(journey, kibanaInstallDir);
+          // Set the phase to WARMUP, this will prevent the FTR from starting Kibana with opt-in telemetry and save logs to file
+          await runFunctionalTest({
+            procRunner,
+            log,
+            journey,
+            phase: 'WARMUP',
+            kibanaInstallDir,
+            logsDir,
+            ingestEsData: true,
+          });
         }
-        await runTest(journey, kibanaInstallDir);
+        process.stdout.write(`--- Running journey: ${journey.name} [collect metrics]\n`);
+        await runFunctionalTest({
+          procRunner,
+          log,
+          journey,
+          phase: 'TEST',
+          kibanaInstallDir,
+          ingestEsData: skipWarmup, // if warmup was skipped, we need to ingest data as part of TEST phase
+        });
       } catch (e) {
         log.error(e);
         failedJourneys.push(journey.name);
       } finally {
         await procRunner.stop('es');
-      }
-    }
-
-    async function runFunctionalTest(
-      configPath: string,
-      phase: 'TEST' | 'WARMUP',
-      kibanaBuildDir: string | undefined
-    ) {
-      await procRunner.run('functional-tests', {
-        cmd: 'node',
-        args: [
-          'scripts/functional_tests',
-          ['--config', configPath],
-          kibanaBuildDir ? ['--kibana-install-dir', kibanaBuildDir] : [],
-          '--debug',
-          '--bail',
-        ].flat(),
-        cwd: REPO_ROOT,
-        wait: true,
-        env: {
-          // Reset all the ELASTIC APM env vars to undefined, FTR config might set it's own values.
-          ...Object.fromEntries(
-            Object.keys(process.env).flatMap((k) =>
-              k.startsWith('ELASTIC_APM_') ? [[k, undefined]] : []
-            )
-          ),
-          TEST_PERFORMANCE_PHASE: phase,
-          TEST_ES_URL: 'http://elastic:changeme@localhost:9200',
-          TEST_ES_DISABLE_STARTUP: 'true',
-        },
-      });
-    }
-
-    async function startEs() {
-      process.stdout.write(`--- Starting ES\n`);
-      await procRunner.run('es', {
-        cmd: 'node',
-        args: [
-          'scripts/es',
-          'snapshot',
-          '--license=trial',
-          ...(JOURNEY_APM_CONFIG.active
-            ? [
-                '-E',
-                'tracing.apm.enabled=true',
-                '-E',
-                'tracing.apm.agent.transaction_sample_rate=1.0',
-                '-E',
-                `tracing.apm.agent.server_url=${JOURNEY_APM_CONFIG.serverUrl}`,
-                '-E',
-                `tracing.apm.agent.secret_token=${JOURNEY_APM_CONFIG.secretToken}`,
-                '-E',
-                `tracing.apm.agent.environment=${JOURNEY_APM_CONFIG.environment}`,
-              ]
-            : []),
-        ],
-        cwd: REPO_ROOT,
-        wait: /kbn\/es setup complete/,
-      });
-
-      log.info(`✅ ES is ready and will run in the background`);
-    }
-
-    async function runWarmup(journey: Journey, kibanaBuildDir: string | undefined) {
-      try {
-        process.stdout.write(`--- Running warmup: ${journey.name}\n`);
-        // Set the phase to WARMUP, this will prevent the functional test server from starting Elasticsearch, opt in to telemetry, etc.
-        await runFunctionalTest(journey.path, 'WARMUP', kibanaBuildDir);
-      } catch (e) {
-        log.warning(`Warmup for ${journey.name} failed`);
-        throw e;
-      }
-    }
-
-    async function runTest(journey: Journey, kibanaBuildDir: string | undefined) {
-      try {
-        process.stdout.write(`--- Running ${journey.name}\n`);
-        await runFunctionalTest(journey.path, 'TEST', kibanaBuildDir);
-      } catch (e) {
-        log.warning(`Journey ${journey.name} failed. Retrying once...`);
-        await runFunctionalTest(journey.path, 'TEST', kibanaBuildDir);
       }
     }
 

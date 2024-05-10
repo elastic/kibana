@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  IlmExplainLifecycleLifecycleExplain,
-  IndicesStatsIndicesStats,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
 import { isEqual, orderBy } from 'lodash/fp';
 
 import type { IndexSummaryTableItem } from '../summary_table/helpers';
@@ -18,6 +15,7 @@ import type {
   DataQualityCheckResult,
   PatternRollup,
   SortConfig,
+  MeteringStatsIndex,
 } from '../../types';
 import { getDocsCount, getSizeInBytes } from '../../helpers';
 
@@ -159,7 +157,7 @@ export const getSummaryTableItems = ({
   results: Record<string, DataQualityCheckResult> | undefined;
   sortByColumn: string;
   sortByDirection: 'desc' | 'asc';
-  stats: Record<string, IndicesStatsIndicesStats> | null;
+  stats: Record<string, MeteringStatsIndex> | null;
 }): IndexSummaryTableItem[] => {
   const summaryTableItems = indexNames.map((indexName) => ({
     docsCount: getDocsCount({ stats, indexName }),
@@ -172,6 +170,7 @@ export const getSummaryTableItems = ({
     pattern,
     patternDocsCount,
     sizeInBytes: getSizeInBytes({ stats, indexName }),
+    checkedAt: results?.[indexName]?.checkedAt,
   }));
 
   return orderBy([sortByColumn], [sortByDirection], summaryTableItems);
@@ -188,7 +187,7 @@ export const shouldCreateIndexNames = ({
   indexNames: string[] | undefined;
   isILMAvailable: boolean;
   newIndexNames: string[];
-  stats: Record<string, IndicesStatsIndicesStats> | null;
+  stats: Record<string, MeteringStatsIndex> | null;
 }): boolean => {
   return (
     !isEqual(newIndexNames, indexNames) &&
@@ -210,7 +209,7 @@ export const shouldCreatePatternRollup = ({
   isILMAvailable: boolean;
   newDocsCount: number;
   patternRollup: PatternRollup | undefined;
-  stats: Record<string, IndicesStatsIndicesStats> | null;
+  stats: Record<string, MeteringStatsIndex> | null;
 }): boolean => {
   if (patternRollup?.docsCount === newDocsCount) {
     return false;

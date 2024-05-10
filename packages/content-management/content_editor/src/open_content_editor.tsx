@@ -15,7 +15,7 @@ import type { ContentEditorFlyoutContentContainerProps } from './components';
 
 export type OpenContentEditorParams = Pick<
   ContentEditorFlyoutContentContainerProps,
-  'item' | 'onSave' | 'isReadonly' | 'entityName' | 'customValidators'
+  'item' | 'onSave' | 'isReadonly' | 'readonlyReason' | 'entityName' | 'customValidators'
 >;
 
 export function useOpenContentEditor() {

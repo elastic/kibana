@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { ExpandableFlyoutContextValue } from '@kbn/expandable-flyout/src/context';
-import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { RightPanelContext } from '../context';
 import { PREVALENCE_TEST_ID } from './test_ids';
-import { LeftPanelInsightsTab, DocumentDetailsLeftPanelKey } from '../../left';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import { LeftPanelInsightsTab } from '../../left';
 import React from 'react';
 import { PrevalenceOverview } from './prevalence_overview';
 import { PREVALENCE_TAB_ID } from '../../left/components/prevalence_details';
@@ -24,6 +23,7 @@ import {
 } from '../../../shared/components/test_ids';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
 import { mockContextValue } from '../mocks/mock_context';
+import { type ExpandableFlyoutApi, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 jest.mock('../../shared/hooks/use_prevalence');
 
@@ -36,20 +36,27 @@ const NO_DATA_MESSAGE = 'No prevalence data available.';
 
 const flyoutContextValue = {
   openLeftPanel: jest.fn(),
-} as unknown as ExpandableFlyoutContextValue;
+} as unknown as ExpandableFlyoutApi;
+
+jest.mock('@kbn/expandable-flyout', () => ({
+  useExpandableFlyoutApi: jest.fn(),
+  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
+}));
 
 const renderPrevalenceOverview = (contextValue: RightPanelContext = mockContextValue) =>
   render(
     <TestProviders>
-      <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
-        <RightPanelContext.Provider value={contextValue}>
-          <PrevalenceOverview />
-        </RightPanelContext.Provider>
-      </ExpandableFlyoutContext.Provider>
+      <RightPanelContext.Provider value={contextValue}>
+        <PrevalenceOverview />
+      </RightPanelContext.Provider>
     </TestProviders>
   );
 
 describe('<PrevalenceOverview />', () => {
+  beforeAll(() => {
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
+  });
+
   it('should render wrapper component', () => {
     (usePrevalence as jest.Mock).mockReturnValue({
       loading: false,

@@ -5,28 +5,30 @@
  * 2.0.
  */
 
+import type { BasicConsoleProps } from '../../hooks/use_with_show_responder';
+import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import type { CommandResponseActionApiState } from './hooks/use_console_action_submitter';
 import type { ManagedConsoleExtensionComponentProps } from '../console';
 import type {
-  HostMetadata,
   EndpointActionDataParameterTypes,
+  EndpointActionResponseDataOutput,
 } from '../../../../common/endpoint/types';
 import type { CommandExecutionComponentProps } from '../console/types';
 
 export interface EndpointCommandDefinitionMeta {
   endpointId: string;
+  agentType: ResponseActionAgentType;
 }
 
-export type EndpointResponderExtensionComponentProps = ManagedConsoleExtensionComponentProps<{
-  endpoint: HostMetadata;
-}>;
+export type EndpointResponderExtensionComponentProps =
+  ManagedConsoleExtensionComponentProps<BasicConsoleProps>;
 
 export type ActionRequestComponentProps<
   TArgs extends object = object,
-  TActionOutputContent extends object = object,
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
 > = CommandExecutionComponentProps<
   { comment?: string } & TArgs,
-  CommandResponseActionApiState<TActionOutputContent, TParameters>,
+  CommandResponseActionApiState<TOutputContent, TParameters>,
   EndpointCommandDefinitionMeta
 >;

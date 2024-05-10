@@ -8,15 +8,7 @@
 import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 
-import {
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-  TestProviders,
-} from '../../../../mock';
-import type { State } from '../../../../store';
-import { createStore } from '../../../../store';
+import { TestProviders } from '../../../../mock';
 import * as i18n from './translations';
 import { useChartSettingsPopoverConfiguration } from '.';
 
@@ -30,11 +22,8 @@ describe('useChartSettingsPopoverConfiguration', () => {
   const onResetStackByFields = jest.fn();
   const queryId = 'abcd';
 
-  const state: State = mockGlobalState;
-  const { storage } = createSecuritySolutionStorageMock();
-  const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <TestProviders store={store}>{children}</TestProviders>
+    <TestProviders>{children}</TestProviders>
   );
 
   beforeEach(() => jest.clearAllMocks());

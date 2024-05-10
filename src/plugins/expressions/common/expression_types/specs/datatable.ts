@@ -55,7 +55,14 @@ export type DatatableRow = Record<string, any>;
  * Datatable column meta information
  */
 export interface DatatableColumnMeta {
+  /**
+   * The Kibana normalized type of the column
+   */
   type: DatatableColumnType;
+  /**
+   * The original type of the column from ES
+   */
+  esType?: string;
   /**
    * field this column is based on
    */
@@ -89,6 +96,7 @@ export interface DatatableColumn {
   id: string;
   name: string;
   meta: DatatableColumnMeta;
+  isNull?: boolean;
 }
 
 /**

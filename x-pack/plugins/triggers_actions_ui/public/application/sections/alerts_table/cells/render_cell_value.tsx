@@ -6,20 +6,25 @@
  */
 
 import { isEmpty } from 'lodash';
-import React, { type ReactNode } from 'react';
-import { ALERT_DURATION, TIMESTAMP } from '@kbn/rule-data-utils';
+import React from 'react';
+import {
+  ALERT_DURATION,
+  AlertConsumers,
+  ALERT_RULE_NAME,
+  ALERT_RULE_UUID,
+  ALERT_START,
+  TIMESTAMP,
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_PRODUCER,
+} from '@kbn/rule-data-utils';
 import {
   FIELD_FORMAT_IDS,
   FieldFormatParams,
   FieldFormatsRegistry,
 } from '@kbn/field-formats-plugin/common';
-import { GetRenderCellValue } from '../../../../types';
+import { EuiBadge, EuiLink, RenderCellValue } from '@elastic/eui';
+import { alertProducersData, observabilityFeatureIds } from '../constants';
 import { useKibana } from '../../../../common/lib/kibana';
-
-interface Props {
-  columnId: string;
-  data: any;
-}
 
 export const getMappedNonEcsValue = ({
   data,
@@ -48,22 +53,17 @@ const getRenderValue = (mappedNonEcsValue: any) => {
   return '—';
 };
 
-export const getRenderCellValue = (fieldFormats: FieldFormatsRegistry): GetRenderCellValue => {
+export const getRenderCellValue: RenderCellValue = ({ columnId, data, fieldFormats }) => {
   const alertValueFormatter = getAlertFormatters(fieldFormats);
+  if (data == null) return null;
 
-  return () =>
-    (props): ReactNode => {
-      const { columnId, data } = props as Props;
-      if (data == null) return null;
+  const mappedNonEcsValue = getMappedNonEcsValue({
+    data,
+    fieldName: columnId,
+  });
+  const value = getRenderValue(mappedNonEcsValue);
 
-      const mappedNonEcsValue = getMappedNonEcsValue({
-        data,
-        fieldName: columnId,
-      });
-      const value = getRenderValue(mappedNonEcsValue);
-
-      return alertValueFormatter(columnId, value);
-    };
+  return alertValueFormatter(columnId, value, data);
 };
 
 const defaultParam: Record<string, FieldFormatParams> = {
@@ -91,13 +91,40 @@ export function useFieldFormatter(fieldType: FIELD_FORMAT_IDS) {
   return getFieldFormatterProvider(fieldFormats as FieldFormatsRegistry)(fieldType);
 }
 
+const AlertRuleLink = ({ alertFields }: { alertFields: Array<{ field: string; value: any }> }) => {
+  const { http } = useKibana().services;
+  const ruleName = alertFields.find((f) => f.field === ALERT_RULE_NAME)?.value?.[0];
+  const ruleUuid = alertFields.find((f) => f.field === ALERT_RULE_UUID)?.value?.[0];
+
+  if (!ruleName || !ruleUuid) {
+    return null;
+  }
+
+  return (
+    <EuiLink
+      href={http.basePath.prepend(
+        `/app/management/insightsAndAlerting/triggersActions/rule/${ruleUuid}`
+      )}
+    >
+      {ruleName}
+    </EuiLink>
+  );
+};
+
 export function getAlertFormatters(fieldFormats: FieldFormatsRegistry) {
   const getFormatter = getFieldFormatterProvider(fieldFormats);
 
-  return (columnId: string, value: any): React.ReactElement => {
+  return (
+    columnId: string,
+    value: any,
+    rowData?: Array<{ field: string; value: any }>
+  ): React.ReactElement => {
     switch (columnId) {
       case TIMESTAMP:
+      case ALERT_START:
         return <>{getFormatter(FIELD_FORMAT_IDS.DATE)(value)}</>;
+      case ALERT_RULE_NAME:
+        return rowData ? <AlertRuleLink alertFields={rowData} /> : <>{value}</>;
       case ALERT_DURATION:
         return (
           <>
@@ -107,6 +134,18 @@ export function getAlertFormatters(fieldFormats: FieldFormatsRegistry) {
             })(value) || '--'}
           </>
         );
+      case ALERT_RULE_CONSUMER:
+        const producer = rowData?.find(({ field }) => field === ALERT_RULE_PRODUCER)?.value?.[0];
+        const consumer: AlertConsumers = observabilityFeatureIds.includes(producer)
+          ? 'observability'
+          : producer && (value === 'alerts' || value === 'stackAlerts')
+          ? producer
+          : value;
+        const consumerData = alertProducersData[consumer];
+        if (!consumerData) {
+          return <>{value}</>;
+        }
+        return <EuiBadge iconType={consumerData.icon}>{consumerData.displayName}</EuiBadge>;
       default:
         return <>{value}</>;
     }

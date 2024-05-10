@@ -7,15 +7,8 @@
 
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-export default function ({ loadTestFile, getPageObject }: FtrProviderContext) {
-  const svlCommonPage = getPageObject('svlCommonPage');
-
+export default function ({ loadTestFile }: FtrProviderContext) {
   describe('discover', function () {
-    before(async function () {
-      // TODO: Serverless tests require login first
-      await svlCommonPage.login();
-    });
-
     loadTestFile(require.resolve('./reporting'));
     loadTestFile(require.resolve('./visualize_field'));
   });

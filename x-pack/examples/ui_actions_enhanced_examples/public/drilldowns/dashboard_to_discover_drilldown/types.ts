@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import type { PublishesDataViews } from '@kbn/presentation-publishing';
 import { CollectConfigProps as CollectConfigPropsBase } from '@kbn/kibana-utils-plugin/public';
 import { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
-import { IEmbeddable } from '@kbn/embeddable-plugin/public';
 
-export type ActionContext = ApplyGlobalFilterActionContext & { embeddable: IEmbeddable };
+export type ActionApi = Partial<PublishesDataViews>;
+
+export type ActionContext = ApplyGlobalFilterActionContext & { embeddable: ActionApi };
 
 export type Config = {
   /**

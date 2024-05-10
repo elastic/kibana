@@ -40,12 +40,11 @@
     "id": "default",
     "label": "Default"
   },
-  "locations": [],
+  "locations": ["dev"],
   "name": "Test HTTP Monitor 03",
   "namespace": "testnamespace",
   "origin": "ui",
   "form_monitor_type": "multistep",
-  "urls": "",
   "url.port": null,
   "id": "",
   "hash": "",

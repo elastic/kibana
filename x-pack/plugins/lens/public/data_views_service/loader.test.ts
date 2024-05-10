@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { ensureIndexPattern, loadIndexPatternRefs, loadIndexPatterns } from './loader';
+import { DataViewsContract, DataViewField } from '@kbn/data-views-plugin/public';
+import {
+  ensureIndexPattern,
+  loadIndexPatternRefs,
+  loadIndexPatterns,
+  buildIndexPatternField,
+} from './loader';
 import { sampleIndexPatterns, mockDataViewsService } from './mocks';
 import { documentField } from '../datasources/form_based/document_field';
 
@@ -311,6 +316,34 @@ describe('loader', () => {
       });
       expect(cache).toEqual({ 2: expect.anything() });
       expect(onError).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('buildIndexPatternField', () => {
+    it('should return a field with the correct name and derived parameters', async () => {
+      const field = buildIndexPatternField({
+        name: 'foo',
+        displayName: 'Foo',
+        type: 'string',
+        aggregatable: true,
+        searchable: true,
+      } as DataViewField);
+      expect(field.name).toEqual('foo');
+      expect(field.meta).toEqual(false);
+      expect(field.runtime).toEqual(false);
+    });
+    it('should return return the right meta field value', async () => {
+      const field = buildIndexPatternField(
+        {
+          name: 'meta',
+          displayName: 'Meta',
+          type: 'string',
+          aggregatable: true,
+          searchable: true,
+        } as DataViewField,
+        new Set(['meta'])
+      );
+      expect(field.meta).toEqual(true);
     });
   });
 });

@@ -27,7 +27,7 @@ import {
   ConnectorMappingsAttributesPartialRt,
   ConnectorMappingsAttributesTransformedRt,
 } from '../../common/types/connector_mappings';
-import { decodeOrThrow } from '../../../common/api';
+import { decodeOrThrow } from '../../common/runtime_types';
 
 export class ConnectorMappingsService {
   constructor(private readonly log: Logger) {}

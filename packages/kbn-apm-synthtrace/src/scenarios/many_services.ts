@@ -7,17 +7,18 @@
  */
 
 import { ApmFields, apm, Instance } from '@kbn/apm-synthtrace-client';
-import { flatten, random } from 'lodash';
+import { flatten, random, times } from 'lodash';
 import { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';
+import { getRandomNameForIndex } from './helpers/random_names';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
-const scenario: Scenario<ApmFields> = async ({ logger }) => {
-  const numServices = 500;
+const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts = { services: 2000 } }) => {
+  const numServices = scenarioOpts.services;
+  const transactionName = 'GET /order/{id}';
   const languages = ['go', 'dotnet', 'java', 'python'];
-  const services = ['web', 'order-processing', 'api-backend', 'proxy'];
   const agentVersions: Record<string, string[]> = {
     go: ['2.1.0', '2.0.0', '1.15.0', '1.14.0', '1.13.1'],
     dotnet: ['1.18.0', '1.17.0', '1.16.1', '1.16.0', '1.15.0'],
@@ -27,82 +28,55 @@ const scenario: Scenario<ApmFields> = async ({ logger }) => {
 
   return {
     generate: ({ range, clients: { apmEsClient } }) => {
-      const successfulTimestamps = range.ratePerMinute(180);
-
       const instances = flatten(
-        [...Array(numServices).keys()].map((index) => {
+        times(numServices).map((index) => {
           const language = languages[index % languages.length];
           const agentLanguageVersions = agentVersions[language];
+          const agentVersion = agentLanguageVersions[index % agentLanguageVersions.length];
 
           const numOfInstances = (index % 3) + 1;
-
-          return [...Array(numOfInstances).keys()].map((instanceIndex) =>
+          return times(numOfInstances).map((instanceIndex) =>
             apm
               .service({
-                name: `${services[index % services.length]}-${language}-${index}`,
+                name: `${getRandomNameForIndex(index)}-${language}-${index}`,
                 environment: ENVIRONMENT,
                 agentName: language,
               })
               .instance(`instance-${index}-${instanceIndex}`)
-              .defaults({
-                'agent.version': agentLanguageVersions[index % agentLanguageVersions.length],
-                'service.language.name': language,
-              })
+              .defaults({ 'agent.version': agentVersion, 'service.language.name': language })
           );
         })
       );
 
-      const urls = ['GET /order/{id}', 'POST /basket/{id}', 'DELETE /basket', 'GET /products'];
+      const instanceSpans = (instance: Instance) => {
+        const hasHighDuration = Math.random() > 0.5;
+        const throughput = random(1, 10);
 
-      const instanceSpans = (instance: Instance, url: string) => {
-        const successfulTraceEvents = successfulTimestamps.generator((timestamp) => {
-          const randomHigh = random(1000, 4000);
-          const randomLow = random(100, randomHigh / 5);
-          const duration = random(randomLow, randomHigh);
-          const childDuration = random(randomLow, duration);
-          const remainderDuration = duration - childDuration;
+        return range.ratePerMinute(throughput).generator((timestamp) => {
+          const parentDuration = hasHighDuration ? random(1000, 5000) : random(100, 1000);
           const generateError = random(1, 4) % 3 === 0;
-          const generateChildError = random(0, 5) % 2 === 0;
           const span = instance
-            .transaction({ transactionName: url })
+            .transaction({ transactionName })
             .timestamp(timestamp)
-            .duration(duration)
-            .children(
-              instance
-                .span({
-                  spanName: 'GET apm-*/_search',
-                  spanType: 'db',
-                  spanSubtype: 'elasticsearch',
-                })
-                .duration(childDuration)
-                .destination('elasticsearch')
-                .timestamp(timestamp)
-                .outcome(generateError && generateChildError ? 'failure' : 'success'),
-              instance
-                .span({ spanName: 'custom_operation', spanType: 'custom' })
-                .duration(remainderDuration)
-                .success()
-                .timestamp(timestamp + childDuration)
-            );
+            .duration(parentDuration);
+
           return !generateError
             ? span.success()
-            : span
-                .failure()
-                .errors(
-                  instance.error({ message: `No handler for ${url}` }).timestamp(timestamp + 50)
-                );
+            : span.failure().errors(
+                instance
+                  .error({
+                    message: `No handler for ${transactionName}`,
+                    type: 'No handler',
+                    culprit: 'request',
+                  })
+                  .timestamp(timestamp + 50)
+              );
         });
-
-        return successfulTraceEvents;
       };
 
       return withClient(
         apmEsClient,
-        logger.perf('generating_apm_events', () =>
-          instances
-            .flatMap((instance) => urls.map((url) => ({ instance, url })))
-            .map(({ instance, url }) => instanceSpans(instance, url))
-        )
+        logger.perf('generating_apm_events', () => instances.map(instanceSpans))
       );
     },
   };

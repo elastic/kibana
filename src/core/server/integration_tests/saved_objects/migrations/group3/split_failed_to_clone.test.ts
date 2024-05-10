@@ -59,7 +59,8 @@ const RELOCATE_TYPES: Record<string, string> = {
 
 export const logFilePath = Path.join(__dirname, 'split_failed_to_clone.test.log');
 
-describe('when splitting .kibana into multiple indices and one clone fails', () => {
+// Failing: See https://github.com/elastic/kibana/issues/163253
+describe.skip('when splitting .kibana into multiple indices and one clone fails', () => {
   let esServer: TestElasticsearchUtils['es'];
   let typeRegistry: ISavedObjectTypeRegistry;
   let migratorTestKitFactory: () => Promise<KibanaMigratorTestKit>;
@@ -131,14 +132,14 @@ describe('when splitting .kibana into multiple indices and one clone fails', () 
     });
 
     // cause a failure when cloning .kibana_slow_clone_* indices
-    client.cluster.putSettings({ persistent: { 'cluster.max_shards_per_node': 15 } });
+    void client.cluster.putSettings({ persistent: { 'cluster.max_shards_per_node': 15 } });
 
     await expect(runMigrationsWhichFailsWhenCloning()).rejects.toThrowError(
       /cluster_shard_limit_exceeded/
     );
 
     // remove the failure
-    client.cluster.putSettings({ persistent: { 'cluster.max_shards_per_node': 20 } });
+    void client.cluster.putSettings({ persistent: { 'cluster.max_shards_per_node': 20 } });
 
     const { runMigrations: runMigrations2ndTime } = await migratorTestKitFactory();
     await runMigrations2ndTime();

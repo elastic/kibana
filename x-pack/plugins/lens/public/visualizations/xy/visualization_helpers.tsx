@@ -9,7 +9,12 @@ import { i18n } from '@kbn/i18n';
 import { cloneDeep, uniq } from 'lodash';
 import { IconChartBarHorizontal, IconChartBarStacked, IconChartMixedXy } from '@kbn/chart-icons';
 import type { LayerType as XYLayerType } from '@kbn/expression-xy-plugin/common';
-import { DatasourceLayers, OperationMetadata, VisualizationType } from '../../types';
+import {
+  DatasourceLayers,
+  FramePublicAPI,
+  OperationMetadata,
+  VisualizationType,
+} from '../../types';
 import {
   State,
   visualizationTypes,
@@ -20,11 +25,6 @@ import {
   XYReferenceLineLayerConfig,
   SeriesType,
   XYByReferenceAnnotationLayerConfig,
-  XYPersistedAnnotationLayerConfig,
-  XYPersistedByReferenceAnnotationLayerConfig,
-  XYPersistedLinkedByValueAnnotationLayerConfig,
-  XYPersistedLayerConfig,
-  XYPersistedByValueAnnotationLayerConfig,
   XYByValueAnnotationLayerConfig,
 } from './types';
 import { isHorizontalChart } from './state_helpers';
@@ -149,31 +149,10 @@ export const isAnnotationsLayer = (
 ): layer is XYAnnotationLayerConfig =>
   layer.layerType === layerTypes.ANNOTATIONS && 'indexPatternId' in layer;
 
-export const isPersistedAnnotationsLayer = (
-  layer: XYPersistedLayerConfig
-): layer is XYPersistedAnnotationLayerConfig =>
-  layer.layerType === layerTypes.ANNOTATIONS && !('indexPatternId' in layer);
-
-export const isPersistedByValueAnnotationsLayer = (
-  layer: XYPersistedLayerConfig
-): layer is XYPersistedByValueAnnotationLayerConfig =>
-  isPersistedAnnotationsLayer(layer) &&
-  (layer.persistanceType === 'byValue' || !layer.persistanceType);
-
 export const isByReferenceAnnotationsLayer = (
   layer: XYLayerConfig
 ): layer is XYByReferenceAnnotationLayerConfig =>
   'annotationGroupId' in layer && '__lastSaved' in layer;
-
-export const isPersistedByReferenceAnnotationsLayer = (
-  layer: XYPersistedAnnotationLayerConfig
-): layer is XYPersistedByReferenceAnnotationLayerConfig =>
-  isPersistedAnnotationsLayer(layer) && layer.persistanceType === 'byReference';
-
-export const isPersistedLinkedByValueAnnotationsLayer = (
-  layer: XYPersistedAnnotationLayerConfig
-): layer is XYPersistedLinkedByValueAnnotationLayerConfig =>
-  isPersistedAnnotationsLayer(layer) && layer.persistanceType === 'linked';
 
 export const getAnnotationsLayers = (layers: Array<Pick<XYLayerConfig, 'layerType'>>) =>
   (layers || []).filter((layer): layer is XYAnnotationLayerConfig => isAnnotationsLayer(layer));
@@ -210,20 +189,26 @@ export const getLayerTypeOptions = (layer: XYLayerConfig, options: LayerTypeToLa
   return options[layerTypes.ANNOTATIONS](layer);
 };
 
-export function getVisualizationType(state: State): VisualizationType | 'mixed' {
+export function getVisualizationType(state: State, layerId?: string): VisualizationType | 'mixed' {
   if (!state.layers.length) {
     return (
       visualizationTypes.find((t) => t.id === state.preferredSeriesType) ?? visualizationTypes[0]
     );
   }
   const dataLayers = getDataLayers(state?.layers);
-  const visualizationType = visualizationTypes.find((t) => t.id === dataLayers?.[0].seriesType);
+  if (layerId) {
+    const dataLayerSeries = layerId
+      ? dataLayers.find((d) => d.layerId === layerId)?.seriesType
+      : dataLayers[0].seriesType;
+    return visualizationTypes.find((t) => t.id === dataLayerSeries) || 'mixed';
+  }
+  const visualizationType = visualizationTypes.find((t) => t.id === dataLayers[0].seriesType);
   const seriesTypes = uniq(dataLayers.map((l) => l.seriesType));
 
   return visualizationType && seriesTypes.length === 1 ? visualizationType : 'mixed';
 }
 
-export function getDescription(state?: State) {
+export function getDescription(state?: State, layerId?: string) {
   if (!state) {
     return {
       icon: defaultIcon,
@@ -233,7 +218,7 @@ export function getDescription(state?: State) {
     };
   }
 
-  const visualizationType = getVisualizationType(state);
+  const visualizationType = getVisualizationType(state, layerId);
 
   if (visualizationType === 'mixed' && isHorizontalChart(state.layers)) {
     return {
@@ -384,7 +369,7 @@ export function getLayersByType(state: State, byType?: string) {
 
 export function validateLayersForDimension(
   dimension: string,
-  layers: XYDataLayerConfig[],
+  allLayers: XYLayerConfig[],
   missingCriteria: (layer: XYDataLayerConfig) => boolean
 ):
   | { valid: true }
@@ -392,23 +377,45 @@ export function validateLayersForDimension(
       valid: false;
       payload: { shortMessage: string; longMessage: React.ReactNode };
     } {
+  const dataLayers = allLayers
+    .map((layer, i) => ({ layer, originalIndex: i }))
+    .filter(({ layer }) => isDataLayer(layer)) as Array<{
+    layer: XYDataLayerConfig;
+    originalIndex: number;
+  }>;
+
+  // filter out those layers with no accessors at all
+  const filteredLayers = dataLayers.filter(
+    ({ layer: { accessors, xAccessor, splitAccessor } }) =>
+      accessors.length > 0 || xAccessor != null || splitAccessor != null
+  );
   // Multiple layers must be consistent:
   // * either a dimension is missing in ALL of them
   // * or should not miss on any
-  if (layers.every(missingCriteria) || !layers.some(missingCriteria)) {
+  if (
+    filteredLayers.every(({ layer }) => missingCriteria(layer)) ||
+    !filteredLayers.some(({ layer }) => missingCriteria(layer))
+  ) {
     return { valid: true };
   }
   // otherwise it's an error and it has to be reported
-  const layerMissingAccessors = layers.reduce((missing: number[], layer, i) => {
-    if (missingCriteria(layer)) {
-      missing.push(i);
-    }
-    return missing;
-  }, []);
+  const layerMissingAccessors = filteredLayers.reduce(
+    (missing: number[], { layer, originalIndex }) => {
+      if (missingCriteria(layer)) {
+        missing.push(originalIndex);
+      }
+      return missing;
+    },
+    []
+  );
 
   return {
     valid: false,
-    payload: getMessageIdsForDimension(dimension, layerMissingAccessors, isHorizontalChart(layers)),
+    payload: getMessageIdsForDimension(
+      dimension,
+      layerMissingAccessors,
+      isHorizontalChart(dataLayers.map(({ layer }) => layer))
+    ),
   };
 }
 
@@ -418,3 +425,16 @@ export const isNumericMetric = (op: OperationMetadata) =>
 export const isNumericDynamicMetric = (op: OperationMetadata) =>
   isNumericMetric(op) && !op.isStaticValue;
 export const isBucketed = (op: OperationMetadata) => op.isBucketed;
+
+export const isTimeChart = (
+  dataLayers: XYDataLayerConfig[],
+  frame?: Pick<FramePublicAPI, 'datasourceLayers'> | undefined
+) =>
+  Boolean(
+    dataLayers.length &&
+      dataLayers.every(
+        (dataLayer) =>
+          dataLayer.xAccessor &&
+          checkScaleOperation('interval', 'date', frame?.datasourceLayers || {})(dataLayer)
+      )
+  );

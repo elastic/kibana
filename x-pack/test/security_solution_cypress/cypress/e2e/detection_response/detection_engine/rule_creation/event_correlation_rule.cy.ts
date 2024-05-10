@@ -39,6 +39,7 @@ import {
   SEVERITY_DETAILS,
   TAGS_DETAILS,
   TIMELINE_TEMPLATE_DETAILS,
+  INTERVAL_ABBR_VALUE,
 } from '../../../../screens/rule_details';
 
 import { getDetails, waitForTheRuleToBeExecuted } from '../../../../tasks/rule_details';
@@ -49,6 +50,8 @@ import {
   fillAboutRuleAndContinue,
   fillDefineEqlRuleAndContinue,
   fillScheduleRuleAndContinue,
+  getIndexPatternClearButton,
+  getRuleIndexInput,
   selectEqlRuleType,
   waitForAlertsToPopulate,
 } from '../../../../tasks/create_new_rule';
@@ -56,6 +59,13 @@ import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { openRuleManagementPageViaBreadcrumbs } from '../../../../tasks/rules_management';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
+import {
+  EQL_OPTIONS_POPOVER_TRIGGER,
+  EQL_OPTIONS_TIMESTAMP_INPUT,
+  EQL_QUERY_INPUT,
+  EQL_QUERY_VALIDATION_ERROR,
+  RULES_CREATION_FORM,
+} from '../../../../screens/create_new_rule';
 
 describe('EQL rules', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
@@ -116,12 +126,16 @@ describe('EQL rules', { tags: ['@ess', '@serverless'] }, () => {
         getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
       });
       cy.get(SCHEDULE_DETAILS).within(() => {
-        getDetails(RUNS_EVERY_DETAILS).should('have.text', `${rule.interval}`);
+        getDetails(RUNS_EVERY_DETAILS)
+          .find(INTERVAL_ABBR_VALUE)
+          .should('have.text', `${rule.interval}`);
         const humanizedDuration = getHumanizedDuration(
           rule.from ?? 'now-6m',
           rule.interval ?? '5m'
         );
-        getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should('have.text', `${humanizedDuration}`);
+        getDetails(ADDITIONAL_LOOK_BACK_DETAILS)
+          .find(INTERVAL_ABBR_VALUE)
+          .should('have.text', `${humanizedDuration}`);
       });
 
       waitForTheRuleToBeExecuted();
@@ -148,7 +162,7 @@ describe('EQL rules', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     after(() => {
-      cy.task('esArchiverUnload', 'auditbeat_multiple');
+      cy.task('esArchiverUnload', { archiveName: 'auditbeat_multiple' });
     });
 
     it('Creates and enables a new EQL rule with a sequence', function () {
@@ -172,6 +186,36 @@ describe('EQL rules', { tags: ['@ess', '@serverless'] }, () => {
           expect(text).contains(rule.name);
           expect(text).contains(rule.severity);
         });
+    });
+  });
+
+  describe('with source data requiring EQL overrides', () => {
+    before(() => {
+      cy.task('esArchiverLoad', { archiveName: 'no_at_timestamp_field', type: 'ftr' });
+    });
+
+    after(() => {
+      cy.task('esArchiverUnload', { archiveName: 'no_at_timestamp_field', type: 'ftr' });
+    });
+
+    it('includes EQL options in query validation', () => {
+      login();
+      visit(CREATE_RULE_URL);
+      selectEqlRuleType();
+      getIndexPatternClearButton().click();
+      getRuleIndexInput().type(`no_at_timestamp_field{enter}`);
+
+      cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('exist');
+      cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('be.visible');
+      cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).type('any where true');
+
+      cy.get(EQL_QUERY_VALIDATION_ERROR).should('be.visible');
+      cy.get(EQL_QUERY_VALIDATION_ERROR).should('have.text', '1');
+
+      cy.get(RULES_CREATION_FORM).find(EQL_OPTIONS_POPOVER_TRIGGER).click();
+      cy.get(EQL_OPTIONS_TIMESTAMP_INPUT).type('event.ingested{enter}');
+
+      cy.get(EQL_QUERY_VALIDATION_ERROR).should('not.exist');
     });
   });
 });

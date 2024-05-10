@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Routes, Route } from '@kbn/shared-ux-router';
+import { EuiLoadingSpinner } from '@elastic/eui';
 
 import { installationStatuses } from '../../../../../../../common/constants';
 
@@ -14,7 +15,7 @@ import { INTEGRATIONS_ROUTING_PATHS, INTEGRATIONS_SEARCH_QUERYPARAM } from '../.
 import { DefaultLayout } from '../../../../layouts';
 import { isPackageUpdatable } from '../../../../services';
 
-import { useGetPackagesQuery } from '../../../../hooks';
+import { useAuthz, useGetPackagesQuery, useGetSettingsQuery } from '../../../../hooks';
 
 import type { CategoryFacet, ExtendedIntegrationCategory } from './category_facets';
 
@@ -41,12 +42,23 @@ export const categoryExists = (category: string, categories: CategoryFacet[]) =>
 };
 
 export const EPMHomePage: React.FC = () => {
-  const [prereleaseEnabled, setPrereleaseEnabled] = useState<boolean>(false);
-
-  // loading packages to find installed ones
-  const { data: allPackages, isLoading } = useGetPackagesQuery({
-    prerelease: prereleaseEnabled,
+  const authz = useAuthz();
+  const isAuthorizedToFetchSettings = authz.fleet.readSettings;
+  const { data: settings, isFetchedAfterMount: isSettingsFetched } = useGetSettingsQuery({
+    enabled: isAuthorizedToFetchSettings,
   });
+
+  const prereleaseIntegrationsEnabled = settings?.item.prerelease_integrations_enabled ?? false;
+  const shouldFetchPackages = !isAuthorizedToFetchSettings || isSettingsFetched;
+  // loading packages to find installed ones
+  const { data: allPackages, isLoading } = useGetPackagesQuery(
+    {
+      prerelease: prereleaseIntegrationsEnabled,
+    },
+    {
+      enabled: shouldFetchPackages,
+    }
+  );
 
   const installedPackages = useMemo(
     () =>
@@ -76,6 +88,11 @@ export const EPMHomePage: React.FC = () => {
   const notificationsBySection = {
     manage: unverifiedPackageCount + upgradeablePackageCount,
   };
+
+  if (!shouldFetchPackages) {
+    return <EuiLoadingSpinner />;
+  }
+
   return (
     <Routes>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_installed}>
@@ -85,7 +102,7 @@ export const EPMHomePage: React.FC = () => {
       </Route>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_all}>
         <DefaultLayout section="browse" notificationsBySection={notificationsBySection}>
-          <AvailablePackages setPrereleaseEnabled={setPrereleaseEnabled} />
+          <AvailablePackages prereleaseIntegrationsEnabled={prereleaseIntegrationsEnabled} />
         </DefaultLayout>
       </Route>
     </Routes>

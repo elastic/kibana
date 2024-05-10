@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiPageTemplate } from '@elastic/eui';
 import { createPermissionFailureMessage } from '../capabilities/check_capabilities';
-import { MlCapabilitiesKey } from '../../../common/types/capabilities';
+import type { MlCapabilitiesKey } from '../../../common/types/capabilities';
 import { HelpMenu } from '../components/help_menu';
 import { useMlKibana } from '../contexts/kibana';
 

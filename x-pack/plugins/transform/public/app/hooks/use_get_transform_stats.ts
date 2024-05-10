@@ -17,6 +17,7 @@ import { useAppDependencies } from '../app_dependencies';
 
 export const useGetTransformStats = (
   transformId: TransformId,
+  basic = false,
   enabled?: boolean,
   refetchInterval?: number | false
 ) => {
@@ -28,6 +29,7 @@ export const useGetTransformStats = (
       http.get<GetTransformsStatsResponseSchema>(
         addInternalBasePath(`transforms/${transformId}/_stats`),
         {
+          query: { basic },
           version: '1',
           signal,
         }
@@ -37,9 +39,11 @@ export const useGetTransformStats = (
 };
 
 export const useGetTransformsStats = ({
+  basic = false,
   enabled,
   refetchInterval,
 }: {
+  basic?: boolean;
   enabled?: boolean;
   refetchInterval?: number | false;
 }) => {
@@ -49,6 +53,7 @@ export const useGetTransformsStats = ({
     [TRANSFORM_REACT_QUERY_KEYS.GET_TRANSFORMS_STATS],
     ({ signal }) =>
       http.get<GetTransformsStatsResponseSchema>(addInternalBasePath(`transforms/_stats`), {
+        query: { basic },
         version: '1',
         asSystemRequest: true,
         signal,

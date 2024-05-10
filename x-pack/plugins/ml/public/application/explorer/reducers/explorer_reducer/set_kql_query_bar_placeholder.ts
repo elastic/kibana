@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { ExplorerState } from './state';
+import type { ExplorerState } from './state';
 
 // Set the KQL query bar placeholder value
 export const setKqlQueryBarPlaceholder = (state: ExplorerState) => {

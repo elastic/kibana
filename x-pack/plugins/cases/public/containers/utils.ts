@@ -148,12 +148,11 @@ export const createUpdateSuccessToaster = (
 export const constructAssigneesFilter = (
   assignees: FilterOptions['assignees']
 ): { assignees?: string | string[] } =>
-  assignees === null || assignees.length > 0
+  assignees.length > 0
     ? {
-        assignees:
-          assignees?.map((assignee) =>
-            assignee === null ? NO_ASSIGNEES_FILTERING_KEYWORD : assignee
-          ) ?? NO_ASSIGNEES_FILTERING_KEYWORD,
+        assignees: assignees?.map((assignee) =>
+          assignee === null ? NO_ASSIGNEES_FILTERING_KEYWORD : assignee
+        ) ?? [NO_ASSIGNEES_FILTERING_KEYWORD],
       }
     : {};
 

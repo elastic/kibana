@@ -26,6 +26,7 @@ export interface RulesTypeUsage {
   new_terms: FeatureTypeUsage;
   elastic_total: FeatureTypeUsage;
   custom_total: FeatureTypeUsage;
+  esql: FeatureTypeUsage;
 }
 
 export interface RuleAdoption {

@@ -9,7 +9,6 @@
     "@kbn/dev-tools-plugin",
     "@kbn/es-ui-shared-plugin",
     "@kbn/home-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/share-plugin",
     "@kbn/usage-collection-plugin",
@@ -26,6 +25,13 @@
     "@kbn/web-worker-stub",
     "@kbn/core-elasticsearch-server",
     "@kbn/core-http-browser-mocks",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/code-editor",
+    "@kbn/monaco",
+    "@kbn/cloud-plugin",
+    "@kbn/core-notifications-browser",
+    "@kbn/react-kibana-context-render",
+    "@kbn/react-kibana-mount"
   ],
   "exclude": [
     "target/**/*",

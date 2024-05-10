@@ -110,6 +110,13 @@ const getEnabledAppsByCategory = (
       apps: getAppsForCategory(appCategories.DATA, filteredApps),
     },
     {
+      id: appCategories.ACCESS,
+      title: i18n.translate('management.landing.withCardNavigation.accessTitle', {
+        defaultMessage: 'Access',
+      }),
+      apps: getAppsForCategory(appCategories.ACCESS, filteredApps),
+    },
+    {
       id: appCategories.ALERTS,
       title: i18n.translate('management.landing.withCardNavigation.alertsTitle', {
         defaultMessage: 'Alerts and insights',

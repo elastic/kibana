@@ -2378,6 +2378,22 @@
             "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.MlEntityField.cardinality",
+            "type": "number",
+            "tags": [],
+            "label": "cardinality",
+            "description": [
+              "\nOptional cardinality of field"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3129,7 +3145,7 @@
           "\nUnion type for ML_JOB_FIELD_TYPES"
         ],
         "signature": [
-          "\"number\" | \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\" | \"unknown\""
+          "\"number\" | \"boolean\" | \"unknown\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\""
         ],
         "path": "x-pack/packages/ml/anomaly_utils/field_types.ts",
         "deprecated": false,

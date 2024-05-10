@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { SerializableRecord } from '@kbn/utility-types';
 import { functionWrapper } from '@kbn/presentation-util-plugin/test_helpers';
 import { getFunctionErrors } from '../../../i18n';
 import { csv } from './csv';
@@ -40,7 +39,7 @@ one,1
 two,2
 fourty two,42`,
         },
-        {} as ExecutionContext<Adapters, SerializableRecord>
+        {} as ExecutionContext<Adapters>
       )
     ).toEqual(expected);
   });
@@ -56,7 +55,7 @@ two\t2
 fourty two\t42`,
           delimiter: '\t',
         },
-        {} as ExecutionContext<Adapters, SerializableRecord>
+        {} as ExecutionContext<Adapters>
       )
     ).toEqual(expected);
 
@@ -70,7 +69,7 @@ two%SPLIT%2
 fourty two%SPLIT%42`,
           delimiter: '%SPLIT%',
         },
-        {} as ExecutionContext<Adapters, SerializableRecord>
+        {} as ExecutionContext<Adapters>
       )
     ).toEqual(expected);
   });
@@ -83,7 +82,7 @@ fourty two%SPLIT%42`,
           data: `name,number\rone,1\rtwo,2\rfourty two,42`,
           newline: '\r',
         },
-        {} as ExecutionContext<Adapters, SerializableRecord>
+        {} as ExecutionContext<Adapters>
       )
     ).toEqual(expected);
   });
@@ -107,7 +106,7 @@ fourty two%SPLIT%42`,
           data: `foo," bar  ", baz, " buz "
 1,2,3,4`,
         },
-        {} as ExecutionContext<Adapters, SerializableRecord>
+        {} as ExecutionContext<Adapters>
       )
     ).toEqual(expectedResult);
   });
@@ -135,7 +134,7 @@ fourty two%SPLIT%42`,
 1,"  best  ",3, "  ok"
 "  good", bad, better   , " worst    " `,
         },
-        {} as ExecutionContext<Adapters, SerializableRecord>
+        {} as ExecutionContext<Adapters>
       )
     ).toEqual(expectedResult);
   });
@@ -150,7 +149,7 @@ one|1
 two.2
 fourty two,42`,
         },
-        {} as ExecutionContext<Adapters, SerializableRecord>
+        {} as ExecutionContext<Adapters>
       );
     }).toThrow(new RegExp(errors.invalidInputCSV().message));
   });

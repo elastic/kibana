@@ -177,3 +177,10 @@ export const CoverageOverviewDashboardInformation = i18n.translate(
       "Your current coverage of MITRE ATT&CK\u00AE tactics and techniques, based on installed rules. Click a cell to view and enable a technique's rules. Rules must be mapped to the MITRE ATT&CK\u00AE framework to be displayed.",
   }
 );
+
+export const COVERAGE_OVERVIEW_FETCH_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.fetchErrorTitle',
+  {
+    defaultMessage: 'Failed to fetch coverage overview data',
+  }
+);

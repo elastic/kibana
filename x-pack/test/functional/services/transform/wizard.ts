@@ -1178,10 +1178,10 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async assertErrorToastsNotExist() {
-      const toastCount = await toasts.getToastCount();
+      const toastCount = await toasts.getCount();
       // Toast element index starts at 1, not 0
       for (let toastIdx = 1; toastIdx < toastCount + 1; toastIdx++) {
-        const toast = await toasts.getToastElement(toastIdx);
+        const toast = await toasts.getElementByIndex(toastIdx);
         const isErrorToast = await toast.elementHasClass('euiToast--danger');
         expect(isErrorToast).to.eql(false, `Expected toast message to be successful, got error.`);
       }

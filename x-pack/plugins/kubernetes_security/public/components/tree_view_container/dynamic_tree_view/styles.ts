@@ -7,75 +7,64 @@
 
 import { useMemo } from 'react';
 import { CSSObject } from '@emotion/react';
-import { transparentize } from '@elastic/eui';
 import { useEuiTheme } from '../../../hooks';
 
 export const useStyles = (depth: number) => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
-    const { size, colors } = euiTheme;
+    const { size, colors, border } = euiTheme;
 
-    const loadMoreButtonWrapper: CSSObject = {
+    const loadMoreButton: CSSObject = {
       position: 'relative',
       textAlign: 'center',
       width: `calc(100% + ${depth * 24}px)`,
       marginLeft: `-${depth * 24}px`,
-      '&:after': {
+      '&::after': {
         content: `''`,
         position: 'absolute',
         top: '50%',
         width: '100%',
-        border: `1px dashed ${colors.mediumShade}`,
+        border: `${border.width.thin} dashed ${colors.mediumShade}`,
         left: 0,
       },
+      '&:hover, &:focus': {
+        backgroundColor: 'transparent',
+      },
+      '.euiTreeView__nodeLabel': {
+        width: '100%',
+      },
     };
-    const loadMoreButton: CSSObject = {
+    const loadMoreBadge: CSSObject = {
       position: 'relative',
       cursor: 'pointer',
       zIndex: 2,
-    };
-    const loadMoreText: CSSObject = {
-      marginRight: size.s,
-    };
-    const loadMoreTextLeft: CSSObject = {
-      marginLeft: size.s,
-    };
-    const leafNodeButton: CSSObject = {
-      marginLeft: size.l,
-      width: `calc(100% - ${size.l})`,
-      paddingLeft: 0,
-    };
-    const labelIcon: CSSObject = {
-      marginRight: size.s,
-      marginLeft: size.s,
-    };
-
-    const treeViewWrapper = (expanded: boolean): CSSObject => ({
-      display: !expanded ? 'none' : 'inherit',
-      '.euiTreeView__node--selected > .euiTreeView__nodeInner': {
-        backgroundColor: transparentize(colors.darkestShade, 0.1),
+      '.euiBadge__content': {
+        gap: size.xs,
       },
-      '.euiTreeView__node--expanded': {
-        maxHeight: '100%',
+    };
+    const nonInteractiveItem: CSSObject = {
+      pointerEvents: 'none',
+      '&:hover, &:focus': {
+        backgroundColor: 'transparent',
       },
-      '.euiTreeView__nodeInner .euiToolTipAnchor': {
-        maxWidth: '100%',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        whiteSpace: 'nowrap',
-        wordWrap: 'normal',
+    };
+    const euiTreeViewWrapper: CSSObject = {
+      ul: {
+        marginLeft: '0 !important',
+        fontSize: 'inherit',
       },
-    });
+      // Override default EUI max-height - `DynamicTreeView` has its own scrolling container
+      '.euiTreeView__node': {
+        maxBlockSize: 'none',
+      },
+    };
 
     return {
       loadMoreButton,
-      loadMoreButtonWrapper,
-      loadMoreText,
-      loadMoreTextLeft,
-      leafNodeButton,
-      labelIcon,
-      treeViewWrapper,
+      loadMoreBadge,
+      nonInteractiveItem,
+      euiTreeViewWrapper,
     };
   }, [euiTheme, depth]);
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EcsVersion } from '@kbn/ecs';
+import { EcsVersion } from '@elastic/ecs';
 
 import {
   FIELD,

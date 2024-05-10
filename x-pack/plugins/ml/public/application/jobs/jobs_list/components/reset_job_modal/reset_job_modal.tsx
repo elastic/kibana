@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect, useCallback } from 'react';
+import type { FC } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiSpacer,
@@ -129,7 +130,7 @@ export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, r
             <EuiSpacer />
             <EuiSwitch
               label={i18n.translate('xpack.ml.jobsList.resetJobModal.deleteUserAnnotations', {
-                defaultMessage: 'Delete annotations.',
+                defaultMessage: 'Delete annotations',
               })}
               checked={deleteUserAnnotations}
               onChange={(e) => setDeleteUserAnnotations(e.target.checked)}

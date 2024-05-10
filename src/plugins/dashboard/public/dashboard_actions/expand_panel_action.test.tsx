@@ -6,92 +6,55 @@
  * Side Public License, v 1.
  */
 
-import { ExpandPanelAction } from './expand_panel_action';
-import { buildMockDashboard, getSampleDashboardPanel } from '../mocks';
-import { DashboardContainer } from '../dashboard_container/embeddable/dashboard_container';
+import { BehaviorSubject } from 'rxjs';
+import { ExpandPanelActionApi, ExpandPanelAction } from './expand_panel_action';
 
-import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
-import {
-  ContactCardEmbeddable,
-  ContactCardEmbeddableFactory,
-  ContactCardEmbeddableInput,
-  ContactCardEmbeddableOutput,
-  CONTACT_CARD_EMBEDDABLE,
-} from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
+describe('Expand panel action', () => {
+  let action: ExpandPanelAction;
+  let context: { embeddable: ExpandPanelActionApi };
 
-import { pluginServices } from '../services/plugin_services';
-
-let container: DashboardContainer;
-let embeddable: ContactCardEmbeddable;
-
-const mockEmbeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
-pluginServices.getServices().embeddable.getEmbeddableFactory = jest
-  .fn()
-  .mockReturnValue(mockEmbeddableFactory);
-
-beforeEach(async () => {
-  container = buildMockDashboard({
-    overrides: {
-      panels: {
-        '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
-          explicitInput: { firstName: 'Sam', id: '123' },
-          type: CONTACT_CARD_EMBEDDABLE,
-        }),
+  beforeEach(() => {
+    action = new ExpandPanelAction();
+    context = {
+      embeddable: {
+        uuid: 'superId',
+        parentApi: {
+          expandPanel: jest.fn(),
+          expandedPanelId: new BehaviorSubject<string | undefined>(undefined),
+        },
       },
-    },
+    };
   });
 
-  const contactCardEmbeddable = await container.addNewEmbeddable<
-    ContactCardEmbeddableInput,
-    ContactCardEmbeddableOutput,
-    ContactCardEmbeddable
-  >(CONTACT_CARD_EMBEDDABLE, {
-    firstName: 'Kibana',
+  it('is compatible when api meets all conditions', async () => {
+    expect(await action.isCompatible(context)).toBe(true);
   });
 
-  if (isErrorEmbeddable(contactCardEmbeddable)) {
-    throw new Error('Failed to create embeddable');
-  } else {
-    embeddable = contactCardEmbeddable;
-  }
-});
+  it('is incompatible when context lacks necessary functions', async () => {
+    const emptyContext = {
+      embeddable: {},
+    };
+    expect(await action.isCompatible(emptyContext)).toBe(false);
+  });
 
-test('Sets the embeddable expanded panel id on the parent', async () => {
-  const expandPanelAction = new ExpandPanelAction();
+  it('returns the correct icon based on expanded panel id', async () => {
+    expect(await action.getIconType(context)).toBe('expand');
+    context.embeddable.parentApi.expandedPanelId = new BehaviorSubject<string | undefined>(
+      'superPanelId'
+    );
+    expect(await action.getIconType(context)).toBe('minimize');
+  });
 
-  expect(container.getExpandedPanelId()).toBeUndefined();
+  it('returns the correct display name based on expanded panel id', async () => {
+    expect(await action.getDisplayName(context)).toBe('Maximize');
+    context.embeddable.parentApi.expandedPanelId = new BehaviorSubject<string | undefined>(
+      'superPanelId'
+    );
+    expect(await action.getDisplayName(context)).toBe('Minimize');
+  });
 
-  expandPanelAction.execute({ embeddable });
-
-  expect(container.getExpandedPanelId()).toBe(embeddable.id);
-});
-
-test('Is not compatible when embeddable is not in a dashboard container', async () => {
-  const action = new ExpandPanelAction();
-  expect(
-    await action.isCompatible({
-      embeddable: new ContactCardEmbeddable(
-        { firstName: 'sue', id: '123' },
-        { execAction: (() => null) as any }
-      ),
-    })
-  ).toBe(false);
-});
-
-test('Execute throws an error when called with an embeddable not in a parent', async () => {
-  const action = new ExpandPanelAction();
-  async function check() {
-    await action.execute({ embeddable: container });
-  }
-  await expect(check()).rejects.toThrow(Error);
-});
-
-test('Returns title', async () => {
-  const action = new ExpandPanelAction();
-  expect(action.getDisplayName({ embeddable })).toBeDefined();
-});
-
-test('Returns an icon', async () => {
-  const action = new ExpandPanelAction();
-  expect(action.getIconType({ embeddable })).toBeDefined();
+  it('calls the parent expandPanel method on execute', async () => {
+    action.execute(context);
+    expect(context.embeddable.parentApi.expandPanel).toHaveBeenCalled();
+  });
 });

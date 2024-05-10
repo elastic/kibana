@@ -1,0 +1,12 @@
+SQRT
+
+Syntax
+Parameters
+number
+Numeric expression. If null, the function returns null.
+DescriptionReturns the square root of a number. The input can be any numeric value, the return value is always a double. Square roots of negative numbers and infinites are null.Supported types
+Example
+```esql
+ROW d = 100.0
+| EVAL s = SQRT(d)
+```

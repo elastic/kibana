@@ -73,7 +73,7 @@ import {
   Timeslice,
 } from '../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../common/constants';
-import { isVectorLayer, IVectorLayer } from '../classes/layers/vector_layer';
+import { hasVectorLayerMethod } from '../classes/layers/vector_layer';
 import { SET_DRAW_MODE, pushDeletedFeatureId, clearDeletedFeatureIds } from './ui_actions';
 import { expandToTileBoundaries, getTilesForExtent } from '../classes/util/geo_tile_utils';
 import { getToasts } from '../kibana_services';
@@ -439,14 +439,14 @@ export function addNewFeatureToIndex(geometries: Array<Geometry | Position[]>) {
       return;
     }
     const layer = getLayerById(layerId, getState());
-    if (!layer || !isVectorLayer(layer)) {
+    if (!layer || !hasVectorLayerMethod(layer, 'addFeature')) {
       return;
     }
 
     try {
       dispatch(updateEditShape(DRAW_SHAPE.WAIT));
       await asyncForEach(geometries, async (geometry) => {
-        await (layer as IVectorLayer).addFeature(geometry);
+        await layer.addFeature(geometry);
       });
       await dispatch(syncDataForLayerDueToDrawing(layer));
     } catch (e) {
@@ -477,13 +477,13 @@ export function deleteFeatureFromIndex(featureId: string) {
       return;
     }
     const layer = getLayerById(layerId, getState());
-    if (!layer || !isVectorLayer(layer)) {
+    if (!layer || !hasVectorLayerMethod(layer, 'deleteFeature')) {
       return;
     }
 
     try {
       dispatch(updateEditShape(DRAW_SHAPE.WAIT));
-      await (layer as IVectorLayer).deleteFeature(featureId);
+      await layer.deleteFeature(featureId);
       dispatch(pushDeletedFeatureId(featureId));
       await dispatch(syncDataForLayerDueToDrawing(layer));
     } catch (e) {

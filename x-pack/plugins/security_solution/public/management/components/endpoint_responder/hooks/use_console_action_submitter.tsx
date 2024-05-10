@@ -22,11 +22,12 @@ import type {
   Immutable,
   ResponseActionApiResponse,
   EndpointActionDataParameterTypes,
+  EndpointActionResponseDataOutput,
 } from '../../../../../common/endpoint/types';
 import type { CommandExecutionComponentProps } from '../../console';
 
 export interface ConsoleActionSubmitter<
-  TActionOutputContent extends object = object,
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
 > {
   /**
@@ -34,14 +35,14 @@ export interface ConsoleActionSubmitter<
    * including pending, error conditions and generic success messages.
    */
   result: JSX.Element;
-  actionDetails: Immutable<ActionDetails<TActionOutputContent, TParameters>> | undefined;
+  actionDetails: Immutable<ActionDetails<TOutputContent, TParameters>> | undefined;
 }
 
 /**
  * Command store state for response action api state.
  */
 export interface CommandResponseActionApiState<
-  TActionOutputContent extends object = object,
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
 > {
   actionApiState?: {
@@ -50,20 +51,20 @@ export interface CommandResponseActionApiState<
       actionId: string | undefined;
       error: IHttpFetchError | undefined;
     };
-    actionDetails: ActionDetails<TActionOutputContent, TParameters> | undefined;
+    actionDetails: ActionDetails<TOutputContent, TParameters> | undefined;
     actionDetailsError: IHttpFetchError | undefined;
   };
 }
 
 export interface UseConsoleActionSubmitterOptions<
   TReqBody extends BaseActionRequestBody = BaseActionRequestBody,
-  TActionOutputContent extends object = object,
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
 > extends Pick<
     CommandExecutionComponentProps<
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       any,
-      CommandResponseActionApiState<TActionOutputContent, TParameters>
+      CommandResponseActionApiState<TOutputContent, TParameters>
     >,
     'ResultComponent' | 'setStore' | 'store' | 'status' | 'setStatus'
   > {
@@ -99,7 +100,7 @@ export interface UseConsoleActionSubmitterOptions<
  */
 export const useConsoleActionSubmitter = <
   TReqBody extends BaseActionRequestBody = BaseActionRequestBody,
-  TActionOutputContent extends object = object,
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
 >({
   actionCreator,
@@ -112,18 +113,17 @@ export const useConsoleActionSubmitter = <
   dataTestSubj,
   pendingMessage,
   successMessage,
-}: UseConsoleActionSubmitterOptions<
-  TReqBody,
-  TActionOutputContent,
+}: UseConsoleActionSubmitterOptions<TReqBody, TOutputContent, TParameters>): ConsoleActionSubmitter<
+  TOutputContent,
   TParameters
->): ConsoleActionSubmitter<TActionOutputContent, TParameters> => {
+> => {
   const isMounted = useIsMounted();
   const getTestId = useTestIdGenerator(dataTestSubj);
   const isPending = status === 'pending';
 
   const currentActionState = useMemo<
     Immutable<
-      Required<CommandResponseActionApiState<TActionOutputContent, TParameters>>['actionApiState']
+      Required<CommandResponseActionApiState<TOutputContent, TParameters>>['actionApiState']
     >
   >(
     () =>
@@ -147,7 +147,7 @@ export const useConsoleActionSubmitter = <
   } = currentActionState.request;
 
   const { data: apiActionDetailsResponse, error: apiActionDetailsError } = useGetActionDetails<
-    TActionOutputContent,
+    TOutputContent,
     TParameters
   >(actionId ?? '-', {
     enabled: Boolean(actionId) && isPending,
@@ -158,11 +158,11 @@ export const useConsoleActionSubmitter = <
   useEffect(() => {
     if (!actionRequestSent && actionRequestBody && isMounted()) {
       const updatedRequestState: Required<
-        CommandResponseActionApiState<TActionOutputContent, TParameters>
+        CommandResponseActionApiState<TOutputContent, TParameters>
       >['actionApiState']['request'] = {
         ...(
           currentActionState as Required<
-            CommandResponseActionApiState<TActionOutputContent, TParameters>
+            CommandResponseActionApiState<TOutputContent, TParameters>
           >['actionApiState']
         ).request,
         sent: true,

@@ -7,7 +7,7 @@
 
 import { createContext } from 'react';
 
-import { GetMlSharedImportsReturnType } from '../../shared_imports';
+import type { GetMlSharedImportsReturnType } from '../../shared_imports';
 
 // This code is a workaround to provide dependencies that are
 // loaded dynamically during runtime.

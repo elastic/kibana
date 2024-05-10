@@ -17,11 +17,11 @@ import { getAlertId, getContainedAlertContext } from './alert_context';
 export function getEntitiesAndGenerateAlerts(
   prevLocationMap: Map<string, GeoContainmentAlertInstanceState[]>,
   currLocationMap: Map<string, GeoContainmentAlertInstanceState[]>,
-  alertFactory: RuleExecutorServices<
+  alertsClient: RuleExecutorServices<
     GeoContainmentAlertInstanceState,
     GeoContainmentAlertInstanceContext,
     typeof ActionGroupId
-  >['alertFactory'],
+  >['alertsClient'],
   shapesIdsNamesMap: Record<string, unknown>,
   windowEnd: Date
 ): {
@@ -43,9 +43,11 @@ export function getEntitiesAndGenerateAlerts(
           shapesIdsNamesMap,
           windowEnd,
         });
-        alertFactory
-          .create(getAlertId(entityName, context.containingBoundaryName))
-          .scheduleActions(ActionGroupId, context);
+        alertsClient!.report({
+          id: getAlertId(entityName, context.containingBoundaryName),
+          actionGroup: ActionGroupId,
+          context,
+        });
       }
     });
 

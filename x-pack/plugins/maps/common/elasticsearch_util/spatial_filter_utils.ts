@@ -229,7 +229,6 @@ export function createDistanceFilterWithMeta({
 
 function extractGeometryFromFilter(geoFieldName: string, filter: GeoFilter): Geometry | undefined {
   if (filter.geo_distance && filter.geo_distance[geoFieldName]) {
-    // @ts-expect-error QueryDslGeoDistanceQuery incorrectly types distance as optional
     const distanceSplit = filter.geo_distance.distance.split('km');
     const distance = parseFloat(distanceSplit[0]);
     const circleFeature = turfCircle(filter.geo_distance[geoFieldName], distance);

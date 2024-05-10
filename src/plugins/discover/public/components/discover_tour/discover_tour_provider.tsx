@@ -295,7 +295,7 @@ export const DiscoverTourStepFooterAction: React.FC<{
             onClick={onFinishTour}
             data-test-subj="discoverTourButtonSkip"
           >
-            {EuiI18n({ token: 'core.euiTourStep.skipTour', default: 'Skip tour' })}
+            {EuiI18n({ token: 'core.euiTourFooter.skipTour', default: 'Skip tour' })}
           </EuiButtonEmpty>
         </EuiFlexItem>
       )}
@@ -306,7 +306,7 @@ export const DiscoverTourStepFooterAction: React.FC<{
             onClick={onFinishTour}
             data-test-subj="discoverTourButtonEnd"
           >
-            {EuiI18n({ token: 'core.euiTourStep.endTour', default: 'End tour' })}
+            {EuiI18n({ token: 'core.euiTourFooter.endTour', default: 'End tour' })}
           </EuiButton>
         ) : (
           <EuiButton
@@ -314,7 +314,7 @@ export const DiscoverTourStepFooterAction: React.FC<{
             onClick={onNextTourStep}
             data-test-subj="discoverTourButtonNext"
           >
-            {EuiI18n({ token: 'core.euiTourStep.nextStep', default: 'Next' })}
+            {EuiI18n({ token: 'core.euiTourFooter.nextStep', default: 'Next' })}
           </EuiButton>
         )}
       </EuiFlexItem>

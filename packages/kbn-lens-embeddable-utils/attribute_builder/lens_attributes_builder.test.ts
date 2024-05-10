@@ -113,14 +113,12 @@ describe('lens_attributes_builder', () => {
         formulaAPI,
       });
       const builder = new LensAttributesBuilder({ visualization: metriChart });
+
       const {
-        state: {
-          datasourceStates: {
-            formBased: { layers },
-          },
-          visualization,
-        },
+        state: { datasourceStates: datasourceStates, visualization },
       } = builder.build();
+
+      const layers = datasourceStates.formBased?.layers;
 
       expect(layers).toEqual({
         layer: {
@@ -156,13 +154,10 @@ describe('lens_attributes_builder', () => {
       });
       const builder = new LensAttributesBuilder({ visualization: metriChart });
       const {
-        state: {
-          datasourceStates: {
-            formBased: { layers },
-          },
-          visualization,
-        },
+        state: { datasourceStates: datasourceStates, visualization },
       } = builder.build();
+
+      const layers = datasourceStates.formBased?.layers;
 
       expect(layers).toEqual({
         layer: {
@@ -215,13 +210,10 @@ describe('lens_attributes_builder', () => {
       });
       const builder = new LensAttributesBuilder({ visualization: xyChart });
       const {
-        state: {
-          datasourceStates: {
-            formBased: { layers },
-          },
-          visualization,
-        },
+        state: { datasourceStates: datasourceStates, visualization },
       } = builder.build();
+
+      const layers = datasourceStates.formBased?.layers;
 
       expect(layers).toEqual({
         layer_0: {
@@ -272,13 +264,10 @@ describe('lens_attributes_builder', () => {
       });
       const builder = new LensAttributesBuilder({ visualization: xyChart });
       const {
-        state: {
-          datasourceStates: {
-            formBased: { layers },
-          },
-          visualization,
-        },
+        state: { datasourceStates: datasourceStates, visualization },
       } = builder.build();
+
+      const layers = datasourceStates.formBased?.layers;
 
       expect(layers).toEqual({
         layer_0: {
@@ -340,13 +329,10 @@ describe('lens_attributes_builder', () => {
       });
       const builder = new LensAttributesBuilder({ visualization: xyChart });
       const {
-        state: {
-          datasourceStates: {
-            formBased: { layers },
-          },
-          visualization,
-        },
+        state: { datasourceStates: datasourceStates, visualization },
       } = builder.build();
+
+      const layers = datasourceStates.formBased?.layers;
 
       expect(layers).toEqual({
         layer_0: {

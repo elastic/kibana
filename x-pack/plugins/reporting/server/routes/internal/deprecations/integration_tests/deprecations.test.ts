@@ -8,10 +8,10 @@
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import supertest from 'supertest';
-import { INTERNAL_ROUTES } from '../../../../../common/constants';
 import {
   createMockPluginSetup,
   createMockPluginStart,

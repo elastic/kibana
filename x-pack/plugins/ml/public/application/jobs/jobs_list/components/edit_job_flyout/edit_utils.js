@@ -8,7 +8,6 @@
 import { difference } from 'lodash';
 import { getNewJobLimits } from '../../../../services/ml_server_info';
 import { processCreatedBy } from '../../../../../../common/util/job_utils';
-import { getDataViews } from '../../../../util/dependency_cache';
 import { ml } from '../../../../services/ml_api_service';
 
 export function saveJob(job, newJobData, finish) {
@@ -72,11 +71,6 @@ function saveDatafeed(datafeedConfig, job) {
   });
 }
 
-export async function loadDataViewListItems() {
-  const dataViewsService = getDataViews();
-  return (await dataViewsService.getIdsWithTitle()).sort((a, b) => a.title.localeCompare(b.title));
-}
-
 function extractDescription(job, newJobData) {
   const description = newJobData.description;
   if (newJobData.description !== job.description) {
@@ -110,6 +104,14 @@ function extractMML(job, newJobData) {
     if (mml !== job.analysis_limits.model_memory_limit) {
       mmlData.analysis_limits = {
         model_memory_limit: mml,
+        // work around for issue in es where categorization_examples_limit will be reset to the default value
+        // if it is not included in the update request
+        // https://github.com/elastic/elasticsearch/issues/108068
+        ...(job.analysis_limits.categorization_examples_limit !== undefined
+          ? {
+              categorization_examples_limit: job.analysis_limits.categorization_examples_limit,
+            }
+          : {}),
       };
     }
   }

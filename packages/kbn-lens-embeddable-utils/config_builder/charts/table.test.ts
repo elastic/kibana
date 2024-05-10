@@ -50,7 +50,7 @@ function mockDataViewsService() {
   } as unknown as Pick<DataViewsContract, 'get' | 'create'>;
 }
 
-test('generates metric chart config', async () => {
+test('generates table config', async () => {
   const result = await buildTable(
     {
       chartType: 'table',
@@ -80,9 +80,6 @@ test('generates metric chart config', async () => {
           "test": Object {},
         },
         "datasourceStates": Object {
-          "formBased": Object {
-            "layers": Object {},
-          },
           "textBased": Object {
             "layers": Object {
               "layer_0": Object {

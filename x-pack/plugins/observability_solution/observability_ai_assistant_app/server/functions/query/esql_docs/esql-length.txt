@@ -1,0 +1,13 @@
+LENGTH
+
+Syntax
+Parameters
+string
+String expression. If null, the function returns null.
+DescriptionReturns the character length of a string.Supported types
+Example
+```esql
+FROM employees
+| KEEP first_name, last_name
+| EVAL fn_length = LENGTH(first_name)
+```

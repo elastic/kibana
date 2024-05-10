@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { take } from 'rxjs/operators';
+import { take } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import { NewsfeedPublicPlugin } from './plugin';
 import { NewsfeedApiEndpoint } from './lib/api';

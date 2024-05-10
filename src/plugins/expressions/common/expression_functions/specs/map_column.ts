@@ -7,7 +7,7 @@
  */
 
 import { Observable, combineLatest, defer } from 'rxjs';
-import { defaultIfEmpty, map } from 'rxjs/operators';
+import { defaultIfEmpty, map } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from '../types';
 import { Datatable, DatatableColumnType, getType } from '../../expression_types';

@@ -65,7 +65,9 @@ export type {
   Value,
 } from './setting_type';
 
-export type { CategorizedFields } from './category';
+export type { CategorizedFields, CategoryCounts } from './category';
+export type { SettingsTabs } from './tab';
+export type { SettingsCapabilities } from './capabilities';
 
 /**
  * A React `ref` that indicates an input can be reset using an

@@ -12,12 +12,12 @@ import {
   ResizableLayoutMode,
 } from '@kbn/resizable-layout';
 import { findTestSubject } from '@kbn/test-jest-helpers';
-import type { UnifiedFieldListSidebarContainerApi } from '@kbn/unified-field-list';
 import { mount } from 'enzyme';
 import { isEqual as mockIsEqual } from 'lodash';
 import React from 'react';
-import { of } from 'rxjs';
 import { DiscoverResizableLayout, SIDEBAR_WIDTH_KEY } from './discover_resizable_layout';
+import { BehaviorSubject } from 'rxjs';
+import { SidebarToggleState } from '../../../types';
 
 const mockSidebarKey = SIDEBAR_WIDTH_KEY;
 let mockSidebarWidth: number | undefined;
@@ -56,7 +56,12 @@ describe('DiscoverResizableLayout', () => {
     const wrapper = mount(
       <DiscoverResizableLayout
         container={null}
-        unifiedFieldListSidebarContainerApi={null}
+        sidebarToggleState$={
+          new BehaviorSubject<SidebarToggleState>({
+            isCollapsed: true,
+            toggle: () => {},
+          })
+        }
         sidebarPanel={<div data-test-subj="sidebarPanel" />}
         mainPanel={<div data-test-subj="mainPanel" />}
       />
@@ -69,7 +74,12 @@ describe('DiscoverResizableLayout', () => {
     const wrapper = mount(
       <DiscoverResizableLayout
         container={null}
-        unifiedFieldListSidebarContainerApi={null}
+        sidebarToggleState$={
+          new BehaviorSubject<SidebarToggleState>({
+            isCollapsed: true,
+            toggle: () => {},
+          })
+        }
         sidebarPanel={<div data-test-subj="sidebarPanel" />}
         mainPanel={<div data-test-subj="mainPanel" />}
       />
@@ -82,7 +92,12 @@ describe('DiscoverResizableLayout', () => {
     const wrapper = mount(
       <DiscoverResizableLayout
         container={null}
-        unifiedFieldListSidebarContainerApi={null}
+        sidebarToggleState$={
+          new BehaviorSubject<SidebarToggleState>({
+            isCollapsed: true,
+            toggle: () => {},
+          })
+        }
         sidebarPanel={<div data-test-subj="sidebarPanel" />}
         mainPanel={<div data-test-subj="mainPanel" />}
       />
@@ -95,8 +110,11 @@ describe('DiscoverResizableLayout', () => {
     const wrapper = mount(
       <DiscoverResizableLayout
         container={null}
-        unifiedFieldListSidebarContainerApi={
-          { isSidebarCollapsed$: of(false) } as UnifiedFieldListSidebarContainerApi
+        sidebarToggleState$={
+          new BehaviorSubject<SidebarToggleState>({
+            isCollapsed: false,
+            toggle: () => {},
+          })
         }
         sidebarPanel={<div data-test-subj="sidebarPanel" />}
         mainPanel={<div data-test-subj="mainPanel" />}
@@ -110,8 +128,11 @@ describe('DiscoverResizableLayout', () => {
     const wrapper = mount(
       <DiscoverResizableLayout
         container={null}
-        unifiedFieldListSidebarContainerApi={
-          { isSidebarCollapsed$: of(false) } as UnifiedFieldListSidebarContainerApi
+        sidebarToggleState$={
+          new BehaviorSubject<SidebarToggleState>({
+            isCollapsed: false,
+            toggle: () => {},
+          })
         }
         sidebarPanel={<div data-test-subj="sidebarPanel" />}
         mainPanel={<div data-test-subj="mainPanel" />}
@@ -125,8 +146,11 @@ describe('DiscoverResizableLayout', () => {
     const wrapper = mount(
       <DiscoverResizableLayout
         container={null}
-        unifiedFieldListSidebarContainerApi={
-          { isSidebarCollapsed$: of(true) } as UnifiedFieldListSidebarContainerApi
+        sidebarToggleState$={
+          new BehaviorSubject<SidebarToggleState>({
+            isCollapsed: true,
+            toggle: () => {},
+          })
         }
         sidebarPanel={<div data-test-subj="sidebarPanel" />}
         mainPanel={<div data-test-subj="mainPanel" />}
@@ -140,8 +164,11 @@ describe('DiscoverResizableLayout', () => {
     const wrapper = mount(
       <DiscoverResizableLayout
         container={null}
-        unifiedFieldListSidebarContainerApi={
-          { isSidebarCollapsed$: of(false) } as UnifiedFieldListSidebarContainerApi
+        sidebarToggleState$={
+          new BehaviorSubject<SidebarToggleState>({
+            isCollapsed: false,
+            toggle: () => {},
+          })
         }
         sidebarPanel={<div data-test-subj="sidebarPanel" />}
         mainPanel={<div data-test-subj="mainPanel" />}
@@ -157,8 +184,11 @@ describe('DiscoverResizableLayout', () => {
     const wrapper = mount(
       <DiscoverResizableLayout
         container={null}
-        unifiedFieldListSidebarContainerApi={
-          { isSidebarCollapsed$: of(false) } as UnifiedFieldListSidebarContainerApi
+        sidebarToggleState$={
+          new BehaviorSubject<SidebarToggleState>({
+            isCollapsed: false,
+            toggle: () => {},
+          })
         }
         sidebarPanel={<div data-test-subj="sidebarPanel" />}
         mainPanel={<div data-test-subj="mainPanel" />}

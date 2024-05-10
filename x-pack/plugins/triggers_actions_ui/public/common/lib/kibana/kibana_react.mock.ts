@@ -15,7 +15,8 @@ import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks'
 import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { TriggersAndActionsUiServices } from '../../../application/app';
+import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
+import { TriggersAndActionsUiServices } from '../../../application/rules_app';
 import {
   RuleTypeRegistryContract,
   ActionTypeRegistryContract,
@@ -42,6 +43,7 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
       getNavigation: jest.fn(async (id) =>
         id === 'alert-with-nav' ? { path: '/alert' } : undefined
       ),
+      getMaxAlertsPerRun: jest.fn(),
     },
     history: scopedHistoryMock.create(),
     setBreadcrumbs: jest.fn(),
@@ -65,6 +67,7 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
       getActions: jest.fn(),
       list: jest.fn(),
       update: jest.fn(),
+      getAlertConfigIdPerRuleTypes: jest.fn(),
     } as AlertsTableConfigurationRegistryContract,
     charts: chartPluginMock.createStartContract(),
     isCloud: false,
@@ -77,6 +80,7 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
     expressions: expressionsPluginMock.createStartContract(),
     isServerless: false,
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
+    lens: lensPluginMock.createStartContract(),
   } as TriggersAndActionsUiServices;
 };
 

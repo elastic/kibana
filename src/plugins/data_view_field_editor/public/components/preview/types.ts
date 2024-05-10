@@ -25,7 +25,7 @@ export interface EsDocument {
     [key: string]: unknown;
   };
   fields: {
-    [key: string]: unknown;
+    [key: string]: unknown[];
   };
   [key: string]: unknown;
 }

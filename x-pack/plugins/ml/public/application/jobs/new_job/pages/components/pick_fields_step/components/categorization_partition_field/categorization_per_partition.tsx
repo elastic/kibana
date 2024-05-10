@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import React, { FC, useContext, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { JobCreatorContext } from '../../../job_creator_context';
-import {
+import type {
   AdvancedJobCreator,
   CategorizationJobCreator,
-  isCategorizationJobCreator,
 } from '../../../../../common/job_creator';
+import { isCategorizationJobCreator } from '../../../../../common/job_creator';
 
 import { Description } from './description';
 

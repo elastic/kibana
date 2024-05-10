@@ -11,7 +11,7 @@ export interface MockIModel {
   id: string;
   value: string;
   changeContentListeners: Array<() => void>;
-  getModeId: () => string;
+  getLanguageId: () => string;
   setValue: (value: string) => void;
   getValue: () => string;
   onDidChangeContent: (handler: () => void) => void;

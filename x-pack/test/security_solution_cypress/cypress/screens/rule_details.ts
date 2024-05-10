@@ -17,6 +17,8 @@ export const ABOUT_DETAILS =
 
 export const ADDITIONAL_LOOK_BACK_DETAILS = 'Additional look-back time';
 
+export const INTERVAL_ABBR_VALUE = '[data-test-subj="interval-abbr-value"]';
+
 export const ALERTS_TAB = '[data-test-subj="navigation-alerts"]';
 
 export const ANOMALY_SCORE_DETAILS = 'Anomaly score';
@@ -53,6 +55,8 @@ export const EXCEPTIONS_ITEM_CONTAINER = '[data-test-subj="exceptionsContainer"]
 export const FALSE_POSITIVES_DETAILS = 'False positive examples';
 
 export const INDEX_PATTERNS_DETAILS = 'Index patterns';
+
+export const INVESTIGATION_FIELDS_DETAILS = 'Custom highlighted fields';
 
 export const ENDPOINT_EXCEPTIONS_TAB = 'a[data-test-subj="navigation-endpoint_exceptions"]';
 
@@ -148,5 +152,14 @@ export const THREAT_TECHNIQUE = '[data-test-subj="threatTechniqueLink"]';
 
 export const THREAT_SUBTECHNIQUE = '[data-test-subj="threatSubtechniqueLink"]';
 
+export const ALERT_SUPPRESSION_INSUFFICIENT_LICENSING_ICON =
+  '[data-test-subj="alertSuppressionInsufficientLicensingIcon"]';
+
 export const HIGHLIGHTED_ROWS_IN_TABLE =
   '[data-test-subj="euiDataGridBody"] .alertsTableHighlightedRow';
+
+export const MAX_SIGNALS_DETAILS = '[data-test-subj="maxSignalsPropertyValue"]';
+
+export const DESCRIPTION_SETUP_GUIDE_BUTTON = '[data-test-subj="stepAboutDetailsToggle-setup"]';
+
+export const DESCRIPTION_SETUP_GUIDE_CONTENT = '[data-test-subj="stepAboutDetailsSetupContent"]';

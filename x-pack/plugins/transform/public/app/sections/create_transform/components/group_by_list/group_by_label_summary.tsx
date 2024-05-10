@@ -9,7 +9,8 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiTextColor } from '@elastic/eui';
 
-import { isGroupByDateHistogram, isGroupByHistogram, PivotGroupByConfig } from '../../../../common';
+import type { PivotGroupByConfig } from '../../../../common';
+import { isGroupByDateHistogram, isGroupByHistogram } from '../../../../common';
 
 interface Props {
   item: PivotGroupByConfig;

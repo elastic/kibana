@@ -8,11 +8,11 @@
 
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import { CoreSetup, CoreStart } from '@kbn/core/public';
-import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
-import { IEsSearchRequest } from '../../../common/search';
+import { coreMock } from '@kbn/core/public/mocks';
+import { IEsSearchRequest } from '@kbn/search-types';
 import { SearchInterceptor } from './search_interceptor';
 import { AbortError } from '@kbn/kibana-utils-plugin/public';
-import { PainlessError, EsError, type IEsError } from '@kbn/search-errors';
+import { EsError, type IEsError } from '@kbn/search-errors';
 import { ISessionService, SearchSessionState } from '..';
 import { bfetchPluginMock } from '@kbn/bfetch-plugin/public/mocks';
 import { BfetchPublicSetup } from '@kbn/bfetch-plugin/public';
@@ -44,7 +44,6 @@ import { SearchSessionIncompleteWarning } from './search_session_incomplete_warn
 import { getMockSearchConfig } from '../../../config.mock';
 
 let searchInterceptor: SearchInterceptor;
-let mockCoreSetup: MockedKeys<CoreSetup>;
 let bfetchSetup: jest.Mocked<BfetchPublicSetup>;
 let fetchMock: jest.Mock<any>;
 
@@ -87,6 +86,7 @@ function mockFetchImplementation(responses: any[]) {
 }
 
 describe('SearchInterceptor', () => {
+  let mockCoreSetup: MockedKeys<CoreSetup>;
   let mockCoreStart: MockedKeys<CoreStart>;
   let sessionService: jest.Mocked<ISessionService>;
   let sessionState$: BehaviorSubject<SearchSessionState>;
@@ -139,7 +139,6 @@ describe('SearchInterceptor', () => {
       http: mockCoreSetup.http,
       executionContext: mockCoreSetup.executionContext,
       session: sessionService,
-      theme: themeServiceMock.createSetupContract(),
       searchConfig: getMockSearchConfig({}),
     });
   });
@@ -157,9 +156,9 @@ describe('SearchInterceptor', () => {
       expect(mockCoreSetup.notifications.toasts.addError).not.toBeCalled();
     });
 
-    test('Renders a PainlessError', async () => {
+    test('Renders a EsError', async () => {
       searchInterceptor.showError(
-        new PainlessError(
+        new EsError(
           {
             statusCode: 400,
             message: 'search_phase_execution_exception',
@@ -167,6 +166,7 @@ describe('SearchInterceptor', () => {
               error: searchPhaseException.error,
             },
           },
+          'search_phase_execution_exception',
           () => {}
         )
       );
@@ -357,8 +357,6 @@ describe('SearchInterceptor', () => {
 
       await timeTravel(1000);
 
-      expect(error).toHaveBeenCalled();
-      expect(error.mock.calls[0][0]).toBeInstanceOf(SearchTimeoutError);
       expect(fetchMock).toHaveBeenCalled();
       expect(mockCoreSetup.http.delete).not.toHaveBeenCalled();
     });
@@ -399,13 +397,110 @@ describe('SearchInterceptor', () => {
       // Long enough to reach the timeout but not long enough to reach the next response
       await timeTravel(1000);
 
+      // Expect 3 calls to fetch - the two polls and a final request for the results before deleting
+      expect(fetchMock).toHaveBeenCalledTimes(3);
+      expect(mockCoreSetup.http.delete).toHaveBeenCalledTimes(1);
+    });
+
+    test('should return the last response on async timeout', async () => {
+      const responses = [
+        {
+          time: 10,
+          value: {
+            isPartial: true,
+            isRunning: true,
+            rawResponse: {},
+            id: 1,
+          },
+        },
+        {
+          time: 2000,
+          value: {
+            isPartial: false,
+            isRunning: false,
+            rawResponse: {},
+            id: 1,
+          },
+        },
+      ];
+      mockFetchImplementation(responses);
+
+      const response = searchInterceptor.search({}, { pollInterval: 0 });
+      response.subscribe({ next, error });
+
+      await timeTravel(10);
+
+      expect(next).toHaveBeenCalled();
+      expect(error).not.toHaveBeenCalled();
+      expect(fetchMock).toHaveBeenCalled();
+      expect(mockCoreSetup.http.delete).not.toHaveBeenCalled();
+
+      // Long enough to reach the timeout but not long enough to reach the next response
+      await timeTravel(1000);
+
+      expect(next).toHaveBeenCalledTimes(2);
+      expect(next.mock.calls[1]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "id": 1,
+            "isPartial": true,
+            "isRunning": false,
+            "meta": Object {
+              "size": 10,
+            },
+            "rawResponse": Object {
+              "timed_out": true,
+            },
+          },
+        ]
+      `);
+    });
+
+    test('should DELETE a running async search on async timeout on error from fetch', async () => {
+      const responses = [
+        {
+          time: 10,
+          value: {
+            isPartial: true,
+            isRunning: true,
+            rawResponse: {},
+            id: 1,
+          },
+        },
+        {
+          time: 10,
+          value: {
+            statusCode: 500,
+            message: 'oh no',
+            id: 1,
+          },
+          isError: true,
+        },
+      ];
+      mockFetchImplementation(responses);
+
+      const response = searchInterceptor.search({}, { pollInterval: 0 });
+      response.subscribe({ next, error });
+
+      await timeTravel(10);
+
+      expect(next).toHaveBeenCalled();
+      expect(error).not.toHaveBeenCalled();
+      expect(fetchMock).toHaveBeenCalled();
+      expect(mockCoreSetup.http.delete).not.toHaveBeenCalled();
+
+      // Long enough to reach the timeout but not long enough to reach the next response
+      await timeTravel(10);
+
       expect(error).toHaveBeenCalled();
-      expect(error.mock.calls[0][0]).toBeInstanceOf(SearchTimeoutError);
+      expect(error.mock.calls[0][0]).toBeInstanceOf(Error);
+      expect((error.mock.calls[0][0] as Error).message).toBe('oh no');
       expect(fetchMock).toHaveBeenCalledTimes(2);
       expect(mockCoreSetup.http.delete).toHaveBeenCalledTimes(1);
     });
 
-    test('should DELETE a running async search on async timeout on error from fetch', async () => {
+    test('should not leak unresolved promises if DELETE fails', async () => {
+      mockCoreSetup.http.delete.mockRejectedValueOnce({ status: 404, statusText: 'Not Found' });
       const responses = [
         {
           time: 10,
@@ -1465,22 +1560,6 @@ describe('SearchInterceptor', () => {
           ).rejects.toThrow(SearchTimeoutError);
           expect(mockCoreSetup.notifications.toasts.addDanger).toBeCalledTimes(1);
         });
-      });
-
-      test('Should throw Painless error on server error with OSS format', async () => {
-        const mockResponse: IEsError = {
-          statusCode: 400,
-          message: 'search_phase_execution_exception',
-          attributes: {
-            error: searchPhaseException.error,
-          },
-        };
-        fetchMock.mockRejectedValueOnce(mockResponse);
-        const mockRequest: IEsSearchRequest = {
-          params: {},
-        };
-        const response = searchInterceptor.search(mockRequest);
-        await expect(response.toPromise()).rejects.toThrow(PainlessError);
       });
 
       test('Should throw ES error on ES server error', async () => {

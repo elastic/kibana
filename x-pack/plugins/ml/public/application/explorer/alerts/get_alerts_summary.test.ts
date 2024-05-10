@@ -12,7 +12,7 @@ import {
   ALERT_END,
   ALERT_DURATION,
 } from '@kbn/rule-data-utils';
-import { AnomalyDetectionAlert } from './anomaly_detection_alerts_state_service';
+import type { AnomalyDetectionAlert } from './anomaly_detection_alerts_state_service';
 import { getAlertsSummary } from './get_alerts_summary';
 
 describe('getAlertsSummary', () => {

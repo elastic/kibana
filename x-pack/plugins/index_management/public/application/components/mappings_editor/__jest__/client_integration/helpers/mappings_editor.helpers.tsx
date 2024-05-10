@@ -24,8 +24,8 @@ export interface DomFields {
   };
 }
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/code-editor', () => {
+  const original = jest.requireActual('@kbn/code-editor');
   return {
     ...original,
     // Mocking CodeEditor, which uses React Monaco under the hood
@@ -376,13 +376,19 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
   };
 };
 
-export const setup = (props: any = { onUpdate() {} }): MappingsEditorTestBed => {
-  const setupTestBed = registerTestBed<TestSubjects>(WithAppDependencies(MappingsEditor), {
-    memoryRouter: {
-      wrapComponent: false,
-    },
-    defaultProps: props,
-  });
+export const setup = (
+  props: any = { onUpdate() {} },
+  appDependencies?: any
+): MappingsEditorTestBed => {
+  const setupTestBed = registerTestBed<TestSubjects>(
+    WithAppDependencies(MappingsEditor, appDependencies),
+    {
+      memoryRouter: {
+        wrapComponent: false,
+      },
+      defaultProps: props,
+    }
+  );
 
   const testBed = setupTestBed() as MappingsEditorTestBed;
 

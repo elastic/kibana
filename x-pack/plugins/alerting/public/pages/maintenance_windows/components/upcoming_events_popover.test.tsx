@@ -49,7 +49,6 @@ describe('rule_actions_popover', () => {
           updatedAt: '2023-04-14T14:58:58.997Z',
           eventStartTime: '2023-04-21T14:58:40.243Z',
           eventEndTime: '2023-04-21T14:58:40.243Z',
-          total: 1000,
         }}
       />
     );

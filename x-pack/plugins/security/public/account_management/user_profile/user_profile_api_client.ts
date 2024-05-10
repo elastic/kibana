@@ -7,7 +7,7 @@
 
 import { merge } from 'lodash';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, skipWhile, Subject, switchMap } from 'rxjs';
 
 import type { HttpStart } from '@kbn/core/public';
 import type {
@@ -20,6 +20,8 @@ import type { UserProfileData } from '@kbn/user-profile-components';
 
 import type { GetUserProfileResponse, UserProfile } from '../../../common';
 
+const DEFAULT_DATAPATHS = 'avatar,userSettings';
+
 export class UserProfileAPIClient implements UserProfileAPIClientType {
   private readonly internalDataUpdates$: Subject<UserProfileData> = new Subject();
 
@@ -30,11 +32,31 @@ export class UserProfileAPIClient implements UserProfileAPIClientType {
     this.internalDataUpdates$.asObservable();
 
   private readonly _userProfile$ = new BehaviorSubject<UserProfileData | null>(null);
+  private readonly _enabled$ = new BehaviorSubject(false);
+  private readonly _userProfileLoaded$ = new BehaviorSubject(false);
 
   /** Observable of the current user profile data */
   public readonly userProfile$ = this._userProfile$.asObservable();
+  public readonly userProfileLoaded$ = this._userProfileLoaded$
+    .asObservable()
+    .pipe(distinctUntilChanged());
+  public enabled$: Observable<boolean>;
 
-  constructor(private readonly http: HttpStart) {}
+  constructor(private readonly http: HttpStart) {
+    this.enabled$ = this.userProfileLoaded$.pipe(
+      skipWhile((loaded) => !loaded),
+      switchMap(() => this._enabled$.asObservable()),
+      distinctUntilChanged()
+    );
+  }
+
+  public start() {
+    // Fetch the user profile with default path to initialize the user profile observable.
+    // This will also enable or not the user profile for the user by checking if we receive a 404 on this request.
+    this.getCurrent({ dataPath: DEFAULT_DATAPATHS }).catch(() => {
+      // silently ignore the error
+    });
+  }
 
   /**
    * Retrieves the user profile of the current user. If the profile isn't available, e.g. for the anonymous users or
@@ -51,8 +73,20 @@ export class UserProfileAPIClient implements UserProfileAPIClientType {
       .then((response) => {
         const data = response?.data ?? {};
         const updated = merge(this._userProfile$.getValue(), data);
+
         this._userProfile$.next(updated);
+        this._enabled$.next(true);
+        this._userProfileLoaded$.next(true);
+
         return response;
+      })
+      .catch((err) => {
+        // If we receive a 404 on the request, it means there are no user profile for the user.
+        const notFound = err?.response?.status === 404;
+        this._enabled$.next(notFound ? false : true);
+        this._userProfileLoaded$.next(true);
+
+        return Promise.reject(err);
       });
   }
 
@@ -111,5 +145,14 @@ export class UserProfileAPIClient implements UserProfileAPIClientType {
         this._userProfile$.next(previous);
         return Promise.reject(err);
       });
+  }
+
+  /**
+   * Updates user profile data of the current user.
+   * @param data Application data to be written (merged with existing data).
+   */
+  public partialUpdate<D extends Partial<UserProfileData>>(data: D) {
+    const updated = merge(this._userProfile$.getValue(), data);
+    return this.update(updated);
   }
 }

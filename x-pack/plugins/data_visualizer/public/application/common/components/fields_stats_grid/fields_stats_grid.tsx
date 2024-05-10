@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo, FC, useState } from 'react';
+import type { FC } from 'react';
+import React, { useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import type { DataVisualizerTableState } from '../../../../../common/types';
-import { DataVisualizerTable, ItemIdToExpandedRowMap } from '../stats_table';
+import type { ItemIdToExpandedRowMap } from '../stats_table';
+import { DataVisualizerTable } from '../stats_table';
 import type { FileBasedFieldVisConfig } from '../../../../../common/types/field_vis_config';
 import { FileBasedDataVisualizerExpandedRow } from '../expanded_row';
 
@@ -45,10 +47,9 @@ function getItemIdToExpandedRowMap(
     return m;
   }, {} as ItemIdToExpandedRowMap);
 }
+const restorableDefaults = getDefaultDataVisualizerListState();
 
 export const FieldsStatsGrid: FC<Props> = ({ results }) => {
-  const restorableDefaults = getDefaultDataVisualizerListState();
-
   const [dataVisualizerListState, setDataVisualizerListState] =
     useState<DataVisualizerTableState>(restorableDefaults);
 

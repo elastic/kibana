@@ -921,6 +921,110 @@
       },
       {
         "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-common.ItemSet",
+        "type": "Interface",
+        "tags": [],
+        "label": "ItemSet",
+        "description": [
+          "\nRepresents an item set returned from `frequent_item_sets` augmented\nwith some metadata related to log rate analysis."
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.ItemSet.set",
+            "type": "Array",
+            "tags": [],
+            "label": "set",
+            "description": [
+              "An array of field-value pairs representing the items in the set."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-agg-utils",
+                "scope": "common",
+                "docId": "kibKbnMlAggUtilsPluginApi",
+                "section": "def-common.FieldValuePair",
+                "text": "FieldValuePair"
+              },
+              "[]"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.ItemSet.size",
+            "type": "number",
+            "tags": [],
+            "label": "size",
+            "description": [
+              "The size of the item set."
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.ItemSet.maxPValue",
+            "type": "number",
+            "tags": [],
+            "label": "maxPValue",
+            "description": [
+              "The maximum p-value associated with the item set."
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.ItemSet.doc_count",
+            "type": "number",
+            "tags": [],
+            "label": "doc_count",
+            "description": [
+              "The document count of the item set."
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.ItemSet.support",
+            "type": "number",
+            "tags": [],
+            "label": "support",
+            "description": [
+              "The support value of the item set."
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.ItemSet.total_doc_count",
+            "type": "number",
+            "tags": [],
+            "label": "total_doc_count",
+            "description": [
+              "The total document count."
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
         "id": "def-common.NumberValidationResult",
         "type": "Interface",
         "tags": [

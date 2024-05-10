@@ -50,25 +50,25 @@ encourage users to run the same versions of Kibana and Elasticsearch down to
 the patch version.
 --
 
-include::{kib-repo-dir}/setup/install.asciidoc[]
+include::{kibana-root}/docs/setup/install.asciidoc[]
 
-include::{kib-repo-dir}/setup/settings.asciidoc[]
+include::{kibana-root}/docs/setup/settings.asciidoc[]
 
-include::{kib-repo-dir}/setup/start-stop.asciidoc[]
+include::{kibana-root}/docs/setup/start-stop.asciidoc[]
 
-include::{kib-repo-dir}/setup/access.asciidoc[]
+include::{kibana-root}/docs/setup/access.asciidoc[]
 
 include::security/tutorials/how-to-secure-access-to-kibana.asciidoc[]
 
-include::{kib-repo-dir}/setup/connect-to-elasticsearch.asciidoc[]
+include::{kibana-root}/docs/setup/connect-to-elasticsearch.asciidoc[]
 
-include::{kib-repo-dir}/setup/upgrade.asciidoc[]
+include::{kibana-root}/docs/setup/upgrade.asciidoc[]
 
 include::security/securing-kibana.asciidoc[]
 
-include::{kib-repo-dir}/setup/configuring-reporting.asciidoc[]
+include::{kibana-root}/docs/setup/configuring-reporting.asciidoc[]
 
-include::{kib-repo-dir}/setup/configuring-logging.asciidoc[]
+include::{kibana-root}/docs/setup/configuring-logging.asciidoc[]
 
 include::monitoring/configuring-monitoring.asciidoc[leveloffset=+1]
 include::monitoring/monitoring-elastic-agent.asciidoc[leveloffset=+2]

@@ -14,12 +14,15 @@ import {
   CoreStart,
   DocLinksStart,
   ToastsStart,
+  I18nStart,
   IUiSettingsClient,
   PluginInitializerContext,
   HttpStart,
   NotificationsStart,
   ApplicationStart,
   AnalyticsServiceStart,
+  AppMountParameters,
+  ScopedHistory,
 } from '@kbn/core/public';
 import {
   FilterManager,
@@ -51,10 +54,10 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { ContentClient } from '@kbn/content-management-plugin/public';
-import { memoize } from 'lodash';
+import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
+import { memoize, noop } from 'lodash';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
-import type { ServerlessPluginStart } from '@kbn/serverless/public';
-import { getHistory } from './kibana_services';
+import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
 import { DiscoverStartPlugins } from './plugin';
 import { DiscoverContextAppLocator } from './application/context/services/locator';
 import { DiscoverSingleDocLocator } from './application/doc/locator';
@@ -67,17 +70,26 @@ export interface HistoryLocationState {
   referrer: string;
 }
 
+export interface UrlTracker {
+  setTrackedUrl: (url: string) => void;
+  restorePreviousUrl: () => void;
+  setTrackingEnabled: (value: boolean) => void;
+}
+
 export interface DiscoverServices {
   application: ApplicationStart;
   addBasePath: (path: string) => string;
   analytics: AnalyticsServiceStart;
+  i18n: I18nStart;
   capabilities: Capabilities;
   chrome: ChromeStart;
   core: CoreStart;
   data: DataPublicPluginStart;
   docLinks: DocLinksStart;
   embeddable: EmbeddableStart;
-  history: () => History<HistoryLocationState>;
+  history: History<HistoryLocationState>;
+  getScopedHistory: <T>() => ScopedHistory<T | undefined> | undefined;
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   theme: CoreStart['theme'];
   filterManager: FilterManager;
   fieldFormats: FieldFormatsStart;
@@ -87,6 +99,7 @@ export interface DiscoverServices {
   navigation: NavigationPublicPluginStart;
   share?: SharePluginStart;
   urlForwarding: UrlForwardingStart;
+  urlTracker: UrlTracker;
   timefilter: TimefilterContract;
   toastNotifications: ToastsStart;
   notifications: NotificationsStart;
@@ -95,6 +108,7 @@ export interface DiscoverServices {
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   dataViewEditor: DataViewEditorStart;
+  dataVisualizer?: DataVisualizerPluginStart;
   http: HttpStart;
   storage: Storage;
   spaces?: SpacesApi;
@@ -112,67 +126,89 @@ export interface DiscoverServices {
   uiActions: UiActionsStart;
   contentClient: ContentClient;
   noDataPage?: NoDataPagePluginStart;
-  serverless?: ServerlessPluginStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
 }
 
-export const buildServices = memoize(function (
-  core: CoreStart,
-  plugins: DiscoverStartPlugins,
-  context: PluginInitializerContext,
-  locator: DiscoverAppLocator,
-  contextLocator: DiscoverContextAppLocator,
-  singleDocLocator: DiscoverSingleDocLocator
-): DiscoverServices {
-  const { usageCollection } = plugins;
-  const storage = new Storage(localStorage);
-
-  return {
-    application: core.application,
-    addBasePath: core.http.basePath.prepend,
-    analytics: core.analytics,
-    capabilities: core.application.capabilities,
-    chrome: core.chrome,
+export const buildServices = memoize(
+  ({
     core,
-    data: plugins.data,
-    docLinks: core.docLinks,
-    embeddable: plugins.embeddable,
-    theme: core.theme,
-    fieldFormats: plugins.fieldFormats,
-    filterManager: plugins.data.query.filterManager,
-    history: getHistory,
-    dataViews: plugins.data.dataViews,
-    inspector: plugins.inspector,
-    metadata: {
-      branch: context.env.packageInfo.branch,
-    },
-    navigation: plugins.navigation,
-    share: plugins.share,
-    urlForwarding: plugins.urlForwarding,
-    timefilter: plugins.data.query.timefilter.timefilter,
-    toastNotifications: core.notifications.toasts,
-    notifications: core.notifications,
-    uiSettings: core.uiSettings,
-    settings: core.settings,
-    storage,
-    trackUiMetric: usageCollection?.reportUiCounter.bind(usageCollection, 'discover'),
-    dataViewFieldEditor: plugins.dataViewFieldEditor,
-    http: core.http,
-    spaces: plugins.spaces,
-    dataViewEditor: plugins.dataViewEditor,
-    triggersActionsUi: plugins.triggersActionsUi,
+    plugins,
+    context,
     locator,
     contextLocator,
     singleDocLocator,
-    expressions: plugins.expressions,
-    charts: plugins.charts,
-    savedObjectsTagging: plugins.savedObjectsTaggingOss?.getTaggingApi(),
-    savedObjectsManagement: plugins.savedObjectsManagement,
-    savedSearch: plugins.savedSearch,
-    unifiedSearch: plugins.unifiedSearch,
-    lens: plugins.lens,
-    uiActions: plugins.uiActions,
-    contentClient: plugins.contentManagement.client,
-    noDataPage: plugins.noDataPage,
-    serverless: plugins.serverless,
-  };
-});
+    history,
+    scopedHistory,
+    urlTracker,
+    setHeaderActionMenu = noop,
+  }: {
+    core: CoreStart;
+    plugins: DiscoverStartPlugins;
+    context: PluginInitializerContext;
+    locator: DiscoverAppLocator;
+    contextLocator: DiscoverContextAppLocator;
+    singleDocLocator: DiscoverSingleDocLocator;
+    history: History<HistoryLocationState>;
+    scopedHistory?: ScopedHistory;
+    urlTracker: UrlTracker;
+    setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
+  }): DiscoverServices => {
+    const { usageCollection } = plugins;
+    const storage = new Storage(localStorage);
+
+    return {
+      application: core.application,
+      addBasePath: core.http.basePath.prepend,
+      analytics: core.analytics,
+      capabilities: core.application.capabilities,
+      chrome: core.chrome,
+      core,
+      data: plugins.data,
+      dataVisualizer: plugins.dataVisualizer,
+      docLinks: core.docLinks,
+      embeddable: plugins.embeddable,
+      i18n: core.i18n,
+      theme: core.theme,
+      fieldFormats: plugins.fieldFormats,
+      filterManager: plugins.data.query.filterManager,
+      history,
+      getScopedHistory: <T>() => scopedHistory as ScopedHistory<T | undefined>,
+      setHeaderActionMenu,
+      dataViews: plugins.data.dataViews,
+      inspector: plugins.inspector,
+      metadata: {
+        branch: context.env.packageInfo.branch,
+      },
+      navigation: plugins.navigation,
+      share: plugins.share,
+      urlForwarding: plugins.urlForwarding,
+      urlTracker,
+      timefilter: plugins.data.query.timefilter.timefilter,
+      toastNotifications: core.notifications.toasts,
+      notifications: core.notifications,
+      uiSettings: core.uiSettings,
+      settings: core.settings,
+      storage,
+      trackUiMetric: usageCollection?.reportUiCounter.bind(usageCollection, 'discover'),
+      dataViewFieldEditor: plugins.dataViewFieldEditor,
+      http: core.http,
+      spaces: plugins.spaces,
+      dataViewEditor: plugins.dataViewEditor,
+      triggersActionsUi: plugins.triggersActionsUi,
+      locator,
+      contextLocator,
+      singleDocLocator,
+      expressions: plugins.expressions,
+      charts: plugins.charts,
+      savedObjectsTagging: plugins.savedObjectsTaggingOss?.getTaggingApi(),
+      savedObjectsManagement: plugins.savedObjectsManagement,
+      savedSearch: plugins.savedSearch,
+      unifiedSearch: plugins.unifiedSearch,
+      lens: plugins.lens,
+      uiActions: plugins.uiActions,
+      contentClient: plugins.contentManagement.client,
+      noDataPage: plugins.noDataPage,
+      observabilityAIAssistant: plugins.observabilityAIAssistant,
+    };
+  }
+);

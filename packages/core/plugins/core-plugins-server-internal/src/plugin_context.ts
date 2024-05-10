@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { shareReplay } from 'rxjs/operators';
+import { shareReplay } from 'rxjs';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { NodeInfo } from '@kbn/core-node-server';
@@ -236,6 +236,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       registerOnPreResponse: deps.http.registerOnPreResponse,
       basePath: deps.http.basePath,
       staticAssets: {
+        prependPublicUrl: (pathname: string) => deps.http.staticAssets.prependPublicUrl(pathname),
         getPluginAssetHref: (assetPath: string) =>
           deps.http.staticAssets.getPluginAssetHref(plugin.name, assetPath),
       },
@@ -271,9 +272,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       registerGlobal: deps.uiSettings.registerGlobal,
       setAllowlist: deps.uiSettings.setAllowlist,
     },
-    userSettings: {
-      setUserProfileSettings: deps.userSettings.setUserProfileSettings,
-    },
+    userSettings: {},
     getStartServices: () => plugin.startDependencies,
     deprecations: deps.deprecations.getRegistry(plugin.name),
     coreUsageData: {
@@ -282,6 +281,13 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
     plugins: {
       onSetup: (...dependencyNames) => runtimeResolver.onSetup(plugin.name, dependencyNames),
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
+    },
+    security: {
+      registerSecurityDelegate: (api) => deps.security.registerSecurityDelegate(api),
+    },
+    userProfile: {
+      registerUserProfileDelegate: (delegate) =>
+        deps.userProfile.registerUserProfileDelegate(delegate),
     },
   };
 }
@@ -329,6 +335,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
       basePath: deps.http.basePath,
       getServerInfo: deps.http.getServerInfo,
       staticAssets: {
+        prependPublicUrl: (pathname: string) => deps.http.staticAssets.prependPublicUrl(pathname),
         getPluginAssetHref: (assetPath: string) =>
           deps.http.staticAssets.getPluginAssetHref(plugin.name, assetPath),
       },
@@ -358,5 +365,10 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     plugins: {
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
     },
+    security: {
+      authc: deps.security.authc,
+      audit: deps.security.audit,
+    },
+    userProfile: deps.userProfile,
   };
 }

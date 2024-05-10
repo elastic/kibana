@@ -5,7 +5,11 @@
  * 2.0.
  */
 import { RulesClient, ConstructorOptions } from '../../../../rules_client/rules_client';
-import { savedObjectsClientMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  savedObjectsRepositoryMock,
+  uiSettingsServiceMock,
+} from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
@@ -18,6 +22,8 @@ import { AlertingAuthorization } from '../../../../authorization/alerting_author
 import { alertsServiceMock } from '../../../../alerts_service/alerts_service.mock';
 import { ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
 import { ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
+import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
+import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -56,6 +62,10 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getAuthenticationAPIKey: jest.fn(),
   getAlertIndicesAlias: jest.fn(),
   alertsService,
+  backfillClient: backfillClientMock.create(),
+  uiSettings: uiSettingsServiceMock.createStartContract(),
+  isSystemAction: jest.fn(),
+  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
 };
 
 describe('bulkUntrackAlerts()', () => {
@@ -74,6 +84,7 @@ describe('bulkUntrackAlerts()', () => {
     ]);
 
     await rulesClient.bulkUntrackAlerts({
+      isUsingQuery: true,
       indices: [
         'she had them apple bottom jeans (jeans)',
         'boots with the fur (with the fur)',
@@ -155,6 +166,7 @@ describe('bulkUntrackAlerts()', () => {
     ]);
 
     await rulesClient.bulkUntrackAlerts({
+      isUsingQuery: true,
       indices: ["honestly who cares we're not even testing the index right now"],
       alertUuids: [mockAlertUuid],
     });

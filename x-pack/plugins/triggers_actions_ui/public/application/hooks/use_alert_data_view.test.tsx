@@ -8,10 +8,11 @@
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
-import { act, renderHook } from '@testing-library/react-hooks';
-import { useAlertDataView } from './use_alert_data_view';
+import { renderHook } from '@testing-library/react-hooks/dom';
+import { useAlertDataViews } from './use_alert_data_view';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
+import { waitFor } from '@testing-library/react';
 
 const mockUseKibanaReturnValue = createStartServicesMock();
 
@@ -69,94 +70,66 @@ describe('useAlertDataView', () => {
   });
 
   it('initially is loading and does not have data', async () => {
-    await act(async () => {
-      const mockedAsyncDataView = {
-        loading: true,
-        dataview: undefined,
-      };
+    const mockedAsyncDataView = {
+      loading: true,
+      dataview: undefined,
+    };
 
-      const { result, waitForNextUpdate } = renderHook(
-        () => useAlertDataView(observabilityAlertFeatureIds),
-        {
-          wrapper,
-        }
-      );
-
-      await waitForNextUpdate();
-
-      expect(result.current).toEqual(mockedAsyncDataView);
+    const { result } = renderHook(() => useAlertDataViews(observabilityAlertFeatureIds), {
+      wrapper,
     });
+
+    await waitFor(() => expect(result.current).toEqual(mockedAsyncDataView));
   });
 
   it('fetch index names + fields for the provided o11y featureIds', async () => {
-    await act(async () => {
-      const { waitForNextUpdate } = renderHook(
-        () => useAlertDataView(observabilityAlertFeatureIds),
-        {
-          wrapper,
-        }
-      );
-
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-
-      expect(fetchAlertIndexNames).toHaveBeenCalledTimes(1);
-      expect(fetchAlertFields).toHaveBeenCalledTimes(1);
+    renderHook(() => useAlertDataViews(observabilityAlertFeatureIds), {
+      wrapper,
     });
+
+    await waitFor(() => expect(fetchAlertIndexNames).toHaveBeenCalledTimes(1));
+    expect(fetchAlertFields).toHaveBeenCalledTimes(1);
   });
 
   it('only fetch index names for security featureId', async () => {
-    await act(async () => {
-      const { waitForNextUpdate } = renderHook(() => useAlertDataView([AlertConsumers.SIEM]), {
-        wrapper,
-      });
-
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-
-      expect(fetchAlertIndexNames).toHaveBeenCalledTimes(1);
-      expect(fetchAlertFields).toHaveBeenCalledTimes(0);
+    renderHook(() => useAlertDataViews([AlertConsumers.SIEM]), {
+      wrapper,
     });
+
+    await waitFor(() => expect(fetchAlertIndexNames).toHaveBeenCalledTimes(1));
+    expect(fetchAlertFields).toHaveBeenCalledTimes(0);
   });
 
-  it('Do not fetch anything if security and o11y featureIds are mix together', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(
-        () => useAlertDataView([AlertConsumers.SIEM, AlertConsumers.LOGS]),
-        {
-          wrapper,
-        }
-      );
+  it('Do not fetch anything if security and o11y featureIds are mixed together', async () => {
+    const { result } = renderHook(
+      () => useAlertDataViews([AlertConsumers.SIEM, AlertConsumers.LOGS]),
+      {
+        wrapper,
+      }
+    );
 
-      await waitForNextUpdate();
-
-      expect(fetchAlertIndexNames).toHaveBeenCalledTimes(0);
-      expect(fetchAlertFields).toHaveBeenCalledTimes(0);
+    await waitFor(() =>
       expect(result.current).toEqual({
         loading: false,
         dataview: undefined,
-      });
-    });
+      })
+    );
+    expect(fetchAlertIndexNames).toHaveBeenCalledTimes(0);
+    expect(fetchAlertFields).toHaveBeenCalledTimes(0);
   });
 
-  it('if fetch throw error return no data', async () => {
+  it('if fetch throws error return no data', async () => {
     fetchAlertIndexNames.mockRejectedValue('error');
 
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(
-        () => useAlertDataView(observabilityAlertFeatureIds),
-        {
-          wrapper,
-        }
-      );
+    const { result } = renderHook(() => useAlertDataViews(observabilityAlertFeatureIds), {
+      wrapper,
+    });
 
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-
+    await waitFor(() =>
       expect(result.current).toEqual({
         loading: false,
         dataview: undefined,
-      });
-    });
+      })
+    );
   });
 });

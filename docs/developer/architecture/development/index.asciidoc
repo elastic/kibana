@@ -1,11 +1,8 @@
 [role="xpack"]
 [[reporting-integration]]
 == Reporting integration
-Integrating a {kib} application with the {report-features} requires a minimum
-amount of code, and the goal is to not have to modify the reporting code as we
-add additional applications. Instead, applications abide by a contract that
-{report-features} use to determine the information that is required to export
-CSVs and PDFs.
+Applications abide by a contract that {report-features} use to determine the information that is required to request exports of
+data from {kib}, and how to generate and store the reports.
 
 [IMPORTANT]
 ==============================================
@@ -14,16 +11,56 @@ However, these docs will be kept up-to-date to reflect the current implementatio
 ==============================================
 
 [float]
-[[reporting-nav-bar-extensions]]
-=== Share menu extensions
-X-Pack uses the `share` plugin of the Kibana platform to register actions in the share menu.
+=== Reporting Export Types
+"Export Types" are pieces of code that plug into the {kib} Reporting framework, and are responsible for exporting data on behalf
+of a {kib} application. These pieces of code are implemented as TypeScript classes that extend an abstract base class, and
+implement methods for controlling the creation of report jobs, and asynchronously generating report contents. Their `createJob`
+methods handle requests to create report jobs, by accepting jobParams objects and returning "task payload" objects. Their
+`runTask` methods generate the report contents by accepting the task payload object created from the `createJob` function, which
+is then stored in a system index in Elasticsearch.
 
 [float]
-=== Generate job URL
-To generate a new reporting job, different export types require different `jobParams` that are Rison encoded into a URL
-that abide by the following convention: `/api/reporting/generate?jobParams=${rison.encode(jobParams)}`. If you use the
-aforementioned <<reporting-nav-bar-extensions, nav bar extensions>> then this detail will be abstracted away, but if you
-provide a custom UI for generating the report, you will have to generate the URL and create a POST request to the URL.
+[[reporting-share-service-registrations]]
+=== Share menu extensions
+X-Pack services, such as the {report-features}, register with the `share` plugin of the Kibana platform to register additional
+actions available to make content shareable.
+
+[float]
+=== Generate a report job URL
+To generate a new reporting job, different export types require different `jobParams` objects, which are Rison-encoded and used as
+a `jobParams` query string variable in the Reporting generation endpoint URL. If you use the aforementioned
+<<reporting-share-service-registrations, Sharing plugin registrations>> then this detail will be abstracted away. If your
+application does not use the Share menu extensions, you will have to generate the URL and create a POST request to the URL.
+
+[float]
+=== Basic job parameters
+Certain fields of Reporting job parameters are required for every type of export.
+
+----
+interface BaseParams {
+  title: string; <1>
+  objectType: string; <2>
+  browserTimezone: string; <3>
+  version: string; <4>
+};
+----
+<1> The `title` for the report. This is shown in the listing of reports in **Stack Management > Alerts and
+Insights > Reporting** and used as the filename when the report is downloaded.
+<2> The `objectType` field is automatically added when using internal Reporting APIs. This value used for choosing an icon for the
+report job in the listing of reports in {kib}.
+<3> The `browserTimezone` field is automatically added when using internal Reporting APIs to craft the job parameters. This is
+used to correctly format time-based data in the user's desired timezone.
+<4> The `version` field is automatically added when using internal Reporting APIs. This is used in cases where job parameters are
+reused after an upgrade of Kibana, and a migration may be needed.
 
 include::csv-integration.asciidoc[]
 include::pdf-integration.asciidoc[]
+
+=== Using POST URLs for debugging
+Developers can capture a POST URL from a reporting-capable application to access the `jobParams` query string variable in the
+public API report generation endpoint. The query string variable can be passed through a URL de-encoder and then passed through a
+Rison-to-JSON converter to make the job parameters human-readable.
+
+If attempting to send requests to the POST URL to test generating a report, use a shell script containing the curl command that
+POSTs the request. This will avoid any unintentional character escaping that can happen if running the curl command in an
+interactive shell.

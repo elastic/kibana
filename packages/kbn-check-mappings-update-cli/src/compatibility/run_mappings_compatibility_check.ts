@@ -13,7 +13,7 @@ import { createTestEsCluster } from '@kbn/test';
 import { extractMappingsFromPlugins } from './extract_mappings_from_plugins';
 import { checkAdditiveOnlyChange } from './check_additive_only_change';
 import { checkIncompatibleMappings } from './check_incompatible_mappings';
-import { readCurrentMappings, updateCurrentMappings } from './current_mappings';
+import { readCurrentMappings, writeCurrentMappings } from './current_mappings';
 
 export const runMappingsCompatibilityChecks = async ({
   fix,
@@ -78,7 +78,7 @@ export const runMappingsCompatibilityChecks = async ({
   }
 
   if (fix) {
-    await updateCurrentMappings(extractedMappings);
+    await writeCurrentMappings(extractedMappings);
     log.warning(
       `Updated extracted mappings in current_mappings.json file, please commit the changes if desired.`
     );

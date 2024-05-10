@@ -15,6 +15,7 @@ export function suspendedComponentWithProps<T = unknown>(
 ) {
   return (props: T) => (
     <Suspense fallback={<CenterJustifiedSpinner size={size ?? 'm'} />}>
+      {/* @ts-expect-error upgrade typescript v4.9.5*/}
       <ComponentToSuspend {...props} />
     </Suspense>
   );

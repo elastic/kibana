@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { FC, Fragment } from 'react';
+import type { FC } from 'react';
+import React, { Fragment } from 'react';
 import { Axis, Position, timeFormatter, niceTimeFormatByDay } from '@elastic/charts';
 import { getYRange } from './utils';
-import { LineChartPoint } from '../../../../common/chart_loader';
+import type { LineChartPoint } from '../../../../common/chart_loader';
 
 const dateFormatter = timeFormatter(niceTimeFormatByDay(3));
 

@@ -27,15 +27,19 @@ import type { FleetRequestHandlerContext } from '../..';
 
 import type { MockedFleetAppContext } from '../../mocks';
 import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
-import { appContextService } from '../../services';
+import { agentPolicyService, appContextService } from '../../services';
 import type {
   GetUninstallTokenRequestSchema,
   GetUninstallTokensMetadataRequestSchema,
 } from '../../types/rest_spec/uninstall_token';
 
+import { createAgentPolicyMock } from '../../../common/mocks';
+
 import { registerRoutes } from '.';
 
 import { getUninstallTokenHandler, getUninstallTokensMetadataHandler } from './handlers';
+
+jest.mock('../../services/agent_policy');
 
 describe('uninstall token handlers', () => {
   let context: FleetRequestHandlerContext;
@@ -57,9 +61,24 @@ describe('uninstall token handlers', () => {
 
   describe('getUninstallTokensMetadataHandler', () => {
     const uninstallTokensFixture: UninstallTokenMetadata[] = [
-      { id: 'id-1', policy_id: 'policy-id-1', created_at: '2023-06-15T16:46:48.274Z' },
-      { id: 'id-2', policy_id: 'policy-id-2', created_at: '2023-06-15T16:46:48.274Z' },
-      { id: 'id-3', policy_id: 'policy-id-3', created_at: '2023-06-15T16:46:48.274Z' },
+      {
+        id: 'id-1',
+        policy_id: 'policy-id-1',
+        policy_name: null,
+        created_at: '2023-06-15T16:46:48.274Z',
+      },
+      {
+        id: 'id-2',
+        policy_id: 'policy-id-2',
+        policy_name: null,
+        created_at: '2023-06-15T16:46:48.274Z',
+      },
+      {
+        id: 'id-3',
+        policy_id: 'policy-id-3',
+        policy_name: null,
+        created_at: '2023-06-15T16:46:48.274Z',
+      },
     ];
 
     const uninstallTokensResponseFixture: GetUninstallTokensMetadataResponse = {
@@ -74,10 +93,17 @@ describe('uninstall token handlers', () => {
       unknown,
       TypeOf<typeof GetUninstallTokensMetadataRequestSchema.query>
     >;
+    const mockAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
 
     beforeEach(() => {
       const uninstallTokenService = appContextService.getUninstallTokenService()!;
       getTokenMetadataMock = uninstallTokenService.getTokenMetadata as jest.Mock;
+      mockAgentPolicyService.list.mockResolvedValue({
+        items: [createAgentPolicyMock()],
+        total: 1,
+        page: 1,
+        perPage: 1,
+      });
 
       request = httpServerMock.createKibanaRequest();
     });
@@ -124,6 +150,7 @@ describe('uninstall token handlers', () => {
     const uninstallTokenFixture: UninstallToken = {
       id: 'id-1',
       policy_id: 'policy-id-1',
+      policy_name: null,
       created_at: '2023-06-15T16:46:48.274Z',
       token: '123456789',
     };

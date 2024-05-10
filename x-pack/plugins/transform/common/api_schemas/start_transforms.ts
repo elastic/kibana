@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
 
-import { transformIdsSchema, CommonResponseStatusSchema } from './common';
+import type { CommonResponseStatusSchema } from './common';
+import { transformIdsSchema } from './common';
 
 export const startTransformsRequestSchema = transformIdsSchema;
 export type StartTransformsRequestSchema = TypeOf<typeof startTransformsRequestSchema>;

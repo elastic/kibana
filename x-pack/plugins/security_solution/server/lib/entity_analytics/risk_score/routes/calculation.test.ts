@@ -8,7 +8,6 @@
 import { riskScoreCalculationRoute } from './calculation';
 
 import { loggerMock } from '@kbn/logging-mocks';
-
 import { RISK_SCORE_CALCULATION_URL } from '../../../../../common/constants';
 import {
   serverMock,

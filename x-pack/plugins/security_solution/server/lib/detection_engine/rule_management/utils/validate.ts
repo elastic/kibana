@@ -10,28 +10,29 @@ import type { Rule } from '@kbn/alerting-plugin/common';
 import { isEqual, xorWith } from 'lodash';
 import { stringifyZodError } from '@kbn/zod-helpers';
 import {
-  RESPONSE_ACTION_API_COMMANDS_TO_CONSOLE_COMMAND_MAP,
+  type QueryRule,
+  type ResponseAction,
+  type RuleCreateProps,
+  RuleResponse,
+  type RuleResponseAction,
+  type RuleUpdateProps,
+} from '../../../../../common/api/detection_engine';
+import {
+  RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
   RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import { isQueryRule } from '../../../../../common/detection_engine/utils';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../..';
 import { CustomHttpRequestError } from '../../../../utils/custom_http_request_error';
-import type {
-  QueryRule,
-  RuleCreateProps,
-  RuleUpdateProps,
-} from '../../../../../common/api/detection_engine/model/rule_schema';
-import { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
-import type { RuleParams, RuleAlertType, UnifiedQueryRuleParams } from '../../rule_schema';
-import { hasValidRuleType } from '../../rule_schema';
-import type { BulkError } from '../../routes/utils';
-import { createBulkErrorObject } from '../../routes/utils';
+import {
+  hasValidRuleType,
+  type RuleAlertType,
+  type RuleParams,
+  type UnifiedQueryRuleParams,
+} from '../../rule_schema';
+import { type BulkError, createBulkErrorObject } from '../../routes/utils';
 import { transform } from './utils';
 import { internalRuleToAPIResponse } from '../normalization/rule_converters';
-import type {
-  ResponseAction,
-  RuleResponseAction,
-} from '../../../../../common/api/detection_engine/model/rule_response_actions';
 
 export const transformValidate = (rule: PartialRule<RuleParams>): RuleResponse => {
   const transformed = transform(rule);
@@ -101,7 +102,7 @@ export const validateResponseActionsPermissions = async (
     }
     const authzPropName =
       RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ[
-        RESPONSE_ACTION_API_COMMANDS_TO_CONSOLE_COMMAND_MAP[action.params.command]
+        RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[action.params.command]
       ];
 
     const isValid = endpointAuthz[authzPropName];

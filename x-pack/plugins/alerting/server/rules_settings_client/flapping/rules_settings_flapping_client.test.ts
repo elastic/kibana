@@ -215,6 +215,7 @@ describe('RulesSettingsFlappingClient', () => {
       references: [],
     });
 
+    // @ts-expect-error access private method
     const result = await client.createSettings();
 
     expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
@@ -249,6 +250,7 @@ describe('RulesSettingsFlappingClient', () => {
       attributes: mockAttributes,
       references: [],
     });
+    // @ts-expect-error access private method
     const result = await client.getSettings();
     expect(result.attributes).toEqual(mockAttributes);
   });
@@ -262,6 +264,7 @@ describe('RulesSettingsFlappingClient', () => {
         RULES_SETTINGS_FLAPPING_SAVED_OBJECT_ID
       )
     );
+    // @ts-expect-error access private method
     await expect(client.getSettings()).rejects.toThrowError();
   });
 

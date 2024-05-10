@@ -8,3 +8,4 @@ export { getIndexMappingsRoute } from './get_index_mappings';
 export { getIndexStatsRoute } from './get_index_stats';
 export { getUnallowedFieldValuesRoute } from './get_unallowed_field_values';
 export { getILMExplainRoute } from './get_ilm_explain';
+export { resultsRoutes } from './results';

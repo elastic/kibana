@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiFilterGroup, EuiButton } from '@elastic/eui';
+import React, { useCallback } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import { mergeWith, isEqual } from 'lodash';
 import { MoreFiltersSelectable } from './table_filter_config/more_filters_selectable';
 import type { CaseStatuses } from '../../../common/types/domain';
@@ -16,11 +16,12 @@ import { useGetTags } from '../../containers/use_get_tags';
 import { useGetCategories } from '../../containers/use_get_categories';
 import type { CurrentUserProfile } from '../types';
 import { useCasesFeatures } from '../../common/use_cases_features';
-import type { AssigneesFilteringSelection } from '../user_profiles/types';
 import { useSystemFilterConfig } from './table_filter_config/use_system_filter_config';
 import { useFilterConfig } from './table_filter_config/use_filter_config';
+import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+import { TableSearch } from './search';
 
-interface CasesTableFiltersProps {
+export interface CasesTableFiltersProps {
   countClosedCases: number | null;
   countInProgressCases: number | null;
   countOpenCases: number | null;
@@ -29,7 +30,6 @@ interface CasesTableFiltersProps {
   availableSolutions: string[];
   isSelectorView?: boolean;
   onCreateCasePressed?: () => void;
-  initialFilterOptions: Partial<FilterOptions>;
   isLoading: boolean;
   currentUserProfile: CurrentUserProfile;
   filterOptions: FilterOptions;
@@ -50,28 +50,17 @@ const CasesTableFiltersComponent = ({
   availableSolutions,
   isSelectorView = false,
   onCreateCasePressed,
-  initialFilterOptions,
   isLoading,
   currentUserProfile,
   filterOptions,
 }: CasesTableFiltersProps) => {
-  const [search, setSearch] = useState(filterOptions.search);
-  const [selectedAssignees, setSelectedAssignees] = useState<AssigneesFilteringSelection[]>([]);
-  const { data: tags = [] } = useGetTags();
-  const { data: categories = [] } = useGetCategories();
+  const { data: tags = [], isLoading: isLoadingTags } = useGetTags();
+  const { data: categories = [], isLoading: isLoadingCategories } = useGetCategories();
   const { caseAssignmentAuthorized } = useCasesFeatures();
-
-  const handleSelectedAssignees = useCallback(
-    (newAssignees: AssigneesFilteringSelection[]) => {
-      if (!isEqual(newAssignees, selectedAssignees)) {
-        setSelectedAssignees(newAssignees);
-        onFilterChanged({
-          assignees: newAssignees.map((assignee) => assignee?.uid ?? null),
-        });
-      }
-    },
-    [selectedAssignees, onFilterChanged]
-  );
+  const {
+    data: { customFields },
+    isFetching: isLoadingCasesConfiguration,
+  } = useGetCaseConfiguration();
 
   const onFilterOptionsChange = useCallback(
     (partialFilterOptions: Partial<FilterOptions>) => {
@@ -83,6 +72,9 @@ const CasesTableFiltersComponent = ({
     [filterOptions, onFilterChanged]
   );
 
+  const isLoadingFilters =
+    isLoading || isLoadingTags || isLoadingCategories || isLoadingCasesConfiguration;
+
   const { systemFilterConfig } = useSystemFilterConfig({
     availableSolutions,
     caseAssignmentAuthorized,
@@ -91,13 +83,10 @@ const CasesTableFiltersComponent = ({
     countInProgressCases,
     countOpenCases,
     currentUserProfile,
-    handleSelectedAssignees,
     hiddenStatuses,
-    initialFilterOptions,
-    isLoading,
+    isLoading: isLoadingFilters,
     isSelectorView,
     onFilterOptionsChange,
-    selectedAssignees,
     tags,
   });
 
@@ -106,18 +95,14 @@ const CasesTableFiltersComponent = ({
     selectableOptions,
     activeSelectableOptionKeys,
     onFilterConfigChange,
-  } = useFilterConfig({ systemFilterConfig, onFilterOptionsChange, isSelectorView, filterOptions });
-
-  const handleOnSearch = useCallback(
-    (newSearch) => {
-      const trimSearch = newSearch.trim();
-      if (!isEqual(trimSearch, search)) {
-        setSearch(trimSearch);
-        onFilterChanged({ search: trimSearch });
-      }
-    },
-    [onFilterChanged, search]
-  );
+  } = useFilterConfig({
+    systemFilterConfig,
+    onFilterOptionsChange,
+    isSelectorView,
+    filterOptions,
+    customFields,
+    isLoading: isLoadingFilters,
+  });
 
   const handleOnCreateCasePressed = useCallback(() => {
     if (onCreateCasePressed) {
@@ -126,7 +111,12 @@ const CasesTableFiltersComponent = ({
   }, [onCreateCasePressed]);
 
   return (
-    <EuiFlexGroup gutterSize="s" justifyContent="flexStart">
+    <EuiFlexGroup
+      gutterSize="s"
+      justifyContent="flexStart"
+      wrap={true}
+      data-test-subj="cases-table-filters"
+    >
       {isSelectorView && onCreateCasePressed ? (
         <EuiFlexItem grow={false}>
           <EuiButton
@@ -140,29 +130,33 @@ const CasesTableFiltersComponent = ({
         </EuiFlexItem>
       ) : null}
       <EuiFlexItem grow={false}>
-        <EuiFieldSearch
-          aria-label={i18n.SEARCH_CASES}
-          data-test-subj="search-cases"
-          fullWidth
-          incremental={false}
-          placeholder={i18n.SEARCH_PLACEHOLDER}
-          onSearch={handleOnSearch}
+        <TableSearch
+          filterOptionsSearch={filterOptions.search}
+          /**
+           * we need this to reset the internal state of the
+           * TableSearch component each time the search in
+           * the all cases state changes
+           */
+          key={filterOptions.search}
+          onFilterOptionsChange={onFilterOptionsChange}
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFilterGroup data-test-subj="cases-table-filters-group">
-          {activeFilters.map((filter) => (
-            <React.Fragment key={filter.key}>{filter.render({ filterOptions })}</React.Fragment>
-          ))}
-          {isSelectorView || (
-            <MoreFiltersSelectable
-              options={selectableOptions}
-              activeFilters={activeSelectableOptionKeys}
-              onChange={onFilterConfigChange}
-            />
-          )}
-        </EuiFilterGroup>
-      </EuiFlexItem>
+      {activeFilters.map((filter) => (
+        <EuiFlexItem grow={false} key={filter.key}>
+          {filter.render({ filterOptions })}
+        </EuiFlexItem>
+      ))}
+
+      {isSelectorView || (
+        <EuiFlexItem grow={false}>
+          <MoreFiltersSelectable
+            options={selectableOptions}
+            activeFilters={activeSelectableOptionKeys}
+            onChange={onFilterConfigChange}
+            isLoading={isLoadingFilters}
+          />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

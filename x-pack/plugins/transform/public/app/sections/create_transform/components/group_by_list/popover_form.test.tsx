@@ -14,9 +14,10 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 const startMock = coreMock.createStart();
 
-import { AggName } from '../../../../../../common/types/aggregations';
+import type { AggName } from '../../../../../../common/types/aggregations';
 
-import { PIVOT_SUPPORTED_GROUP_BY_AGGS, PivotGroupByConfig } from '../../../../common';
+import type { PivotGroupByConfig } from '../../../../common';
+import { PIVOT_SUPPORTED_GROUP_BY_AGGS } from '../../../../common';
 
 import { isIntervalValid, PopoverForm } from './popover_form';
 

@@ -19,7 +19,7 @@ import {
   VisualizeEmbeddableContract,
   VisualizeInput,
 } from '../..';
-import type { VisualizeServices } from '../types';
+import type { VisInstance, VisualizeServices } from '../types';
 
 function isErrorRelatedToRuntimeFields(error: ExpressionValueError['error']) {
   const originalError = error.original || error;
@@ -70,7 +70,7 @@ export const getVisualizationInstanceFromInput = async (
   visualizeServices: VisualizeServices,
   input: VisualizeInput
 ) => {
-  const { data, spaces, savedObjectsTagging } = visualizeServices;
+  const { data, spaces, savedObjectsTagging, ...startServices } = visualizeServices;
   const visState = input.savedVis as SerializedVis;
 
   /**
@@ -79,9 +79,9 @@ export const getVisualizationInstanceFromInput = async (
    */
   const savedVis: VisSavedObject = await getSavedVisualization({
     search: data.search,
-    dataViews: data.dataViews,
     spaces,
     savedObjectsTagging,
+    ...startServices,
   });
 
   if (visState.uiState && Object.keys(visState.uiState).length !== 0) {
@@ -120,15 +120,15 @@ export const getVisualizationInstance = async (
    * Both come from url search query
    */
   opts?: Record<string, unknown> | string
-) => {
-  const { data, spaces, savedObjectsTagging } = visualizeServices;
+): Promise<VisInstance> => {
+  const { data, spaces, savedObjectsTagging, ...startServices } = visualizeServices;
 
   const savedVis: VisSavedObject = await getSavedVisualization(
     {
       search: data.search,
-      dataViews: data.dataViews,
       spaces,
       savedObjectsTagging,
+      ...startServices,
     },
     opts
   );

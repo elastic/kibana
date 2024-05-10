@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { decodeWithExcessOrThrow } from '../../../../common/api';
+import { decodeWithExcessOrThrow } from '../../../common/runtime_types';
 import { CASE_PUSH_URL } from '../../../../common/constants';
 import type { CaseRoute } from '../types';
 import { createCaseError } from '../../../common/error';

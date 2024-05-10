@@ -5,40 +5,50 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 
-const Icon = styled(EuiIcon)`
-  margin-right: 4px;
-`;
-
-const FlexGroup = styled(EuiFlexGroup)`
-  margin-right: 16px;
-`;
-const OuterContainer = styled.span`
-  width: fit-content;
-`;
 export const IconWithCount = React.memo<{
   count: number;
   icon: string;
   tooltip: string;
-}>(({ count, icon, tooltip }) => (
-  <OuterContainer>
-    <EuiToolTip content={tooltip}>
-      <FlexGroup alignItems="center" gutterSize="none">
-        <EuiFlexItem grow={false}>
-          <Icon color="default" size="s" type={icon} />
-        </EuiFlexItem>
+}>(({ count, icon, tooltip }) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <span
+      css={css`
+        width: fit-content;
+      `}
+    >
+      <EuiToolTip content={tooltip}>
+        <EuiFlexGroup
+          alignItems="center"
+          gutterSize="none"
+          css={css`
+            margin-right: ${euiTheme.size.base};
+          `}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiIcon
+              css={css`
+                margin-right: ${euiTheme.size.xs};
+              `}
+              color="default"
+              size="s"
+              type={icon}
+            />
+          </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <EuiText color="default" size="xs">
-            {count}
-          </EuiText>
-        </EuiFlexItem>
-      </FlexGroup>
-    </EuiToolTip>
-  </OuterContainer>
-));
+          <EuiFlexItem grow={false}>
+            <EuiText color="default" size="xs">
+              {count}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiToolTip>
+    </span>
+  );
+});
 
 IconWithCount.displayName = 'IconWithCount';

@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/index-lifecycle-management-plugin",
-  "owner": "@elastic/platform-deployment-management",
+  "owner": "@elastic/kibana-management",
   "plugin": {
     "id": "indexLifecycleManagement",
     "server": true,

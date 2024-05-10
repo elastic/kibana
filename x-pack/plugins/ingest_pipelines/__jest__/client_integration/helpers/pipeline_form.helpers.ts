@@ -78,6 +78,7 @@ export type PipelineFormTestSubjects =
   | 'showRequestLink'
   | 'apiRequestFlyout'
   | 'apiRequestFlyout.apiRequestFlyoutTitle'
+  | 'deprecatedPipelineCallout'
   | 'testPipelineFlyout'
   | 'testPipelineFlyout.title'
   | 'documentationLink';

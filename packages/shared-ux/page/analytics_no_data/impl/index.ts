@@ -15,3 +15,5 @@ export type {
   AnalyticsNoDataPageKibanaDependencies,
   AnalyticsNoDataPageProps,
 } from '@kbn/shared-ux-page-analytics-no-data-types';
+
+export { getHasApiKeys$ } from './lib/get_has_api_keys';

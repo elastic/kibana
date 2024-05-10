@@ -15,9 +15,9 @@ import { useStorage } from '@kbn/ml-local-storage';
 import {
   type CategorizationAdditionalFilter,
   createCategoryRequest,
-} from '../../../common/api/log_categorization/create_category_request';
-import { processCategoryResults } from '../../../common/api/log_categorization/process_category_results';
-import type { Category, CatResponse } from '../../../common/api/log_categorization/types';
+} from '@kbn/aiops-log-pattern-analysis/create_category_request';
+import { processCategoryResults } from '@kbn/aiops-log-pattern-analysis/process_category_results';
+import type { CatResponse } from '@kbn/aiops-log-pattern-analysis/types';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import {
@@ -71,7 +71,7 @@ export function useCategorizeRequest() {
       query: QueryDslQueryContainer,
       intervalMs?: number,
       additionalFilter?: CategorizationAdditionalFilter
-    ): Promise<{ categories: Category[] }> => {
+    ): Promise<ReturnType<typeof processCategoryResults>> => {
       const { wrap, unwrap } = randomSampler.createRandomSamplerWrapper();
 
       return new Promise((resolve, reject) => {
@@ -101,7 +101,7 @@ export function useCategorizeRequest() {
             },
             error: (error) => {
               if (error.name === 'AbortError') {
-                return resolve({ categories: [] });
+                return resolve({ categories: [], hasExamples: false });
               }
               reject(error);
             },

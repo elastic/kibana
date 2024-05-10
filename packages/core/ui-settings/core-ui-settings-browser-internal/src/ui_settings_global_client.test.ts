@@ -7,7 +7,7 @@
  */
 
 import { Subject } from 'rxjs';
-import { take, toArray } from 'rxjs/operators';
+import { take, toArray } from 'rxjs';
 
 import { UiSettingsGlobalClient } from './ui_settings_global_client';
 

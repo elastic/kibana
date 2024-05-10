@@ -1,0 +1,15 @@
+RTRIM
+
+Syntax
+Parameters
+string
+String expression. If null, the function returns null.
+DescriptionRemoves trailing whitespaces from a string.Supported types
+Example
+```esql
+ROW message = "   some text  ",  color = " red "
+| EVAL message = RTRIM(message)
+| EVAL color = RTRIM(color)
+| EVAL message = CONCAT("'", message, "'")
+| EVAL color = CONCAT("'", color, "'")
+```

@@ -8,11 +8,16 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { Filter, Query } from '@kbn/es-query';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import { SEARCH_QUERY_LANGUAGE, type SearchQueryLanguage } from '@kbn/ml-query-utils';
 
 const defaultSearchQuery = {
   match_all: {},
+} as const;
+
+export const isDefaultSearchQuery = (arg: unknown): arg is typeof defaultSearchQuery => {
+  return isPopulatedObject(arg, ['match_all']);
 };
 
 export interface AiOpsPageUrlState {

@@ -7,7 +7,7 @@
  */
 
 import { of, Observable } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError } from 'rxjs';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { Execution, ExecutionResult } from './execution';
 import { ExpressionValueError } from '../expression_types/specs';
@@ -17,7 +17,11 @@ import { ExpressionAstExpression } from '../ast';
  * `ExecutionContract` is a wrapper around `Execution` class. It provides the
  * same functionality but does not expose Expressions plugin internals.
  */
-export class ExecutionContract<Input = unknown, Output = unknown, InspectorAdapters = unknown> {
+export class ExecutionContract<
+  Input = unknown,
+  Output = unknown,
+  InspectorAdapters extends Adapters = object
+> {
   public get isPending(): boolean {
     const { state, result } = this.execution.state.get();
     const finished = state === 'error' || (state === 'result' && !result?.partial);

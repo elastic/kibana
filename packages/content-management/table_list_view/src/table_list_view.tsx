@@ -31,13 +31,13 @@ export type TableListViewProps<T extends UserContentCommonSchema = UserContentCo
   | 'editItem'
   | 'deleteItems'
   | 'getDetailViewLink'
-  | 'onClickTitle'
+  | 'getOnClickTitle'
   | 'id'
   | 'rowItemActions'
   | 'contentEditor'
   | 'titleColumnName'
   | 'withoutPageTemplateWrapper'
-  | 'itemIsEditable'
+  | 'createdByEnabled'
 > & {
   title: string;
   description?: string;
@@ -66,7 +66,7 @@ export const TableListView = <T extends UserContentCommonSchema>({
   editItem,
   deleteItems,
   getDetailViewLink,
-  onClickTitle,
+  getOnClickTitle,
   rowItemActions,
   id: listingId,
   contentEditor,
@@ -74,7 +74,7 @@ export const TableListView = <T extends UserContentCommonSchema>({
   titleColumnName,
   additionalRightSideActions,
   withoutPageTemplateWrapper,
-  itemIsEditable,
+  createdByEnabled,
 }: TableListViewProps<T>) => {
   const PageTemplate = withoutPageTemplateWrapper
     ? (React.Fragment as unknown as typeof KibanaPageTemplate)
@@ -116,14 +116,14 @@ export const TableListView = <T extends UserContentCommonSchema>({
           deleteItems={deleteItems}
           rowItemActions={rowItemActions}
           getDetailViewLink={getDetailViewLink}
-          onClickTitle={onClickTitle}
+          getOnClickTitle={getOnClickTitle}
           id={listingId}
           contentEditor={contentEditor}
           titleColumnName={titleColumnName}
-          itemIsEditable={itemIsEditable}
           withoutPageTemplateWrapper={withoutPageTemplateWrapper}
           onFetchSuccess={onFetchSuccess}
           setPageDataTestSubject={setPageDataTestSubject}
+          createdByEnabled={createdByEnabled}
         />
       </KibanaPageTemplate.Section>
     </PageTemplate>

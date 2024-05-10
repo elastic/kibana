@@ -8,16 +8,11 @@
 
 import { monaco } from '../../monaco_imports';
 
-import { globals } from './shared';
+import { globals } from '../../common/lexer_rules';
 
-export const lexerRules: monaco.languages.IMonarchLanguage = {
-  ...(globals as any),
-
-  defaultToken: 'invalid',
-  tokenPostfix: '',
-
-  tokenizer: {
-    root: [
+export const buildXjsonRules = (root: string = 'root') => {
+  return {
+    [root]: [
       [
         /("(?:[^"]*_)?script"|"inline"|"source")(\s*?)(:)(\s*?)(""")/,
         [
@@ -106,7 +101,15 @@ export const lexerRules: monaco.languages.IMonarchLanguage = {
       [/\\""""/, { token: 'punctuation.end_triple_quote', next: '@pop' }],
       [/./, { token: 'multi_string' }],
     ],
-  },
+  };
+};
+export const lexerRules: monaco.languages.IMonarchLanguage = {
+  ...(globals as any),
+
+  defaultToken: 'invalid',
+  tokenPostfix: '',
+
+  tokenizer: { ...buildXjsonRules() },
 };
 
 export const languageConfiguration: monaco.languages.LanguageConfiguration = {

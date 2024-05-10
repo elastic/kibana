@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 
 import { LanguageDefinition } from '../types';
@@ -38,6 +39,7 @@ interface CodeBoxProps {
   setSelectedLanguage: (language: LanguageDefinition) => void;
   assetBasePath: string;
   application?: ApplicationStart;
+  consolePlugin?: ConsolePluginStart;
   sharePlugin: SharePluginStart;
   consoleRequest?: string;
 }
@@ -45,6 +47,7 @@ interface CodeBoxProps {
 export const CodeBox: React.FC<CodeBoxProps> = ({
   application,
   codeSnippet,
+  consolePlugin,
   languageType,
   languages,
   assetBasePath,
@@ -117,6 +120,7 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
               <TryInConsoleButton
                 request={consoleRequest}
                 application={application}
+                consolePlugin={consolePlugin}
                 sharePlugin={sharePlugin}
               />
             </EuiFlexItem>

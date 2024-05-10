@@ -30,7 +30,7 @@ const {
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
@@ -70,16 +70,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177128
   registry.when('Top operations when data is generated', { config: 'basic', archives: [] }, () => {
     before(() =>
       generateOperationData({
-        synthtraceEsClient,
+        apmSynthtraceEsClient,
         start,
         end,
       })
     );
 
-    after(() => synthtraceEsClient.clean());
+    after(() => apmSynthtraceEsClient.clean());
 
     describe('requested for elasticsearch', () => {
       let response: TopOperations;

@@ -37,6 +37,12 @@ const PIPELINE_NAME_EXISTS_ERROR = i18n.translate(
     defaultMessage: 'Name already used by another pipeline.',
   }
 );
+const MODEL_NOT_DEPLOYED_ERROR = i18n.translate(
+  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.modelNotDeployedError',
+  {
+    defaultMessage: 'Model must be deployed before use.',
+  }
+);
 
 export const validateInferencePipelineConfiguration = (
   config: InferencePipelineConfiguration
@@ -55,6 +61,8 @@ export const validateInferencePipelineConfiguration = (
   }
   if (config.modelID.trim().length === 0) {
     errors.modelID = FIELD_REQUIRED_ERROR;
+  } else if (config.isModelPlaceholderSelected) {
+    errors.modelStatus = MODEL_NOT_DEPLOYED_ERROR;
   }
 
   return errors;

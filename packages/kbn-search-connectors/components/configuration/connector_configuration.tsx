@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { createContext, useEffect, useState } from 'react';
+import React, { createContext, useEffect, useRef, useState, FC, PropsWithChildren } from 'react';
 
 import {
   EuiButton,
@@ -20,8 +20,15 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { isDeepEqual } from 'react-use/lib/util';
 import { sortAndFilterConnectorConfiguration } from '../../utils/connector_configuration_utils';
-import { Connector, ConnectorConfigProperties, ConnectorStatus, FeatureName } from '../..';
+import {
+  Connector,
+  ConnectorConfigProperties,
+  ConnectorConfiguration,
+  ConnectorStatus,
+  FeatureName,
+} from '../..';
 
 import { ConnectorConfigurationForm } from './connector_configuration_form';
 
@@ -39,6 +46,7 @@ interface ConnectorConfigurationProps {
   saveConfig: (configuration: Record<string, string | number | boolean | null>) => void;
   stackManagementLink?: string;
   subscriptionLink?: string;
+  children?: React.ReactNode;
 }
 
 interface ConfigEntry extends ConnectorConfigProperties {
@@ -73,7 +81,9 @@ export const LicenseContext = createContext<{
   stackManagementLink: undefined,
 });
 
-export const ConnectorConfigurationComponent: React.FC<ConnectorConfigurationProps> = ({
+export const ConnectorConfigurationComponent: FC<
+  PropsWithChildren<ConnectorConfigurationProps>
+> = ({
   children,
   connector,
   hasPlatinumLicense,
@@ -82,6 +92,7 @@ export const ConnectorConfigurationComponent: React.FC<ConnectorConfigurationPro
   subscriptionLink,
   stackManagementLink,
 }) => {
+  const configurationRef = useRef<ConnectorConfiguration>({});
   const {
     configuration,
     error,
@@ -95,7 +106,10 @@ export const ConnectorConfigurationComponent: React.FC<ConnectorConfigurationPro
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
-    setIsEditing(false);
+    if (!isDeepEqual(configuration, configurationRef.current)) {
+      configurationRef.current = configuration;
+      setIsEditing(false);
+    }
   }, [configuration]);
 
   useEffect(() => {
@@ -118,6 +132,27 @@ export const ConnectorConfigurationComponent: React.FC<ConnectorConfigurationPro
     <LicenseContext.Provider value={{ hasPlatinumLicense, stackManagementLink, subscriptionLink }}>
       <EuiFlexGroup direction="column">
         {children && <EuiFlexItem>{children}</EuiFlexItem>}
+        {!uncategorizedDisplayList.length && (
+          <EuiFlexItem>
+            <EuiCallOut
+              color="warning"
+              title={i18n.translate(
+                'searchConnectors.configurationConnector.config.noConfigCallout.title',
+                {
+                  defaultMessage: 'No configuration fields',
+                }
+              )}
+            >
+              {i18n.translate(
+                'searchConnectors.configurationConnector.config.noConfigCallout.description',
+                {
+                  defaultMessage:
+                    'This connector has no configuration fields. Has your connector connected successfully to Elasticsearch and set its configuration?',
+                }
+              )}
+            </EuiCallOut>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem>
           {isEditing ? (
             <ConnectorConfigurationForm

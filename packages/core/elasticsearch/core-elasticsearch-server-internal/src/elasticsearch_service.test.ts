@@ -24,7 +24,7 @@ import {
 
 import type { NodesVersionCompatibility } from './version_check/ensure_es_version';
 import { BehaviorSubject, firstValueFrom, of } from 'rxjs';
-import { first, concatMap } from 'rxjs/operators';
+import { first, concatMap } from 'rxjs';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { Env } from '@kbn/config';
 import { configServiceMock, getEnvOptions } from '@kbn/config-mocks';
@@ -37,12 +37,14 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { configSchema, ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService, SetupDeps } from './elasticsearch_service';
 import { duration } from 'moment';
-import { isValidConnection as isValidConnectionMock } from './is_valid_connection';
+import { isValidConnection } from './is_valid_connection';
 import { pollEsNodesVersion as pollEsNodesVersionMocked } from './version_check/ensure_es_version';
 
 const { pollEsNodesVersion: pollEsNodesVersionActual } = jest.requireActual(
   './version_check/ensure_es_version'
 );
+
+const isValidConnectionMock = isValidConnection as jest.Mock;
 
 const delay = async (durationMs: number) =>
   await new Promise((resolve) => setTimeout(resolve, durationMs));
@@ -69,6 +71,7 @@ beforeEach(() => {
     hosts: ['http://1.2.3.4'],
     healthCheck: {
       delay: duration(10),
+      startupDelay: duration(10),
     },
     ssl: {
       verificationMode: 'none',
@@ -182,6 +185,7 @@ describe('#preboot', () => {
       expect(config).toMatchInlineSnapshot(`
         Object {
           "healthCheckDelay": "PT0.01S",
+          "healthCheckStartupDelay": "PT0.01S",
           "hosts": Array [
             "http://8.8.8.8",
           ],
@@ -282,6 +286,48 @@ describe('#start', () => {
     expect(loggingSystemMock.collect(coreContext.logger).error).toEqual([
       ['Something went terribly wrong!'],
     ]);
+  });
+
+  it('logs an info message about connecting to ES', async () => {
+    isValidConnectionMock.mockImplementation(async () => {
+      await new Promise((r) => setTimeout(r, 50));
+    });
+
+    await elasticsearchService.setup(setupDeps);
+    await elasticsearchService.start();
+
+    expect(isValidConnectionMock).toHaveBeenCalledTimes(1);
+
+    const infoMessages = loggingSystemMock.collect(coreContext.logger).info;
+    expect(infoMessages).toHaveLength(1);
+
+    const esMessage = infoMessages[0][0];
+    expect(esMessage).toMatch(
+      /^Successfully connected to Elasticsearch after waiting for ([0-9]+) milliseconds$/
+    );
+  });
+
+  it('returns the information about the time spent waiting for Elasticsearch', async () => {
+    isValidConnectionMock.mockImplementation(async () => {
+      await new Promise((r) => setTimeout(r, 50));
+    });
+
+    await elasticsearchService.setup(setupDeps);
+    const startContract = await elasticsearchService.start();
+
+    expect(isValidConnectionMock).toHaveBeenCalledTimes(1);
+
+    const infoMessages = loggingSystemMock.collect(coreContext.logger).info;
+    expect(infoMessages).toHaveLength(1);
+
+    const regexp =
+      /^Successfully connected to Elasticsearch after waiting for ([0-9]+) milliseconds$/;
+
+    const esMessage = infoMessages[0][0];
+    const groups = regexp.exec(esMessage);
+    const esWaitTime = parseInt(groups![1], 10);
+
+    expect(startContract.metrics.elasticsearchWaitTime).toEqual(esWaitTime);
   });
 
   describe('skipStartupConnectionCheck', () => {
@@ -400,6 +446,7 @@ describe('#start', () => {
       expect(config).toMatchInlineSnapshot(`
         Object {
           "healthCheckDelay": "PT0.01S",
+          "healthCheckStartupDelay": "PT0.01S",
           "hosts": Array [
             "http://8.8.8.8",
           ],

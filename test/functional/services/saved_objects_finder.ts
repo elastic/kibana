@@ -7,8 +7,8 @@
  */
 
 import expect from '@kbn/expect';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
-import { WebElementWrapper } from './lib/web_element_wrapper';
 
 export class SavedObjectsFinderService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
@@ -32,7 +32,7 @@ export class SavedObjectsFinderService extends FtrService {
     for (let i = 0; i < listItems.length; i++) {
       const listItem = await listItems[i].findByClassName('euiSelectableListItem__text');
       const text = await listItem.getVisibleText();
-      if (text.includes(type)) {
+      if (text === type) {
         await listItem.click();
         await this.toggleFilterPopover();
         break;

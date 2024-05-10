@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { SavedObjectReference } from '@kbn/core/server';
 
 import { transformFromLegacyActions } from './transform_legacy_actions';
@@ -48,7 +49,7 @@ describe('transformFromLegacyActions', () => {
       {
         name: 'alert_0',
         id: 'alert-1',
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
       },
     ]);
 

@@ -61,14 +61,32 @@ import { registerResponseActionRoutes } from './response_actions';
 import * as ActionDetailsService from '../../services/actions/action_details_by_id';
 import { CaseStatuses } from '@kbn/cases-components';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
-import { actionCreateService } from '../../services/actions';
+import { getResponseActionsClient as _getResponseActionsClient } from '../../services';
 import type { UploadActionApiRequestBody } from '../../../../common/api/endpoint';
 import type { FleetToHostFileClientInterface } from '@kbn/fleet-plugin/server';
 import type { HapiReadableStream, SecuritySolutionRequestHandlerContext } from '../../../types';
 import { createHapiReadableStreamMock } from '../../services/actions/mocks';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
-import { omit } from 'lodash';
+import { omit, set } from 'lodash';
+import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
+import { responseActionsClientMock } from '../../services/actions/clients/mocks';
+import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
+import { sentinelOneMock } from '../../services/actions/clients/sentinelone/mocks';
+import { ResponseActionsClientError } from '../../services/actions/clients/errors';
+
+jest.mock('../../services', () => {
+  const realModule = jest.requireActual('../../services');
+
+  return {
+    ...realModule,
+    getResponseActionsClient: jest.fn((...args) => {
+      return realModule.getResponseActionsClient(...args);
+    }),
+  };
+});
+
+const getResponseActionsClientMock = _getResponseActionsClient;
 
 interface CallRouteInterface {
   body?: ResponseActionRequestBody;
@@ -85,12 +103,19 @@ const Platinum = licenseMock.createLicense({ license: { type: 'platinum', mode: 
 const Gold = licenseMock.createLicense({ license: { type: 'gold', mode: 'gold' } });
 
 describe('Response actions', () => {
+  let getActionDetailsByIdSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    getActionDetailsByIdSpy = jest
+      .spyOn(ActionDetailsService, 'getActionDetailsById')
+      .mockResolvedValue(new EndpointActionGenerator('seed').generateActionDetails());
+  });
+
   describe('handler', () => {
     let endpointAppContextService: EndpointAppContextService;
     let mockResponse: jest.Mocked<KibanaResponseFactory>;
     let licenseService: LicenseService;
     let licenseEmitter: Subject<ILicense>;
-    let getActionDetailsByIdSpy: jest.SpyInstance;
 
     let callRoute: (
       routePrefix: string,
@@ -133,16 +158,11 @@ describe('Response actions', () => {
       endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
       endpointAppContextService.start({
         ...startContract,
-        actionCreateService: actionCreateService(mockScopedClient.asInternalUser, endpointContext),
         licenseService,
       });
 
       // add the host isolation route handlers to routerMock
       registerResponseActionRoutes(routerMock, endpointContext);
-
-      getActionDetailsByIdSpy = jest
-        .spyOn(ActionDetailsService, 'getActionDetailsById')
-        .mockResolvedValue({} as ActionDetails);
 
       // define a convenience function to execute an API call for a given route, body, and mocked response from ES
       // it returns the requestContext mock used in the call, to assert internal calls (e.g. the indexed document)
@@ -313,9 +333,13 @@ describe('Response actions', () => {
       );
     });
 
-    it('creates an action and returns its ID + ActionDetails', async () => {
+    it('creates an action and returns its ID (`action` legacy property) + ActionDetails', async () => {
       const endpointIds = ['XYZ'];
-      const actionDetails = { agents: endpointIds, command: 'isolate' } as ActionDetails;
+      const actionDetails = {
+        agents: endpointIds,
+        command: 'isolate',
+        id: '1-2-3',
+      } as ActionDetails;
       getActionDetailsByIdSpy.mockResolvedValue(actionDetails);
 
       await callRoute(ISOLATE_HOST_ROUTE_V2, {
@@ -838,25 +862,25 @@ describe('Response actions', () => {
 
       it('handles errors', async () => {
         const expectedError = new Error('Uh oh!');
-
-        await expect(
-          callRoute(
-            UNISOLATE_HOST_ROUTE_V2,
-            {
-              body: { endpoint_ids: ['XYZ'] },
-              version: '2023-10-31',
-              indexErrorResponse: {
-                statusCode: 500,
-                body: {
-                  result: expectedError.message,
-                },
+        await callRoute(
+          UNISOLATE_HOST_ROUTE_V2,
+          {
+            body: { endpoint_ids: ['XYZ'] },
+            version: '2023-10-31',
+            indexErrorResponse: {
+              statusCode: 500,
+              body: {
+                result: expectedError.message,
               },
             },
-            { endpointDsExists: true }
-          )
-        ).rejects.toEqual(expectedError);
+          },
+          { endpointDsExists: true }
+        );
 
-        expect(mockResponse.ok).not.toBeCalled();
+        expect(mockResponse.customError).toHaveBeenCalledWith({
+          body: expect.any(ResponseActionsClientError),
+          statusCode: 500,
+        });
       });
     });
 
@@ -1053,16 +1077,18 @@ describe('Response actions', () => {
         },
       };
 
+      testSetup
+        .getEsClientMock('internalUser')
+        // @ts-expect-error issue with `index()` method being overloaded
+        .index.mockResolvedValue(responseActionsClientMock.createIndexedResponse());
+
       httpRequestMock = testSetup.createRequestMock({ body: reqBody });
       registerResponseActionRoutes(testSetup.routerMock, testSetup.endpointAppContextMock);
 
-      createdUploadAction = new EndpointActionGenerator('seed').generateActionDetails({
+      const actionsGenerator = new EndpointActionGenerator('seed');
+      createdUploadAction = actionsGenerator.generateActionDetails({
         command: 'upload',
       });
-
-      (
-        testSetup.endpointAppContextMock.service.getActionCreateService().createAction as jest.Mock
-      ).mockResolvedValue(createdUploadAction);
 
       (testSetup.endpointAppContextMock.service.getEndpointMetadataService as jest.Mock) = jest
         .fn()
@@ -1073,6 +1099,12 @@ describe('Response actions', () => {
                 agent: {
                   id: '123-456',
                 },
+              },
+              agent: {
+                id: '123-456',
+              },
+              host: {
+                hostname: 'test-host',
               },
             },
           ]),
@@ -1085,7 +1117,7 @@ describe('Response actions', () => {
     });
 
     afterEach(() => {
-      jest.resetAllMocks();
+      jest.clearAllMocks();
     });
 
     it('should create a file', async () => {
@@ -1097,30 +1129,29 @@ describe('Response actions', () => {
     it('should create the action using parameters with stored file info', async () => {
       await callHandler();
 
-      const createActionMock = testSetup.endpointAppContextMock.service.getActionCreateService()
-        .createAction as jest.Mock;
-
-      expect(createActionMock).toHaveBeenCalledWith(
-        {
-          command: 'upload',
-          endpoint_ids: ['123-456'],
-          parameters: {
-            file_id: '123-456-789',
-            file_name: 'foo.txt',
-            file_sha256: '96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
-            file_size: 45632,
-            overwrite: true,
-          },
-          user: { username: 'unknown' },
-        },
-        ['123-456']
+      const createActionMock = testSetup.getEsClientMock();
+      expect(createActionMock.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            EndpointActions: expect.objectContaining({
+              data: expect.objectContaining({
+                parameters: {
+                  file_id: '123-456-789',
+                  file_name: 'foo.txt',
+                  file_sha256: '96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+                  file_size: 45632,
+                  overwrite: true,
+                },
+              }),
+            }),
+          }),
+        }),
+        { meta: true }
       );
     });
 
     it('should delete file if creation of Action fails', async () => {
-      const createActionMock = testSetup.endpointAppContextMock.service.getActionCreateService()
-        .createAction as jest.Mock;
-      createActionMock.mockImplementation(async () => {
+      testSetup.getEsClientMock('internalUser').index.mockImplementation(async () => {
         throw new CustomHttpRequestError('oh oh');
       });
       await callHandler();
@@ -1137,14 +1168,112 @@ describe('Response actions', () => {
     });
 
     it('should return expected response on success', async () => {
+      getActionDetailsByIdSpy.mockResolvedValue(createdUploadAction);
       await callHandler();
 
       expect(httpResponseMock.ok).toHaveBeenCalledWith({
         body: {
-          action: createdUploadAction.action,
           data: omit(createdUploadAction, 'action'),
         },
       });
+    });
+  });
+
+  describe('and `responseActionsSentinelOneV1Enabled` feature flag is enabled', () => {
+    let testSetup: HttpApiTestSetupMock;
+    let httpRequestMock: ReturnType<HttpApiTestSetupMock['createRequestMock']>;
+    let httpHandlerContextMock: HttpApiTestSetupMock['httpHandlerContextMock'];
+    let httpResponseMock: HttpApiTestSetupMock['httpResponseMock'];
+    let callHandler: () => ReturnType<RequestHandler>;
+
+    beforeEach(async () => {
+      testSetup = createHttpApiTestSetupMock();
+
+      ({ httpHandlerContextMock, httpResponseMock } = testSetup);
+      httpRequestMock = testSetup.createRequestMock();
+
+      testSetup.endpointAppContextMock.experimentalFeatures = {
+        ...testSetup.endpointAppContextMock.experimentalFeatures,
+        responseActionsSentinelOneV1Enabled: true,
+      };
+
+      httpHandlerContextMock.actions = Promise.resolve({
+        getActionsClient: () => sentinelOneMock.createConnectorActionsClient(),
+      } as unknown as jest.Mocked<ActionsApiRequestHandlerContext>);
+
+      // Set the esClient to be used in the handler context
+      // eslint-disable-next-line require-atomic-updates
+      httpHandlerContextMock.core = Promise.resolve(
+        set(
+          await httpHandlerContextMock.core,
+          'elasticsearch.client.asInternalUser',
+          responseActionsClientMock.createConstructorOptions().esClient
+        )
+      );
+
+      httpRequestMock = testSetup.createRequestMock({
+        body: {
+          endpoint_ids: ['123-456'],
+        },
+      });
+      registerResponseActionRoutes(testSetup.routerMock, testSetup.endpointAppContextMock);
+
+      (testSetup.endpointAppContextMock.service.getEndpointMetadataService as jest.Mock) = jest
+        .fn()
+        .mockReturnValue({
+          getMetadataForEndpoints: jest.fn().mockResolvedValue([
+            {
+              elastic: {
+                agent: {
+                  id: '123-456',
+                },
+              },
+              agent: {
+                id: '123-456',
+              },
+              host: {
+                hostname: 'test-host',
+              },
+            },
+          ]),
+        });
+
+      const handler = testSetup.getRegisteredVersionedRoute(
+        'post',
+        ISOLATE_HOST_ROUTE_V2,
+        '2023-10-31'
+      ).routeHandler as RequestHandler;
+
+      callHandler = () => handler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it.each([
+      ['undefined', undefined],
+      ['blank value', ''],
+      ['endpoint', 'endpoint'],
+    ])(
+      'should use endpoint response actions client when agentType is: %s',
+      async (_, agentTypeValue) => {
+        if (agentTypeValue !== undefined) {
+          httpRequestMock.body.agent_type = agentTypeValue as ResponseActionAgentType;
+        }
+        await callHandler();
+
+        expect(getResponseActionsClientMock).toHaveBeenCalledWith('endpoint', expect.anything());
+        expect(httpResponseMock.ok).toHaveBeenCalled();
+      }
+    );
+
+    it('should use SentinelOne response actions client when agent type is sentinel_one', async () => {
+      httpRequestMock.body.agent_type = 'sentinel_one';
+      await callHandler();
+
+      expect(getResponseActionsClientMock).toHaveBeenCalledWith('sentinel_one', expect.anything());
+      expect(httpResponseMock.ok).toHaveBeenCalled();
     });
   });
 });

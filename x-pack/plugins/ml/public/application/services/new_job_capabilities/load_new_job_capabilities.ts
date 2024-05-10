@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
-import { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import { getDataViewAndSavedSearchCallback } from '../../util/index_utils';
-import { JobType } from '../../../../common/types/saved_objects';
+import type { JobType } from '../../../../common/types/saved_objects';
 import { newJobCapsServiceAnalytics } from './new_job_capabilities_service_analytics';
 import { newJobCapsService } from './new_job_capabilities_service';
 

@@ -39,6 +39,7 @@ export const INTEGRATION_CATEGORY_DISPLAY: {
   datastore: { title: 'Database', parent_id: undefined },
   dns_security: { title: 'DNS', parent_id: 'security' },
   edr_xdr: { title: 'EDR/XDR', parent_id: 'security' },
+  cloudsecurity_cdr: { title: 'Cloud Security/CDR', parent_id: 'security' },
   elasticsearch_sdk: { title: 'Elasticsearch SDK', parent_id: undefined },
   elastic_stack: { title: 'Elastic Stack', parent_id: undefined },
   email_security: { title: 'Email', parent_id: 'security' },

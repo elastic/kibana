@@ -60,7 +60,14 @@ describe('Header', () => {
     const breadcrumbs$ = new BehaviorSubject([{ text: 'test' }]);
     const isLocked$ = new BehaviorSubject(false);
     const navLinks$ = new BehaviorSubject([
-      { id: 'kibana', title: 'kibana', baseUrl: '', href: '', url: '' },
+      {
+        id: 'kibana',
+        title: 'kibana',
+        baseUrl: '',
+        href: '',
+        url: '',
+        visibleIn: ['globalSearch' as const],
+      },
     ]);
     const headerBanner$ = new BehaviorSubject(undefined);
     const customNavLink$ = new BehaviorSubject({
@@ -69,6 +76,7 @@ describe('Header', () => {
       baseUrl: '',
       url: '',
       href: '',
+      visibleIn: ['globalSearch' as const],
     });
     const recentlyAccessed$ = new BehaviorSubject([
       { link: '', label: 'dashboard', id: 'dashboard' },

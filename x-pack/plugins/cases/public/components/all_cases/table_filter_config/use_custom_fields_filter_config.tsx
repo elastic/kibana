@@ -6,13 +6,12 @@
  */
 
 import React from 'react';
+import type { CasesConfigurationUI } from '../../../../common/ui';
 import type { CustomFieldTypes } from '../../../../common/types/domain';
 import { builderMap as customFieldsBuilder } from '../../custom_fields/builder';
-import { useGetCaseConfiguration } from '../../../containers/configure/use_get_case_configuration';
 import type { FilterChangeHandler, FilterConfig, FilterConfigRenderParams } from './types';
 import { MultiSelectFilter } from '../multi_select_filter';
-
-export const CUSTOM_FIELD_KEY_PREFIX = 'cf_';
+import { deflattenCustomFieldKey, flattenCustomFieldKey } from '../utils';
 
 interface CustomFieldFilterOptionFactoryProps {
   buttonLabel: string;
@@ -20,6 +19,7 @@ interface CustomFieldFilterOptionFactoryProps {
   fieldKey: string;
   onFilterOptionsChange: FilterChangeHandler;
   type: CustomFieldTypes;
+  isLoading: boolean;
 }
 const customFieldFilterOptionFactory = ({
   buttonLabel,
@@ -27,9 +27,10 @@ const customFieldFilterOptionFactory = ({
   fieldKey,
   onFilterOptionsChange,
   type,
+  isLoading,
 }: CustomFieldFilterOptionFactoryProps) => {
   return {
-    key: `${CUSTOM_FIELD_KEY_PREFIX}${fieldKey}`, // this prefix is set in case custom field has the same key as a system field
+    key: flattenCustomFieldKey(fieldKey), // this prefix is set in case custom field has the same key as a system field
     isActive: false,
     isAvailable: true,
     label: buttonLabel,
@@ -53,7 +54,7 @@ const customFieldFilterOptionFactory = ({
       }) => {
         onFilterOptionsChange({
           customFields: {
-            [filterId.replace(CUSTOM_FIELD_KEY_PREFIX, '')]: {
+            [deflattenCustomFieldKey(filterId)]: {
               options: selectedOptionKeys,
               type,
             },
@@ -71,6 +72,7 @@ const customFieldFilterOptionFactory = ({
             label: option.label,
           }))}
           selectedOptionKeys={filterOptions.customFields[fieldKey]?.options || []}
+          isLoading={isLoading}
         />
       );
     },
@@ -79,15 +81,15 @@ const customFieldFilterOptionFactory = ({
 
 export const useCustomFieldsFilterConfig = ({
   isSelectorView,
+  customFields,
+  isLoading,
   onFilterOptionsChange,
 }: {
   isSelectorView: boolean;
+  customFields: CasesConfigurationUI['customFields'];
+  isLoading: boolean;
   onFilterOptionsChange: FilterChangeHandler;
 }) => {
-  const {
-    data: { customFields },
-  } = useGetCaseConfiguration();
-
   const customFieldsFilterConfig: FilterConfig[] = [];
 
   if (isSelectorView) {
@@ -106,6 +108,7 @@ export const useCustomFieldsFilterConfig = ({
             fieldKey,
             onFilterOptionsChange,
             type,
+            isLoading,
           })
         );
       }

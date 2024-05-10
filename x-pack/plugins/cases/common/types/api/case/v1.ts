@@ -22,7 +22,6 @@ import {
   MAX_CATEGORY_FILTER_LENGTH,
   MAX_ASSIGNEES_PER_CASE,
   MAX_CUSTOM_FIELDS_PER_CASE,
-  MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
 } from '../../../constants';
 import {
   limitedStringSchema,
@@ -42,22 +41,17 @@ import {
 import { CaseConnectorRt } from '../../domain/connector/v1';
 import { CaseUserProfileRt, UserRt } from '../../domain/user/v1';
 import { CasesStatusResponseRt } from '../stats/v1';
-
-const CaseCustomFieldTextWithValidationValueRt = limitedStringSchema({
-  fieldName: 'value',
-  min: 1,
-  max: MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
-});
+import { CaseCustomFieldTextWithValidationValueRt } from '../custom_field/v1';
 
 const CaseCustomFieldTextWithValidationRt = rt.strict({
   key: rt.string,
   type: CustomFieldTextTypeRt,
-  value: rt.union([CaseCustomFieldTextWithValidationValueRt, rt.null]),
+  value: rt.union([CaseCustomFieldTextWithValidationValueRt('value'), rt.null]),
 });
 
 const CustomFieldRt = rt.union([CaseCustomFieldTextWithValidationRt, CaseCustomFieldToggleRt]);
 
-const CustomFieldsRt = limitedArraySchema({
+export const CaseRequestCustomFieldsRt = limitedArraySchema({
   codec: CustomFieldRt,
   fieldName: 'customFields',
   min: 0,
@@ -130,7 +124,7 @@ export const CasePostRequestRt = rt.intersection([
       /**
        * The list of custom field values of the case.
        */
-      customFields: CustomFieldsRt,
+      customFields: CaseRequestCustomFieldsRt,
     })
   ),
 ]);
@@ -424,7 +418,7 @@ export const CasePatchRequestRt = rt.intersection([
       /**
        * Custom fields of the case
        */
-      customFields: CustomFieldsRt,
+      customFields: CaseRequestCustomFieldsRt,
     })
   ),
   /**
@@ -516,6 +510,7 @@ export type GetReportersResponse = rt.TypeOf<typeof GetReportersResponseRt>;
 export type CasesBulkGetRequest = rt.TypeOf<typeof CasesBulkGetRequestRt>;
 export type CasesBulkGetResponse = rt.TypeOf<typeof CasesBulkGetResponseRt>;
 export type GetRelatedCasesByAlertResponse = rt.TypeOf<typeof GetRelatedCasesByAlertResponseRt>;
-export type CaseRequestCustomFields = rt.TypeOf<typeof CustomFieldsRt>;
+export type CaseRequestCustomFields = rt.TypeOf<typeof CaseRequestCustomFieldsRt>;
+export type CaseRequestCustomField = rt.TypeOf<typeof CustomFieldRt>;
 export type BulkCreateCasesRequest = rt.TypeOf<typeof BulkCreateCasesRequestRt>;
 export type BulkCreateCasesResponse = rt.TypeOf<typeof BulkCreateCasesResponseRt>;

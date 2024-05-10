@@ -32,6 +32,7 @@ export interface LanguageProvidersModule<Deps = unknown> {
   getSuggestionProvider: (callbacks?: Deps) => monaco.languages.CompletionItemProvider;
   getSignatureProvider?: (callbacks?: Deps) => monaco.languages.SignatureHelpProvider;
   getHoverProvider?: (callbacks?: Deps) => monaco.languages.HoverProvider;
+  getCodeActionProvider?: (callbacks?: Deps) => monaco.languages.CodeActionProvider;
 }
 
 export interface CustomLangModuleType<Deps = unknown>
@@ -40,25 +41,26 @@ export interface CustomLangModuleType<Deps = unknown>
   onLanguage: () => void;
 }
 
-export interface EditorError {
+export interface MonacoEditorError {
   severity: monaco.MarkerSeverity;
   startLineNumber: number;
   startColumn: number;
   endLineNumber: number;
   endColumn: number;
   message: string;
+  code?: string | undefined;
 }
 
 export interface LangValidation {
   isValidating: boolean;
   isValid: boolean;
-  errors: EditorError[];
+  errors: MonacoEditorError[];
 }
 
 export interface SyntaxErrors {
-  [modelId: string]: EditorError[];
+  [modelId: string]: MonacoEditorError[];
 }
 
 export interface BaseWorkerDefinition {
-  getSyntaxErrors: (modelUri: string) => Promise<EditorError[] | undefined>;
+  getSyntaxErrors: (modelUri: string) => Promise<MonacoEditorError[] | undefined>;
 }

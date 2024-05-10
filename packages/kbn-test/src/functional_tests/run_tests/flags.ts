@@ -30,6 +30,7 @@ export const FLAG_OPTIONS: FlagOptions = {
     'exclude-tag',
     'include',
     'exclude',
+    'writeLogsToPath',
   ],
   alias: {
     updateAll: 'u',
@@ -47,6 +48,7 @@ export const FLAG_OPTIONS: FlagOptions = {
     --kibana-install-dir Run Kibana from existing install directory instead of from source
     --bail               Stop the test run at the first failure
     --logToFile          Write the log output from Kibana/ES to files instead of to stdout
+    --writeLogsToPath    Write the log output from Kibana/ES to files in specified path
     --dry-run            Report tests without executing them
     --updateBaselines    Replace baseline screenshots with whatever is generated from the test
     --updateSnapshots    Replace inline and file snapshots with whatever is generated from the test
@@ -73,6 +75,12 @@ export function parseFlags(flags: FlagsReader) {
 
   const esVersionString = flags.string('es-version');
 
+  const logsDir = flags.path('writeLogsToPath')
+    ? Path.resolve(REPO_ROOT, flags.path('writeLogsToPath')!)
+    : flags.boolean('logToFile')
+    ? Path.resolve(REPO_ROOT, 'data/ftr_servers_logs', uuidV4())
+    : undefined;
+
   return {
     configs,
     esVersion: esVersionString ? new EsVersion(esVersionString) : EsVersion.getDefault(),
@@ -80,9 +88,7 @@ export function parseFlags(flags: FlagsReader) {
     dryRun: flags.boolean('dry-run'),
     updateBaselines: flags.boolean('updateBaselines') || flags.boolean('updateAll'),
     updateSnapshots: flags.boolean('updateSnapshots') || flags.boolean('updateAll'),
-    logsDir: flags.boolean('logToFile')
-      ? Path.resolve(REPO_ROOT, 'data/ftr_servers_logs', uuidV4())
-      : undefined,
+    logsDir,
     esFrom: flags.enum('esFrom', ['snapshot', 'source', 'serverless']),
     esServerlessImage: flags.string('esServerlessImage'),
     installDir: flags.path('kibana-install-dir'),

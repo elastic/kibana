@@ -119,7 +119,6 @@ export const OptionsListPopoverSortingButton = ({
       aria-labelledby="optionsList_sortingOptions"
       closePopover={() => setIsSortingPopoverOpen(false)}
       panelClassName={'optionsList--sortPopover'}
-      anchorClassName={'optionsList__sortButtonPopoverAnchor'}
     >
       <span data-test-subj="optionsListControl__sortingOptionsPopover">
         <EuiPopoverTitle paddingSize="s">

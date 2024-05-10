@@ -6,15 +6,11 @@
  */
 
 import React, { NamedExoticComponent } from 'react';
-import { BlockListFlyoutProps, BlockListFormProps } from '../types';
+import { BlockListFlyoutProps, BlockListFormProps, SelectedDataView } from '../types';
 import { SecuritySolutionPluginContext } from '..';
 
 export const getSecuritySolutionContextMock = (): SecuritySolutionPluginContext => ({
   getFiltersGlobalComponent:
-    () =>
-    ({ children }) =>
-      <div>{children}</div>,
-  getPageWrapper:
     () =>
     ({ children }) =>
       <div>{children}</div>,
@@ -26,12 +22,19 @@ export const getSecuritySolutionContextMock = (): SecuritySolutionPluginContext 
       return true;
     },
   },
+  getPageWrapper:
+    () =>
+    ({ children }) =>
+      <div>{children}</div>,
   sourcererDataView: {
+    sourcererDataView: {
+      id: 'security-solution-default',
+    },
     browserFields: {},
     selectedPatterns: [],
     indexPattern: { fields: [], title: '' },
     loading: false,
-  },
+  } as unknown as SelectedDataView,
   securitySolutionStore: {
     // @ts-ignore
     dispatch: () => jest.fn(),

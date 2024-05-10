@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useState, memo } from 'react';
+import type { FC } from 'react';
+import React, { useState, memo } from 'react';
 
 import {
   EuiButtonEmpty,
@@ -23,8 +24,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
-import { ModelItem } from '../../../model_management/models_list';
+import { CodeEditor } from '@kbn/code-editor';
+import type { ModelItem } from '../../../model_management/models_list';
 import {
   EDIT_MESSAGE,
   CANCEL_EDIT_MESSAGE,

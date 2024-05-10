@@ -155,7 +155,7 @@ export function TimeShift({
                 );
               })}
               selectedOptions={getSelectedOption()}
-              singleSelection={{ asPlainText: true }}
+              singleSelection={{ asPlainText: false }}
               isInvalid={isLocalValueInvalid}
               onCreateOption={(val) => {
                 const parsedVal = parseTimeShift(val);

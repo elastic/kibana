@@ -10,17 +10,13 @@ import React from 'react';
 import type { EuiButtonProps, EuiSelectableProps } from '@elastic/eui';
 import type { DataView, DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Query } from '@kbn/es-query';
+import { TextBasedLanguages } from '@kbn/esql-utils';
 import { ChangeDataView } from './change_dataview';
 
 export type ChangeDataViewTriggerProps = EuiButtonProps & {
   label: string;
   title?: string;
 };
-
-export enum TextBasedLanguages {
-  SQL = 'SQL',
-  ESQL = 'ESQL',
-}
 
 export interface OnSaveTextLanguageQueryProps {
   onSave: () => void;
@@ -84,6 +80,11 @@ export interface DataViewPickerProps {
    * Callback that is called when the user clicks the Save and switch transition modal button
    */
   onSaveTextLanguageQuery?: ({ onSave, onCancel }: OnSaveTextLanguageQueryProps) => void;
+  /**
+   * Determines if the text based language transition
+   * modal should be shown when switching data views
+   */
+  shouldShowTextBasedLanguageTransitionModal?: boolean;
 
   /**
    * Makes the picker disabled by disabling the popover trigger
@@ -117,6 +118,7 @@ export const DataViewPicker = ({
   onSaveTextLanguageQuery,
   onTextLangQuerySubmit,
   textBasedLanguage,
+  shouldShowTextBasedLanguageTransitionModal,
   onCreateDefaultAdHocDataView,
   isDisabled,
 }: DataViewPickerPropsExtended) => {
@@ -137,6 +139,7 @@ export const DataViewPicker = ({
       onSaveTextLanguageQuery={onSaveTextLanguageQuery}
       onTextLangQuerySubmit={onTextLangQuerySubmit}
       textBasedLanguage={textBasedLanguage}
+      shouldShowTextBasedLanguageTransitionModal={shouldShowTextBasedLanguageTransitionModal}
       isDisabled={isDisabled}
     />
   );

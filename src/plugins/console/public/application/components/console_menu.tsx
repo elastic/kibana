@@ -121,7 +121,7 @@ export class ConsoleMenu extends Component<Props, State> {
           defaultMessage: 'Request options',
         })}
       >
-        <EuiIcon type="wrench" />
+        <EuiIcon type="boxesVertical" />
       </EuiLink>
     );
 
@@ -135,10 +135,22 @@ export class ConsoleMenu extends Component<Props, State> {
           this.closePopover();
           this.copyAsCurl();
         }}
+        icon="copyClipboard"
       >
         <FormattedMessage
           id="console.requestOptions.copyAsUrlButtonLabel"
-          defaultMessage="Copy as cURL"
+          defaultMessage="Copy cURL command"
+        />
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem
+        data-test-subj="consoleMenuAutoIndent"
+        key="Auto indent"
+        onClick={this.autoIndent}
+        icon="arrowEnd"
+      >
+        <FormattedMessage
+          id="console.requestOptions.autoIndentButtonLabel"
+          defaultMessage="Apply indentations"
         />
       </EuiContextMenuItem>,
       <EuiContextMenuItem
@@ -147,20 +159,11 @@ export class ConsoleMenu extends Component<Props, State> {
         onClick={() => {
           this.openDocs();
         }}
+        icon="documentation"
       >
         <FormattedMessage
           id="console.requestOptions.openDocumentationButtonLabel"
-          defaultMessage="Open documentation"
-        />
-      </EuiContextMenuItem>,
-      <EuiContextMenuItem
-        data-test-subj="consoleMenuAutoIndent"
-        key="Auto indent"
-        onClick={this.autoIndent}
-      >
-        <FormattedMessage
-          id="console.requestOptions.autoIndentButtonLabel"
-          defaultMessage="Auto indent"
+          defaultMessage="View documentation"
         />
       </EuiContextMenuItem>,
     ];

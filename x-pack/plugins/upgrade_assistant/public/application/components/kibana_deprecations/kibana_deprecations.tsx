@@ -8,12 +8,19 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
-import { EuiPageHeader, EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { EuiCode, EuiPageHeader, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { DomainDeprecationDetails } from '@kbn/core/public';
-import { SectionLoading, GlobalFlyout } from '../../../shared_imports';
+import {
+  WithPrivileges,
+  MissingPrivileges,
+  SectionLoading,
+  GlobalFlyout,
+} from '../../../shared_imports';
+import { APP_LOGS_COUNT_CLUSTER_PRIVILEGES } from '../../../../common/constants';
 import { useAppContext } from '../../app_context';
 import { uiMetricService, UIM_KIBANA_DEPRECATIONS_PAGE_LOAD } from '../../lib/ui_metric';
 import { DeprecationsPageLoadingError, NoDeprecationsPrompt, DeprecationCount } from '../shared';
@@ -56,6 +63,18 @@ const i18nTexts = {
         pluginIds: pluginIds.join(', '),
       },
     }),
+  missingPermissionDescription: (privilegesMissing: MissingPrivileges) => (
+    <FormattedMessage
+      id="xpack.upgradeAssistant.overview.logsStep.missingPermissionDescription"
+      defaultMessage="Certain issues might be missing due to missing cluster {privilegesCount, plural, one {privilege} other {privileges}} for: {missingPrivileges}."
+      values={{
+        missingPrivileges: (
+          <EuiCode transparentBackground={true}>{privilegesMissing?.cluster?.join(', ')}</EuiCode>
+        ),
+        privilegesCount: privilegesMissing?.cluster?.length,
+      }}
+    />
+  ),
 };
 
 export interface DeprecationResolutionState {
@@ -87,7 +106,17 @@ const getDeprecationCountByLevel = (deprecations: KibanaDeprecationDetails[]) =>
   };
 };
 
-export const KibanaDeprecations = withRouter(({ history }: RouteComponentProps) => {
+interface KibanaDeprecationsListProps {
+  history: RouteComponentProps['history'];
+  hasPrivileges: boolean;
+  privilegesMissing: MissingPrivileges;
+}
+
+export const KibanaDeprecationsList = ({
+  history,
+  hasPrivileges,
+  privilegesMissing,
+}: KibanaDeprecationsListProps) => {
   const [kibanaDeprecations, setKibanaDeprecations] = useState<
     KibanaDeprecationDetails[] | undefined
   >(undefined);
@@ -256,7 +285,7 @@ export const KibanaDeprecations = withRouter(({ history }: RouteComponentProps) 
 
       <EuiSpacer size="l" />
 
-      {kibanaDeprecationErrors.length > 0 && (
+      {(!hasPrivileges || kibanaDeprecationErrors.length > 0) && (
         <>
           <EuiCallOut
             title={i18nTexts.kibanaDeprecationErrorTitle}
@@ -264,7 +293,13 @@ export const KibanaDeprecations = withRouter(({ history }: RouteComponentProps) 
             iconType="warning"
             data-test-subj="kibanaDeprecationErrors"
           >
-            <p>{i18nTexts.getKibanaDeprecationErrorDescription(kibanaDeprecationErrors)}</p>
+            <>
+              {!hasPrivileges && <p>{i18nTexts.missingPermissionDescription(privilegesMissing)}</p>}
+
+              {kibanaDeprecationErrors.length > 0 && (
+                <p>{i18nTexts.getKibanaDeprecationErrorDescription(kibanaDeprecationErrors)}</p>
+              )}
+            </>
           </EuiCallOut>
 
           <EuiSpacer />
@@ -278,5 +313,23 @@ export const KibanaDeprecations = withRouter(({ history }: RouteComponentProps) 
         deprecationResolutionState={deprecationResolutionState}
       />
     </div>
+  );
+};
+
+export const KibanaDeprecations = withRouter(({ history }: RouteComponentProps) => {
+  const requiredPrivileges = APP_LOGS_COUNT_CLUSTER_PRIVILEGES.map(
+    (privilege) => `cluster.${privilege}`
+  );
+
+  return (
+    <WithPrivileges privileges={requiredPrivileges}>
+      {({ hasPrivileges, isLoading, privilegesMissing }) => (
+        <KibanaDeprecationsList
+          history={history}
+          hasPrivileges={!isLoading && hasPrivileges}
+          privilegesMissing={privilegesMissing}
+        />
+      )}
+    </WithPrivileges>
   );
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RiskWeightTypes, RiskCategories } from '../../../../common/risk_engine';
+import { RiskWeightTypes, RiskCategories } from '../../../../common/entity_analytics/risk_engine';
 import {
   buildCategoryAssignment,
   buildCategoryWeights,

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { DEFAULT_DOCS_PER_PAGE } from '../types';
 
 import { fetchSearchResults } from './fetch_search_results';
@@ -14,9 +14,7 @@ import { fetchSearchResults } from './fetch_search_results';
 const DEFAULT_FROM_VALUE = 0;
 describe('fetchSearchResults lib function', () => {
   const mockClient = {
-    asCurrentUser: {
-      search: jest.fn(),
-    },
+    search: jest.fn(),
   };
 
   const indexName = 'search-regular-index';
@@ -78,15 +76,13 @@ describe('fetchSearchResults lib function', () => {
   });
 
   it('should return search results with hits', async () => {
-    mockClient.asCurrentUser.search.mockImplementation(() =>
-      Promise.resolve(mockSearchResponseWithHits)
-    );
+    mockClient.search.mockImplementation(() => Promise.resolve(mockSearchResponseWithHits));
 
     await expect(
-      fetchSearchResults(mockClient as unknown as IScopedClusterClient, indexName, query)
+      fetchSearchResults(mockClient as unknown as ElasticsearchClient, indexName, query)
     ).resolves.toEqual(regularSearchResultsResponse);
 
-    expect(mockClient.asCurrentUser.search).toHaveBeenCalledWith({
+    expect(mockClient.search).toHaveBeenCalledWith({
       from: DEFAULT_FROM_VALUE,
       index: indexName,
       q: query,
@@ -95,13 +91,11 @@ describe('fetchSearchResults lib function', () => {
   });
 
   it('should escape quotes in queries and return results with hits', async () => {
-    mockClient.asCurrentUser.search.mockImplementation(() =>
-      Promise.resolve(mockSearchResponseWithHits)
-    );
+    mockClient.search.mockImplementation(() => Promise.resolve(mockSearchResponseWithHits));
 
     await expect(
       fetchSearchResults(
-        mockClient as unknown as IScopedClusterClient,
+        mockClient as unknown as ElasticsearchClient,
         indexName,
         '"yellow banana"',
         0,
@@ -109,7 +103,7 @@ describe('fetchSearchResults lib function', () => {
       )
     ).resolves.toEqual(regularSearchResultsResponse);
 
-    expect(mockClient.asCurrentUser.search).toHaveBeenCalledWith({
+    expect(mockClient.search).toHaveBeenCalledWith({
       from: DEFAULT_FROM_VALUE,
       index: indexName,
       q: '\\"yellow banana\\"',
@@ -118,15 +112,13 @@ describe('fetchSearchResults lib function', () => {
   });
 
   it('should return search results with hits when no query is passed', async () => {
-    mockClient.asCurrentUser.search.mockImplementation(() =>
-      Promise.resolve(mockSearchResponseWithHits)
-    );
+    mockClient.search.mockImplementation(() => Promise.resolve(mockSearchResponseWithHits));
 
     await expect(
-      fetchSearchResults(mockClient as unknown as IScopedClusterClient, indexName)
+      fetchSearchResults(mockClient as unknown as ElasticsearchClient, indexName)
     ).resolves.toEqual(regularSearchResultsResponse);
 
-    expect(mockClient.asCurrentUser.search).toHaveBeenCalledWith({
+    expect(mockClient.search).toHaveBeenCalledWith({
       from: DEFAULT_FROM_VALUE,
       index: indexName,
       size: DEFAULT_DOCS_PER_PAGE,
@@ -134,7 +126,7 @@ describe('fetchSearchResults lib function', () => {
   });
 
   it('should return empty search results', async () => {
-    mockClient.asCurrentUser.search.mockImplementationOnce(() =>
+    mockClient.search.mockImplementationOnce(() =>
       Promise.resolve({
         ...mockSearchResponseWithHits,
         hits: {
@@ -149,10 +141,10 @@ describe('fetchSearchResults lib function', () => {
     );
 
     await expect(
-      fetchSearchResults(mockClient as unknown as IScopedClusterClient, indexName, query)
+      fetchSearchResults(mockClient as unknown as ElasticsearchClient, indexName, query)
     ).resolves.toEqual(emptySearchResultsResponse);
 
-    expect(mockClient.asCurrentUser.search).toHaveBeenCalledWith({
+    expect(mockClient.search).toHaveBeenCalledWith({
       from: DEFAULT_FROM_VALUE,
       index: indexName,
       q: query,

@@ -16,7 +16,7 @@ import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import type { CasesUiStart, CasesUiSetup } from '@kbn/cases-plugin/public';
+import type { CasesPublicStart, CasesPublicSetup } from '@kbn/cases-plugin/public';
 import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type {
   getLazyLiveQueryField,
@@ -52,14 +52,14 @@ export interface StartPlugins {
   lens?: LensPublicStart;
   security: SecurityPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-  cases: CasesUiStart;
+  cases: CasesPublicStart;
   timelines: TimelinesUIStart;
   appName?: string;
 }
 
 export interface SetupPlugins {
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
-  cases?: CasesUiSetup;
+  cases?: CasesPublicSetup;
 }
 
 export type StartServices = CoreStart & StartPlugins;

@@ -179,14 +179,14 @@ Want to export multiple workpads? Go to the *Canvas* home page, select the workp
 
 --
 
-include::{kib-repo-dir}/canvas/canvas-edit-workpads.asciidoc[]
+include::{kibana-root}/docs/canvas/canvas-edit-workpads.asciidoc[]
 
-include::{kib-repo-dir}/canvas/canvas-present-workpad.asciidoc[]
+include::{kibana-root}/docs/canvas/canvas-present-workpad.asciidoc[]
 
-include::{kib-repo-dir}/canvas/canvas-tutorial.asciidoc[]
+include::{kibana-root}/docs/canvas/canvas-tutorial.asciidoc[]
 
-include::{kib-repo-dir}/canvas/canvas-expression-lifecycle.asciidoc[]
+include::{kibana-root}/docs/canvas/canvas-expression-lifecycle.asciidoc[]
 
-include::{kib-repo-dir}/canvas/canvas-function-reference.asciidoc[]
+include::{kibana-root}/docs/canvas/canvas-function-reference.asciidoc[]
 
-include::{kib-repo-dir}/canvas/canvas-tinymath-functions.asciidoc[]
+include::{kibana-root}/docs/canvas/canvas-tinymath-functions.asciidoc[]

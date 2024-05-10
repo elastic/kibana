@@ -6,10 +6,8 @@
  */
 
 import { EuiLoadingSpinner } from '@elastic/eui';
-import type { ReactNode } from 'react';
+import type { ReactNode, PropsWithChildren } from 'react';
 import React, { lazy, Suspense } from 'react';
-import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { useIsDarkTheme } from '../../common/use_is_dark_theme';
 import type { CasesContextProps } from '../../components/cases_context';
 
 export type GetCasesContextPropsInternal = CasesContextProps;
@@ -20,9 +18,10 @@ export type GetCasesContextProps = Omit<
   | 'getFilesClient'
 >;
 
-const CasesProviderLazy: React.FC<{ value: GetCasesContextPropsInternal }> = lazy(
-  () => import('../../components/cases_context')
-);
+const CasesProviderLazy: React.FC<{
+  children: React.ReactNode;
+  value: GetCasesContextPropsInternal;
+}> = lazy(() => import('../../components/cases_context'));
 
 const CasesProviderLazyWrapper = ({
   externalReferenceAttachmentTypeRegistry,
@@ -33,29 +32,23 @@ const CasesProviderLazyWrapper = ({
   children,
   releasePhase,
   getFilesClient,
-}: GetCasesContextPropsInternal & { children: ReactNode }) => {
-  const isDarkTheme = useIsDarkTheme();
-
-  return (
-    <Suspense fallback={<EuiLoadingSpinner />}>
-      <StyledComponentsThemeProvider darkMode={isDarkTheme}>
-        <CasesProviderLazy
-          value={{
-            externalReferenceAttachmentTypeRegistry,
-            persistableStateAttachmentTypeRegistry,
-            owner,
-            permissions,
-            features,
-            releasePhase,
-            getFilesClient,
-          }}
-        >
-          {children}
-        </CasesProviderLazy>
-      </StyledComponentsThemeProvider>
-    </Suspense>
-  );
-};
+}: GetCasesContextPropsInternal & { children: ReactNode }) => (
+  <Suspense fallback={<EuiLoadingSpinner />}>
+    <CasesProviderLazy
+      value={{
+        externalReferenceAttachmentTypeRegistry,
+        persistableStateAttachmentTypeRegistry,
+        owner,
+        permissions,
+        features,
+        releasePhase,
+        getFilesClient,
+      }}
+    >
+      {children}
+    </CasesProviderLazy>
+  </Suspense>
+);
 
 CasesProviderLazyWrapper.displayName = 'CasesProviderLazyWrapper';
 
@@ -68,8 +61,8 @@ export const getCasesContextLazy = ({
   | 'externalReferenceAttachmentTypeRegistry'
   | 'persistableStateAttachmentTypeRegistry'
   | 'getFilesClient'
->): (() => React.FC<GetCasesContextProps>) => {
-  const CasesProviderLazyWrapperWithRegistry: React.FC<GetCasesContextProps> = ({
+>): (() => React.FC<PropsWithChildren<GetCasesContextProps>>) => {
+  const CasesProviderLazyWrapperWithRegistry: React.FC<PropsWithChildren<GetCasesContextProps>> = ({
     children,
     ...props
   }) => (

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ResizeObserver } from '@juggle/resize-observer';
 import type React from 'react';
 import type { Store, Middleware, Dispatch, AnyAction } from 'redux';
 import type { BBox } from 'rbush';
@@ -315,6 +314,8 @@ export interface DataState {
   };
 
   readonly detectedBounds?: TimeFilters;
+
+  readonly overriddenTimeBounds?: TimeFilters;
 
   readonly tree?: {
     /**
@@ -877,7 +878,7 @@ export interface ResolverPluginSetup {
 
   /**
    * The Resolver component without the required Providers.
-   * You must wrap this component in: `I18nProvider`, `Router` (from react-router,) `KibanaContextProvider`,
+   * You must wrap this component in: `KibanaRenderContextProvider`, `Router` (from react-router,) `KibanaContextProvider`,
    * and the `Provider` component provided by this object.
    */
   ResolverWithoutProviders: React.MemoExoticComponent<

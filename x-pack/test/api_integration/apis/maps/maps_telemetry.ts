@@ -51,27 +51,28 @@ export default function ({ getService }: FtrProviderContext) {
       delete mapUsage.timeCaptured;
 
       expect(mapUsage).eql({
-        mapsTotalCount: 27,
+        mapsTotalCount: 28,
         basemaps: {},
-        joins: { term: { min: 1, max: 1, total: 4, avg: 0.14814814814814814 } },
+        joins: { term: { min: 1, max: 1, total: 4, avg: 0.14285714285714285 } },
         layerTypes: {
-          es_docs: { min: 1, max: 3, total: 20, avg: 0.7407407407407407 },
-          es_agg_grids: { min: 1, max: 1, total: 6, avg: 0.2222222222222222 },
-          es_point_to_point: { min: 1, max: 1, total: 1, avg: 0.037037037037037035 },
-          es_top_hits: { min: 1, max: 1, total: 2, avg: 0.07407407407407407 },
-          es_agg_heatmap: { min: 1, max: 1, total: 1, avg: 0.037037037037037035 },
-          kbn_tms_raster: { min: 1, max: 1, total: 1, avg: 0.037037037037037035 },
-          ems_basemap: { min: 1, max: 1, total: 1, avg: 0.037037037037037035 },
-          ems_region: { min: 1, max: 1, total: 1, avg: 0.037037037037037035 },
+          es_docs: { min: 1, max: 3, total: 20, avg: 0.7142857142857143 },
+          es_agg_grids: { min: 1, max: 1, total: 6, avg: 0.21428571428571427 },
+          es_point_to_point: { min: 1, max: 1, total: 1, avg: 0.03571428571428571 },
+          es_top_hits: { min: 1, max: 1, total: 2, avg: 0.07142857142857142 },
+          es_agg_heatmap: { min: 1, max: 1, total: 1, avg: 0.03571428571428571 },
+          esql: { min: 1, max: 1, total: 2, avg: 0.07142857142857142 },
+          kbn_tms_raster: { min: 1, max: 1, total: 1, avg: 0.03571428571428571 },
+          ems_basemap: { min: 1, max: 1, total: 1, avg: 0.03571428571428571 },
+          ems_region: { min: 1, max: 1, total: 1, avg: 0.03571428571428571 },
         },
         resolutions: {
-          coarse: { min: 1, max: 1, total: 4, avg: 0.14814814814814814 },
-          super_fine: { min: 1, max: 1, total: 3, avg: 0.1111111111111111 },
+          coarse: { min: 1, max: 1, total: 4, avg: 0.14285714285714285 },
+          super_fine: { min: 1, max: 1, total: 3, avg: 0.10714285714285714 },
         },
         scalingOptions: {
-          limit: { min: 1, max: 3, total: 15, avg: 0.5555555555555556 },
-          clusters: { min: 1, max: 1, total: 1, avg: 0.037037037037037035 },
-          mvt: { min: 1, max: 1, total: 4, avg: 0.14814814814814814 },
+          limit: { min: 1, max: 3, total: 15, avg: 0.5357142857142857 },
+          clusters: { min: 1, max: 1, total: 1, avg: 0.03571428571428571 },
+          mvt: { min: 1, max: 1, total: 4, avg: 0.14285714285714285 },
         },
         attributesPerMap: {
           customIconsCount: {
@@ -80,52 +81,52 @@ export default function ({ getService }: FtrProviderContext) {
             min: 0,
           },
           dataSourcesCount: {
-            avg: 1.1851851851851851,
-            max: 6,
+            avg: 1.2142857142857142,
+            max: 7,
             min: 1,
           },
           emsVectorLayersCount: {
             idThatDoesNotExitForEMSFileSource: {
-              avg: 0.037037037037037035,
+              avg: 0.03571428571428571,
               max: 1,
               min: 1,
             },
           },
           layerTypesCount: {
             BLENDED_VECTOR: {
-              avg: 0.037037037037037035,
+              avg: 0.03571428571428571,
               max: 1,
               min: 1,
             },
             EMS_VECTOR_TILE: {
-              avg: 0.037037037037037035,
+              avg: 0.03571428571428571,
               max: 1,
               min: 1,
             },
             GEOJSON_VECTOR: {
-              avg: 0.8148148148148148,
-              max: 5,
+              avg: 0.8571428571428571,
+              max: 6,
               min: 1,
             },
             HEATMAP: {
-              avg: 0.037037037037037035,
+              avg: 0.03571428571428571,
               max: 1,
               min: 1,
             },
             MVT_VECTOR: {
-              avg: 0.25925925925925924,
+              avg: 0.25,
               max: 1,
               min: 1,
             },
             RASTER_TILE: {
-              avg: 0.037037037037037035,
+              avg: 0.03571428571428571,
               max: 1,
               min: 1,
             },
           },
           layersCount: {
-            avg: 1.2222222222222223,
-            max: 7,
+            avg: 1.25,
+            max: 8,
             min: 1,
           },
         },

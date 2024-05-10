@@ -21,10 +21,10 @@ import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import classnames from 'classnames';
 import type { EuiThemeSize, RenderAs } from '@kbn/core-chrome-browser/src/project_navigation';
 
-import type { NavigateToUrlFn } from '../../../types/internal';
 import { useNavigation as useServices } from '../../services';
-import { useNavigation } from './navigation';
 import { isAbsoluteLink, isActiveFromUrl } from '../../utils';
+import type { NavigateToUrlFn } from '../../types';
+import { useNavigation } from '../navigation';
 import { PanelContext, usePanel } from './panel';
 import { NavigationItemOpenPanel } from './navigation_item_open_panel';
 
@@ -195,7 +195,7 @@ const nodeToEuiCollapsibleNavProps = (
   const dataTestSubj = getTestSubj(navNode, isSelected);
 
   let spaceBefore = navNode.spaceBefore;
-  if (spaceBefore === undefined && treeDepth === 1 && hasChildren) {
+  if (spaceBefore === undefined && treeDepth === 1 && hasChildren && !isItem) {
     // For groups at level 1 that don't have a space specified we default to add a "m"
     // space. For all other groups, unless specified, there is no vertical space.
     spaceBefore = DEFAULT_SPACE_BETWEEN_LEVEL_1_GROUPS;
@@ -309,7 +309,7 @@ const nodeToEuiCollapsibleNavProps = (
   const hasVisibleChildren = (items?.length ?? 0) > 0;
   const isVisible = isItem || hasVisibleChildren;
 
-  if (isVisible && spaceBefore) {
+  if (isVisible && Boolean(spaceBefore)) {
     items.unshift({
       renderItem: () => <EuiSpacer size={spaceBefore!} />,
     });
@@ -318,15 +318,9 @@ const nodeToEuiCollapsibleNavProps = (
   return { items, isVisible };
 };
 
-// Temporary solution to prevent showing the outline when the page load when the
-// accordion is auto-expanded if one of its children is active
-// Once https://github.com/elastic/eui/pull/7314 is released in Kibana we can
-// safely remove this CSS class.
 const className = css`
-  .euiAccordion__childWrapper,
-  .euiAccordion__children,
-  .euiCollapsibleNavAccordion__children {
-    outline: none;
+  .euiAccordion__childWrapper {
+    transition: none; // Remove the transition as it does not play well with dynamic links added to the accordion
   }
 `;
 

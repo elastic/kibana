@@ -11,8 +11,7 @@ import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { EuiCodeBlock, EuiTextColor } from '@elastic/eui';
 
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
-import type { CodeEditorProps } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor, type CodeEditorProps } from '@kbn/code-editor';
 
 const CodeEditorContainer = styled.div`
   min-height: 0;

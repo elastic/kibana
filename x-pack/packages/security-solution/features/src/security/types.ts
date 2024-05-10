@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { AppFeatureSecurityKey, SecuritySubFeatureId } from '../app_features_keys';
-import type { AppFeatureKibanaConfig } from '../types';
+import type { ProductFeatureSecurityKey, SecuritySubFeatureId } from '../product_features_keys';
+import type { ProductFeatureKibanaConfig } from '../types';
 
 export interface SecurityFeatureParams {
   experimentalFeatures: Record<string, boolean>;
   savedObjects: string[];
 }
 
-export type DefaultSecurityAppFeaturesConfig = Omit<
-  Record<AppFeatureSecurityKey, AppFeatureKibanaConfig<SecuritySubFeatureId>>,
-  AppFeatureSecurityKey.endpointExceptions
-  // | add not default security app features here
+export type DefaultSecurityProductFeaturesConfig = Omit<
+  Record<ProductFeatureSecurityKey, ProductFeatureKibanaConfig<SecuritySubFeatureId>>,
+  ProductFeatureSecurityKey.endpointExceptions
+  // | add not generic security app features here
 >;

@@ -14,6 +14,7 @@ import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { Section } from '../../../../common/constants';
 import { documentationService } from '../../services/documentation';
 import { ComponentTemplateList } from '../../components/component_templates';
+import { useAppContext } from '../../app_context';
 import { IndexList } from './index_list';
 import { EnrichPoliciesList } from './enrich_policies_list';
 import { IndexDetailsPage } from './index_list/details_page';
@@ -38,6 +39,9 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
   },
   history,
 }) => {
+  const {
+    plugins: { console: consolePlugin },
+  } = useAppContext();
   const tabs = [
     {
       id: Section.Indices,
@@ -141,6 +145,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
         />
         <Route exact path={`/${Section.EnrichPolicies}`} component={EnrichPoliciesList} />
       </Routes>
+      {consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null}
     </>
   );
   return (

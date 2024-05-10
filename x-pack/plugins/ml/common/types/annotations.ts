@@ -59,7 +59,7 @@
 //     ]
 // }
 
-import { MlPartitionFieldsType } from '@kbn/ml-anomaly-utils';
+import type { MlPartitionFieldsType } from '@kbn/ml-anomaly-utils';
 import { ANNOTATION_TYPE } from '../constants/annotations';
 
 export type AnnotationFieldName = 'partition_field_name' | 'over_field_name' | 'by_field_name';

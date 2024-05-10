@@ -12,13 +12,15 @@ import '@testing-library/jest-dom/extend-expect';
 
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
+import type {
+  NumericChartData,
+  OrdinalChartData,
+  UnsupportedChartData,
+} from '../lib/field_histograms';
 import {
   isNumericChartData,
   isOrdinalChartData,
   isUnsupportedChartData,
-  NumericChartData,
-  OrdinalChartData,
-  UnsupportedChartData,
 } from '../lib/field_histograms';
 
 import { getFieldType, getLegendText, getXScaleType, useColumnChart } from './use_column_chart';

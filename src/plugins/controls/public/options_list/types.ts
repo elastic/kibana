@@ -34,6 +34,7 @@ export interface OptionsListComponentState {
   popoverOpen: boolean;
   field?: FieldSpec;
   error?: string;
+  showInvalidSelectionWarning?: boolean;
 }
 
 // public only - redux embeddable state type

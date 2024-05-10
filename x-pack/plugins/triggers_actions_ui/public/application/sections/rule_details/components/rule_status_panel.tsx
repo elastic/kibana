@@ -102,6 +102,13 @@ export const RuleStatusPanel: React.FC<RuleStatusPanelWithApiProps> = ({
     requestRefresh();
   }, [requestRefresh, loadEventLogs]);
 
+  const onDisableRule = useCallback(
+    (untrack: boolean) => {
+      return bulkDisableRules({ ids: [rule.id], untrack });
+    },
+    [bulkDisableRules, rule.id]
+  );
+
   useEffect(() => {
     if (isInitialized.current) {
       loadEventLogs();
@@ -126,7 +133,7 @@ export const RuleStatusPanel: React.FC<RuleStatusPanelWithApiProps> = ({
           </EuiFlexItem>
           <EuiFlexItem>
             <RuleStatusDropdown
-              disableRule={() => bulkDisableRules({ ids: [rule.id] })}
+              disableRule={onDisableRule}
               enableRule={() => bulkEnableRules({ ids: [rule.id] })}
               snoozeRule={async () => {}}
               unsnoozeRule={async () => {}}

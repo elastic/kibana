@@ -11,7 +11,7 @@ import type * as H from 'history';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import type { CasesPluginStart } from '../../../types';
+import type { CasesPublicStartDependencies } from '../../../types';
 import type { CasesContextProps } from '../../cases_context';
 
 export type CasesUIActionContextProps = Pick<
@@ -23,7 +23,7 @@ export type CasesUIActionContextProps = Pick<
 
 export interface CasesUIActionProps {
   core: CoreStart;
-  plugins: CasesPluginStart;
+  plugins: CasesPublicStartDependencies;
   caseContextProps: CasesUIActionContextProps;
   history: H.History;
   storage: Storage;

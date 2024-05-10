@@ -7,27 +7,45 @@
 
 import expect from 'expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
-  const supertest = getService('supertest');
+  const svlUserManager = getService('svlUserManager');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  let commonRequestHeader: Record<string, string>;
+  let internalRequestHeader: Record<string, string>;
+  let roleAuthc: RoleCredentials;
 
   describe('spaces', function () {
+    before(async () => {
+      // admin is the only predefined role that will work for all 3 solutions
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      commonRequestHeader = svlCommonApi.getCommonRequestHeader();
+      internalRequestHeader = svlCommonApi.getInternalRequestHeader();
+    });
+
+    after(async () => {
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+    });
+
     describe('route access', () => {
       describe('disabled', () => {
         it('#delete', async () => {
-          const { body, status } = await supertest
+          const { body, status } = await supertestWithoutAuth
             .delete('/api/spaces/space/default')
-            .set(svlCommonApi.getCommonRequestHeader());
+            .set(commonRequestHeader)
+            .set(roleAuthc.apiKeyHeader);
 
           // normally we'd get a 400 bad request if we tried to delete the default space
           svlCommonApi.assertApiNotFound(body, status);
         });
 
         it('#create', async () => {
-          const { body, status } = await supertest
+          const { body, status } = await supertestWithoutAuth
             .post('/api/spaces/space')
-            .set(svlCommonApi.getCommonRequestHeader())
+            .set(commonRequestHeader)
+            .set(roleAuthc.apiKeyHeader)
             .send({
               id: 'custom',
               name: 'Custom',
@@ -38,9 +56,10 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('#update requires internal header', async () => {
-          const { body, status } = await supertest
+          const { body, status } = await supertestWithoutAuth
             .put('/api/spaces/space/default')
-            .set(svlCommonApi.getCommonRequestHeader())
+            .set(commonRequestHeader)
+            .set(roleAuthc.apiKeyHeader)
             .send({
               id: 'default',
               name: 'UPDATED!',
@@ -51,45 +70,50 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('#copyToSpace', async () => {
-          const { body, status } = await supertest
+          const { body, status } = await supertestWithoutAuth
             .post('/api/spaces/_copy_saved_objects')
-            .set(svlCommonApi.getCommonRequestHeader());
+            .set(commonRequestHeader)
+            .set(roleAuthc.apiKeyHeader);
 
           // without a request body we would normally a 400 bad request if the endpoint was registered
           svlCommonApi.assertApiNotFound(body, status);
         });
 
         it('#resolveCopyToSpaceErrors', async () => {
-          const { body, status } = await supertest
+          const { body, status } = await supertestWithoutAuth
             .post('/api/spaces/_resolve_copy_saved_objects_errors')
-            .set(svlCommonApi.getCommonRequestHeader());
+            .set(commonRequestHeader)
+            .set(roleAuthc.apiKeyHeader);
 
           // without a request body we would normally a 400 bad request if the endpoint was registered
           svlCommonApi.assertApiNotFound(body, status);
         });
 
         it('#updateObjectsSpaces', async () => {
-          const { body, status } = await supertest
+          const { body, status } = await supertestWithoutAuth
             .post('/api/spaces/_update_objects_spaces')
-            .set(svlCommonApi.getCommonRequestHeader());
+            .set(commonRequestHeader)
+            .set(roleAuthc.apiKeyHeader);
 
           // without a request body we would normally a 400 bad request if the endpoint was registered
           svlCommonApi.assertApiNotFound(body, status);
         });
 
         it('#getShareableReferences', async () => {
-          const { body, status } = await supertest
+          const { body, status } = await supertestWithoutAuth
             .post('/api/spaces/_get_shareable_references')
-            .set(svlCommonApi.getCommonRequestHeader());
+            .set(commonRequestHeader)
+            .set(roleAuthc.apiKeyHeader);
 
           // without a request body we would normally a 400 bad request if the endpoint was registered
           svlCommonApi.assertApiNotFound(body, status);
         });
 
         it('#disableLegacyUrlAliases', async () => {
-          const { body, status } = await supertest
+          const { body, status } = await supertestWithoutAuth
             .post('/api/spaces/_disable_legacy_url_aliases')
-            .set(svlCommonApi.getCommonRequestHeader());
+            .set(commonRequestHeader)
+            .set(roleAuthc.apiKeyHeader);
 
           // without a request body we would normally a 400 bad request if the endpoint was registered
           svlCommonApi.assertApiNotFound(body, status);
@@ -101,9 +125,10 @@ export default function ({ getService }: FtrProviderContext) {
           let body: any;
           let status: number;
 
-          ({ body, status } = await supertest
+          ({ body, status } = await supertestWithoutAuth
             .get('/api/spaces/space/default')
-            .set(svlCommonApi.getCommonRequestHeader()));
+            .set(commonRequestHeader)
+            .set(roleAuthc.apiKeyHeader));
           // expect a rejection because we're not using the internal header
           expect(body).toEqual({
             statusCode: 400,
@@ -114,9 +139,10 @@ export default function ({ getService }: FtrProviderContext) {
           });
           expect(status).toBe(400);
 
-          ({ body, status } = await supertest
+          ({ body, status } = await supertestWithoutAuth
             .get('/api/spaces/space/default')
-            .set(svlCommonApi.getInternalRequestHeader()));
+            .set(internalRequestHeader)
+            .set(roleAuthc.apiKeyHeader));
           // expect success because we're using the internal header
           expect(body).toEqual(
             expect.objectContaining({
@@ -130,9 +156,10 @@ export default function ({ getService }: FtrProviderContext) {
           let body: any;
           let status: number;
 
-          ({ body, status } = await supertest
+          ({ body, status } = await supertestWithoutAuth
             .get('/api/spaces/space')
-            .set(svlCommonApi.getCommonRequestHeader()));
+            .set(commonRequestHeader)
+            .set(roleAuthc.apiKeyHeader));
           // expect a rejection because we're not using the internal header
           expect(body).toEqual({
             statusCode: 400,
@@ -143,9 +170,10 @@ export default function ({ getService }: FtrProviderContext) {
           });
           expect(status).toBe(400);
 
-          ({ body, status } = await supertest
+          ({ body, status } = await supertestWithoutAuth
             .get('/api/spaces/space')
-            .set(svlCommonApi.getInternalRequestHeader()));
+            .set(internalRequestHeader)
+            .set(roleAuthc.apiKeyHeader));
           // expect success because we're using the internal header
           expect(body).toEqual(
             expect.arrayContaining([
@@ -161,9 +189,10 @@ export default function ({ getService }: FtrProviderContext) {
           let body: any;
           let status: number;
 
-          ({ body, status } = await supertest
+          ({ body, status } = await supertestWithoutAuth
             .get('/internal/spaces/_active_space')
-            .set(svlCommonApi.getCommonRequestHeader()));
+            .set(commonRequestHeader)
+            .set(roleAuthc.apiKeyHeader));
           // expect a rejection because we're not using the internal header
           expect(body).toEqual({
             statusCode: 400,
@@ -174,9 +203,10 @@ export default function ({ getService }: FtrProviderContext) {
           });
           expect(status).toBe(400);
 
-          ({ body, status } = await supertest
+          ({ body, status } = await supertestWithoutAuth
             .get('/internal/spaces/_active_space')
-            .set(svlCommonApi.getInternalRequestHeader()));
+            .set(internalRequestHeader)
+            .set(roleAuthc.apiKeyHeader));
           // expect success because we're using the internal header
           expect(body).toEqual(
             expect.objectContaining({

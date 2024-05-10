@@ -25,6 +25,8 @@ import { integrationsServiceMock } from '@kbn/core-integrations-browser-mocks';
 import { coreAppsMock } from '@kbn/core-apps-browser-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-browser-mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
+import { securityServiceMock } from '@kbn/core-security-browser-mocks';
+import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 
 export const analyticsServiceStartMock = analyticsServiceMock.createAnalyticsServiceStart();
 export const MockAnalyticsService = analyticsServiceMock.create();
@@ -155,4 +157,18 @@ export const MockLoggingSystem = loggingSystemMock.create();
 export const LoggingSystemConstructor = jest.fn().mockImplementation(() => MockLoggingSystem);
 jest.doMock('@kbn/core-logging-browser-internal', () => ({
   BrowserLoggingSystem: LoggingSystemConstructor,
+}));
+
+export const MockSecurityService = securityServiceMock.create();
+export const SecurityServiceConstructor = jest.fn().mockImplementation(() => MockSecurityService);
+jest.doMock('@kbn/core-security-browser-internal', () => ({
+  SecurityService: SecurityServiceConstructor,
+}));
+
+export const MockUserProfileService = userProfileServiceMock.create();
+export const UserProfileServiceConstructor = jest
+  .fn()
+  .mockImplementation(() => MockUserProfileService);
+jest.doMock('@kbn/core-user-profile-browser-internal', () => ({
+  UserProfileService: UserProfileServiceConstructor,
 }));

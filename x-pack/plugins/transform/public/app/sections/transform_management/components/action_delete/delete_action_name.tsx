@@ -13,10 +13,11 @@ import { EuiToolTip } from '@elastic/eui';
 
 import { missingTransformStats } from '../../../../common/transform_list';
 import { createNoStatsTooltipMessage } from '../../../../../../common/utils/create_stats_unknown_message';
-import { TransformCapabilities } from '../../../../../../common/types/capabilities';
-import { TransformListRow } from '../../../../common';
+import type { TransformCapabilities } from '../../../../../../common/types/capabilities';
+import type { TransformListRow } from '../../../../common';
 import { createCapabilityFailureMessage } from '../../../../../../common/utils/create_capability_failure_message';
-import { TransformState, TRANSFORM_STATE } from '../../../../../../common/constants';
+import type { TransformState } from '../../../../../../common/constants';
+import { TRANSFORM_STATE } from '../../../../../../common/constants';
 
 export const deleteActionNameText = i18n.translate(
   'xpack.transform.transformList.deleteActionNameText',

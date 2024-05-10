@@ -10,7 +10,7 @@ import { inspect } from 'util';
 
 import { fork, type ChildProcess } from 'child_process';
 import * as Rx from 'rxjs';
-import { map, takeUntil, first, ignoreElements } from 'rxjs/operators';
+import { map, takeUntil, first, ignoreElements } from 'rxjs';
 
 import { isWorkerMsg, WorkerConfig, WorkerMsg, Bundle, BundleRemotes } from '../common';
 

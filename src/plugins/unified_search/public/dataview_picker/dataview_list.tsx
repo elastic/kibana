@@ -19,9 +19,8 @@ import {
 } from '@elastic/eui';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
-
 import { css } from '@emotion/react';
-
+import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { SortingService } from './sorting_service';
 import { MIDDLE_TRUNCATION_PROPS } from '../filter_bar/filter_editor/lib/helpers';
 
@@ -89,9 +88,13 @@ export function DataViewsList({
     []
   );
 
-  const [sortedDataViewsList, setSortedDataViewsList] = useState<DataViewListItemEnhanced[]>(
-    sortingService.sortData(dataViewsList)
-  );
+  const [sortedDataViewsList, setSortedDataViewsList] = useState<DataViewListItemEnhanced[]>(() => {
+    // Don't show ES|QL ad hoc data views in the data view list
+    const filteredDataViewsList = dataViewsList.filter(
+      (dataView) => !dataView.isAdhoc || dataView.type !== ESQL_TYPE
+    );
+    return sortingService.sortData(filteredDataViewsList);
+  });
 
   const sortOrderOptions = useMemo(
     () =>

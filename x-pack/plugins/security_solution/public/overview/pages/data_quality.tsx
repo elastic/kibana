@@ -35,7 +35,7 @@ import { SecurityPageName } from '../../app/types';
 import { getGroupByFieldsOnClick } from '../../common/components/alerts_treemap/lib/helpers';
 import { useThemes } from '../../common/components/charts/common';
 import { HeaderPage } from '../../common/components/header_page';
-import { LandingPageComponent } from '../../common/components/landing_page';
+import { EmptyPrompt } from '../../common/components/empty_prompt';
 import { useLocalStorage } from '../../common/components/local_storage';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { APP_ID, DEFAULT_BYTES_FORMAT, DEFAULT_NUMBER_FORMAT } from '../../../common/constants';
@@ -136,12 +136,6 @@ const DataQualityComponent: React.FC = () => {
   const { baseTheme, theme } = useThemes();
   const toasts = useToasts();
 
-  const addSuccessToast = useCallback(
-    (toast: { title: string }) => {
-      toasts.addSuccess(toast);
-    },
-    [toasts]
-  );
   const [defaultBytesFormat] = useUiSetting$<string>(DEFAULT_BYTES_FORMAT);
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
   const labelInputId = useGeneratedHtmlId({ prefix: 'labelInput' });
@@ -280,7 +274,6 @@ const DataQualityComponent: React.FC = () => {
           </HeaderPage>
 
           <DataQualityPanel
-            addSuccessToast={addSuccessToast}
             baseTheme={baseTheme}
             canUserCreateAndReadCases={canUserCreateAndReadCases}
             defaultBytesFormat={defaultBytesFormat}
@@ -299,10 +292,11 @@ const DataQualityComponent: React.FC = () => {
             setLastChecked={setLastChecked}
             startDate={startDate}
             theme={theme}
+            toasts={toasts}
           />
         </SecuritySolutionPageWrapper>
       ) : (
-        <LandingPageComponent />
+        <EmptyPrompt />
       )}
 
       <SpyRoute pageName={SecurityPageName.dataQuality} />

@@ -21,14 +21,17 @@ import type {
 } from '../../../../../common/api/detection_engine/model/alerts';
 import type { RuleServices } from '../types';
 import { createEnrichEventsFunction } from './enrichments';
+import type { ExperimentalFeatures } from '../../../../../common';
 
 export interface GenericBulkCreateResponse<T extends BaseFieldsLatest> {
   success: boolean;
   bulkCreateDuration: string;
   enrichmentDuration: string;
   createdItemsCount: number;
+  suppressedItemsCount: number;
   createdItems: Array<AlertWithCommonFieldsLatest<T> & { _id: string; _index: string }>;
   errors: string[];
+  alertsWereTruncated: boolean;
 }
 
 export const bulkCreateWithSuppression = async <
@@ -40,6 +43,9 @@ export const bulkCreateWithSuppression = async <
   services,
   suppressionWindow,
   alertTimestampOverride,
+  isSuppressionPerRuleExecution,
+  maxAlerts,
+  experimentalFeatures,
 }: {
   alertWithSuppression: SuppressedAlertService;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
@@ -47,6 +53,9 @@ export const bulkCreateWithSuppression = async <
   services: RuleServices;
   suppressionWindow: string;
   alertTimestampOverride: Date | undefined;
+  isSuppressionPerRuleExecution?: boolean;
+  maxAlerts?: number;
+  experimentalFeatures: ExperimentalFeatures;
 }): Promise<GenericBulkCreateResponse<T>> => {
   if (wrappedDocs.length === 0) {
     return {
@@ -55,7 +64,9 @@ export const bulkCreateWithSuppression = async <
       enrichmentDuration: '0',
       bulkCreateDuration: '0',
       createdItemsCount: 0,
+      suppressedItemsCount: 0,
       createdItems: [],
+      alertsWereTruncated: false,
     };
   }
 
@@ -71,7 +82,7 @@ export const bulkCreateWithSuppression = async <
   const enrichAlertsWrapper: typeof enrichAlerts = async (alerts, params) => {
     enrichmentsTimeStart = performance.now();
     try {
-      const enrichedAlerts = await enrichAlerts(alerts, params);
+      const enrichedAlerts = await enrichAlerts(alerts, params, experimentalFeatures);
       return enrichedAlerts;
     } catch (error) {
       ruleExecutionLogger.error(`Alerts enrichment failed: ${error}`);
@@ -81,16 +92,19 @@ export const bulkCreateWithSuppression = async <
     }
   };
 
-  const { createdAlerts, errors } = await alertWithSuppression(
-    wrappedDocs.map((doc) => ({
-      _id: doc._id,
-      // `fields` should have already been merged into `doc._source`
-      _source: doc._source,
-    })),
-    suppressionWindow,
-    enrichAlertsWrapper,
-    alertTimestampOverride
-  );
+  const { createdAlerts, errors, suppressedAlerts, alertsWereTruncated } =
+    await alertWithSuppression(
+      wrappedDocs.map((doc) => ({
+        _id: doc._id,
+        // `fields` should have already been merged into `doc._source`
+        _source: doc._source,
+      })),
+      suppressionWindow,
+      enrichAlertsWrapper,
+      alertTimestampOverride,
+      isSuppressionPerRuleExecution,
+      maxAlerts
+    );
 
   const end = performance.now();
 
@@ -105,6 +119,8 @@ export const bulkCreateWithSuppression = async <
       bulkCreateDuration: makeFloatString(end - start),
       createdItemsCount: createdAlerts.length,
       createdItems: createdAlerts,
+      suppressedItemsCount: suppressedAlerts.length,
+      alertsWereTruncated,
     };
   } else {
     return {
@@ -114,6 +130,8 @@ export const bulkCreateWithSuppression = async <
       enrichmentDuration: makeFloatString(enrichmentsTimeFinish - enrichmentsTimeStart),
       createdItemsCount: createdAlerts.length,
       createdItems: createdAlerts,
+      suppressedItemsCount: suppressedAlerts.length,
+      alertsWereTruncated,
     };
   }
 };

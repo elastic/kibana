@@ -10,10 +10,13 @@ import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
 
 import { docLinks } from '../../doc_links';
 
+import { INDEX_NAME_PLACEHOLDER } from './constants';
+
 import { ingestKeysToRuby } from './helpers';
 
 export const rubyDefinition: LanguageDefinition = {
-  buildSearchQuery: ({ indexName }) => `client.search(index: '${indexName}', q: 'snow')`,
+  buildSearchQuery: ({ indexName = INDEX_NAME_PLACEHOLDER }) =>
+    `client.search(index: '${indexName}', q: 'snow')`,
   configureClient: ({ url, apiKey, cloudId }) => `client = Elasticsearch::Client.new(
   api_key: '${apiKey}',
   ${cloudId ? `cloud_id: ${cloudId},` : `url: '${url}',`}
@@ -28,7 +31,11 @@ export const rubyDefinition: LanguageDefinition = {
   },
   iconType: 'ruby.svg',
   id: Languages.RUBY,
-  ingestData: ({ indexName, ingestPipeline, extraIngestDocumentValues }) => {
+  ingestData: ({
+    indexName = INDEX_NAME_PLACEHOLDER,
+    ingestPipeline,
+    extraIngestDocumentValues,
+  }) => {
     const ingestDocumentKeys = ingestPipeline ? ingestKeysToRuby(extraIngestDocumentValues) : '';
     return `documents = [
   { index: { _index: '${indexName}', data: {name: "Snow Crash", author: "Neal Stephenson", release_date: "1992-06-01", page_count: 470${ingestDocumentKeys}} } },

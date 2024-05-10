@@ -13,6 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { Join } from './resources/join';
 import { JoinDocumentationPopover } from './resources/join_documentation_popover';
 import { IVectorLayer } from '../../../classes/layers/vector_layer';
+import { isESSource } from '../../../classes/sources/es_source';
 import { JoinDescriptor } from '../../../../common/descriptor_types';
 import { SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { AddJoinButton } from './add_join_button';
@@ -38,7 +39,7 @@ export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDispla
   useEffect(() => {
     let ignore = false;
     const source = layer.getSource();
-    if (!source.isESSource()) {
+    if (!isESSource(source)) {
       setSpatialJoinDisableReason(
         i18n.translate('xpack.maps.layerPanel.joinEditor.spatialJoin.disabled.esSourceOnly', {
           defaultMessage: 'Spatial joins are not supported for {sourceType}.',

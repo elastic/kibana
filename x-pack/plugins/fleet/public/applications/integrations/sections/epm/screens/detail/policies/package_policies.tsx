@@ -20,6 +20,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative, FormattedMessage } from '@kbn/i18n-react';
 
+import { policyHasFleetServer } from '../../../../../../../../common/services';
+
 import { InstallStatus } from '../../../../../types';
 import type { GetAgentPoliciesResponseItem, InMemoryPackagePolicy } from '../../../../../types';
 import {
@@ -112,6 +114,8 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
   const { isPackagePolicyUpgradable } = useIsPackagePolicyUpgradable();
 
   const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
+  const canAddAgents = useAuthz().fleet.addAgents;
+  const canAddFleetServers = useAuthz().fleet.addFleetServers;
 
   const packageAndAgentPolicies = useMemo((): Array<{
     agentPolicy?: GetAgentPoliciesResponseItem;
@@ -263,11 +267,15 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
           if (!agentPolicy) {
             return null;
           }
+          const canAddAgentsForPolicy = policyHasFleetServer(agentPolicy)
+            ? canAddFleetServers
+            : canAddAgents;
           return (
             <PackagePolicyAgentsCell
               agentPolicy={agentPolicy}
               agentCount={agentPolicy.agents}
               onAddAgent={() => setFlyoutOpenForPolicyId(agentPolicy.id)}
+              canAddAgents={canAddAgentsForPolicy}
               hasHelpPopover={showAddAgentHelpForPackagePolicyId === packagePolicy.id}
             />
           );
@@ -299,7 +307,13 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
         },
       },
     ],
-    [getHref, showAddAgentHelpForPackagePolicyId, canWriteIntegrationPolicies]
+    [
+      getHref,
+      canWriteIntegrationPolicies,
+      canAddAgents,
+      canAddFleetServers,
+      showAddAgentHelpForPackagePolicyId,
+    ]
   );
 
   const noItemsMessage = useMemo(() => {

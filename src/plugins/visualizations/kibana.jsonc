@@ -17,7 +17,6 @@
       "navigation",
       "embeddable",
       "inspector",
-      "savedObjects",
       "screenshotMode",
       "presentationUtil",
       "dataViews",
@@ -40,7 +39,8 @@
     "requiredBundles": [
       "kibanaUtils",
       "kibanaReact",
-      "charts"
+      "charts",
+      "savedObjects",
     ],
     "extraPublicDirs": [
       "common/constants",

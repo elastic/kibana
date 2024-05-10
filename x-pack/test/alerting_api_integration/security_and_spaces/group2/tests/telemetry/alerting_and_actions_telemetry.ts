@@ -28,7 +28,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
 
   describe('test telemetry', () => {
     const objectRemover = new ObjectRemover(supertest);
-    const alwaysFiringRuleId: { [key: string]: string } = {};
+    const esQueryRuleId: { [key: string]: string } = {};
 
     beforeEach(async () => {
       await esTestIndexTool.destroy();
@@ -90,7 +90,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
           connectorTypeId: 'test.excluded',
         });
 
-        alwaysFiringRuleId[space.id] = await createRule({
+        await createRule({
           space: space.id,
           ruleOverwrites: {
             rule_type_id: 'test.patternFiring',
@@ -158,6 +158,28 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
             actions: [],
           },
         });
+        // ES query rule
+        esQueryRuleId[space.id] = await createRule({
+          space: space.id,
+          ruleOverwrites: {
+            rule_type_id: '.es-query',
+            schedule: { interval: '1h' },
+            throttle: null,
+            params: {
+              size: 100,
+              timeWindowSize: 5,
+              timeWindowUnit: 'm',
+              thresholdComparator: '>',
+              threshold: [0],
+              searchType: 'esqlQuery',
+              esqlQuery: {
+                esql: 'from .kibana-alerting-test-data | stats c = count(date) | where c < 0',
+              },
+              timeField: 'date_epoch_millis',
+            },
+            actions: [],
+          },
+        });
       }
     }
 
@@ -220,7 +242,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
     function verifyAlertingTelemetry(telemetry: any) {
       logger.info(`alerting telemetry - ${JSON.stringify(telemetry)}`);
       // total number of enabled rules
-      expect(telemetry.count_active_total).to.equal(9);
+      expect(telemetry.count_active_total).to.equal(12);
 
       // total number of disabled rules
       expect(telemetry.count_disabled_total).to.equal(3);
@@ -230,18 +252,26 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
       expect(telemetry.count_by_type.test__patternFiring).to.equal(3);
       expect(telemetry.count_by_type.test__multipleSearches).to.equal(3);
       expect(telemetry.count_by_type.test__throw).to.equal(3);
+      expect(telemetry.count_by_type['__es-query']).to.equal(3);
+      expect(telemetry.count_by_type['__es-query_es_query']).to.equal(0);
+      expect(telemetry.count_by_type['__es-query_search_source']).to.equal(0);
+      expect(telemetry.count_by_type['__es-query_esql_query']).to.equal(3);
 
       // total number of enabled rules broken down by rule type
       expect(telemetry.count_active_by_type.test__patternFiring).to.equal(3);
       expect(telemetry.count_active_by_type.test__multipleSearches).to.equal(3);
       expect(telemetry.count_active_by_type.test__throw).to.equal(3);
+      expect(telemetry.count_active_by_type['__es-query']).to.equal(3);
+      expect(telemetry.count_active_by_type['__es-query_es_query']).to.equal(0);
+      expect(telemetry.count_active_by_type['__es-query_search_source']).to.equal(0);
+      expect(telemetry.count_active_by_type['__es-query_esql_query']).to.equal(3);
 
       // throttle time stats
       expect(telemetry.throttle_time.min).to.equal('0s');
-      expect(telemetry.throttle_time.avg).to.equal('0.4s');
+      expect(telemetry.throttle_time.avg).to.equal('0.3333333333333333s');
       expect(telemetry.throttle_time.max).to.equal('1s');
       expect(telemetry.throttle_time_number_s.min).to.equal(0);
-      expect(telemetry.throttle_time_number_s.avg).to.equal(0.4);
+      expect(telemetry.throttle_time_number_s.avg).to.equal(0.3333333333333333);
       expect(telemetry.throttle_time_number_s.max).to.equal(1);
 
       // schedule interval stats
@@ -254,7 +284,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
 
       // attached connectors stats
       expect(telemetry.connectors_per_alert.min).to.equal(0);
-      expect(telemetry.connectors_per_alert.avg).to.equal(1);
+      expect(telemetry.connectors_per_alert.avg).to.equal(0.8);
       expect(telemetry.connectors_per_alert.max).to.equal(3);
 
       // number of spaces with rules
@@ -269,6 +299,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
       expect(telemetry.count_by_type.test__noop >= 3).to.be(true);
       expect(telemetry.count_by_type.test__multipleSearches >= 3).to.be(true);
       expect(telemetry.count_by_type.test__throw >= 3).to.be(true);
+      expect(telemetry.count_by_type['__es-query'] >= 3).to.be(true);
 
       // average execution time - just checking for non-zero as we can't set an exact number
       expect(telemetry.avg_execution_time_per_day > 0).to.be(true);
@@ -277,6 +308,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
       expect(telemetry.avg_execution_time_by_type_per_day.test__patternFiring > 0).to.be(true);
       expect(telemetry.avg_execution_time_by_type_per_day.test__multipleSearches > 0).to.be(true);
       expect(telemetry.avg_execution_time_by_type_per_day.test__throw > 0).to.be(true);
+      expect(telemetry.avg_execution_time_by_type_per_day['__es-query'] > 0).to.be(true);
 
       // average es search time - just checking for non-zero as we can't set an exact number
       expect(telemetry.avg_es_search_duration_per_day > 0).to.be(true);
@@ -360,6 +392,16 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
         telemetry.percentile_num_generated_actions_by_type_per_day.p99.test__multipleSearches
       ).to.equal(0);
 
+      expect(telemetry.percentile_num_generated_actions_by_type_per_day.p50['__es-query']).to.equal(
+        0
+      );
+      expect(telemetry.percentile_num_generated_actions_by_type_per_day.p90['__es-query']).to.equal(
+        0
+      );
+      expect(telemetry.percentile_num_generated_actions_by_type_per_day.p99['__es-query']).to.equal(
+        0
+      );
+
       // percentile calculations for number of alerts
       expect(telemetry.percentile_num_alerts_per_day.p50 >= 0).to.be(true);
       expect(telemetry.percentile_num_alerts_per_day.p90 >= 0).to.be(true);
@@ -392,17 +434,21 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
         0
       );
 
+      expect(telemetry.percentile_num_alerts_by_type_per_day.p50['__es-query']).to.equal(0);
+      expect(telemetry.percentile_num_alerts_by_type_per_day.p90['__es-query']).to.equal(0);
+      expect(telemetry.percentile_num_alerts_by_type_per_day.p99['__es-query']).to.equal(0);
+
       // rules grouped by execution status
       expect(telemetry.count_rules_by_execution_status.success > 0).to.be(true);
       expect(telemetry.count_rules_by_execution_status.error > 0).to.be(true);
       expect(telemetry.count_rules_by_execution_status.warning).to.equal(0);
 
       // number of rules that has tags
-      expect(telemetry.count_rules_with_tags).to.equal(12);
+      expect(telemetry.count_rules_with_tags).to.equal(15);
       // rules grouped by notify when
       expect(telemetry.count_rules_by_notify_when.on_action_group_change).to.equal(0);
       expect(telemetry.count_rules_by_notify_when.on_active_alert).to.equal(0);
-      expect(telemetry.count_rules_by_notify_when.on_throttle_interval).to.equal(12);
+      expect(telemetry.count_rules_by_notify_when.on_throttle_interval).to.equal(15);
       // rules snoozed
       expect(telemetry.count_rules_snoozed).to.equal(0);
       // rules muted
@@ -427,7 +473,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
           getService,
           spaceId: Spaces[2].id,
           type: 'alert',
-          id: alwaysFiringRuleId[Spaces[2].id],
+          id: esQueryRuleId[Spaces[2].id],
           provider: 'alerting',
           actions: new Map([['execute', { gte: 1 }]]),
         });
@@ -474,7 +520,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
         expect(taskState).not.to.be(undefined);
         alertingTelemetry = JSON.parse(taskState!);
         expect(alertingTelemetry.runs > 0).to.be(true);
-        expect(alertingTelemetry.count_total).to.equal(12);
+        expect(alertingTelemetry.count_total).to.equal(15);
       });
 
       verifyAlertingTelemetry(alertingTelemetry);

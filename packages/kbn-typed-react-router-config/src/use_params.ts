@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Location } from 'history';
+import { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useRouter } from './use_router';
 
@@ -23,9 +23,9 @@ export function useParams(...args: any[]) {
     args.pop();
   }
 
-  const paths = args as string[];
-
-  const getParamsArgs = [...paths, location, optional] as [never, Location<any>, boolean];
-
-  return router.getParams(...getParamsArgs);
+  return useMemo(() => {
+    // @ts-expect-error
+    return router.getParams(...args, location, optional);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router, ...args, location, optional]);
 }

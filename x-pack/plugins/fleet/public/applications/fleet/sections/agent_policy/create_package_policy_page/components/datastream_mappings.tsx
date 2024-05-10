@@ -5,14 +5,23 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle, EuiLink } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import {
+  EuiBasicTable,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiTitle,
+  EuiLink,
+  EuiSpacer,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import type { PackageInfo } from '../../../../types';
 import { getComponentTemplateNameForDatastream } from '../../../../../../../common/services';
-import { useStartServices } from '../../../../hooks';
+import { useGetComponentTemplateQuery, useStartServices } from '../../../../hooks';
 
 import { usePackagePolicyEditorPageUrl } from './datastream_hooks';
 
@@ -26,15 +35,34 @@ export interface PackagePolicyEditorDatastreamMappingsProps {
 }
 
 function useComponentTemplates(dataStream: { dataset: string; type: string }) {
-  return [
-    {
-      templateName: getComponentTemplateNameForDatastream(dataStream, '@package'),
-    },
-    {
-      templateName: getComponentTemplateNameForDatastream(dataStream, '@custom'),
-      canEdit: true,
-    },
-  ];
+  const customComponentTemplateRes = useGetComponentTemplateQuery(
+    getComponentTemplateNameForDatastream(dataStream, '@custom')
+  );
+
+  const hasCustom = !!customComponentTemplateRes.data;
+
+  const componentTemplateItems = useMemo(() => {
+    return [
+      {
+        templateName: getComponentTemplateNameForDatastream(dataStream, '@package'),
+        canEdit: false,
+      },
+      ...(hasCustom
+        ? [
+            {
+              templateName: getComponentTemplateNameForDatastream(dataStream, '@custom'),
+              canEdit: true,
+            },
+          ]
+        : []),
+    ];
+  }, [dataStream, hasCustom]);
+
+  return {
+    isLoading: customComponentTemplateRes.isLoading,
+    hasCustom,
+    componentTemplateItems,
+  };
 }
 
 export const PackagePolicyEditorDatastreamMappings: React.FunctionComponent<
@@ -46,7 +74,7 @@ export const PackagePolicyEditorDatastreamMappings: React.FunctionComponent<
   const pageUrl = usePackagePolicyEditorPageUrl(packageInputStream.id);
 
   const { application, docLinks } = useStartServices();
-  const componentTemplateItems = useComponentTemplates(dataStream);
+  const { componentTemplateItems, hasCustom, isLoading } = useComponentTemplates(dataStream);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="xs" alignItems="flexStart">
@@ -135,6 +163,32 @@ export const PackagePolicyEditorDatastreamMappings: React.FunctionComponent<
           ]}
         />
       </EuiFlexItem>
+      {!isLoading && !hasCustom && (
+        <EuiFlexItem grow={false}>
+          <EuiSpacer size="xs" />
+          <EuiButtonEmpty
+            size="xs"
+            flush="left"
+            iconType="plusInCircle"
+            data-test-subj="datastreamAddCustomComponentTemplateBtn"
+            onClick={async () => {
+              const url = application.getUrlForApp('management', {
+                path: `/data/index_management/create_component_template`,
+              });
+              const name = getComponentTemplateNameForDatastream(dataStream, '@custom');
+
+              application.navigateToUrl(
+                `${url}?name=${name}&step=mappings&redirect_path=${pageUrl}`
+              );
+            }}
+          >
+            <FormattedMessage
+              id="xpack.fleet.packagePolicyEditor.datastreamMappings.addCustomButn"
+              defaultMessage="Add custom mappings"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

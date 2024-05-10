@@ -16,13 +16,13 @@ import { AutocompleteInfo, setAutocompleteInfo } from '../../services';
 describe('Knowledge base', () => {
   let autocompleteInfo;
   beforeEach(() => {
-    kb.setActiveApi(kb._test.loadApisFromJson({}));
+    kb._test.setActiveApi(kb._test.loadApisFromJson({}));
     autocompleteInfo = new AutocompleteInfo();
     setAutocompleteInfo(autocompleteInfo);
     autocompleteInfo.mapping.clearMappings();
   });
   afterEach(() => {
-    kb.setActiveApi(kb._test.loadApisFromJson({}));
+    kb._test.setActiveApi(kb._test.loadApisFromJson({}));
     autocompleteInfo = null;
     setAutocompleteInfo(null);
   });
@@ -113,7 +113,7 @@ describe('Knowledge base', () => {
         kb._test.globalUrlComponentFactories
       );
 
-      kb.setActiveApi(testApi);
+      kb._test.setActiveApi(testApi);
 
       autocompleteInfo.mapping.loadMappings(MAPPING);
       testUrlContext(tokenPath, otherTokenValues, expectedContext);

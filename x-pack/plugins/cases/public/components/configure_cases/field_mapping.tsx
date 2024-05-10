@@ -6,18 +6,13 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-import styled from 'styled-components';
+import { EuiFlexItem, EuiFlexGroup, useEuiFontSize } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { FieldMappingRowStatic } from './field_mapping_row_static';
 import * as i18n from './translations';
 
 import type { CaseConnectorMapping } from '../../containers/configure/types';
-
-const FieldRowWrapper = styled.div`
-  margin: 10px 0;
-  font-size: 14px;
-`;
 
 export interface FieldMappingProps {
   actionTypeName: string;
@@ -30,6 +25,7 @@ const FieldMappingComponent: React.FC<FieldMappingProps> = ({
   isLoading,
   mappings,
 }) => {
+  const sFontSize = useEuiFontSize('s').fontSize;
   return mappings.length ? (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem>
@@ -47,7 +43,13 @@ const FieldMappingComponent: React.FC<FieldMappingProps> = ({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <FieldRowWrapper data-test-subj="case-configure-field-mappings-row-wrapper">
+        <div
+          data-test-subj="case-configure-field-mappings-row-wrapper"
+          css={css`
+            margin: 10px 0;
+            font-size: ${sFontSize};
+          `}
+        >
           {mappings.map((item) => (
             <FieldMappingRowStatic
               key={`${item.source}`}
@@ -57,7 +59,7 @@ const FieldMappingComponent: React.FC<FieldMappingProps> = ({
               selectedThirdParty={item.target ?? 'not_mapped'}
             />
           ))}
-        </FieldRowWrapper>
+        </div>
       </EuiFlexItem>
     </EuiFlexGroup>
   ) : null;

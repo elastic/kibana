@@ -8,26 +8,34 @@
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
 import { getFlattenedObject } from '@kbn/std';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import { EmbeddableInput, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
+import type { Filter, AggregateQuery, Query, TimeRange } from '@kbn/es-query';
+import type {
+  EmbeddableApiContext,
+  HasParentApi,
+  HasUniqueId,
+  PublishesPanelTitle,
+  PublishesSavedObjectId,
+  PublishesUnifiedSearch,
+  PublishesDataViews,
+} from '@kbn/presentation-publishing';
+import { getPanelTitle } from '@kbn/presentation-publishing';
 import type { UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
 import { txtValue } from './i18n';
-import type { EmbeddableWithQueryInput } from '../url_drilldown';
 import { deleteUndefinedKeys } from './util';
 import type { ActionFactoryContext } from '../url_drilldown';
 
 /**
- * Part of context scope extracted from an embeddable
+ * Part of context scope extracted from an api
  * Expose on the scope as: `{{context.panel.id}}`, `{{context.panel.filters.[0]}}`
  */
-interface PanelValues extends EmbeddableInput {
+interface PanelValues {
   /**
-   * ID of the embeddable panel.
+   * ID of the api panel.
    */
-  id: string;
+  id?: string;
 
   /**
-   * Title of the embeddable panel.
+   * Title of the api panel.
    */
   title?: string;
 
@@ -41,7 +49,7 @@ interface PanelValues extends EmbeddableInput {
    */
   indexPatternIds?: string[];
 
-  query?: Query;
+  query?: Query | AggregateQuery;
   filters?: Filter[];
   timeRange?: TimeRange;
   savedObjectId?: string;
@@ -51,65 +59,34 @@ export interface ContextValues {
   panel: PanelValues;
 }
 
-function hasSavedObjectId(obj: Record<string, unknown>): obj is { savedObjectId: string } {
-  return 'savedObjectId' in obj && typeof obj.savedObjectId === 'string';
-}
-
-/**
- * @todo Same functionality is implemented in x-pack/plugins/discover_enhanced/public/actions/explore_data/shared.ts,
- *       combine both implementations into a common approach.
- */
-function getIndexPatternIds(output: EmbeddableOutput): string[] {
-  function hasIndexPatterns(
-    _output: unknown
-  ): _output is { indexPatterns: Array<{ id?: string }> } {
-    return (
-      typeof _output === 'object' &&
-      !!_output &&
-      Array.isArray((_output as { indexPatterns: unknown[] }).indexPatterns) &&
-      (_output as { indexPatterns: Array<{ id?: string }> }).indexPatterns.length > 0
-    );
-  }
-  return hasIndexPatterns(output)
-    ? (output.indexPatterns.map((ip) => ip.id).filter(Boolean) as string[])
-    : [];
-}
-
-export function getEmbeddableVariables(embeddable: EmbeddableWithQueryInput): PanelValues {
-  const input = embeddable.getInput();
-  const output = embeddable.getOutput();
-  const indexPatternsIds = getIndexPatternIds(output);
-
-  return deleteUndefinedKeys({
-    id: input.id,
-    title: output.title ?? input.title,
-    savedObjectId:
-      output.savedObjectId ?? (hasSavedObjectId(input) ? input.savedObjectId : undefined),
-    query: input.query,
-    timeRange: input.timeRange,
-    filters: input.filters,
-    indexPatternIds: indexPatternsIds.length > 1 ? indexPatternsIds : undefined,
-    indexPatternId: indexPatternsIds.length === 1 ? indexPatternsIds[0] : undefined,
-  });
-}
-
-const getContextPanelScopeValues = (contextScopeInput: unknown): PanelValues => {
-  function hasEmbeddable(val: unknown): val is { embeddable: EmbeddableWithQueryInput } {
-    if (val && typeof val === 'object' && 'embeddable' in val) return true;
-    return false;
-  }
-  if (!hasEmbeddable(contextScopeInput))
+export const getContextScopeValues = (context: Partial<EmbeddableApiContext>): ContextValues => {
+  if (!context.embeddable)
     throw new Error(
       "UrlDrilldown [getContextScope] can't build scope because embeddable object is missing in context"
     );
-  const embeddable = contextScopeInput.embeddable;
+  const api = context.embeddable as Partial<
+    HasUniqueId &
+      PublishesPanelTitle &
+      PublishesSavedObjectId &
+      PublishesUnifiedSearch &
+      PublishesDataViews &
+      HasParentApi<Partial<PublishesUnifiedSearch>>
+  >;
+  const dataViewIds = api.dataViews?.value
+    ? (api.dataViews?.value.map((dataView) => dataView.id).filter(Boolean) as string[])
+    : [];
 
-  return getEmbeddableVariables(embeddable);
-};
-
-export const getContextScopeValues = (contextScopeInput: unknown): ContextValues => {
   return {
-    panel: getContextPanelScopeValues(contextScopeInput),
+    panel: deleteUndefinedKeys({
+      id: api.uuid,
+      title: getPanelTitle(api),
+      savedObjectId: api.savedObjectId?.value,
+      query: api.parentApi?.query$?.value,
+      timeRange: api.timeRange$?.value ?? api.parentApi?.timeRange$?.value,
+      filters: api.parentApi?.filters$?.value,
+      indexPatternIds: dataViewIds.length > 1 ? dataViewIds : undefined,
+      indexPatternId: dataViewIds.length === 1 ? dataViewIds[0] : undefined,
+    }),
   };
 };
 

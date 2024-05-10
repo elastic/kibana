@@ -15,13 +15,19 @@ import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { usePostCase } from '../../containers/use_post_case';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
+
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+import { useGetAllCaseConfigurations } from '../../containers/configure/use_get_all_case_configurations';
+
 import { useGetIncidentTypes } from '../connectors/resilient/use_get_incident_types';
 import { useGetSeverity } from '../connectors/resilient/use_get_severity';
 import { useGetIssueTypes } from '../connectors/jira/use_get_issue_types';
 import { useGetChoices } from '../connectors/servicenow/use_get_choices';
 import { useGetFieldsByIssueType } from '../connectors/jira/use_get_fields_by_issue_type';
-import { useCaseConfigureResponse } from '../configure_cases/__mock__';
+import {
+  useCaseConfigureResponse,
+  useGetAllCaseConfigurationsResponse,
+} from '../configure_cases/__mock__';
 import {
   sampleConnectorData,
   sampleData,
@@ -53,6 +59,7 @@ import {
   ConnectorTypes,
   CustomFieldTypes,
 } from '../../../common/types/domain';
+import { useAvailableCasesOwners } from '../app/use_available_owners';
 
 jest.mock('../../containers/use_post_case');
 jest.mock('../../containers/use_create_attachments');
@@ -60,6 +67,7 @@ jest.mock('../../containers/use_post_push_to_service');
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/configure/use_get_supported_action_connectors');
 jest.mock('../../containers/configure/use_get_case_configuration');
+jest.mock('../../containers/configure/use_get_all_case_configurations');
 jest.mock('../connectors/resilient/use_get_incident_types');
 jest.mock('../connectors/resilient/use_get_severity');
 jest.mock('../connectors/jira/use_get_issue_types');
@@ -70,9 +78,11 @@ jest.mock('../../common/lib/kibana');
 jest.mock('../../containers/user_profiles/api');
 jest.mock('../../common/use_license');
 jest.mock('../../containers/use_get_categories');
+jest.mock('../app/use_available_owners');
 
 const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
 const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
+const useGetAllCaseConfigurationsMock = useGetAllCaseConfigurations as jest.Mock;
 const usePostCaseMock = usePostCase as jest.Mock;
 const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
@@ -86,6 +96,7 @@ const pushCaseToExternalService = jest.fn();
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const useLicenseMock = useLicense as jest.Mock;
 const useGetCategoriesMock = useGetCategories as jest.Mock;
+const useAvailableOwnersMock = useAvailableCasesOwners as jest.Mock;
 
 const sampleId = 'case-id';
 
@@ -97,11 +108,8 @@ const defaultPostCase = {
 
 const defaultCreateCaseForm: CreateCaseFormFieldsProps = {
   isLoadingConnectors: false,
-  isLoadingCaseConfiguration: false,
   connectors: [],
-  customFieldsConfiguration: [],
   withSteps: true,
-  owner: ['securitySolution'],
   draftStorageKey: 'cases.kibana.createCase.description.markdownEditor',
 };
 
@@ -149,8 +157,7 @@ const waitForFormToRender = async (renderer: Screen) => {
   });
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/146394
-describe.skip('Create case', () => {
+describe('Create case', () => {
   const refetch = jest.fn();
   const onFormSubmitSuccess = jest.fn();
   const afterCaseCreated = jest.fn();
@@ -199,12 +206,14 @@ describe.skip('Create case', () => {
     usePostPushToServiceMock.mockImplementation(() => defaultPostPushToService);
     useGetConnectorsMock.mockReturnValue(sampleConnectorData);
     useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
+    useGetAllCaseConfigurationsMock.mockImplementation(() => useGetAllCaseConfigurationsResponse);
     useGetIncidentTypesMock.mockReturnValue(useGetIncidentTypesResponse);
     useGetSeverityMock.mockReturnValue(useGetSeverityResponse);
     useGetIssueTypesMock.mockReturnValue(useGetIssueTypesResponse);
     useGetFieldsByIssueTypeMock.mockReturnValue(useGetFieldsByIssueTypeResponse);
     useGetChoicesMock.mockReturnValue(useGetChoicesResponse);
     useGetCategoriesMock.mockReturnValue({ isLoading: false, data: categories });
+    useAvailableOwnersMock.mockReturnValue(['securitySolution', 'observability', 'cases']);
 
     (useGetTags as jest.Mock).mockImplementation(() => ({
       data: sampleTags,
@@ -437,20 +446,22 @@ describe.skip('Create case', () => {
     });
 
     it('should submit form with custom fields', async () => {
-      useGetCaseConfigurationMock.mockImplementation(() => ({
-        ...useCaseConfigureResponse,
-        data: {
-          ...useCaseConfigureResponse.data,
-          customFields: [
-            ...customFieldsConfigurationMock,
-            {
-              key: 'my_custom_field_key',
-              type: CustomFieldTypes.TEXT,
-              label: 'my custom field label',
-              required: false,
-            },
-          ],
-        },
+      useGetAllCaseConfigurationsMock.mockImplementation(() => ({
+        ...useGetAllCaseConfigurationsResponse,
+        data: [
+          {
+            ...useGetAllCaseConfigurationsResponse.data[0],
+            customFields: [
+              ...customFieldsConfigurationMock,
+              {
+                key: 'my_custom_field_key',
+                type: CustomFieldTypes.TEXT,
+                label: 'my custom field label',
+                required: false,
+              },
+            ],
+          },
+        ],
       }));
 
       appMockRender.render(
@@ -466,18 +477,20 @@ describe.skip('Create case', () => {
       const textField = customFieldsConfigurationMock[0];
       const toggleField = customFieldsConfigurationMock[1];
 
-      expect(screen.getByTestId('create-case-custom-fields')).toBeInTheDocument();
+      expect(await screen.findByTestId('create-case-custom-fields')).toBeInTheDocument();
 
-      userEvent.paste(
-        screen.getByTestId(`${textField.key}-${textField.type}-create-custom-field`),
-        'My text test value 1'
+      const textCustomField = await screen.findByTestId(
+        `${textField.key}-${textField.type}-create-custom-field`
       );
+
+      userEvent.clear(textCustomField);
+      userEvent.paste(textCustomField, 'My text test value 1');
 
       userEvent.click(
-        screen.getByTestId(`${toggleField.key}-${toggleField.type}-create-custom-field`)
+        await screen.findByTestId(`${toggleField.key}-${toggleField.type}-create-custom-field`)
       );
 
-      userEvent.click(screen.getByTestId('create-case-submit'));
+      userEvent.click(await screen.findByTestId('create-case-submit'));
 
       await waitFor(() => expect(postCase).toHaveBeenCalled());
 
@@ -485,7 +498,10 @@ describe.skip('Create case', () => {
         request: {
           ...sampleDataWithoutTags,
           customFields: [
-            ...customFieldsMock,
+            customFieldsMock[0],
+            { ...customFieldsMock[1], value: false }, // toggled the default
+            customFieldsMock[2],
+            { ...customFieldsMock[3], value: false },
             {
               key: 'my_custom_field_key',
               type: CustomFieldTypes.TEXT,
@@ -494,6 +510,120 @@ describe.skip('Create case', () => {
           ],
         },
       });
+    });
+
+    it('should change custom fields based on the selected owner', async () => {
+      appMockRender = createAppMockRenderer({ owner: [] });
+
+      const securityCustomField = {
+        key: 'security_custom_field',
+        type: CustomFieldTypes.TEXT,
+        label: 'security custom field',
+        required: false,
+      };
+      const o11yCustomField = {
+        key: 'o11y_field_key',
+        type: CustomFieldTypes.TEXT,
+        label: 'observability custom field',
+        required: false,
+      };
+      const stackCustomField = {
+        key: 'stack_field_key',
+        type: CustomFieldTypes.TEXT,
+        label: 'stack custom field',
+        required: false,
+      };
+
+      useGetAllCaseConfigurationsMock.mockImplementation(() => ({
+        ...useGetAllCaseConfigurationsResponse,
+        data: [
+          {
+            ...useGetAllCaseConfigurationsResponse.data[0],
+            owner: 'securitySolution',
+            customFields: [securityCustomField],
+          },
+          {
+            ...useGetAllCaseConfigurationsResponse.data[0],
+            owner: 'observability',
+            customFields: [o11yCustomField],
+          },
+          {
+            ...useGetAllCaseConfigurationsResponse.data[0],
+            owner: 'cases',
+            customFields: [stackCustomField],
+          },
+        ],
+      }));
+
+      appMockRender.render(
+        <FormContext onSuccess={onFormSubmitSuccess}>
+          <CreateCaseFormFields {...defaultCreateCaseForm} />
+          <SubmitCaseButton />
+        </FormContext>
+      );
+
+      await waitForFormToRender(screen);
+      await fillFormReactTestingLib({ renderer: screen });
+
+      const createCaseCustomFields = await screen.findByTestId('create-case-custom-fields');
+
+      // the default selectedOwner is securitySolution
+      // only the security custom field should be displayed
+      expect(
+        await within(createCaseCustomFields).findByTestId(
+          `${securityCustomField.key}-${securityCustomField.type}-create-custom-field`
+        )
+      ).toBeInTheDocument();
+      expect(
+        await within(createCaseCustomFields).queryByTestId(
+          `${o11yCustomField.key}-${o11yCustomField.type}-create-custom-field`
+        )
+      ).not.toBeInTheDocument();
+      expect(
+        await within(createCaseCustomFields).queryByTestId(
+          `${stackCustomField.key}-${stackCustomField.type}-create-custom-field`
+        )
+      ).not.toBeInTheDocument();
+
+      const caseOwnerSelector = await screen.findByTestId('caseOwnerSelector');
+
+      userEvent.click(await within(caseOwnerSelector).findByLabelText('Observability'));
+
+      // only the o11y custom field should be displayed
+      expect(
+        await within(createCaseCustomFields).findByTestId(
+          `${o11yCustomField.key}-${o11yCustomField.type}-create-custom-field`
+        )
+      ).toBeInTheDocument();
+      expect(
+        await within(createCaseCustomFields).queryByTestId(
+          `${securityCustomField.key}-${securityCustomField.type}-create-custom-field`
+        )
+      ).not.toBeInTheDocument();
+      expect(
+        await within(createCaseCustomFields).queryByTestId(
+          `${stackCustomField.key}-${stackCustomField.type}-create-custom-field`
+        )
+      ).not.toBeInTheDocument();
+
+      userEvent.click(await within(caseOwnerSelector).findByLabelText('Stack'));
+
+      // only the stack custom field should be displayed
+      expect(
+        await within(createCaseCustomFields).findByTestId(
+          `${stackCustomField.key}-${stackCustomField.type}-create-custom-field`
+        )
+      ).toBeInTheDocument();
+      expect(
+        await within(createCaseCustomFields).queryByTestId(
+          `${securityCustomField.key}-${securityCustomField.type}-create-custom-field`
+        )
+      ).not.toBeInTheDocument();
+      expect(
+        await within(createCaseCustomFields).queryByTestId(
+          `${o11yCustomField.key}-${o11yCustomField.type}-create-custom-field`
+        )
+      ).not.toBeInTheDocument();
     });
 
     it('should select the default connector set in the configuration', async () => {
@@ -508,6 +638,21 @@ describe.skip('Create case', () => {
             fields: null,
           },
         },
+      }));
+
+      useGetAllCaseConfigurationsMock.mockImplementation(() => ({
+        ...useGetAllCaseConfigurationsResponse,
+        data: [
+          {
+            ...useGetAllCaseConfigurationsResponse.data,
+            connector: {
+              id: 'servicenow-1',
+              name: 'SN',
+              type: ConnectorTypes.serviceNowITSM,
+              fields: null,
+            },
+          },
+        ],
       }));
 
       useGetConnectorsMock.mockReturnValue({
@@ -560,6 +705,21 @@ describe.skip('Create case', () => {
             fields: null,
           },
         },
+      }));
+
+      useGetAllCaseConfigurationsMock.mockImplementation(() => ({
+        ...useGetAllCaseConfigurationsResponse,
+        data: [
+          {
+            ...useGetAllCaseConfigurationsResponse.data,
+            connector: {
+              id: 'not-exist',
+              name: 'SN',
+              type: ConnectorTypes.serviceNowITSM,
+              fields: null,
+            },
+          },
+        ],
       }));
 
       useGetConnectorsMock.mockReturnValue({

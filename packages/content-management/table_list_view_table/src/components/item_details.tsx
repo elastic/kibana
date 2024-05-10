@@ -19,7 +19,7 @@ import { TagBadge } from './tag_badge';
 
 type InheritedProps<T extends UserContentCommonSchema> = Pick<
   TableListViewTableProps<T>,
-  'onClickTitle' | 'getDetailViewLink' | 'id'
+  'getOnClickTitle' | 'getDetailViewLink' | 'id'
 >;
 interface Props<T extends UserContentCommonSchema> extends InheritedProps<T> {
   item: T;
@@ -39,7 +39,7 @@ export function ItemDetails<T extends UserContentCommonSchema>({
   item,
   searchTerm = '',
   getDetailViewLink,
-  onClickTitle,
+  getOnClickTitle,
   onClickTag,
 }: Props<T>) {
   const {
@@ -59,20 +59,21 @@ export function ItemDetails<T extends UserContentCommonSchema>({
   );
 
   const onClickTitleHandler = useMemo(() => {
+    const onClickTitle = getOnClickTitle?.(item);
     if (!onClickTitle || getDetailViewLink?.(item)) {
       return undefined;
     }
 
     return ((e) => {
       e.preventDefault();
-      onClickTitle(item);
+      onClickTitle();
     }) as React.MouseEventHandler<HTMLAnchorElement>;
-  }, [item, onClickTitle, getDetailViewLink]);
+  }, [getOnClickTitle, item, getDetailViewLink]);
 
   const renderTitle = useCallback(() => {
     const href = getDetailViewLink ? getDetailViewLink(item) : undefined;
 
-    if (!href && !onClickTitle) {
+    if (!href && !getOnClickTitle?.(item)) {
       // This item is not clickable
       return <span>{title}</span>;
     }
@@ -93,9 +94,9 @@ export function ItemDetails<T extends UserContentCommonSchema>({
     );
   }, [
     getDetailViewLink,
+    getOnClickTitle,
     id,
     item,
-    onClickTitle,
     onClickTitleHandler,
     redirectAppLinksCoreStart,
     searchTerm,

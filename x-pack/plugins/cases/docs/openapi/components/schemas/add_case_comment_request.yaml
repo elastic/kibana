@@ -2,8 +2,12 @@ title: Add case comment request
 description: >-
   The add comment to case API request body varies depending on whether you are
   adding an alert or a comment.
-discriminator:
-  propertyName: type
 oneOf:
   - $ref: 'add_alert_comment_request_properties.yaml'
   - $ref: 'add_user_comment_request_properties.yaml'
+discriminator:
+  propertyName: type
+  mapping:
+    alert: 'add_alert_comment_request_properties.yaml'
+    user: 'add_user_comment_request_properties.yaml'
+

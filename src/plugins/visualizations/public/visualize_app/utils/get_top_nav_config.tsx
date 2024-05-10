@@ -106,18 +106,17 @@ export const getTopNavConfig = (
     data,
     application,
     chrome,
-    overlays,
     history,
     share,
     setActiveUrl,
     toastNotifications,
     visualizeCapabilities,
     dashboardCapabilities,
-    i18n: { Context: I18nContext },
     savedObjectsTagging,
     presentationUtil,
     getKibanaVersion,
     serverless,
+    ...startServices
   }: VisualizeServices
 ) => {
   const { vis, embeddableHandler } = visInstance;
@@ -144,8 +143,8 @@ export const getTopNavConfig = (
 
     try {
       const id = await saveVisualization(savedVis, saveOptions, {
-        overlays,
         savedObjectsTagging,
+        ...startServices,
       });
 
       if (id) {
@@ -410,6 +409,7 @@ export const getTopNavConfig = (
             },
             isDirty: hasUnappliedChanges || hasUnsavedChanges,
             showPublicUrlSwitch,
+            toasts: toastNotifications,
           });
         }
       },
@@ -605,6 +605,14 @@ export const getTopNavConfig = (
                       }
                     )}
                     onClose={() => {}}
+                    mustCopyOnSaveMessage={
+                      savedVis.managed
+                        ? i18n.translate('visualizations.topNavMenu.mustCopyOnSave', {
+                            defaultMessage:
+                              'Elastic manages this visualization. Save any changes to a new visualization.',
+                          })
+                        : undefined
+                    }
                   />
                 );
               }

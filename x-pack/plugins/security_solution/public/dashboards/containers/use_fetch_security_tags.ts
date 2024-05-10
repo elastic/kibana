@@ -54,7 +54,7 @@ export const useFetchSecurityTags = () => {
 
   const tagsResult = useMemo(() => {
     if (tags?.length) {
-      return tags.map((t) => ({ id: t.id, type: 'tag', ...t.attributes }));
+      return tags.map((t) => ({ id: t.id, type: 'tag', managed: t.managed, ...t.attributes }));
     }
     return tag ? [{ type: 'tag', ...tag }] : undefined;
   }, [tags, tag]);

@@ -7,7 +7,7 @@
  */
 
 import { Subject, BehaviorSubject } from 'rxjs';
-import { shareReplay, takeUntil, map } from 'rxjs/operators';
+import { shareReplay, takeUntil, map } from 'rxjs';
 import type {
   CustomBrandingStart,
   CustomBrandingSetup,

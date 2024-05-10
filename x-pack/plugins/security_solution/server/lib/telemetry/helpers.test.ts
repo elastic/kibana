@@ -24,7 +24,6 @@ import {
   formatValueListMetaData,
   tlog,
   setIsElasticCloudDeployment,
-  createTaskMetric,
   processK8sUsernames,
 } from './helpers';
 import type { ESClusterInfo, ESLicense, ExceptionListItem } from './types';
@@ -941,47 +940,6 @@ describe('test tlog', () => {
     tlog(logger, 'test');
     expect(logger.info).toHaveBeenCalledTimes(0);
     expect(logger.debug).toHaveBeenCalled();
-  });
-});
-
-// FLAKY: https://github.com/elastic/kibana/issues/141356
-describe.skip('test create task metrics', () => {
-  test('can succeed when all parameters are given', async () => {
-    const stubTaskName = 'test';
-    const stubPassed = true;
-    const stubStartTime = Date.now();
-    await new Promise((r) => setTimeout(r, 11));
-    const response = createTaskMetric(stubTaskName, stubPassed, stubStartTime);
-    const {
-      time_executed_in_ms: timeExecutedInMs,
-      start_time: startTime,
-      end_time: endTime,
-      ...rest
-    } = response;
-    expect(timeExecutedInMs).toBeGreaterThan(10);
-    expect(rest).toEqual({
-      name: 'test',
-      passed: true,
-    });
-  });
-
-  test('can succeed when error given', async () => {
-    const stubTaskName = 'test';
-    const stubPassed = false;
-    const stubStartTime = Date.now();
-    const errorMessage = 'failed';
-    const response = createTaskMetric(stubTaskName, stubPassed, stubStartTime, errorMessage);
-    const {
-      time_executed_in_ms: timeExecutedInMs,
-      start_time: startTime,
-      end_time: endTime,
-      ...rest
-    } = response;
-    expect(rest).toEqual({
-      name: 'test',
-      passed: false,
-      error_message: 'failed',
-    });
   });
 });
 

@@ -12,6 +12,7 @@ import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_key
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { createNewAPIKeySet, updateMeta } from '../lib';
 import { RulesClientContext } from '../types';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 export async function updateApiKey(
   context: RulesClientContext,
@@ -32,9 +33,13 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: { id: st
 
   try {
     const decryptedAlert =
-      await context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>('alert', id, {
-        namespace: context.namespace,
-      });
+      await context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>(
+        RULE_SAVED_OBJECT_TYPE,
+        id,
+        {
+          namespace: context.namespace,
+        }
+      );
     oldApiKeyToInvalidate = decryptedAlert.attributes.apiKey;
     oldApiKeyCreatedByUser = decryptedAlert.attributes.apiKeyCreatedByUser;
     attributes = decryptedAlert.attributes;
@@ -45,7 +50,10 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: { id: st
       `updateApiKey(): Failed to load API key to invalidate on alert ${id}: ${e.message}`
     );
     // Still attempt to load the attributes and version using SOC
-    const alert = await context.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
+    const alert = await context.unsecuredSavedObjectsClient.get<RawRule>(
+      RULE_SAVED_OBJECT_TYPE,
+      id
+    );
     attributes = alert.attributes;
     version = alert.version;
   }
@@ -64,7 +72,7 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: { id: st
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.UPDATE_API_KEY,
-        savedObject: { type: 'alert', id },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
         error,
       })
     );
@@ -92,14 +100,16 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: { id: st
     ruleAuditEvent({
       action: RuleAuditAction.UPDATE_API_KEY,
       outcome: 'unknown',
-      savedObject: { type: 'alert', id },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
     })
   );
 
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
   try {
-    await context.unsecuredSavedObjectsClient.update('alert', id, updateAttributes, { version });
+    await context.unsecuredSavedObjectsClient.update(RULE_SAVED_OBJECT_TYPE, id, updateAttributes, {
+      version,
+    });
   } catch (e) {
     // Avoid unused API key
     await bulkMarkApiKeysForInvalidation(

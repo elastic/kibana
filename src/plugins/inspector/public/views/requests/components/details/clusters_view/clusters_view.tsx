@@ -10,7 +10,6 @@ import React, { Component } from 'react';
 import { estypes } from '@elastic/elasticsearch';
 import { EuiSearchBar, type EuiSearchBarOnChangeArgs, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ClusterDetails } from '@kbn/es-types';
 import { Request } from '../../../../../../common/adapters/request/types';
 import type { DetailViewProps } from '../types';
 import { ClusterHealth, ClustersHealth } from './clusters_health';
@@ -18,7 +17,7 @@ import { ClustersTable } from './clusters_table';
 import { findClusters } from './find_clusters';
 
 interface State {
-  clusters: Record<string, ClusterDetails>;
+  clusters: Record<string, estypes.ClusterDetails>;
   showSearchAndStatusBar: boolean;
 }
 

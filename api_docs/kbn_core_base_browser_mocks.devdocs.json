@@ -43,7 +43,16 @@
             "description": [],
             "signature": [
               "({ production }?: { production?: boolean | undefined; }) => ",
-              "CoreContext"
+              "CoreContext",
+              " & { logger: ",
+              {
+                "pluginId": "@kbn/logging-mocks",
+                "scope": "common",
+                "docId": "kibKbnLoggingMocksPluginApi",
+                "section": "def-common.MockedLogger",
+                "text": "MockedLogger"
+              },
+              "; }"
             ],
             "path": "packages/core/base/core-base-browser-mocks/src/core_context.mock.ts",
             "deprecated": false,

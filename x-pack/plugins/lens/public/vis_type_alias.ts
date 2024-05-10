@@ -36,13 +36,14 @@ export const getLensAliasConfig = (): VisTypeAlias => ({
       clientOptions: { update: { overwrite: true } },
       client: getLensClient,
       toListItem(savedObject) {
-        const { id, type, updatedAt, attributes } = savedObject;
+        const { id, type, updatedAt, attributes, managed } = savedObject;
         const { title, description } = attributes as { title: string; description?: string };
         return {
           id,
           title,
           description,
           updatedAt,
+          managed,
           editor: { editUrl: getEditPath(id), editApp: 'lens' },
           icon: 'lensApp',
           stage: 'production',

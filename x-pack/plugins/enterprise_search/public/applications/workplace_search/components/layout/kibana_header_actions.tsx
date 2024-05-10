@@ -7,9 +7,10 @@
 
 import React from 'react';
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiHeaderLinks } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { externalUrl, getWorkplaceSearchUrl } from '../../../shared/enterprise_search_url';
+import { EndpointsHeaderAction } from '../../../shared/layout/endpoints_header_action';
 import { EuiButtonEmptyTo } from '../../../shared/react_router_helpers';
 import { NAV } from '../../constants';
 import { PRIVATE_SOURCES_PATH } from '../../routes';
@@ -18,7 +19,7 @@ export const WorkplaceSearchHeaderActions: React.FC = () => {
   if (!externalUrl.enterpriseSearchUrl) return null;
 
   return (
-    <EuiHeaderLinks>
+    <EndpointsHeaderAction>
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <EuiButtonEmptyTo
@@ -42,6 +43,6 @@ export const WorkplaceSearchHeaderActions: React.FC = () => {
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiHeaderLinks>
+    </EndpointsHeaderAction>
   );
 };

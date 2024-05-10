@@ -7,6 +7,7 @@
 
 import { alertComment } from '../../../containers/mock';
 import { renderHook } from '@testing-library/react-hooks';
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { CasesContext } from '../../cases_context';
 import { CasesContextStoreActionsList } from '../../cases_context/cases_context_reducer';
@@ -22,7 +23,7 @@ const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTyp
 
 describe('use cases add to new case flyout hook', () => {
   const dispatch = jest.fn();
-  let wrapper: React.FC;
+  let wrapper: FC<PropsWithChildren<unknown>>;
   beforeEach(() => {
     dispatch.mockReset();
     wrapper = ({ children }) => {
@@ -33,8 +34,6 @@ describe('use cases add to new case flyout hook', () => {
             persistableStateAttachmentTypeRegistry,
             owner: ['test'],
             permissions: allCasesPermissions(),
-            appId: 'test',
-            appTitle: 'jest',
             basePath: '/jest',
             dispatch,
             features: { alerts: { sync: true, enabled: true, isExperimental: false }, metrics: [] },

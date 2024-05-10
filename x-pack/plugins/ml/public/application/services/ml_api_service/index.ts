@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -52,6 +52,7 @@ import { jobsApiProvider } from './jobs';
 import { savedObjectsApiProvider } from './saved_objects';
 import { trainedModelsApiProvider } from './trained_models';
 import { notificationsProvider } from './notifications';
+import { inferenceModelsApiProvider } from './inference_models';
 
 export interface MlHasPrivilegesResponse {
   hasPrivileges?: estypes.SecurityHasPrivilegesResponse;
@@ -117,8 +118,6 @@ const proxyHttpStart = new Proxy<HttpStart>({} as unknown as HttpStart, {
     }
   },
 });
-
-export type MlApiServices = ReturnType<typeof mlApiServicesProvider>;
 
 export const ml = mlApiServicesProvider(new HttpService(proxyHttpStart));
 
@@ -434,20 +433,6 @@ export function mlApiServicesProvider(httpService: HttpService) {
 
       return httpService.http<Record<string, { exists: boolean }>>({
         path: `${ML_INTERNAL_BASE_PATH}/index_exists`,
-        method: 'POST',
-        body,
-        version: '1',
-      });
-    },
-
-    getFieldCaps({ index, fields }: { index: string; fields: string[] }) {
-      const body = JSON.stringify({
-        ...(index !== undefined ? { index } : {}),
-        ...(fields !== undefined ? { fields } : {}),
-      });
-
-      return httpService.http<any>({
-        path: `${ML_INTERNAL_BASE_PATH}/indices/field_caps`,
         method: 'POST',
         body,
         version: '1',
@@ -816,7 +801,10 @@ export function mlApiServicesProvider(httpService: HttpService) {
     jobs: jobsApiProvider(httpService),
     savedObjects: savedObjectsApiProvider(httpService),
     trainedModels: trainedModelsApiProvider(httpService),
+    inferenceModels: inferenceModelsApiProvider(httpService),
     notifications: notificationsProvider(httpService),
     jsonSchema: jsonSchemaProvider(httpService),
   };
 }
+
+export type MlApiServices = ReturnType<typeof mlApiServicesProvider>;

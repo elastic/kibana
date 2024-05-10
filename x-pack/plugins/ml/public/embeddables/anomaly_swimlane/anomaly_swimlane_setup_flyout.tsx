@@ -8,52 +8,63 @@
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { extractInfluencers } from '../../../common/util/job_utils';
-import { VIEW_BY_JOB_LABEL } from '../../application/explorer/explorer_constants';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { distinctUntilChanged, from, skip, takeUntil } from 'rxjs';
+import { jobsApiProvider } from '../../application/services/ml_api_service/jobs';
 import { AnomalySwimlaneInitializer } from './anomaly_swimlane_initializer';
-import { getDefaultSwimlanePanelTitle } from './anomaly_swimlane_embeddable';
 import { HttpService } from '../../application/services/http_service';
-import type { AnomalySwimlaneEmbeddableInput } from '..';
-import { resolveJobSelection } from '../common/resolve_job_selection';
-import { mlApiServicesProvider } from '../../application/services/ml_api_service';
+import type { AnomalySwimLaneEmbeddableState, AnomalySwimlaneEmbeddableUserInput } from '..';
 
 export async function resolveAnomalySwimlaneUserInput(
   coreStart: CoreStart,
-  input?: AnomalySwimlaneEmbeddableInput
-): Promise<Partial<AnomalySwimlaneEmbeddableInput>> {
-  const { http, overlays, theme, i18n } = coreStart;
-
-  const { getJobs } = mlApiServicesProvider(new HttpService(http));
+  input?: Partial<AnomalySwimLaneEmbeddableState>
+): Promise<AnomalySwimlaneEmbeddableUserInput> {
+  const {
+    http,
+    overlays,
+    application: { currentAppId$ },
+    ...startServices
+  } = coreStart;
 
   return new Promise(async (resolve, reject) => {
     try {
-      const { jobIds } = await resolveJobSelection(coreStart, input?.jobIds);
-      const title = input?.title ?? getDefaultSwimlanePanelTitle(jobIds);
-      const { jobs } = await getJobs({ jobId: jobIds.join(',') });
-      const influencers = extractInfluencers(jobs);
-      influencers.push(VIEW_BY_JOB_LABEL);
-      const modalSession = overlays.openModal(
+      const adJobsApiService = jobsApiProvider(new HttpService(http));
+
+      const flyoutSession = overlays.openFlyout(
         toMountPoint(
-          <AnomalySwimlaneInitializer
-            defaultTitle={title}
-            influencers={influencers}
-            initialInput={input}
-            onCreate={(explicitInput) => {
-              modalSession.close();
-              resolve({
-                jobIds,
-                title: explicitInput.panelTitle,
-                ...explicitInput,
-              });
-            }}
-            onCancel={() => {
-              modalSession.close();
-              reject();
-            }}
-          />,
-          { theme, i18n }
-        )
+          <KibanaContextProvider services={{ ...coreStart }}>
+            <AnomalySwimlaneInitializer
+              adJobsApiService={adJobsApiService}
+              initialInput={input}
+              onCreate={(explicitInput) => {
+                flyoutSession.close();
+                resolve(explicitInput);
+              }}
+              onCancel={() => {
+                flyoutSession.close();
+                reject();
+              }}
+            />
+          </KibanaContextProvider>,
+          startServices
+        ),
+        {
+          type: 'push',
+          ownFocus: true,
+          size: 's',
+          onClose: () => {
+            flyoutSession.close();
+            reject();
+          },
+        }
       );
+
+      // Close the flyout when user navigates out of the current plugin
+      currentAppId$
+        .pipe(skip(1), takeUntil(from(flyoutSession.onClose)), distinctUntilChanged())
+        .subscribe(() => {
+          flyoutSession.close();
+        });
     } catch (error) {
       reject(error);
     }

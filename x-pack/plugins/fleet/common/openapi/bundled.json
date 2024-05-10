@@ -15,8 +15,8 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5601/api/fleet",
-      "description": "local"
+      "url": "http://KIBANA_HOST:5601/api/fleet",
+      "description": "Public and supported Fleet API"
     }
   ],
   "paths": {
@@ -187,6 +187,47 @@
           }
         },
         "operationId": "update-settings"
+      }
+    },
+    "/settings/enrollment": {
+      "servers": [
+        {
+          "url": "http://KIBANA_HOST:5601/internal/fleet",
+          "description": "Used for Fleet internals and not supported"
+        }
+      ],
+      "get": {
+        "summary": "Get enrollment settings",
+        "tags": [
+          "Fleet internals"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "agentPolicyId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "An agent policy ID to scope the enrollment settings to. For example, that policy's Fleet Server host, its proxy, download location, etc. If not provided, the default Fleet Server policy is used (if any)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/fleet_settings_enrollment_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "operationId": "get-enrollment-settings"
       }
     },
     "/service-tokens": {
@@ -589,7 +630,7 @@
               "type": "boolean",
               "default": false
             },
-            "description": "skip data stream rollover during index template mapping or settings update"
+            "description": "Skip data stream rollover during index template mapping or settings update"
           }
         ],
         "requestBody": {
@@ -845,7 +886,7 @@
               "type": "boolean",
               "default": false
             },
-            "description": "skip data stream rollover during index template mapping or settings update"
+            "description": "Skip data stream rollover during index template mapping or settings update"
           }
         ],
         "requestBody": {
@@ -1143,7 +1184,7 @@
               "type": "boolean",
               "default": false
             },
-            "description": "skip data stream rollover during index template mapping or settings update"
+            "description": "Skip data stream rollover during index template mapping or settings update"
           }
         ],
         "requestBody": {
@@ -1312,6 +1353,109 @@
         }
       }
     },
+    "/epm/packages/{pkgName}/{pkgVersion}/transforms/authorize": {
+      "post": {
+        "summary": "Authorize transforms",
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "transformId": {
+                            "type": "string"
+                          },
+                          "success": {
+                            "type": "boolean"
+                          },
+                          "error": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "transformId",
+                          "error"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "items"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "operationId": "reauthorize-transforms",
+        "description": "",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "pkgName",
+            "in": "path",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "pkgVersion",
+            "in": "path",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "prerelease",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "description": "Whether to include prerelease packages in categories count (e.g. beta, rc, preview)"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "transforms": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "transformId": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/epm/packages/{pkgName}/{pkgVersion}/{filePath}": {
       "get": {
         "summary": "Get package file",
@@ -1427,6 +1571,9 @@
           "Elastic Package Manager (EPM)"
         ],
         "responses": {
+          "200": {
+            "description": "OK"
+          },
           "400": {
             "$ref": "#/components/responses/error"
           }
@@ -1466,6 +1613,14 @@
           },
           "name": "format",
           "description": "Format of response - json or yaml",
+          "in": "query"
+        },
+        {
+          "schema": {
+            "type": "boolean"
+          },
+          "name": "prerelease",
+          "description": "Specify if version is prerelease",
           "in": "query"
         }
       ]
@@ -2965,6 +3120,30 @@
         "tags": [
           "Agents"
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "additional_metrics": {
+                    "type": "array",
+                    "items": {
+                      "oneOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "CPU"
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -3048,6 +3227,19 @@
                         "description": "list of agent IDs"
                       }
                     ]
+                  },
+                  "additional_metrics": {
+                    "type": "array",
+                    "items": {
+                      "oneOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "CPU"
+                          ]
+                        }
+                      ]
+                    }
                   }
                 },
                 "required": [
@@ -5075,6 +5267,13 @@
                   "is_default": {
                     "type": "boolean"
                   },
+                  "is_internal": {
+                    "type": "boolean"
+                  },
+                  "proxy_id": {
+                    "description": "The ID of the proxy to use for this fleet server host. See the proxies API for more information.",
+                    "type": "string"
+                  },
                   "host_urls": {
                     "type": "array",
                     "items": {
@@ -5186,6 +5385,14 @@
                   },
                   "is_default": {
                     "type": "boolean"
+                  },
+                  "is_internal": {
+                    "type": "boolean"
+                  },
+                  "proxy_id": {
+                    "description": "The ID of the proxy to use for this fleet server host. See the proxies API for more information.",
+                    "type": "string",
+                    "nullable": true
                   },
                   "host_urls": {
                     "type": "array",
@@ -5888,6 +6095,166 @@
           "item"
         ]
       },
+      "fleet_server_host": {
+        "title": "Fleet Server Host",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "is_default": {
+            "type": "boolean"
+          },
+          "is_internal": {
+            "type": "boolean"
+          },
+          "is_preconfigured": {
+            "type": "boolean"
+          },
+          "proxy_id": {
+            "type": "string"
+          },
+          "host_urls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "fleet_server_hosts",
+          "id",
+          "is_default",
+          "is_preconfigured",
+          "host_urls"
+        ]
+      },
+      "proxies": {
+        "title": "Fleet Proxy",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "proxy_headers": {
+            "type": "object"
+          },
+          "certificate_authorities": {
+            "type": "string"
+          },
+          "certificate": {
+            "type": "string"
+          },
+          "certificate_key": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "url"
+        ]
+      },
+      "download_sources": {
+        "title": "Download Source",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "is_default": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "host": {
+            "type": "string"
+          },
+          "proxy_id": {
+            "description": "The ID of the proxy to use for this download source. See the proxies API for more information.",
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "is_default",
+          "name",
+          "host"
+        ]
+      },
+      "fleet_settings_enrollment_response": {
+        "title": "Fleet settings response",
+        "type": "object",
+        "properties": {
+          "fleet_server": {
+            "type": "object",
+            "properties": {
+              "policies": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "is_managed": {
+                      "type": "boolean"
+                    },
+                    "is_default_fleet_server": {
+                      "type": "boolean"
+                    },
+                    "has_fleet_server": {
+                      "type": "boolean"
+                    },
+                    "fleet_server_host_id": {
+                      "type": "string"
+                    },
+                    "download_source_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "is_managed"
+                  ]
+                }
+              },
+              "has_active": {
+                "type": "boolean"
+              },
+              "host": {
+                "$ref": "#/components/schemas/fleet_server_host"
+              },
+              "host_proxy": {
+                "$ref": "#/components/schemas/proxies"
+              }
+            },
+            "required": [
+              "agent_policies",
+              "has_active"
+            ]
+          },
+          "download_source": {
+            "$ref": "#/components/schemas/download_sources"
+          }
+        },
+        "required": [
+          "fleet_server"
+        ]
+      },
       "saved_object_type": {
         "title": "Saved Object type",
         "oneOf": [
@@ -5928,33 +6295,33 @@
         "type": "object",
         "deprecated": true,
         "properties": {
-          "response": {
+          "items": {
             "type": "array",
             "items": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "type": "string"
-                  },
-                  "type": {
-                    "$ref": "#/components/schemas/saved_object_type"
-                  },
-                  "updatedAt": {
-                    "type": "string"
-                  },
-                  "attributes": {
-                    "type": "object",
-                    "properties": {
-                      "title": {
-                        "type": "string"
-                      },
-                      "description": {
-                        "type": "string"
-                      }
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "type": {
+                  "$ref": "#/components/schemas/saved_object_type"
+                },
+                "updatedAt": {
+                  "type": "string"
+                },
+                "attributes": {
+                  "type": "object",
+                  "properties": {
+                    "title": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
                     }
                   }
+                },
+                "appLink": {
+                  "type": "string"
                 }
               }
             }
@@ -6143,6 +6510,34 @@
                     }
                   }
                 }
+              }
+            }
+          },
+          "latest_executed_state": {
+            "description": "Latest successfully executed state in package install state machine",
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "enum": [
+                  "create_restart_installation",
+                  "install_kibana_assets",
+                  "install_ilm_policies",
+                  "install_ml_model",
+                  "install_index_template_pipelines",
+                  "remove_legacy_templates",
+                  "update_current_write_indices",
+                  "install_transforms",
+                  "delete_previous_pipelines",
+                  "save_archive_entries_from_assets_map",
+                  "update_so"
+                ]
+              },
+              "started_at": {
+                "type": "string"
+              },
+              "error": {
+                "type": "string"
               }
             }
           },
@@ -6857,6 +7252,10 @@
           "force": {
             "type": "boolean",
             "description": "Force upgrade, skipping validation (should be used with caution)"
+          },
+          "skipRateLimitCheck": {
+            "type": "boolean",
+            "description": "Skip rate limit check for upgrade"
           }
         },
         "required": [
@@ -6921,6 +7320,10 @@
           "force": {
             "type": "boolean",
             "description": "Force upgrade, skipping validation (should be used with caution)"
+          },
+          "skipRateLimitCheck": {
+            "type": "boolean",
+            "description": "Skip rate limit check for upgrade"
           }
         },
         "required": [
@@ -7051,6 +7454,9 @@
           },
           "description": {
             "type": "string"
+          },
+          "overrides": {
+            "type": "object"
           }
         },
         "required": [
@@ -7165,6 +7571,9 @@
           "agents": {
             "type": "number"
           },
+          "unprivileged_agents": {
+            "type": "number"
+          },
           "agent_features": {
             "type": "array",
             "items": {
@@ -7191,6 +7600,15 @@
             "type": "object",
             "description": "Override settings that are defined in the agent policy. Input settings cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.",
             "nullable": true
+          },
+          "advanced_settings": {
+            "type": "object",
+            "description": "Advanced settings stored in the agent policy, e.g. agent_limits_go_max_procs",
+            "nullable": true
+          },
+          "supports_agentless": {
+            "type": "boolean",
+            "description": "Indicates whether the agent policy supports agentless integrations. Only allowed in a serverless environment."
           }
         },
         "required": [
@@ -7268,6 +7686,10 @@
           },
           "is_protected": {
             "type": "boolean"
+          },
+          "force": {
+            "type": "boolean",
+            "description": "Force agent policy creation even if packages are not verified."
           }
         },
         "required": [
@@ -7340,6 +7762,10 @@
           },
           "is_protected": {
             "type": "boolean"
+          },
+          "force": {
+            "type": "boolean",
+            "description": "Force agent policy creation even if packages are not verified."
           }
         },
         "required": [
@@ -7663,8 +8089,8 @@
           },
           "namespace": {
             "type": "string",
-            "description": "namespace by default \"default\"",
-            "example": "default"
+            "description": "The package policy namespace. Leave blank to inherit the agent policy's namespace.",
+            "example": "customnamespace"
           },
           "policy_id": {
             "type": "string",
@@ -7747,6 +8173,16 @@
                 }
               }
             }
+          },
+          "overrides": {
+            "type": "object",
+            "properties": {
+              "inputs": {
+                "type": "object"
+              }
+            },
+            "description": "Override settings that are defined in the package policy. The override option should be used only in unusual circumstances and not as a routine procedure.",
+            "nullable": true
           },
           "force": {
             "type": "boolean",
@@ -7928,6 +8364,9 @@
           "is_default_monitoring": {
             "type": "boolean"
           },
+          "is_internal": {
+            "type": "boolean"
+          },
           "name": {
             "type": "string"
           },
@@ -8027,6 +8466,9 @@
             "type": "boolean"
           },
           "is_default_monitoring": {
+            "type": "boolean"
+          },
+          "is_internal": {
             "type": "boolean"
           },
           "name": {
@@ -8169,7 +8611,12 @@
               }
             }
           },
+          "topic": {
+            "type": "string"
+          },
           "topics": {
+            "deprecated": true,
+            "description": "Use topic instead.",
             "type": "array",
             "items": {
               "type": "object",
@@ -8178,6 +8625,8 @@
                   "type": "string"
                 },
                 "when": {
+                  "deprecated": true,
+                  "description": "Deprecated, kafka output do not support conditionnal topics anymore.",
                   "type": "object",
                   "properties": {
                     "type": {
@@ -8250,6 +8699,9 @@
             "type": "boolean"
           },
           "is_default_monitoring": {
+            "type": "boolean"
+          },
+          "is_internal": {
             "type": "boolean"
           },
           "name": {
@@ -8358,6 +8810,9 @@
           "is_default_monitoring": {
             "type": "boolean"
           },
+          "is_internal": {
+            "type": "boolean"
+          },
           "name": {
             "type": "string"
           },
@@ -8426,6 +8881,9 @@
             "type": "boolean"
           },
           "is_default_monitoring": {
+            "type": "boolean"
+          },
+          "is_internal": {
             "type": "boolean"
           },
           "name": {
@@ -8529,6 +8987,9 @@
             "type": "boolean"
           },
           "is_default_monitoring": {
+            "type": "boolean"
+          },
+          "is_internal": {
             "type": "boolean"
           },
           "name": {
@@ -8671,7 +9132,12 @@
               }
             }
           },
+          "topic": {
+            "type": "string"
+          },
           "topics": {
+            "deprecated": true,
+            "description": "Use topic instead.",
             "type": "array",
             "items": {
               "type": "object",
@@ -8680,6 +9146,8 @@
                   "type": "string"
                 },
                 "when": {
+                  "deprecated": true,
+                  "description": "Deprecated, kafka output do not support conditionnal topics anymore.",
                   "type": "object",
                   "properties": {
                     "type": {
@@ -8732,6 +9200,9 @@
             "type": "boolean"
           },
           "is_default_monitoring": {
+            "type": "boolean"
+          },
+          "is_internal": {
             "type": "boolean"
           },
           "name": {
@@ -8833,96 +9304,6 @@
             "logstash": "#/components/schemas/output_update_request_logstash"
           }
         }
-      },
-      "download_sources": {
-        "title": "Download Source",
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "is_default": {
-            "type": "boolean"
-          },
-          "name": {
-            "type": "string"
-          },
-          "host": {
-            "type": "string"
-          },
-          "proxy_id": {
-            "description": "The ID of the proxy to use for this download source. See the proxies API for more information.",
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "required": [
-          "is_default",
-          "name",
-          "host"
-        ]
-      },
-      "fleet_server_host": {
-        "title": "Fleet Server Host",
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "is_default": {
-            "type": "boolean"
-          },
-          "is_preconfigured": {
-            "type": "boolean"
-          },
-          "host_urls": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "required": [
-          "fleet_server_hosts",
-          "id",
-          "is_default",
-          "is_preconfigured",
-          "host_urls"
-        ]
-      },
-      "proxies": {
-        "title": "Fleet Proxy",
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "url": {
-            "type": "string"
-          },
-          "proxy_headers": {
-            "type": "object"
-          },
-          "certificate_authorities": {
-            "type": "string"
-          },
-          "certificate": {
-            "type": "string"
-          },
-          "certificate_key": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "name",
-          "url"
-        ]
       }
     }
   },

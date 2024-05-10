@@ -10,11 +10,11 @@ import React, { Dispatch, useCallback, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiButtonIcon, EuiIconProps } from '@elastic/eui';
+import { TooltipWrapper } from '@kbn/visualization-utils';
 
 import type { PaletteContinuity, CustomPaletteParams } from '../../../palettes';
 
 import { isLastItem } from './utils';
-import { TooltipWrapper } from '../tooltip_wrapper';
 
 import type { ColorRangesActions, ColorRange, ColorRangeAccessor } from './types';
 import { ColorRangesContext } from './color_ranges_context';

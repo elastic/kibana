@@ -26,7 +26,7 @@ describe('UnauthenticatedPage', () => {
     const body = renderToStaticMarkup(
       <UnauthenticatedPage
         originalURL="/some/url?some-query=some-value#some-hash"
-        buildNumber={100500}
+        staticAssets={mockCoreSetup.http.staticAssets}
         basePath={mockCoreSetup.http.basePath}
         customBranding={{}}
       />
@@ -44,7 +44,7 @@ describe('UnauthenticatedPage', () => {
     const body = renderToStaticMarkup(
       <UnauthenticatedPage
         originalURL="/some/url?some-query=some-value#some-hash"
-        buildNumber={100500}
+        staticAssets={mockCoreSetup.http.staticAssets}
         basePath={mockCoreSetup.http.basePath}
         customBranding={{ pageTitle: 'My Company Name' }}
       />

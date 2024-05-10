@@ -19,7 +19,8 @@ import {
   RuleCreationValidConsumer,
   STACK_ALERTS_FEATURE_ID,
 } from '@kbn/rule-data-utils';
-import { DiscoverStateContainer } from '../../services/discover_state';
+import { RuleTypeMetaData } from '@kbn/alerting-plugin/common';
+import { DiscoverStateContainer } from '../../state_management/discover_state';
 import { DiscoverServices } from '../../../../build_services';
 
 const container = document.createElement('div');
@@ -42,7 +43,7 @@ interface AlertsPopoverProps {
   isPlainRecord?: boolean;
 }
 
-interface EsQueryAlertMetaData {
+interface EsQueryAlertMetaData extends RuleTypeMetaData {
   isManagementPage?: boolean;
   adHocDataViewList: DataView[];
 }
@@ -110,11 +111,11 @@ export function AlertsPopover({
       metadata: discoverMetadata,
       consumer: 'alerts',
       onClose: (_, metadata) => {
-        onFinishFlyoutInteraction(metadata as EsQueryAlertMetaData);
+        onFinishFlyoutInteraction(metadata!);
         onClose();
       },
       onSave: async (metadata) => {
-        onFinishFlyoutInteraction(metadata as EsQueryAlertMetaData);
+        onFinishFlyoutInteraction(metadata!);
       },
       canChangeTrigger: false,
       ruleTypeId: ES_QUERY_ID,
@@ -166,7 +167,7 @@ export function AlertsPopover({
           ),
           icon: 'tableOfContents',
           href: services?.application?.getUrlForApp(
-            'management/insightsAndAlerting/triggersActions/alerts'
+            'management/insightsAndAlerting/triggersActions/rules'
           ),
           ['data-test-subj']: 'discoverManageAlertsButton',
         },
@@ -217,7 +218,7 @@ export function openAlertsPopover({
   document.body.appendChild(container);
 
   const element = (
-    <KibanaRenderContextProvider theme={services.core.theme} i18n={services.core.i18n}>
+    <KibanaRenderContextProvider {...services.core}>
       <KibanaContextProvider services={services}>
         <AlertsPopover
           onClose={closeAlertsPopover}

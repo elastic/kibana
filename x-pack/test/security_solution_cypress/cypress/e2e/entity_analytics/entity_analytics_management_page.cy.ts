@@ -56,7 +56,7 @@ describe(
     });
 
     after(() => {
-      cy.task('esArchiverUnload', 'all_users');
+      cy.task('esArchiverUnload', { archiveName: 'all_users' });
     });
 
     it('renders page as expected', () => {

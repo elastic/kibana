@@ -10,7 +10,6 @@ import type {
   FieldValue,
   QueryDslQueryContainer,
   QueryDslTermQuery,
-  QueryDslTextExpansionQuery,
 } from '@elastic/elasticsearch/lib/api/types';
 
 /**
@@ -43,7 +42,7 @@ export const getVectorSearchQuery = ({
             model_id: modelId,
             model_text: query,
           },
-        } as unknown as QueryDslTextExpansionQuery,
+        },
       },
     ],
     filter,

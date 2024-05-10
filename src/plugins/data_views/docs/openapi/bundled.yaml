@@ -17,7 +17,7 @@ tags:
   - name: data views
     description: Data view APIs enable you to manage data views, formerly known as Kibana index patterns.
 paths:
-  /api/data_views:
+  /s/{spaceId}/api/data_views:
     get:
       summary: Retrieves a list of all data views.
       operationId: getAllDataViews
@@ -25,6 +25,8 @@ paths:
         This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       tags:
         - data views
+      parameters:
+        - $ref: '#/components/parameters/space_id'
       responses:
         '200':
           description: Indicates a successful call.
@@ -59,7 +61,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
-  /api/data_views/data_view:
+  /s/{spaceId}/api/data_views/data_view:
     post:
       summary: Creates a data view.
       operationId: createDataView
@@ -69,6 +71,7 @@ paths:
         - data views
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/space_id'
       requestBody:
         required: true
         content:
@@ -91,7 +94,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
-  /api/data_views/data_view/{viewId}:
+  /s/{spaceId}/api/data_views/data_view/{viewId}:
     get:
       summary: Retrieves a single data view by identifier.
       operationId: getDataView
@@ -101,6 +104,7 @@ paths:
         - data views
       parameters:
         - $ref: '#/components/parameters/view_id'
+        - $ref: '#/components/parameters/space_id'
       responses:
         '200':
           description: Indicates a successful call.
@@ -127,6 +131,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/view_id'
+        - $ref: '#/components/parameters/space_id'
       responses:
         '204':
           description: Indicates a successful call.
@@ -146,6 +151,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/view_id'
+        - $ref: '#/components/parameters/space_id'
       requestBody:
         required: true
         content:
@@ -168,7 +174,84 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
-  /api/data_views/data_view/{viewId}/fields:
+  /s/{spaceId}/api/data_views/default:
+    get:
+      summary: Retrieves the default data view identifier.
+      operationId: getDefaultDataView
+      description: |
+        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      tags:
+        - data views
+      parameters:
+        - $ref: '#/components/parameters/space_id'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data_view_id:
+                    type: string
+              examples:
+                getDefaultDataViewResponse:
+                  $ref: '#/components/examples/get_default_data_view_response'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
+    post:
+      summary: Sets the default data view identifier.
+      operationId: setDefaultDatailView
+      description: |
+        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      tags:
+        - data views
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/space_id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - data_view_id
+              properties:
+                data_view_id:
+                  type:
+                    - string
+                    - 'null'
+                  description: |
+                    The data view identifier. NOTE: The API does not validate whether it is a valid identifier. Use `null` to unset the default data view.
+                force:
+                  type: boolean
+                  description: Update an existing default data view identifier.
+                  default: false
+            examples:
+              setDefaultDataViewRequest:
+                $ref: '#/components/examples/set_default_data_view_request'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  acknowledged:
+                    type: boolean
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
+  /s/{spaceId}/api/data_views/data_view/{viewId}/fields:
     post:
       summary: Update fields presentation metadata such as count, customLabel and format.
       operationId: updateFieldsMetadata
@@ -179,6 +262,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/view_id'
+        - $ref: '#/components/parameters/space_id'
       requestBody:
         required: true
         content:
@@ -210,7 +294,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
-  /api/data_views/data_view/{viewId}/runtime_field:
+  /s/{spaceId}/api/data_views/data_view/{viewId}/runtime_field:
     post:
       summary: Creates a runtime field.
       operationId: createRuntimeField
@@ -221,6 +305,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/view_id'
+        - $ref: '#/components/parameters/space_id'
       requestBody:
         required: true
         content:
@@ -251,6 +336,7 @@ paths:
         - data views
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/space_id'
         - name: viewId
           in: path
           description: |
@@ -302,7 +388,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
-  /api/data_views/data_view/{viewId}/runtime_field/{fieldName}:
+  /s/{spaceId}/api/data_views/data_view/{viewId}/runtime_field/{fieldName}:
     get:
       summary: Retrieves a runtime field.
       operationId: getRuntimeField
@@ -313,6 +399,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/field_name'
         - $ref: '#/components/parameters/view_id'
+        - $ref: '#/components/parameters/space_id'
       responses:
         '200':
           description: Indicates a successful call.
@@ -346,6 +433,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/field_name'
         - $ref: '#/components/parameters/view_id'
+        - $ref: '#/components/parameters/space_id'
       responses:
         '200':
           description: Indicates a successful call.
@@ -365,6 +453,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/field_name'
         - $ref: '#/components/parameters/view_id'
+        - $ref: '#/components/parameters/space_id'
       requestBody:
         required: true
         content:
@@ -395,80 +484,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
-  /api/data_views/default:
-    get:
-      summary: Retrieves the default data view identifier.
-      operationId: getDefaultDataView
-      description: |
-        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
-      tags:
-        - data views
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data_view_id:
-                    type: string
-              examples:
-                getDefaultDataViewResponse:
-                  $ref: '#/components/examples/get_default_data_view_response'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400_response'
-    post:
-      summary: Sets the default data view identifier.
-      operationId: setDefaultDatailView
-      description: |
-        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
-      tags:
-        - data views
-      parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - data_view_id
-              properties:
-                data_view_id:
-                  type:
-                    - string
-                    - 'null'
-                  description: |
-                    The data view identifier. NOTE: The API does not validate whether it is a valid identifier. Use `null` to unset the default data view.
-                force:
-                  type: boolean
-                  description: Update an existing default data view identifier.
-                  default: false
-            examples:
-              setDefaultDataViewRequest:
-                $ref: '#/components/examples/set_default_data_view_request'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  acknowledged:
-                    type: boolean
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400_response'
 components:
   securitySchemes:
     basicAuth:
@@ -479,6 +494,39 @@ components:
       in: header
       name: Authorization
       description: 'e.g. Authorization: ApiKey base64AccessApiKey'
+  parameters:
+    space_id:
+      in: path
+      name: spaceId
+      description: An identifier for the space. If `/s/` and the identifier are omitted from the path, the default space is used.
+      required: true
+      schema:
+        type: string
+        examples:
+          - default
+    kbn_xsrf:
+      schema:
+        type: string
+      in: header
+      name: kbn-xsrf
+      description: Cross-site request forgery protection
+      required: true
+    view_id:
+      in: path
+      name: viewId
+      description: An identifier for the data view.
+      required: true
+      schema:
+        type: string
+        example: ff959d40-b880-11e8-a6d9-e546fe2bba5f
+    field_name:
+      in: path
+      name: fieldName
+      description: The name of the runtime field.
+      required: true
+      schema:
+        type: string
+        example: hour_of_day
   examples:
     get_data_views_response:
       summary: The get all data views API returns a list of data views.
@@ -1447,6 +1495,15 @@ components:
           allowNoIndex: false
           name: Kibana Sample Data eCommerce
         refresh_fields: true
+    get_default_data_view_response:
+      summary: The get default data view API returns the default data view identifier.
+      value:
+        data_view_id: ff959d40-b880-11e8-a6d9-e546fe2bba5f
+    set_default_data_view_request:
+      summary: Set the default data view identifier.
+      value:
+        data_view_id: ff959d40-b880-11e8-a6d9-e546fe2bba5f
+        force: true
     update_field_metadata_request:
       summary: Set popularity count for field foo.
       value:
@@ -1973,15 +2030,6 @@ components:
         runtimeField:
           script:
             source: emit(doc["bar"].value)
-    get_default_data_view_response:
-      summary: The get default data view API returns the default data view identifier.
-      value:
-        data_view_id: ff959d40-b880-11e8-a6d9-e546fe2bba5f
-    set_default_data_view_request:
-      summary: Set the default data view identifier.
-      value:
-        data_view_id: ff959d40-b880-11e8-a6d9-e546fe2bba5f
-        force: true
   schemas:
     400_response:
       title: Bad request
@@ -2171,27 +2219,3 @@ components:
           type: boolean
           description: Reloads the data view fields after the data view is updated.
           default: false
-  parameters:
-    kbn_xsrf:
-      schema:
-        type: string
-      in: header
-      name: kbn-xsrf
-      description: Cross-site request forgery protection
-      required: true
-    view_id:
-      in: path
-      name: viewId
-      description: An identifier for the data view.
-      required: true
-      schema:
-        type: string
-        example: ff959d40-b880-11e8-a6d9-e546fe2bba5f
-    field_name:
-      in: path
-      name: fieldName
-      description: The name of the runtime field.
-      required: true
-      schema:
-        type: string
-        example: hour_of_day

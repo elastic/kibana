@@ -13,8 +13,8 @@ import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
 
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 
-import { StepDefineExposedState } from '../common';
-import { StepDefineFormProps } from '../step_define_form';
+import type { StepDefineExposedState } from '../common';
+import type { StepDefineFormProps } from '../step_define_form';
 
 export const useDatePicker = (
   defaults: StepDefineExposedState,

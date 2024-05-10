@@ -1,7 +1,7 @@
 [[try-esql]]
 == Try {esql}
 
-preview::[]
+preview::["Do not use {esql} on production environments. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."]
 
 The Elasticsearch Query Language, {esql}, makes it easier to explore your data without leaving Discover. 
 
@@ -11,7 +11,7 @@ In this tutorial we'll use the {kib} sample web logs in Discover and Lens to exp
 [[prerequisite]]
 === Prerequisite 
 
-To be able to select **Try {esql}** from the Data views menu the `discover:enableESQL` setting must be enabled from **Stack Management > Advanced Settings**. It is enabled by default. 
+To be able to select **Try {esql}** from the Data views menu the `enableESQL` setting must be enabled from **Stack Management > Advanced Settings**. It is enabled by default. 
 
 [float]
 [[tutorial-try-esql]]

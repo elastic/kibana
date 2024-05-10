@@ -7,7 +7,8 @@
 
 import React from 'react';
 
-import { EuiCodeBlock, EuiDataGridCellPopoverElementProps } from '@elastic/eui';
+import type { EuiDataGridCellPopoverElementProps } from '@elastic/eui';
+import { EuiCodeBlock } from '@elastic/eui';
 
 import {
   type DataFrameAnalysisConfigType,

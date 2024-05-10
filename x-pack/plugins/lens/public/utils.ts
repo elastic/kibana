@@ -429,3 +429,5 @@ export const getColorMappingDefaults = () => {
   }
   return { ...DEFAULT_COLOR_MAPPING_CONFIG };
 };
+
+export const EXPRESSION_BUILD_ERROR_ID = 'expression_build_error';

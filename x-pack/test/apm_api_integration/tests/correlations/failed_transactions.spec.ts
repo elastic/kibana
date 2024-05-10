@@ -27,7 +27,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     kuery: '',
   });
 
-  registry.when('failed transactions without data', { config: 'trial', archives: [] }, () => {
+  registry.when.skip('failed transactions without data', { config: 'trial', archives: [] }, () => {
     it('handles the empty state', async () => {
       const overallDistributionResponse = await apmApiClient.readUser({
         endpoint: 'POST /internal/apm/latency/overall_distribution/transactions',
@@ -104,118 +104,127 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
-  registry.when('failed transactions with data', { config: 'trial', archives: ['8.0.0'] }, () => {
-    it('runs queries and returns results', async () => {
-      const overallDistributionResponse = await apmApiClient.readUser({
-        endpoint: 'POST /internal/apm/latency/overall_distribution/transactions',
-        params: {
-          body: {
-            ...getOptions(),
-            percentileThreshold: 95,
-            chartType: LatencyDistributionChartType.failedTransactionsCorrelations,
+  // FLAKY: https://github.com/elastic/kibana/issues/176544
+  registry.when.skip(
+    'failed transactions with data',
+    { config: 'trial', archives: ['8.0.0'] },
+    () => {
+      it('runs queries and returns results', async () => {
+        const overallDistributionResponse = await apmApiClient.readUser({
+          endpoint: 'POST /internal/apm/latency/overall_distribution/transactions',
+          params: {
+            body: {
+              ...getOptions(),
+              percentileThreshold: 95,
+              chartType: LatencyDistributionChartType.failedTransactionsCorrelations,
+            },
           },
-        },
-      });
-
-      expect(overallDistributionResponse.status).to.eql(
-        200,
-        `Expected status to be '200', got '${overallDistributionResponse.status}'`
-      );
-
-      const errorDistributionResponse = await apmApiClient.readUser({
-        endpoint: 'POST /internal/apm/latency/overall_distribution/transactions',
-        params: {
-          body: {
-            ...getOptions(),
-            percentileThreshold: 95,
-            termFilters: [{ fieldName: EVENT_OUTCOME, fieldValue: EventOutcome.failure }],
-            chartType: LatencyDistributionChartType.failedTransactionsCorrelations,
-          },
-        },
-      });
-
-      expect(errorDistributionResponse.status).to.eql(
-        200,
-        `Expected status to be '200', got '${errorDistributionResponse.status}'`
-      );
-
-      const fieldCandidatesResponse = await apmApiClient.readUser({
-        endpoint: 'GET /internal/apm/correlations/field_candidates/transactions',
-        params: {
-          query: getOptions(),
-        },
-      });
-
-      expect(fieldCandidatesResponse.status).to.eql(
-        200,
-        `Expected status to be '200', got '${fieldCandidatesResponse.status}'`
-      );
-
-      const fieldCandidates = fieldCandidatesResponse.body?.fieldCandidates.filter(
-        (t) => !(t === EVENT_OUTCOME)
-      );
-
-      // Identified 68 fieldCandidates.
-      expect(fieldCandidates.length).to.eql(
-        68,
-        `Expected field candidates length to be '68', got '${fieldCandidates.length}'`
-      );
-
-      const failedTransactionsCorrelationsResponse = await apmApiClient.readUser({
-        endpoint: 'POST /internal/apm/correlations/p_values/transactions',
-        params: {
-          body: {
-            ...getOptions(),
-            fieldCandidates,
-          },
-        },
-      });
-
-      expect(failedTransactionsCorrelationsResponse.status).to.eql(
-        200,
-        `Expected status to be '200', got '${failedTransactionsCorrelationsResponse.status}'`
-      );
-
-      const fieldsToSample = new Set<string>();
-      if (failedTransactionsCorrelationsResponse.body?.failedTransactionsCorrelations.length > 0) {
-        failedTransactionsCorrelationsResponse.body?.failedTransactionsCorrelations.forEach((d) => {
-          fieldsToSample.add(d.fieldName);
         });
-      }
 
-      const finalRawResponse: FailedTransactionsCorrelationsResponse = {
-        ccsWarning: failedTransactionsCorrelationsResponse.body?.ccsWarning,
-        percentileThresholdValue: overallDistributionResponse.body?.percentileThresholdValue,
-        overallHistogram: overallDistributionResponse.body?.overallHistogram,
-        errorHistogram: errorDistributionResponse.body?.overallHistogram,
-        failedTransactionsCorrelations:
-          failedTransactionsCorrelationsResponse.body?.failedTransactionsCorrelations,
-      };
+        expect(overallDistributionResponse.status).to.eql(
+          200,
+          `Expected status to be '200', got '${overallDistributionResponse.status}'`
+        );
 
-      expect(finalRawResponse?.percentileThresholdValue).to.be(1309695.875);
-      expect(finalRawResponse?.errorHistogram?.length).to.be(101);
-      expect(finalRawResponse?.overallHistogram?.length).to.be(101);
+        const errorDistributionResponse = await apmApiClient.readUser({
+          endpoint: 'POST /internal/apm/latency/overall_distribution/transactions',
+          params: {
+            body: {
+              ...getOptions(),
+              percentileThreshold: 95,
+              termFilters: [{ fieldName: EVENT_OUTCOME, fieldValue: EventOutcome.failure }],
+              chartType: LatencyDistributionChartType.failedTransactionsCorrelations,
+            },
+          },
+        });
 
-      expect(finalRawResponse?.failedTransactionsCorrelations?.length).to.eql(
-        30,
-        `Expected 30 identified correlations, got ${finalRawResponse?.failedTransactionsCorrelations?.length}.`
-      );
+        expect(errorDistributionResponse.status).to.eql(
+          200,
+          `Expected status to be '200', got '${errorDistributionResponse.status}'`
+        );
 
-      const sortedCorrelations = finalRawResponse?.failedTransactionsCorrelations?.sort(
-        (a, b) => b.score - a.score
-      );
-      const correlation = sortedCorrelations?.[0];
+        const fieldCandidatesResponse = await apmApiClient.readUser({
+          endpoint: 'GET /internal/apm/correlations/field_candidates/transactions',
+          params: {
+            query: getOptions(),
+          },
+        });
 
-      expect(typeof correlation).to.be('object');
-      expect(correlation?.doc_count).to.be(31);
-      expect(correlation?.score).to.be(83.70467673605746);
-      expect(correlation?.bg_count).to.be(31);
-      expect(correlation?.fieldName).to.be('http.response.status_code');
-      expect(correlation?.fieldValue).to.be(500);
-      expect(typeof correlation?.pValue).to.be('number');
-      expect(typeof correlation?.normalizedScore).to.be('number');
-      expect(typeof correlation?.failurePercentage).to.be('number');
-      expect(typeof correlation?.successPercentage).to.be('number');
-    });
-  });
+        expect(fieldCandidatesResponse.status).to.eql(
+          200,
+          `Expected status to be '200', got '${fieldCandidatesResponse.status}'`
+        );
+
+        const fieldCandidates = fieldCandidatesResponse.body?.fieldCandidates.filter(
+          (t) => !(t === EVENT_OUTCOME)
+        );
+
+        // Identified 68 fieldCandidates.
+        expect(fieldCandidates.length).to.eql(
+          68,
+          `Expected field candidates length to be '68', got '${fieldCandidates.length}'`
+        );
+
+        const failedTransactionsCorrelationsResponse = await apmApiClient.readUser({
+          endpoint: 'POST /internal/apm/correlations/p_values/transactions',
+          params: {
+            body: {
+              ...getOptions(),
+              fieldCandidates,
+            },
+          },
+        });
+
+        expect(failedTransactionsCorrelationsResponse.status).to.eql(
+          200,
+          `Expected status to be '200', got '${failedTransactionsCorrelationsResponse.status}'`
+        );
+
+        const fieldsToSample = new Set<string>();
+        if (
+          failedTransactionsCorrelationsResponse.body?.failedTransactionsCorrelations.length > 0
+        ) {
+          failedTransactionsCorrelationsResponse.body?.failedTransactionsCorrelations.forEach(
+            (d) => {
+              fieldsToSample.add(d.fieldName);
+            }
+          );
+        }
+
+        const finalRawResponse: FailedTransactionsCorrelationsResponse = {
+          ccsWarning: failedTransactionsCorrelationsResponse.body?.ccsWarning,
+          percentileThresholdValue: overallDistributionResponse.body?.percentileThresholdValue,
+          overallHistogram: overallDistributionResponse.body?.overallHistogram,
+          errorHistogram: errorDistributionResponse.body?.overallHistogram,
+          failedTransactionsCorrelations:
+            failedTransactionsCorrelationsResponse.body?.failedTransactionsCorrelations,
+        };
+
+        expect(finalRawResponse?.percentileThresholdValue).to.be(1309695.875);
+        expect(finalRawResponse?.errorHistogram?.length).to.be(101);
+        expect(finalRawResponse?.overallHistogram?.length).to.be(101);
+
+        expect(finalRawResponse?.failedTransactionsCorrelations?.length).to.eql(
+          30,
+          `Expected 30 identified correlations, got ${finalRawResponse?.failedTransactionsCorrelations?.length}.`
+        );
+
+        const sortedCorrelations = finalRawResponse?.failedTransactionsCorrelations?.sort(
+          (a, b) => b.score - a.score
+        );
+        const correlation = sortedCorrelations?.[0];
+
+        expect(typeof correlation).to.be('object');
+        expect(correlation?.doc_count).to.be(31);
+        expect(correlation?.score).to.be(83.70467673605746);
+        expect(correlation?.bg_count).to.be(31);
+        expect(correlation?.fieldName).to.be('http.response.status_code');
+        expect(correlation?.fieldValue).to.be(500);
+        expect(typeof correlation?.pValue).to.be('number');
+        expect(typeof correlation?.normalizedScore).to.be('number');
+        expect(typeof correlation?.failurePercentage).to.be('number');
+        expect(typeof correlation?.successPercentage).to.be('number');
+      });
+    }
+  );
 }

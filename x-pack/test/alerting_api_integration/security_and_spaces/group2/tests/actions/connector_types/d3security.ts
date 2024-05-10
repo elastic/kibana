@@ -11,6 +11,7 @@ import {
   D3SecuritySimulator,
   d3SecuritySuccessResponse,
 } from '@kbn/actions-simulators-plugin/server/d3security_simulation';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 const connectorTypeId = '.d3security';
@@ -179,6 +180,7 @@ export default function d3SecurityTest({ getService }: FtrProviderContext) {
             message:
               'error validating action params: [subAction]: expected value of type [string] but got [undefined]',
             retry: false,
+            errorSource: TaskErrorSource.FRAMEWORK,
           });
         });
 
@@ -196,6 +198,7 @@ export default function d3SecurityTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: true,
             message: 'an error occurred while running the action',
+            errorSource: TaskErrorSource.FRAMEWORK,
             service_message: `Sub action "invalidAction" is not registered. Connector id: ${d3SecurityActionId}. Connector name: D3 Security. Connector type: .d3security`,
           });
         });
@@ -287,6 +290,7 @@ export default function d3SecurityTest({ getService }: FtrProviderContext) {
               message:
                 'error validating action params: [subAction]: expected value of type [string] but got [undefined]',
               retry: false,
+              errorSource: TaskErrorSource.FRAMEWORK,
             });
           });
         });

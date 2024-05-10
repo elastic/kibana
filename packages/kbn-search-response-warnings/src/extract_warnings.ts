@@ -7,7 +7,6 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import type { ClusterDetails } from '@kbn/es-types';
 import type { Start as InspectorStartContract, RequestAdapter } from '@kbn/inspector-plugin/public';
 import type { SearchResponseWarning } from './types';
 
@@ -24,24 +23,16 @@ export function extractWarnings(
   const warnings: SearchResponseWarning[] = [];
 
   const isPartial = rawResponse._clusters
-    ? Object.values(
-        (
-          rawResponse._clusters as estypes.ClusterStatistics & {
-            details: Record<string, ClusterDetails>;
-          }
-        ).details
-      ).some((clusterDetails) => clusterDetails.status !== 'successful')
+    ? rawResponse._clusters.partial > 0 ||
+      rawResponse._clusters.skipped > 0 ||
+      rawResponse._clusters.running > 0
     : rawResponse.timed_out || rawResponse._shards.failed > 0;
   if (isPartial) {
     warnings.push({
       type: 'incomplete',
       requestName,
       clusters: rawResponse._clusters
-        ? (
-            rawResponse._clusters as estypes.ClusterStatistics & {
-              details: Record<string, ClusterDetails>;
-            }
-          ).details
+        ? rawResponse._clusters.details ?? {}
         : {
             '(local)': {
               status: 'partial',

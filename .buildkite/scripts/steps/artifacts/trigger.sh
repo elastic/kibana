@@ -12,9 +12,5 @@ echo "--- Trigger artifact builds"
 if [ "$BEATS_MANIFEST_LATEST_URL" = "$KIBANA_BEATS_MANIFEST_URL" ]; then
   echo "Kibana has the latest version of beats, skipping trigger"
 else
-  # Staging builds are not necessary on main
-  if [[ "$BUILDKITE_BRANCH" != "main" ]]; then
-    ts-node .buildkite/scripts/steps/trigger_pipeline.ts kibana-artifacts-staging "$BUILDKITE_BRANCH"
-  fi
-  ts-node .buildkite/scripts/steps/trigger_pipeline.ts kibana-artifacts-snapshot "$BUILDKITE_BRANCH"
+  ts-node .buildkite/scripts/steps/trigger_pipeline.ts kibana-artifacts-staging "$BUILDKITE_BRANCH"
 fi

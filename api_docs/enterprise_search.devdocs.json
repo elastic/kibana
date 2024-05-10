@@ -14,7 +14,7 @@
         "label": "EnterpriseSearchPublicStart",
         "description": [],
         "signature": [
-          "Promise<void>"
+          "{} | undefined"
         ],
         "path": "x-pack/plugins/enterprise_search/public/plugin.ts",
         "deprecated": false,

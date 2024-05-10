@@ -24,7 +24,7 @@ export const TagList = ({ onClick, references, tagRender }: TagListProps) => {
   return (
     <div>
       {references.map((ref) => {
-        const tag = { ...ref, color: 'blue', description: '' };
+        const tag = { ...ref, color: 'blue', description: '', managed: false };
 
         if (tagRender) {
           return tagRender(tag);
@@ -71,6 +71,9 @@ export const getStoryServices = (params: Params, action: ActionFn = () => {}) =>
     itemHasTags: () => true,
     getTagManagementUrl: () => '',
     getTagIdsFromReferences: () => [],
+    bulkGetUserProfiles: () => Promise.resolve([]),
+    getUserProfile: jest.fn(),
+    isTaggingEnabled: () => true,
     ...params,
   };
 

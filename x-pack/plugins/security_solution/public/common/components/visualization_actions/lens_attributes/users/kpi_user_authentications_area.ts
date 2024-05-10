@@ -89,6 +89,7 @@ export const kpiUserAuthenticationsAreaLensAttributes: LensAttributes = {
         meta: {
           alias: null,
           disabled: false,
+          // @ts-expect-error upgrade typescript v4.9.5
           indexRefName: 'filter-index-pattern-0',
           key: 'query',
           negate: false,

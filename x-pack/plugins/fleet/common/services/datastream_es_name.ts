@@ -16,7 +16,7 @@ export function getRegistryDataStreamAssetBaseName(dataStream: {
   type: string;
   hidden?: boolean;
 }): string {
-  const baseName = `${dataStream.type}-${dataStream.dataset}`;
+  const baseName = `${dataStream.type}-${dataStream.dataset.toLowerCase()}`;
   return dataStream.hidden ? `.${baseName}` : baseName;
 }
 
@@ -44,7 +44,7 @@ export const getPipelineNameForDatastream = ({
   dataStream: { dataset: string; type: string };
   packageVersion: string;
 }): string => {
-  return `${dataStream.type}-${dataStream.dataset}-${packageVersion}`;
+  return `${dataStream.type}-${dataStream.dataset.toLowerCase()}-${packageVersion}`;
 };
 
 /**
@@ -54,5 +54,5 @@ export const getCustomPipelineNameForDatastream = (dataStream: {
   dataset: string;
   type: string;
 }): string => {
-  return `${dataStream.type}-${dataStream.dataset}@custom`;
+  return `${dataStream.type}-${dataStream.dataset.toLowerCase()}@custom`;
 };

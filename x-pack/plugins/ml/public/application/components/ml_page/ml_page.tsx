@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { createContext, FC, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { createContext, useEffect, useMemo, useState } from 'react';
 import { createHtmlPortalNode, type HtmlPortalNode } from 'react-reverse-portal';
 import { Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
@@ -127,6 +128,7 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
         className={'ml-app'}
         data-test-subj={'mlApp'}
         restrictWidth={false}
+        panelled
         solutionNav={
           showMLNavMenu
             ? {

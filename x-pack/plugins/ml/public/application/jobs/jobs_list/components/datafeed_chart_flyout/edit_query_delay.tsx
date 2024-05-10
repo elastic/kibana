@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -19,7 +20,7 @@ import {
 
 import { useMlApiContext } from '../../../../contexts/kibana';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
-import { Datafeed } from '../../../../../../common/types/anomaly_detection_jobs';
+import type { Datafeed } from '../../../../../../common/types/anomaly_detection_jobs';
 
 const tooltipContent = i18n.translate(
   'xpack.ml.jobsList.datafeedChart.editQueryDelay.tooltipContent',
@@ -34,6 +35,7 @@ export const EditQueryDelay: FC<{
   queryDelay: Datafeed['query_delay'];
   isEnabled: boolean;
 }> = ({ datafeedId, queryDelay, isEnabled }) => {
+  const [currentQueryDelay, setCurrentQueryDelay] = useState(queryDelay);
   const [newQueryDelay, setNewQueryDelay] = useState<string | undefined>();
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const { updateDatafeed } = useMlApiContext();
@@ -45,6 +47,7 @@ export const EditQueryDelay: FC<{
         datafeedId,
         datafeedConfig: { query_delay: newQueryDelay },
       });
+      setCurrentQueryDelay(newQueryDelay);
       displaySuccessToast(
         i18n.translate(
           'xpack.ml.jobsList.datafeedChart.editQueryDelay.changesSavedNotificationMessage',
@@ -120,7 +123,12 @@ export const EditQueryDelay: FC<{
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="none" direction="column">
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty color="primary" size="xs" onClick={updateQueryDelay}>
+                  <EuiButtonEmpty
+                    disabled={newQueryDelay === currentQueryDelay}
+                    color="primary"
+                    size="xs"
+                    onClick={updateQueryDelay}
+                  >
                     <FormattedMessage
                       id="xpack.ml.jobsList.datafeedChart.applyQueryDelayLabel"
                       defaultMessage="Apply"

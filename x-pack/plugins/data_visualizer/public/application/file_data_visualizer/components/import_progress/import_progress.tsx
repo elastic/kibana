@@ -7,9 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 
-import { EuiStepsHorizontal, EuiStepStatus, EuiProgress, EuiSpacer } from '@elastic/eui';
+import type { EuiStepStatus } from '@elastic/eui';
+import { EuiStepsHorizontal, EuiProgress, EuiSpacer } from '@elastic/eui';
 
 export enum IMPORT_STATUS {
   INCOMPLETE = 'incomplete',

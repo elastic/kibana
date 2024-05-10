@@ -302,10 +302,10 @@
           },
           {
             "parentPluginId": "@kbn/core-test-helpers-model-versions",
-            "id": "def-common.ModelVersionTestKit.tearsDown",
+            "id": "def-common.ModelVersionTestKit.tearDown",
             "type": "Function",
             "tags": [],
-            "label": "tearsDown",
+            "label": "tearDown",
             "description": [
               "\nCleanup function that will delete the test index.\nShould be called before calling `testbed.prepareTestKit` again."
             ],

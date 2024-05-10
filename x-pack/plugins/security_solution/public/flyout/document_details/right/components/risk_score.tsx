@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
@@ -16,7 +15,7 @@ import { useRightPanelContext } from '../context';
 /**
  * Document details risk score displayed in flyout right section header
  */
-export const RiskScore: FC = memo(() => {
+export const RiskScore = memo(() => {
   const { getFieldsData } = useRightPanelContext();
   const fieldsData = getFieldsData(ALERT_RISK_SCORE);
 
@@ -34,13 +33,13 @@ export const RiskScore: FC = memo(() => {
   }
 
   return (
-    <EuiFlexGroup alignItems="center" direction="row" gutterSize="xs" responsive={false}>
+    <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiTitle size="xxs" data-test-subj={RISK_SCORE_TITLE_TEST_ID}>
           <h3>
             <FormattedMessage
               id="xpack.securitySolution.flyout.right.header.riskScoreTitle"
-              defaultMessage="Risk score:"
+              defaultMessage="Risk score"
             />
           </h3>
         </EuiTitle>

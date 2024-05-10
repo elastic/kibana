@@ -9,6 +9,7 @@ import type { Client } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import type { BulkRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { ResponseActionsApiCommandNames } from '../service/response_actions/constants';
 import { EndpointError } from '../errors';
 import { usageTracker } from './usage_tracker';
 import type {
@@ -117,6 +118,15 @@ interface BuildIEndpointAndFleetActionsBulkOperationsResponse
   operations: Required<BulkRequest>['operations'];
 }
 
+const getAutomatedActionsSample = (): Array<{
+  command: ResponseActionsApiCommandNames;
+  config?: { overwrite: boolean };
+}> => [
+  { command: 'isolate' },
+  { command: 'suspend-process', config: { overwrite: true } },
+  { command: 'kill-process', config: { overwrite: true } },
+];
+
 export const buildIEndpointAndFleetActionsBulkOperations = ({
   endpoints,
   count = 1,
@@ -138,13 +148,14 @@ export const buildIEndpointAndFleetActionsBulkOperations = ({
   for (const endpoint of endpoints) {
     const agentId = endpoint.elastic.agent.id;
 
+    const automatedActions = getAutomatedActionsSample();
     for (let i = 0; i < count; i++) {
       // start with endpoint action
       const logsEndpointAction: LogsEndpointAction = endpointActionGenerator.generate({
         EndpointActions: {
           data: {
             comment: 'data generator: this host is bad',
-            ...(alertIds ? { command: 'isolate' } : {}),
+            ...(alertIds ? automatedActions[i] : {}),
           },
         },
       });

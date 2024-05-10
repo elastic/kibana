@@ -50,7 +50,6 @@ describe('SearchBar', () => {
   const usageCollection = usageCollectionPluginMock.createSetupContract();
   const core = coreMock.createStart();
   const basePathUrl = '/plugins/globalSearchBar/assets/';
-  const darkMode = false;
   let searchService: ReturnType<typeof globalSearchPluginMock.createStartContract>;
   let applications: ReturnType<typeof applicationServiceMock.createStartContract>;
   let mockReportUiCounter: typeof usageCollection.reportUiCounter;
@@ -114,7 +113,6 @@ describe('SearchBar', () => {
             globalSearch={searchService}
             navigateToUrl={applications.navigateToUrl}
             basePathUrl={basePathUrl}
-            darkMode={darkMode}
             chromeStyle$={chromeStyle$}
             reportEvent={eventReporter}
           />
@@ -137,7 +135,6 @@ describe('SearchBar', () => {
             globalSearch={searchService}
             navigateToUrl={applications.navigateToUrl}
             basePathUrl={basePathUrl}
-            darkMode={darkMode}
             chromeStyle$={chromeStyle$}
             reportEvent={eventReporter}
           />
@@ -165,7 +162,6 @@ describe('SearchBar', () => {
             globalSearch={searchService}
             navigateToUrl={applications.navigateToUrl}
             basePathUrl={basePathUrl}
-            darkMode={darkMode}
             chromeStyle$={chromeStyle$}
             reportEvent={eventReporter}
           />
@@ -203,7 +199,6 @@ describe('SearchBar', () => {
             globalSearch={searchService}
             navigateToUrl={applications.navigateToUrl}
             basePathUrl={basePathUrl}
-            darkMode={darkMode}
             chromeStyle$={chromeStyle$}
             reportEvent={eventReporter}
           />
@@ -240,7 +235,6 @@ describe('SearchBar', () => {
             globalSearch={searchService}
             navigateToUrl={applications.navigateToUrl}
             basePathUrl={basePathUrl}
-            darkMode={darkMode}
             chromeStyle$={chromeStyle$}
             reportEvent={eventReporter}
           />
@@ -270,7 +264,6 @@ describe('SearchBar', () => {
               globalSearch={searchService}
               navigateToUrl={applications.navigateToUrl}
               basePathUrl={basePathUrl}
-              darkMode={darkMode}
               chromeStyle$={chromeStyle$}
               reportEvent={eventReporter}
             />
@@ -300,7 +293,6 @@ describe('SearchBar', () => {
               globalSearch={searchService}
               navigateToUrl={applications.navigateToUrl}
               basePathUrl={basePathUrl}
-              darkMode={darkMode}
               chromeStyle$={chromeStyle$}
               reportEvent={eventReporter}
             />

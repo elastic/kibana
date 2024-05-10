@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+
 /**
  * Collected performance metrics during a screenshotting session.
  */
@@ -29,3 +31,9 @@ export interface PerformanceMetrics {
    */
   memoryInMegabytes?: number;
 }
+
+/**
+ * Timestamp metrics about a running screenshot task
+ * which determine the maximum timeouts possible
+ */
+export type TaskInstanceFields = Pick<ConcreteTaskInstance, 'retryAt' | 'startedAt'>;

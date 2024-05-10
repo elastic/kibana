@@ -46,12 +46,35 @@ export const getThemeSettings = (
       name: i18n.translate('core.ui_settings.params.darkModeTitle', {
         defaultMessage: 'Dark mode',
       }),
-      value: defaultDarkMode,
+      value: defaultDarkMode ? 'enabled' : 'disabled',
       description: i18n.translate('core.ui_settings.params.darkModeText', {
-        defaultMessage: `Enable a dark mode for the Kibana UI. A page refresh is required for the setting to be applied.`,
+        defaultMessage:
+          `The UI theme that the Kibana UI should use. ` +
+          `Set to 'enabled' or 'disabled' to enable or disable the dark theme. ` +
+          `Set to 'system' to have the Kibana UI theme follow the system theme. ` +
+          `A page refresh is required for the setting to be applied.`,
       }),
+      type: 'select',
+      options: ['enabled', 'disabled', 'system'],
+      optionLabels: {
+        enabled: i18n.translate('core.ui_settings.params.darkMode.options.enabled', {
+          defaultMessage: `Enabled`,
+        }),
+        disabled: i18n.translate('core.ui_settings.params.darkMode.options.disabled', {
+          defaultMessage: `Disabled`,
+        }),
+        system: i18n.translate('core.ui_settings.params.darkMode.options.system', {
+          defaultMessage: `Sync with system`,
+        }),
+      },
       requiresPageReload: true,
-      schema: schema.boolean(),
+      schema: schema.oneOf([
+        schema.literal('enabled'),
+        schema.literal('disabled'),
+        schema.literal('system'),
+        // for backward-compatibility
+        schema.boolean(),
+      ]),
     },
     /**
      * Theme is sticking around as there are still a number of places reading it and

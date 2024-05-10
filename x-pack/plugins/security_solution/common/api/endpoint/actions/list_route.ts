@@ -14,17 +14,24 @@ import {
   RESPONSE_ACTION_TYPE,
 } from '../../../endpoint/service/response_actions/constants';
 import { ENDPOINT_DEFAULT_PAGE_SIZE } from '../../../endpoint/constants';
+import { agentTypesSchema } from './common/base';
 
 const commandsSchema = schema.oneOf(
   // @ts-expect-error TS2769: No overload matches this call
   RESPONSE_ACTION_API_COMMANDS_NAMES.map((command) => schema.literal(command))
 );
 
-// TODO: fix the odd TS error
-// @ts-expect-error TS2769: No overload matches this call
-const statusesSchema = schema.oneOf(RESPONSE_ACTION_STATUS.map((status) => schema.literal(status)));
-// @ts-expect-error TS2769: No overload matches this call
-const typesSchema = schema.oneOf(RESPONSE_ACTION_TYPE.map((type) => schema.literal(type)));
+const statusesSchema = {
+  // @ts-expect-error TS2769: No overload matches this call
+  schema: schema.oneOf(RESPONSE_ACTION_STATUS.map((status) => schema.literal(status))),
+  options: { minSize: 1, maxSize: RESPONSE_ACTION_STATUS.length },
+};
+
+const actionTypesSchema = {
+  // @ts-expect-error TS2769: No overload matches this call
+  schema: schema.oneOf(RESPONSE_ACTION_TYPE.map((type) => schema.literal(type))),
+  options: { minSize: 1, maxSize: RESPONSE_ACTION_TYPE.length },
+};
 
 export const EndpointActionListRequestSchema = {
   query: schema.object({
@@ -32,6 +39,12 @@ export const EndpointActionListRequestSchema = {
       schema.oneOf([
         schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
         schema.string({ minLength: 1 }),
+      ])
+    ),
+    agentTypes: schema.maybe(
+      schema.oneOf([
+        schema.arrayOf(agentTypesSchema.schema, agentTypesSchema.options),
+        agentTypesSchema.schema,
       ])
     ),
     commands: schema.maybe(
@@ -44,7 +57,10 @@ export const EndpointActionListRequestSchema = {
     startDate: schema.maybe(schema.string()), // date ISO strings or moment date
     endDate: schema.maybe(schema.string()), // date ISO strings or moment date
     statuses: schema.maybe(
-      schema.oneOf([schema.arrayOf(statusesSchema, { minSize: 1, maxSize: 3 }), statusesSchema])
+      schema.oneOf([
+        schema.arrayOf(statusesSchema.schema, statusesSchema.options),
+        statusesSchema.schema,
+      ])
     ),
     userIds: schema.maybe(
       schema.oneOf([
@@ -72,8 +88,12 @@ export const EndpointActionListRequestSchema = {
         }),
       ])
     ),
+    // action types
     types: schema.maybe(
-      schema.oneOf([schema.arrayOf(typesSchema, { minSize: 1, maxSize: 2 }), typesSchema])
+      schema.oneOf([
+        schema.arrayOf(actionTypesSchema.schema, actionTypesSchema.options),
+        actionTypesSchema.schema,
+      ])
     ),
   }),
 };

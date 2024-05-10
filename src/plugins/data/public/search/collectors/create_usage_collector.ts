@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { first } from 'rxjs/operators';
+import { first } from 'rxjs';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { UiCounterMetricType } from '@kbn/analytics';
 import type { StartServicesAccessor } from '@kbn/core/public';

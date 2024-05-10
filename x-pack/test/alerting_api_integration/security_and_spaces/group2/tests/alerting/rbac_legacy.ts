@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { UserAtSpaceScenarios, Superuser } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover, AlertUtils } from '../../../../common/lib';
@@ -31,27 +32,27 @@ export default function alertTests({ getService }: FtrProviderContext) {
   const MIGRATED_ALERT_ID: Record<string, string> = {
     space_1_all_alerts_none_actions: SavedObjectsUtils.getConvertedObjectId(
       'space1',
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       '6ee9630a-a20e-44af-9465-217a3717d2ab'
     ),
     space_1_all_with_restricted_fixture: SavedObjectsUtils.getConvertedObjectId(
       'space1',
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       '5cc59319-74ee-4edc-8646-a79ea91067cd'
     ),
     space_1_all: SavedObjectsUtils.getConvertedObjectId(
       'space1',
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       'd41a6abb-b93b-46df-a80a-926221ea847c'
     ),
     global_read: SavedObjectsUtils.getConvertedObjectId(
       'space1',
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       '362e362b-a137-4aa2-9434-43e3d0d84a34'
     ),
     superuser: SavedObjectsUtils.getConvertedObjectId(
       'space1',
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       'b384be60-ec53-4b26-857e-0253ee55b277'
     ),
   };

@@ -8,7 +8,7 @@
 import moment from 'moment-timezone';
 import { useEffect, useMemo, useState } from 'react';
 
-import { EuiDataGridColumn } from '@elastic/eui';
+import type { EuiDataGridColumn } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { getFlattenedObject } from '@kbn/std';
@@ -34,9 +34,9 @@ import { getErrorMessage } from '../../../common/utils/errors';
 
 import { getPreviewTransformRequestBody, type TransformConfigQuery } from '../common';
 
-import { SearchItems } from './use_search_items';
+import type { SearchItems } from './use_search_items';
 import { useGetTransformsPreview } from './use_get_transforms_preview';
-import { StepDefineExposedState } from '../sections/create_transform/components/step_define';
+import type { StepDefineExposedState } from '../sections/create_transform/components/step_define';
 import {
   isLatestPartialRequest,
   isPivotPartialRequest,

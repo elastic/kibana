@@ -14,11 +14,13 @@ import {
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_CONSECUTIVE_MATCHES,
   ALERT_INSTANCE_ID,
   ALERT_LAST_DETECTED,
   ALERT_REASON,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
+  ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_NAME,
   ALERT_RULE_PARAMETERS,
@@ -80,6 +82,11 @@ export const alertFieldMap = {
     array: true,
     required: false,
   },
+  [ALERT_CONSECUTIVE_MATCHES]: {
+    type: 'long',
+    array: false,
+    required: false,
+  },
   [ALERT_INSTANCE_ID]: {
     type: 'keyword',
     array: false,
@@ -111,6 +118,11 @@ export const alertFieldMap = {
     type: 'keyword',
     array: false,
     required: true,
+  },
+  [ALERT_RULE_EXECUTION_TIMESTAMP]: {
+    type: 'date',
+    array: false,
+    required: false,
   },
   [ALERT_RULE_EXECUTION_UUID]: {
     type: 'keyword',

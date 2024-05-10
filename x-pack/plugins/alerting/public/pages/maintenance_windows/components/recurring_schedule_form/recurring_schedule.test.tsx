@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { Frequency } from '@kbn/rrule';
 import { fireEvent, within } from '@testing-library/react';
 import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -25,7 +25,7 @@ const initialValue: FormProps = {
 describe('RecurringSchedule', () => {
   let appMockRenderer: AppMockRenderer;
 
-  const MockHookWrapperComponent: React.FC<{ iv?: FormProps }> = ({
+  const MockHookWrapperComponent: FC<PropsWithChildren<{ iv?: FormProps }>> = ({
     children,
     iv = initialValue,
   }) => {
@@ -94,7 +94,7 @@ describe('RecurringSchedule', () => {
     const endsInput = within(result.getByTestId('ends-field')).getByTestId('never');
 
     expect(frequencyInput).toHaveValue('3');
-    expect(endsInput).toBeChecked();
+    expect(endsInput).toHaveAttribute('aria-pressed', 'true');
   });
 
   it('should prefill the form when provided with initialValue', () => {
@@ -119,7 +119,7 @@ describe('RecurringSchedule', () => {
       'Press the down key to open a popover containing a calendar.'
     );
     expect(frequencyInput).toHaveValue('1');
-    expect(endsInput).toBeChecked();
+    expect(endsInput).toHaveAttribute('aria-pressed', 'true');
     expect(untilInput).toHaveValue('03/24/2023');
   });
 });

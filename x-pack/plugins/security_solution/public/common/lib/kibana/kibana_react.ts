@@ -10,6 +10,7 @@ import {
   useKibana,
   useUiSetting,
   useUiSetting$,
+  useDarkMode,
   withKibana,
 } from '@kbn/kibana-react-plugin/public';
 import type { ApmBase } from '@elastic/apm-rum';
@@ -23,5 +24,6 @@ export {
   useTypedKibana as useKibana,
   useUiSetting,
   useUiSetting$,
+  useDarkMode,
   withKibana,
 };

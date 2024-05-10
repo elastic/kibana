@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
 
           await retry.try(async () => {
-            expect(await toasts.getToastCount()).to.equal(1);
+            expect(await toasts.getCount()).to.equal(1);
           });
         });
       });

@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useMemo, useState, useEffect } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiCheckableCard,
   EuiTitle,
   EuiSpacer,
   EuiSwitch,
   EuiHorizontalRule,
-  EuiComboBoxOptionOption,
   EuiComboBox,
   EuiFormRow,
   EuiCallOut,
@@ -85,6 +86,7 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
   const quickJobCreator = useMemo(
     () =>
       new QuickCategorizationJobCreator(
+        data.dataViews,
         uiSettings,
         data.query.timefilter.timefilter,
         dashboardService,
@@ -145,7 +147,6 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
     <JobDetails
       createADJob={createADJob}
       createADJobInWizard={createADJobInWizard}
-      embeddable={undefined}
       timeRange={timeRange}
       layer={undefined}
       layerIndex={0}
@@ -169,10 +170,49 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
                 defaultMessage="Look for anomalies in the event rate of a category."
                 id="xpack.ml.newJobFromPatternAnalysisFlyout.count.description"
               />
+
+              <EuiSpacer size="xs" />
+
+              <FormattedMessage
+                id="xpack.ml.newJobFromPatternAnalysisFlyout.count.description2"
+                defaultMessage="Recommended for categorizing all messages."
+              />
             </>
           }
           checked={categorizationType === CATEGORIZATION_TYPE.COUNT}
           onChange={() => setCategorizationType(CATEGORIZATION_TYPE.COUNT)}
+        />
+
+        <EuiSpacer size="m" />
+
+        <EuiCheckableCard
+          id={'highCount'}
+          label={
+            <>
+              <EuiTitle size="xs">
+                <h5>
+                  <FormattedMessage
+                    defaultMessage="High count"
+                    id="xpack.ml.newJobFromPatternAnalysisFlyout.highCount.title"
+                  />
+                </h5>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+              <FormattedMessage
+                defaultMessage="Look for unusually high counts of a category in the event rate."
+                id="xpack.ml.newJobFromPatternAnalysisFlyout.highCount.description"
+              />
+
+              <EuiSpacer size="xs" />
+
+              <FormattedMessage
+                id="xpack.ml.newJobFromPatternAnalysisFlyout.highCount.description2"
+                defaultMessage="Recommended for categorizing error messages."
+              />
+            </>
+          }
+          checked={categorizationType === CATEGORIZATION_TYPE.HIGH_COUNT}
+          onChange={() => setCategorizationType(CATEGORIZATION_TYPE.HIGH_COUNT)}
         />
 
         <EuiSpacer size="m" />

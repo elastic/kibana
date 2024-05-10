@@ -29,21 +29,19 @@ import { login } from '../../../../tasks/login';
 
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../objects/rule';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 
 const RULES_TABLE_REFRESH_INTERVAL_MS = 60000;
 
 describe('Rules table: auto-refresh', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
+  beforeEach(() => {
     login();
+    deleteAlertsAndRules();
     setRulesTableAutoRefreshIntervalSetting({
       enabled: true,
       refreshInterval: RULES_TABLE_REFRESH_INTERVAL_MS,
     });
     createRule(getNewRule({ name: 'Test rule 1', rule_id: '1', enabled: false }));
-  });
-
-  beforeEach(() => {
-    login();
   });
 
   it('gets deactivated when any rule selected and activated after rules unselected', () => {

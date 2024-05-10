@@ -81,12 +81,12 @@ items:
         - summary
       properties:
         notify_when:
-          $ref: 'notify_when.yaml'
+          $ref: 'notify_when_action.yaml'
         summary:
           type: boolean
           description: Indicates whether the action is a summary.
         throttle:
-          $ref: 'throttle.yaml'
+          $ref: 'throttle_action.yaml'
     group:
       type: string
       description: >

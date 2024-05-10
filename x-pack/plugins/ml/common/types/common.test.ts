@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Dictionary, dictionaryToArray } from './common';
+import type { Dictionary } from './common';
+import { dictionaryToArray } from './common';
 
 describe('Types: Dictionary', () => {
   test('dictionaryToArray()', () => {

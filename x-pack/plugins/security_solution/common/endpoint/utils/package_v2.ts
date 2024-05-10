@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import semverLte from 'semver/functions/lte';
+// import semverLte from 'semver/functions/lte';
 
-const MIN_ENDPOINT_PACKAGE_V2_VERSION = '8.12.0';
+// switch to "v2" logic
+// const MIN_ENDPOINT_PACKAGE_V2_VERSION = '8.14.0-prerelease.1';
 export function isEndpointPackageV2(version: string) {
-  return semverLte(MIN_ENDPOINT_PACKAGE_V2_VERSION, version);
+  return false;
 }

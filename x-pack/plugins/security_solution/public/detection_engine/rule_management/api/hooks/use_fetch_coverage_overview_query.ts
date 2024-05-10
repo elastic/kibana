@@ -8,12 +8,14 @@
 import type { UseQueryOptions } from '@tanstack/react-query';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
+import * as i18n from '../../../rule_management_ui/pages/coverage_overview/translations';
 import type { CoverageOverviewFilter } from '../../../../../common/api/detection_engine';
 import { RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL } from '../../../../../common/api/detection_engine';
 import { fetchCoverageOverview } from '../api';
 import { buildCoverageOverviewDashboardModel } from '../../logic/coverage_overview/build_coverage_overview_dashboard_model';
 import type { CoverageOverviewDashboard } from '../../model/coverage_overview/dashboard';
 import { DEFAULT_QUERY_OPTIONS } from './constants';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 
 const COVERAGE_OVERVIEW_QUERY_KEY = ['POST', RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL];
 
@@ -29,6 +31,8 @@ export const useFetchCoverageOverviewQuery = (
   filter: CoverageOverviewFilter = {},
   options?: UseQueryOptions<CoverageOverviewDashboard>
 ) => {
+  const { addError } = useAppToasts();
+
   return useQuery<CoverageOverviewDashboard>(
     [...COVERAGE_OVERVIEW_QUERY_KEY, filter],
     async ({ signal }) => {
@@ -39,6 +43,11 @@ export const useFetchCoverageOverviewQuery = (
     {
       ...DEFAULT_QUERY_OPTIONS,
       ...options,
+      onError: (error) => {
+        addError(error, {
+          title: i18n.COVERAGE_OVERVIEW_FETCH_ERROR_TITLE,
+        });
+      },
     }
   );
 };

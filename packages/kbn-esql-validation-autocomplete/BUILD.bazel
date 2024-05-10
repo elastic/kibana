@@ -1,0 +1,33 @@
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
+
+SRCS = glob(
+  [
+    "**/*.ts",
+  ],
+  exclude = [
+    "**/*.config.js",
+    "**/*.mock.*",
+    "**/*.test.*",
+    "**/*.stories.*",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
+  ],
+)
+
+SHARED_DEPS = [
+  "//packages/kbn-i18n",
+  "@npm//js-levenshtein",
+]
+
+js_library(
+  name = "kbn-esql-validation-autocomplete",
+  package_name = "@kbn/esql-validation-autocomplete",
+  srcs = ["package.json"] + SRCS,
+  deps = SHARED_DEPS,
+  visibility = ["//visibility:public"],
+)

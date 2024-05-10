@@ -10,11 +10,9 @@ import { EuiFlyoutBody, EuiFlyoutHeader, EuiSpacer, EuiText, EuiTitle } from '@e
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Fragment } from 'react';
 import { CoreStart } from '@kbn/core/public';
-import {
-  CodeEditor,
-  createKibanaReactContext,
-  toMountPoint,
-} from '@kbn/kibana-react-plugin/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { CodeEditor } from '@kbn/code-editor';
 import { UISession } from '../../types';
 import { IClickActionDescriptor } from '..';
 import './inspect_button.scss';
@@ -126,9 +124,7 @@ export const createInspectActionDescriptor = (
         searchSession={uiSession}
       />
     );
-    const overlay = core.overlays.openFlyout(
-      toMountPoint(flyoutWrapper, { theme$: core.theme.theme$ })
-    );
+    const overlay = core.overlays.openFlyout(toMountPoint(flyoutWrapper, core));
     await overlay.onClose;
   },
 });

@@ -416,6 +416,10 @@ async function endpointListMiddleware({
     // so we check first if endpoints actually do exist before pulling in data for the onboarding
     // messages.
     if (await doEndpointsExist(http)) {
+      dispatch({
+        type: 'serverFinishedInitialization',
+        payload: true,
+      });
       return;
     }
 
@@ -455,6 +459,11 @@ async function endpointListMiddleware({
       payload: true,
     });
   }
+
+  dispatch({
+    type: 'serverFinishedInitialization',
+    payload: true,
+  });
 }
 
 export async function handleLoadMetadataTransformStats(http: HttpStart, store: EndpointPageStore) {

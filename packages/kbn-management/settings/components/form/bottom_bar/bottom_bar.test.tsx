@@ -26,6 +26,7 @@ const defaultProps: BottomBarProps = {
   hasInvalidChanges: false,
   unsavedChangesCount,
   isLoading: false,
+  hiddenChangesCount: 0,
 };
 
 const unsavedChangesCountText = unsavedChangesCount + ' unsaved settings';

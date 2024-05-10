@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { EuiTitle } from '@elastic/eui';
+import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { TECHNICAL_PREVIEW, TECHNICAL_PREVIEW_TOOLTIP } from '../../../common/translations';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { isAlertFromSentinelOneEvent } from '../../../common/utils/sentinelone_alert_check';
 import { useIsolateHostPanelContext } from './context';
 import { FLYOUT_HEADER_TITLE_TEST_ID } from './test_ids';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
@@ -17,20 +20,34 @@ import { FlyoutHeader } from '../../shared/components/flyout_header';
  * Document details expandable right section header for the isolate host panel
  */
 export const PanelHeader: FC = () => {
-  const { isolateAction } = useIsolateHostPanelContext();
+  const { isolateAction, dataFormattedForFieldBrowser: data } = useIsolateHostPanelContext();
+  const isSentinelOneAlert = isAlertFromSentinelOneEvent({ data });
+  const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
+    'responseActionsSentinelOneV1Enabled'
+  );
 
-  const title =
-    isolateAction === 'isolateHost' ? (
-      <FormattedMessage
-        id="xpack.securitySolution.flyout.isolateHost.isolateTitle"
-        defaultMessage="Isolate host"
-      />
-    ) : (
-      <FormattedMessage
-        id="xpack.securitySolution.flyout.isolateHost.releaseTitle"
-        defaultMessage="Release host"
-      />
-    );
+  const title = (
+    <EuiFlexGroup responsive gutterSize="s">
+      <EuiFlexItem grow={false}>
+        {isolateAction === 'isolateHost' ? (
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.isolateHost.isolateTitle"
+            defaultMessage="Isolate host"
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.isolateHost.releaseTitle"
+            defaultMessage="Release host"
+          />
+        )}
+      </EuiFlexItem>
+      {isSentinelOneV1Enabled && isSentinelOneAlert && (
+        <EuiFlexItem grow={false}>
+          <EuiBetaBadge label={TECHNICAL_PREVIEW} tooltipContent={TECHNICAL_PREVIEW_TOOLTIP} />
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  );
 
   return (
     <FlyoutHeader>

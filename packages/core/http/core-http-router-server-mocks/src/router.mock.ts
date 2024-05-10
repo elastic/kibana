@@ -121,6 +121,7 @@ const createResponseFactoryMock = (): jest.Mocked<KibanaResponseFactory> => ({
   ok: jest.fn(),
   accepted: jest.fn(),
   noContent: jest.fn(),
+  notModified: jest.fn(),
   custom: jest.fn(),
   redirected: jest.fn(),
   badRequest: jest.fn(),

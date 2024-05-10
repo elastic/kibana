@@ -1,0 +1,44 @@
+CASE
+
+Syntax
+CASE(condition1, value1[, ..., conditionN, valueN][, default_value])
+Parameters
+conditionX
+A condition.
+valueX
+The value that’s returned when the corresponding condition is the first to
+evaluate to true.
+default_value
+The default value that’s is returned when no condition matches.
+DescriptionAccepts pairs of conditions and values. The function returns the value that
+belongs to the first condition that evaluates to true.If the number of arguments is odd, the last argument is the default value which
+is returned when no condition matches. If the number of arguments is even, and
+no condition matches, the function returns null.ExampleDetermine whether employees are monolingual, bilingual, or polyglot:
+```esql
+FROM employees
+| EVAL type = CASE(
+    languages <= 1, "monolingual",
+    languages <= 2, "bilingual",
+     "polyglot")
+| KEEP emp_no, languages, type
+```
+
+Calculate the total connection success rate based on log messages:
+```esql
+FROM sample_data
+| EVAL successful = CASE(
+    STARTS_WITH(message, "Connected to"), 1,
+    message == "Connection error", 0
+  )
+| STATS success_rate = AVG(successful)
+```
+
+Calculate an hourly error rate as a percentage of the total number of log
+messages:
+```esql
+FROM sample_data
+| EVAL error = CASE(message LIKE "*error*", 1, 0)
+| EVAL hour = DATE_TRUNC(1 hour, @timestamp)
+| STATS error_rate = AVG(error) by hour
+| SORT hour
+```

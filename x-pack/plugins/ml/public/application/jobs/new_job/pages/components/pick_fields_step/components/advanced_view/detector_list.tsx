@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useContext, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -23,10 +24,10 @@ import {
 } from '@elastic/eui';
 
 import { JobCreatorContext } from '../../../job_creator_context';
-import { AdvancedJobCreator } from '../../../../../common/job_creator';
-import { Validation } from '../../../../../common/job_validator';
+import type { AdvancedJobCreator } from '../../../../../common/job_creator';
+import type { Validation } from '../../../../../common/job_validator';
 import { detectorToString } from '../../../../../../../util/string_utils';
-import { Detector } from '../../../../../../../../../common/types/anomaly_detection_jobs';
+import type { Detector } from '../../../../../../../../../common/types/anomaly_detection_jobs';
 
 interface Props {
   isActive: boolean;

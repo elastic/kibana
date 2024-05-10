@@ -28,9 +28,8 @@ import {
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
 import { OverviewCardWithActions, OverviewCard } from './overview_card';
 import { StatusPopoverButton } from './status_popover_button';
-import { SeverityBadge } from '../../../../detections/components/rules/severity_badge';
+import { SeverityBadge } from '../../severity_badge';
 import { useThrottledResizeObserver } from '../../utils';
-import { isNotNull } from '../../../../timelines/store/timeline/helpers';
 
 export const NotGrowingFlexGroup = euiStyled(EuiFlexGroup)`
   flex-grow: 0;
@@ -217,6 +216,10 @@ export const Overview = React.memo<Props>(
 
 function hasData(fieldInfo?: EnrichedFieldInfo): fieldInfo is EnrichedFieldInfoWithValues {
   return !!fieldInfo && Array.isArray(fieldInfo.values);
+}
+
+function isNotNull<T>(value: T | null): value is T {
+  return value !== null;
 }
 
 Overview.displayName = 'Overview';

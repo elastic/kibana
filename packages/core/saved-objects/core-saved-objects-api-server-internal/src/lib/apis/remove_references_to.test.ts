@@ -6,71 +6,277 @@
  * Side Public License, v 1.
  */
 
-import { apiContextMock, ApiExecutionContextMock } from '../../mocks';
-import { createType } from '../../test_helpers/repository.test.common';
+/* eslint-disable @typescript-eslint/no-shadow */
+
+import {
+  pointInTimeFinderMock,
+  mockGetCurrentTime,
+  mockGetSearchDsl,
+} from '../repository.test.mock';
+
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
+import { SavedObjectsRepository } from '../repository';
+import { loggerMock } from '@kbn/logging-mocks';
+import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
+import { apiContextMock, ApiExecutionContextMock, kibanaMigratorMock } from '../../mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+
+import {
+  mockTimestamp,
+  mappings,
+  createRegistry,
+  createDocumentMigrator,
+  removeReferencesToSuccess,
+  createSpySerializer,
+  createConflictErrorPayload,
+  createType,
+} from '../../test_helpers/repository.test.common';
 import { performRemoveReferencesTo } from './remove_references_to';
 
-const fooType = createType('foo', {});
-const barType = createType('bar', {});
+describe('SavedObjectsRepository', () => {
+  let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
+  let repository: SavedObjectsRepository;
+  let migrator: ReturnType<typeof kibanaMigratorMock.create>;
+  let logger: ReturnType<typeof loggerMock.create>;
+  let serializer: jest.Mocked<SavedObjectsSerializer>;
 
-describe('performRemoveReferencesTo', () => {
-  const namespace = 'some_ns';
-  const indices = ['.kib_1', '.kib_2'];
-  let apiExecutionContext: ApiExecutionContextMock;
+  const registry = createRegistry();
+  const documentMigrator = createDocumentMigrator(registry);
+  const fooType = createType('foo', {});
+  const barType = createType('bar', {});
 
   beforeEach(() => {
-    apiExecutionContext = apiContextMock.create();
-    apiExecutionContext.registry.registerType(fooType);
-    apiExecutionContext.registry.registerType(barType);
+    pointInTimeFinderMock.mockClear();
+    client = elasticsearchClientMock.createElasticsearchClient();
+    migrator = kibanaMigratorMock.create();
+    documentMigrator.prepareMigrations();
+    migrator.migrateDocument = jest.fn().mockImplementation(documentMigrator.migrate);
+    migrator.runMigrations = jest.fn().mockResolvedValue([{ status: 'skipped' }]);
+    logger = loggerMock.create();
 
-    apiExecutionContext.helpers.common.getCurrentNamespace.mockImplementation(
-      (space) => space ?? 'default'
-    );
-    apiExecutionContext.helpers.common.getIndicesForTypes.mockReturnValue(indices);
-  });
+    // create a mock serializer "shim" so we can track function calls, but use the real serializer's implementation
+    serializer = createSpySerializer(registry);
 
-  describe('with all extensions enabled', () => {
-    it('calls getCurrentNamespace with the correct parameters', async () => {
-      await performRemoveReferencesTo(
-        { type: 'foo', id: 'id', options: { namespace } },
-        apiExecutionContext
-      );
+    const allTypes = registry.getAllTypes().map((type) => type.name);
+    const allowedTypes = [...new Set(allTypes.filter((type) => !registry.isHidden(type)))];
 
-      const commonHelper = apiExecutionContext.helpers.common;
-      expect(commonHelper.getCurrentNamespace).toHaveBeenCalledTimes(1);
-      expect(commonHelper.getCurrentNamespace).toHaveBeenLastCalledWith(namespace);
+    // @ts-expect-error must use the private constructor to use the mocked serializer
+    repository = new SavedObjectsRepository({
+      index: '.kibana-test',
+      mappings,
+      client,
+      migrator,
+      typeRegistry: registry,
+      serializer,
+      allowedTypes,
+      logger,
     });
 
-    it('calls authorizeRemoveReferences with the correct parameters', async () => {
-      await performRemoveReferencesTo(
-        { type: 'foo', id: 'id', options: { namespace } },
-        apiExecutionContext
-      );
+    mockGetCurrentTime.mockReturnValue(mockTimestamp);
+    mockGetSearchDsl.mockClear();
+  });
 
-      const securityExt = apiExecutionContext.extensions.securityExtension!;
-      expect(securityExt.authorizeRemoveReferences).toHaveBeenCalledTimes(1);
-      expect(securityExt.authorizeRemoveReferences).toHaveBeenLastCalledWith({
-        namespace,
-        object: { type: 'foo', id: 'id' },
+  describe('#removeReferencesTo', () => {
+    const type = 'type';
+    const id = 'id';
+    const defaultOptions = {};
+    const updatedCount = 42;
+
+    describe('client calls', () => {
+      it('should use the ES updateByQuery action', async () => {
+        await removeReferencesToSuccess(client, repository, type, id);
+        expect(client.updateByQuery).toHaveBeenCalledTimes(1);
+      });
+
+      it('uses the correct default `refresh` value', async () => {
+        await removeReferencesToSuccess(client, repository, type, id);
+        expect(client.updateByQuery).toHaveBeenCalledWith(
+          expect.objectContaining({
+            refresh: true,
+          }),
+          expect.any(Object)
+        );
+      });
+
+      it('merges output of getSearchDsl into es request body', async () => {
+        const query = { query: 1, aggregations: 2 };
+        mockGetSearchDsl.mockReturnValue(query);
+        await removeReferencesToSuccess(client, repository, type, id, { type });
+
+        expect(client.updateByQuery).toHaveBeenCalledWith(
+          expect.objectContaining({
+            body: expect.objectContaining({ ...query }),
+          }),
+          expect.anything()
+        );
+      });
+
+      it('should set index to all known SO indices on the request', async () => {
+        await removeReferencesToSuccess(client, repository, type, id);
+        expect(client.updateByQuery).toHaveBeenCalledWith(
+          expect.objectContaining({
+            index: ['.kibana-test_8.0.0-testing', 'custom_8.0.0-testing'],
+          }),
+          expect.anything()
+        );
+      });
+
+      it('should use the `refresh` option in the request', async () => {
+        const refresh = Symbol();
+
+        await removeReferencesToSuccess(client, repository, type, id, { refresh });
+        expect(client.updateByQuery).toHaveBeenCalledWith(
+          expect.objectContaining({
+            refresh,
+          }),
+          expect.anything()
+        );
+      });
+
+      it('should pass the correct parameters to the update script', async () => {
+        await removeReferencesToSuccess(client, repository, type, id);
+        expect(client.updateByQuery).toHaveBeenCalledWith(
+          expect.objectContaining({
+            body: expect.objectContaining({
+              script: expect.objectContaining({
+                params: {
+                  type,
+                  id,
+                },
+              }),
+            }),
+          }),
+          expect.anything()
+        );
       });
     });
 
-    it('calls client.updateByQuery with the correct parameters', async () => {
-      await performRemoveReferencesTo(
-        { type: 'foo', id: 'id', options: { namespace, refresh: false } },
-        apiExecutionContext
-      );
+    describe('search dsl', () => {
+      it(`passes mappings and registry to getSearchDsl`, async () => {
+        await removeReferencesToSuccess(client, repository, type, id);
+        expect(mockGetSearchDsl).toHaveBeenCalledWith(mappings, registry, expect.anything());
+      });
 
-      const client = apiExecutionContext.client;
-      expect(client.updateByQuery).toHaveBeenCalledTimes(1);
-      expect(client.updateByQuery).toHaveBeenLastCalledWith(
-        {
-          refresh: false,
-          index: indices,
-          body: expect.any(Object),
-        },
-        { ignore: [404], meta: true }
+      it('passes namespace to getSearchDsl', async () => {
+        await removeReferencesToSuccess(client, repository, type, id, { namespace: 'some-ns' });
+        expect(mockGetSearchDsl).toHaveBeenCalledWith(
+          mappings,
+          registry,
+          expect.objectContaining({
+            namespaces: ['some-ns'],
+          })
+        );
+      });
+
+      it('passes hasReference to getSearchDsl', async () => {
+        await removeReferencesToSuccess(client, repository, type, id);
+        expect(mockGetSearchDsl).toHaveBeenCalledWith(
+          mappings,
+          registry,
+          expect.objectContaining({
+            hasReference: {
+              type,
+              id,
+            },
+          })
+        );
+      });
+
+      it('passes all known types to getSearchDsl', async () => {
+        await removeReferencesToSuccess(client, repository, type, id);
+        expect(mockGetSearchDsl).toHaveBeenCalledWith(
+          mappings,
+          registry,
+          expect.objectContaining({
+            type: registry.getAllTypes().map((type) => type.name),
+          })
+        );
+      });
+    });
+
+    describe('returns', () => {
+      it('returns the updated count from the ES response', async () => {
+        const response = await removeReferencesToSuccess(client, repository, type, id);
+        expect(response.updated).toBe(updatedCount);
+      });
+    });
+
+    describe('errors', () => {
+      it(`throws when ES returns failures`, async () => {
+        client.updateByQuery.mockResponseOnce({
+          updated: 7,
+          failures: [
+            { id: 'failure' } as estypes.BulkIndexByScrollFailure,
+            { id: 'another-failure' } as estypes.BulkIndexByScrollFailure,
+          ],
+        });
+
+        await expect(repository.removeReferencesTo(type, id, defaultOptions)).rejects.toThrowError(
+          createConflictErrorPayload(type, id)
+        );
+      });
+    });
+  });
+  describe('performRemoveReferencesTo', () => {
+    const namespace = 'some_ns';
+    const indices = ['.kib_1', '.kib_2'];
+    let apiExecutionContext: ApiExecutionContextMock;
+
+    beforeEach(() => {
+      apiExecutionContext = apiContextMock.create();
+      apiExecutionContext.registry.registerType(fooType);
+      apiExecutionContext.registry.registerType(barType);
+
+      apiExecutionContext.helpers.common.getCurrentNamespace.mockImplementation(
+        (space) => space ?? 'default'
       );
+      apiExecutionContext.helpers.common.getIndicesForTypes.mockReturnValue(indices);
+    });
+
+    describe('with all extensions enabled', () => {
+      it('calls getCurrentNamespace with the correct parameters', async () => {
+        await performRemoveReferencesTo(
+          { type: 'foo', id: 'id', options: { namespace } },
+          apiExecutionContext
+        );
+
+        const commonHelper = apiExecutionContext.helpers.common;
+        expect(commonHelper.getCurrentNamespace).toHaveBeenCalledTimes(1);
+        expect(commonHelper.getCurrentNamespace).toHaveBeenLastCalledWith(namespace);
+      });
+
+      it('calls authorizeRemoveReferences with the correct parameters', async () => {
+        await performRemoveReferencesTo(
+          { type: 'foo', id: 'id', options: { namespace } },
+          apiExecutionContext
+        );
+
+        const securityExt = apiExecutionContext.extensions.securityExtension!;
+        expect(securityExt.authorizeRemoveReferences).toHaveBeenCalledTimes(1);
+        expect(securityExt.authorizeRemoveReferences).toHaveBeenLastCalledWith({
+          namespace,
+          object: { type: 'foo', id: 'id' },
+        });
+      });
+
+      it('calls client.updateByQuery with the correct parameters', async () => {
+        await performRemoveReferencesTo(
+          { type: 'foo', id: 'id', options: { namespace, refresh: false } },
+          apiExecutionContext
+        );
+
+        const client = apiExecutionContext.client;
+        expect(client.updateByQuery).toHaveBeenCalledTimes(1);
+        expect(client.updateByQuery).toHaveBeenLastCalledWith(
+          {
+            refresh: false,
+            index: indices,
+            body: expect.any(Object),
+          },
+          { ignore: [404], meta: true }
+        );
+      });
     });
   });
 });

@@ -31,7 +31,7 @@ export const registerUpdateRoute = ({
     async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const { name } = request.params;
-      const { template, version, _meta } = request.body;
+      const { template, version, _meta, deprecated } = request.body;
 
       try {
         // Verify component exists; ES will throw 404 if not
@@ -43,6 +43,8 @@ export const registerUpdateRoute = ({
             template: template as estypes.IndicesIndexState,
             version,
             _meta,
+            // @ts-expect-error deprecated property is not yet part of the API types
+            deprecated,
           },
         });
 

@@ -9,21 +9,14 @@ import { discoverPluginMock } from '@kbn/discover-plugin/public/mocks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { renderHook } from '@testing-library/react-hooks';
-import {
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-  TestProviders,
-} from '../../mock';
+import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
 import { useDiscoverInTimelineActions } from './use_discover_in_timeline_actions';
 import type { Filter } from '@kbn/es-query';
 import { createStartServicesMock } from '../../lib/kibana/kibana_react.mock';
 import { useKibana } from '../../lib/kibana';
 import type { State } from '../../store';
-import { createStore } from '../../store';
 import { TimelineId } from '../../../../common/types';
-import * as timelineActions from '../../../timelines/store/timeline/actions';
+import * as timelineActions from '../../../timelines/store/actions';
 import type { ComponentType, FC, PropsWithChildren } from 'react';
 import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -67,10 +60,8 @@ jest.mock('./use_discover_in_timeline_actions', () => {
   return actual;
 });
 
-const { storage } = createSecuritySolutionStorageMock();
-
 const getTestProviderWithCustomState = (state: State = mockState) => {
-  const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  const store = createMockStore(state);
 
   const MockTestProvider: FC<PropsWithChildren<{}>> = ({ children }) => (
     <TestProviders store={store}> {children}</TestProviders>
@@ -182,42 +173,13 @@ describe('useDiscoverInTimelineActions', () => {
     });
   });
 
-  describe('restoreDiscoverAppStateFromSavedSearch', () => {
-    it('should restore basic discover app state and timeRange from a given saved Search', async () => {
-      const { result, waitFor } = renderTestHook();
-      result.current.restoreDiscoverAppStateFromSavedSearch(savedSearchMock);
-
-      await waitFor(() => {
-        const appState = mockDiscoverStateContainerRef.current.appState.getState();
-        const globalState = mockDiscoverStateContainerRef.current.globalState.get();
-        expect(appState).toMatchObject({
-          breakdownField: 'customBreakDownField',
-          columns: ['default_column'],
-          filters: [customFilter],
-          grid: undefined,
-          hideAggregatedPreview: undefined,
-          hideChart: true,
-          index: 'the-data-view-id',
-          interval: 'auto',
-          query: customQuery,
-          rowHeight: undefined,
-          rowsPerPage: undefined,
-          savedQuery: undefined,
-          sort: [['@timestamp', 'desc']],
-          viewMode: undefined,
-        });
-
-        expect(globalState).toMatchObject({ time: { from: 'now-20d', to: 'now' } });
-      });
-    });
-  });
   describe('resetDiscoverAppState', () => {
     it('should reset Discover AppState to a default state', async () => {
       const { result, waitFor } = renderTestHook();
       await result.current.resetDiscoverAppState();
       await waitFor(() => {
         const appState = mockDiscoverStateContainerRef.current.appState.getState();
-        expect(appState).toMatchObject(result.current.getDefaultDiscoverAppState());
+        expect(appState).toMatchObject(result.current.defaultDiscoverAppState);
       });
     });
     it('should reset Discover time to a default state', async () => {

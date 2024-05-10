@@ -9,7 +9,7 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
 import { css } from '@emotion/react';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
@@ -85,7 +85,7 @@ export const getMetricVisRenderer = (
 
       const { MetricVis } = await import('../components/metric_vis');
       render(
-        <KibanaThemeProvider theme$={core.theme.theme$}>
+        <KibanaRenderContextProvider {...core}>
           <div
             data-test-subj="mtrVis"
             css={css`
@@ -101,12 +101,11 @@ export const getMetricVisRenderer = (
               config={visConfig}
               renderComplete={renderComplete}
               fireEvent={handlers.event}
-              renderMode={handlers.getRenderMode()}
               filterable={filterable}
               overrides={overrides}
             />
           </div>
-        </KibanaThemeProvider>,
+        </KibanaRenderContextProvider>,
         domNode
       );
     },

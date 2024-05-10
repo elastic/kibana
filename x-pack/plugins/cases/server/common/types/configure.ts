@@ -33,6 +33,7 @@ type PersistedCustomFieldsConfiguration = Array<{
   type: string;
   label: string;
   required: boolean;
+  defaultValue?: string | boolean | null;
 }>;
 
 export type ConfigurationTransformedAttributes = ConfigurationAttributes;

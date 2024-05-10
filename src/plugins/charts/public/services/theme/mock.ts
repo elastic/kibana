@@ -6,14 +6,28 @@
  * Side Public License, v 1.
  */
 
-import { EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
+import { LIGHT_THEME, PartialTheme } from '@elastic/charts';
 import { ThemeService } from './theme';
 
+export const MOCK_SPARKLINE_THEME: PartialTheme = {
+  lineSeriesStyle: {
+    point: {
+      visible: false,
+      strokeWidth: 1,
+      radius: 1,
+    },
+  },
+  areaSeriesStyle: {
+    point: {
+      visible: false,
+      strokeWidth: 1,
+      radius: 1,
+    },
+  },
+};
+
 export const themeServiceMock: ThemeService = {
-  chartsDefaultTheme: EUI_CHARTS_THEME_LIGHT.theme,
-  chartsTheme$: jest.fn(() => ({
-    subscribe: jest.fn(),
-  })),
+  chartsDefaultBaseTheme: LIGHT_THEME,
   chartsBaseTheme$: jest.fn(() => ({
     subscribe: jest.fn(),
   })),
@@ -21,6 +35,6 @@ export const themeServiceMock: ThemeService = {
     subscribe: jest.fn(),
   })),
   useDarkMode: jest.fn().mockReturnValue(false),
-  useChartsTheme: jest.fn().mockReturnValue({}),
-  useChartsBaseTheme: jest.fn().mockReturnValue({}),
+  useChartsBaseTheme: jest.fn().mockReturnValue(LIGHT_THEME),
+  useSparklineOverrides: jest.fn().mockReturnValue(MOCK_SPARKLINE_THEME),
 } as any;

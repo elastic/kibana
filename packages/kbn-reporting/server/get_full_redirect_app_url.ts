@@ -8,7 +8,7 @@
 
 import { format } from 'url';
 
-import { buildKibanaPath, getRedirectAppPath } from '@kbn/reporting-common';
+import { buildKibanaPath, REPORTING_REDIRECT_APP } from '@kbn/reporting-common';
 import type { ReportingServerInfo } from '@kbn/reporting-common/types';
 import type { ReportingConfigType } from '.';
 
@@ -24,7 +24,7 @@ export function getFullRedirectAppUrl(
   const path = buildKibanaPath({
     basePath: serverInfo.basePath,
     spaceId,
-    appPath: getRedirectAppPath(),
+    appPath: REPORTING_REDIRECT_APP,
   });
 
   return format({

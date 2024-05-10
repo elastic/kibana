@@ -287,6 +287,28 @@ export class EndpointRuleAlertGenerator extends BaseDataGenerator {
                 comment: 'test',
               },
             },
+            {
+              params: {
+                command: 'suspend-process',
+                comment: 'Suspend host',
+                config: {
+                  field: 'entity_id',
+                  overwrite: false,
+                },
+              },
+              action_type_id: '.endpoint',
+            },
+            {
+              params: {
+                command: 'kill-process',
+                comment: 'Kill host',
+                config: {
+                  field: '',
+                  overwrite: true,
+                },
+              },
+              action_type_id: '.endpoint',
+            },
           ],
           rule_id: ELASTIC_SECURITY_RULE_ID,
           rule_name_override: 'message',

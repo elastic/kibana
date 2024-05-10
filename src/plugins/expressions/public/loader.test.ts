@@ -7,7 +7,7 @@
  */
 
 import { firstValueFrom, of } from 'rxjs';
-import { first, skip, toArray } from 'rxjs/operators';
+import { first, skip, toArray } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import { loader, ExpressionLoader } from './loader';
 import { Observable } from 'rxjs';

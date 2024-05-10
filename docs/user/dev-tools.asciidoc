@@ -30,10 +30,10 @@ a| <<painlesslab, Painless&nbsp;Lab>>
 
 --
 
-include::{kib-repo-dir}/dev-tools/console/console.asciidoc[]
+include::{kibana-root}/docs/dev-tools/console/console.asciidoc[]
 
-include::{kib-repo-dir}/dev-tools/searchprofiler/index.asciidoc[]
+include::{kibana-root}/docs/dev-tools/searchprofiler/index.asciidoc[]
 
-include::{kib-repo-dir}/dev-tools/grokdebugger/index.asciidoc[]
+include::{kibana-root}/docs/dev-tools/grokdebugger/index.asciidoc[]
 
-include::{kib-repo-dir}/dev-tools/painlesslab/index.asciidoc[]
+include::{kibana-root}/docs/dev-tools/painlesslab/index.asciidoc[]

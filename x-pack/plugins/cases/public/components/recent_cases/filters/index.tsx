@@ -67,6 +67,7 @@ export const RecentCasesFilters = React.memo<{
       onChange={onChange}
       options={options}
       value={filterBy}
+      aria-label={i18n.RECENT_CASES}
     />
   );
 });

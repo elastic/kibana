@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ELASTIC_AI_ASSISTANT_TITLE, WELCOME_CONVERSATION_TITLE } from '@kbn/elastic-assistant';
+import { WELCOME_CONVERSATION_TITLE } from '@kbn/elastic-assistant';
 import type { Conversation } from '@kbn/elastic-assistant';
 import { DATA_QUALITY_DASHBOARD_CONVERSATION_ID } from '@kbn/ecs-data-quality-dashboard/impl/data_quality/data_quality_panel/tabs/summary_tab/callout_summary/translations';
 import { DETECTION_RULES_CONVERSATION_ID } from '../../../detections/pages/detection_engine/rules/translations';
@@ -13,57 +13,56 @@ import {
   ALERT_SUMMARY_CONVERSATION_ID,
   EVENT_SUMMARY_CONVERSATION_ID,
 } from '../../../common/components/event_details/translations';
-import { ELASTIC_AI_ASSISTANT } from '../../comment_actions/translations';
 import { TIMELINE_CONVERSATION_TITLE } from './translations';
 
 export const BASE_SECURITY_CONVERSATIONS: Record<string, Conversation> = {
   [ALERT_SUMMARY_CONVERSATION_ID]: {
-    id: ALERT_SUMMARY_CONVERSATION_ID,
+    id: '',
+    title: ALERT_SUMMARY_CONVERSATION_ID,
+    category: 'assistant',
     isDefault: true,
     messages: [],
-    apiConfig: {},
+    replacements: {},
   },
   [DATA_QUALITY_DASHBOARD_CONVERSATION_ID]: {
-    id: DATA_QUALITY_DASHBOARD_CONVERSATION_ID,
+    id: '',
+    title: DATA_QUALITY_DASHBOARD_CONVERSATION_ID,
+    category: 'assistant',
     isDefault: true,
     messages: [],
-    apiConfig: {},
+    replacements: {},
   },
   [DETECTION_RULES_CONVERSATION_ID]: {
-    id: DETECTION_RULES_CONVERSATION_ID,
+    id: '',
+    title: DETECTION_RULES_CONVERSATION_ID,
+    category: 'assistant',
     isDefault: true,
     messages: [],
-    apiConfig: {},
+    replacements: {},
   },
   [EVENT_SUMMARY_CONVERSATION_ID]: {
-    id: EVENT_SUMMARY_CONVERSATION_ID,
+    id: '',
+    title: EVENT_SUMMARY_CONVERSATION_ID,
+    category: 'assistant',
     isDefault: true,
     messages: [],
-    apiConfig: {},
+    replacements: {},
   },
   [TIMELINE_CONVERSATION_TITLE]: {
     excludeFromLastConversationStorage: true,
-    id: TIMELINE_CONVERSATION_TITLE,
+    id: '',
+    title: TIMELINE_CONVERSATION_TITLE,
+    category: 'assistant',
     isDefault: true,
     messages: [],
-    apiConfig: {},
+    replacements: {},
   },
   [WELCOME_CONVERSATION_TITLE]: {
-    id: WELCOME_CONVERSATION_TITLE,
+    id: '',
+    title: WELCOME_CONVERSATION_TITLE,
+    category: 'assistant',
     isDefault: true,
-    theme: {
-      title: ELASTIC_AI_ASSISTANT_TITLE,
-      titleIcon: 'logoSecurity',
-      assistant: {
-        name: ELASTIC_AI_ASSISTANT,
-        icon: 'logoSecurity',
-      },
-      system: {
-        icon: 'logoElastic',
-      },
-      user: {},
-    },
     messages: [],
-    apiConfig: {},
+    replacements: {},
   },
 };

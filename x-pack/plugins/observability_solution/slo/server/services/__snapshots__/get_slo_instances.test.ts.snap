@@ -1,0 +1,41 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Get SLO Instances returns all instances of a SLO defined with a 'groupBy' 1`] = `
+Array [
+  Object {
+    "aggs": Object {
+      "instances": Object {
+        "terms": Object {
+          "field": "slo.instanceId",
+          "size": 1000,
+        },
+      },
+    },
+    "index": ".slo-observability.sli-v3*",
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "now-7d",
+              },
+            },
+          },
+          Object {
+            "term": Object {
+              "slo.id": "slo-id",
+            },
+          },
+          Object {
+            "term": Object {
+              "slo.revision": 2,
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+]
+`;

@@ -19,7 +19,7 @@ import type {
   BaseState,
   CalculateExcludeFiltersState,
   UpdateSourceMappingsPropertiesState,
-  CheckTargetMappingsState,
+  CheckTargetTypesMappingsState,
   CheckUnknownDocumentsState,
   CheckVersionIndexReadyActions,
   CleanupUnknownAndExcluded,
@@ -115,7 +115,16 @@ describe('migrations v2 model', () => {
         ],
       },
     },
+    indexTypes: ['config'],
     knownTypes: ['dashboard', 'config'],
+    latestMappingsVersions: {
+      config: '10.3.0',
+      dashboard: '10.3.0',
+    },
+    hashToVersionMap: {
+      'config|someHash': '10.1.0',
+      'dashboard|anotherHash': '10.2.0',
+    },
     excludeFromUpgradeFilterHooks: {},
     migrationDocLinks: {
       resolveMigrationFailures: 'https://someurl.co/',
@@ -2583,7 +2592,7 @@ describe('migrations v2 model', () => {
 
       it('OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT -> CHECK_TARGET_MAPPINGS if action succeeded', () => {
         const res: ResponseType<'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT'> = Either.right({});
-        const newState = model(state, res) as CheckTargetMappingsState;
+        const newState = model(state, res) as CheckTargetTypesMappingsState;
         expect(newState.controlState).toBe('CHECK_TARGET_MAPPINGS');
         // @ts-expect-error pitId shouldn't leak outside
         expect(newState.pitId).toBe(undefined);
@@ -2591,7 +2600,7 @@ describe('migrations v2 model', () => {
     });
 
     describe('CHECK_TARGET_MAPPINGS', () => {
-      const checkTargetMappingsState: CheckTargetMappingsState = {
+      const checkTargetTypesMappingsState: CheckTargetTypesMappingsState = {
         ...postInitState,
         controlState: 'CHECK_TARGET_MAPPINGS',
         versionIndexReadyActions: Option.none,
@@ -2602,10 +2611,10 @@ describe('migrations v2 model', () => {
       describe('reindex migration', () => {
         it('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES if origin mappings did not exist', () => {
           const res: ResponseType<'CHECK_TARGET_MAPPINGS'> = Either.left({
-            type: 'actual_mappings_incomplete' as const,
+            type: 'index_mappings_incomplete' as const,
           });
           const newState = model(
-            checkTargetMappingsState,
+            checkTargetTypesMappingsState,
             res
           ) as UpdateTargetMappingsPropertiesState;
           expect(newState.controlState).toBe('UPDATE_TARGET_MAPPINGS_PROPERTIES');
@@ -2614,28 +2623,14 @@ describe('migrations v2 model', () => {
       });
 
       describe('compatible migration', () => {
-        it('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES if core fields have been updated', () => {
+        it('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES if SO types have changed', () => {
           const res: ResponseType<'CHECK_TARGET_MAPPINGS'> = Either.left({
-            type: 'compared_mappings_changed' as const,
-            updatedHashes: ['dashboard', 'lens', 'namespaces'],
+            type: 'types_changed' as const,
+            updatedFields: [],
+            updatedTypes: ['dashboard', 'lens'],
           });
           const newState = model(
-            checkTargetMappingsState,
-            res
-          ) as UpdateTargetMappingsPropertiesState;
-          expect(newState.controlState).toBe('UPDATE_TARGET_MAPPINGS_PROPERTIES');
-          // since a core field has been updated, we must pickup ALL SOs.
-          // Thus, we must NOT define a filter query.
-          expect(Option.isNone(newState.updatedTypesQuery)).toEqual(true);
-        });
-
-        it('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES if only SO types have changed', () => {
-          const res: ResponseType<'CHECK_TARGET_MAPPINGS'> = Either.left({
-            type: 'compared_mappings_changed' as const,
-            updatedHashes: ['dashboard', 'lens'],
-          });
-          const newState = model(
-            checkTargetMappingsState,
+            checkTargetTypesMappingsState,
             res
           ) as UpdateTargetMappingsPropertiesState;
           expect(newState.controlState).toBe('UPDATE_TARGET_MAPPINGS_PROPERTIES');
@@ -2659,11 +2654,14 @@ describe('migrations v2 model', () => {
           });
         });
 
-        it('CHECK_TARGET_MAPPINGS -> CHECK_VERSION_INDEX_READY_ACTIONS if mappings match', () => {
+        it('CHECK_TARGET_MAPPINGS -> CHECK_VERSION_INDEX_READY_ACTIONS if types match (there might be additions in core fields)', () => {
           const res: ResponseType<'CHECK_TARGET_MAPPINGS'> = Either.right({
-            type: 'compared_mappings_match' as const,
+            type: 'types_match' as const,
           });
-          const newState = model(checkTargetMappingsState, res) as CheckVersionIndexReadyActions;
+          const newState = model(
+            checkTargetTypesMappingsState,
+            res
+          ) as CheckVersionIndexReadyActions;
           expect(newState.controlState).toBe('CHECK_VERSION_INDEX_READY_ACTIONS');
         });
       });

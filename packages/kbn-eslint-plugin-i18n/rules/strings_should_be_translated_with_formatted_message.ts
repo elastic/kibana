@@ -12,7 +12,7 @@ import { getIntentFromNode } from '../helpers/get_intent_from_node';
 import { getI18nIdentifierFromFilePath } from '../helpers/get_i18n_identifier_from_file_path';
 import { getFunctionName } from '../helpers/get_function_name';
 import { getI18nImportFixer } from '../helpers/get_i18n_import_fixer';
-import { cleanString, isTruthy } from '../helpers/utils';
+import { getTranslatableValueFromString, isTruthy } from '../helpers/utils';
 
 export const RULE_WARNING_MESSAGE =
   'Strings should be translated with <FormattedMessage />. Use the autofix suggestion or add your own.';
@@ -26,9 +26,9 @@ export const StringsShouldBeTranslatedWithFormattedMessage: Rule.RuleModule = {
 
     return {
       JSXText: (node: TSESTree.JSXText) => {
-        const value = cleanString(node.value);
+        const value = getTranslatableValueFromString(node.value);
 
-        // If the JSXText element is empty we don't need to do anything
+        // If the JSXText element is empty or untranslatable we don't need to do anything
         if (!value) return;
 
         // Get the whitespaces before the string so we can add them to the autofix suggestion
@@ -75,7 +75,12 @@ export const StringsShouldBeTranslatedWithFormattedMessage: Rule.RuleModule = {
         });
       },
       JSXAttribute: (node: TSESTree.JSXAttribute) => {
-        if (node.name.name !== 'aria-label' && node.name.name !== 'label') return;
+        if (
+          node.name.name !== 'aria-label' &&
+          node.name.name !== 'label' &&
+          node.name.name !== 'title'
+        )
+          return;
 
         let val: string = '';
 
@@ -86,12 +91,12 @@ export const StringsShouldBeTranslatedWithFormattedMessage: Rule.RuleModule = {
           'value' in node.value.expression &&
           typeof node.value.expression.value === 'string'
         ) {
-          val = cleanString(node.value.expression.value);
+          val = getTranslatableValueFromString(node.value.expression.value);
         }
 
         // label="foo"
         if (node.value && 'value' in node.value && typeof node.value.value === 'string') {
-          val = cleanString(node.value.value);
+          val = getTranslatableValueFromString(node.value.value);
         }
 
         if (!val) return;

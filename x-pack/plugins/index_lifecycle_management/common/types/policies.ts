@@ -18,6 +18,7 @@ export type PhaseWithDownsample = 'hot' | 'warm' | 'cold';
 export interface SerializedPolicy {
   name: string;
   phases: Phases;
+  deprecated?: boolean;
   _meta?: Record<string, any>;
 }
 

@@ -120,6 +120,24 @@ export function registerMapsUsageCollector(usageCollection?: UsageCollectionSetu
             _meta: { description: 'total number of es machine learning anomaly layers in cluster' },
           },
         },
+        esql: {
+          min: {
+            type: 'long',
+            _meta: { description: 'min number of ES|QL layers per map' },
+          },
+          max: {
+            type: 'long',
+            _meta: { description: 'max number of ES|QL layers per map' },
+          },
+          avg: {
+            type: 'float',
+            _meta: { description: 'avg number of ES|QL layers per map' },
+          },
+          total: {
+            type: 'long',
+            _meta: { description: 'total number of ES|QL layers in cluster' },
+          },
+        },
         es_point_to_point: {
           min: {
             type: 'long',

@@ -53,10 +53,7 @@ export {
   isOfQueryType,
   isOfAggregateQueryType,
   getAggregateQueryMode,
-  getIndexPatternFromSQLQuery,
-  getIndexPatternFromESQLQuery,
   getLanguageDisplayName,
-  cleanupESQLQueryForLensSuggestions,
 } from './src/es_query';
 
 export {
@@ -128,3 +125,5 @@ export {
   isDataViewFieldSubtypeMulti,
   isDataViewFieldSubtypeNested,
 } from './src/utils';
+
+export type { ExecutionContextSearch } from './src/expressions/types';

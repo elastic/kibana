@@ -22,6 +22,12 @@ export const navTabsUsersDetails = (
   const hiddenTabs = [];
 
   const userDetailsNavTabs = {
+    [UsersTableType.events]: {
+      id: UsersTableType.events,
+      name: i18n.NAVIGATION_EVENTS_TITLE,
+      href: getTabsOnUsersDetailsUrl(userName, UsersTableType.events),
+      disabled: false,
+    },
     [UsersTableType.authentications]: {
       id: UsersTableType.authentications,
       name: i18n.NAVIGATION_AUTHENTICATIONS_TITLE,
@@ -32,12 +38,6 @@ export const navTabsUsersDetails = (
       id: UsersTableType.anomalies,
       name: i18n.NAVIGATION_ANOMALIES_TITLE,
       href: getTabsOnUsersDetailsUrl(userName, UsersTableType.anomalies),
-      disabled: false,
-    },
-    [UsersTableType.events]: {
-      id: UsersTableType.events,
-      name: i18n.NAVIGATION_EVENTS_TITLE,
-      href: getTabsOnUsersDetailsUrl(userName, UsersTableType.events),
       disabled: false,
     },
     [UsersTableType.risk]: {

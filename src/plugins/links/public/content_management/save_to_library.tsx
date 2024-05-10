@@ -75,7 +75,7 @@ export const runSaveToLibrary = async (
       <SavedObjectSaveModal
         onSave={onSave}
         onClose={() => resolve(undefined)}
-        title={newAttributes.title}
+        title={newAttributes.title ?? ''}
         customModalTitle={modalTitle}
         description={newAttributes.description}
         showDescription

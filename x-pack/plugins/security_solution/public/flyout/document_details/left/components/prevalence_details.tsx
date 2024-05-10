@@ -47,7 +47,7 @@ import {
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { IS_OPERATOR } from '../../../../../common/types';
 
-export const PREVALENCE_TAB_ID = 'prevalence-details';
+export const PREVALENCE_TAB_ID = 'prevalence';
 const DEFAULT_FROM = 'now-30d';
 const DEFAULT_TO = 'now';
 

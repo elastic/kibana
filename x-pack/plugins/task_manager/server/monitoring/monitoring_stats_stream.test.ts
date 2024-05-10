@@ -7,7 +7,7 @@
 
 import { TaskManagerConfig } from '../config';
 import { of, Subject } from 'rxjs';
-import { take, bufferCount } from 'rxjs/operators';
+import { take, bufferCount } from 'rxjs';
 import { createMonitoringStatsStream } from './monitoring_stats_stream';
 import { JsonValue } from '@kbn/utility-types';
 import { AggregatedStat } from '../lib/runtime_statistics_aggregator';
@@ -52,13 +52,11 @@ describe('createMonitoringStatsStream', () => {
       warn_threshold: 5000,
     },
     worker_utilization_running_average_window: 5,
-    requeue_invalid_tasks: {
-      enabled: false,
-      delay: 3000,
-      max_attempts: 20,
-    },
     metrics_reset_interval: 3000,
     claim_strategy: 'default',
+    request_timeouts: {
+      update_by_query: 1000,
+    },
   };
 
   it('returns the initial config used to configure Task Manager', async () => {

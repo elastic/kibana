@@ -17,7 +17,8 @@
       "presentationUtil",
       "dashboard",
       "fieldFormats",
-      "unifiedSearch"
+      "unifiedSearch",
+      "share"
     ],
     "optionalPlugins": [
       "cases",
@@ -29,9 +30,6 @@
       "kibanaUtils",
       "embeddable",
       "cases"
-    ],
-    "extraPublicDirs": [
-      "common"
     ]
   }
 }

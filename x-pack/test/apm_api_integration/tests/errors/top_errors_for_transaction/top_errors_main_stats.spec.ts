@@ -20,7 +20,7 @@ type ErrorGroups =
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const serviceName = 'synth-go';
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
@@ -58,6 +58,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177638
   registry.when('when data is loaded', { config: 'basic', archives: [] }, () => {
     describe('top errors for transaction', () => {
       const {
@@ -65,10 +66,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       } = config;
 
       before(async () => {
-        await generateData({ serviceName, start, end, synthtraceEsClient });
+        await generateData({ serviceName, start, end, apmSynthtraceEsClient });
       });
 
-      after(() => synthtraceEsClient.clean());
+      after(() => apmSynthtraceEsClient.clean());
 
       describe('returns the correct data', () => {
         const NUMBER_OF_BUCKETS = 15;

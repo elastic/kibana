@@ -3,7 +3,7 @@ info:
   title: Suggest user profiles API endpoint
   version: '2023-10-31'
 paths:
-  /api/detection_engine/signals/_find:
+  /internal/detection_engine/users/_find:
     summary: Suggests user profiles based on provided search term
     post:
       operationId: SuggestUserProfiles

@@ -13,9 +13,26 @@ import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_e
  * @param editAction {@link BulkActionEditType}
  * @returns {boolean}
  */
-export const isIndexPatternsBulkEditAction = (editAction: BulkActionEditType) =>
-  [
+export const isIndexPatternsBulkEditAction = (editAction: BulkActionEditType) => {
+  const indexPatternsActions: BulkActionEditType[] = [
     BulkActionEditTypeEnum.add_index_patterns,
     BulkActionEditTypeEnum.delete_index_patterns,
     BulkActionEditTypeEnum.set_index_patterns,
-  ].includes(editAction);
+  ];
+  return indexPatternsActions.includes(editAction);
+};
+
+/**
+ * helper utility that defines whether bulk edit action is related to investigation fields, i.e. one of:
+ * 'add_investigation_fields', 'delete_investigation_fields', 'set_investigation_fields'
+ * @param editAction {@link BulkActionEditType}
+ * @returns {boolean}
+ */
+export const isInvestigationFieldsBulkEditAction = (editAction: BulkActionEditType) => {
+  const investigationFieldsActions: BulkActionEditType[] = [
+    BulkActionEditTypeEnum.add_investigation_fields,
+    BulkActionEditTypeEnum.delete_investigation_fields,
+    BulkActionEditTypeEnum.set_investigation_fields,
+  ];
+  return investigationFieldsActions.includes(editAction);
+};

@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiRange, EuiText, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { TooltipWrapper } from './tooltip_wrapper';
+import { TooltipWrapper } from '@kbn/visualization-utils';
 
 export interface ControlSliderProps {
   /** Allowed values to show on the Control Slider */

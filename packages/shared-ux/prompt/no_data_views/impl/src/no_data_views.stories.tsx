@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import React from 'react';
 
 import {
@@ -12,7 +13,7 @@ import {
   NoDataViewsPromptStorybookParams,
 } from '@kbn/shared-ux-prompt-no-data-views-mocks';
 
-import { NoDataViewsPrompt } from './no_data_views';
+import { NoDataViewsPrompt as Component } from './no_data_views';
 import { NoDataViewsPromptProvider } from './services';
 
 import mdx from '../README.mdx';
@@ -29,12 +30,12 @@ export default {
 
 const mock = new NoDataViewsPromptStorybookMock();
 
-export const Prompt = (params: NoDataViewsPromptStorybookParams) => {
+export const CreateDataView = (params: NoDataViewsPromptStorybookParams) => {
   return (
     <NoDataViewsPromptProvider {...mock.getServices(params)}>
-      <NoDataViewsPrompt {...mock.getProps()} />
+      <Component {...mock.getProps()} />
     </NoDataViewsPromptProvider>
   );
 };
 
-Prompt.argTypes = mock.getArgumentTypes();
+CreateDataView.argTypes = mock.getArgumentTypes();

@@ -11,26 +11,21 @@ import { enrichEvents } from '.';
 import { searchEnrichments } from './search_enrichments';
 import { ruleExecutionLogMock } from '../../../rule_monitoring/mocks';
 import { createAlert } from './__mocks__/alerts';
-import { getIsHostRiskScoreAvailable } from './enrichment_by_type/host_risk';
 
-import { getIsUserRiskScoreAvailable } from './enrichment_by_type/user_risk';
+import { isIndexExist } from './utils/is_index_exist';
+
+import { allowedExperimentalValues } from '../../../../../../common';
+import { ENABLE_ASSET_CRITICALITY_SETTING } from '../../../../../../common/constants';
 
 jest.mock('./search_enrichments', () => ({
   searchEnrichments: jest.fn(),
 }));
 const mockSearchEnrichments = searchEnrichments as jest.Mock;
 
-jest.mock('./enrichment_by_type/host_risk', () => ({
-  ...jest.requireActual('./enrichment_by_type/host_risk'),
-  getIsHostRiskScoreAvailable: jest.fn(),
+jest.mock('./utils/is_index_exist', () => ({
+  isIndexExist: jest.fn(),
 }));
-const mockGetIsHostRiskScoreAvailable = getIsHostRiskScoreAvailable as jest.Mock;
-
-jest.mock('./enrichment_by_type/user_risk', () => ({
-  ...jest.requireActual('./enrichment_by_type/user_risk'),
-  getIsUserRiskScoreAvailable: jest.fn(),
-}));
-const mockGetIsUserRiskScoreAvailable = getIsUserRiskScoreAvailable as jest.Mock;
+const mockIsIndexExist = isIndexExist as jest.Mock;
 
 const hostEnrichmentResponse = [
   {
@@ -66,6 +61,30 @@ const userEnrichmentResponse = [
   },
 ];
 
+const assetCriticalityUserResponse = [
+  {
+    fields: {
+      id_value: ['user name 1'],
+      criticality_level: ['important'],
+    },
+  },
+];
+
+const assetCriticalityHostResponse = [
+  {
+    fields: {
+      id_value: ['host name 2'],
+      criticality_level: ['extremely_critical'],
+    },
+  },
+  {
+    fields: {
+      id_value: ['host name 1'],
+      criticality_level: ['low'],
+    },
+  },
+];
+
 describe('enrichEvents', () => {
   let ruleExecutionLogger: ReturnType<typeof ruleExecutionLogMock.forExecutors.create>;
   let alertServices: RuleExecutorServicesMock;
@@ -76,11 +95,13 @@ describe('enrichEvents', () => {
     ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
     alertServices = alertsMock.createRuleExecutorServices();
   });
+  afterEach(() => {
+    mockIsIndexExist.mockClear();
+  });
 
   it('return the same events, if risk indexes are not available', async () => {
     mockSearchEnrichments.mockImplementation(() => []);
-    mockGetIsUserRiskScoreAvailable.mockImplementation(() => false);
-    mockGetIsHostRiskScoreAvailable.mockImplementation(() => false);
+    mockIsIndexExist.mockImplementation(() => false);
     const events = [
       createAlert('1', createEntity('host', 'host name')),
       createAlert('2', createEntity('user', 'user name')),
@@ -97,8 +118,7 @@ describe('enrichEvents', () => {
 
   it('return the same events, if there no fields', async () => {
     mockSearchEnrichments.mockImplementation(() => []);
-    mockGetIsUserRiskScoreAvailable.mockImplementation(() => true);
-    mockGetIsHostRiskScoreAvailable.mockImplementation(() => true);
+    mockIsIndexExist.mockImplementation(() => true);
     const events = [createAlert('1'), createAlert('2')];
     const enrichedEvents = await enrichEvents({
       logger: ruleExecutionLogger,
@@ -110,12 +130,11 @@ describe('enrichEvents', () => {
     expect(enrichedEvents).toEqual(events);
   });
 
-  it('return enriched events', async () => {
+  it('return enriched events with risk score', async () => {
     mockSearchEnrichments
       .mockReturnValueOnce(hostEnrichmentResponse)
       .mockReturnValueOnce(userEnrichmentResponse);
-    mockGetIsUserRiskScoreAvailable.mockImplementation(() => true);
-    mockGetIsHostRiskScoreAvailable.mockImplementation(() => true);
+    mockIsIndexExist.mockImplementation(() => true);
 
     const enrichedEvents = await enrichEvents({
       logger: ruleExecutionLogger,
@@ -159,14 +178,59 @@ describe('enrichEvents', () => {
     ]);
   });
 
+  it('return enriched events with asset criticality', async () => {
+    mockSearchEnrichments
+      .mockReturnValueOnce(assetCriticalityUserResponse)
+      .mockReturnValueOnce(assetCriticalityHostResponse);
+
+    // disable risk score enrichments
+    mockIsIndexExist.mockImplementationOnce(() => false);
+    mockIsIndexExist.mockImplementationOnce(() => false);
+    mockIsIndexExist.mockImplementationOnce(() => false);
+    // enable for asset criticality
+    mockIsIndexExist.mockImplementation(() => true);
+
+    // enable asset criticality settings
+    alertServices.uiSettingsClient.get.mockImplementation((key) =>
+      Promise.resolve(key === ENABLE_ASSET_CRITICALITY_SETTING)
+    );
+
+    const enrichedEvents = await enrichEvents({
+      logger: ruleExecutionLogger,
+      services: alertServices,
+      events: [
+        createAlert('1', {
+          ...createEntity('host', 'host name 1'),
+          ...createEntity('user', 'user name 1'),
+        }),
+        createAlert('2', createEntity('host', 'user name 1')),
+      ],
+      spaceId: 'default',
+      experimentalFeatures: allowedExperimentalValues,
+    });
+
+    expect(enrichedEvents).toEqual([
+      createAlert('1', {
+        ...createEntity('user', 'user name 1'),
+        ...createEntity('host', 'host name 1'),
+
+        'host.asset.criticality': 'low',
+        'user.asset.criticality': 'important',
+      }),
+      createAlert('2', {
+        ...createEntity('host', 'user name 1'),
+      }),
+    ]);
+  });
+
   it('if some enrichments failed, another work as expected', async () => {
     mockSearchEnrichments
       .mockImplementationOnce(() => {
         throw new Error('1');
       })
       .mockImplementationOnce(() => userEnrichmentResponse);
-    mockGetIsUserRiskScoreAvailable.mockImplementation(() => true);
-    mockGetIsHostRiskScoreAvailable.mockImplementation(() => true);
+    mockIsIndexExist.mockImplementation(() => true);
+    mockIsIndexExist.mockImplementation(() => true);
 
     const enrichedEvents = await enrichEvents({
       logger: ruleExecutionLogger,

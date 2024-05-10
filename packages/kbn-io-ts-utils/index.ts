@@ -15,6 +15,7 @@ export { jsonRt } from './src/json_rt';
 export { mergeRt } from './src/merge_rt';
 export { strictKeysRt } from './src/strict_keys_rt';
 export { isoToEpochRt } from './src/iso_to_epoch_rt';
+export { isoToEpochSecsRt } from './src/iso_to_epoch_secs_rt';
 export { toNumberRt } from './src/to_number_rt';
 export { toBooleanRt } from './src/to_boolean_rt';
 export { toJsonSchema } from './src/to_json_schema';

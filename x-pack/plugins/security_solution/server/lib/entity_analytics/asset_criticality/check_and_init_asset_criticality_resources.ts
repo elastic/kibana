@@ -25,6 +25,7 @@ export const checkAndInitAssetCriticalityResources = async (
   const assetCriticalityDataClient = new AssetCriticalityDataClient({
     esClient,
     logger,
+    auditLogger: securityContext.getAuditLogger(),
     namespace: securityContext.getSpaceId(),
   });
 

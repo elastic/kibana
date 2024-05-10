@@ -25,7 +25,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         'cases-add-custom-field',
         screenshotDirectories,
         1400,
-        600
+        700
       );
       await testSubjects.setValue('custom-field-label-input', 'my-field');
       await testSubjects.click('custom-field-flyout-save');

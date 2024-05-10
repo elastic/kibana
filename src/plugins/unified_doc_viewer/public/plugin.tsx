@@ -8,7 +8,7 @@
 
 import React from 'react';
 import type { CoreSetup, Plugin } from '@kbn/core/public';
-import { DOC_TABLE_LEGACY } from '@kbn/discover-utils';
+import { isLegacyTableEnabled } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
@@ -16,25 +16,39 @@ import { createGetterSetter, Storage } from '@kbn/kibana-utils-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { CoreStart } from '@kbn/core/public';
+import { dynamic } from '@kbn/shared-ux-utility';
+import { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { UnifiedDocViewerServices } from './types';
 
 export const [getUnifiedDocViewerServices, setUnifiedDocViewerServices] =
   createGetterSetter<UnifiedDocViewerServices>('UnifiedDocViewerServices');
 
-const DocViewerLegacyTable = React.lazy(() => import('./components/doc_viewer_table/legacy'));
-const DocViewerTable = React.lazy(() => import('./components/doc_viewer_table'));
-const SourceViewer = React.lazy(() => import('./components/doc_viewer_source'));
+const fallback = (
+  <EuiDelayRender delay={300}>
+    <EuiSkeletonText />
+  </EuiDelayRender>
+);
+
+const LazyDocViewerLogsOverview = dynamic(() => import('./components/doc_viewer_logs_overview'), {
+  fallback,
+});
+const LazyDocViewerLegacyTable = dynamic(() => import('./components/doc_viewer_table/legacy'), {
+  fallback,
+});
+const LazyDocViewerTable = dynamic(() => import('./components/doc_viewer_table'), { fallback });
+const LazySourceViewer = dynamic(() => import('./components/doc_viewer_source'), { fallback });
 
 export interface UnifiedDocViewerSetup {
-  addDocView: DocViewsRegistry['addDocView'];
+  registry: DocViewsRegistry;
 }
 
 export interface UnifiedDocViewerStart {
-  getDocViews: DocViewsRegistry['getDocViewsSorted'];
+  registry: DocViewsRegistry;
 }
 
 export interface UnifiedDocViewerStartDeps {
   data: DataPublicPluginStart;
+  discoverShared: DiscoverSharedPublicStart;
   fieldFormats: FieldFormatsStart;
 }
 
@@ -44,69 +58,80 @@ export class UnifiedDocViewerPublicPlugin
   private docViewsRegistry = new DocViewsRegistry();
 
   public setup(core: CoreSetup<UnifiedDocViewerStartDeps, UnifiedDocViewerStart>) {
-    this.docViewsRegistry.addDocView({
+    this.docViewsRegistry.add({
+      id: 'doc_view_logs_overview',
+      title: i18n.translate('unifiedDocViewer.docViews.logsOverview.title', {
+        defaultMessage: 'Overview',
+      }),
+      order: 0,
+      enabled: false, // Disabled doc view by default, can be programmatically enabled using the DocViewsRegistry.prototype.enableById method.
+      component: (props) => {
+        return <LazyDocViewerLogsOverview {...props} />;
+      },
+    });
+
+    this.docViewsRegistry.add({
+      id: 'doc_view_table',
       title: i18n.translate('unifiedDocViewer.docViews.table.tableTitle', {
         defaultMessage: 'Table',
       }),
       order: 10,
       component: (props) => {
+        const { textBasedHits } = props;
         const { uiSettings } = getUnifiedDocViewerServices();
-        const DocView = uiSettings.get(DOC_TABLE_LEGACY) ? DocViewerLegacyTable : DocViewerTable;
 
-        return (
-          <React.Suspense
-            fallback={
-              <EuiDelayRender delay={300}>
-                <EuiSkeletonText />
-              </EuiDelayRender>
-            }
-          >
-            <DocView {...props} />
-          </React.Suspense>
-        );
+        const LazyDocView = isLegacyTableEnabled({
+          uiSettings,
+          isTextBasedQueryMode: Array.isArray(textBasedHits),
+        })
+          ? LazyDocViewerLegacyTable
+          : LazyDocViewerTable;
+
+        return <LazyDocView {...props} />;
       },
     });
 
-    this.docViewsRegistry.addDocView({
+    this.docViewsRegistry.add({
+      id: 'doc_view_source',
       title: i18n.translate('unifiedDocViewer.docViews.json.jsonTitle', {
         defaultMessage: 'JSON',
       }),
       order: 20,
-      component: ({ hit, dataView, query, textBasedHits }) => {
+      component: ({ hit, dataView, textBasedHits }) => {
         return (
-          <React.Suspense
-            fallback={
-              <EuiDelayRender delay={300}>
-                <EuiSkeletonText />
-              </EuiDelayRender>
-            }
-          >
-            <SourceViewer
-              index={hit.raw._index}
-              id={hit.raw._id ?? hit.id}
-              dataView={dataView}
-              textBasedHits={textBasedHits}
-              hasLineNumbers
-              onRefresh={() => {}}
-            />
-          </React.Suspense>
+          <LazySourceViewer
+            index={hit.raw._index}
+            id={hit.raw._id ?? hit.id}
+            dataView={dataView}
+            textBasedHits={textBasedHits}
+            hasLineNumbers
+            onRefresh={() => {}}
+          />
         );
       },
     });
 
     return {
-      addDocView: this.docViewsRegistry.addDocView.bind(this.docViewsRegistry),
+      registry: this.docViewsRegistry,
     };
   }
 
   public start(core: CoreStart, deps: UnifiedDocViewerStartDeps) {
     const { analytics, uiSettings } = core;
-    const { data, fieldFormats } = deps;
+    const { data, discoverShared, fieldFormats } = deps;
     const storage = new Storage(localStorage);
     const unifiedDocViewer = {
-      getDocViews: this.docViewsRegistry.getDocViewsSorted.bind(this.docViewsRegistry),
+      registry: this.docViewsRegistry,
     };
-    const services = { analytics, data, fieldFormats, storage, uiSettings, unifiedDocViewer };
+    const services = {
+      analytics,
+      data,
+      discoverShared,
+      fieldFormats,
+      storage,
+      uiSettings,
+      unifiedDocViewer,
+    };
     setUnifiedDocViewerServices(services);
     return unifiedDocViewer;
   }

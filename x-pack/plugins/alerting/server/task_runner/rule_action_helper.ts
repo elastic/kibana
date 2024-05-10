@@ -15,16 +15,16 @@ import {
 } from '../../common';
 
 export const isSummaryAction = (action?: RuleAction) => {
-  return action?.frequency?.summary || false;
+  return action?.frequency?.summary ?? false;
 };
 
 export const isActionOnInterval = (action?: RuleAction) => {
-  if (!action?.frequency) {
+  if (action?.frequency == null) {
     return false;
   }
   return (
-    action.frequency.notifyWhen === RuleNotifyWhenTypeValues[2] &&
-    typeof action.frequency.throttle === 'string'
+    action?.frequency.notifyWhen === RuleNotifyWhenTypeValues[2] &&
+    typeof action?.frequency.throttle === 'string'
   );
 };
 
@@ -44,14 +44,19 @@ export const isSummaryActionThrottled = ({
   if (!isActionOnInterval(action)) {
     return false;
   }
+
   if (!throttledSummaryActions) {
     return false;
   }
+
   const throttledAction = throttledSummaryActions[action?.uuid!];
+
   if (!throttledAction) {
     return false;
   }
+
   let throttleMills = 0;
+
   try {
     throttleMills = parseDuration(action?.frequency!.throttle!);
   } catch (e) {
@@ -86,6 +91,7 @@ export const getSummaryActionsFromTaskState = ({
       (action) =>
         action.frequency?.summary && (action.uuid === key || generateActionHash(action) === key)
     );
+
     if (actionExists) {
       // replace hash with uuid
       newObj[actionExists.uuid!] = val;
@@ -102,6 +108,7 @@ export const getSummaryActionTimeBounds = (
   if (!isSummaryAction(action)) {
     return { start: undefined, end: undefined };
   }
+
   let startDate: Date;
   const now = Date.now();
 

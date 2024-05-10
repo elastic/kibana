@@ -144,6 +144,7 @@ export const dataLoaders = (
 ): void => {
   // Env. variable is set by `cypress_serverless.config.ts`
   const isServerless = config.env.IS_SERVERLESS;
+  const isCloudServerless = Boolean(config.env.CLOUD_SERVERLESS);
   const stackServicesPromise = setupStackServicesUsingCypressConfig(config);
   const roleAndUserLoaderPromise: Promise<TestRoleAndUserLoader> = stackServicesPromise.then(
     ({ kbnClient, log }) => {
@@ -169,12 +170,13 @@ export const dataLoaders = (
       endpointPackageVersion?: string;
       agentPolicyName?: string;
     }) => {
-      const { kbnClient } = await stackServicesPromise;
+      const { kbnClient, log } = await stackServicesPromise;
       return indexFleetEndpointPolicy(
         kbnClient,
         policyName,
         endpointPackageVersion,
-        agentPolicyName
+        agentPolicyName,
+        log
       );
     },
 
@@ -276,8 +278,8 @@ export const dataLoaders = (
     }: {
       endpointAgentIds: string[];
     }): Promise<DeleteAllEndpointDataResponse> => {
-      const { esClient } = await stackServicesPromise;
-      return deleteAllEndpointData(esClient, endpointAgentIds);
+      const { esClient, log } = await stackServicesPromise;
+      return deleteAllEndpointData(esClient, log, endpointAgentIds, !isCloudServerless);
     },
 
     /**
@@ -304,6 +306,8 @@ export const dataLoadersForRealEndpoints = (
   config: Cypress.PluginConfigOptions
 ): void => {
   const stackServicesPromise = setupStackServicesUsingCypressConfig(config);
+  const isServerless = Boolean(config.env.IS_SERVERLESS);
+  const isCloudServerless = Boolean(config.env.CLOUD_SERVERLESS);
 
   on('task', {
     createSentinelOneHost: async () => {
@@ -390,8 +394,8 @@ ${s1Info.status}
     createEndpointHost: async (
       options: Omit<CreateAndEnrollEndpointHostCIOptions, 'log' | 'kbnClient'>
     ): Promise<CreateAndEnrollEndpointHostCIResponse> => {
-      const { kbnClient, log } = await stackServicesPromise;
-
+      const { kbnClient, log, esClient } = await stackServicesPromise;
+      const isMkiEnvironment = isServerless && isCloudServerless;
       let retryAttempt = 0;
       const attemptCreateEndpointHost =
         async (): Promise<CreateAndEnrollEndpointHostCIResponse> => {
@@ -400,9 +404,11 @@ ${s1Info.status}
             const newHost = process.env.CI
               ? await createAndEnrollEndpointHostCI({
                   useClosestVersionMatch: true,
+                  isMkiEnvironment,
                   ...options,
                   log,
                   kbnClient,
+                  esClient,
                 })
               : await createAndEnrollEndpointHost({
                   useClosestVersionMatch: true,

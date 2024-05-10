@@ -19,9 +19,9 @@ import { useKibana } from '../../lib/kibana';
 import { combineQueries } from '../../lib/kuery';
 import type { inputsModel, State } from '../../store';
 import { inputsSelectors } from '../../store';
-import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
-import { timelineSelectors } from '../../../timelines/store/timeline';
-import type { TimelineModel } from '../../../timelines/store/timeline/model';
+import { timelineDefaults } from '../../../timelines/store/defaults';
+import { timelineSelectors } from '../../../timelines/store';
+import type { TimelineModel } from '../../../timelines/store/model';
 
 import { getOptions, isDetectionsAlertsTable } from './helpers';
 import { TopN } from './top_n';
@@ -126,7 +126,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
               language: 'kuery',
               query: activeTimelineKqlQueryExpression ?? '',
             },
-          })?.filterQuery
+          })
         : undefined,
     [
       scopeId,
@@ -147,7 +147,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
 
   return (
     <TopN
-      combinedQueries={combinedQueries}
+      filterQuery={combinedQueries?.filterQuery}
       data-test-subj="top-n"
       defaultView={defaultView}
       deleteQuery={isActiveTimeline(scopeId ?? '') ? undefined : deleteQuery}

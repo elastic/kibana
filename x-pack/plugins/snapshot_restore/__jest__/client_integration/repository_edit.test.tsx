@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { setupEnvironment, pageHelpers, nextTick, TestBed, getRandomString } from './helpers';
+import { setupEnvironment, pageHelpers, TestBed, getRandomString } from './helpers';
 import { RepositoryForm } from '../../public/application/components/repository_form';
 import { RepositoryEditTestSubjects } from './helpers/repository_edit.helpers';
 import { RepositoryAddTestSubjects } from './helpers/repository_add.helpers';
@@ -16,23 +15,6 @@ import { REPOSITORY_EDIT, REPOSITORY_NAME } from './helpers/constant';
 
 const { setup } = pageHelpers.repositoryEdit;
 const { setup: setupRepositoryAdd } = pageHelpers.repositoryAdd;
-
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
-  return {
-    ...original,
-    // Mocking CodeEditor, which uses React Monaco under the hood
-    CodeEditor: (props: any) => (
-      <input
-        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
-        data-currentvalue={props.value}
-        onChange={(e: any) => {
-          props.onChange(e.jsonContent);
-        }}
-      />
-    ),
-  };
-});
 
 describe('<RepositoryEdit />', () => {
   let testBed: TestBed<RepositoryEditTestSubjects>;
@@ -45,12 +27,11 @@ describe('<RepositoryEdit />', () => {
         repository: REPOSITORY_EDIT,
         snapshots: { count: 0 },
       });
-      testBed = await setup(httpSetup);
 
       await act(async () => {
-        await nextTick();
-        testBed.component.update();
+        testBed = await setup(httpSetup);
       });
+      testBed.component.update();
     });
 
     test('should set the correct page title', () => {
@@ -78,18 +59,70 @@ describe('<RepositoryEdit />', () => {
     });
   });
 
+  describe('should disable client, bucket / container and base path fields for managed repositories', () => {
+    const mountComponentWithMock = async (repository: any) => {
+      httpRequestsMockHelpers.setGetRepositoryResponse(REPOSITORY_NAME, {
+        repository: { name: getRandomString(), ...repository },
+        snapshots: { count: 0 },
+        isManagedRepository: true,
+      });
+
+      await act(async () => {
+        testBed = await setup(httpSetup);
+      });
+      testBed.component.update();
+    };
+
+    it('azure repository', async () => {
+      await mountComponentWithMock({ type: 'azure' });
+      const { find } = testBed;
+      const clientInput = find('clientInput');
+      expect(clientInput.props().disabled).toEqual(true);
+
+      const containerInput = find('containerInput');
+      expect(containerInput.props().disabled).toEqual(true);
+
+      const basePathInput = find('basePathInput');
+      expect(basePathInput.props().disabled).toEqual(true);
+    });
+
+    it('gcs repository', async () => {
+      await mountComponentWithMock({ type: 'gcs' });
+      const { find } = testBed;
+      const clientInput = find('clientInput');
+      expect(clientInput.props().disabled).toEqual(true);
+
+      const bucketInput = find('bucketInput');
+      expect(bucketInput.props().disabled).toEqual(true);
+
+      const basePathInput = find('basePathInput');
+      expect(basePathInput.props().disabled).toEqual(true);
+    });
+
+    it('s3 repository', async () => {
+      await mountComponentWithMock({ type: 's3' });
+      const { find } = testBed;
+      const clientInput = find('clientInput');
+      expect(clientInput.props().disabled).toEqual(true);
+
+      const bucketInput = find('bucketInput');
+      expect(bucketInput.props().disabled).toEqual(true);
+
+      const basePathInput = find('basePathInput');
+      expect(basePathInput.props().disabled).toEqual(true);
+    });
+  });
+
   describe('should populate the correct values', () => {
     const mountComponentWithMock = async (repository: any) => {
       httpRequestsMockHelpers.setGetRepositoryResponse(REPOSITORY_NAME, {
         repository: { name: getRandomString(), ...repository },
         snapshots: { count: 0 },
       });
-      testBed = await setup(httpSetup);
-
       await act(async () => {
-        await nextTick();
-        testBed.component.update();
+        testBed = await setup(httpSetup);
       });
+      testBed.component.update();
     };
 
     it('fs repository', async () => {

@@ -7,9 +7,8 @@
 
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
-
 import { TestProviders } from '../../../common/mock';
-import { SecuritySolutionTemplateWrapper } from '.';
+import { SecuritySolutionTemplateWrapper, type SecuritySolutionTemplateWrapperProps } from '.';
 import { SecurityPageName } from '../../types';
 
 const mockUseShowTimeline = jest.fn((): [boolean] => [false]);
@@ -18,9 +17,9 @@ jest.mock('../../../common/utils/timeline/use_show_timeline', () => ({
   useShowTimeline: () => mockUseShowTimeline(),
 }));
 
-jest.mock('./bottom_bar', () => ({
-  ...jest.requireActual('./bottom_bar'),
-  SecuritySolutionBottomBar: () => <div>{'Bottom Bar'}</div>,
+jest.mock('./timeline', () => ({
+  ...jest.requireActual('./timeline'),
+  Timeline: () => <div>{'Timeline'}</div>,
 }));
 
 jest.mock('../../../common/components/navigation/use_security_solution_navigation', () => {
@@ -57,15 +56,15 @@ jest.mock('../../../common/utils/route/use_route_spy', () => ({
   useRouteSpy: () => mockUseRouteSpy(),
 }));
 
-const renderComponent = () => {
-  return render(
+const renderComponent = ({
+  children = <div>{'child of wrapper'}</div>,
+  ...props
+}: SecuritySolutionTemplateWrapperProps = {}) =>
+  render(
     <TestProviders>
-      <SecuritySolutionTemplateWrapper>
-        <div>{'child of wrapper'}</div>
-      </SecuritySolutionTemplateWrapper>
+      <SecuritySolutionTemplateWrapper {...props}>{children}</SecuritySolutionTemplateWrapper>
     </TestProviders>
   );
-};
 
 describe('SecuritySolutionTemplateWrapper', () => {
   beforeEach(() => {
@@ -78,7 +77,7 @@ describe('SecuritySolutionTemplateWrapper', () => {
 
     await waitFor(() => {
       expect(getByText('child of wrapper')).toBeInTheDocument();
-      expect(getByText('Bottom Bar')).toBeInTheDocument();
+      expect(getByText('Timeline')).toBeInTheDocument();
     });
   });
 
@@ -89,7 +88,19 @@ describe('SecuritySolutionTemplateWrapper', () => {
 
     await waitFor(() => {
       expect(getByText('child of wrapper')).toBeInTheDocument();
-      expect(queryByText('Bottom Bar')).not.toBeInTheDocument();
+      expect(queryByText('Timeline')).not.toBeInTheDocument();
     });
+  });
+
+  it('Should render emptyPageBody when isEmptyState is true', async () => {
+    mockUseShowTimeline.mockReturnValue([false]);
+
+    const { getByText } = renderComponent({
+      isEmptyState: true,
+      emptyPageBody: <div>{'empty page body'}</div>,
+      children: null,
+    });
+
+    expect(getByText('empty page body')).toBeInTheDocument();
   });
 });

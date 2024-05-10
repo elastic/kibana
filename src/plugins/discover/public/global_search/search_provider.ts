@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type { GlobalSearchResultProvider } from '@kbn/global-search-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { getInitialESQLQuery } from '@kbn/esql-utils';
 import type { DiscoverAppLocator } from '../../common';
 
 /**
@@ -49,7 +50,7 @@ export const getESQLSearchProvider: (
 
         const params = {
           query: {
-            esql: `from ${defaultDataView?.getIndexPattern()} | limit 10`,
+            esql: getInitialESQLQuery(defaultDataView?.getIndexPattern()),
           },
           dataViewSpec: defaultDataView?.toSpec(),
         };

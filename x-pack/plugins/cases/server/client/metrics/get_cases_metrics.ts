@@ -8,13 +8,12 @@
 import { merge } from 'lodash';
 
 import type { CasesMetricsRequest, CasesMetricsResponse } from '../../../common/types/api';
-import { decodeWithExcessOrThrow } from '../../../common/api';
+import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 import { CasesMetricsRequestRt, CasesMetricsResponseRt } from '../../../common/types/api';
 import { createCaseError } from '../../common/error';
 import type { CasesClient } from '../client';
 import type { CasesClientArgs } from '../types';
 import { buildHandlers } from './utils';
-import { decodeOrThrow } from '../../../common/api/runtime_types';
 
 export const getCasesMetrics = async (
   params: CasesMetricsRequest,

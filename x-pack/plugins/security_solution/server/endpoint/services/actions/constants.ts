@@ -6,6 +6,7 @@
  */
 
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
+import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import {
   ENDPOINT_ACTIONS_INDEX,
   ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
@@ -20,4 +21,10 @@ export const ACTION_REQUEST_INDICES = [AGENT_ACTIONS_INDEX, ENDPOINT_ACTIONS_IND
 export const ACTION_RESPONSE_INDICES = [
   AGENT_ACTIONS_RESULTS_INDEX,
   ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+];
+
+/** Legacy API"s that should still return `action` (the action id) in the response */
+export const responseActionsWithLegacyActionProperty: readonly ResponseActionsApiCommandNames[] = [
+  'isolate',
+  'unisolate',
 ];

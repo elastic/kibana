@@ -46,7 +46,7 @@ export const responseActionTypes: ResponseActionType[] = [
   },
   {
     id: ResponseActionTypesEnum['.endpoint'],
-    name: 'Endpoint Security',
+    name: 'Elastic Defend',
     iconClass: 'logoSecurity',
   },
 ];

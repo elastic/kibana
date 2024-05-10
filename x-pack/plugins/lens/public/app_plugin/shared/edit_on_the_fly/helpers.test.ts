@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { getESQLQueryColumns } from '@kbn/esql-utils';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { createMockStartDependencies } from '../../../editor_frame_service/mocks';
 import {
@@ -14,49 +15,47 @@ import {
   mockAllSuggestions,
 } from '../../../mocks';
 import { suggestionsApi } from '../../../lens_suggestions_api';
-import { fetchDataFromAggregateQuery } from '../../../datasources/text_based/fetch_data_from_aggregate_query';
 import { getSuggestions } from './helpers';
 
 const mockSuggestionApi = suggestionsApi as jest.Mock;
-const mockFetchData = fetchDataFromAggregateQuery as jest.Mock;
+const mockFetchData = getESQLQueryColumns as jest.Mock;
 
 jest.mock('../../../lens_suggestions_api', () => ({
   suggestionsApi: jest.fn(() => mockAllSuggestions),
 }));
 
-jest.mock('../../../datasources/text_based/fetch_data_from_aggregate_query', () => ({
-  fetchDataFromAggregateQuery: jest.fn(() => {
-    return {
-      columns: [
-        {
-          name: '@timestamp',
-          id: '@timestamp',
-          meta: {
-            type: 'date',
-          },
+jest.mock('@kbn/esql-utils', () => {
+  return {
+    getESQLQueryColumns: jest.fn().mockResolvedValue(() => [
+      {
+        name: '@timestamp',
+        id: '@timestamp',
+        meta: {
+          type: 'date',
         },
-        {
-          name: 'bytes',
-          id: 'bytes',
-          meta: {
-            type: 'number',
-          },
+      },
+      {
+        name: 'bytes',
+        id: 'bytes',
+        meta: {
+          type: 'number',
         },
-        {
-          name: 'memory',
-          id: 'memory',
-          meta: {
-            type: 'number',
-          },
+      },
+      {
+        name: 'memory',
+        id: 'memory',
+        meta: {
+          type: 'number',
         },
-      ],
-    };
-  }),
-}));
+      },
+    ]),
+    getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('index1'),
+  };
+});
 
 describe('getSuggestions', () => {
   const query = {
-    esql: 'from index1 | limit 10 | stats average = avg(bytes',
+    esql: 'from index1 | limit 10 | stats average = avg(bytes)',
   };
   const mockStartDependencies =
     createMockStartDependencies() as unknown as LensPluginStartDependencies;

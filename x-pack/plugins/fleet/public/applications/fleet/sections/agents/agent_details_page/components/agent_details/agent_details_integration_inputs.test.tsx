@@ -123,4 +123,13 @@ describe('AgentDetailsIntegrationInputs', () => {
       component.queryByTestId('agentDetailsIntegrationsInputStatusHealthSuccess')
     ).not.toBeInTheDocument();
   });
+
+  it('should not throw error when there is no components', () => {
+    agent.components = undefined;
+
+    const component = renderComponent();
+    userEvent.click(component.container.querySelector('#agentIntegrationsInputs')!);
+    userEvent.click(component.container.querySelector('#endpoint')!);
+    expect(component.getByText('Endpoint')).toBeInTheDocument();
+  });
 });

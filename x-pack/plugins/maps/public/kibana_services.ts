@@ -33,6 +33,12 @@ export function setIsCloudEnabled(enabled: boolean) {
 }
 export const getIsCloud = () => isCloudEnabled;
 
+let spaceId = 'default';
+export const getSpaceId = () => spaceId;
+export const setSpaceId = (_spaceId: string) => {
+  spaceId = _spaceId;
+};
+
 export const getIndexNameFormComponent = () => pluginsStart.fileUpload.IndexNameFormComponent;
 export const getFileUploadComponent = () => pluginsStart.fileUpload.FileUploadComponent;
 export const getIndexPatternService = () => pluginsStart.data.dataViews;
@@ -60,6 +66,7 @@ export const getUiActions = () => pluginsStart.uiActions;
 export const getCore = () => coreStart;
 export const getNavigation = () => pluginsStart.navigation;
 export const getCoreI18n = () => coreStart.i18n;
+export const getAnalytics = () => coreStart.analytics;
 export const getSearchService = () => pluginsStart.data.search;
 export const getEmbeddableService = () => pluginsStart.embeddable;
 export const getNavigateToApp = () => coreStart.application.navigateToApp;
@@ -97,6 +104,3 @@ export const getEMSSettings: () => EMSSettings = () => {
 export const getEmsTileLayerId = () => mapsEms.config.emsTileLayerId;
 
 export const getShareService = () => pluginsStart.share;
-
-export const getIsAllowByValueEmbeddables = () =>
-  pluginsStart.dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables;

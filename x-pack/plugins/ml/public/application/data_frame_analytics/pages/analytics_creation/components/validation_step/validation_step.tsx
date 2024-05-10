@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 
-import { CalloutMessage } from '../../../../../../../common/constants/validation';
+import type { CalloutMessage } from '../../../../../../../common/constants/validation';
 import { Callout } from '../../../../../components/callout';
 import { ANALYTICS_STEPS } from '../../page';
 import { ContinueButton } from '../continue_button';

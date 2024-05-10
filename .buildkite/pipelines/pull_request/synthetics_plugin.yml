@@ -3,10 +3,12 @@ steps:
     label: 'Synthetics @elastic/synthetics Tests'
     agents:
       queue: n2-4-spot
-    depends_on: build
+    depends_on:
+      - build
+      - quick_checks
     timeout_in_minutes: 60
     artifact_paths:
-      - 'x-pack/plugins/synthetics/e2e/.journeys/**/*'
+      - 'x-pack/plugins/observability_solution/synthetics/e2e/.journeys/**/*'
     retry:
       automatic:
         - exit_status: '-1'

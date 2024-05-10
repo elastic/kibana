@@ -6,8 +6,9 @@
  */
 
 import { useEffect } from 'react';
-import { BehaviorSubject, Subscription } from 'rxjs';
-import { distinctUntilChanged, filter } from 'rxjs/operators';
+import type { Subscription } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import { distinctUntilChanged, filter } from 'rxjs';
 import { cloneDeep } from 'lodash';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import {
@@ -17,9 +18,9 @@ import {
   type TrackTotalHitsSearchResponse,
   ANALYSIS_CONFIG_TYPE,
 } from '@kbn/ml-data-frame-analytics-utils';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ml } from '../../services/ml_api_service';
-import { Dictionary } from '../../../../common/types/common';
+import type { Dictionary } from '../../../../common/types/common';
 
 export type IndexPattern = string;
 

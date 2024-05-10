@@ -6,7 +6,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { concatMap, last } from 'rxjs/operators';
+import { concatMap, last } from 'rxjs';
 import { ClaimOwnershipResult } from '../queries/task_claiming';
 import { ConcreteTaskInstance } from '../task';
 import { WithTaskTiming, startTaskTimer } from '../task_events';

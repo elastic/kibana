@@ -10,6 +10,7 @@ import {
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,
 } from '@kbn/core/server';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import { RuleAttributes } from '../types';
 
 export interface FindRulesSoParams {
@@ -24,6 +25,6 @@ export const findRulesSo = <RuleAggregation = Record<string, unknown>>(
 
   return savedObjectsClient.find<RuleAttributes, RuleAggregation>({
     ...savedObjectsFindOptions,
-    type: 'alert',
+    type: RULE_SAVED_OBJECT_TYPE,
   });
 };

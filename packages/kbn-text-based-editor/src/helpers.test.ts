@@ -12,6 +12,7 @@ import {
   getInlineEditorText,
   getWrappedInPipesCode,
   getIndicesList,
+  getRemoteIndicesList,
 } from './helpers';
 
 describe('helpers', function () {
@@ -90,9 +91,34 @@ describe('helpers', function () {
       ]);
     });
 
-    it('should return the correct array of warnings if multiple warnins are detected', function () {
+    it('should return the correct array of warnings if multiple warnings are detected', function () {
       const warning =
         '299 Elasticsearch-8.10.0-SNAPSHOT-adb9fce96079b421c2575f0d2d445f492eb5f075 "Line 1:52: evaluation of [date_parse(geo.dest)] failed, treating result as null. Only first 20 failures recorded.", 299 Elasticsearch-8.10.0-SNAPSHOT-adb9fce96079b421c2575f0d2d445f492eb5f075 "Line 1:84: evaluation of [date_parse(geo.src)] failed, treating result as null. Only first 20 failures recorded."';
+      expect(parseWarning(warning)).toEqual([
+        {
+          endColumn: 138,
+          endLineNumber: 1,
+          message:
+            'evaluation of [date_parse(geo.dest)] failed, treating result as null. Only first 20 failures recorded.',
+          severity: 4,
+          startColumn: 52,
+          startLineNumber: 1,
+        },
+        {
+          endColumn: 169,
+          endLineNumber: 1,
+          message:
+            'evaluation of [date_parse(geo.src)] failed, treating result as null. Only first 20 failures recorded.',
+          severity: 4,
+          startColumn: 84,
+          startLineNumber: 1,
+        },
+      ]);
+    });
+
+    it('should return the correct array of warnings if the message contains additional info', function () {
+      const warning =
+        '299 Elasticsearch-8.10.0-SNAPSHOT-adb9fce96079b421c2575f0d2d445f492eb5f075 "Line 1:52: evaluation of [date_parse(geo.dest)] failed, treating result as null. Only first 20 failures recorded.", 299 Elasticsearch-8.10.0-SNAPSHOT-adb9fce96079b421c2575f0d2d445f492eb5f075 "Line 1:84: java.lang.IllegalArgumentException: evaluation of [date_parse(geo.src)] failed, treating result as null. Only first 20 failures recorded."';
       expect(parseWarning(warning)).toEqual([
         {
           endColumn: 138,
@@ -254,6 +280,38 @@ describe('helpers', function () {
         { name: '.system1', hidden: true },
         { name: 'logs', hidden: false },
       ]);
+    });
+  });
+
+  describe('getRemoteIndicesList', function () {
+    it('should filter out aliases and hidden indices', async function () {
+      const dataViewsMock = dataViewPluginMocks.createStartContract();
+      const updatedDataViewsMock = {
+        ...dataViewsMock,
+        getIndices: jest.fn().mockResolvedValue([
+          {
+            name: 'remote: alias1',
+            item: {
+              indices: ['index1'],
+            },
+          },
+          {
+            name: 'remote:.system1',
+            item: {
+              name: 'system',
+            },
+          },
+          {
+            name: 'remote:logs',
+            item: {
+              name: 'logs',
+              timestamp_field: '@timestamp',
+            },
+          },
+        ]),
+      };
+      const indices = await getRemoteIndicesList(updatedDataViewsMock);
+      expect(indices).toStrictEqual([{ name: 'remote:logs', hidden: false }]);
     });
   });
 });

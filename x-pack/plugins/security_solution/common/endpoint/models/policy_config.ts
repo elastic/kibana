@@ -6,7 +6,7 @@
  */
 
 import type { PolicyConfig } from '../types';
-import { ProtectionModes } from '../types';
+import { ProtectionModes, AntivirusRegistrationModes } from '../types';
 
 /**
  * Return a new default `PolicyConfig` for platinum and above licenses
@@ -43,6 +43,7 @@ export const policyFactory = (
       malware: {
         mode: ProtectionModes.prevent,
         blocklist: true,
+        on_write_scan: true,
       },
       ransomware: {
         mode: ProtectionModes.prevent,
@@ -79,6 +80,7 @@ export const policyFactory = (
         file: 'info',
       },
       antivirus_registration: {
+        mode: AntivirusRegistrationModes.disabled,
         enabled: false,
       },
       attack_surface_reduction: {
@@ -96,6 +98,7 @@ export const policyFactory = (
       malware: {
         mode: ProtectionModes.prevent,
         blocklist: true,
+        on_write_scan: true,
       },
       behavior_protection: {
         mode: ProtectionModes.prevent,
@@ -138,6 +141,7 @@ export const policyFactory = (
       malware: {
         mode: ProtectionModes.prevent,
         blocklist: true,
+        on_write_scan: true,
       },
       behavior_protection: {
         mode: ProtectionModes.prevent,

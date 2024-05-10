@@ -20,7 +20,7 @@
     "@kbn/core",
     "@kbn/kibana-utils-plugin",
     "@kbn/data-views-plugin",
-    "@kbn/core-application-browser",
     "@kbn/bfetch-error",
+    "@kbn/search-types",
   ]
 }

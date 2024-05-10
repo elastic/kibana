@@ -14,22 +14,21 @@ import { EuiBadge, EuiCodeBlock, EuiForm, EuiFormRow, EuiSpacer, EuiText } from 
 
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { DataGrid } from '@kbn/ml-data-grid';
+import { isDefaultQuery, isMatchAllQuery } from '@kbn/ml-query-utils';
 
 import { useToastNotifications } from '../../../../app_dependencies';
 import {
   getTransformConfigQuery,
   getTransformPreviewDevConsoleStatement,
   getPreviewTransformRequestBody,
-  isDefaultQuery,
-  isMatchAllQuery,
 } from '../../../../common';
 import { useTransformConfigData } from '../../../../hooks/use_transform_config_data';
-import { SearchItems } from '../../../../hooks/use_search_items';
+import type { SearchItems } from '../../../../hooks/use_search_items';
 
 import { AggListSummary } from '../aggregation_list';
 import { GroupByListSummary } from '../group_by_list';
 
-import { StepDefineExposedState } from './common';
+import type { StepDefineExposedState } from './common';
 import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
 import { isLatestPartialRequest } from './common/types';
 

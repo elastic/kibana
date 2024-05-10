@@ -6,10 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { AppNavLinkStatus } from '@kbn/core/public';
+import { AnalyticsServiceStart, I18nStart, ThemeServiceStart } from '@kbn/core/public';
 
 export interface ConfigSchema {
   deeplinks: {
-    navLinkStatus: keyof typeof AppNavLinkStatus;
+    navLinkStatus: 'default' | 'visible';
   };
+}
+
+export interface DevToolsStartServices {
+  analytics: Pick<AnalyticsServiceStart, 'reportEvent'>;
+  i18n: I18nStart;
+  theme: Pick<ThemeServiceStart, 'theme$'>;
 }

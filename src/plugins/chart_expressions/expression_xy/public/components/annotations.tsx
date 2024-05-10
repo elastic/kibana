@@ -23,9 +23,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiIcon,
   EuiPanel,
   EuiSpacer,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import type {
@@ -45,7 +45,7 @@ import { mapVerticalToHorizontalPlacement, LINES_MARKER_SIZE } from '../helpers'
 export interface AnnotationsProps {
   groupedLineAnnotations: MergedAnnotation[];
   rangeAnnotations: ManualRangeEventAnnotationRow[];
-  formatter?: FieldFormat;
+  timeFormat?: string;
   isHorizontal: boolean;
   paddingMap: Partial<Record<Position, number>>;
   simpleView?: boolean;
@@ -270,7 +270,7 @@ RectAnnotation.displayName = 'RectAnnotation';
 export const Annotations = ({
   groupedLineAnnotations,
   rangeAnnotations,
-  formatter,
+  timeFormat,
   isHorizontal,
   paddingMap,
   simpleView,
@@ -355,18 +355,30 @@ export const Annotations = ({
             id={id}
             key={id}
             customTooltip={() => (
-              <div className="echTooltip xyAnnotationTooltip">
-                <div className="echTooltip__header">
-                  <EuiText size="xs">
-                    <h4>
-                      {formatter
-                        ? `${formatter.convert(time)} — ${formatter?.convert(endTime)}`
-                        : `${moment(time).toISOString()} — ${moment(endTime).toISOString()}`}
-                    </h4>
-                  </EuiText>
+              <EuiPanel
+                color="plain"
+                hasShadow={false}
+                hasBorder={false}
+                paddingSize="none"
+                borderRadius="none"
+                className="xyAnnotationTooltip"
+              >
+                <div className="xyAnnotationTooltip__row">
+                  <EuiFlexGroup gutterSize="xs">
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type="stopFilled" color={color} />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiTitle size="xxxs">
+                        <h6>{label}</h6>
+                      </EuiTitle>
+                      <EuiFlexItem>{`${moment(time).format(timeFormat)} — ${moment(endTime).format(
+                        timeFormat
+                      )}`}</EuiFlexItem>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </div>
-                <div className="xyAnnotationTooltipDetail">{label}</div>
-              </div>
+              </EuiPanel>
             )}
             dataValues={[
               {

@@ -6,7 +6,7 @@
  */
 
 import { lastValueFrom } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { first } from 'rxjs';
 import { Query } from '@elastic/eui';
 import { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import {

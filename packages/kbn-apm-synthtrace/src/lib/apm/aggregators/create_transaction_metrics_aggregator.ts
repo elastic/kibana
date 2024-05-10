@@ -80,6 +80,10 @@ export function createTransactionMetricsAggregator(flushInterval: string) {
             sum: 0,
             value_count: 0,
           },
+          labels:
+            event['service.name'] === 'synth-node-0'
+              ? { custom_label: 'value' }
+              : { custom_label: ['value1', 'value2'] },
         };
       },
     },

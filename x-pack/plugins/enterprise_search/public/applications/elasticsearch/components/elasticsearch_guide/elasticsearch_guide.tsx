@@ -13,31 +13,25 @@ import { EuiHorizontalRule, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { LanguageDefinitionSnippetArguments } from '@kbn/search-api-panels';
-import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
 
-import { Status } from '../../../../../common/types/api';
-
-import { CreateApiKeyAPILogic } from '../../../enterprise_search_overview/api/create_elasticsearch_api_key_logic';
 import { FetchApiKeysAPILogic } from '../../../enterprise_search_overview/api/fetch_api_keys_logic';
 import { CreateApiKeyFlyout } from '../../../shared/api_key/create_api_key_flyout';
 import { useCloudDetails } from '../../../shared/cloud_details/cloud_details';
 import { GettingStarted } from '../../../shared/getting_started/getting_started';
-import { KibanaLogic } from '../../../shared/kibana/kibana_logic';
+import { KibanaLogic } from '../../../shared/kibana';
 import { EnterpriseSearchElasticsearchPageTemplate } from '../layout';
 
 export const ElasticsearchGuide = () => {
-  const { user } = useValues(KibanaLogic);
   const cloudContext = useCloudDetails();
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  const { esConfig } = useValues(KibanaLogic);
 
   const codeArgs: LanguageDefinitionSnippetArguments = {
     apiKey: '',
     cloudId: cloudContext.cloudId,
-    url: cloudContext.elasticsearchUrl || ELASTICSEARCH_URL_PLACEHOLDER,
+    url: esConfig.elasticsearch_host,
   };
   const { makeRequest } = useActions(FetchApiKeysAPILogic);
-  const { makeRequest: saveApiKey } = useActions(CreateApiKeyAPILogic);
-  const { error, status } = useValues(CreateApiKeyAPILogic);
   const { data } = useValues(FetchApiKeysAPILogic);
   const apiKeys = data?.api_keys || [];
 
@@ -45,15 +39,7 @@ export const ElasticsearchGuide = () => {
 
   return (
     <EnterpriseSearchElasticsearchPageTemplate>
-      {isFlyoutOpen && (
-        <CreateApiKeyFlyout
-          error={error?.body?.message}
-          isLoading={status === Status.LOADING}
-          onClose={() => setIsFlyoutOpen(false)}
-          setApiKey={saveApiKey}
-          username={user?.full_name || user?.username || ''}
-        />
-      )}
+      {isFlyoutOpen && <CreateApiKeyFlyout onClose={() => setIsFlyoutOpen(false)} />}
       <EuiTitle size="l" data-test-subj="elasticsearchGuide">
         <h1>
           {i18n.translate('xpack.enterpriseSearch.content.overview.gettingStarted.pageTitle', {

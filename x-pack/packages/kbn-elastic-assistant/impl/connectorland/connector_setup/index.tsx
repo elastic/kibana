@@ -8,49 +8,60 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { EuiCommentProps } from '@elastic/eui';
 import { EuiAvatar, EuiBadge, EuiMarkdownFormat, EuiText, EuiTextAlign } from '@elastic/eui';
-// eslint-disable-next-line @kbn/eslint/module_migration
-import styled from 'styled-components';
+import styled from '@emotion/styled';
+import { css } from '@emotion/react';
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 
 import { ActionType } from '@kbn/triggers-actions-ui-plugin/public';
 import { AddConnectorModal } from '../add_connector_modal';
 import { WELCOME_CONVERSATION } from '../../assistant/use_conversation/sample_conversations';
-import { Conversation, Message } from '../../..';
+import { Conversation, ClientMessage } from '../../..';
 import { useLoadActionTypes } from '../use_load_action_types';
 import { StreamingText } from '../../assistant/streaming_text';
 import { ConnectorButton } from '../connector_button';
 import { useConversation } from '../../assistant/use_conversation';
-import { clearPresentationData, conversationHasNoPresentationData } from './helpers';
+import { conversationHasNoPresentationData } from './helpers';
 import * as i18n from '../translations';
 import { useAssistantContext } from '../../assistant_context';
 import { useLoadConnectors } from '../use_load_connectors';
 import { AssistantAvatar } from '../../assistant/assistant_avatar/assistant_avatar';
-import { getActionTypeTitle, getGenAiConfig } from '../helpers';
+import { getGenAiConfig } from '../helpers';
 
 const ConnectorButtonWrapper = styled.div`
   margin-bottom: 10px;
 `;
 
-const SkipEuiText = styled(EuiText)`
-  margin-top: 20px;
-`;
-
 export interface ConnectorSetupProps {
   conversation?: Conversation;
+  isFlyoutMode?: boolean;
   onSetupComplete?: () => void;
+  onConversationUpdate: ({ cId, cTitle }: { cId: string; cTitle: string }) => Promise<void>;
+  updateConversationsOnSaveConnector?: boolean;
 }
 
 export const useConnectorSetup = ({
-  conversation = WELCOME_CONVERSATION,
+  conversation: defaultConversation,
+  isFlyoutMode,
   onSetupComplete,
+  onConversationUpdate,
+  updateConversationsOnSaveConnector = true,
 }: ConnectorSetupProps): {
   comments: EuiCommentProps[];
   prompt: React.ReactElement;
 } => {
-  const { appendMessage, setApiConfig, setConversation } = useConversation();
+  const conversation = useMemo(
+    () =>
+      defaultConversation || {
+        ...WELCOME_CONVERSATION,
+        messages: !isFlyoutMode ? WELCOME_CONVERSATION.messages : [],
+      },
+    [defaultConversation, isFlyoutMode]
+  );
+  const { setApiConfig } = useConversation();
   const bottomRef = useRef<HTMLDivElement | null>(null);
   // Access all conversations so we can add connector to all on initial setup
-  const { actionTypeRegistry, conversations, http } = useAssistantContext();
+  const { actionTypeRegistry, http } = useAssistantContext();
+
   const {
     data: connectors,
     isSuccess: areConnectorsFetched,
@@ -67,15 +78,6 @@ export const useConnectorSetup = ({
 
   const [selectedActionType, setSelectedActionType] = useState<ActionType | null>(null);
 
-  // User constants
-  const userName = useMemo(
-    () => conversation.theme?.user?.name ?? i18n.CONNECTOR_SETUP_USER_YOU,
-    [conversation.theme?.user?.name]
-  );
-  const assistantName = useMemo(
-    () => conversation.theme?.assistant?.name ?? i18n.CONNECTOR_SETUP_USER_ASSISTANT,
-    [conversation.theme?.assistant?.name]
-  );
   const lastConversationMessageIndex = useMemo(
     () => conversation.messages.length - 1,
     [conversation.messages.length]
@@ -108,8 +110,7 @@ export const useConnectorSetup = ({
     setShowAddConnectorButton(true);
     bottomRef.current?.scrollIntoView({ block: 'end' });
     onSetupComplete?.();
-    setConversation({ conversation: clearPresentationData(conversation) });
-  }, [conversation, onSetupComplete, setConversation]);
+  }, [onSetupComplete]);
 
   // Show button to add connector after last message has finished streaming
   const handleSkipSetup = useCallback(() => {
@@ -118,13 +119,13 @@ export const useConnectorSetup = ({
 
   // Create EuiCommentProps[] from conversation messages
   const commentBody = useCallback(
-    (message: Message, index: number, length: number) => {
+    (message: ClientMessage, index: number, length: number) => {
       // If timestamp is not set, set it to current time (will update conversation at end of setup)
       if (
         conversation.messages[index].timestamp == null ||
         conversation.messages[index].timestamp.length === 0
       ) {
-        conversation.messages[index].timestamp = new Date().toLocaleString();
+        conversation.messages[index].timestamp = new Date().toISOString();
       }
       const isLastMessage = index === length - 1;
       const enableStreaming =
@@ -158,9 +159,11 @@ export const useConnectorSetup = ({
     () =>
       conversation.messages.slice(0, currentMessageIndex + 1).map((message, index) => {
         const isUser = message.role === 'user';
-
+        const timestamp = `${i18n.CONNECTOR_SETUP_TIMESTAMP_AT}: ${new Date(
+          message.timestamp
+        ).toLocaleString()}`;
         const commentProps: EuiCommentProps = {
-          username: isUser ? userName : assistantName,
+          username: isUser ? i18n.CONNECTOR_SETUP_USER_YOU : i18n.CONNECTOR_SETUP_USER_ASSISTANT,
           children: commentBody(message, index, conversation.messages.length),
           timelineAvatar: (
             <EuiAvatar
@@ -170,55 +173,69 @@ export const useConnectorSetup = ({
               iconType={AssistantAvatar}
             />
           ),
-          timestamp: `${i18n.CONNECTOR_SETUP_TIMESTAMP_AT}: ${message.timestamp}`,
+          timestamp,
         };
         return commentProps;
       }),
-    [assistantName, commentBody, conversation.messages, currentMessageIndex, userName]
+    [commentBody, conversation.messages, currentMessageIndex]
   );
 
   const onSaveConnector = useCallback(
-    (connector: ActionConnector) => {
-      const config = getGenAiConfig(connector);
-      // add action type title to new connector
-      const connectorTypeTitle = getActionTypeTitle(actionTypeRegistry.get(connector.actionTypeId));
-      Object.values(conversations).forEach((c) => {
-        setApiConfig({
-          conversationId: c.id,
+    async (connector: ActionConnector) => {
+      if (updateConversationsOnSaveConnector) {
+        // this side effect is not required for Attack discovery, because the connector is not used in a conversation
+        const config = getGenAiConfig(connector);
+        // persist only the active conversation
+        const updatedConversation = await setApiConfig({
+          conversation,
           apiConfig: {
-            ...c.apiConfig,
+            ...conversation.apiConfig,
             connectorId: connector.id,
-            connectorTypeTitle,
+            actionTypeId: connector.actionTypeId,
             provider: config?.apiProvider,
             model: config?.defaultModel,
           },
         });
-      });
 
-      refetchConnectors?.();
-      setIsConnectorModalVisible(false);
-      appendMessage({
-        conversationId: conversation.id,
-        message: {
-          role: 'assistant',
-          content: i18n.CONNECTOR_SETUP_COMPLETE,
-          timestamp: new Date().toLocaleString(),
-        },
-      });
+        if (updatedConversation) {
+          onConversationUpdate({ cId: updatedConversation.id, cTitle: updatedConversation.title });
+
+          refetchConnectors?.();
+          setIsConnectorModalVisible(false);
+        }
+      } else {
+        refetchConnectors?.();
+      }
     },
     [
-      actionTypeRegistry,
-      appendMessage,
-      conversation.id,
-      conversations,
+      conversation,
+      onConversationUpdate,
       refetchConnectors,
       setApiConfig,
+      updateConversationsOnSaveConnector,
     ]
   );
 
+  const handleClose = useCallback(() => {
+    setSelectedActionType(null);
+    setIsConnectorModalVisible(false);
+  }, []);
+
   return {
-    comments,
-    prompt: (
+    comments: isFlyoutMode ? [] : comments,
+    prompt: isFlyoutMode ? (
+      <div data-test-subj="prompt">
+        <AddConnectorModal
+          actionTypeRegistry={actionTypeRegistry}
+          actionTypes={actionTypes}
+          onClose={handleClose}
+          onSaveConnector={onSaveConnector}
+          onSelectActionType={setSelectedActionType}
+          selectedActionType={selectedActionType}
+          actionTypeSelectorInline={true}
+        />
+      </div>
+    ) : (
       <div data-test-subj="prompt">
         {showAddConnectorButton && (
           <ConnectorButtonWrapper>
@@ -226,7 +243,17 @@ export const useConnectorSetup = ({
           </ConnectorButtonWrapper>
         )}
         {!showAddConnectorButton && (
-          <SkipEuiText color="subdued" size={'xs'}>
+          <EuiText
+            color="subdued"
+            size={'xs'}
+            css={
+              !isFlyoutMode
+                ? css`
+                    margin-top: 20px;
+                  `
+                : null
+            }
+          >
             <EuiTextAlign textAlign="center">
               <EuiBadge
                 color="hollow"
@@ -237,15 +264,15 @@ export const useConnectorSetup = ({
                 {i18n.CONNECTOR_SETUP_SKIP}
               </EuiBadge>
             </EuiTextAlign>
-          </SkipEuiText>
+          </EuiText>
         )}
         {isConnectorModalVisible && (
           <AddConnectorModal
             actionTypeRegistry={actionTypeRegistry}
             actionTypes={actionTypes}
-            onClose={() => setIsConnectorModalVisible(false)}
+            onClose={handleClose}
             onSaveConnector={onSaveConnector}
-            onSelectActionType={(actionType: ActionType) => setSelectedActionType(actionType)}
+            onSelectActionType={setSelectedActionType}
             selectedActionType={selectedActionType}
           />
         )}

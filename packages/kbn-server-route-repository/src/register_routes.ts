@@ -63,6 +63,7 @@ export function registerRoutes({
             request,
             context,
             params: validatedParams,
+            logger,
             ...dependencies,
           }).then((value) => {
             return {

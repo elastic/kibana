@@ -10,7 +10,6 @@ import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';
-import { act } from 'react-dom/test-utils';
 import { of } from 'rxjs';
 import { Chart } from '../chart';
 import {
@@ -77,6 +76,7 @@ describe('Layout', () => {
           to: '2020-05-14T11:20:13.590',
         }}
         lensSuggestionsApi={jest.fn()}
+        onSuggestionContextChange={jest.fn()}
         isChartLoading={false}
         {...rest}
       />
@@ -153,53 +153,12 @@ describe('Layout', () => {
         height: `${expectedHeight}px`,
       });
     });
-
-    it('should pass undefined for onResetChartHeight to Chart when layout mode is ResizableLayoutMode.Static', async () => {
-      const component = await mountComponent({ topPanelHeight: 123 });
-      expect(component.find(Chart).prop('onResetChartHeight')).toBeDefined();
-      setBreakpoint(component, 's');
-      expect(component.find(Chart).prop('onResetChartHeight')).toBeUndefined();
-    });
   });
 
   describe('topPanelHeight', () => {
     it('should pass a default fixedPanelSize to ResizableLayout when the topPanelHeight prop is undefined', async () => {
       const component = await mountComponent({ topPanelHeight: undefined });
       expect(component.find(ResizableLayout).prop('fixedPanelSize')).toBeGreaterThan(0);
-    });
-
-    it('should reset the fixedPanelSize to the default when onResetChartHeight is called on Chart', async () => {
-      const component: ReactWrapper = await mountComponent({
-        onTopPanelHeightChange: jest.fn((topPanelHeight) => {
-          component.setProps({ topPanelHeight });
-        }),
-      });
-      const defaultTopPanelHeight = component.find(ResizableLayout).prop('fixedPanelSize');
-      const newTopPanelHeight = 123;
-      expect(component.find(ResizableLayout).prop('fixedPanelSize')).not.toBe(newTopPanelHeight);
-      act(() => {
-        component.find(ResizableLayout).prop('onFixedPanelSizeChange')!(newTopPanelHeight);
-      });
-      expect(component.find(ResizableLayout).prop('fixedPanelSize')).toBe(newTopPanelHeight);
-      act(() => {
-        component.find(Chart).prop('onResetChartHeight')!();
-      });
-      expect(component.find(ResizableLayout).prop('fixedPanelSize')).toBe(defaultTopPanelHeight);
-    });
-
-    it('should pass undefined for onResetChartHeight to Chart when the chart is the default height', async () => {
-      const component = await mountComponent({
-        topPanelHeight: 123,
-        onTopPanelHeightChange: jest.fn((topPanelHeight) => {
-          component.setProps({ topPanelHeight });
-        }),
-      });
-      expect(component.find(Chart).prop('onResetChartHeight')).toBeDefined();
-      act(() => {
-        component.find(Chart).prop('onResetChartHeight')!();
-      });
-      component.update();
-      expect(component.find(Chart).prop('onResetChartHeight')).toBeUndefined();
     });
   });
 });

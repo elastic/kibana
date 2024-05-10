@@ -15,6 +15,7 @@ export interface Query {
 export interface QueryClick extends Query {
   document?: {
     id: string;
+    engine: string;
   };
 }
 

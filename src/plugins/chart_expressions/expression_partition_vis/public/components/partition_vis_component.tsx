@@ -39,6 +39,7 @@ import {
 } from '@kbn/expressions-plugin/public';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { getOverridesFor } from '@kbn/chart-expressions-common';
+import { PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import { consolidateMetricColumns } from '../../common/utils';
 import { DEFAULT_PERCENT_DECIMALS } from '../../common/constants';
 import {
@@ -113,7 +114,6 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     hasOpenedOnAggBasedEditor,
   } = props;
   const visParams = useMemo(() => filterOutConfig(visType, preVisParams), [preVisParams, visType]);
-  const chartTheme = props.chartsThemeService.useChartsTheme();
   const chartBaseTheme = props.chartsThemeService.useChartsBaseTheme();
 
   const {
@@ -377,12 +377,19 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
       getPartitionTheme(
         visType,
         visParams,
-        chartTheme,
+        chartBaseTheme,
         containerDimensions,
         rescaleFactor,
         hasOpenedOnAggBasedEditor
       ),
-    [visType, visParams, chartTheme, containerDimensions, rescaleFactor, hasOpenedOnAggBasedEditor]
+    [
+      visType,
+      visParams,
+      chartBaseTheme,
+      containerDimensions,
+      rescaleFactor,
+      hasOpenedOnAggBasedEditor,
+    ]
   );
 
   const fixedViewPort = document.getElementById('app-fixed-viewport');
@@ -557,7 +564,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                 legendColorPicker={props.uiState ? LegendColorPickerWrapper : undefined}
                 flatLegend={flatLegend}
                 legendSort={customLegendSort}
-                showLegendExtra={visParams.showValuesInLegend}
+                showLegendExtra={visParams.legendStats?.[0] === PartitionLegendValue.Value}
                 onElementClick={([elementEvent]) => {
                   // this cast is safe because we are rendering a partition chart
                   const [layerValues] = elementEvent as PartitionElementEvent;
@@ -574,7 +581,6 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                   // Chart background should be transparent for the usage at Canvas.
                   { background: { color: 'transparent' } },
                   themeOverrides,
-                  chartTheme,
                   {
                     legend: {
                       labelOptions: {

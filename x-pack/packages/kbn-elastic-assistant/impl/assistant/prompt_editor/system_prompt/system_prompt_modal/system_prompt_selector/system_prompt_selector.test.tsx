@@ -25,7 +25,7 @@ describe('SystemPromptSelector', () => {
   });
   it('Selects an existing quick prompt', () => {
     const { getByTestId } = render(<SystemPromptSelector {...testProps} />);
-    expect(getByTestId('euiComboBoxPill')).toHaveTextContent(mockSystemPrompts[0].name);
+    expect(getByTestId('comboBoxSearchInput')).toHaveValue(mockSystemPrompts[0].name);
     fireEvent.click(getByTestId('comboBoxToggleListButton'));
     fireEvent.click(getByTestId(`systemPromptSelector-${mockSystemPrompts[1].id}`));
     expect(onSystemPromptSelectionChange).toHaveBeenCalledWith(mockSystemPrompts[1]);

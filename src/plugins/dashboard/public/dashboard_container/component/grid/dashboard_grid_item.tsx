@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
-import classNames from 'classnames';
-
-import { EmbeddablePhaseEvent, EmbeddablePanel, ViewMode } from '@kbn/embeddable-plugin/public';
-
 import { css } from '@emotion/react';
+import { EmbeddablePanel, ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
+import { PhaseEvent } from '@kbn/presentation-publishing';
+import classNames from 'classnames';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { DashboardPanelState } from '../../../../common';
+import { getReferencesForPanelId } from '../../../../common/dashboard_container/persistable_state/dashboard_container_references';
 import { pluginServices } from '../../../services/plugin_services';
 import { useDashboardContainer } from '../../embeddable/dashboard_container';
 
@@ -27,7 +27,7 @@ export interface Props extends DivProps {
   focusedPanelId?: string;
   key: string;
   isRenderable?: boolean;
-  onPanelStatusChange?: (info: EmbeddablePhaseEvent) => void;
+  onPanelStatusChange?: (info: PhaseEvent) => void;
 }
 
 export const Item = React.forwardRef<HTMLDivElement, Props>(
@@ -51,6 +51,8 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
     const container = useDashboardContainer();
     const scrollToPanelId = container.select((state) => state.componentState.scrollToPanelId);
     const highlightPanelId = container.select((state) => state.componentState.highlightPanelId);
+    const useMargins = container.select((state) => state.explicitInput.useMargins);
+    const panel = container.select((state) => state.explicitInput.panels[id]);
 
     const expandPanel = expandedPanelId !== undefined && expandedPanelId === id;
     const hidePanel = expandedPanelId !== undefined && expandedPanelId !== id;
@@ -91,7 +93,46 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
           pointer-events: none;
           opacity: 0.25;
         `
-      : css``;
+      : undefined;
+
+    const renderedEmbeddable = useMemo(() => {
+      const {
+        embeddable: { reactEmbeddableRegistryHasKey },
+      } = pluginServices.getServices();
+      const references = getReferencesForPanelId(id, container.savedObjectReferences);
+
+      const panelProps = {
+        showBadges: true,
+        showBorder: useMargins,
+        showNotifications: true,
+        showShadow: false,
+      };
+
+      // render React embeddable
+      if (reactEmbeddableRegistryHasKey(type)) {
+        return (
+          <ReactEmbeddableRenderer
+            type={type}
+            maybeId={id}
+            parentApi={container}
+            key={`${type}_${id}`}
+            panelProps={panelProps}
+            onApiAvailable={(api) => container.registerChildApi(api)}
+            state={{ rawState: panel.explicitInput as object, references }}
+          />
+        );
+      }
+      // render legacy embeddable
+      return (
+        <EmbeddablePanel
+          key={type}
+          index={index}
+          onPanelStatusChange={onPanelStatusChange}
+          embeddable={() => container.untilEmbeddableLoaded(id)}
+          {...panelProps}
+        />
+      );
+    }, [id, container, useMargins, type, index, onPanelStatusChange, panel.explicitInput]);
 
     return (
       <div
@@ -104,19 +145,11 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       >
         {isRenderable ? (
           <>
-            <EmbeddablePanel
-              key={type}
-              index={index}
-              showBadges={true}
-              showShadow={true}
-              showNotifications={true}
-              onPanelStatusChange={onPanelStatusChange}
-              embeddable={() => container.untilEmbeddableLoaded(id)}
-            />
+            {renderedEmbeddable}
             {children}
           </>
         ) : (
-          <div className="embPanel embPanel-isLoading">
+          <div>
             <EuiLoadingChart size="l" mono />
           </div>
         )}

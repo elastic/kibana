@@ -8,15 +8,15 @@
 import { PayloadAction } from '@reduxjs/toolkit';
 import { WritableDraft } from 'immer/dist/types/types-external';
 
-import { Filter } from '@kbn/es-query';
 import { FieldSpec } from '@kbn/data-views-plugin/common';
+import { Filter } from '@kbn/es-query';
 
-import { OptionsListReduxState, OptionsListComponentState } from './types';
-import { getIpRangeQuery } from '../../common/options_list/ip_search';
+import { isValidSearch } from '../../common/options_list/is_valid_search';
 import {
-  OPTIONS_LIST_DEFAULT_SORT,
   OptionsListSortingType,
+  OPTIONS_LIST_DEFAULT_SORT,
 } from '../../common/options_list/suggestions_sorting';
+import { OptionsListComponentState, OptionsListReduxState } from './types';
 
 export const getDefaultComponentState = (): OptionsListReduxState['componentState'] => ({
   popoverOpen: false,
@@ -36,18 +36,25 @@ export const optionsListReducers = {
   },
   setSearchString: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<string>) => {
     state.componentState.searchString.value = action.payload;
-    if (
-      action.payload !== '' && // empty string search is never invalid
-      state.componentState.field?.type === 'ip' // only IP searches can currently be invalid
-    ) {
-      state.componentState.searchString.valid = getIpRangeQuery(action.payload).validSearch;
-    }
+    state.componentState.searchString.valid = isValidSearch({
+      searchString: action.payload,
+      fieldType: state.componentState.field?.type,
+      searchTechnique: state.componentState.allowExpensiveQueries
+        ? state.explicitInput.searchTechnique
+        : 'exact', // only exact match searching is supported when allowExpensiveQueries is false
+    });
   },
   setAllowExpensiveQueries: (
     state: WritableDraft<OptionsListReduxState>,
     action: PayloadAction<boolean>
   ) => {
     state.componentState.allowExpensiveQueries = action.payload;
+  },
+  setInvalidSelectionWarningOpen: (
+    state: WritableDraft<OptionsListReduxState>,
+    action: PayloadAction<boolean>
+  ) => {
+    state.componentState.showInvalidSelectionWarning = action.payload;
   },
   setPopoverOpen: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<boolean>) => {
     state.componentState.popoverOpen = action.payload;

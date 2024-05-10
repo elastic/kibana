@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { TimeRange } from '@kbn/data-plugin/common/query/timefilter/types';
-import { CombinedJob, Datafeed, Job } from '../../../common/types/anomaly_detection_jobs';
-import { Calendar } from '../../../common/types/calendars';
+import type { TimeRange } from '@kbn/data-plugin/common/query/timefilter/types';
+import type { CombinedJob, Datafeed, Job } from '../../../common/types/anomaly_detection_jobs';
+import type { Calendar } from '../../../common/types/calendars';
+import type { ToastNotificationService } from './toast_notification_service';
+import type { MlApiServices } from './ml_api_service';
 
 export interface ExistingJobsAndGroups {
   jobIds: string[];
   groupIds: string[];
 }
 
-declare interface JobService {
+export declare interface MlJobService {
   jobs: CombinedJob[];
   createResultsUrlForJobs: (jobs: any[], target: string, timeRange?: TimeRange) => string;
   tempJobCloningObjects: {
@@ -46,4 +48,8 @@ declare interface JobService {
   detectorsByJob: Record<string, any>;
 }
 
-export const mlJobService: JobService;
+export const mlJobService: MlJobService;
+export const mlJobServiceFactory: (
+  toastNotificationServiceOverride?: ToastNotificationService,
+  mlOverride?: MlApiServices
+) => MlJobService;

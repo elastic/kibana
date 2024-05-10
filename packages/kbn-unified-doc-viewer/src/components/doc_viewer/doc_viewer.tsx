@@ -22,25 +22,27 @@ export interface DocViewerProps extends DocViewRenderProps {
  * a `render` function.
  */
 export function DocViewer({ docViews, ...renderProps }: DocViewerProps) {
-  const tabs = docViews.map(({ title, render, component }: DocView, idx: number) => {
-    return {
-      id: `kbn_doc_viewer_tab_${idx}`,
-      name: title,
-      content: (
-        <DocViewerTab
-          id={idx}
-          title={title}
-          component={component}
-          renderProps={renderProps}
-          render={render}
-        />
-      ),
-      ['data-test-subj']: `docViewerTab-${idx}`,
-    };
-  });
+  const tabs = docViews
+    .filter(({ enabled }) => enabled) // Filter out disabled doc views
+    .map(({ id, title, render, component }: DocView) => {
+      return {
+        id: `kbn_doc_viewer_tab_${id}`,
+        name: title,
+        content: (
+          <DocViewerTab
+            id={id}
+            title={title}
+            component={component}
+            renderProps={renderProps}
+            render={render}
+          />
+        ),
+        ['data-test-subj']: `docViewerTab-${id}`,
+      };
+    });
 
   if (!tabs.length) {
-    // There there's a minimum of 2 tabs active in Discover.
+    // There's a minimum of 2 tabs active in Discover.
     // This condition takes care of unit tests with 0 tabs.
     return null;
   }

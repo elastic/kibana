@@ -9,16 +9,34 @@ import React, { useMemo } from 'react';
 import { sortBy } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 
+import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { CasesConfigurationUI } from '../../../common/ui';
 import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
 import * as i18n from './translations';
+import { useCasesContext } from '../cases_context/use_cases_context';
+import { useGetAllCaseConfigurations } from '../../containers/configure/use_get_all_case_configurations';
+import { getConfigurationByOwner } from '../../containers/configure/utils';
 
 interface Props {
   isLoading: boolean;
-  customFieldsConfiguration: CasesConfigurationUI['customFields'];
 }
 
-const CustomFieldsComponent: React.FC<Props> = ({ isLoading, customFieldsConfiguration }) => {
+const CustomFieldsComponent: React.FC<Props> = ({ isLoading }) => {
+  const { owner } = useCasesContext();
+  const [{ selectedOwner }] = useFormData<{ selectedOwner: string }>({ watch: ['selectedOwner'] });
+  const { data: configurations, isLoading: isLoadingCaseConfiguration } =
+    useGetAllCaseConfigurations();
+
+  const configurationOwner: string | undefined = selectedOwner ? selectedOwner : owner[0];
+  const customFieldsConfiguration = useMemo(
+    () =>
+      getConfigurationByOwner({
+        configurations,
+        owner: configurationOwner,
+      }).customFields ?? [],
+    [configurations, configurationOwner]
+  );
+
   const sortedCustomFields = useMemo(
     () => sortCustomFieldsByLabel(customFieldsConfiguration),
     [customFieldsConfiguration]
@@ -33,7 +51,7 @@ const CustomFieldsComponent: React.FC<Props> = ({ isLoading, customFieldsConfigu
 
       return (
         <CreateComponent
-          isLoading={isLoading}
+          isLoading={isLoading || isLoadingCaseConfiguration}
           customFieldConfiguration={customField}
           key={customField.key}
         />

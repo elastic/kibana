@@ -7,6 +7,8 @@
  */
 
 import { validateVersion } from '@kbn/object-versioning/lib/utils';
+
+import { getContentClientFactory } from '../content_client';
 import { ContentType } from './content_type';
 import { EventBus } from './event_bus';
 import type { ContentStorage, ContentTypeDefinition, MSearchConfig } from './types';
@@ -45,6 +47,15 @@ export class ContentRegistry {
     );
 
     this.types.set(contentType.id, contentType);
+
+    const contentClient = getContentClientFactory({ contentRegistry: this })(contentType.id);
+
+    return {
+      /**
+       * Client getters to interact with the registered content type.
+       */
+      contentClient,
+    };
   }
 
   getContentType(id: string): ContentType {

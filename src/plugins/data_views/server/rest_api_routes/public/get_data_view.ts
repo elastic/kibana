@@ -39,7 +39,7 @@ export const getDataView = async ({
   id,
 }: GetDataViewArgs) => {
   usageCollection?.incrementCounter({ counterName });
-  return dataViewsService.get(id);
+  return dataViewsService.getDataViewLazy(id);
 };
 
 const getDataViewRouteFactory =
@@ -69,9 +69,10 @@ const getDataViewRouteFactory =
           },
           response: {
             200: {
-              body: schema.object({
-                [serviceKey]: dataViewSpecSchema,
-              }),
+              body: () =>
+                schema.object({
+                  [serviceKey]: dataViewSpecSchema,
+                }),
             },
           },
         },
@@ -98,7 +99,7 @@ const getDataViewRouteFactory =
 
           const responseBody: Record<string, DataViewSpecRestResponse> = {
             [serviceKey]: {
-              ...dataView.toSpec(),
+              ...(await dataView.toSpec({ fieldParams: { fieldName: ['*'] } })),
               namespaces: dataView.namespaces,
             },
           };

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { CustomIntegrationsSetup, CustomIntegrationsStart } from './types';
 import { CustomIntegrationsServicesProvider } from './services';
@@ -25,7 +25,7 @@ function createCustomIntegrationsStart(): jest.Mocked<CustomIntegrationsStart> {
 
   return {
     languageClientsUiComponents: {},
-    ContextProvider: jest.fn(({ children }) => (
+    ContextProvider: jest.fn(({ children }: PropsWithChildren<unknown>) => (
       <CustomIntegrationsServicesProvider {...services}>
         {children}
       </CustomIntegrationsServicesProvider>

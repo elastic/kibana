@@ -17,7 +17,7 @@ export const NoPermissionPrompt = () => (
       <h1>
         <FormattedMessage
           id="xpack.triggersActionsUI.sections.rulesList.noPermissionToReadTitle"
-          defaultMessage="No permissions to read rules"
+          defaultMessage="No permissions to read rules and alerts"
         />
       </h1>
     }

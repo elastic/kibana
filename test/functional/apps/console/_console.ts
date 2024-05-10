@@ -11,15 +11,29 @@ import { asyncForEach } from '@kbn/std';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const DEFAULT_REQUEST = `
+# Welcome to the Dev Tools Console!
+#
+# You can use Console to explore the Elasticsearch API. See the \n  Elasticsearch API reference to learn more:
+# https://www.elastic.co/guide/en/elasticsearch/reference/current\n  /rest-apis.html
+#
+# Here are a few examples to get you started.
 
-# Click the Variables button, above, to create your own variables.
-GET \${exampleVariable1} // _search
+
+# Create an index
+PUT /my-index
+
+
+# Add a document to my-index
+POST /my-index/_doc
 {
-  "query": {
-    "\${exampleVariable2}": {} // match_all
-  }
+    "id": "park_rocky-mountain",
+    "title": "Rocky Mountain",
+    "description": "Bisected north to south by the Continental \n      Divide, this portion of the Rockies has ecosystems varying \n      from over 150 riparian lakes to montane and subalpine forests \n      to treeless alpine tundra."
 }
 
+
+# Perform a search in my-index
+GET /my-index/_search?q="rocky mountain"
 `.trim();
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -70,7 +84,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should return statusCode 400 to unsupported HTTP verbs', async () => {
       const expectedResponseContains = '"statusCode": 400';
-      await PageObjects.console.enterRequest('\n OPTIONS /');
+      await PageObjects.console.clearTextArea();
+      await PageObjects.console.enterRequest('OPTIONS /');
       await PageObjects.console.clickPlay();
       await retry.try(async () => {
         const actualResponse = await PageObjects.console.getResponse();
@@ -157,7 +172,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('with folded/unfolded lines in request body', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/152825
+    describe.skip('with folded/unfolded lines in request body', () => {
       const enterRequest = async () => {
         await PageObjects.console.enterRequest('\nGET test/doc/1 \n{\n\t\t"_source": []');
         await PageObjects.console.clickPlay();

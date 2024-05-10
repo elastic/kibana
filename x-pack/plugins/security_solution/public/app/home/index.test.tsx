@@ -11,13 +11,7 @@ import { HomePage } from '.';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { FilterManager } from '@kbn/data-plugin/public';
 
-import {
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-  TestProviders,
-} from '../../common/mock';
+import { createMockStore, mockGlobalState, TestProviders } from '../../common/mock';
 import { inputsActions } from '../../common/store/inputs';
 import {
   setSearchBarFilter,
@@ -26,11 +20,10 @@ import {
 } from '../../common/store/inputs/actions';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { Filter } from '@kbn/es-query';
-import { createStore } from '../../common/store';
 import type { TimeRange, UrlInputsModel } from '../../common/store/inputs/model';
 import { SecurityPageName } from '../types';
-import type { TimelineUrl } from '../../timelines/store/timeline/model';
-import { timelineDefaults } from '../../timelines/store/timeline/defaults';
+import type { TimelineUrl } from '../../timelines/store/model';
+import { timelineDefaults } from '../../timelines/store/defaults';
 import { URL_PARAM_KEY } from '../../common/hooks/use_url_state';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { TopValuesPopoverService } from '../components/top_values_popover/top_values_popover_service';
@@ -92,13 +85,13 @@ jest.mock('../../timelines/components/open_timeline/helpers', () => {
   const original = jest.requireActual('../../timelines/components/open_timeline/helpers');
   return {
     ...original,
-    queryTimelineById: (params: unknown) => mockQueryTimelineById(params),
+    useQueryTimelineById: () => mockQueryTimelineById,
   };
 });
 
 const mockGetTimeline = jest.fn();
 
-jest.mock('../../timelines/store/timeline', () => ({
+jest.mock('../../timelines/store', () => ({
   timelineSelectors: {
     getTimelineByIdSelector: () => mockGetTimeline,
   },
@@ -346,7 +339,6 @@ describe('HomePage', () => {
       const state = null;
       mockUseInitializeUrlParam(URL_PARAM_KEY.filters, state);
       const spySetAppFilters = jest.spyOn(mockedFilterManager, 'setAppFilters');
-      const { storage } = createSecuritySolutionStorageMock();
 
       const mockstate = {
         ...mockGlobalState,
@@ -359,7 +351,7 @@ describe('HomePage', () => {
         },
       };
 
-      const mockStore = createStore(mockstate, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      const mockStore = createMockStore(mockstate);
 
       render(
         <TestProviders store={mockStore}>
@@ -512,8 +504,7 @@ describe('HomePage', () => {
         },
       };
 
-      const { storage } = createSecuritySolutionStorageMock();
-      const mockStore = createStore(mockstate, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      const mockStore = createMockStore(mockstate);
 
       const TestComponent = () => (
         <TestProviders store={mockStore}>
@@ -569,8 +560,7 @@ describe('HomePage', () => {
         },
       };
 
-      const { storage } = createSecuritySolutionStorageMock();
-      const mockStore = createStore(mockstate, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      const mockStore = createMockStore(mockstate);
 
       const TestComponent = () => (
         <TestProviders store={mockStore}>
@@ -629,16 +619,13 @@ describe('HomePage', () => {
     });
 
     it('it keeps timeline visibility and selected tab state in URL', async () => {
-      const { storage } = createSecuritySolutionStorageMock();
-      const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-
       mockUseInitializeUrlParam(URL_PARAM_KEY.timeline, {
         id: 'testSavedTimelineId',
         isOpen: false,
       });
 
       const TestComponent = () => (
-        <TestProviders store={store}>
+        <TestProviders>
           <HomePage>
             <span />
           </HomePage>
@@ -660,8 +647,6 @@ describe('HomePage', () => {
     });
 
     it('it updates URL when timeline store changes', async () => {
-      const { storage } = createSecuritySolutionStorageMock();
-      const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
       const savedObjectId = 'testTimelineId';
 
       mockUseInitializeUrlParam(URL_PARAM_KEY.timeline, {
@@ -670,7 +655,7 @@ describe('HomePage', () => {
       });
 
       const TestComponent = () => (
-        <TestProviders store={store}>
+        <TestProviders>
           <HomePage>
             <span />
           </HomePage>

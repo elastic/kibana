@@ -18,3 +18,15 @@ export const ALLOWED_HOSTS_ERROR = (message: string) =>
       message,
     },
   });
+
+export const OTHER_FIELDS_LENGTH_ERROR = (length: number) =>
+  i18n.translate('xpack.stackConnectors.jira.schema.otherFieldsLengthError', {
+    values: { length },
+    defaultMessage: 'A maximum of {length} otherFields can be defined at a time.',
+  });
+
+export const OTHER_FIELDS_PROPERTY_ERROR = (properties: string) =>
+  i18n.translate('xpack.stackConnectors.jira.schema.otherFieldsPropertyError', {
+    values: { properties },
+    defaultMessage: 'The following properties cannot be defined inside otherFields: {properties}.',
+  });

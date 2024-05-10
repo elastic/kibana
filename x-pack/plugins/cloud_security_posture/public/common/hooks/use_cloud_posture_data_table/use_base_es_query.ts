@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { DataView } from '@kbn/data-views-plugin/common';
 import { buildEsQuery, EsQueryConfig } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { useEffect, useMemo } from 'react';
-import { FindingsBaseESQueryConfig, FindingsBaseProps, FindingsBaseURLQuery } from '../../types';
+import { useDataViewContext } from '../../contexts/data_view_context';
+import { FindingsBaseESQueryConfig, FindingsBaseURLQuery } from '../../types';
 import { useKibana } from '../use_kibana';
 
 const getBaseQuery = ({
@@ -16,7 +18,10 @@ const getBaseQuery = ({
   query,
   filters,
   config,
-}: FindingsBaseURLQuery & FindingsBaseProps & FindingsBaseESQueryConfig) => {
+}: FindingsBaseURLQuery &
+  FindingsBaseESQueryConfig & {
+    dataView: DataView;
+  }) => {
   try {
     return {
       query: buildEsQuery(dataView, query, filters, config), // will throw for malformed query
@@ -30,11 +35,10 @@ const getBaseQuery = ({
 };
 
 export const useBaseEsQuery = ({
-  dataView,
   filters = [],
   query,
   nonPersistedFilters,
-}: FindingsBaseURLQuery & FindingsBaseProps) => {
+}: FindingsBaseURLQuery) => {
   const {
     notifications: { toasts },
     data: {
@@ -42,6 +46,7 @@ export const useBaseEsQuery = ({
     },
     uiSettings,
   } = useKibana().services;
+  const { dataView } = useDataViewContext();
   const allowLeadingWildcards = uiSettings.get('query:allowLeadingWildcards');
   const config: EsQueryConfig = useMemo(() => ({ allowLeadingWildcards }), [allowLeadingWildcards]);
   const baseEsQuery = useMemo(

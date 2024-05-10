@@ -7,6 +7,7 @@
 
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
+import { buildQueryFromFilters } from '@kbn/es-query';
 import { first, last, meanBy } from 'lodash';
 import moment from 'moment';
 import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
@@ -25,7 +26,7 @@ type ThroughputReturn = APIReturnType<'GET /internal/apm/services/{serviceName}/
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const serviceName = 'synth-go';
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
@@ -77,6 +78,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177510
   registry.when('Throughput when data is loaded', { config: 'basic', archives: [] }, () => {
     describe('Throughput chart api', () => {
       const GO_PROD_RATE = 50;
@@ -95,7 +97,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .service({ name: 'synth-java', environment: 'development', agentName: 'java' })
           .instance('instance-c');
 
-        await synthtraceEsClient.index([
+        await apmSynthtraceEsClient.index([
           timerange(start, end)
             .interval('1m')
             .rate(GO_PROD_RATE)
@@ -126,7 +128,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ]);
       });
 
-      after(() => synthtraceEsClient.clean());
+      after(() => apmSynthtraceEsClient.clean());
 
       describe('compare transactions and metrics based throughput', () => {
         let throughputMetrics: ThroughputReturn;
@@ -282,6 +284,250 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               roundNumber((GO_PROD_RATE + GO_DEV_RATE) / durationAsMinutes)
             )
           );
+        });
+      });
+
+      describe('handles kuery', () => {
+        let throughputMetrics: ThroughputReturn;
+        let throughputTransactions: ThroughputReturn;
+
+        before(async () => {
+          const [throughputMetricsResponse, throughputTransactionsResponse] = await Promise.all([
+            callApi(
+              {
+                query: {
+                  kuery: 'transaction.name : "GET /api/product/list"',
+                },
+              },
+              'metric'
+            ),
+            callApi(
+              {
+                query: {
+                  kuery: 'transaction.name : "GET /api/product/list"',
+                },
+              },
+              'transaction'
+            ),
+          ]);
+          throughputMetrics = throughputMetricsResponse.body;
+          throughputTransactions = throughputTransactionsResponse.body;
+        });
+
+        it('returns some transactions data', () => {
+          expect(throughputTransactions.currentPeriod.length).to.be.greaterThan(0);
+          const hasData = throughputTransactions.currentPeriod.some(({ y }) => isFiniteNumber(y));
+          expect(hasData).to.equal(true);
+        });
+
+        it('returns some metrics data', () => {
+          expect(throughputMetrics.currentPeriod.length).to.be.greaterThan(0);
+          const hasData = throughputMetrics.currentPeriod.some(({ y }) => isFiniteNumber(y));
+          expect(hasData).to.equal(true);
+        });
+
+        it('has same mean value for metrics and transactions data', () => {
+          const transactionsMean = meanBy(throughputTransactions.currentPeriod, 'y');
+          const metricsMean = meanBy(throughputMetrics.currentPeriod, 'y');
+          [transactionsMean, metricsMean].forEach((value) =>
+            expect(roundNumber(value)).to.be.equal(roundNumber(GO_PROD_RATE))
+          );
+        });
+
+        it('has a bucket size of 30 seconds for transactions data', () => {
+          const firstTimerange = throughputTransactions.currentPeriod[0].x;
+          const secondTimerange = throughputTransactions.currentPeriod[1].x;
+          const timeIntervalAsSeconds = (secondTimerange - firstTimerange) / 1000;
+          expect(timeIntervalAsSeconds).to.equal(30);
+        });
+
+        it('has a bucket size of 1 minute for metrics data', () => {
+          const firstTimerange = throughputMetrics.currentPeriod[0].x;
+          const secondTimerange = throughputMetrics.currentPeriod[1].x;
+          const timeIntervalAsMinutes = (secondTimerange - firstTimerange) / 1000 / 60;
+          expect(timeIntervalAsMinutes).to.equal(1);
+        });
+      });
+
+      describe('handles filters', () => {
+        let throughputMetrics: ThroughputReturn;
+        let throughputTransactions: ThroughputReturn;
+        const filters = [
+          {
+            meta: {
+              disabled: false,
+              negate: false,
+              alias: null,
+              key: 'transaction.name',
+              params: ['GET /api/product/list'],
+              type: 'phrases',
+            },
+            query: {
+              bool: {
+                minimum_should_match: 1,
+                should: {
+                  match_phrase: {
+                    'transaction.name': 'GET /api/product/list',
+                  },
+                },
+              },
+            },
+          },
+        ];
+        const serializedFilters = JSON.stringify(buildQueryFromFilters(filters, undefined));
+
+        before(async () => {
+          const [throughputMetricsResponse, throughputTransactionsResponse] = await Promise.all([
+            callApi(
+              {
+                query: {
+                  filters: serializedFilters,
+                },
+              },
+              'metric'
+            ),
+            callApi(
+              {
+                query: {
+                  filters: serializedFilters,
+                },
+              },
+              'transaction'
+            ),
+          ]);
+          throughputMetrics = throughputMetricsResponse.body;
+          throughputTransactions = throughputTransactionsResponse.body;
+        });
+
+        it('returns some transactions data', () => {
+          expect(throughputTransactions.currentPeriod.length).to.be.greaterThan(0);
+          const hasData = throughputTransactions.currentPeriod.some(({ y }) => isFiniteNumber(y));
+          expect(hasData).to.equal(true);
+        });
+
+        it('returns some metrics data', () => {
+          expect(throughputMetrics.currentPeriod.length).to.be.greaterThan(0);
+          const hasData = throughputMetrics.currentPeriod.some(({ y }) => isFiniteNumber(y));
+          expect(hasData).to.equal(true);
+        });
+
+        it('has same mean value for metrics and transactions data', () => {
+          const transactionsMean = meanBy(throughputTransactions.currentPeriod, 'y');
+          const metricsMean = meanBy(throughputMetrics.currentPeriod, 'y');
+          [transactionsMean, metricsMean].forEach((value) =>
+            expect(roundNumber(value)).to.be.equal(roundNumber(GO_PROD_RATE))
+          );
+        });
+
+        it('has a bucket size of 30 seconds for transactions data', () => {
+          const firstTimerange = throughputTransactions.currentPeriod[0].x;
+          const secondTimerange = throughputTransactions.currentPeriod[1].x;
+          const timeIntervalAsSeconds = (secondTimerange - firstTimerange) / 1000;
+          expect(timeIntervalAsSeconds).to.equal(30);
+        });
+
+        it('has a bucket size of 1 minute for metrics data', () => {
+          const firstTimerange = throughputMetrics.currentPeriod[0].x;
+          const secondTimerange = throughputMetrics.currentPeriod[1].x;
+          const timeIntervalAsMinutes = (secondTimerange - firstTimerange) / 1000 / 60;
+          expect(timeIntervalAsMinutes).to.equal(1);
+        });
+      });
+
+      describe('handles negate filters', () => {
+        let throughputMetrics: ThroughputReturn;
+        let throughputTransactions: ThroughputReturn;
+        const filters = [
+          {
+            meta: {
+              disabled: false,
+              negate: true,
+              alias: null,
+              key: 'transaction.name',
+              params: ['GET /api/product/list'],
+              type: 'phrases',
+            },
+            query: {
+              bool: {
+                minimum_should_match: 1,
+                should: {
+                  match_phrase: {
+                    'transaction.name': 'GET /api/product/list',
+                  },
+                },
+              },
+            },
+          },
+        ];
+        const serializedFilters = JSON.stringify(buildQueryFromFilters(filters, undefined));
+
+        before(async () => {
+          const [throughputMetricsResponse, throughputTransactionsResponse] = await Promise.all([
+            callApi(
+              {
+                query: {
+                  filters: serializedFilters,
+                },
+              },
+              'metric'
+            ),
+            callApi(
+              {
+                query: {
+                  filters: serializedFilters,
+                },
+              },
+              'transaction'
+            ),
+          ]);
+          throughputMetrics = throughputMetricsResponse.body;
+          throughputTransactions = throughputTransactionsResponse.body;
+        });
+
+        it('returns some transactions data', () => {
+          expect(throughputTransactions.currentPeriod.length).to.be.greaterThan(0);
+          const hasData = throughputTransactions.currentPeriod.some(({ y }) => isFiniteNumber(y));
+          expect(hasData).to.equal(true);
+        });
+
+        it('returns some metrics data', () => {
+          expect(throughputMetrics.currentPeriod.length).to.be.greaterThan(0);
+          const hasData = throughputMetrics.currentPeriod.some(({ y }) => isFiniteNumber(y));
+          expect(hasData).to.equal(true);
+        });
+
+        it('has same mean value for metrics and transactions data', () => {
+          const transactionsMean = meanBy(throughputTransactions.currentPeriod, 'y');
+          const metricsMean = meanBy(throughputMetrics.currentPeriod, 'y');
+          [transactionsMean, metricsMean].forEach((value) =>
+            expect(roundNumber(value)).to.be.equal(roundNumber(GO_DEV_RATE))
+          );
+        });
+
+        it('has a bucket size of 30 seconds for transactions data', () => {
+          const firstTimerange = throughputTransactions.currentPeriod[0].x;
+          const secondTimerange = throughputTransactions.currentPeriod[1].x;
+          const timeIntervalAsSeconds = (secondTimerange - firstTimerange) / 1000;
+          expect(timeIntervalAsSeconds).to.equal(30);
+        });
+
+        it('has a bucket size of 1 minute for metrics data', () => {
+          const firstTimerange = throughputMetrics.currentPeriod[0].x;
+          const secondTimerange = throughputMetrics.currentPeriod[1].x;
+          const timeIntervalAsMinutes = (secondTimerange - firstTimerange) / 1000 / 60;
+          expect(timeIntervalAsMinutes).to.equal(1);
+        });
+      });
+
+      describe('handles bad filters request', () => {
+        it('throws bad request error', async () => {
+          try {
+            await callApi({
+              query: { environment: 'production', filters: '{}}' },
+            });
+          } catch (error) {
+            expect(error.res.status).to.be(400);
+          }
         });
       });
     });

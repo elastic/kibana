@@ -26,7 +26,9 @@ SRCS = glob(
 SHARED_DEPS = [
   "//packages/kbn-i18n",
   "//packages/kbn-ui-theme",
-  "@npm//antlr4ts",
+  "//packages/kbn-esql-validation-autocomplete",
+  "//packages/kbn-esql-ast",
+  "@npm//antlr4",
   "@npm//monaco-editor",
   "@npm//monaco-yaml",
 ]
@@ -36,6 +38,7 @@ webpack_cli(
   data = SRCS + SHARED_DEPS + [
     "//:.browserslistrc",
     "//packages/kbn-babel-preset",
+    "@npm//terser-webpack-plugin",
     "@npm//@babel/runtime",
     "@npm//babel-loader",
     "@npm//raw-loader",

@@ -254,7 +254,7 @@
             "label": "enableSaving",
             "description": [],
             "signature": [
-              "{ global: boolean; namespace: boolean; }"
+              "{ namespace: boolean; global: boolean; }"
             ],
             "path": "packages/kbn-management/settings/section_registry/section_registry.ts",
             "deprecated": false,

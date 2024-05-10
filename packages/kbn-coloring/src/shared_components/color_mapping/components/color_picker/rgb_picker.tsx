@@ -48,7 +48,8 @@ export function RGBPicker({
     customColorMappingColor.type === 'categorical'
       ? getPaletteFn(customColorMappingColor.paletteId).getColor(
           customColorMappingColor.colorIndex,
-          isDarkMode
+          isDarkMode,
+          false
         )
       : customColorMappingColor.colorCode;
 
@@ -142,7 +143,7 @@ export function RGBPicker({
                     if (chromajs.valid(textColor)) {
                       setCustomColorMappingColor({
                         type: 'colorCode',
-                        colorCode: chromajs(textColor).hex(),
+                        colorCode: textColor,
                       });
                     }
                   }}

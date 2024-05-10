@@ -59,7 +59,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Convert to by-value
       const byRefPanel = await testSubjects.find('embeddablePanelHeading-' + lensTitle);
-      await dashboardPanelActions.unlinkFromLibary(byRefPanel);
+      await dashboardPanelActions.legacyUnlinkFromLibary(byRefPanel);
       await PageObjects.dashboard.waitForRenderComplete();
       const byValueSessionId = await dashboardPanelActions.getSearchSessionIdByTitle(lensTitle);
 
