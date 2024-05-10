@@ -43,7 +43,6 @@ export function SLODetailsHistory({ slo, isAutoRefreshing, selectedTabId }: Prop
   const onRefresh = (val: OnRefreshProps) => {};
 
   const range = useMemo(() => {
-    // replace absoluteFrom usage with from.getTime()
     return {
       from: new Date(DateMath.parse(start)!.valueOf()),
       to: new Date(DateMath.parse(end, { roundUp: true })!.valueOf()),
