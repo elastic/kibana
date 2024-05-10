@@ -244,6 +244,12 @@ export function SloCardChart({
               title: slo.name,
               subtitle: subTitle,
               value: sliValue,
+              trendA11yTitle: i18n.translate('xpack.slo.slo.sLOGridItem.trendA11yLabel', {
+                defaultMessage: `The "{title}" trend`,
+                values: {
+                  title: slo.name,
+                },
+              }),
               trendShape: MetricTrendShape.Area,
               trend: historicalSliData?.map((d) => ({
                 x: d.key as number,
