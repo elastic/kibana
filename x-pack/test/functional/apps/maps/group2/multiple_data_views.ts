@@ -15,7 +15,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'maps']);
 
-  describe.only('maps with multiple data views', () => {
+  describe('maps with multiple data views', () => {
     const mapTitle = 'map with multiple data views';
 
     const createLayerForDataView = async (dataView: string) => {
