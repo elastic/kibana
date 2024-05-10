@@ -75,7 +75,7 @@ export const TopValues: FC<Props> = ({
   if (originalTopValues?.length === 0) return null;
   const totalDocuments = showSampledValues
     ? stats.topValuesSampleSize ?? 0
-    : Math.min(sampleCount ?? 0, stats.totalDocuments ?? 0);
+    : Math.min(sampleCount ?? Infinity, stats.totalDocuments ?? Infinity);
 
   const getMessage = () => {
     if (showSampledValues && stats.topValuesSampleSize !== undefined) {

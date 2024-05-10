@@ -1029,6 +1029,10 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 
 ### Observability Plugins
 
+# Observability AI Assistant
+x-pack/test/observability_ai_assistant_api_integration @elastic/obs-ai-assistant
+x-pack/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
+
 # Infra Monitoring
 ## This plugin mostly contains the codebase for the infra services, but also includes some code for the Logs UI app.
 ## To keep @elastic/obs-ux-logs-team as codeowner of the plugin manifest without requiring a review for all the other code changes
@@ -1428,6 +1432,7 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/test/security_solution_cypress/cypress/tasks/hosts @elastic/security-threat-hunting-explore
 /x-pack/test/security_solution_cypress/cypress/tasks/network @elastic/security-threat-hunting-explore
 
+/x-pack/plugins/security_solution/public/app/actions @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/guided_onboarding_tour @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/charts @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/detections/components/alerts_table/grouping_settings @elastic/security-threat-hunting-explore
