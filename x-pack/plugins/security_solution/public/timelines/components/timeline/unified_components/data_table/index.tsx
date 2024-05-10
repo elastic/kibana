@@ -35,7 +35,7 @@ import { SourcererScopeName } from '../../../../../common/store/sourcerer/model'
 import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
 import { activeTimeline } from '../../../../containers/active_timeline_context';
 import { DetailsPanel } from '../../../side_panel';
-import { SecurityCellActionsTrigger } from '../../../../../actions/constants';
+import { SecurityCellActionsTrigger } from '../../../../../app/actions/constants';
 import { getFormattedFields } from '../../body/renderers/formatted_field_udt';
 import ToolbarAdditionalControls from './toolbar_additional_controls';
 import { StyledTimelineUnifiedDataTable, StyledEuiProgress } from '../styles';
