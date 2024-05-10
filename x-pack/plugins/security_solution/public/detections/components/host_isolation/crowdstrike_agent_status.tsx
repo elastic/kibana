@@ -35,7 +35,7 @@ export const CrowdstrikeAgentStatus = React.memo(
     const { data, isLoading, isFetched } = useAgentStatus([agentId], 'crowdstrike', {
       enabled: crowdstrikeManualHostActionsEnabled,
     });
-    const agentStatus = data?.[`${agentId}`];
+    const agentStatus = data?.[agentId];
 
     const label = useMemo(() => {
       const currentNetworkStatus = agentStatus?.isolated;

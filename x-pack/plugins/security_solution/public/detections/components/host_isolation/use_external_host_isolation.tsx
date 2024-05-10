@@ -21,7 +21,7 @@ interface ErrorType {
   meta: ActionTypeExecutorResult<SentinelOneGetAgentsResponse>;
 }
 
-// TODO: 8.15: Remove `useGetSentinelOneAgentStatus` function when `agentStatusClientEnabled` is enabled/removed
+// TODO: 8.15: Remove `useGetExternalAgentStatus` function when `agentStatusClientEnabled` is removed
 export const useGetExternalAgentStatus = (
   agentIds: string[],
   agentType: string,
