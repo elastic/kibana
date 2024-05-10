@@ -42,9 +42,10 @@ async function main() {
   });
 
   // Comment it on the PR
-  const prNumber =
-    buildkiteBuild.pull_request?.id || extractPRNumberFromBranch(process.env.BUILDKITE_BRANCH);
-  if (!prNumber) {
+  const prNumber = Number(
+    buildkiteBuild.pull_request?.id || extractPRNumberFromBranch(process.env.BUILDKITE_BRANCH)
+  );
+  if (isNaN(prNumber)) {
     throw new Error(`Couldn't find PR number for build ${buildkiteBuild.web_url}.`);
   }
 
@@ -92,7 +93,7 @@ function extractPRNumberFromBranch(branch: string | undefined) {
   if (!branch) {
     return null;
   } else {
-    return branch.match(/refs\/pull\/(\d+)\/head/)?.[0];
+    return branch.match(/refs\/pull\/(\d+)\/head/)?.[1];
   }
 }
 
