@@ -8,8 +8,8 @@ import { schema } from '@kbn/config-schema';
 import { estypes } from '@elastic/elasticsearch';
 // import { transformError } from '@kbn/securitysolution-es-utils';
 // import type { ElasticsearchClient } from '@kbn/core/server';
-import { extractFieldValue } from '../lib/utils';
-import { defineQueryForPodsMemoryUtilisation, calulcatePodsMemoryUtilisation } from '../lib/pods_memory_utils';
+import { extractFieldValue, checkDefaultNamespace } from '../lib/utils';
+import { defineQueryForAllPodsMemoryUtilisation, calulcateAllPodsMemoryUtilisation } from '../lib/pods_memory_utils';
 import { IRouter, Logger } from '@kbn/core/server';
 import {
   DEPLOYMENT_MEMORY_ROUTE,
@@ -27,23 +27,25 @@ export const registerDeploymentsMemoryRoute = (router: IRouter, logger: Logger) 
         validate: {
           request: {
             query: schema.object({
-              deployment_name: schema.string(),
-              namespace: schema.string(),
+              name: schema.string(),
+              namespace: schema.maybe(schema.string()),
             }),
           },
         },
       },
       async (context, request, response) => {
+        var namespace = checkDefaultNamespace(request.query.namespace);
+
         const client = (await context.core).elasticsearch.client.asCurrentUser;
         const mustsPods = [
           {
             term: {
-              'resource.attributes.k8s.deployment.name': request.query.deployment_name,
+              'resource.attributes.k8s.deployment.name': request.query.name,
             },
           },
           {
             term: {
-              'resource.attributes.k8s.namespace.name': request.query.namespace,
+              'resource.attributes.k8s.namespace.name': namespace,
             },
           },
           { exists: { field: 'metrics.k8s.pod.phase' } }
@@ -83,9 +85,9 @@ export const registerDeploymentsMemoryRoute = (router: IRouter, logger: Logger) 
           for (var entries of hitsPodsAggs) {
             const podName = entries.key;
             console.log(podName);
-            const dslPodsCpu = defineQueryForPodsMemoryUtilisation(podName, request.query.namespace, client)
+            const dslPodsCpu = defineQueryForAllPodsMemoryUtilisation(podName, namespace, client)
             const esResponsePodsCpu = await client.search(dslPodsCpu);
-            const [reason, message] = calulcatePodsMemoryUtilisation(podName, request.query.namespace, esResponsePodsCpu)
+            const [reason, message] = calulcateAllPodsMemoryUtilisation(podName, namespace, esResponsePodsCpu)
             reasons.push(reason);
             messages.push(message);
             console.log("reason:" + reason, "message:" + message);
@@ -94,19 +96,19 @@ export const registerDeploymentsMemoryRoute = (router: IRouter, logger: Logger) 
             body: {
               time: time,
               message: messages,
-              name: request.query.deployment_name,
-              namespace: request.query.namespace,
+              name: request.query.name,
+              namespace: namespace,
               reason: reasons,
             },
           });
         } else {
-          const message = `Deployment ${request.query.namespace}/${request.query.deployment_name} not found`
+          const message = `Deployment ${namespace}/${request.query.name} not found`
           return response.ok({
             body: {
               time: '',
               message: message,
-              name: request.query.deployment_name,
-              namespace: request.query.namespace,
+              name: request.query.name,
+              namespace: namespace,
               reason: "Not found",
             },
           });

@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { estypes } from '@elastic/elasticsearch';
 // import { transformError } from '@kbn/securitysolution-es-utils';
 // import type { ElasticsearchClient } from '@kbn/core/server';
-import { extractFieldValue, round } from '../lib/utils';
+import { extractFieldValue, round, checkDefaultNamespace } from '../lib/utils';
 import { IRouter, Logger } from '@kbn/core/server';
 import {
   POD_CPU_ROUTE,
@@ -27,23 +27,25 @@ export const registerPodsCpuRoute = (router: IRouter, logger: Logger) => {
         validate: {
           request: {
             query: schema.object({
-              pod_name: schema.string(),
-              namespace: schema.string(),
+              name: schema.string(),
+              namespace: schema.maybe(schema.string()),
             }),
           },
         },
       },
       async (context, request, response) => {
+        var namespace = checkDefaultNamespace(request.query.namespace);
+
         const client = (await context.core).elasticsearch.client.asCurrentUser;
         const musts = [
           {
             term: {
-              'resource.attributes.k8s.pod.name': request.query.pod_name,
+              'resource.attributes.k8s.pod.name': request.query.name,
             },
           },
           {
             term: {
-              'resource.attributes.k8s.namespace.name': request.query.namespace,
+              'resource.attributes.k8s.namespace.name': namespace,
             },
           },
           { exists: { field: 'metrics.k8s.pod.cpu.utilization' } }
@@ -92,24 +94,24 @@ export const registerPodsCpuRoute = (router: IRouter, logger: Logger) => {
             reason = "High"
           }
 
-          message = `Pod ${request.query.namespace}/${request.query.pod_name} has CPU utilisation ${podCpuUtilization}%`;
+          message = `Pod ${namespace}/${request.query.name} has CPU utilisation ${podCpuUtilization}%`;
           return response.ok({
             body: {
               time: time,
               message: message,
-              name: request.query.pod_name,
-              namespace: request.query.namespace,
+              name: request.query.name,
+              namespace: namespace,
               reason: reason + " cpu utilisation",
             },
           });
         } else {
-          const message = `Pod ${request.query.namespace}/${request.query.pod_name} not found`
+          const message = `Pod ${namespace}/${request.query.name} not found`
           return response.ok({
             body: {
               time: '',
               message: message,
-              name: request.query.pod_name,
-              namespace: request.query.namespace,
+              name: request.query.name,
+              namespace: namespace,
               reason: "Not found",
             },
           });

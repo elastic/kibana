@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { estypes } from '@elastic/elasticsearch';
 // import { transformError } from '@kbn/securitysolution-es-utils';
 // import type { ElasticsearchClient } from '@kbn/core/server';
-import { extractFieldValue, round } from '../lib/utils';
+import { extractFieldValue, round, checkDefaultNamespace } from '../lib/utils';
 import { IRouter, Logger } from '@kbn/core/server';
 import {
   DAEMONSET_MEMORY_ROUTE,
@@ -27,23 +27,24 @@ export const registerDaemonsetsMemoryRoute = (router: IRouter, logger: Logger) =
         validate: {
           request: {
             query: schema.object({
-              daemonset_name: schema.string(),
-              namespace: schema.string(),
+              name: schema.string(),
+              namespace: schema.maybe(schema.string()),
             }),
           },
         },
       },
       async (context, request, response) => {
+        var namespace = checkDefaultNamespace(request.query.namespace);
         const client = (await context.core).elasticsearch.client.asCurrentUser;
         const musts = [
           {
             term: {
-              'resource.attributes.k8s.daemonset.name': request.query.daemonset_name,
+              'resource.attributes.k8s.daemonset.name': request.query.name,
             },
           },
           {
             term: {
-              'resource.attributes.k8s.namespace.name': request.query.namespace,
+              'resource.attributes.k8s.namespace.name': namespace,
             },
           },
           { exists: { field: 'metrics.k8s.daemonset.ready_nodes' } }
@@ -75,12 +76,12 @@ export const registerDaemonsetsMemoryRoute = (router: IRouter, logger: Logger) =
           const mustsPods = [
             {
               term: {
-                'resource.attributes.k8s.daemonset.name': request.query.daemonset_name,
+                'resource.attributes.k8s.daemonset.name': request.query.name,
               },
             },
             {
               term: {
-                'resource.attributes.k8s.namespace.name': request.query.namespace,
+                'resource.attributes.k8s.namespace.name': namespace,
               },
             },
             { exists: { field: 'metrics.k8s.pod.phase' } }
@@ -134,7 +135,7 @@ export const registerDaemonsetsMemoryRoute = (router: IRouter, logger: Logger) =
               },
               {
                 term: {
-                  'resource.attributes.k8s.namespace.name': request.query.namespace,
+                  'resource.attributes.k8s.namespace.name': namespace,
                 },
               },
               { exists: { field: 'metrics.k8s.pod.memory.usage' } }
@@ -183,14 +184,14 @@ export const registerDaemonsetsMemoryRoute = (router: IRouter, logger: Logger) =
                 } else {
                   alarm = "High"
                 }
-                reason = `Pod ${request.query.namespace}/${podName} Reason: ${alarm} Memory utilisation`;
+                reason = `Pod ${namespace}/${podName} Reason: ${alarm} Memory utilisation`;
                 reasons.push(reason);
-                message = `Pod ${request.query.namespace}/${podName} has Memory utilisation ${podMemoryUtilization}`;
+                message = `Pod ${namespace}/${podName} has Memory utilisation ${podMemoryUtilization}`;
                 messages.push(message);
               } else {
-                reason = `Pod ${request.query.namespace}/${podName} Reason: No memory limit defined`;
+                reason = `Pod ${namespace}/${podName} Reason: No memory limit defined`;
                 reasons.push(reason);
-                message = `Pod ${request.query.namespace}/${podName} has Memory usage ${memory_usage} Bytes`;
+                message = `Pod ${namespace}/${podName} has Memory usage ${memory_usage} Bytes`;
                 messages.push(message);
               }
             }
@@ -199,19 +200,19 @@ export const registerDaemonsetsMemoryRoute = (router: IRouter, logger: Logger) =
             body: {
               time: time,
               message: messages.join(" & "),
-              name: request.query.daemonset_name,
-              namespace: request.query.namespace,
+              name: request.query.name,
+              namespace: namespace,
               reason: reasons.join(" & "),
             },
           });
         } else {
-          const message = `Daemonset ${request.query.namespace}/${request.query.daemonset_name} not found`
+          const message = `Daemonset ${namespace}/${request.query.name} not found`
           return response.ok({
             body: {
               time: '',
               message: message,
-              name: request.query.daemonset_name,
-              namespace: request.query.namespace,
+              name: request.query.name,
+              namespace: namespace,
               reason: "Not found",
             },
           });

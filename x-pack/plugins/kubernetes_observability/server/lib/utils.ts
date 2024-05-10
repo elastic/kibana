@@ -12,7 +12,14 @@ export type Event = {
     time: string;
     kind: string;
     object: string;
-  };
+};
+
+export type Pod = {
+    name: string;
+    namespace: string;
+    memory_availabe: number;
+    memory_usage: number;
+};
 
 export function extractFieldValue<T>(maybeArray: T | T[] | undefined): T {
     return toArray(maybeArray)[0];
@@ -20,47 +27,62 @@ export function extractFieldValue<T>(maybeArray: T | T[] | undefined): T {
 
 function toArray<T>(maybeArray: T | T[] | undefined): T[] {
     if (!maybeArray) {
-      return [];
+        return [];
     }
     if (Array.isArray(maybeArray)) {
-      return maybeArray;
+        return maybeArray;
     }
     return [maybeArray];
 }
 
 export function phaseToState(phase: number) {
-    switch(phase) { 
-        case 1: { 
-           return "Pending"; 
-        } 
-        case 2: { 
-            return "Running"; 
-        } 
-        case 3: { 
-            return "Succeeded"; 
+    switch (phase) {
+        case 1: {
+            return "Pending";
         }
-        case 4: { 
-            return "Failed"; 
+        case 2: {
+            return "Running";
         }
-        case 5: { 
-            return "Unknown"; 
-        }  
-        default: { 
-            return "Unknown"; 
-        } 
-    } 
+        case 3: {
+            return "Succeeded";
+        }
+        case 4: {
+            return "Failed";
+        }
+        case 5: {
+            return "Unknown";
+        }
+        default: {
+            return "Unknown";
+        }
+    }
 }
 
-export function round(num: number, decimalPlaces = 0) {
+export function round(num: number, decimalPlaces = 0): number {
     var p = Math.pow(10, decimalPlaces);
     var n = (num * p) * (1 + Number.EPSILON);
     return Math.round(n) / p;
 }
-    
+
 export function toEntries<T>(a: T[]) {
     return a.map((value, index) => [index, value] as const);
 }
 
 export function capitalizeFirstLetter(str: string): string {
     return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+export function median(arr: number[]): number | undefined {
+    if (!arr.length) return undefined;
+    const s = [...arr].sort((a, b) => a - b);
+    const mid = Math.floor(s.length / 2);
+    return s.length % 2 ? s[mid] : ((s[mid - 1] + s[mid]) / 2);
+};
+
+export function checkDefaultNamespace(namespace: string| undefined): string {
+    if (namespace == null || namespace == undefined) {
+        return namespace = "default"
+    } else {
+        return namespace
+    }
 }

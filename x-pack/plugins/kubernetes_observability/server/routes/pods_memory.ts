@@ -7,13 +7,14 @@
 import { schema } from '@kbn/config-schema';
 // import { transformError } from '@kbn/securitysolution-es-utils';
 // import type { ElasticsearchClient } from '@kbn/core/server';
-import { defineQueryForPodsMemoryUtilisation, calulcatePodsMemoryUtilisation } from '../lib/pods_memory_utils';
+import { defineQueryForAllPodsMemoryUtilisation, calulcateAllPodsMemoryUtilisation } from '../lib/pods_memory_utils';
 
-import { extractFieldValue, round } from '../lib/utils';
+import { extractFieldValue, checkDefaultNamespace } from '../lib/utils';
 import { IRouter, Logger } from '@kbn/core/server';
 import {
   POD_MEMORY_ROUTE,
 } from '../../common/constants';
+
 
 export const registerPodsMemoryRoute = (router: IRouter, logger: Logger) => {
   router.versioned
@@ -27,48 +28,57 @@ export const registerPodsMemoryRoute = (router: IRouter, logger: Logger) => {
         validate: {
           request: {
             query: schema.object({
-              pod_name: schema.string(),
-              namespace: schema.string(),
+              name: schema.string(),
+              namespace: schema.maybe(schema.string()),
             }),
           },
         },
       },
       async (context, request, response) => {
-        const client = (await context.core).elasticsearch.client.asCurrentUser;
-        const dsl = defineQueryForPodsMemoryUtilisation(request.query.pod_name, request.query.namespace, client)
-        const esResponse = await client.search(dsl);
-        console.log(esResponse);
-        var message = {};
-        var reason = {};
-        var memory_available= undefined;
-        var memory_usage= undefined;
-        var memory_utilization =undefined
-        if (esResponse.hits.hits.length > 0) {
-        const hits = esResponse.hits.hits[0];
-        const { fields = {} } = hits;
-        const time = extractFieldValue(fields['@timestamp']);
+        var namespace = checkDefaultNamespace(request.query.namespace);
 
-        [reason, message, memory_available, memory_usage, memory_utilization] = calulcatePodsMemoryUtilisation(request.query.pod_name, request.query.namespace, esResponse)
+        const client = (await context.core).elasticsearch.client.asCurrentUser;
+       //const dsl = defineQueryForPodsMemoryUtilisation(request.query.name, namespace, client)
+        //const esResponse = await client.search(dsl);
+        const dslAll = defineQueryForAllPodsMemoryUtilisation(request.query.name, namespace, client)
+        const esResponseAll = await client.search(dslAll);
+        console.log(dslAll);
+        console.log(esResponseAll.hits.hits);
+        console.log(esResponseAll.hits.hits.length);
+        //console.log(esResponse);
+        var message = undefined;
+        var reason = undefined;
+        var memory_available = undefined;
+        var memory_usage = undefined;
+        var memory_utilization = undefined
+        var memory_usage_median = undefined
+        if (esResponseAll.hits.hits.length > 0) {
+          const hits = esResponseAll.hits.hits[0];
+          const { fields = {} } = hits;
+          const time = extractFieldValue(fields['@timestamp']);
+          
+          [reason, message, memory_available, memory_usage, memory_utilization, memory_usage_median ] = calulcateAllPodsMemoryUtilisation(request.query.name, namespace, esResponseAll)
           return response.ok({
             body: {
               time: time,
               message: message,
-              name: request.query.pod_name,
-              namespace: request.query.namespace,
+              name: request.query.name,
+              namespace: namespace,
               memory_utilization: memory_utilization,
+              memory_usage_median: memory_usage_median,
               memory_available: memory_available,
               memory_usage: memory_usage,
               reason: reason,
             },
           });
         } else {
-          const message = `Pod ${request.query.namespace}/${request.query.pod_name} not found`
+          const message = `Pod ${namespace}/${request.query.name} not found`
           return response.ok({
             body: {
               time: '',
               message: message,
-              name: request.query.pod_name,
-              namespace: request.query.namespace,
+              name: request.query.name,
+              namespace: namespace,
               reason: "Not found",
             },
           });

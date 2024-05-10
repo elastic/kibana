@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { estypes } from '@elastic/elasticsearch';
 // import { transformError } from '@kbn/securitysolution-es-utils';
 // import type { ElasticsearchClient } from '@kbn/core/server';
-import {extractFieldValue, phaseToState, Event} from '../lib/utils';
+import {extractFieldValue, phaseToState, Event, checkDefaultNamespace } from '../lib/utils';
 import { IRouter, Logger } from '@kbn/core/server';
 import {
     POD_STATUS_ROUTE,
@@ -26,23 +26,25 @@ export const registerPodsRoute = (router: IRouter, logger: Logger) => {
         validate: {
           request: {
             query: schema.object({
-              pod_name: schema.string(),
-              namespace: schema.string(),
+              name: schema.string(),
+              namespace: schema.maybe(schema.string()),
             }),
           },
         },
       },
       async (context, request, response) => {
+        var namespace = checkDefaultNamespace(request.query.namespace);
+
         const client = (await context.core).elasticsearch.client.asCurrentUser;
         const musts = [
             {
                 term: {
-                  'resource.attributes.k8s.pod.name': request.query.pod_name,
+                  'resource.attributes.k8s.pod.name': request.query.name,
                 },
               },
               {
                 term: {
-                  'resource.attributes.k8s.namespace.name': request.query.namespace,
+                  'resource.attributes.k8s.namespace.name': namespace,
                 },
               },
               { exists: { field: 'metrics.k8s.pod.phase' } }
@@ -76,7 +78,7 @@ export const registerPodsRoute = (router: IRouter, logger: Logger) => {
         const state = phaseToState(podPhase);
         var failingReason = {} as Event;
         if (state !== 'Succeeded' && state !== 'Running') {
-          const event = await getPodEvents(client, request.query.pod_name, request.query.namespace);
+          const event = await getPodEvents(client, request.query.name, namespace);
           if (event.note != '') {
             failingReason = event;
           }
@@ -84,22 +86,22 @@ export const registerPodsRoute = (router: IRouter, logger: Logger) => {
         return response.ok({
           body: {
             time: time,
-            message: "Pod " + request.query.namespace + "/" + request.query.pod_name + " is in " + state + " state",
+            message: "Pod " + namespace + "/" + request.query.name + " is in " + state + " state",
             state: state,
-            name: request.query.pod_name,
-            namespace: request.query.namespace,
+            name: request.query.name,
+            namespace: namespace,
             node: nodeName,
             failingReason: failingReason,
           },
         });
       } else {
-        const message =  `Pod ${request.query.namespace}/${request.query.pod_name} not found`
+        const message =  `Pod ${namespace}/${request.query.name} not found`
         return response.ok({
             body: {
               time: '',
               message: message,
-              name: request.query.pod_name,
-              namespace: request.query.namespace,
+              name: request.query.name,
+              namespace: namespace,
               reason: "Not found",
             },
           });

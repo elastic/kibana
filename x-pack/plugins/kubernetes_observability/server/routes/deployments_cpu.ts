@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { estypes } from '@elastic/elasticsearch';
 // import { transformError } from '@kbn/securitysolution-es-utils';
 // import type { ElasticsearchClient } from '@kbn/core/server';
-import { extractFieldValue } from '../lib/utils';
+import { extractFieldValue, checkDefaultNamespace } from '../lib/utils';
 import { IRouter, Logger } from '@kbn/core/server';
 import {
   DEPLOYMENT_CPU_ROUTE,
@@ -27,23 +27,24 @@ export const registerDeploymentsCpuRoute = (router: IRouter, logger: Logger) => 
         validate: {
           request: {
             query: schema.object({
-              deployment_name: schema.string(),
-              namespace: schema.string(),
+              name: schema.string(),
+              namespace: schema.maybe(schema.string()),
             }),
           },
         },
       },
       async (context, request, response) => {
+        var namespace = checkDefaultNamespace(request.query.namespace);
         const client = (await context.core).elasticsearch.client.asCurrentUser;
         const musts = [
           {
             term: {
-              'resource.attributes.k8s.deployment.name': request.query.deployment_name,
+              'resource.attributes.k8s.deployment.name': request.query.name,
             },
           },
           {
             term: {
-              'resource.attributes.k8s.namespace.name': request.query.namespace,
+              'resource.attributes.k8s.namespace.name': namespace,
             },
           },
           { exists: { field: 'metrics.k8s.deployment.available' } }
@@ -75,12 +76,12 @@ export const registerDeploymentsCpuRoute = (router: IRouter, logger: Logger) => 
           const mustsPods = [
             {
               term: {
-                'resource.attributes.k8s.deployment.name': request.query.deployment_name,
+                'resource.attributes.k8s.deployment.name': request.query.name,
               },
             },
             {
               term: {
-                'resource.attributes.k8s.namespace.name': request.query.namespace,
+                'resource.attributes.k8s.namespace.name': namespace,
               },
             },
             { exists: { field: 'metrics.k8s.pod.phase' } }
@@ -131,7 +132,7 @@ export const registerDeploymentsCpuRoute = (router: IRouter, logger: Logger) => 
               },
               {
                 term: {
-                  'resource.attributes.k8s.namespace.name': request.query.namespace,
+                  'resource.attributes.k8s.namespace.name': namespace,
                 },
               },
               { exists: { field: 'metrics.k8s.pod.cpu.utilization' } }
@@ -178,9 +179,9 @@ export const registerDeploymentsCpuRoute = (router: IRouter, logger: Logger) => 
               } else {
                 alarm = "High"
               }
-              reason = `Pod ${request.query.namespace}/${podName} Reason: ${alarm} CPU utilisation`;
+              reason = `Pod ${namespace}/${podName} Reason: ${alarm} CPU utilisation`;
               reasons.push(reason);
-              message = `Pod ${request.query.namespace}/${podName} has CPU utilisation ${podCpuUtilization}`;
+              message = `Pod ${namespace}/${podName} has CPU utilisation ${podCpuUtilization}`;
               messages.push(message);
             }
           }
@@ -188,19 +189,19 @@ export const registerDeploymentsCpuRoute = (router: IRouter, logger: Logger) => 
             body: {
               time: time,
               message: messages.join(" & "),
-              name: request.query.deployment_name,
-              namespace: request.query.namespace,
+              name: request.query.name,
+              namespace: namespace,
               reason: reasons.join(" & "),
             },
           });
         } else {
-          const message = `Deployment ${request.query.namespace}/${request.query.deployment_name} not found`
+          const message = `Deployment ${namespace}/${request.query.name} not found`
           return response.ok({
             body: {
               time: '',
               message: message,
-              name: request.query.deployment_name,
-              namespace: request.query.namespace,
+              name: request.query.name,
+              namespace: namespace,
               reason: "Not found",
             },
           });
