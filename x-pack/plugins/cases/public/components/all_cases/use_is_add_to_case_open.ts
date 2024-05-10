@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import useObservable from 'react-use/lib/useObservable';
-import { useCasesContext } from '../cases_context/use_cases_context';
+import { useCasesContextState } from './utils/use_cases_context_state';
 
 export type UseIsAddToCaseOpen = () => boolean;
 
 export const useIsAddToCaseOpen: UseIsAddToCaseOpen = () => {
-  const { casesContextState$ } = useCasesContext();
-  const { selectCaseModal, createCaseFlyout } = useObservable(casesContextState$) ?? {};
+  const { selectCaseModal, createCaseFlyout } = useCasesContextState();
   return (selectCaseModal?.isModalOpen || createCaseFlyout?.isFlyoutOpen) ?? false;
 };

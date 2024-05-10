@@ -35,7 +35,7 @@ import { isRegisteredOwner } from '../../files';
 import { casesQueryClient } from './query_client';
 
 type CasesContextValueDispatch = Dispatch<CasesContextStoreAction>;
-type CasesContextState$ = Observable<CasesContextState | undefined>;
+type CasesContextState$ = BehaviorSubject<CasesContextState>;
 export interface CasesContextValue {
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
@@ -86,10 +86,10 @@ export const CasesProvider: FC<
   const [state, dispatch] = useReducer(casesContextReducer, getInitialCasesContextState());
 
   // The state behavior subject wil be created only once so it won't trigger a context rerender
-  const casesContextState$ = useMemo(
-    () => new BehaviorSubject<CasesContextState | undefined>(undefined),
-    []
-  );
+  // This is needed to retrieve state information from the plugin contract.
+  // This BehaviorSubject should be used only inside cases.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const casesContextState$ = useMemo(() => new BehaviorSubject<CasesContextState>(state), []);
   useEffect(() => {
     casesContextState$.next(state);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -124,7 +124,7 @@ export const CasesProvider: FC<
         ),
         releasePhase,
         dispatch,
-        casesContextState$: casesContextState$.asObservable(),
+        casesContextState$,
       };
     },
     /**
@@ -142,8 +142,6 @@ export const CasesProvider: FC<
       permissions.read,
       permissions.settings,
       permissions.update,
-      // state.createCaseFlyout.isFlyoutOpen,
-      // state.selectCaseModal.isModalOpen,
     ]
   );
 
