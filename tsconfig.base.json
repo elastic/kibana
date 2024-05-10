@@ -1058,6 +1058,8 @@
       "@kbn/logging/*": ["packages/kbn-logging/*"],
       "@kbn/logging-mocks": ["packages/kbn-logging-mocks"],
       "@kbn/logging-mocks/*": ["packages/kbn-logging-mocks/*"],
+      "@kbn/logs-data-access-plugin": ["x-pack/plugins/observability_solution/logs_data_access"],
+      "@kbn/logs-data-access-plugin/*": ["x-pack/plugins/observability_solution/logs_data_access/*"],
       "@kbn/logs-explorer-plugin": ["x-pack/plugins/observability_solution/logs_explorer"],
       "@kbn/logs-explorer-plugin/*": ["x-pack/plugins/observability_solution/logs_explorer/*"],
       "@kbn/logs-shared-plugin": ["x-pack/plugins/observability_solution/logs_shared"],

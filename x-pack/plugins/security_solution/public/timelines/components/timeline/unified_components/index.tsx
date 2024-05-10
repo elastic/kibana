@@ -158,14 +158,17 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
       dataViews,
       dataViewFieldEditor,
       application: { capabilities },
-      data: dataPluginContract,
       uiActions,
       charts,
       docLinks,
       analytics,
-      timelineFilterManager,
+      timelineDataService,
     },
   } = useKibana();
+  const {
+    query: { filterManager: timelineFilterManager },
+  } = timelineDataService;
+
   const [eventIdsAddingNotes, setEventIdsAddingNotes] = useState<Set<string>>(new Set());
   const onToggleShowNotes = useCallback(
     (eventId: string) => {
@@ -179,12 +182,13 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
     },
     [eventIdsAddingNotes]
   );
+
   const fieldListSidebarServices: UnifiedFieldListSidebarContainerProps['services'] = useMemo(
     () => ({
       fieldFormats,
       dataViews,
       dataViewFieldEditor,
-      data: dataPluginContract,
+      data: timelineDataService,
       uiActions,
       charts,
       core: {
@@ -197,7 +201,7 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
       fieldFormats,
       dataViews,
       dataViewFieldEditor,
-      dataPluginContract,
+      timelineDataService,
       uiActions,
       charts,
       uiSettings,
