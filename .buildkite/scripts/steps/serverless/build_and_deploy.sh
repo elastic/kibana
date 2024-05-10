@@ -154,7 +154,7 @@ $BUILDKITE_PULL_REQUEST
 
 ### Further details
 
-Caused by @$GITHUB_PR_TRIGGER_USER using the github label in https://github.com/elastic/kibana/pull/$BUILDKITE_PULL_REQUEST
+Caused by the GitHub label 'ci:project-deploy-observability' in https://github.com/elastic/kibana/pull/$BUILDKITE_PULL_REQUEST
 EOF
 
   GH_TOKEN="$GITHUB_TOKEN" \
