@@ -33,6 +33,7 @@ import {
   GetIncidentResponseSchema,
 } from './schema';
 import { formatUpdateRequest } from './utils';
+import { getBasicAuthHeader } from '../lib/get_basic_auth_header';
 
 const VIEW_INCIDENT_URL = `#incidents`;
 
@@ -96,12 +97,10 @@ export class ResilientConnector extends CaseConnector<
   }
 
   private getAuthHeaders() {
-    const token = Buffer.from(
-      this.secrets.apiKeyId + ':' + this.secrets.apiKeySecret,
-      'utf8'
-    ).toString('base64');
-
-    return { Authorization: `Basic ${token}` };
+    return getBasicAuthHeader({
+      username: this.secrets.apiKeyId,
+      password: this.secrets.apiKeySecret,
+    });
   }
 
   private getOrgUrl() {
