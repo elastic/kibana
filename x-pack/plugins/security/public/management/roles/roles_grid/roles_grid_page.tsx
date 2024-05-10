@@ -254,6 +254,21 @@ export class RolesGridPage extends Component<Props, State> {
           );
         },
       },
+      {
+        field: 'description',
+        name: i18n.translate('xpack.security.management.roles.descriptionColumnName', {
+          defaultMessage: 'Role Description',
+        }),
+        sortable: true,
+        truncateText: { lines: 2 },
+        render: (description: string) => {
+          return (
+            <EuiText color="subdued" size="s">
+              {description}
+            </EuiText>
+          );
+        },
+      },
     ];
     if (this.props.buildFlavor !== 'serverless') {
       config.push({

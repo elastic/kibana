@@ -211,6 +211,7 @@ function useRole(
       ? rolesAPIClient.getRole(roleName)
       : Promise.resolve({
           name: '',
+          description: '',
           elasticsearch: { cluster: [], indices: [], run_as: [], remote_cluster: [] },
           kibana: [],
           _unrecognized_applications: [],
@@ -455,43 +456,72 @@ export const EditRolePage: FunctionComponent<Props> = ({
   const getRoleName = () => {
     return (
       <EuiPanel hasShadow={false} hasBorder={true}>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiFormRow
+              data-test-subj={'roleNameFormRow'}
+              label={
+                <FormattedMessage
+                  id="xpack.security.management.editRole.roleNameFormRowTitle"
+                  defaultMessage="Role name"
+                />
+              }
+              helpText={
+                !isEditingExistingRole ? (
+                  <FormattedMessage
+                    id="xpack.security.management.createRole.roleNameFormRowHelpText"
+                    defaultMessage="Once the role is created you can no longer edit its name."
+                  />
+                ) : !isRoleReserved ? (
+                  <FormattedMessage
+                    id="xpack.security.management.editRole.roleNameFormRowHelpText"
+                    defaultMessage="A role's name cannot be changed once it has been created."
+                  />
+                ) : undefined
+              }
+              {...validator.validateRoleName(role)}
+              {...(creatingRoleAlreadyExists
+                ? { error: 'A role with this name already exists.', isInvalid: true }
+                : {})}
+            >
+              <EuiFieldText
+                name={'name'}
+                value={role.name || ''}
+                onChange={onNameChange}
+                onBlur={onNameBlur}
+                data-test-subj={'roleFormNameInput'}
+                disabled={isRoleReserved || isEditingExistingRole || isRoleReadOnly}
+                isInvalid={creatingRoleAlreadyExists}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+          {getRoleDescription()}
+        </EuiFlexGroup>
+      </EuiPanel>
+    );
+  };
+
+  const getRoleDescription = () => {
+    return (
+      <EuiFlexItem>
         <EuiFormRow
-          data-test-subj={'roleNameFormRow'}
+          data-test-subj="roleDescriptionFormRow"
           label={
             <FormattedMessage
-              id="xpack.security.management.editRole.roleNameFormRowTitle"
-              defaultMessage="Role name"
+              id="xpack.security.management.editRole.roleDescriptionFormRowTitle"
+              defaultMessage="Role description"
             />
           }
-          helpText={
-            !isEditingExistingRole ? (
-              <FormattedMessage
-                id="xpack.security.management.createRole.roleNameFormRowHelpText"
-                defaultMessage="Once the role is created you can no longer edit its name."
-              />
-            ) : !isRoleReserved ? (
-              <FormattedMessage
-                id="xpack.security.management.editRole.roleNameFormRowHelpText"
-                defaultMessage="A role's name cannot be changed once it has been created."
-              />
-            ) : undefined
-          }
-          {...validator.validateRoleName(role)}
-          {...(creatingRoleAlreadyExists
-            ? { error: 'A role with this name already exists.', isInvalid: true }
-            : {})}
         >
           <EuiFieldText
-            name={'name'}
-            value={role.name || ''}
-            onChange={onNameChange}
-            onBlur={onNameBlur}
-            data-test-subj={'roleFormNameInput'}
-            disabled={isRoleReserved || isEditingExistingRole || isRoleReadOnly}
-            isInvalid={creatingRoleAlreadyExists}
+            name="description"
+            value={role.description ?? ''}
+            onChange={onDescriptionChange}
+            data-test-subj="roleFormDescriptionInput"
+            disabled={isRoleReserved || isRoleReadOnly}
           />
         </EuiFormRow>
-      </EuiPanel>
+      </EuiFlexItem>
     );
   };
 
@@ -509,6 +539,12 @@ export const EditRolePage: FunctionComponent<Props> = ({
       });
     }
   };
+
+  const onDescriptionChange = (e: ChangeEvent<HTMLInputElement>) =>
+    setRole({
+      ...role,
+      description: e.target.value,
+    });
 
   const getElasticsearchPrivileges = () => {
     return (
