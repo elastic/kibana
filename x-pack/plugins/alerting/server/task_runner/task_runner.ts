@@ -65,7 +65,8 @@ import { lastRunToRaw } from '../lib/last_run_status';
 import { RuleRunningHandler } from './rule_running_handler';
 import { RuleResultService } from '../monitoring/rule_result_service';
 import { MaintenanceWindow } from '../application/maintenance_window/types';
-import { filterMaintenanceWindowsIds, getMaintenanceWindows } from './get_maintenance_windows';
+// import { filterMaintenanceWindowsIds, getMaintenanceWindows } from './get_maintenance_windows';
+import { filterMaintenanceWindowsIds } from './get_maintenance_windows';
 import { RuleTypeRunner } from './rule_type_runner';
 import { initializeAlertsClient } from '../alerts_client';
 import { processRunResults } from './lib';
@@ -520,14 +521,15 @@ export class TaskRunner<
       this.ruleMonitoring.setMonitoring(runRuleParams.rule.monitoring);
 
       // Load the maintenance windows
-      this.maintenanceWindows = await getMaintenanceWindows({
-        context: this.context,
-        fakeRequest: runRuleParams.fakeRequest,
-        logger: this.logger,
-        ruleTypeId: this.ruleType.id,
-        ruleId,
-        ruleTypeCategory: this.ruleType.category,
-      });
+      // TODO: Fetch only when there are alerts
+      // this.maintenanceWindows = await getMaintenanceWindows({
+      //   context: this.context,
+      //   fakeRequest: runRuleParams.fakeRequest,
+      //   logger: this.logger,
+      //   ruleTypeId: this.ruleType.id,
+      //   ruleId,
+      //   ruleTypeCategory: this.ruleType.category,
+      // });
 
       // Set the event log MW Id field the first time with MWs without scoped queries
       this.maintenanceWindowsWithoutScopedQueryIds = filterMaintenanceWindowsIds({
