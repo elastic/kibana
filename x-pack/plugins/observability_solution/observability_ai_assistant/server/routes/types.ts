@@ -40,6 +40,7 @@ export type ObservabilityAIAssistantRequestHandlerContext = Omit<
     };
     uiSettings: {
       client: IUiSettingsClient;
+      globalClient: IUiSettingsClient;
     };
     savedObjects: {
       client: SavedObjectsClientContract;

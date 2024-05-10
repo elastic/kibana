@@ -17,7 +17,7 @@ import { PresentationLabsService } from './services/labs/types';
 export interface PresentationUtilPluginSetup {}
 
 export interface PresentationUtilPluginStart {
-  ContextProvider: FC<PropsWithChildren>;
+  ContextProvider: FC<PropsWithChildren<unknown>>;
   labsService: PresentationLabsService;
   registerExpressionsLanguage: typeof registerExpressionsLanguage;
 }

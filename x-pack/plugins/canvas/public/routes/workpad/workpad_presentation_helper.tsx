@@ -21,7 +21,7 @@ const getWorkpadLabel = () =>
     defaultMessage: 'Workpad',
   });
 
-export const WorkpadPresentationHelper: FC<PropsWithChildren> = ({ children }) => {
+export const WorkpadPresentationHelper: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const platformService = usePlatformService();
   const workpad = useSelector(getWorkpad);
   useFullscreenPresentationHelper();

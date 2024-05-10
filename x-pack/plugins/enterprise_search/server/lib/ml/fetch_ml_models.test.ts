@@ -35,8 +35,8 @@ describe('fetchMlModels', () => {
     }));
   });
 
-  it('errors when there is no trained model provider', () => {
-    expect(() => fetchMlModels(undefined, mockLogger)).rejects.toThrowError(
+  it('errors when there is no trained model provider', async () => {
+    await expect(() => fetchMlModels(undefined, mockLogger)).rejects.toThrowError(
       'Machine Learning is not enabled'
     );
   });

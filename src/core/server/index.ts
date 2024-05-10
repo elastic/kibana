@@ -122,6 +122,12 @@ export type {
   SecurityServiceSetup,
   SecurityServiceStart,
   CoreAuthenticationService,
+  CoreAuditService,
+  AuditEvent,
+  AuditHttp,
+  AuditKibana,
+  AuditRequest,
+  AuditLogger,
 } from '@kbn/core-security-server';
 export type {
   User,

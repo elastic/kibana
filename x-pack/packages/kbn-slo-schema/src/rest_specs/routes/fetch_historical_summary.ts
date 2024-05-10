@@ -31,7 +31,13 @@ const fetchHistoricalSummaryParamsSchema = t.type({
           groupBy: allOrAnyStringOrArray,
           revision: t.number,
         }),
-        t.partial({ remoteName: t.string }),
+        t.partial({
+          remoteName: t.string,
+          range: t.type({
+            from: t.string,
+            to: t.string,
+          }),
+        }),
       ])
     ),
   }),

@@ -10,6 +10,6 @@ import React from 'react';
 
 export const TogglePanel = jest
   .fn()
-  .mockImplementation(({ children }: PropsWithChildren) => (
+  .mockImplementation(({ children }: PropsWithChildren<unknown>) => (
     <div data-test-subj="toggle-panel">{children}</div>
   ));

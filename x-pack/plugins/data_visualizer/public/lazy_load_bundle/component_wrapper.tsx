@@ -11,7 +11,7 @@ import { EuiErrorBoundary, EuiSkeletonText } from '@elastic/eui';
 import type { ResultLinks } from '../../common/app';
 import type { DataDriftDetectionAppStateProps } from '../application/data_drift/data_drift_app_state';
 
-const LazyWrapper: FC<PropsWithChildren> = ({ children }) => (
+const LazyWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <EuiErrorBoundary>
     <Suspense fallback={<EuiSkeletonText lines={3} />}>{children}</Suspense>
   </EuiErrorBoundary>

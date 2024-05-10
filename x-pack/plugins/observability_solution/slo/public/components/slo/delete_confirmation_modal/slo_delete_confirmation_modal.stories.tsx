@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
-import { ComponentStory } from '@storybook/react';
-
 import { KibanaReactStorybookDecorator } from '@kbn/observability-plugin/public';
-import {
-  SloDeleteConfirmationModal as Component,
-  SloDeleteConfirmationModalProps,
-} from './slo_delete_confirmation_modal';
+import { ComponentStory } from '@storybook/react';
+import React from 'react';
 import { buildSlo } from '../../../data/slo/slo';
+import { Props, SloDeleteModal as Component } from './slo_delete_confirmation_modal';
 
 export default {
   component: Component,
@@ -21,9 +17,7 @@ export default {
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: ComponentStory<typeof Component> = (props: SloDeleteConfirmationModalProps) => (
-  <Component {...props} />
-);
+const Template: ComponentStory<typeof Component> = (props: Props) => <Component {...props} />;
 
 const defaultProps = {
   slo: buildSlo(),

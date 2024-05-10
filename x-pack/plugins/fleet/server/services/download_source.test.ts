@@ -291,12 +291,12 @@ describe('Download Service', () => {
   });
 
   describe('requireUniqueName', () => {
-    it('throws an error if the name already exists', () => {
+    it('throws an error if the name already exists', async () => {
       const soClient = getMockedSoClient({
         defaultDownloadSourceId: 'download-source-test',
         sameName: true,
       });
-      expect(
+      await expect(
         async () => await downloadSourceService.requireUniqueName(soClient, { name: 'Test' })
       ).rejects.toThrow(`Download Source 'download-source-test' already exists with name 'Test'`);
     });

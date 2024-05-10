@@ -84,7 +84,7 @@ test('canEditEmbeddable returns false when edit url is available, in edit mode, 
 
 test('getEditHref returns the edit url', async () => {
   const embeddable = new EditableEmbeddable({ id: '123', viewMode: ViewMode.EDIT }, true);
-  expect(embeddable.getEditHref()).toBe(embeddable.getOutput().editUrl);
+  expect(await embeddable.getEditHref()).toBe(embeddable.getOutput().editUrl);
 });
 
 test('redirects to app using state transfer', async () => {

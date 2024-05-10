@@ -682,7 +682,7 @@
         "label": "showSaveModal",
         "description": [],
         "signature": [
-          "(saveModal: React.ReactElement<MinimalSaveModalProps, string | React.JSXElementConstructor<any>>, Wrapper: React.FC<{}> | undefined) => void"
+          "(saveModal: React.ReactElement<MinimalSaveModalProps, string | React.JSXElementConstructor<any>>, Wrapper: React.FC<{ children?: React.ReactNode; }> | undefined) => void"
         ],
         "path": "src/plugins/saved_objects/public/save_modal/show_saved_object_save_modal.tsx",
         "deprecated": false,
@@ -711,7 +711,7 @@
             "label": "Wrapper",
             "description": [],
             "signature": [
-              "React.FC<{}> | undefined"
+              "React.FC<{ children?: React.ReactNode; }> | undefined"
             ],
             "path": "src/plugins/saved_objects/public/save_modal/show_saved_object_save_modal.tsx",
             "deprecated": false,

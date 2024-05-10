@@ -67,7 +67,7 @@ afterEach(async () => {
 
 it('is disabled by default', async () => {
   const server = await startService();
-  supertest(server.listener).get('/api/oas').expect(404);
+  await supertest(server.listener).get('/api/oas').expect(404);
 });
 
 it('handles requests when enabled', async () => {

@@ -85,9 +85,9 @@
           "\nKibana-specific Provider that maps dependencies to services."
         ],
         "signature": [
-          "({ children, ...dependencies }: React.PropsWithChildren<",
+          "({ children, ...dependencies }: React.PropsWithChildren<React.PropsWithChildren<",
           "AnalyticsNoDataPageKibanaDependencies",
-          ">) => JSX.Element"
+          ">>) => JSX.Element"
         ],
         "path": "packages/shared-ux/page/analytics_no_data/impl/src/services.tsx",
         "deprecated": false,
@@ -98,12 +98,12 @@
             "id": "def-public.AnalyticsNoDataPageKibanaProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  children,\n  ...dependencies\n}",
+            "label": "{ children, ...dependencies }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
+              "React.PropsWithChildren<React.PropsWithChildren<",
               "AnalyticsNoDataPageKibanaDependencies",
-              ">"
+              ">>"
             ],
             "path": "packages/shared-ux/page/analytics_no_data/impl/src/services.tsx",
             "deprecated": false,
@@ -124,9 +124,9 @@
           "\nA Context Provider that provides services to the component and its dependencies."
         ],
         "signature": [
-          "({ children, ...services }: React.PropsWithChildren<",
+          "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
           "AnalyticsNoDataPageServices",
-          ">) => JSX.Element"
+          ">>) => JSX.Element"
         ],
         "path": "packages/shared-ux/page/analytics_no_data/impl/src/services.tsx",
         "deprecated": false,
@@ -140,9 +140,9 @@
             "label": "{\n  children,\n  ...services\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
+              "React.PropsWithChildren<React.PropsWithChildren<",
               "AnalyticsNoDataPageServices",
-              ">"
+              ">>"
             ],
             "path": "packages/shared-ux/page/analytics_no_data/impl/src/services.tsx",
             "deprecated": false,

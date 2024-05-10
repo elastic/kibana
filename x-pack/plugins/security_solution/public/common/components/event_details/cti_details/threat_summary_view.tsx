@@ -28,7 +28,7 @@ const UppercaseEuiTitle = styled(EuiTitle)`
   text-transform: uppercase;
 `;
 
-const ThreatSummaryPanelTitle: FC<PropsWithChildren> = ({ children }) => (
+const ThreatSummaryPanelTitle: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <UppercaseEuiTitle size="xxxs">
     <h5>{children}</h5>
   </UppercaseEuiTitle>

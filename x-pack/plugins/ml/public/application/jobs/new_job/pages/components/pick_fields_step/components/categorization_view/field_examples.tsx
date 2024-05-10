@@ -73,6 +73,6 @@ export const FieldExamples: FC<Props> = ({ fieldExamples }) => {
   );
 };
 
-const Token: FC<PropsWithChildren> = ({ children }) => (
+const Token: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <span style={{ backgroundColor: TOKEN_HIGHLIGHT_COLOR }}>{children}</span>
 );

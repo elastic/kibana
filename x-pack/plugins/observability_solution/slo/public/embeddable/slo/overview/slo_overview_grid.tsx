@@ -153,7 +153,7 @@ export function SloCardChartList({ sloId }: { sloId: string }) {
 
   return (
     <>
-      <div style={{ width: '100%' }}>
+      <div data-shared-item="" style={{ width: '100%' }}>
         <Chart>
           <Settings
             baseTheme={DARK_THEME}

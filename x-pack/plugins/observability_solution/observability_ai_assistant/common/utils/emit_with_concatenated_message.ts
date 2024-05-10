@@ -5,9 +5,20 @@
  * 2.0.
  */
 
-import { concat, from, last, mergeMap, Observable, shareReplay, withLatestFrom } from 'rxjs';
+import {
+  concat,
+  from,
+  last,
+  mergeMap,
+  Observable,
+  OperatorFunction,
+  shareReplay,
+  withLatestFrom,
+} from 'rxjs';
+import { withoutTokenCountEvents } from './without_token_count_events';
 import {
   ChatCompletionChunkEvent,
+  ChatEvent,
   MessageAddEvent,
   StreamingChatResponseEventType,
 } from '../conversation_complete';
@@ -40,20 +51,21 @@ function mergeWithEditedMessage(
   );
 }
 
-export function emitWithConcatenatedMessage(
+export function emitWithConcatenatedMessage<T extends ChatEvent>(
   callback?: ConcatenateMessageCallback
-): (
-  source$: Observable<ChatCompletionChunkEvent>
-) => Observable<ChatCompletionChunkEvent | MessageAddEvent> {
-  return (source$: Observable<ChatCompletionChunkEvent>) => {
+): OperatorFunction<T, T | MessageAddEvent> {
+  return (source$) => {
     const shared = source$.pipe(shareReplay());
+
+    const withoutTokenCount$ = shared.pipe(withoutTokenCountEvents());
 
     const response$ = concat(
       shared,
       shared.pipe(
+        withoutTokenCountEvents(),
         concatenateChatCompletionChunks(),
         last(),
-        withLatestFrom(source$),
+        withLatestFrom(withoutTokenCount$),
         mergeMap(([message, chunkEvent]) => {
           return mergeWithEditedMessage(message, chunkEvent, callback);
         })

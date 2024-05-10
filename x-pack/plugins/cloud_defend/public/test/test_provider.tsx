@@ -21,20 +21,6 @@ import '@kbn/code-editor-mock/jest_helper';
 // @ts-ignore-next
 window.Worker = Worker;
 
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: jest.fn().mockImplementation((query) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: jest.fn(), // Deprecated
-    removeListener: jest.fn(), // Deprecated
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    dispatchEvent: jest.fn(),
-  })),
-});
-
 interface CloudDefendAppDeps {
   core: CoreStart;
   deps: CloudDefendPluginStartDeps;

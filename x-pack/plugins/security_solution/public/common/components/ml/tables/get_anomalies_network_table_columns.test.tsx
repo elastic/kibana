@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import '../../../mock/match_media';
 import { getAnomaliesNetworkTableColumnsCurated } from './get_anomalies_network_table_columns';
 import { NetworkType } from '../../../../explore/network/store/model';
 import * as i18n from './translations';

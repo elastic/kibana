@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
 
+import { MAX_DATA_RETENTION } from '../../../../../../common/constants';
 import { useAppContext } from '../../../../app_context';
 import { DataStream } from '../../../../../../common/types';
 import { getLifecycleValue } from '../../../../lib/data_streams';
@@ -169,7 +170,33 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
         condition={dataStream.isDataStreamFullyManagedByILM}
         wrap={(children) => <EuiTextColor color="subdued">{children}</EuiTextColor>}
       >
-        <>{getLifecycleValue(lifecycle, INFINITE_AS_ICON)}</>
+        <>
+          {getLifecycleValue(lifecycle, INFINITE_AS_ICON)}
+
+          {lifecycle?.retention_determined_by === MAX_DATA_RETENTION && (
+            <>
+              {' '}
+              <EuiToolTip
+                content={i18n.translate(
+                  'xpack.idxMgmt.dataStreamList.table.usingEffectiveRetentionTooltip',
+                  {
+                    defaultMessage: `This data stream is using the maximum allowed data retention: [{effectiveRetention}].`,
+                    values: {
+                      effectiveRetention: lifecycle?.effective_retention,
+                    },
+                  }
+                )}
+              >
+                <EuiIcon
+                  size="s"
+                  color="subdued"
+                  type="iInCircle"
+                  data-test-subj="usingMaxRetention"
+                />
+              </EuiToolTip>
+            </>
+          )}
+        </>
       </ConditionalWrap>
     ),
   });

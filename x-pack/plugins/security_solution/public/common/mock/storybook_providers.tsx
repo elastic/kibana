@@ -94,7 +94,7 @@ const KibanaReactContext = createKibanaReactContext(coreMock);
  * It is a simplified version of TestProvidersComponent.
  * To reuse TestProvidersComponent here, we need to remove all references to jest from mocks.
  */
-export const StorybookProviders: FC<PropsWithChildren> = ({ children }) => {
+export const StorybookProviders: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const store = createMockStore();
 
   return (

@@ -14,6 +14,7 @@ export {
   DASHBOARD_APP_ID,
   LEGACY_DASHBOARD_APP_ID,
   DASHBOARD_GRID_COLUMN_COUNT,
+  PanelPlacementStrategy,
 } from './dashboard_constants';
 export {
   type DashboardAPI,
@@ -22,6 +23,7 @@ export {
   DASHBOARD_CONTAINER_TYPE,
   type DashboardCreationOptions,
   type DashboardLocatorParams,
+  type IProvidesLegacyPanelPlacementSettings,
 } from './dashboard_container';
 export type { DashboardSetup, DashboardStart, DashboardFeatureFlagConfig } from './plugin';
 

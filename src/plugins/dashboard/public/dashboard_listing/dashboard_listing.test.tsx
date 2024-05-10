@@ -27,9 +27,11 @@ jest.mock('@kbn/content-management-table-list-view-table', () => {
   return {
     __esModule: true,
     ...originalModule,
-    TableListViewKibanaProvider: jest.fn().mockImplementation(({ children }: PropsWithChildren) => {
-      return <>{children}</>;
-    }),
+    TableListViewKibanaProvider: jest
+      .fn()
+      .mockImplementation(({ children }: PropsWithChildren<unknown>) => {
+        return <>{children}</>;
+      }),
   };
 });
 jest.mock('@kbn/content-management-table-list-view', () => {

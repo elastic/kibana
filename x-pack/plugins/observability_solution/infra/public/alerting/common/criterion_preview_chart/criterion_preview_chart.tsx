@@ -70,7 +70,7 @@ export const getDomain = (series: Series, stacked: boolean = false) => {
   return { yMin: min || 0, yMax: max || 0, xMin: minTimestamp, xMax: maxTimestamp };
 };
 
-export const EmptyContainer: FC<PropsWithChildren> = ({ children }) => (
+export const EmptyContainer: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <div
     style={{
       width: '100%',
@@ -84,7 +84,7 @@ export const EmptyContainer: FC<PropsWithChildren> = ({ children }) => (
   </div>
 );
 
-export const ChartContainer: FC<PropsWithChildren> = ({ children }) => (
+export const ChartContainer: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <div
     style={{
       width: '100%',

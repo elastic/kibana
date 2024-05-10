@@ -27,7 +27,7 @@ const services: CloudChatServices = {
   },
 };
 
-export const getCloudContextProvider: () => FC<PropsWithChildren> =
+export const getCloudContextProvider: () => FC<PropsWithChildren<unknown>> =
   () =>
   ({ children }) =>
     <ServicesProvider {...services}>{children}</ServicesProvider>;

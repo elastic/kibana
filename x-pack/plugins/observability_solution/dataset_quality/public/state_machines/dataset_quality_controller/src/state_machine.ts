@@ -8,13 +8,13 @@
 import { IToasts } from '@kbn/core/public';
 import { getDateISORange } from '@kbn/timerange';
 import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from 'xstate';
+import { DataStreamStat } from '../../../../common/api_types';
 import { Integration } from '../../../../common/data_streams_stats/integration';
 import { IDataStreamDetailsClient } from '../../../services/data_stream_details';
 import {
   DashboardType,
   DataStreamSettings,
   DataStreamDetails,
-  DataStreamStat,
   GetDataStreamsStatsQuery,
   GetIntegrationsParams,
 } from '../../../../common/data_streams_stats';

@@ -71,7 +71,7 @@ export class CustomIntegrationsPlugin
       })),
     };
 
-    const ContextProvider: FC<PropsWithChildren> = ({ children }) => (
+    const ContextProvider: FC<PropsWithChildren<unknown>> = ({ children }) => (
       <CustomIntegrationsServicesProvider {...services}>
         {children}
       </CustomIntegrationsServicesProvider>

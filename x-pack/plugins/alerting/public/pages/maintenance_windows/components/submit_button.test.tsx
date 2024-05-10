@@ -17,7 +17,7 @@ import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils'
 describe('SubmitButton', () => {
   const onSubmit = jest.fn();
 
-  const MockHookWrapperComponent: FC<PropsWithChildren> = ({ children }) => {
+  const MockHookWrapperComponent: FC<PropsWithChildren<unknown>> = ({ children }) => {
     const { form } = useForm<FormProps>({
       defaultValue: { title: 'title' },
       schema: {

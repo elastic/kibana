@@ -14,7 +14,7 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FLASH_MESSAGE_TYPES } from './constants';
 import { FlashMessagesLogic } from './flash_messages_logic';
 
-export const FlashMessages: FC<PropsWithChildren> = ({ children }) => {
+export const FlashMessages: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const { messages } = useValues(FlashMessagesLogic);
 
   return (

@@ -101,7 +101,7 @@ const tabPaddingClassName = css`
   padding: 0 ${euiThemeVars.euiSizeM} ${euiThemeVars.euiSizeXL} ${euiThemeVars.euiSizeM};
 `;
 
-export const TabContentPadding: FC<PropsWithChildren> = ({ children }) => (
+export const TabContentPadding: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <div className={tabPaddingClassName}>{children}</div>
 );
 

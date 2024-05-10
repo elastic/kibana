@@ -121,7 +121,7 @@ export function MachineLearningAlertingProvider(
       });
     },
 
-    async assertLookbackInterval(expectedValue: string) {
+    async assertLookbackInterval(expectedValue: string, expectError = false) {
       await this.ensureAdvancedSectionOpen();
       const actualValue = await testSubjects.getAttribute(
         'mlAnomalyAlertLookbackInterval',
@@ -131,27 +131,47 @@ export function MachineLearningAlertingProvider(
         expectedValue,
         `Expected lookback interval to equal ${expectedValue}, got ${actualValue}`
       );
+
+      if (expectError) {
+        const formRowEl = await testSubjects.find('mlAnomalyAlertAdvancedSettingsLookbackInterval');
+        // Assert error state
+        const labelEl = await formRowEl.findByClassName('euiFormRow__label');
+        expect(await labelEl.elementHasClass('euiFormLabel-isInvalid')).to.be(true);
+
+        // Assert error message
+        const errorEl = await formRowEl.findByClassName('euiFormErrorText');
+        const errorMessage = await errorEl.getVisibleText();
+        expect(errorMessage).to.eql(
+          `${expectedValue} is not a valid time interval format e.g. 30s, 10m, 1h, 7d. It also needs to be higher than zero.`
+        );
+      }
     },
 
-    async assertTopNBuckets(expectedNumberOfBuckets: number) {
+    async assertTopNBuckets(expectedNumberOfBuckets: number, expectError = false) {
       await this.ensureAdvancedSectionOpen();
       const actualValue = await testSubjects.getAttribute('mlAnomalyAlertTopNBuckets', 'value');
       expect(actualValue).to.eql(
         expectedNumberOfBuckets,
         `Expected number of buckets to equal ${expectedNumberOfBuckets}, got ${actualValue}`
       );
+      if (expectError) {
+        const formRowEl = await testSubjects.find('mlAnomalyAlertTopNBucketsFormRow');
+        // Assert error state
+        const labelEl = await formRowEl.findByClassName('euiFormRow__label');
+        expect(await labelEl.elementHasClass('euiFormLabel-isInvalid')).to.be(true);
+      }
     },
 
-    async setLookbackInterval(interval: string) {
+    async setLookbackInterval(interval: string, isInvalid = false) {
       await this.ensureAdvancedSectionOpen();
       await testSubjects.setValue('mlAnomalyAlertLookbackInterval', interval);
-      await this.assertLookbackInterval(interval);
+      await this.assertLookbackInterval(interval, isInvalid);
     },
 
-    async setTopNBuckets(numberOfBuckets: number) {
+    async setTopNBuckets(numberOfBuckets: number, isInvalid = false) {
       await this.ensureAdvancedSectionOpen();
       await testSubjects.setValue('mlAnomalyAlertTopNBuckets', numberOfBuckets.toString());
-      await this.assertTopNBuckets(numberOfBuckets);
+      await this.assertTopNBuckets(numberOfBuckets, isInvalid);
     },
 
     async isAdvancedSectionOpened() {

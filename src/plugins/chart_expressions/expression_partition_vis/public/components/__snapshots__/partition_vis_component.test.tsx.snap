@@ -637,6 +637,13 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
                 "spacingBuffer": 10,
                 "verticalWidth": 200,
               },
+              "lineAnnotation": Object {
+                "line": Object {
+                  "opacity": 1,
+                  "stroke": "#69707D",
+                  "strokeWidth": 1,
+                },
+              },
               "lineSeriesStyle": Object {
                 "fit": Object {
                   "line": Object {
@@ -734,6 +741,12 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
                 "radialPadding": 0.017453292519943295,
                 "sectorLineStroke": "#FFF",
                 "sectorLineWidth": 1.5,
+              },
+              "rectAnnotation": Object {
+                "fill": "#69707D",
+                "opacity": 0.25,
+                "stroke": "#69707D",
+                "strokeWidth": 0,
               },
               "scales": Object {
                 "barsPadding": 0.25,
@@ -1554,6 +1567,13 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
                 "spacingBuffer": 10,
                 "verticalWidth": 200,
               },
+              "lineAnnotation": Object {
+                "line": Object {
+                  "opacity": 1,
+                  "stroke": "#69707D",
+                  "strokeWidth": 1,
+                },
+              },
               "lineSeriesStyle": Object {
                 "fit": Object {
                   "line": Object {
@@ -1651,6 +1671,12 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
                 "radialPadding": 0.017453292519943295,
                 "sectorLineStroke": "#FFF",
                 "sectorLineWidth": 1.5,
+              },
+              "rectAnnotation": Object {
+                "fill": "#69707D",
+                "opacity": 0.25,
+                "stroke": "#69707D",
+                "strokeWidth": 0,
               },
               "scales": Object {
                 "barsPadding": 0.25,
@@ -2531,6 +2557,13 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                 "spacingBuffer": 10,
                 "verticalWidth": 200,
               },
+              "lineAnnotation": Object {
+                "line": Object {
+                  "opacity": 1,
+                  "stroke": "#69707D",
+                  "strokeWidth": 1,
+                },
+              },
               "lineSeriesStyle": Object {
                 "fit": Object {
                   "line": Object {
@@ -2628,6 +2661,12 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                 "radialPadding": 0.017453292519943295,
                 "sectorLineStroke": "#FFF",
                 "sectorLineWidth": 1.5,
+              },
+              "rectAnnotation": Object {
+                "fill": "#69707D",
+                "opacity": 0.25,
+                "stroke": "#69707D",
+                "strokeWidth": 0,
               },
               "scales": Object {
                 "barsPadding": 0.25,
@@ -3510,6 +3549,13 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
                 "spacingBuffer": 10,
                 "verticalWidth": 200,
               },
+              "lineAnnotation": Object {
+                "line": Object {
+                  "opacity": 1,
+                  "stroke": "#69707D",
+                  "strokeWidth": 1,
+                },
+              },
               "lineSeriesStyle": Object {
                 "fit": Object {
                   "line": Object {
@@ -3607,6 +3653,12 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
                 "radialPadding": 0.017453292519943295,
                 "sectorLineStroke": "#FFF",
                 "sectorLineWidth": 1.5,
+              },
+              "rectAnnotation": Object {
+                "fill": "#69707D",
+                "opacity": 0.25,
+                "stroke": "#69707D",
+                "strokeWidth": 0,
               },
               "scales": Object {
                 "barsPadding": 0.25,
@@ -4427,6 +4479,13 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
                 "spacingBuffer": 10,
                 "verticalWidth": 200,
               },
+              "lineAnnotation": Object {
+                "line": Object {
+                  "opacity": 1,
+                  "stroke": "#69707D",
+                  "strokeWidth": 1,
+                },
+              },
               "lineSeriesStyle": Object {
                 "fit": Object {
                   "line": Object {
@@ -4524,6 +4583,12 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
                 "radialPadding": 0.017453292519943295,
                 "sectorLineStroke": "#FFF",
                 "sectorLineWidth": 1.5,
+              },
+              "rectAnnotation": Object {
+                "fill": "#69707D",
+                "opacity": 0.25,
+                "stroke": "#69707D",
+                "strokeWidth": 0,
               },
               "scales": Object {
                 "barsPadding": 0.25,
@@ -5299,6 +5364,13 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                 "spacingBuffer": 10,
                 "verticalWidth": 200,
               },
+              "lineAnnotation": Object {
+                "line": Object {
+                  "opacity": 1,
+                  "stroke": "#69707D",
+                  "strokeWidth": 1,
+                },
+              },
               "lineSeriesStyle": Object {
                 "fit": Object {
                   "line": Object {
@@ -5396,6 +5468,12 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                 "radialPadding": 0.017453292519943295,
                 "sectorLineStroke": "#FFF",
                 "sectorLineWidth": 1.5,
+              },
+              "rectAnnotation": Object {
+                "fill": "#69707D",
+                "opacity": 0.25,
+                "stroke": "#69707D",
+                "strokeWidth": 0,
               },
               "scales": Object {
                 "barsPadding": 0.25,

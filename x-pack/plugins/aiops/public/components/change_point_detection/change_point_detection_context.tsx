@@ -99,7 +99,7 @@ export const useChangePointDetectionControlsContext = () => {
   return useContext(ChangePointDetectionControlsContext);
 };
 
-export const ChangePointDetectionControlsContextProvider: FC<PropsWithChildren> = ({
+export const ChangePointDetectionControlsContextProvider: FC<PropsWithChildren<unknown>> = ({
   children,
 }) => {
   const { dataView } = useDataSource();
@@ -129,7 +129,9 @@ export const ChangePointDetectionControlsContextProvider: FC<PropsWithChildren> 
   );
 };
 
-export const ChangePointDetectionContextProvider: FC<PropsWithChildren> = ({ children }) => {
+export const ChangePointDetectionContextProvider: FC<PropsWithChildren<unknown>> = ({
+  children,
+}) => {
   const { dataView, savedSearch } = useDataSource();
   const {
     uiSettings,

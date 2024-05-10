@@ -22,7 +22,7 @@ import { cloneDeep } from 'lodash';
 import { PartitionChartsMeta } from './partition_charts_meta';
 import { CollapseFunction } from '../../../common/expressions';
 import { PaletteOutput } from '@kbn/coloring';
-import { LegendStats } from '@kbn/visualizations-plugin/common/constants';
+import { PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import { PersistedPieVisualizationState } from './persistence';
 
 jest.mock('../../id_generator');
@@ -169,11 +169,11 @@ describe('pie_visualization', () => {
     describe('converting to legendStats', () => {
       it('loads a chart with `legendStats` property', () => {
         const persistedState = getExampleState();
-        persistedState.layers[0].legendStats = ['values' as LegendStats.values];
+        persistedState.layers[0].legendStats = [PartitionLegendValue.Value];
 
         const runtimeState = pieVisualization.initialize(() => 'first', persistedState);
 
-        expect(runtimeState.layers[0].legendStats).toEqual(['values']);
+        expect(runtimeState.layers[0].legendStats).toEqual(['value']);
         expect('showValuesInLegend' in runtimeState.layers[0]).toEqual(false);
       });
       it('loads a xy chart with `showValuesInLegend` property equal to false and converts to legendStats: []', () => {
@@ -192,7 +192,7 @@ describe('pie_visualization', () => {
 
         const runtimeState = pieVisualization.initialize(() => 'first', persistedState);
 
-        expect(runtimeState.layers[0].legendStats).toEqual(['values']);
+        expect(runtimeState.layers[0].legendStats).toEqual(['value']);
         expect('showValuesInLegend' in runtimeState.layers[0]).toEqual(false);
       });
 
@@ -201,35 +201,6 @@ describe('pie_visualization', () => {
 
         expect(runtimeState.layers[0].legendStats).toEqual(undefined);
         expect('showValuesInLegend' in runtimeState.layers[0]).toEqual(false);
-      });
-    });
-  });
-
-  describe('#getPersistableState', () => {
-    describe('converting to legend stats', () => {
-      it('converts `legendStats` to `valuesInLegend`', () => {
-        const runtimeState = getExampleState();
-        // no legend stats at all
-        const { state } = pieVisualization.getPersistableState!(runtimeState);
-        expect('legendStats' in state.layers[0]).toBeFalsy();
-        expect(state.layers[0].showValuesInLegend).toEqual(undefined);
-
-        // legend stats === ['values']
-        runtimeState.layers[0].legendStats = ['values' as LegendStats.values];
-        const { state: stateWithShowValuesInLegendTrue } =
-          pieVisualization.getPersistableState!(runtimeState);
-
-        expect('legendStats' in stateWithShowValuesInLegendTrue.layers[0]).toBeFalsy();
-        expect(stateWithShowValuesInLegendTrue.layers[0].showValuesInLegend).toEqual(true);
-
-        // legend stats === ['values']
-        runtimeState.layers[0].legendStats = [];
-
-        const { state: stateWithShowValuesInLegendFalse } =
-          pieVisualization.getPersistableState!(runtimeState);
-
-        expect('legendStats' in stateWithShowValuesInLegendFalse.layers[0]).toBeFalsy();
-        expect(stateWithShowValuesInLegendFalse.layers[0].showValuesInLegend).toEqual(false);
       });
     });
   });

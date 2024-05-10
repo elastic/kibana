@@ -22,7 +22,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const es = getService('es');
   const logger = getService('log');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const start = moment().subtract(2, 'days');
   const end = moment();
@@ -128,7 +128,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             ];
           });
 
-        await synthtraceEsClient.index(events);
+        await apmSynthtraceEsClient.index(events);
       });
 
       afterEach(async () => {
@@ -136,7 +136,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       async function cleanup() {
-        await synthtraceEsClient.clean();
+        await apmSynthtraceEsClient.clean();
         await ml.cleanMlIndices();
       }
 

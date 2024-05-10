@@ -815,7 +815,7 @@ export const LensTopNavMenu = ({
       if (newQuery) {
         if (!isEqual(newQuery, query)) {
           dispatchSetState({ query: newQuery });
-          // check if query is text-based (sql, essql etc) and switchAndCleanDatasource
+          // check if query is text-based (esql etc) and switchAndCleanDatasource
           if (isOfAggregateQueryType(newQuery) && !isOnTextBasedMode) {
             setIsOnTextBasedMode(true);
             dispatch(

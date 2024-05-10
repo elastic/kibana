@@ -175,7 +175,7 @@ export const FormattedTokens: FC<Props> = ({ category }) => {
   );
 };
 
-const WrapInText: FC<PropsWithChildren> = ({ children }) => (
+const WrapInText: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <EuiText css={{ fontWeight: 'bold' }} size="s">
     {children}
   </EuiText>

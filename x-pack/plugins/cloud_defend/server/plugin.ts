@@ -55,23 +55,26 @@ export class CloudDefendPlugin implements Plugin<CloudDefendPluginSetup, CloudDe
   public start(core: CoreStart, plugins: CloudDefendPluginStartDeps): CloudDefendPluginStart {
     this.logger.debug('cloudDefend: Started');
 
-    plugins.fleet.fleetSetupCompleted().then(async () => {
-      plugins.fleet.registerExternalCallback(
-        'packagePolicyCreate',
-        async (packagePolicy: NewPackagePolicy): Promise<NewPackagePolicy> => {
-          const license = await plugins.licensing.refresh();
-          if (isCloudDefendPackage(packagePolicy.package?.name)) {
-            if (!isSubscriptionAllowed(this.isCloudEnabled, license)) {
-              throw new Error(
-                'To use this feature you must upgrade your subscription or start a trial'
-              );
+    plugins.fleet
+      .fleetSetupCompleted()
+      .then(async () => {
+        plugins.fleet.registerExternalCallback(
+          'packagePolicyCreate',
+          async (packagePolicy: NewPackagePolicy): Promise<NewPackagePolicy> => {
+            const license = await plugins.licensing.refresh();
+            if (isCloudDefendPackage(packagePolicy.package?.name)) {
+              if (!isSubscriptionAllowed(this.isCloudEnabled, license)) {
+                throw new Error(
+                  'To use this feature you must upgrade your subscription or start a trial'
+                );
+              }
             }
-          }
 
-          return packagePolicy;
-        }
-      );
-    });
+            return packagePolicy;
+          }
+        );
+      })
+      .catch(() => {}); // it shouldn't reject, but just in case
 
     plugins.fleet.registerExternalCallback(
       'packagePolicyPostCreate',

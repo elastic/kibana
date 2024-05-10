@@ -160,6 +160,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           connectorId,
           functions: [],
         })
+        .expect(200)
         .pipe(passThrough);
 
       let data: string = '';
@@ -188,9 +189,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       await new Promise<void>((resolve) => passThrough.on('end', () => resolve()));
 
-      const response = JSON.parse(data);
+      const response = JSON.parse(data.trim());
 
-      expect(response.message).to.be(
+      expect(response.error.message).to.be(
         `Token limit reached. Token limit is 8192, but the current conversation has 11036 tokens.`
       );
     });

@@ -7,7 +7,7 @@
 import React, { FC, PropsWithChildren } from 'react';
 import { EuiHorizontalRule, EuiPanel, EuiText } from '@elastic/eui';
 
-export const TitlePanel: FC<PropsWithChildren> = ({ children }) => (
+export const TitlePanel: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <>
     <EuiPanel hasShadow={false} paddingSize="s">
       <EuiText size="s" color="subdued">

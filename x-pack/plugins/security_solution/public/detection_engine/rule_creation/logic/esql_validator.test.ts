@@ -17,6 +17,19 @@ describe('computeHasMetadataOperator', () => {
     expect(computeHasMetadataOperator('from test* | eval x="[metadata _id]"')).toBe(false);
   });
   it('should be true if query has operator', () => {
+    expect(computeHasMetadataOperator('from test* metadata _id')).toBe(true);
+    expect(computeHasMetadataOperator('from test* metadata _id, _index')).toBe(true);
+    expect(computeHasMetadataOperator('from test* metadata _index, _id')).toBe(true);
+    expect(computeHasMetadataOperator('from test*  metadata _id ')).toBe(true);
+    expect(computeHasMetadataOperator('from test*  metadata _id | limit 10')).toBe(true);
+    expect(
+      computeHasMetadataOperator(`from packetbeat* metadata 
+
+        _id
+        | limit 100`)
+    ).toBe(true);
+
+    // still validates deprecated square bracket syntax
     expect(computeHasMetadataOperator('from test* [metadata _id]')).toBe(true);
     expect(computeHasMetadataOperator('from test* [metadata _id, _index]')).toBe(true);
     expect(computeHasMetadataOperator('from test* [metadata _index, _id]')).toBe(true);
