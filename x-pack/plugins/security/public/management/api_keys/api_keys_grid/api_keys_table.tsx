@@ -321,8 +321,8 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
             }}
           >
             <FormattedMessage
-              id="xpack.security.accountManagement.apiKeys.retryButton"
-              defaultMessage="Try again"
+              id="xpack.security.accountManagement.apiKeys.resetQueryButton"
+              defaultMessage="Reset query"
             />
           </EuiButton>
         </ApiKeysEmptyPrompt>

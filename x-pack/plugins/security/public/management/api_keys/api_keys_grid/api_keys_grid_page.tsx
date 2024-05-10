@@ -63,7 +63,42 @@ const parseSearchBarQuery = (query: Query): QueryContainer => {
     parsedQuery = EuiSearchBar.Query.parse(`${subQuery} expiration<=${moment.now()}`);
   } else if (query.text.includes('expired:false')) {
     const subQuery = query.text.replace('expired:false', '');
-    parsedQuery = EuiSearchBar.Query.parse(`${subQuery} expiration>${moment.now()}`);
+    parsedQuery = EuiSearchBar.Query.parse(subQuery).addSimpleFieldValue('invalidated', false);
+
+    const qdsl = {
+      bool: {
+        must: [
+          {
+            term: {
+              invalidated: false,
+            },
+          },
+          {
+            bool: {
+              should: [
+                {
+                  range: {
+                    expiration: 'now',
+                  },
+                },
+                {
+                  bool: {
+                    must_not: {
+                      exists: {
+                        field: 'expiration',
+                      },
+                    },
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ],
+      },
+    };
+
+    return qdsl as QueryContainer;
   }
 
   parsedQuery = parsedQuery.addSimpleFieldValue('invalidated', false);
@@ -151,7 +186,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
 
     return (
       <ApiKeysEmptyPrompt error={state.error}>
-        <EuiButton iconType="refresh" onClick={() => resetQueryOnError()}>
+        <EuiButton iconType="refresh" onClick={() => queryApiKeysAndAggregations(tableState)}>
           <FormattedMessage
             id="xpack.security.accountManagement.apiKeys.retryButton"
             defaultMessage="Try again"

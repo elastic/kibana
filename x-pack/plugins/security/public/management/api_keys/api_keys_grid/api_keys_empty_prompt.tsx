@@ -76,17 +76,22 @@ export const ApiKeysEmptyPrompt: FC<PropsWithChildren<ApiKeysEmptyPromptProps>> 
       throw error;
     };
 
+    const promptHeading = doesErrorIndicateBadQuery(error) ? (
+      <FormattedMessage
+        id="xpack.security.management.apiKeysEmptyPrompt.badQueryErrorMessage"
+        defaultMessage="Could not load API keys as the query is incorrect."
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.security.management.apiKeysEmptyPrompt.errorMessage"
+        defaultMessage="Could not load API keys."
+      />
+    );
+
     return (
       <KibanaPageTemplate.EmptyPrompt
         iconType="warning"
-        body={
-          <p>
-            <FormattedMessage
-              id="xpack.security.management.apiKeysEmptyPrompt.errorMessage"
-              defaultMessage="Could not load API keys."
-            />
-          </p>
-        }
+        body={<p>{promptHeading}</p>}
         actions={
           <>
             {children}
@@ -181,8 +186,8 @@ function doesErrorIndicateUserHasNoPermissionsToManageAPIKeys(error: Record<stri
 export function doesErrorIndicateBadQuery(error: Record<string, any>) {
   const message = error.body?.message || '';
   const errorString = error.body?.error || '';
+
   return (
-    errorString.indexOf('Bad Request') !== '-1' ||
-    message.indexOf('illegal_argument_exception') !== -1
+    errorString.indexOf('Bad Request') > '-1' || message.indexOf('illegal_argument_exception') > -1
   );
 }
