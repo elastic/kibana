@@ -22,8 +22,9 @@ async function main() {
     process.env.BUILDKITE_PIPELINE_SLUG!,
     process.env.BUILDKITE_BUILD_NUMBER!
   );
+  const buildLink = `[${buildkiteBuild.pipeline.slug}#${buildkiteBuild.number}](${buildkiteBuild.web_url})`;
 
-  // Calculate success
+  // Calculate success metrics
   const jobs = buildkiteBuild.jobs;
   const testSuiteRuns = jobs.filter((step) => {
     return step.step_key?.includes('ftr-suite') || step.step_key?.includes('cypress-suite');
@@ -41,7 +42,7 @@ async function main() {
     };
   });
 
-  // Comment it on the PR
+  // Comment results on the PR
   const prNumber = Number(
     buildkiteBuild.pull_request?.id || extractPRNumberFromBranch(process.env.BUILDKITE_BRANCH)
   );
@@ -49,20 +50,21 @@ async function main() {
     throw new Error(`Couldn't find PR number for build ${buildkiteBuild.web_url}.`);
   }
 
-  const buildLink = `[${buildkiteBuild.pipeline.slug}#${buildkiteBuild.number}](${buildkiteBuild.web_url})`;
   const prComment = `
 ## Flaky Test Runner Stats
-${success ? '🎉 All tests passed!' : '🟠 Some tests failed.'} - ${buildLink}
+### ${success ? '🎉 All tests passed!' : '🟠 Some tests failed.'} - ${buildLink}
 ${testGroupResults.map(formatTestGroupResult).join('\n')}
 `;
 
   const githubClient = getGithubClient();
-  await githubClient.issues.createComment({
+  const commentResult = await githubClient.issues.createComment({
     owner: 'elastic',
     repo: 'kibana',
     body: prComment,
-    issue_number: Number(prNumber),
+    issue_number: prNumber,
   });
+
+  console.log(`Comment added: ${commentResult.data.html_url}`);
 }
 
 function formatTestGroupResult(result: TestSuiteResult) {
@@ -99,7 +101,7 @@ function extractPRNumberFromBranch(branch: string | undefined) {
 
 main()
   .then(() => {
-    console.log('PR commented with flaky test runner stats!');
+    console.log('Flaky runner stats comment added to PR!');
   })
   .catch((e) => {
     console.error(e);
