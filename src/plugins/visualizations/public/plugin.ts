@@ -453,7 +453,6 @@ export class VisualizationsPlugin
       expressions,
       uiActions,
       embeddable,
-      savedObjects,
       spaces,
       savedObjectsTaggingOss,
       fieldFormats,
@@ -464,7 +463,6 @@ export class VisualizationsPlugin
     }: VisualizationsStartDeps
   ): VisualizationsStart {
     const types = this.types.start();
-
     setTypes(types);
     setI18n(core.i18n);
     setEmbeddable(embeddable);
