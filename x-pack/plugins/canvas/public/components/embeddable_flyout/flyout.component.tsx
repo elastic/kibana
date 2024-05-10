@@ -9,7 +9,7 @@ import React, { FC, useCallback, useMemo } from 'react';
 import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutBody, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
+import { SavedObjectFinder, SavedObjectMetaData } from '@kbn/saved-objects-finder-plugin/public';
 import { FinderAttributes } from '@kbn/saved-objects-finder-plugin/common';
 import {
   EmbeddableFactory,
@@ -86,15 +86,25 @@ export const AddEmbeddableFlyout: FC<Props> = ({
         ...Object.values(factoriesBySavedObjectType),
         ...Object.values(legacyFactoriesBySavedObjectType),
       ]
-        .filter((embeddableFactory) =>
+        .filter((factory) =>
           Boolean(
-            embeddableFactory.savedObjectMetaData &&
-              availableEmbeddables.includes(embeddableFactory.type)
+            factory.type !== 'links' && // Links panels only exist on Dashboards
+              (isByValueEnabled || availableEmbeddables.includes(factory.type))
           )
         )
-        .map(({ savedObjectMetaData }) => savedObjectMetaData!)
+        .map((factory) => factory.savedObjectMetaData)
+        .filter<SavedObjectMetaData<{}>>(function (
+          maybeSavedObjectMetaData
+        ): maybeSavedObjectMetaData is SavedObjectMetaData<{}> {
+          return maybeSavedObjectMetaData !== undefined;
+        })
         .sort((a, b) => a.type.localeCompare(b.type)),
-    [availableEmbeddables, factoriesBySavedObjectType, legacyFactoriesBySavedObjectType]
+    [
+      availableEmbeddables,
+      factoriesBySavedObjectType,
+      isByValueEnabled,
+      legacyFactoriesBySavedObjectType,
+    ]
   );
 
   const onAddPanel = useCallback(
