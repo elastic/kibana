@@ -12,7 +12,8 @@
       "developerExamples",
       "embeddable",
       "navigation",
-      "presentationUtil"
+      "presentationUtil",
+      "uiActions"
     ]
   }
 }

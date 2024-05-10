@@ -9,8 +9,11 @@
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import { PANEL_HOVER_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { PLUGIN_ID } from './constants';
+import { EditControlAction } from './controls/actions/edit_control_action';
 import { registerControlFactory } from './controls/control_factory_registry';
 import { SearchControlState, SEARCH_CONTROL_TYPE } from './controls/search_control/types';
 import img from './control_group_image.png';
@@ -22,6 +25,7 @@ interface SetupDeps {
 export interface ControlsExampleStartDeps {
   data: DataPublicPluginStart;
   navigation: NavigationPublicPluginStart;
+  uiActions: UiActionsStart;
 }
 
 export class ControlsExamplePlugin
@@ -48,6 +52,10 @@ export class ControlsExamplePlugin
   }
 
   public start(core: CoreStart, deps: ControlsExampleStartDeps) {
+    const editControlAction = new EditControlAction({ core, dataViews: deps.data.dataViews });
+    deps.uiActions.registerAction(editControlAction);
+    deps.uiActions.attachAction(PANEL_HOVER_TRIGGER, editControlAction.id);
+
     // core.overlays.
     registerControlFactory<SearchControlState>(SEARCH_CONTROL_TYPE, async () => {
       const { getSearchEmbeddableFactory } = await import(

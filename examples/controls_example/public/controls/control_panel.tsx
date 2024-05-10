@@ -21,7 +21,10 @@ import React, { useMemo, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { DefaultControlApi } from './types';
 
-export const ControlPanel = <State extends object>({
+export const ControlPanel = <
+  State extends object,
+  ApiType extends DefaultControlApi = DefaultControlApi
+>({
   index,
 
   getActions,
@@ -31,8 +34,8 @@ export const ControlPanel = <State extends object>({
   // componentProps,
 
   onPanelStatusChange,
-}: PresentationPanelProps<DefaultControlApi<State>, {}>) => {
-  const [api, setApi] = useState<DefaultControlApi<State> | null>(null);
+}: PresentationPanelProps<ApiType, {}>) => {
+  const [api, setApi] = useState<ApiType | null>(null);
   const headerId = useMemo(() => htmlIdGenerator()(), []);
 
   const { loading, value, error } = useAsync(async () => {
@@ -83,7 +86,7 @@ export const ControlPanel = <State extends object>({
       //   'controlFrameFloatingActions--oneLine': !usingTwoLineLayout,
       // })}
       viewMode={viewMode}
-      // embeddable={embeddable}
+      embeddable={api}
       disabledActions={[]}
       isEnabled={true}
     >

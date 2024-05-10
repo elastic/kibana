@@ -29,8 +29,8 @@ import {
 import { PublishesDataView } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
 
 export interface PublishesControlDisplaySettings {
-  grow$: PublishingSubject<boolean | undefined>;
-  width$: PublishingSubject<ControlWidth | undefined>;
+  grow: PublishingSubject<boolean | undefined>;
+  width: PublishingSubject<ControlWidth | undefined>;
 }
 
 /** This is the stuff the control group cares about */
@@ -67,8 +67,12 @@ export interface DefaultDataControlState extends DefaultControlState {
 
 export type ControlApiRegistration<ControlApi extends DefaultControlApi = DefaultControlApi> = Omit<
   ControlApi,
-  'uuid' | 'parent' | 'type' | 'unsavedChanges' | 'resetUnsavedChanges' | 'grow$' | 'width$'
+  'uuid' | 'parent' | 'type' | 'unsavedChanges' | 'resetUnsavedChanges' | 'grow' | 'width'
 >;
+
+export type ControlStateRegistration<
+  ControlState extends DefaultControlState = DefaultControlState
+> = Omit<ControlState, 'grow' | 'width'>;
 
 export interface ControlFactory<
   State extends object = object,
@@ -84,7 +88,7 @@ export interface ControlFactory<
     initialState: State,
     buildApi: (
       apiRegistration: ControlApiRegistration<ControlApi>,
-      comparators: StateComparators<State>
+      comparators: StateComparators<ControlStateRegistration<State>>
     ) => ControlApi,
     uuid: string,
     parentApi: ControlGroupApi

@@ -42,8 +42,10 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
     uiActions: { getTriggerCompatibleActions },
   } = pluginServices.getServices();
   const [floatingActions, setFloatingActions] = useState<JSX.Element | undefined>(undefined);
+  // console.log('floatingActions', embeddable);
 
   useEffect(() => {
+    console.log('here', embeddable);
     if (!embeddable) return;
 
     const getActions = async () => {

@@ -10,7 +10,6 @@ import React from 'react';
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import { CoreStart } from '@kbn/core/public';
@@ -21,10 +20,9 @@ import {
   EmbeddableApiContext,
   getInheritedViewMode,
 } from '@kbn/presentation-publishing';
-import { BehaviorSubject } from 'rxjs';
-import { ACTION_EDIT_CONTROL } from '..';
+import { DataControlApi } from '../types';
 
-export type EditControlActionApi = DefaultControlApi;
+export type EditControlActionApi = DataControlApi;
 
 const isApiCompatible = (api: unknown | null): api is EditControlActionApi =>
   Boolean(
@@ -35,6 +33,9 @@ const isApiCompatible = (api: unknown | null): api is EditControlActionApi =>
     // apiIsOfType(api.parentApi, CONTROL_GROUP_TYPE) &&
     // apiIsPresentationContainer(api.parentApi)
   );
+// edit DATA control
+
+const ACTION_EDIT_CONTROL = 'editDataControl';
 
 export class EditControlAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_EDIT_CONTROL;
@@ -77,6 +78,7 @@ export class EditControlAction implements Action<EmbeddableApiContext> {
   }
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
+    console.log('isCompatible', embeddable);
     return (
       isApiCompatible(embeddable) &&
       getInheritedViewMode(embeddable.parentApi) === ViewMode.EDIT &&
@@ -86,52 +88,53 @@ export class EditControlAction implements Action<EmbeddableApiContext> {
 
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-
-    const selectedDataViewId: string | undefined =
-      embeddable.dataView.getValue()?.id ??
-      embeddable.parentApi.lastUsedDataViewId?.getValue() ??
-      embeddable.parentApi.dataViews.getValue()?.[0].id ??
-      (await this.dataViewsService.getDefaultId()) ??
-      undefined; // getDefaultId returns null rather than undefined, so catch that
-    const controlGrow = embeddable.grow$.getValue();
-
-    const stateManager = {
-      dataViewId$: new BehaviorSubject<string | undefined>(selectedDataViewId),
-      fieldName$: new BehaviorSubject<string | undefined>(embeddable.fieldName$.getValue()),
-      grow: new BehaviorSubject<boolean | undefined>(
-        controlGrow === undefined ? embeddable.parentApi.defaultGrow$.getValue() : controlGrow
-      ),
-      width: new BehaviorSubject<ControlWidth | undefined>(
-        embeddable.width$.getValue() ?? embeddable.parentApi.defaultWidth$.getValue()
-      ),
-      settings: new BehaviorSubject<object | undefined>(embeddable.settings),
-    };
-
-    console.log('stateManager', stateManager);
-
-    const flyoutInstance = this.overlays.openFlyout(
-      toMountPoint(
-        <ControlEditor
-          api={embeddable}
-          parentApi={embeddable.parentApi}
-          stateManager={stateManager}
-          closeFlyout={() => {
-            setFlyoutRef(undefined);
-            flyoutInstance.close();
-          }}
-        />,
-        { theme: this.theme, i18n: this.i18n }
-      ),
-      {
-        'aria-label': ControlGroupStrings.manageControl.getFlyoutEditTitle(),
-        outsideClickCloses: false,
-        onClose: (flyout) => {
-          setFlyoutRef(undefined);
-          flyout.close();
-        },
-        ownFocus: true,
-      }
-    );
-    setFlyoutRef(flyoutInstance);
+    console.log('execute');
   }
+  //   const selectedDataViewId: string | undefined =
+  //     embeddable.dataView.getValue()?.id ??
+  //     embeddable.parentApi.lastUsedDataViewId?.getValue() ??
+  //     embeddable.parentApi.dataViews.getValue()?.[0].id ??
+  //     (await this.dataViewsService.getDefaultId()) ??
+  //     undefined; // getDefaultId returns null rather than undefined, so catch that
+  //   const controlGrow = embeddable.grow$.getValue();
+
+  //   const stateManager = {
+  //     dataViewId$: new BehaviorSubject<string | undefined>(selectedDataViewId),
+  //     fieldName$: new BehaviorSubject<string | undefined>(embeddable.fieldName$.getValue()),
+  //     grow: new BehaviorSubject<boolean | undefined>(
+  //       controlGrow === undefined ? embeddable.parentApi.defaultGrow$.getValue() : controlGrow
+  //     ),
+  //     width: new BehaviorSubject<ControlWidth | undefined>(
+  //       embeddable.width$.getValue() ?? embeddable.parentApi.defaultWidth$.getValue()
+  //     ),
+  //     settings: new BehaviorSubject<object | undefined>(embeddable.settings),
+  //   };
+
+  //   console.log('stateManager', stateManager);
+
+  //   const flyoutInstance = this.overlays.openFlyout(
+  //     toMountPoint(
+  //       <ControlEditor
+  //         api={embeddable}
+  //         parentApi={embeddable.parentApi}
+  //         stateManager={stateManager}
+  //         closeFlyout={() => {
+  //           setFlyoutRef(undefined);
+  //           flyoutInstance.close();
+  //         }}
+  //       />,
+  //       { theme: this.theme, i18n: this.i18n }
+  //     ),
+  //     {
+  //       'aria-label': ControlGroupStrings.manageControl.getFlyoutEditTitle(),
+  //       outsideClickCloses: false,
+  //       onClose: (flyout) => {
+  //         setFlyoutRef(undefined);
+  //         flyout.close();
+  //       },
+  //       ownFocus: true,
+  //     }
+  //   );
+  //   setFlyoutRef(flyoutInstance);
+  // }
 }

@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ControlFactory } from './types';
+import { ControlFactory, DefaultControlApi } from './types';
 
 const registry: { [key: string]: ControlFactory<any> } = {};
 
@@ -30,11 +30,11 @@ export const registerControlFactory = async <
 
 export const getControlFactory = <
   State extends object = object,
-  Factory extends ControlFactory<State> = ControlFactory<State>
+  ApiType extends DefaultControlApi = DefaultControlApi,
+  Factory extends ControlFactory<State, ApiType> = ControlFactory<State, ApiType>
 >(
   key: string
 ): Factory => {
-  console.log('registry', registry);
   if (registry[key] === undefined)
     throw new Error(
       i18n.translate('controlFactoryRegistry.factoryNotFoundError', {

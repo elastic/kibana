@@ -23,12 +23,14 @@ import { initializeDataControl } from './initialize_data_control';
 import {
   ControlApiRegistration,
   ControlGroupApi,
+  ControlStateRegistration,
   DataControlApi,
   DefaultControlApi,
   DefaultControlState,
   DefaultDataControlState,
   isDataControlFactory,
 } from './types';
+import { SerializedPanelState } from '@kbn/presentation-containers';
 
 const ON_STATE_CHANGE_DEBOUNCE = 100;
 
@@ -61,20 +63,28 @@ export const ControlRenderer = <
         const uuid = maybeId ?? generateId();
         console.log('here 2', type, uuid);
 
-        const factory = getControlFactory<StateType>(type);
+        const factory = getControlFactory<StateType, ApiType>(type);
         console.log('here 3', factory);
 
         const registerApi = (
           apiRegistration: ControlApiRegistration<ApiType>,
-          comparators: StateComparators<StateType>
+          comparators: StateComparators<ControlStateRegistration<StateType>>
         ) => {
-          console.log('here');
+          const grow = new BehaviorSubject<boolean | undefined>(state.grow);
+          const width = new BehaviorSubject<ControlWidth | undefined>(state.width);
           const { unsavedChanges, resetUnsavedChanges, cleanup } =
-            startTrackingEmbeddableUnsavedChanges(uuid, parentApi, comparators, state);
-          const grow$ = new BehaviorSubject<boolean | undefined>(state.grow);
-          const width$ = new BehaviorSubject<ControlWidth | undefined>(state.width);
-          const panelTitle = new BehaviorSubject<string | undefined>(state.title);
-          const defaultPanelTitle = new BehaviorSubject<string | undefined>(state.fieldName); // only applicable for data controls - make this generic
+            startTrackingEmbeddableUnsavedChanges<StateType>(
+              uuid,
+              parentApi,
+              {
+                ...comparators,
+                grow: [grow, (newGrow: boolean | undefined) => grow.next(newGrow)],
+                width: [width, (newWidth: ControlWidth | undefined) => width.next(newWidth)],
+              },
+              (serializedState: SerializedPanelState<StateType>) => serializedState.rawState
+            );
+          // const panelTitle = new BehaviorSubject<string | undefined>(state.title);
+          // const defaultPanelTitle = new BehaviorSubject<string | undefined>(state.fieldName); // only applicable for data controls - make this generic
 
           // const snapshotRuntimeState = () => {
           //   const comparatorKeys = Object.keys(embeddable.comparators) as Array<keyof RuntimeState>;
@@ -84,41 +94,17 @@ export const ControlRenderer = <
           //   }, {} as RuntimeState);
           // };
 
-          const fullApi: DefaultControlApi | DataControlApi = {
+          const fullApi: ApiType = {
             ...apiRegistration,
             uuid,
             parentApi,
             unsavedChanges,
             resetUnsavedChanges,
             type: factory.type,
-            defaultPanelTitle,
-            grow$,
-            width$,
+            // defaultPanelTitle,
+            grow,
+            width,
           };
-
-          if (isDataControlFactory(factory)) {
-            // fullApi.onEdit = () => {
-            //   const flyoutInstance = services.overlays.openFlyout(
-            //     toMountPoint(
-            //       <ControlEditor
-            //         api={embeddable}
-            //         parentApi={embeddable.parentApi}
-            //         stateManager={stateManager}
-            //       />,
-            //       { theme: this.theme, i18n: this.i18n }
-            //     ),
-            //     {
-            //       'aria-label': ControlGroupStrings.manageControl.getFlyoutEditTitle(),
-            //       outsideClickCloses: false,
-            //       onClose: (flyout) => {
-            //         setFlyoutRef(undefined);
-            //         flyout.close();
-            //       },
-            //       ownFocus: true,
-            //     }
-            //   );
-            // };
-          }
 
           cleanupFunction.current = () => cleanup();
           return fullApi;
