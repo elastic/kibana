@@ -12,7 +12,7 @@ import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mock
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { savedSearchMockWithESQL } from '../../../__mocks__/saved_search';
 import { FetchStatus } from '../../types';
-import { DataDocuments$, RecordRawType } from './discover_data_state_container';
+import { DataDocuments$ } from './discover_data_state_container';
 import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
 import { fetchDocuments } from '../data_fetching/fetch_documents';
 
@@ -92,7 +92,7 @@ describe('test getDataStateContainer', () => {
     await waitFor(() => {
       expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
     });
-    dataState.reset(stateContainer.savedSearchState.getState());
+    dataState.reset();
     await waitFor(() => {
       expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.LOADING);
     });
@@ -105,8 +105,6 @@ describe('test getDataStateContainer', () => {
     });
     stateContainer.savedSearchState.load = jest.fn().mockResolvedValue(savedSearchMockWithESQL);
     await stateContainer.actions.loadSavedSearch({ savedSearchId: savedSearchMockWithESQL.id });
-
-    expect(stateContainer.dataState.data$.main$.getValue().recordRawType).toBe(RecordRawType.PLAIN);
   });
 
   test('refetch$ accepts "fetch_more" signal', (done) => {

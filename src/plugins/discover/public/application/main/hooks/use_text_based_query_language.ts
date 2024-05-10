@@ -54,7 +54,7 @@ export function useTextBasedQueryLanguage({
     const subscription = stateContainer.dataState.data$.documents$
       .pipe(
         switchMap(async (next) => {
-          const { query, recordRawType } = next;
+          const { query } = next;
           if (!query || next.fetchStatus === FetchStatus.ERROR) {
             return;
           }
@@ -66,7 +66,7 @@ export function useTextBasedQueryLanguage({
           };
           const { viewMode } = stateContainer.appState.getState();
           let nextColumns: string[] = [];
-          const isTextBasedQueryLang = recordRawType === 'plain' && isOfAggregateQueryType(query);
+          const isTextBasedQueryLang = isOfAggregateQueryType(query);
           const hasResults = Boolean(next.result?.length);
           let queryHasTransformationalCommands = false;
           if ('esql' in query) {

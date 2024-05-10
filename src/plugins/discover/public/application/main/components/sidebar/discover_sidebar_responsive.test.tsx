@@ -23,7 +23,6 @@ import { FetchStatus, SidebarToggleState } from '../../../types';
 import {
   AvailableFields$,
   DataDocuments$,
-  RecordRawType,
 } from '../../state_management/discover_data_state_container';
 import { stubLogstashDataView } from '@kbn/data-plugin/common/stubs';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -521,7 +520,6 @@ describe('discover responsive sidebar', function () {
       onAddFilter: undefined,
       documents$: new BehaviorSubject({
         fetchStatus: FetchStatus.COMPLETE,
-        recordRawType: RecordRawType.PLAIN,
         result: getDataTableRecords(stubLogstashDataView),
         textBasedQueryColumns: [
           { id: '1', name: 'extension', meta: { type: 'text' } },

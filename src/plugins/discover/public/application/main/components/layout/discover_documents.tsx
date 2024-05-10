@@ -46,7 +46,6 @@ import { useInternalStateSelector } from '../../state_management/discover_intern
 import { useAppStateSelector } from '../../state_management/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
-import { RecordRawType } from '../../state_management/discover_data_state_container';
 import { DiscoverStateContainer } from '../../state_management/discover_state';
 import { useDataState } from '../../hooks/use_data_state';
 import { DocTableInfinite } from '../../../../components/doc_table/doc_table_infinite';
@@ -56,7 +55,6 @@ import {
   DISCOVER_TOUR_STEP_ANCHOR_IDS,
   DiscoverTourProvider,
 } from '../../../../components/discover_tour';
-import { getRawRecordType } from '../../utils/get_raw_record_type';
 import {
   getMaxAllowedSampleSize,
   getAllowedSampleSize,
@@ -67,6 +65,7 @@ import { useFetchMoreRecords } from './use_fetch_more_records';
 import { SelectedVSAvailableCallout } from './selected_vs_available_callout';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { onResizeGridColumn } from '../../../../utils/on_resize_grid_column';
+import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 
 const containerStyles = css`
   position: relative;
@@ -122,12 +121,12 @@ function DiscoverDocumentsComponent({
       ];
     });
   const expandedDoc = useInternalStateSelector((state) => state.expandedDoc);
-  const isTextBasedQuery = useMemo(() => getRawRecordType(query) === RecordRawType.PLAIN, [query]);
+  const isEsqlMode = useIsEsqlMode();
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
   const hideAnnouncements = useMemo(() => uiSettings.get(HIDE_ANNOUNCEMENTS), [uiSettings]);
   const isLegacy = useMemo(
-    () => isLegacyTableEnabled({ uiSettings, isTextBasedQueryMode: isTextBasedQuery }),
-    [uiSettings, isTextBasedQuery]
+    () => isLegacyTableEnabled({ uiSettings, isTextBasedQueryMode: isEsqlMode }),
+    [uiSettings, isEsqlMode]
   );
   const documentState = useDataState(documents$);
   const isDataLoading =
@@ -144,13 +143,13 @@ function DiscoverDocumentsComponent({
   // 5. this is propagated to Discover's URL and causes an unwanted change of state to an unsorted state
   // This solution switches to the loading state in this component when the URL index doesn't match the dataView.id
   const isDataViewLoading =
-    useInternalStateSelector((state) => state.isDataViewLoading) && !isTextBasedQuery;
+    useInternalStateSelector((state) => state.isDataViewLoading) && !isEsqlMode;
   const isEmptyDataResult =
-    isTextBasedQuery || !documentState.result || documentState.result.length === 0;
+    isEsqlMode || !documentState.result || documentState.result.length === 0;
   const rows = useMemo(() => documentState.result || [], [documentState.result]);
 
   const { isMoreDataLoading, totalHits, onFetchMoreRecords } = useFetchMoreRecords({
-    isTextBasedQuery,
+    isTextBasedQuery: isEsqlMode,
     stateContainer,
   });
 
@@ -270,7 +269,7 @@ function DiscoverDocumentsComponent({
     () => (
       <>
         <SelectedVSAvailableCallout
-          isPlainRecord={isTextBasedQuery}
+          isPlainRecord={isEsqlMode}
           textBasedQueryColumns={documents?.textBasedQueryColumns}
           selectedColumns={currentColumns}
         />
@@ -278,7 +277,7 @@ function DiscoverDocumentsComponent({
       </>
     ),
     [
-      isTextBasedQuery,
+      isEsqlMode,
       currentColumns,
       documents?.textBasedQueryColumns,
       documentState.interceptedWarnings,
@@ -290,12 +289,12 @@ function DiscoverDocumentsComponent({
       return null;
     }
 
-    return !isTextBasedQuery ? (
-      <DiscoverTourProvider isPlainRecord={isTextBasedQuery}>
+    return !isEsqlMode ? (
+      <DiscoverTourProvider isPlainRecord={isEsqlMode}>
         <DocumentExplorerUpdateCallout />
       </DiscoverTourProvider>
     ) : null;
-  }, [hideAnnouncements, isLegacy, isTextBasedQuery]);
+  }, [hideAnnouncements, isLegacy, isEsqlMode]);
 
   const loadingIndicator = useMemo(
     () =>
@@ -365,12 +364,12 @@ function DiscoverDocumentsComponent({
                   isLoading={isDataLoading}
                   searchDescription={savedSearch.description}
                   sharedItemTitle={savedSearch.title}
-                  isPlainRecord={isTextBasedQuery}
+                  isPlainRecord={isEsqlMode}
                   onAddColumn={onAddColumn}
                   onFilter={onAddFilter as DocViewFilterFn}
                   onMoveColumn={onMoveColumn}
                   onRemoveColumn={onRemoveColumn}
-                  onSort={!isTextBasedQuery ? onSort : undefined}
+                  onSort={!isEsqlMode ? onSort : undefined}
                   useNewFieldsApi={useNewFieldsApi}
                   dataTestSubj="discoverDocTable"
                 />
@@ -416,12 +415,12 @@ function DiscoverDocumentsComponent({
                   rowHeightState={rowHeight}
                   onUpdateRowHeight={onUpdateRowHeight}
                   isSortEnabled={true}
-                  isPlainRecord={isTextBasedQuery}
+                  isPlainRecord={isEsqlMode}
                   rowsPerPageState={rowsPerPage ?? getDefaultRowsPerPage(services.uiSettings)}
                   onUpdateRowsPerPage={onUpdateRowsPerPage}
                   maxAllowedSampleSize={getMaxAllowedSampleSize(services.uiSettings)}
                   sampleSizeState={getAllowedSampleSize(sampleSizeState, services.uiSettings)}
-                  onUpdateSampleSize={!isTextBasedQuery ? onUpdateSampleSize : undefined}
+                  onUpdateSampleSize={!isEsqlMode ? onUpdateSampleSize : undefined}
                   onFieldEdited={onFieldEdited}
                   configRowHeight={uiSettings.get(ROW_HEIGHT_OPTION)}
                   showMultiFields={uiSettings.get(SHOW_MULTIFIELDS)}

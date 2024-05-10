@@ -10,9 +10,9 @@ import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject, filter, firstValueFrom, map, merge, scan } from 'rxjs';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { isEqual } from 'lodash';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { DiscoverAppState } from '../state_management/discover_app_state_container';
 import { updateVolatileSearchSource } from './update_search_source';
-import { getRawRecordType } from '../utils/get_raw_record_type';
 import {
   checkHitCount,
   sendCompleteMsg,
@@ -25,11 +25,7 @@ import {
 } from '../hooks/use_saved_search_messages';
 import { fetchDocuments } from './fetch_documents';
 import { FetchStatus } from '../../types';
-import {
-  DataMsg,
-  RecordRawType,
-  SavedSearchData,
-} from '../state_management/discover_data_state_container';
+import { DataMsg, SavedSearchData } from '../state_management/discover_data_state_container';
 import { DiscoverServices } from '../../../build_services';
 import { fetchTextBased } from './fetch_text_based';
 import { InternalState } from '../state_management/discover_internal_state_container';
@@ -74,13 +70,12 @@ export function fetchAll(
     const dataView = searchSource.getField('index')!;
     const query = getAppState().query;
     const prevQuery = dataSubjects.documents$.getValue().query;
-    const recordRawType = getRawRecordType(query);
-    const useTextBased = recordRawType === RecordRawType.PLAIN;
+    const isEsqlQuery = isOfAggregateQueryType(query);
     if (reset) {
-      sendResetMsg(dataSubjects, initialFetchStatus, recordRawType);
+      sendResetMsg(dataSubjects, initialFetchStatus);
     }
 
-    if (recordRawType === RecordRawType.DOCUMENT) {
+    if (!isEsqlQuery) {
       // Update the base searchSource, base for all child fetches
       updateVolatileSearchSource(searchSource, {
         dataView,
@@ -90,16 +85,15 @@ export function fetchAll(
       });
     }
 
-    const shouldFetchTextBased = useTextBased && !!query;
+    const shouldFetchTextBased = isEsqlQuery && !!query;
 
     // Mark all subjects as loading
-    sendLoadingMsg(dataSubjects.main$, { recordRawType });
-    sendLoadingMsg(dataSubjects.documents$, { recordRawType, query });
+    sendLoadingMsg(dataSubjects.main$);
+    sendLoadingMsg(dataSubjects.documents$);
 
     // histogram for data view mode will send `loading` for totalHits$
     if (shouldFetchTextBased) {
       sendLoadingMsg(dataSubjects.totalHits$, {
-        recordRawType,
         result: dataSubjects.totalHits$.getValue().result,
       });
     }
@@ -133,7 +127,6 @@ export function fetchAll(
           dataSubjects.totalHits$.next({
             fetchStatus: FetchStatus.COMPLETE,
             result: records.length,
-            recordRawType,
           });
         } else {
           const currentTotalHits = dataSubjects.totalHits$.getValue();
@@ -144,7 +137,6 @@ export function fetchAll(
             dataSubjects.totalHits$.next({
               fetchStatus: FetchStatus.PARTIAL,
               result: records.length,
-              recordRawType,
             });
           }
         }
@@ -156,7 +148,7 @@ export function fetchAll(
          * So it takes too long, a bad user experience, also a potential flakniess in tests
          */
         const fetchStatus =
-          useTextBased && (!prevQuery || !isEqual(query, prevQuery))
+          isEsqlQuery && (!prevQuery || !isEqual(query, prevQuery))
             ? FetchStatus.PARTIAL
             : FetchStatus.COMPLETE;
 
@@ -166,7 +158,6 @@ export function fetchAll(
           textBasedQueryColumns,
           textBasedHeaderWarning,
           interceptedWarnings,
-          recordRawType,
           query,
         });
 
@@ -213,9 +204,9 @@ export async function fetchMoreDocuments(
 
     const dataView = searchSource.getField('index')!;
     const query = getAppState().query;
-    const recordRawType = getRawRecordType(query);
+    const isEsqlQuery = isOfAggregateQueryType(query);
 
-    if (recordRawType === RecordRawType.PLAIN) {
+    if (isEsqlQuery) {
       // not supported yet
       return;
     }

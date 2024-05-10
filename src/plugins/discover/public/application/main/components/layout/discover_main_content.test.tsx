@@ -18,7 +18,6 @@ import {
   DataDocuments$,
   DataMain$,
   DataTotalHits$,
-  RecordRawType,
 } from '../../state_management/discover_data_state_container';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { FetchStatus, SidebarToggleState } from '../../../types';
@@ -67,7 +66,6 @@ const mountComponent = async ({
 
   const main$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
-    recordRawType: isPlainRecord ? RecordRawType.PLAIN : RecordRawType.DOCUMENT,
     foundDocuments: true,
   }) as DataMain$;
 

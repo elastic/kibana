@@ -11,8 +11,8 @@ import { AggregateQuery, Query } from '@kbn/es-query';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { DiscoverGridEmbeddable } from './saved_search_grid';
 import { DiscoverDocTableEmbeddable } from '../components/doc_table/create_doc_table_embeddable';
-import { isTextBasedQuery } from '../application/main/utils/is_text_based_query';
 import type { EmbeddableComponentSearchProps } from './types';
+import { useIsEsqlMode } from '../application/main/hooks/use_is_esql_mode';
 
 interface SavedSearchEmbeddableComponentProps {
   fetchedSampleSize: number;
@@ -30,16 +30,18 @@ export function SavedSearchEmbeddableComponent({
   useLegacyTable,
   query,
 }: SavedSearchEmbeddableComponentProps) {
+  const isEsqlMode = useIsEsqlMode();
+
   if (useLegacyTable) {
-    const isPlainRecord = isTextBasedQuery(query);
     return (
       <DiscoverDocTableEmbeddableMemoized
         {...searchProps}
         sampleSizeState={fetchedSampleSize}
-        isPlainRecord={isPlainRecord}
+        isPlainRecord={isEsqlMode}
       />
     );
   }
+
   return (
     <DiscoverGridEmbeddableMemoized
       {...searchProps}

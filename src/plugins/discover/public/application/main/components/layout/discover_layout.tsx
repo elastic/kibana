@@ -44,10 +44,9 @@ import { DiscoverSidebarResponsive } from '../sidebar';
 import { DiscoverTopNav } from '../top_nav/discover_topnav';
 import { getResultState } from '../../utils/get_result_state';
 import { DiscoverUninitialized } from '../uninitialized/uninitialized';
-import { DataMainMsg, RecordRawType } from '../../state_management/discover_data_state_container';
+import { DataMainMsg } from '../../state_management/discover_data_state_container';
 import { FetchStatus, SidebarToggleState } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
-import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { SavedSearchURLConflictCallout } from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import { ErrorCallout } from '../../../../components/common/error_callout';
@@ -55,6 +54,7 @@ import { addLog } from '../../../../utils/add_log';
 import { DiscoverResizableLayout } from './discover_resizable_layout';
 import { PanelsToggle, PanelsToggleProps } from '../../../../components/panels_toggle';
 import { sendErrorMsg } from '../../hooks/use_saved_search_messages';
+import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
@@ -84,9 +84,9 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     state.columns,
     state.sort,
   ]);
-  const isPlainRecord = useMemo(() => getRawRecordType(query) === RecordRawType.PLAIN, [query]);
+  const isEsqlMode = useIsEsqlMode();
   const viewMode: VIEW_MODE = useAppStateSelector((state) => {
-    if (uiSettings.get(SHOW_FIELD_STATISTICS) !== true || isPlainRecord)
+    if (uiSettings.get(SHOW_FIELD_STATISTICS) !== true || isEsqlMode)
       return VIEW_MODE.DOCUMENT_LEVEL;
     return state.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;
   });
@@ -140,10 +140,10 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   useEffect(() => {
     return observabilityAIAssistant?.service.setScreenContext({
       screenDescription: `The user is looking at the Discover view on the ${
-        isPlainRecord ? 'ES|QL' : 'dataView'
+        isEsqlMode ? 'ES|QL' : 'dataView'
       } mode. The index pattern is the ${dataView.getIndexPattern()}`,
     });
-  }, [dataView, isPlainRecord, observabilityAIAssistant?.service]);
+  }, [dataView, isEsqlMode, observabilityAIAssistant?.service]);
 
   const onAddFilter = useCallback(
     (field: DataViewField | string, values: unknown, operation: '+' | '-') => {
@@ -185,7 +185,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     [data.query.queryString, query, trackUiMetric]
   );
 
-  const onFilter = isPlainRecord
+  const onFilter = isEsqlMode
     ? (onPopulateWhereClause as DocViewFilterFn)
     : (onAddFilter as DocViewFilterFn);
 
@@ -213,16 +213,16 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const documentState = useDataState(stateContainer.dataState.data$.documents$);
 
   const textBasedLanguageModeWarning = useMemo(() => {
-    if (isPlainRecord) {
+    if (isEsqlMode) {
       return documentState.textBasedHeaderWarning;
     }
-  }, [documentState.textBasedHeaderWarning, isPlainRecord]);
+  }, [documentState.textBasedHeaderWarning, isEsqlMode]);
 
   const textBasedLanguageModeErrors = useMemo(() => {
-    if (isPlainRecord) {
+    if (isEsqlMode) {
       return dataState.error;
     }
-  }, [dataState.error, isPlainRecord]);
+  }, [dataState.error, isEsqlMode]);
 
   const [sidebarContainer, setSidebarContainer] = useState<HTMLDivElement | null>(null);
   const [mainContainer, setMainContainer] = useState<HTMLDivElement | null>(null);
@@ -262,7 +262,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     return (
       <>
         <DiscoverHistogramLayout
-          isPlainRecord={isPlainRecord}
+          isPlainRecord={isEsqlMode}
           dataView={dataView}
           stateContainer={stateContainer}
           columns={currentColumns}
@@ -278,7 +278,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     );
   }, [
     resultState,
-    isPlainRecord,
+    isEsqlMode,
     dataView,
     stateContainer,
     currentColumns,

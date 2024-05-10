@@ -323,7 +323,6 @@ describe('useDiscoverHistogram', () => {
       expect(stateContainer.dataState.data$.totalHits$.value).not.toEqual({
         fetchStatus: FetchStatus.COMPLETE,
         result: 100,
-        recordRawType: stateContainer.dataState.data$.totalHits$.value.recordRawType,
       });
       act(() => {
         hook.result.current.ref(api);
@@ -331,7 +330,6 @@ describe('useDiscoverHistogram', () => {
       expect(stateContainer.dataState.data$.totalHits$.value).toEqual({
         fetchStatus: FetchStatus.COMPLETE,
         result: 100,
-        recordRawType: stateContainer.dataState.data$.totalHits$.value.recordRawType,
       });
       expect(mockCheckHitCount).toHaveBeenCalledWith(stateContainer.dataState.data$.main$, 100);
     });
@@ -370,7 +368,6 @@ describe('useDiscoverHistogram', () => {
       expect(stateContainer.dataState.data$.totalHits$.value).not.toEqual({
         fetchStatus: FetchStatus.ERROR,
         error,
-        recordRawType: stateContainer.dataState.data$.totalHits$.value.recordRawType,
       });
       act(() => {
         hook.result.current.ref(api);
@@ -379,7 +376,6 @@ describe('useDiscoverHistogram', () => {
       expect(stateContainer.dataState.data$.totalHits$.value).toEqual({
         fetchStatus: FetchStatus.ERROR,
         error,
-        recordRawType: stateContainer.dataState.data$.totalHits$.value.recordRawType,
       });
       expect(mockCheckHitCount).not.toHaveBeenCalled();
     });

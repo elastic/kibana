@@ -39,8 +39,8 @@ import {
   useDiscoverCustomizationService,
 } from '../../customizations';
 import { DiscoverTopNavInline } from './components/top_nav/discover_topnav_inline';
-import { isTextBasedQuery } from './utils/is_text_based_query';
 import { DiscoverStateContainer, LoadParams } from './state_management/discover_state';
+import { DataSourceType, isDataSourceType } from '../../../common/data_sources';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -369,8 +369,7 @@ function getLoadParamsForNewSearch(stateContainer: DiscoverStateContainer): {
   const prevAppState = stateContainer.appState.getState();
   const prevDataView = stateContainer.internalState.getState().dataView;
   const initialAppState =
-    prevAppState?.query &&
-    isTextBasedQuery(prevAppState.query) &&
+    isDataSourceType(prevAppState.dataSource, DataSourceType.Esql) &&
     prevDataView &&
     prevDataView.type === ESQL_TYPE
       ? {

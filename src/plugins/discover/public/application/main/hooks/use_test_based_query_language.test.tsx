@@ -12,7 +12,6 @@ import { DataViewsContract } from '@kbn/data-plugin/public';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { useTextBasedQueryLanguage } from './use_text_based_query_language';
 import { FetchStatus } from '../../types';
-import { RecordRawType } from '../state_management/discover_data_state_container';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { AggregateQuery, Query } from '@kbn/es-query';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
@@ -37,7 +36,6 @@ function getHookProps(
   stateContainer.internalState.transitions.setSavedDataViews([dataViewMock as DataViewListItem]);
 
   const msgLoading = {
-    recordRawType: RecordRawType.PLAIN,
     fetchStatus: FetchStatus.PARTIAL,
     query,
   };
@@ -52,7 +50,6 @@ function getHookProps(
 }
 const query = { esql: 'from the-data-view-title' };
 const msgComplete = {
-  recordRawType: RecordRawType.PLAIN,
   fetchStatus: FetchStatus.PARTIAL,
   result: [
     {
@@ -124,7 +121,6 @@ describe('useTextBasedQueryLanguage', () => {
     replaceUrlState.mockReset();
 
     documents$.next({
-      recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.PARTIAL,
       result: [
         {
@@ -151,7 +147,6 @@ describe('useTextBasedQueryLanguage', () => {
     stateContainer.dataState.data$.documents$.next(msgComplete);
 
     documents$.next({
-      recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.PARTIAL,
       result: [
         {
@@ -175,7 +170,6 @@ describe('useTextBasedQueryLanguage', () => {
     replaceUrlState.mockReset();
 
     documents$.next({
-      recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.PARTIAL,
       result: [
         {
@@ -195,7 +189,6 @@ describe('useTextBasedQueryLanguage', () => {
     replaceUrlState.mockReset();
 
     documents$.next({
-      recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.PARTIAL,
       result: [
         {
@@ -218,7 +211,6 @@ describe('useTextBasedQueryLanguage', () => {
     replaceUrlState.mockReset();
 
     documents$.next({
-      recordRawType: RecordRawType.DOCUMENT,
       fetchStatus: FetchStatus.PARTIAL,
       result: [
         {
@@ -230,7 +222,6 @@ describe('useTextBasedQueryLanguage', () => {
     });
 
     documents$.next({
-      recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.PARTIAL,
       result: [
         {
@@ -257,7 +248,6 @@ describe('useTextBasedQueryLanguage', () => {
     expect(replaceUrlState).toHaveBeenCalledTimes(0);
 
     documents$.next({
-      recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.PARTIAL,
       result: [
         {
@@ -272,7 +262,6 @@ describe('useTextBasedQueryLanguage', () => {
     expect(replaceUrlState).toHaveBeenCalledTimes(0);
 
     documents$.next({
-      recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.PARTIAL,
       result: [
         {
@@ -296,7 +285,6 @@ describe('useTextBasedQueryLanguage', () => {
     const documents$ = stateContainer.dataState.data$.documents$;
 
     documents$.next({
-      recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.PARTIAL,
       result: [
         {
@@ -316,7 +304,6 @@ describe('useTextBasedQueryLanguage', () => {
     const documents$ = stateContainer.dataState.data$.documents$;
 
     documents$.next({
-      recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.PARTIAL,
       result: [
         {
@@ -329,7 +316,6 @@ describe('useTextBasedQueryLanguage', () => {
     });
     expect(replaceUrlState).toHaveBeenCalledTimes(0);
     documents$.next({
-      recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.PARTIAL,
       result: [
         {
@@ -353,13 +339,11 @@ describe('useTextBasedQueryLanguage', () => {
     const documents$ = stateContainer.dataState.data$.documents$;
 
     documents$.next({
-      recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.LOADING,
       query: { esql: 'from the-data-view-title | WHERE field1=2' },
     });
     expect(replaceUrlState).toHaveBeenCalledTimes(0);
     documents$.next({
-      recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.PARTIAL,
       result: [
         {
@@ -377,24 +361,20 @@ describe('useTextBasedQueryLanguage', () => {
     replaceUrlState.mockReset();
 
     documents$.next({
-      recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.LOADING,
       query: { esql: 'from the-data-view-title | keep field 1; | WHERE field1=2' },
     });
 
     documents$.next({
-      recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.ERROR,
     });
 
     documents$.next({
-      recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.LOADING,
       query: { esql: 'from the-data-view-title | keep field1' },
     });
 
     documents$.next({
-      recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.PARTIAL,
       result: [
         {
@@ -425,7 +405,6 @@ describe('useTextBasedQueryLanguage', () => {
     replaceUrlState.mockReset();
 
     documents$.next({
-      recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.PARTIAL,
       result: [
         {

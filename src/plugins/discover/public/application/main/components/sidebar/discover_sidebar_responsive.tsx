@@ -26,7 +26,6 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import {
   AvailableFields$,
   DataDocuments$,
-  RecordRawType,
 } from '../../state_management/discover_data_state_container';
 import { calcFieldCounts } from '../../utils/calc_field_counts';
 import { FetchStatus, SidebarToggleState } from '../../../types';
@@ -38,6 +37,7 @@ import {
   DiscoverSidebarReducerStatus,
 } from './lib/sidebar_reducer';
 import { useDiscoverCustomization } from '../../../../customizations';
+import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 
 const EMPTY_FIELD_COUNTS = {};
 
@@ -150,6 +150,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     useState<UnifiedFieldListSidebarContainerApi | null>(null);
   const { euiTheme } = useEuiTheme();
   const services = useDiscoverServices();
+  const isEsqlMode = useIsEsqlMode();
   const {
     fieldListVariant,
     selectedDataView,
@@ -173,8 +174,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
 
   useEffect(() => {
     const subscription = props.documents$.subscribe((documentState) => {
-      const isPlainRecordType = documentState.recordRawType === RecordRawType.PLAIN;
-
       switch (documentState?.fetchStatus) {
         case FetchStatus.UNINITIALIZED:
           dispatchSidebarStateAction({
@@ -188,7 +187,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
           dispatchSidebarStateAction({
             type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING,
             payload: {
-              isPlainRecord: isPlainRecordType,
+              isPlainRecord: isEsqlMode,
             },
           });
           break;
@@ -197,11 +196,9 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
             payload: {
               dataView: selectedDataViewRef.current,
-              fieldCounts: isPlainRecordType
-                ? EMPTY_FIELD_COUNTS
-                : calcFieldCounts(documentState.result),
+              fieldCounts: isEsqlMode ? EMPTY_FIELD_COUNTS : calcFieldCounts(documentState.result),
               textBasedQueryColumns: documentState.textBasedQueryColumns,
-              isPlainRecord: isPlainRecordType,
+              isPlainRecord: isEsqlMode,
             },
           });
           break;
@@ -211,7 +208,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             payload: {
               dataView: selectedDataViewRef.current,
               fieldCounts: EMPTY_FIELD_COUNTS,
-              isPlainRecord: isPlainRecordType,
+              isPlainRecord: isEsqlMode,
             },
           });
           break;
@@ -220,7 +217,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       }
     });
     return () => subscription.unsubscribe();
-  }, [props.documents$, dispatchSidebarStateAction, selectedDataViewRef]);
+  }, [props.documents$, dispatchSidebarStateAction, selectedDataViewRef, isEsqlMode]);
 
   useEffect(() => {
     if (selectedDataView !== selectedDataViewRef.current) {

@@ -23,8 +23,8 @@ import { onSaveSearch } from './on_save_search';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { addLog } from '../../../../utils/add_log';
 import { useAppStateSelector } from '../../state_management/discover_app_state_container';
-import { isTextBasedQuery } from '../../utils/is_text_based_query';
 import { useDiscoverTopNav } from './use_discover_topnav';
+import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 
 export interface DiscoverTopNavProps {
   savedQuery?: string;
@@ -60,14 +60,13 @@ export const DiscoverTopNav = ({
   const dataView = useInternalStateSelector((state) => state.dataView!);
   const savedDataViews = useInternalStateSelector((state) => state.savedDataViews);
   const savedSearch = useSavedSearchInitial();
+  const isEsqlMode = useIsEsqlMode();
   const showDatePicker = useMemo(() => {
     // always show the timepicker for text based languages
-    const isTextBased = isTextBasedQuery(query);
     return (
-      isTextBased ||
-      (!isTextBased && dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP)
+      isEsqlMode || (!isEsqlMode && dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP)
     );
-  }, [dataView, query]);
+  }, [dataView, isEsqlMode]);
 
   const closeFieldEditor = useRef<() => void | undefined>();
   const closeDataViewEditor = useRef<() => void | undefined>();

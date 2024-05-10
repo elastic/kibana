@@ -31,7 +31,7 @@ import useObservable from 'react-use/lib/useObservable';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
-import type { Filter } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
@@ -41,11 +41,9 @@ import type { DiscoverStateContainer } from '../../state_management/discover_sta
 import { addLog } from '../../../../utils/add_log';
 import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
 import type { DiscoverAppState } from '../../state_management/discover_app_state_container';
-import {
-  DataDocumentsMsg,
-  RecordRawType,
-} from '../../state_management/discover_data_state_container';
+import { DataDocumentsMsg } from '../../state_management/discover_data_state_container';
 import { useSavedSearch } from '../../state_management/discover_state_provider';
+import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
 
 const EMPTY_TEXT_BASED_COLUMNS: DatatableColumn[] = [];
 const EMPTY_FILTERS: Filter[] = [];
@@ -163,9 +161,12 @@ export const useDiscoverHistogram = ({
   useEffect(() => {
     const subscription = createTotalHitsObservable(unifiedHistogram?.state$)?.subscribe(
       ({ status, result }) => {
-        const { recordRawType, result: totalHitsResult } = savedSearchData$.totalHits$.getValue();
+        const isEsqlMode = isDataSourceType(
+          stateContainer.appState.getState().dataSource,
+          DataSourceType.Esql
+        );
 
-        if (recordRawType === RecordRawType.PLAIN) {
+        if (isEsqlMode) {
           // ignore histogram's total hits updates for text-based records as Discover manages them during docs fetching
           return;
         }
@@ -175,6 +176,8 @@ export const useDiscoverHistogram = ({
           setTotalHitsError(result);
           return;
         }
+
+        const { result: totalHitsResult } = savedSearchData$.totalHits$.getValue();
 
         if (
           (status === UnifiedHistogramFetchStatus.loading ||
@@ -190,7 +193,6 @@ export const useDiscoverHistogram = ({
         savedSearchData$.totalHits$.next({
           fetchStatus: status.toString() as FetchStatus,
           result,
-          recordRawType,
         });
 
         if (status !== UnifiedHistogramFetchStatus.complete || typeof result !== 'number') {
@@ -209,6 +211,7 @@ export const useDiscoverHistogram = ({
     savedSearchData$.main$,
     savedSearchData$.totalHits$,
     setTotalHitsError,
+    stateContainer.appState,
     unifiedHistogram?.state$,
   ]);
 
