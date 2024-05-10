@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { reactEmbeddableRegistryHasKey } from '@kbn/embeddable-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { CommonEmbeddableStartContract, EmbeddableStateWithType } from '../types';
 import { extractBaseEmbeddableInput } from './migrate_base_input';
@@ -13,14 +14,19 @@ import { extractBaseEmbeddableInput } from './migrate_base_input';
 export const getExtractFunction = (embeddables: CommonEmbeddableStartContract) => {
   return (state: EmbeddableStateWithType) => {
     const enhancements = state.enhancements || {};
-    const factory = embeddables.getEmbeddableFactory(state.type);
+    const factory = reactEmbeddableRegistryHasKey(state.type)
+      ? () => {}
+      : embeddables.getEmbeddableFactory(state.type);
 
     const baseResponse = extractBaseEmbeddableInput(state);
     let updatedInput = baseResponse.state;
     const refs = baseResponse.references;
 
     if (factory) {
+      console.log('extract!', state, factory);
+      debugger;
       const factoryResponse = factory.extract(state);
+      console.log('factoryResponse', factoryResponse);
       updatedInput = factoryResponse.state as EmbeddableStateWithType;
       refs.push(...factoryResponse.references);
     }
