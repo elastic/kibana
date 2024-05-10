@@ -109,6 +109,8 @@ function getFunctionSignaturesByReturnType(
   const list = [];
   if (agg) {
     list.push(...statsAggregationFunctionDefinitions);
+    // right now all grouping functions are agg functions too
+    list.push(...groupingFunctionDefinitions);
   }
   if (grouping) {
     list.push(...groupingFunctionDefinitions);
@@ -120,7 +122,10 @@ function getFunctionSignaturesByReturnType(
   if (builtin) {
     list.push(...builtinFunctions.filter(({ name }) => (skipAssign ? name !== '=' : true)));
   }
-  return list
+
+  const deduped = Array.from(new Set(list));
+
+  return deduped
     .filter(({ signatures, ignoreAsSuggestion, supportedCommands, supportedOptions, name }) => {
       if (ignoreAsSuggestion) {
         return false;
@@ -732,7 +737,7 @@ describe('autocomplete', () => {
     testSuggestions(
       'from a | stats round(',
       [
-        ...getFunctionSignaturesByReturnType('stats', 'number', { agg: true }),
+        ...getFunctionSignaturesByReturnType('stats', 'number', { agg: true, grouping: true }),
         ...getFieldNamesByType('number'),
         ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }, undefined, [
           'round',
