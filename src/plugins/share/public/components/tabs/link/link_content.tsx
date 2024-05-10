@@ -148,7 +148,7 @@ export const LinkContent = ({
               data-share-url={url}
               onBlur={() => (objectType === 'lens' && isDirty ? null : setTextCopied(false))}
               onClick={copyUrlHelper}
-              disabled={objectType === 'lens' && isDirty}
+              color={objectType === 'lens' && isDirty ? 'warning' : 'primary'}
             >
               <FormattedMessage id="share.link.copyLinkButton" defaultMessage="Copy link" />
             </EuiButton>

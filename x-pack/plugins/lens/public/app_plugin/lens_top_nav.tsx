@@ -635,7 +635,8 @@ export const LensTopNavMenu = ({
                 }),
               },
               sharingData,
-              isDirty: isCurrentStateDirty,
+              // only want to know about changes when savedObjectURL.href
+              isDirty: !shareUrlEnabled ? isCurrentStateDirty : false,
               // disable the menu if both shortURL permission and the visualization has not been saved
               // TODO: improve here the disabling state with more specific checks
               disabledShareUrl: Boolean(!shareUrlEnabled && !currentDoc?.savedObjectId),
