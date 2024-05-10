@@ -39,6 +39,7 @@ import {
   defaultEmbeddableFactoryProvider,
   IEmbeddable,
   SavedObjectEmbeddableInput,
+  registerReactEmbeddableSavedObject,
 } from './lib';
 import { EmbeddableFactoryDefinition } from './lib/embeddables/embeddable_factory_definition';
 import { EmbeddableStateTransfer } from './lib/state_transfer';
@@ -53,6 +54,13 @@ import {
 } from '../common/lib';
 import { getAllMigrations } from '../common/lib/get_all_migrations';
 import { setKibanaServices } from './kibana_services';
+import {
+  DefaultEmbeddableApi,
+  ReactEmbeddableFactory,
+  reactEmbeddableRegistryHasKey,
+  registerReactEmbeddableFactory,
+} from './react_embeddable_system';
+import { registerSavedObjectToPanelMethod } from './registry/saved_object_to_panel_methods';
 
 export interface EmbeddableSetupDependencies {
   uiActions: UiActionsSetup;
@@ -68,6 +76,23 @@ export interface EmbeddableStartDependencies {
 }
 
 export interface EmbeddableSetup {
+  registerReactEmbeddableSavedObject: typeof registerReactEmbeddableSavedObject;
+  registerSavedObjectToPanelMethod: typeof registerSavedObjectToPanelMethod;
+
+  /**
+   * Registers an async {@link ReactEmbeddableFactory} getter.
+   */
+  registerReactEmbeddableFactory: <
+    StateType extends object = object,
+    APIType extends DefaultEmbeddableApi<StateType> = DefaultEmbeddableApi<StateType>
+  >(
+    type: string,
+    getFactory: () => Promise<ReactEmbeddableFactory<StateType, APIType>>
+  ) => void;
+
+  /**
+   * @deprecated use {@link registerReactEmbeddableFactory} instead.
+   */
   registerEmbeddableFactory: <
     I extends EmbeddableInput,
     O extends EmbeddableOutput,
@@ -76,11 +101,25 @@ export interface EmbeddableSetup {
     id: string,
     factory: EmbeddableFactoryDefinition<I, O, E>
   ) => () => EmbeddableFactory<I, O, E>;
+  /**
+   * @deprecated
+   */
   registerEnhancement: (enhancement: EnhancementRegistryDefinition) => void;
+  /**
+   * @deprecated
+   */
   setCustomEmbeddableFactoryProvider: (customProvider: EmbeddableFactoryProvider) => void;
 }
 
 export interface EmbeddableStart extends PersistableStateService<EmbeddableStateWithType> {
+  /**
+   * Checks if a {@link ReactEmbeddableFactory} has been registered using {@link registerReactEmbeddableFactory}
+   */
+  reactEmbeddableRegistryHasKey: (type: string) => boolean;
+
+  /**
+   * @deprecated use {@link registerReactEmbeddableFactory} instead.
+   */
   getEmbeddableFactory: <
     I extends EmbeddableInput = EmbeddableInput,
     O extends EmbeddableOutput = EmbeddableOutput,
@@ -88,6 +127,10 @@ export interface EmbeddableStart extends PersistableStateService<EmbeddableState
   >(
     embeddableFactoryId: string
   ) => EmbeddableFactory<I, O, E> | undefined;
+
+  /**
+   * @deprecated
+   */
   getEmbeddableFactories: () => IterableIterator<EmbeddableFactory>;
   getStateTransfer: (storage?: Storage) => EmbeddableStateTransfer;
   getAttributeService: <
@@ -121,6 +164,11 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     bootstrap(uiActions);
 
     return {
+      registerReactEmbeddableFactory,
+      reactEmbeddableRegistryHasKey,
+      registerSavedObjectToPanelMethod,
+      registerReactEmbeddableSavedObject,
+
       registerEmbeddableFactory: this.registerEmbeddableFactory,
       registerEnhancement: this.registerEnhancement,
       setCustomEmbeddableFactoryProvider: (provider: EmbeddableFactoryProvider) => {
@@ -169,6 +217,8 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       );
 
     const embeddableStart: EmbeddableStart = {
+      reactEmbeddableRegistryHasKey,
+
       getEmbeddableFactory: this.getEmbeddableFactory,
       getEmbeddableFactories: this.getEmbeddableFactories,
       getAttributeService: (type: string, options) =>
