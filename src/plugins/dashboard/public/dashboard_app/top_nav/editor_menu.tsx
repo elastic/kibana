@@ -46,9 +46,9 @@ interface UnwrappedEmbeddableFactory {
   isEditable: boolean;
 }
 
-export type GetEmbeddableFactoryMenuItem = ReturnType<typeof getEmbeddableFactoryMenuItemProvider>;
+type GetEmbeddableFactoryMenuItem = ReturnType<typeof getEmbeddableFactoryMenuItemProvider>;
 
-export const getEmbeddableFactoryMenuItemProvider =
+const getEmbeddableFactoryMenuItemProvider =
   (api: PresentationContainer, closePopover: () => void) => (factory: EmbeddableFactory) => {
     const icon = factory?.getIconType ? factory.getIconType() : 'empty';
 
@@ -60,7 +60,7 @@ export const getEmbeddableFactoryMenuItemProvider =
       toolTipContent,
       onClick: async () => {
         closePopover();
-        api.addNewPanel({ panelType: factory.type }, true);
+        api.addNewPanel({ panelType: factory.type, initialState: {} }, true);
       },
       'data-test-subj': `createNew-${factory.type}`,
     };
