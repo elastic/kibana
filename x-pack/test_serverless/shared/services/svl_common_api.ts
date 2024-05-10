@@ -26,7 +26,7 @@ export function SvlCommonApiServiceProvider({}: FtrProviderContext) {
       return COMMON_REQUEST_HEADERS;
     },
 
-    getInternalRequestHeader() {
+    getInternalRequestHeader(): InternalRequestHeader {
       return INTERNAL_REQUEST_HEADERS;
     },
 
