@@ -73,7 +73,6 @@ export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
       },
     })) as ActionTypeExecutorResult<CrowdstrikeGetAgentOnlineStatusResponse>;
 
-    console.log({ agentStatusResponse: JSON.stringify(agentStatusResponse, null, 2) });
     return keyBy(agentStatusResponse.data?.resources, 'id');
   }
   async getAgentStatuses(agentIds: string[]): Promise<AgentStatusRecords> {
