@@ -18,7 +18,7 @@ import { Logger } from '@kbn/core/server';
 import { getCustomAgents } from './get_custom_agents';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { SSLSettings } from '../types';
-import { getBasicAuthHeader } from './get_basic_auth_header';
+import { combineHeadersWithBasicAuthHeader } from './get_basic_auth_header';
 
 export const request = async <T = unknown>({
   axios,
@@ -58,13 +58,11 @@ export const request = async <T = unknown>({
 
   const { auth, ...restConfig } = config;
 
-  const headersWithBasicAuth =
-    auth != null
-      ? {
-          ...getBasicAuthHeader({ username: auth.username, password: auth.password }),
-          ...headers,
-        }
-      : headers;
+  const headersWithBasicAuth = combineHeadersWithBasicAuthHeader({
+    username: auth?.username,
+    password: auth?.password,
+    headers,
+  });
 
   return await axios(url, {
     ...restConfig,

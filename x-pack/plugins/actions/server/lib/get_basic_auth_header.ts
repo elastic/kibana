@@ -5,13 +5,29 @@
  * 2.0.
  */
 
+import type { AxiosHeaderValue } from 'axios';
+
 interface GetBasicAuthHeaderArgs {
   username: string;
   password: string;
 }
 
+type CombineHeadersWithBasicAuthHeader = Partial<GetBasicAuthHeaderArgs> & {
+  headers?: Record<string, AxiosHeaderValue> | null;
+};
+
 export const getBasicAuthHeader = ({ username, password }: GetBasicAuthHeaderArgs) => {
   const header = `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
 
   return { Authorization: header };
+};
+
+export const combineHeadersWithBasicAuthHeader = ({
+  username,
+  password,
+  headers,
+}: CombineHeadersWithBasicAuthHeader = {}) => {
+  return username != null && password != null
+    ? { ...getBasicAuthHeader({ username, password }), ...headers }
+    : headers ?? undefined;
 };

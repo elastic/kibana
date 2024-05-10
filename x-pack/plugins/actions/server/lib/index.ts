@@ -38,4 +38,4 @@ export {
 export { validateEmptyStrings } from './validate_empty_strings';
 export { parseDate } from './parse_date';
 export type { RelatedSavedObjects } from './related_saved_objects';
-export { getBasicAuthHeader } from './get_basic_auth_header';
+export { getBasicAuthHeader, combineHeadersWithBasicAuthHeader } from './get_basic_auth_header';

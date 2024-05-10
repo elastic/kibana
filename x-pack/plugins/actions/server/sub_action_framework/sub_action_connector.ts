@@ -30,7 +30,7 @@ import { SubAction, SubActionRequestParams } from './types';
 import { ServiceParams } from './types';
 import * as i18n from './translations';
 import { request } from '../lib/axios_utils';
-import { getBasicAuthHeader } from '../lib';
+import { combineHeadersWithBasicAuthHeader } from '../lib/get_basic_auth_header';
 
 const isObject = (value: unknown): value is Record<string, unknown> => {
   return isPlainObject(value);
@@ -93,13 +93,11 @@ export abstract class SubActionConnector<Config, Secrets> {
     auth?: AxiosBasicCredentials,
     headers?: AxiosRequestHeaders
   ): Record<string, AxiosHeaderValue> {
-    const headersWithBasicAuth =
-      auth != null
-        ? {
-            ...getBasicAuthHeader({ username: auth.username, password: auth.password }),
-            ...headers,
-          }
-        : headers;
+    const headersWithBasicAuth = combineHeadersWithBasicAuthHeader({
+      username: auth?.username,
+      password: auth?.password,
+      headers,
+    });
 
     return { 'Content-Type': 'application/json', ...headersWithBasicAuth };
   }
