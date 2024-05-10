@@ -98,11 +98,7 @@ export class UnifiedManifestClient {
     const unifiedManifestsFetcher = this.fetchAllUnifiedManifests(this.savedObjectsClient, options);
 
     for await (const unifiedManifests of unifiedManifestsFetcher) {
-      if (cb.constructor.name === 'AsyncFunction') {
-        await cb(unifiedManifests);
-      } else {
-        cb(unifiedManifests);
-      }
+      await cb(unifiedManifests);
     }
   }
 

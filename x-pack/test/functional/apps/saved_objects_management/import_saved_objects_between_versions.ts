@@ -25,7 +25,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
   const renderService = getService('renderable');
 
-  describe('Export import saved objects between versions', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/183061
+  describe.skip('Export import saved objects between versions', function () {
     before(async function () {
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');

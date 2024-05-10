@@ -54,7 +54,7 @@ export const bedrockConfig: ConfigFieldSchema[] = [
     label: i18n.DEFAULT_MODEL_LABEL,
     helpText: (
       <FormattedMessage
-        defaultMessage='Current support is for the Anthropic Claude models. The model can be set on a per request basis by including a "model" parameter alongside the request body. If no model is provided, the fallback will be the default model -  Claude 2. For more information, refer to the {bedrockAPIModelDocs}.'
+        defaultMessage='Current support is for the Anthropic Claude models. The model can be set on a per request basis by including a "model" parameter alongside the request body. If no model is provided, the fallback will be the default model -  Claude 3 Sonnet. For more information, refer to the {bedrockAPIModelDocs}.'
         id="xpack.stackConnectors.components.bedrock.bedrockDocumentationModel"
         values={{
           bedrockAPIModelDocs: (

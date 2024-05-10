@@ -37,6 +37,8 @@ import type {
   CommandOptionsDefinition,
   FunctionArgSignature,
   FunctionDefinition,
+  FunctionParameterType,
+  FunctionReturnType,
   SignatureArgType,
 } from '../definitions/types';
 import type { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
@@ -214,14 +216,18 @@ export function getCommandOption(optionName: CommandOptionsDefinition['name']) {
   );
 }
 
-function compareLiteralType(argTypes: string, item: ESQLLiteral) {
+function compareLiteralType(argType: string, item: ESQLLiteral) {
   if (item.literalType !== 'string') {
-    return argTypes === item.literalType;
+    if (argType === item.literalType) {
+      return true;
+    }
+    return false;
   }
-  if (argTypes === 'chrono_literal') {
+  if (argType === 'chrono_literal') {
     return chronoLiterals.some(({ name }) => name === item.text);
   }
-  return argTypes === item.literalType;
+  // date-type parameters accept string literals because of ES auto-casting
+  return ['string', 'date'].includes(argType);
 }
 
 export function getColumnHit(
@@ -238,11 +244,19 @@ export function isArrayType(type: string) {
   return ARRAY_REGEXP.test(type);
 }
 
+const arrayToSingularMap: Map<FunctionParameterType, FunctionParameterType> = new Map([
+  ['number[]', 'number'],
+  ['date[]', 'date'],
+  ['boolean[]', 'boolean'],
+  ['string[]', 'string'],
+  ['any[]', 'any'],
+]);
+
 /**
  * Given an array type for example `string[]` it will return `string`
  */
-export function extractSingularType(type: string) {
-  return type.replace(ARRAY_REGEXP, '');
+export function extractSingularType(type: FunctionParameterType): FunctionParameterType {
+  return arrayToSingularMap.get(type) ?? type;
 }
 
 export function createMapFromList<T extends { name: string }>(arr: T[]): Map<string, T> {
@@ -274,10 +288,14 @@ export function printFunctionSignature(arg: ESQLFunction): string {
             ...fnDef?.signatures[0],
             params: arg.args.map((innerArg) =>
               Array.isArray(innerArg)
-                ? { name: `InnerArgument[]`, type: '' }
-                : { name: innerArg.text, type: innerArg.type }
+                ? { name: `InnerArgument[]`, type: 'any' as const }
+                : // this cast isn't actually correct, but we're abusing the
+                  // getFunctionSignatures API anyways
+                  { name: innerArg.text, type: innerArg.type as FunctionParameterType }
             ),
-            returnType: '',
+            // this cast isn't actually correct, but we're abusing the
+            // getFunctionSignatures API anyways
+            returnType: '' as FunctionReturnType,
           },
         ],
       },
