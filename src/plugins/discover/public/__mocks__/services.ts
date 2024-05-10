@@ -157,7 +157,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
       FieldStatisticsTable: jest.fn(() => createElement('div')),
     },
     aiops: {
-      patternAnalysisAvailable: jest.fn().mockResolvedValue(true),
+      getPatternAnalysisAvailable: jest.fn().mockResolvedValue(jest.fn().mockResolvedValue(true)),
       PatternAnalysisComponent: jest.fn(() => createElement('div')),
     },
     docLinks: docLinksServiceMock.createStartContract(),

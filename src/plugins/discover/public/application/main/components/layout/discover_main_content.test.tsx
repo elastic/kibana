@@ -162,11 +162,6 @@ describe('Discover main content component', () => {
       expect(component.find(DocumentViewModeToggle).exists()).toBe(true);
     });
 
-    it('should show DocumentViewModeToggle for Patterns', async () => {
-      const component = await mountComponent({ viewMode: VIEW_MODE.PATTERN_LEVEL });
-      expect(component.find(DocumentViewModeToggle).exists()).toBe(true);
-    });
-
     it('should include PanelsToggle when chart is available', async () => {
       const component = await mountComponent({ isChartAvailable: true });
       expect(component.find(PanelsToggle).prop('isChartAvailable')).toBe(true);

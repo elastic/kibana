@@ -36,7 +36,9 @@ describe('Document view mode toggle component', () => {
         get: () => showFieldStatistics,
       },
       aiops: {
-        patternAnalysisAvailable: jest.fn().mockResolvedValue(useDataViewWithTextFields),
+        getPatternAnalysisAvailable: jest
+          .fn()
+          .mockResolvedValue(jest.fn().mockResolvedValue(useDataViewWithTextFields)),
       },
     };
 
