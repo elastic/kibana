@@ -51,8 +51,18 @@ const cleanException = (url: string, ex: any) => {
   }
 };
 
-const getSessionCookie = (cookieString: string) => {
-  return parseCookie(cookieString);
+const getCookieFromResponseHeaders = (response: AxiosResponse, errorMessage: string) => {
+  const setCookieHeader = response?.headers['set-cookie'];
+  if (!setCookieHeader) {
+    throw new Error(`Failed to parse 'set-cookie' header`);
+  }
+
+  const cookie = parseCookie(setCookieHeader![0]);
+  if (!cookie) {
+    throw new Error(errorMessage);
+  }
+
+  return cookie;
 };
 
 const getCloudHostName = () => {
@@ -72,7 +82,7 @@ const getCloudUrl = (hostname: string, pathname: string) => {
   });
 };
 
-const createCloudSession = async (params: CreateSamlSessionParams) => {
+export const createCloudSession = async (params: CreateSamlSessionParams) => {
   const { hostname, email, password, log } = params;
   const cloudLoginUrl = getCloudUrl(hostname, '/api/v1/saas/auth/_login');
   let sessionResponse: AxiosResponse | undefined;
@@ -113,7 +123,7 @@ const createCloudSession = async (params: CreateSamlSessionParams) => {
   return token;
 };
 
-const createSAMLRequest = async (kbnUrl: string, kbnVersion: string, log: ToolingLog) => {
+export const createSAMLRequest = async (kbnUrl: string, kbnVersion: string, log: ToolingLog) => {
   let samlResponse: AxiosResponse;
   const url = kbnUrl + '/internal/security/login';
   try {
@@ -139,10 +149,10 @@ const createSAMLRequest = async (kbnUrl: string, kbnVersion: string, log: Toolin
     throw ex;
   }
 
-  const cookie = getSessionCookie(samlResponse.headers['set-cookie']![0]);
-  if (!cookie) {
-    throw new Error(`Failed to parse cookie from SAML response headers`);
-  }
+  const cookie = getCookieFromResponseHeaders(
+    samlResponse,
+    'Failed to parse cookie from SAML response headers'
+  );
 
   const location = samlResponse?.data?.location as string;
   if (!location) {
@@ -156,7 +166,7 @@ const createSAMLRequest = async (kbnUrl: string, kbnVersion: string, log: Toolin
   return { location, sid: cookie.value };
 };
 
-const createSAMLResponse = async (
+export const createSAMLResponse = async (
   url: string,
   ecSession: string,
   email: string,
@@ -193,7 +203,7 @@ ${kbnHost} in the same window.`
   return value;
 };
 
-const finishSAMLHandshake = async ({
+export const finishSAMLHandshake = async ({
   kbnHost,
   samlResponse,
   sid,
@@ -226,12 +236,10 @@ const finishSAMLHandshake = async ({
     throw ex;
   }
 
-  const cookie = getSessionCookie(authResponse!.headers['set-cookie']![0]);
-  if (!cookie) {
-    throw new Error(`Failed to get cookie from SAML callback response headers`);
-  }
-
-  return cookie;
+  return getCookieFromResponseHeaders(
+    authResponse,
+    'Failed to get cookie from SAML callback response headers'
+  );
 };
 
 const getSecurityProfile = async ({
