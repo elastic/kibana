@@ -139,10 +139,10 @@ export abstract class BaseAuthenticationProvider {
     return deepFreeze({
       ...authenticationInfo,
       authentication_provider: { type: this.type, name: this.options.name },
-      elastic_cloud_user: true,
-      //     this.options.isElasticCloudDeployment() &&
-      //     authenticationInfo.authentication_realm.type === 'saml' &&
-      //     authenticationInfo.authentication_realm.name === ELASTIC_CLOUD_SSO_REALM_NAME,
+      elastic_cloud_user:
+        this.options.isElasticCloudDeployment() &&
+        authenticationInfo.authentication_realm.type === 'saml' &&
+        authenticationInfo.authentication_realm.name === ELASTIC_CLOUD_SSO_REALM_NAME,
     } as AuthenticatedUser);
   }
 }
