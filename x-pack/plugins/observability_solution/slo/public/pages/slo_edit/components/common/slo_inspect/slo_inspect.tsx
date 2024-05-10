@@ -27,14 +27,14 @@ import { GetSLOResponse } from '@kbn/slo-schema';
 import React, { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
-import { useKibana } from '../../../../utils/kibana_react';
-import { useFetchSloInspect } from '../../../../hooks/use_fetch_slo_inspect';
-import { usePluginContext } from '../../../../hooks/use_plugin_context';
-import { transformCreateSLOFormToCreateSLOInput } from '../../helpers/process_slo_form_values';
-import { CreateSLOForm } from '../../types';
-import { CodeBlockAccordion } from './slo_inspect/code_block_accordion';
-import { LoadingState } from './slo_inspect/loading_state';
-import { RequestCodeViewer } from './slo_inspect/req_code_viewer';
+import { useKibana } from '../../../../../utils/kibana_react';
+import { useFetchSloInspect } from '../../../../../hooks/use_fetch_slo_inspect';
+import { usePluginContext } from '../../../../../hooks/use_plugin_context';
+import { transformCreateSLOFormToCreateSLOInput } from '../../../helpers/process_slo_form_values';
+import { CreateSLOForm } from '../../../types';
+import { CodeBlockAccordion } from './code_block_accordion';
+import { LoadingState } from './loading_state';
+import { RequestCodeViewer } from './req_code_viewer';
 
 interface Props {
   slo?: GetSLOResponse;
@@ -60,11 +60,7 @@ function SLOInspect({ slo, disabled }: Props) {
   const [isFormValid, setFormValid] = useState(false);
 
   const sloFormValues = transformCreateSLOFormToCreateSLOInput(getValues());
-  const {
-    data: inspectSloData,
-    transformQueryString,
-    isLoading,
-  } = useFetchSloInspect(
+  const { data: inspectSloData, isLoading } = useFetchSloInspect(
     { ...sloFormValues, id: slo?.id, revision: slo?.revision },
     isFlyoutVisible && isFormValid
   );
@@ -185,13 +181,25 @@ function SLOInspect({ slo, disabled }: Props) {
               <EuiSpacer size="s" />
 
               <CodeBlockAccordion
-                id="transformQuery"
+                id="rollupTransformQuery"
                 label={i18n.translate(
                   'xpack.slo.sLOInspect.codeBlockAccordion.transformQueryLabel',
-                  { defaultMessage: 'Rollup Transform query' }
+                  { defaultMessage: 'Rollup Transform query composite' }
                 )}
               >
-                <RequestCodeViewer value={transformQueryString} />
+                <RequestCodeViewer value={inspectSloData.rollUpTransformCompositeQuery} />
+              </CodeBlockAccordion>
+
+              <EuiSpacer size="s" />
+
+              <CodeBlockAccordion
+                id="summmaryTransformQuery"
+                label={i18n.translate(
+                  'xpack.slo.sLOInspect.codeBlockAccordion.summaryTransformQueryLabel',
+                  { defaultMessage: 'Summary Transform query composite' }
+                )}
+              >
+                <RequestCodeViewer value={inspectSloData.summaryTransformCompositeQuery} />
               </CodeBlockAccordion>
             </>
           )}
