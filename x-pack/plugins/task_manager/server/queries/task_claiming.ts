@@ -111,6 +111,8 @@ export class TaskClaiming {
     this.unusedTypes = opts.unusedTypes;
     this.taskClaimer = getTaskClaimer(opts.strategy);
     this.events$ = new Subject<TaskClaim>();
+
+    this.logger.info(`using task claiming strategy: ${opts.strategy}`);
   }
 
   private partitionIntoClaimingBatches(definitions: TaskTypeDictionary): TaskClaimingBatches {
