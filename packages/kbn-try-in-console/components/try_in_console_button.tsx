@@ -65,11 +65,20 @@ export const TryInConsoleButton = ({
   };
 
   if (link) {
-    return <EuiLink onClick={onClick}>{content ?? TRY_IN_CONSOLE}</EuiLink>;
+    return (
+      <EuiLink data-test-subj="tryInConsoleLink" onClick={onClick}>
+        {content ?? TRY_IN_CONSOLE}
+      </EuiLink>
+    );
   }
 
   return (
-    <EuiButtonEmpty onClick={onClick} iconType={showIcon ? 'popout' : undefined} size="s">
+    <EuiButtonEmpty
+      data-test-subj="tryInConsoleButton"
+      onClick={onClick}
+      iconType={showIcon ? 'popout' : undefined}
+      size="s"
+    >
       {content ?? TRY_IN_CONSOLE}
     </EuiButtonEmpty>
   );
