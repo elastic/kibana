@@ -6,12 +6,12 @@
  */
 
 import useObservable from 'react-use/lib/useObservable';
-import { useCasesContext } from '../../cases_context/use_cases_context';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
-export const useIsAddToNewCaseFlyoutOpen = () => {
+export type UseIsAddToCaseOpen = () => boolean;
+
+export const useIsAddToCaseOpen: UseIsAddToCaseOpen = () => {
   const { casesContextState$ } = useCasesContext();
-  const { createCaseFlyout } = useObservable(casesContextState$) ?? {};
-  return createCaseFlyout?.isFlyoutOpen ?? false;
+  const { selectCaseModal, createCaseFlyout } = useObservable(casesContextState$) ?? {};
+  return (selectCaseModal?.isModalOpen || createCaseFlyout?.isFlyoutOpen) ?? false;
 };
-
-export type UseIsAddToNewCaseFlyoutOpen = typeof useIsAddToNewCaseFlyoutOpen;
