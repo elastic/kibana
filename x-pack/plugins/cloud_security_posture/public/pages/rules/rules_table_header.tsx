@@ -272,7 +272,6 @@ const CurrentPageOfTotal = ({
         ruleIds: bulkSelectedRules,
       });
       setIsPopoverOpen(false);
-      // await refetchRulesStates();
       showChangeBenchmarkRuleStatesSuccessToast(startServices, state !== 'mute', {
         numberOfRules: bulkSelectedRules.length,
         numberOfDetectionRules: detectionRulesForSelectedRules?.total || 0,

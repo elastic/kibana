@@ -87,7 +87,6 @@ export const RuleFlyout = ({ onClose, rule }: RuleFlyoutProps) => {
         newState: nextRuleStates,
         ruleIds: [rulesObjectRequest],
       });
-      // refetchRulesStates();
       showChangeBenchmarkRuleStatesSuccessToast(startServices, isRuleMuted, {
         numberOfRules: 1,
         numberOfDetectionRules: rulesData?.total || 0,

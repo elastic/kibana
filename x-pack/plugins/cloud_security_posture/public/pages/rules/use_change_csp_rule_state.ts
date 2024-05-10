@@ -47,9 +47,12 @@ export const useChangeCspRuleState = () => {
       const previousCspRules = queryClient.getQueryData(CSP_RULES_STATES_QUERY_KEY);
 
       // Optimistically update to the rules that have state changes
-      queryClient.setQueryData(CSP_RULES_STATES_QUERY_KEY, (currentRuleStates: any) => {
-        return createRulesWithUpdatedState(ruleStateUpdateRequest, currentRuleStates);
-      });
+      queryClient.setQueryData(
+        CSP_RULES_STATES_QUERY_KEY,
+        (currentRuleStates: Record<string, RuleStateAttributes>) => {
+          return createRulesWithUpdatedState(ruleStateUpdateRequest, currentRuleStates);
+        }
+      );
 
       // Return a context object with the previous value
       return { previousCspRules };
