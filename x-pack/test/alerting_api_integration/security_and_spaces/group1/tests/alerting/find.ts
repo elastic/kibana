@@ -623,6 +623,9 @@ const findTestUtils = (
         .set('kbn-xsrf', 'foo')
         .auth(user.username, user.password);
 
+      expect(response.body.data.length).to.eql(1);
+      expect(response.body.data[0].actions.length).to.eql(2);
+
       const action = response.body.data[0].actions[0];
       const systemAction = response.body.data[0].actions[1];
       const { uuid, ...restAction } = action;
