@@ -23,8 +23,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/172770
-  describe.skip('log pattern analysis', async function () {
+  describe('log pattern analysis', async function () {
     let tabsCount = 1;
 
     afterEach(async () => {
