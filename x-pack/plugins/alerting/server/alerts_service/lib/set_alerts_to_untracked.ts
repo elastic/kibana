@@ -253,7 +253,7 @@ export async function setAlertsToUntracked(
     });
     return searchResponse.hits.hits.map((hit) => hit._source) as UntrackedAlertsResult;
   } catch (err) {
-    logger.error(
+    logger.debug(
       `Error marking ${ruleIds ? 'ruleIds' : 'alertUuids'} ${
         ruleIds ? ruleIds : alertUuids
       } as untracked - ${err.message}`
