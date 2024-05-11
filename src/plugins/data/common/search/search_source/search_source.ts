@@ -775,11 +775,11 @@ export class SearchSource {
 
   private flatten() {
     const { getConfig } = this.dependencies;
+    const metaFields = getConfig(UI_SETTINGS.META_FIELDS) ?? [];
+
     const searchRequest = this.mergeProps();
     searchRequest.body = searchRequest.body || {};
     const { body, index, query, filters, highlightAll } = searchRequest;
-    searchRequest.indexType = this.getIndexType(index);
-    const metaFields = getConfig(UI_SETTINGS.META_FIELDS) ?? [];
 
     // get some special field types from the index pattern
     const { docvalueFields, scriptFields, runtimeFields } = index
@@ -824,16 +824,12 @@ export class SearchSource {
 
     // specific fields were provided, so we need to exclude any others
     if (fieldListProvided || fieldsFromSource.length) {
-      const bodyFieldNames = body.fields.map((field: SearchFieldValue) => this.getFieldName(field));
-      const uniqFieldNames = [...new Set([...bodyFieldNames, ...fieldsFromSource])];
+      const uniqFieldNames = this.getUniqueFieldNames({ fields: body.fields, fieldsFromSource });
 
-      if (!uniqFieldNames.includes('*')) {
-        // filter down script_fields to only include items specified
-        body.script_fields = pick(
-          body.script_fields,
-          Object.keys(body.script_fields).filter((f) => uniqFieldNames.includes(f))
-        );
-      }
+      body.script_fields = this.filterScriptFields({
+        uniqFieldNames,
+        scriptFields: body.script_fields,
+      });
 
       // request the remaining fields from stored_fields just in case, since the
       // fields API does not handle stored fields
@@ -867,6 +863,15 @@ export class SearchSource {
           }),
         ];
 
+        /*
+        body.fields = this.getFieldsAndDocValueFields({
+          fields: body.fields,
+          docvalueFields,
+          fieldsFromSource,
+          filteredDocvalueFields,
+        });
+        */
+
         // delete fields array if it is still set to the empty default
         if (!fieldListProvided && body.fields.length === 0) delete body.fields;
       } else {
@@ -884,15 +889,7 @@ export class SearchSource {
       body.fields = filteredDocvalueFields;
     }
 
-    // If sorting by _score, build queries in the "must" clause instead of "filter" clause to enable scoring
-    const filtersInMustClause = (body.sort ?? []).some((sort: EsQuerySortValue[]) =>
-      sort.hasOwnProperty('_score')
-    );
-    const esQueryConfigs = {
-      ...getEsQueryConfig({ get: getConfig }),
-      filtersInMustClause,
-    };
-    body.query = buildEsQuery(index, query, filters, esQueryConfigs);
+    const builtQuery = this.getBuiltEsQuery({ index, query, filters, getConfig, sort: body.sort });
 
     // For testing shard failure messages in the UI, follow these steps:
     // 1. Add all three sample data sets (flights, ecommerce, logs) to Kibana.
@@ -913,7 +910,7 @@ export class SearchSource {
     // });
     // Alternatively you could also add this query via "Edit as Query DSL", then it needs no code to be changed
 
-    if (highlightAll && body.query) {
+    if (highlightAll && builtQuery) {
       body.highlight = getHighlightRequest(getConfig(UI_SETTINGS.DOC_HIGHLIGHT));
       delete searchRequest.highlightAll;
     }
@@ -927,9 +924,65 @@ export class SearchSource {
     const bodyToReturn = {
       ...searchRequest.body,
       pit: searchRequest.pit,
+      query: builtQuery,
     };
 
-    return omitByIsNil({ ...searchRequest, body: omitByIsNil(bodyToReturn) }) as SearchRequest;
+    return omitByIsNil({
+      ...searchRequest,
+      body: omitByIsNil(bodyToReturn),
+      indexType: this.getIndexType(index),
+    }) as SearchRequest;
+  }
+
+  private getUniqueFieldNames({
+    fields,
+    fieldsFromSource,
+  }: {
+    fields: any;
+    fieldsFromSource: any;
+  }) {
+    const bodyFieldNames = fields.map((field: SearchFieldValue) => this.getFieldName(field));
+    return [...new Set([...bodyFieldNames, ...fieldsFromSource])];
+  }
+
+  private filterScriptFields({
+    uniqFieldNames,
+    scriptFields,
+  }: {
+    uniqFieldNames: any;
+    scriptFields: any;
+  }) {
+    return uniqFieldNames.includes('*')
+      ? scriptFields
+      : // filter down script_fields to only include items specified
+        pick(
+          scriptFields,
+          Object.keys(scriptFields).filter((f) => uniqFieldNames.includes(f))
+        );
+  }
+
+  private getBuiltEsQuery({
+    index,
+    query,
+    filters,
+    getConfig,
+    sort,
+  }: {
+    index: any;
+    query: any;
+    filters: any;
+    getConfig: (key: string) => any;
+    sort?: any;
+  }) {
+    // If sorting by _score, build queries in the "must" clause instead of "filter" clause to enable scoring
+    const filtersInMustClause = (sort ?? []).some((srt: EsQuerySortValue[]) =>
+      srt.hasOwnProperty('_score')
+    );
+    const esQueryConfigs = {
+      ...getEsQueryConfig({ get: getConfig }),
+      filtersInMustClause,
+    };
+    return buildEsQuery(index, query, filters, esQueryConfigs);
   }
 
   private getRemainingFields({
@@ -953,6 +1006,7 @@ export class SearchSource {
     });
   }
 
+  /*
   private getFieldsAndDocValueFields({
     fields,
     docvalueFields,
@@ -976,6 +1030,7 @@ export class SearchSource {
       }),
     ];
   }
+  */
 
   private getUniqueFields({
     index,
