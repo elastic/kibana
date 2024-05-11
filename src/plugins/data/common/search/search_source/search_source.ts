@@ -837,13 +837,11 @@ export class SearchSource {
 
       // request the remaining fields from stored_fields just in case, since the
       // fields API does not handle stored fields
-      const remainingFields = difference(uniqFieldNames, [
-        ...Object.keys(body.script_fields),
-        ...Object.keys(body.runtime_mappings),
-      ]).filter((remainingField) => {
-        if (!remainingField) return false;
-        if (!body._source || !body._source.excludes) return true;
-        return !body._source.excludes.includes(remainingField);
+      const remainingFields = this.getRemainingFields({
+        uniqFieldNames,
+        scriptFields: body.script_fields,
+        runtimeMappings: body.runtime_mappings,
+        _source: body._source,
       });
 
       body.stored_fields = [...new Set(remainingFields)];
@@ -922,12 +920,61 @@ export class SearchSource {
 
     const omitByIsNil = (object: Record<string, any>) => omitBy(object, isNil);
 
+    /*
+    const filterScriptedFields =
+      (fieldListProvided || fieldsFromSource.length) && !uniqFieldNames.includes('*');
+*/
     const bodyToReturn = {
       ...searchRequest.body,
       pit: searchRequest.pit,
     };
 
     return omitByIsNil({ ...searchRequest, body: omitByIsNil(bodyToReturn) }) as SearchRequest;
+  }
+
+  private getRemainingFields({
+    uniqFieldNames,
+    scriptFields,
+    runtimeMappings,
+    _source,
+  }: {
+    uniqFieldNames: any;
+    scriptFields: any;
+    runtimeMappings: any;
+    _source: any;
+  }) {
+    return difference(uniqFieldNames, [
+      ...Object.keys(scriptFields),
+      ...Object.keys(runtimeMappings),
+    ]).filter((remainingField) => {
+      if (!remainingField) return false;
+      if (!_source || !_source.excludes) return true;
+      return !_source.excludes.includes(remainingField);
+    });
+  }
+
+  private getFieldsAndDocValueFields({
+    fields,
+    docvalueFields,
+    fieldsFromSource,
+    filteredDocvalueFields,
+  }: {
+    fields: any;
+    docvalueFields: any;
+    fieldsFromSource: any;
+    filteredDocvalueFields: any;
+  }) {
+    return [
+      ...fields,
+      ...filteredDocvalueFields.filter((fld: SearchFieldValue) => {
+        return (
+          fieldsFromSource.includes(this.getFieldName(fld)) &&
+          !(docvalueFields || [])
+            .map((d: string | Record<string, SearchFieldValue>) => this.getFieldName(d))
+            .includes(this.getFieldName(fld))
+        );
+      }),
+    ];
   }
 
   private getUniqueFields({
