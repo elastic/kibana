@@ -33,7 +33,10 @@ export const createSearchSource = (
   indexPatterns: DataViewsContract,
   searchSourceDependencies: SearchSourceDependencies
 ) => {
-  const createFields = async (searchSourceFields: SerializedSearchSourceFields = {}) => {
+  const createFields = async (
+    searchSourceFields: SerializedSearchSourceFields = {},
+    useDataViewLazy = false
+  ) => {
     const { index, parent, ...restOfFields } = searchSourceFields;
     const fields: SearchSourceFields = {
       ...restOfFields,
@@ -41,10 +44,18 @@ export const createSearchSource = (
 
     // hydrating index pattern
     if (searchSourceFields.index) {
-      if (typeof searchSourceFields.index === 'string') {
-        fields.index = await indexPatterns.get(searchSourceFields.index);
+      if (!useDataViewLazy) {
+        if (typeof searchSourceFields.index === 'string') {
+          fields.index = await indexPatterns.get(searchSourceFields.index);
+        } else {
+          fields.index = await indexPatterns.create(searchSourceFields.index);
+        }
       } else {
-        fields.index = await indexPatterns.create(searchSourceFields.index);
+        if (typeof searchSourceFields.index === 'string') {
+          fields.index = await indexPatterns.getDataViewLazy(searchSourceFields.index);
+        } else {
+          fields.index = await indexPatterns.createDataViewLazy(searchSourceFields.index);
+        }
       }
     }
 
@@ -55,8 +66,11 @@ export const createSearchSource = (
     return fields;
   };
 
-  const createSearchSourceFn = async (searchSourceFields: SerializedSearchSourceFields = {}) => {
-    const fields = await createFields(searchSourceFields);
+  const createSearchSourceFn = async (
+    searchSourceFields: SerializedSearchSourceFields = {},
+    useDataViewLazy: boolean
+  ) => {
+    const fields = await createFields(searchSourceFields, useDataViewLazy);
     const searchSource = new SearchSource(fields, searchSourceDependencies);
 
     // todo: move to migration script .. create issue
@@ -64,6 +78,10 @@ export const createSearchSource = (
 
     if (typeof query !== 'undefined') {
       searchSource.setField('query', migrateLegacyQuery(query));
+    }
+    if (useDataViewLazy) {
+      console.log('useDataViewLazy', useDataViewLazy);
+      await searchSource.loadDataViewFields();
     }
 
     return searchSource;

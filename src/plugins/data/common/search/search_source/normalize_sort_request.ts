@@ -7,7 +7,7 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import { DataView, DataViewLazy } from '@kbn/data-views-plugin/common';
 import { EsQuerySortValue } from './types';
 
 type FieldSortOptions = estypes.FieldSort &
@@ -19,9 +19,10 @@ type FieldSortOptions = estypes.FieldSort &
 
 export function normalizeSortRequest(
   sortObject: EsQuerySortValue | EsQuerySortValue[],
-  indexPattern: DataView | string | undefined,
+  indexPattern: DataView | DataViewLazy | string | undefined,
   defaultSortOptions: FieldSortOptions | string = {}
 ) {
+  console.log('normalizeSortRequest', sortObject, defaultSortOptions);
   const sortArray: EsQuerySortValue[] = Array.isArray(sortObject) ? sortObject : [sortObject];
   return sortArray.map(function (sortable) {
     return normalize(sortable, indexPattern, defaultSortOptions);
@@ -35,14 +36,14 @@ export function normalizeSortRequest(
  */
 function normalize(
   sortable: EsQuerySortValue,
-  indexPattern: DataView | string | undefined,
+  indexPattern: DataView | DataViewLazy | string | undefined,
   defaultSortOptions: FieldSortOptions | string
 ) {
   const [[sortField, sortOrder]] = Object.entries(sortable);
   const order = typeof sortOrder === 'object' ? sortOrder : { order: sortOrder };
 
   if (indexPattern && typeof indexPattern !== 'string') {
-    const indexField = indexPattern.fields.find(({ name }) => name === sortField);
+    const indexField = indexPattern.fields?.find(({ name }) => name === sortField);
     if (indexField && indexField.scripted && indexField.sortable) {
       return {
         _script: {

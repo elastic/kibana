@@ -22,11 +22,12 @@ import type {
   SourceFilter,
   TypeMeta,
   RuntimeField,
+  DataViewFieldMap,
 } from '../types';
 import { removeFieldAttrs } from './utils';
 import { metaUnitsToFormatter } from './meta_units_to_formatter';
 
-import type { DataViewAttributes, FieldAttrs, FieldAttrSet } from '..';
+import type { DataViewAttributes, FieldAttrs, FieldAttrSet, IIndexPatternFieldList} from '..';
 
 import type { DataViewField } from '../fields';
 
@@ -68,6 +69,10 @@ export abstract class AbstractDataView {
    * Only used by rollup indices, used by rollup specific endpoint to load field list.
    */
   public typeMeta?: TypeMeta;
+  /**
+   * Field list, in extended array format
+   */
+  public fields?: IIndexPatternFieldList & { toSpec: () => DataViewFieldMap };
 
   /**
    * Timestamp field name
