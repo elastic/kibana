@@ -32,7 +32,6 @@ export const UsersTabs = memo<UsersTabsProps>(
       startDate: from,
       type,
     };
-
     return (
       <Routes>
         <Route path={`${USERS_PATH}/:tabName(${UsersTableType.allUsers})`}>

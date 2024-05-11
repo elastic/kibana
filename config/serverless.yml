@@ -48,6 +48,10 @@ xpack.index_management.enableIndexStats: false
 xpack.index_management.editableIndexSettings: limited
 # Disable Storage size column in the Data streams table from Index Management UI
 xpack.index_management.enableDataStreamsStorageColumn: false
+# Disable _source field in the Mappings editor's advanced options form from Index Management UI
+xpack.index_management.enableMappingsSourceFieldSection: false
+# Disable toggle for enabling data retention in DSL form from Index Management UI
+xpack.index_management.enableTogglingDataRetention: false
 
 # Keep deeplinks visible so that they are shown in the sidenav
 dev_tools.deeplinks.navLinkStatus: visible
@@ -126,6 +130,8 @@ xpack.alerting.rules.run.timeout: 1m
 xpack.alerting.rules.run.ruleTypeOverrides:
   - id: siem.indicatorRule
     timeout: 10m
+  - id: siem.eqlRule
+    timeout: 5m
 xpack.alerting.rules.minimumScheduleInterval.enforce: true
 xpack.alerting.rules.maxScheduledPerMinute: 400
 xpack.actions.run.maxAttempts: 10
@@ -134,22 +140,24 @@ xpack.actions.queued.max: 10000
 # Disables ESQL in advanced settings (hides it from the UI)
 uiSettings:
   overrides:
-    discover:enableESQL: false
+    enableESQL: true
 
 # Task Manager
 xpack.task_manager.allow_reading_invalid_state: false
 xpack.task_manager.request_timeouts.update_by_query: 60000
+xpack.task_manager.metrics_reset_interval: 120000
 
 # Reporting feature
 xpack.screenshotting.enabled: false
 xpack.reporting.queue.pollInterval: 3m
 xpack.reporting.roles.enabled: false
 xpack.reporting.statefulSettings.enabled: false
+xpack.reporting.csv.maxConcurrentShardRequests: 0
 
 # Disabled Observability plugins
 xpack.ux.enabled: false
-xpack.monitoring.enabled: false
 xpack.legacy_uptime.enabled: false
+monitoring.enabled: false
 monitoring.ui.enabled: false
 
 ## Enable uiSettings validations

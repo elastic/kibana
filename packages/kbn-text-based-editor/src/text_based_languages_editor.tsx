@@ -9,14 +9,7 @@
 import React, { useRef, memo, useEffect, useState, useCallback, useMemo } from 'react';
 import classNames from 'classnames';
 import memoize from 'lodash/memoize';
-import {
-  SQLLang,
-  monaco,
-  ESQL_LANG_ID,
-  ESQL_THEME_ID,
-  ESQLLang,
-  type ESQLCallbacks,
-} from '@kbn/monaco';
+import { monaco, ESQL_LANG_ID, ESQL_THEME_ID, ESQLLang, type ESQLCallbacks } from '@kbn/monaco';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getAggregateQueryMode, getLanguageDisplayName } from '@kbn/es-query';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -43,7 +36,7 @@ import {
 import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
 
 import {
-  textBasedLanguagedEditorStyles,
+  textBasedLanguageEditorStyles,
   EDITOR_INITIAL_HEIGHT,
   EDITOR_INITIAL_HEIGHT_EXPANDED,
   EDITOR_MAX_HEIGHT,
@@ -143,18 +136,6 @@ const KEYCODE_ARROW_DOWN = 40;
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
 
-const languageId = (language: string) => {
-  switch (language) {
-    case 'esql': {
-      return ESQL_LANG_ID;
-    }
-    case 'sql':
-    default: {
-      return SQLLang.ID;
-    }
-  }
-};
-
 let clickedOutside = false;
 let initialRender = true;
 let updateLinesFromModel = false;
@@ -189,7 +170,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     kibana.services;
   const timeZone = core?.uiSettings?.get('dateFormat:tz');
   const [code, setCode] = useState<string>(queryString ?? '');
-  const [codeOneLiner, setCodeOneLiner] = useState('');
+  const [codeOneLiner, setCodeOneLiner] = useState<string | null>(null);
   // To make server side errors less "sticky", register the state of the code when submitting
   const [codeWhenSubmitted, setCodeStateOnSubmission] = useState(code);
   const [editorHeight, setEditorHeight] = useState(
@@ -273,7 +254,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     });
   });
 
-  const styles = textBasedLanguagedEditorStyles(
+  const styles = textBasedLanguageEditorStyles(
     euiTheme,
     isCompactFocused,
     editorHeight,
@@ -342,34 +323,24 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     updateLinesFromModel = false;
     clickedOutside = true;
     if (editor1.current) {
-      const editorElement = editor1.current.getDomNode();
-      if (editorElement) {
-        editorElement.style.height = `${EDITOR_INITIAL_HEIGHT}px`;
-        const contentWidth = Number(editorElement?.style.width.replace('px', ''));
-        calculateVisibleCode(contentWidth, true);
-        editor1.current.layout({ width: contentWidth, height: EDITOR_INITIAL_HEIGHT });
-      }
+      const contentWidth = editor1.current.getLayoutInfo().width;
+      calculateVisibleCode(contentWidth, true);
+      editor1.current.layout({ width: contentWidth, height: EDITOR_INITIAL_HEIGHT });
     }
   };
 
   const updateHeight = useCallback((editor: monaco.editor.IStandaloneCodeEditor) => {
-    if (lines === 1 || clickedOutside || initialRender) return;
-    const editorElement = editor.getDomNode();
+    if (clickedOutside || initialRender) return;
     const contentHeight = Math.min(MAX_COMPACT_VIEW_LENGTH, editor.getContentHeight());
-
-    if (editorElement) {
-      editorElement.style.height = `${contentHeight}px`;
-    }
-    const contentWidth = Number(editorElement?.style.width.replace('px', ''));
-    editor.layout({ width: contentWidth, height: contentHeight });
     setEditorHeight(contentHeight);
+    editor.layout({ width: editor.getLayoutInfo().width, height: contentHeight });
   }, []);
 
   const onEditorFocus = useCallback(() => {
     setIsCompactFocused(true);
     setIsCodeEditorExpandedFocused(true);
     setShowLineNumbers(true);
-    setCodeOneLiner('');
+    setCodeOneLiner(null);
     clickedOutside = false;
     initialRender = false;
     updateLinesFromModel = true;
@@ -598,13 +569,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
   useEffect(() => {
     if (editor1.current && !isCompactFocused) {
-      const editorElement = editor1.current.getDomNode();
-      if (editorElement) {
-        const contentWidth = Number(editorElement?.style.width.replace('px', ''));
-        if (code !== queryString) {
-          setCode(queryString);
-          calculateVisibleCode(contentWidth);
-        }
+      if (code !== queryString) {
+        setCode(queryString);
+        calculateVisibleCode(editor1.current.getLayoutInfo().width);
       }
     }
   }, [calculateVisibleCode, code, isCompactFocused, queryString]);
@@ -878,7 +845,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         />
                       )}
                     <CodeEditor
-                      languageId={languageId(language)}
+                      languageId={ESQL_LANG_ID}
                       value={codeOneLiner || code}
                       options={codeEditorOptions}
                       width="100%"
@@ -944,9 +911,14 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                           monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
                           onQuerySubmit
                         );
+
                         if (!isCodeEditorExpanded) {
                           editor.onDidContentSizeChange((e) => {
-                            updateHeight(editor);
+                            // @ts-expect-error the property _oldContentHeight exists on the event object received but
+                            // is not available on the type definition
+                            if (e.contentHeight !== e._oldContentHeight) {
+                              updateHeight(editor);
+                            }
                           });
                         }
                       }}
@@ -976,6 +948,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         hideQueryHistory={hideHistoryComponent}
                         refetchHistoryItems={refetchHistoryItems}
                         isInCompactMode={true}
+                        queryHasChanged={code !== codeWhenSubmitted}
                       />
                     )}
                   </div>
@@ -1074,6 +1047,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           containerWidth={editorWidth}
           hideQueryHistory={hideHistoryComponent}
           refetchHistoryItems={refetchHistoryItems}
+          queryHasChanged={code !== codeWhenSubmitted}
         />
       )}
       {isCodeEditorExpanded && (

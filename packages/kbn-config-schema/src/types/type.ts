@@ -7,16 +7,23 @@
  */
 
 import type { AnySchema, CustomValidator, ErrorReport } from 'joi';
-import { META_FIELD_X_OAS_REF_ID } from '../oas_meta_fields';
+import { META_FIELD_X_OAS_DEPRECATED, META_FIELD_X_OAS_REF_ID } from '../oas_meta_fields';
 import { SchemaTypeError, ValidationError } from '../errors';
 import { Reference } from '../references';
 
-/** Meta fields used when introspecting runtime validation */
+/**
+ * Meta fields used when introspecting runtime validation. Most notably for
+ * generating OpenAPI spec.
+ */
 export interface TypeMeta {
   /**
    * A human-friendly description of this type to be used in documentation.
    */
   description?: string;
+  /**
+   * Whether this field is deprecated.
+   */
+  deprecated?: boolean;
   /**
    * A string that uniquely identifies this schema. Used when generating OAS
    * to create refs instead of inline schemas.
@@ -107,6 +114,9 @@ export abstract class Type<V> {
       }
       if (options.meta.id) {
         schema = schema.meta({ [META_FIELD_X_OAS_REF_ID]: options.meta.id });
+      }
+      if (options.meta.deprecated) {
+        schema = schema.meta({ [META_FIELD_X_OAS_DEPRECATED]: true });
       }
     }
 

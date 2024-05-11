@@ -99,6 +99,12 @@ describe('CompleteExternalTaskRunner class', () => {
           EndpointActions: expect.any(Object),
           agent: expect.any(Object),
         }),
+        { create: { _index: ENDPOINT_ACTION_RESPONSES_INDEX } },
+        expect.objectContaining({
+          '@timestamp': expect.any(String),
+          EndpointActions: expect.any(Object),
+          agent: expect.any(Object),
+        }),
       ],
     });
   });
@@ -134,13 +140,13 @@ describe('CompleteExternalTaskRunner class', () => {
         return clientMock;
       }
     );
-    runnerInstance.run();
+    void runnerInstance.run();
 
     await waitFor(() => {
       expect(endpointContextServicesMock.getInternalResponseActionsClient).toHaveBeenCalled();
     });
 
-    runnerInstance.cancel();
+    await runnerInstance.cancel();
 
     expect(processPendingActionsAbortSignal!.aborted).toBe(true);
   });

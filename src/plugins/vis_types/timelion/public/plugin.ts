@@ -13,7 +13,6 @@ import type {
   PluginInitializerContext,
   IUiSettingsClient,
   HttpSetup,
-  ThemeServiceStart,
 } from '@kbn/core/public';
 import type { Plugin as ExpressionsPlugin } from '@kbn/expressions-plugin/public';
 import type {
@@ -33,6 +32,7 @@ import {
   setIndexPatterns,
   setDataSearch,
   setCharts,
+  setCoreStart,
   setFieldFormats,
   setUsageCollection,
 } from './helpers/plugin_services';
@@ -47,7 +47,6 @@ export interface TimelionVisDependencies extends Partial<CoreStart> {
   uiSettings: IUiSettingsClient;
   http: HttpSetup;
   timefilter: TimefilterContract;
-  theme: ThemeServiceStart;
 }
 
 /** @internal */
@@ -85,14 +84,13 @@ export class TimelionVisPlugin
   constructor(public initializerContext: PluginInitializerContext<TimelionPublicConfig>) {}
 
   public setup(
-    { uiSettings, http, theme }: CoreSetup,
+    { uiSettings, http }: CoreSetup,
     { expressions, visualizations, data, charts }: TimelionVisSetupDependencies
   ) {
     const dependencies: TimelionVisDependencies = {
       http,
       uiSettings,
       timefilter: data.query.timefilter.timefilter,
-      theme,
     };
 
     expressions.registerFunction(() => getTimelionVisualizationConfig(dependencies));
@@ -109,6 +107,7 @@ export class TimelionVisPlugin
     core: CoreStart,
     { data, charts, dataViews, fieldFormats, usageCollection }: TimelionVisStartDependencies
   ) {
+    setCoreStart(core);
     setIndexPatterns(dataViews);
     setDataSearch(data.search);
     setCharts(charts);

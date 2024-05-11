@@ -457,7 +457,7 @@ export const PolicyTabs = React.memo(() => {
       cancelUnsavedChangesModal,
       history,
       policyId,
-      routeState.backLink,
+      routeState?.backLink,
       unsavedChangesModal.showModal,
     ]
   );

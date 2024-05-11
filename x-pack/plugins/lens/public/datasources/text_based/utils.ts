@@ -9,7 +9,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
-import { getIndexPatternFromSQLQuery, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { generateId } from '../../id_generator';
 import { fetchDataFromAggregateQuery } from './fetch_data_from_aggregate_query';
@@ -129,17 +129,7 @@ export async function getStateFromAggregateQuery(
 }
 
 export function getIndexPatternFromTextBasedQuery(query: AggregateQuery): string {
-  let indexPattern = '';
-  // sql queries
-  if ('sql' in query) {
-    indexPattern = getIndexPatternFromSQLQuery(query.sql);
-  }
-  if ('esql' in query) {
-    indexPattern = getIndexPatternFromESQLQuery(query.esql);
-  }
-  // other textbased queries....
-
-  return indexPattern;
+  return getIndexPatternFromESQLQuery(query.esql);
 }
 
 export const isNumeric = (column: TextBasedLayerColumn | DatatableColumn) =>

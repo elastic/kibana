@@ -26,11 +26,11 @@ import { getMatchingIndexes } from './get_indexes_matching_pattern';
 export function initIndexingRoutes({
   router,
   logger,
-  dataPlugin,
+  getDataPlugin,
 }: {
   router: IRouter<DataRequestHandlerContext>;
   logger: Logger;
-  dataPlugin: DataPluginStart;
+  getDataPlugin: () => Promise<DataPluginStart>;
   securityPlugin?: SecurityPluginStart;
 }) {
   router.versioned
@@ -58,6 +58,7 @@ export function initIndexingRoutes({
       async (context, request, response) => {
         const coreContext = await context.core;
         const { index, mappings } = request.body;
+        const dataPlugin = await getDataPlugin();
         const indexPatternsService = await dataPlugin.indexPatterns.dataViewsServiceFactory(
           coreContext.savedObjects.client,
           coreContext.elasticsearch.client.asCurrentUser,

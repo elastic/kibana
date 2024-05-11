@@ -33,6 +33,7 @@ import { withApmSpan } from '../../utils/with_apm_span';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import {
   environmentRt,
+  filtersRt,
   kueryRt,
   probabilityRt,
   rangeRt,
@@ -495,7 +496,7 @@ const serviceThroughputRoute = createApmServerRoute({
     }),
     query: t.intersection([
       t.type({ transactionType: t.string, bucketSizeInSeconds: toNumberRt }),
-      t.partial({ transactionName: t.string }),
+      t.partial({ transactionName: t.string, filters: filtersRt }),
       t.intersection([environmentRt, kueryRt, rangeRt, offsetRt, serviceTransactionDataSourceRt]),
     ]),
   }),
@@ -512,6 +513,7 @@ const serviceThroughputRoute = createApmServerRoute({
     const {
       environment,
       kuery,
+      filters,
       transactionType,
       transactionName,
       offset,
@@ -525,6 +527,7 @@ const serviceThroughputRoute = createApmServerRoute({
     const commonProps = {
       environment,
       kuery,
+      filters,
       serviceName,
       apmEventClient,
       transactionType,

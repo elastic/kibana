@@ -12,10 +12,11 @@ import { getRiskScorePalette, RISK_SCORE_STEPS } from '../chart_palette';
 import { getFlattenedLegendItems } from './get_flattened_legend_items';
 import { bucketsWithStackByField1, maxRiskSubAggregations } from '../flatten/mocks/mock_buckets';
 import { flattenedBuckets } from '../flatten/mocks/mock_flattened_buckets';
+import { TableId } from '@kbn/securitysolution-data-table';
 
 describe('getFlattenedLegendItems', () => {
   it('returns the expected legend items', () => {
-    const expected: Array<Pick<LegendItem, 'color' | 'count' | 'field' | 'value'>> = [
+    const expected: Array<Pick<LegendItem, 'color' | 'count' | 'field' | 'value' | 'scopeId'>> = [
       {
         count: 34,
         field: 'kibana.alert.rule.name',
@@ -137,7 +138,7 @@ describe('getFlattenedLegendItems', () => {
         field: 'host.name',
         value: 'Host-r4y6xi92ob',
       },
-    ];
+    ].map((legend) => ({ ...legend, scopeId: TableId.alertsOnAlertsPage }));
 
     const legendItems = getFlattenedLegendItems({
       buckets: bucketsWithStackByField1,

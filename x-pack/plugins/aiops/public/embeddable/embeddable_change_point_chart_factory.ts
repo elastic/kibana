@@ -68,22 +68,21 @@ export class EmbeddableChangePointChartFactory implements EmbeddableFactoryDefin
   async create(input: EmbeddableChangePointChartInput, parent?: IContainer) {
     try {
       const [
-        { i18n: i18nService, theme, http, uiSettings, notifications },
+        { http, uiSettings, notifications, ...startServices },
         { lens, data, usageCollection, fieldFormats },
       ] = await this.getStartServices();
 
       return new EmbeddableChangePointChart(
         this.type,
         {
-          theme,
           http,
-          i18n: i18nService,
           uiSettings,
           data,
           notifications,
           lens,
           usageCollection,
           fieldFormats,
+          ...startServices,
         },
         input,
         parent

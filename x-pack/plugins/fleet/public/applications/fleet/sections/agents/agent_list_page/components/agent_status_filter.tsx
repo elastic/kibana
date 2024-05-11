@@ -67,6 +67,7 @@ const LeftpaddedNotificationBadge = styled(EuiNotificationBadge)`
 `;
 
 const InactiveAgentsTourStep: React.FC<{
+  children: React.ReactNode;
   isOpen: boolean;
   setInactiveAgentsCalloutHasBeenDismissed: (val: boolean) => void;
 }> = ({ children, isOpen, setInactiveAgentsCalloutHasBeenDismissed }) => (

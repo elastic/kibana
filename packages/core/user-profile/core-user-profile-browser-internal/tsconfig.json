@@ -1,0 +1,26 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "react"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core-user-profile-browser",
+    "@kbn/logging-mocks",
+    "@kbn/core-base-server-mocks",
+    "@kbn/logging",
+    "@kbn/core-base-browser-internal",
+    "@kbn/core-user-profile-common",
+  ]
+}

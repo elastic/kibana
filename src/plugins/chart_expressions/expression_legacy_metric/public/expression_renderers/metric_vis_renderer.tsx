@@ -9,7 +9,7 @@
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import {
   ExpressionValueVisDimension,
   VisualizationContainer,
@@ -109,7 +109,7 @@ export const getMetricVisRenderer: (
     handlers.event(chartSizeEvent);
 
     render(
-      <KibanaThemeProvider theme$={core.theme.theme$}>
+      <KibanaRenderContextProvider {...core}>
         <VisualizationContainer
           data-test-subj="legacyMtrVis"
           className="legacyMtrVis"
@@ -125,7 +125,7 @@ export const getMetricVisRenderer: (
             filterable={filterable}
           />
         </VisualizationContainer>
-      </KibanaThemeProvider>,
+      </KibanaRenderContextProvider>,
       domNode
     );
   },

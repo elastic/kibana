@@ -38,12 +38,13 @@ import { AlertingRulesConfig } from '../config';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 import { GetAlertIndicesAlias } from '../lib';
 import { AlertsService } from '../alerts_service';
+import { BackfillClient } from '../backfill_client/backfill_client';
 
 export type {
   BulkEditOperation,
   BulkEditFields,
 } from '../application/rule/methods/bulk_edit/types';
-export type { FindOptions, FindResult } from './methods/find';
+export type { FindResult } from '../application/rule/methods/find/find_rules';
 export type { GetAlertSummaryParams } from './methods/get_alert_summary';
 export type {
   GetExecutionLogByIdParams,
@@ -82,6 +83,7 @@ export interface RulesClientContext {
   readonly connectorAdapterRegistry: ConnectorAdapterRegistry;
   readonly getAlertIndicesAlias: GetAlertIndicesAlias;
   readonly alertsService: AlertsService | null;
+  readonly backfillClient: BackfillClient;
   readonly isSystemAction: (actionId: string) => boolean;
   readonly uiSettings: UiSettingsServiceStart;
 }

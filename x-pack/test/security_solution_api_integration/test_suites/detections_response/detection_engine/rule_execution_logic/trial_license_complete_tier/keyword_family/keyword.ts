@@ -50,7 +50,7 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteAllRules(supertest, log);
     });
 
-    describe('@ess @serverless "kql" rule type', () => {
+    describe('@ess @serverless @serverlessQA "kql" rule type', () => {
       it('should detect the "dataset_name_1" from "event.dataset"', async () => {
         const rule: QueryRuleCreateProps = {
           ...getRuleForAlertTesting(['keyword']),

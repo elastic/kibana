@@ -7,9 +7,9 @@
  */
 
 import type { OpenAPIV3 } from 'openapi-types';
-import { VersionedRouterRoute } from '@kbn/core-http-router-server-internal/src/versioned_router/types';
 import {
   getRequestValidation,
+  type RouteConfigOptionsBody,
   type RouterRoute,
   type RouteValidatorConfig,
 } from '@kbn/core-http-server';
@@ -23,16 +23,18 @@ export const getPathParameters = (path: string): KnownParameters => {
   }, {});
 };
 
-export const extractValidationSchemaFromVersionedHandler = (
-  handler: VersionedRouterRoute['handlers'][0]
-) => {
-  if (handler.options.validate === false) return undefined;
-  if (typeof handler.options.validate === 'function') return handler.options.validate();
-  return handler.options.validate;
+export const extractContentType = (body: undefined | RouteConfigOptionsBody) => {
+  if (body?.accepts) {
+    return Array.isArray(body.accepts) ? body.accepts : [body.accepts];
+  }
+  return ['application/json'];
 };
 
-export const getVersionedContentString = (version: string): string => {
-  return `application/json; Elastic-Api-Version=${version}`;
+export const getVersionedContentTypeString = (
+  version: string,
+  acceptedContentTypes: string[]
+): string => {
+  return `${acceptedContentTypes.join('; ')}; Elastic-Api-Version=${version}`;
 };
 
 export const extractValidationSchemaFromRoute = (
@@ -48,9 +50,30 @@ export const getVersionedHeaderParam = (
 ): OpenAPIV3.ParameterObject => ({
   in: 'header',
   name: 'elastic-api-version',
+  description: 'The version of the API to use',
   schema: {
     type: 'string',
     enum: versions,
     default: defaultVersion,
   },
 });
+
+export const prepareRoutes = <
+  R extends { path: string; options: { access?: 'public' | 'internal' } }
+>(
+  routes: R[],
+  pathStartsWith?: string
+): R[] => {
+  return routes.filter(
+    pathStartsWith ? (route) => route.path.startsWith(pathStartsWith) : () => true
+  );
+};
+
+export const assignToPathsObject = (
+  paths: OpenAPIV3.PathsObject,
+  path: string,
+  pathObject: OpenAPIV3.PathItemObject
+): void => {
+  const pathName = path.replace('?', '');
+  paths[pathName] = { ...paths[pathName], ...pathObject };
+};

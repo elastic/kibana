@@ -64,7 +64,7 @@ export const SyncJobsTable: React.FC<SyncJobHistoryTableProps> = ({
           content={
             <FormattedMessage
               id="searchConnectors.syncJobs.lastSync.columnTitle.tooltip"
-              defaultMessage="The timestamp of a given job's {completed_at}. This is when syncs finish, either successfully, in error, or by being canceled."
+              defaultMessage="The timestamp of a given job's {completed_at}. Syncs complete with a success, an error, or a cancellation."
               values={{ completed_at: <EuiCode>completed_at</EuiCode> }}
             />
           }
@@ -88,7 +88,7 @@ export const SyncJobsTable: React.FC<SyncJobHistoryTableProps> = ({
           content={
             <FormattedMessage
               id="searchConnectors.syncJobs.syncDuration.columnTitle.tooltip"
-              defaultMessage="The time between when a sync started ({started_at}) and when it terminated ({completed_at}) (whether successfully, in error, or canceled). Note that this does not include the time the job may have spent in a “pending” stage, waiting for a worker to pick it up."
+              defaultMessage="Time elapsed between a sync's {started_at} and {completed_at} timestamps. Does not include time spent in “pending” stage."
               values={{
                 completed_at: <EuiCode>completed_at</EuiCode>,
                 started_at: <EuiCode>started_at</EuiCode>,
@@ -116,7 +116,7 @@ export const SyncJobsTable: React.FC<SyncJobHistoryTableProps> = ({
                 content={
                   <FormattedMessage
                     id="searchConnectors.index.syncJobs.documents.upserted.tooltip"
-                    defaultMessage="The number of {index} operations the connector sent to the Elasticsearch _bulk API during this sync. This includes net-new documents and updates to existing documents. This does not account for duplicate _ids, or any documents dropped by an ingest processor"
+                    defaultMessage="Number of {index} operations the connector sent to the Elasticsearch _bulk API, including updates to existing documents. Note that the number of documents upserted and the number of documents in the index may differ."
                     values={{ index: <EuiCode>index</EuiCode> }}
                   />
                 }
@@ -144,7 +144,7 @@ export const SyncJobsTable: React.FC<SyncJobHistoryTableProps> = ({
                 content={
                   <FormattedMessage
                     id="searchConnectors.index.syncJobs.documents.deleted.tooltip"
-                    defaultMessage="The number of {delete} operations the connector sent to the Elasticsearch _bulk API at the conclusion of this sync. This may include documents dropped by Sync Rules. This does not include documents dropped by ingest processors. Documents are deleted from the index if the connector determines that they are no longer present in the data that should be fetched from the 3rd-party source."
+                    defaultMessage="Number of {delete} operations the connector sent to the Elasticsearch _bulk API. May include documents dropped by Sync Rules. Does not include documents dropped by ingest processors. Documents are deleted when the connector determines they are no longer present in the third-party source."
                     values={{ delete: <EuiCode>delete</EuiCode> }}
                   />
                 }

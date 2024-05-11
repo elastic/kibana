@@ -11,6 +11,7 @@ export {
   versionHandlerResolvers,
   CoreVersionedRouter,
   ALLOWED_PUBLIC_VERSION,
+  unwrapVersionedResponseBodyValidation,
   type VersionedRouterRoute,
   type HandlerResolutionStrategy,
 } from './src/versioned_router';
@@ -24,9 +25,4 @@ export type {
 export { isKibanaRequest, isRealRequest, ensureRawRequest, CoreKibanaRequest } from './src/request';
 export { isSafeMethod } from './src/route';
 export { HapiResponseAdapter } from './src/response_adapter';
-export {
-  kibanaResponseFactory,
-  lifecycleResponseFactory,
-  isKibanaResponse,
-  KibanaResponse,
-} from './src/response';
+export { kibanaResponseFactory, lifecycleResponseFactory, KibanaResponse } from './src/response';

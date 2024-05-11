@@ -7,11 +7,18 @@
 import type { Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { ASSET_CRITICALITY_URL, APP_ID } from '../../../../../common/constants';
+import {
+  ASSET_CRITICALITY_URL,
+  APP_ID,
+  ENABLE_ASSET_CRITICALITY_SETTING,
+} from '../../../../../common/constants';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
 import { buildRouteValidationWithZod } from '../../../../utils/build_validation/route_validation';
-import { CreateAssetCriticalityRecord } from '../../../../../common/api/entity_analytics/asset_criticality';
+import { CreateAssetCriticalityRecord } from '../../../../../common/api/entity_analytics';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { AssetCriticalityAuditActions } from '../audit';
+import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
+import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
 export const assetCriticalityUpsertRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger
@@ -36,6 +43,7 @@ export const assetCriticalityUpsertRoute = (
       async (context, request, response) => {
         const siemResponse = buildSiemResponse(response);
         try {
+          await assertAdvancedSettingsEnabled(await context.core, ENABLE_ASSET_CRITICALITY_SETTING);
           await checkAndInitAssetCriticalityResources(context, logger);
 
           const securitySolution = await context.securitySolution;
@@ -47,7 +55,20 @@ export const assetCriticalityUpsertRoute = (
             criticalityLevel: request.body.criticality_level,
           };
 
-          const result = await assetCriticalityClient.upsert(assetCriticalityRecord);
+          const result = await assetCriticalityClient.upsert(
+            assetCriticalityRecord,
+            request.body.refresh
+          );
+
+          securitySolution.getAuditLogger()?.log({
+            message: 'User attempted to assign the asset criticality level for an entity',
+            event: {
+              action: AssetCriticalityAuditActions.ASSET_CRITICALITY_UPDATE,
+              category: AUDIT_CATEGORY.DATABASE,
+              type: AUDIT_TYPE.CREATION,
+              outcome: AUDIT_OUTCOME.UNKNOWN,
+            },
+          });
 
           return response.ok({
             body: result,

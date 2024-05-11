@@ -13,9 +13,9 @@ import useObservable from 'react-use/lib/useObservable';
 import type { AppMountParameters, CustomBrandingStart, IBasePath } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { parseNextURL } from '@kbn/std';
 
 import type { StartServices } from '../..';
-import { parseNext } from '../../../common/parse_next';
 import { AuthenticationStatePage } from '../components';
 
 interface Props {
@@ -35,7 +35,7 @@ export function LoggedOutPage({ basePath, customBranding }: Props) {
       }
       logo={customBrandingValue?.logo}
     >
-      <EuiButton href={parseNext(window.location.href, basePath.serverBasePath)}>
+      <EuiButton href={parseNextURL(window.location.href, basePath.serverBasePath)}>
         <FormattedMessage id="xpack.security.loggedOut.login" defaultMessage="Log in" />
       </EuiButton>
     </AuthenticationStatePage>

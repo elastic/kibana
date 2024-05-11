@@ -25,21 +25,27 @@ RUN cd /tmp && \
      https://{{publicArtifactSubdomain}}.elastic.co/downloads/kibana/{{artifactPrefix}}-$(arch).tar.gz && \
   cd -
 {{/usePublicArtifact}}
-
 {{^usePublicArtifact}}
 COPY {{artifactTarball}} /tmp/kibana.tar.gz
 {{/usePublicArtifact}}
 
 RUN mkdir /usr/share/kibana
 WORKDIR /usr/share/kibana
-RUN tar --strip-components=1 -zxf /tmp/kibana.tar.gz
+RUN tar \
+# Exclude serverless.yml disabled assets
+{{#serverless}}
+  --exclude=screenshotting-plugin/chromium \
+  --exclude=screenshotting-plugin/server/assets \
+{{/serverless}}
+  --strip-components=1 \
+  -zxf /tmp/kibana.tar.gz
 # Ensure that group permissions are the same as user permissions.
 # This will help when relying on GID-0 to run Kibana, rather than UID-1000.
 # OpenShift does this, for example.
 # REF: https://docs.openshift.org/latest/creating_images/guidelines.html
 RUN chmod -R g=u /usr/share/kibana
-
 {{#cloud}}
+
 COPY {{filebeatTarball}} /tmp/filebeat.tar.gz
 COPY {{metricbeatTarball}} /tmp/metricbeat.tar.gz
 
@@ -157,9 +163,6 @@ COPY --chown=1000:0 config/serverless.yml /usr/share/kibana/config/serverless.ym
 COPY --chown=1000:0 config/serverless.es.yml /usr/share/kibana/config/serverless.es.yml
 COPY --chown=1000:0 config/serverless.oblt.yml /usr/share/kibana/config/serverless.oblt.yml
 COPY --chown=1000:0 config/serverless.security.yml /usr/share/kibana/config/serverless.security.yml
-# Supportability enhancement: enable capturing heap snapshots. See https://nodejs.org/api/cli.html#--heapsnapshot-signalsignal
-RUN /usr/bin/echo -e '\n--heapsnapshot-signal=SIGUSR2' >> config/node.options
-RUN /usr/bin/echo '--diagnostic-dir=./data' >> config/node.options
 ENV PROFILER_SIGNAL=SIGUSR1
 {{/serverless}}
 {{^opensslLegacyProvider}}

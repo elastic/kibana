@@ -31,6 +31,9 @@ export function createApmApiClient(st: supertest.SuperTest<supertest.Test>) {
     const pathnameWithSpaceId = options.spaceId ? `/s/${options.spaceId}${pathname}` : pathname;
     const url = format({ pathname: pathnameWithSpaceId, query: params?.query });
 
+    // eslint-disable-next-line no-console
+    console.debug(`Calling APM API: ${method.toUpperCase()} ${url}`);
+
     const headers: Record<string, string> = {
       'kbn-xsrf': 'foo',
       'x-elastic-internal-origin': 'foo',

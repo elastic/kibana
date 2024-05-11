@@ -13,9 +13,9 @@ import type { AppMountParameters, IBasePath } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { AuthenticationServiceSetup } from '@kbn/security-plugin-types-public';
+import { parseNextURL } from '@kbn/std';
 
 import type { StartServices } from '../..';
-import { parseNext } from '../../../common/parse_next';
 import { AuthenticationStatePage } from '../components';
 
 interface Props {
@@ -42,7 +42,7 @@ export function OverwrittenSessionPage({ authc, basePath }: Props) {
         />
       }
     >
-      <EuiButton href={parseNext(window.location.href, basePath.serverBasePath)}>
+      <EuiButton href={parseNextURL(window.location.href, basePath.serverBasePath)}>
         <FormattedMessage
           id="xpack.security.overwrittenSession.continueAsUserText"
           defaultMessage="Continue as {username}"

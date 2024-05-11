@@ -80,7 +80,7 @@ export class UptimeEsClient {
     this.heartbeatIndices = heartbeatIndices;
     this.isDev = isDev;
     this.inspectableEsQueries = [];
-    this.getInspectEnabled();
+    this.getInspectEnabled().catch(() => {});
   }
 
   async initSettings() {

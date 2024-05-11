@@ -180,8 +180,8 @@ const combineFilters = (filters: Array<string | null>) =>
 
 const getTimelinesCreatedAndUpdatedByCurrentUser = ({ request }: { request: FrameworkRequest }) => {
   const username = request.user?.username ?? UNAUTHENTICATED_USER;
-  const updatedBy = `siem-ui-timeline.attributes.updatedBy: ${username}`;
-  const createdBy = `siem-ui-timeline.attributes.createdBy: ${username}`;
+  const updatedBy = `siem-ui-timeline.attributes.updatedBy: "${username}"`;
+  const createdBy = `siem-ui-timeline.attributes.createdBy: "${username}"`;
   return combineFilters([updatedBy, createdBy]);
 };
 

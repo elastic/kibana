@@ -15,10 +15,7 @@ import {
 } from '@kbn/es-query';
 import { DefaultActionsSupportedValue } from '../types';
 
-export const isEmptyFilterValue = (value: Array<string | number | boolean>) =>
-  value.length === 0 || value.every((v) => v === '');
-
-const createExistsFilter = ({
+export const createExistsFilter = ({
   key,
   negate,
   dataViewId,

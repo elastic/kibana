@@ -23,11 +23,17 @@ import {
 describe('Agents guards', () => {
   it('isOpenTelemetryAgentName should guard if the passed agent is an OpenTelemetry one.', () => {
     expect(isOpenTelemetryAgentName('otlp')).toBe(true);
+    expect(isOpenTelemetryAgentName('opentelemetry/java')).toBe(true);
+    expect(isOpenTelemetryAgentName('opentelemetry/java/opentelemetry-java-instrumentation')).toBe(
+      true
+    );
     expect(isOpenTelemetryAgentName('not-an-agent')).toBe(false);
   });
 
   it('isJavaAgentName should guard if the passed agent is an Java one.', () => {
     expect(isJavaAgentName('java')).toBe(true);
+    expect(isJavaAgentName('opentelemetry/java')).toBe(true);
+    expect(isJavaAgentName('opentelemetry/java/opentelemetry-java-instrumentation')).toBe(true);
     expect(isJavaAgentName('not-an-agent')).toBe(false);
   });
 

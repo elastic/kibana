@@ -48,6 +48,7 @@ export async function mountManagementSection(
     application,
     executionContext,
     license,
+    consolePlugin: depsStart.console,
   };
 
   return renderApp(element, services, { ...coreStart, http });

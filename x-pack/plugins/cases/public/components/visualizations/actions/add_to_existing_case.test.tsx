@@ -13,6 +13,7 @@ import ReactDOM, { unmountComponentAtNode } from 'react-dom';
 import { createAddToExistingCaseLensAction } from './add_to_existing_case';
 import type { ActionContext } from './types';
 import { useCasesAddToExistingCaseModal } from '../../all_cases/selector_modal/use_cases_add_to_existing_case_modal';
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import {
@@ -44,7 +45,9 @@ jest.mock('../../../client/helpers/can_use_cases', () => {
 });
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  KibanaThemeProvider: jest.fn().mockImplementation(({ children }) => <>{children}</>),
+  KibanaThemeProvider: jest
+    .fn()
+    .mockImplementation(({ children }: PropsWithChildren<unknown>) => <>{children}</>),
 }));
 
 jest.mock('@kbn/react-kibana-mount', () => ({

@@ -32,8 +32,6 @@ export type {
   ServiceNowActionParams,
   JiraConnectorTypeId,
   JiraActionParams,
-  ResilientConnectorTypeId,
-  ResilientActionParams,
   TeamsConnectorTypeId,
   TeamsActionParams,
 } from './connector_types';

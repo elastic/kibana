@@ -17,9 +17,12 @@ import { langChainMessages } from '../../../__mocks__/lang_chain_messages';
 import { ESQL_RESOURCE } from '../../../routes/knowledge_base/constants';
 import { callAgentExecutor } from '.';
 import { PassThrough, Stream } from 'stream';
-import { ActionsClientChatOpenAI, ActionsClientLlm } from '@kbn/elastic-assistant-common/impl/llm';
+import {
+  ActionsClientChatOpenAI,
+  ActionsClientLlm,
+} from '@kbn/elastic-assistant-common/impl/language_models';
 
-jest.mock('@kbn/elastic-assistant-common/impl/llm', () => ({
+jest.mock('@kbn/elastic-assistant-common/impl/language_models', () => ({
   ActionsClientChatOpenAI: jest.fn(),
   ActionsClientLlm: jest.fn(),
 }));
@@ -96,17 +99,16 @@ const defaultProps = {
   telemetry: mockTelemetry,
   replacements: {},
 };
+const executorMock = initializeAgentExecutorWithOptions as jest.Mock;
 describe('callAgentExecutor', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (initializeAgentExecutorWithOptions as jest.Mock).mockImplementation(
-      (_a, _b, { agentType }) => ({
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        call: (props: any, more: any) => mockCall({ ...props, agentType }, more),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        invoke: (props: any, more: any) => mockInvoke({ ...props, agentType }, more),
-      })
-    );
+    executorMock.mockImplementation((_a, _b, { agentType }) => ({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      call: (props: any, more: any) => mockCall({ ...props, agentType }, more),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      invoke: (props: any, more: any) => mockInvoke({ ...props, agentType }, more),
+    }));
   });
 
   describe('callAgentExecutor', () => {
@@ -141,6 +143,7 @@ describe('callAgentExecutor', () => {
         maxRetries: 0,
         request: mockRequest,
         streaming: false,
+        temperature: 0.2,
         llmType: 'openai',
       });
     });
@@ -149,6 +152,41 @@ describe('callAgentExecutor', () => {
       await callAgentExecutor(defaultProps);
 
       expect(mockCall.mock.calls[0][0].agentType).toEqual('chat-conversational-react-description');
+    });
+
+    it('uses the DynamicTool version of ESQLKnowledgeBaseTool', async () => {
+      await callAgentExecutor({
+        ...defaultProps,
+        assistantTools: [
+          {
+            name: 'ESQLKnowledgeBaseTool',
+            id: 'esql-knowledge-base-tool',
+            description: '',
+            sourceRegister: '',
+            isSupported: jest.fn(),
+            getTool: jest.fn().mockReturnValue(() => 'ESQLKnowledgeBaseTool'),
+          },
+          {
+            name: 'ESQLKnowledgeBaseStructuredTool',
+            id: 'esql-knowledge-base-structured-tool',
+            description: '',
+            sourceRegister: '',
+            isSupported: jest.fn(),
+            getTool: jest.fn().mockReturnValue(() => 'ESQLKnowledgeBaseStructuredTool'),
+          },
+          {
+            name: 'UnrelatedTool',
+            id: 'unrelated-tool',
+            description: '',
+            sourceRegister: '',
+            isSupported: jest.fn(),
+            getTool: jest.fn().mockReturnValue(() => 'UnrelatedTool'),
+          },
+        ],
+      });
+
+      expect(executorMock.mock.calls[0][0].length).toEqual(2);
+      expect(executorMock.mock.calls[0][0][0]()).toEqual('ESQLKnowledgeBaseTool');
     });
 
     it('returns the expected response', async () => {
@@ -179,6 +217,7 @@ describe('callAgentExecutor', () => {
         maxRetries: 0,
         request: mockRequest,
         streaming: true,
+        temperature: 0.2,
         llmType: 'openai',
       });
     });
@@ -187,6 +226,42 @@ describe('callAgentExecutor', () => {
       await callAgentExecutor({ ...defaultProps, isStream: true });
 
       expect(mockInvoke.mock.calls[0][0].agentType).toEqual('openai-functions');
+    });
+
+    it('uses the DynamicStructuredTool version of ESQLKnowledgeBaseTool', async () => {
+      await callAgentExecutor({
+        ...defaultProps,
+        isStream: true,
+        assistantTools: [
+          {
+            name: 'ESQLKnowledgeBaseTool',
+            id: 'esql-knowledge-base-tool',
+            description: '',
+            sourceRegister: '',
+            isSupported: jest.fn(),
+            getTool: jest.fn().mockReturnValue(() => 'ESQLKnowledgeBaseTool'),
+          },
+          {
+            name: 'ESQLKnowledgeBaseStructuredTool',
+            id: 'esql-knowledge-base-structured-tool',
+            description: '',
+            sourceRegister: '',
+            isSupported: jest.fn(),
+            getTool: jest.fn().mockReturnValue(() => 'ESQLKnowledgeBaseStructuredTool'),
+          },
+          {
+            name: 'UnrelatedTool',
+            id: 'unrelated-tool',
+            description: '',
+            sourceRegister: '',
+            isSupported: jest.fn(),
+            getTool: jest.fn().mockReturnValue(() => 'UnrelatedTool'),
+          },
+        ],
+      });
+
+      expect(executorMock.mock.calls[0][0].length).toEqual(2);
+      expect(executorMock.mock.calls[0][0][0]()).toEqual('ESQLKnowledgeBaseStructuredTool');
     });
 
     it('returns the expected response', async () => {
@@ -216,7 +291,7 @@ describe('callAgentExecutor', () => {
             mockInvokeWithChainCallback({ ...props, agentType }, more),
         })
       );
-      const onLlmResponse = jest.fn();
+      const onLlmResponse = jest.fn(async () => {}); // We need it to be a promise, or it'll crash because of missing `.catch`
       await callAgentExecutor({ ...defaultProps, onLlmResponse, isStream: true });
 
       expect(onLlmResponse).toHaveBeenCalledWith(
@@ -245,7 +320,7 @@ describe('callAgentExecutor', () => {
             mockInvokeWithChainCallback({ ...props, agentType }, more),
         })
       );
-      const onLlmResponse = jest.fn();
+      const onLlmResponse = jest.fn(async () => {}); // We need it to be a promise, or it'll crash because of missing `.catch`
       await callAgentExecutor({ ...defaultProps, onLlmResponse, isStream: true });
 
       expect(mockPush).toHaveBeenCalledWith({ payload: 'hi', type: 'content' });

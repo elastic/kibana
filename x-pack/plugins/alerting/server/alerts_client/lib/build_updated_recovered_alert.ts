@@ -10,6 +10,7 @@ import type { Alert } from '@kbn/alerts-as-data-utils';
 import {
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
+  ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_RULE_EXECUTION_UUID,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
@@ -22,6 +23,7 @@ import { removeUnflattenedFieldsFromAlert, replaceRefreshableAlertFields } from 
 interface BuildUpdatedRecoveredAlertOpts<AlertData extends RuleAlertData> {
   alert: Alert & AlertData;
   legacyRawAlert: RawAlertInstance;
+  runTimestamp?: string;
   timestamp: string;
   rule: AlertRule;
 }
@@ -35,6 +37,7 @@ export const buildUpdatedRecoveredAlert = <AlertData extends RuleAlertData>({
   alert,
   legacyRawAlert,
   rule,
+  runTimestamp,
   timestamp,
 }: BuildUpdatedRecoveredAlertOpts<AlertData>): Alert & AlertData => {
   // Make sure that any alert fields that are updatable are flattened.
@@ -45,6 +48,7 @@ export const buildUpdatedRecoveredAlert = <AlertData extends RuleAlertData>({
     ...rule,
     // Update the timestamp to reflect latest update time
     [TIMESTAMP]: timestamp,
+    [ALERT_RULE_EXECUTION_TIMESTAMP]: runTimestamp ?? timestamp,
     // Set latest flapping state
     [ALERT_FLAPPING]: legacyRawAlert.meta?.flapping,
     // Set latest flapping history

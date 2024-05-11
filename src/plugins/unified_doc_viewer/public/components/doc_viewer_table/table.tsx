@@ -23,7 +23,8 @@ import {
   EuiTablePagination,
   EuiSelectableMessage,
   EuiI18n,
-  useIsWithinBreakpoints,
+  useEuiTheme,
+  useResizeObserver,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -118,7 +119,12 @@ export const DocViewerTable = ({
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) => {
-  const showActionsInsideTableCell = useIsWithinBreakpoints(['xl'], true);
+  const { euiTheme } = useEuiTheme();
+  const [ref, setRef] = useState<HTMLDivElement | HTMLSpanElement | null>(null);
+  const dimensions = useResizeObserver(ref);
+  const showActionsInsideTableCell = dimensions?.width
+    ? dimensions.width > euiTheme.breakpoint.m
+    : false;
 
   const { fieldFormats, storage, uiSettings } = getUnifiedDocViewerServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
@@ -407,7 +413,7 @@ export const DocViewerTable = ({
   ];
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
+    <EuiFlexGroup direction="column" gutterSize="none" responsive={false} ref={setRef}>
       <EuiFlexItem grow={false}>
         <EuiSpacer size="s" />
       </EuiFlexItem>
