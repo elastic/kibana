@@ -61,12 +61,17 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('embeddablePanelAction-embeddable_addToExistingCase');
 
         await retry.waitFor('wait for the modal to open', async () => {
-          return testSubjects.exists('all-cases-modal');
+          return (
+            (await testSubjects.exists('all-cases-modal')) &&
+            (await testSubjects.exists('cases-table-add-case-filter-bar'))
+          );
         });
 
-        await testSubjects.click('cases-table-add-case-filter-bar');
-
         await retry.waitFor('wait for the flyout to open', async () => {
+          if (await testSubjects.exists('cases-table-add-case-filter-bar')) {
+            await testSubjects.click('cases-table-add-case-filter-bar');
+          }
+
           return testSubjects.exists('create-case-flyout');
         });
 
