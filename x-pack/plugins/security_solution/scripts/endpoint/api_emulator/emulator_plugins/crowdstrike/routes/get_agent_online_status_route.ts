@@ -20,7 +20,7 @@ export const getAgentOnlineStatusRouteDefinition = (): EmulatorServerRouteDefini
 
 const getAgentOnlineStatusHandler: ExternalEdrServerEmulatorRouteHandlerMethod<{}> = async () => {
   return {
-    resources: [createCrowdstrikeGetAgentOnlineStatusDetailsMock()],
+    resources: [createCrowdstrikeGetAgentOnlineStatusDetailsMock({})],
     meta: {
       query_time: 123,
       powered_by: 'test',
