@@ -795,8 +795,6 @@ export class SearchSource {
     const fieldListProvided = !!body.fields;
 
     // set defaults
-    let fieldsFromSource = searchRequest.fieldsFromSource || [];
-    body.fields = body.fields || [];
     body.script_fields = this.dependencies.scriptedFieldsEnabled
       ? {
           ...body.script_fields,
@@ -806,24 +804,18 @@ export class SearchSource {
     body.stored_fields = ['*'];
     body.runtime_mappings = runtimeFields || {};
 
-    // apply source filters from index pattern if specified by the user
-    let filteredDocvalueFields = docvalueFields;
-    if (index) {
-      const sourceFilters = index.getSourceFiltering();
-      if (!body.hasOwnProperty('_source')) {
-        body._source = sourceFilters;
-      }
+    body._source =
+      index && !body.hasOwnProperty('_source') ? index.getSourceFiltering() : body._source;
 
-      const filter = fieldWildcardFilter(body._source.excludes, metaFields);
-      // also apply filters to provided fields & default docvalueFields
-      body.fields = body.fields.filter((fld: SearchFieldValue) => filter(this.getFieldName(fld)));
-      fieldsFromSource = fieldsFromSource.filter((fld: SearchFieldValue) =>
-        filter(this.getFieldName(fld))
-      );
-      filteredDocvalueFields = filteredDocvalueFields.filter((fld: SearchFieldValue) =>
-        filter(this.getFieldName(fld))
-      );
-    }
+    // get filter if data view specified, otherwuse null filter
+    const filter = index
+      ? this.getFieldFilter({ bodySourceExcludes: body._source.excludes, metaFields })
+      : (fields: any) => fields;
+
+    body.fields = filter(body.fields || []);
+    const fieldsFromSource = filter(searchRequest.fieldsFromSource || []);
+    // apply source filters from index pattern if specified by the user
+    const filteredDocvalueFields = filter(docvalueFields);
 
     // specific fields were provided, so we need to exclude any others
     if (fieldListProvided || fieldsFromSource.length) {
@@ -935,6 +927,18 @@ export class SearchSource {
       body: omitByIsNil(bodyToReturn),
       indexType: this.getIndexType(index),
     }) as SearchRequest;
+  }
+
+  private getFieldFilter({
+    bodySourceExcludes,
+    metaFields,
+  }: {
+    bodySourceExcludes: any;
+    metaFields: any;
+  }) {
+    const filter = fieldWildcardFilter(bodySourceExcludes, metaFields);
+    return (fieldsToFilter: any) =>
+      fieldsToFilter.filter((fld: SearchFieldValue) => filter(this.getFieldName(fld)));
   }
 
   private getUniqueFieldNames({
