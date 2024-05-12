@@ -21,12 +21,12 @@ export class DataStreamStat {
   size?: DataStreamStatType['size']; // total datastream size
   sizeBytes?: DataStreamStatType['sizeBytes']; // total datastream size
   lastActivity?: DataStreamStatType['lastActivity'];
-  docsCount?: DataStreamStatType['docsCount']; // docs count in the filtered time range
+  docsCount?: DataStreamStatType['docsCount']; // total datastream docs count
   integration?: Integration;
   degradedDocs: {
     percentage: number;
     count: number;
-    totalDocs: number; // total datastream docs count
+    totalDocs: number; // docs count in the filtered time range
     quality: QualityIndicators;
   };
 
