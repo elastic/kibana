@@ -89,7 +89,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
   async function navigateToError() {
     await browser.navigateTo(deployment.getHostPort());
     await common.navigateToApp('apm', {
-      hash: `/services/opbeans-go/errors?rangeFrom=now-15m&rangeTo=now`,
+      path: `/services/opbeans-go/errors`,
     });
     await testSubjects.click('errorGroupId');
   }
