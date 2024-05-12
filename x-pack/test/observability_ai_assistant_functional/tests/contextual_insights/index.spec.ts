@@ -87,10 +87,8 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
   }
 
   async function navigateToError() {
-    await browser.navigateTo(deployment.getHostPort());
-    await common.navigateToApp('apm', {
-      path: `/services/opbeans-go/errors`,
-    });
+    await common.navigateToApp('apm');
+    await browser.get(`${deployment.getHostPort()}/app/apm/services/opbeans-go/errors/`);
     await testSubjects.click('errorGroupId');
   }
 
