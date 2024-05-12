@@ -794,13 +794,6 @@ export class SearchSource {
     const fieldListProvided = !!body.fields;
 
     // set defaults
-    body.script_fields = this.dependencies.scriptedFieldsEnabled
-      ? {
-          ...body.script_fields,
-          ...scriptFields,
-        }
-      : {};
-
     body._source =
       index && !body.hasOwnProperty('_source') ? index.getSourceFiltering() : body._source;
 
@@ -809,56 +802,41 @@ export class SearchSource {
       ? this.getFieldFilter({ bodySourceExcludes: body._source.excludes, metaFields })
       : (fields: any) => fields;
 
-    body.fields = filter(body.fields || []);
-
     const fieldsFromSource = filter(searchRequest.fieldsFromSource || []);
     // apply source filters from index pattern if specified by the user
     const filteredDocvalueFields = filter(docvalueFields);
 
     const sourceFieldsProvided = !!fieldsFromSource.length;
 
-    body.fields = fieldListProvided || sourceFieldsProvided ? body.fields : filteredDocvalueFields;
-
-    const uniqFieldNames = this.getUniqueFieldNames({ fields: body.fields, fieldsFromSource });
-
-    body.script_fields =
+    const fields =
       fieldListProvided || sourceFieldsProvided
+        ? filter(body.fields || [])
+        : filteredDocvalueFields;
+
+    const uniqFieldNames = this.getUniqueFieldNames({ fields, fieldsFromSource });
+
+    const scriptedFields = (() => {
+      const flds = this.dependencies.scriptedFieldsEnabled
+        ? { ...body.script_fields, ...scriptFields }
+        : {};
+
+      // specific fields were provided, so we need to exclude any others
+      return fieldListProvided || sourceFieldsProvided
         ? this.filterScriptFields({
             uniqFieldNames,
-            scriptFields: body.script_fields,
+            scriptFields: flds,
           })
-        : body.script_fields;
+        : flds;
+    })();
 
     // request the remaining fields from stored_fields just in case, since the
     // fields API does not handle stored fields
     const remainingFields = this.getRemainingFields({
       uniqFieldNames,
-      scriptFields: body.script_fields,
+      scriptFields: scriptedFields,
       runtimeFields,
       _source: body._source,
     });
-
-    // specific fields were provided, so we need to exclude any others
-    // if (fieldListProvided || sourceFieldsProvided) {
-    /*
-      body.script_fields = this.filterScriptFields({
-        uniqFieldNames,
-        scriptFields: body.script_fields,
-      });
-      */
-
-    // request the remaining fields from stored_fields just in case, since the
-    // fields API does not handle stored fields
-    /*
-      const remainingFields = this.getRemainingFields({
-        uniqFieldNames,
-        scriptFields: body.script_fields,
-        runtimeMappings: body.runtime_mappings,
-        _source: body._source,
-      });
-
-      body.stored_fields = [...new Set(remainingFields)];
-      */
 
     // only include unique values
     if (sourceFieldsProvided) {
@@ -867,26 +845,6 @@ export class SearchSource {
           return isObject(nsValue) ? {} : nsValue;
         });
       }
-    }
-    // }
-
-    if (fieldListProvided || sourceFieldsProvided) {
-      // if items that are in the docvalueFields are provided, we should
-      // make sure those are added to the fields API unless they are
-      // already set in docvalue_fields
-      body.fields = sourceFieldsProvided
-        ? this.getFieldsAndDocValueFields({
-            fields: body.fields,
-            docvalueFields: body.docvalue_fields,
-            fieldsFromSource,
-            filteredDocvalueFields,
-          })
-        : this.getUniqueFields({
-            index,
-            fields: body.fields,
-            metaFields,
-            filteredDocvalueFields,
-          });
     }
 
     // For testing shard failure messages in the UI, follow these steps:
@@ -929,6 +887,17 @@ export class SearchSource {
       stored_fields:
         fieldListProvided || sourceFieldsProvided ? [...new Set(remainingFields)] : ['*'],
       runtime_mappings: runtimeFields,
+      script_fields: scriptedFields,
+      fields: this.getFieldsList({
+        index,
+        fields,
+        docvalueFields: body.docvalue_fields,
+        fieldsFromSource,
+        filteredDocvalueFields,
+        metaFields,
+        fieldListProvided,
+        sourceFieldsProvided,
+      }),
     };
 
     return omitByIsNil({
@@ -1024,31 +993,50 @@ export class SearchSource {
     });
   }
 
-  private getFieldsAndDocValueFields({
+  private getFieldsList({
+    index,
     fields,
     docvalueFields,
     fieldsFromSource,
     filteredDocvalueFields,
+    metaFields,
+    fieldListProvided,
+    sourceFieldsProvided,
   }: {
+    index?: DataView;
     fields: any;
     docvalueFields: any;
     fieldsFromSource: any;
     filteredDocvalueFields: any;
+    metaFields: string;
+    fieldListProvided: boolean;
+    sourceFieldsProvided: boolean;
   }) {
-    // if items that are in the docvalueFields are provided, we should
-    // make sure those are added to the fields API unless they are
-    // already set in docvalue_fields
-    return [
-      ...fields,
-      ...filteredDocvalueFields.filter((fld: SearchFieldValue) => {
-        return (
-          fieldsFromSource.includes(this.getFieldName(fld)) &&
-          !(docvalueFields || [])
-            .map((d: string | Record<string, SearchFieldValue>) => this.getFieldName(d))
-            .includes(this.getFieldName(fld))
-        );
-      }),
-    ];
+    if (fieldListProvided || sourceFieldsProvided) {
+      // if items that are in the docvalueFields are provided, we should
+      // make sure those are added to the fields API unless they are
+      // already set in docvalue_fields
+      return sourceFieldsProvided
+        ? [
+            ...fields,
+            ...filteredDocvalueFields.filter((fld: SearchFieldValue) => {
+              return (
+                fieldsFromSource.includes(this.getFieldName(fld)) &&
+                !(docvalueFields || [])
+                  .map((d: string | Record<string, SearchFieldValue>) => this.getFieldName(d))
+                  .includes(this.getFieldName(fld))
+              );
+            }),
+          ]
+        : this.getUniqueFields({
+            index,
+            fields,
+            metaFields,
+            filteredDocvalueFields,
+          });
+    }
+
+    return fields;
   }
 
   private getUniqueFields({
