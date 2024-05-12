@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { SuperTest, Test } from 'supertest';
 import { chunk, omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
+import { deleteAllAlertingData } from '../../../../common/lib/delete_all_alerting_data';
 import { SuperuserAtSpace1, UserAtSpaceScenarios } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -653,11 +654,20 @@ const findTestUtils = (
 export default function createFindTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const kbnServer = getService('kibanaServer');
 
   describe('find', () => {
     const objectRemover = new ObjectRemover(supertest);
 
+    before(async () => {
+      await deleteAllAlertingData({ kbnServer });
+    });
+
     afterEach(() => objectRemover.removeAll());
+
+    after(async () => {
+      await deleteAllAlertingData({ kbnServer });
+    });
 
     findTestUtils('public', objectRemover, supertest, supertestWithoutAuth);
     findTestUtils('internal', objectRemover, supertest, supertestWithoutAuth);
