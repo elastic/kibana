@@ -24,10 +24,9 @@ export const ChatPlaygroundOverview: React.FC = () => {
     >
       <EuiPageTemplate
         offset={0}
-        grow
         restrictWidth={false}
         data-test-subj="svlPlaygroundPage"
-        minHeight={0}
+        grow={false}
       >
         <EuiPageTemplate.Header
           pageTitle={
