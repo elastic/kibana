@@ -794,12 +794,12 @@ export class SearchSource {
     const fieldListProvided = !!body.fields;
 
     // set defaults
-    body._source =
+    const _source =
       index && !body.hasOwnProperty('_source') ? index.getSourceFiltering() : body._source;
 
     // get filter if data view specified, otherwise null filter
     const filter = index
-      ? this.getFieldFilter({ bodySourceExcludes: body._source.excludes, metaFields })
+      ? this.getFieldFilter({ bodySourceExcludes: _source.excludes, metaFields })
       : (fields: any) => fields;
 
     const fieldsFromSource = filter(searchRequest.fieldsFromSource || []);
@@ -835,17 +835,8 @@ export class SearchSource {
       uniqFieldNames,
       scriptFields: scriptedFields,
       runtimeFields,
-      _source: body._source,
+      _source,
     });
-
-    // only include unique values
-    if (sourceFieldsProvided) {
-      if (!isEqual(remainingFields, fieldsFromSource)) {
-        setWith(body, '_source.includes', remainingFields, (nsValue) => {
-          return isObject(nsValue) ? {} : nsValue;
-        });
-      }
-    }
 
     // For testing shard failure messages in the UI, follow these steps:
     // 1. Add all three sample data sets (flights, ecommerce, logs) to Kibana.
@@ -865,6 +856,17 @@ export class SearchSource {
     //   },
     // });
     // Alternatively you could also add this query via "Edit as Query DSL", then it needs no code to be changed
+
+    body._source = _source;
+
+    // only include unique values
+    if (sourceFieldsProvided) {
+      if (!isEqual(remainingFields, fieldsFromSource)) {
+        setWith(body, '_source.includes', remainingFields, (nsValue) => {
+          return isObject(nsValue) ? {} : nsValue;
+        });
+      }
+    }
 
     const builtQuery = this.getBuiltEsQuery({
       index,
