@@ -8,18 +8,32 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { DataStreamType } from '../../../../common/types';
 import { dataStreamService } from '../../../services';
+import { indexStatsService } from '../../../services';
 
-export async function getDataStreamsStats(options: {
+export async function getDataStreamsStats({
+  esClient,
+  type,
+  datasetQuery,
+  sizeStatsAvailable = true,
+}: {
   esClient: ElasticsearchClient;
   type?: DataStreamType;
   datasetQuery?: string;
+  sizeStatsAvailable?: boolean; // Only Needed to determine whether `_stats` endpoint is available https://github.com/elastic/kibana/issues/178954
 }) {
-  const { esClient, type, datasetQuery } = options;
-
-  const matchingDataStreamsStats = await dataStreamService.getMatchingDataStreamsStats(esClient, {
+  const matchingDataStreamsStatsPromise = dataStreamService.getMatchingDataStreamsStats(esClient, {
     type: type ?? '*',
     dataset: datasetQuery ? `*${datasetQuery}*` : '*',
   });
+
+  const indicesDocsCountPromise = sizeStatsAvailable
+    ? indexStatsService.getIndicesDocCounts(esClient, type ?? '*')
+    : Promise.resolve(null);
+
+  const [indicesDocsCountStats, matchingDataStreamsStats] = await Promise.all([
+    indicesDocsCountPromise,
+    matchingDataStreamsStatsPromise,
+  ]);
 
   const mappedDataStreams = matchingDataStreamsStats.map((dataStream) => {
     return {
@@ -27,6 +41,9 @@ export async function getDataStreamsStats(options: {
       size: dataStream.store_size?.toString(),
       sizeBytes: dataStream.store_size_bytes,
       lastActivity: dataStream.maximum_timestamp,
+      docsCount: sizeStatsAvailable
+        ? indicesDocsCountStats!.docsCountPerDataStream[dataStream.data_stream] || 0
+        : null,
     };
   });
 

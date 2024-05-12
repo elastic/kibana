@@ -55,6 +55,22 @@ jest.mock('../../../services/data_stream', () => {
     },
   };
 });
+jest.mock('../../../services/index_stats', () => {
+  return {
+    indexStatsService: {
+      getIndicesDocCounts: jest.fn().mockImplementation(() => {
+        return {
+          perIndexStats: {
+            'logs-elastic_agent-default': 100,
+            'logs-elastic_agent.filebeat-default': 200,
+            'logs-elastic_agent.fleet_server-default': 0,
+            'logs-elastic_agent.metricbeat-default': 245,
+          },
+        };
+      }),
+    },
+  };
+});
 
 describe('getDataStreams', () => {
   it('Passes the correct parameters to the DataStreamService', async () => {
@@ -81,30 +97,35 @@ describe('getDataStreams', () => {
         size: '1gb',
         sizeBytes: 1170805528,
         lastActivity: 1698916071000,
+        docsCount: 100,
       },
       {
         name: 'logs-elastic_agent.filebeat-default',
         size: '1.3mb',
         sizeBytes: 1459100,
         lastActivity: 1698902209996,
+        docsCount: 200,
       },
       {
         name: 'logs-elastic_agent.fleet_server-default',
         size: '2.9mb',
         sizeBytes: 3052148,
         lastActivity: 1698914110010,
+        docsCount: 0,
       },
       {
         name: 'logs-elastic_agent.metricbeat-default',
         size: '1.6mb',
         sizeBytes: 1704807,
         lastActivity: 1698672046707,
+        docsCount: 245,
       },
       {
         name: 'logs-test.test-default',
         size: '6.2mb',
         sizeBytes: 6570447,
         lastActivity: 1698913802000,
+        docsCount: 0,
       },
     ]);
   });

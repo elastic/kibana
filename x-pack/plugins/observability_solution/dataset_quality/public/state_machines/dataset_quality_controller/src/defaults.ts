@@ -41,4 +41,5 @@ export const DEFAULT_CONTEXT: DefaultDatasetQualityControllerState = {
   },
   flyout: {},
   datasets: [],
+  isSizeStatsAvailable: true,
 };

@@ -78,6 +78,7 @@ export interface WithDegradedDocs {
 
 export interface WithDatasets {
   datasets: DataStreamStat[];
+  isSizeStatsAvailable: boolean;
 }
 
 export interface WithIntegrations {

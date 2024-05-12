@@ -18,13 +18,15 @@ export class DataStreamStat {
   name: DataStreamStatType['name'];
   namespace: string;
   title: string;
-  size?: DataStreamStatType['size'];
-  sizeBytes?: DataStreamStatType['sizeBytes'];
+  size?: DataStreamStatType['size']; // total datastream size
+  sizeBytes?: DataStreamStatType['sizeBytes']; // total datastream size
   lastActivity?: DataStreamStatType['lastActivity'];
+  docsCount?: DataStreamStatType['docsCount']; // docs count in the filtered time range
   integration?: Integration;
   degradedDocs: {
     percentage: number;
     count: number;
+    totalDocs: number; // total datastream docs count
     quality: QualityIndicators;
   };
 
@@ -37,10 +39,12 @@ export class DataStreamStat {
     this.size = dataStreamStat.size;
     this.sizeBytes = dataStreamStat.sizeBytes;
     this.lastActivity = dataStreamStat.lastActivity;
+    this.docsCount = dataStreamStat.docsCount;
     this.integration = dataStreamStat.integration;
     this.degradedDocs = {
       percentage: dataStreamStat.degradedDocs.percentage,
       count: dataStreamStat.degradedDocs.count,
+      totalDocs: dataStreamStat.degradedDocs.totalDocs,
       quality: dataStreamStat.degradedDocs.quality,
     };
   }
@@ -57,6 +61,7 @@ export class DataStreamStat {
       size: dataStreamStat.size,
       sizeBytes: dataStreamStat.sizeBytes,
       lastActivity: dataStreamStat.lastActivity,
+      docsCount: dataStreamStat.docsCount,
       degradedDocs: DEFAULT_DEGRADED_DOCS,
     };
 
@@ -82,10 +87,16 @@ export class DataStreamStat {
       degradedDocs: {
         percentage: degradedDocStat.percentage,
         count: degradedDocStat.count,
+        totalDocs: degradedDocStat.totalDocs,
         quality: mapPercentageToQuality(degradedDocStat.percentage),
       },
     };
 
     return new DataStreamStat(dataStreamStatProps);
+  }
+
+  public static calculateFilteredSize({ sizeBytes, docsCount, degradedDocs }: DataStreamStat) {
+    const avgDocSize = sizeBytes && docsCount ? sizeBytes / docsCount : 0;
+    return avgDocSize * degradedDocs.totalDocs;
   }
 }

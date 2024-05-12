@@ -9,7 +9,6 @@ import * as t from 'io-ts';
 import { keyBy, merge, values } from 'lodash';
 import {
   DataStreamDetails,
-  DataStreamsEstimatedDataInBytes,
   DataStreamSettings,
   DataStreamStat,
   DegradedDocs,
@@ -21,7 +20,6 @@ import { getDataStreamDetails, getDataStreamSettings } from './get_data_stream_d
 import { getDataStreams } from './get_data_streams';
 import { getDataStreamsStats } from './get_data_streams_stats';
 import { getDegradedDocsPaginated } from './get_degraded_docs';
-import { getEstimatedDataInBytes } from './get_estimated_data_in_bytes';
 
 const statsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/stats',
@@ -39,8 +37,9 @@ const statsRoute = createDatasetQualityServerRoute({
   async handler(resources): Promise<{
     dataStreamsStats: DataStreamStat[];
   }> {
-    const { context, params } = resources;
+    const { context, params, getEsCapabilities } = resources;
     const coreContext = await context.core;
+    const sizeStatsAvailable = !(await getEsCapabilities()).serverless;
 
     // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
@@ -51,7 +50,7 @@ const statsRoute = createDatasetQualityServerRoute({
         ...params.query,
         uncategorisedOnly: false,
       }),
-      getDataStreamsStats({ esClient, ...params.query }),
+      getDataStreamsStats({ esClient, sizeStatsAvailable, ...params.query }),
     ]);
 
     return {
@@ -165,42 +164,9 @@ const dataStreamDetailsRoute = createDatasetQualityServerRoute({
   },
 });
 
-const estimatedDataInBytesRoute = createDatasetQualityServerRoute({
-  endpoint: 'GET /internal/dataset_quality/data_streams/estimated_data',
-  params: t.type({
-    query: t.intersection([typeRt, rangeRt]),
-  }),
-  options: {
-    tags: [],
-  },
-  async handler(resources): Promise<DataStreamsEstimatedDataInBytes> {
-    const { context, params, getEsCapabilities } = resources;
-    const coreContext = await context.core;
-
-    const esClient = coreContext.elasticsearch.client.asCurrentUser;
-    const isServerless = (await getEsCapabilities()).serverless;
-
-    if (isServerless) {
-      return {
-        estimatedDataInBytes: null,
-      };
-    }
-
-    const estimatedDataInBytes = await getEstimatedDataInBytes({
-      esClient,
-      ...params.query,
-    });
-
-    return {
-      estimatedDataInBytes,
-    };
-  },
-});
-
 export const dataStreamsRouteRepository = {
   ...statsRoute,
   ...degradedDocsRoute,
   ...dataStreamDetailsRoute,
   ...dataStreamSettingsRoute,
-  ...estimatedDataInBytesRoute,
 };
