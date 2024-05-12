@@ -49,3 +49,17 @@ Retrievers make it easier to compose and test different retrieval strategies in 
 ====
 // TODO: uncomment and add to note once following page is live
 //Refer to {ref}/retrievers-overview.html[documentation] for a high level overview of retrievers.
+[[playground-hidden-fields]]
+=== Hidden fields
+
+We present a simplified view of choosing fields to search on. The query editor presents fields which are ideal for the user to search on.
+
+Available Field types:
+- Semantic fields like `sparse_vector` or `dense_vector` fields where the embeddings have been created from a inference processor
+- `text` fields
+
+hidden Field Types:
+- non `text` fields like `keyword` fields
+- fields that are not indexed
+- semantic fields where the embeddings have not been created from a inference processor
+- nested fields
