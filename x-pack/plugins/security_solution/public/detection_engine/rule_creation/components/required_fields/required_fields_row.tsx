@@ -6,19 +6,10 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import {
-  EuiButtonIcon,
-  EuiComboBox,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiIcon,
-  EuiTextColor,
-} from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiTextColor } from '@elastic/eui';
 import { UseField } from '../../../../shared_imports';
-import { useNameField } from './use_name_field';
-import { useTypeField } from './use_type_field';
+import { NameComboBox } from './name_combobox';
+import { TypeComboBox } from './type_combobox';
 import * as i18n from './translations';
 
 import type {
@@ -33,8 +24,6 @@ import type {
   RequiredField,
   RequiredFieldInput,
 } from '../../../../../common/api/detection_engine/model/rule_schema/common_attributes.gen';
-
-const SINGLE_SELECTION_AS_PLAIN_TEXT = { asPlainText: true };
 
 interface RequiredFieldRowProps {
   item: ArrayItem;
@@ -80,7 +69,7 @@ export const RequiredFieldRow = ({
       key={item.id}
       path={item.path}
       config={rowFieldConfig}
-      component={RequiredFieldRowContent}
+      component={RequiredFieldField}
       readDefaultValueOnForm={!item.isNew}
       componentProps={{
         itemId: item.id,
@@ -93,7 +82,7 @@ export const RequiredFieldRow = ({
   );
 };
 
-interface RequiredFieldRowInnerProps {
+interface RequiredFieldFieldProps {
   field: FieldHook<RequiredFieldInput>;
   onRemove: () => void;
   typesByFieldName: Record<string, string[] | undefined>;
@@ -105,20 +94,14 @@ interface RequiredFieldRowInnerProps {
   itemId: string;
 }
 
-const RequiredFieldRowContent = ({
+const RequiredFieldField = ({
   field,
   typesByFieldName,
   onRemove,
   availableFieldNames,
   getWarnings,
   itemId,
-}: RequiredFieldRowInnerProps) => {
-  const { selectableNameOptions, selectedNameOptions, handleNameChange, handleAddCustomName } =
-    useNameField(field, availableFieldNames, typesByFieldName);
-
-  const { selectableTypeOptions, selectedTypeOptions, handleTypeChange, handleAddCustomType } =
-    useTypeField(field, typesByFieldName);
-
+}: RequiredFieldFieldProps) => {
   const { nameWarning, typeWarning } = getWarnings(field.value);
   const warningMessage = nameWarning || typeWarning;
 
@@ -153,53 +136,22 @@ const RequiredFieldRowContent = ({
     >
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow>
-          <EuiComboBox
-            data-test-subj={`requiredFieldNameSelect-${field.value.name || 'empty'}`}
-            aria-label={i18n.FIELD_NAME}
-            placeholder={i18n.FIELD_NAME}
-            singleSelection={SINGLE_SELECTION_AS_PLAIN_TEXT}
-            options={selectableNameOptions}
-            selectedOptions={selectedNameOptions}
-            onChange={handleNameChange}
-            isClearable={false}
-            onCreateOption={handleAddCustomName}
-            isInvalid={Boolean(nameError)}
-            prepend={
-              nameWarning ? (
-                <EuiIcon
-                  size="s"
-                  type="warning"
-                  color={euiThemeVars.euiColorWarningText}
-                  data-test-subj="warningIcon"
-                  aria-labelledby={`warningText-${itemId}`}
-                />
-              ) : undefined
-            }
+          <NameComboBox
+            field={field}
+            itemId={itemId}
+            availableFieldNames={availableFieldNames}
+            typesByFieldName={typesByFieldName}
+            nameWarning={nameWarning}
+            nameError={nameError}
           />
         </EuiFlexItem>
         <EuiFlexItem grow>
-          <EuiComboBox
-            data-test-subj={`requiredFieldTypeSelect-${field.value.type || 'empty'}`}
-            aria-label={i18n.FIELD_TYPE}
-            placeholder={i18n.FIELD_TYPE}
-            singleSelection={SINGLE_SELECTION_AS_PLAIN_TEXT}
-            options={selectableTypeOptions}
-            selectedOptions={selectedTypeOptions}
-            onChange={handleTypeChange}
-            isClearable={false}
-            onCreateOption={handleAddCustomType}
-            isInvalid={Boolean(typeError)}
-            prepend={
-              typeWarning ? (
-                <EuiIcon
-                  size="s"
-                  type="warning"
-                  color={euiThemeVars.euiColorWarningText}
-                  data-test-subj="warningIcon"
-                  aria-labelledby={`warningText-${itemId}`}
-                />
-              ) : undefined
-            }
+          <TypeComboBox
+            field={field}
+            itemId={itemId}
+            typesByFieldName={typesByFieldName}
+            typeWarning={typeWarning}
+            typeError={typeError}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

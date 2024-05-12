@@ -5,27 +5,34 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState, useEffect } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
+import { EuiComboBox, EuiIcon } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
 import type { FieldHook } from '../../../../shared_imports';
 import type { RequiredFieldInput } from '../../../../../common/api/detection_engine/model/rule_schema/common_attributes.gen';
+import * as i18n from './translations';
 
-interface UseTypeFieldReturn {
-  selectableTypeOptions: Array<EuiComboBoxOptionOption<string>>;
-  selectedTypeOptions: Array<EuiComboBoxOptionOption<string>>;
-  handleTypeChange: (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => void;
-  handleAddCustomType: (newType: string) => void;
+interface TypeComboBoxProps {
+  field: FieldHook<RequiredFieldInput>;
+  itemId: string;
+  typesByFieldName: Record<string, string[] | undefined>;
+  typeWarning: string;
+  typeError: { message: string } | undefined;
 }
 
-export const useTypeField = (
-  field: FieldHook<RequiredFieldInput>,
-  typesByFieldName: Record<string, string[] | undefined>
-): UseTypeFieldReturn => {
+export function TypeComboBox({
+  field,
+  itemId,
+  typesByFieldName,
+  typeWarning,
+  typeError,
+}: TypeComboBoxProps) {
+  const { value, setValue } = field;
+
   const selectableTypeOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(() => {
-    const typesAvailableForSelectedName = typesByFieldName[field.value.name];
-    const isSelectedTypeAvailable = (typesAvailableForSelectedName || []).includes(
-      field.value.type
-    );
+    const typesAvailableForSelectedName = typesByFieldName[value.name];
+    const isSelectedTypeAvailable = (typesAvailableForSelectedName || []).includes(value.type);
 
     if (typesAvailableForSelectedName && isSelectedTypeAvailable) {
       /*
@@ -49,8 +56,8 @@ export const useTypeField = (
           label: type,
           value: type,
         }))
-        .concat({ label: field.value.type, value: field.value.type });
-    } else if (field.value.name) {
+        .concat({ label: value.type, value: value.type });
+    } else if (value.name) {
       /*
         Case: name is not available (so the type is also not available)
         Field name is set (not an empty string), but it's not present in index patterns.
@@ -58,39 +65,35 @@ export const useTypeField = (
       */
       return [
         {
-          label: field.value.type,
-          value: field.value.type,
+          label: value.type,
+          value: value.type,
         },
       ];
     }
 
     return [];
-  }, [field.value.name, field.value.type, typesByFieldName]);
+  }, [value.name, value.type, typesByFieldName]);
 
   /*
     Using a state for `selectedTypeOptions` instead of using the field value directly
     to fix the issue where pressing the backspace key in combobox input would clear the field value
     and trigger a validation error. By using a separate state, we can clear the selected option 
     without clearing the field value.
-   */
+  */
   const [selectedTypeOptions, setSelectedTypeOptions] = useState<
     Array<EuiComboBoxOptionOption<string>>
   >(() => {
-    const selectedTypeOption = selectableTypeOptions.find(
-      (option) => option.value === field.value.type
-    );
+    const selectedTypeOption = selectableTypeOptions.find((option) => option.value === value.type);
 
     return selectedTypeOption ? [selectedTypeOption] : [];
   });
 
   useEffect(() => {
     /* Re-computing the new selected type option when the field value changes */
-    const selectedTypeOption = selectableTypeOptions.find(
-      (option) => option.value === field.value.type
-    );
+    const selectedTypeOption = selectableTypeOptions.find((option) => option.value === value.type);
 
     setSelectedTypeOptions(selectedTypeOption ? [selectedTypeOption] : []);
-  }, [field.value.type, selectableTypeOptions]);
+  }, [value.type, selectableTypeOptions]);
 
   const handleTypeChange = useCallback(
     (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
@@ -105,31 +108,50 @@ export const useTypeField = (
       const updatedType = newlySelectedOption?.value || '';
 
       const updatedFieldValue: RequiredFieldInput = {
-        name: field.value.name,
+        name: value.name,
         type: updatedType,
       };
 
-      field.setValue(updatedFieldValue);
+      setValue(updatedFieldValue);
     },
-    [field]
+    [value.name, setValue]
   );
 
   const handleAddCustomType = useCallback(
     (newType: string) => {
       const updatedFieldValue: RequiredFieldInput = {
-        name: field.value.name,
+        name: value.name,
         type: newType,
       };
 
-      field.setValue(updatedFieldValue);
+      setValue(updatedFieldValue);
     },
-    [field]
+    [value.name, setValue]
   );
 
-  return {
-    selectableTypeOptions,
-    selectedTypeOptions,
-    handleTypeChange,
-    handleAddCustomType,
-  };
-};
+  return (
+    <EuiComboBox
+      data-test-subj={`requiredFieldTypeSelect-${value.type || 'empty'}`}
+      aria-label={i18n.FIELD_TYPE}
+      placeholder={i18n.FIELD_TYPE}
+      singleSelection={{ asPlainText: true }}
+      options={selectableTypeOptions}
+      selectedOptions={selectedTypeOptions}
+      onChange={handleTypeChange}
+      isClearable={false}
+      onCreateOption={handleAddCustomType}
+      isInvalid={Boolean(typeError)}
+      prepend={
+        typeWarning ? (
+          <EuiIcon
+            size="s"
+            type="warning"
+            color={euiThemeVars.euiColorWarningText}
+            data-test-subj="warningIcon"
+            aria-labelledby={`warningText-${itemId}`}
+          />
+        ) : undefined
+      }
+    />
+  );
+}

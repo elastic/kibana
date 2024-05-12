@@ -5,31 +5,42 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState, useEffect } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
+import { EuiComboBox, EuiIcon } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
 import type { FieldHook } from '../../../../shared_imports';
 import type { RequiredFieldInput } from '../../../../../common/api/detection_engine/model/rule_schema/common_attributes.gen';
+import { pickTypeForName } from './utils';
+import * as i18n from './translations';
 
-interface UseNameFieldReturn {
-  selectableNameOptions: Array<EuiComboBoxOptionOption<string>>;
-  selectedNameOptions: Array<EuiComboBoxOptionOption<string>>;
-  handleNameChange: (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => void;
-  handleAddCustomName: (newName: string) => void;
+interface NameComboBoxProps {
+  field: FieldHook<RequiredFieldInput>;
+  itemId: string;
+  availableFieldNames: string[];
+  typesByFieldName: Record<string, string[] | undefined>;
+  nameWarning: string;
+  nameError: { message: string } | undefined;
 }
 
-export const useNameField = (
-  field: FieldHook<RequiredFieldInput>,
-  availableFieldNames: string[],
-  typesByFieldName: Record<string, string[] | undefined>
-): UseNameFieldReturn => {
+export function NameComboBox({
+  field,
+  itemId,
+  availableFieldNames,
+  typesByFieldName,
+  nameWarning,
+  nameError,
+}: NameComboBoxProps) {
+  const { value, setValue } = field;
+
   const selectableNameOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(
     () =>
       /* Not adding an empty string to the list of selectable field names */
-      (field.value.name ? [field.value.name] : []).concat(availableFieldNames).map((name) => ({
+      (value.name ? [value.name] : []).concat(availableFieldNames).map((name) => ({
         label: name,
         value: name,
       })),
-    [availableFieldNames, field.value.name]
+    [availableFieldNames, value.name]
   );
 
   /*
@@ -37,25 +48,21 @@ export const useNameField = (
     to fix the issue where pressing the backspace key in combobox input would clear the field value
     and trigger a validation error. By using a separate state, we can clear the selected option 
     without clearing the field value.
-   */
+  */
   const [selectedNameOptions, setSelectedNameOptions] = useState<
     Array<EuiComboBoxOptionOption<string>>
   >(() => {
-    const selectedNameOption = selectableNameOptions.find(
-      (option) => option.label === field.value.name
-    );
+    const selectedNameOption = selectableNameOptions.find((option) => option.label === value.name);
 
     return selectedNameOption ? [selectedNameOption] : [];
   });
 
   useEffect(() => {
     /* Re-computing the new selected name option when the field value changes */
-    const selectedNameOption = selectableNameOptions.find(
-      (option) => option.label === field.value.name
-    );
+    const selectedNameOption = selectableNameOptions.find((option) => option.label === value.name);
 
     setSelectedNameOptions(selectedNameOption ? [selectedNameOption] : []);
-  }, [field.value.name, selectableNameOptions]);
+  }, [value.name, selectableNameOptions]);
 
   const handleNameChange = useCallback(
     (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
@@ -69,54 +76,53 @@ export const useNameField = (
 
       const updatedName = newlySelectedOption?.value || '';
 
-      const updatedType = pickTypeForName(updatedName, field.value.type, typesByFieldName);
+      const updatedType = pickTypeForName(updatedName, value.type, typesByFieldName);
 
       const updatedFieldValue: RequiredFieldInput = {
         name: updatedName,
         type: updatedType,
       };
 
-      field.setValue(updatedFieldValue);
+      setValue(updatedFieldValue);
     },
-    [field, typesByFieldName]
+    [setValue, value.type, typesByFieldName]
   );
 
   const handleAddCustomName = useCallback(
     (newName: string) => {
       const updatedFieldValue: RequiredFieldInput = {
         name: newName,
-        type: pickTypeForName(newName, field.value.type, typesByFieldName),
+        type: pickTypeForName(newName, value.type, typesByFieldName),
       };
 
-      field.setValue(updatedFieldValue);
+      setValue(updatedFieldValue);
     },
-    [field, typesByFieldName]
+    [setValue, value.type, typesByFieldName]
   );
 
-  return {
-    selectableNameOptions,
-    selectedNameOptions,
-    handleNameChange,
-    handleAddCustomName,
-  };
-};
-
-function pickTypeForName(
-  currentName: string,
-  currentType: string,
-  typesByFieldName: Record<string, string[] | undefined>
-) {
-  const typesAvailableForNewName = typesByFieldName[currentName] || [];
-  const isCurrentTypeAvailableForNewName = typesAvailableForNewName.includes(currentType);
-
-  /* First try to keep the current type if it's available for the new name */
-  if (isCurrentTypeAvailableForNewName) {
-    return currentType;
-  }
-
-  /*
-    If current type is not available, pick the first available type.
-    If no type is available, use the currently selected type.
-  */
-  return typesAvailableForNewName?.[0] ?? currentType;
+  return (
+    <EuiComboBox
+      data-test-subj={`requiredFieldNameSelect-${value.name || 'empty'}`}
+      aria-label={i18n.FIELD_NAME}
+      placeholder={i18n.FIELD_NAME}
+      singleSelection={{ asPlainText: true }}
+      options={selectableNameOptions}
+      selectedOptions={selectedNameOptions}
+      onChange={handleNameChange}
+      isClearable={false}
+      onCreateOption={handleAddCustomName}
+      isInvalid={Boolean(nameError)}
+      prepend={
+        nameWarning ? (
+          <EuiIcon
+            size="s"
+            type="warning"
+            color={euiThemeVars.euiColorWarningText}
+            data-test-subj="warningIcon"
+            aria-labelledby={`warningText-${itemId}`}
+          />
+        ) : undefined
+      }
+    />
+  );
 }
