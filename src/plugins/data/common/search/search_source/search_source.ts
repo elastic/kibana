@@ -146,6 +146,8 @@ interface ExpressionAstOptions {
   asDatatable?: boolean;
 }
 
+const omitByIsNil = (object: Record<string, any>) => omitBy(object, isNil);
+
 /** @public **/
 export class SearchSource {
   private id: string = uniqueId('data_source');
@@ -798,37 +800,56 @@ export class SearchSource {
           ...scriptFields,
         }
       : {};
-    body.stored_fields = ['*'];
-    body.runtime_mappings = runtimeFields || {};
 
     body._source =
       index && !body.hasOwnProperty('_source') ? index.getSourceFiltering() : body._source;
 
-    // get filter if data view specified, otherwuse null filter
+    // get filter if data view specified, otherwise null filter
     const filter = index
       ? this.getFieldFilter({ bodySourceExcludes: body._source.excludes, metaFields })
       : (fields: any) => fields;
 
     body.fields = filter(body.fields || []);
+
     const fieldsFromSource = filter(searchRequest.fieldsFromSource || []);
     // apply source filters from index pattern if specified by the user
     const filteredDocvalueFields = filter(docvalueFields);
 
-    const fieldsProvidedOrFromSource = !!(fieldListProvided || fieldsFromSource.length);
+    const sourceFieldsProvided = !!fieldsFromSource.length;
 
-    body.fields = fieldsProvidedOrFromSource ? body.fields : filteredDocvalueFields;
+    body.fields = fieldListProvided || sourceFieldsProvided ? body.fields : filteredDocvalueFields;
+
+    const uniqFieldNames = this.getUniqueFieldNames({ fields: body.fields, fieldsFromSource });
+
+    body.script_fields =
+      fieldListProvided || sourceFieldsProvided
+        ? this.filterScriptFields({
+            uniqFieldNames,
+            scriptFields: body.script_fields,
+          })
+        : body.script_fields;
+
+    // request the remaining fields from stored_fields just in case, since the
+    // fields API does not handle stored fields
+    const remainingFields = this.getRemainingFields({
+      uniqFieldNames,
+      scriptFields: body.script_fields,
+      runtimeFields,
+      _source: body._source,
+    });
 
     // specific fields were provided, so we need to exclude any others
-    if (fieldsProvidedOrFromSource) {
-      const uniqFieldNames = this.getUniqueFieldNames({ fields: body.fields, fieldsFromSource });
-
+    // if (fieldListProvided || sourceFieldsProvided) {
+    /*
       body.script_fields = this.filterScriptFields({
         uniqFieldNames,
         scriptFields: body.script_fields,
       });
+      */
 
-      // request the remaining fields from stored_fields just in case, since the
-      // fields API does not handle stored fields
+    // request the remaining fields from stored_fields just in case, since the
+    // fields API does not handle stored fields
+    /*
       const remainingFields = this.getRemainingFields({
         uniqFieldNames,
         scriptFields: body.script_fields,
@@ -837,32 +858,33 @@ export class SearchSource {
       });
 
       body.stored_fields = [...new Set(remainingFields)];
+      */
 
-      // only include unique values
-      if (fieldsFromSource.length) {
-        if (!isEqual(remainingFields, fieldsFromSource)) {
-          setWith(body, '_source.includes', remainingFields, (nsValue) => {
-            return isObject(nsValue) ? {} : nsValue;
-          });
-        }
+    // only include unique values
+    if (sourceFieldsProvided) {
+      if (!isEqual(remainingFields, fieldsFromSource)) {
+        setWith(body, '_source.includes', remainingFields, (nsValue) => {
+          return isObject(nsValue) ? {} : nsValue;
+        });
       }
     }
+    // }
 
-    if (fieldsProvidedOrFromSource) {
-      body.fields = !fieldsFromSource.length
-        ? this.getUniqueFields({
-            index,
-            fields: body.fields,
-            metaFields,
-            filteredDocvalueFields,
-          })
-        : // if items that are in the docvalueFields are provided, we should
-          // make sure those are added to the fields API unless they are
-          // already set in docvalue_fields
-          this.getFieldsAndDocValueFields({
+    if (fieldListProvided || sourceFieldsProvided) {
+      // if items that are in the docvalueFields are provided, we should
+      // make sure those are added to the fields API unless they are
+      // already set in docvalue_fields
+      body.fields = sourceFieldsProvided
+        ? this.getFieldsAndDocValueFields({
             fields: body.fields,
             docvalueFields: body.docvalue_fields,
             fieldsFromSource,
+            filteredDocvalueFields,
+          })
+        : this.getUniqueFields({
+            index,
+            fields: body.fields,
+            metaFields,
             filteredDocvalueFields,
           });
     }
@@ -893,7 +915,6 @@ export class SearchSource {
       getConfig,
       sort: body.sort,
     });
-    const omitByIsNil = (object: Record<string, any>) => omitBy(object, isNil);
 
     const bodyToReturn = {
       ...searchRequest.body,
@@ -904,7 +925,10 @@ export class SearchSource {
           ? getHighlightRequest(getConfig(UI_SETTINGS.DOC_HIGHLIGHT))
           : undefined,
       // remove _source, since everything's coming from fields API, scripted, or stored fields
-      _source: fieldsProvidedOrFromSource && !fieldsFromSource.length ? false : body._source,
+      _source: fieldListProvided && !sourceFieldsProvided ? false : body._source,
+      stored_fields:
+        fieldListProvided || sourceFieldsProvided ? [...new Set(remainingFields)] : ['*'],
+      runtime_mappings: runtimeFields,
     };
 
     return omitByIsNil({
@@ -982,17 +1006,17 @@ export class SearchSource {
   private getRemainingFields({
     uniqFieldNames,
     scriptFields,
-    runtimeMappings,
+    runtimeFields,
     _source,
   }: {
     uniqFieldNames: any;
     scriptFields: any;
-    runtimeMappings: any;
+    runtimeFields: any;
     _source: any;
   }) {
     return difference(uniqFieldNames, [
       ...Object.keys(scriptFields),
-      ...Object.keys(runtimeMappings),
+      ...Object.keys(runtimeFields),
     ]).filter((remainingField) => {
       if (!remainingField) return false;
       if (!_source || !_source.excludes) return true;
