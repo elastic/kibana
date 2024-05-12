@@ -779,7 +779,7 @@ export class SearchSource {
 
     const searchRequest = this.mergeProps();
     searchRequest.body = searchRequest.body || {};
-    const { body, index, query, filters, highlightAll } = searchRequest;
+    const { body, index } = searchRequest;
 
     // get some special field types from the index pattern
     const { docvalueFields, scriptFields, runtimeFields } = index
@@ -814,8 +814,12 @@ export class SearchSource {
     // apply source filters from index pattern if specified by the user
     const filteredDocvalueFields = filter(docvalueFields);
 
+    const fieldsProvidedOrFromSource = !!(fieldListProvided || fieldsFromSource.length);
+
+    body.fields = fieldsProvidedOrFromSource ? body.fields : filteredDocvalueFields;
+
     // specific fields were provided, so we need to exclude any others
-    if (fieldListProvided || fieldsFromSource.length) {
+    if (fieldsProvidedOrFromSource) {
       const uniqFieldNames = this.getUniqueFieldNames({ fields: body.fields, fieldsFromSource });
 
       body.script_fields = this.filterScriptFields({
@@ -833,55 +837,35 @@ export class SearchSource {
       });
 
       body.stored_fields = [...new Set(remainingFields)];
+
       // only include unique values
       if (fieldsFromSource.length) {
         if (!isEqual(remainingFields, fieldsFromSource)) {
-          setWith(body, '_source.includes', remainingFields, (nsValue) =>
-            isObject(nsValue) ? {} : nsValue
-          );
+          setWith(body, '_source.includes', remainingFields, (nsValue) => {
+            return isObject(nsValue) ? {} : nsValue;
+          });
         }
-        // if items that are in the docvalueFields are provided, we should
-        // make sure those are added to the fields API unless they are
-        // already set in docvalue_fields
-        body.fields = [
-          ...body.fields,
-          ...filteredDocvalueFields.filter((fld: SearchFieldValue) => {
-            return (
-              fieldsFromSource.includes(this.getFieldName(fld)) &&
-              !(body.docvalue_fields || [])
-                .map((d: string | Record<string, SearchFieldValue>) => this.getFieldName(d))
-                .includes(this.getFieldName(fld))
-            );
-          }),
-        ];
-
-        /*
-        body.fields = this.getFieldsAndDocValueFields({
-          fields: body.fields,
-          docvalueFields,
-          fieldsFromSource,
-          filteredDocvalueFields,
-        });
-        */
-
-        // delete fields array if it is still set to the empty default
-        if (!fieldListProvided && body.fields.length === 0) delete body.fields;
-      } else {
-        // remove _source, since everything's coming from fields API, scripted, or stored fields
-        body._source = false;
-
-        body.fields = this.getUniqueFields({
-          index,
-          fields: body.fields,
-          metaFields,
-          filteredDocvalueFields,
-        });
       }
-    } else {
-      body.fields = filteredDocvalueFields;
     }
 
-    const builtQuery = this.getBuiltEsQuery({ index, query, filters, getConfig, sort: body.sort });
+    if (fieldsProvidedOrFromSource) {
+      body.fields = !fieldsFromSource.length
+        ? this.getUniqueFields({
+            index,
+            fields: body.fields,
+            metaFields,
+            filteredDocvalueFields,
+          })
+        : // if items that are in the docvalueFields are provided, we should
+          // make sure those are added to the fields API unless they are
+          // already set in docvalue_fields
+          this.getFieldsAndDocValueFields({
+            fields: body.fields,
+            docvalueFields: body.docvalue_fields,
+            fieldsFromSource,
+            filteredDocvalueFields,
+          });
+    }
 
     // For testing shard failure messages in the UI, follow these steps:
     // 1. Add all three sample data sets (flights, ecommerce, logs) to Kibana.
@@ -902,27 +886,33 @@ export class SearchSource {
     // });
     // Alternatively you could also add this query via "Edit as Query DSL", then it needs no code to be changed
 
-    if (highlightAll && builtQuery) {
-      body.highlight = getHighlightRequest(getConfig(UI_SETTINGS.DOC_HIGHLIGHT));
-      delete searchRequest.highlightAll;
-    }
-
+    const builtQuery = this.getBuiltEsQuery({
+      index,
+      query: searchRequest.query,
+      filters: searchRequest.filters,
+      getConfig,
+      sort: body.sort,
+    });
     const omitByIsNil = (object: Record<string, any>) => omitBy(object, isNil);
 
-    /*
-    const filterScriptedFields =
-      (fieldListProvided || fieldsFromSource.length) && !uniqFieldNames.includes('*');
-*/
     const bodyToReturn = {
       ...searchRequest.body,
       pit: searchRequest.pit,
       query: builtQuery,
+      highlight:
+        searchRequest.highlightAll && builtQuery
+          ? getHighlightRequest(getConfig(UI_SETTINGS.DOC_HIGHLIGHT))
+          : undefined,
+      // remove _source, since everything's coming from fields API, scripted, or stored fields
+      _source: fieldsProvidedOrFromSource && !fieldsFromSource.length ? false : body._source,
     };
 
     return omitByIsNil({
       ...searchRequest,
       body: omitByIsNil(bodyToReturn),
       indexType: this.getIndexType(index),
+      highlightAll:
+        searchRequest.highlightAll && builtQuery ? undefined : searchRequest.highlightAll,
     }) as SearchRequest;
   }
 
@@ -1010,7 +1000,6 @@ export class SearchSource {
     });
   }
 
-  /*
   private getFieldsAndDocValueFields({
     fields,
     docvalueFields,
@@ -1022,6 +1011,9 @@ export class SearchSource {
     fieldsFromSource: any;
     filteredDocvalueFields: any;
   }) {
+    // if items that are in the docvalueFields are provided, we should
+    // make sure those are added to the fields API unless they are
+    // already set in docvalue_fields
     return [
       ...fields,
       ...filteredDocvalueFields.filter((fld: SearchFieldValue) => {
@@ -1034,7 +1026,6 @@ export class SearchSource {
       }),
     ];
   }
-  */
 
   private getUniqueFields({
     index,
