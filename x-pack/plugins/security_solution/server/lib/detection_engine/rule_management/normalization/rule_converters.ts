@@ -773,6 +773,7 @@ export const convertPrebuiltRuleAssetToRuleResponse = (
   return RuleResponse.parse({
     ...prebuiltRuleAssetDefaults,
     ...prebuiltRuleAsset,
+    required_fields: addEcsToRequiredFields(prebuiltRuleAsset.required_fields),
     ...ruleResponseSpecificFields,
   });
 };
