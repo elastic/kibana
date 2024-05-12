@@ -100,8 +100,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should not show Patterns tab (basic license)', async () => {
-          await testSubjects.click('dscViewModePatternAnalysisButton');
-
           await testSubjects.missingOrFail('dscViewModePatternAnalysisButton');
           await retry.try(async () => {
             const fieldStatsTab = await testSubjects.find('dscViewModeDocumentButton');
