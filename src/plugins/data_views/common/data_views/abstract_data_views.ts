@@ -27,7 +27,7 @@ import type {
 import { removeFieldAttrs } from './utils';
 import { metaUnitsToFormatter } from './meta_units_to_formatter';
 
-import type { DataViewAttributes, FieldAttrs, FieldAttrSet, IIndexPatternFieldList} from '..';
+import type { DataViewAttributes, FieldAttrs, FieldAttrSet, IIndexPatternFieldList } from '..';
 
 import type { DataViewField } from '../fields';
 

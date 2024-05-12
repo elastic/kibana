@@ -22,7 +22,6 @@ export function normalizeSortRequest(
   indexPattern: DataView | DataViewLazy | string | undefined,
   defaultSortOptions: FieldSortOptions | string = {}
 ) {
-  console.log('normalizeSortRequest', sortObject, defaultSortOptions);
   const sortArray: EsQuerySortValue[] = Array.isArray(sortObject) ? sortObject : [sortObject];
   return sortArray.map(function (sortable) {
     return normalize(sortable, indexPattern, defaultSortOptions);

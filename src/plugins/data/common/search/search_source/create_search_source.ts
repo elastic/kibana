@@ -80,7 +80,6 @@ export const createSearchSource = (
       searchSource.setField('query', migrateLegacyQuery(query));
     }
     if (useDataViewLazy) {
-      console.log('useDataViewLazy', useDataViewLazy);
       await searchSource.loadDataViewFields();
     }
 

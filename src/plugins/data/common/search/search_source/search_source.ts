@@ -805,21 +805,16 @@ export class SearchSource {
     }
     // eslint-disable-next-line no-console
     console.log('loadDataViewFields because of DataViewLazy');
-    const sort1 = this.getField('sort');
-    console.log(sort1);
     const request = this.mergeProps(this, { body: {} }, ['query', 'filter']);
     let fields = dataView.timeFieldName ? [dataView.timeFieldName] : [];
     const sort = this.getField('sort');
-    console.log(sort);
     if (sort) {
       const sortArr = Array.isArray(sort) ? sort : [sort];
       for (const s of sortArr) {
         const keys = Object.keys(s);
-        console.log({ keys });
         fields = fields.concat(keys);
       }
     }
-    console.log('fields after sort', fields);
     for (const query of request.query) {
       if (query.query) {
         const nodes = fromKueryExpression(query.query);
@@ -827,7 +822,6 @@ export class SearchSource {
         fields = fields.concat(queryFields);
       }
     }
-    console.log('fields after query', fields);
     const filters = request.filters;
     if (filters) {
       const filtersArr = Array.isArray(filters) ? filters : [filters];
@@ -836,14 +830,11 @@ export class SearchSource {
       }
     }
     fields = fields.filter((f) => Boolean(f));
-    console.log('fields after query', fields);
 
     if (dataView.getSourceFiltering() && dataView.getSourceFiltering().excludes.length) {
       // if source filtering is enabled, we need to fetch all the fields
       await dataView.getFields({ fieldName: ['*'] });
     } else if (fields.length) {
-      // eslint-disable-next-line no-console
-      console.log('loadDataViewFields fields:', fields);
       const fieldSpec = await dataView.getFields({
         fieldName: fields,
         // fieldTypes: ['date', 'date_nanos'],
@@ -986,7 +977,6 @@ export class SearchSource {
     } else {
       body.fields = filteredDocvalueFields;
     }
-    console.log('body.fields', body.fields);
     // @ts-ignore
     body.fields = body.fields.filter((field) => Boolean(field));
 
