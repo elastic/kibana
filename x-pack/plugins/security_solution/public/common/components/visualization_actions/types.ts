@@ -11,7 +11,7 @@ import type {
   FormBasedPersistedState,
   TypedLensByValueInput,
 } from '@kbn/lens-plugin/public';
-import type { IKibanaSearchResponse } from '@kbn/data-plugin/common';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';

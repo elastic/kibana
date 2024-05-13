@@ -95,7 +95,7 @@ type RenderFunctionProp = (
   state: DraggableStateSnapshot
 ) => React.ReactNode;
 
-interface Props {
+export interface DraggableWrapperProps {
   dataProvider: DataProvider;
   fieldType?: string;
   isAggregatable?: boolean;
