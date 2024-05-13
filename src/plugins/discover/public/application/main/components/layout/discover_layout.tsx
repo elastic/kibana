@@ -173,6 +173,17 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       screenDescription: `The user is looking at the Discover view on the ${
         isEsqlMode ? 'ES|QL' : 'dataView'
       } mode. ${indexPatternText}${dataViewIdText}`,
+      starterPrompts: [
+        {
+          title: i18n.translate('discover.aiAssistant.starterPrompts.logRateAnalysis.title', {
+            defaultMessage: 'Explain',
+          }),
+          prompt: i18n.translate('discover.aiAssistant.starterPrompts.logRateAnalysis.title', {
+            defaultMessage: 'Can you analyze the log rate?',
+          }),
+          icon: 'inspect',
+        },
+      ],
     });
   }, [dataView, isEsqlMode, observabilityAIAssistant?.service]);
 
