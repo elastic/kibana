@@ -489,7 +489,10 @@ export class SearchSource {
     const aggs = this.getField('aggs');
     if (aggs instanceof AggConfigs) {
       return aggs.aggs.some(
-        (agg) => agg.enabled && typeof agg.type.postFlightRequest === 'function'
+        (agg) =>
+          agg.enabled &&
+          typeof agg.type.postFlightRequest === 'function' &&
+          (agg.params.otherBucket || agg.params.missingBucket)
       );
     } else {
       return false;
