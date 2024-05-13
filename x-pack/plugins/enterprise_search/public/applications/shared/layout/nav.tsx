@@ -23,6 +23,7 @@ import {
   AI_SEARCH_PLUGIN,
   VECTOR_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
+  ENTERPRISE_SEARCH_RELEVANCE_PLUGIN,
 } from '../../../../common/constants';
 import {
   SEARCH_APPLICATIONS_PATH,
@@ -35,6 +36,8 @@ import {
   CRAWLERS_PATH,
   SEARCH_INDICES_PATH,
 } from '../../enterprise_search_content/routes';
+
+import { INFERENCE_ENDPOINTS_PATH } from '../../enterprise_search_relevance/routes';
 import { KibanaLogic } from '../kibana';
 
 import { generateNavLink } from './nav_link_helpers';
@@ -106,6 +109,25 @@ export const useEnterpriseSearchNav = (alwaysReturn = false) => {
       ],
       name: i18n.translate('xpack.enterpriseSearch.nav.contentTitle', {
         defaultMessage: 'Content',
+      }),
+    },
+    {
+      id: 'relevance',
+      items: [
+        {
+          id: 'inference_endpoints',
+          name: i18n.translate('xpack.enterpriseSearch.nav.inferenceEndpointsTitle', {
+            defaultMessage: 'Inference Endpoints',
+          }),
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            shouldShowActiveForSubroutes: true,
+            to: ENTERPRISE_SEARCH_RELEVANCE_PLUGIN.URL + INFERENCE_ENDPOINTS_PATH,
+          }),
+        },
+      ],
+      name: i18n.translate('xpack.enterpriseSearch.nav.relevanceTitle', {
+        defaultMessage: 'Relevance',
       }),
     },
     {

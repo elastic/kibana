@@ -48,6 +48,7 @@ import {
   SEARCH_PRODUCT_NAME,
   VECTOR_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
+  ENTERPRISE_SEARCH_RELEVANCE_PLUGIN,
 } from '../common/constants';
 import {
   CreatIndexLocatorDefinition,
@@ -63,6 +64,7 @@ import {
   CRAWLERS_PATH,
 } from './applications/enterprise_search_content/routes';
 
+import { INFERENCE_ENDPOINTS_PATH } from './applications/enterprise_search_relevance/routes';
 import { docLinks } from './applications/shared/doc_links';
 import type { DynamicSideNavItems } from './navigation_tree';
 
@@ -125,6 +127,19 @@ const contentLinks: AppDeepLink[] = [
     title: i18n.translate('xpack.enterpriseSearch.navigation.contentWebcrawlersLinkLabel', {
       defaultMessage: 'Web crawlers',
     }),
+  },
+];
+
+const relevanceLinks: AppDeepLink[] = [
+  {
+    id: 'inferenceEndpoints',
+    path: `/${INFERENCE_ENDPOINTS_PATH}`,
+    title: i18n.translate(
+      'xpack.enterpriseSearch.navigation.relevanceInferenceEndpointsLinkLabel',
+      {
+        defaultMessage: 'Inference endpoints',
+      }
+    ),
   },
 ];
 
@@ -285,6 +300,30 @@ export class EnterpriseSearchPlugin implements Plugin {
         return renderApp(EnterpriseSearchContent, kibanaDeps, pluginData);
       },
       title: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAV_TITLE,
+    });
+
+    core.application.register({
+      appRoute: ENTERPRISE_SEARCH_RELEVANCE_PLUGIN.URL,
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      deepLinks: relevanceLinks,
+      euiIconType: ENTERPRISE_SEARCH_RELEVANCE_PLUGIN.LOGO,
+      id: ENTERPRISE_SEARCH_RELEVANCE_PLUGIN.ID,
+      mount: async (params: AppMountParameters) => {
+        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
+        const { chrome, http } = kibanaDeps.core;
+        chrome.docTitle.change(ENTERPRISE_SEARCH_RELEVANCE_PLUGIN.NAME);
+
+        await this.getInitialData(http);
+        const pluginData = this.getPluginData();
+
+        const { renderApp } = await import('./applications');
+        const { EnterpriseSearchRelevance } = await import(
+          './applications/enterprise_search_relevance'
+        );
+
+        return renderApp(EnterpriseSearchRelevance, kibanaDeps, pluginData);
+      },
+      title: ENTERPRISE_SEARCH_RELEVANCE_PLUGIN.NAV_TITLE,
     });
 
     core.application.register({

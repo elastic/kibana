@@ -14,6 +14,7 @@ import {
   ANALYTICS_PLUGIN,
   APP_SEARCH_PLUGIN,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
+  ENTERPRISE_SEARCH_RELEVANCE_PLUGIN,
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
   ENTERPRISE_SEARCH_PRODUCT_NAME,
   AI_SEARCH_PLUGIN,
@@ -148,6 +149,12 @@ export const useWorkplaceSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
 export const useEnterpriseSearchContentBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   useSearchBreadcrumbs([
     { text: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAV_TITLE, path: '/' },
+    ...breadcrumbs,
+  ]);
+
+export const useEnterpriseSearchRelevanceBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
+  useSearchBreadcrumbs([
+    { text: ENTERPRISE_SEARCH_RELEVANCE_PLUGIN.NAV_TITLE, path: '/' },
     ...breadcrumbs,
   ]);
 
