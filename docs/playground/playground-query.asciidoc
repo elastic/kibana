@@ -59,7 +59,8 @@ Available Field types:
 - Semantic fields like `sparse_vector` or `dense_vector` fields where the embeddings have been created from a inference processor
 - `text` fields
 
-hidden Field Types:
+Hidden Field Types:
+
 - non `text` fields like `keyword` fields
 - fields that are not indexed
 - semantic fields where the embeddings have not been created from a inference processor
