@@ -72,6 +72,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
   let latestTimestamp: string | undefined = tryToParseAsDate(state.latestTimestamp);
   const { dateStart, dateEnd } = getTimeRange(`${params.timeWindowSize}${params.timeWindowUnit}`);
 
+  const start = Date.now();
   const { parsedResults, link, index } = searchSourceRule
     ? await fetchSearchSourceQuery({
         ruleId,
@@ -118,6 +119,12 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         dateStart,
         dateEnd,
       });
+
+  const timeTo1s = start + 1000 - Date.now();
+  if (timeTo1s > 0) {
+    await new Promise((resolve) => setTimeout(resolve, timeTo1s));
+  }
+
   const unmetGroupValues: Record<string, number> = {};
   for (const result of parsedResults.results) {
     const alertId = result.group;
