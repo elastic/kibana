@@ -16,6 +16,7 @@ import {
   SCHEDULE_CONTINUE_BUTTON,
 } from '../../../../screens/create_new_rule';
 import {
+  MAX_SIGNALS_DETAILS,
   DESCRIPTION_SETUP_GUIDE_BUTTON,
   DESCRIPTION_SETUP_GUIDE_CONTENT,
   RULE_NAME_HEADER,
@@ -29,6 +30,7 @@ import {
   fillDescription,
   fillFalsePositiveExamples,
   fillFrom,
+  fillMaxSignals,
   fillNote,
   fillReferenceUrls,
   fillRelatedIntegrations,
@@ -81,6 +83,7 @@ describe('Common rule creation flows', { tags: ['@ess', '@serverless'] }, () => 
     fillThreatTechnique();
     fillThreatSubtechnique();
     fillCustomInvestigationFields();
+    fillMaxSignals();
     fillNote();
     fillSetup();
     cy.get(ABOUT_CONTINUE_BTN).click();
@@ -103,6 +106,7 @@ describe('Common rule creation flows', { tags: ['@ess', '@serverless'] }, () => 
 
     // UI redirects to rule creation page of a created rule
     cy.get(RULE_NAME_HEADER).should('contain', ruleFields.ruleName);
+    cy.get(MAX_SIGNALS_DETAILS).should('contain', ruleFields.maxSignals);
 
     cy.get(DESCRIPTION_SETUP_GUIDE_BUTTON).click();
     cy.get(DESCRIPTION_SETUP_GUIDE_CONTENT).should('contain', 'test setup markdown'); // Markdown formatting should be removed

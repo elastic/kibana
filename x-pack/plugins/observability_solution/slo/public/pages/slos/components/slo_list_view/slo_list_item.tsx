@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useState } from 'react';
-import { SloDeleteConfirmationModal } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
+import { SloDeleteModal } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { SloResetConfirmationModal } from '../../../../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
 import { useResetSlo } from '../../../../hooks/use_reset_slo';
 import { BurnRateRuleParams } from '../../../../typings';
@@ -48,12 +48,15 @@ export function SloListItem({
   const { mutateAsync: resetSlo, isLoading: isResetLoading } = useResetSlo();
   const { sloDetailsUrl } = useSloFormattedSummary(slo);
 
-  const { handleCreateRule, handleDeleteCancel, handleDeleteConfirm } = useSloListActions({
+  const { handleCreateRule } = useSloListActions({
     slo,
-    setDeleteConfirmationModalOpen,
     setIsActionsPopoverOpen,
     setIsAddRuleFlyoutOpen,
   });
+
+  const closeDeleteModal = () => {
+    setDeleteConfirmationModalOpen(false);
+  };
 
   const handleResetConfirm = async () => {
     await resetSlo({ id: slo.id, name: slo.name });
@@ -63,6 +66,7 @@ export function SloListItem({
   const handleResetCancel = () => {
     setResetConfirmationModalOpen(false);
   };
+
   return (
     <EuiPanel data-test-subj="sloItem" hasBorder hasShadow={false}>
       <EuiFlexGroup responsive={false} alignItems="center">
@@ -129,11 +133,7 @@ export function SloListItem({
       />
 
       {isDeleteConfirmationModalOpen ? (
-        <SloDeleteConfirmationModal
-          slo={slo}
-          onCancel={handleDeleteCancel}
-          onConfirm={handleDeleteConfirm}
-        />
+        <SloDeleteModal slo={slo} onCancel={closeDeleteModal} onSuccess={closeDeleteModal} />
       ) : null}
 
       {isResetConfirmationModalOpen ? (

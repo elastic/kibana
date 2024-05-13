@@ -40,6 +40,20 @@ export const CreateAssetCriticalityRecord = AssetCriticalityRecordIdParts.merge(
      * The criticality level of the asset.
      */
     criticality_level: z.enum(['low_impact', 'medium_impact', 'high_impact', 'extreme_impact']),
+    /**
+     * If 'wait_for' the request will wait for the index refresh.
+     */
+    refresh: z.literal('wait_for').optional(),
+  })
+);
+
+export type DeleteAssetCriticalityRecord = z.infer<typeof DeleteAssetCriticalityRecord>;
+export const DeleteAssetCriticalityRecord = AssetCriticalityRecordIdParts.merge(
+  z.object({
+    /**
+     * If 'wait_for' the request will wait for the index refresh.
+     */
+    refresh: z.literal('wait_for').optional(),
   })
 );
 

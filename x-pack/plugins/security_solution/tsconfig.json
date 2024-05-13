@@ -154,7 +154,6 @@
     "@kbn/expressions-plugin",
     "@kbn/dev-proc-runner",
     "@kbn/alerts-ui-shared",
-    "@kbn/text-based-editor",
     "@kbn/security-solution-navigation",
     "@kbn/security-solution-upselling",
     "@kbn/discover-plugin",
@@ -200,6 +199,7 @@
     "@kbn/management-plugin",
     "@kbn/security-plugin-types-server",
     "@kbn/deeplinks-security",
-    "@kbn/react-kibana-context-render"
+    "@kbn/react-kibana-context-render",
+    "@kbn/search-types"
   ]
 }

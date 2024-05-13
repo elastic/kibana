@@ -17,6 +17,7 @@ import {
   getLegendMap,
 } from '.';
 import type { FlattenedBucket, RawBucket } from '../../types';
+import { TableId } from '@kbn/securitysolution-data-table';
 
 describe('legend', () => {
   const colorPalette = getRiskScorePalette(RISK_SCORE_STEPS);
@@ -169,6 +170,7 @@ describe('legend', () => {
         count: 12,
         field: 'host.name',
         value: 'Host-k8iyfzraq9',
+        scopeId: TableId.alertsOnAlertsPage,
       });
     });
 
@@ -214,30 +216,35 @@ describe('legend', () => {
           count: 34,
           field: 'kibana.alert.rule.name',
           value: 'matches everything',
+          scopeId: TableId.alertsOnAlertsPage,
         },
         {
           color: '#da8b45',
           count: 28,
           field: 'kibana.alert.rule.name',
           value: 'EQL process sequence',
+          scopeId: TableId.alertsOnAlertsPage,
         },
         {
           color: '#d6bf57',
           count: 19,
           field: 'kibana.alert.rule.name',
           value: 'Endpoint Security',
+          scopeId: TableId.alertsOnAlertsPage,
         },
         {
           color: '#e7664c',
           count: 5,
           field: 'kibana.alert.rule.name',
           value: 'mimikatz process started',
+          scopeId: TableId.alertsOnAlertsPage,
         },
         {
           color: '#e7664c',
           count: 1,
           field: 'kibana.alert.rule.name',
           value: 'Threshold rule',
+          scopeId: TableId.alertsOnAlertsPage,
         },
       ]);
     });
@@ -264,7 +271,7 @@ describe('legend', () => {
     it('returns the expected legend item', () => {
       const expected: Record<
         string,
-        Array<Pick<LegendItem, 'color' | 'count' | 'field' | 'value'>>
+        Array<Pick<LegendItem, 'color' | 'count' | 'field' | 'value' | 'scopeId'>>
       > = {
         'matches everything': [
           {
@@ -272,6 +279,7 @@ describe('legend', () => {
             count: 34,
             field: 'kibana.alert.rule.name',
             value: 'matches everything',
+            scopeId: TableId.alertsOnAlertsPage,
           },
         ],
         'EQL process sequence': [
@@ -280,6 +288,7 @@ describe('legend', () => {
             count: 28,
             field: 'kibana.alert.rule.name',
             value: 'EQL process sequence',
+            scopeId: TableId.alertsOnAlertsPage,
           },
         ],
         'Endpoint Security': [
@@ -288,6 +297,7 @@ describe('legend', () => {
             count: 19,
             field: 'kibana.alert.rule.name',
             value: 'Endpoint Security',
+            scopeId: TableId.alertsOnAlertsPage,
           },
         ],
         'mimikatz process started': [
@@ -296,6 +306,7 @@ describe('legend', () => {
             count: 5,
             field: 'kibana.alert.rule.name',
             value: 'mimikatz process started',
+            scopeId: TableId.alertsOnAlertsPage,
           },
         ],
         'Threshold rule': [
@@ -304,6 +315,7 @@ describe('legend', () => {
             count: 1,
             field: 'kibana.alert.rule.name',
             value: 'Threshold rule',
+            scopeId: TableId.alertsOnAlertsPage,
           },
         ],
       };
