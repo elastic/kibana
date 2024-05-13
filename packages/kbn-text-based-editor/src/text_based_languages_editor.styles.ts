@@ -22,16 +22,16 @@ export const textBasedLanguageEditorStyles = (
   isCodeEditorExpandedFocused: boolean,
   hasReference: boolean,
   editorIsInline: boolean,
-  historyIsOpen: boolean
+  historyIsOpen: boolean,
+  hideHeaderWhenExpanded: boolean
 ) => {
-  let position = isCompactFocused ? ('absolute' as 'absolute') : ('relative' as 'relative'); // cast string to type 'relative' | 'absolute'
-  if (isCodeEditorExpanded) {
-    position = 'relative' as 'relative';
-  }
   const bottomContainerBorderColor = hasErrors ? euiTheme.colors.danger : euiTheme.colors.primary;
+
+  const showHeader = hideHeaderWhenExpanded === true && isCodeEditorExpanded;
+
   return {
     editorContainer: {
-      position,
+      position: 'relative' as const,
       zIndex: isCompactFocused ? 4 : 0,
       height: `${editorHeight}px`,
       border: isCompactFocused ? euiTheme.border.thin : 'none',
@@ -111,8 +111,8 @@ export const textBasedLanguageEditorStyles = (
       backgroundColor: euiTheme.colors.lightestShade,
       paddingLeft: euiTheme.size.base,
       paddingRight: euiTheme.size.base,
-      paddingTop: editorIsInline ? euiTheme.size.s : euiTheme.size.xs,
-      paddingBottom: editorIsInline ? euiTheme.size.s : euiTheme.size.xs,
+      paddingTop: showHeader ? euiTheme.size.s : euiTheme.size.xs,
+      paddingBottom: showHeader ? euiTheme.size.s : euiTheme.size.xs,
       width: 'calc(100% + 2px)',
       position: 'relative' as 'relative', // cast string to type 'relative',
       marginLeft: 0,
