@@ -823,4 +823,9 @@ export class DashboardPageObject extends FtrService {
       return false;
     }
   }
+
+  public async dismissFilterTour() {
+    const dismissButton = await this.testSubjects.find('ignore_filter_tour_dismiss_button');
+    if (dismissButton) dismissButton.click();
+  }
 }

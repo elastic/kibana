@@ -46,7 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.missingOrFail('ignore_filter_tour');
       await filterBar.addFilter({ field: 'Carrier', operation: 'exists' });
       await testSubjects.existOrFail('ignore_filter_tour');
-      await testSubjects.click('ignore_filter_tour_dismiss_button');
+      await PageObjects.dashboard.dismissFilterTour();
     });
 
     it('ignores filters on panels using a data view without the filter field by default', async () => {

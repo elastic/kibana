@@ -99,7 +99,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('ignores global filters on controls using a data view without the filter field by default', async () => {
       await filterBar.addFilter({ field: 'Carrier', operation: 'exists' });
       await testSubjects.existOrFail('ignore_filter_tour');
-      await testSubjects.click('ignore_filter_tour_dismiss_button');
+      await dashboard.dismissFilterTour();
 
       await dashboardControls.optionsListOpenPopover(controlIds[0]);
       expect(await dashboardControls.optionsListGetCardinalityValue()).to.be('4');

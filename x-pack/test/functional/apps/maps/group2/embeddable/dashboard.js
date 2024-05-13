@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
 
 export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'maps']);
@@ -33,7 +32,6 @@ export default function ({ getPageObjects, getService }) {
       );
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'c698b940-e149-11e8-a35a-370a8516603a',
-        [UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX]: true,
       });
       await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.loadSavedDashboard('map embeddable example');
@@ -41,9 +39,6 @@ export default function ({ getPageObjects, getService }) {
     });
 
     after(async () => {
-      await kibanaServer.uiSettings.replace({
-        [UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX]: false,
-      });
       await security.testUser.restoreDefaults();
     });
 
@@ -105,6 +100,7 @@ export default function ({ getPageObjects, getService }) {
         value: 'win 8',
       });
       await PageObjects.maps.waitForLayersToLoad();
+      await PageObjects.dashboard.dismissFilterTour();
 
       await filterBar.addFilterAndSelectDataView('meta_for_geo_shapes*', {
         field: 'shape_name',
