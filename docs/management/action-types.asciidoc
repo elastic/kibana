@@ -2,12 +2,17 @@
 [[action-types]]
 == Connectors
 
-Connectors provide a central place to store connection information for services and integrations with third party systems. Actions are instantiations of a connector that are linked to rules and run as background tasks on the {kib} server when rule conditions are met. {kib} provides the following types of connectors:
+Connectors provide a central place to store connection information for services and integrations with Elastic or third party systems.
+Actions are instantiations of a connector that are linked to rules and run as background tasks on the {kib} server when rule conditions are met. {kib} provides the following types of connectors:
 
 [cols="2"]
 |===
 
 a| <<bedrock-action-type,{bedrock}>>
+
+| Send a request to {bedrock}.
+
+a| <<cases-action-type,Cases>>
 
 | Send a request to {bedrock}.
 
