@@ -467,68 +467,74 @@ export class Execution<
     args: Record<string, unknown>
   ): Observable<UnwrapReturnType<Fn['fn']>> {
     let hash: string | undefined;
+    let lastValue: unknown;
+    let completionFlag = false;
 
-    return of(input).pipe(
-      map((currentInput) => this.cast(currentInput, fn.inputTypes)),
-      map((normalizedInput) => {
-        if (fn.allowCache && this.context.allowCache) {
-          hash = calculateObjectHash([
-            fn.name,
-            normalizedInput,
-            args,
-            this.context.getSearchContext(),
-          ]);
-        }
-        return normalizedInput;
-      }),
-      switchMap((normalizedInput) => {
-        if (hash && this.functionCache.has(hash)) {
-          const cached = this.functionCache.get(hash);
-          if (cached && Date.now() - cached.time < this.cacheTimeout) {
-            return of(cached.value);
+    return of(input)
+      .pipe(
+        map((currentInput) => this.cast(currentInput, fn.inputTypes)),
+        switchMap((normalizedInput) => {
+          if (fn.allowCache && this.context.allowCache) {
+            hash = calculateObjectHash([
+              fn.name,
+              normalizedInput,
+              args,
+              this.context.getSearchContext(),
+            ]);
           }
-        }
-        return of(fn.fn(normalizedInput, args, this.context));
-      }),
-      switchMap(
-        (fnResult) =>
-          (isObservable(fnResult)
-            ? fnResult
-            : from(isPromise(fnResult) ? fnResult : [fnResult])) as Observable<
-            UnwrapReturnType<Fn['fn']>
-          >
-      ),
-      map((output) => {
-        // Validate that the function returned the type it said it would.
-        // This isn't required, but it keeps function developers honest.
-        const returnType = getType(output);
-        const expectedType = fn.type;
-        if (expectedType && returnType !== expectedType) {
-          throw new Error(
-            `Function '${fn.name}' should return '${expectedType}',` +
-              ` actually returned '${returnType}'`
-          );
-        }
+          if (hash && this.functionCache.has(hash)) {
+            const cached = this.functionCache.get(hash);
+            if (cached && Date.now() - cached.time < this.cacheTimeout) {
+              return of(cached.value);
+            }
+          }
+          return of(fn.fn(normalizedInput, args, this.context));
+        }),
+        switchMap((fnResult) => {
+          return (
+            isObservable(fnResult) ? fnResult : from(isPromise(fnResult) ? fnResult : [fnResult])
+          ) as Observable<UnwrapReturnType<Fn['fn']>>;
+        }),
+        map((output) => {
+          // Validate that the function returned the type it said it would.
+          // This isn't required, but it keeps function developers honest.
+          const returnType = getType(output);
+          const expectedType = fn.type;
+          if (expectedType && returnType !== expectedType) {
+            throw new Error(
+              `Function '${fn.name}' should return '${expectedType}',` +
+                ` actually returned '${returnType}'`
+            );
+          }
 
-        // Validate the function output against the type definition's validate function.
-        const type = this.context.types[fn.type];
-        if (type && type.validate) {
-          try {
-            type.validate(output);
-          } catch (e) {
-            throw new Error(`Output of '${fn.name}' is not a valid type '${fn.type}': ${e}`);
+          // Validate the function output against the type definition's validate function.
+          const type = this.context.types[fn.type];
+          if (type && type.validate) {
+            try {
+              type.validate(output);
+            } catch (e) {
+              throw new Error(`Output of '${fn.name}' is not a valid type '${fn.type}': ${e}`);
+            }
           }
-        }
 
-        if (hash) {
-          while (this.functionCache.size >= maxCacheSize) {
-            this.functionCache.delete(this.functionCache.keys().next().value);
+          lastValue = output;
+
+          return output;
+        }),
+        finalize(() => {
+          if (completionFlag) {
+            while (this.functionCache.size >= maxCacheSize) {
+              this.functionCache.delete(this.functionCache.keys().next().value);
+            }
+            this.functionCache.set(hash as string, { value: lastValue, time: Date.now() });
           }
-          this.functionCache.set(hash, { value: output, time: Date.now() });
-        }
-        return output;
-      })
-    );
+        })
+      )
+      .pipe(
+        tap({
+          complete: () => (completionFlag = true), // Set flag true only on successful completion
+        })
+      );
   }
 
   public cast<Type = unknown>(value: unknown, toTypeNames?: string[]): Type {
