@@ -48,3 +48,35 @@ ex:
 
 In the `package.json` file, you'll find commands to configure the server for each environment and to run tests against that specific environment. These commands adhere to the Mocha tagging system, allowing for the inclusion and exclusion of tags, mirroring the setup of the CI pipeline.
 
+# How to run
+You can run various commands with different parameters for the different test worflows.
+
+The command structure follows this pattern:
+
+- `<test>`: The test workflow you want to run.
+- `<type>`: The type of operation, either "server" or "runner."
+- `<environment>`: The testing environment, such as "serverless," or "ess", specifies the correct configuration file for the tests.
+
+Run the server for "alerting_burn_rate" in the "serverless" environment:
+
+```shell
+npm run alerting_burn_rate:server:serverless
+```
+
+Run tests for "alerting_burn_rate" in the "serverless" environment:
+
+```shell
+npm run alerting_burn_rate:runner:serverless
+```
+
+Run the server for "alerting_burn_rate" in the "ess" environment:
+
+```shell
+npm run alerting_burn_rate:server:ess
+```
+
+Run tests for "alerting_burn_rate" in the "ess" environment:
+
+```shell
+npm run alerting_burn_rate:runner:ess
+```

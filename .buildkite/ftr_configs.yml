@@ -566,5 +566,5 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/investigation/timeline/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/sources/indices/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/sources/indices/trial_license_complete_tier/configs/serverless.config.ts
-  - x-pack/test/observability_solution_api_integration/test_suites/slo/configs/serverless.config.ts
-  - x-pack/test/observability_solution_api_integration/test_suites/slo/configs/ess.config.ts
+  - x-pack/test/observability_solution_api_integration/test_suites/alerting/burn_rate/configs/serverless.config.ts
+  - x-pack/test/observability_solution_api_integration/test_suites/alerting/burn_rate/configs/ess.config.ts

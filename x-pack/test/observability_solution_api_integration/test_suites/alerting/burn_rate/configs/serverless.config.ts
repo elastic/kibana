@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { createTestConfig } from '../../../config/serverless/config.base';
-import { AlertingApiProvider } from '../../../services/alerting_api';
-import { SloApiProvider } from '../../../services/slo_api';
+import { createTestConfig } from '../../../../config/serverless/config.base';
+import { AlertingApiProvider } from '../../../../services/alerting_api';
+import { SloApiProvider } from '../../../../services/slo_api';
 
 export default createTestConfig({
   services: {
