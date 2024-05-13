@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { validateDuplicatedCustomFieldKeysInRequest } from './validators';
+import { validateDuplicatedKeysInRequest } from './validators';
 
 describe('validators', () => {
-  describe('validateDuplicatedCustomFieldKeysInRequest', () => {
-    it('returns customFields in request that have duplicated keys', () => {
+  describe('validateDuplicatedKeysInRequest', () => {
+    it('returns fields in request that have duplicated keys', () => {
       expect(() =>
-        validateDuplicatedCustomFieldKeysInRequest({
-          requestCustomFields: [
+        validateDuplicatedKeysInRequest({
+          requestFields: [
             {
               key: 'triplicated_key',
             },
@@ -29,16 +29,18 @@ describe('validators', () => {
               key: 'duplicated_key',
             },
           ],
+
+          fieldName: 'foobar',
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid duplicated custom field keys in request: triplicated_key,duplicated_key"`
+        `"Invalid duplicated foobar keys in request: triplicated_key,duplicated_key"`
       );
     });
 
-    it('does not throw if no customFields in request have duplicated keys', () => {
+    it('does not throw if no fields in request have duplicated keys', () => {
       expect(() =>
-        validateDuplicatedCustomFieldKeysInRequest({
-          requestCustomFields: [
+        validateDuplicatedKeysInRequest({
+          requestFields: [
             {
               key: '1',
             },
@@ -46,6 +48,7 @@ describe('validators', () => {
               key: '2',
             },
           ],
+          fieldName: 'foobar',
         })
       ).not.toThrow();
     });

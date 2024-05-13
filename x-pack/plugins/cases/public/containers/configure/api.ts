@@ -115,7 +115,8 @@ export const fetchActionTypes = async ({ signal }: ApiProps): Promise<ActionType
 const convertConfigureResponseToCasesConfigure = (
   configuration: SnakeToCamelCase<Configuration>
 ): CasesConfigurationUI => {
-  const { id, version, mappings, customFields, closureType, connector, owner } = configuration;
+  const { id, version, mappings, customFields, templates, closureType, connector, owner } =
+    configuration;
 
-  return { id, version, mappings, customFields, closureType, connector, owner };
+  return { id, version, mappings, customFields, templates, closureType, connector, owner };
 };

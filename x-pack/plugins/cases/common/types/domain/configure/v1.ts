@@ -9,6 +9,7 @@ import * as rt from 'io-ts';
 import { CaseConnectorRt, ConnectorMappingsRt } from '../connector/v1';
 import { UserRt } from '../user/v1';
 import { CustomFieldTextTypeRt, CustomFieldToggleTypeRt } from '../custom_field/v1';
+import { CaseBaseOptionalFieldsRt } from '../case/v1';
 
 export const ClosureTypeRt = rt.union([
   rt.literal('close-by-user'),
@@ -57,6 +58,27 @@ export const CustomFieldConfigurationRt = rt.union([
 
 export const CustomFieldsConfigurationRt = rt.array(CustomFieldConfigurationRt);
 
+export const TemplateConfigurationRt = rt.strict({
+  /**
+   * key of template
+   */
+  key: rt.string,
+  /**
+   * name of template
+   */
+  name: rt.string,
+  /**
+   * description of template
+   */
+  description: rt.string,
+  /**
+   * case fields of template
+   */
+  caseFields: rt.union([rt.null, CaseBaseOptionalFieldsRt]),
+});
+
+export const TemplatesConfigurationRt = rt.array(TemplateConfigurationRt);
+
 export const ConfigurationBasicWithoutOwnerRt = rt.strict({
   /**
    * The external connector
@@ -70,6 +92,10 @@ export const ConfigurationBasicWithoutOwnerRt = rt.strict({
    * The custom fields configured for the case
    */
   customFields: CustomFieldsConfigurationRt,
+  /**
+   * Templates configured for the case
+   */
+  templates: TemplatesConfigurationRt,
 });
 
 export const CasesConfigureBasicRt = rt.intersection([
@@ -109,6 +135,8 @@ export const ConfigurationsRt = rt.array(ConfigurationRt);
 
 export type CustomFieldsConfiguration = rt.TypeOf<typeof CustomFieldsConfigurationRt>;
 export type CustomFieldConfiguration = rt.TypeOf<typeof CustomFieldConfigurationRt>;
+export type TemplatesConfiguration = rt.TypeOf<typeof TemplatesConfigurationRt>;
+export type TemplateConfiguration = rt.TypeOf<typeof TemplateConfigurationRt>;
 export type ClosureType = rt.TypeOf<typeof ClosureTypeRt>;
 export type ConfigurationAttributes = rt.TypeOf<typeof ConfigurationAttributesRt>;
 export type Configuration = rt.TypeOf<typeof ConfigurationRt>;
