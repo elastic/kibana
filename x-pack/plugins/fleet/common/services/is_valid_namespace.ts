@@ -18,18 +18,18 @@ export function isValidNamespace(
 }
 
 export function isValidDataset(
-  namespace: string,
+  dataset: string,
   allowBlank?: boolean
 ): { valid: boolean; error?: string } {
-  const { valid, error } = isValidEntity(namespace, 'Dataset', allowBlank);
+  const { valid, error } = isValidEntity(dataset, 'Dataset', allowBlank);
   if (!valid) {
     return { valid, error };
   }
-  if (namespace.startsWith('_') || namespace.startsWith('.')) {
+  if (dataset.startsWith('_') || dataset.startsWith('.')) {
     return {
       valid: false,
       error: i18n.translate(
-        'xpack.fleet.namespaceValidation.datasetStartsWithUnderscoreErrorMessage',
+        'xpack.fleet.datasetValidation.datasetStartsWithUnderscoreErrorMessage',
         {
           defaultMessage: 'Dataset cannot start with an underscore or dot',
         }
