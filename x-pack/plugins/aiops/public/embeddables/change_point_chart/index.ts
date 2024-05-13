@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { EmbeddableChangePointChartFactory } from './embeddable_change_point_chart_factory';
-export { type EmbeddableChangePointChartProps } from './embeddable_change_point_chart_component';
+export { getChangePointChartEmbeddableFactory } from './embeddable_change_point_chart_factory';
