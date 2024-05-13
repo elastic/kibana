@@ -81,11 +81,6 @@ components:
               type: string
             response:
               type: string
-        # scores:
-        #   type: array
-        #   description: A list of risk scores
-        #   items:
-        #     $ref: '../common/common.schema.yaml#/components/schemas/EntityRiskScore'
         scores:
           type: object
           properties:

@@ -247,8 +247,6 @@ export const RiskScoreEnableSection: React.FC<{
   };
 
   let initRiskEngineErrors: string[] = [];
-
-  // check if this error type is right. Foes it included body?
   if (initRiskEngineMutation.isError) {
     const errorBody = initRiskEngineMutation.error.body;
     initRiskEngineErrors = [errorBody.message];
@@ -269,7 +267,6 @@ export const RiskScoreEnableSection: React.FC<{
       </EuiCallOut>
     );
   }
-
   return (
     <>
       <>
