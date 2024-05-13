@@ -4,28 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { type FC, useMemo, useState, useEffect } from 'react';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { DatePickerContextProvider } from '@kbn/ml-date-picker';
+import { css } from '@emotion/react';
 import type { ChangePointDetectionViewType } from '@kbn/aiops-change-point-detection/constants';
-import type { TimeRange } from '@kbn/es-query';
-import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import { pick } from 'lodash';
-import { UI_SETTINGS } from '@kbn/data-service';
 import { EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import { UI_SETTINGS } from '@kbn/data-service';
+import type { TimeRange } from '@kbn/es-query';
+import { DatePickerContextProvider } from '@kbn/ml-date-picker';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { pick } from 'lodash';
+import React, { useEffect, useMemo, useState, type FC } from 'react';
 import type { Observable } from 'rxjs';
-import { distinctUntilChanged, map } from 'rxjs';
-import { combineLatest, BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, combineLatest, distinctUntilChanged, map } from 'rxjs';
+import {
+  ChangePointDetectionControlsContextProvider,
+  type ChangePointAnnotation,
+} from '../components/change_point_detection/change_point_detection_context';
 import { ChartGridEmbeddableWrapper } from '../embeddables/change_point_chart/embeddable_chart_component_wrapper';
-import type { AiopsPluginStartDeps } from '../types';
 import { AiopsAppContext, type AiopsAppDependencies } from '../hooks/use_aiops_app_context';
-import { ReloadContextProvider } from '../hooks/use_reload';
 import { DataSourceContextProvider } from '../hooks/use_data_source';
 import { FilterQueryContextProvider } from '../hooks/use_filters_query';
-import {
-  type ChangePointAnnotation,
-  ChangePointDetectionControlsContextProvider,
-} from '../components/change_point_detection/change_point_detection_context';
+import { ReloadContextProvider } from '../hooks/use_reload';
+import type { AiopsPluginStartDeps } from '../types';
 
 /**
  * Only used to initialize internally
@@ -133,7 +133,12 @@ const ChangePointDetectionWrapper: FC<ChangePointDetectionPropsWithDeps> = ({
 
   // TODO: Remove data-shared-item as part of https://github.com/elastic/kibana/issues/179376>
   return (
-    <div data-shared-item="">
+    <div
+      data-shared-item=""
+      css={css`
+        width: 100%;
+      `}
+    >
       <KibanaRenderContextProvider {...coreStart}>
         <AiopsAppContext.Provider value={aiopsAppContextValue}>
           <DatePickerContextProvider {...datePickerDeps}>
