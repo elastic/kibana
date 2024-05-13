@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReadonlyContainer } from '@kbn/core-di-common';
+import type { interfaces } from 'inversify';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { CoreId } from '@kbn/core-base-common-internal';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -25,15 +25,13 @@ export class CoreInjectionRouteHandlerContext implements InjectionRequestHandler
     private readonly callerId: PluginOpaqueId | CoreId
   ) {}
 
-  #container?: ReadonlyContainer;
+  #container?: interfaces.Container;
 
   public get container() {
     if (this.#container == null) {
-      this.#container = this.injectionServiceStart.createRequestContainer(
-        this.request,
-        this.callerId
-      );
+      this.#container = this.injectionServiceStart.fork();
     }
+
     return this.#container;
   }
 }

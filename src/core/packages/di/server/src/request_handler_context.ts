@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReadonlyContainer } from '@kbn/core-di-common';
+import type { interfaces } from 'inversify';
 
 /**
  * Core's `injection` request handler context.
@@ -18,5 +18,5 @@ export interface InjectionRequestHandlerContext {
    * The injection container scoped to the current request
    * and to the plugin that registered the handler.
    */
-  container: ReadonlyContainer;
+  container: interfaces.Container;
 }

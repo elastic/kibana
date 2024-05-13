@@ -7,14 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { inject, injectable } from './src/decorators';
-export type {
-  ServiceIdentifier,
-  ServiceType,
-  PluginContainer,
-  ContainerModule,
-  CreateModuleFn,
-  CreateModuleCallback,
-  CreateModuleOptions,
-  ReadonlyContainer,
-} from './src/interfaces';
+export type { ServiceType } from './src/interfaces';
+export { Global } from './src/services';

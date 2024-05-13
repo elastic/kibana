@@ -7,66 +7,61 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReadonlyContainer } from '@kbn/core-di-common';
+import { Container } from 'inversify';
 import type { CoreDiServiceSetup, CoreDiServiceStart } from '@kbn/core-di-server';
 import type {
   InternalCoreDiServiceSetup,
   InternalCoreDiServiceStart,
 } from '@kbn/core-di-server-internal';
+import { MethodKeysOf } from '@kbn/utility-types';
 
-const createReadonlyContainerMock = () => {
-  const containerMock: jest.Mocked<ReadonlyContainer> = {
-    get: jest.fn(),
+function createContainer() {
+  const container = new Container({ defaultScope: 'Singleton', skipBaseClassChecks: true });
+
+  for (const method of ['bind', 'get', 'getAll', 'isBound', 'load']) {
+    jest.spyOn(container, method as MethodKeysOf<Container>);
+  }
+
+  return container as jest.Mocked<Container>;
+}
+
+function createSetupContract() {
+  const mock: jest.MockedObjectDeep<CoreDiServiceSetup> = {
+    load: jest.fn(),
   };
 
-  return containerMock;
-};
+  return mock;
+}
 
-const createSetupContractMock = () => {
-  const mock: jest.Mocked<CoreDiServiceSetup> = {
-    setupModule: jest.fn(),
+const createStartContract = () => {
+  const mock: jest.MockedObjectDeep<CoreDiServiceStart> = {
+    getContainer: jest.fn().mockImplementation(createContainer),
   };
 
   return mock;
 };
 
-const createStartContractMock = () => {
-  const mock: jest.Mocked<CoreDiServiceStart> & { container: jest.Mocked<ReadonlyContainer> } = {
-    container: createReadonlyContainerMock(),
-  };
-
-  return mock;
-};
-
-const createInternalSetupContractMock = () => {
+const createInternalSetupContract = () => {
   const mock: jest.Mocked<InternalCoreDiServiceSetup> = {
-    configurePluginModule: jest.fn(),
-    createPluginContainer: jest.fn(),
-    registerPluginModule: jest.fn(),
-    registerGlobalModule: jest.fn(),
-    registerRequestModule: jest.fn(),
+    load: jest.fn(),
   };
 
   return mock;
 };
 
-const createInternalStartContractMock = () => {
+const createInternalStartContract = () => {
   const mock: jest.Mocked<InternalCoreDiServiceStart> = {
-    getPluginContainer: jest.fn(),
-    createRequestContainer: jest.fn(),
-    disposeRequestContainer: jest.fn(),
+    fork: jest.fn(createContainer),
+    getContainer: jest.fn().mockImplementation(createContainer),
   };
-
-  mock.getPluginContainer.mockReturnValue(createReadonlyContainerMock());
-  mock.createRequestContainer.mockReturnValue(createReadonlyContainerMock());
 
   return mock;
 };
 
 export const injectionServiceMock = {
-  createReadonlyContainer: createReadonlyContainerMock,
-  createSetupContract: createSetupContractMock,
-  createStartContract: createStartContractMock,
-  createInternalSetupContract: createInternalSetupContractMock,
-  createInternalStartContract: createInternalStartContractMock,
+  createContainer,
+  createSetupContract,
+  createStartContract,
+  createInternalSetupContract,
+  createInternalStartContract,
 };

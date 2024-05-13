@@ -25,7 +25,6 @@ import type {
   PluginsServiceStartDeps,
 } from './plugins_service';
 import { RuntimePluginContractResolver } from './plugin_contract_resolver';
-import { buildPluginModule } from './injection_modules';
 
 const Sec = 1000;
 
@@ -97,13 +96,6 @@ export class PluginsSystem<T extends PluginType> {
       return contracts;
     }
 
-    // don't handle DI on preboot phase for now
-    if (this.type === PluginType.standard) {
-      const { injection: injectionService } = deps as PluginsServiceSetupDeps;
-      // register the plugin-scoped module exposing services such as logging and config
-      injectionService.registerPluginModule(buildPluginModule(this.coreContext));
-    }
-
     const runtimeDependencies = buildPluginRuntimeDependencyMap(this.plugins);
     this.runtimeResolver.setDependencyMap(runtimeDependencies);
 
@@ -141,12 +133,6 @@ export class PluginsSystem<T extends PluginType> {
           plugin,
           runtimeResolver: this.runtimeResolver,
         });
-      }
-
-      // don't handle DI on preboot phase for now
-      if (this.type === PluginType.standard) {
-        const { injection: injectionService } = deps as PluginsServiceSetupDeps;
-        injectionService.createPluginContainer(plugin.opaqueId, plugin.manifest);
       }
 
       await plugin.init();

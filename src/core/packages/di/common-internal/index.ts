@@ -6,14 +6,3 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-// TODO: needs to be imported for decorators used by inversify.
-//       needs to be loaded exactly one.
-//       so need to figure out exactly where the best place to load it would be.
-import 'reflect-metadata';
-
-export {
-  pluginOpaqueIdServiceId,
-  pluginNameServiceId,
-  pluginManifestServiceId,
-} from './src/service_identifiers';
