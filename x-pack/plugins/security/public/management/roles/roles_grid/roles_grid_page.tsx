@@ -183,7 +183,7 @@ export class RolesGridPage extends Component<Props, State> {
 
         <EuiInMemoryTable
           itemId="name"
-          responsiveBreakpoint={false}
+          // responsiveBreakpoint={false}
           columns={this.getColumnConfig()}
           selection={
             this.props.readOnly
