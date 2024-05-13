@@ -49,7 +49,10 @@ export const useChangeCspRuleState = () => {
       // Optimistically update to the rules that have state changes
       queryClient.setQueryData(
         CSP_RULES_STATES_QUERY_KEY,
-        (currentRuleStates: Record<string, RuleStateAttributes>) => {
+        (currentRuleStates: Record<string, RuleStateAttributes> | undefined) => {
+          if (!currentRuleStates) {
+            return currentRuleStates;
+          }
           return createRulesWithUpdatedState(ruleStateUpdateRequest, currentRuleStates);
         }
       );
