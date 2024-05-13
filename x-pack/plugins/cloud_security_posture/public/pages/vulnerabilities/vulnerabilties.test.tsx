@@ -133,7 +133,7 @@ describe('<Vulnerabilities />', () => {
     });
   });
 
-  it.only('renders the success state component when "latest vulnerabilities findings" DataView exists and request status is "success"', async () => {
+  it('renders the success state component when "latest vulnerabilities findings" DataView exists and request status is "success"', async () => {
     server.use(cnvmStatusIndexed);
 
     const { getByText, getByTestId, debug } = renderVulnerabilitiesPage();
