@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import { PANEL_HOVER_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { PANEL_HOVER_TRIGGER, registerReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { PLUGIN_ID } from './constants';
@@ -55,6 +56,16 @@ export class ControlsExamplePlugin
     const editControlAction = new EditControlAction({ core, dataViews: deps.data.dataViews });
     deps.uiActions.registerAction(editControlAction);
     deps.uiActions.attachAction(PANEL_HOVER_TRIGGER, editControlAction.id);
+
+    registerReactEmbeddableFactory(CONTROL_GROUP_TYPE, async () => {
+      const { getControlGroupEmbeddableFactory } = await import(
+        './controls/get_control_group_factory'
+      );
+      return getControlGroupEmbeddableFactory({
+        overlays: core.overlays,
+        dataViewsService: deps.data.dataViews,
+      });
+    });
 
     // core.overlays.
     registerControlFactory<SearchControlState>(SEARCH_CONTROL_TYPE, async () => {

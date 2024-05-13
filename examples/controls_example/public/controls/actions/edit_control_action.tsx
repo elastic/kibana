@@ -78,7 +78,6 @@ export class EditControlAction implements Action<EmbeddableApiContext> {
   }
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
-    console.log('isCompatible', embeddable);
     return (
       isApiCompatible(embeddable) &&
       getInheritedViewMode(embeddable.parentApi) === ViewMode.EDIT &&

@@ -70,6 +70,7 @@ export const ControlPanel = <
     api?.defaultPanelTitle,
     viewModeSubject
   );
+
   const viewMode = (rawViewMode ?? ViewMode.VIEW) as ViewMode;
 
   const [initialLoadComplete, setInitialLoadComplete] = useState(!dataLoading);

@@ -46,11 +46,13 @@ export const ControlRenderer = <
   state,
   parentApi,
   services,
+  onApiAvailable,
 }: {
   maybeId?: string;
   type: string;
   state: StateType; // TODO: Delete this
-  parentApi?: ControlGroupApi; // TODO: Make required
+  parentApi: ControlGroupApi;
+  onApiAvailable?: (api: ApiType) => void;
 
   /** TODO: Remove this */
   services: { overlays: OverlayStart; dataViews: DataViewsPublicPluginStart };
@@ -61,10 +63,7 @@ export const ControlRenderer = <
     () =>
       (async () => {
         const uuid = maybeId ?? generateId();
-        console.log('here 2', type, uuid);
-
         const factory = getControlFactory<StateType, ApiType>(type);
-        console.log('here 3', factory);
 
         const registerApi = (
           apiRegistration: ControlApiRegistration<ApiType>,
@@ -107,6 +106,7 @@ export const ControlRenderer = <
           };
 
           cleanupFunction.current = () => cleanup();
+          onApiAvailable?.(fullApi);
           return fullApi;
         };
 

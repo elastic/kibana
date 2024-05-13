@@ -9,27 +9,78 @@
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 
-import { ControlWidth, CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
 import {
+  ControlsPanels,
+  ControlWidth,
+  CONTROL_GROUP_TYPE,
   DEFAULT_CONTROL_GROW,
   DEFAULT_CONTROL_WIDTH,
-} from '@kbn/controls-plugin/common/control_group/control_group_constants';
+} from '@kbn/controls-plugin/common';
+import { OverlayStart } from '@kbn/core/public';
 import { DataView } from '@kbn/data-views-plugin/common';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { Filter } from '@kbn/es-query';
-import { ControlGroupApi, ControlGroupState } from './types';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { omit } from 'lodash';
+import { ControlRenderer } from './control_renderer';
+import {
+  ControlGroupApi,
+  ControlGroupRuntimeState,
+  ControlGroupSerializedState,
+  DefaultControlApi,
+} from './types';
 
-export const getControlGroupEmbeddableFactory = () => {
-  const imageEmbeddableFactory: ReactEmbeddableFactory<ControlGroupState, ControlGroupApi> = {
+export const getControlGroupEmbeddableFactory = (services: {
+  overlays: OverlayStart;
+  dataViews: DataViewsPublicPluginStart;
+}) => {
+  const controlGroupEmbeddableFactory: ReactEmbeddableFactory<
+    ControlGroupSerializedState,
+    ControlGroupApi,
+    ControlGroupRuntimeState
+  > = {
     type: CONTROL_GROUP_TYPE,
-    deserializeState: (state) => state.rawState,
-    buildEmbeddable: async (initialState, buildApi, uuid) => {
+    deserializeState: (state) => {
+      const panels = JSON.parse(state.rawState.panelsJSON);
+      const ignoreParentSettings = JSON.parse(state.rawState.ignoreParentSettingsJSON);
+
+      /** Inject data view references into each individual control */
+      const references = state.references ?? [];
+      references.forEach((reference) => {
+        const referenceName = reference.name;
+        const panelId = referenceName.substring(
+          'controlGroup_'.length,
+          referenceName.lastIndexOf(':') // is this too generic?
+        );
+        if (panels[panelId]) {
+          panels[panelId].dataViewId = reference.id;
+        }
+      });
+
+      const flattenedPanels = Object.keys(panels).reduce((prev, panelId) => {
+        const currentPanel = panels[panelId];
+        const currentPanelExplicitInput = panels[panelId].explicitInput;
+        return {
+          ...prev,
+          [panelId]: { ...omit(currentPanel, 'explicitInput'), ...currentPanelExplicitInput },
+        };
+      }, {});
+
+      return {
+        ...omit(state.rawState, ['panelsJSON', 'ignoreParentSettingsJSON']),
+        panels: flattenedPanels,
+        ignoreParentSettings,
+      };
+    },
+    buildEmbeddable: async (initialState, buildApi, uuid, parentApi) => {
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const grow = new BehaviorSubject<boolean>(DEFAULT_CONTROL_GROW);
       const width = new BehaviorSubject<ControlWidth>(DEFAULT_CONTROL_WIDTH);
-      const children$ = new BehaviorSubject<{ [key: string]: unknown }>({});
+      const children$ = new BehaviorSubject<{ [key: string]: DefaultControlApi }>({});
       const filters$ = new BehaviorSubject<Filter[] | undefined>([]);
       const dataViews = new BehaviorSubject<DataView[] | undefined>(undefined);
+      const panels$ = new BehaviorSubject<ControlsPanels>(initialState.panels);
 
       const embeddable = buildApi(
         {
@@ -52,6 +103,7 @@ export const getControlGroupEmbeddableFactory = () => {
           },
           removePanel: (panelId) => {
             // TODO: Remove a child control
+            console.log('Remove', panelId);
           },
           replacePanel: async (panelId, newPanel) => {
             // TODO: Replace a child control
@@ -67,11 +119,29 @@ export const getControlGroupEmbeddableFactory = () => {
       return {
         api: embeddable,
         Component: () => {
-          return <>Here</>;
+          const panels = useStateFromPublishingSubject(panels$);
+          return (
+            <>
+              {Object.keys(panels).map((id) => (
+                <ControlRenderer
+                  services={services}
+                  type={panels[id].type}
+                  state={panels[id]}
+                  parentApi={embeddable}
+                  onApiAvailable={(api) => {
+                    children$.next({
+                      ...children$.getValue(),
+                      [api.uuid]: api as DefaultControlApi,
+                    });
+                  }}
+                />
+              ))}
+            </>
+          );
         },
       };
     },
   };
 
-  return imageEmbeddableFactory;
+  return controlGroupEmbeddableFactory;
 };

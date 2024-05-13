@@ -21,8 +21,8 @@ export interface PanelPackage<SerializedState extends object = object> {
 }
 
 export interface PresentationContainer
-  extends Partial<PublishesViewMode & PublishesSettings>,
-    CanAddNewPanel {
+  // extends Partial<PublishesViewMode & PublishesSettings>,
+  extends CanAddNewPanel {
   removePanel: (panelId: string) => void;
   canRemovePanels?: () => boolean;
   replacePanel: <SerializedState extends object = object>(

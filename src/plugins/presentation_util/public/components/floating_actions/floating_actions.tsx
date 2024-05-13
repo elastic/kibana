@@ -45,7 +45,6 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
   // console.log('floatingActions', embeddable);
 
   useEffect(() => {
-    console.log('here', embeddable);
     if (!embeddable) return;
 
     const getActions = async () => {
@@ -60,7 +59,6 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
         })
         .sort((a, b) => (a.order || 0) - (b.order || 0));
 
-      console.log('actions', actions);
       if (!mounted) return;
       if (actions.length > 0) {
         setFloatingActions(

@@ -22,12 +22,16 @@ import ReactDOM from 'react-dom';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { ControlsExampleStartDeps } from '../plugin';
 import { ControlGroupRendererExamples } from './control_group_renderer_examples';
-import { RegisterControlType } from './register_control_type';
+import { ReactControlExample } from './react_control_example';
 
 const CONTROLS_AS_A_BUILDING_BLOCK = 'controls_as_a_building_block';
 const CONTROLS_REFACTOR_TEST = 'controls_refactor_test';
 
-const App = ({ core, data, navigation }: { core: CoreStart } & ControlsExampleStartDeps) => {
+const App = ({
+  core,
+  data,
+  navigation,
+}: { core: CoreStart } & Pick<ControlsExampleStartDeps, 'data' | 'navigation'>) => {
   const [selectedTabId, setSelectedTabId] = useState(CONTROLS_REFACTOR_TEST); // TODO: Make this the first tab
 
   function onSelectedTabChanged(tabId: string) {
@@ -36,7 +40,7 @@ const App = ({ core, data, navigation }: { core: CoreStart } & ControlsExampleSt
 
   function renderTabContent() {
     if (selectedTabId === CONTROLS_REFACTOR_TEST) {
-      return <RegisterControlType dataViews={data.dataViews} overlays={core.overlays} />;
+      return <ReactControlExample dataViews={data.dataViews} overlays={core.overlays} />;
     }
 
     return <ControlGroupRendererExamples data={data} navigation={navigation} />;
@@ -77,7 +81,7 @@ const App = ({ core, data, navigation }: { core: CoreStart } & ControlsExampleSt
 
 export const renderApp = (
   core: CoreStart,
-  { data, navigation }: ControlsExampleStartDeps,
+  { data, navigation }: Pick<ControlsExampleStartDeps, 'data' | 'navigation'>,
   { element }: AppMountParameters
 ) => {
   ReactDOM.render(<App core={core} data={data} navigation={navigation} />, element);

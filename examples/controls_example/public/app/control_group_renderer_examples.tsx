@@ -16,7 +16,10 @@ import { BasicReduxExample } from './control_group_renderer_examples/basic_redux
 import { AddButtonExample } from './control_group_renderer_examples/add_button_example';
 import { ControlsExampleStartDeps } from '../plugin';
 
-export const ControlGroupRendererExamples = ({ data, navigation }: ControlsExampleStartDeps) => {
+export const ControlGroupRendererExamples = ({
+  data,
+  navigation,
+}: Pick<ControlsExampleStartDeps, 'data' | 'navigation'>) => {
   const {
     loading,
     value: dataViews,
