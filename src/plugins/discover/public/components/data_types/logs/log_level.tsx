@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
-import { FlyoutDoc } from '@kbn/discover-utils/src';
+import { LogFlyoutDoc } from '@kbn/discover-utils/src';
 import * as constants from '../../../../common/data_types/logs/constants';
 import { ChipWithPopover } from './popover_chip';
 
@@ -20,7 +20,7 @@ const LEVEL_DICT = {
 } as const;
 
 interface LogLevelProps {
-  level: FlyoutDoc['log.level'];
+  level: LogFlyoutDoc['log.level'];
   dataTestSubj?: string;
   renderInFlyout?: boolean;
 }

@@ -41,7 +41,7 @@ export interface LogDocument extends DataTableRecord {
   };
 }
 
-export interface FlyoutDoc {
+export interface LogFlyoutDoc {
   '@timestamp': string;
   'log.level'?: string;
   message?: string;
