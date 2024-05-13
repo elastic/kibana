@@ -56,13 +56,13 @@ export function createOAMDefinitionRoute<T extends RequestHandlerContext>({
       } catch (e) {
         // Clean up anything that was successful.
         if (definitionCreated) {
-          deleteOAMDefinition(soClient, req.body, logger);
+          await deleteOAMDefinition(soClient, req.body, logger);
         }
         if (ingestPipelineCreated) {
-          deleteIngestPipeline(esClient, req.body, logger);
+          await deleteIngestPipeline(esClient, req.body, logger);
         }
         if (transformCreated) {
-          stopAndDeleteTransform(esClient, req.body, logger);
+          await stopAndDeleteTransform(esClient, req.body, logger);
         }
         if (e instanceof OAMIdConflict) {
           return res.conflict({ body: e });
