@@ -100,7 +100,7 @@ export const EndpointDetailsContent = memo<EndpointDetailsContentProps>(
               />
             </ColumnTitle>
           ),
-          // TODO: 8.15 remove `EndpointAgentStatus` when `agentStatusClientEnabled` FF is enabled
+          // TODO: 8.15 remove `EndpointAgentStatus` when `agentStatusClientEnabled` FF is enabled and removed
           description: agentStatusClientEnabled ? (
             <AgentStatus agentId={hostInfo.metadata.agent.id} agentType="endpoint" />
           ) : (

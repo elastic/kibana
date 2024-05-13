@@ -82,7 +82,7 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
           'data-test-subj': `${agentType}ResponseActionsConsole`,
           storagePrefix: 'xpack.securitySolution.Responder',
           TitleComponent: () => {
-            if (agentStatusClientEnabled || agentType === 'sentinel_one') {
+            if (agentStatusClientEnabled || agentType !== 'endpoint') {
               return (
                 <AgentInfo
                   agentId={agentId}

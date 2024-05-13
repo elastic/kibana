@@ -103,7 +103,7 @@ export const HighlightedFieldsCell: VFC<HighlightedFieldsCellProps> = ({
             />
           );
         } else {
-          // TODO: remove usage of `EndpointAgentStatusById` when `agentStatusClientEnabled` FF is enabled
+          // TODO: remove usage of `EndpointAgentStatusById` when `agentStatusClientEnabled` FF is enabled and removed
           return (
             <EndpointAgentStatusById
               endpointAgentId={String(value ?? '')}

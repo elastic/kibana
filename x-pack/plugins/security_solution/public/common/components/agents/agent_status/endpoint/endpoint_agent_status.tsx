@@ -65,7 +65,7 @@ export interface EndpointAgentStatusProps {
  */
 
 // TODO: used by `EndpointAgentStatusById`
-// remove usage/code when `agentStatusClientEnabled` FF is enabled
+// remove usage/code when `agentStatusClientEnabled` FF is enabled and removed
 export const EndpointAgentStatus = memo<EndpointAgentStatusProps>(
   ({ endpointHostInfo, autoRefresh = true, pendingActions, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);

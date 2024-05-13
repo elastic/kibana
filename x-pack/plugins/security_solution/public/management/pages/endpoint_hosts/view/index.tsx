@@ -158,7 +158,7 @@ const getEndpointListColumns = ({
       }),
       sortable: true,
       render: (hostStatus: HostInfo['host_status'], endpointInfo) => {
-        // TODO: 8.15 remove `EndpointAgentStatus` when `agentStatusClientEnabled` FF is enabled
+        // TODO: 8.15 remove `EndpointAgentStatus` when `agentStatusClientEnabled` FF is enabled and removed
         return agentStatusClientEnabled ? (
           <AgentStatus agentId={endpointInfo.metadata.agent.id} agentType="endpoint" />
         ) : (

@@ -84,7 +84,7 @@ export const EndpointOverview = React.memo<Props>(({ contextID, data, sourcererS
         {
           title: i18n.FLEET_AGENT_STATUS,
           description:
-            // TODO: 8.15 remove `EndpointAgentStatus` when `agentStatusClientEnabled` FF is enabled
+            // TODO: 8.15 remove `EndpointAgentStatus` when `agentStatusClientEnabled` FF is enabled and removed
             data != null && data.hostInfo ? (
               agentStatusClientEnabled ? (
                 <AgentStatus agentId={data.hostInfo.metadata.agent.id} agentType="endpoint" />
