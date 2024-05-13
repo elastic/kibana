@@ -8,7 +8,6 @@ if [[ "$(type -t vault_get)" != "function" ]]; then
   source .buildkite/scripts/common/vault_fns.sh
 fi
 
-
 # Set up general-purpose tokens and credentials
 {
   BUILDKITE_TOKEN="$(vault_get buildkite-ci buildkite_token_all_jobs)"
