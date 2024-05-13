@@ -49,8 +49,7 @@ describe('OpenAPI Bundler - circular specs', () => {
     );
 
     expect(dump(bundledSpec.paths['/api/some_api']!.get!.responses['200'])).toMatchInlineSnapshot(`
-"description: Successful response
-content:
+"content:
   application/json:
     schema: &ref_0
       type: object
@@ -58,6 +57,7 @@ content:
         fieldA:
           type: integer
         fieldB: *ref_0
+description: Successful response
 "
 `);
   });
