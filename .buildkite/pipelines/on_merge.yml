@@ -431,7 +431,7 @@ steps:
     label: 'Check Types'
     agents:
       queue: n2-4-spot
-    timeout_in_minutes: 60
+    timeout_in_minutes: 70
     retry:
       automatic:
         - exit_status: '-1'
