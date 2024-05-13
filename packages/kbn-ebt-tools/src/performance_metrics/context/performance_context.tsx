@@ -10,7 +10,7 @@ import React, { useMemo, useState } from 'react';
 import { afterFrame } from '@elastic/apm-rum-core';
 import { useLocation } from 'react-router-dom';
 import { perfomanceMarkers } from '../performance_markers';
-import { PerformanceContext } from './use_performance_context';
+import { PerformanceApi, PerformanceContext } from './use_performance_context';
 
 function measureInteraction() {
   performance.mark(perfomanceMarkers.startPageChange);
