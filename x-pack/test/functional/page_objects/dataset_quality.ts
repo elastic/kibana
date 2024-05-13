@@ -7,7 +7,6 @@
 
 import querystring from 'querystring';
 import rison from '@kbn/rison';
-import expect from '@kbn/expect';
 import { TimeUnitId } from '@elastic/eui';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import {
@@ -220,34 +219,18 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       return find.clickByCssSelector(selectors.showFullDatasetNamesSwitch);
     },
 
-    async openDatasetFlyout(datasetName: string) {
-      const cols = await this.parseDatasetTable();
-      const datasetNameCol = cols['Dataset Name'];
-      const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
-      const testDatasetRowIndex = datasetNameColCellTexts.findIndex(
-        (dName) => dName === datasetName
-      );
-      const expanderColumn = cols['0'];
-      let expanderButtons: WebElementWrapper[];
-      await retry.try(async () => {
-        expanderButtons = await expanderColumn.getCellChildren(
-          `[data-test-subj=${testSubjectSelectors.datasetQualityExpandButton}]`
-        );
-        expect(expanderButtons.length).to.be.greaterThan(0);
-
-        // Check if 'title' attribute is "Expand" or "Collapse"
-        const isCollapsed =
-          (await expanderButtons[testDatasetRowIndex].getAttribute('title')) === 'Expand';
-
-        // Open if collapsed
-        if (isCollapsed) {
-          await expanderButtons[testDatasetRowIndex].click();
-        }
+    async openDatasetFlyout(datasetTestSubjectSuffix: string) {
+      await testSubjects.click(`datasetQualityExpandButton-${datasetTestSubjectSuffix}`);
+      await testSubjects.existOrFail('datasetQualityFlyoutTitle', {
+        timeout: 10_000,
       });
     },
 
     async closeFlyout() {
-      return testSubjects.click(testSubjectSelectors.euiFlyoutCloseButton);
+      await testSubjects.click(testSubjectSelectors.euiFlyoutCloseButton);
+      await testSubjects.missingOrFail('datasetQualityFlyoutTitle', {
+        timeout: 10 * 1000,
+      });
     },
 
     async refreshFlyout() {

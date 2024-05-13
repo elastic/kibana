@@ -44,12 +44,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('opens the flyout for the right dataset', async () => {
-      const testDatasetName = datasetNames[1];
-
-      await PageObjects.datasetQuality.openDatasetFlyout(testDatasetName);
-
-      await testSubjects.existOrFail(
-        PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutTitle
+      await PageObjects.datasetQuality.openDatasetFlyout('logs-synth.2-default');
+      const flyoutTitleVisibleText: string = await testSubjects.getVisibleText(
+        'datasetQualityFlyoutTitle'
+      );
+      expect(flyoutTitleVisibleText).to.eql(
+        'synth.2',
+        `Expect flyout title visible text to be synth.2, but got: [${flyoutTitleVisibleText}]`
       );
     });
 
@@ -75,7 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const lastActivityText = (await cols['Last Activity'].getCellTexts())[testDatasetRowIndex];
 
-      await PageObjects.datasetQuality.openDatasetFlyout(testDatasetName);
+      await PageObjects.datasetQuality.openDatasetFlyout('logs-apache.access-default');
 
       const lastActivityTextExists = await PageObjects.datasetQuality.doestTextExistInFlyout(
         lastActivityText,
@@ -87,8 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     // FLAKY: https://github.com/elastic/kibana/issues/180994
     it.skip('reflects the breakdown field state in url', async () => {
-      const testDatasetName = datasetNames[0];
-      await PageObjects.datasetQuality.openDatasetFlyout(testDatasetName);
+      await PageObjects.datasetQuality.openDatasetFlyout('logs-synth.1-default');
 
       const breakdownField = 'service.name';
       await PageObjects.datasetQuality.selectBreakdownField(breakdownField);
@@ -111,7 +111,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('shows the integration details', async () => {
       const apacheAccessDatasetName = 'apache.access';
-      const apacheAccessDatasetHumanName = 'Apache access logs';
       const apacheIntegrationId = 'apache';
 
       await PageObjects.observabilityLogsExplorer.navigateTo();
@@ -126,7 +125,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.datasetQuality.navigateTo();
 
-      await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
+      await PageObjects.datasetQuality.openDatasetFlyout('logs-apache.access-default');
 
       const integrationNameElements = await PageObjects.datasetQuality.getFlyoutElementsByText(
         '[data-test-subj=datasetQualityFlyoutFieldValue]',
@@ -139,22 +138,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('goes to log explorer page when open button is clicked', async () => {
-      const testDatasetName = datasetNames[2];
-      await PageObjects.datasetQuality.openDatasetFlyout(testDatasetName);
+      await PageObjects.datasetQuality.openDatasetFlyout('logs-synth.3-default');
 
       await (await PageObjects.datasetQuality.getFlyoutLogsExplorerButton()).click();
 
       // Confirm dataset selector text in observability logs explorer
       const datasetSelectorText =
         await PageObjects.observabilityLogsExplorer.getDataSourceSelectorButtonText();
-      expect(datasetSelectorText).to.eql(testDatasetName);
+      expect(datasetSelectorText).to.eql(datasetNames[2]);
     });
 
     it('shows summary KPIs', async () => {
       await PageObjects.datasetQuality.navigateTo();
 
-      const apacheAccessDatasetHumanName = 'Apache access logs';
-      await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
+      await PageObjects.datasetQuality.openDatasetFlyout('logs-apache.access-default');
 
       const summary = await PageObjects.datasetQuality.parseFlyoutKpis(excludeKeysFromServerless);
       expect(summary).to.eql({
@@ -168,8 +165,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('shows the updated KPIs', async () => {
       const apacheAccessDatasetName = 'apache.access';
-      const apacheAccessDatasetHumanName = 'Apache access logs';
-      await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
+      await PageObjects.datasetQuality.openDatasetFlyout('logs-apache.access-default');
 
       const summaryBefore = await PageObjects.datasetQuality.parseFlyoutKpis(
         excludeKeysFromServerless
@@ -226,8 +222,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('shows the right number of services', async () => {
       const apacheAccessDatasetName = 'apache.access';
-      const apacheAccessDatasetHumanName = 'Apache access logs';
-      await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
+      await PageObjects.datasetQuality.openDatasetFlyout('logs-apache.access-default');
 
       const summaryBefore = await PageObjects.datasetQuality.parseFlyoutKpis(
         excludeKeysFromServerless
@@ -258,8 +253,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('goes to log explorer for degraded docs when show all is clicked', async () => {
       const apacheAccessDatasetName = 'apache.access';
-      const apacheAccessDatasetHumanName = 'Apache access logs';
-      await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
+      await PageObjects.datasetQuality.openDatasetFlyout('logs-apache.access-default');
 
       const degradedDocsShowAllSelector = `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutKpiLink}-${PageObjects.datasetQuality.texts.degradedDocs}`;
       await testSubjects.click(degradedDocsShowAllSelector);
@@ -276,8 +270,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     // Blocked by https://github.com/elastic/kibana/issues/181705
     it.skip('goes to infra hosts for hosts when show all is clicked', async () => {
-      const apacheAccessDatasetHumanName = 'Apache access logs';
-      await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
+      await PageObjects.datasetQuality.openDatasetFlyout('logs-apache.access-default');
 
       const hostsShowAllSelector = `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutKpiLink}-${PageObjects.datasetQuality.texts.hosts}`;
       await testSubjects.click(hostsShowAllSelector);
@@ -296,7 +289,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('Integration actions menu is present with correct actions', async () => {
       const apacheAccessDatasetName = 'apache.access';
-      const apacheAccessDatasetHumanName = 'Apache access logs';
 
       await PageObjects.observabilityLogsExplorer.navigateTo();
 
@@ -310,7 +302,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.datasetQuality.navigateTo();
 
-      await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
+      await PageObjects.datasetQuality.openDatasetFlyout('logs-apache.access-default');
       await PageObjects.datasetQuality.openIntegrationActionsMenu();
 
       const actions = await Promise.all(
@@ -324,7 +316,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('Integration dashboard action hidden for integrations without dashboards', async () => {
       const bitbucketDatasetName = 'atlassian_bitbucket.audit';
-      const bitbucketDatasetHumanName = 'Bitbucket Audit Logs';
 
       await PageObjects.observabilityLogsExplorer.navigateTo();
 
@@ -339,7 +330,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.datasetQuality.navigateTo();
 
-      await PageObjects.datasetQuality.openDatasetFlyout(bitbucketDatasetHumanName);
+      await PageObjects.datasetQuality.openDatasetFlyout('logs-atlassian_bitbucket.audit-default');
       await PageObjects.datasetQuality.openIntegrationActionsMenu();
 
       await testSubjects.missingOrFail(
@@ -351,7 +342,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('Integration overview action should navigate to the integration overview page', async () => {
       const bitbucketDatasetName = 'atlassian_bitbucket.audit';
-      const bitbucketDatasetHumanName = 'Bitbucket Audit Logs';
 
       await PageObjects.observabilityLogsExplorer.navigateTo();
 
@@ -366,7 +356,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.datasetQuality.navigateTo();
 
-      await PageObjects.datasetQuality.openDatasetFlyout(bitbucketDatasetHumanName);
+      await PageObjects.datasetQuality.openDatasetFlyout('logs-atlassian_bitbucket.audit-default');
+
       await PageObjects.datasetQuality.openIntegrationActionsMenu();
 
       const action = await PageObjects.datasetQuality.getIntegrationActionButtonByAction(
@@ -385,7 +376,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('Integration template action should navigate to the index template page', async () => {
       const apacheAccessDatasetName = 'apache.access';
-      const apacheAccessDatasetHumanName = 'Apache access logs';
 
       await PageObjects.observabilityLogsExplorer.navigateTo();
 
@@ -399,7 +389,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.datasetQuality.navigateTo();
 
-      await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
+      await PageObjects.datasetQuality.openDatasetFlyout('logs-apache.access-default');
+
       await PageObjects.datasetQuality.openIntegrationActionsMenu();
 
       await retry.tryForTime(5000, async () => {
@@ -419,7 +410,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('Integration dashboard action should navigate to the selected dashboard', async () => {
       const apacheAccessDatasetName = 'apache.access';
-      const apacheAccessDatasetHumanName = 'Apache access logs';
 
       await PageObjects.observabilityLogsExplorer.navigateTo();
 
@@ -433,7 +423,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.datasetQuality.navigateTo();
 
-      await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
+      await PageObjects.datasetQuality.openDatasetFlyout('logs-apache.access-default');
+
       await PageObjects.datasetQuality.openIntegrationActionsMenu();
 
       const action = await PageObjects.datasetQuality.getIntegrationActionButtonByAction(
