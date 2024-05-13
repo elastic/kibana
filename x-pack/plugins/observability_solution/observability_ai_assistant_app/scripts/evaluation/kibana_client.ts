@@ -21,12 +21,10 @@ import {
 import type { ObservabilityAIAssistantScreenContext } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { throwSerializedChatCompletionErrors } from '@kbn/observability-ai-assistant-plugin/common/utils/throw_serialized_chat_completion_errors';
 import {
-  APIReturnType,
   isSupportedConnectorType,
   Message,
   MessageRole,
-  ObservabilityAIAssistantAPIClientRequestParamsOf,
-} from '@kbn/observability-ai-assistant-plugin/public';
+} from '@kbn/observability-ai-assistant-plugin/common';
 import { streamIntoObservable } from '@kbn/observability-ai-assistant-plugin/server';
 import { ToolingLog } from '@kbn/tooling-log';
 import axios, { AxiosInstance, AxiosResponse, isAxiosError } from 'axios';
@@ -47,6 +45,10 @@ import {
 } from 'rxjs';
 import { format, parse, UrlObject } from 'url';
 import { inspect } from 'util';
+import type {
+  ObservabilityAIAssistantAPIClientRequestParamsOf,
+  APIReturnType,
+} from '@kbn/observability-ai-assistant-plugin/public';
 import { EvaluationResult } from './types';
 
 // eslint-disable-next-line spaced-comment
