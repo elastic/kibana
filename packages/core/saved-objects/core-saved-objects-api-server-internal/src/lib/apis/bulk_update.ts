@@ -58,6 +58,7 @@ type ExpectedBulkGetResult = Either<
     objectNamespace?: string;
     esRequestIndex: number;
     migrationVersionCompatibility?: 'raw' | 'compatible';
+    overrideAttributes: boolean;
   }
 >;
 
@@ -89,7 +90,15 @@ export const performBulkUpdate = async <T>(
 
   let bulkGetRequestIndexCounter = 0;
   const expectedBulkGetResults = objects.map<ExpectedBulkGetResult>((object) => {
-    const { type, id, attributes, references, version, namespace: objectNamespace } = object;
+    const {
+      type,
+      id,
+      attributes,
+      references,
+      version,
+      namespace: objectNamespace,
+      overrideAttributes = false,
+    } = object;
     let error: DecoratedError | undefined;
 
     if (!allowedTypes.includes(type)) {
@@ -122,6 +131,7 @@ export const performBulkUpdate = async <T>(
       objectNamespace,
       esRequestIndex: bulkGetRequestIndexCounter++,
       migrationVersionCompatibility,
+      overrideAttributes,
     });
   });
 
@@ -205,8 +215,15 @@ export const performBulkUpdate = async <T>(
         return expectedBulkGetResult;
       }
 
-      const { esRequestIndex, id, type, version, documentToSave, objectNamespace } =
-        expectedBulkGetResult.value;
+      const {
+        esRequestIndex,
+        id,
+        type,
+        version,
+        documentToSave,
+        objectNamespace,
+        overrideAttributes,
+      } = expectedBulkGetResult.value;
 
       let namespaces: string[] | undefined;
       const versionProperties = getExpectedVersionProperties(version);
@@ -261,18 +278,23 @@ export const performBulkUpdate = async <T>(
       }
 
       const typeDefinition = registry.getType(type)!;
-      const updatedAttributes = mergeForUpdate({
-        targetAttributes: {
-          ...(migrated!.attributes as Record<string, unknown>),
-        },
-        updatedAttributes: await encryptionHelper.optionallyEncryptAttributes(
-          type,
-          id,
-          objectNamespace || namespace,
-          documentToSave[type]
-        ),
-        typeMappings: typeDefinition.mappings,
-      });
+
+      const encryptedUpdatedAttributes = await encryptionHelper.optionallyEncryptAttributes(
+        type,
+        id,
+        objectNamespace || namespace,
+        documentToSave[type]
+      );
+
+      const updatedAttributes = overrideAttributes
+        ? encryptedUpdatedAttributes
+        : mergeForUpdate({
+            targetAttributes: {
+              ...(migrated!.attributes as Record<string, unknown>),
+            },
+            updatedAttributes: encryptedUpdatedAttributes,
+            typeMappings: typeDefinition.mappings,
+          });
 
       const migratedUpdatedSavedObjectDoc = migrationHelper.migrateInputDocument({
         ...migrated!,
