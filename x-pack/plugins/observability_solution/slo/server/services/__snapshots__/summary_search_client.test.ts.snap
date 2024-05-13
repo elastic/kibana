@@ -48,6 +48,7 @@ Object {
         },
         "sliValue": -1,
         "status": "NO_DATA",
+        "summaryUpdatedAt": null,
       },
     },
     Object {
@@ -63,6 +64,7 @@ Object {
         },
         "sliValue": -1,
         "status": "NO_DATA",
+        "summaryUpdatedAt": null,
       },
     },
     Object {
@@ -78,6 +80,7 @@ Object {
         },
         "sliValue": -1,
         "status": "NO_DATA",
+        "summaryUpdatedAt": null,
       },
     },
     Object {
@@ -93,6 +96,7 @@ Object {
         },
         "sliValue": -1,
         "status": "NO_DATA",
+        "summaryUpdatedAt": null,
       },
     },
     Object {
@@ -108,6 +112,7 @@ Object {
         },
         "sliValue": -1,
         "status": "NO_DATA",
+        "summaryUpdatedAt": null,
       },
     },
   ],

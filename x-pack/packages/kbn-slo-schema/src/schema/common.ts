@@ -43,12 +43,16 @@ const statusSchema = t.union([
   t.literal('VIOLATED'),
 ]);
 
-const summarySchema = t.type({
-  status: statusSchema,
-  sliValue: t.number,
-  errorBudget: errorBudgetSchema,
-  summaryUpdatedAt: t.union([t.string, t.null]),
-});
+const summarySchema = t.intersection([
+  t.type({
+    status: statusSchema,
+    sliValue: t.number,
+    errorBudget: errorBudgetSchema,
+  }),
+  t.partial({
+    summaryUpdatedAt: t.union([t.string, t.null]),
+  }),
+]);
 
 const groupingsSchema = t.record(t.string, t.union([t.string, t.number]));
 
