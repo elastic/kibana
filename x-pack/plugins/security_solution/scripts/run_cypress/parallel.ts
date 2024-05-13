@@ -207,18 +207,30 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
       const failedSpecFilePaths: string[] = [];
 
       const runSpecs = async (filePaths: string[]) =>
-        pMap(
+        pMap<
+          string,
+          | CypressCommandLine.CypressRunResult
+          | CypressCommandLine.CypressFailedRunResult
+          | undefined
+        >(
           filePaths,
           async (filePath) => {
             let result:
               | CypressCommandLine.CypressRunResult
               | CypressCommandLine.CypressFailedRunResult
               | undefined;
-            await withProcRunner(log, async (procs) => {
+            failedSpecFilePaths.push(filePath);
+
+            return withProcRunner<
+              Array<
+                | CypressCommandLine.CypressRunResult
+                | CypressCommandLine.CypressFailedRunResult
+                | undefined
+              >
+            >(log, async (procs) => {
               const abortCtrl = new AbortController();
 
               const onEarlyExit = (msg: string) => {
-                failedSpecFilePaths.push(filePath);
                 log.error(msg);
                 abortCtrl.abort();
               };
@@ -436,12 +448,11 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
                       env: cyCustomEnv,
                     },
                   });
-                  if ((result as CypressCommandLine.CypressRunResult)?.totalFailed) {
-                    failedSpecFilePaths.push(filePath);
+                  if (!(result as CypressCommandLine.CypressRunResult)?.totalFailed) {
+                    _.pull(failedSpecFilePaths, filePath);
                   }
                 } catch (error) {
                   result = error;
-                  failedSpecFilePaths.push(filePath);
                 }
               }
 
@@ -455,7 +466,6 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
 
               return result;
             });
-            return result;
           },
           {
             concurrency: 1,
@@ -464,9 +474,14 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
 
       const initialResults = await runSpecs(files);
       // If there are failed tests, retry them
+
+      console.error('initialResults', JSON.stringify(initialResults, null, 2));
+
       const retryResults = await runSpecs([...failedSpecFilePaths]);
 
-      renderSummaryTable([
+      console.error('retryResults', JSON.stringify(initialResults, null, 2));
+
+      const finalResults = [
         // Don't include failed specs from initial run in results
         ..._.filter(
           initialResults,
@@ -478,7 +493,10 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
             )
         ),
         ...retryResults,
-      ] as CypressCommandLine.CypressRunResult[]);
+      ] as CypressCommandLine.CypressRunResult[];
+
+      renderSummaryTable(finalResults);
+
       const hasFailedTests = (
         runResults: Array<
           | CypressCommandLine.CypressFailedRunResult
@@ -496,6 +514,10 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
 
       const hasFailedInitialTests = hasFailedTests(initialResults);
       const hasFailedRetryTests = hasFailedTests(retryResults);
+
+      if (finalResults.length !== files.length) {
+        throw createFailError('Cypress crashed', { exitCode: -1 });
+      }
 
       // If the initialResults had failures and failedSpecFilePaths was not populated properly return errors
       if (hasFailedRetryTests || (hasFailedInitialTests && !retryResults.length)) {
