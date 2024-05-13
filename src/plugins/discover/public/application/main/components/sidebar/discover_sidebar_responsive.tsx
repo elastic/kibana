@@ -38,7 +38,7 @@ import {
   DiscoverSidebarReducerStatus,
 } from './lib/sidebar_reducer';
 import { useDiscoverCustomization } from '../../../../customizations';
-import { useAdditionalFieldGroups } from './hooks/use_additional_field_groups';
+import { useAdditionalFieldGroups } from '../../hooks/sidebar/use_additional_field_groups';
 
 const EMPTY_FIELD_COUNTS = {};
 
