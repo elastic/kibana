@@ -16,7 +16,6 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  euiScrollBarStyles,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { Datatable } from '@kbn/expressions-plugin/public';
