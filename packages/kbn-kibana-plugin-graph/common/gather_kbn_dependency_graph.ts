@@ -62,17 +62,14 @@ export async function generateGraph() {
       }
       if (json.plugin?.optionalPlugins) {
         for (const optionalPlugin of json.plugin.optionalPlugins) {
-          if (elements.nodes.find((node) => node.data.id === optionalPlugin)) {
-            // apparently elements in 'optionalPlugins' are not checked; so it could be they don't exist
-            elements.edges.push({
-              data: {
-                id: `${json.plugin.id}-${optionalPlugin}`,
-                source: json.plugin.id,
-                target: optionalPlugin,
-                type: 'optionalPlugin',
-              },
-            });
-          }
+          elements.edges.push({
+            data: {
+              id: `${json.plugin.id}-${optionalPlugin}`,
+              source: json.plugin.id,
+              target: optionalPlugin,
+              type: 'optionalPlugin',
+            },
+          });
         }
       }
 

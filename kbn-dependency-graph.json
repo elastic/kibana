@@ -68,12 +68,6 @@
     },
     {
       "data": {
-        "id": "featureControlsExamples",
-        "type": "plugin"
-      }
-    },
-    {
-      "data": {
         "id": "filesExample",
         "type": "plugin"
       }
@@ -86,13 +80,13 @@
     },
     {
       "data": {
-        "id": "guidedOnboardingExample",
+        "id": "featureControlsExamples",
         "type": "plugin"
       }
     },
     {
       "data": {
-        "id": "helloWorld",
+        "id": "guidedOnboardingExample",
         "type": "plugin"
       }
     },
@@ -104,13 +98,19 @@
     },
     {
       "data": {
-        "id": "locatorExplorer",
+        "id": "helloWorld",
         "type": "plugin"
       }
     },
     {
       "data": {
         "id": "paertialResultsExample",
+        "type": "plugin"
+      }
+    },
+    {
+      "data": {
+        "id": "locatorExplorer",
         "type": "plugin"
       }
     },
@@ -123,12 +123,6 @@
     {
       "data": {
         "id": "prebootExample",
-        "type": "plugin"
-      }
-    },
-    {
-      "data": {
-        "id": "resizableLayoutExamples",
         "type": "plugin"
       }
     },
@@ -152,19 +146,25 @@
     },
     {
       "data": {
+        "id": "resizableLayoutExamples",
+        "type": "plugin"
+      }
+    },
+    {
+      "data": {
         "id": "searchExamples",
         "type": "plugin"
       }
     },
     {
       "data": {
-        "id": "shareExamples",
+        "id": "stateContainersExamples",
         "type": "plugin"
       }
     },
     {
       "data": {
-        "id": "stateContainersExamples",
+        "id": "shareExamples",
         "type": "plugin"
       }
     },
@@ -194,13 +194,13 @@
     },
     {
       "data": {
-        "id": "userProfileExamples",
+        "id": "vEIGHTProfilerExamples",
         "type": "plugin"
       }
     },
     {
       "data": {
-        "id": "vEIGHTProfilerExamples",
+        "id": "userProfileExamples",
         "type": "plugin"
       }
     },
@@ -290,13 +290,13 @@
     },
     {
       "data": {
-        "id": "actions",
+        "id": "aiops",
         "type": "plugin"
       }
     },
     {
       "data": {
-        "id": "aiops",
+        "id": "actions",
         "type": "plugin"
       }
     },
@@ -416,12 +416,6 @@
     },
     {
       "data": {
-        "id": "features",
-        "type": "plugin"
-      }
-    },
-    {
-      "data": {
         "id": "fileUpload",
         "type": "plugin"
       }
@@ -458,6 +452,12 @@
     },
     {
       "data": {
+        "id": "features",
+        "type": "plugin"
+      }
+    },
+    {
+      "data": {
         "id": "grokdebugger",
         "type": "plugin"
       }
@@ -465,6 +465,18 @@
     {
       "data": {
         "id": "indexLifecycleManagement",
+        "type": "plugin"
+      }
+    },
+    {
+      "data": {
+        "id": "kubernetesSecurity",
+        "type": "plugin"
+      }
+    },
+    {
+      "data": {
+        "id": "lens",
         "type": "plugin"
       }
     },
@@ -482,13 +494,7 @@
     },
     {
       "data": {
-        "id": "kubernetesSecurity",
-        "type": "plugin"
-      }
-    },
-    {
-      "data": {
-        "id": "lens",
+        "id": "licenseApiGuard",
         "type": "plugin"
       }
     },
@@ -512,12 +518,6 @@
     },
     {
       "data": {
-        "id": "licenseApiGuard",
-        "type": "plugin"
-      }
-    },
-    {
-      "data": {
         "id": "logstash",
         "type": "plugin"
       }
@@ -525,6 +525,12 @@
     {
       "data": {
         "id": "maps",
+        "type": "plugin"
+      }
+    },
+    {
+      "data": {
+        "id": "monitoring",
         "type": "plugin"
       }
     },
@@ -542,7 +548,7 @@
     },
     {
       "data": {
-        "id": "monitoring",
+        "id": "notifications",
         "type": "plugin"
       }
     },
@@ -554,19 +560,7 @@
     },
     {
       "data": {
-        "id": "notifications",
-        "type": "plugin"
-      }
-    },
-    {
-      "data": {
         "id": "osquery",
-        "type": "plugin"
-      }
-    },
-    {
-      "data": {
-        "id": "painlessLab",
         "type": "plugin"
       }
     },
@@ -578,7 +572,7 @@
     },
     {
       "data": {
-        "id": "reporting",
+        "id": "painlessLab",
         "type": "plugin"
       }
     },
@@ -590,19 +584,25 @@
     },
     {
       "data": {
+        "id": "reporting",
+        "type": "plugin"
+      }
+    },
+    {
+      "data": {
         "id": "ruleRegistry",
         "type": "plugin"
       }
     },
     {
       "data": {
-        "id": "savedObjectsTagging",
+        "id": "runtimeFields",
         "type": "plugin"
       }
     },
     {
       "data": {
-        "id": "runtimeFields",
+        "id": "savedObjectsTagging",
         "type": "plugin"
       }
     },
@@ -644,12 +644,6 @@
     },
     {
       "data": {
-        "id": "securitySolution",
-        "type": "plugin"
-      }
-    },
-    {
-      "data": {
         "id": "securitySolutionEss",
         "type": "plugin"
       }
@@ -657,6 +651,12 @@
     {
       "data": {
         "id": "securitySolutionServerless",
+        "type": "plugin"
+      }
+    },
+    {
+      "data": {
+        "id": "securitySolution",
         "type": "plugin"
       }
     },
@@ -824,19 +824,13 @@
     },
     {
       "data": {
-        "id": "infra",
-        "type": "plugin"
-      }
-    },
-    {
-      "data": {
-        "id": "logsShared",
-        "type": "plugin"
-      }
-    },
-    {
-      "data": {
         "id": "logsExplorer",
+        "type": "plugin"
+      }
+    },
+    {
+      "data": {
+        "id": "infra",
         "type": "plugin"
       }
     },
@@ -860,6 +854,12 @@
     },
     {
       "data": {
+        "id": "logsShared",
+        "type": "plugin"
+      }
+    },
+    {
+      "data": {
         "id": "observabilityAiAssistantManagement",
         "type": "plugin"
       }
@@ -872,7 +872,7 @@
     },
     {
       "data": {
-        "id": "observabilityOnboarding",
+        "id": "profiling",
         "type": "plugin"
       }
     },
@@ -884,7 +884,7 @@
     },
     {
       "data": {
-        "id": "profiling",
+        "id": "observabilityOnboarding",
         "type": "plugin"
       }
     },
@@ -1022,13 +1022,13 @@
     },
     {
       "data": {
-        "id": "samlProviderPlugin",
+        "id": "userProfilesConsumerPlugin",
         "type": "plugin"
       }
     },
     {
       "data": {
-        "id": "userProfilesConsumerPlugin",
+        "id": "samlProviderPlugin",
         "type": "plugin"
       }
     },
@@ -1064,13 +1064,13 @@
     },
     {
       "data": {
-        "id": "alertingApiIntegrationTestPlugin",
+        "id": "alertsRestrictedFixtures",
         "type": "plugin"
       }
     },
     {
       "data": {
-        "id": "alertsRestrictedFixtures",
+        "id": "alertingApiIntegrationTestPlugin",
         "type": "plugin"
       }
     },
@@ -1160,19 +1160,13 @@
     },
     {
       "data": {
-        "id": "data",
-        "type": "plugin"
-      }
-    },
-    {
-      "data": {
-        "id": "dataViewEditor",
-        "type": "plugin"
-      }
-    },
-    {
-      "data": {
         "id": "dashboard",
+        "type": "plugin"
+      }
+    },
+    {
+      "data": {
+        "id": "data",
         "type": "plugin"
       }
     },
@@ -1197,6 +1191,12 @@
     {
       "data": {
         "id": "devTools",
+        "type": "plugin"
+      }
+    },
+    {
+      "data": {
+        "id": "dataViewEditor",
         "type": "plugin"
       }
     },
@@ -1250,12 +1250,6 @@
     },
     {
       "data": {
-        "id": "expressionRepeatImage",
-        "type": "plugin"
-      }
-    },
-    {
-      "data": {
         "id": "expressionRevealImage",
         "type": "plugin"
       }
@@ -1263,6 +1257,12 @@
     {
       "data": {
         "id": "expressionShape",
+        "type": "plugin"
+      }
+    },
+    {
+      "data": {
+        "id": "expressionRepeatImage",
         "type": "plugin"
       }
     },
@@ -1286,13 +1286,13 @@
     },
     {
       "data": {
-        "id": "filesManagement",
+        "id": "ftrApis",
         "type": "plugin"
       }
     },
     {
       "data": {
-        "id": "ftrApis",
+        "id": "filesManagement",
         "type": "plugin"
       }
     },
@@ -1310,13 +1310,13 @@
     },
     {
       "data": {
-        "id": "imageEmbeddable",
+        "id": "inputControlVis",
         "type": "plugin"
       }
     },
     {
       "data": {
-        "id": "inputControlVis",
+        "id": "imageEmbeddable",
         "type": "plugin"
       }
     },
@@ -1352,13 +1352,13 @@
     },
     {
       "data": {
-        "id": "links",
+        "id": "kibanaUtils",
         "type": "plugin"
       }
     },
     {
       "data": {
-        "id": "kibanaUtils",
+        "id": "links",
         "type": "plugin"
       }
     },
@@ -1370,31 +1370,19 @@
     },
     {
       "data": {
-        "id": "mapsEms",
-        "type": "plugin"
-      }
-    },
-    {
-      "data": {
         "id": "navigation",
         "type": "plugin"
       }
     },
     {
       "data": {
+        "id": "mapsEms",
+        "type": "plugin"
+      }
+    },
+    {
+      "data": {
         "id": "newsfeed",
-        "type": "plugin"
-      }
-    },
-    {
-      "data": {
-        "id": "presentationUtil",
-        "type": "plugin"
-      }
-    },
-    {
-      "data": {
-        "id": "savedObjects",
         "type": "plugin"
       }
     },
@@ -1412,7 +1400,25 @@
     },
     {
       "data": {
+        "id": "presentationUtil",
+        "type": "plugin"
+      }
+    },
+    {
+      "data": {
+        "id": "savedObjects",
+        "type": "plugin"
+      }
+    },
+    {
+      "data": {
         "id": "savedObjectsFinder",
+        "type": "plugin"
+      }
+    },
+    {
+      "data": {
+        "id": "savedSearch",
         "type": "plugin"
       }
     },
@@ -1431,12 +1437,6 @@
     {
       "data": {
         "id": "screenshotMode",
-        "type": "plugin"
-      }
-    },
-    {
-      "data": {
-        "id": "savedSearch",
         "type": "plugin"
       }
     },
@@ -1472,13 +1472,13 @@
     },
     {
       "data": {
-        "id": "uiActionsEnhanced",
+        "id": "uiActions",
         "type": "plugin"
       }
     },
     {
       "data": {
-        "id": "uiActions",
+        "id": "uiActionsEnhanced",
         "type": "plugin"
       }
     },
@@ -1490,13 +1490,13 @@
     },
     {
       "data": {
-        "id": "unifiedSearch",
+        "id": "unifiedHistogram",
         "type": "plugin"
       }
     },
     {
       "data": {
-        "id": "unifiedHistogram",
+        "id": "unifiedSearch",
         "type": "plugin"
       }
     },
@@ -1508,25 +1508,25 @@
     },
     {
       "data": {
-        "id": "visDefaultEditor",
-        "type": "plugin"
-      }
-    },
-    {
-      "data": {
-        "id": "visTypeMarkdown",
-        "type": "plugin"
-      }
-    },
-    {
-      "data": {
         "id": "usageCollection",
         "type": "plugin"
       }
     },
     {
       "data": {
+        "id": "visDefaultEditor",
+        "type": "plugin"
+      }
+    },
+    {
+      "data": {
         "id": "visualizations",
+        "type": "plugin"
+      }
+    },
+    {
+      "data": {
+        "id": "visTypeMarkdown",
         "type": "plugin"
       }
     },
@@ -2032,46 +2032,6 @@
     },
     {
       "data": {
-        "id": "featureControlsExamples-developerExamples",
-        "source": "featureControlsExamples",
-        "target": "developerExamples",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "featureControlsExamples-security",
-        "source": "featureControlsExamples",
-        "target": "security",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "featureControlsExamples-spaces",
-        "source": "featureControlsExamples",
-        "target": "spaces",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "featureControlsExamples-features",
-        "source": "featureControlsExamples",
-        "target": "features",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "featureControlsExamples-kibanaReact",
-        "source": "featureControlsExamples",
-        "target": "kibanaReact",
-        "type": "bundle"
-      }
-    },
-    {
-      "data": {
         "id": "filesExample-files",
         "source": "filesExample",
         "target": "files",
@@ -2120,9 +2080,65 @@
     },
     {
       "data": {
+        "id": "featureControlsExamples-developerExamples",
+        "source": "featureControlsExamples",
+        "target": "developerExamples",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "featureControlsExamples-security",
+        "source": "featureControlsExamples",
+        "target": "security",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "featureControlsExamples-spaces",
+        "source": "featureControlsExamples",
+        "target": "spaces",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "featureControlsExamples-features",
+        "source": "featureControlsExamples",
+        "target": "features",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "featureControlsExamples-kibanaReact",
+        "source": "featureControlsExamples",
+        "target": "kibanaReact",
+        "type": "bundle"
+      }
+    },
+    {
+      "data": {
         "id": "guidedOnboardingExample-navigation",
         "source": "guidedOnboardingExample",
         "target": "navigation",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "guidedOnboardingExample-guidedOnboarding",
+        "source": "guidedOnboardingExample",
+        "target": "guidedOnboarding",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "locatorExamples-share",
+        "source": "locatorExamples",
+        "target": "share",
         "type": "requiredPlugin"
       }
     },
@@ -2136,9 +2152,17 @@
     },
     {
       "data": {
-        "id": "locatorExamples-share",
-        "source": "locatorExamples",
-        "target": "share",
+        "id": "paertialResultsExample-developerExamples",
+        "source": "paertialResultsExample",
+        "target": "developerExamples",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "paertialResultsExample-expressions",
+        "source": "paertialResultsExample",
+        "target": "expressions",
         "type": "requiredPlugin"
       }
     },
@@ -2163,22 +2187,6 @@
         "id": "locatorExplorer-developerExamples",
         "source": "locatorExplorer",
         "target": "developerExamples",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "paertialResultsExample-developerExamples",
-        "source": "paertialResultsExample",
-        "target": "developerExamples",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "paertialResultsExample-expressions",
-        "source": "paertialResultsExample",
-        "target": "expressions",
         "type": "requiredPlugin"
       }
     },
@@ -2234,14 +2242,6 @@
       "data": {
         "id": "portableDashboardExamples-developerExamples",
         "source": "portableDashboardExamples",
-        "target": "developerExamples",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "resizableLayoutExamples-developerExamples",
-        "source": "resizableLayoutExamples",
         "target": "developerExamples",
         "type": "requiredPlugin"
       }
@@ -2304,6 +2304,14 @@
     },
     {
       "data": {
+        "id": "resizableLayoutExamples-developerExamples",
+        "source": "resizableLayoutExamples",
+        "target": "developerExamples",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "searchExamples-navigation",
         "source": "searchExamples",
         "target": "navigation",
@@ -2360,14 +2368,6 @@
     },
     {
       "data": {
-        "id": "shareExamples-share",
-        "source": "shareExamples",
-        "target": "share",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
         "id": "stateContainersExamples-navigation",
         "source": "stateContainersExamples",
         "target": "navigation",
@@ -2396,6 +2396,14 @@
         "source": "stateContainersExamples",
         "target": "kibanaUtils",
         "type": "bundle"
+      }
+    },
+    {
+      "data": {
+        "id": "shareExamples-share",
+        "source": "shareExamples",
+        "target": "share",
+        "type": "requiredPlugin"
       }
     },
     {
@@ -3016,6 +3024,22 @@
     },
     {
       "data": {
+        "id": "mapsCustomRasterSource-kibanaUtils",
+        "source": "mapsCustomRasterSource",
+        "target": "kibanaUtils",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "mapsCustomRasterSource-kibanaReact",
+        "source": "mapsCustomRasterSource",
+        "target": "kibanaReact",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "thirdPartyVisLensExample-lens",
         "source": "thirdPartyVisLensExample",
         "target": "lens",
@@ -3120,6 +3144,14 @@
     },
     {
       "data": {
+        "id": "triggersActionsUiExample-spaces",
+        "source": "triggersActionsUiExample",
+        "target": "spaces",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "uiActionsEnhancedExamples-uiActions",
         "source": "uiActionsEnhancedExamples",
         "target": "uiActions",
@@ -3204,46 +3236,6 @@
         "source": "uiActionsEnhancedExamples",
         "target": "kibanaUtils",
         "type": "bundle"
-      }
-    },
-    {
-      "data": {
-        "id": "actions-licensing",
-        "source": "actions",
-        "target": "licensing",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "actions-taskManager",
-        "source": "actions",
-        "target": "taskManager",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "actions-encryptedSavedObjects",
-        "source": "actions",
-        "target": "encryptedSavedObjects",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "actions-eventLog",
-        "source": "actions",
-        "target": "eventLog",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "actions-features",
-        "source": "actions",
-        "target": "features",
-        "type": "requiredPlugin"
       }
     },
     {
@@ -3336,6 +3328,22 @@
     },
     {
       "data": {
+        "id": "aiops-cases",
+        "source": "aiops",
+        "target": "cases",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "aiops-usageCollection",
+        "source": "aiops",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "aiops-fieldFormats",
         "source": "aiops",
         "target": "fieldFormats",
@@ -3372,6 +3380,86 @@
         "source": "aiops",
         "target": "cases",
         "type": "bundle"
+      }
+    },
+    {
+      "data": {
+        "id": "actions-licensing",
+        "source": "actions",
+        "target": "licensing",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "actions-taskManager",
+        "source": "actions",
+        "target": "taskManager",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "actions-encryptedSavedObjects",
+        "source": "actions",
+        "target": "encryptedSavedObjects",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "actions-eventLog",
+        "source": "actions",
+        "target": "eventLog",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "actions-features",
+        "source": "actions",
+        "target": "features",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "actions-usageCollection",
+        "source": "actions",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "actions-spaces",
+        "source": "actions",
+        "target": "spaces",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "actions-security",
+        "source": "actions",
+        "target": "security",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "actions-monitoringCollection",
+        "source": "actions",
+        "target": "monitoringCollection",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "actions-serverless",
+        "source": "actions",
+        "target": "serverless",
+        "type": "optionalPlugin"
       }
     },
     {
@@ -3496,6 +3584,46 @@
     },
     {
       "data": {
+        "id": "alerting-usageCollection",
+        "source": "alerting",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "alerting-security",
+        "source": "alerting",
+        "target": "security",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "alerting-monitoringCollection",
+        "source": "alerting",
+        "target": "monitoringCollection",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "alerting-spaces",
+        "source": "alerting",
+        "target": "spaces",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "alerting-serverless",
+        "source": "alerting",
+        "target": "serverless",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "assetManager-apmDataAccess",
         "source": "assetManager",
         "target": "apmDataAccess",
@@ -3516,6 +3644,14 @@
         "source": "banners",
         "target": "licensing",
         "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "banners-screenshotMode",
+        "source": "banners",
+        "target": "screenshotMode",
+        "type": "optionalPlugin"
       }
     },
     {
@@ -3676,6 +3812,38 @@
         "source": "canvas",
         "target": "savedObjectsFinder",
         "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "canvas-home",
+        "source": "canvas",
+        "target": "home",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "canvas-reporting",
+        "source": "canvas",
+        "target": "reporting",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "canvas-spaces",
+        "source": "canvas",
+        "target": "spaces",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "canvas-usageCollection",
+        "source": "canvas",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
       }
     },
     {
@@ -3856,6 +4024,46 @@
     },
     {
       "data": {
+        "id": "cases-home",
+        "source": "cases",
+        "target": "home",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "cases-taskManager",
+        "source": "cases",
+        "target": "taskManager",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "cases-usageCollection",
+        "source": "cases",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "cases-spaces",
+        "source": "cases",
+        "target": "spaces",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "cases-serverless",
+        "source": "cases",
+        "target": "serverless",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "cases-esUiShared",
         "source": "cases",
         "target": "esUiShared",
@@ -3884,6 +4092,14 @@
         "source": "cases",
         "target": "savedObjectsFinder",
         "type": "bundle"
+      }
+    },
+    {
+      "data": {
+        "id": "cloud-usageCollection",
+        "source": "cloud",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
       }
     },
     {
@@ -3956,6 +4172,14 @@
         "source": "cloudDefend",
         "target": "kubernetesSecurity",
         "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "cloudDefend-usageCollection",
+        "source": "cloudDefend",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
       }
     },
     {
@@ -4088,6 +4312,14 @@
     },
     {
       "data": {
+        "id": "cloudSecurityPosture-usageCollection",
+        "source": "cloudSecurityPosture",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "cloudSecurityPosture-kibanaReact",
         "source": "cloudSecurityPosture",
         "target": "kibanaReact",
@@ -4156,6 +4388,14 @@
         "source": "crossClusterReplication",
         "target": "features",
         "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "crossClusterReplication-usageCollection",
+        "source": "crossClusterReplication",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
       }
     },
     {
@@ -4384,6 +4624,54 @@
     },
     {
       "data": {
+        "id": "dataVisualizer-security",
+        "source": "dataVisualizer",
+        "target": "security",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "dataVisualizer-maps",
+        "source": "dataVisualizer",
+        "target": "maps",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "dataVisualizer-home",
+        "source": "dataVisualizer",
+        "target": "home",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "dataVisualizer-lens",
+        "source": "dataVisualizer",
+        "target": "lens",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "dataVisualizer-dataViewFieldEditor",
+        "source": "dataVisualizer",
+        "target": "dataViewFieldEditor",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "dataVisualizer-customIntegrations",
+        "source": "dataVisualizer",
+        "target": "customIntegrations",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "dataVisualizer-cloud",
         "source": "dataVisualizer",
         "target": "cloud",
@@ -4480,6 +4768,22 @@
     },
     {
       "data": {
+        "id": "discoverEnhanced-share",
+        "source": "discoverEnhanced",
+        "target": "share",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "discoverEnhanced-usageCollection",
+        "source": "discoverEnhanced",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "discoverEnhanced-kibanaUtils",
         "source": "discoverEnhanced",
         "target": "kibanaUtils",
@@ -4508,6 +4812,14 @@
         "source": "ecsDataQualityDashboard",
         "target": "data",
         "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "ecsDataQualityDashboard-spaces",
+        "source": "ecsDataQualityDashboard",
+        "target": "spaces",
+        "type": "optionalPlugin"
       }
     },
     {
@@ -4600,6 +4912,14 @@
     },
     {
       "data": {
+        "id": "encryptedSavedObjects-security",
+        "source": "encryptedSavedObjects",
+        "target": "security",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "enterpriseSearch-data",
         "source": "enterpriseSearch",
         "target": "data",
@@ -4640,9 +4960,145 @@
     },
     {
       "data": {
+        "id": "enterpriseSearch-customIntegrations",
+        "source": "enterpriseSearch",
+        "target": "customIntegrations",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "enterpriseSearch-globalSearch",
+        "source": "enterpriseSearch",
+        "target": "globalSearch",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "enterpriseSearch-home",
+        "source": "enterpriseSearch",
+        "target": "home",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "enterpriseSearch-indexManagement",
+        "source": "enterpriseSearch",
+        "target": "indexManagement",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "enterpriseSearch-ml",
+        "source": "enterpriseSearch",
+        "target": "ml",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "enterpriseSearch-security",
+        "source": "enterpriseSearch",
+        "target": "security",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "enterpriseSearch-spaces",
+        "source": "enterpriseSearch",
+        "target": "spaces",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "enterpriseSearch-usageCollection",
+        "source": "enterpriseSearch",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "enterpriseSearch-guidedOnboarding",
+        "source": "enterpriseSearch",
+        "target": "guidedOnboarding",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "enterpriseSearch-console",
+        "source": "enterpriseSearch",
+        "target": "console",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "enterpriseSearch-searchConnectors",
+        "source": "enterpriseSearch",
+        "target": "searchConnectors",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "enterpriseSearch-searchPlayground",
+        "source": "enterpriseSearch",
+        "target": "searchPlayground",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "enterpriseSearch-embeddable",
+        "source": "enterpriseSearch",
+        "target": "embeddable",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "enterpriseSearch-discover",
+        "source": "enterpriseSearch",
+        "target": "discover",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "enterpriseSearch-charts",
+        "source": "enterpriseSearch",
+        "target": "charts",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "enterpriseSearch-cloud",
         "source": "enterpriseSearch",
         "target": "cloud",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "enterpriseSearch-lens",
+        "source": "enterpriseSearch",
+        "target": "lens",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "enterpriseSearch-share",
+        "source": "enterpriseSearch",
+        "target": "share",
         "type": "optionalPlugin"
       }
     },
@@ -4656,10 +5112,18 @@
     },
     {
       "data": {
-        "id": "features-licensing",
-        "source": "features",
-        "target": "licensing",
-        "type": "requiredPlugin"
+        "id": "eventLog-spaces",
+        "source": "eventLog",
+        "target": "spaces",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "eventLog-serverless",
+        "source": "eventLog",
+        "target": "serverless",
+        "type": "optionalPlugin"
       }
     },
     {
@@ -4676,6 +5140,14 @@
         "source": "fileUpload",
         "target": "usageCollection",
         "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "fileUpload-security",
+        "source": "fileUpload",
+        "target": "security",
+        "type": "optionalPlugin"
       }
     },
     {
@@ -4808,6 +5280,70 @@
     },
     {
       "data": {
+        "id": "fleet-usageCollection",
+        "source": "fleet",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "fleet-home",
+        "source": "fleet",
+        "target": "home",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "fleet-globalSearch",
+        "source": "fleet",
+        "target": "globalSearch",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "fleet-telemetry",
+        "source": "fleet",
+        "target": "telemetry",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "fleet-discover",
+        "source": "fleet",
+        "target": "discover",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "fleet-ingestPipelines",
+        "source": "fleet",
+        "target": "ingestPipelines",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "fleet-spaces",
+        "source": "fleet",
+        "target": "spaces",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "fleet-guidedOnboarding",
+        "source": "fleet",
+        "target": "guidedOnboarding",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "fleet-kibanaReact",
         "source": "fleet",
         "target": "kibanaReact",
@@ -4868,6 +5404,22 @@
         "source": "globalSearchBar",
         "target": "globalSearch",
         "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "globalSearchBar-usageCollection",
+        "source": "globalSearchBar",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "globalSearchBar-savedObjectsTagging",
+        "source": "globalSearchBar",
+        "target": "savedObjectsTagging",
+        "type": "optionalPlugin"
       }
     },
     {
@@ -4944,9 +5496,25 @@
     },
     {
       "data": {
+        "id": "graph-home",
+        "source": "graph",
+        "target": "home",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "graph-features",
         "source": "graph",
         "target": "features",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "graph-spaces",
+        "source": "graph",
+        "target": "spaces",
         "type": "optionalPlugin"
       }
     },
@@ -4972,6 +5540,14 @@
         "source": "graph",
         "target": "savedObjects",
         "type": "bundle"
+      }
+    },
+    {
+      "data": {
+        "id": "features-licensing",
+        "source": "features",
+        "target": "licensing",
+        "type": "requiredPlugin"
       }
     },
     {
@@ -5048,6 +5624,30 @@
     },
     {
       "data": {
+        "id": "indexLifecycleManagement-usageCollection",
+        "source": "indexLifecycleManagement",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "indexLifecycleManagement-indexManagement",
+        "source": "indexLifecycleManagement",
+        "target": "indexManagement",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "indexLifecycleManagement-home",
+        "source": "indexLifecycleManagement",
+        "target": "home",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "indexLifecycleManagement-indexManagement",
         "source": "indexLifecycleManagement",
         "target": "indexManagement",
@@ -5067,134 +5667,6 @@
         "id": "indexLifecycleManagement-esUiShared",
         "source": "indexLifecycleManagement",
         "target": "esUiShared",
-        "type": "bundle"
-      }
-    },
-    {
-      "data": {
-        "id": "indexManagement-home",
-        "source": "indexManagement",
-        "target": "home",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "indexManagement-management",
-        "source": "indexManagement",
-        "target": "management",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "indexManagement-features",
-        "source": "indexManagement",
-        "target": "features",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "indexManagement-share",
-        "source": "indexManagement",
-        "target": "share",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "indexManagement-fleet",
-        "source": "indexManagement",
-        "target": "fleet",
-        "type": "optionalPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "indexManagement-cloud",
-        "source": "indexManagement",
-        "target": "cloud",
-        "type": "optionalPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "indexManagement-kibanaReact",
-        "source": "indexManagement",
-        "target": "kibanaReact",
-        "type": "bundle"
-      }
-    },
-    {
-      "data": {
-        "id": "indexManagement-esUiShared",
-        "source": "indexManagement",
-        "target": "esUiShared",
-        "type": "bundle"
-      }
-    },
-    {
-      "data": {
-        "id": "indexManagement-runtimeFields",
-        "source": "indexManagement",
-        "target": "runtimeFields",
-        "type": "bundle"
-      }
-    },
-    {
-      "data": {
-        "id": "ingestPipelines-licensing",
-        "source": "ingestPipelines",
-        "target": "licensing",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "ingestPipelines-management",
-        "source": "ingestPipelines",
-        "target": "management",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "ingestPipelines-features",
-        "source": "ingestPipelines",
-        "target": "features",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "ingestPipelines-share",
-        "source": "ingestPipelines",
-        "target": "share",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "ingestPipelines-fileUpload",
-        "source": "ingestPipelines",
-        "target": "fileUpload",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "ingestPipelines-esUiShared",
-        "source": "ingestPipelines",
-        "target": "esUiShared",
-        "type": "bundle"
-      }
-    },
-    {
-      "data": {
-        "id": "ingestPipelines-kibanaReact",
-        "source": "ingestPipelines",
-        "target": "kibanaReact",
         "type": "bundle"
       }
     },
@@ -5432,9 +5904,73 @@
     },
     {
       "data": {
+        "id": "lens-expressionLegacyMetricVis",
+        "source": "lens",
+        "target": "expressionLegacyMetricVis",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "lens-expressionPartitionVis",
+        "source": "lens",
+        "target": "expressionPartitionVis",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "lens-usageCollection",
+        "source": "lens",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "lens-taskManager",
+        "source": "lens",
+        "target": "taskManager",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "lens-globalSearch",
         "source": "lens",
         "target": "globalSearch",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "lens-savedObjectsTagging",
+        "source": "lens",
+        "target": "savedObjectsTagging",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "lens-spaces",
+        "source": "lens",
+        "target": "spaces",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "lens-serverless",
+        "source": "lens",
+        "target": "serverless",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "lens-licensing",
+        "source": "lens",
+        "target": "licensing",
         "type": "optionalPlugin"
       }
     },
@@ -5504,6 +6040,190 @@
     },
     {
       "data": {
+        "id": "indexManagement-home",
+        "source": "indexManagement",
+        "target": "home",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "indexManagement-management",
+        "source": "indexManagement",
+        "target": "management",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "indexManagement-features",
+        "source": "indexManagement",
+        "target": "features",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "indexManagement-share",
+        "source": "indexManagement",
+        "target": "share",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "indexManagement-security",
+        "source": "indexManagement",
+        "target": "security",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "indexManagement-usageCollection",
+        "source": "indexManagement",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "indexManagement-fleet",
+        "source": "indexManagement",
+        "target": "fleet",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "indexManagement-cloud",
+        "source": "indexManagement",
+        "target": "cloud",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "indexManagement-ml",
+        "source": "indexManagement",
+        "target": "ml",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "indexManagement-console",
+        "source": "indexManagement",
+        "target": "console",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "indexManagement-kibanaReact",
+        "source": "indexManagement",
+        "target": "kibanaReact",
+        "type": "bundle"
+      }
+    },
+    {
+      "data": {
+        "id": "indexManagement-esUiShared",
+        "source": "indexManagement",
+        "target": "esUiShared",
+        "type": "bundle"
+      }
+    },
+    {
+      "data": {
+        "id": "indexManagement-runtimeFields",
+        "source": "indexManagement",
+        "target": "runtimeFields",
+        "type": "bundle"
+      }
+    },
+    {
+      "data": {
+        "id": "ingestPipelines-licensing",
+        "source": "ingestPipelines",
+        "target": "licensing",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "ingestPipelines-management",
+        "source": "ingestPipelines",
+        "target": "management",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "ingestPipelines-features",
+        "source": "ingestPipelines",
+        "target": "features",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "ingestPipelines-share",
+        "source": "ingestPipelines",
+        "target": "share",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "ingestPipelines-fileUpload",
+        "source": "ingestPipelines",
+        "target": "fileUpload",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "ingestPipelines-security",
+        "source": "ingestPipelines",
+        "target": "security",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "ingestPipelines-usageCollection",
+        "source": "ingestPipelines",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "ingestPipelines-console",
+        "source": "ingestPipelines",
+        "target": "console",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "ingestPipelines-esUiShared",
+        "source": "ingestPipelines",
+        "target": "esUiShared",
+        "type": "bundle"
+      }
+    },
+    {
+      "data": {
+        "id": "ingestPipelines-kibanaReact",
+        "source": "ingestPipelines",
+        "target": "kibanaReact",
+        "type": "bundle"
+      }
+    },
+    {
+      "data": {
         "id": "licenseManagement-home",
         "source": "licenseManagement",
         "target": "home",
@@ -5544,6 +6264,14 @@
     },
     {
       "data": {
+        "id": "licenseManagement-telemetry",
+        "source": "licenseManagement",
+        "target": "telemetry",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "licenseManagement-telemetryManagementSection",
         "source": "licenseManagement",
         "target": "telemetryManagementSection",
@@ -5568,6 +6296,22 @@
     },
     {
       "data": {
+        "id": "lists-spaces",
+        "source": "lists",
+        "target": "spaces",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "lists-security",
+        "source": "lists",
+        "target": "security",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "logstash-licensing",
         "source": "logstash",
         "target": "licensing",
@@ -5588,6 +6332,30 @@
         "source": "logstash",
         "target": "features",
         "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "logstash-home",
+        "source": "logstash",
+        "target": "home",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "logstash-monitoring",
+        "source": "logstash",
+        "target": "monitoring",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "logstash-security",
+        "source": "logstash",
+        "target": "security",
+        "type": "optionalPlugin"
       }
     },
     {
@@ -5752,6 +6520,78 @@
     },
     {
       "data": {
+        "id": "maps-customIntegrations",
+        "source": "maps",
+        "target": "customIntegrations",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "maps-home",
+        "source": "maps",
+        "target": "home",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "maps-savedObjectsTagging",
+        "source": "maps",
+        "target": "savedObjectsTagging",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "maps-charts",
+        "source": "maps",
+        "target": "charts",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "maps-screenshotMode",
+        "source": "maps",
+        "target": "screenshotMode",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "maps-security",
+        "source": "maps",
+        "target": "security",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "maps-spaces",
+        "source": "maps",
+        "target": "spaces",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "maps-usageCollection",
+        "source": "maps",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "maps-serverless",
+        "source": "maps",
+        "target": "serverless",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "maps-kibanaReact",
         "source": "maps",
         "target": "kibanaReact",
@@ -5803,6 +6643,182 @@
         "id": "maps-savedObjects",
         "source": "maps",
         "target": "savedObjects",
+        "type": "bundle"
+      }
+    },
+    {
+      "data": {
+        "id": "monitoring-licensing",
+        "source": "monitoring",
+        "target": "licensing",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "monitoring-features",
+        "source": "monitoring",
+        "target": "features",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "monitoring-data",
+        "source": "monitoring",
+        "target": "data",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "monitoring-navigation",
+        "source": "monitoring",
+        "target": "navigation",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "monitoring-observability",
+        "source": "monitoring",
+        "target": "observability",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "monitoring-observabilityShared",
+        "source": "monitoring",
+        "target": "observabilityShared",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "monitoring-dataViews",
+        "source": "monitoring",
+        "target": "dataViews",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "monitoring-unifiedSearch",
+        "source": "monitoring",
+        "target": "unifiedSearch",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "monitoring-infra",
+        "source": "monitoring",
+        "target": "infra",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "monitoring-logsShared",
+        "source": "monitoring",
+        "target": "logsShared",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "monitoring-usageCollection",
+        "source": "monitoring",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "monitoring-home",
+        "source": "monitoring",
+        "target": "home",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "monitoring-cloud",
+        "source": "monitoring",
+        "target": "cloud",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "monitoring-triggersActionsUi",
+        "source": "monitoring",
+        "target": "triggersActionsUi",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "monitoring-alerting",
+        "source": "monitoring",
+        "target": "alerting",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "monitoring-actions",
+        "source": "monitoring",
+        "target": "actions",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "monitoring-encryptedSavedObjects",
+        "source": "monitoring",
+        "target": "encryptedSavedObjects",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "monitoring-dashboard",
+        "source": "monitoring",
+        "target": "dashboard",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "monitoring-fleet",
+        "source": "monitoring",
+        "target": "fleet",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "monitoring-kibanaUtils",
+        "source": "monitoring",
+        "target": "kibanaUtils",
+        "type": "bundle"
+      }
+    },
+    {
+      "data": {
+        "id": "monitoring-alerting",
+        "source": "monitoring",
+        "target": "alerting",
+        "type": "bundle"
+      }
+    },
+    {
+      "data": {
+        "id": "monitoring-kibanaReact",
+        "source": "monitoring",
+        "target": "kibanaReact",
         "type": "bundle"
       }
     },
@@ -6016,6 +7032,22 @@
     },
     {
       "data": {
+        "id": "ml-dashboard",
+        "source": "ml",
+        "target": "dashboard",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "ml-home",
+        "source": "ml",
+        "target": "home",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "ml-licenseManagement",
         "source": "ml",
         "target": "licenseManagement",
@@ -6024,9 +7056,41 @@
     },
     {
       "data": {
+        "id": "ml-management",
+        "source": "ml",
+        "target": "management",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "ml-maps",
         "source": "ml",
         "target": "maps",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "ml-security",
+        "source": "ml",
+        "target": "security",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "ml-spaces",
+        "source": "ml",
+        "target": "spaces",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "ml-usageCollection",
+        "source": "ml",
+        "target": "usageCollection",
         "type": "optionalPlugin"
       }
     },
@@ -6123,134 +7187,6 @@
         "id": "ml-usageCollection",
         "source": "ml",
         "target": "usageCollection",
-        "type": "bundle"
-      }
-    },
-    {
-      "data": {
-        "id": "monitoring-licensing",
-        "source": "monitoring",
-        "target": "licensing",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "monitoring-features",
-        "source": "monitoring",
-        "target": "features",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "monitoring-data",
-        "source": "monitoring",
-        "target": "data",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "monitoring-navigation",
-        "source": "monitoring",
-        "target": "navigation",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "monitoring-observability",
-        "source": "monitoring",
-        "target": "observability",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "monitoring-observabilityShared",
-        "source": "monitoring",
-        "target": "observabilityShared",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "monitoring-dataViews",
-        "source": "monitoring",
-        "target": "dataViews",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "monitoring-unifiedSearch",
-        "source": "monitoring",
-        "target": "unifiedSearch",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "monitoring-cloud",
-        "source": "monitoring",
-        "target": "cloud",
-        "type": "optionalPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "monitoring-alerting",
-        "source": "monitoring",
-        "target": "alerting",
-        "type": "optionalPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "monitoring-actions",
-        "source": "monitoring",
-        "target": "actions",
-        "type": "optionalPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "monitoring-encryptedSavedObjects",
-        "source": "monitoring",
-        "target": "encryptedSavedObjects",
-        "type": "optionalPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "monitoring-fleet",
-        "source": "monitoring",
-        "target": "fleet",
-        "type": "optionalPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "monitoring-kibanaUtils",
-        "source": "monitoring",
-        "target": "kibanaUtils",
-        "type": "bundle"
-      }
-    },
-    {
-      "data": {
-        "id": "monitoring-alerting",
-        "source": "monitoring",
-        "target": "alerting",
-        "type": "bundle"
-      }
-    },
-    {
-      "data": {
-        "id": "monitoring-kibanaReact",
-        "source": "monitoring",
-        "target": "kibanaReact",
         "type": "bundle"
       }
     },
@@ -6368,9 +7304,25 @@
     },
     {
       "data": {
+        "id": "osquery-home",
+        "source": "osquery",
+        "target": "home",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "osquery-lens",
         "source": "osquery",
         "target": "lens",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "osquery-telemetry",
+        "source": "osquery",
+        "target": "telemetry",
         "type": "optionalPlugin"
       }
     },
@@ -6432,38 +7384,6 @@
     },
     {
       "data": {
-        "id": "painlessLab-devTools",
-        "source": "painlessLab",
-        "target": "devTools",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "painlessLab-licensing",
-        "source": "painlessLab",
-        "target": "licensing",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "painlessLab-home",
-        "source": "painlessLab",
-        "target": "home",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "painlessLab-kibanaReact",
-        "source": "painlessLab",
-        "target": "kibanaReact",
-        "type": "bundle"
-      }
-    },
-    {
-      "data": {
         "id": "remoteClusters-licensing",
         "source": "remoteClusters",
         "target": "licensing",
@@ -6504,6 +7424,14 @@
     },
     {
       "data": {
+        "id": "remoteClusters-usageCollection",
+        "source": "remoteClusters",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "remoteClusters-cloud",
         "source": "remoteClusters",
         "target": "cloud",
@@ -6523,6 +7451,134 @@
         "id": "remoteClusters-esUiShared",
         "source": "remoteClusters",
         "target": "esUiShared",
+        "type": "bundle"
+      }
+    },
+    {
+      "data": {
+        "id": "painlessLab-devTools",
+        "source": "painlessLab",
+        "target": "devTools",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "painlessLab-licensing",
+        "source": "painlessLab",
+        "target": "licensing",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "painlessLab-home",
+        "source": "painlessLab",
+        "target": "home",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "painlessLab-kibanaReact",
+        "source": "painlessLab",
+        "target": "kibanaReact",
+        "type": "bundle"
+      }
+    },
+    {
+      "data": {
+        "id": "rollup-management",
+        "source": "rollup",
+        "target": "management",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "rollup-licensing",
+        "source": "rollup",
+        "target": "licensing",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "rollup-features",
+        "source": "rollup",
+        "target": "features",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "rollup-dataViews",
+        "source": "rollup",
+        "target": "dataViews",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "rollup-data",
+        "source": "rollup",
+        "target": "data",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "rollup-home",
+        "source": "rollup",
+        "target": "home",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "rollup-indexManagement",
+        "source": "rollup",
+        "target": "indexManagement",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "rollup-usageCollection",
+        "source": "rollup",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "rollup-kibanaUtils",
+        "source": "rollup",
+        "target": "kibanaUtils",
+        "type": "bundle"
+      }
+    },
+    {
+      "data": {
+        "id": "rollup-kibanaReact",
+        "source": "rollup",
+        "target": "kibanaReact",
+        "type": "bundle"
+      }
+    },
+    {
+      "data": {
+        "id": "rollup-esUiShared",
+        "source": "rollup",
+        "target": "esUiShared",
+        "type": "bundle"
+      }
+    },
+    {
+      "data": {
+        "id": "rollup-data",
+        "source": "rollup",
+        "target": "data",
         "type": "bundle"
       }
     },
@@ -6616,6 +7672,38 @@
     },
     {
       "data": {
+        "id": "reporting-security",
+        "source": "reporting",
+        "target": "security",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "reporting-spaces",
+        "source": "reporting",
+        "target": "spaces",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "reporting-usageCollection",
+        "source": "reporting",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "reporting-screenshotting",
+        "source": "reporting",
+        "target": "screenshotting",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "reporting-embeddable",
         "source": "reporting",
         "target": "embeddable",
@@ -6635,86 +7723,6 @@
         "id": "reporting-kibanaReact",
         "source": "reporting",
         "target": "kibanaReact",
-        "type": "bundle"
-      }
-    },
-    {
-      "data": {
-        "id": "rollup-management",
-        "source": "rollup",
-        "target": "management",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "rollup-licensing",
-        "source": "rollup",
-        "target": "licensing",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "rollup-features",
-        "source": "rollup",
-        "target": "features",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "rollup-dataViews",
-        "source": "rollup",
-        "target": "dataViews",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "rollup-data",
-        "source": "rollup",
-        "target": "data",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "rollup-indexManagement",
-        "source": "rollup",
-        "target": "indexManagement",
-        "type": "optionalPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "rollup-kibanaUtils",
-        "source": "rollup",
-        "target": "kibanaUtils",
-        "type": "bundle"
-      }
-    },
-    {
-      "data": {
-        "id": "rollup-kibanaReact",
-        "source": "rollup",
-        "target": "kibanaReact",
-        "type": "bundle"
-      }
-    },
-    {
-      "data": {
-        "id": "rollup-esUiShared",
-        "source": "rollup",
-        "target": "esUiShared",
-        "type": "bundle"
-      }
-    },
-    {
-      "data": {
-        "id": "rollup-data",
-        "source": "rollup",
-        "target": "data",
         "type": "bundle"
       }
     },
@@ -6744,6 +7752,38 @@
     },
     {
       "data": {
+        "id": "ruleRegistry-security",
+        "source": "ruleRegistry",
+        "target": "security",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "ruleRegistry-spaces",
+        "source": "ruleRegistry",
+        "target": "spaces",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "runtimeFields-kibanaReact",
+        "source": "runtimeFields",
+        "target": "kibanaReact",
+        "type": "bundle"
+      }
+    },
+    {
+      "data": {
+        "id": "runtimeFields-esUiShared",
+        "source": "runtimeFields",
+        "target": "esUiShared",
+        "type": "bundle"
+      }
+    },
+    {
+      "data": {
         "id": "savedObjectsTagging-features",
         "source": "savedObjectsTagging",
         "target": "features",
@@ -6768,18 +7808,18 @@
     },
     {
       "data": {
-        "id": "runtimeFields-kibanaReact",
-        "source": "runtimeFields",
-        "target": "kibanaReact",
-        "type": "bundle"
+        "id": "savedObjectsTagging-usageCollection",
+        "source": "savedObjectsTagging",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
       }
     },
     {
       "data": {
-        "id": "runtimeFields-esUiShared",
-        "source": "runtimeFields",
-        "target": "esUiShared",
-        "type": "bundle"
+        "id": "savedObjectsTagging-security",
+        "source": "savedObjectsTagging",
+        "target": "security",
+        "type": "optionalPlugin"
       }
     },
     {
@@ -6976,6 +8016,54 @@
     },
     {
       "data": {
+        "id": "security-dataViews",
+        "source": "security",
+        "target": "dataViews",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "security-home",
+        "source": "security",
+        "target": "home",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "security-management",
+        "source": "security",
+        "target": "management",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "security-usageCollection",
+        "source": "security",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "security-spaces",
+        "source": "security",
+        "target": "spaces",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "security-share",
+        "source": "security",
+        "target": "share",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "security-kibanaReact",
         "source": "security",
         "target": "kibanaReact",
@@ -7004,6 +8092,142 @@
         "source": "security",
         "target": "remoteClusters",
         "type": "bundle"
+      }
+    },
+    {
+      "data": {
+        "id": "securitySolutionEss-securitySolution",
+        "source": "securitySolutionEss",
+        "target": "securitySolution",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "securitySolutionEss-management",
+        "source": "securitySolutionEss",
+        "target": "management",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "securitySolutionEss-navigation",
+        "source": "securitySolutionEss",
+        "target": "navigation",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "securitySolutionEss-licensing",
+        "source": "securitySolutionEss",
+        "target": "licensing",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "securitySolutionEss-cloudExperiments",
+        "source": "securitySolutionEss",
+        "target": "cloudExperiments",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "securitySolutionEss-kibanaReact",
+        "source": "securitySolutionEss",
+        "target": "kibanaReact",
+        "type": "bundle"
+      }
+    },
+    {
+      "data": {
+        "id": "securitySolutionServerless-kibanaReact",
+        "source": "securitySolutionServerless",
+        "target": "kibanaReact",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "securitySolutionServerless-management",
+        "source": "securitySolutionServerless",
+        "target": "management",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "securitySolutionServerless-security",
+        "source": "securitySolutionServerless",
+        "target": "security",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "securitySolutionServerless-securitySolution",
+        "source": "securitySolutionServerless",
+        "target": "securitySolution",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "securitySolutionServerless-serverless",
+        "source": "securitySolutionServerless",
+        "target": "serverless",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "securitySolutionServerless-taskManager",
+        "source": "securitySolutionServerless",
+        "target": "taskManager",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "securitySolutionServerless-cloud",
+        "source": "securitySolutionServerless",
+        "target": "cloud",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "securitySolutionServerless-fleet",
+        "source": "securitySolutionServerless",
+        "target": "fleet",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "securitySolutionServerless-actions",
+        "source": "securitySolutionServerless",
+        "target": "actions",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "securitySolutionServerless-discover",
+        "source": "securitySolutionServerless",
+        "target": "discover",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "securitySolutionServerless-securitySolutionEss",
+        "source": "securitySolutionServerless",
+        "target": "securitySolutionEss",
+        "type": "optionalPlugin"
       }
     },
     {
@@ -7344,6 +8568,14 @@
     },
     {
       "data": {
+        "id": "securitySolution-cloudExperiments",
+        "source": "securitySolution",
+        "target": "cloudExperiments",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "securitySolution-encryptedSavedObjects",
         "source": "securitySolution",
         "target": "encryptedSavedObjects",
@@ -7368,9 +8600,25 @@
     },
     {
       "data": {
+        "id": "securitySolution-newsfeed",
+        "source": "securitySolution",
+        "target": "newsfeed",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "securitySolution-security",
         "source": "securitySolution",
         "target": "security",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "securitySolution-usageCollection",
+        "source": "securitySolution",
+        "target": "usageCollection",
         "type": "optionalPlugin"
       }
     },
@@ -7384,9 +8632,57 @@
     },
     {
       "data": {
+        "id": "securitySolution-home",
+        "source": "securitySolution",
+        "target": "home",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "securitySolution-management",
+        "source": "securitySolution",
+        "target": "management",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "securitySolution-telemetry",
+        "source": "securitySolution",
+        "target": "telemetry",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "securitySolution-dataViewFieldEditor",
+        "source": "securitySolution",
+        "target": "dataViewFieldEditor",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "securitySolution-osquery",
         "source": "securitySolution",
         "target": "osquery",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "securitySolution-savedObjectsTaggingOss",
+        "source": "securitySolution",
+        "target": "savedObjectsTaggingOss",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "securitySolution-guidedOnboarding",
+        "source": "securitySolution",
+        "target": "guidedOnboarding",
         "type": "optionalPlugin"
       }
     },
@@ -7452,134 +8748,6 @@
         "source": "securitySolution",
         "target": "unifiedSearch",
         "type": "bundle"
-      }
-    },
-    {
-      "data": {
-        "id": "securitySolutionEss-securitySolution",
-        "source": "securitySolutionEss",
-        "target": "securitySolution",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "securitySolutionEss-management",
-        "source": "securitySolutionEss",
-        "target": "management",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "securitySolutionEss-navigation",
-        "source": "securitySolutionEss",
-        "target": "navigation",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "securitySolutionEss-licensing",
-        "source": "securitySolutionEss",
-        "target": "licensing",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "securitySolutionEss-kibanaReact",
-        "source": "securitySolutionEss",
-        "target": "kibanaReact",
-        "type": "bundle"
-      }
-    },
-    {
-      "data": {
-        "id": "securitySolutionServerless-kibanaReact",
-        "source": "securitySolutionServerless",
-        "target": "kibanaReact",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "securitySolutionServerless-management",
-        "source": "securitySolutionServerless",
-        "target": "management",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "securitySolutionServerless-security",
-        "source": "securitySolutionServerless",
-        "target": "security",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "securitySolutionServerless-securitySolution",
-        "source": "securitySolutionServerless",
-        "target": "securitySolution",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "securitySolutionServerless-serverless",
-        "source": "securitySolutionServerless",
-        "target": "serverless",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "securitySolutionServerless-taskManager",
-        "source": "securitySolutionServerless",
-        "target": "taskManager",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "securitySolutionServerless-cloud",
-        "source": "securitySolutionServerless",
-        "target": "cloud",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "securitySolutionServerless-fleet",
-        "source": "securitySolutionServerless",
-        "target": "fleet",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "securitySolutionServerless-actions",
-        "source": "securitySolutionServerless",
-        "target": "actions",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "securitySolutionServerless-discover",
-        "source": "securitySolutionServerless",
-        "target": "discover",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "securitySolutionServerless-securitySolutionEss",
-        "source": "securitySolutionServerless",
-        "target": "securitySolutionEss",
-        "type": "optionalPlugin"
       }
     },
     {
@@ -7760,6 +8928,14 @@
     },
     {
       "data": {
+        "id": "serverlessSearch-usageCollection",
+        "source": "serverlessSearch",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "serverlessSearch-kibanaReact",
         "source": "serverlessSearch",
         "target": "kibanaReact",
@@ -7788,6 +8964,14 @@
         "source": "sessionView",
         "target": "ruleRegistry",
         "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "sessionView-usageCollection",
+        "source": "sessionView",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
       }
     },
     {
@@ -7840,6 +9024,14 @@
     },
     {
       "data": {
+        "id": "snapshotRestore-usageCollection",
+        "source": "snapshotRestore",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "snapshotRestore-security",
         "source": "snapshotRestore",
         "target": "security",
@@ -7851,6 +9043,14 @@
         "id": "snapshotRestore-cloud",
         "source": "snapshotRestore",
         "target": "cloud",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "snapshotRestore-home",
+        "source": "snapshotRestore",
+        "target": "home",
         "type": "optionalPlugin"
       }
     },
@@ -7884,6 +9084,30 @@
         "source": "spaces",
         "target": "licensing",
         "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "spaces-home",
+        "source": "spaces",
+        "target": "home",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "spaces-management",
+        "source": "spaces",
+        "target": "management",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "spaces-usageCollection",
+        "source": "spaces",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
       }
     },
     {
@@ -8012,6 +9236,14 @@
         "source": "stackConnectors",
         "target": "triggersActionsUi",
         "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "taskManager-usageCollection",
+        "source": "taskManager",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
       }
     },
     {
@@ -8280,9 +9512,25 @@
     },
     {
       "data": {
+        "id": "transform-dataViewEditor",
+        "source": "transform",
+        "target": "dataViewEditor",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "transform-security",
         "source": "transform",
         "target": "security",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "transform-usageCollection",
+        "source": "transform",
+        "target": "usageCollection",
         "type": "optionalPlugin"
       }
     },
@@ -8496,6 +9744,14 @@
     },
     {
       "data": {
+        "id": "triggersActionsUi-home",
+        "source": "triggersActionsUi",
+        "target": "home",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "triggersActionsUi-spaces",
         "source": "triggersActionsUi",
         "target": "spaces",
@@ -8592,6 +9848,14 @@
     },
     {
       "data": {
+        "id": "upgradeAssistant-usageCollection",
+        "source": "upgradeAssistant",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "upgradeAssistant-cloud",
         "source": "upgradeAssistant",
         "target": "cloud",
@@ -8603,6 +9867,22 @@
         "id": "upgradeAssistant-security",
         "source": "upgradeAssistant",
         "target": "security",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "upgradeAssistant-infra",
+        "source": "upgradeAssistant",
+        "target": "infra",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "upgradeAssistant-logsShared",
+        "source": "upgradeAssistant",
+        "target": "logsShared",
         "type": "optionalPlugin"
       }
     },
@@ -8736,6 +10016,14 @@
     },
     {
       "data": {
+        "id": "cloudChat-cloudExperiments",
+        "source": "cloudChat",
+        "target": "cloudExperiments",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "cloudDataMigration-cloud",
         "source": "cloudDataMigration",
         "target": "cloud",
@@ -8792,6 +10080,14 @@
     },
     {
       "data": {
+        "id": "cloudExperiments-usageCollection",
+        "source": "cloudExperiments",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "cloudFullStory-cloud",
         "source": "cloudFullStory",
         "target": "cloud",
@@ -8827,6 +10123,14 @@
         "id": "cloudLinks-security",
         "source": "cloudLinks",
         "target": "security",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "cloudLinks-guidedOnboarding",
+        "source": "cloudLinks",
+        "target": "guidedOnboarding",
         "type": "optionalPlugin"
       }
     },
@@ -9064,6 +10368,14 @@
     },
     {
       "data": {
+        "id": "apm-charts",
+        "source": "apm",
+        "target": "charts",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "apm-cloud",
         "source": "apm",
         "target": "cloud",
@@ -9072,9 +10384,33 @@
     },
     {
       "data": {
+        "id": "apm-discover",
+        "source": "apm",
+        "target": "discover",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "apm-fleet",
         "source": "apm",
         "target": "fleet",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "apm-fieldFormats",
+        "source": "apm",
+        "target": "fieldFormats",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "apm-home",
+        "source": "apm",
+        "target": "home",
         "type": "optionalPlugin"
       }
     },
@@ -9112,6 +10448,22 @@
     },
     {
       "data": {
+        "id": "apm-usageCollection",
+        "source": "apm",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "apm-customIntegrations",
+        "source": "apm",
+        "target": "customIntegrations",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "apm-licenseManagement",
         "source": "apm",
         "target": "licenseManagement",
@@ -9120,9 +10472,25 @@
     },
     {
       "data": {
+        "id": "apm-profilingDataAccess",
+        "source": "apm",
+        "target": "profilingDataAccess",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "apm-cases",
         "source": "apm",
         "target": "cases",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "apm-observabilityAIAssistant",
+        "source": "apm",
+        "target": "observabilityAIAssistant",
         "type": "optionalPlugin"
       }
     },
@@ -9392,6 +10760,30 @@
     },
     {
       "data": {
+        "id": "exploratoryView-discover",
+        "source": "exploratoryView",
+        "target": "discover",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "exploratoryView-embeddable",
+        "source": "exploratoryView",
+        "target": "embeddable",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "exploratoryView-home",
+        "source": "exploratoryView",
+        "target": "home",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "exploratoryView-licensing",
         "source": "exploratoryView",
         "target": "licensing",
@@ -9403,6 +10795,22 @@
         "id": "exploratoryView-spaces",
         "source": "exploratoryView",
         "target": "spaces",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "exploratoryView-usageCollection",
+        "source": "exploratoryView",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "exploratoryView-observabilityAIAssistant",
+        "source": "exploratoryView",
+        "target": "observabilityAIAssistant",
         "type": "optionalPlugin"
       }
     },
@@ -9468,6 +10876,102 @@
         "source": "exploratoryView",
         "target": "visualizations",
         "type": "bundle"
+      }
+    },
+    {
+      "data": {
+        "id": "logsExplorer-controls",
+        "source": "logsExplorer",
+        "target": "controls",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "logsExplorer-data",
+        "source": "logsExplorer",
+        "target": "data",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "logsExplorer-dataViews",
+        "source": "logsExplorer",
+        "target": "dataViews",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "logsExplorer-discover",
+        "source": "logsExplorer",
+        "target": "discover",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "logsExplorer-embeddable",
+        "source": "logsExplorer",
+        "target": "embeddable",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "logsExplorer-fieldFormats",
+        "source": "logsExplorer",
+        "target": "fieldFormats",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "logsExplorer-fleet",
+        "source": "logsExplorer",
+        "target": "fleet",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "logsExplorer-kibanaReact",
+        "source": "logsExplorer",
+        "target": "kibanaReact",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "logsExplorer-kibanaUtils",
+        "source": "logsExplorer",
+        "target": "kibanaUtils",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "logsExplorer-navigation",
+        "source": "logsExplorer",
+        "target": "navigation",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "logsExplorer-share",
+        "source": "logsExplorer",
+        "target": "share",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "logsExplorer-unifiedSearch",
+        "source": "logsExplorer",
+        "target": "unifiedSearch",
+        "type": "requiredPlugin"
       }
     },
     {
@@ -9696,6 +11200,22 @@
     },
     {
       "data": {
+        "id": "infra-home",
+        "source": "infra",
+        "target": "home",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "infra-embeddable",
+        "source": "infra",
+        "target": "embeddable",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "infra-osquery",
         "source": "infra",
         "target": "osquery",
@@ -9707,6 +11227,22 @@
         "id": "infra-cloud",
         "source": "infra",
         "target": "cloud",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "infra-profilingDataAccess",
+        "source": "infra",
+        "target": "profilingDataAccess",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "infra-observabilityAIAssistant",
+        "source": "infra",
+        "target": "observabilityAIAssistant",
         "type": "optionalPlugin"
       }
     },
@@ -9788,158 +11324,6 @@
         "source": "infra",
         "target": "controls",
         "type": "bundle"
-      }
-    },
-    {
-      "data": {
-        "id": "logsShared-data",
-        "source": "logsShared",
-        "target": "data",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "logsShared-dataViews",
-        "source": "logsShared",
-        "target": "dataViews",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "logsShared-usageCollection",
-        "source": "logsShared",
-        "target": "usageCollection",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "logsShared-observabilityShared",
-        "source": "logsShared",
-        "target": "observabilityShared",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "logsShared-share",
-        "source": "logsShared",
-        "target": "share",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "logsShared-kibanaUtils",
-        "source": "logsShared",
-        "target": "kibanaUtils",
-        "type": "bundle"
-      }
-    },
-    {
-      "data": {
-        "id": "logsShared-kibanaReact",
-        "source": "logsShared",
-        "target": "kibanaReact",
-        "type": "bundle"
-      }
-    },
-    {
-      "data": {
-        "id": "logsExplorer-controls",
-        "source": "logsExplorer",
-        "target": "controls",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "logsExplorer-data",
-        "source": "logsExplorer",
-        "target": "data",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "logsExplorer-dataViews",
-        "source": "logsExplorer",
-        "target": "dataViews",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "logsExplorer-discover",
-        "source": "logsExplorer",
-        "target": "discover",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "logsExplorer-embeddable",
-        "source": "logsExplorer",
-        "target": "embeddable",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "logsExplorer-fieldFormats",
-        "source": "logsExplorer",
-        "target": "fieldFormats",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "logsExplorer-fleet",
-        "source": "logsExplorer",
-        "target": "fleet",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "logsExplorer-kibanaReact",
-        "source": "logsExplorer",
-        "target": "kibanaReact",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "logsExplorer-kibanaUtils",
-        "source": "logsExplorer",
-        "target": "kibanaUtils",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "logsExplorer-navigation",
-        "source": "logsExplorer",
-        "target": "navigation",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "logsExplorer-share",
-        "source": "logsExplorer",
-        "target": "share",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "logsExplorer-unifiedSearch",
-        "source": "logsExplorer",
-        "target": "unifiedSearch",
-        "type": "requiredPlugin"
       }
     },
     {
@@ -10168,6 +11552,30 @@
     },
     {
       "data": {
+        "id": "observability-discover",
+        "source": "observability",
+        "target": "discover",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "observability-home",
+        "source": "observability",
+        "target": "home",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "observability-usageCollection",
+        "source": "observability",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "observability-cloud",
         "source": "observability",
         "target": "cloud",
@@ -10187,6 +11595,22 @@
         "id": "observability-serverless",
         "source": "observability",
         "target": "serverless",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "observability-guidedOnboarding",
+        "source": "observability",
+        "target": "guidedOnboarding",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "observability-observabilityAIAssistant",
+        "source": "observability",
+        "target": "observabilityAIAssistant",
         "type": "optionalPlugin"
       }
     },
@@ -10464,6 +11888,70 @@
     },
     {
       "data": {
+        "id": "logsShared-data",
+        "source": "logsShared",
+        "target": "data",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "logsShared-dataViews",
+        "source": "logsShared",
+        "target": "dataViews",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "logsShared-usageCollection",
+        "source": "logsShared",
+        "target": "usageCollection",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "logsShared-observabilityShared",
+        "source": "logsShared",
+        "target": "observabilityShared",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "logsShared-share",
+        "source": "logsShared",
+        "target": "share",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "logsShared-observabilityAIAssistant",
+        "source": "logsShared",
+        "target": "observabilityAIAssistant",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "logsShared-kibanaUtils",
+        "source": "logsShared",
+        "target": "kibanaUtils",
+        "type": "bundle"
+      }
+    },
+    {
+      "data": {
+        "id": "logsShared-kibanaReact",
+        "source": "logsShared",
+        "target": "kibanaReact",
+        "type": "bundle"
+      }
+    },
+    {
+      "data": {
         "id": "observabilityAiAssistantManagement-management",
         "source": "observabilityAiAssistantManagement",
         "target": "management",
@@ -10491,6 +11979,14 @@
         "id": "observabilityAiAssistantManagement-actions",
         "source": "observabilityAiAssistantManagement",
         "target": "actions",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "observabilityAiAssistantManagement-home",
+        "source": "observabilityAiAssistantManagement",
+        "target": "home",
         "type": "optionalPlugin"
       }
     },
@@ -10608,6 +12104,30 @@
     },
     {
       "data": {
+        "id": "observabilityLogsExplorer-unifiedSearch",
+        "source": "observabilityLogsExplorer",
+        "target": "unifiedSearch",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "observabilityLogsExplorer-dataViews",
+        "source": "observabilityLogsExplorer",
+        "target": "dataViews",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "observabilityLogsExplorer-dataViewEditor",
+        "source": "observabilityLogsExplorer",
+        "target": "dataViewEditor",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "observabilityLogsExplorer-lens",
         "source": "observabilityLogsExplorer",
         "target": "lens",
@@ -10635,142 +12155,6 @@
         "id": "observabilityLogsExplorer-triggersActionsUi",
         "source": "observabilityLogsExplorer",
         "target": "triggersActionsUi",
-        "type": "bundle"
-      }
-    },
-    {
-      "data": {
-        "id": "observabilityOnboarding-data",
-        "source": "observabilityOnboarding",
-        "target": "data",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "observabilityOnboarding-observability",
-        "source": "observabilityOnboarding",
-        "target": "observability",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "observabilityOnboarding-observabilityShared",
-        "source": "observabilityOnboarding",
-        "target": "observabilityShared",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "observabilityOnboarding-discover",
-        "source": "observabilityOnboarding",
-        "target": "discover",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "observabilityOnboarding-share",
-        "source": "observabilityOnboarding",
-        "target": "share",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "observabilityOnboarding-fleet",
-        "source": "observabilityOnboarding",
-        "target": "fleet",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "observabilityOnboarding-cloud",
-        "source": "observabilityOnboarding",
-        "target": "cloud",
-        "type": "optionalPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "observabilityOnboarding-cloudExperiments",
-        "source": "observabilityOnboarding",
-        "target": "cloudExperiments",
-        "type": "optionalPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "observabilityOnboarding-kibanaReact",
-        "source": "observabilityOnboarding",
-        "target": "kibanaReact",
-        "type": "bundle"
-      }
-    },
-    {
-      "data": {
-        "id": "observabilityShared-cases",
-        "source": "observabilityShared",
-        "target": "cases",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "observabilityShared-uiActions",
-        "source": "observabilityShared",
-        "target": "uiActions",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "observabilityShared-embeddable",
-        "source": "observabilityShared",
-        "target": "embeddable",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "observabilityShared-share",
-        "source": "observabilityShared",
-        "target": "share",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "observabilityShared-data",
-        "source": "observabilityShared",
-        "target": "data",
-        "type": "bundle"
-      }
-    },
-    {
-      "data": {
-        "id": "observabilityShared-inspector",
-        "source": "observabilityShared",
-        "target": "inspector",
-        "type": "bundle"
-      }
-    },
-    {
-      "data": {
-        "id": "observabilityShared-kibanaReact",
-        "source": "observabilityShared",
-        "target": "kibanaReact",
-        "type": "bundle"
-      }
-    },
-    {
-      "data": {
-        "id": "observabilityShared-kibanaUtils",
-        "source": "observabilityShared",
-        "target": "kibanaUtils",
         "type": "bundle"
       }
     },
@@ -10872,6 +12256,14 @@
     },
     {
       "data": {
+        "id": "profiling-usageCollection",
+        "source": "profiling",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "profiling-security",
         "source": "profiling",
         "target": "security",
@@ -10923,6 +12315,158 @@
         "id": "profiling-kibanaUtils",
         "source": "profiling",
         "target": "kibanaUtils",
+        "type": "bundle"
+      }
+    },
+    {
+      "data": {
+        "id": "observabilityShared-cases",
+        "source": "observabilityShared",
+        "target": "cases",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "observabilityShared-uiActions",
+        "source": "observabilityShared",
+        "target": "uiActions",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "observabilityShared-embeddable",
+        "source": "observabilityShared",
+        "target": "embeddable",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "observabilityShared-share",
+        "source": "observabilityShared",
+        "target": "share",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "observabilityShared-guidedOnboarding",
+        "source": "observabilityShared",
+        "target": "guidedOnboarding",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "observabilityShared-data",
+        "source": "observabilityShared",
+        "target": "data",
+        "type": "bundle"
+      }
+    },
+    {
+      "data": {
+        "id": "observabilityShared-inspector",
+        "source": "observabilityShared",
+        "target": "inspector",
+        "type": "bundle"
+      }
+    },
+    {
+      "data": {
+        "id": "observabilityShared-kibanaReact",
+        "source": "observabilityShared",
+        "target": "kibanaReact",
+        "type": "bundle"
+      }
+    },
+    {
+      "data": {
+        "id": "observabilityShared-kibanaUtils",
+        "source": "observabilityShared",
+        "target": "kibanaUtils",
+        "type": "bundle"
+      }
+    },
+    {
+      "data": {
+        "id": "observabilityOnboarding-data",
+        "source": "observabilityOnboarding",
+        "target": "data",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "observabilityOnboarding-observability",
+        "source": "observabilityOnboarding",
+        "target": "observability",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "observabilityOnboarding-observabilityShared",
+        "source": "observabilityOnboarding",
+        "target": "observabilityShared",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "observabilityOnboarding-discover",
+        "source": "observabilityOnboarding",
+        "target": "discover",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "observabilityOnboarding-share",
+        "source": "observabilityOnboarding",
+        "target": "share",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "observabilityOnboarding-fleet",
+        "source": "observabilityOnboarding",
+        "target": "fleet",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "observabilityOnboarding-cloud",
+        "source": "observabilityOnboarding",
+        "target": "cloud",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "observabilityOnboarding-cloudExperiments",
+        "source": "observabilityOnboarding",
+        "target": "cloudExperiments",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "observabilityOnboarding-usageCollection",
+        "source": "observabilityOnboarding",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "observabilityOnboarding-kibanaReact",
+        "source": "observabilityOnboarding",
+        "target": "kibanaReact",
         "type": "bundle"
       }
     },
@@ -11176,6 +12720,14 @@
     },
     {
       "data": {
+        "id": "slo-discover",
+        "source": "slo",
+        "target": "discover",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "slo-observabilityAIAssistant",
         "source": "slo",
         "target": "observabilityAIAssistant",
@@ -11416,9 +12968,25 @@
     },
     {
       "data": {
+        "id": "synthetics-data",
+        "source": "synthetics",
+        "target": "data",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "synthetics-fleet",
         "source": "synthetics",
         "target": "fleet",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "synthetics-home",
+        "source": "synthetics",
+        "target": "home",
         "type": "optionalPlugin"
       }
     },
@@ -11443,6 +13011,14 @@
         "id": "synthetics-spaces",
         "source": "synthetics",
         "target": "spaces",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "synthetics-telemetry",
+        "source": "synthetics",
+        "target": "telemetry",
         "type": "optionalPlugin"
       }
     },
@@ -11720,9 +13296,25 @@
     },
     {
       "data": {
+        "id": "uptime-data",
+        "source": "uptime",
+        "target": "data",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "uptime-fleet",
         "source": "uptime",
         "target": "fleet",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "uptime-home",
+        "source": "uptime",
+        "target": "home",
         "type": "optionalPlugin"
       }
     },
@@ -11739,6 +13331,14 @@
         "id": "uptime-spaces",
         "source": "uptime",
         "target": "spaces",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "uptime-telemetry",
+        "source": "uptime",
+        "target": "telemetry",
         "type": "optionalPlugin"
       }
     },
@@ -11867,6 +13467,14 @@
         "id": "ux-cloud",
         "source": "ux",
         "target": "cloud",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "ux-usageCollection",
+        "source": "ux",
+        "target": "usageCollection",
         "type": "optionalPlugin"
       }
     },
@@ -12144,14 +13752,6 @@
     },
     {
       "data": {
-        "id": "samlProviderPlugin-cloud",
-        "source": "samlProviderPlugin",
-        "target": "cloud",
-        "type": "optionalPlugin"
-      }
-    },
-    {
-      "data": {
         "id": "userProfilesConsumerPlugin-security",
         "source": "userProfilesConsumerPlugin",
         "target": "security",
@@ -12172,6 +13772,14 @@
         "source": "userProfilesConsumerPlugin",
         "target": "features",
         "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "samlProviderPlugin-cloud",
+        "source": "samlProviderPlugin",
+        "target": "cloud",
+        "type": "optionalPlugin"
       }
     },
     {
@@ -12236,6 +13844,46 @@
         "source": "actionsSimulators",
         "target": "encryptedSavedObjects",
         "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "alertsRestrictedFixtures-taskManager",
+        "source": "alertsRestrictedFixtures",
+        "target": "taskManager",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "alertsRestrictedFixtures-features",
+        "source": "alertsRestrictedFixtures",
+        "target": "features",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "alertsRestrictedFixtures-actions",
+        "source": "alertsRestrictedFixtures",
+        "target": "actions",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "alertsRestrictedFixtures-alerting",
+        "source": "alertsRestrictedFixtures",
+        "target": "alerting",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "alertsRestrictedFixtures-spaces",
+        "source": "alertsRestrictedFixtures",
+        "target": "spaces",
+        "type": "optionalPlugin"
       }
     },
     {
@@ -12314,46 +13962,6 @@
       "data": {
         "id": "alertingApiIntegrationTestPlugin-spaces",
         "source": "alertingApiIntegrationTestPlugin",
-        "target": "spaces",
-        "type": "optionalPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "alertsRestrictedFixtures-taskManager",
-        "source": "alertsRestrictedFixtures",
-        "target": "taskManager",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "alertsRestrictedFixtures-features",
-        "source": "alertsRestrictedFixtures",
-        "target": "features",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "alertsRestrictedFixtures-actions",
-        "source": "alertsRestrictedFixtures",
-        "target": "actions",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "alertsRestrictedFixtures-alerting",
-        "source": "alertsRestrictedFixtures",
-        "target": "alerting",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "alertsRestrictedFixtures-spaces",
-        "source": "alertsRestrictedFixtures",
         "target": "spaces",
         "type": "optionalPlugin"
       }
@@ -12496,6 +14104,22 @@
     },
     {
       "data": {
+        "id": "advancedSettings-home",
+        "source": "advancedSettings",
+        "target": "home",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "advancedSettings-usageCollection",
+        "source": "advancedSettings",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "bfetch-kibanaUtils",
         "source": "bfetch",
         "target": "kibanaUtils",
@@ -12532,6 +14156,22 @@
         "source": "console",
         "target": "share",
         "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "console-usageCollection",
+        "source": "console",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "console-home",
+        "source": "console",
+        "target": "home",
+        "type": "optionalPlugin"
       }
     },
     {
@@ -12635,150 +14275,6 @@
         "id": "controls-kibanaUtils",
         "source": "controls",
         "target": "kibanaUtils",
-        "type": "bundle"
-      }
-    },
-    {
-      "data": {
-        "id": "data-bfetch",
-        "source": "data",
-        "target": "bfetch",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "data-expressions",
-        "source": "data",
-        "target": "expressions",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "data-uiActions",
-        "source": "data",
-        "target": "uiActions",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "data-share",
-        "source": "data",
-        "target": "share",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "data-inspector",
-        "source": "data",
-        "target": "inspector",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "data-fieldFormats",
-        "source": "data",
-        "target": "fieldFormats",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "data-dataViews",
-        "source": "data",
-        "target": "dataViews",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "data-screenshotMode",
-        "source": "data",
-        "target": "screenshotMode",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "data-management",
-        "source": "data",
-        "target": "management",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "data-security",
-        "source": "data",
-        "target": "security",
-        "type": "optionalPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "data-kibanaUtils",
-        "source": "data",
-        "target": "kibanaUtils",
-        "type": "bundle"
-      }
-    },
-    {
-      "data": {
-        "id": "data-kibanaReact",
-        "source": "data",
-        "target": "kibanaReact",
-        "type": "bundle"
-      }
-    },
-    {
-      "data": {
-        "id": "data-inspector",
-        "source": "data",
-        "target": "inspector",
-        "type": "bundle"
-      }
-    },
-    {
-      "data": {
-        "id": "dataViewEditor-data",
-        "source": "dataViewEditor",
-        "target": "data",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "dataViewEditor-dataViews",
-        "source": "dataViewEditor",
-        "target": "dataViews",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "dataViewEditor-kibanaReact",
-        "source": "dataViewEditor",
-        "target": "kibanaReact",
-        "type": "bundle"
-      }
-    },
-    {
-      "data": {
-        "id": "dataViewEditor-kibanaUtils",
-        "source": "dataViewEditor",
-        "target": "kibanaUtils",
-        "type": "bundle"
-      }
-    },
-    {
-      "data": {
-        "id": "dataViewEditor-esUiShared",
-        "source": "dataViewEditor",
-        "target": "esUiShared",
         "type": "bundle"
       }
     },
@@ -12920,9 +14416,41 @@
     },
     {
       "data": {
+        "id": "dashboard-home",
+        "source": "dashboard",
+        "target": "home",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "dashboard-spaces",
         "source": "dashboard",
         "target": "spaces",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "dashboard-savedObjectsTaggingOss",
+        "source": "dashboard",
+        "target": "savedObjectsTaggingOss",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "dashboard-screenshotMode",
+        "source": "dashboard",
+        "target": "screenshotMode",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "dashboard-usageCollection",
+        "source": "dashboard",
+        "target": "usageCollection",
         "type": "optionalPlugin"
       }
     },
@@ -12939,6 +14467,14 @@
         "id": "dashboard-serverless",
         "source": "dashboard",
         "target": "serverless",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "dashboard-noDataPage",
+        "source": "dashboard",
+        "target": "noDataPage",
         "type": "optionalPlugin"
       }
     },
@@ -12984,6 +14520,118 @@
     },
     {
       "data": {
+        "id": "data-bfetch",
+        "source": "data",
+        "target": "bfetch",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "data-expressions",
+        "source": "data",
+        "target": "expressions",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "data-uiActions",
+        "source": "data",
+        "target": "uiActions",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "data-share",
+        "source": "data",
+        "target": "share",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "data-inspector",
+        "source": "data",
+        "target": "inspector",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "data-fieldFormats",
+        "source": "data",
+        "target": "fieldFormats",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "data-dataViews",
+        "source": "data",
+        "target": "dataViews",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "data-screenshotMode",
+        "source": "data",
+        "target": "screenshotMode",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "data-management",
+        "source": "data",
+        "target": "management",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "data-usageCollection",
+        "source": "data",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "data-security",
+        "source": "data",
+        "target": "security",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "data-kibanaUtils",
+        "source": "data",
+        "target": "kibanaUtils",
+        "type": "bundle"
+      }
+    },
+    {
+      "data": {
+        "id": "data-kibanaReact",
+        "source": "data",
+        "target": "kibanaReact",
+        "type": "bundle"
+      }
+    },
+    {
+      "data": {
+        "id": "data-inspector",
+        "source": "data",
+        "target": "inspector",
+        "type": "bundle"
+      }
+    },
+    {
+      "data": {
         "id": "dataViewFieldEditor-data",
         "source": "dataViewFieldEditor",
         "target": "data",
@@ -13004,6 +14652,14 @@
         "source": "dataViewFieldEditor",
         "target": "dataViews",
         "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "dataViewFieldEditor-usageCollection",
+        "source": "dataViewFieldEditor",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
       }
     },
     {
@@ -13096,6 +14752,14 @@
     },
     {
       "data": {
+        "id": "dataViewManagement-noDataPage",
+        "source": "dataViewManagement",
+        "target": "noDataPage",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "dataViewManagement-spaces",
         "source": "dataViewManagement",
         "target": "spaces",
@@ -13144,6 +14808,14 @@
     },
     {
       "data": {
+        "id": "dataViews-usageCollection",
+        "source": "dataViews",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "dataViews-kibanaUtils",
         "source": "dataViews",
         "target": "kibanaUtils",
@@ -13163,6 +14835,46 @@
         "id": "devTools-kibanaReact",
         "source": "devTools",
         "target": "kibanaReact",
+        "type": "bundle"
+      }
+    },
+    {
+      "data": {
+        "id": "dataViewEditor-data",
+        "source": "dataViewEditor",
+        "target": "data",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "dataViewEditor-dataViews",
+        "source": "dataViewEditor",
+        "target": "dataViews",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "dataViewEditor-kibanaReact",
+        "source": "dataViewEditor",
+        "target": "kibanaReact",
+        "type": "bundle"
+      }
+    },
+    {
+      "data": {
+        "id": "dataViewEditor-kibanaUtils",
+        "source": "dataViewEditor",
+        "target": "kibanaUtils",
+        "type": "bundle"
+      }
+    },
+    {
+      "data": {
+        "id": "dataViewEditor-esUiShared",
+        "source": "dataViewEditor",
+        "target": "esUiShared",
         "type": "bundle"
       }
     },
@@ -13320,6 +15032,30 @@
     },
     {
       "data": {
+        "id": "discover-home",
+        "source": "discover",
+        "target": "home",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "discover-share",
+        "source": "discover",
+        "target": "share",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "discover-usageCollection",
+        "source": "discover",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "discover-spaces",
         "source": "discover",
         "target": "spaces",
@@ -13336,9 +15072,25 @@
     },
     {
       "data": {
+        "id": "discover-savedObjectsTaggingOss",
+        "source": "discover",
+        "target": "savedObjectsTaggingOss",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "discover-lens",
         "source": "discover",
         "target": "lens",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "discover-noDataPage",
+        "source": "discover",
+        "target": "noDataPage",
         "type": "optionalPlugin"
       }
     },
@@ -13428,6 +15180,22 @@
         "source": "embeddable",
         "target": "contentManagement",
         "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "embeddable-savedObjectsTaggingOss",
+        "source": "embeddable",
+        "target": "savedObjectsTaggingOss",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "embeddable-usageCollection",
+        "source": "embeddable",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
       }
     },
     {
@@ -13728,30 +15496,6 @@
     },
     {
       "data": {
-        "id": "expressionRepeatImage-expressions",
-        "source": "expressionRepeatImage",
-        "target": "expressions",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "expressionRepeatImage-presentationUtil",
-        "source": "expressionRepeatImage",
-        "target": "presentationUtil",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "expressionRepeatImage-kibanaReact",
-        "source": "expressionRepeatImage",
-        "target": "kibanaReact",
-        "type": "bundle"
-      }
-    },
-    {
-      "data": {
         "id": "expressionRevealImage-expressions",
         "source": "expressionRevealImage",
         "target": "expressions",
@@ -13800,6 +15544,30 @@
     },
     {
       "data": {
+        "id": "expressionRepeatImage-expressions",
+        "source": "expressionRepeatImage",
+        "target": "expressions",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "expressionRepeatImage-presentationUtil",
+        "source": "expressionRepeatImage",
+        "target": "presentationUtil",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "expressionRepeatImage-kibanaReact",
+        "source": "expressionRepeatImage",
+        "target": "kibanaReact",
+        "type": "bundle"
+      }
+    },
+    {
+      "data": {
         "id": "expressions-kibanaUtils",
         "source": "expressions",
         "target": "kibanaUtils",
@@ -13819,6 +15587,14 @@
         "id": "files-security",
         "source": "files",
         "target": "security",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "files-usageCollection",
+        "source": "files",
+        "target": "usageCollection",
         "type": "optionalPlugin"
       }
     },
@@ -13896,6 +15672,14 @@
     },
     {
       "data": {
+        "id": "home-usageCollection",
+        "source": "home",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "home-customIntegrations",
         "source": "home",
         "target": "customIntegrations",
@@ -13932,54 +15716,6 @@
         "source": "home",
         "target": "kibanaReact",
         "type": "bundle"
-      }
-    },
-    {
-      "data": {
-        "id": "imageEmbeddable-embeddable",
-        "source": "imageEmbeddable",
-        "target": "embeddable",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "imageEmbeddable-files",
-        "source": "imageEmbeddable",
-        "target": "files",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "imageEmbeddable-uiActions",
-        "source": "imageEmbeddable",
-        "target": "uiActions",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "imageEmbeddable-kibanaReact",
-        "source": "imageEmbeddable",
-        "target": "kibanaReact",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "imageEmbeddable-security",
-        "source": "imageEmbeddable",
-        "target": "security",
-        "type": "optionalPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "imageEmbeddable-embeddableEnhanced",
-        "source": "imageEmbeddable",
-        "target": "embeddableEnhanced",
-        "type": "optionalPlugin"
       }
     },
     {
@@ -14048,6 +15784,62 @@
     },
     {
       "data": {
+        "id": "imageEmbeddable-embeddable",
+        "source": "imageEmbeddable",
+        "target": "embeddable",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "imageEmbeddable-files",
+        "source": "imageEmbeddable",
+        "target": "files",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "imageEmbeddable-uiActions",
+        "source": "imageEmbeddable",
+        "target": "uiActions",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "imageEmbeddable-kibanaReact",
+        "source": "imageEmbeddable",
+        "target": "kibanaReact",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "imageEmbeddable-security",
+        "source": "imageEmbeddable",
+        "target": "security",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "imageEmbeddable-screenshotMode",
+        "source": "imageEmbeddable",
+        "target": "screenshotMode",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "imageEmbeddable-embeddableEnhanced",
+        "source": "imageEmbeddable",
+        "target": "embeddableEnhanced",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "inspector-share",
         "source": "inspector",
         "target": "share",
@@ -14100,6 +15892,22 @@
         "source": "kibanaOverview",
         "target": "dataViewEditor",
         "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "kibanaOverview-newsfeed",
+        "source": "kibanaOverview",
+        "target": "newsfeed",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "kibanaOverview-usageCollection",
+        "source": "kibanaOverview",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
       }
     },
     {
@@ -14200,6 +16008,14 @@
     },
     {
       "data": {
+        "id": "links-usageCollection",
+        "source": "links",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "links-savedObjects",
         "source": "links",
         "target": "savedObjects",
@@ -14248,14 +16064,6 @@
     },
     {
       "data": {
-        "id": "mapsEms-licensing",
-        "source": "mapsEms",
-        "target": "licensing",
-        "type": "optionalPlugin"
-      }
-    },
-    {
-      "data": {
         "id": "navigation-unifiedSearch",
         "source": "navigation",
         "target": "unifiedSearch",
@@ -14288,10 +16096,90 @@
     },
     {
       "data": {
+        "id": "mapsEms-licensing",
+        "source": "mapsEms",
+        "target": "licensing",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
         "id": "newsfeed-screenshotMode",
         "source": "newsfeed",
         "target": "screenshotMode",
         "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "presentationPanel-data",
+        "source": "presentationPanel",
+        "target": "data",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "presentationPanel-inspector",
+        "source": "presentationPanel",
+        "target": "inspector",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "presentationPanel-uiActions",
+        "source": "presentationPanel",
+        "target": "uiActions",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "presentationPanel-usageCollection",
+        "source": "presentationPanel",
+        "target": "usageCollection",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "presentationPanel-contentManagement",
+        "source": "presentationPanel",
+        "target": "contentManagement",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "presentationPanel-savedObjectsManagement",
+        "source": "presentationPanel",
+        "target": "savedObjectsManagement",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "presentationPanel-savedObjectsTaggingOss",
+        "source": "presentationPanel",
+        "target": "savedObjectsTaggingOss",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "presentationPanel-kibanaReact",
+        "source": "presentationPanel",
+        "target": "kibanaReact",
+        "type": "bundle"
+      }
+    },
+    {
+      "data": {
+        "id": "presentationPanel-unifiedSearch",
+        "source": "presentationPanel",
+        "target": "unifiedSearch",
+        "type": "bundle"
       }
     },
     {
@@ -14376,138 +16264,10 @@
     },
     {
       "data": {
-        "id": "presentationPanel-data",
-        "source": "presentationPanel",
-        "target": "data",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "presentationPanel-inspector",
-        "source": "presentationPanel",
-        "target": "inspector",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "presentationPanel-uiActions",
-        "source": "presentationPanel",
-        "target": "uiActions",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "presentationPanel-usageCollection",
-        "source": "presentationPanel",
-        "target": "usageCollection",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "presentationPanel-contentManagement",
-        "source": "presentationPanel",
-        "target": "contentManagement",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "presentationPanel-savedObjectsManagement",
-        "source": "presentationPanel",
-        "target": "savedObjectsManagement",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "presentationPanel-savedObjectsTaggingOss",
-        "source": "presentationPanel",
-        "target": "savedObjectsTaggingOss",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "presentationPanel-kibanaReact",
-        "source": "presentationPanel",
-        "target": "kibanaReact",
-        "type": "bundle"
-      }
-    },
-    {
-      "data": {
-        "id": "presentationPanel-unifiedSearch",
-        "source": "presentationPanel",
-        "target": "unifiedSearch",
-        "type": "bundle"
-      }
-    },
-    {
-      "data": {
         "id": "savedObjectsFinder-savedObjectsManagement",
         "source": "savedObjectsFinder",
         "target": "savedObjectsManagement",
         "type": "bundle"
-      }
-    },
-    {
-      "data": {
-        "id": "savedObjectsManagement-management",
-        "source": "savedObjectsManagement",
-        "target": "management",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "savedObjectsManagement-data",
-        "source": "savedObjectsManagement",
-        "target": "data",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "savedObjectsManagement-dataViews",
-        "source": "savedObjectsManagement",
-        "target": "dataViews",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "savedObjectsManagement-home",
-        "source": "savedObjectsManagement",
-        "target": "home",
-        "type": "optionalPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "savedObjectsManagement-spaces",
-        "source": "savedObjectsManagement",
-        "target": "spaces",
-        "type": "optionalPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "savedObjectsManagement-kibanaReact",
-        "source": "savedObjectsManagement",
-        "target": "kibanaReact",
-        "type": "bundle"
-      }
-    },
-    {
-      "data": {
-        "id": "savedObjectsTaggingOss-savedObjects",
-        "source": "savedObjectsTaggingOss",
-        "target": "savedObjects",
-        "type": "optionalPlugin"
       }
     },
     {
@@ -14555,6 +16315,70 @@
         "id": "savedSearch-savedObjectsTaggingOss",
         "source": "savedSearch",
         "target": "savedObjectsTaggingOss",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "savedObjectsManagement-management",
+        "source": "savedObjectsManagement",
+        "target": "management",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "savedObjectsManagement-data",
+        "source": "savedObjectsManagement",
+        "target": "data",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "savedObjectsManagement-dataViews",
+        "source": "savedObjectsManagement",
+        "target": "dataViews",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "savedObjectsManagement-home",
+        "source": "savedObjectsManagement",
+        "target": "home",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "savedObjectsManagement-savedObjectsTaggingOss",
+        "source": "savedObjectsManagement",
+        "target": "savedObjectsTaggingOss",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "savedObjectsManagement-spaces",
+        "source": "savedObjectsManagement",
+        "target": "spaces",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "savedObjectsManagement-kibanaReact",
+        "source": "savedObjectsManagement",
+        "target": "kibanaReact",
+        "type": "bundle"
+      }
+    },
+    {
+      "data": {
+        "id": "savedObjectsTaggingOss-savedObjects",
+        "source": "savedObjectsTaggingOss",
+        "target": "savedObjects",
         "type": "optionalPlugin"
       }
     },
@@ -14643,6 +16467,14 @@
         "id": "telemetryManagementSection-usageCollection",
         "source": "telemetryManagementSection",
         "target": "usageCollection",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "telemetryManagementSection-usageCollection",
+        "source": "telemetryManagementSection",
+        "target": "usageCollection",
         "type": "bundle"
       }
     },
@@ -14688,6 +16520,14 @@
     },
     {
       "data": {
+        "id": "uiActions-kibanaUtils",
+        "source": "uiActions",
+        "target": "kibanaUtils",
+        "type": "bundle"
+      }
+    },
+    {
+      "data": {
         "id": "uiActionsEnhanced-embeddable",
         "source": "uiActionsEnhanced",
         "target": "embeddable",
@@ -14728,14 +16568,6 @@
     },
     {
       "data": {
-        "id": "uiActions-kibanaUtils",
-        "source": "uiActions",
-        "target": "kibanaUtils",
-        "type": "bundle"
-      }
-    },
-    {
-      "data": {
         "id": "unifiedDocViewer-data",
         "source": "unifiedDocViewer",
         "target": "data",
@@ -14755,78 +16587,6 @@
         "id": "unifiedDocViewer-kibanaUtils",
         "source": "unifiedDocViewer",
         "target": "kibanaUtils",
-        "type": "bundle"
-      }
-    },
-    {
-      "data": {
-        "id": "unifiedSearch-dataViews",
-        "source": "unifiedSearch",
-        "target": "dataViews",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "unifiedSearch-data",
-        "source": "unifiedSearch",
-        "target": "data",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "unifiedSearch-uiActions",
-        "source": "unifiedSearch",
-        "target": "uiActions",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "unifiedSearch-screenshotMode",
-        "source": "unifiedSearch",
-        "target": "screenshotMode",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "unifiedSearch-savedObjectsManagement",
-        "source": "unifiedSearch",
-        "target": "savedObjectsManagement",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "unifiedSearch-kibanaUtils",
-        "source": "unifiedSearch",
-        "target": "kibanaUtils",
-        "type": "bundle"
-      }
-    },
-    {
-      "data": {
-        "id": "unifiedSearch-kibanaReact",
-        "source": "unifiedSearch",
-        "target": "kibanaReact",
-        "type": "bundle"
-      }
-    },
-    {
-      "data": {
-        "id": "unifiedSearch-data",
-        "source": "unifiedSearch",
-        "target": "data",
-        "type": "bundle"
-      }
-    },
-    {
-      "data": {
-        "id": "unifiedSearch-textBasedLanguages",
-        "source": "unifiedSearch",
-        "target": "textBasedLanguages",
         "type": "bundle"
       }
     },
@@ -14872,6 +16632,102 @@
     },
     {
       "data": {
+        "id": "unifiedSearch-dataViews",
+        "source": "unifiedSearch",
+        "target": "dataViews",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "unifiedSearch-data",
+        "source": "unifiedSearch",
+        "target": "data",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "unifiedSearch-uiActions",
+        "source": "unifiedSearch",
+        "target": "uiActions",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "unifiedSearch-screenshotMode",
+        "source": "unifiedSearch",
+        "target": "screenshotMode",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "unifiedSearch-savedObjectsManagement",
+        "source": "unifiedSearch",
+        "target": "savedObjectsManagement",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "unifiedSearch-usageCollection",
+        "source": "unifiedSearch",
+        "target": "usageCollection",
+        "type": "optionalPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "unifiedSearch-kibanaUtils",
+        "source": "unifiedSearch",
+        "target": "kibanaUtils",
+        "type": "bundle"
+      }
+    },
+    {
+      "data": {
+        "id": "unifiedSearch-kibanaReact",
+        "source": "unifiedSearch",
+        "target": "kibanaReact",
+        "type": "bundle"
+      }
+    },
+    {
+      "data": {
+        "id": "unifiedSearch-data",
+        "source": "unifiedSearch",
+        "target": "data",
+        "type": "bundle"
+      }
+    },
+    {
+      "data": {
+        "id": "unifiedSearch-textBasedLanguages",
+        "source": "unifiedSearch",
+        "target": "textBasedLanguages",
+        "type": "bundle"
+      }
+    },
+    {
+      "data": {
+        "id": "usageCollection-screenshotMode",
+        "source": "usageCollection",
+        "target": "screenshotMode",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "usageCollection-kibanaUtils",
+        "source": "usageCollection",
+        "target": "kibanaUtils",
+        "type": "bundle"
+      }
+    },
+    {
+      "data": {
         "id": "visDefaultEditor-dataViews",
         "source": "visDefaultEditor",
         "target": "dataViews",
@@ -14884,6 +16740,14 @@
         "source": "visDefaultEditor",
         "target": "unifiedSearch",
         "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "visDefaultEditor-visualizations",
+        "source": "visDefaultEditor",
+        "target": "visualizations",
+        "type": "optionalPlugin"
       }
     },
     {
@@ -14939,70 +16803,6 @@
         "id": "visDefaultEditor-savedSearch",
         "source": "visDefaultEditor",
         "target": "savedSearch",
-        "type": "bundle"
-      }
-    },
-    {
-      "data": {
-        "id": "visTypeMarkdown-expressions",
-        "source": "visTypeMarkdown",
-        "target": "expressions",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "visTypeMarkdown-visualizations",
-        "source": "visTypeMarkdown",
-        "target": "visualizations",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "visTypeMarkdown-expressions",
-        "source": "visTypeMarkdown",
-        "target": "expressions",
-        "type": "bundle"
-      }
-    },
-    {
-      "data": {
-        "id": "visTypeMarkdown-kibanaReact",
-        "source": "visTypeMarkdown",
-        "target": "kibanaReact",
-        "type": "bundle"
-      }
-    },
-    {
-      "data": {
-        "id": "visTypeMarkdown-visDefaultEditor",
-        "source": "visTypeMarkdown",
-        "target": "visDefaultEditor",
-        "type": "bundle"
-      }
-    },
-    {
-      "data": {
-        "id": "visTypeMarkdown-visualizations",
-        "source": "visTypeMarkdown",
-        "target": "visualizations",
-        "type": "bundle"
-      }
-    },
-    {
-      "data": {
-        "id": "usageCollection-screenshotMode",
-        "source": "usageCollection",
-        "target": "screenshotMode",
-        "type": "requiredPlugin"
-      }
-    },
-    {
-      "data": {
-        "id": "usageCollection-kibanaUtils",
-        "source": "usageCollection",
-        "target": "kibanaUtils",
         "type": "bundle"
       }
     },
@@ -15235,6 +17035,54 @@
         "id": "visualizations-savedObjects",
         "source": "visualizations",
         "target": "savedObjects",
+        "type": "bundle"
+      }
+    },
+    {
+      "data": {
+        "id": "visTypeMarkdown-expressions",
+        "source": "visTypeMarkdown",
+        "target": "expressions",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "visTypeMarkdown-visualizations",
+        "source": "visTypeMarkdown",
+        "target": "visualizations",
+        "type": "requiredPlugin"
+      }
+    },
+    {
+      "data": {
+        "id": "visTypeMarkdown-expressions",
+        "source": "visTypeMarkdown",
+        "target": "expressions",
+        "type": "bundle"
+      }
+    },
+    {
+      "data": {
+        "id": "visTypeMarkdown-kibanaReact",
+        "source": "visTypeMarkdown",
+        "target": "kibanaReact",
+        "type": "bundle"
+      }
+    },
+    {
+      "data": {
+        "id": "visTypeMarkdown-visDefaultEditor",
+        "source": "visTypeMarkdown",
+        "target": "visDefaultEditor",
+        "type": "bundle"
+      }
+    },
+    {
+      "data": {
+        "id": "visTypeMarkdown-visualizations",
+        "source": "visTypeMarkdown",
+        "target": "visualizations",
         "type": "bundle"
       }
     },

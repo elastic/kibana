@@ -64,7 +64,10 @@ export const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => {
             : theme.eui.euiColorAccent,
         opacity: 0.5,
         'overlay-opacity': 0,
-        'target-arrow-color': lineColor,
+        'target-arrow-color': (edge) =>
+          edge.data('type') === 'requiredPlugin'
+            ? theme.eui.euiColorPrimary
+            : theme.eui.euiColorAccent,
         'target-arrow-shape': 'triangle',
         'target-distance-from-node': parseInt(theme.eui.euiSizeXS, 10),
         width: 1,

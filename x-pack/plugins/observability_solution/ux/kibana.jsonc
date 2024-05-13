@@ -24,7 +24,6 @@
       "usageCollection",
       "taskManager",
       "actions",
-      "alerts",
       "observability",
       "security",
       "maps",
@@ -32,11 +31,6 @@
       "observabilityAIAssistant",
       "spaces"
     ],
-    "requiredBundles": [
-      "kibanaReact",
-      "exploratoryView",
-      "observability",
-      "maps"
-    ]
+    "requiredBundles": ["kibanaReact", "exploratoryView", "observability", "maps"]
   }
 }

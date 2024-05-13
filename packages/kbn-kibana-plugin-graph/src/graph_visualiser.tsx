@@ -23,6 +23,7 @@ import cytoscape from 'cytoscape';
 import { Cytoscape } from './cytoscape';
 import kbnGraph from '../../../kbn-dependency-graph.json';
 import { OptionsPanel } from './options_panel';
+import { InspectPanel } from './inspect_panel';
 
 export function GraphVisualiser() {
   const [loading, setLoading] = useState(true);
@@ -34,6 +35,7 @@ export function GraphVisualiser() {
       value: 'observabilityAIAssistant',
     },
   ]);
+  const [inspectedNode, setInspectedNode] = useState<string>();
 
   const ref = useRef<HTMLDivElement | null>(null);
   const [container, setContainerDimensions] = useState<{ width: number; height: number } | null>(
@@ -50,6 +52,10 @@ export function GraphVisualiser() {
     }
   };
 
+  const handleSelectNode = (node: string) => {
+    setInspectedNode(node);
+  };
+
   useLayoutEffect(() => {
     handleResize();
 
@@ -63,7 +69,7 @@ export function GraphVisualiser() {
   const [cytoscapeOptions, setCytoscapeOptions] = useState<cytoscape.LayoutOptions>({
     // general layout
     // name: 'cose',
-    animate: true,
+    animate: false,
     padding: 0,
     componentSpacing: 50,
     avoidOverlap: true,
@@ -124,6 +130,8 @@ export function GraphVisualiser() {
     label: el.data.id || '',
     value: el.data.id || '',
   }));
+
+  const flexBoxStyleReset = { minWidth: 0, minHeight: 0 };
 
   return (
     <EuiPanel style={{ height: '100%' }}>
@@ -213,13 +221,47 @@ export function GraphVisualiser() {
           onSetCytoscapeOptions={setCytoscapeOptions}
         />
 
-        <EuiFlexItem style={{ minHeight: 0 }}>
+        {inspectedNode ? (
+          <InspectPanel
+            containerHeight={container?.height}
+            inspectedNode={inspectedNode}
+            selectedNodes={selectedNodes?.map((el) => el.value || '') || []}
+            graph={kbnGraph}
+            onClose={() => handleSelectNode('')}
+            onSelectNode={(node) => {
+              const newNode = [{ label: node, value: node }];
+              setSelectedNodes(newNode);
+              setJson(filterNodes(newNode));
+              handleSelectNode(node);
+            }}
+            onAddNode={(node) => {
+              const newNode = [...(selectedNodes || []), { label: node, value: node }];
+              setSelectedNodes(newNode);
+              setJson(filterNodes(newNode));
+            }}
+            onRemoveNode={(node) => {
+              const newNode = selectedNodes?.filter((el) => el.label !== node);
+              if (newNode) {
+                setSelectedNodes(newNode);
+                setJson(filterNodes(newNode));
+              }
+            }}
+          />
+        ) : null}
+
+        <EuiFlexItem style={flexBoxStyleReset}>
           <EuiSpacer size="l" />
 
-          <EuiFlexGroup style={{ minHeight: 0 }}>
-            <EuiFlexItem>
+          <EuiFlexGroup style={flexBoxStyleReset}>
+            <EuiFlexItem style={flexBoxStyleReset}>
               <div
-                style={{ display: 'flex', height: '100%', width: '100%', flexGrow: 0 }}
+                style={{
+                  display: 'flex',
+                  flexGrow: 0,
+                  height: '100%',
+                  width: '100%',
+                  overflow: 'hidden',
+                }}
                 ref={ref}
               >
                 {json && container ? (
@@ -229,6 +271,7 @@ export function GraphVisualiser() {
                     width={container.width}
                     layoutOptions={cytoscapeOptions}
                     onReady={() => setLoading(false)}
+                    onSelectNode={handleSelectNode}
                   />
                 ) : null}
               </div>

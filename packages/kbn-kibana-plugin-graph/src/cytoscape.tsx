@@ -23,6 +23,7 @@ export interface CytoscapeProps {
   style?: CSSProperties;
   layoutOptions: any;
   onReady: () => void;
+  onSelectNode: (node: string) => void;
 }
 
 export function Cytoscape({
@@ -32,9 +33,10 @@ export function Cytoscape({
   width,
   style,
   layoutOptions,
+  onSelectNode,
 }: CytoscapeProps) {
   const theme = useTheme();
-  const [ref] = useCytoscape({
+  const [ref, cy] = useCytoscape({
     options: {
       boxSelectionEnabled: false,
       maxZoom: 3,
@@ -43,6 +45,10 @@ export function Cytoscape({
       elements,
     },
     layoutOptions,
+  });
+
+  cy?.on('select', 'node', (event) => {
+    onSelectNode(event.target.id());
   });
 
   return (

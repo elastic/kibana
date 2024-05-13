@@ -8,6 +8,7 @@
 
 import cytoscape from 'cytoscape';
 import { useEffect, useRef, useState } from 'react';
+import { isEqual } from 'lodash';
 
 export function useCytoscape({
   options,
@@ -17,21 +18,28 @@ export function useCytoscape({
   layoutOptions: any;
 }) {
   const [cy, setCy] = useState<cytoscape.Core | undefined>(undefined);
+  const [stateElements, setStateElements] = useState(options.elements);
+  const [stateLayoutOptions, _] = useState();
+
   const ref = useRef(null);
 
   useEffect(() => {
     if (!cy) {
       setCy(cytoscape({ ...options, container: ref.current }));
-    } else if (options.elements) {
+    } else if (!isEqual(options.elements, stateElements)) {
       cy.elements().remove();
       cy.resize();
       cy.add(options.elements);
+      cy?.layout(layoutOptions).run();
+      cy?.fit();
+      setStateElements(options.elements);
     }
-    cy?.layout(layoutOptions).run();
-    cy?.fit();
-  }, [options, cy, layoutOptions]);
+  }, [options, cy, layoutOptions, stateElements]);
 
-  // Destroy the cytoscape instance on unmount
+  useEffect(() => {
+    cy?.layout(layoutOptions).run();
+  }, [cy, layoutOptions, stateLayoutOptions]);
+
   useEffect(() => {
     return () => {
       if (cy) {
