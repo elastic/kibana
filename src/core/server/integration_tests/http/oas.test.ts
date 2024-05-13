@@ -189,12 +189,3 @@ it.each([
     expect(result.body).not.toMatchObject(excludes);
   }
 );
-
-it('only accepts "public" or "internal" for "access" query param', async () => {
-  const server = await startService({ config: { server: { oas: { enabled: true } } } });
-  const result = await supertest(server.listener).get('/api/oas').query({ access: 'invalid' });
-  expect(result.body.message).toBe(
-    'Invalid access query parameter. Must be one of "public" or "internal".'
-  );
-  expect(result.status).toBe(400);
-});

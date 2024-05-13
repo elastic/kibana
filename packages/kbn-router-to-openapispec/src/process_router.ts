@@ -16,7 +16,7 @@ import {
   extractContentType,
   extractValidationSchemaFromRoute,
   getPathParameters,
-  getContentTypeString,
+  getVersionedContentTypeString,
   getVersionedHeaderParam,
   prepareRoutes,
 } from './util';
@@ -65,7 +65,7 @@ export const processRouter = (
           requestBody: !!validationSchemas?.body
             ? {
                 content: {
-                  [getContentTypeString(contentType)]: {
+                  [getVersionedContentTypeString(SERVERLESS_VERSION_2023_10_31, contentType)]: {
                     schema: converter.convert(validationSchemas.body),
                   },
                 },
@@ -103,10 +103,12 @@ export const extractResponses = (route: InternalRouterRoute, converter: OasConve
           description: route.options.description ?? 'No description',
           content: {
             ...((acc[statusCode] ?? {}) as OpenAPIV3.ResponseObject).content,
-            [getContentTypeString(schema.bodyContentType ? [schema.bodyContentType] : contentType)]:
-              {
-                schema: oasSchema,
-              },
+            [getVersionedContentTypeString(
+              SERVERLESS_VERSION_2023_10_31,
+              schema.bodyContentType ? [schema.bodyContentType] : contentType
+            )]: {
+              schema: oasSchema,
+            },
           },
         };
         return acc;

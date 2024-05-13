@@ -16,8 +16,8 @@ import { OasConverter } from './oas_converter';
 import { createOperationIdCounter } from './operation_id_counter';
 import {
   processVersionedRouter,
-  extractVersionedRequestBody,
   extractVersionedResponses,
+  extractVersionedRequestBodies,
 } from './process_versioned_router';
 
 const route: VersionedRouterRoute = {
@@ -79,12 +79,10 @@ beforeEach(() => {
   oasConverter = new OasConverter();
 });
 
-describe('extractVersionedRequestBody', () => {
+describe('extractVersionedRequestBodies', () => {
   test('handles full request config as expected', () => {
-    expect(
-      extractVersionedRequestBody(route.handlers[0], ['application/json'], oasConverter)
-    ).toEqual({
-      'application/json': {
+    expect(extractVersionedRequestBodies(route, oasConverter, ['application/json'])).toEqual({
+      'application/json; Elastic-Api-Version=2023-10-31': {
         schema: {
           additionalProperties: false,
           properties: {
@@ -96,18 +94,28 @@ describe('extractVersionedRequestBody', () => {
           type: 'object',
         },
       },
+      'application/json; Elastic-Api-Version=2024-12-31': {
+        schema: {
+          additionalProperties: false,
+          properties: {
+            foo2: {
+              type: 'string',
+            },
+          },
+          required: ['foo2'],
+          type: 'object',
+        },
+      },
     });
   });
 });
 
 describe('extractVersionedResponses', () => {
   test('handles full response config as expected', () => {
-    expect(
-      extractVersionedResponses(route.handlers[0], ['application/test+json'], oasConverter)
-    ).toEqual({
+    expect(extractVersionedResponses(route, oasConverter, ['application/test+json'])).toEqual({
       200: {
         content: {
-          'application/test+json': {
+          'application/test+json; Elastic-Api-Version=2023-10-31': {
             schema: {
               type: 'object',
               additionalProperties: false,
@@ -117,11 +125,35 @@ describe('extractVersionedResponses', () => {
               required: ['bar'],
             },
           },
+          'application/test+json; Elastic-Api-Version=2024-12-31': {
+            schema: {
+              type: 'object',
+              additionalProperties: false,
+              properties: {
+                bar2: { type: 'number', minimum: 1, maximum: 99 },
+              },
+              required: ['bar2'],
+            },
+          },
         },
       },
       404: {
         content: {
-          'application/test2+json': {
+          'application/test2+json; Elastic-Api-Version=2023-10-31': {
+            schema: {
+              type: 'object',
+              additionalProperties: false,
+              properties: {
+                ok: { type: 'boolean', enum: [false] },
+              },
+              required: ['ok'],
+            },
+          },
+        },
+      },
+      500: {
+        content: {
+          'application/test2+json; Elastic-Api-Version=2024-12-31': {
             schema: {
               type: 'object',
               additionalProperties: false,
@@ -147,8 +179,9 @@ describe('processVersionedRouter', () => {
     );
 
     expect(Object.keys(get(baseCase, 'paths["/foo"].get.responses.200.content'))).toEqual([
-      'application/test+json',
-    ]); // defaults to latest
+      'application/test+json; Elastic-Api-Version=2023-10-31',
+      'application/test+json; Elastic-Api-Version=2024-12-31',
+    ]);
 
     const filteredCase = processVersionedRouter(
       { getRoutes: () => [route] } as unknown as CoreVersionedRouter,
@@ -157,7 +190,7 @@ describe('processVersionedRouter', () => {
       { version: '2023-10-31' }
     );
     expect(Object.keys(get(filteredCase, 'paths["/foo"].get.responses.200.content'))).toEqual([
-      'application/test+json',
+      'application/test+json; Elastic-Api-Version=2023-10-31',
     ]);
   });
 });

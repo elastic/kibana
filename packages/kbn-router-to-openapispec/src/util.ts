@@ -31,8 +31,11 @@ export const extractContentType = (body: undefined | RouteConfigOptionsBody) => 
   return ['application/json'];
 };
 
-export const getContentTypeString = (acceptedContentTypes: string[]): string => {
-  return `${acceptedContentTypes.join('; ')}`;
+export const getVersionedContentTypeString = (
+  version: string,
+  acceptedContentTypes: string[]
+): string => {
+  return `${acceptedContentTypes.join('; ')}; Elastic-Api-Version=${version}`;
 };
 
 export const extractValidationSchemaFromRoute = (

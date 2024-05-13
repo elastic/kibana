@@ -250,20 +250,8 @@ export class HttpService
       path: '/api/oas',
       method: 'GET',
       handler: async (req, h) => {
-        const version = req.query?.version;
         const pathStartsWith = req.query?.pathStartsWith;
-
-        const access = req.query?.access as 'public' | 'internal' | undefined;
-        if (access && !['public', 'internal'].some((a) => a === access)) {
-          return h
-            .response({
-              message: 'Invalid access query parameter. Must be one of "public" or "internal".',
-            })
-            .code(400);
-        }
-
         const pluginId = req.query?.pluginId;
-
         return await firstValueFrom(
           of(1).pipe(
             HttpService.generateOasSemaphore.acquire(),
@@ -274,7 +262,7 @@ export class HttpService
                   baseUrl,
                   title: 'Kibana HTTP APIs',
                   version: '0.0.0', // TODO get a better version here
-                  filters: { pathStartsWith, access, version },
+                  pathStartsWith,
                 });
                 return h.response(result);
               } catch (e) {

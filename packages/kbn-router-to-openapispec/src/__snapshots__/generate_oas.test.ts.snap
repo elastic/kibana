@@ -58,7 +58,7 @@ Object {
         ],
         "requestBody": Object {
           "content": Object {
-            "application/json": Object {
+            "application/json; Elastic-Api-Version=2023-10-31": Object {
               "schema": Object {
                 "additionalProperties": false,
                 "properties": Object {
@@ -81,7 +81,7 @@ Object {
         "responses": Object {
           "200": Object {
             "content": Object {
-              "application/json": Object {
+              "application/json; Elastic-Api-Version=2023-10-31": Object {
                 "schema": Object {
                   "maxLength": 10,
                   "minLength": 1,
@@ -145,6 +145,7 @@ Object {
             "schema": Object {
               "default": "oas-test-version-2",
               "enum": Array [
+                "oas-test-version-1",
                 "oas-test-version-2",
               ],
               "type": "string",
@@ -153,7 +154,26 @@ Object {
         ],
         "requestBody": Object {
           "content": Object {
-            "application/json": Object {
+            "application/json; Elastic-Api-Version=oas-test-version-1": Object {
+              "schema": Object {
+                "additionalProperties": false,
+                "properties": Object {
+                  "deprecatedFoo": Object {
+                    "deprecated": true,
+                    "description": "deprecated foo",
+                    "type": "string",
+                  },
+                  "foo": Object {
+                    "type": "string",
+                  },
+                },
+                "required": Array [
+                  "foo",
+                ],
+                "type": "object",
+              },
+            },
+            "application/json; Elastic-Api-Version=oas-test-version-2": Object {
               "schema": Object {
                 "additionalProperties": false,
                 "properties": Object {
@@ -172,7 +192,22 @@ Object {
         "responses": Object {
           "200": Object {
             "content": Object {
-              "application/octet-stream": Object {
+              "application/json; Elastic-Api-Version=oas-test-version-1": Object {
+                "schema": Object {
+                  "additionalProperties": false,
+                  "description": "fooResponse",
+                  "properties": Object {
+                    "fooResponseWithDescription": Object {
+                      "type": "string",
+                    },
+                  },
+                  "required": Array [
+                    "fooResponseWithDescription",
+                  ],
+                  "type": "object",
+                },
+              },
+              "application/octet-stream; Elastic-Api-Version=oas-test-version-2": Object {
                 "schema": Object {
                   "description": "stream response",
                   "type": "object",
@@ -225,7 +260,7 @@ Object {
         ],
         "requestBody": Object {
           "content": Object {
-            "application/json": Object {
+            "application/json; Elastic-Api-Version=2023-10-31": Object {
               "schema": Object {
                 "additionalProperties": false,
                 "properties": Object {
@@ -304,7 +339,7 @@ Object {
         "responses": Object {
           "200": Object {
             "content": Object {
-              "application/json": Object {
+              "application/json; Elastic-Api-Version=2023-10-31": Object {
                 "schema": Object {
                   "maxLength": 10,
                   "minLength": 1,
@@ -376,7 +411,7 @@ Object {
         ],
         "requestBody": Object {
           "content": Object {
-            "application/json": Object {
+            "application/json; Elastic-Api-Version=2023-10-31": Object {
               "schema": Object {},
             },
           },
@@ -384,7 +419,7 @@ Object {
         "responses": Object {
           "200": Object {
             "content": Object {
-              "application/json": Object {
+              "application/json; Elastic-Api-Version=2023-10-31": Object {
                 "schema": Object {},
               },
             },
@@ -413,7 +448,7 @@ Object {
         ],
         "requestBody": Object {
           "content": Object {
-            "application/json": Object {
+            "application/json; Elastic-Api-Version=123": Object {
               "schema": Object {},
             },
           },
@@ -421,7 +456,7 @@ Object {
         "responses": Object {
           "200": Object {
             "content": Object {
-              "application/json": Object {
+              "application/json; Elastic-Api-Version=123": Object {
                 "schema": Object {},
               },
             },
