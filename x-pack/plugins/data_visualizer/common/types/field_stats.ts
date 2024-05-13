@@ -96,6 +96,11 @@ export interface StringFieldStats {
   sampledValues?: Bucket[];
   topValuesSampleSize?: number;
   topValuesSamplerShardSize?: number;
+  /**
+   * Approximate: true for when the terms are from a random subset of the source data
+   * such that result/count for each term is not deterministic every time
+   */
+  approximate?: boolean;
 }
 
 export interface DateFieldStats {

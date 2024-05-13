@@ -71,7 +71,7 @@ export const getESQLKeywordFieldStats = async ({
 
           if (results) {
             const topValuesSampleSize = results.reduce((acc, row) => {
-              return row[1] + acc;
+              return row[0] + acc;
             }, 0);
 
             const terms = results.map((row) => ({
@@ -83,6 +83,7 @@ export const getESQLKeywordFieldStats = async ({
               fieldName: field.name,
               topValues: terms,
               isTopValuesSampled: true,
+              approximate: true,
               topValuesSampleSize,
             } as StringFieldStats;
           }
