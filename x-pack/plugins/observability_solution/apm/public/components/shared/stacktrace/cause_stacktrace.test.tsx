@@ -16,9 +16,7 @@ describe('CauseStacktrace', () => {
       it('renders without the accordion', () => {
         const props = { id: 'testId', message: 'testMessage' };
 
-        expect(
-          mountWithTheme(<CauseStacktrace {...props} />).find('CausedBy')
-        ).toHaveLength(1);
+        expect(mountWithTheme(<CauseStacktrace {...props} />).find('CausedBy')).toHaveLength(1);
       });
     });
 
@@ -46,9 +44,7 @@ describe('CauseStacktrace', () => {
         };
 
         expect(
-          shallow(<CauseStacktrace {...props} />).find(
-            'Styled(EuiAccordionClass)'
-          )
+          shallow(<CauseStacktrace {...props} />).find('Styled(EuiAccordionClass)')
         ).toHaveLength(1);
       });
     });

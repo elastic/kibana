@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/search-types';
 import type {
   NetworkTopNFlowCountRequestOptions,
   NetworkTopNFlowRequestOptions,
@@ -947,8 +947,8 @@ export const formattedSearchStrategyResponse: NetworkTopNFlowStrategyResponse = 
                 format: 'strict_date_optional_time',
               },
             ],
+            size: 0,
           },
-          size: 0,
           track_total_hits: false,
         },
         null,
@@ -997,8 +997,8 @@ export const formattedCountStrategyResponse: NetworkTopNFlowCountStrategyRespons
               },
             },
             _source: false,
+            size: 0,
           },
-          size: 0,
           track_total_hits: false,
         },
         null,
@@ -1098,8 +1098,8 @@ export const expectedDsl = {
         format: 'strict_date_optional_time',
       },
     ],
+    size: 0,
   },
-  size: 0,
   track_total_hits: false,
 };
 
@@ -1137,7 +1137,7 @@ export const expectedCountDsl = {
       },
     },
     _source: false,
+    size: 0,
   },
-  size: 0,
   track_total_hits: false,
 };

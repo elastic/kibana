@@ -69,7 +69,8 @@ describe('decodeRequestParams', () => {
     };
 
     expect(decode).toThrowErrorMatchingInlineSnapshot(`
-      "Excess keys are not allowed:
+      "Failed to validate: 
+        Excess keys are not allowed:
       path.extraKey"
     `);
   });

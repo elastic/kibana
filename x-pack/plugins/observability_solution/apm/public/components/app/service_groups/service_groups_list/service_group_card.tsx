@@ -17,10 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import {
-  ServiceGroup,
-  SERVICE_GROUP_COLOR_DEFAULT,
-} from '../../../../../common/service_groups';
+import { ServiceGroup, SERVICE_GROUP_COLOR_DEFAULT } from '../../../../../common/service_groups';
 import { useObservabilityActiveAlertsHref } from '../../../shared/links/kibana';
 import { ServiceStat } from './service_stat';
 
@@ -31,12 +28,7 @@ interface Props {
   isLoading: boolean;
 }
 
-export function ServiceGroupsCard({
-  serviceGroup,
-  href,
-  serviceGroupCounts,
-  isLoading,
-}: Props) {
+export function ServiceGroupsCard({ serviceGroup, href, serviceGroupCounts, isLoading }: Props) {
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
 
   const activeAlertsHref = useObservabilityActiveAlertsHref(serviceGroup.kuery);
@@ -57,10 +49,9 @@ export function ServiceGroupsCard({
         <EuiFlexItem>
           <EuiText size="s">
             {serviceGroup.description ||
-              i18n.translate(
-                'xpack.apm.serviceGroups.cardsList.emptyDescription',
-                { defaultMessage: 'No description available' }
-              )}
+              i18n.translate('xpack.apm.serviceGroups.cardsList.emptyDescription', {
+                defaultMessage: 'No description available',
+              })}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexGroup alignItems="center">
@@ -68,14 +59,11 @@ export function ServiceGroupsCard({
             <EuiFlexItem>
               <EuiText size="xs" textAlign="left">
                 {serviceGroupCounts !== undefined &&
-                  i18n.translate(
-                    'xpack.apm.serviceGroups.cardsList.serviceCount',
-                    {
-                      defaultMessage:
-                        '{servicesCount} {servicesCount, plural, one {service} other {services}}',
-                      values: { servicesCount: serviceGroupCounts.services },
-                    }
-                  )}
+                  i18n.translate('xpack.apm.serviceGroups.cardsList.serviceCount', {
+                    defaultMessage:
+                      '{servicesCount} {servicesCount, plural, one {service} other {services}}',
+                    values: { servicesCount: serviceGroupCounts.services },
+                  })}
               </EuiText>
             </EuiFlexItem>
           </ServiceStat>
@@ -100,14 +88,11 @@ export function ServiceGroupsCard({
                     },
                   } as object)} // workaround for type check that prevents href + onclick
                 >
-                  {i18n.translate(
-                    'xpack.apm.serviceGroups.cardsList.alertCount',
-                    {
-                      defaultMessage:
-                        '{alertsCount} {alertsCount, plural, one {alert} other {alerts}}',
-                      values: { alertsCount: serviceGroupCounts.alerts },
-                    }
-                  )}
+                  {i18n.translate('xpack.apm.serviceGroups.cardsList.alertCount', {
+                    defaultMessage:
+                      '{alertsCount} {alertsCount, plural, one {alert} other {alerts}}',
+                    values: { alertsCount: serviceGroupCounts.alerts },
+                  })}
                 </EuiBadge>
               </EuiToolTip>
             )}
@@ -120,11 +105,7 @@ export function ServiceGroupsCard({
 
   return (
     <EuiFlexItem key={serviceGroup.groupName} grow={false}>
-      <EuiCard
-        layout="vertical"
-        {...cardProps}
-        data-test-subj="serviceGroupCard"
-      />
+      <EuiCard layout="vertical" {...cardProps} data-test-subj="serviceGroupCard" />
     </EuiFlexItem>
   );
 }

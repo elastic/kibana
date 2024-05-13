@@ -7,10 +7,7 @@
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ApmDocumentType } from '../../../../common/document_type';
-import {
-  SERVICE_NAME,
-  TRANSACTION_NAME,
-} from '../../../../common/es_fields/apm';
+import { SERVICE_NAME, TRANSACTION_NAME } from '../../../../common/es_fields/apm';
 import { RollupInterval } from '../../../../common/rollup';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';

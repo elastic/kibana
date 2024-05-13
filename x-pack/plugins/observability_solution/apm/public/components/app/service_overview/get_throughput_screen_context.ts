@@ -43,10 +43,6 @@ export function getThroughputScreenContext({
   return {
     screenDescription: `There is a throughput chart displayed. The field values are: ${JSON.stringify(
       fieldValues
-    )}. ${
-      preferred
-        ? `The bucket size in seconds is ${preferred?.bucketSizeInSeconds}s`
-        : ''
-    }`,
+    )}. ${preferred ? `The bucket size in seconds is ${preferred?.bucketSizeInSeconds}s` : ''}`,
   };
 }

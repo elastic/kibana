@@ -24,9 +24,7 @@ export function getDeprecations({
   fleet?: APMRouteHandlerResources['plugins']['fleet'];
   branch: string;
 }) {
-  return async ({
-    savedObjectsClient,
-  }: GetDeprecationsContext): Promise<DeprecationsDetails[]> => {
+  return async ({ savedObjectsClient }: GetDeprecationsContext): Promise<DeprecationsDetails[]> => {
     const deprecations: DeprecationsDetails[] = [];
     if (!fleet) {
       return deprecations;

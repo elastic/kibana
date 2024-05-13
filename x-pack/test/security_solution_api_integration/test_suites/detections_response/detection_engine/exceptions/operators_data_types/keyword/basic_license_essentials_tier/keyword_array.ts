@@ -33,7 +33,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
 
-  describe('@serverless @ess Rule exception operators for data type keyword', () => {
+  describe('@serverles @serverlessQA @ess Rule exception operators for data type keyword', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/rule_exceptions/keyword_as_array');
     });

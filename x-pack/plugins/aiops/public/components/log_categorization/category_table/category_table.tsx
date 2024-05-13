@@ -194,7 +194,7 @@ export const CategoryTable: FC<Props> = ({
         defaultMessage: 'Actions',
       }),
       sortable: false,
-      width: '60px',
+      width: '65px',
       actions: [
         {
           name: labels.singleSelect.in,
@@ -317,14 +317,12 @@ export const CategoryTable: FC<Props> = ({
         compressed
         items={categories}
         columns={columns}
-        isSelectable={true}
         selection={selectionValue}
         itemId="key"
         onTableChange={onTableChange}
         pagination={pagination}
         sorting={sorting}
         data-test-subj="aiopsLogPatternsTable"
-        isExpandable={true}
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         rowProps={(category) => {
           return enableRowActions

@@ -11,10 +11,7 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { METRICSET_NAME } from '../../../../common/es_fields/apm';
 
-export async function getAgentConfigEtagMetrics(
-  apmEventClient: APMEventClient,
-  etag?: string
-) {
+export async function getAgentConfigEtagMetrics(apmEventClient: APMEventClient, etag?: string) {
   const params = {
     apm: {
       events: [ProcessorEvent.metric],
@@ -27,10 +24,7 @@ export async function getAgentConfigEtagMetrics(
           filter: [
             ...termQuery(METRICSET_NAME, 'agent_config'),
             ...termQuery('labels.etag', etag),
-            ...rangeQuery(
-              datemath.parse('now-15m')!.valueOf(),
-              datemath.parse('now')!.valueOf()
-            ),
+            ...rangeQuery(datemath.parse('now-15m')!.valueOf(), datemath.parse('now')!.valueOf()),
           ],
         },
       },
@@ -45,14 +39,7 @@ export async function getAgentConfigEtagMetrics(
     },
   };
 
-  const response = await apmEventClient.search(
-    'get_agent_config_etag_metrics',
-    params
-  );
+  const response = await apmEventClient.search('get_agent_config_etag_metrics', params);
 
-  return (
-    response.aggregations?.config_by_etag.buckets.map(
-      ({ key }) => key as string
-    ) ?? []
-  );
+  return response.aggregations?.config_by_etag.buckets.map(({ key }) => key as string) ?? [];
 }

@@ -53,3 +53,13 @@ export interface SentinelOneIsolationResponseMeta {
   /** The SentinelOne activity log primary description */
   activityLogEntryDescription: string;
 }
+
+export interface SentinelOneGetFileRequestMeta extends SentinelOneActionRequestCommonMeta {
+  /** The SentinelOne activity log entry id for the Get File request */
+  activityId: string;
+  /**
+   * The command batch UUID is a value that appears in both the Request and the Response, thus it
+   * is stored in the request to facilitate locating the response later by the background task
+   */
+  commandBatchUuid: string;
+}

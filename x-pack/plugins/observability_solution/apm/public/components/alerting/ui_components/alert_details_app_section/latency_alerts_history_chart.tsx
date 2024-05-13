@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  AnnotationDomainType,
-  LineAnnotation,
-  Position,
-} from '@elastic/charts';
+import { AnnotationDomainType, LineAnnotation, Position } from '@elastic/charts';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -47,6 +43,7 @@ interface LatencyAlertsHistoryChartProps {
   start: string;
   end: string;
   transactionType?: string;
+  transactionName?: string;
   latencyAggregationType: LatencyAggregationType;
   environment: string;
   timeZone: string;
@@ -58,6 +55,7 @@ export function LatencyAlertsHistoryChart({
   start,
   end,
   transactionType,
+  transactionName,
   latencyAggregationType,
   environment,
   timeZone,
@@ -69,42 +67,36 @@ export function LatencyAlertsHistoryChart({
     end,
     kuery: '',
     numBuckets: 100,
-    type: ApmDocumentType.ServiceTransactionMetric,
+    // ServiceTransactionMetric does not have transactionName as a dimension, but it is faster than TransactionMetric
+    // We use TransactionMetric only when there is a transactionName
+    type: transactionName
+      ? ApmDocumentType.TransactionMetric
+      : ApmDocumentType.ServiceTransactionMetric,
   });
   const { http, notifications } = useKibana().services;
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (
-        serviceName &&
-        start &&
-        end &&
-        transactionType &&
-        latencyAggregationType &&
-        preferred
-      ) {
-        return callApmApi(
-          `GET /internal/apm/services/{serviceName}/transactions/charts/latency`,
-          {
-            params: {
-              path: { serviceName },
-              query: {
-                environment,
-                kuery: '',
-                start,
-                end,
-                transactionType,
-                transactionName: undefined,
-                latencyAggregationType,
-                bucketSizeInSeconds: preferred.bucketSizeInSeconds,
-                documentType: preferred.source.documentType,
-                rollupInterval: preferred.source.rollupInterval,
-                useDurationSummary:
-                  preferred.source.hasDurationSummaryField &&
-                  latencyAggregationType === LatencyAggregationType.avg,
-              },
+      if (serviceName && start && end && transactionType && latencyAggregationType && preferred) {
+        return callApmApi(`GET /internal/apm/services/{serviceName}/transactions/charts/latency`, {
+          params: {
+            path: { serviceName },
+            query: {
+              environment,
+              kuery: '',
+              start,
+              end,
+              transactionType,
+              transactionName,
+              latencyAggregationType,
+              bucketSizeInSeconds: preferred.bucketSizeInSeconds,
+              documentType: preferred.source.documentType,
+              rollupInterval: preferred.source.rollupInterval,
+              useDurationSummary:
+                preferred.source.hasDurationSummaryField &&
+                latencyAggregationType === LatencyAggregationType.avg,
             },
-          }
-        );
+          },
+        });
       }
     },
     [
@@ -113,6 +105,7 @@ export function LatencyAlertsHistoryChart({
       latencyAggregationType,
       serviceName,
       start,
+      transactionName,
       transactionType,
       preferred,
     ]
@@ -134,11 +127,7 @@ export function LatencyAlertsHistoryChart({
   const latencyMaxY = getMaxY(timeseriesLatency);
   const latencyFormatter = getDurationFormatter(latencyMaxY);
   const {
-    data: {
-      totalTriggeredAlerts,
-      avgTimeToRecoverUS,
-      histogramTriggeredAlerts,
-    },
+    data: { totalTriggeredAlerts, avgTimeToRecoverUS, histogramTriggeredAlerts },
     isError,
     isLoading,
   } = useAlertsHistory({
@@ -151,12 +140,9 @@ export function LatencyAlertsHistoryChart({
 
   if (isError) {
     notifications?.toasts.addDanger({
-      title: i18n.translate(
-        'xpack.apm.alertDetails.latencyAlertHistoryChart.error.toastTitle',
-        {
-          defaultMessage: 'Latency alerts history chart error',
-        }
-      ),
+      title: i18n.translate('xpack.apm.alertDetails.latencyAlertHistoryChart.error.toastTitle', {
+        defaultMessage: 'Latency alerts history chart error',
+      }),
       text: i18n.translate(
         'xpack.apm.alertDetails.latencyAlertHistoryChart.error.toastDescription',
         {
@@ -197,23 +183,16 @@ export function LatencyAlertsHistoryChart({
               <EuiText color="danger">
                 <EuiTitle size="s">
                   <h3>
-                    {isLoading ? (
-                      <EuiLoadingSpinner size="s" />
-                    ) : (
-                      totalTriggeredAlerts || '-'
-                    )}
+                    {isLoading ? <EuiLoadingSpinner size="s" /> : totalTriggeredAlerts || '-'}
                   </h3>
                 </EuiTitle>
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="s" color="subdued">
-                {i18n.translate(
-                  'xpack.apm.latencyChartHistory.alertsTriggered',
-                  {
-                    defaultMessage: 'Alerts triggered',
-                  }
-                )}
+                {i18n.translate('xpack.apm.latencyChartHistory.alertsTriggered', {
+                  defaultMessage: 'Alerts triggered',
+                })}
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -240,12 +219,9 @@ export function LatencyAlertsHistoryChart({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="subdued">
-              {i18n.translate(
-                'xpack.apm.latencyChartHistory.avgTimeToRecover',
-                {
-                  defaultMessage: 'Avg time to recover',
-                }
-              )}
+              {i18n.translate('xpack.apm.latencyChartHistory.avgTimeToRecover', {
+                defaultMessage: 'Avg time to recover',
+              })}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -266,9 +242,7 @@ export function LatencyAlertsHistoryChart({
                   return {
                     dataValue: annotation.key,
                     header: String(annotation.doc_count),
-                    details: moment(annotation.key_as_string).format(
-                      'yyyy-MM-DD'
-                    ),
+                    details: moment(annotation.key_as_string).format('yyyy-MM-DD'),
                   };
                 }) || []
             }
@@ -279,9 +253,7 @@ export function LatencyAlertsHistoryChart({
                 opacity: 1,
               },
             }}
-            marker={
-              <EuiIcon type="warning" color={CHART_ANNOTATION_RED_COLOR} />
-            }
+            marker={<EuiIcon type="warning" color={CHART_ANNOTATION_RED_COLOR} />}
             markerBody={(annotationData) => (
               <>
                 <EuiBadge color={CHART_ANNOTATION_RED_COLOR}>

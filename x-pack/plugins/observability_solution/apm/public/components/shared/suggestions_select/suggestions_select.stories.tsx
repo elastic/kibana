@@ -52,12 +52,7 @@ const stories: Meta<Args> = {
 };
 export default stories;
 
-export const Example: Story<Args> = ({
-  allOption,
-  customOptionText,
-  field,
-  placeholder,
-}) => {
+export const Example: Story<Args> = ({ allOption, customOptionText, field, placeholder }) => {
   return (
     <SuggestionsSelect
       customOptions={[allOption]}

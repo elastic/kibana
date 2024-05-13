@@ -13,10 +13,7 @@ import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { Coordinate, TimeSeries } from '../../../../typings/timeseries';
 import { TimeseriesChartWithContext } from '../charts/timeseries_chart_with_context';
-import {
-  ChartType,
-  getTimeSeriesColor,
-} from '../charts/helper/get_timeseries_color';
+import { ChartType, getTimeSeriesColor } from '../charts/helper/get_timeseries_color';
 import { getComparisonChartTheme } from '../time_comparison/get_comparison_chart_theme';
 import { DependencyMetricChartsRouteParams } from './dependency_metric_charts_route_params';
 import { useSearchServiceDestinationMetrics } from '../../../context/time_range_metadata/use_search_service_destination_metrics';
@@ -57,10 +54,7 @@ export function DependencyFailedTransactionRateChart({
             dependencyName,
             start,
             end,
-            offset:
-              comparisonEnabled && isTimeComparison(offset)
-                ? offset
-                : undefined,
+            offset: comparisonEnabled && isTimeComparison(offset) ? offset : undefined,
             kuery,
             environment,
             spanName: spanName || '',

@@ -11,6 +11,8 @@ import { RISK_ENGINE_INIT_URL, APP_ID } from '../../../../../common/constants';
 import { TASK_MANAGER_UNAVAILABLE_ERROR } from './translations';
 import type { EntityAnalyticsRoutesDeps, InitRiskEngineResultResponse } from '../../types';
 import { withRiskEnginePrivilegeCheck } from '../risk_engine_privileges';
+import { RiskEngineAuditActions } from '../audit';
+import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 export const riskEngineInitRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
@@ -26,8 +28,19 @@ export const riskEngineInitRoute = (
     .addVersion(
       { version: '1', validate: {} },
       withRiskEnginePrivilegeCheck(getStartServices, async (context, request, response) => {
-        const siemResponse = buildSiemResponse(response);
         const securitySolution = await context.securitySolution;
+
+        securitySolution.getAuditLogger()?.log({
+          message: 'User attempted to initialize the risk engine',
+          event: {
+            action: RiskEngineAuditActions.RISK_ENGINE_INIT,
+            category: AUDIT_CATEGORY.DATABASE,
+            type: AUDIT_TYPE.CHANGE,
+            outcome: AUDIT_OUTCOME.UNKNOWN,
+          },
+        });
+
+        const siemResponse = buildSiemResponse(response);
         const [_, { taskManager }] = await getStartServices();
         const riskEngineDataClient = securitySolution.getRiskEngineDataClient();
         const riskScoreDataClient = securitySolution.getRiskScoreDataClient();

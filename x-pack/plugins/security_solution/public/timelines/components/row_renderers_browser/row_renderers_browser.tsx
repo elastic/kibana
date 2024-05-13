@@ -162,7 +162,6 @@ const RowRenderersBrowserComponent = ({
       columns={columns}
       search={search}
       sorting={initialSorting}
-      isSelectable={true}
     />
   );
 };

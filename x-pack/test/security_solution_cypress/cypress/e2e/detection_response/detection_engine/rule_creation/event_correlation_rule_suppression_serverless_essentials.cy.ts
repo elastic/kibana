@@ -28,18 +28,12 @@ const SUPPRESS_BY_FIELDS = ['agent.type'];
 describe(
   'Detection Rule Creation - EQL Rules - With Alert Suppression  - Serverless Essentials License',
   {
-    tags: ['@serverless', '@skipInServerless'],
-    // alertSuppressionForNonSequenceEqlRuleEnabled feature flag is also enabled in a global config
+    tags: ['@serverless'],
     env: {
       ftrConfig: {
         productTypes: [
           { product_line: 'security', product_tier: 'essentials' },
           { product_line: 'endpoint', product_tier: 'essentials' },
-        ],
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'alertSuppressionForNonSequenceEqlRuleEnabled',
-          ])}`,
         ],
       },
     },

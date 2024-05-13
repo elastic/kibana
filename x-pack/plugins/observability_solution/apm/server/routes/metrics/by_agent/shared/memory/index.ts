@@ -35,12 +35,9 @@ const series = {
 };
 
 const chartBase: ChartBase = {
-  title: i18n.translate(
-    'xpack.apm.serviceDetails.metrics.memoryUsageChartTitle',
-    {
-      defaultMessage: 'System memory usage',
-    }
-  ),
+  title: i18n.translate('xpack.apm.serviceDetails.metrics.memoryUsageChartTitle', {
+    defaultMessage: 'System memory usage',
+  }),
   key: 'memory_usage_chart',
   type: 'linemark',
   yUnit: 'percent',
@@ -168,10 +165,7 @@ export async function getMemoryChartData({
           memoryUsedAvg: { avg: { script: cgroupMemory.script } },
           memoryUsedMax: { max: { script: cgroupMemory.script } },
         },
-        additionalFilters: [
-          cgroupMemory.filter,
-          ...termQuery(FAAS_ID, serverlessId),
-        ],
+        additionalFilters: [cgroupMemory.filter, ...termQuery(FAAS_ID, serverlessId)],
         operationName: 'get_cgroup_memory_metrics_charts',
       });
 
@@ -190,10 +184,7 @@ export async function getMemoryChartData({
             memoryUsedAvg: { avg: { script: systemMemory.script } },
             memoryUsedMax: { max: { script: systemMemory.script } },
           },
-          additionalFilters: [
-            systemMemory.filter,
-            ...termQuery(FAAS_ID, serverlessId),
-          ],
+          additionalFilters: [systemMemory.filter, ...termQuery(FAAS_ID, serverlessId)],
           operationName: 'get_system_memory_metrics_charts',
         });
       }

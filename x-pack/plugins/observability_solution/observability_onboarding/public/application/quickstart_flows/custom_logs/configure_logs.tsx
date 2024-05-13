@@ -56,16 +56,11 @@ export function ConfigureLogs() {
   } = useKibana();
 
   const { goToStep, setState, getState } = useWizard();
-  const { integrationName, datasetName, lastCreatedIntegrationOptions } =
-    getState();
+  const { integrationName, datasetName, lastCreatedIntegrationOptions } = getState();
 
-  const onIntegrationCreation: Callbacks['onIntegrationCreation'] = (
-    integrationOptions
-  ) => {
-    const {
-      integrationName: createdIntegrationName,
-      datasets: createdDatasets,
-    } = integrationOptions;
+  const onIntegrationCreation: Callbacks['onIntegrationCreation'] = (integrationOptions) => {
+    const { integrationName: createdIntegrationName, datasets: createdDatasets } =
+      integrationOptions;
     setState((state) => ({
       ...state,
       integrationName: createdIntegrationName,
@@ -139,14 +134,9 @@ export function ConfigureLogsContent() {
     setLogFilePaths((prev) => prev.filter((_, i) => i !== index));
   }
 
-  function onLogFilePathChanges(
-    index: number,
-    event: React.FormEvent<HTMLInputElement>
-  ) {
+  function onLogFilePathChanges(index: number, event: React.FormEvent<HTMLInputElement>) {
     const filepath = event.currentTarget?.value;
-    setLogFilePaths((prev) =>
-      prev.map((path, i) => (i === index ? filepath : path))
-    );
+    setLogFilePaths((prev) => prev.map((path, i) => (i === index ? filepath : path)));
 
     if (index === 0) {
       if (updateCreateFields) {
@@ -180,22 +170,16 @@ export function ConfigureLogsContent() {
       <EuiForm fullWidth>
         <EuiText color="subdued">
           <p>
-            {i18n.translate(
-              'xpack.observability_onboarding.configureLogs.description',
-              {
-                defaultMessage: 'Configure inputs',
-              }
-            )}
+            {i18n.translate('xpack.observability_onboarding.configureLogs.description', {
+              defaultMessage: 'Configure inputs',
+            })}
           </p>
         </EuiText>
         <EuiSpacer size="l" />
         <EuiFormRow
-          label={i18n.translate(
-            'xpack.observability_onboarding.configureLogs.logFile.path',
-            {
-              defaultMessage: 'Log file path',
-            }
-          )}
+          label={i18n.translate('xpack.observability_onboarding.configureLogs.logFile.path', {
+            defaultMessage: 'Log file path',
+          })}
           helpText={i18n.translate(
             'xpack.observability_onboarding.configureLogs.logFile.helperText',
             {
@@ -205,10 +189,7 @@ export function ConfigureLogsContent() {
         >
           <>
             {logFilePaths.map((filepath, index) => (
-              <div
-                key={index}
-                data-test-subj={`obltOnboardingLogFilePath-${index}`}
-              >
+              <div key={index} data-test-subj={`obltOnboardingLogFilePath-${index}`}>
                 {index > 0 && <EuiSpacer size="s" />}
                 <EuiFlexGroup alignItems="center" gutterSize="xs">
                   <EuiFlexItem>
@@ -250,30 +231,20 @@ export function ConfigureLogsContent() {
               onClick={addLogFilePath}
               data-test-subj="obltOnboardingCustomLogsAddFilePath"
             >
-              {i18n.translate(
-                'xpack.observability_onboarding.configureLogs.logFile.addRow',
-                {
-                  defaultMessage: 'Add row',
-                }
-              )}
+              {i18n.translate('xpack.observability_onboarding.configureLogs.logFile.addRow', {
+                defaultMessage: 'Add row',
+              })}
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
         <OptionalFormRow
           label={
-            <EuiFlexGroup
-              alignItems="center"
-              gutterSize="xs"
-              responsive={false}
-            >
+            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
               <EuiFlexItem grow={false}>
-                {i18n.translate(
-                  'xpack.observability_onboarding.configureLogs.serviceName',
-                  {
-                    defaultMessage: 'Service name',
-                  }
-                )}
+                {i18n.translate('xpack.observability_onboarding.configureLogs.serviceName', {
+                  defaultMessage: 'Service name',
+                })}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiIconTip
@@ -333,18 +304,11 @@ export function ConfigureLogsContent() {
           <EuiSpacer size="l" />
           <EuiFormRow
             label={
-              <EuiFlexGroup
-                alignItems="center"
-                gutterSize="xs"
-                responsive={false}
-              >
+              <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  {i18n.translate(
-                    'xpack.observability_onboarding.configureLogs.namespace',
-                    {
-                      defaultMessage: 'Namespace',
-                    }
-                  )}
+                  {i18n.translate('xpack.observability_onboarding.configureLogs.namespace', {
+                    defaultMessage: 'Namespace',
+                  })}
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiIconTip
@@ -374,12 +338,9 @@ export function ConfigureLogsContent() {
                         'https://www.elastic.co/guide/en/fleet/current/data-streams.html#data-streams-naming-scheme'
                       }
                     >
-                      {i18n.translate(
-                        'xpack.observability_onboarding.configureLogs.learnMore',
-                        {
-                          defaultMessage: 'Learn more',
-                        }
-                      )}
+                      {i18n.translate('xpack.observability_onboarding.configureLogs.learnMore', {
+                        defaultMessage: 'Learn more',
+                      })}
                     </EuiLink>
                   ),
                 }}
@@ -400,12 +361,9 @@ export function ConfigureLogsContent() {
           </EuiFormRow>
           <EuiSpacer size="l" />
           <OptionalFormRow
-            label={i18n.translate(
-              'xpack.observability_onboarding.configureLogs.customConfig',
-              {
-                defaultMessage: 'Custom configurations',
-              }
-            )}
+            label={i18n.translate('xpack.observability_onboarding.configureLogs.customConfig', {
+              defaultMessage: 'Custom configurations',
+            })}
             helpText={
               <FormattedMessage
                 id="xpack.observability_onboarding.configureLogs.customConfig.helper"
@@ -420,12 +378,9 @@ export function ConfigureLogsContent() {
                         'https://www.elastic.co/guide/en/beats/filebeat/current/multiline-examples.html'
                       }
                     >
-                      {i18n.translate(
-                        'xpack.observability_onboarding.configureLogs.learnMore',
-                        {
-                          defaultMessage: 'Learn more',
-                        }
-                      )}
+                      {i18n.translate('xpack.observability_onboarding.configureLogs.learnMore', {
+                        defaultMessage: 'Learn more',
+                      })}
                     </EuiLink>
                   ),
                 }}
@@ -440,9 +395,7 @@ export function ConfigureLogsContent() {
           </OptionalFormRow>
         </EuiAccordion>
         <EuiSpacer size="l" />
-        <ConnectedCustomIntegrationsForm
-          testSubjects={customIntegrationsTestSubjects}
-        />
+        <ConnectedCustomIntegrationsForm testSubjects={customIntegrationsTestSubjects} />
       </EuiForm>
     </StepModal>
   );

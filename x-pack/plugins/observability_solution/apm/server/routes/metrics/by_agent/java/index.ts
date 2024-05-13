@@ -52,9 +52,7 @@ export function getJavaMetricsCharts({
     };
 
     return Promise.all([
-      isOpenTelemetry
-        ? getOTelSystemCPUChartDataForJava(options)
-        : getCPUChartData(options),
+      isOpenTelemetry ? getOTelSystemCPUChartDataForJava(options) : getCPUChartData(options),
       getMemoryChartData(options),
       getHeapMemoryChart(options),
       getNonHeapMemoryChart(options),

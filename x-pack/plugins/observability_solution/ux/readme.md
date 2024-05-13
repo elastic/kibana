@@ -6,7 +6,7 @@ https://docs.elastic.dev/kibana-dev-docs/welcome
 
 The tests are managed via the `scripts/e2e.js` file. This script accepts numerous options.
 
-From the kibana root you can run `node x-pack/plugins/observability_solution/ux/scripts/e2e.js` to simply stand up the stack, load data, and run the tests.
+From the Kibana root you can run `node x-pack/plugins/observability_solution/ux/scripts/e2e.js` to simply stand up the stack, load data, and run the tests.
 
 If you are developing a new test, it is better to stand up the stack in one shell and load data/run tests in a second session. You can do this by running:
 

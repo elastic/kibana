@@ -25,10 +25,9 @@ import { offsetRt } from '../../../common/comparison_rt';
 import { diagnosticsRoute } from '../app/diagnostics';
 import { TransactionDetailsByNameLink } from '../app/transaction_details_link';
 
-const ServiceGroupsTitle = i18n.translate(
-  'xpack.apm.views.serviceGroups.title',
-  { defaultMessage: 'Services' }
-);
+const ServiceGroupsTitle = i18n.translate('xpack.apm.views.serviceGroups.title', {
+  defaultMessage: 'Services',
+});
 
 /**
  * The array of route definitions to be used when the application

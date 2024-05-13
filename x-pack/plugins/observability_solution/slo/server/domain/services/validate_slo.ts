@@ -27,7 +27,7 @@ export function validateSLO(slo: SLODefinition) {
     throw new IllegalArgumentError('Invalid id');
   }
 
-  if (!isValidTargetNumber(slo.objective.target)) {
+  if (!isValidObjectiveTarget(slo.objective.target)) {
     throw new IllegalArgumentError('Invalid objective.target');
   }
 
@@ -48,7 +48,7 @@ export function validateSLO(slo: SLODefinition) {
   if (timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)) {
     if (
       slo.objective.timesliceTarget === undefined ||
-      !isValidTargetNumber(slo.objective.timesliceTarget)
+      !isValidTimesliceTarget(slo.objective.timesliceTarget)
     ) {
       throw new IllegalArgumentError('Invalid objective.timeslice_target');
     }
@@ -80,8 +80,12 @@ function isValidId(id: string): boolean {
   return MIN_ID_LENGTH <= id.length && id.length <= MAX_ID_LENGTH;
 }
 
-function isValidTargetNumber(value: number): boolean {
+function isValidObjectiveTarget(value: number): boolean {
   return value > 0 && value < 1;
+}
+
+function isValidTimesliceTarget(value: number): boolean {
+  return value >= 0 && value <= 1;
 }
 
 function isValidRollingTimeWindowDuration(duration: Duration): boolean {

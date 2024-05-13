@@ -9,6 +9,7 @@
 import { CoreEditor, Range, Token } from '../../types';
 
 export interface ResultTerm {
+  meta?: string;
   context?: AutoCompleteContext;
   insertValue?: string;
   name?: string;

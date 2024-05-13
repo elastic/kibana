@@ -31,7 +31,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
 
-  describe('@ess @serverless Rule detects against a keyword and constant_keyword of event.dataset', () => {
+  describe('@ess @serverless @serverlessQA Rule detects against a keyword and constant_keyword of event.dataset', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/rule_keyword_family/const_keyword');
       await esArchiver.load('x-pack/test/functional/es_archives/rule_keyword_family/keyword');

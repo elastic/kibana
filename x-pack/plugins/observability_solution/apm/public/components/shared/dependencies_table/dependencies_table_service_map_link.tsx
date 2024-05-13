@@ -10,10 +10,7 @@ import { EuiLink } from '@elastic/eui';
 
 export function DependenciesTableServiceMapLink({ href }: { href: string }) {
   return (
-    <EuiLink
-      data-test-subj="apmDependenciesTableServiceMapLinkViewServiceMapLink"
-      href={href}
-    >
+    <EuiLink data-test-subj="apmDependenciesTableServiceMapLinkViewServiceMapLink" href={href}>
       {i18n.translate('xpack.apm.dependenciesTable.serviceMapLinkText', {
         defaultMessage: 'View service map',
       })}

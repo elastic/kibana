@@ -1158,7 +1158,7 @@
         "label": "SOLUTION_NAV_FEATURE_FLAG_NAME",
         "description": [],
         "signature": [
-          "\"navigation.solutionNavEnabled\""
+          "\"solutionNavEnabled\""
         ],
         "path": "src/plugins/navigation/common/constants.ts",
         "deprecated": false,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useCallback } from 'react';
+import React, { FC, PropsWithChildren, useEffect, useCallback } from 'react';
 import { Redirect, useParams } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { useDispatch } from 'react-redux';
@@ -110,7 +110,7 @@ const ExportWorkpadRouteComponent: FC<{ route: WorkpadRouteProps }> = ({ route: 
   );
 };
 
-export const ExportRouteManager: FC = ({ children }) => {
+export const ExportRouteManager: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const params = useParams<WorkpadPageRouteParams>();
   usePageSync();
 
@@ -123,7 +123,7 @@ export const ExportRouteManager: FC = ({ children }) => {
   return <>{children}</>;
 };
 
-export const WorkpadHistoryManager: FC = ({ children }) => {
+export const WorkpadHistoryManager: FC<PropsWithChildren<unknown>> = ({ children }) => {
   useRestoreHistory();
   useWorkpadHistory();
   usePageSync();

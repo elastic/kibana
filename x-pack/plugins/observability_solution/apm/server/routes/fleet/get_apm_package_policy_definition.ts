@@ -12,10 +12,7 @@ import {
   POLICY_ELASTIC_AGENT_ON_CLOUD,
   INPUT_VAR_NAME_TO_SCHEMA_PATH,
 } from '../../../common/fleet';
-import {
-  APMPluginSetupDependencies,
-  APMPluginStartDependencies,
-} from '../../types';
+import { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../types';
 import { getLatestApmPackage } from './get_latest_apm_package';
 import { translateLegacySchemaPaths } from './translate_legacy_schema_paths';
 
@@ -76,20 +73,21 @@ function getApmPackageInputVars({
     ), // fixes issue where "*" needs to be wrapped in quotes to be parsed as a YAML string
   };
 
-  return policyTemplateInputVars.reduce<
-    Record<string, { type: string; value: any }>
-  >((acc, registryVarsEntry) => {
-    const { name, type, default: defaultValue } = registryVarsEntry;
-    acc[name] = {
-      type,
-      value:
-        overrideValues[name] ??
-        apmServerSchema[INPUT_VAR_NAME_TO_SCHEMA_PATH[name]] ??
-        defaultValue ??
-        '',
-    };
-    return acc;
-  }, {});
+  return policyTemplateInputVars.reduce<Record<string, { type: string; value: any }>>(
+    (acc, registryVarsEntry) => {
+      const { name, type, default: defaultValue } = registryVarsEntry;
+      acc[name] = {
+        type,
+        value:
+          overrideValues[name] ??
+          apmServerSchema[INPUT_VAR_NAME_TO_SCHEMA_PATH[name]] ??
+          defaultValue ??
+          '',
+      };
+      return acc;
+    },
+    {}
+  );
 }
 
 function ensureValidMultiText(textMultiValue: string[] | undefined) {

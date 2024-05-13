@@ -199,7 +199,7 @@ export interface MeteringIndicesStatsResponse {
 export type DataQualityIndexCheckedParams = DataQualityCheckAllCompletedParams & {
   errorCount?: number;
   ilmPhase?: string;
-  indexId?: string;
+  indexId?: string | null;
   indexName: string;
   sameFamilyFields?: string[];
   unallowedMappingFields?: string[];

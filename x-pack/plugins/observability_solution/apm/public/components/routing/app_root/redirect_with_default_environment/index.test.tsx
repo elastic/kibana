@@ -21,21 +21,16 @@ describe('RedirectWithDefaultEnvironment', () => {
     history = createMemoryHistory();
   });
 
-  function renderUrl(
-    location: Pick<Location, 'pathname' | 'search'>,
-    defaultSetting: string
-  ) {
+  function renderUrl(location: Pick<Location, 'pathname' | 'search'>, defaultSetting: string) {
     history.replace(location);
 
-    jest
-      .spyOn(useApmPluginContextExports, 'useApmPluginContext')
-      .mockReturnValue({
-        core: {
-          uiSettings: {
-            get: () => defaultSetting,
-          },
+    jest.spyOn(useApmPluginContextExports, 'useApmPluginContext').mockReturnValue({
+      core: {
+        uiSettings: {
+          get: () => defaultSetting,
         },
-      } as any);
+      },
+    } as any);
 
     return render(
       <RouterProvider history={history} router={apmRouter as any}>
@@ -70,9 +65,7 @@ describe('RedirectWithDefaultEnvironment', () => {
       ''
     );
 
-    expect(qs.parse(history.entries[0].search).environment).toEqual(
-      ENVIRONMENT_ALL.value
-    );
+    expect(qs.parse(history.entries[0].search).environment).toEqual(ENVIRONMENT_ALL.value);
   });
 
   it('redirects to the default environment if set', () => {
@@ -84,9 +77,7 @@ describe('RedirectWithDefaultEnvironment', () => {
       'production'
     );
 
-    expect(qs.parse(history.entries[0].search).environment).toEqual(
-      'production'
-    );
+    expect(qs.parse(history.entries[0].search).environment).toEqual('production');
   });
 
   it('does not redirect when an environment has been set', () => {
@@ -100,9 +91,7 @@ describe('RedirectWithDefaultEnvironment', () => {
       'production'
     );
 
-    expect(qs.parse(history.entries[0].search).environment).toEqual(
-      'development'
-    );
+    expect(qs.parse(history.entries[0].search).environment).toEqual('development');
   });
 
   it('does not redirect for the service overview', () => {

@@ -9,6 +9,12 @@ import { FtrConfigProviderContext } from '@kbn/test';
 import { merge } from 'lodash';
 import supertest from 'supertest';
 import { format, UrlObject } from 'url';
+import type { EBTHelpersContract } from '@kbn/analytics-ftr-helpers-plugin/common/types';
+import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import {
+  KibanaEBTServerProvider,
+  KibanaEBTUIProvider,
+} from '../../../../test/analytics/services/kibana_ebt';
 import {
   ObservabilityAIAssistantFtrConfig,
   CreateTest as CreateTestAPI,
@@ -32,6 +38,11 @@ export interface TestConfig extends CreateTestAPI {
           testUser: ObservabilityAIAssistantAPIClient;
         }
       >;
+      kibana_ebt_server: (context: InheritedFtrProviderContext) => EBTHelpersContract;
+      kibana_ebt_ui: (context: InheritedFtrProviderContext) => EBTHelpersContract;
+      apmSynthtraceEsClient: (
+        context: InheritedFtrProviderContext
+      ) => Promise<ApmSynthtraceEsClient>;
     };
 }
 
@@ -76,6 +87,8 @@ export function createTestConfig(
               ),
             };
           },
+          kibana_ebt_server: KibanaEBTServerProvider,
+          kibana_ebt_ui: KibanaEBTUIProvider,
         },
       }
     );

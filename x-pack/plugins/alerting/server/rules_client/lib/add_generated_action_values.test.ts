@@ -21,6 +21,7 @@ import { AlertingAuthorization } from '../../authorization';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { ConstructorOptions } from '../rules_client';
+import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
 import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
 
 jest.mock('uuid', () => ({
@@ -62,6 +63,7 @@ describe('addGeneratedActionValues()', () => {
     getAuthenticationAPIKey: jest.fn(),
     getAlertIndicesAlias: jest.fn(),
     alertsService: null,
+    backfillClient: backfillClientMock.create(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
     connectorAdapterRegistry: new ConnectorAdapterRegistry(),
     isSystemAction: jest.fn(),
@@ -146,7 +148,7 @@ describe('addGeneratedActionValues()', () => {
   });
 
   test('throws error if KQL is not valid', async () => {
-    expect(async () =>
+    await expect(async () =>
       addGeneratedActionValues(
         [
           {

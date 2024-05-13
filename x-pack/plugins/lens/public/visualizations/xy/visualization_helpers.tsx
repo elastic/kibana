@@ -25,11 +25,6 @@ import {
   XYReferenceLineLayerConfig,
   SeriesType,
   XYByReferenceAnnotationLayerConfig,
-  XYPersistedAnnotationLayerConfig,
-  XYPersistedByReferenceAnnotationLayerConfig,
-  XYPersistedLinkedByValueAnnotationLayerConfig,
-  XYPersistedLayerConfig,
-  XYPersistedByValueAnnotationLayerConfig,
   XYByValueAnnotationLayerConfig,
 } from './types';
 import { isHorizontalChart } from './state_helpers';
@@ -154,31 +149,10 @@ export const isAnnotationsLayer = (
 ): layer is XYAnnotationLayerConfig =>
   layer.layerType === layerTypes.ANNOTATIONS && 'indexPatternId' in layer;
 
-export const isPersistedAnnotationsLayer = (
-  layer: XYPersistedLayerConfig
-): layer is XYPersistedAnnotationLayerConfig =>
-  layer.layerType === layerTypes.ANNOTATIONS && !('indexPatternId' in layer);
-
-export const isPersistedByValueAnnotationsLayer = (
-  layer: XYPersistedLayerConfig
-): layer is XYPersistedByValueAnnotationLayerConfig =>
-  isPersistedAnnotationsLayer(layer) &&
-  (layer.persistanceType === 'byValue' || !layer.persistanceType);
-
 export const isByReferenceAnnotationsLayer = (
   layer: XYLayerConfig
 ): layer is XYByReferenceAnnotationLayerConfig =>
   'annotationGroupId' in layer && '__lastSaved' in layer;
-
-export const isPersistedByReferenceAnnotationsLayer = (
-  layer: XYPersistedAnnotationLayerConfig
-): layer is XYPersistedByReferenceAnnotationLayerConfig =>
-  isPersistedAnnotationsLayer(layer) && layer.persistanceType === 'byReference';
-
-export const isPersistedLinkedByValueAnnotationsLayer = (
-  layer: XYPersistedAnnotationLayerConfig
-): layer is XYPersistedLinkedByValueAnnotationLayerConfig =>
-  isPersistedAnnotationsLayer(layer) && layer.persistanceType === 'linked';
 
 export const getAnnotationsLayers = (layers: Array<Pick<XYLayerConfig, 'layerType'>>) =>
   (layers || []).filter((layer): layer is XYAnnotationLayerConfig => isAnnotationsLayer(layer));

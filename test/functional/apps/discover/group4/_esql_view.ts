@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const defaultSettings = {
     defaultIndex: 'logstash-*',
-    'discover:enableESQL': true,
+    enableESQL: true,
   };
 
   describe('discover esql view', async function () {
@@ -524,6 +524,68 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         expect(await testSubjects.getVisibleText('dataGridColumnSortingButton')).to.be(
           'Sort fields\n2'
+        );
+      });
+    });
+
+    describe('filtering by clicking on the table', () => {
+      beforeEach(async () => {
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
+      });
+
+      it('should append a where clause by clicking the table', async () => {
+        await PageObjects.discover.selectTextBaseLang();
+        const testQuery = `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB`;
+        await monacoEditor.setCodeEditorValue(testQuery);
+
+        await testSubjects.click('querySubmitButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+
+        await testSubjects.click('TextBasedLangEditor-expand');
+        await dataGrid.clickCellFilterForButton(0, 3);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+
+        const editorValue = await monacoEditor.getCodeEditorValue();
+        expect(editorValue).to.eql(
+          `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB\n| where \`geo.dest\`=="BT"`
+        );
+
+        // negate
+        await dataGrid.clickCellFilterOutButton(0, 3);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+
+        const newValue = await monacoEditor.getCodeEditorValue();
+        expect(newValue).to.eql(
+          `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB\n| where \`geo.dest\`!="BT"`
+        );
+      });
+
+      it('should append an end in existing where clause by clicking the table', async () => {
+        await PageObjects.discover.selectTextBaseLang();
+        const testQuery = `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB | where countB > 0`;
+        await monacoEditor.setCodeEditorValue(testQuery);
+
+        await testSubjects.click('querySubmitButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+
+        await testSubjects.click('TextBasedLangEditor-expand');
+        await dataGrid.clickCellFilterForButton(0, 3);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+
+        const editorValue = await monacoEditor.getCodeEditorValue();
+        expect(editorValue).to.eql(
+          `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB | where countB > 0\nand \`geo.dest\`=="BT"`
         );
       });
     });

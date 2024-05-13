@@ -11,7 +11,6 @@ import { mount } from 'enzyme';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { useHistory, useParams } from 'react-router-dom';
 
-import '../../../common/mock/match_media';
 import '../../../common/mock/formatted_relative';
 import { SecurityPageName } from '../../../app/types';
 import { TimelineType } from '../../../../common/api/timeline';

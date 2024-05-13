@@ -4,10 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  Sort,
-  QueryDslQueryContainer,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { Sort, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import {
@@ -89,10 +86,7 @@ export async function getTraceSamples({
         track_total_hits: false,
         query: {
           bool: {
-            filter: [
-              ...commonFilters,
-              { term: { [TRANSACTION_SAMPLED]: true } },
-            ],
+            filter: [...commonFilters, { term: { [TRANSACTION_SAMPLED]: true } }],
             should: [
               { term: { [TRACE_ID]: traceId } },
               { term: { [TRANSACTION_ID]: transactionId } },

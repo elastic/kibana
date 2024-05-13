@@ -11,18 +11,11 @@ import { v4 as uuidv4 } from 'uuid';
 import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import {
-  FETCH_STATUS,
-  isPending,
-  useFetcher,
-} from '../../../hooks/use_fetcher';
+import { FETCH_STATUS, isPending, useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { InstancesLatencyDistributionChart } from '../../shared/charts/instances_latency_distribution_chart';
-import {
-  ServiceOverviewInstancesTable,
-  TableOptions,
-} from './service_overview_instances_table';
+import { ServiceOverviewInstancesTable, TableOptions } from './service_overview_instances_table';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { InstancesSortField } from '../../../../common/instances';
 
@@ -82,10 +75,7 @@ export function ServiceOverviewInstancesChartAndTable({
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const {
-    data: mainStatsData = INITIAL_STATE_MAIN_STATS,
-    status: mainStatsStatus,
-  } = useFetcher(
+  const { data: mainStatsData = INITIAL_STATE_MAIN_STATS, status: mainStatsStatus } = useFetcher(
     (callApmApi) => {
       if (!transactionType && transactionTypeStatus === FETCH_STATUS.SUCCESS) {
         return Promise.resolve(INITIAL_STATE_MAIN_STATS);
@@ -105,15 +95,11 @@ export function ServiceOverviewInstancesChartAndTable({
             query: {
               environment,
               kuery,
-              latencyAggregationType:
-                latencyAggregationType as LatencyAggregationType,
+              latencyAggregationType: latencyAggregationType as LatencyAggregationType,
               start,
               end,
               transactionType,
-              offset:
-                comparisonEnabled && isTimeComparison(offset)
-                  ? offset
-                  : undefined,
+              offset: comparisonEnabled && isTimeComparison(offset) ? offset : undefined,
               sortField: tableOptions.sort.field,
               sortDirection: tableOptions.sort.direction,
             },
@@ -150,12 +136,8 @@ export function ServiceOverviewInstancesChartAndTable({
     ]
   );
 
-  const {
-    currentPeriodItems,
-    previousPeriodItems,
-    requestId,
-    currentPeriodItemsCount,
-  } = mainStatsData;
+  const { currentPeriodItems, previousPeriodItems, requestId, currentPeriodItemsCount } =
+    mainStatsData;
 
   const currentPageItems = currentPeriodItems.slice(
     pageIndex * PAGE_SIZE,
@@ -187,19 +169,13 @@ export function ServiceOverviewInstancesChartAndTable({
             query: {
               environment,
               kuery,
-              latencyAggregationType:
-                latencyAggregationType as LatencyAggregationType,
+              latencyAggregationType: latencyAggregationType as LatencyAggregationType,
               start,
               end,
               numBuckets: 20,
               transactionType,
-              serviceNodeIds: JSON.stringify(
-                currentPageItems.map((item) => item.serviceNodeName)
-              ),
-              offset:
-                comparisonEnabled && isTimeComparison(offset)
-                  ? offset
-                  : undefined,
+              serviceNodeIds: JSON.stringify(currentPageItems.map((item) => item.serviceNodeName)),
+              offset: comparisonEnabled && isTimeComparison(offset) ? offset : undefined,
             },
           },
         }

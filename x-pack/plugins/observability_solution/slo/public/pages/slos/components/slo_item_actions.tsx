@@ -30,6 +30,7 @@ interface Props {
   isActionsPopoverOpen: boolean;
   setIsActionsPopoverOpen: (value: boolean) => void;
   setDeleteConfirmationModalOpen: (value: boolean) => void;
+  setResetConfirmationModalOpen: (value: boolean) => void;
   setIsAddRuleFlyoutOpen: (value: boolean) => void;
   setIsEditRuleFlyoutOpen: (value: boolean) => void;
   setDashboardAttachmentReady?: (value: boolean) => void;
@@ -65,6 +66,7 @@ export function SloItemActions({
   setIsAddRuleFlyoutOpen,
   setIsEditRuleFlyoutOpen,
   setDeleteConfirmationModalOpen,
+  setResetConfirmationModalOpen,
   setDashboardAttachmentReady,
   btnProps,
 }: Props) {
@@ -77,12 +79,13 @@ export function SloItemActions({
   const { hasWriteCapabilities } = useCapabilities();
   const navigateToClone = useCloneSlo();
 
-  const { handleNavigateToRules, sloEditUrl, remoteDeleteUrl, sloDetailsUrl } = useSloActions({
-    slo,
-    rules,
-    setIsEditRuleFlyoutOpen,
-    setIsActionsPopoverOpen,
-  });
+  const { handleNavigateToRules, sloEditUrl, remoteDeleteUrl, remoteResetUrl, sloDetailsUrl } =
+    useSloActions({
+      slo,
+      rules,
+      setIsEditRuleFlyoutOpen,
+      setIsActionsPopoverOpen,
+    });
 
   const handleClickActions = () => {
     setIsActionsPopoverOpen(!isActionsPopoverOpen);
@@ -101,6 +104,15 @@ export function SloItemActions({
       window.open(remoteDeleteUrl, '_blank');
     } else {
       setDeleteConfirmationModalOpen(true);
+      setIsActionsPopoverOpen(false);
+    }
+  };
+
+  const handleReset = () => {
+    if (!!remoteResetUrl) {
+      window.open(remoteResetUrl, '_blank');
+    } else {
+      setResetConfirmationModalOpen(true);
       setIsActionsPopoverOpen(false);
     }
   };
@@ -235,6 +247,20 @@ export function SloItemActions({
             data-test-subj="sloActionsDelete"
           >
             {i18n.translate('xpack.slo.item.actions.delete', { defaultMessage: 'Delete' })}
+            {showRemoteLinkIcon}
+          </EuiContextMenuItem>,
+          ,
+          <EuiContextMenuItem
+            key="reset"
+            icon="refresh"
+            disabled={!hasWriteCapabilities || hasUndefinedRemoteKibanaUrl}
+            onClick={handleReset}
+            toolTipContent={
+              hasUndefinedRemoteKibanaUrl ? NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL : ''
+            }
+            data-test-subj="sloActionsReset"
+          >
+            {i18n.translate('xpack.slo.item.actions.reset', { defaultMessage: 'Reset' })}
             {showRemoteLinkIcon}
           </EuiContextMenuItem>,
         ].concat(

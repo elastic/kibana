@@ -16,10 +16,10 @@ export interface UseFetchDataViewsResponse {
   data: DataViewListItem[] | undefined;
 }
 
-export function useFetchDataViews(): UseFetchDataViewsResponse {
+export function useFetchDataViews() {
   const { dataViews } = useKibana().services;
 
-  const { isLoading, isError, isSuccess, data } = useQuery({
+  const { isLoading, isError, isSuccess, data, refetch } = useQuery({
     queryKey: ['fetchDataViewsList'],
     queryFn: async () => {
       return dataViews.getIdsWithTitle();
@@ -29,5 +29,5 @@ export function useFetchDataViews(): UseFetchDataViewsResponse {
     refetchOnWindowFocus: false,
   });
 
-  return { isLoading, isError, isSuccess, data };
+  return { isLoading, isError, isSuccess, data, refetch };
 }

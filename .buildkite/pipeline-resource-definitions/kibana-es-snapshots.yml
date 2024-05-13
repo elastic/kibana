@@ -21,8 +21,8 @@ spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
-      allow_rebuilds: false
-      branch_configuration: main 8.13 7.17
+      allow_rebuilds: true
+      branch_configuration: main 8.14 7.17
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/es_snapshots/build.yml
@@ -34,7 +34,7 @@ spec:
         trigger_mode: none
         build_tags: false
         prefix_pull_request_fork_branch_names: false
-        skip_pull_request_builds_for_existing_commits: true
+        skip_pull_request_builds_for_existing_commits: false
       teams:
         everyone:
           access_level: BUILD_AND_READ
@@ -49,10 +49,10 @@ spec:
           cronline: 0 9 * * * America/New_York
           message: Daily build
           branch: main
-        Daily build (8.13):
+        Daily build (8.14):
           cronline: 0 9 * * * America/New_York
           message: Daily build
-          branch: '8.13'
+          branch: '8.14'
         Daily build (7.17):
           cronline: 0 9 * * * America/New_York
           message: Daily build
@@ -81,8 +81,8 @@ spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
-      allow_rebuilds: false
-      branch_configuration: main 8.13 7.17
+      allow_rebuilds: true
+      branch_configuration: main 8.14 7.17
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/es_snapshots/promote.yml
@@ -94,7 +94,7 @@ spec:
         trigger_mode: none
         build_tags: false
         prefix_pull_request_fork_branch_names: false
-        skip_pull_request_builds_for_existing_commits: true
+        skip_pull_request_builds_for_existing_commits: false
       teams:
         everyone:
           access_level: BUILD_AND_READ
@@ -128,8 +128,9 @@ spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
-      allow_rebuilds: false
-      branch_configuration: main 8.13 7.17
+        REPORT_FAILED_TESTS_TO_GITHUB: 'true'
+      allow_rebuilds: true
+      branch_configuration: main 8.14 7.17
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/es_snapshots/verify.yml
@@ -141,7 +142,7 @@ spec:
         trigger_mode: none
         build_tags: false
         prefix_pull_request_fork_branch_names: false
-        skip_pull_request_builds_for_existing_commits: true
+        skip_pull_request_builds_for_existing_commits: false
       teams:
         everyone:
           access_level: BUILD_AND_READ

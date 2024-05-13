@@ -12,8 +12,10 @@ import {
   ApiConfig,
   Replacements,
   API_VERSIONS,
+  ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
 } from '@kbn/elastic-assistant-common';
 import { Conversation, ClientMessage } from '../../../assistant_context/types';
+import { FetchConversationsResponse } from './use_fetch_current_user_conversations';
 
 export interface GetConversationByIdParams {
   http: HttpSetup;
@@ -52,6 +54,44 @@ export const getConversationById = async ({
       title: i18n.translate('xpack.elasticAssistant.conversations.getConversationError', {
         defaultMessage: 'Error fetching conversation by id {id}',
         values: { id },
+      }),
+    });
+    throw error;
+  }
+};
+
+/**
+ * API call for getting all user conversations.
+ *
+ * @param {Object} options - The options object.
+ * @param {HttpSetup} options.http - HttpSetup
+ * @param {IToasts} [options.toasts] - IToasts
+ * @param {AbortSignal} [options.signal] - AbortSignal
+ *
+ * @returns {Promise<FetchConversationsResponse>}
+ */
+export const getUserConversations = async ({
+  http,
+  signal,
+  toasts,
+}: {
+  http: HttpSetup;
+  toasts?: IToasts;
+  signal?: AbortSignal | undefined;
+}) => {
+  try {
+    return await http.fetch<FetchConversationsResponse>(
+      ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
+      {
+        method: 'GET',
+        version: API_VERSIONS.public.v1,
+        signal,
+      }
+    );
+  } catch (error) {
+    toasts?.addError(error.body && error.body.message ? new Error(error.body.message) : error, {
+      title: i18n.translate('xpack.elasticAssistant.conversations.getUserConversationsError', {
+        defaultMessage: 'Error fetching conversations',
       }),
     });
     throw error;

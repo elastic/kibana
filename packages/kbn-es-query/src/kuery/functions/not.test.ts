@@ -14,8 +14,6 @@ import * as ast from '../ast';
 import * as not from './not';
 import { KqlNotFunctionNode } from './not';
 
-jest.mock('../grammar');
-
 const childNode = nodeTypes.function.buildNode('is', 'extension', 'jpg');
 
 describe('kuery functions', () => {

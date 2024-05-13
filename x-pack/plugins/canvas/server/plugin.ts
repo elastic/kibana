@@ -99,7 +99,7 @@ export class CanvasPlugin implements Plugin {
 
   public start(coreStart: CoreStart) {
     const client = coreStart.savedObjects.createInternalRepository();
-    initializeTemplates(client);
+    initializeTemplates(client).catch(() => {});
   }
 
   public stop() {}

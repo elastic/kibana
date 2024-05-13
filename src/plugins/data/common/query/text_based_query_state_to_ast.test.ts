@@ -32,7 +32,7 @@ describe('textBasedQueryStateToExpressionAst', () => {
   it('returns an object with the correct structure for an SQL query', async () => {
     const actual = await textBasedQueryStateToExpressionAst({
       filters: [],
-      query: { sql: 'SELECT * FROM foo' },
+      query: { esql: 'FROM foo' },
       time: {
         from: 'now',
         to: 'now+7d',
@@ -50,7 +50,7 @@ describe('textBasedQueryStateToExpressionAst', () => {
     expect(actual).toHaveProperty(
       'chain.2.arguments',
       expect.objectContaining({
-        query: ['SELECT * FROM foo'],
+        query: ['FROM foo'],
       })
     );
   });
@@ -58,7 +58,7 @@ describe('textBasedQueryStateToExpressionAst', () => {
   it('returns an object with the correct structure for an ES|QL query', async () => {
     const actual = await textBasedQueryStateToExpressionAst({
       filters: [],
-      query: { sql: 'FROM foo' },
+      query: { esql: 'FROM foo' },
       time: {
         from: 'now',
         to: 'now+7d',

@@ -34,8 +34,7 @@ export async function updateToV3({
   const v2Jobs = allJobs.filter((job) => job.version === 2);
 
   const activeV2Jobs = v2Jobs.filter(
-    (job) =>
-      job.jobState === JOB_STATE.OPENED || job.jobState === JOB_STATE.OPENING
+    (job) => job.jobState === JOB_STATE.OPENED || job.jobState === JOB_STATE.OPENING
   );
 
   const environments = uniq(v2Jobs.map((job) => job.environment));

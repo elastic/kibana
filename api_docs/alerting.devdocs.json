@@ -310,6 +310,22 @@
             }
           ],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "alerting",
+          "id": "def-public.PluginStartContract.getMaxAlertsPerRun",
+          "type": "Function",
+          "tags": [],
+          "label": "getMaxAlertsPerRun",
+          "description": [],
+          "signature": [
+            "() => number"
+          ],
+          "path": "x-pack/plugins/alerting/public/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",
@@ -2041,7 +2057,7 @@
           },
           "<Params>"
         ],
-        "path": "x-pack/plugins/alerting/server/rules_client/methods/find.ts",
+        "path": "x-pack/plugins/alerting/server/application/rule/methods/find/find_rules.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2052,7 +2068,7 @@
             "tags": [],
             "label": "page",
             "description": [],
-            "path": "x-pack/plugins/alerting/server/rules_client/methods/find.ts",
+            "path": "x-pack/plugins/alerting/server/application/rule/methods/find/find_rules.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2063,7 +2079,7 @@
             "tags": [],
             "label": "perPage",
             "description": [],
-            "path": "x-pack/plugins/alerting/server/rules_client/methods/find.ts",
+            "path": "x-pack/plugins/alerting/server/application/rule/methods/find/find_rules.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2074,7 +2090,7 @@
             "tags": [],
             "label": "total",
             "description": [],
-            "path": "x-pack/plugins/alerting/server/rules_client/methods/find.ts",
+            "path": "x-pack/plugins/alerting/server/application/rule/methods/find/find_rules.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2095,7 +2111,7 @@
               },
               "<Params>[]"
             ],
-            "path": "x-pack/plugins/alerting/server/rules_client/methods/find.ts",
+            "path": "x-pack/plugins/alerting/server/application/rule/methods/find/find_rules.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3234,7 +3250,8 @@
             "label": "executionStatus",
             "description": [],
             "signature": [
-              "RuleExecutionStatus"
+              "RuleExecutionStatus",
+              " | undefined"
             ],
             "path": "x-pack/plugins/alerting/server/application/rule/types/rule.ts",
             "deprecated": false,
@@ -3248,7 +3265,7 @@
             "label": "monitoring",
             "description": [],
             "signature": [
-              "Readonly<{} & { run: Readonly<{} & { history: Readonly<{ outcome?: Readonly<{ warning?: \"execute\" | \"unknown\" | \"license\" | \"read\" | \"decrypt\" | \"timeout\" | \"disabled\" | \"validate\" | \"maxExecutableActions\" | \"maxAlerts\" | \"maxQueuedActions\" | null | undefined; outcomeOrder?: number | undefined; outcomeMsg?: string[] | null | undefined; } & { outcome: \"warning\" | \"succeeded\" | \"failed\"; alertsCount: Readonly<{ active?: number | null | undefined; new?: number | null | undefined; recovered?: number | null | undefined; ignored?: number | null | undefined; } & {}>; }> | undefined; duration?: number | undefined; } & { timestamp: number; success: boolean; }>[]; calculated_metrics: Readonly<{ p50?: number | undefined; p95?: number | undefined; p99?: number | undefined; } & { success_ratio: number; }>; last_run: Readonly<{} & { timestamp: string; metrics: Readonly<{ duration?: number | undefined; total_search_duration_ms?: number | null | undefined; total_indexing_duration_ms?: number | null | undefined; total_alerts_detected?: number | null | undefined; total_alerts_created?: number | null | undefined; gap_duration_s?: number | null | undefined; } & {}>; }>; }>; }> | undefined"
+              "Readonly<{} & { run: Readonly<{} & { history: Readonly<{ outcome?: Readonly<{ warning?: \"execute\" | \"validate\" | \"unknown\" | \"license\" | \"timeout\" | \"read\" | \"decrypt\" | \"disabled\" | \"maxExecutableActions\" | \"maxAlerts\" | \"maxQueuedActions\" | null | undefined; outcomeOrder?: number | undefined; outcomeMsg?: string[] | null | undefined; } & { outcome: \"warning\" | \"succeeded\" | \"failed\"; alertsCount: Readonly<{ recovered?: number | null | undefined; active?: number | null | undefined; new?: number | null | undefined; ignored?: number | null | undefined; } & {}>; }> | undefined; duration?: number | undefined; } & { timestamp: number; success: boolean; }>[]; calculated_metrics: Readonly<{ p50?: number | undefined; p95?: number | undefined; p99?: number | undefined; } & { success_ratio: number; }>; last_run: Readonly<{} & { timestamp: string; metrics: Readonly<{ duration?: number | undefined; total_search_duration_ms?: number | null | undefined; total_indexing_duration_ms?: number | null | undefined; total_alerts_detected?: number | null | undefined; total_alerts_created?: number | null | undefined; gap_duration_s?: number | null | undefined; } & {}>; }>; }>; }> | undefined"
             ],
             "path": "x-pack/plugins/alerting/server/application/rule/types/rule.ts",
             "deprecated": false,
@@ -3262,7 +3279,7 @@
             "label": "snoozeSchedule",
             "description": [],
             "signature": [
-              "Readonly<{ id?: string | undefined; skipRecurrences?: string[] | undefined; } & { duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | undefined; bymonth?: number[] | undefined; bysetpos?: number[] | undefined; bymonthday?: number[] | undefined; byyearday?: number[] | undefined; byweekno?: number[] | undefined; byhour?: number[] | undefined; byminute?: number[] | undefined; bysecond?: number[] | undefined; } & { dtstart: string; tzid: string; }>; }>[] | undefined"
+              "Readonly<{ id?: string | undefined; skipRecurrences?: string[] | undefined; } & { duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; byweekday?: (string | number)[] | undefined; bymonthday?: number[] | undefined; bymonth?: number[] | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; bysetpos?: number[] | undefined; byyearday?: number[] | undefined; byweekno?: number[] | undefined; byhour?: number[] | undefined; byminute?: number[] | undefined; bysecond?: number[] | undefined; } & { dtstart: string; tzid: string; }>; }>[] | undefined"
             ],
             "path": "x-pack/plugins/alerting/server/application/rule/types/rule.ts",
             "deprecated": false,
@@ -3304,7 +3321,7 @@
             "label": "lastRun",
             "description": [],
             "signature": [
-              "Readonly<{ warning?: \"execute\" | \"unknown\" | \"license\" | \"read\" | \"decrypt\" | \"timeout\" | \"disabled\" | \"validate\" | \"maxExecutableActions\" | \"maxAlerts\" | \"maxQueuedActions\" | null | undefined; outcomeOrder?: number | undefined; outcomeMsg?: string[] | null | undefined; } & { outcome: \"warning\" | \"succeeded\" | \"failed\"; alertsCount: Readonly<{ active?: number | null | undefined; new?: number | null | undefined; recovered?: number | null | undefined; ignored?: number | null | undefined; } & {}>; }> | null | undefined"
+              "Readonly<{ warning?: \"execute\" | \"validate\" | \"unknown\" | \"license\" | \"timeout\" | \"read\" | \"decrypt\" | \"disabled\" | \"maxExecutableActions\" | \"maxAlerts\" | \"maxQueuedActions\" | null | undefined; outcomeOrder?: number | undefined; outcomeMsg?: string[] | null | undefined; } & { outcome: \"warning\" | \"succeeded\" | \"failed\"; alertsCount: Readonly<{ recovered?: number | null | undefined; active?: number | null | undefined; new?: number | null | undefined; ignored?: number | null | undefined; } & {}>; }> | null | undefined"
             ],
             "path": "x-pack/plugins/alerting/server/application/rule/types/rule.ts",
             "deprecated": false,
@@ -3372,6 +3389,20 @@
             "description": [],
             "signature": [
               "Readonly<{} & { active: number; }> | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/server/application/rule/types/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.Rule.legacyId",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "legacyId",
+            "description": [],
+            "signature": [
+              "string | null | undefined"
             ],
             "path": "x-pack/plugins/alerting/server/application/rule/types/rule.ts",
             "deprecated": false,
@@ -3530,6 +3561,17 @@
           },
           {
             "parentPluginId": "alerting",
+            "id": "def-server.RuleExecutorOptions.startedAtOverridden",
+            "type": "boolean",
+            "tags": [],
+            "label": "startedAtOverridden",
+            "description": [],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
             "id": "def-server.RuleExecutorOptions.state",
             "type": "Uncategorized",
             "tags": [],
@@ -3598,7 +3640,8 @@
             "label": "getTimeRange",
             "description": [],
             "signature": [
-              "(timeWindow?: string | undefined) => { dateStart: string; dateEnd: string; }"
+              "(timeWindow?: string | undefined) => ",
+              "GetTimeRangeResult"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
@@ -3777,22 +3820,6 @@
               {
                 "plugin": "synthetics",
                 "path": "x-pack/plugins/observability_solution/synthetics/server/alert_rules/status_rule/monitor_status_rule.ts"
-              },
-              {
-                "plugin": "uptime",
-                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/lib/alerts/common.ts"
-              },
-              {
-                "plugin": "uptime",
-                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/lib/alerts/status_check.ts"
-              },
-              {
-                "plugin": "uptime",
-                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/lib/alerts/tls.ts"
-              },
-              {
-                "plugin": "uptime",
-                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/lib/alerts/duration_anomaly.ts"
               },
               {
                 "plugin": "ruleRegistry",
@@ -4837,7 +4864,7 @@
         "label": "AlertingRulesConfig",
         "description": [],
         "signature": [
-          "Pick<Readonly<{ overwriteProducer?: \"siem\" | \"observability\" | \"stackAlerts\" | undefined; } & { run: Readonly<{ timeout?: string | undefined; ruleTypeOverrides?: Readonly<{ timeout?: string | undefined; } & { id: string; }>[] | undefined; } & { actions: Readonly<{ connectorTypeOverrides?: Readonly<{ max?: number | undefined; } & { id: string; }>[] | undefined; } & { max: number; }>; alerts: Readonly<{} & { max: number; }>; }>; minimumScheduleInterval: Readonly<{} & { value: string; enforce: boolean; }>; maxScheduledPerMinute: number; }>, \"minimumScheduleInterval\" | \"maxScheduledPerMinute\"> & { isUsingSecurity: boolean; }"
+          "Pick<Readonly<{ overwriteProducer?: \"siem\" | \"observability\" | \"stackAlerts\" | undefined; } & { minimumScheduleInterval: Readonly<{} & { value: string; enforce: boolean; }>; maxScheduledPerMinute: number; run: Readonly<{ timeout?: string | undefined; ruleTypeOverrides?: Readonly<{ timeout?: string | undefined; } & { id: string; }>[] | undefined; } & { actions: Readonly<{ connectorTypeOverrides?: Readonly<{ max?: number | undefined; } & { id: string; }>[] | undefined; } & { max: number; }>; alerts: Readonly<{} & { max: number; }>; }>; }>, \"minimumScheduleInterval\" | \"maxScheduledPerMinute\" | \"run\"> & { isUsingSecurity: boolean; }"
         ],
         "path": "x-pack/plugins/alerting/server/config.ts",
         "deprecated": false,
@@ -4861,6 +4888,21 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-server.API_KEY_PENDING_INVALIDATION_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "API_KEY_PENDING_INVALIDATION_TYPE",
+        "description": [],
+        "signature": [
+          "\"api_key_pending_invalidation\""
+        ],
+        "path": "x-pack/plugins/alerting/server/saved_objects/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-server.BulkEditOperation",
         "type": "Type",
         "tags": [],
@@ -4875,7 +4917,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | undefined; timeframe?: Readonly<{} & { days: (2 | 1 | 7 | 6 | 5 | 4 | 3)[]; hours: Readonly<{} & { start: string; end: string; }>; timezone: string; }> | undefined; } & {}> | undefined; uuid?: string | undefined; useAlertDataForTemplate?: boolean | undefined; } & { params: Record<string, any>; id: string; group: string; }> | Readonly<{ actionTypeId?: string | undefined; uuid?: string | undefined; } & { params: Record<string, any>; id: string; }>)[]; operation: \"add\" | \"set\"; field: \"actions\"; }> | Readonly<{} & { value: Readonly<{} & { interval: string; }>; operation: \"set\"; field: \"schedule\"; }> | Readonly<{} & { value: string | null; operation: \"set\"; field: \"throttle\"; }> | Readonly<{} & { value: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; operation: \"set\"; field: \"notifyWhen\"; }> | Readonly<{} & { value: Readonly<{ id?: string | undefined; } & { duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 3 | undefined; until?: string | undefined; byweekday?: string[] | undefined; bymonth?: number[] | undefined; bymonthday?: number[] | undefined; } & { dtstart: string; tzid: string; }>; }>; operation: \"set\"; field: \"snoozeSchedule\"; }> | Readonly<{ value?: string[] | undefined; } & { operation: \"delete\"; field: \"snoozeSchedule\"; }> | Readonly<{} & { operation: \"set\"; field: \"apiKey\"; }>"
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | undefined; timeframe?: Readonly<{} & { days: (2 | 1 | 7 | 6 | 5 | 4 | 3)[]; hours: Readonly<{} & { start: string; end: string; }>; timezone: string; }> | undefined; } & {}> | undefined; uuid?: string | undefined; useAlertDataForTemplate?: boolean | undefined; } & { params: Record<string, any>; id: string; group: string; }> | Readonly<{ actionTypeId?: string | undefined; uuid?: string | undefined; } & { params: Record<string, any>; id: string; }>)[]; operation: \"add\" | \"set\"; field: \"actions\"; }> | Readonly<{} & { value: Readonly<{} & { interval: string; }>; operation: \"set\"; field: \"schedule\"; }> | Readonly<{} & { value: string | null; operation: \"set\"; field: \"throttle\"; }> | Readonly<{} & { value: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; operation: \"set\"; field: \"notifyWhen\"; }> | Readonly<{} & { value: Readonly<{ id?: string | undefined; } & { duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 3 | undefined; until?: string | undefined; byweekday?: string[] | undefined; bymonthday?: number[] | undefined; bymonth?: number[] | undefined; } & { dtstart: string; tzid: string; }>; }>; operation: \"set\"; field: \"snoozeSchedule\"; }> | Readonly<{ value?: string[] | undefined; } & { operation: \"delete\"; field: \"snoozeSchedule\"; }> | Readonly<{} & { operation: \"set\"; field: \"apiKey\"; }>"
         ],
         "path": "x-pack/plugins/alerting/server/application/rule/methods/bulk_edit/types/bulk_edit_rules_options.ts",
         "deprecated": false,
@@ -5183,9 +5225,7 @@
             "section": "def-common.RuleTypeParams",
             "text": "RuleTypeParams"
           },
-          " = never>(params: ",
-          "GetParams",
-          ") => Promise<",
+          " = never>(params: Readonly<{ includeLegacyId?: boolean | undefined; includeSnoozeData?: boolean | undefined; excludeFromPublicApi?: boolean | undefined; } & { id: string; }>) => Promise<",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -5215,9 +5255,7 @@
             "section": "def-common.RuleTypeParams",
             "text": "RuleTypeParams"
           },
-          " = never>(params?: ",
-          "FindParams",
-          " | undefined) => Promise<",
+          " = never>(params?: Readonly<{ options?: Readonly<{ page?: number | undefined; filter?: string | Record<string, any> | undefined; search?: string | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; hasReference?: Readonly<{} & { id: string; type: string; }> | undefined; fields?: string[] | undefined; filterConsumers?: string[] | undefined; } & {}> | undefined; includeSnoozeData?: boolean | undefined; excludeFromPublicApi?: boolean | undefined; featureIds?: string[] | undefined; } & {}> | undefined) => Promise<",
           {
             "pluginId": "alerting",
             "scope": "server",
@@ -5235,7 +5273,7 @@
             "section": "def-common.RuleTypeParams",
             "text": "RuleTypeParams"
           },
-          " = never>(args_0: string, args_1: { newId?: string | undefined; }) => Promise<",
+          " = never>(params: Readonly<{ newId?: string | undefined; } & { id: string; }>) => Promise<",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -5319,25 +5357,11 @@
           "BulkEditOptions",
           "<Params>) => Promise<",
           "BulkEditResult",
-          "<Params>>; bulkEnableRules: (options: ",
-          "BulkOptions",
-          ") => Promise<{ errors: ",
-          {
-            "pluginId": "alerting",
-            "scope": "server",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-server.BulkOperationError",
-            "text": "BulkOperationError"
-          },
-          "[]; rules: ",
-          {
-            "pluginId": "alerting",
-            "scope": "server",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-server.Rule",
-            "text": "Rule"
-          },
-          "<Record<string, any>>[]; total: number; taskIdsFailedToBeEnabled: string[]; }>; bulkDisableRules: (options: Readonly<{ filter?: string | undefined; ids?: string[] | undefined; untrack?: boolean | undefined; } & {}>) => Promise<",
+          "<Params>>; bulkEnableRules: (params: ",
+          "BulkEnableRulesParams",
+          ") => Promise<",
+          "BulkEnableRulesResult",
+          "<Record<string, any>>>; bulkDisableRules: (options: Readonly<{ filter?: string | undefined; ids?: string[] | undefined; untrack?: boolean | undefined; } & {}>) => Promise<",
           "BulkDisableRulesResult",
           "<Record<string, any>>>; updateApiKey: (options: { id: string; }) => Promise<void>; enable: (options: { id: string; }) => Promise<void>; disable: (options: { id: string; untrack?: boolean | undefined; }) => Promise<void>; snooze: (options: ",
           "SnoozeRuleOptions",
@@ -5359,9 +5383,9 @@
             "section": "def-common.RuleTypeParams",
             "text": "RuleTypeParams"
           },
-          ">, \"id\" | \"snoozeSchedule\">; version?: string | undefined; }) => Promise<void>; unmuteAll: (options: { id: string; }) => Promise<void>; muteInstance: (options: Readonly<{} & { alertId: string; alertInstanceId: string; }>) => Promise<void>; unmuteInstance: (options: Readonly<{} & { alertId: string; alertInstanceId: string; }>) => Promise<void>; bulkUntrackAlerts: (options: Readonly<{ indices?: string[] | undefined; alertUuids?: string[] | undefined; query?: any[] | undefined; featureIds?: string[] | undefined; } & { isUsingQuery: boolean; }>) => Promise<void>; runSoon: (options: { id: string; }) => Promise<string | undefined>; listRuleTypes: () => Promise<Set<",
+          ">, \"id\" | \"snoozeSchedule\">; version?: string | undefined; }) => Promise<void>; unmuteAll: (options: { id: string; }) => Promise<void>; muteInstance: (options: Readonly<{} & { alertId: string; alertInstanceId: string; }>) => Promise<void>; unmuteInstance: (options: Readonly<{} & { alertId: string; alertInstanceId: string; }>) => Promise<void>; bulkUntrackAlerts: (options: Readonly<{ indices?: string[] | undefined; featureIds?: string[] | undefined; alertUuids?: string[] | undefined; query?: any[] | undefined; } & { isUsingQuery: boolean; }>) => Promise<void>; runSoon: (options: { id: string; }) => Promise<string | undefined>; listRuleTypes: () => Promise<Set<",
           "RegistryAlertTypeWithAuth",
-          ">>; getSpaceId: () => string | undefined; getAuthorization: () => ",
+          ">>; scheduleBackfill: (params: Readonly<{ end?: string | undefined; } & { start: string; ruleId: string; }>[]) => Promise<(Readonly<{ end?: string | undefined; } & { id: string; spaceId: string; start: string; rule: Readonly<{ apiKeyCreatedByUser?: boolean | null | undefined; } & { params: Record<string, any>; id: string; consumer: string; name: string; tags: string[]; enabled: boolean; alertTypeId: string; schedule: Readonly<{} & { interval: string; }>; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; apiKeyOwner: string | null; revision: number; }>; enabled: boolean; schedule: Readonly<{} & { interval: string; status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; runAt: string; }>[]; createdAt: string; duration: string; status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; }> | Readonly<{} & { error: Readonly<{} & { error: string; message: string; }>; }>)[]>; getBackfill: (id: string) => Promise<Readonly<{ end?: string | undefined; } & { id: string; spaceId: string; start: string; rule: Readonly<{ apiKeyCreatedByUser?: boolean | null | undefined; } & { params: Record<string, any>; id: string; consumer: string; name: string; tags: string[]; enabled: boolean; alertTypeId: string; schedule: Readonly<{} & { interval: string; }>; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; apiKeyOwner: string | null; revision: number; }>; enabled: boolean; schedule: Readonly<{} & { interval: string; status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; runAt: string; }>[]; createdAt: string; duration: string; status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; }>>; findBackfill: (params: Readonly<{ start?: string | undefined; end?: string | undefined; sortField?: \"start\" | \"createdAt\" | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; ruleIds?: string | undefined; } & { page: number; perPage: number; }>) => Promise<Readonly<{} & { page: number; perPage: number; total: number; data: Readonly<{ end?: string | undefined; } & { id: string; spaceId: string; start: string; rule: Readonly<{ apiKeyCreatedByUser?: boolean | null | undefined; } & { params: Record<string, any>; id: string; consumer: string; name: string; tags: string[]; enabled: boolean; alertTypeId: string; schedule: Readonly<{} & { interval: string; }>; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; apiKeyOwner: string | null; revision: number; }>; enabled: boolean; schedule: Readonly<{} & { interval: string; status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; runAt: string; }>[]; createdAt: string; duration: string; status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; }>[]; }>>; deleteBackfill: (id: string) => Promise<{}>; getSpaceId: () => string | undefined; getAuthorization: () => ",
           {
             "pluginId": "alerting",
             "scope": "server",
@@ -5371,10 +5395,10 @@
           },
           "; getAuditLogger: () => ",
           {
-            "pluginId": "@kbn/security-plugin-types-server",
-            "scope": "server",
-            "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-            "section": "def-server.AuditLogger",
+            "pluginId": "@kbn/core-security-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSecurityServerPluginApi",
+            "section": "def-common.AuditLogger",
             "text": "AuditLogger"
           },
           " | undefined; getTags: (params: Readonly<{ search?: string | undefined; perPage?: number | undefined; } & { page: number; }>) => Promise<Readonly<{} & { page: number; perPage: number; total: number; data: string[]; }>>; getScheduleFrequency: () => Promise<Readonly<{} & { totalScheduledPerMinute: number; remainingSchedulesPerMinute: number; }>>; getAlertFromRaw: (params: ",
@@ -6371,6 +6395,54 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.validateBackfillSchedule",
+        "type": "Function",
+        "tags": [],
+        "label": "validateBackfillSchedule",
+        "description": [],
+        "signature": [
+          "(start: string, end: string | undefined) => string | void"
+        ],
+        "path": "x-pack/plugins/alerting/common/lib/validate_backfill_schedule.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.validateBackfillSchedule.$1",
+            "type": "string",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/alerting/common/lib/validate_backfill_schedule.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.validateBackfillSchedule.$2",
+            "type": "string",
+            "tags": [],
+            "label": "end",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/lib/validate_backfill_schedule.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -8910,7 +8982,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"unknown\" | \"ok\" | \"error\" | \"active\" | \"warning\" | \"pending\""
+              "\"unknown\" | \"ok\" | \"error\" | \"pending\" | \"active\" | \"warning\""
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
@@ -11371,7 +11443,7 @@
         "label": "ReservedActionGroups",
         "description": [],
         "signature": [
-          "\"recovered\" | RecoveryActionGroupId"
+          "RecoveryActionGroupId | \"recovered\""
         ],
         "path": "x-pack/plugins/alerting/common/builtin_action_groups.ts",
         "deprecated": false,
@@ -11458,7 +11530,7 @@
         "signature": [
           "Omit<",
           "Options",
-          ", \"dtstart\" | \"until\" | \"wkst\" | \"byweekday\"> & { dtstart: string; byweekday?: (string | number)[] | undefined; wkst?: ",
+          ", \"dtstart\" | \"until\" | \"byweekday\" | \"wkst\"> & { dtstart: string; byweekday?: (string | number)[] | undefined; wkst?: ",
           {
             "pluginId": "@kbn/rrule",
             "scope": "common",
@@ -11613,7 +11685,7 @@
         "label": "RuleExecutionStatuses",
         "description": [],
         "signature": [
-          "\"unknown\" | \"ok\" | \"error\" | \"active\" | \"warning\" | \"pending\""
+          "\"unknown\" | \"ok\" | \"error\" | \"pending\" | \"active\" | \"warning\""
         ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
@@ -11838,7 +11910,7 @@
         "signature": [
           "Pick<",
           "AggregateOptions",
-          ", \"search\" | \"filter\"> & { after?: ",
+          ", \"filter\" | \"search\"> & { after?: ",
           "AggregationsCompositeAggregateKey",
           " | undefined; maxTags?: number | undefined; }"
         ],

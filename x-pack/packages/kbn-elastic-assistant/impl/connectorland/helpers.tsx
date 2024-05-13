@@ -30,16 +30,19 @@ interface GenAiConfig {
 export const getGenAiConfig = (connector: ActionConnector | undefined): GenAiConfig | undefined => {
   if (!connector?.isPreconfigured) {
     const config = (connector as ActionConnectorProps<GenAiConfig, unknown>)?.config;
-    if (config?.apiProvider === OpenAiProviderType.AzureAi) {
-      return {
-        ...config,
-        defaultModel: getAzureApiVersionParameter(config.apiUrl ?? ''),
-      };
-    }
+    const { apiProvider, apiUrl, defaultModel } = config ?? {};
 
-    return (connector as ActionConnectorProps<GenAiConfig, unknown>)?.config;
+    return {
+      apiProvider,
+      apiUrl,
+      defaultModel:
+        apiProvider === OpenAiProviderType.AzureAi
+          ? getAzureApiVersionParameter(apiUrl ?? '')
+          : defaultModel,
+    };
   }
-  return undefined;
+
+  return undefined; // the connector is neither available nor editable
 };
 
 export const getActionTypeTitle = (actionType: ActionTypeModel): string => {

@@ -41,13 +41,17 @@
 
 .kbnDocViewer__tableActionsCell,
 .kbnDocViewer__tableFieldNameCell {
-  align-items: flex-start;
-  padding: $euiSizeXS;
+  .euiTableCellContent {
+    align-items: flex-start;
+    padding: $euiSizeXS;
+  }
 }
 
 .kbnDocViewer__tableValueCell {
-  flex-direction: column;
-  align-items: flex-start;
+  .euiTableCellContent {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 
 .kbnDocViewer__value {

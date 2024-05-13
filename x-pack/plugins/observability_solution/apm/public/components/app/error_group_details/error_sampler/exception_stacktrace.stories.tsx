@@ -16,9 +16,7 @@ export default {
   component: ExceptionStacktrace,
 };
 
-export const JavaWithLongLines: Story<Args> = (args) => (
-  <ExceptionStacktrace {...args} />
-);
+export const JavaWithLongLines: Story<Args> = (args) => <ExceptionStacktrace {...args} />;
 JavaWithLongLines.args = {
   codeLanguage: 'java',
   exceptions: [
@@ -28,8 +26,7 @@ JavaWithLongLines.args = {
           library_frame: true,
           exclude_from_grouping: false,
           filename: 'AbstractJackson2HttpMessageConverter.java',
-          classname:
-            'org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter',
+          classname: 'org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter',
           line: {
             number: 296,
           },
@@ -40,8 +37,7 @@ JavaWithLongLines.args = {
           library_frame: true,
           exclude_from_grouping: false,
           filename: 'AbstractGenericHttpMessageConverter.java',
-          classname:
-            'org.springframework.http.converter.AbstractGenericHttpMessageConverter',
+          classname: 'org.springframework.http.converter.AbstractGenericHttpMessageConverter',
           line: {
             number: 102,
           },
@@ -124,8 +120,7 @@ JavaWithLongLines.args = {
           library_frame: true,
           exclude_from_grouping: false,
           filename: 'AbstractHandlerMethodAdapter.java',
-          classname:
-            'org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter',
+          classname: 'org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter',
           line: {
             number: 87,
           },
@@ -576,8 +571,7 @@ JavaWithLongLines.args = {
           library_frame: true,
           exclude_from_grouping: false,
           filename: 'TaskThread.java',
-          classname:
-            'org.apache.tomcat.util.threads.TaskThread$WrappingRunnable',
+          classname: 'org.apache.tomcat.util.threads.TaskThread$WrappingRunnable',
           line: {
             number: 61,
           },
@@ -628,8 +622,7 @@ JavaWithLongLines.args = {
           library_frame: true,
           exclude_from_grouping: false,
           filename: 'BeanSerializerBase.java',
-          classname:
-            'com.fasterxml.jackson.databind.ser.std.BeanSerializerBase',
+          classname: 'com.fasterxml.jackson.databind.ser.std.BeanSerializerBase',
           line: {
             number: 727,
           },
@@ -662,8 +655,7 @@ JavaWithLongLines.args = {
           library_frame: true,
           exclude_from_grouping: false,
           filename: 'BeanSerializerBase.java',
-          classname:
-            'com.fasterxml.jackson.databind.ser.std.BeanSerializerBase',
+          classname: 'com.fasterxml.jackson.databind.ser.std.BeanSerializerBase',
           line: {
             number: 719,
           },
@@ -685,8 +677,7 @@ JavaWithLongLines.args = {
           library_frame: true,
           exclude_from_grouping: false,
           filename: 'DefaultSerializerProvider.java',
-          classname:
-            'com.fasterxml.jackson.databind.ser.DefaultSerializerProvider',
+          classname: 'com.fasterxml.jackson.databind.ser.DefaultSerializerProvider',
           line: {
             number: 480,
           },
@@ -697,8 +688,7 @@ JavaWithLongLines.args = {
           library_frame: true,
           exclude_from_grouping: false,
           filename: 'DefaultSerializerProvider.java',
-          classname:
-            'com.fasterxml.jackson.databind.ser.DefaultSerializerProvider',
+          classname: 'com.fasterxml.jackson.databind.ser.DefaultSerializerProvider',
           line: {
             number: 319,
           },
@@ -731,8 +721,7 @@ JavaWithLongLines.args = {
           library_frame: true,
           exclude_from_grouping: false,
           filename: 'AbstractJackson2HttpMessageConverter.java',
-          classname:
-            'org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter',
+          classname: 'org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter',
           line: {
             number: 286,
           },
@@ -743,8 +732,7 @@ JavaWithLongLines.args = {
           library_frame: true,
           exclude_from_grouping: false,
           filename: 'AbstractGenericHttpMessageConverter.java',
-          classname:
-            'org.springframework.http.converter.AbstractGenericHttpMessageConverter',
+          classname: 'org.springframework.http.converter.AbstractGenericHttpMessageConverter',
           line: {
             number: 102,
           },
@@ -827,8 +815,7 @@ JavaWithLongLines.args = {
           library_frame: true,
           exclude_from_grouping: false,
           filename: 'AbstractHandlerMethodAdapter.java',
-          classname:
-            'org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter',
+          classname: 'org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter',
           line: {
             number: 87,
           },
@@ -1187,8 +1174,7 @@ JavaWithLongLines.args = {
           library_frame: true,
           exclude_from_grouping: false,
           filename: 'BeanSerializerBase.java',
-          classname:
-            'com.fasterxml.jackson.databind.ser.std.BeanSerializerBase',
+          classname: 'com.fasterxml.jackson.databind.ser.std.BeanSerializerBase',
           line: {
             number: 719,
           },
@@ -1221,8 +1207,7 @@ JavaWithLongLines.args = {
           library_frame: true,
           exclude_from_grouping: false,
           filename: 'BeanSerializerBase.java',
-          classname:
-            'com.fasterxml.jackson.databind.ser.std.BeanSerializerBase',
+          classname: 'com.fasterxml.jackson.databind.ser.std.BeanSerializerBase',
           line: {
             number: 719,
           },
@@ -1244,8 +1229,7 @@ JavaWithLongLines.args = {
           library_frame: true,
           exclude_from_grouping: false,
           filename: 'DefaultSerializerProvider.java',
-          classname:
-            'com.fasterxml.jackson.databind.ser.DefaultSerializerProvider',
+          classname: 'com.fasterxml.jackson.databind.ser.DefaultSerializerProvider',
           line: {
             number: 480,
           },
@@ -1256,8 +1240,7 @@ JavaWithLongLines.args = {
           library_frame: true,
           exclude_from_grouping: false,
           filename: 'DefaultSerializerProvider.java',
-          classname:
-            'com.fasterxml.jackson.databind.ser.DefaultSerializerProvider',
+          classname: 'com.fasterxml.jackson.databind.ser.DefaultSerializerProvider',
           line: {
             number: 319,
           },
@@ -1290,8 +1273,7 @@ JavaWithLongLines.args = {
           library_frame: true,
           exclude_from_grouping: false,
           filename: 'AbstractJackson2HttpMessageConverter.java',
-          classname:
-            'org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter',
+          classname: 'org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter',
           line: {
             number: 286,
           },
@@ -1302,8 +1284,7 @@ JavaWithLongLines.args = {
           exclude_from_grouping: false,
           library_frame: true,
           filename: 'AbstractGenericHttpMessageConverter.java',
-          classname:
-            'org.springframework.http.converter.AbstractGenericHttpMessageConverter',
+          classname: 'org.springframework.http.converter.AbstractGenericHttpMessageConverter',
           line: {
             number: 102,
           },
@@ -1386,8 +1367,7 @@ JavaWithLongLines.args = {
           library_frame: true,
           exclude_from_grouping: false,
           filename: 'AbstractHandlerMethodAdapter.java',
-          classname:
-            'org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter',
+          classname: 'org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter',
           line: {
             number: 87,
           },
@@ -1739,9 +1719,7 @@ JavaWithLongLines.decorators = [
   ),
 ];
 
-export const JavaScriptWithSomeContext: Story<Args> = (args) => (
-  <ExceptionStacktrace {...args} />
-);
+export const JavaScriptWithSomeContext: Story<Args> = (args) => <ExceptionStacktrace {...args} />;
 JavaScriptWithSomeContext.storyName = 'JavaScript With Some Context';
 JavaScriptWithSomeContext.args = {
   codeLanguage: 'javascript',
@@ -1772,8 +1750,7 @@ JavaScriptWithSomeContext.args = {
           abs_path: '/app/node_modules/elastic-apm-http-client/index.js',
           line: {
             number: 196,
-            context:
-              '        res.destroy(processConfigErrorResponse(res, buf))',
+            context: '        res.destroy(processConfigErrorResponse(res, buf))',
           },
           function: '<anonymous>',
           context: {
@@ -1881,8 +1858,7 @@ RubyWithContextAndLibraryFrames.args = {
           library_frame: true,
           exclude_from_grouping: false,
           filename: 'active_record/core.rb',
-          abs_path:
-            '/usr/local/bundle/gems/activerecord-5.2.4.1/lib/active_record/core.rb',
+          abs_path: '/usr/local/bundle/gems/activerecord-5.2.4.1/lib/active_record/core.rb',
           line: {
             number: 177,
           },
@@ -1918,8 +1894,7 @@ RubyWithContextAndLibraryFrames.args = {
           library_frame: true,
           exclude_from_grouping: false,
           filename: 'abstract_controller/base.rb',
-          abs_path:
-            '/usr/local/bundle/gems/actionpack-5.2.4.1/lib/abstract_controller/base.rb',
+          abs_path: '/usr/local/bundle/gems/actionpack-5.2.4.1/lib/abstract_controller/base.rb',
           line: {
             number: 194,
           },
@@ -1951,8 +1926,7 @@ RubyWithContextAndLibraryFrames.args = {
           library_frame: true,
           exclude_from_grouping: false,
           filename: 'active_support/callbacks.rb',
-          abs_path:
-            '/usr/local/bundle/gems/activesupport-5.2.4.1/lib/active_support/callbacks.rb',
+          abs_path: '/usr/local/bundle/gems/activesupport-5.2.4.1/lib/active_support/callbacks.rb',
           line: {
             number: 132,
           },
@@ -2061,8 +2035,7 @@ RubyWithContextAndLibraryFrames.args = {
           library_frame: true,
           exclude_from_grouping: false,
           filename: 'abstract_controller/base.rb',
-          abs_path:
-            '/usr/local/bundle/gems/actionpack-5.2.4.1/lib/abstract_controller/base.rb',
+          abs_path: '/usr/local/bundle/gems/actionpack-5.2.4.1/lib/abstract_controller/base.rb',
           line: {
             number: 134,
           },
@@ -2072,8 +2045,7 @@ RubyWithContextAndLibraryFrames.args = {
           library_frame: true,
           exclude_from_grouping: false,
           filename: 'action_view/rendering.rb',
-          abs_path:
-            '/usr/local/bundle/gems/actionview-5.2.4.1/lib/action_view/rendering.rb',
+          abs_path: '/usr/local/bundle/gems/actionview-5.2.4.1/lib/action_view/rendering.rb',
           line: {
             number: 32,
           },
@@ -2083,8 +2055,7 @@ RubyWithContextAndLibraryFrames.args = {
           library_frame: true,
           exclude_from_grouping: false,
           filename: 'action_controller/metal.rb',
-          abs_path:
-            '/usr/local/bundle/gems/actionpack-5.2.4.1/lib/action_controller/metal.rb',
+          abs_path: '/usr/local/bundle/gems/actionpack-5.2.4.1/lib/action_controller/metal.rb',
           line: {
             number: 191,
           },
@@ -2093,8 +2064,7 @@ RubyWithContextAndLibraryFrames.args = {
         {
           library_frame: true,
           exclude_from_grouping: false,
-          abs_path:
-            '/usr/local/bundle/gems/actionpack-5.2.4.1/lib/action_controller/metal.rb',
+          abs_path: '/usr/local/bundle/gems/actionpack-5.2.4.1/lib/action_controller/metal.rb',
           filename: 'action_controller/metal.rb',
           line: {
             number: 252,
@@ -2181,8 +2151,7 @@ RubyWithContextAndLibraryFrames.args = {
           library_frame: true,
           exclude_from_grouping: false,
           filename: 'rack/tempfile_reaper.rb',
-          abs_path:
-            '/usr/local/bundle/gems/rack-2.2.3/lib/rack/tempfile_reaper.rb',
+          abs_path: '/usr/local/bundle/gems/rack-2.2.3/lib/rack/tempfile_reaper.rb',
           line: {
             number: 15,
           },
@@ -2202,8 +2171,7 @@ RubyWithContextAndLibraryFrames.args = {
           library_frame: true,
           exclude_from_grouping: false,
           filename: 'rack/conditional_get.rb',
-          abs_path:
-            '/usr/local/bundle/gems/rack-2.2.3/lib/rack/conditional_get.rb',
+          abs_path: '/usr/local/bundle/gems/rack-2.2.3/lib/rack/conditional_get.rb',
           line: {
             number: 27,
           },
@@ -2234,8 +2202,7 @@ RubyWithContextAndLibraryFrames.args = {
           exclude_from_grouping: false,
           library_frame: true,
           filename: 'rack/session/abstract/id.rb',
-          abs_path:
-            '/usr/local/bundle/gems/rack-2.2.3/lib/rack/session/abstract/id.rb',
+          abs_path: '/usr/local/bundle/gems/rack-2.2.3/lib/rack/session/abstract/id.rb',
           line: {
             number: 266,
           },
@@ -2245,8 +2212,7 @@ RubyWithContextAndLibraryFrames.args = {
           library_frame: true,
           exclude_from_grouping: false,
           filename: 'rack/session/abstract/id.rb',
-          abs_path:
-            '/usr/local/bundle/gems/rack-2.2.3/lib/rack/session/abstract/id.rb',
+          abs_path: '/usr/local/bundle/gems/rack-2.2.3/lib/rack/session/abstract/id.rb',
           line: {
             number: 260,
           },
@@ -2278,8 +2244,7 @@ RubyWithContextAndLibraryFrames.args = {
           library_frame: true,
           exclude_from_grouping: false,
           filename: 'active_support/callbacks.rb',
-          abs_path:
-            '/usr/local/bundle/gems/activesupport-5.2.4.1/lib/active_support/callbacks.rb',
+          abs_path: '/usr/local/bundle/gems/activesupport-5.2.4.1/lib/active_support/callbacks.rb',
           line: {
             number: 98,
           },
@@ -2322,8 +2287,7 @@ RubyWithContextAndLibraryFrames.args = {
           library_frame: true,
           exclude_from_grouping: false,
           filename: 'lograge/rails_ext/rack/logger.rb',
-          abs_path:
-            '/usr/local/bundle/gems/lograge-0.11.2/lib/lograge/rails_ext/rack/logger.rb',
+          abs_path: '/usr/local/bundle/gems/lograge-0.11.2/lib/lograge/rails_ext/rack/logger.rb',
           line: {
             number: 15,
           },
@@ -2333,8 +2297,7 @@ RubyWithContextAndLibraryFrames.args = {
           exclude_from_grouping: false,
           library_frame: true,
           filename: 'rails/rack/logger.rb',
-          abs_path:
-            '/usr/local/bundle/gems/railties-5.2.4.1/lib/rails/rack/logger.rb',
+          abs_path: '/usr/local/bundle/gems/railties-5.2.4.1/lib/rails/rack/logger.rb',
           line: {
             number: 28,
           },
@@ -2355,8 +2318,7 @@ RubyWithContextAndLibraryFrames.args = {
           exclude_from_grouping: false,
           library_frame: true,
           filename: 'request_store/middleware.rb',
-          abs_path:
-            '/usr/local/bundle/gems/request_store-1.5.0/lib/request_store/middleware.rb',
+          abs_path: '/usr/local/bundle/gems/request_store-1.5.0/lib/request_store/middleware.rb',
           line: {
             number: 19,
           },
@@ -2377,8 +2339,7 @@ RubyWithContextAndLibraryFrames.args = {
           library_frame: true,
           exclude_from_grouping: false,
           filename: 'rack/method_override.rb',
-          abs_path:
-            '/usr/local/bundle/gems/rack-2.2.3/lib/rack/method_override.rb',
+          abs_path: '/usr/local/bundle/gems/rack-2.2.3/lib/rack/method_override.rb',
           line: {
             number: 24,
           },
@@ -2456,8 +2417,7 @@ RubyWithContextAndLibraryFrames.args = {
           library_frame: true,
           exclude_from_grouping: false,
           filename: 'elastic_apm/middleware.rb',
-          abs_path:
-            '/usr/local/bundle/gems/elastic-apm-3.8.0/lib/elastic_apm/middleware.rb',
+          abs_path: '/usr/local/bundle/gems/elastic-apm-3.8.0/lib/elastic_apm/middleware.rb',
           line: {
             number: 36,
           },
@@ -2467,8 +2427,7 @@ RubyWithContextAndLibraryFrames.args = {
           library_frame: true,
           exclude_from_grouping: false,
           filename: 'rails/engine.rb',
-          abs_path:
-            '/usr/local/bundle/gems/railties-5.2.4.1/lib/rails/engine.rb',
+          abs_path: '/usr/local/bundle/gems/railties-5.2.4.1/lib/rails/engine.rb',
           line: {
             number: 524,
           },
@@ -2478,8 +2437,7 @@ RubyWithContextAndLibraryFrames.args = {
           exclude_from_grouping: false,
           library_frame: true,
           filename: 'puma/configuration.rb',
-          abs_path:
-            '/usr/local/bundle/gems/puma-4.3.5/lib/puma/configuration.rb',
+          abs_path: '/usr/local/bundle/gems/puma-4.3.5/lib/puma/configuration.rb',
           line: {
             number: 228,
           },

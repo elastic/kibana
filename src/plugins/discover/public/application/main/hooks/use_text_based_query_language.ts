@@ -10,8 +10,8 @@ import { isOfAggregateQueryType, getAggregateQueryMode } from '@kbn/es-query';
 import { useCallback, useEffect, useRef } from 'react';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { switchMap } from 'rxjs';
-import { useSavedSearchInitial } from '../services/discover_state_provider';
-import type { DiscoverStateContainer } from '../services/discover_state';
+import { useSavedSearchInitial } from '../state_management/discover_state_provider';
+import type { DiscoverStateContainer } from '../state_management/discover_state';
 import { getValidViewMode } from '../utils/get_valid_view_mode';
 import { FetchStatus } from '../../types';
 
@@ -66,12 +66,9 @@ export function useTextBasedQueryLanguage({
           };
           const { index, viewMode } = stateContainer.appState.getState();
           let nextColumns: string[] = [];
-          const isTextBasedQueryLang =
-            recordRawType === 'plain' &&
-            isOfAggregateQueryType(query) &&
-            ('sql' in query || 'esql' in query);
+          const isTextBasedQueryLang = recordRawType === 'plain' && isOfAggregateQueryType(query);
           const hasResults = Boolean(next.result?.length);
-          let queryHasTransformationalCommands = 'sql' in query;
+          let queryHasTransformationalCommands = false;
           if ('esql' in query) {
             TRANSFORMATIONAL_COMMANDS.forEach((command: string) => {
               if (query.esql.toLowerCase().includes(command)) {

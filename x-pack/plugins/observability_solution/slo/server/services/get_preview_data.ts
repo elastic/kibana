@@ -26,7 +26,7 @@ import { getElasticsearchQueryOrThrow } from './transform_generators';
 import { buildParamValues } from './transform_generators/synthetics_availability';
 import { typedSearch } from '../utils/queries';
 import { APMTransactionDurationIndicator } from '../domain/models';
-import { computeSLI } from '../domain/services';
+import { computeSLIForPreview } from '../domain/services';
 import {
   GetCustomMetricIndicatorAggregation,
   GetHistogramIndicatorAggregation,
@@ -135,7 +135,7 @@ export class GetPreviewData {
         const total = bucket.total?.value ?? 0;
         return {
           date: bucket.key_as_string,
-          sliValue: computeSLI(good, total),
+          sliValue: computeSLIForPreview(good, total),
           events: {
             good,
             total,
@@ -225,7 +225,7 @@ export class GetPreviewData {
       date: bucket.key_as_string,
       sliValue:
         !!bucket.good && !!bucket.total
-          ? computeSLI(bucket.good.doc_count, bucket.total.doc_count)
+          ? computeSLIForPreview(bucket.good.doc_count, bucket.total.doc_count)
           : null,
       events: {
         good: bucket.good?.doc_count ?? 0,
@@ -290,7 +290,9 @@ export class GetPreviewData {
     return result.aggregations?.perMinute.buckets.map((bucket) => ({
       date: bucket.key_as_string,
       sliValue:
-        !!bucket.good && !!bucket.total ? computeSLI(bucket.good.value, bucket.total.value) : null,
+        !!bucket.good && !!bucket.total
+          ? computeSLIForPreview(bucket.good.value, bucket.total.value)
+          : null,
       events: {
         good: bucket.good?.value ?? 0,
         bad: (bucket.total?.value ?? 0) - (bucket.good?.value ?? 0),
@@ -353,7 +355,9 @@ export class GetPreviewData {
     return result.aggregations?.perMinute.buckets.map((bucket) => ({
       date: bucket.key_as_string,
       sliValue:
-        !!bucket.good && !!bucket.total ? computeSLI(bucket.good.value, bucket.total.value) : null,
+        !!bucket.good && !!bucket.total
+          ? computeSLIForPreview(bucket.good.value, bucket.total.value)
+          : null,
       events: {
         good: bucket.good?.value ?? 0,
         bad: (bucket.total?.value ?? 0) - (bucket.good?.value ?? 0),
@@ -465,7 +469,7 @@ export class GetPreviewData {
       date: bucket.key_as_string,
       sliValue:
         !!bucket.good && !!bucket.total
-          ? computeSLI(bucket.good.doc_count, bucket.total.doc_count)
+          ? computeSLIForPreview(bucket.good.doc_count, bucket.total.doc_count)
           : null,
       events: {
         good: bucket.good?.doc_count ?? 0,
@@ -570,7 +574,7 @@ export class GetPreviewData {
       const total = bucket.total?.doc_count ?? 0;
       data.push({
         date: bucket.key_as_string,
-        sliValue: computeSLI(good, total),
+        sliValue: computeSLIForPreview(good, total),
         events: {
           good,
           bad,

@@ -85,15 +85,11 @@ describe('Agent configuration', () => {
   });
 
   it('persists service enviroment when clicking on edit button', () => {
-    cy.intercept(
-      'GET',
-      '/api/apm/settings/agent-configuration/environments?*'
-    ).as('serviceEnvironmentApi');
+    cy.intercept('GET', '/api/apm/settings/agent-configuration/environments?*').as(
+      'serviceEnvironmentApi'
+    );
     cy.contains('Create configuration').click();
-    cy.getByTestSubj('serviceNameComboBox')
-      .click()
-      .type('opbeans-node')
-      .type('{enter}');
+    cy.getByTestSubj('serviceNameComboBox').click().type('opbeans-node').type('{enter}');
 
     cy.contains('opbeans-node').realClick();
     cy.wait('@serviceEnvironmentApi');
@@ -113,18 +109,15 @@ describe('Agent configuration', () => {
       .should('contain', 'production');
   });
   it('displays All label when selecting all option', () => {
-    cy.intercept(
-      'GET',
-      '/api/apm/settings/agent-configuration/environments'
-    ).as('serviceEnvironmentApi');
+    cy.intercept('GET', '/api/apm/settings/agent-configuration/environments').as(
+      'serviceEnvironmentApi'
+    );
     cy.contains('Create configuration').click();
     cy.getByTestSubj('serviceNameComboBox').click().type('All').type('{enter}');
     cy.contains('All').realClick();
     cy.wait('@serviceEnvironmentApi');
 
-    cy.getByTestSubj('serviceEnviromentComboBox')
-      .click({ force: true })
-      .type('All');
+    cy.getByTestSubj('serviceEnviromentComboBox').click({ force: true }).type('All');
 
     cy.get('mark').contains('All').click({ force: true });
     cy.contains('Next step').click();

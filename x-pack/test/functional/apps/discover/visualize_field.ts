@@ -31,7 +31,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const monacoEditor = getService('monacoEditor');
 
   const defaultSettings = {
-    'discover:enableESQL': true,
+    enableESQL: true,
   };
 
   async function setDiscoverTimeRange() {

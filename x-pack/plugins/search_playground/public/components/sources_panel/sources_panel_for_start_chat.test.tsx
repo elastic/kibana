@@ -5,100 +5,104 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render as testingLibraryRender, screen } from '@testing-library/react';
+import React, { FC, PropsWithChildren } from 'react';
+import { render, screen } from '@testing-library/react';
+import { SourcesPanelForStartChat } from './sources_panel_for_start_chat';
+import { useSourceIndicesFields } from '../../hooks/use_source_indices_field';
+import { useQueryIndices } from '../../hooks/use_query_indices';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
-import { SourcesPanelForStartChat } from './sources_panel_for_start_chat';
-import { useSourceIndicesField } from '../../hooks/use_source_indices_field';
-import { getDefaultSourceFields } from '../../utils/create_query';
+jest.mock('../../hooks/use_source_indices_field', () => ({
+  useSourceIndicesFields: jest.fn(),
+}));
+jest.mock('../../hooks/use_query_indices', () => ({
+  useQueryIndices: jest.fn(),
+}));
 
-const render = (children: React.ReactNode) =>
-  testingLibraryRender(<IntlProvider locale="en">{children}</IntlProvider>);
+jest.mock('../../hooks/use_kibana', () => ({
+  useKibana: jest.fn(() => ({
+    services: {
+      application: { navigateToUrl: jest.fn() },
+      share: { url: { locators: { get: jest.fn() } } },
+    },
+  })),
+}));
 
-jest.mock('./create_index_callout', () => ({ CreateIndexCallout: () => 'mocked component' }));
-jest.mock('../../hooks/use_source_indices_field');
-jest.mock('../../utils/create_query');
-jest.mock('../../hooks/use_query_indices', () => {
-  return {
-    useQueryIndices: () => {
-      return {
-        indices: [],
-        isLoading: false,
-      };
-    },
-  };
-});
-jest.mock('../../hooks/use_indices_fields', () => {
-  return {
-    useIndicesFields: () => {
-      return {
-        fields: {},
-        isLoading: false,
-      };
-    },
-  };
-});
-jest.mock('react-hook-form', () => {
-  return {
-    useController: () => {
-      return {
-        field: { onChange: jest.fn() },
-      };
-    },
-  };
-});
-const mockUseSourceIndicesField = useSourceIndicesField as jest.Mock;
-const mockGetDefaultSourceFields = getDefaultSourceFields as jest.Mock;
+const Wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
+  return (
+    <>
+      <IntlProvider locale="en">{children}</IntlProvider>
+    </>
+  );
+};
 
-describe('SourcesPanelForStartChat', () => {
-  describe('renders sources', () => {
-    beforeEach(() => {
-      mockUseSourceIndicesField.mockReturnValue({
-        selectedIndices: [],
-        addIndex: jest.fn(),
-        removeIndex: jest.fn(),
-      });
-      mockGetDefaultSourceFields.mockReturnValue({});
+describe('SourcesPanelForStartChat component', () => {
+  afterEach(jest.clearAllMocks);
+
+  it('shows a loading spinner when query is loading', () => {
+    (useQueryIndices as jest.Mock).mockReturnValue({ indices: [], isLoading: true });
+    (useSourceIndicesFields as jest.Mock).mockReturnValue({
+      indices: [],
+      removeIndex: jest.fn(),
+      addIndex: jest.fn(),
+      loading: false,
     });
 
-    test('renders Sources', () => {
-      render(<SourcesPanelForStartChat />);
-      expect(screen.getByText(/Select Sources/i)).toBeInTheDocument();
-    });
+    render(<SourcesPanelForStartChat />, { wrapper: Wrapper });
+    expect(screen.getByTestId('indicesLoading')).toBeInTheDocument();
   });
 
-  describe('with default index', () => {
-    beforeEach(() => {
-      mockUseSourceIndicesField.mockReturnValue({
-        selectedIndices: ['index-1'],
-        addIndex: jest.fn(),
-        removeIndex: jest.fn(),
-      });
-      mockGetDefaultSourceFields.mockReturnValue({
-        'index-1': ['text'],
-      });
+  it('shows the "AddIndicesField" component when there are indices and not loading', () => {
+    (useQueryIndices as jest.Mock).mockReturnValue({ indices: ['index1'], isLoading: false });
+    (useSourceIndicesFields as jest.Mock).mockReturnValue({
+      indices: [],
+      removeIndex: jest.fn(),
+      addIndex: jest.fn(),
+      loading: false,
     });
 
-    test('renders Sources', () => {
-      render(<SourcesPanelForStartChat />);
-      expect(screen.getByText(/Select Sources/i)).toBeInTheDocument();
-    });
-    test('renders indices table', () => {
-      render(<SourcesPanelForStartChat />);
-      expect(screen.getByText(/index-1/i)).toBeInTheDocument();
-    });
+    render(<SourcesPanelForStartChat />, { wrapper: Wrapper });
+    expect(screen.queryByTestId('indicesLoading')).not.toBeInTheDocument();
   });
 
-  describe('no source fields', () => {
-    beforeEach(() => {
-      mockGetDefaultSourceFields.mockReturnValue({
-        'index-1': [undefined],
-      });
+  it('displays IndicesTable when there are selected indices', () => {
+    (useQueryIndices as jest.Mock).mockReturnValue({ indices: ['index1'], isLoading: false });
+    (useSourceIndicesFields as jest.Mock).mockReturnValue({
+      indices: ['index1'],
+      removeIndex: jest.fn(),
+      addIndex: jest.fn(),
+      loading: false,
     });
-    test('renders warning callout', () => {
-      render(<SourcesPanelForStartChat />);
-      expect(screen.getByText(/No source fields found for index-1/i)).toBeInTheDocument();
+
+    render(<SourcesPanelForStartChat />, { wrapper: Wrapper });
+    expect(screen.getAllByText('index1')).toHaveLength(1);
+    expect(screen.getByTestId('removeIndexButton')).toBeInTheDocument();
+  });
+
+  it('displays "CreateIndexCallout" when no indices are found and not loading', () => {
+    (useQueryIndices as jest.Mock).mockReturnValue({ indices: [], isLoading: false });
+    (useSourceIndicesFields as jest.Mock).mockReturnValue({
+      indices: [],
+      removeIndex: jest.fn(),
+      addIndex: jest.fn(),
+      loading: false,
     });
+
+    render(<SourcesPanelForStartChat />, { wrapper: Wrapper });
+    expect(screen.getByTestId('createIndexCallout')).toBeInTheDocument();
+  });
+
+  it('renders warning callout', () => {
+    (useSourceIndicesFields as jest.Mock).mockReturnValue({
+      indices: ['index1'],
+      removeIndex: jest.fn(),
+      addIndex: jest.fn(),
+      loading: false,
+      noFieldsIndicesWarning: 'index1',
+    });
+
+    render(<SourcesPanelForStartChat />, { wrapper: Wrapper });
+    expect(screen.getByTestId('NoIndicesFieldsMessage')).toBeInTheDocument();
+    expect(screen.getByTestId('NoIndicesFieldsMessage')).toHaveTextContent('index1');
   });
 });

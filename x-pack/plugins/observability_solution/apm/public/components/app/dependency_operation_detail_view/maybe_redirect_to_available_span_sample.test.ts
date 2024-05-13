@@ -21,10 +21,9 @@ describe('maybeRedirectToAvailableSpanSample', () => {
     transactionId: '',
   }));
 
-  let defaultParams: Omit<
-    Parameters<typeof maybeRedirectToAvailableSpanSample>[0],
-    'replace'
-  > & { replace: jest.MockedFunction<typeof urlHelpersReplace> };
+  let defaultParams: Omit<Parameters<typeof maybeRedirectToAvailableSpanSample>[0], 'replace'> & {
+    replace: jest.MockedFunction<typeof urlHelpersReplace>;
+  };
 
   beforeEach(() => {
     defaultParams = {

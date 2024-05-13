@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 
 /**
  * Create a separator with a text on the right side
  */
-export const LogTextSeparator: React.FC = ({ children }) => {
+export const LogTextSeparator: FC<PropsWithChildren<unknown>> = ({ children }) => {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">
       <EuiFlexItem grow={false}>{children}</EuiFlexItem>
