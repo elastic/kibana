@@ -26,7 +26,6 @@ import {
   embeddableInputToSubject,
   isExplicitInputWithAttributes,
   PanelNotFoundError,
-  reactEmbeddableRegistryHasKey,
   ViewMode,
   type EmbeddableFactory,
   type EmbeddableInput,
@@ -482,7 +481,7 @@ export class DashboardContainer
   ) {
     const {
       notifications: { toasts },
-      embeddable: { getEmbeddableFactory },
+      embeddable: { getEmbeddableFactory, reactEmbeddableRegistryHasKey },
     } = pluginServices.getServices();
 
     const onSuccess = (id?: string, title?: string) => {
@@ -569,6 +568,9 @@ export class DashboardContainer
   }
 
   public getDashboardPanelFromId = async (panelId: string) => {
+    const {
+      embeddable: { reactEmbeddableRegistryHasKey },
+    } = pluginServices.getServices();
     const panel = this.getInput().panels[panelId];
     if (reactEmbeddableRegistryHasKey(panel.type)) {
       const child = this.children$.value[panelId];
@@ -680,6 +682,7 @@ export class DashboardContainer
       }
       this.dispatch.setAnimatePanelTransforms(false); // prevents panels from animating on navigate.
       this.dispatch.setLastSavedId(newSavedObjectId);
+      this.setExpandedPanelId(undefined);
     });
     this.updateInput(newInput);
     dashboardContainerReady$.next(this);
@@ -731,6 +734,9 @@ export class DashboardContainer
   };
 
   public async getPanelTitles(): Promise<string[]> {
+    const {
+      embeddable: { reactEmbeddableRegistryHasKey },
+    } = pluginServices.getServices();
     const titles: string[] = [];
     for (const [id, panel] of Object.entries(this.getInput().panels)) {
       const title = await (async () => {
@@ -814,6 +820,9 @@ export class DashboardContainer
   };
 
   public removePanel(id: string) {
+    const {
+      embeddable: { reactEmbeddableRegistryHasKey },
+    } = pluginServices.getServices();
     const type = this.getInput().panels[id]?.type;
     this.removeEmbeddable(id);
     if (reactEmbeddableRegistryHasKey(type)) {
