@@ -138,6 +138,26 @@ it.each([
       },
     },
   },
+  {
+    queryParam: { access: 'public', version: '2023-10-31' },
+    includes: {
+      paths: {
+        '/api/include-test': {
+          get: {},
+        },
+        '/api/versioned': {
+          get: {},
+        },
+      },
+    },
+    excludes: {
+      paths: {
+        '/api/my-include-test/{id}': {},
+        '/api/my-include-test/exclude-test': {},
+        '/api/my-other-plugin': {},
+      },
+    },
+  },
 ])(
   'can filter paths based on query params $queryParam',
   async ({ queryParam, includes, excludes }) => {
@@ -145,10 +165,17 @@ it.each([
       config: { server: { oas: { enabled: true } } },
       createRoutes: (getRouter) => {
         const router1 = getRouter(Symbol('myPlugin'));
-        router1.get({ path: '/api/include-test', validate: false }, (_, __, res) => res.ok());
+        router1.get(
+          { path: '/api/include-test', validate: false, options: { access: 'public' } },
+          (_, __, res) => res.ok()
+        );
         router1.post({ path: '/api/include-test', validate: false }, (_, __, res) => res.ok());
         router1.get({ path: '/api/include-test/{id}', validate: false }, (_, __, res) => res.ok());
         router1.get({ path: '/api/exclude-test', validate: false }, (_, __, res) => res.ok());
+
+        router1.versioned
+          .get({ path: '/api/versioned', access: 'public' })
+          .addVersion({ version: '2023-10-31', validate: false }, (_, __, res) => res.ok());
 
         const router2 = getRouter(Symbol('myOtherPlugin'));
         router2.get({ path: '/api/my-other-plugin', validate: false }, (_, __, res) => res.ok());
@@ -162,3 +189,12 @@ it.each([
     expect(result.body).not.toMatchObject(excludes);
   }
 );
+
+it('only accepts "public" or "internal" for "access" query param', async () => {
+  const server = await startService({ config: { server: { oas: { enabled: true } } } });
+  const result = await supertest(server.listener).get('/api/oas').query({ access: 'invalid' });
+  expect(result.body.message).toBe(
+    'Invalid access query parameter. Must be one of "public" or "internal".'
+  );
+  expect(result.status).toBe(400);
+});
