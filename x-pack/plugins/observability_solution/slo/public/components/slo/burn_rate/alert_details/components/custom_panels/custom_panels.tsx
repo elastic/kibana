@@ -11,7 +11,10 @@ import { APMLatencyAlertDetails, APMAvailabilityAlertDetails } from './apm/apm_a
 import { CustomKqlPanels } from './custom_kql/custom_kql_panels';
 import { getDataTimeRange } from '../../utils/time_range';
 import type { BurnRateAlert, BurnRateRule } from '../../types';
-import type { APMTransactionDurationSLOResponse } from './apm/apm_alert_details';
+import type {
+  APMTransactionDurationSLOResponse,
+  APMErrorRateSLOResponse,
+} from './apm/apm_alert_details';
 
 interface Props {
   alert: BurnRateAlert;
@@ -36,7 +39,7 @@ export function CustomAlertDetailsPanel({ slo, alert, rule }: Props) {
     case 'sli.apm.transactionErrorRate':
       return (
         <APMAvailabilityAlertDetails
-          slo={slo as APMTransactionDurationSLOResponse}
+          slo={slo as APMErrorRateSLOResponse}
           dataTimeRange={dataTimeRange}
           alert={alert}
           rule={rule}
