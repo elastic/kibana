@@ -756,7 +756,7 @@ describe('Test discover state actions', () => {
 
   test('onChangeDataView', async () => {
     const { state, getCurrentUrl } = await getState('/', { savedSearch: savedSearchMock });
-    const { actions, savedSearchState, dataState, appState } = state;
+    const { actions, savedSearchState, dataState } = state;
 
     await actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });
     const unsubscribe = actions.initializeAndSync();
