@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { IKibanaResponse } from '@kbn/core-http-server';
 import * as t from 'io-ts';
 import { RequiredKeys } from 'utility-types';
 
@@ -94,7 +95,9 @@ export type ReturnOf<
   infer TReturnType,
   ServerRouteCreateOptions
 >
-  ? TReturnType
+  ? TReturnType extends IKibanaResponse<infer TWrappedResponseType>
+    ? TWrappedResponseType
+    : TReturnType
   : never;
 
 export type DecodedRequestParamsOf<
