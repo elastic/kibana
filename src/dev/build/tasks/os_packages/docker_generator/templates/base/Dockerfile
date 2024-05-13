@@ -65,10 +65,11 @@ RUN set -e ; \
   rm "${TINI_BIN}.sha256sum" ; \
   mv "${TINI_BIN}" /bin/tini ; \
   chmod +x /bin/tini
-
+{{^serverless}}
 RUN mkdir /usr/share/fonts/local && \
   curl --retry 8 -S -L -o /usr/share/fonts/local/NotoSansCJK-Regular.ttc https://github.com/googlefonts/noto-cjk/raw/NotoSansV2.001/NotoSansCJK-Regular.ttc && \
   echo "5dcd1c336cc9344cb77c03a0cd8982ca8a7dc97d620fd6c9c434e02dcb1ceeb3  /usr/share/fonts/local/NotoSansCJK-Regular.ttc" | sha256sum -c -
+{{/serverless}}
 
 COPY {{filebeatTarball}} /tmp/filebeat.tar.gz
 COPY {{metricbeatTarball}} /tmp/metricbeat.tar.gz
