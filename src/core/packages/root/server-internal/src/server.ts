@@ -99,7 +99,7 @@ export class Server {
   private readonly userSettingsService: UserSettingsService;
   private readonly security: SecurityService;
   private readonly userProfile: UserProfileService;
-  private readonly injectionService: CoreInjectionService;
+  private readonly injection: CoreInjectionService;
 
   private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
   private resolveSavedObjectsStartPromise?: (value: SavedObjectsServiceStart) => void;
@@ -125,7 +125,7 @@ export class Server {
 
     const core = { coreId, configService: this.configService, env, logger: this.logger };
     this.analytics = new AnalyticsService(core);
-    this.injectionService = new CoreInjectionService(core);
+    this.injection = new CoreInjectionService(core);
     this.context = new ContextService(core);
     this.featureFlags = new FeatureFlagsService(core);
     this.http = new HttpService(core);
@@ -282,7 +282,7 @@ export class Server {
     const securitySetup = this.security.setup();
     const userProfileSetup = this.userProfile.setup();
 
-    const injectionSetup = this.injectionService.setup();
+    const injectionSetup = this.injection.setup();
 
     const httpSetup = await this.http.setup({
       context: contextServiceSetup,
@@ -424,7 +424,7 @@ export class Server {
     const startStartUptime = performance.now();
     const startTransaction = apm.startTransaction('server-start', 'kibana-platform');
 
-    const injectionStart = this.injectionService.start();
+    const injectionStart = this.injection.start();
     const analyticsStart = this.analytics.start();
     const securityStart = this.security.start();
     const userProfileStart = this.userProfile.start();

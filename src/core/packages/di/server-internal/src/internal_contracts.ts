@@ -7,37 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginOpaqueId, PluginManifest } from '@kbn/core-base-common';
-import type { ContainerModule, PluginContainer, ReadonlyContainer } from '@kbn/core-di-common';
-import type { CoreDiSetupModuleCallback } from '@kbn/core-di-server';
-import type { KibanaRequest } from '@kbn/core-http-server';
+import type { interfaces } from 'inversify';
+import type { PluginOpaqueId } from '@kbn/core-base-common';
 
 /** @internal */
 export interface InternalCoreDiServiceSetup {
-  // public interfaces to be bridged to the public contract
-
-  configurePluginModule(pluginId: PluginOpaqueId, callback: CoreDiSetupModuleCallback): void;
-
-  // all APIs below are internal for Core usages only and not re-exposed
-
-  createPluginContainer(pluginId: PluginOpaqueId, manifest: PluginManifest): PluginContainer;
-
   /**
-   * Registers a plugin-scoped module that will be loaded for each plugin.
-   * Used to register the plugin-scoped config, logger and so on.
+   * Loads a scoped module that will be loaded for each plugin.
    */
-  registerPluginModule(module: ContainerModule): void;
-
-  registerGlobalModule(module: ContainerModule): void;
-
-  registerRequestModule(module: ContainerModule): void;
+  load(id: PluginOpaqueId, module: interfaces.ContainerModule): void;
 }
 
 /** @internal */
 export interface InternalCoreDiServiceStart {
-  getPluginContainer(pluginId: PluginOpaqueId): ReadonlyContainer;
+  getContainer(id: PluginOpaqueId): interfaces.Container;
 
-  createRequestContainer(request: KibanaRequest, pluginId: PluginOpaqueId): ReadonlyContainer;
-
-  disposeRequestContainer(request: KibanaRequest): boolean;
+  fork(root?: interfaces.Container): interfaces.Container;
 }
