@@ -8,6 +8,7 @@
 import { setupServer } from 'msw/node';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { CoreStart } from '@kbn/core/public';
+import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { defaultHandlers } from './handlers';
 import { getMockDependencies } from './fixtures/get_mock_dependencies';
 import { CspClientPluginStartDeps } from '../types';
@@ -40,6 +41,23 @@ export const getMockServerServicesSetup = () => {
             });
             return response.json();
           },
+        },
+        dataViews: {
+          ...getMockDependencies().data.dataViews,
+          find: async (pattern: string) => {
+            const response = await fetch(
+              `http://localhost/internal/data_views/fields?pattern=${pattern}`
+            );
+            return [response.json()];
+          },
+        },
+      },
+      licensing: {
+        ...getMockDependencies().licensing,
+        refresh: async () => {
+          const response = await fetch('http://localhost/api/licensing/info');
+          const responseJson = await response.json();
+          return licenseMock.createLicense(responseJson);
         },
       },
     } as unknown as Partial<CspClientPluginStartDeps>,
