@@ -44,7 +44,6 @@ RUN tar \
 # OpenShift does this, for example.
 # REF: https://docs.openshift.org/latest/creating_images/guidelines.html
 RUN chmod -R g=u /usr/share/kibana
-{{#cloud}}
 
 # Add an init process, check the checksum to make sure it's a match
 RUN set -e ; \
@@ -66,11 +65,12 @@ RUN set -e ; \
   mv "${TINI_BIN}" /bin/tini ; \
   chmod +x /bin/tini
 {{^serverless}}
-RUN mkdir /usr/share/fonts/local && \
+RUN mkdir -p /usr/share/fonts/local && \
   curl --retry 8 -S -L -o /usr/share/fonts/local/NotoSansCJK-Regular.ttc https://github.com/googlefonts/noto-cjk/raw/NotoSansV2.001/NotoSansCJK-Regular.ttc && \
   echo "5dcd1c336cc9344cb77c03a0cd8982ca8a7dc97d620fd6c9c434e02dcb1ceeb3  /usr/share/fonts/local/NotoSansCJK-Regular.ttc" | sha256sum -c -
 {{/serverless}}
 
+{{#cloud}}
 COPY {{filebeatTarball}} /tmp/filebeat.tar.gz
 COPY {{metricbeatTarball}} /tmp/metricbeat.tar.gz
 
@@ -104,7 +104,7 @@ RUN for iter in {1..10}; do \
       {{packageManager}} update  && \
       {{packageManager}} upgrade -y  && \
       {{packageManager}} install -y --no-install-recommends \
-       fontconfig fonts-liberation libnss3 libfontconfig1 ca-certificates  && \
+       fontconfig libnss3 ca-certificates  && \
       {{packageManager}} clean && \
       rm -rf /var/lib/apt/lists/* && exit_code=0 && break || exit_code=$? && echo "{{packageManager}} error: retry $iter in 10s" && \
       sleep 10; \
