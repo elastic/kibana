@@ -5,6 +5,10 @@
     "types": ["jest", "node"]
   },
   "include": ["**/*.ts", "**/*.tsx"],
-  "kbn_references": ["@kbn/analytics-client", "@kbn/logging-mocks"],
+  "kbn_references": [
+    "@kbn/analytics-client",
+    "@kbn/logging-mocks",
+    "@kbn/shared-ux-utility",
+  ],
   "exclude": ["target/**/*"]
 }
