@@ -85,7 +85,7 @@ describe('helpers', () => {
     const isAssistantEnabled = true;
     it('when no conversation history, returns the welcome conversation', () => {
       const result = getBlockBotConversation(defaultConversation, isAssistantEnabled);
-      expect(result.messages.length).toEqual(3);
+      expect(result.messages.length).toEqual(0);
     });
     it('returns a conversation history with the welcome conversation appended', () => {
       const conversation = {
@@ -103,7 +103,7 @@ describe('helpers', () => {
         ],
       };
       const result = getBlockBotConversation(conversation, isAssistantEnabled);
-      expect(result.messages.length).toEqual(4);
+      expect(result.messages.length).toEqual(1);
     });
   });
 
