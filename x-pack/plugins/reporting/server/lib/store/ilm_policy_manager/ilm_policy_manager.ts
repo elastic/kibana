@@ -32,11 +32,8 @@ export class IlmPolicyManager {
    * Check that the ILM policy exists
    */
   public async doesIlmPolicyExist(): Promise<boolean> {
-    const reportingIlmGetLifecycleRequest: estypes.IlmGetLifecycleRequest = {
-      name: ILM_POLICY_NAME,
-    };
     try {
-      await this.client.ilm.getLifecycle(reportingIlmGetLifecycleRequest);
+      await this.client.ilm.getLifecycle({ name: ILM_POLICY_NAME });
       return true;
     } catch (e) {
       if (e.statusCode === 404) {
@@ -81,38 +78,21 @@ export class IlmPolicyManager {
    * Create the Reporting ILM policy
    */
   public async createIlmPolicy(): Promise<void> {
-    const reportingIlmPutLifecycleRequest: estypes.IlmPutLifecycleRequest = {
+    await this.client.ilm.putLifecycle({
       name: ILM_POLICY_NAME,
-      policy: {
-        phases: {
-          hot: {
-            actions: {},
-          },
-        },
-      },
-    };
-
-    await this.client.ilm.putLifecycle(reportingIlmPutLifecycleRequest);
+      policy: { phases: { hot: { actions: {} } } },
+    });
   }
 
   /**
    * Update the Data Stream index template with a link to the Reporting ILM policy
    */
   public async linkIlmPolicy() {
-    const reportingIndicesPutTemplateRequest: estypes.ClusterPutComponentTemplateRequest = {
+    const putTemplateAcknowledged = await this.client.cluster.putComponentTemplate({
       name: REPORTING_DATA_STREAM_COMPONENT_TEMPLATE,
-      template: {
-        settings: {
-          lifecycle: {
-            name: ILM_POLICY_NAME,
-          },
-        },
-      },
+      template: { settings: { lifecycle: { name: ILM_POLICY_NAME } } },
       create: false,
-    };
-    const putTemplateAcknowledged = await this.client.cluster.putComponentTemplate(
-      reportingIndicesPutTemplateRequest
-    );
+    });
 
     let backingIndicesAcknowledged: { acknowledged: boolean | null } = { acknowledged: null };
     const backingIndicesExist = await this.client.indices.exists({
@@ -120,17 +100,10 @@ export class IlmPolicyManager {
       expand_wildcards: ['hidden'],
     });
     if (backingIndicesExist) {
-      const datastreamPutSettingsRequest: estypes.IndicesPutSettingsRequest = {
+      backingIndicesAcknowledged = await this.client.indices.putSettings({
         index: REPORTING_DATA_STREAM_ALIAS,
-        settings: {
-          lifecycle: {
-            name: ILM_POLICY_NAME,
-          },
-        },
-      };
-      backingIndicesAcknowledged = await this.client.indices.putSettings(
-        datastreamPutSettingsRequest
-      );
+        settings: { lifecycle: { name: ILM_POLICY_NAME } },
+      });
     }
 
     return { putTemplateResponse: putTemplateAcknowledged, backingIndicesAcknowledged };
@@ -152,17 +125,10 @@ export class IlmPolicyManager {
       expand_wildcards: ['hidden'],
     });
     if (legacyExists) {
-      const legacyIndicesPutSettingsRequest: estypes.IndicesPutSettingsRequest = {
+      const { acknowledged } = await this.client.indices.putSettings({
         index: REPORTING_LEGACY_INDICES,
-        settings: {
-          lifecycle: {
-            name: ILM_POLICY_NAME,
-          },
-        },
-      };
-      const { acknowledged } = await this.client.indices.putSettings(
-        legacyIndicesPutSettingsRequest
-      );
+        settings: { lifecycle: { name: ILM_POLICY_NAME } },
+      });
       legacyAcknowledged = acknowledged;
     }
 
