@@ -26,6 +26,8 @@ bin/kibana-keystore create
 The file `kibana.keystore` will be created in the `config` directory defined by the
 environment variable `KBN_PATH_CONF`.
 
+To create a password protected keystore use the `--password` flag.
+
 [float]
 [[list-settings]]
 === List settings in the keystore
@@ -91,4 +93,28 @@ To display the configured setting values, use the `show` command:
 [source, sh]
 ----------------------------------------------------------------
 bin/kibana-keystore show setting.key
+----------------------------------------------------------------
+
+[float]
+[[change-password]]
+=== Change password
+
+To change the password of the keystore, use the `passwd` command: 
+
+[source, sh]
+----------------------------------------------------------------
+bin/kibana-keystore passwd
+----------------------------------------------------------------
+
+[float]
+[[has-password]]
+=== Has password
+
+To check if the keystore is password protected, use the `has-passwd` command.
+An exit code of 0 will be returned if the keystore is password protected, 
+and the command will fail otherwise.
+
+[source, sh]
+----------------------------------------------------------------
+bin/kibana-keystore has-passwd
 ----------------------------------------------------------------

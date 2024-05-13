@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { IEsSearchResponse } from '@kbn/search-types';
 
 import { toPartialResponseAfterTimeout } from './to_partial_response';
-import { IEsSearchResponse } from '../../../common';
 
 describe('toPartialResponseAfterTimeout', () => {
   it('should transform a non-CCS response', () => {

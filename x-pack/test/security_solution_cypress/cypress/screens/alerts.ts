@@ -180,7 +180,7 @@ export const ALERT_TABLE_EVENT_RENDERED_VIEW_OPTION = '[data-test-subj="eventRen
 export const ALERT_RENDERER_HOST_NAME =
   '[data-test-subj="alertFieldBadge"] [data-test-subj="render-content-host.name"]';
 
-export const HOVER_ACTIONS_CONTAINER = getDataTestSubjectSelector('hover-actions-container');
+export const HOVER_ACTIONS_CONTAINER = getDataTestSubjectSelector('hoverActionsPopover');
 
 export const SECURITY_SOLUTION_USERS_AVATAR = (user: string) =>
   `[data-test-subj="securitySolutionUsersAvatar-${user}"]`;

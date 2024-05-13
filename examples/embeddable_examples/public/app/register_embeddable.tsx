@@ -64,10 +64,11 @@ export const RegisterEmbeddable = () => {
       <EuiText>
         <h2>Configure initial dashboard placement (optional)</h2>
         <p>
-          Add an entry to <strong>registerDashboardPanelPlacementSetting</strong> to configure
-          initial dashboard placement. Panel placement lets you configure the width, height, and
-          placement strategy when panels get added to a dashboard. In the example below, the Field
-          List embeddable will be added to dashboards as a narrow and tall panel.
+          Add an entry to <strong>registerDashboardPanelPlacementSetting</strong> provided by the
+          Dashboard plugin start contract to configure initial dashboard placement. Panel placement
+          lets you configure the width, height, and placement strategy when panels get added to a
+          dashboard. In the example below, the Field List embeddable will be added to dashboards as
+          a narrow and tall panel.
         </p>
       </EuiText>
       <EuiSpacer size="s" />
