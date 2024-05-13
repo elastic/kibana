@@ -31,6 +31,11 @@ interface ActionRefIdsAgg {
   doc_count: number;
 }
 
+interface ConnectorAggRes {
+  total: number;
+  connectorTypes: Record<string, number>;
+}
+
 export async function getTotalCount(
   esClient: ElasticsearchClient,
   kibanaIndex: string,
@@ -129,41 +134,6 @@ export async function getInUseTotalCount(
   countEmailByService: Record<string, number>;
   countNamespaces: number;
 }> {
-  const scriptedMetric = {
-    scripted_metric: {
-      init_script: 'state.connectorIds = new HashMap(); state.total = 0;',
-      map_script: `
-        String connectorId = doc['references.id'].value;
-        String actionRef = doc['references.name'].value;
-        if (state.connectorIds[connectorId] === null) {
-          state.connectorIds[connectorId] = actionRef;
-          state.total++;
-        }
-      `,
-      // Combine script is executed per cluster, but we already have a key-value pair per cluster.
-      // Despite docs that say this is optional, this script can't be blank.
-      combine_script: 'return state',
-      // Reduce script is executed across all clusters, so we need to add up all the total from each cluster
-      // This also needs to account for having no data
-      reduce_script: `
-          Map connectorIds = [:];
-          long total = 0;
-          for (state in states) {
-            if (state !== null) {
-              total += state.total;
-              for (String k : state.connectorIds.keySet()) {
-                connectorIds.put(k, connectorIds.containsKey(k) ? connectorIds.get(k) + state.connectorIds.get(k) : state.connectorIds.get(k));
-              }
-            }
-          }
-          Map result = new HashMap();
-          result.total = total;
-          result.connectorIds = connectorIds;
-          return result;
-      `,
-    },
-  };
-
   const mustQuery = [
     {
       bool: {
@@ -247,7 +217,7 @@ export async function getInUseTotalCount(
     const actionResults = await esClient.search<
       unknown,
       {
-        refs: { actionRefIds: { value: { total: number; connectorIds: Record<string, string> } } };
+        refs: { actionRefIds: { buckets: ActionRefIdsAgg[] } };
         actions: { actionRefIds: { buckets: ActionRefIdsAgg[] } };
       }
     >({
@@ -274,7 +244,18 @@ export async function getInUseTotalCount(
               path: 'references',
             },
             aggs: {
-              actionRefIds: scriptedMetric,
+              actionRefIds: {
+                multi_terms: {
+                  terms: [
+                    {
+                      field: 'references.id',
+                    },
+                    {
+                      field: 'references.name',
+                    },
+                  ],
+                },
+              },
             },
           },
           actions: {
@@ -307,17 +288,26 @@ export async function getInUseTotalCount(
       const actionTypeId = bucket.key[1];
       if (actionRef.startsWith('preconfigured:')) {
         preconfiguredActionsAggs.actionRefs[actionRef] = { actionRef, actionTypeId };
-        preconfiguredActionsAggs.total++;
+        preconfiguredActionsAggs.total += bucket.doc_count;
       }
       if (actionRef.startsWith('system_action:')) {
         systemActionsAggs.actionRefs[actionRef] = { actionRef, actionTypeId };
-        preconfiguredActionsAggs.total++;
+        systemActionsAggs.total += bucket.doc_count;
       }
     }
     const totalInMemoryActions =
       (preconfiguredActionsAggs?.total ?? 0) + (systemActionsAggs?.total ?? 0);
 
-    const aggs = actionResults.aggregations?.refs.actionRefIds.value;
+    const aggs: { total: number; connectorIds: Record<string, string> } = {
+      total: 0,
+      connectorIds: {},
+    };
+    for (const bucket of actionResults.aggregations?.refs?.actionRefIds?.buckets ?? []) {
+      const connectorId = bucket.key[0];
+      const actionRef = bucket.key[1];
+      aggs.connectorIds[connectorId] = actionRef;
+      aggs.total += bucket.doc_count;
+    }
 
     const { hits: actions } = await esClient.search<{
       action: ActionResult;
@@ -482,40 +472,6 @@ export async function getExecutionsPerDayCount(
   avgExecutionTimeByType: Record<string, number>;
   countRunOutcomeByConnectorType: Record<string, Record<string, number>>;
 }> {
-  const scriptedMetric = {
-    scripted_metric: {
-      init_script: 'state.connectorTypes = [:];  state.total = 0;',
-      map_script: `
-        if (doc['kibana.saved_objects.type'].value == 'action') {
-          String connectorType = doc['kibana.saved_objects.type_id'].value;
-          state.connectorTypes.put(connectorType, state.connectorTypes.containsKey(connectorType) ? state.connectorTypes.get(connectorType) + 1 : 1);
-          state.total++;
-        }
-      `,
-      // Combine script is executed per cluster, but we already have a key-value pair per cluster.
-      // Despite docs that say this is optional, this script can't be blank.
-      combine_script: 'return state',
-      // Reduce script is executed across all clusters, so we need to add up all the total from each cluster
-      // This also needs to account for having no data
-      reduce_script: `
-          Map connectorTypes = [:];
-          long total = 0;
-          for (state in states) {
-            if (state !== null) {
-              total += state.total;
-              for (String k : state.connectorTypes.keySet()) {
-                connectorTypes.put(k, connectorTypes.containsKey(k) ? connectorTypes.get(k) + state.connectorTypes.get(k) : state.connectorTypes.get(k));
-              }
-            }
-          }
-          Map result = new HashMap();
-          result.total = total;
-          result.connectorTypes = connectorTypes;
-          return result;
-      `,
-    },
-  };
-
   try {
     const actionResults = await esClient.search({
       index: eventLogIndex,
@@ -550,7 +506,16 @@ export async function getExecutionsPerDayCount(
               path: 'kibana.saved_objects',
             },
             aggs: {
-              byConnectorTypeId: scriptedMetric,
+              refs: {
+                filter: { term: { 'kibana.saved_objects.type': 'action' } },
+                aggs: {
+                  byConnectorTypeId: {
+                    terms: {
+                      field: 'kibana.saved_objects.type_id',
+                    },
+                  },
+                },
+              },
             },
           },
           failedExecutions: {
@@ -566,12 +531,21 @@ export async function getExecutionsPerDayCount(
               },
             },
             aggs: {
-              refs: {
+              actionSavedObjects: {
                 nested: {
                   path: 'kibana.saved_objects',
                 },
                 aggs: {
-                  byConnectorTypeId: scriptedMetric,
+                  refs: {
+                    filter: { term: { 'kibana.saved_objects.type': 'action' } },
+                    aggs: {
+                      byConnectorTypeId: {
+                        terms: {
+                          field: 'kibana.saved_objects.type_id',
+                        },
+                      },
+                    },
+                  },
                 },
               },
             },
@@ -635,16 +609,26 @@ export async function getExecutionsPerDayCount(
       },
     });
 
+    const aggsExecutions: ConnectorAggRes = { total: 0, connectorTypes: {} };
     // @ts-expect-error aggegation type is not specified
-    const aggsExecutions = actionResults.aggregations.totalExecutions?.byConnectorTypeId.value;
+    for (const bucket of actionResults.aggregations.totalExecutions?.refs?.byConnectorTypeId
+      .buckets ?? []) {
+      aggsExecutions.connectorTypes[bucket.key] = bucket.doc_count;
+      aggsExecutions.total += bucket.doc_count;
+    }
     // convert nanoseconds to milliseconds
     const aggsAvgExecutionTime = Math.round(
       // @ts-expect-error aggegation type is not specified
       actionResults.aggregations.avgDuration.value / (1000 * 1000)
     );
-    const aggsFailedExecutions =
-      // @ts-expect-error aggegation type is not specified
-      actionResults.aggregations.failedExecutions?.refs?.byConnectorTypeId.value;
+
+    const aggsFailedExecutions: ConnectorAggRes = { total: 0, connectorTypes: {} };
+    // @ts-expect-error aggegation type is not specified
+    for (const bucket of actionResults.aggregations.failedExecutions?.actionSavedObjects?.refs
+      ?.byConnectorTypeId.buckets ?? []) {
+      aggsFailedExecutions.connectorTypes[bucket.key] = bucket.doc_count;
+      aggsFailedExecutions.total += bucket.doc_count;
+    }
 
     const avgDurationByType =
       // @ts-expect-error aggegation type is not specified
@@ -672,7 +656,6 @@ export async function getExecutionsPerDayCount(
       countTotal: aggsExecutions.total,
       countByType: Object.entries(aggsExecutions.connectorTypes).reduce(
         (res: Record<string, number>, [key, value]) => {
-          // @ts-expect-error aggegation type is not specified
           res[replaceFirstAndLastDotSymbols(key)] = value;
           return res;
         },
@@ -681,7 +664,6 @@ export async function getExecutionsPerDayCount(
       countFailed: aggsFailedExecutions.total,
       countFailedByType: Object.entries(aggsFailedExecutions.connectorTypes).reduce(
         (res: Record<string, number>, [key, value]) => {
-          // @ts-expect-error aggegation type is not specified
           res[replaceFirstAndLastDotSymbols(key)] = value;
           return res;
         },
