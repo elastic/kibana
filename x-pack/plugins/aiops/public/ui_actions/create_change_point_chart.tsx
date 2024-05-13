@@ -58,7 +58,8 @@ export function createAddChangePointChartAction(
         const initialState = await resolveEmbeddableChangePointUserInput(
           coreStart,
           pluginStart,
-          context.embeddable
+          context.embeddable,
+          context.embeddable.uuid
         );
 
         presentationContainerParent.addNewPanel({

@@ -141,7 +141,8 @@ export const getChangePointChartEmbeddableFactory = (
               const result = await resolveEmbeddableChangePointUserInput(
                 coreStart,
                 pluginStart,
-                api,
+                parentApi,
+                uuid,
                 serializeChangePointChartState()
               );
 

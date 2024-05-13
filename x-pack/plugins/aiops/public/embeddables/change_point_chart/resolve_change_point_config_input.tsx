@@ -6,25 +6,25 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
+import { tracksOverlays } from '@kbn/presentation-containers';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import React from 'react';
-import { apiHasParentApi } from '@kbn/presentation-publishing';
-import { tracksOverlays } from '@kbn/presentation-containers';
-import type { ChangePointEmbeddableApi, ChangePointEmbeddableState } from './types';
 import type { AiopsAppDependencies } from '../..';
 import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
 import type { AiopsPluginStartDeps } from '../../types';
 import { ChangePointChartInitializer } from './change_point_chart_initializer';
+import type { ChangePointEmbeddableState } from './types';
 
 export async function resolveEmbeddableChangePointUserInput(
   coreStart: CoreStart,
   pluginStart: AiopsPluginStartDeps,
-  api: ChangePointEmbeddableApi,
+  parentApi: unknown,
+  focusedPanelId: string,
   input?: ChangePointEmbeddableState
 ): Promise<ChangePointEmbeddableState> {
   const { overlays } = coreStart;
 
-  const overlayTracker = tracksOverlays(api.parentApi) ? api.parentApi : undefined;
+  const overlayTracker = tracksOverlays(parentApi) ? parentApi : undefined;
 
   return new Promise(async (resolve, reject) => {
     try {
@@ -68,8 +68,8 @@ export async function resolveEmbeddableChangePointUserInput(
         }
       );
 
-      if (apiHasParentApi(api) && tracksOverlays(api.parentApi)) {
-        api.parentApi.openOverlay(flyoutSession, { focusedPanelId: api.uuid });
+      if (tracksOverlays(parentApi)) {
+        parentApi.openOverlay(flyoutSession, { focusedPanelId });
       }
     } catch (error) {
       reject(error);
