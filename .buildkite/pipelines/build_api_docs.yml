@@ -1,9 +1,9 @@
 env:
   PUBLISH_API_DOCS_CHANGES: 'true'
 steps:
-  - command: .buildkite/scripts/steps/api_docs/type_check_with_status.sh
-    label: Run scripts/type_check
-    key: type_check
+  - command: .buildkite/scripts/steps/check_types.sh
+    label: 'Check types'
+    key: check_types
     agents:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
