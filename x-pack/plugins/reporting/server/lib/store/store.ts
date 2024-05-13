@@ -14,7 +14,10 @@ import type {
   ReportOutput,
   ReportSource,
 } from '@kbn/reporting-common/types';
-import { REPORTING_DATA_STREAM_ALIAS } from '@kbn/reporting-server';
+import {
+  REPORTING_DATA_STREAM_ALIAS,
+  REPORTING_DATA_STREAM_COMPONENT_TEMPLATE,
+} from '@kbn/reporting-server';
 import moment from 'moment';
 import type { Report } from '.';
 import { SavedReport } from '.';
@@ -125,10 +128,10 @@ export class ReportingStore {
       this.logger.info(`Creating ILM policy for reporting data stream: ${ILM_POLICY_NAME}`);
       await ilmPolicyManager.createIlmPolicy();
     }
-    this.logger.info(`Creating ILM policy for reporting data stream: ${ILM_POLICY_NAME}`);
-    await ilmPolicyManager.createIlmPolicy();
 
-    this.logger.info(`Linking ILM policy to reporting data stream: ${REPORTING_DATA_STREAM_ALIAS}`);
+    this.logger.info(
+      `Linking ILM policy to reporting data stream: ${REPORTING_DATA_STREAM_ALIAS}, component template: ${REPORTING_DATA_STREAM_COMPONENT_TEMPLATE}`
+    );
     await ilmPolicyManager.linkIlmPolicy();
   }
 

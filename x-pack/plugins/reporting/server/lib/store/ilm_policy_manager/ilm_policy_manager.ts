@@ -46,6 +46,10 @@ export class IlmPolicyManager {
     }
   }
 
+  /**
+   * This method is automatically called on the Stack Management > Reporting page, by the `` API for users with
+   * privilege to manage ILM, to notify them when attention is needed to update the policy for any reason.
+   */
   public async checkIlmMigrationStatus(): Promise<IlmPolicyMigrationStatus> {
     if (!(await this.doesIlmPolicyExist())) {
       return 'policy-not-found';
