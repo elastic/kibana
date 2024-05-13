@@ -571,109 +571,8 @@ describe('validation logic', () => {
         }
       }
 
-      function tweakSignatureForRowCommand(signature: string) {
-        /**
-         * row has no access to any field, so replace it with literal
-         * or functions (for dates)
-         */
-        return signature
-          .replace(/numberField/g, '5')
-          .replace(/stringField/g, '"a"')
-          .replace(/dateField/g, 'now()')
-          .replace(/booleanField/g, 'true')
-          .replace(/ipField/g, 'to_ip("127.0.0.1")')
-          .replace(/geoPointField/g, 'to_geopoint("POINT (30 10)")')
-          .replace(/geoShapeField/g, 'to_geoshape("POINT (30 10)")')
-          .replace(/cartesianPointField/g, 'to_cartesianpoint("POINT (30 10)")')
-          .replace(/cartesianShapeField/g, 'to_cartesianshape("POINT (30 10)")');
-      }
+      // MOVE
 
-      for (const { name, alias, signatures, ...defRest } of evalFunctionsDefinitions) {
-        if (name === 'date_diff') continue;
-        for (const { params, ...signRest } of signatures) {
-          const fieldMapping = getFieldMapping(params);
-          const signatureStringCorrect = tweakSignatureForRowCommand(
-            getFunctionSignatures(
-              { name, ...defRest, signatures: [{ params: fieldMapping, ...signRest }] },
-              { withTypes: false }
-            )[0].declaration
-          );
-
-          testErrorsAndWarnings(`row var = ${signatureStringCorrect}`, []);
-          testErrorsAndWarnings(`row ${signatureStringCorrect}`, []);
-
-          if (alias) {
-            for (const otherName of alias) {
-              const signatureStringWithAlias = tweakSignatureForRowCommand(
-                getFunctionSignatures(
-                  {
-                    name: otherName,
-                    ...defRest,
-                    signatures: [{ params: fieldMapping, ...signRest }],
-                  },
-                  { withTypes: false }
-                )[0].declaration
-              );
-
-              testErrorsAndWarnings(`row var = ${signatureStringWithAlias}`, []);
-            }
-          }
-
-          // Skip functions that have only arguments of type "any", as it is not possible to pass "the wrong type".
-          // to_version functions are a bit harder to test exactly a combination of argument and predict the
-          // the right error message
-          if (
-            params.every(({ type }) => type !== 'any') &&
-            ![
-              'to_version',
-              'mv_sort',
-              // skip the date functions because the row tests always throw in
-              // a string literal and expect it to be invalid for the date functions
-              // but it's always valid because ES will parse it as a date
-              'date_diff',
-              'date_extract',
-              'date_format',
-              'date_trunc',
-            ].includes(name)
-          ) {
-            // now test nested functions
-            const fieldMappingWithNestedFunctions = getFieldMapping(params, {
-              useNestedFunction: true,
-              useLiterals: true,
-            });
-            const signatureString = tweakSignatureForRowCommand(
-              getFunctionSignatures(
-                {
-                  name,
-                  ...defRest,
-                  signatures: [{ params: fieldMappingWithNestedFunctions, ...signRest }],
-                },
-                { withTypes: false }
-              )[0].declaration
-            );
-
-            testErrorsAndWarnings(`row var = ${signatureString}`, []);
-
-            const { wrongFieldMapping, expectedErrors } = generateIncorrectlyTypedParameters(
-              name,
-              signatures,
-              params,
-              {
-                stringField: '"a"',
-                numberField: '5',
-                booleanField: 'true',
-              }
-            );
-            const wrongSignatureString = tweakSignatureForRowCommand(
-              getFunctionSignatures(
-                { name, ...defRest, signatures: [{ params: wrongFieldMapping, ...signRest }] },
-                { withTypes: false }
-              )[0].declaration
-            );
-            testErrorsAndWarnings(`row var = ${wrongSignatureString}`, expectedErrors);
-          }
-        }
-      }
       for (const op of ['>', '>=', '<', '<=', '==', '!=']) {
         testErrorsAndWarnings(`row var = 5 ${op} 0`, []);
         testErrorsAndWarnings(`row var = NOT 5 ${op} 0`, []);
@@ -1222,6 +1121,8 @@ describe('validation logic', () => {
       // this is a scenario that was failing because "or" didn't accept "null"
       testErrorsAndWarnings('from a_index | where stringField == "a" or null', []);
 
+      // MOVE
+
       for (const {
         name,
         alias,
@@ -1264,6 +1165,7 @@ describe('validation logic', () => {
         }
       }
 
+      // MOVE
       // Test that all functions work in where
       const numericOrStringFunctions = evalFunctionsDefinitions.filter(({ name, signatures }) => {
         return signatures.some(
@@ -1410,6 +1312,8 @@ describe('validation logic', () => {
         ]);
       }
 
+      // MOVE
+
       for (const { name, alias, signatures, ...defRest } of statsAggregationFunctionDefinitions) {
         for (const { params, ...signRest } of signatures) {
           const fieldMapping = getFieldMapping(params);
@@ -1470,6 +1374,8 @@ describe('validation logic', () => {
           );
         }
       }
+
+      // MOVE
 
       for (const { name, alias, signatures, ...defRest } of evalFunctionsDefinitions) {
         for (const { params, ...signRest } of signatures) {
@@ -2500,6 +2406,7 @@ describe('validation logic', () => {
           []
         );
 
+        // MOVE
         // SORT doesn't accept agg or grouping functions
         for (const definition of [
           ...statsAggregationFunctionDefinitions,
