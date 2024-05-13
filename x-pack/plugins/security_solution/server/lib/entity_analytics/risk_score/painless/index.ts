@@ -12,8 +12,13 @@ const PHASES = ['init', 'map', 'combine', 'reduce'] as const;
 type Phase = typeof PHASES[number];
 export type PainlessScripts = Record<Phase, string>;
 
-const readScript = (phase: Phase) =>
-  fs.promises.readFile(`${__dirname}/risk_scoring_${phase}.painless`, 'utf8');
+const removeNewlines = (content: string) => content.replace(/\n/g, '');
+const condenseMultipleSpaces = (content: string) => content.replace(/\s+/g, ' ');
+const minifyContent = (content: string) => condenseMultipleSpaces(removeNewlines(content));
+const readScript = async (phase: Phase) => {
+  const content = await fs.promises.readFile(`${__dirname}/risk_scoring_${phase}.painless`, 'utf8');
+  return minifyContent(content);
+};
 
 let cache: PainlessScripts | undefined;
 

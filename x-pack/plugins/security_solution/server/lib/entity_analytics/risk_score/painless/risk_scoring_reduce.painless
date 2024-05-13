@@ -3,8 +3,6 @@ List inputs = [];
 for (state in states) {
   inputs.addAll(state.inputs)
 }
-Collections.sort(inputs, (a, b) -> b.get('weighted_score').compareTo(a.get('weighted_score')));
-
 double num_inputs_to_score = Math.min(inputs.length, params.max_risk_inputs_per_identity);
 results['notes'] = [];
 if (num_inputs_to_score == params.max_risk_inputs_per_identity) {
@@ -18,7 +16,7 @@ double total_score = 0;
 double current_score = 0;
 List risk_inputs = [];
 for (int i = 0; i < num_inputs_to_score; i++) {
-  current_score = inputs[i].weighted_score / Math.pow(i + 1, params.p);
+  current_score = inputs[i].score / Math.pow(i + 1, params.p);
 
   if (i < 10) {
     inputs[i]["contribution"] = 100 * current_score / params.risk_cap;
