@@ -14,9 +14,7 @@ export interface PublishesPanelDescription {
 }
 
 export function getPanelDescription(api: Partial<PublishesPanelDescription>): string | undefined {
-  return api.panelDescription?.value !== undefined
-    ? api.panelDescription?.value
-    : api.defaultPanelDescription?.value;
+  return api.panelDescription?.value ?? api.defaultPanelDescription?.value;
 }
 
 export type PublishesWritablePanelDescription = PublishesPanelDescription & {
