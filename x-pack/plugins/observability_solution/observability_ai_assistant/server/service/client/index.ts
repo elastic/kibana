@@ -44,7 +44,8 @@ import {
 } from '../../../common/conversation_complete';
 import { CompatibleJSONSchema } from '../../../common/functions/types';
 import {
-  UserInstruction,
+  RecallQuery,
+  UserInstructionOrPlainText,
   type Conversation,
   type ConversationCreateRequest,
   type ConversationUpdateRequest,
@@ -163,9 +164,13 @@ export class ObservabilityAIAssistantClient {
     title?: string;
     isPublic?: boolean;
     kibanaPublicUrl?: string;
-    instructions?: Array<string | UserInstruction>;
+    instructions?: UserInstructionOrPlainText[];
     simulateFunctionCalling?: boolean;
-    disableFunctions?: boolean;
+    disableFunctions?:
+      | boolean
+      | {
+          except: string[];
+        };
   }): Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>> => {
     const {
       functionClient,
@@ -651,7 +656,7 @@ export class ObservabilityAIAssistantClient {
     queries,
     categories,
   }: {
-    queries: string[];
+    queries: Array<string | RecallQuery>;
     categories?: string[];
   }): Promise<{ entries: RecalledEntry[] }> => {
     return this.dependencies.knowledgeBaseService.recall({

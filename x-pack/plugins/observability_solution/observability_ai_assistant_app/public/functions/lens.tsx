@@ -156,7 +156,7 @@ export function registerLensRenderFunction({
           label: layer.label,
           format: layer.format,
           filter: {
-            language: 'kql',
+            language: 'kuery',
             query: layer.filter ?? '',
           },
         })),

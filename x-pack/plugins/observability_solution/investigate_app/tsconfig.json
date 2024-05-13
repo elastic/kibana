@@ -50,6 +50,10 @@
     "@kbn/alerts-ui-shared",
     "@kbn/es-query",
     "@kbn/slo-plugin",
+    "@kbn/server-route-repository",
+    "@kbn/management-settings-ids",
+    "@kbn/dashboard-plugin",
+    "@kbn/security-plugin",
     "@kbn/ui-actions-plugin"
   ],
 }

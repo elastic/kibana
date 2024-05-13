@@ -47,6 +47,9 @@ export const registerFunctions: RegistrationCallback = async ({
   
   Note that ES|QL (the Elasticsearch Query Language which is a new piped language) is the preferred query language.
 
+  If you want to call a function or tool, only call it a single time per message. Wait until the function has been executed and its results
+  returned to you, before executing the same tool or another tool again if needed.
+
   DO NOT UNDER ANY CIRCUMSTANCES USE ES|QL syntax (\`service.name == "foo"\`) with "kqlFilter" (\`service.name:"foo"\`).
   
   The user is able to change the language which they want you to reply in on the settings page of the AI Assistant for Observability, which can be found in the ${
@@ -59,7 +62,11 @@ export const registerFunctions: RegistrationCallback = async ({
   functions.registerInstruction(({ availableFunctionNames }) => {
     const instructions: string[] = [];
 
-    if (availableFunctionNames.includes('get_dataset_info')) {
+    if (
+      (availableFunctionNames.includes('get_dataset_info') &&
+        availableFunctionNames.includes('query')) ||
+      availableFunctionNames.includes('changes')
+    ) {
       instructions.push(`You MUST use the get_dataset_info function ${
         functions.hasFunction('get_apm_dataset_info') ? 'or get_apm_dataset_info' : ''
       } function before calling the "query" or "changes" function.

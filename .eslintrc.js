@@ -924,6 +924,10 @@ module.exports = {
       ],
       rules: {
         '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'error',
+        'react-hooks/exhaustive-deps': [
+          'error',
+          { additionalHooks: '^(useAbortableAsync|useMemoWithAbortSignal)$' },
+        ],
       },
     },
     {

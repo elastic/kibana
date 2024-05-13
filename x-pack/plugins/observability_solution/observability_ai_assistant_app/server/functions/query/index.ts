@@ -69,9 +69,11 @@ const loadEsqlDocs = once(async () => {
 });
 
 export function registerQueryFunction({ functions, resources }: FunctionRegistrationParameters) {
-  functions.registerInstruction(({ availableFunctionNames }) =>
-    availableFunctionNames.includes('query')
-      ? `You MUST use the "query" function when the user wants to:
+  functions.registerInstruction(({ availableFunctionNames }) => {
+    let message = '';
+
+    if (availableFunctionNames.includes('query')) {
+      message += `You MUST use the "query" function when the user wants to:
   - visualize data
   - run any arbitrary query
   - breakdown or filter ES|QL queries that are displayed on the current page
@@ -82,12 +84,15 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
   DO NOT UNDER ANY CIRCUMSTANCES try to correct an ES|QL query yourself - always use the "query" function for this.
 
   Even if the "context" function was used before that, follow it up with the "query" function. If a query fails, do not attempt to correct it yourself. Again you should call the "query" function,
-  even if it has been called before.
+  even if it has been called before.`;
+    }
 
-  When the "visualize_query" function has been called, a visualization has been displayed to the user. DO NOT UNDER ANY CIRCUMSTANCES follow up a "visualize_query" function call with your own visualization attempt.
-  If the "execute_query" function has been called, summarize these results for the user. The user does not see a visualization in this case.`
-      : undefined
-  );
+    if (availableFunctionNames.includes('visualize_query')) {
+      message += `When the "visualize_query" function has been called, a visualization has been displayed to the user. DO NOT UNDER ANY CIRCUMSTANCES follow up a "visualize_query" function call with your own visualization attempt.
+      If the "execute_query" function has been called, summarize these results for the user. The user does not see a visualization in this case.`;
+    }
+    return message;
+  });
 
   functions.registerFunction(
     {

@@ -16,7 +16,12 @@ import { encode } from 'gpt-tokenizer';
 import { MlTrainedModelDeploymentNodesStats } from '@elastic/elasticsearch/lib/api/types';
 import { aiAssistantSearchConnectorIndexPattern } from '../../../common';
 import { INDEX_QUEUED_DOCUMENTS_TASK_ID, INDEX_QUEUED_DOCUMENTS_TASK_TYPE } from '..';
-import { KnowledgeBaseEntry, KnowledgeBaseEntryRole, UserInstruction } from '../../../common/types';
+import {
+  KnowledgeBaseEntry,
+  KnowledgeBaseEntryRole,
+  RecallQuery,
+  UserInstruction,
+} from '../../../common/types';
 import type { ObservabilityAIAssistantResourceNames } from '../types';
 import { getAccessQuery } from '../util/get_access_query';
 import { getCategoryQuery } from '../util/get_category_query';
@@ -304,19 +309,20 @@ export class KnowledgeBaseService {
     user,
     modelId,
   }: {
-    queries: string[];
+    queries: RecallQuery[];
     categories?: string[];
     namespace: string;
     user?: { name: string };
     modelId: string;
   }): Promise<RecalledEntry[]> {
-    const query = {
+    const esQuery = {
       bool: {
-        should: queries.map((text) => ({
+        should: queries.map((query) => ({
           text_expansion: {
             'ml.tokens': {
-              model_text: text,
+              model_text: query.text,
               model_id: modelId,
+              boost: query.boost,
             },
           },
         })),
@@ -334,7 +340,7 @@ export class KnowledgeBaseService {
       Pick<KnowledgeBaseEntry, 'text' | 'is_correction' | 'labels'>
     >({
       index: [this.dependencies.resources.aliases.kb],
-      query,
+      query: esQuery,
       size: 20,
       _source: {
         includes: ['text', 'is_correction', 'labels'],
@@ -386,7 +392,7 @@ export class KnowledgeBaseService {
     uiSettingsClient,
     modelId,
   }: {
-    queries: string[];
+    queries: RecallQuery[];
     asCurrentUser: ElasticsearchClient;
     uiSettingsClient: IUiSettingsClient;
     modelId: string;
@@ -422,8 +428,9 @@ export class KnowledgeBaseService {
               {
                 text_expansion: {
                   [vectorField]: {
-                    model_text: query,
+                    model_text: query.text,
                     model_id: modelId,
+                    boost: query.boost,
                   },
                 },
               },
@@ -471,7 +478,7 @@ export class KnowledgeBaseService {
     asCurrentUser,
     uiSettingsClient,
   }: {
-    queries: string[];
+    queries: Array<string | RecallQuery>;
     categories?: string[];
     user?: { name: string };
     namespace: string;
@@ -480,13 +487,17 @@ export class KnowledgeBaseService {
   }): Promise<{
     entries: RecalledEntry[];
   }> => {
-    this.dependencies.logger.debug(`Recalling entries from KB for queries: "${queries}"`);
+    const mappedQueries = queries.map((query) =>
+      typeof query === 'string' ? { boost: 1, text: query } : query
+    );
+
+    this.dependencies.logger.debug(`Recalling entries from KB for queries: "${mappedQueries}"`);
     const modelId = await this.dependencies.getModelId();
 
     const [documentsFromKb, documentsFromConnectors] = await Promise.all([
       this.recallFromKnowledgeBase({
         user,
-        queries,
+        queries: mappedQueries,
         categories,
         namespace,
         modelId,
@@ -499,7 +510,7 @@ export class KnowledgeBaseService {
       this.recallFromConnectors({
         asCurrentUser,
         uiSettingsClient,
-        queries,
+        queries: mappedQueries,
         modelId,
       }).catch((error) => {
         this.dependencies.logger.debug('Error getting data from search indices');

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { compact } from 'lodash';
+import { compact, partition } from 'lodash';
 import { v4 } from 'uuid';
-import { UserInstruction } from '../../../common/types';
+import { UserInstruction, UserInstructionOrPlainText } from '../../../common/types';
 import { withTokenBudget } from '../../../common/utils/with_token_budget';
 import { RegisteredInstruction } from '../types';
 
@@ -19,7 +19,7 @@ export function getSystemMessageFromInstructions({
 }: {
   registeredInstructions: RegisteredInstruction[];
   knowledgeBaseInstructions: UserInstruction[];
-  requestInstructions: Array<UserInstruction | string>;
+  requestInstructions: UserInstructionOrPlainText[];
   availableFunctionNames: string[];
 }): string {
   const allRegisteredInstructions = compact(
@@ -32,13 +32,20 @@ export function getSystemMessageFromInstructions({
   );
 
   const requestInstructionsWithId = requestInstructions.map((instruction) =>
-    typeof instruction === 'string' ? { doc_id: v4(), text: instruction } : instruction
+    typeof instruction === 'string'
+      ? { doc_id: v4(), text: instruction, system: false }
+      : instruction
   );
 
-  const requestOverrideIds = requestInstructionsWithId.map((instruction) => instruction.doc_id);
+  const [requestSystemInstructions, requestUserInstructionsWithId] = partition(
+    requestInstructionsWithId,
+    (instruction) => instruction.system === true
+  );
+
+  const requestOverrideIds = requestUserInstructionsWithId.map((instruction) => instruction.doc_id);
 
   // all request instructions, and those from the KB that are not defined as a request instruction
-  const allUserInstructions = requestInstructionsWithId.concat(
+  const allUserInstructions = requestUserInstructionsWithId.concat(
     knowledgeBaseInstructions.filter(
       (instruction) => !requestOverrideIds.includes(instruction.doc_id)
     )
@@ -47,10 +54,15 @@ export function getSystemMessageFromInstructions({
   const instructionsWithinBudget = withTokenBudget(allUserInstructions, 1000);
 
   return [
-    ...allRegisteredInstructions,
+    ...allRegisteredInstructions.concat(requestSystemInstructions),
     ...(instructionsWithinBudget.length
       ? [
-          `What follows is a set of instructions provided by the user, please abide by them as long as they don't conflict with anything you've been told so far:`,
+          `## User instructions
+          
+          What follows is a set of instructions provided by the user, please abide by them
+          as long as they don't conflict with anything you've been told so far:
+          
+          `,
           ...instructionsWithinBudget,
         ]
       : []),

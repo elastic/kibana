@@ -9,7 +9,7 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { castArray, chunk, groupBy, uniq } from 'lodash';
 import { lastValueFrom } from 'rxjs';
-import { MessageRole, type Message } from '../../../common';
+import { getWordsToReplaceUuidsList, MessageRole, type Message } from '../../../common';
 import { concatenateChatCompletionChunks } from '../../../common/utils/concatenate_chat_completion_chunks';
 import { FunctionCallChatFunction } from '../../service/types';
 
@@ -34,6 +34,8 @@ export async function getRelevantFieldNames({
   chat: FunctionCallChatFunction;
   signal: AbortSignal;
 }): Promise<{ fields: string[] }> {
+  const wordIdList = await getWordsToReplaceUuidsList();
+
   const dataViewsService = await dataViews.dataViewsServiceFactory(savedObjectsClient, esClient);
 
   const hasAnyHitsResponse = await esClient.search({
@@ -88,7 +90,7 @@ export async function getRelevantFieldNames({
   const groupedFields = groupBy(allFields, (field) => field.name);
 
   const relevantFields = await Promise.all(
-    chunk(fieldNames, 500).map(async (fieldsInChunk) => {
+    chunk(fieldNames, Math.min(250, wordIdList.length)).map(async (fieldsInChunk) => {
       const chunkResponse$ = (
         await chat('get_relevant_dataset_names', {
           signal,
@@ -112,29 +114,31 @@ export async function getRelevantFieldNames({
                 role: MessageRole.User,
                 content: `This is the list:
 
-            ${fieldsInChunk.join('\n')}`,
+            ${fieldsInChunk
+              .map((field) => JSON.stringify({ field, id: wordIdList.take(field) }))
+              .join('\n')}`,
               },
             },
           ],
           functions: [
             {
-              name: 'fields',
-              description: 'The fields you consider relevant to the conversation',
+              name: 'select_relevant_fields',
+              description: 'The IDs of the fields you consider relevant to the conversation',
               parameters: {
                 type: 'object',
                 properties: {
-                  fields: {
+                  fieldIds: {
                     type: 'array',
                     items: {
                       type: 'string',
                     },
                   },
                 },
-                required: ['fields'],
+                required: ['fieldIds'],
               } as const,
             },
           ],
-          functionCall: 'fields',
+          functionCall: 'select_relevant_fields',
         })
       ).pipe(concatenateChatCompletionChunks());
 
@@ -143,10 +147,16 @@ export async function getRelevantFieldNames({
       return chunkResponse.message?.function_call?.arguments
         ? (
             JSON.parse(chunkResponse.message.function_call.arguments) as {
-              fields: string[];
+              fieldIds: string[];
             }
-          ).fields
-            .filter((field) => fieldsInChunk.includes(field))
+          ).fieldIds
+            .map((fieldId) => {
+              const fieldName = wordIdList.lookup(fieldId);
+              return fieldName ?? fieldId;
+            })
+            .filter((fieldName) => {
+              return fieldsInChunk.includes(fieldName);
+            })
             .map((field) => {
               const fieldDescriptors = groupedFields[field];
               return `${field}:${fieldDescriptors.map((descriptor) => descriptor.type).join(',')}`;

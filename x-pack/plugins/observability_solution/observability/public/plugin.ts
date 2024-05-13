@@ -357,6 +357,16 @@ export class Plugin
                   ]
                 : [];
 
+              const investigateLink = [
+                {
+                  label: i18n.translate('xpack.observability.investigateLinkTitle', {
+                    defaultMessage: 'Investigate',
+                  }),
+                  app: 'investigate',
+                  path: '/new',
+                },
+              ];
+
               const isAiAssistantEnabled =
                 pluginsStart.observabilityAIAssistant?.service.isEnabled();
 
@@ -420,6 +430,7 @@ export class Plugin
                   sortKey: 100,
                   entries: [
                     ...overviewLink,
+                    ...investigateLink,
                     ...alertsLink,
                     ...sloLink,
                     ...casesLink,

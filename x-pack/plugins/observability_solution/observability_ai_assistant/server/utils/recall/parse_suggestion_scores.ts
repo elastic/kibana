@@ -12,11 +12,11 @@ export function parseSuggestionScores(scoresAsString: string) {
     .trim()
     .split(/\s+/)
     .map((pair) => {
-      const [index, score] = pair.split(',').map((str) => parseInt(str, 10));
+      const [id, score] = pair.split(',').map((str) => str.trim());
 
       return {
-        index,
-        score,
+        id,
+        score: parseInt(score, 10),
       };
     });
 
