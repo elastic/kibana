@@ -24,6 +24,7 @@ import { readRules } from '../../../logic/crud/read_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
 import { transformValidate, validateResponseActionsPermissions } from '../../../utils/validate';
+import { getRulesManagementClient } from '../../../logic/rules_management_client';
 
 export const createRuleRoute = (
   router: SecuritySolutionPluginRouter,
@@ -50,6 +51,7 @@ export const createRuleRoute = (
       async (context, request, response): Promise<IKibanaResponse<CreateRuleResponse>> => {
         const siemResponse = buildSiemResponse(response);
         const validationErrors = validateCreateRuleProps(request.body);
+        const rulesManagementClient = getRulesManagementClient();
         if (validationErrors.length) {
           return siemResponse.error({ statusCode: 400, body: validationErrors });
         }
@@ -104,7 +106,7 @@ export const createRuleRoute = (
 
           await validateResponseActionsPermissions(ctx.securitySolution, request.body);
 
-          const createdRule = await createRules({
+          const createdRule = await rulesManagementClient.createCustomRule({
             rulesClient,
             params: request.body,
           });

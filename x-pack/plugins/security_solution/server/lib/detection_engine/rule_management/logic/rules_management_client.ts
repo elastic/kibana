@@ -66,16 +66,25 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { RuleCreateProps } from '../../../../../common/api/detection_engine';
 import { convertCreateAPIToInternalSchema } from '..';
-import type { RuleParams } from '../../rule_schema';
+import type { RuleParams, RuleSourceCamelCased } from '../../rule_schema';
+import type { PrebuiltRuleAsset } from '../../prebuilt_rules';
 
 interface CreateCustomRuleProps {
   rulesClient: RulesClient;
   params: RuleCreateProps;
 }
+interface CreatePrebuiltRuleProps {
+  rulesClient: RulesClient;
+  ruleAsset: PrebuiltRuleAsset;
+}
 
-export const RulesManagementClient = () => {
+// TODOs:
+// 1. Refactor `convertCreateAPIToInternalSchema` to take a first argument of input/params and then options object
+
+export const getRulesManagementClient = () => {
   return {
     // 1.  CREATE CUSTOM RULE
+    // Need to pass enabled flag?
     createCustomRule: async (
       createCustomRulePayload: CreateCustomRuleProps
     ): Promise<SanitizedRule<RuleParams>> => {
@@ -86,7 +95,10 @@ export const RulesManagementClient = () => {
         data: internalRule,
       });
 
-      return rule;
+      // Do migration of rulesClient response here
+      const migratedRule = migrateRule(rule);
+
+      return migratedRule;
     },
 
     // 2.  BULK CREATE CUSTOM RULES
@@ -94,7 +106,44 @@ export const RulesManagementClient = () => {
       // API handler loops over istances of createCustomRule
     },
 
-    // 3. UPDATE RULE
+    // 9. INSTALL NEW PREBUILT RULES
+    createPrebuiltRule: async (
+      createPrebuiltRulePayload: CreatePrebuiltRuleProps
+    ): Promise<SanitizedRule<RuleParams>> => {
+      const { rulesClient, ruleAsset } = createPrebuiltRulePayload;
 
+      const internalRule = convertCreateAPIToInternalSchema(ruleAsset, true, false);
+      const rule = await rulesClient.create<RuleParams>({
+        data: internalRule,
+      });
+
+      return rule;
+    },
+  };
+};
+
+// TODO: Just testing migration, to remove
+const migrateRule = (rule: SanitizedRule<RuleParams>): SanitizedRule<RuleParams> => {
+  const immutable = rule.params.immutable;
+
+  if (rule.params.ruleSource) {
+    return {
+      ...rule,
+      params: {
+        ...rule.params,
+        immutable: rule.params.ruleSource.type === 'external',
+      },
+    };
+  }
+  const ruleSource: RuleSourceCamelCased = immutable
+    ? { type: 'external', isCustomized: false }
+    : { type: 'internal' };
+
+  return {
+    ...rule,
+    params: {
+      ...rule.params,
+      ruleSource,
+    },
   };
 };
