@@ -42,6 +42,13 @@ export default defineCypressConfig({
     specPattern: './cypress/e2e/**/*.cy.ts',
     setupNodeEvents(on, config) {
       esArchiver(on, config);
+      on('before:browser:launch', (browser, launchOptions) => {
+        if (browser.name === 'chrome') {
+          // exposes window.gc() function that will manually force garbage collection
+          launchOptions.args.push('--js-flags=--expose-gc');
+        }
+        return launchOptions;
+      });
       samlAuthentication(on, config);
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
       // eslint-disable-next-line @typescript-eslint/no-var-requires

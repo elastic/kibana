@@ -40,6 +40,13 @@ export default defineCypressConfig({
     specPattern: './cypress/e2e/**/*.cy.ts',
     setupNodeEvents(on, config) {
       esArchiver(on, config);
+      on('before:browser:launch', (browser, launchOptions) => {
+        if (browser.name === 'chrome') {
+          // exposes window.gc() function that will manually force garbage collection
+          launchOptions.args.push('--js-flags=--expose-gc');
+        }
+        return launchOptions;
+      });
       samlAuthentication(on, config);
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('@cypress/grep/src/plugin')(config);

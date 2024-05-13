@@ -37,3 +37,18 @@ registerCypressGrep();
 Cypress.on('uncaught:exception', () => {
   return false;
 });
+
+afterEach(() => {
+  cy.window().then((win) => {
+    // window.gc is enabled with --js-flags=--expose-gc chrome flag
+    // window.gc is enabled for electron with ELECTRON_EXTRA_LAUNCH_ARGS=--js-flags=--expose_gc
+    if (typeof win.gc === 'function') {
+      // run gc multiple times in an attempt to force a major GC between tests
+      win.gc();
+      win.gc();
+      win.gc();
+      win.gc();
+      win.gc();
+    }
+  });
+});
