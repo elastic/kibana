@@ -25,6 +25,12 @@ interface ByActionTypeIdAgg {
   doc_count: number;
 }
 
+interface ActionRefIdsAgg {
+  key: string[];
+  key_as_string: string;
+  doc_count: number;
+}
+
 export async function getTotalCount(
   esClient: ElasticsearchClient,
   kibanaIndex: string,
@@ -123,44 +129,6 @@ export async function getInUseTotalCount(
   countEmailByService: Record<string, number>;
   countNamespaces: number;
 }> {
-  const getInMemoryActionScriptedMetric = (actionRefPrefix: string) => ({
-    scripted_metric: {
-      init_script: 'state.actionRefs = new HashMap(); state.total = 0;',
-      map_script: `
-        String actionRef = doc['alert.actions.actionRef'].value;
-        String actionTypeId = doc['alert.actions.actionTypeId'].value;
-        if (actionRef.startsWith('${actionRefPrefix}') && state.actionRefs[actionRef] === null) {
-          HashMap map = new HashMap();
-          map.actionRef = actionRef;
-          map.actionTypeId = actionTypeId;
-          state.actionRefs[actionRef] = map;
-          state.total++;
-        }
-      `,
-      // Combine script is executed per cluster, but we already have a key-value pair per cluster.
-      // Despite docs that say this is optional, this script can't be blank.
-      combine_script: 'return state',
-      // Reduce script is executed across all clusters, so we need to add up all the total from each cluster
-      // This also needs to account for having no data
-      reduce_script: `
-          Map actionRefs = [:];
-          long total = 0;
-          for (state in states) {
-            if (state !== null) {
-              total += state.total;
-              for (String k : state.actionRefs.keySet()) {
-                actionRefs.put(k, state.actionRefs.get(k));
-              }
-            }
-          }
-          Map result = new HashMap();
-          result.total = total;
-          result.actionRefs = actionRefs;
-          return result;
-      `,
-    },
-  });
-
   const scriptedMetric = {
     scripted_metric: {
       init_script: 'state.connectorIds = new HashMap(); state.total = 0;',
@@ -195,9 +163,6 @@ export async function getInUseTotalCount(
       `,
     },
   };
-
-  const preconfiguredActionsScriptedMetric = getInMemoryActionScriptedMetric('preconfigured:');
-  const systemActionsScriptedMetric = getInMemoryActionScriptedMetric('system_action:');
 
   const mustQuery = [
     {
@@ -283,8 +248,7 @@ export async function getInUseTotalCount(
       unknown,
       {
         refs: { actionRefIds: { value: { total: number; connectorIds: Record<string, string> } } };
-        preconfigured_actions: { preconfiguredActionRefIds: { value: InMemoryAggRes } };
-        system_actions: { systemActionRefIds: { value: InMemoryAggRes } };
+        actions: { actionRefIds: { buckets: ActionRefIdsAgg[] } };
       }
     >({
       index: kibanaIndex,
@@ -313,35 +277,47 @@ export async function getInUseTotalCount(
               actionRefIds: scriptedMetric,
             },
           },
-          preconfigured_actions: {
+          actions: {
             nested: {
               path: 'alert.actions',
             },
             aggs: {
-              preconfiguredActionRefIds: preconfiguredActionsScriptedMetric,
-            },
-          },
-          system_actions: {
-            nested: {
-              path: 'alert.actions',
-            },
-            aggs: {
-              systemActionRefIds: systemActionsScriptedMetric,
+              actionRefIds: {
+                multi_terms: {
+                  terms: [
+                    {
+                      field: 'alert.actions.actionRef',
+                    },
+                    {
+                      field: 'alert.actions.actionTypeId',
+                    },
+                  ],
+                },
+              },
             },
           },
         },
       },
     });
 
-    const aggs = actionResults.aggregations?.refs.actionRefIds.value;
-
-    const preconfiguredActionsAggs =
-      actionResults.aggregations?.preconfigured_actions?.preconfiguredActionRefIds.value;
-
-    const systemActionsAggs = actionResults.aggregations?.system_actions?.systemActionRefIds.value;
-
+    const preconfiguredActionsAggs: InMemoryAggRes = { total: 0, actionRefs: {} };
+    const systemActionsAggs: InMemoryAggRes = { total: 0, actionRefs: {} };
+    for (const bucket of actionResults.aggregations?.actions?.actionRefIds?.buckets ?? []) {
+      const actionRef = bucket.key[0];
+      const actionTypeId = bucket.key[1];
+      if (actionRef.startsWith('preconfigured:')) {
+        preconfiguredActionsAggs.actionRefs[actionRef] = { actionRef, actionTypeId };
+        preconfiguredActionsAggs.total++;
+      }
+      if (actionRef.startsWith('system_action:')) {
+        systemActionsAggs.actionRefs[actionRef] = { actionRef, actionTypeId };
+        preconfiguredActionsAggs.total++;
+      }
+    }
     const totalInMemoryActions =
       (preconfiguredActionsAggs?.total ?? 0) + (systemActionsAggs?.total ?? 0);
+
+    const aggs = actionResults.aggregations?.refs.actionRefIds.value;
 
     const { hits: actions } = await esClient.search<{
       action: ActionResult;
