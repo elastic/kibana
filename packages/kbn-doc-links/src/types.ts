@@ -650,6 +650,10 @@ export interface DocLinks {
   };
   readonly playground: {
     readonly chatPlayground: string;
+    readonly retrievalOptimize: string;
+    readonly retrieval: string;
+    readonly context: string;
+    readonly hiddenFields: string;
   };
 }
 

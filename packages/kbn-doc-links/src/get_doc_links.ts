@@ -955,6 +955,10 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     playground: {
       chatPlayground: `${KIBANA_DOCS}playground.html`,
+      retrievalOptimize: `${KIBANA_DOCS}playground-query.html#playground-query-relevance`,
+      retrieval: `${KIBANA_DOCS}playground-query.html`,
+      context: `${KIBANA_DOCS}playground-context.html`,
+      hiddenFields: `${KIBANA_DOCS}playground-query.html#playground-hidden-fields`,
     },
   });
 };
