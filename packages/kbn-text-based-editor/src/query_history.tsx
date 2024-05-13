@@ -347,9 +347,8 @@ export function QueryHistory({
     },
   };
   const { euiTheme } = theme;
-  const extraStyling = isOnReducedSpaceLayout
-    ? getReducedSpaceStyling()
-    : `width: ${containerWidth}px`;
+  const extraStyling = isOnReducedSpaceLayout ? getReducedSpaceStyling() : '';
+
   const tableStyling = css`
     .euiTable {
       background-color: ${euiTheme.colors.lightestShade};

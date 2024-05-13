@@ -915,7 +915,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
                     editor.onDidLayoutChange((layoutInfoEvent) => {
                       if (layoutInfoEvent.contentWidth !== measuredEditorWidth) {
-                        setMeasuredEditorWidth(layoutInfoEvent.contentWidth);
+                        const nextMeasuredWidth = layoutInfoEvent.contentWidth;
+                        setMeasuredEditorWidth(nextMeasuredWidth);
+                        calculateVisibleCode(nextMeasuredWidth);
                       }
                     });
 
