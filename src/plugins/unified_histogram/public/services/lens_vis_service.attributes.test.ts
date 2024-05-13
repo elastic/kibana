@@ -539,13 +539,7 @@ describe('LensVisService attributes', () => {
     expect(lensVis.visContext).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
-          "references": Array [
-            Object {
-              "id": "index-pattern-with-timefield-id",
-              "name": "textBasedLanguages-datasource-layer-suggestion",
-              "type": "index-pattern",
-            },
-          ],
+          "references": Array [],
           "state": Object {
             "datasourceStates": Object {
               "textBased": Object {
@@ -736,13 +730,7 @@ describe('LensVisService attributes', () => {
           'index-pattern-with-timefield-id': {},
         },
       }),
-      references: [
-        {
-          id: 'index-pattern-with-timefield-id',
-          name: 'textBasedLanguages-datasource-layer-suggestion',
-          type: 'index-pattern',
-        },
-      ],
+      references: [],
       title: 'Heat map',
       visualizationType: 'lnsHeatmap',
     });
