@@ -18,7 +18,7 @@ import {
   DataMain$,
   DataTotalHits$,
   RecordRawType,
-} from '../../services/discover_data_state_container';
+} from '../../state_management/discover_data_state_container';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus, SidebarToggleState } from '../../../types';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -31,7 +31,7 @@ import { createSearchSessionMock } from '../../../../__mocks__/search_session';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { DiscoverMainProvider } from '../../services/discover_state_provider';
+import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 import { act } from 'react-dom/test-utils';
 import { PanelsToggle } from '../../../../components/panels_toggle';
 

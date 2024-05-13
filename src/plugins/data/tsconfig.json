@@ -55,7 +55,8 @@
     "@kbn/code-editor",
     "@kbn/core-test-helpers-model-versions",
     "@kbn/esql-utils",
-    "@kbn/react-kibana-mount"
+    "@kbn/react-kibana-mount",
+    "@kbn/search-types"
   ],
   "exclude": [
     "target/**/*",

@@ -240,6 +240,7 @@ export function AlertDetails() {
           >
             <HeaderActions
               alert={alertDetail?.formatted ?? null}
+              alertIndex={alertDetail?.raw._index}
               alertStatus={alertStatus}
               onUntrackAlert={onUntrackAlert}
             />
