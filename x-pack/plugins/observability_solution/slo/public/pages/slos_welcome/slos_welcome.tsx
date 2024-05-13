@@ -13,7 +13,7 @@ import {
   EuiLink,
   EuiPageTemplate,
   EuiSpacer,
-  EuiTitle,
+  EuiTitle
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
