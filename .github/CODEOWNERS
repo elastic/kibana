@@ -592,8 +592,8 @@ x-pack/packages/ml/url_state @elastic/ml-ui
 packages/kbn-mock-idp-plugin @elastic/kibana-security
 packages/kbn-mock-idp-utils @elastic/kibana-security
 packages/kbn-monaco @elastic/appex-sharedux
-x-pack/plugins/monitoring_collection @elastic/obs-ux-infra_services-team
-x-pack/plugins/monitoring @elastic/obs-ux-infra_services-team
+x-pack/plugins/monitoring_collection @elastic/stack-monitoring
+x-pack/plugins/monitoring @elastic/stack-monitoring
 src/plugins/navigation @elastic/appex-sharedux
 src/plugins/newsfeed @elastic/kibana-core
 test/common/plugins/newsfeed @elastic/kibana-core
