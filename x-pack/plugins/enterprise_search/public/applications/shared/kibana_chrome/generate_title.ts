@@ -10,6 +10,7 @@ import {
   ANALYTICS_PLUGIN,
   APP_SEARCH_PLUGIN,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
+  ENTERPRISE_SEARCH_RELEVANCE_PLUGIN,
   SEARCH_EXPERIENCES_PLUGIN,
   SEARCH_PRODUCT_NAME,
   VECTOR_SEARCH_PLUGIN,
@@ -57,3 +58,6 @@ export const vectorSearchTitle = (page: Title = []) =>
 
 export const enterpriseSearchContentTitle = (page: Title = []) =>
   generateTitle([...page, ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME]);
+
+export const enterpriseSearchRelevanceTitle = (page: Title = []) =>
+  generateTitle([...page, ENTERPRISE_SEARCH_RELEVANCE_PLUGIN.NAME]);

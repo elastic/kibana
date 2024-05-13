@@ -147,6 +147,13 @@ export const getNavigationTreeDefinition = ({
                   }),
                 },
                 {
+                  children: [{ link: 'enterpriseSearchRelevance:inferenceEndpoints' }],
+                  id: 'relevance',
+                  title: i18n.translate('xpack.enterpriseSearch.searchNav.relevance', {
+                    defaultMessage: 'Relevance',
+                  }),
+                },
+                {
                   children: [
                     {
                       link: 'enterpriseSearchApplications:playground',
