@@ -30,7 +30,7 @@ import { dataViewAdHoc, dataViewComplexMock } from '../../../__mocks__/data_view
 import { copySavedSearch } from './discover_saved_search_container';
 import { createKbnUrlStateStorage, IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { mockCustomizationContext } from '../../../customizations/__mocks__/customization_context';
-import { createDataViewDataSource, DataViewDataSource } from '../../../../common/data_sources';
+import { createDataViewDataSource, createEsqlDataSource } from '../../../../common/data_sources';
 
 const startSync = (appState: DiscoverAppStateContainer) => {
   const { start, stop } = appState.syncState();
@@ -637,6 +637,7 @@ describe('Test discover state actions', () => {
       "/#?_a=(dataSource:(dataViewId:abcde,type:dataView),query:(esql:'FROM test'))&_g=()";
     const { state } = await getState(url, { savedSearch: savedSearchMock, isEmptyUrl: false });
     await state.actions.loadSavedSearch();
+    expect(state.appState.getState().dataSource).toEqual(createEsqlDataSource());
     expect(discoverServiceMock.toastNotifications.addWarning).not.toHaveBeenCalled();
   });
 
@@ -733,8 +734,8 @@ describe('Test discover state actions', () => {
     const adHocDataViewId = savedSearchAdHoc.searchSource.getField('index')!.id;
     const { state } = await getState('/', { savedSearch: savedSearchAdHocCopy });
     await state.actions.loadSavedSearch({ savedSearchId: savedSearchAdHoc.id });
-    expect((state.appState.getState().dataSource as DataViewDataSource).dataViewId).toBe(
-      adHocDataViewId
+    expect(state.appState.getState().dataSource).toEqual(
+      createDataViewDataSource({ dataViewId: adHocDataViewId! })
     );
     expect(state.internalState.getState().adHocDataViews[0].id).toBe(adHocDataViewId);
   });
@@ -771,8 +772,8 @@ describe('Test discover state actions', () => {
 
     // test changed state, fetch should be called once and URL should be updated
     expect(dataState.fetch).toHaveBeenCalledTimes(1);
-    expect((appState.getState().dataSource as DataViewDataSource).dataViewId).toBe(
-      dataViewComplexMock.id
+    expect(state.appState.getState().dataSource).toEqual(
+      createDataViewDataSource({ dataViewId: dataViewComplexMock.id! })
     );
     expect(savedSearchState.getState().searchSource.getField('index')!.id).toBe(
       dataViewComplexMock.id
@@ -789,8 +790,8 @@ describe('Test discover state actions', () => {
     await waitFor(() => {
       expect(state.internalState.getState().dataView?.id).toBe(dataViewComplexMock.id);
     });
-    expect((state.appState.getState().dataSource as DataViewDataSource).dataViewId).toBe(
-      dataViewComplexMock.id
+    expect(state.appState.getState().dataSource).toEqual(
+      createDataViewDataSource({ dataViewId: dataViewComplexMock.id! })
     );
     expect(state.savedSearchState.getState().searchSource.getField('index')!.id).toBe(
       dataViewComplexMock.id
@@ -805,8 +806,8 @@ describe('Test discover state actions', () => {
     await waitFor(() => {
       expect(state.internalState.getState().dataView?.id).toBe(dataViewAdHoc.id);
     });
-    expect((state.appState.getState().dataSource as DataViewDataSource).dataViewId).toBe(
-      dataViewAdHoc.id
+    expect(state.appState.getState().dataSource).toEqual(
+      createDataViewDataSource({ dataViewId: dataViewAdHoc.id! })
     );
     expect(state.savedSearchState.getState().searchSource.getField('index')!.id).toBe(
       dataViewAdHoc.id
@@ -868,8 +869,8 @@ describe('Test discover state actions', () => {
     await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });
     const unsubscribe = state.actions.initializeAndSync();
     await state.actions.createAndAppendAdHocDataView({ title: 'ad-hoc-test' });
-    expect((state.appState.getState().dataSource as DataViewDataSource).dataViewId).toBe(
-      'ad-hoc-id'
+    expect(state.appState.getState().dataSource).toEqual(
+      createDataViewDataSource({ dataViewId: 'ad-hoc-id' })
     );
     expect(state.internalState.getState().adHocDataViews[0].id).toBe('ad-hoc-id');
     unsubscribe();
