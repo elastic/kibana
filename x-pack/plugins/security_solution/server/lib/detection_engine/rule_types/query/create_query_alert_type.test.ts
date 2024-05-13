@@ -37,8 +37,9 @@ describe('Custom Query Alerts', () => {
   const publicBaseUrl = 'http://somekibanabaseurl.com';
 
   const { dependencies, executor, services } = mocks;
-  const { alerting, lists, logger, ruleDataClient } = dependencies;
+  const { actions, alerting, lists, logger, ruleDataClient } = dependencies;
   const securityRuleTypeWrapper = createSecurityRuleTypeWrapper({
+    actions,
     lists,
     logger,
     config: createMockConfig(),
