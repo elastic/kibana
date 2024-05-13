@@ -9,7 +9,7 @@
 import * as React from 'react';
 import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useConnectionDetailsOpts } from './context';
+import { useConnectionDetailsOpts, useConnectionDetailsService } from './context';
 import { EndpointsTab } from './tabs/endpoints_tab';
 import { ApiKeysTab } from './tabs/api_keys_tab';
 
@@ -18,6 +18,7 @@ export const ConnectionDetails: React.FC = () => {
   type Tab = [id: TabID, name: string, content: React.ReactNode];
 
   const ctx = useConnectionDetailsOpts();
+  const service = useConnectionDetailsService();
   const [tab, setTab] = React.useState<TabID>('endpoints');
 
   const tabs: Tab[] = [];
@@ -52,7 +53,10 @@ export const ConnectionDetails: React.FC = () => {
         {tabs.map(([id, name]) => (
           <EuiTab
             key={id}
-            onClick={() => setTab(id)}
+            onClick={() => {
+              service.emitTelemetryEvent(['tab_switched', { tab: id }]);
+              setTab(id);
+            }}
             isSelected={tab === id}
             data-test-subj={`connectionDetailsTabBtn-${id}`}
           >

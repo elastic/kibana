@@ -40,8 +40,15 @@ const defaultOpts: ConnectionDetailsOpts = {
   },
 };
 
-export const StoriesProvider: React.FC = ({ children }) => {
-  return <ConnectionDetailsOptsProvider {...defaultOpts}>{children}</ConnectionDetailsOptsProvider>;
+export const StoriesProvider: React.FC<Partial<ConnectionDetailsOpts>> = ({
+  children,
+  ...rest
+}) => {
+  return (
+    <ConnectionDetailsOptsProvider {...{ ...defaultOpts, ...rest }}>
+      {children}
+    </ConnectionDetailsOptsProvider>
+  );
 };
 
 export const StoriesProviderKeyCreationError: React.FC = ({ children }) => {

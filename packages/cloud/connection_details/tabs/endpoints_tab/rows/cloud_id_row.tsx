@@ -10,17 +10,20 @@ import * as React from 'react';
 import { EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CopyInput } from '../../../components/copy_input';
-import { useConnectionDetailsService } from '../../../context';
-import { useBehaviorSubject } from '../../../hooks/use_behavior_subject';
 
 export interface CloudIdRowProps {
   value: string;
+  showCloudId: boolean;
+  onShowCloudIdToggle: () => void;
+  onCopyClick?: () => void;
 }
 
-export const CloudIdRow: React.FC<CloudIdRowProps> = ({ value }) => {
-  const service = useConnectionDetailsService();
-  const showCloudId = useBehaviorSubject(service.showCloudId$);
-
+export const CloudIdRow: React.FC<CloudIdRowProps> = ({
+  value,
+  showCloudId,
+  onShowCloudIdToggle,
+  onCopyClick,
+}) => {
   return (
     <>
       <EuiSpacer size="l" />
@@ -30,7 +33,7 @@ export const CloudIdRow: React.FC<CloudIdRowProps> = ({ value }) => {
           defaultMessage: 'Show Cloud ID',
         })}
         checked={showCloudId}
-        onChange={service.toggleShowCloudId}
+        onChange={() => onShowCloudIdToggle()}
         data-test-subj="connectionDetailsCloudIdSwitch"
       />
 
@@ -48,7 +51,7 @@ export const CloudIdRow: React.FC<CloudIdRowProps> = ({ value }) => {
           fullWidth
           data-test-subj="connectionDetailsCloudId"
         >
-          <CopyInput value={value} />
+          <CopyInput value={value} onCopyClick={() => onCopyClick?.()} />
         </EuiFormRow>
       )}
     </>
