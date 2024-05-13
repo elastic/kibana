@@ -20,6 +20,7 @@ import React, { useEffect } from 'react';
 import { paths } from '../../../common/locators/paths';
 import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { SloOutdatedCallout } from '../../components/slo/slo_outdated_callout';
+import { SloPermissionsCallout } from '../../components/slo/slo_permissions_callout';
 import { useFetchSloList } from '../../hooks/use_fetch_slo_list';
 import { useLicense } from '../../hooks/use_license';
 import { usePermissions } from '../../hooks/use_permissions';
@@ -58,6 +59,7 @@ export function SlosWelcomePage() {
     <ObservabilityPageTemplate data-test-subj="slosPageWelcomePrompt">
       <HeaderMenu />
       <SloOutdatedCallout />
+      <SloPermissionsCallout />
       <EuiPageTemplate.EmptyPrompt
         title={
           <EuiTitle size="l">
