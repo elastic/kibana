@@ -74,6 +74,7 @@ export const typeInOsqueryFieldInput = (text: string, index = 0) =>
     .getBySel('osqueryColumnValueSelect')
     .eq(index)
     .within(() => {
+      cy.getBySel('comboBoxInput').click();
       cy.getBySel('comboBoxInput').type(text);
     });
 
