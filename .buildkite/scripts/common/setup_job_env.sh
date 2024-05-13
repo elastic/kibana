@@ -20,8 +20,6 @@ fi
   export KIBANA_CI_GITHUB_TOKEN
 
   KIBANA_DOCKER_USERNAME="$(vault_get container-registry username)"
-  export KIBANA_DOCKER_USERNAME
-
   KIBANA_DOCKER_PASSWORD="$(vault_get container-registry password)"
   echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
 }
