@@ -133,12 +133,14 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         }
 
         const rawParams = parseSearchParams(searchValue.toLowerCase());
-        const tagIds =
-          taggingApi && rawParams.filters.tags
-            ? rawParams.filters.tags.map(
-                (tagName) => taggingApi.ui.getTagIdFromName(tagName.toLowerCase()) ?? UNKNOWN_TAG_ID
-              )
-            : undefined;
+        let tagIds: string[] | undefined;
+        if (taggingApi && rawParams.filters.tags) {
+          tagIds = rawParams.filters.tags.map(
+            (tagName) => taggingApi.ui.getTagIdFromName(tagName.toLowerCase()) ?? UNKNOWN_TAG_ID
+          );
+        } else {
+          tagIds = undefined;
+        }
         const searchParams: GlobalSearchFindParams = {
           term: rawParams.term,
           types: rawParams.filters.types,

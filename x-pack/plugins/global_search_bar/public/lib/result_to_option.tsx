@@ -43,16 +43,19 @@ export const resultToOption = (
       : [{ text: cleanMeta((meta.displayName as string) ?? type) }];
 
   if (tagIds.length && getTagList) {
-    const tags = getTagList().filter((tag, index) => {
-      if (!tag) {
+    const tagList = getTagList();
+    const tags: Tag[] = [];
+    for (let i = 0; i < tagIds.length; i++) {
+      const foundTag = tagList.find((tag) => tag.id === tagIds[i]);
+      if (!foundTag) {
         //  eslint-disable-next-line no-console
         console.warn(
-          `SearchBar: Tag with id "${tagIds[index]}" not found. Tag "${tagIds[index]}" is referenced by the search result "${result.type}:${result.id}". Skipping displaying the missing tag.`
+          `SearchBar: Tag with id "${tagIds[i]}" not found. Tag "${tagIds[i]}" is referenced by the search result "${result.type}:${result.id}". Skipping displaying the missing tag.`
         );
-        return false;
+      } else {
+        tags.push(foundTag);
       }
-      return true;
-    }) as Tag[];
+    }
 
     if (tags.length) {
       option.append = <ResultTagList tags={tags} searchTagIds={searchTagIds} />;
