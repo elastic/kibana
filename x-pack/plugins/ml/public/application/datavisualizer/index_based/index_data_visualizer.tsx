@@ -50,7 +50,6 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
   );
   const isMounted = useMountedState();
   useEffect(() => {
-    const unmounted = false;
     if (dataVisualizer !== undefined) {
       const { getIndexDataVisualizerComponent } = dataVisualizer;
       getIndexDataVisualizerComponent().then((component) => {
