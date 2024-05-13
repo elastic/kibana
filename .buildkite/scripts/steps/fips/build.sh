@@ -7,7 +7,6 @@ set -euo pipefail
 source .buildkite/scripts/common/util.sh
 source .buildkite/scripts/steps/artifacts/env.sh
 
-echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
 mkdir -p target
 download_artifact "kibana-$FULL_VERSION-linux-x86_64.tar.gz" ./target --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
 
@@ -27,8 +26,6 @@ node scripts/build \
     --skip-docker-cloud \
     --skip-docker-serverless \
     --skip-docker-contexts
-
-docker logout docker.elastic.co
 
 # Moving to `target/` first will keep `buildkite-agent` from including directories in the artifact name
 cd "$KIBANA_DIR/target"

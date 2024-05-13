@@ -8,6 +8,7 @@ if [[ "$(type -t vault_get)" != "function" ]]; then
   source .buildkite/scripts/common/vault_fns.sh
 fi
 
+
 # Set up general-purpose tokens and credentials
 {
   BUILDKITE_TOKEN="$(vault_get buildkite-ci buildkite_token_all_jobs)"
@@ -23,7 +24,7 @@ fi
   export KIBANA_DOCKER_USERNAME
 
   KIBANA_DOCKER_PASSWORD="$(vault_get container-registry password)"
-  export KIBANA_DOCKER_PASSWORD
+  echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
 }
 
 # Set up a custom ES Snapshot Manifest if one has been specified for this build
