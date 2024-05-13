@@ -4,12 +4,12 @@ info:
   title: Risk Scoring API
   description: These APIs allow the consumer to manage Entity Risk Scores within Entity Analytics.
 servers:
-  - url: 'http://{kibana_host}:{port}'
+  - url: "http://{kibana_host}:{port}"
     variables:
       kibana_host:
         default: localhost
       port:
-        default: '5601'
+        default: "5601"
 
 paths:
   /engine/status:
@@ -17,20 +17,20 @@ paths:
       summary: Get the status of the Risk Engine
       description: Returns the status of both the legacy transform-based risk engine, as well as the new risk engine
       responses:
-        '200':
+        "200":
           description: Successful response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RiskEngineStatusResponse'
+                $ref: "#/components/schemas/RiskEngineStatusResponse"
 components:
   schemas:
     RiskEngineStatus:
       type: string
       enum:
-        - 'NOT_INSTALLED'
-        - 'DISABLED'
-        - 'ENABLED'
+        - "NOT_INSTALLED"
+        - "DISABLED"
+        - "ENABLED"
     RiskEngineStatusResponse:
       type: object
       required:
@@ -39,10 +39,9 @@ components:
         - is_max_amount_of_risk_engines_reached
       properties:
         legacy_risk_engine_status:
-          $ref: '#/components/schemas/RiskEngineStatus'
+          $ref: "#/components/schemas/RiskEngineStatus"
         risk_engine_status:
-          $ref: '#/components/schemas/RiskEngineStatus'
+          $ref: "#/components/schemas/RiskEngineStatus"
         is_max_amount_of_risk_engines_reached:
           description: Indicates whether the maximum amount of risk engines has been reached
           type: boolean
-          

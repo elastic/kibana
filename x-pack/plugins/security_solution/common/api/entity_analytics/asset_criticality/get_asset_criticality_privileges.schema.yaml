@@ -3,24 +3,24 @@ info:
   title: Get Asset Criticality Privileges Schema
   version: 1.0.0
 servers:
-  - url: 'http://{kibana_host}:{port}'
+  - url: "http://{kibana_host}:{port}"
     variables:
       kibana_host:
         default: localhost
       port:
-        default: '5601'
+        default: "5601"
 paths:
   /internal/asset_criticality/privileges:
     get:
       operationId: AssetCriticalityGetPrivileges
       summary: Get Asset Criticality Privileges
       responses:
-        '200':
+        "200":
           description: Successful response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EntityAnalyticsPrivileges'
+                $ref: "#/components/schemas/EntityAnalyticsPrivileges"
               example:
                 elasticsearch:
                   index:
@@ -31,39 +31,38 @@ paths:
 components:
   schemas:
     EntityAnalyticsPrivileges:
+      type: object
+      properties:
+        has_all_required:
+          type: boolean
+        has_read_permissions:
+          type: boolean
+        has_write_permissions:
+          type: boolean
+        privileges:
           type: object
           properties:
-            has_all_required:
-              type: boolean
-            has_read_permissions:
-              type: boolean
-            has_write_permissions:
-              type: boolean
-            privileges:
+            elasticsearch:
               type: object
               properties:
-                elasticsearch:
+                cluster:
                   type: object
                   properties:
-                    cluster:
-                      type: object
-                      properties:
-                        manage_index_templates:
-                          type: boolean
-                        manage_transform:
-                          type: boolean
-                    index:
-                      type: object
-                      additionalProperties:
-                        type: object
-                        properties:
-                          read:
-                            type: boolean
-                          write:
-                            type: boolean
-              required:
-                - elasticsearch
+                    manage_index_templates:
+                      type: boolean
+                    manage_transform:
+                      type: boolean
+                index:
+                  type: object
+                  additionalProperties:
+                    type: object
+                    properties:
+                      read:
+                        type: boolean
+                      write:
+                        type: boolean
           required:
-            - has_all_required
-            - privileges
-    
+            - elasticsearch
+      required:
+        - has_all_required
+        - privileges

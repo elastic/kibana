@@ -3,25 +3,25 @@ info:
   version: 1.0.0
   title: Asset Criticality Status Schema
 servers:
-  - url: 'http://{kibana_host}:{port}'
+  - url: "http://{kibana_host}:{port}"
     variables:
       kibana_host:
         default: localhost
       port:
-        default: '5601'
+        default: "5601"
 paths:
   /internal/asset_criticality/status:
     get:
       operationId: AssetCriticalityGetStatus
       summary: Get Asset Criticality Status
       responses:
-        '200':
+        "200":
           description: Successful response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AssetCriticalityStatusResponse'
-        '400':
+                $ref: "#/components/schemas/AssetCriticalityStatusResponse"
+        "400":
           description: Invalid request
 
 components:
