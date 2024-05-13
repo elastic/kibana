@@ -112,6 +112,8 @@ interface ConsoleWrapperProps
 export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
   const [dependencies, setDependencies] = useState<ConsoleDependencies | null>(null);
   const { core, usageCollection, onKeyDown, isMonacoEnabled } = props;
+  const { analytics, i18n, theme } = core;
+  const startServices = { analytics, i18n, theme };
 
   useEffect(() => {
     if (dependencies === null) {
@@ -142,7 +144,6 @@ export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
     objectStorageClient,
     settings,
     storage,
-    theme$,
     trackUiMetric,
   } = dependencies;
   return (
@@ -162,10 +163,10 @@ export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
             http,
             autocompleteInfo,
           },
-          theme$,
           config: {
             isMonacoEnabled,
           },
+          startServices,
         }}
       >
         <RequestContextProvider>

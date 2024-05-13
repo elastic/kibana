@@ -125,6 +125,7 @@ import {
   ALERTS_INDEX_BUTTON,
   INVESTIGATIONS_INPUT,
   QUERY_BAR_ADD_FILTER,
+  MAX_SIGNALS_INPUT,
   SETUP_GUIDE_TEXTAREA,
   RELATED_INTEGRATION_COMBO_BOX_INPUT,
 } from '../screens/create_new_rule';
@@ -196,6 +197,13 @@ export const fillAboutRule = (rule: RuleCreateProps) => {
 
 export const expandAdvancedSettings = () => {
   cy.get(ADVANCED_SETTINGS_BTN).click({ force: true });
+};
+
+export const fillMaxSignals = (maxSignals: number = ruleFields.maxSignals) => {
+  cy.get(MAX_SIGNALS_INPUT).clear({ force: true });
+  cy.get(MAX_SIGNALS_INPUT).type(maxSignals.toString());
+
+  return maxSignals;
 };
 
 export const fillNote = (note: string = ruleFields.investigationGuide) => {

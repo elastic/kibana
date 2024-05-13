@@ -70,6 +70,12 @@
     "@kbn/aiops-change-point-detection",
     "@kbn/react-kibana-context-theme",
     "@kbn/react-kibana-context-render",
+    "@kbn/presentation-publishing",
+    "@kbn/data-service",
+    "@kbn/shared-ux-utility",
+    "@kbn/presentation-containers",
+    "@kbn/search-types",
+    "@kbn/content-management-utils",
   ],
   "exclude": [
     "target/**/*",
