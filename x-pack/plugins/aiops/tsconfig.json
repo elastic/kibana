@@ -75,6 +75,7 @@
     "@kbn/shared-ux-utility",
     "@kbn/presentation-containers",
     "@kbn/search-types",
+    "@kbn/content-management-utils",
   ],
   "exclude": [
     "target/**/*",
