@@ -10,6 +10,7 @@ import { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/co
 import { ALL_VALUE, Paginated, Pagination } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import { partition } from 'lodash';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import { Groupings, SLODefinition, SLOId, StoredSLOSettings, Summary } from '../domain/models';
 import { toHighPrecision } from '../utils/number';
@@ -162,6 +163,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
               },
               sliValue: toHighPrecision(doc._source.sliValue),
               status: summaryDoc.status,
+              summaryUpdatedAt: summaryDoc.summaryUpdatedAt,
             },
             groupings: getFlattenedGroupings({
               groupings: summaryDoc.slo.groupings,
@@ -196,16 +198,23 @@ function excludeStaleSummaryFilter(
   settings: StoredSLOSettings,
   kqlFilter: string,
   hideStale?: boolean
-) {
+): estypes.QueryDslQueryContainer[] {
   if (kqlFilter.includes('summaryUpdatedAt') || !settings.staleThresholdInHours || !hideStale) {
     return [];
   }
   return [
     {
-      range: {
-        summaryUpdatedAt: {
-          gte: `now-${settings.staleThresholdInHours}h`,
-        },
+      bool: {
+        should: [
+          { term: { isTempDoc: true } },
+          {
+            range: {
+              summaryUpdatedAt: {
+                gte: `now-${settings.staleThresholdInHours}h`,
+              },
+            },
+          },
+        ],
       },
     },
   ];

@@ -47,6 +47,7 @@ const summarySchema = t.type({
   status: statusSchema,
   sliValue: t.number,
   errorBudget: errorBudgetSchema,
+  summaryUpdatedAt: t.union([t.string, t.null]),
 });
 
 const groupingsSchema = t.record(t.string, t.union([t.string, t.number]));
