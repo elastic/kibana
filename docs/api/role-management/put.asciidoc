@@ -26,7 +26,7 @@ To use the create or update role API, you must have the `manage_security` cluste
 
 `elasticsearch`::
   (Optional, object) {es} cluster and index privileges. Valid keys include
-  `cluster`, `indices`, `remote_indices`, and `run_as`. For more information, see
+  `cluster`, `indices`, `remote_indices`, `remote_cluster`, and `run_as`. For more information, see
   {ref}/defining-roles.html[Defining roles].
 
 `kibana`::
@@ -209,6 +209,12 @@ $ curl -X PUT api/security/role/my_kibana_role
         "clusters": [ "remote_cluster1" ],
         "names": [ "remote_index1", "remote_index2" ],
         "privileges": [ "all" ]
+      }
+    ],
+    "remote_cluster": [
+      {
+        "clusters": [ "remote_cluster1" ],
+        "privileges": [ "monitor_enrich" ]
       }
     ]
   },
