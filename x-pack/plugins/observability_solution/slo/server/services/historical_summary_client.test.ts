@@ -29,16 +29,21 @@ const commonEsResponse = {
   },
 };
 
-const generateEsResponseForRollingSLO = (
-  rollingDays: number = 30,
-  good: number = 97,
-  total: number = 100
-) => {
+const generateEsResponseForRollingSLO = (rollingDays: number = 30, timesliceInMin?: number) => {
   const { fixedInterval, bucketsPerDay } = getFixedIntervalAndBucketsPerDay(rollingDays);
-  const numberOfBuckets = rollingDays * bucketsPerDay;
   const doubleDuration = rollingDays * 2;
-  const startDay = moment.utc().subtract(doubleDuration, 'day').startOf('day');
-  const bucketSize = fixedInterval === '1d' ? 24 : Number(fixedInterval.slice(0, -1));
+  const numberOfBuckets = doubleDuration * bucketsPerDay;
+  const startDay = moment().subtract(doubleDuration, 'day').startOf('day');
+  const bucketSizeInHour = moment
+    .duration(
+      fixedInterval.slice(0, -1),
+      fixedInterval.slice(-1) as moment.unitOfTime.DurationConstructor
+    )
+    .asHours();
+
+  const good = timesliceInMin ? Math.floor(((bucketSizeInHour * 60) / timesliceInMin) * 0.97) : 97;
+  const total = timesliceInMin ? Math.floor((bucketSizeInHour * 60) / timesliceInMin) : 100;
+
   return {
     ...commonEsResponse,
     responses: [
@@ -51,11 +56,11 @@ const generateEsResponseForRollingSLO = (
               .map((_, index) => ({
                 key_as_string: startDay
                   .clone()
-                  .add(index * bucketSize, 'hours')
+                  .add(index * bucketSizeInHour, 'hours')
                   .toISOString(),
                 key: startDay
                   .clone()
-                  .add(index * bucketSize, 'hours')
+                  .add(index * bucketSizeInHour, 'hours')
                   .format('x'),
                 doc_count: 1440,
                 total: {
@@ -65,10 +70,16 @@ const generateEsResponseForRollingSLO = (
                   value: good,
                 },
                 cumulative_good: {
-                  value: good * (index + 1),
+                  value:
+                    index < rollingDays * bucketsPerDay
+                      ? good * (index + 1)
+                      : good * rollingDays * bucketsPerDay,
                 },
                 cumulative_total: {
-                  value: total * (index + 1),
+                  value:
+                    index < rollingDays * bucketsPerDay
+                      ? total * (index + 1)
+                      : total * rollingDays * bucketsPerDay,
                 },
               })),
           },
@@ -176,7 +187,7 @@ describe('FetchHistoricalSummary', () => {
         objective: { target: 0.95, timesliceTarget: 0.9, timesliceWindow: oneMinute() },
         groupBy: ALL_VALUE,
       });
-      esClientMock.msearch.mockResolvedValueOnce(generateEsResponseForRollingSLO(30));
+      esClientMock.msearch.mockResolvedValueOnce(generateEsResponseForRollingSLO(30, 1));
       const client = new DefaultHistoricalSummaryClient(esClientMock);
 
       const results = await client.fetch({

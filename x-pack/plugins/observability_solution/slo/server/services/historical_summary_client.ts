@@ -295,7 +295,10 @@ function generateSearchQuery({
 }): MsearchMultisearchBody {
   const unit = toMomentUnitOfTime(timeWindow.duration.unit);
   const timeWindowDurationInDays = moment.duration(timeWindow.duration.value, unit).asDays();
-  const queryRangeDurationInDays = moment(dateRange.range.to).diff(dateRange.range.from, 'days');
+
+  const queryRangeDurationInDays = Math.ceil(
+    moment(dateRange.range.to).diff(dateRange.range.from, 'days')
+  );
 
   const { fixedInterval, bucketsPerDay } =
     getFixedIntervalAndBucketsPerDay(queryRangeDurationInDays);
@@ -330,8 +333,8 @@ function generateSearchQuery({
           field: '@timestamp',
           fixed_interval: fixedInterval,
           extended_bounds: {
-            min: dateRange.range.from.toISOString(),
-            max: dateRange.range.to.toISOString(),
+            min: dateRange.queryRange.from.toISOString(),
+            max: dateRange.queryRange.to.toISOString(),
           },
         },
         aggs: {
@@ -383,7 +386,17 @@ function generateSearchQuery({
   };
 }
 
-// The queryRange is used for the filter range on the query, while the range is used for storing the actual range requested
+/**
+ * queryRange is used for the filter range on the query,
+ * while range is used for storing the actual range requested
+ * For a rolling window, the query range starts 1 timeWindow duration before the actual range from.
+ * For calednar window, the query range is the same as the range.
+ *
+ * @param timeWindow
+ * @param range
+ * @returns the request {range} and the query range {queryRange}
+ *
+ */
 function getDateRange(
   timeWindow: TimeWindow,
   range?: DateRange
@@ -408,7 +421,7 @@ function getDateRange(
     return {
       range: {
         from: now.clone().subtract(timeWindow.duration.value, unit).startOf('day').toDate(),
-        to: now.startOf('minute').toDate(),
+        to: now.clone().startOf('minute').toDate(),
       },
       queryRange: {
         from: now
@@ -416,7 +429,7 @@ function getDateRange(
           .subtract(timeWindow.duration.value * 2, unit)
           .startOf('day')
           .toDate(),
-        to: now.startOf('minute').toDate(),
+        to: now.clone().startOf('minute').toDate(),
       },
     };
   }
