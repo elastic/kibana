@@ -12,7 +12,7 @@ export const AVERAGE_TIME_IS_CALCULATED = (intervals: number) =>
     'xpack.securitySolution.attackDiscovery.loadingCallout.countdown.lastTimesPopover.aiIsCurrentlyAnalyzing',
     {
       defaultMessage:
-        'Average time is calculated over the last {intervals} {intervals, plural, =1 {generation} other {generations}} on the selected connector:',
+        'Remaining time is based on the average speed of the last {intervals} {intervals, plural, =1 {time} other {times}} the same connector generated results.',
       values: { intervals },
     }
   );
