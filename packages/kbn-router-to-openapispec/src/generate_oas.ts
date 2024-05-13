@@ -18,6 +18,7 @@ export const openApiVersion = '3.0.0';
 export interface GenerateOpenApiDocumentOptionsFilters {
   pathStartsWith?: string;
   access?: 'public' | 'internal';
+  version?: string;
 }
 
 export interface GenerateOpenApiDocumentOptions {

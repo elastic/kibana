@@ -8,7 +8,7 @@
 
 import type { Router } from '@kbn/core-http-router-server-internal';
 import { getResponseValidation } from '@kbn/core-http-server';
-import { ALLOWED_PUBLIC_VERSION as LATEST_SERVERLESS_VERSION } from '@kbn/core-http-router-server-internal';
+import { ALLOWED_PUBLIC_VERSION as SERVERLESS_VERSION_2023_10_31 } from '@kbn/core-http-router-server-internal';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { OasConverter } from './oas_converter';
 import {
@@ -29,9 +29,11 @@ export const processRouter = (
   getOpId: OperationIdCounter,
   filters?: GenerateOpenApiDocumentOptionsFilters
 ) => {
+  const paths: OpenAPIV3.PathsObject = {};
+  // We only process the latest serverless version since these unversioned routes will default to 2023-10-31
+  if (filters?.version && filters.version !== SERVERLESS_VERSION_2023_10_31) return { paths };
   const routes = prepareRoutes(appRouter.getRoutes({ excludeVersionedRoutes: true }), filters);
 
-  const paths: OpenAPIV3.PathsObject = {};
   for (const route of routes) {
     try {
       const pathParams = getPathParameters(route.path);
@@ -51,7 +53,7 @@ export const processRouter = (
           queryObjects = converter.convertQuery(reqQuery);
         }
         parameters = [
-          getVersionedHeaderParam(LATEST_SERVERLESS_VERSION, [LATEST_SERVERLESS_VERSION]),
+          getVersionedHeaderParam(SERVERLESS_VERSION_2023_10_31, [SERVERLESS_VERSION_2023_10_31]),
           ...pathObjects,
           ...queryObjects,
         ];
@@ -63,7 +65,7 @@ export const processRouter = (
           requestBody: !!validationSchemas?.body
             ? {
                 content: {
-                  [getVersionedContentTypeString(LATEST_SERVERLESS_VERSION, contentType)]: {
+                  [getVersionedContentTypeString(SERVERLESS_VERSION_2023_10_31, contentType)]: {
                     schema: converter.convert(validationSchemas.body),
                   },
                 },
@@ -102,7 +104,7 @@ export const extractResponses = (route: InternalRouterRoute, converter: OasConve
           content: {
             ...((acc[statusCode] ?? {}) as OpenAPIV3.ResponseObject).content,
             [getVersionedContentTypeString(
-              LATEST_SERVERLESS_VERSION,
+              SERVERLESS_VERSION_2023_10_31,
               schema.bodyContentType ? [schema.bodyContentType] : contentType
             )]: {
               schema: oasSchema,

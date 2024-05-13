@@ -35,16 +35,23 @@ export const processVersionedRouter = (
   const paths: OpenAPIV3.PathsObject = {};
   for (const route of routes) {
     const pathParams = getPathParameters(route.path);
-    /**
-     * Note: for a given route we accept that route params and query params remain BWC
-     *       so we only take the latest version of the params and query params, we also
-     *       assume at this point that we are generating for serverless.
-     */
+
     let parameters: OpenAPIV3.ParameterObject[] = [];
-    const versions = route.handlers.map(({ options: { version: v } }) => v).sort();
-    const newestVersion = versionHandlerResolvers.newest(versions);
-    const handler = route.handlers.find(({ options: { version: v } }) => v === newestVersion);
+    let version: undefined | string;
+    let handler: undefined | VersionedRouterRoute['handlers'][0];
+
+    if (filters?.version) {
+      handler = route.handlers.find(({ options: { version: v } }) => v === filters.version);
+      version = filters.version;
+    } else {
+      const versions = route.handlers.map(({ options: { version: v } }) => v).sort();
+      version = versionHandlerResolvers.newest(versions);
+      handler = route.handlers.find(({ options: { version: v } }) => v === version);
+    }
+
     const schemas = handler ? extractValidationSchemaFromVersionedHandler(handler) : undefined;
+
+    if (!handler) return {};
 
     try {
       if (handler && schemas) {
@@ -59,24 +66,23 @@ export const processVersionedRouter = (
           queryObjects = converter.convertQuery(reqQuery);
         }
         parameters = [
-          getVersionedHeaderParam(newestVersion, versions),
+          getVersionedHeaderParam(version, [version!]),
           ...pathObjects,
           ...queryObjects,
         ];
       }
 
-      const hasBody = Boolean(
-        handler && extractValidationSchemaFromVersionedHandler(handler)?.request?.body
-      );
+      const hasBody = Boolean(extractValidationSchemaFromVersionedHandler(handler)?.request?.body);
+      const contentType = extractContentType(route.options.options?.body);
       const path: OpenAPIV3.PathItemObject = {
         [route.method]: {
           summary: route.options.description ?? '',
           requestBody: hasBody
             ? {
-                content: extractVersionedRequestBody(route, converter),
+                content: extractVersionedRequestBody(handler, contentType, converter),
               }
             : undefined,
-          responses: extractVersionedResponses(route, converter),
+          responses: extractVersionedResponses(handler, contentType, converter),
           parameters,
           operationId: getOpId(route.path),
         },
@@ -85,7 +91,7 @@ export const processVersionedRouter = (
       assignToPathsObject(paths, route.path, path);
     } catch (e) {
       // Enrich the error message with a bit more context
-      e.message = `Error generating OpenAPI for route '${route.path}' using newest version '${newestVersion}': ${e.message}`;
+      e.message = `Error generating OpenAPI for route '${route.path}' using version '${version}': ${e.message}`;
       throw e;
     }
   }
@@ -93,50 +99,46 @@ export const processVersionedRouter = (
 };
 
 export const extractVersionedRequestBody = (
-  route: VersionedRouterRoute,
+  handler: VersionedRouterRoute['handlers'][0],
+  contentType: string[],
   converter: OasConverter
 ): OpenAPIV3.RequestBodyObject['content'] => {
-  const contentType = extractContentType(route.options.options?.body);
-  return route.handlers.reduce<OpenAPIV3.RequestBodyObject['content']>((acc, handler) => {
-    const schemas = extractValidationSchemaFromVersionedHandler(handler);
-    if (!schemas?.request) return acc;
-    const schema = converter.convert(schemas.request.body);
-    return {
-      ...acc,
-      [getVersionedContentTypeString(handler.options.version, contentType)]: {
-        schema,
-      },
-    };
-  }, {});
+  const schemas = extractValidationSchemaFromVersionedHandler(handler);
+  if (!schemas?.request) return {};
+  const schema = converter.convert(schemas.request.body);
+  return {
+    [getVersionedContentTypeString(handler.options.version, contentType)]: {
+      schema,
+    },
+  };
 };
 
 export const extractVersionedResponses = (
-  route: VersionedRouterRoute,
+  handler: VersionedRouterRoute['handlers'][0],
+  contentType: string[],
   converter: OasConverter
-): OpenAPIV3.ResponsesObject => {
-  const contentType = extractContentType(route.options.options?.body);
-  return route.handlers.reduce<OpenAPIV3.ResponsesObject>((acc, handler) => {
-    const schemas = extractValidationSchemaFromVersionedHandler(handler);
-    if (!schemas?.response) return acc;
-    const { unsafe, ...responses } = schemas.response;
-    for (const [statusCode, responseSchema] of Object.entries(responses)) {
-      const maybeSchema = unwrapVersionedResponseBodyValidation(responseSchema.body);
-      const schema = converter.convert(maybeSchema);
-      acc[statusCode] = {
-        ...acc[statusCode],
-        content: {
-          ...((acc[statusCode] ?? {}) as OpenAPIV3.ResponseObject).content,
-          [getVersionedContentTypeString(
-            handler.options.version,
-            responseSchema.bodyContentType ? [responseSchema.bodyContentType] : contentType
-          )]: {
-            schema,
-          },
+) => {
+  const schemas = extractValidationSchemaFromVersionedHandler(handler);
+  if (!schemas?.response) return {};
+  const { unsafe, ...responses } = schemas.response;
+  const result: OpenAPIV3.ResponsesObject = {};
+  for (const [statusCode, responseSchema] of Object.entries(responses)) {
+    const maybeSchema = unwrapVersionedResponseBodyValidation(responseSchema.body);
+    const schema = converter.convert(maybeSchema);
+    result[statusCode] = {
+      ...result[statusCode],
+      content: {
+        ...((result[statusCode] ?? {}) as OpenAPIV3.ResponseObject).content,
+        [getVersionedContentTypeString(
+          handler.options.version,
+          responseSchema.bodyContentType ? [responseSchema.bodyContentType] : contentType
+        )]: {
+          schema,
         },
-      };
-    }
-    return acc;
-  }, {});
+      },
+    };
+  }
+  return result;
 };
 
 const extractValidationSchemaFromVersionedHandler = (
