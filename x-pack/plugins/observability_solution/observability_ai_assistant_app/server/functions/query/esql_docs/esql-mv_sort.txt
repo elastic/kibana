@@ -6,7 +6,7 @@ field
 Multivalue expression. If null, the function returns null.
 order
 Sort order. The valid options are ASC and DESC, the default is ASC.
-DescriptionSorts a multivalue expression in lexicographical order.Supported types
+DescriptionSorts a multivalued field in lexicographical order.Supported types
 Example
 ```esql
 ROW a = [4, 2, -3, 2]
