@@ -33,7 +33,6 @@ const MockFormProvider = ({ children }: { children: React.ReactElement }) => {
 };
 
 describe('AssistantMessage component', () => {
-
   const mockMessage = {
     content: 'Test content',
     createdAt: new Date(),
