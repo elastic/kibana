@@ -496,7 +496,10 @@ export class DashboardPageObject extends FtrService {
       }
 
       if (saveOptions.tags) {
-        await this.selectDashboardTags(saveOptions.tags);
+        const tagsComboBox = await this.testSubjects.find('comboBoxInput');
+        for (const tagName of saveOptions.tags) {
+          await this.comboBox.setElement(tagsComboBox, tagName);
+        }
       }
 
       this.log.debug('DashboardPage.applyCustomization');
@@ -807,7 +810,7 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async expectMissingSaveOption() {
-    await this.testSubjects.missingOrFail('dashboardSaveMenuItem');
+    await this.testSubjects.missingOrFail('dashboardSaveAsMenuItem');
   }
 
   public async expectMissingQuickSaveOption() {

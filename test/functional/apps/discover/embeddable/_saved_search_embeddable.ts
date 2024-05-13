@@ -68,6 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dataGrid.checkCurrentRowsPerPageToBe(100);
 
       await PageObjects.dashboard.saveDashboard(dashboardName, {
+        operation: 'create',
         waitDialogIsClosed: true,
         exitFromEditMode: false,
       });
