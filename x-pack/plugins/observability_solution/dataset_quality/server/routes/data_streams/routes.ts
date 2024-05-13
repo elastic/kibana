@@ -66,7 +66,7 @@ const degradedDocsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/degraded_docs',
   params: t.type({
     query: t.intersection([
-      t.partial(rangeRt.props),
+      rangeRt,
       typeRt,
       t.partial({
         datasetQuery: t.string,

@@ -22,7 +22,6 @@ import { getCriteriaFromUsersType } from '../../../../common/components/ml/crite
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
 import { UsersType } from '../../../../explore/users/store/model';
-import { getSourcererScopeId } from '../../../../helpers';
 
 export const QUERY_ID = 'usersDetailsQuery';
 export interface ExpandableUserProps {
@@ -100,7 +99,7 @@ export const ExpandableUserDetails = ({
           data={userDetails}
           loading={loading}
           contextID={contextID}
-          sourcererScopeId={getSourcererScopeId(scopeId)}
+          scopeId={scopeId}
           isDraggable={isDraggable}
           id={QUERY_ID}
           anomaliesData={anomaliesData}

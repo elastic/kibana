@@ -4,21 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiFlexGroup, EuiLink } from '@elastic/eui';
-import { Rule } from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
-import { AlertSummaryField, TopAlert } from '@kbn/observability-plugin/public';
+import { AlertSummaryField } from '@kbn/observability-plugin/public';
 import { useKibana } from '../../../../utils/kibana_react';
 import { useFetchSloDetails } from '../../../../hooks/use_fetch_slo_details';
-import { BurnRateRuleParams } from '../../../../typings/slo';
 import { AlertsHistoryPanel } from './components/alerts_history/alerts_history_panel';
 import { ErrorRatePanel } from './components/error_rate/error_rate_panel';
 import { CustomAlertDetailsPanel } from './components/custom_panels/custom_panels';
-
-export type BurnRateRule = Rule<BurnRateRuleParams>;
-export type BurnRateAlert = TopAlert;
+import { BurnRateAlert, BurnRateRule } from './types';
 
 interface AppSectionProps {
   alert: BurnRateAlert;
