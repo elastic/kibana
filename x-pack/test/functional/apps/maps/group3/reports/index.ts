@@ -26,7 +26,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     // helper function to check the difference between the new image and the baseline
     const measurePngDifference = async (fileName: string) => {
       const url = await PageObjects.reporting.getReportURL(60000);
-      const reportData = await PageObjects.reporting.getRawPdfReportData(url ?? '');
+      const reportData = await PageObjects.reporting.getRawReportData(url ?? '');
 
       const sessionReportPath = await PageObjects.reporting.writeSessionReport(
         fileName,

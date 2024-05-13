@@ -139,7 +139,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug('get the report download URL');
         const url = await PageObjects.reporting.getReportURL(60000);
         log.debug('download the report');
-        const reportData = await PageObjects.reporting.getRawPdfReportData(url ?? '');
+        const reportData = await PageObjects.reporting.getRawReportData(url ?? '');
         const sessionReportPath = await PageObjects.reporting.writeSessionReport(
           reportFileName,
           'png',
