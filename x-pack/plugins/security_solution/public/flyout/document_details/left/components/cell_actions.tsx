@@ -10,7 +10,7 @@ import React, { useMemo } from 'react';
 import { useLeftPanelContext } from '../context';
 import { getSourcererScopeId } from '../../../../helpers';
 import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
-import { SecurityCellActionType } from '../../../../actions/constants';
+import { SecurityCellActionType } from '../../../../app/actions/constants';
 import {
   CellActionsMode,
   SecurityCellActions,

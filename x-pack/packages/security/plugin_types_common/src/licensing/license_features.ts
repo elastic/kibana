@@ -60,6 +60,11 @@ export interface SecurityLicenseFeatures {
   readonly allowRoleRemoteIndexPrivileges: boolean;
 
   /**
+   * Indicates whether we allow users to define remote cluster privileges in roles.
+   */
+  readonly allowRemoteClusterPrivileges: boolean;
+
+  /**
    * Indicates whether we allow Role-based access control (RBAC).
    */
   readonly allowRbac: boolean;
