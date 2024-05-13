@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 
-import { SerializableRecord } from '@kbn/utility-types';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { ASSET_DETAILS_LOCATOR_ID } from '@kbn/observability-shared-plugin/public';
 import { useHostIpToName } from './use_host_ip_to_name';
 import { LoadingPage } from '../../components/loading_page';

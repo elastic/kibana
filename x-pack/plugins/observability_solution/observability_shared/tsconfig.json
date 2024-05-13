@@ -43,7 +43,6 @@
     "@kbn/core-chrome-browser",
     "@kbn/rule-data-utils",
     "@kbn/es-query",
-    "@kbn/metrics-data-access-plugin",
   ],
   "exclude": ["target/**/*"]
 }

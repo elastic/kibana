@@ -7,12 +7,11 @@
 import { SerializableRecord } from '@kbn/utility-types';
 import rison from '@kbn/rison';
 import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
-import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 
 export type AssetDetailsLocator = LocatorPublic<AssetDetailsLocatorParams>;
 
 export interface AssetDetailsLocatorParams extends SerializableRecord {
-  assetType: InventoryItemType;
+  assetType: string;
   assetId: string;
   state?: SerializableRecord;
   _a?: {
