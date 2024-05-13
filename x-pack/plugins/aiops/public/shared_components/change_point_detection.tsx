@@ -135,6 +135,7 @@ const ChangePointDetectionWrapper: FC<ChangePointDetectionPropsWithDeps> = ({
   return (
     <div
       data-shared-item=""
+      data-test-subj="aiopsEmbeddableChangePointChart"
       css={css`
         width: 100%;
       `}
