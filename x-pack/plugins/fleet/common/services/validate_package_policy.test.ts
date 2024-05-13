@@ -1182,5 +1182,41 @@ describe('Fleet - validatePackagePolicyConfig', () => {
 
       expect(res).toEqual(null);
     });
+
+    it('should return an error message if the string dataset value has special characters', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'text',
+          value: 'test*',
+        },
+        {
+          name: 'data_stream.dataset',
+          type: 'text',
+        },
+        'data_stream.dataset',
+        safeLoad,
+        'input'
+      );
+
+      expect(res).toEqual(['Dataset contains invalid characters']);
+    });
+
+    it('should return an error message if the dataset value has special characters', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'text',
+          value: { dataset: 'test*', package: 'log' },
+        },
+        {
+          name: 'data_stream.dataset',
+          type: 'text',
+        },
+        'data_stream.dataset',
+        safeLoad,
+        'input'
+      );
+
+      expect(res).toEqual(['Dataset contains invalid characters']);
+    });
   });
 });

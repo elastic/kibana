@@ -367,12 +367,11 @@ export const validatePackagePolicyConfig = (
     }
   }
 
-  if (
-    varName === DATASET_VAR_NAME &&
-    packageType === 'input' &&
-    parsedValue?.dataset !== undefined
-  ) {
-    const { valid, error } = isValidDataset(parsedValue.dataset, false);
+  if (varName === DATASET_VAR_NAME && packageType === 'input' && parsedValue !== undefined) {
+    const { valid, error } = isValidDataset(
+      parsedValue.dataset ? parsedValue.dataset : parsedValue,
+      false
+    );
     if (!valid && error) {
       errors.push(error);
     }
