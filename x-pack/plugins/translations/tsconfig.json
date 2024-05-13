@@ -4,7 +4,9 @@
     "outDir": "target/types",
   },
   "include": ["server/**/*", "translations/ja-JP.json", "translations/zh-CN.json"],
-  "kbn_references": [],
+  "kbn_references": [
+    "@kbn/core",
+  ],
   "exclude": [
     "target/**/*",
   ]
