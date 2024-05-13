@@ -126,7 +126,7 @@ export class GetSLOsOverview {
         filter: [
           {
             term: {
-              'alert.attributes.alertTypeId': 'slo.rules.burnRate',
+              'kibana.alert.rule.rule_type_id': 'slo.rules.burnRate',
             },
           },
         ],

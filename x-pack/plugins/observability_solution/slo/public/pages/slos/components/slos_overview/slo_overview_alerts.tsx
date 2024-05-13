@@ -30,7 +30,7 @@ export function SLOOverviewAlerts({
 
   const locator = locators.get<RulesParams>(rulesLocatorID);
 
-  const alertsUrl = useAlertsUrl();
+  const getAlertsUrl = useAlertsUrl();
 
   return (
     <EuiPanel hasShadow={false} hasBorder={true}>
@@ -63,7 +63,7 @@ export function SLOOverviewAlerts({
           titleColor="danger"
           isLoading={isLoading}
           onClick={() => {
-            application.navigateToUrl(alertsUrl);
+            application.navigateToUrl(getAlertsUrl('active'));
           }}
         />
         <OverViewItem
@@ -74,7 +74,7 @@ export function SLOOverviewAlerts({
           titleColor="success"
           isLoading={isLoading}
           onClick={() => {
-            application.navigateToUrl(alertsUrl);
+            application.navigateToUrl(getAlertsUrl('recovered'));
           }}
         />
         <OverViewItem
