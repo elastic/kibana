@@ -7,10 +7,10 @@
 
 import { of } from 'rxjs';
 import type {
-  IKibanaSearchRequest,
   IKibanaSearchResponse,
+  IKibanaSearchRequest,
   ISearchOptions,
-} from '@kbn/data-plugin/public';
+} from '@kbn/search-types';
 import { defaultLogViewAttributes } from '@kbn/logs-shared-plugin/common';
 import {
   type LogEntriesSearchResponsePayload,

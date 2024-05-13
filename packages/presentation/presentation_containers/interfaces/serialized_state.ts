@@ -14,8 +14,7 @@ import { Reference } from '@kbn/content-management-utils';
  */
 export interface SerializedPanelState<RawStateType extends object = object> {
   references?: Reference[];
-  rawState: RawStateType | undefined;
-  version?: string;
+  rawState: RawStateType;
 }
 
 export interface HasSerializableState<StateType extends object = object> {

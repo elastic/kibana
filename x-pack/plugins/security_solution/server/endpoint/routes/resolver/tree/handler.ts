@@ -19,15 +19,16 @@ import { featureUsageService } from '../../../services/feature_usage';
 import { Fetcher } from './utils/fetch';
 
 export function handleTree(
-  ruleRegistry: RuleRegistryPluginStartContract,
+  getRuleRegistry: () => Promise<RuleRegistryPluginStartContract>,
   config: ConfigType,
-  licensing: LicensingPluginStart
+  getLicensing: () => Promise<LicensingPluginStart>
 ): RequestHandler<unknown, unknown, TypeOf<typeof validateTree.body>> {
   return async (context, req, res) => {
     const client = (await context.core).elasticsearch.client;
     const {
       experimentalFeatures: { insightsRelatedAlertsByProcessAncestry },
     } = config;
+    const licensing = await getLicensing();
     const license = await firstValueFrom(licensing.license$);
     const hasAccessToInsightsRelatedByProcessAncestry =
       insightsRelatedAlertsByProcessAncestry && license.hasAtLeast('platinum');
@@ -40,7 +41,7 @@ export function handleTree(
     }
 
     const alertsClient = hasAccessToInsightsRelatedByProcessAncestry
-      ? await ruleRegistry.getRacClientWithRequest(req)
+      ? await (await getRuleRegistry()).getRacClientWithRequest(req)
       : undefined;
     const fetcher = new Fetcher(client, alertsClient);
     const body = await fetcher.tree({ ...req.body, shouldExcludeColdAndFrozenTiers });

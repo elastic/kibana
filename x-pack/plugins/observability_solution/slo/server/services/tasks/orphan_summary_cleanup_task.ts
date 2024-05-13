@@ -232,7 +232,7 @@ export class SloOrphanSummaryCleanupTask {
     }
 
     if (this.config.sloOrphanSummaryCleanUpTaskEnabled) {
-      this.taskManager.ensureScheduled({
+      await this.taskManager.ensureScheduled({
         id: this.taskId,
         taskType: TASK_TYPE,
         schedule: {
@@ -243,7 +243,7 @@ export class SloOrphanSummaryCleanupTask {
         params: {},
       });
     } else {
-      this.taskManager.removeIfExists(this.taskId);
+      await this.taskManager.removeIfExists(this.taskId);
     }
   }
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useState, useMemo } from 'react';
+import React, { FC, PropsWithChildren, useCallback, useEffect, useState, useMemo } from 'react';
 import { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
@@ -147,7 +147,7 @@ export async function mountApp(
   mountProps: {
     createEditorFrame: EditorFrameStart['createInstance'];
     attributeService: LensAttributeService;
-    getPresentationUtilContext: () => FC;
+    getPresentationUtilContext: () => FC<PropsWithChildren<{}>>;
     topNavMenuEntryGenerators: LensTopNavMenuEntryGenerator[];
     locator?: LensAppLocator;
   }

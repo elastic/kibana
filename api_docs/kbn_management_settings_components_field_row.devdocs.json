@@ -80,7 +80,7 @@
           "\nKibana-specific Provider that maps Kibana plugins and services to a {@link FieldRowProvider}."
         ],
         "signature": [
-          "({ children, docLinks, notifications, settings, }: React.PropsWithChildren<",
+          "({ children, docLinks, notifications, settings, }: React.PropsWithChildren<React.PropsWithChildren<",
           {
             "pluginId": "@kbn/management-settings-components-field-row",
             "scope": "common",
@@ -88,7 +88,7 @@
             "section": "def-common.FieldRowKibanaDependencies",
             "text": "FieldRowKibanaDependencies"
           },
-          ">) => JSX.Element"
+          ">>) => JSX.Element"
         ],
         "path": "packages/kbn-management/settings/components/field_row/services.tsx",
         "deprecated": false,
@@ -102,7 +102,7 @@
             "label": "{\n  children,\n  docLinks,\n  notifications,\n  settings,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
+              "React.PropsWithChildren<React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/management-settings-components-field-row",
                 "scope": "common",
@@ -110,7 +110,7 @@
                 "section": "def-common.FieldRowKibanaDependencies",
                 "text": "FieldRowKibanaDependencies"
               },
-              ">"
+              ">>"
             ],
             "path": "packages/kbn-management/settings/components/field_row/services.tsx",
             "deprecated": false,

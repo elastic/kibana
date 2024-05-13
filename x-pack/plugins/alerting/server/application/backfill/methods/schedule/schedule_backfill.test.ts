@@ -185,6 +185,10 @@ function getMockData(overwrites: Record<string, unknown> = {}): ScheduleBackfill
 describe('scheduleBackfill()', () => {
   let rulesClient: RulesClient;
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2023-12-16T08:00:00.000Z'));
+  });
   beforeEach(async () => {
     jest.resetAllMocks();
     rulesClient = new RulesClient(rulesClientParams);
@@ -239,6 +243,7 @@ describe('scheduleBackfill()', () => {
     });
     backfillClient.bulkQueue.mockResolvedValue(mockBulkQueueResult);
   });
+  afterAll(() => jest.useRealTimers());
 
   test('should successfully schedule backfill', async () => {
     const mockData = [getMockData(), getMockData({ ruleId: '2', end: '2023-11-17T08:00:00.000Z' })];
@@ -400,6 +405,7 @@ describe('scheduleBackfill()', () => {
       rules: [
         {
           id: existingDecryptedRule1.id,
+          legacyId: null,
           actions: existingDecryptedRule1.attributes.actions,
           alertTypeId: existingDecryptedRule1.attributes.alertTypeId,
           apiKey: existingDecryptedRule1.attributes.apiKey,
@@ -430,6 +436,7 @@ describe('scheduleBackfill()', () => {
         },
         {
           id: existingDecryptedRule2.id,
+          legacyId: null,
           actions: existingDecryptedRule2.attributes.actions,
           alertTypeId: existingDecryptedRule2.attributes.alertTypeId,
           apiKey: existingDecryptedRule2.attributes.apiKey,

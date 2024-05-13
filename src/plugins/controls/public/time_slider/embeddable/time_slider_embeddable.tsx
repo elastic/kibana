@@ -10,11 +10,11 @@ import _ from 'lodash';
 import moment from 'moment-timezone';
 import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
-import { Subscription } from 'rxjs';
-import { debounceTime, first, map } from 'rxjs';
+import { debounceTime, first, map, Subscription } from 'rxjs';
 
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
@@ -374,6 +374,7 @@ export class TimeSliderControlEmbeddable
   private formatDate = (epoch: number) => {
     return moment
       .tz(epoch, getMomentTimezone(this.getTimezone()))
+      .locale(i18n.getLocale())
       .format(this.getState().componentState.format);
   };
 

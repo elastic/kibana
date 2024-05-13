@@ -7,6 +7,7 @@
 
 import { DoneInvokeEvent } from 'xstate';
 import { RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
+import { QualityIndicators } from '../../../../common/types';
 import { Integration } from '../../../../common/data_streams_stats/integration';
 import { Direction, SortField } from '../../../hooks';
 import { DegradedDocsStat } from '../../../../common/data_streams_stats/malformed_docs_stat';
@@ -18,6 +19,7 @@ import {
   DataStreamStatServiceResponse,
   IntegrationsResponse,
   DataStreamStat,
+  DataStreamStatType,
 } from '../../../../common/data_streams_stats';
 
 export type FlyoutDataset = Omit<
@@ -44,6 +46,7 @@ interface FiltersCriteria {
   timeRange: TimeRangeConfig;
   integrations: string[];
   namespaces: string[];
+  qualities: QualityIndicators[];
   query?: string;
 }
 
@@ -66,7 +69,7 @@ export interface WithFilters {
 }
 
 export interface WithDataStreamStats {
-  dataStreamStats: DataStreamStat[];
+  dataStreamStats: DataStreamStatType[];
 }
 
 export interface WithDegradedDocs {
@@ -176,6 +179,10 @@ export type DatasetQualityControllerEvent =
   | {
       type: 'UPDATE_NAMESPACES';
       namespaces: string[];
+    }
+  | {
+      type: 'UPDATE_QUALITIES';
+      qualities: QualityIndicators[];
     }
   | {
       type: 'UPDATE_QUERY';

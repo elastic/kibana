@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import * as t from 'io-ts';
+import { kibanaResponseFactory } from '@kbn/core/server';
 import { createServerRouteFactory } from './create_server_route_factory';
 import { decodeRequestParams } from './decode_request_params';
 import { EndpointOf, ReturnOf, RouteRepositoryClient } from './typings';
@@ -124,6 +125,24 @@ const repository = {
       };
     },
   }),
+  ...createServerRoute({
+    endpoint: 'GET /internal/endpoint_returning_result',
+    handler: async () => {
+      return {
+        result: true,
+      };
+    },
+  }),
+  ...createServerRoute({
+    endpoint: 'GET /internal/endpoint_returning_kibana_response',
+    handler: async () => {
+      return kibanaResponseFactory.ok({
+        body: {
+          result: true,
+        },
+      });
+    },
+  }),
 };
 
 type TestRepository = typeof repository;
@@ -149,6 +168,14 @@ const noParamsInvalid: ReturnOf<TestRepository, 'GET /internal/endpoint_without_
   // @ts-expect-error type '{ paramsForMe: boolean; }' is not assignable to type '{ noParamsForMe: boolean; }'.
   paramsForMe: true,
 };
+
+assertType<ReturnOf<TestRepository, 'GET /internal/endpoint_returning_result'>>({
+  result: true,
+});
+
+assertType<ReturnOf<TestRepository, 'GET /internal/endpoint_returning_kibana_response'>>({
+  result: true,
+});
 
 // RouteRepositoryClient
 
@@ -211,6 +238,22 @@ client('GET /internal/endpoint_with_params', {
 
   assertType<{
     yesParamsForMe: boolean;
+  }>(res);
+});
+
+client('GET /internal/endpoint_returning_result', {
+  timeout: 1,
+}).then((res) => {
+  assertType<{
+    result: boolean;
+  }>(res);
+});
+
+client('GET /internal/endpoint_returning_kibana_response', {
+  timeout: 1,
+}).then((res) => {
+  assertType<{
+    result: boolean;
   }>(res);
 });
 

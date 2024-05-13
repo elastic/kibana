@@ -11,8 +11,6 @@ import { fields } from '../../../filters/stubs';
 import { DataViewBase } from '../../../..';
 import { getFullFieldNameNode } from './get_full_field_name_node';
 
-jest.mock('../../grammar');
-
 describe('getFullFieldNameNode', function () {
   let indexPattern: DataViewBase;
 

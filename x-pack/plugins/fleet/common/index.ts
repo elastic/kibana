@@ -195,7 +195,7 @@ export type {
   FleetServerAgentComponentStatus,
   AssetSOObject,
   SimpleSOAssetType,
-  AllowedAssetTypes,
+  DisplayedAssetTypes,
 } from './types';
 
 export { ElasticsearchAssetType } from './types';

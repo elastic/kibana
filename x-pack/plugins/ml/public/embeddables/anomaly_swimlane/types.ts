@@ -7,6 +7,7 @@
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type {
+  HasEditCapabilities,
   PublishesDataViews,
   PublishesUnifiedSearch,
   PublishesWritablePanelTitle,
@@ -41,6 +42,7 @@ export type AnomalySwimLaneEmbeddableApi = MlEmbeddableBaseApi<AnomalySwimLaneEm
   PublishesDataViews &
   PublishesUnifiedSearch &
   PublishesWritablePanelTitle &
+  HasEditCapabilities &
   AnomalySwimLaneComponentApi;
 
 export interface AnomalySwimLaneActionContext {
@@ -61,3 +63,14 @@ export function isSwimLaneEmbeddableContext(arg: unknown): arg is AnomalySwimLan
 export interface AnomalySwimLaneEmbeddableState
   extends SerializedTitles,
     AnomalySwimlaneEmbeddableCustomInput {}
+
+/**
+ * The subset of the Anomaly Swim Lane Embeddable state that is actually used by the swimlane embeddable.
+ *
+ * TODO: Ideally this should be the same as the AnomalySwimLaneEmbeddableState, but that type is used in many
+ * places, so we cannot change it at the moment.
+ */
+export type AnomalySwimlaneRuntimeState = Omit<
+  AnomalySwimLaneEmbeddableState,
+  'id' | 'filters' | 'query' | 'refreshConfig'
+>;

@@ -28,7 +28,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   const browser = getService('browser');
   const to = '2024-01-01T12:00:00.000Z';
 
-  describe('Dataset quality flyout', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/182154
+  describe.skip('Dataset quality flyout', () => {
     before(async () => {
       await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
       await PageObjects.datasetQuality.navigateTo();
@@ -386,13 +387,13 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
       await PageObjects.datasetQuality.openIntegrationActionsMenu();
 
-      const action = await PageObjects.datasetQuality.getIntegrationActionButtonByAction(
-        integrationActions.template
-      );
-
-      await action.click();
-
       await retry.tryForTime(5000, async () => {
+        const action = await PageObjects.datasetQuality.getIntegrationActionButtonByAction(
+          integrationActions.template
+        );
+
+        await action.click();
+
         const currentUrl = await browser.getCurrentUrl();
         const parsedUrl = new URL(currentUrl);
         expect(parsedUrl.pathname).to.contain(

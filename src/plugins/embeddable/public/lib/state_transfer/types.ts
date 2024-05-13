@@ -6,9 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { Optional } from '@kbn/utility-types';
-import { EmbeddableInput, SavedObjectEmbeddableInput } from '..';
-
 export const EMBEDDABLE_EDITOR_STATE_KEY = 'embeddable_editor_state';
 
 /**
@@ -19,7 +16,7 @@ export interface EmbeddableEditorState {
   originatingApp: string;
   originatingPath?: string;
   embeddableId?: string;
-  valueInput?: EmbeddableInput;
+  valueInput?: object;
 
   /**
    * Pass current search session id when navigating to an editor,
@@ -40,7 +37,7 @@ export const EMBEDDABLE_PACKAGE_STATE_KEY = 'embeddable_package_state';
  */
 export interface EmbeddablePackageState {
   type: string;
-  input: Optional<EmbeddableInput, 'id'> | Optional<SavedObjectEmbeddableInput, 'id'>;
+  input: object;
   embeddableId?: string;
   size?: {
     width?: number;

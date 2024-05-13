@@ -58,7 +58,7 @@ export function createTelemetryDiagnosticsTaskConfig() {
 
           if (alerts.length === 0) {
             log.l('no diagnostic alerts retrieved');
-            taskMetricsService.end(trace);
+            await taskMetricsService.end(trace);
             return alertCount;
           }
 
@@ -67,10 +67,10 @@ export function createTelemetryDiagnosticsTaskConfig() {
           await sender.sendOnDemand(TELEMETRY_CHANNEL_ENDPOINT_ALERTS, processedAlerts);
         }
 
-        taskMetricsService.end(trace);
+        await taskMetricsService.end(trace);
         return alertCount;
       } catch (err) {
-        taskMetricsService.end(trace, err);
+        await taskMetricsService.end(trace, err);
         return 0;
       }
     },

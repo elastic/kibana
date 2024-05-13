@@ -194,6 +194,9 @@ Object {
       ],
       "legend": Object {
         "isVisible": false,
+        "legendStats": Array [
+          "currentAndLastValue",
+        ],
         "position": "right",
       },
       "preferredSeriesType": "line",
@@ -204,7 +207,6 @@ Object {
       },
       "title": "Empty XY chart",
       "valueLabels": "hide",
-      "valuesInLegend": true,
       "xTitle": "",
       "yLeftExtent": Object {
         "lowerBound": 0,

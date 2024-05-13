@@ -121,7 +121,7 @@ describe('deleteBackfill()', () => {
   let rulesClient: RulesClient;
 
   beforeEach(async () => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
     rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValue(mockAdHocRunSO);
     unsecuredSavedObjectsClient.delete.mockResolvedValue({});

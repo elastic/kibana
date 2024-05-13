@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { useHostIsolationAction } from './use_host_isolation_action';
@@ -33,7 +34,7 @@ describe('useHostIsolationAction', () => {
   ])('works with %s hook', (name, hook) => {
     const createReactQueryWrapper = () => {
       const queryClient = new QueryClient();
-      const wrapper: React.FC = ({ children }) => (
+      const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
         <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
       );
       return wrapper;

@@ -13,8 +13,6 @@ import { KQL_NODE_TYPE_LITERAL } from '../node_types/literal';
 import * as exists from './exists';
 import type { KqlExistsFunctionNode } from './exists';
 
-jest.mock('../grammar');
-
 describe('kuery functions', () => {
   describe('exists', () => {
     let indexPattern: DataViewBase;

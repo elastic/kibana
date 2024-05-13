@@ -6,31 +6,30 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import type { InstalledIntegration } from '../../../../../../common/api/detection_engine/fleet_integrations';
+import type { Integration } from '../../../../../../common/api/detection_engine/fleet_integrations';
 import { TestProviders } from '../../../../../common/mock';
 import { ENTRA_ID_PACKAGE_NAME } from '../constants';
 import { useManagedUser } from './use_managed_user';
 
-const makeInstalledIntegration = (
-  pkgName = 'testPkg',
-  isEnabled = false
-): InstalledIntegration => ({
+const makeIntegration = (pkgName = 'testPkg', isEnabled = false): Integration => ({
   package_name: pkgName,
   package_title: '',
-  package_version: '',
+  latest_package_version: '',
+  installed_package_version: '',
   integration_name: '',
   integration_title: '',
+  is_installed: true,
   is_enabled: isEnabled,
 });
 
-const mockUseInstalledIntegrations = jest.fn().mockReturnValue({
+const mockUseIntegrations = jest.fn().mockReturnValue({
   data: [],
 });
 
 jest.mock(
-  '../../../../../detections/components/rules/related_integrations/use_installed_integrations',
+  '../../../../../detections/components/rules/related_integrations/use_integrations',
   () => ({
-    useInstalledIntegrations: () => mockUseInstalledIntegrations(),
+    useIntegrations: () => mockUseIntegrations(),
   })
 );
 
@@ -67,8 +66,8 @@ describe('useManagedUser', () => {
     mockSearch.mockClear();
   });
   it('returns isIntegrationEnabled:true when it finds an enabled integration with the given name', () => {
-    mockUseInstalledIntegrations.mockReturnValue({
-      data: [makeInstalledIntegration(ENTRA_ID_PACKAGE_NAME, true)],
+    mockUseIntegrations.mockReturnValue({
+      data: [makeIntegration(ENTRA_ID_PACKAGE_NAME, true)],
     });
 
     const { result } = renderHook(() => useManagedUser('test-userName', undefined, false), {
@@ -79,8 +78,8 @@ describe('useManagedUser', () => {
   });
 
   it('returns isIntegrationEnabled:false when it does not find an enabled integration with the given name', () => {
-    mockUseInstalledIntegrations.mockReturnValue({
-      data: [makeInstalledIntegration('fake-name', true)],
+    mockUseIntegrations.mockReturnValue({
+      data: [makeIntegration('fake-name', true)],
     });
 
     const { result } = renderHook(() => useManagedUser('test-userName', undefined, false), {
@@ -130,7 +129,7 @@ describe('useManagedUser', () => {
 
   it('should return loading false when the feature is disabled', () => {
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
-    mockUseInstalledIntegrations.mockReturnValue({
+    mockUseIntegrations.mockReturnValue({
       data: [],
       isLoading: true,
     });

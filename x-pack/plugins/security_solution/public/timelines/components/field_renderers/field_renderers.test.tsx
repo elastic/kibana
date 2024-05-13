@@ -10,7 +10,6 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { TestProviders } from '../../../common/mock';
-import '../../../common/mock/match_media';
 import { getEmptyValue } from '../../../common/components/empty_value';
 
 import {
@@ -44,7 +43,8 @@ describe('Field Renderers', () => {
   describe('#locationRenderer', () => {
     test('it renders correctly against snapshot', () => {
       const { asFragment } = render(
-        locationRenderer(['source.geo.city_name', 'source.geo.region_name'], mockData.complete)
+        locationRenderer(['source.geo.city_name', 'source.geo.region_name'], mockData.complete),
+        { wrapper: TestProviders }
       );
 
       expect(asFragment()).toMatchSnapshot();
@@ -67,7 +67,9 @@ describe('Field Renderers', () => {
 
   describe('#dateRenderer', () => {
     test('it renders correctly against snapshot', () => {
-      const { asFragment } = render(dateRenderer(mockData.complete.source?.firstSeen));
+      const { asFragment } = render(dateRenderer(mockData.complete.source?.firstSeen), {
+        wrapper: TestProviders,
+      });
 
       expect(asFragment()).toMatchSnapshot();
     });
@@ -84,7 +86,8 @@ describe('Field Renderers', () => {
 
     test('it renders correctly against snapshot', () => {
       const { asFragment } = render(
-        autonomousSystemRenderer(mockData.complete.source!.autonomousSystem!, FlowTarget.source)
+        autonomousSystemRenderer(mockData.complete.source!.autonomousSystem!, FlowTarget.source),
+        { wrapper: TestProviders }
       );
 
       expect(asFragment()).toMatchSnapshot();

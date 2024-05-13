@@ -64,7 +64,6 @@
     "@kbn/shared-ux-router",
     "@kbn/core-http-server",
     "@kbn/core-http-server-mocks",
-    "@kbn/core-user-settings-server",
     "@kbn/remote-clusters-plugin",
     "@kbn/analytics-client",
     "@kbn/security-plugin-types-common",

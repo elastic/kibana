@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { SHAREABLE_RUNTIME_NAME } from '../../shareable_runtime/constants_static';
 import { FilterField } from '../../types';
+
+// avoid import from shareable_runtime
+const SHAREABLE_RUNTIME_NAME = 'kbn_canvas';
 
 export const CANVAS_TYPE = 'canvas-workpad';
 export const CUSTOM_ELEMENT_TYPE = 'canvas-element';

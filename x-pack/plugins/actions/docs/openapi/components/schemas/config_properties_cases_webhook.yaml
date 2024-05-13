@@ -23,7 +23,7 @@ properties:
       placed when the REST method runs. Manually ensure that the JSON is valid,
       disregarding the Mustache variables, so the later validation will pass.
     examples:
-      - {"body": {{{case.comment}}}}
+      - '{"body": {{{case.comment}}}}'
   createCommentMethod:
     type: string
     description: >
@@ -55,7 +55,7 @@ properties:
       placed when REST method runs. Manually ensure that the JSON is valid to
       avoid future validation errors; disregard Mustache variables during your review.
     examples:
-      - {"fields": {"summary": {{{case.title}}},"description": {{{case.description}}},"labels": {{{case.tags}}}}}
+      - '{"fields": {"summary": {{{case.title}}},"description": {{{case.description}}},"labels": {{{case.tags}}}}}'
   createIncidentMethod:
     type: string
     description: >
@@ -112,7 +112,7 @@ properties:
       placed when REST method runs. Manually ensure that the JSON is valid to
       avoid future validation errors; disregard Mustache variables during your review.
     examples:
-      - {"fields": {"summary": {{{case.title}}},"description": {{{case.description}}},"labels": {{{case.tags}}}}}
+      - '{"fields": {"summary": {{{case.title}}},"description": {{{case.description}}},"labels": {{{case.tags}}}}}'
   updateIncidentMethod:
     type: string
     description: >

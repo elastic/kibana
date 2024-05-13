@@ -92,10 +92,12 @@ export const OnboardingFlowForm: FunctionComponent = () => {
   const packageListRef = useRef<HTMLDivElement | null>(null);
   const formRef = useRef<HTMLDivElement | null>(null);
   const [integrationSearch, setIntegrationSearch] = useState(searchParams.get('search') ?? '');
-  const selectedCategory: Category | null = searchParams.get('category') as Category | null;
+  const [scrollToCategory, setScrollToCategory] = useState<Category | null>(
+    searchParams.get('category') as Category | null
+  );
 
   useEffect(() => {
-    if (selectedCategory === null || !hasPackageListLoaded) {
+    if (scrollToCategory === null || !hasPackageListLoaded) {
       return;
     }
 
@@ -107,7 +109,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
     }, 10);
 
     return () => clearTimeout(timeout);
-  }, [selectedCategory, hasPackageListLoaded]);
+  }, [scrollToCategory, hasPackageListLoaded]);
 
   useEffect(() => {
     const searchParam = searchParams.get('search') ?? '';
@@ -143,6 +145,8 @@ export const OnboardingFlowForm: FunctionComponent = () => {
   );
   const virtualSearchResults = useVirtualSearchResults();
 
+  let isSelectingCategoryWithKeyboard: boolean = false;
+
   return (
     <EuiPanel hasBorder paddingSize="xl" panelRef={formRef}>
       <TitleWithIcon
@@ -158,10 +162,12 @@ export const OnboardingFlowForm: FunctionComponent = () => {
       <EuiSpacer size="m" />
       <EuiFlexGroup css={{ ...customMargin, maxWidth: '560px' }} gutterSize="l" direction="column">
         {options.map((option) => (
-          <EuiFlexItem key={option.id}>
+          <EuiFlexItem
+            key={option.id}
+            data-test-subj={`observabilityOnboardingUseCaseCard-${option.id}`}
+          >
             <EuiCheckableCard
               id={`${radioGroupId}_${option.id}`}
-              data-test-subj={`observabilityOnboardingUseCaseCard-${option.id}`}
               name={radioGroupId}
               label={
                 <>
@@ -173,9 +179,22 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                 </>
               }
               checked={option.id === searchParams.get('category')}
+              /**
+               * onKeyDown and onKeyUp handlers disable
+               * scrolling to the category items when user
+               * changes the selected category using keyboard,
+               * which prevents our custom scroll behavior
+               * from conflicting with browser's native one to
+               * put keyboard-focused item into the view.
+               */
+              onKeyDown={() => (isSelectingCategoryWithKeyboard = true)}
+              onKeyUp={() => (isSelectingCategoryWithKeyboard = false)}
               onChange={() => {
                 setIntegrationSearch('');
                 setSearchParams({ category: option.id }, { replace: true });
+                if (!isSelectingCategoryWithKeyboard) {
+                  setScrollToCategory(option.id);
+                }
               }}
             />
           </EuiFlexItem>
