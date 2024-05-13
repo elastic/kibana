@@ -76,18 +76,22 @@ export async function getErrorGroupMainStatistics({
     ? { [maxTimestampAggKey]: sortDirection }
     : { _count: sortDirection };
 
-  const shouldQuery = searchQuery
-    ? {
-        should: [
-          ERROR_LOG_MESSAGE,
-          ERROR_EXC_MESSAGE,
-          ERROR_GROUP_NAME,
-          ERROR_EXC_TYPE,
-          ERROR_CULPRIT,
-        ].flatMap((field) => wildcardQuery(field, searchQuery)),
-        minimum_should_match: 1,
-      }
-    : {};
+  const shouldMatchSearchQuery = searchQuery
+    ? [
+        {
+          bool: {
+            should: [
+              ERROR_LOG_MESSAGE,
+              ERROR_EXC_MESSAGE,
+              ERROR_GROUP_NAME,
+              ERROR_EXC_TYPE,
+              ERROR_CULPRIT,
+            ].flatMap((field) => wildcardQuery(field, searchQuery)),
+            minimum_should_match: 1,
+          },
+        },
+      ]
+    : [];
 
   const response = await apmEventClient.search('get_error_group_main_statistics', {
     apm: {
@@ -110,8 +114,8 @@ export async function getErrorGroupMainStatistics({
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
+            ...shouldMatchSearchQuery,
           ],
-          ...shouldQuery,
         },
       },
       aggs: {
