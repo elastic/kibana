@@ -16,6 +16,7 @@ import { registerDeploymentsMemoryRoute } from './deployments_memory';
 import { registerDaemonsetsCpuRoute } from './daemonsets_cpu';
 import { registerDaemonsetsMemoryRoute } from './daemonsets_memory';
 import { registerEventsRoute } from './events';
+import { registerNodesCpuRoute } from './nodes_cpu';
 
 
 export const registerRoutes = (
@@ -33,4 +34,5 @@ export const registerRoutes = (
   registerDaemonsetsCpuRoute(router, logger)
   registerDaemonsetsMemoryRoute(router, logger)
   registerEventsRoute(router, logger);
+  registerNodesCpuRoute(router, logger);
 };

@@ -2,7 +2,7 @@ import { estypes } from '@elastic/elasticsearch';
 import { extractFieldValue, toEntries, round, Pod, Limits, median } from './utils';
 import { ElasticsearchClient } from '@kbn/core/server';
 
-// Define the global CPU limits to categorise memory utilisation
+// Define the global CPU limits to categorise cpu utilisation
 const limits: Limits = {
     medium: 0.7,
     high: 0.9,

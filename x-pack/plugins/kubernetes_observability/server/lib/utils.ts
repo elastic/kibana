@@ -25,6 +25,13 @@ export type Pod = {
     cpu_utilization: number| undefined;
 };
 
+export type Node = {
+    name: string;
+    memory_availabe: number | undefined;
+    memory_usage: number | undefined;
+    cpu_utilization: number| undefined;
+};
+
 export type Limits = {
     [key: string]: double;
 };
@@ -93,5 +100,9 @@ export function checkDefaultNamespace(namespace: string| undefined): string {
     } else {
         return namespace
     }
+}
+
+export function toPct(num: number | undefined): number | undefined {
+    return num === undefined ? undefined : num * 100;
 }
 
