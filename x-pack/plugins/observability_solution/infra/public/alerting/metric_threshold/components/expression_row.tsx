@@ -59,7 +59,12 @@ interface ExpressionRowProps {
   dataView: DataViewBase;
 }
 
-const NegativeHorizontalMarginDiv = euiStyled.div`margin: 0 -4px;`;
+const StyledExpressionRow = euiStyled(EuiFlexGroup)`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin: 0 -4px;
+`;
 
 const StyledExpression = euiStyled.div`
   padding: 0 4px;
@@ -228,12 +233,7 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
           />
         </EuiFlexItem>
         <EuiFlexItem grow>
-          <EuiFlexGroup
-            component={NegativeHorizontalMarginDiv}
-            gutterSize={aggType !== 'custom' ? 'l' : 'm'}
-            alignItems="center"
-            wrap
-          >
+          <StyledExpressionRow style={{ gap: aggType !== 'custom' ? 24 : 12 }}>
             <StyledExpression>
               <WhenExpression
                 customAggTypesOptions={aggregationType}
@@ -278,7 +278,7 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
             {!displayWarningThreshold && (
               <>
                 <EuiSpacer size={'xs'} />
-                <EuiFlexGroup component={NegativeHorizontalMarginDiv} alignItems="center">
+                <StyledExpressionRow>
                   <EuiButtonEmpty
                     data-test-subj="infraExpressionRowAddWarningThresholdButton"
                     color={'primary'}
@@ -292,13 +292,13 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
                       defaultMessage="Add warning threshold"
                     />
                   </EuiButtonEmpty>
-                </EuiFlexGroup>
+                </StyledExpressionRow>
               </>
             )}
-          </EuiFlexGroup>
+          </StyledExpressionRow>
           {displayWarningThreshold && (
             <>
-              <EuiFlexGroup component={NegativeHorizontalMarginDiv} alignItems="center">
+              <StyledExpressionRow>
                 {criticalThresholdExpression}
                 <StyledHealth color="danger">
                   <FormattedMessage
@@ -306,8 +306,8 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
                     defaultMessage="Alert"
                   />
                 </StyledHealth>
-              </EuiFlexGroup>
-              <EuiFlexGroup component={NegativeHorizontalMarginDiv} alignItems="center">
+              </StyledExpressionRow>
+              <StyledExpressionRow>
                 {warningThresholdExpression}
                 <StyledHealth color="warning">
                   <FormattedMessage
@@ -328,13 +328,13 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
                   iconType={'minusInCircleFilled'}
                   onClick={toggleWarningThreshold}
                 />
-              </EuiFlexGroup>
+              </StyledExpressionRow>
             </>
           )}
           {aggType === Aggregators.CUSTOM && (
             <>
               <EuiSpacer size={'m'} />
-              <EuiFlexGroup component={NegativeHorizontalMarginDiv} alignItems="center">
+              <StyledExpressionRow>
                 <CustomEquationEditor
                   expression={expression}
                   fields={normalizedFields}
@@ -343,7 +343,7 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
                   errors={errors}
                   dataView={dataView}
                 />
-              </EuiFlexGroup>
+              </StyledExpressionRow>
               <EuiSpacer size={'s'} />
             </>
           )}

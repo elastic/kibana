@@ -4,14 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiFlexGroup,
-  EuiFlexGroupProps,
-  EuiFlexItem,
-  EuiLoadingChart,
-  EuiText,
-  EuiIcon,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiText, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { AsyncState, AsyncStatus } from '../hooks/use_async';
@@ -25,7 +18,7 @@ export function AsyncComponent({
   style,
   alignTop,
 }: AsyncState<any> & {
-  style?: EuiFlexGroupProps['style'];
+  style?: React.ComponentProps<typeof EuiFlexGroup>['style'];
   children: React.ReactElement;
   mono?: boolean;
   size: 'm' | 'l' | 'xl';

@@ -13,6 +13,10 @@ import { EMPTY_STAT, getIncompatibleStatColor } from '../../../../helpers';
 import { StatLabel } from '../../../stat_label';
 import * as i18n from '../../../stat_label/translations';
 
+const StatsFlexGroup = styled(EuiFlexGroup)`
+  gap: ${({ theme }) => theme.eui.euiSizeS};
+`;
+
 const IndicesStatContainer = styled.div`
   min-width: 100px;
 `;
@@ -57,10 +61,10 @@ const StatsRollupComponent: React.FC<Props> = ({
   const indicesDescription = useMemo(() => <StatLabel line2={i18n.INDICES} />, []);
 
   return (
-    <EuiFlexGroup
+    <StatsFlexGroup
       alignItems="flexEnd"
       data-test-subj="statsRollup"
-      gutterSize="s"
+      gutterSize="none"
       justifyContent="flexEnd"
     >
       <EuiFlexItem grow={false}>
@@ -151,7 +155,7 @@ const StatsRollupComponent: React.FC<Props> = ({
           </EuiToolTip>
         </DocsContainer>
       </EuiFlexItem>
-    </EuiFlexGroup>
+    </StatsFlexGroup>
   );
 };
 
