@@ -11,11 +11,14 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiLink,
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 
 import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';
@@ -35,6 +38,7 @@ const EmptyPromptComponent: React.FC<Props> = ({
   isDisabled = false,
   onGenerate,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const { hasAssistantPrivilege } = useAssistantAvailability();
   const title = useMemo(
     () => (
@@ -51,6 +55,16 @@ const EmptyPromptComponent: React.FC<Props> = ({
 
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" direction="row" gutterSize="none">
+            <EuiFlexItem
+              css={css`
+                margin-right: ${euiTheme.size.xs};
+              `}
+              data-test-subj="upTo"
+              grow={false}
+            >
+              <span>{i18n.UP_TO}</span>
+            </EuiFlexItem>
+
             <EuiFlexItem data-test-subj="emptyPromptAnimatedCounter" grow={false}>
               <AnimatedCounter count={alertsCount} />
             </EuiFlexItem>
@@ -58,11 +72,25 @@ const EmptyPromptComponent: React.FC<Props> = ({
             <EuiFlexItem data-test-subj="emptyPromptAlertsWillBeAnalyzed" grow={false}>
               <span>{i18n.ALERTS_WILL_BE_ANALYZED(alertsCount)}</span>
             </EuiFlexItem>
+
+            <EuiFlexItem
+              css={css`
+                margin-left: ${euiTheme.size.xs};
+              `}
+              grow={false}
+            >
+              <EuiIconTip
+                content={i18n.RESPONSES_FROM_AI_SYSTEMS}
+                data-test-subj="responsesFromAiSystemsTooltip"
+                position="right"
+                type="iInCircle"
+              />
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [alertsCount]
+    [alertsCount, euiTheme.size.xs]
   );
 
   const body = useMemo(
@@ -117,7 +145,7 @@ const EmptyPromptComponent: React.FC<Props> = ({
       <EuiFlexItem grow={false}>
         <EuiLink
           data-test-subj="learnMore"
-          href="https://www.elastic.co/guide/en/security/master/attack-discovery.html"
+          href="https://www.elastic.co/guide/en/security/current/attack-discovery.html"
           target="_blank"
         >
           {i18n.LEARN_MORE}
