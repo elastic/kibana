@@ -88,6 +88,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.missingOrFail('discoverErrorCalloutTitle');
         });
 
+        it('should not show Patterns tab (basic license)', async () => {
+          await testSubjects.missingOrFail('dscViewModePatternAnalysisButton');
+          await retry.try(async () => {
+            const documentTab = await testSubjects.find('dscViewModeDocumentButton');
+            expect(await documentTab.getAttribute('aria-selected')).to.be('true');
+          });
+        });
+
         it('should show Field Statistics tab', async () => {
           await testSubjects.click('dscViewModeFieldStatsButton');
 
@@ -97,14 +105,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
 
           await testSubjects.existOrFail('dscViewModeToggle');
-        });
-
-        it('should not show Patterns tab (basic license)', async () => {
-          await testSubjects.missingOrFail('dscViewModePatternAnalysisButton');
-          await retry.try(async () => {
-            const fieldStatsTab = await testSubjects.find('dscViewModeDocumentButton');
-            expect(await fieldStatsTab.getAttribute('aria-selected')).to.be('true');
-          });
         });
 
         it('should not show view mode toggle for text-based searches', async () => {
