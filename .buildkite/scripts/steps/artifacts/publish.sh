@@ -49,8 +49,6 @@ chmod -R a+r target/*
 chmod -R a+w target
 
 echo "--- Pull latest Release Manager CLI"
-echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
-trap 'docker logout docker.elastic.co' EXIT
 docker pull docker.elastic.co/infra/release-manager:latest
 
 echo "--- Publish artifacts"
