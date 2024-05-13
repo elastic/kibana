@@ -46,30 +46,39 @@ const renderReactEmbeddable = ({
   input,
   container,
   handlers,
+  core,
 }: {
   type: string;
   uuid: string;
   input: EmbeddableInput;
   container: CanvasContainerApi;
   handlers: RendererHandlers;
+  core: CoreStart;
 }) => {
   return (
-    <ReactEmbeddableRenderer
-      type={type}
-      maybeId={uuid}
-      parentApi={container as unknown as PresentationContainer}
-      key={`${type}_${uuid}`}
-      state={{ rawState: input }}
-      onAnyStateChange={(newState) => {
-        const newExpression = embeddableInputToExpression(
-          newState.rawState as unknown as EmbeddableInput,
-          type,
-          undefined,
-          true
-        );
-        if (newExpression) handlers.onEmbeddableInputChange(newExpression);
-      }}
-    />
+    <KibanaRenderContextProvider {...core}>
+      <div
+        className={CANVAS_EMBEDDABLE_CLASSNAME}
+        style={{ width: '100%', height: '100%', cursor: 'auto' }}
+      >
+        <ReactEmbeddableRenderer
+          type={type}
+          maybeId={uuid}
+          parentApi={container as unknown as PresentationContainer}
+          key={`${type}_${uuid}`}
+          state={{ rawState: input }}
+          onAnyStateChange={(newState) => {
+            const newExpression = embeddableInputToExpression(
+              newState.rawState as unknown as EmbeddableInput,
+              type,
+              undefined,
+              true
+            );
+            if (newExpression) handlers.onEmbeddableInputChange(newExpression);
+          }}
+        />
+      </div>
+    </KibanaRenderContextProvider>
   );
 };
 
@@ -138,6 +147,7 @@ export const embeddableRendererFactory = (
             uuid: uniqueId,
             type: embeddableType,
             container: canvasApi,
+            core,
           }),
           domNode,
           () => handlers.done()
