@@ -42,12 +42,19 @@ export interface ClaimOwnershipResult {
 
 export type TaskClaimerFn = (opts: TaskClaimerOpts) => Observable<ClaimOwnershipResult>;
 
-export function getTaskClaimer(strategy: string): TaskClaimerFn {
+let WarnedOnInvalidClaimer = false;
+
+export function getTaskClaimer(logger: Logger, strategy: string): TaskClaimerFn {
   switch (strategy) {
     case CLAIM_STRATEGY_DEFAULT:
       return claimAvailableTasksDefault;
     case CLAIM_STRATEGY_MGET:
       return claimAvailableTasksMget;
   }
-  throw new Error(`Unknown task claiming strategy (${strategy})`);
+
+  if (!WarnedOnInvalidClaimer) {
+    WarnedOnInvalidClaimer = true;
+    logger.warn(`Unknown task claiming strategy "${strategy}", falling back to default`);
+  }
+  return claimAvailableTasksDefault;
 }
