@@ -8,7 +8,12 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { ExperimentalFeaturesService } from '../../../../../services';
-import type { AgentPolicy, NewAgentPolicy } from '../../../../../types';
+import type {
+  AgentPolicy,
+  NewAgentPolicy,
+  NewPackagePolicy,
+  PackageInfo,
+} from '../../../../../types';
 import { SetupTechnology } from '../../../../../types';
 import { sendGetOneAgentPolicy, useStartServices } from '../../../../../hooks';
 import { SelectedPolicyTab } from '../../components';
@@ -20,12 +25,38 @@ export const useAgentlessPolicy = () => {
   const isServerless = !!cloud?.isServerlessEnabled;
 
   const isAgentlessEnabled = agentlessExperimentalFeatureEnabled && isServerless;
-  const isAgentlessPolicyId = (id: string | undefined) =>
-    isAgentlessEnabled && id === AGENTLESS_POLICY_ID;
 
+  // TODO: remove check agentPolicy.id === AGENTLESS_POLICY_ID
+  const isAgentlessAgentPolicy = (agentPolicy: AgentPolicy | undefined) => {
+    if (agentPolicy && agentPolicy?.supports_agentless && agentPolicy?.id)
+      return (
+        isAgentlessEnabled &&
+        (agentPolicy.id === AGENTLESS_POLICY_ID || agentPolicy.supports_agentless)
+      );
+    return false;
+  };
+
+  const isAgentlessIntegration = (packageInfo: PackageInfo | undefined) => {
+    if (
+      packageInfo?.policy_templates &&
+      packageInfo?.policy_templates.length > 0 &&
+      packageInfo?.policy_templates[0]?.deployment_modes?.agentless
+    ) {
+      return true;
+    }
+    return false;
+  };
+
+  // TODO: remove this check when CSPM adds the above flag in the integration
+  // and rely only on isAgentlessIntegration
+  const isAgentlessPackagePolicy = (packagePolicy: NewPackagePolicy) => {
+    return packagePolicy.policy_id === AGENTLESS_POLICY_ID;
+  };
   return {
     isAgentlessEnabled,
-    isAgentlessPolicyId,
+    isAgentlessAgentPolicy,
+    isAgentlessIntegration,
+    isAgentlessPackagePolicy,
   };
 };
 

@@ -233,8 +233,8 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
       </EuiFlexGroup>
     );
 
-    const { isAgentlessPolicyId } = useAgentlessPolicy();
-    const hasAgentBasedPolicyId = !isAgentlessPolicyId(agentPolicy?.id);
+    const { isAgentlessAgentPolicy } = useAgentlessPolicy();
+    const hasAgentBasedPolicyId = !isAgentlessAgentPolicy(agentPolicy);
     const showAgentPolicyName = agentPolicy && (isAdd || isEdit) && hasAgentBasedPolicyId;
 
     const rightColumn = showAgentPolicyName ? (
