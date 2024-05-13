@@ -57,7 +57,7 @@ export const UnprivilegedConfirmModal: React.FC<UnprivilegedConfirmModalProps> =
         >
           <FormattedMessage
             id="xpack.fleet.addIntegration.confirmModal.unprivilegedAgentsMessage"
-            defaultMessage="This integration requires Elastic Agents to have root privileges. There {unprivilegedAgentsCount, plural, one {is # agent} other {are # agents}} running in an unprivileged mode using the selected {agentPolicyName} agent policy. This integration may not be able to collect some data from these agents."
+            defaultMessage="This integration requires Elastic Agents to have root privileges. There {unprivilegedAgentsCount, plural, one {is # agent} other {are # agents}} running in an unprivileged mode using the selected {agentPolicyName}. This integration will not be able to collect some data from these agents."
             values={{
               unprivilegedAgentsCount,
               agentPolicyName,
