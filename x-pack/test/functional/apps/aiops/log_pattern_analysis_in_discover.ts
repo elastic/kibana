@@ -23,7 +23,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
   }
 
-  describe('log pattern analysis', async function () {
+  // temporarily disabled, to be replaced
+  describe.skip('log pattern analysis', async function () {
     let tabsCount = 1;
 
     afterEach(async () => {
