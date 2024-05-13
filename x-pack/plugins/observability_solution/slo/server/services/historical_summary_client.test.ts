@@ -8,7 +8,8 @@
 import { ElasticsearchClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import moment from 'moment';
-import { oneMinute, oneMonth, thirtyDays } from './fixtures/duration';
+import { DateRange, SLODefinition } from '../domain/models';
+import { oneMinute, oneMonth, sevenDays, thirtyDays } from './fixtures/duration';
 import { createSLO } from './fixtures/slo';
 import {
   DefaultHistoricalSummaryClient,
@@ -29,11 +30,23 @@ const commonEsResponse = {
   },
 };
 
-const generateEsResponseForRollingSLO = (rollingDays: number = 30, timesliceInMin?: number) => {
-  const { fixedInterval, bucketsPerDay } = getFixedIntervalAndBucketsPerDay(rollingDays);
-  const doubleDuration = rollingDays * 2;
-  const numberOfBuckets = doubleDuration * bucketsPerDay;
-  const startDay = moment().subtract(doubleDuration, 'day').startOf('day');
+const MINUTES_IN_DAY = 1440;
+
+const generateEsResponseForRollingSLO = (slo: SLODefinition, overridedRange?: DateRange) => {
+  const rollingDurationInDays = slo.timeWindow.duration.asMinutes() / MINUTES_IN_DAY;
+  const timesliceInMin = slo.objective.timesliceWindow?.asMinutes();
+  const overridedRangeInDays = overridedRange
+    ? moment(overridedRange.to).diff(moment(overridedRange.from), 'days')
+    : 0;
+
+  const { fixedInterval, bucketsPerDay } = getFixedIntervalAndBucketsPerDay(
+    overridedRangeInDays ? overridedRangeInDays : rollingDurationInDays
+  );
+  const fullDuration = overridedRange
+    ? rollingDurationInDays + overridedRangeInDays
+    : rollingDurationInDays * 2;
+  const numberOfBuckets = fullDuration * bucketsPerDay;
+  const startDay = moment().subtract(fullDuration, 'day').startOf('day');
   const bucketSizeInHour = moment
     .duration(
       fixedInterval.slice(0, -1),
@@ -71,15 +84,15 @@ const generateEsResponseForRollingSLO = (rollingDays: number = 30, timesliceInMi
                 },
                 cumulative_good: {
                   value:
-                    index < rollingDays * bucketsPerDay
+                    index < rollingDurationInDays * bucketsPerDay
                       ? good * (index + 1)
-                      : good * rollingDays * bucketsPerDay,
+                      : good * rollingDurationInDays * bucketsPerDay,
                 },
                 cumulative_total: {
                   value:
-                    index < rollingDays * bucketsPerDay
+                    index < rollingDurationInDays * bucketsPerDay
                       ? total * (index + 1)
-                      : total * rollingDays * bucketsPerDay,
+                      : total * rollingDurationInDays * bucketsPerDay,
                 },
               })),
           },
@@ -148,13 +161,13 @@ describe('FetchHistoricalSummary', () => {
   });
 
   describe('Rolling and Occurrences SLOs', () => {
-    it('returns the summary', async () => {
+    it('returns the summary using the SLO timeWindow date range', async () => {
       const slo = createSLO({
         timeWindow: { type: 'rolling', duration: thirtyDays() },
         objective: { target: 0.95 },
         groupBy: ALL_VALUE,
       });
-      esClientMock.msearch.mockResolvedValueOnce(generateEsResponseForRollingSLO(30));
+      esClientMock.msearch.mockResolvedValueOnce(generateEsResponseForRollingSLO(slo));
       const client = new DefaultHistoricalSummaryClient(esClientMock);
 
       const results = await client.fetch({
@@ -174,8 +187,40 @@ describe('FetchHistoricalSummary', () => {
       results[0].data.forEach((dailyResult) =>
         expect(dailyResult).toMatchSnapshot({ date: expect.any(Date) })
       );
+    });
 
-      expect(results[0].data).toHaveLength(180);
+    it('returns the summary using the provided date range', async () => {
+      const slo = createSLO({
+        timeWindow: { type: 'rolling', duration: sevenDays() },
+        objective: { target: 0.9 },
+        groupBy: ALL_VALUE,
+      });
+      const range: DateRange = {
+        from: new Date('2023-01-09T15:00:00.000Z'),
+        to: new Date('2023-01-13T15:00:00.000Z'),
+      };
+
+      esClientMock.msearch.mockResolvedValueOnce(generateEsResponseForRollingSLO(slo, range));
+      const client = new DefaultHistoricalSummaryClient(esClientMock);
+
+      const results = await client.fetch({
+        list: [
+          {
+            timeWindow: slo.timeWindow,
+            groupBy: slo.groupBy,
+            budgetingMethod: slo.budgetingMethod,
+            objective: slo.objective,
+            revision: slo.revision,
+            sloId: slo.id,
+            instanceId: ALL_VALUE,
+            range,
+          },
+        ],
+      });
+
+      results[0].data.forEach((dailyResult) =>
+        expect(dailyResult).toMatchSnapshot({ date: expect.any(Date) })
+      );
     });
   });
 
@@ -187,7 +232,7 @@ describe('FetchHistoricalSummary', () => {
         objective: { target: 0.95, timesliceTarget: 0.9, timesliceWindow: oneMinute() },
         groupBy: ALL_VALUE,
       });
-      esClientMock.msearch.mockResolvedValueOnce(generateEsResponseForRollingSLO(30, 1));
+      esClientMock.msearch.mockResolvedValueOnce(generateEsResponseForRollingSLO(slo));
       const client = new DefaultHistoricalSummaryClient(esClientMock);
 
       const results = await client.fetch({
@@ -286,7 +331,7 @@ describe('FetchHistoricalSummary', () => {
       objective: { target: 0.95 },
       groupBy: 'host',
     });
-    esClientMock.msearch.mockResolvedValueOnce(generateEsResponseForRollingSLO(30));
+    esClientMock.msearch.mockResolvedValueOnce(generateEsResponseForRollingSLO(slo));
     const client = new DefaultHistoricalSummaryClient(esClientMock);
 
     const results = await client.fetch({
