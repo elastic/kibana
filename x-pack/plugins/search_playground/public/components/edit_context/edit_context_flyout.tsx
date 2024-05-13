@@ -124,7 +124,7 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
                   label={i18n.translate(
                     'xpack.searchPlayground.editContext.flyout.docsRetrievedCount',
                     {
-                      defaultMessage: 'Number of documents to retrieve',
+                      defaultMessage: 'Number of documents sent to LLM',
                     }
                   )}
                 >
