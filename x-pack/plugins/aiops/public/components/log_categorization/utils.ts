@@ -47,7 +47,7 @@ export function getMessageField(dataView: DataView): {
     messageField = dataViewFields.find((f) => f.name === 'error.message');
   }
   if (messageField === undefined) {
-    messageField = dataViewFields.find((f) => f.name === 'event.original ');
+    messageField = dataViewFields.find((f) => f.name === 'event.original');
   }
   if (messageField === undefined) {
     if (dataViewFields.length > 0) {
