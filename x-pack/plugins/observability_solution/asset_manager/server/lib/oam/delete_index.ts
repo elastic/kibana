@@ -16,7 +16,7 @@ export async function deleteIndex(
 ) {
   const indexName = generateIndexName(definition);
   try {
-    esClient.indices.delete({ index: indexName, ignore_unavailable: true });
+    await esClient.indices.delete({ index: indexName, ignore_unavailable: true });
   } catch (e) {
     logger.error(`Unable to remove OAM Defintion index [${definition.id}}]`);
     throw e;
