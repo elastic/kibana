@@ -11,7 +11,10 @@ import { BehaviorSubject } from 'rxjs';
 import type { ChangePointDetectionViewType } from '@kbn/aiops-change-point-detection/constants';
 import type { ChangePointComponentApi, ChangePointEmbeddableState } from './types';
 
-type ChangePointEmbeddableCustomState = Omit<ChangePointEmbeddableState, 'timeRange'>;
+type ChangePointEmbeddableCustomState = Omit<
+  ChangePointEmbeddableState,
+  'timeRange' | 'title' | 'description' | 'hidePanelTitles'
+>;
 
 export const initializeChangePointControls = (rawState: ChangePointEmbeddableState) => {
   const viewType = new BehaviorSubject<ChangePointDetectionViewType>(rawState.viewType);

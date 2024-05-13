@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { ChangePointDetectionViewType } from '@kbn/aiops-change-point-detection/constants';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type {
   HasEditCapabilities,
@@ -15,7 +15,7 @@ import type {
   SerializedTimeRange,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
-import type { ChangePointDetectionViewType } from '@kbn/aiops-change-point-detection/constants';
+import type { FC } from 'react';
 import type { SelectedChangePoint } from '../../components/change_point_detection/change_point_detection_context';
 
 export type ViewComponent = FC<{
@@ -41,7 +41,7 @@ export type ChangePointEmbeddableApi = DefaultEmbeddableApi<ChangePointEmbeddabl
   PublishesTimeRange &
   ChangePointComponentApi;
 
-export interface ChangePointEmbeddableState {
+export interface ChangePointEmbeddableState extends SerializedTitles, SerializedTimeRange {
   viewType: ChangePointDetectionViewType;
   dataViewId: string;
   fn: 'avg' | 'sum' | 'min' | 'max' | string;
@@ -51,6 +51,4 @@ export interface ChangePointEmbeddableState {
   maxSeriesToPlot?: number;
 }
 
-export type ChangePointEmbeddableRuntimeState = ChangePointEmbeddableState &
-  SerializedTimeRange &
-  SerializedTitles;
+export type ChangePointEmbeddableRuntimeState = ChangePointEmbeddableState;

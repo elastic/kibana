@@ -55,7 +55,11 @@ export function createAddChangePointChartAction(
           '../embeddables/change_point_chart/resolve_change_point_config_input'
         );
 
-        const initialState = await resolveEmbeddableChangePointUserInput(coreStart, pluginStart);
+        const initialState = await resolveEmbeddableChangePointUserInput(
+          coreStart,
+          pluginStart,
+          context.embeddable
+        );
 
         presentationContainerParent.addNewPanel({
           panelType: EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
