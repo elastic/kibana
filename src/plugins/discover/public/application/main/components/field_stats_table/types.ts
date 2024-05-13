@@ -164,4 +164,9 @@ export interface FieldStatisticsTableProps {
    * Search session id to save to or restore from
    */
   searchSessionId?: string;
+  /**
+   * If table should should accept text based query
+   * isPlainRecord is true when in ES|QL mode
+   */
+  isPlainRecord?: boolean;
 }

@@ -71,7 +71,7 @@ export const TopValues: FC<Props> = ({
   } = useDataVisualizerKibana();
 
   if (stats === undefined || !stats.topValues) return null;
-  const { fieldName, sampleCount, count: countOfDocsExistingForField, approximate } = stats;
+  const { fieldName, sampleCount, approximate } = stats;
 
   const originalTopValues = (showSampledValues ? stats.sampledValues : stats.topValues) ?? [];
   if (originalTopValues?.length === 0) return null;
