@@ -48,6 +48,8 @@ async function main() {
         if (!doc.event) doc.event = {};
         if (doc.event.start) doc.event.startMs = new Date(doc.event.start).valueOf();
         if (doc.event.end) doc.event.endMs = new Date(doc.event.end).valueOf();
+        if (doc.event.endMs && doc.event.startMs)
+          doc.event.durationMs = doc.event.endMs - doc.event.startMs;
       }
       serverDocs.push(docResult.value);
     }
@@ -56,7 +58,7 @@ async function main() {
   // for each server's docs, apply a worker id
   for (const docs of serverDocs) {
     // sort ascending by timestamp
-    docs.sort((a, b) => a['@timestamp'].localeCompare(b['@timestamp']));
+    docs.sort((a, b) => a.event.startMs - b.event.startMs);
 
     assignWorkerIds(docs);
 
@@ -71,24 +73,27 @@ class Worker {
   constructor(id) {
     this.id = id;
     /** @type { number | undefined } */
-    this.end = undefined;
+    this.nextEnd = undefined;
+    /** @type { number | undefined } */
+    this.lastEnd = undefined;
   }
 
   /** @type { (currentDate: number) => void } */
   update(currentDate) {
-    if (currentDate >= this.end) {
-      this.end = undefined;
+    if (currentDate >= this.nextEnd) {
+      this.lastEnd = this.nextEnd;
+      this.nextEnd = undefined;
     }
   }
 
   /** @type { () => boolean } */
   isAvailable() {
-    return this.end === undefined;
+    return this.nextEnd === undefined;
   }
 
   /** @type { (end: number) => void } */
   claimTill(end) {
-    this.end = end;
+    this.nextEnd = end;
   }
 }
 
@@ -150,6 +155,7 @@ function assignWorkerIds(docs) {
     const serverId = workers.getServerId(doc).padStart(3, '0');
     const workerId = `${worker.id}`.padStart(3, '0');
     doc.kibana.worker = `${serverId}-${workerId}`;
+    doc.event.preIdleMs = worker.lastEnd ? doc.event.startMs - worker.lastEnd : 0;
   }
 }
 
@@ -212,6 +218,8 @@ usage: [this-command] <es-url1> <es-url2> ... <es-urlN>
 Will fetch rule execution event logs from each url, and augment them:
 - adds event.startMs           - event.start as an epoch number
 - adds event.endMs             - event.end as an epoch number
+- adds event.durationMs        - event.end as an epoch number
+- adds event.preIdleMs         - time worker was idle before this
 - adds kibana.url              - the URL passed in (which is actually ES)
 - adds kibana.host             - just the host name from that URL
 - adds kibana.worker           - worker in form of nodeId-workerId (unique only by url)
