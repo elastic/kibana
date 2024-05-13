@@ -7,6 +7,7 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
+import { useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { mockTimelineData, mockTimelineModel, TestProviders } from '../../mock';
 import { useShallowEqualSelector } from '../../hooks/use_selector';
@@ -87,6 +88,14 @@ jest.mock('../../hooks/use_license', () => {
     },
   };
 });
+
+jest.mock('@kbn/expandable-flyout', () => {
+  return {
+    useExpandableFlyoutState: jest.fn(() => ({ left: false })),
+  };
+});
+
+const useExpandableFlyoutStateMock = useExpandableFlyoutState as jest.Mock;
 
 const defaultProps = {
   ariaRowindex: 2,
@@ -201,6 +210,30 @@ describe('Actions', () => {
 
       expect(wrapper.find(GuidedOnboardingTourStep).exists()).toEqual(true);
       expect(wrapper.find(SecurityTourStep).exists()).toEqual(true);
+    });
+
+    test('if left expandable flyout is expanded, SecurityTourStep is active', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} {...isTourAnchorConditions} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find(GuidedOnboardingTourStep).exists()).toEqual(true);
+      expect(wrapper.find(SecurityTourStep).exists()).toEqual(true);
+    });
+
+    test('if left expandable flyout is expanded, SecurityTourStep not active', () => {
+      useExpandableFlyoutStateMock.mockReturnValue({ left: true });
+
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} {...isTourAnchorConditions} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find(GuidedOnboardingTourStep).exists()).toEqual(true);
+      expect(wrapper.find(SecurityTourStep).exists()).toEqual(false);
     });
 
     test('on expand event click and SecurityTourStep is active, incrementStep', () => {

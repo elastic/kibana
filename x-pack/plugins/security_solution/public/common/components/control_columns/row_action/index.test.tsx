@@ -32,6 +32,7 @@ jest.mock('../../../utils/route/use_route_spy');
 jest.mock('@kbn/expandable-flyout', () => {
   return {
     useExpandableFlyoutApi: () => ({ openFlyout: mockOpenFlyout }),
+    useExpandableFlyoutState: () => ({ left: false }),
   };
 });
 
