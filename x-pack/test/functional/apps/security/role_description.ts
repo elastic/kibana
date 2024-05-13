@@ -10,8 +10,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  const browser = getService('browser');
-  const find = getService('find');
   const security = getService('security');
   const PageObjects = getPageObjects(['security', 'settings', 'common', 'header']);
 
