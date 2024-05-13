@@ -36,7 +36,7 @@ export interface ExecutionContext<InspectorAdapters extends Adapters = Adapters>
   types: Record<string, ExpressionType>;
 
   /**
-   * Prevents caching in the current execution.
+   * Allow caching in the current execution.
    */
   allowCache?: boolean;
 
