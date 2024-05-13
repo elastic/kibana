@@ -453,7 +453,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
     return null;
   };
 
-  const getRoleName = () => {
+  const getRoleNameAndDescription = () => {
     return (
       <EuiPanel hasShadow={false} hasBorder={true}>
         <EuiFlexGroup>
@@ -495,33 +495,27 @@ export const EditRolePage: FunctionComponent<Props> = ({
               />
             </EuiFormRow>
           </EuiFlexItem>
-          {getRoleDescription()}
+          <EuiFlexItem>
+            <EuiFormRow
+              data-test-subj="roleDescriptionFormRow"
+              label={
+                <FormattedMessage
+                  id="xpack.security.management.editRole.roleDescriptionFormRowTitle"
+                  defaultMessage="Role description"
+                />
+              }
+            >
+              <EuiFieldText
+                name="description"
+                value={role.description ?? ''}
+                onChange={onDescriptionChange}
+                data-test-subj="roleFormDescriptionInput"
+                disabled={isRoleReserved || isRoleReadOnly}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
-    );
-  };
-
-  const getRoleDescription = () => {
-    return (
-      <EuiFlexItem>
-        <EuiFormRow
-          data-test-subj="roleDescriptionFormRow"
-          label={
-            <FormattedMessage
-              id="xpack.security.management.editRole.roleDescriptionFormRowTitle"
-              defaultMessage="Role description"
-            />
-          }
-        >
-          <EuiFieldText
-            name="description"
-            value={role.description ?? ''}
-            onChange={onDescriptionChange}
-            data-test-subj="roleFormDescriptionInput"
-            disabled={isRoleReserved || isRoleReadOnly}
-          />
-        </EuiFormRow>
-      </EuiFlexItem>
     );
   };
 
@@ -823,7 +817,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
           </Fragment>
         )}
         <EuiSpacer />
-        {getRoleName()}
+        {getRoleNameAndDescription()}
         {getElasticsearchPrivileges()}
         {getKibanaPrivileges()}
         <EuiSpacer />
