@@ -4658,6 +4658,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/esql-ast-inspector-plugin@link:examples/esql_ast_inspector":
+  version "0.0.0"
+  uid ""
+
 "@kbn/esql-ast@link:packages/kbn-esql-ast":
   version "0.0.0"
   uid ""
