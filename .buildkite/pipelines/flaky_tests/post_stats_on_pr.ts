@@ -43,17 +43,20 @@ async function main() {
   });
 
   // Comment results on the PR
-  const prNumber = Number(
-    buildkiteBuild.pull_request?.id || extractPRNumberFromBranch(process.env.BUILDKITE_BRANCH)
-  );
+  const prNumber = Number(extractPRNumberFromBranch(buildkiteBuild.branch));
   if (isNaN(prNumber)) {
     throw new Error(`Couldn't find PR number for build ${buildkiteBuild.web_url}.`);
   }
+  const flakyRunHistoryLink = `https://buildkite.com/elastic/${
+    buildkiteBuild.pipeline.slug
+  }/builds?branch=${encodeURIComponent(buildkiteBuild.branch)}`;
 
   const prComment = `
 ## Flaky Test Runner Stats
 ### ${success ? '🎉 All tests passed!' : '🟠 Some tests failed.'} - ${buildLink}
 ${testGroupResults.map(formatTestGroupResult).join('\n')}
+
+[see run history](${flakyRunHistoryLink})
 `;
 
   const githubClient = getGithubClient();
