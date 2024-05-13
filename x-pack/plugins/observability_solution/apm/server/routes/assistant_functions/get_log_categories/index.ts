@@ -127,9 +127,10 @@ export async function getLogCategories({
       const hit = sample.hits.hits[0]._source as { message: string; trace?: { id: string } };
       const sampleMessage = hit?.message;
       const sampleTraceId = hit?.trace?.id;
+      const errorCategory = key as string;
 
       if (!sampleTraceId) {
-        return { errorCategory: key as string, docCount, sampleMessage };
+        return { errorCategory, docCount, sampleMessage };
       }
 
       const downstreamServiceResource = await getDownstreamServiceResource({
@@ -139,7 +140,7 @@ export async function getLogCategories({
         apmEventClient,
       });
 
-      return { errorCategory: key as string, docCount, sampleMessage, downstreamServiceResource };
+      return { errorCategory, docCount, sampleMessage, downstreamServiceResource };
     }
   );
 
