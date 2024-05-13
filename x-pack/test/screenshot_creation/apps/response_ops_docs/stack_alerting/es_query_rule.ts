@@ -134,7 +134,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       /* Add a cases action */
       await testSubjects.click('.cases-alerting-ActionTypeSelectOption');
       await testSubjects.scrollIntoView('addAlertActionButton');
+      await pageObjects.header.waitUntilLoadingHasFinished();
       await commonScreenshots.takeScreenshot('cases-action', screenshotDirectories, 1400, 1024);
+
       const cancelEditButton = await testSubjects.find('cancelSaveEditedRuleButton');
       await cancelEditButton.click();
       const confirmCancelButton = await testSubjects.find('confirmModalConfirmButton');
