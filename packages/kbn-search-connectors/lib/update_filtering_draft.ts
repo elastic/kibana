@@ -50,7 +50,7 @@ export const updateFilteringDraft = async (
 
   if (updateDraftFilteringResult.result === 'updated') {
     const connector = await fetchConnectorById(client, connectorId);
-    return connector?.filtering[0].draft;
+    return connector?.filtering?.[0]?.draft;
   }
   return undefined;
 };
