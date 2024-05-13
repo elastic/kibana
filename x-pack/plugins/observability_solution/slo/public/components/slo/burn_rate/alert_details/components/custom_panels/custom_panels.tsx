@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { GetSLOResponse } from '@kbn/slo-schema';
-import { APMAlertDetails } from './apm/apm_alert_details';
+import { APMLatencyAlertDetails, APMAvailabilityAlertDetails } from './apm/apm_alert_details';
 import { CustomKqlPanels } from './custom_kql/custom_kql_panels';
 import { getDataTimeRange } from '../../utils/time_range';
 import type { BurnRateAlert, BurnRateRule } from '../../types';
@@ -26,7 +26,16 @@ export function CustomAlertDetailsPanel({ slo, alert, rule }: Props) {
       return <CustomKqlPanels slo={slo} alert={alert} rule={rule} />;
     case 'sli.apm.transactionDuration':
       return (
-        <APMAlertDetails
+        <APMLatencyAlertDetails
+          slo={slo as APMTransactionDurationSLOResponse}
+          dataTimeRange={dataTimeRange}
+          alert={alert}
+          rule={rule}
+        />
+      );
+    case 'sli.apm.transactionErrorRate':
+      return (
+        <APMAvailabilityAlertDetails
           slo={slo as APMTransactionDurationSLOResponse}
           dataTimeRange={dataTimeRange}
           alert={alert}
