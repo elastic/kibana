@@ -71,7 +71,7 @@ export default function ({ getService }: FtrProviderContext) {
     let internalReqHeader: InternalRequestHeader;
 
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createApiKeyForRole('developer');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
     });
 
