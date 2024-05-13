@@ -40,7 +40,7 @@ describe('Create Remote cluster', () => {
     test('should have a toggle to Skip unavailable remote cluster', () => {
       expect(actions.skipUnavailableSwitch.exists()).toBe(true);
 
-      // By default it should be set to "false"
+      // By default it should be set to "true"
       expect(actions.skipUnavailableSwitch.isChecked()).toBe(true);
 
       actions.skipUnavailableSwitch.toggle();
