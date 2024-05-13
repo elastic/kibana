@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('save empty dashboard', async () => {
-      await PageObjects.dashboard.saveDashboard(dashboardName, { operation: 'create' });
+      await PageObjects.dashboard.saveDashboard(dashboardName);
       await a11y.testAppSnapshot();
     });
 

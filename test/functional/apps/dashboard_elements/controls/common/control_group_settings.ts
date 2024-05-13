@@ -209,7 +209,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('on save', async () => {
         await dashboardControls.openControlGroupSettingsFlyout();
         await dashboard.saveDashboard('Test Control Group Settings', {
-          saveAsNew: false,
+          operation: 'update',
           exitFromEditMode: false,
         });
         await testSubjects.missingOrFail('control-group-settings-flyout');

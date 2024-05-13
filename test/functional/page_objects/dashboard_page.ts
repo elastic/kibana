@@ -518,14 +518,14 @@ export class DashboardPageObject extends FtrService {
    * toast message
    *
    * @param dashboardName {String}
-   * @param saveOptions {{storeTimeWithDashboard: boolean, saveAsNew: boolean, needsConfirm: false,  waitDialogIsClosed: boolean }}
+   * @param saveOptions {{storeTimeWithDashboard: boolean, needsConfirm: false,  waitDialogIsClosed: boolean }}
    */
   public async saveDashboard(
     dashboardName: string,
     saveOptions: SaveDashboardOptions = {
       waitDialogIsClosed: true,
       exitFromEditMode: true,
-      operation: 'update',
+      operation: 'create',
     }
   ) {
     await this.retry.try(async () => {
@@ -534,6 +534,10 @@ export class DashboardPageObject extends FtrService {
         await this.clickQuickSave();
       } else if (saveOptions.operation === 'create') {
         await this.enterDashboardSaveModalApplyUpdatesAndClickSave(dashboardName, saveOptions);
+      }
+
+      if (saveOptions.needsConfirm) {
+        await this.ensureDuplicateTitleCallout();
         await this.clickSave();
       }
 
@@ -541,9 +545,13 @@ export class DashboardPageObject extends FtrService {
       await this.testSubjects.existOrFail('saveDashboardSuccess');
     });
 
-    const message = await this.toasts.getTitleAndDismiss();
-    await this.header.waitUntilLoadingHasFinished();
-    await this.common.waitForSaveModalToClose();
+    let message;
+
+    if (saveOptions.operation === 'create') {
+      message = await this.toasts.getTitleAndDismiss();
+      await this.header.waitUntilLoadingHasFinished();
+      await this.common.waitForSaveModalToClose();
+    }
 
     const isInViewMode = await this.testSubjects.exists('dashboardEditMode');
     if (saveOptions.exitFromEditMode && !isInViewMode) {
@@ -614,7 +622,7 @@ export class DashboardPageObject extends FtrService {
    * @param dashboardTitle {String}
    */
   public async enterDashboardTitleAndPressEnter(dashboardTitle: string) {
-    await this.testSubjects.click('dashboardSaveMenuItem');
+    await this.testSubjects.click('dashboardSaveAsMenuItem');
     const modalDialog = await this.testSubjects.find('savedObjectSaveModal');
 
     this.log.debug('entering new title');
