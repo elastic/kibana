@@ -3,6 +3,8 @@ List inputs = [];
 for (state in states) {
   inputs.addAll(state.inputs)
 }
+Collections.sort(inputs, (a, b) -> b.get('score').compareTo(a.get('score')));
+
 double num_inputs_to_score = Math.min(inputs.length, params.max_risk_inputs_per_identity);
 results['notes'] = [];
 if (num_inputs_to_score == params.max_risk_inputs_per_identity) {
