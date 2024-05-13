@@ -6,25 +6,29 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
+import { tracksOverlays } from '@kbn/presentation-containers';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import React from 'react';
-import type { EmbeddableChangePointChartExplicitInput } from './types';
-import type { AiopsAppDependencies } from '..';
-import { AiopsAppContext } from '../hooks/use_aiops_app_context';
-import type { AiopsPluginStartDeps } from '../types';
+import type { AiopsAppDependencies } from '../..';
+import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
+import type { AiopsPluginStartDeps } from '../../types';
 import { ChangePointChartInitializer } from './change_point_chart_initializer';
-import type { EmbeddableChangePointChartInput } from './embeddable_change_point_chart';
+import type { ChangePointEmbeddableState } from './types';
 
 export async function resolveEmbeddableChangePointUserInput(
   coreStart: CoreStart,
   pluginStart: AiopsPluginStartDeps,
-  input?: EmbeddableChangePointChartInput
-): Promise<EmbeddableChangePointChartExplicitInput> {
+  parentApi: unknown,
+  focusedPanelId: string,
+  input?: ChangePointEmbeddableState
+): Promise<ChangePointEmbeddableState> {
   const { overlays } = coreStart;
+
+  const overlayTracker = tracksOverlays(parentApi) ? parentApi : undefined;
 
   return new Promise(async (resolve, reject) => {
     try {
-      const modalSession = overlays.openModal(
+      const flyoutSession = overlays.openFlyout(
         toMountPoint(
           <AiopsAppContext.Provider
             value={
@@ -36,19 +40,37 @@ export async function resolveEmbeddableChangePointUserInput(
           >
             <ChangePointChartInitializer
               initialInput={input}
-              onCreate={(update: EmbeddableChangePointChartExplicitInput) => {
-                modalSession.close();
+              onCreate={(update) => {
                 resolve(update);
+                flyoutSession.close();
+                overlayTracker?.clearOverlays();
               }}
               onCancel={() => {
-                modalSession.close();
                 reject();
+                flyoutSession.close();
+                overlayTracker?.clearOverlays();
               }}
             />
           </AiopsAppContext.Provider>,
           coreStart
-        )
+        ),
+        {
+          ownFocus: true,
+          size: 's',
+          type: 'push',
+          'data-test-subj': 'aiopsChangePointChartEmbeddableInitializer',
+          'aria-labelledby': 'changePointConfig',
+          onClose: () => {
+            reject();
+            flyoutSession.close();
+            overlayTracker?.clearOverlays();
+          },
+        }
       );
+
+      if (tracksOverlays(parentApi)) {
+        parentApi.openOverlay(flyoutSession, { focusedPanelId });
+      }
     } catch (error) {
       reject(error);
     }

@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { Theme } from '@elastic/charts';
+import { BoolQuery } from '@kbn/es-query';
 import {
   RecursivePartial,
   EuiFlexItem,
@@ -23,6 +24,7 @@ import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { asExactTransactionRate } from '../../../../../common/utils/formatters';
+import { TransactionTypeSelect } from './transaction_type_select';
 
 const INITIAL_STATE = {
   currentPeriod: [],
@@ -30,6 +32,8 @@ const INITIAL_STATE = {
 };
 function ThroughputChart({
   transactionType,
+  transactionTypes,
+  setTransactionType,
   transactionName,
   serviceName,
   environment,
@@ -39,8 +43,12 @@ function ThroughputChart({
   comparisonEnabled,
   offset,
   timeZone,
+  kuery = '',
+  filters,
 }: {
   transactionType: string;
+  transactionTypes?: string[];
+  setTransactionType?: (transactionType: string) => void;
   transactionName?: string;
   serviceName: string;
   environment: string;
@@ -50,14 +58,14 @@ function ThroughputChart({
   comparisonEnabled: boolean;
   offset: string;
   timeZone: string;
+  kuery?: string;
+  filters?: BoolQuery;
 }) {
-  /* Throughput Chart */
-
   const preferred = usePreferredDataSourceAndBucketSize({
     start,
     end,
     numBuckets: 100,
-    kuery: '',
+    kuery,
     type: transactionName
       ? ApmDocumentType.TransactionMetric
       : ApmDocumentType.ServiceTransactionMetric,
@@ -73,7 +81,8 @@ function ThroughputChart({
             },
             query: {
               environment,
-              kuery: '',
+              kuery,
+              filters: filters ? JSON.stringify(filters) : undefined,
               start,
               end,
               transactionType,
@@ -86,7 +95,17 @@ function ThroughputChart({
         });
       }
     },
-    [environment, serviceName, start, end, transactionType, transactionName, preferred]
+    [
+      environment,
+      serviceName,
+      start,
+      end,
+      transactionType,
+      transactionName,
+      preferred,
+      kuery,
+      filters,
+    ]
   );
   const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(ChartType.THROUGHPUT);
   const timeseriesThroughput = [
@@ -110,6 +129,8 @@ function ThroughputChart({
       : []),
   ];
 
+  const showTransactionTypeSelect = setTransactionType && transactionTypes;
+
   return (
     <EuiFlexItem>
       <EuiPanel hasBorder={true}>
@@ -132,6 +153,15 @@ function ThroughputChart({
               position="right"
             />
           </EuiFlexItem>
+          {showTransactionTypeSelect && (
+            <EuiFlexItem grow={false}>
+              <TransactionTypeSelect
+                transactionType={transactionType}
+                transactionTypes={transactionTypes}
+                onChange={setTransactionType}
+              />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
 
         <TimeseriesChart
