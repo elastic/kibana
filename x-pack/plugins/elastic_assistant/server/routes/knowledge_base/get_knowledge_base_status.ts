@@ -20,6 +20,7 @@ import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantPluginRouter, GetElser } from '../../types';
 import { ElasticsearchStore } from '../../lib/langchain/elasticsearch_store/elasticsearch_store';
 import { ESQL_DOCS_LOADED_QUERY, ESQL_RESOURCE, KNOWLEDGE_BASE_INDEX_PATTERN } from './constants';
+import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
 
 /**
  * Get the status of the Knowledge Base index, pipeline, and resources (collection of documents)
@@ -58,7 +59,7 @@ export const getKnowledgeBaseStatusRoute = (
           const esClient = (await context.core).elasticsearch.client.asInternalUser;
           const elserId = await getElser();
           const kbResource = getKbResource(request);
-          const esStore = new ElasticsearchStore(
+          let esStore = new ElasticsearchStore(
             esClient,
             KNOWLEDGE_BASE_INDEX_PATTERN,
             logger,
@@ -66,6 +67,43 @@ export const getKnowledgeBaseStatusRoute = (
             elserId,
             kbResource
           );
+
+          const authenticatedUser = assistantContext.getCurrentUser();
+          if (authenticatedUser == null) {
+            return response.custom({
+              body: `Authenticated user not found`,
+              statusCode: 401,
+            });
+          }
+
+          const pluginName = getPluginNameFromRequest({
+            request,
+            defaultPluginName: DEFAULT_PLUGIN_NAME,
+            logger,
+          });
+          const enableKnowledgeBaseByDefault =
+            assistantContext.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
+
+          // Code path for when `assistantKnowledgeBaseByDefault` FF is enabled
+          if (enableKnowledgeBaseByDefault) {
+            const knowledgeBaseDataClient =
+              await assistantContext.getAIAssistantKnowledgeBaseDataClient(true);
+            if (!knowledgeBaseDataClient) {
+              return response.custom({ body: { success: false }, statusCode: 500 });
+            }
+
+            // Use old status checks by overriding esStore to use kbDataClient
+            esStore = new ElasticsearchStore(
+              esClient,
+              knowledgeBaseDataClient.indexTemplateAndPattern.alias,
+              logger,
+              telemetry,
+              elserId,
+              kbResource,
+              knowledgeBaseDataClient,
+              authenticatedUser
+            );
+          }
 
           const indexExists = await esStore.indexExists();
           const pipelineExists = await esStore.pipelineExists();

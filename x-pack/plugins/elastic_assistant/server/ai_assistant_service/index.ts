@@ -122,6 +122,19 @@ export class AIAssistantService {
     newDataStream.setIndexTemplate({
       name: this.resourceNames.indexTemplate[resource],
       componentTemplateRefs: [this.resourceNames.componentTemplate[resource]],
+      // Apply `default_pipeline` if pipeline exists for resource
+      ...(resource in this.resourceNames.pipelines
+        ? {
+            template: {
+              settings: {
+                'index.default_pipeline':
+                  this.resourceNames.pipelines[
+                    resource as keyof typeof this.resourceNames.pipelines
+                  ],
+              },
+            },
+          }
+        : {}),
     });
 
     return newDataStream;
@@ -152,7 +165,9 @@ export class AIAssistantService {
           id: this.resourceNames.pipelines.knowledgeBase,
         });
         if (!pipelineCreated) {
-          this.options.logger.debug('Installing ingest pipeline');
+          this.options.logger.debug(
+            `Installing ingest pipeline - ${this.resourceNames.pipelines.knowledgeBase}`
+          );
           const response = await createPipeline({
             esClient,
             id: this.resourceNames.pipelines.knowledgeBase,
@@ -161,7 +176,9 @@ export class AIAssistantService {
 
           this.options.logger.debug(`Installed ingest pipeline: ${response}`);
         } else {
-          this.options.logger.debug('Ingest pipeline already exists');
+          this.options.logger.debug(
+            `Ingest pipeline already exists - ${this.resourceNames.pipelines.knowledgeBase}`
+          );
         }
       }
 
@@ -303,7 +320,7 @@ export class AIAssistantService {
       elasticsearchClientPromise: this.options.elasticsearchClientPromise,
       spaceId: opts.spaceId,
       kibanaVersion: this.options.kibanaVersion,
-      indexPatternsResourceName: this.resourceNames.aliases.conversations,
+      indexPatternsResourceName: this.resourceNames.aliases.knowledgeBase,
       currentUser: opts.currentUser,
       ml: this.options.ml,
       getElserId: this.getElserId,

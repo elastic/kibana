@@ -88,7 +88,7 @@ export const postKnowledgeBaseRoute = (
           // Continue to use esStore for loading esql docs until `semantic_text` is available and we can test the new chunking strategy
           const esStore = new ElasticsearchStore(
             esClient,
-            knowledgeBaseDataClient.options.indexPatternsResourceName,
+            knowledgeBaseDataClient.indexTemplateAndPattern.alias,
             logger,
             telemetry,
             elserId,
@@ -96,7 +96,6 @@ export const postKnowledgeBaseRoute = (
             knowledgeBaseDataClient,
             authenticatedUser
           );
-          //
 
           await knowledgeBaseDataClient.setupKnowledgeBase({ esStore });
 

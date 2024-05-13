@@ -70,6 +70,7 @@ export const TERMS_QUERY_SIZE = 10000;
 export class ElasticsearchStore extends VectorStore {
   declare FilterType: QueryDslQueryContainer;
 
+  // AuthenticatedUser is required for adding/retrieving documents as it is not encapsulated in the kbDataClient
   private readonly authenticatedUser: AuthenticatedUser | undefined;
   private readonly esClient: ElasticsearchClient;
   private readonly kbDataClient: AIAssistantKnowledgeBaseDataClient | undefined;
@@ -96,7 +97,7 @@ export class ElasticsearchStore extends VectorStore {
     super(new ElasticsearchEmbeddings(logger), { esClient, index });
     this.esClient = esClient;
     this.index = kbDataClient
-      ? kbDataClient.options.indexPatternsResourceName
+      ? kbDataClient.indexTemplateAndPattern.alias
       : index ?? KNOWLEDGE_BASE_INDEX_PATTERN;
     this.logger = logger;
     this.telemetry = telemetry;

@@ -153,7 +153,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       docsCreated.length > 0
         ? await this.findDocuments<EsKnowledgeBaseEntrySchema>({
             page: 1,
-            perPage: 100,
+            perPage: 10000,
             filter: docsCreated.map((c) => `_id:${c}`).join(' OR '),
           })
         : undefined;
