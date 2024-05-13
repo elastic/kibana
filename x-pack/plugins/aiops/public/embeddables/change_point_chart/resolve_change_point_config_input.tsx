@@ -8,7 +8,9 @@
 import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import React from 'react';
-import type { ChangePointEmbeddableState } from './types';
+import { apiHasParentApi } from '@kbn/presentation-publishing';
+import { tracksOverlays } from '@kbn/presentation-containers';
+import type { ChangePointEmbeddableApi, ChangePointEmbeddableState } from './types';
 import type { AiopsAppDependencies } from '../..';
 import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
 import type { AiopsPluginStartDeps } from '../../types';
@@ -17,9 +19,12 @@ import { ChangePointChartInitializer } from './change_point_chart_initializer';
 export async function resolveEmbeddableChangePointUserInput(
   coreStart: CoreStart,
   pluginStart: AiopsPluginStartDeps,
+  api: ChangePointEmbeddableApi,
   input?: ChangePointEmbeddableState
 ): Promise<ChangePointEmbeddableState> {
   const { overlays } = coreStart;
+
+  const overlayTracker = tracksOverlays(api.parentApi) ? api.parentApi : undefined;
 
   return new Promise(async (resolve, reject) => {
     try {
@@ -36,12 +41,14 @@ export async function resolveEmbeddableChangePointUserInput(
             <ChangePointChartInitializer
               initialInput={input}
               onCreate={(update) => {
-                flyoutSession.close();
                 resolve(update);
+                flyoutSession.close();
+                overlayTracker?.clearOverlays();
               }}
               onCancel={() => {
-                flyoutSession.close();
                 reject();
+                flyoutSession.close();
+                overlayTracker?.clearOverlays();
               }}
             />
           </AiopsAppContext.Provider>,
@@ -54,11 +61,16 @@ export async function resolveEmbeddableChangePointUserInput(
           'data-test-subj': 'aiopsChangePointChartEmbeddableInitializer',
           'aria-labelledby': 'changePointConfig',
           onClose: () => {
-            flyoutSession.close();
             reject();
+            flyoutSession.close();
+            overlayTracker?.clearOverlays();
           },
         }
       );
+
+      if (apiHasParentApi(api) && tracksOverlays(api.parentApi)) {
+        api.parentApi.openOverlay(flyoutSession, { focusedPanelId: api.uuid });
+      }
     } catch (error) {
       reject(error);
     }

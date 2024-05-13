@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import type { Reference } from '@kbn/content-management-utils';
-import { i18n } from '@kbn/i18n';
-import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import {
   CHANGE_POINT_CHART_DATA_VIEW_REF_NAME,
   EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
 } from '@kbn/aiops-change-point-detection/constants';
-import { BehaviorSubject, distinctUntilChanged, map, skipWhile } from 'rxjs';
+import type { Reference } from '@kbn/content-management-utils';
+import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
+import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
+import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { i18n } from '@kbn/i18n';
 import {
   apiHasExecutionContext,
   fetch$,
@@ -22,15 +23,14 @@ import {
   initializeTitles,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import React, { useMemo } from 'react';
 import fastIsEqual from 'fast-deep-equal';
-import useObservable from 'react-use/lib/useObservable';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { cloneDeep } from 'lodash';
+import React, { useMemo } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import { BehaviorSubject, distinctUntilChanged, map, skipWhile } from 'rxjs';
 import { getChangePointDetectionComponent } from '../../shared_components';
-import { initializeChangePointControls } from './initialize_change_point_controls';
 import type { AiopsPluginStart, AiopsPluginStartDeps } from '../../types';
+import { initializeChangePointControls } from './initialize_change_point_controls';
 import type {
   ChangePointEmbeddableApi,
   ChangePointEmbeddableRuntimeState,
@@ -141,6 +141,7 @@ export const getChangePointChartEmbeddableFactory = (
               const result = await resolveEmbeddableChangePointUserInput(
                 coreStart,
                 pluginStart,
+                api,
                 serializeChangePointChartState()
               );
 
