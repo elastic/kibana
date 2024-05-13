@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import { AlertConsumers } from '../alerts_as_data_rbac';
+import { STACK_ALERTS_FEATURE_ID } from './stack_rules';
 
 export * from './stack_rules';
 export * from './o11y_rules';
@@ -14,5 +15,5 @@ export type RuleCreationValidConsumer =
   | typeof AlertConsumers.LOGS
   | typeof AlertConsumers.INFRASTRUCTURE
   | typeof AlertConsumers.OBSERVABILITY
-  | typeof AlertConsumers.STACK_ALERTS
+  | typeof STACK_ALERTS_FEATURE_ID
   | 'alerts';
