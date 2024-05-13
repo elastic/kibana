@@ -857,6 +857,7 @@
     "@kbn/triggers-actions-ui-example-plugin": "link:x-pack/examples/triggers_actions_ui_example",
     "@kbn/triggers-actions-ui-plugin": "link:x-pack/plugins/triggers_actions_ui",
     "@kbn/triggers-actions-ui-types": "link:packages/kbn-triggers-actions-ui-types",
+    "@kbn/try-in-console": "link:packages/kbn-try-in-console",
     "@kbn/typed-react-router-config": "link:packages/kbn-typed-react-router-config",
     "@kbn/ui-actions-browser": "link:packages/kbn-ui-actions-browser",
     "@kbn/ui-actions-enhanced-examples-plugin": "link:x-pack/examples/ui_actions_enhanced_examples",
