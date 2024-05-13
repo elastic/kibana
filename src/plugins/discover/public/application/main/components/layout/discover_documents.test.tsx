@@ -125,5 +125,7 @@ describe('Discover documents layout', () => {
     expect(discoverGridComponent.prop('customControlColumnsConfiguration')).toEqual(
       customControlColumnsConfiguration
     );
+    expect(discoverGridComponent.prop('externalCustomRenderers')).toBeDefined();
+    expect(discoverGridComponent.prop('customGridColumnsConfiguration')).toBeDefined();
   });
 });
