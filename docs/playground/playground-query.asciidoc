@@ -53,7 +53,7 @@ Retrievers make it easier to compose and test different retrieval strategies in 
 [[playground-hidden-fields]]
 === Hidden fields
 
-We present a simplified view of choosing fields to search on. The query editor presents fields which are ideal for the user to search on.
+The query editor shows fields which make sense for the user to search on, but not all fields in your documents are visible from the editor.
 
 Available Field types:
 - Semantic fields like `sparse_vector` or `dense_vector` fields where the embeddings have been created from a inference processor
