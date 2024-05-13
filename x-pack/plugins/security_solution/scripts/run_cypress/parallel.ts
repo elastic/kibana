@@ -394,6 +394,7 @@ ${JSON.stringify(
                 KIBANA_PASSWORD: config.get('servers.kibana.password'),
 
                 IS_SERVERLESS: config.get('serverless'),
+                CYPRESS_NO_COMMAND_LOG: 1,
 
                 ...argv.env,
               };
@@ -421,7 +422,7 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
               } else {
                 try {
                   result = await cypress.run({
-                    browser: 'electron',
+                    browser: 'chrome',
                     spec: filePath,
                     configFile: cypressConfigFilePath,
                     reporter: argv.reporter as string,
