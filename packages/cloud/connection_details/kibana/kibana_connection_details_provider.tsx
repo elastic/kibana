@@ -10,6 +10,7 @@ import * as React from 'react';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { CreateAPIKeyParams, CreateAPIKeyResult } from '@kbn/security-plugin-types-server';
 import { ConnectionDetailsOptsProvider } from '../context';
 import { ConnectionDetailsOpts } from '../types';
@@ -20,6 +21,8 @@ const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
   const { http, docLinks } = start.core;
   const locator = start.plugins?.share?.url?.locators.get('MANAGEMENT_APP_LOCATOR');
   const manageKeysLink = await locator?.getUrl({ sectionId: 'security', appId: 'api_keys' });
+  const security = start.plugins?.security;
+
   const result: ConnectionDetailsOpts = {
     ...options,
     navigateToUrl: start.core.application
@@ -64,7 +67,9 @@ const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
           },
         };
       },
-      hasPermission: async () => true,
+      hasPermission: security
+        ? async () => (await security.authz.getCurrentUserApiKeyPrivileges()).canManageOwnApiKeys
+        : async () => true,
       ...options?.apiKeys,
     },
   };
@@ -86,6 +91,7 @@ export interface KibanaConnectionDetailsProviderProps {
     plugins?: {
       cloud?: CloudStart;
       share?: SharePluginStart;
+      security?: SecurityPluginStart;
     };
   };
 }
