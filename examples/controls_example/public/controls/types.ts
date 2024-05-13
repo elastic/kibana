@@ -6,9 +6,20 @@
  * Side Public License, v 1.
  */
 
+import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
+import {
+  ControlGroupChainingSystem,
+  ControlsPanels,
+} from '@kbn/controls-plugin/common/control_group/types';
 import { ControlGroupApi } from '@kbn/controls-plugin/public/control_group/types';
-import { ControlWidth } from '@kbn/controls-plugin/public/types';
+import { ControlStyle, ControlWidth } from '@kbn/controls-plugin/public/types';
 import { DataViewField } from '@kbn/data-views-plugin/common';
+import {
+  HasSerializableState,
+  PresentationContainer,
+  PublishesLastSavedState,
+} from '@kbn/presentation-containers';
+import { PublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
 import {
   HasEditCapabilities,
   HasParentApi,
@@ -18,15 +29,43 @@ import {
   PublishesDataLoading,
   PublishesDisabledActionIds,
   PublishesFilter,
+  PublishesFilters,
   PublishesPanelTitle,
   PublishesTimeslice,
+  PublishesUnifiedSearch,
   PublishesUnsavedChanges,
-  PublishesWritablePanelTitle,
   PublishingSubject,
-  SerializedTitles,
   StateComparators,
 } from '@kbn/presentation-publishing';
-import { PublishesDataView } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
+import {
+  PublishesDataView,
+  PublishesDataViews,
+} from '@kbn/presentation-publishing/interfaces/publishes_data_views';
+
+export type ControlGroupApi = PresentationContainer &
+  HasSerializableState &
+  PublishesFilters &
+  // PublishesSettings & // published so children can use it... Might be unnecessary?
+  PublishesDataViews &
+  HasEditCapabilities & // editing for control group settings - this will be a custom action
+  PublishesDataLoading & // loading = true if any children loading
+  PublishesUnsavedChanges<PersistableControlGroupInput> & // unsaved changes = diff published filters + combine all children unsaved changes
+  PublishesDefaultControlDisplaySettings &
+  Partial<HasParentApi<PublishesUnifiedSearch & PublishesLastSavedState>>;
+
+export interface ControlGroupState {
+  chainingSystem: ControlGroupChainingSystem;
+  defaultControlWidth?: ControlWidth;
+  defaultControlGrow?: boolean;
+  controlStyle: ControlStyle;
+  panels: ControlsPanels;
+  showApplySelections?: boolean;
+}
+
+export interface PublishesDefaultControlDisplaySettings {
+  grow: PublishingSubject<boolean>;
+  width: PublishingSubject<ControlWidth>;
+}
 
 export interface PublishesControlDisplaySettings {
   grow: PublishingSubject<boolean | undefined>;

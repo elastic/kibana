@@ -56,7 +56,6 @@ import {
 import { startDiffingControlGroupState } from '../state/control_group_diffing_integration';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import {
-  ControlGroupApi,
   ControlGroupComponentState,
   ControlGroupFilterOutput,
   ControlGroupInput,
