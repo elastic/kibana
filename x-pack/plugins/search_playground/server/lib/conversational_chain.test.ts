@@ -20,7 +20,7 @@ describe('conversational chain', () => {
     expectedDocs: any,
     expectedTokens: any,
     expectedSearchRequest: any,
-    contentField?: Record<string, string>
+    contentField: Record<string, string> = { index: 'field', website: 'body_content' }
   ) => {
     const searchMock = jest.fn().mockImplementation(() => {
       return {
@@ -73,7 +73,7 @@ describe('conversational chain', () => {
             },
           },
         }),
-        content_field: contentField ?? { index: 'field', website: 'body_content' },
+        content_field: contentField,
         size: 3,
       },
       prompt: 'you are a QA bot',
@@ -182,7 +182,6 @@ describe('conversational chain', () => {
           body: { query: { match: { field: 'what is the work from home policy?' } }, size: 3 },
         },
       ],
-      // @ts-ignore
       { index: 'field', website: 'metadata.source' }
     );
   });
