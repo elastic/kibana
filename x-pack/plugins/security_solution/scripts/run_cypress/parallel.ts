@@ -465,6 +465,7 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
 
               return result;
             });
+            return result;
           },
           {
             concurrency: 1,
