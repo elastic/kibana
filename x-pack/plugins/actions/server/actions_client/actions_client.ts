@@ -49,6 +49,7 @@ import {
   InMemoryConnector,
   ActionTypeExecutorResult,
   ConnectorTokenClientContract,
+  ActionTypeParams,
 } from '../types';
 import { PreconfiguredActionDisabledModificationError } from '../lib/errors/preconfigured_action_disabled_modification';
 import { ExecuteOptions } from '../lib/action_executor';
@@ -815,6 +816,23 @@ export class ActionsClient {
     return !!this.context.inMemoryConnectors.find(
       (connector) => connector.isSystemAction && connector.id === connectorId
     );
+  }
+
+  public replaceActionParams(
+    connectorTypeId: string,
+    params: ActionTypeParams,
+    overrideMessage: string
+  ): ActionTypeParams {
+    try {
+      const connectorType = this.context.actionTypeRegistry.get(connectorTypeId);
+      if (connectorType.overrideParamsForAutoRecovery) {
+        return connectorType.overrideParamsForAutoRecovery(params, overrideMessage);
+      }
+    } catch (error) {
+      // no-op
+    }
+
+    return params;
   }
 
   public async getGlobalExecutionLogWithAuth({

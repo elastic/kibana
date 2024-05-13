@@ -211,6 +211,7 @@ const rawRuleActionSchema = schema.object({
   ),
   alertsFilter: schema.maybe(rawRuleAlertsFilterSchema),
   useAlertDataForTemplate: schema.maybe(schema.boolean()),
+  doAutoRecover: schema.maybe(schema.boolean()),
 });
 
 export const alertDelaySchema = schema.object({

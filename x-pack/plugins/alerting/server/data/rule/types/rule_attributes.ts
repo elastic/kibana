@@ -132,6 +132,7 @@ export interface RuleActionAttributes {
   };
   alertsFilter?: AlertsFilterAttributes;
   useAlertDataAsTemplate?: boolean;
+  doAutoRecover?: boolean;
 }
 
 type MappedParamsAttributes = SavedObjectAttributes & {

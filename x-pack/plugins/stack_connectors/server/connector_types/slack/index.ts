@@ -79,6 +79,7 @@ export function getConnectorType({
       UptimeConnectorFeatureId,
       SecurityConnectorFeatureId,
     ],
+    canAutoRecover: true,
     validate: {
       config: { schema: schema.object({}, { defaultValue: {} }) },
       secrets: {
@@ -89,6 +90,10 @@ export function getConnectorType({
         schema: ParamsSchema,
       },
     },
+    overrideParamsForAutoRecovery: (params: ActionParamsType, overrideMessage: string) => ({
+      ...params,
+      message: overrideMessage,
+    }),
     renderParameterTemplates,
     executor,
   };

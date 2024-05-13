@@ -48,6 +48,7 @@ export const rewriteBodyRequest: RewriteResponseCase<RuleCreateBody> = ({
             alerts_filter: action.alertsFilter,
           }
         : {}),
+      ...('doAutoRecover' in action ? { do_auto_recover: action.doAutoRecover } : {}),
       ...('useAlertDataForTemplate' in action &&
       typeof action.useAlertDataForTemplate !== 'undefined'
         ? { use_alert_data_for_template: action.useAlertDataForTemplate }

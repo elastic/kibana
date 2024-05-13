@@ -31,6 +31,7 @@ export const transformUpdateBodyActions = (actions: UpdateRuleActionV1[]): Actio
       uuid,
       alerts_filter: alertsFilter,
       use_alert_data_for_template: useAlertDataForTemplate,
+      do_auto_recover: doAutoRecover,
     }) => {
       return {
         group: group ?? 'default',
@@ -49,6 +50,7 @@ export const transformUpdateBodyActions = (actions: UpdateRuleActionV1[]): Actio
             }
           : {}),
         ...(alertsFilter ? { alertsFilter } : {}),
+        ...(doAutoRecover ? { doAutoRecover } : {}),
       };
     }
   );

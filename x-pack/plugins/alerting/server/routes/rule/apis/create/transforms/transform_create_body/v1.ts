@@ -30,6 +30,7 @@ const transformCreateBodyActions = (actions: CreateRuleActionV1[]): ActionReques
       uuid,
       alerts_filter: alertsFilter,
       use_alert_data_for_template: useAlertDataForTemplate,
+      do_auto_recover: doAutoRecover,
     }) => {
       return {
         group: group ?? 'default',
@@ -47,6 +48,7 @@ const transformCreateBodyActions = (actions: CreateRuleActionV1[]): ActionReques
             }
           : {}),
         ...(alertsFilter ? { alertsFilter } : {}),
+        ...(doAutoRecover ? { doAutoRecover } : {}),
       };
     }
   );

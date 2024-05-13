@@ -154,6 +154,7 @@ export function getConnectorType(): PagerDutyConnectorType {
       UptimeConnectorFeatureId,
       SecurityConnectorFeatureId,
     ],
+    canAutoRecover: true,
     validate: {
       config: {
         schema: ConfigSchema,
@@ -166,6 +167,10 @@ export function getConnectorType(): PagerDutyConnectorType {
         schema: ParamsSchema,
       },
     },
+    overrideParamsForAutoRecovery: (params: ActionParamsType, overrideMessage: string) => ({
+      ...params,
+      eventAction: EVENT_ACTION_RESOLVE,
+    }),
     executor,
   };
 }

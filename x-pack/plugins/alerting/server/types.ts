@@ -450,6 +450,7 @@ export interface RawRuleAction extends SavedObjectAttributes {
   };
   alertsFilter?: RawRuleAlertsFilter;
   useAlertDataAsTemplate?: boolean;
+  doAutoRecover?: boolean;
 }
 
 // note that the `error` property is "null-able", as we're doing a partial

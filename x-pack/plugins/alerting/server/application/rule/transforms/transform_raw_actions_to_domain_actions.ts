@@ -42,6 +42,7 @@ export const transformRawActionsToDomainActions = ({
         uuid: action.uuid,
         ...(action.frequency ? { frequency: action.frequency } : {}),
         ...(action.alertsFilter ? { alertsFilter: action.alertsFilter } : {}),
+        ...(action.doAutoRecover ? { doAutoRecover: action.doAutoRecover } : {}),
         ...(action.useAlertDataAsTemplate
           ? { useAlertDataAsTemplate: action.useAlertDataAsTemplate }
           : {}),

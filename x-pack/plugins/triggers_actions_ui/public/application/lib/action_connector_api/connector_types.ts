@@ -24,6 +24,7 @@ const rewriteBodyReq: RewriteRequestCase<ActionType> = ({
   minimum_license_required: minimumLicenseRequired,
   supported_feature_ids: supportedFeatureIds,
   is_system_action_type: isSystemActionType,
+  can_auto_recover: canAutoRecover,
   ...res
 }: AsApiContract<ActionType>) => ({
   enabledInConfig,
@@ -31,6 +32,7 @@ const rewriteBodyReq: RewriteRequestCase<ActionType> = ({
   minimumLicenseRequired,
   supportedFeatureIds,
   isSystemActionType,
+  canAutoRecover,
   ...res,
 });
 

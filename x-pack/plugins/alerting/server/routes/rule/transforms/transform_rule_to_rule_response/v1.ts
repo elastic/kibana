@@ -53,6 +53,7 @@ export const transformRuleActions = (
         uuid,
         alertsFilter,
         useAlertDataForTemplate,
+        doAutoRecover,
       } = action;
 
       return {
@@ -71,6 +72,7 @@ export const transformRuleActions = (
           : {}),
         ...(uuid && { uuid }),
         ...(alertsFilter && { alerts_filter: alertsFilter }),
+        ...(doAutoRecover && { do_auto_recover: doAutoRecover }),
         ...(useAlertDataForTemplate !== undefined && {
           use_alert_data_for_template: useAlertDataForTemplate,
         }),

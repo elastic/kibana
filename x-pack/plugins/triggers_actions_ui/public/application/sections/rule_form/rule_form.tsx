@@ -402,6 +402,13 @@ export const RuleForm = ({
     [dispatch]
   );
 
+  const setActionDoRecoverProperty = useCallback(
+    (key: string, value: boolean, index: number) => {
+      dispatch({ command: { type: 'setRuleActionDoRecover' }, payload: { key, value, index } });
+    },
+    [dispatch]
+  );
+
   const setAlertDelayProperty = (key: string, value: any) => {
     dispatch({ command: { type: 'setAlertDelayProperty' }, payload: { key, value } });
   };
@@ -947,7 +954,11 @@ export const RuleForm = ({
                     defaultActionMessage:
                       ruleTypeModel?.defaultRecoveryMessage || recoveredActionGroupMessage,
                   }
-                : { ...actionGroup, defaultActionMessage: ruleTypeModel?.defaultActionMessage }
+                : {
+                    ...actionGroup,
+                    defaultActionMessage:
+                      actionGroup.defaultMessage ?? ruleTypeModel?.defaultActionMessage,
+                  }
             )}
             recoveryActionGroup={recoveryActionGroup}
             setActionUseAlertDataForTemplate={(enabled: boolean, index: number) => {
@@ -962,6 +973,7 @@ export const RuleForm = ({
             actionTypeRegistry={actionTypeRegistry}
             setActionFrequencyProperty={setActionFrequencyProperty}
             setActionAlertsFilterProperty={setActionAlertsFilterProperty}
+            setActionDoRecoverProperty={setActionDoRecoverProperty}
             defaultSummaryMessage={ruleTypeModel?.defaultSummaryMessage || summaryMessage}
             minimumThrottleInterval={[ruleInterval, ruleIntervalUnit]}
           />

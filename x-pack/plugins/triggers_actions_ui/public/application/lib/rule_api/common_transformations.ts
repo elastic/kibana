@@ -31,6 +31,9 @@ const transformAction: RewriteRequestCase<RuleUiAction> = (action) => {
     ...('alerts_filter' in action && action.alerts_filter
       ? { alertsFilter: action.alerts_filter }
       : {}),
+    ...('do_auto_recover' in action && action.do_auto_recover
+      ? { doAutoRecover: action.do_auto_recover }
+      : {}),
     ...(uuid && { uuid }),
   };
 };

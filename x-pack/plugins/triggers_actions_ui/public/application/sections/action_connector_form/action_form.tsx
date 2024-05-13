@@ -73,6 +73,7 @@ export interface ActionAccordionFormProps {
     value: RuleActionAlertsFilterProperty,
     index: number
   ) => void;
+  setActionDoRecoverProperty: (key: string, value: boolean, index: number) => void;
   featureId: string;
   producerId: string;
   ruleTypeId?: string;
@@ -109,6 +110,7 @@ export const ActionForm = ({
   setActionParamsProperty,
   setActionFrequencyProperty,
   setActionAlertsFilterProperty,
+  setActionDoRecoverProperty,
   featureId,
   messageVariables,
   summaryMessageVariables,
@@ -501,6 +503,7 @@ export const ActionForm = ({
               setActionParamsProperty={setActionParamsProperty}
               setActionFrequencyProperty={setActionFrequencyProperty}
               setActionAlertsFilterProperty={setActionAlertsFilterProperty}
+              setActionDoRecoverProperty={setActionDoRecoverProperty}
               actionTypesIndex={actionTypesIndex}
               connectors={connectors}
               defaultActionGroupId={defaultActionGroupId}

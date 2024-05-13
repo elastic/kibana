@@ -454,11 +454,30 @@ export const createMetricThresholdExecutor =
     };
   };
 
+const defaultImprovingMessage = i18n.translate(
+  'xpack.infra.metrics.alerting.threshold.defaultImprovingMessage',
+  {
+    defaultMessage: `\\{\\{rule.name\\}\\} has improved from \\{\\{alert.previousActionGroupName\\}\\} to \\{\\{alert.actionGroupName\\}\\}.
+
+      - Affected: \\{\\{context.group\\}\\}
+      - Metric: \\{\\{context.metric\\}\\}
+      - Observed value: \\{\\{context.value\\}\\}
+      - Threshold: \\{\\{context.threshold\\}\\}
+
+      [View alert details](\\{\\{context.alertDetailsUrl\\}\\})
+  `,
+  }
+);
+
 export const FIRED_ACTIONS = {
   id: 'metrics.threshold.fired',
   name: i18n.translate('xpack.infra.metrics.alerting.threshold.fired', {
     defaultMessage: 'Alert',
   }),
+  severity: {
+    level: 1,
+    defaultImprovingMessage,
+  },
 };
 
 export const WARNING_ACTIONS = {
@@ -466,6 +485,10 @@ export const WARNING_ACTIONS = {
   name: i18n.translate('xpack.infra.metrics.alerting.threshold.warning', {
     defaultMessage: 'Warning',
   }),
+  severity: {
+    level: 0,
+    defaultImprovingMessage,
+  },
 };
 
 export const NO_DATA_ACTIONS = {

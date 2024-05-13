@@ -6,7 +6,13 @@
  * Side Public License, v 1.
  */
 
+export interface ActionGroupSeverity {
+  level: number;
+  defaultImprovingMessage?: string;
+}
 export interface ActionGroup<ActionGroupIds extends string> {
   id: ActionGroupIds;
   name: string;
+  defaultMessage?: string;
+  severity?: ActionGroupSeverity;
 }

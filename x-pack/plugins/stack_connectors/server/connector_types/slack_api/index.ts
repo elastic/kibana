@@ -38,6 +38,7 @@ export const getConnectorType = (): SlackApiConnectorType => {
     minimumLicenseRequired: 'gold',
     name: SLACK_CONNECTOR_NAME,
     supportedFeatureIds: [AlertingConnectorFeatureId, SecurityConnectorFeatureId],
+    canAutoRecover: true,
     validate: {
       config: { schema: SlackApiConfigSchema },
       secrets: {
@@ -47,6 +48,39 @@ export const getConnectorType = (): SlackApiConnectorType => {
       params: {
         schema: SlackApiParamsSchema,
       },
+    },
+    overrideParamsForAutoRecovery: (params: SlackApiParams, overrideMessage: string) => {
+      if (params.subAction === 'postMessage') {
+        return {
+          ...params,
+          subActionParams: {
+            ...params.subActionParams,
+            text: overrideMessage,
+          },
+        };
+      }
+
+      if (params.subAction === 'postBlockkit') {
+        return {
+          ...params,
+          subActionParams: {
+            ...params.subActionParams,
+            text: JSON.stringify({
+              blocks: [
+                {
+                  type: 'section',
+                  text: {
+                    type: 'mrkdwn',
+                    text: overrideMessage,
+                  },
+                },
+              ],
+            }),
+          },
+        };
+      }
+
+      return params;
     },
     renderParameterTemplates,
     executor: async (execOptions: SlackApiExecutorOptions) => await slackApiExecutor(execOptions),

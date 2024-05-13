@@ -6,6 +6,7 @@
  */
 
 import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import { ActionTypeParams } from '@kbn/actions-plugin/server/types';
 import { AADAlert } from '@kbn/alerts-as-data-utils';
 import { mapKeys, snakeCase } from 'lodash/fp';
 import {
@@ -29,7 +30,7 @@ export interface TransformActionParamsOptions {
   alertUuid: string;
   alertActionGroup: string;
   alertActionGroupName: string;
-  actionParams: RuleActionParams;
+  actionParams: ActionTypeParams;
   alertParams: RuleTypeParams;
   state: AlertInstanceState;
   kibanaBaseUrl?: string;
@@ -38,6 +39,9 @@ export interface TransformActionParamsOptions {
   flapping: boolean;
   aadAlert?: AADAlert;
   consecutiveMatches?: number;
+  alertPreviousActionGroup?: string;
+  alertPreviousActionGroupName?: string;
+  alertIsImproving?: boolean;
 }
 
 interface SummarizedAlertsWithAll {
@@ -81,7 +85,10 @@ export function transformActionParams({
   flapping,
   aadAlert,
   consecutiveMatches,
-}: TransformActionParamsOptions): RuleActionParams {
+  alertPreviousActionGroup,
+  alertPreviousActionGroupName,
+  alertIsImproving,
+}: TransformActionParamsOptions): ActionTypeParams {
   // when the list of variables we pass in here changes,
   // the UI will need to be updated as well; see:
   // x-pack/plugins/triggers_actions_ui/public/application/lib/action_variables.ts
@@ -114,6 +121,11 @@ export function transformActionParams({
       actionGroupName: alertActionGroupName,
       flapping,
       consecutiveMatches,
+      ...(!!alertIsImproving ? { isImproving: alertIsImproving } : {}),
+      ...(!!alertPreviousActionGroup ? { previousActionGroup: alertPreviousActionGroup } : {}),
+      ...(!!alertPreviousActionGroupName
+        ? { previousActionGroupName: alertPreviousActionGroupName }
+        : {}),
     },
     ...(aadAlert ? { ...aadAlert } : {}),
   };

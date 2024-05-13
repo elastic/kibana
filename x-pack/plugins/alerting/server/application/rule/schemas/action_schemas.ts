@@ -53,6 +53,7 @@ export const actionSchema = schema.object({
   frequency: schema.maybe(actionFrequencySchema),
   alertsFilter: schema.maybe(actionAlertsFilterSchema),
   useAlertDataForTemplate: schema.maybe(schema.boolean()),
+  doAutoRecover: schema.maybe(schema.boolean()),
 });
 
 export const systemActionSchema = schema.object({
@@ -75,6 +76,7 @@ export const actionRequestSchema = schema.object({
   frequency: schema.maybe(actionFrequencySchema),
   alertsFilter: schema.maybe(actionAlertsFilterSchema),
   useAlertDataForTemplate: schema.maybe(schema.boolean()),
+  doAutoRecover: schema.maybe(schema.boolean()),
 });
 
 export const systemActionRequestSchema = schema.object({

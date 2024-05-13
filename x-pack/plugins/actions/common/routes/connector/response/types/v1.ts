@@ -24,6 +24,7 @@ export interface ConnectorResponse {
   is_preconfigured: ConnectorResponseSchemaType['is_preconfigured'];
   is_deprecated: ConnectorResponseSchemaType['is_deprecated'];
   is_system_action: ConnectorResponseSchemaType['is_system_action'];
+  can_auto_recover: ConnectorResponseSchemaType['can_auto_recover'];
 }
 
 export interface AllConnectorsResponse extends ConnectorResponse {
