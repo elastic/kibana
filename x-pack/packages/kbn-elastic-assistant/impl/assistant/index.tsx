@@ -230,14 +230,28 @@ const AssistantComponent: React.FC<Props> = ({
 
         if (deepEqual(prev, nextConversation)) return prev;
 
-        return (
+        const conversationToReturn =
           (nextConversation &&
             conversations[
               nextConversation?.id !== '' ? nextConversation?.id : nextConversation?.title
             ]) ??
           conversations[WELCOME_CONVERSATION_TITLE] ??
-          getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE, isFlyoutMode })
-        );
+          getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE, isFlyoutMode });
+
+        if (
+          prev &&
+          prev.id === conversationToReturn.id &&
+          // if the conversation id has not changed and the previous conversation has more messages
+          // it is because the local conversation has a readable stream running
+          // and it has not yet been persisted to the stored conversation
+          prev.messages.length > conversationToReturn.messages.length
+        ) {
+          return {
+            ...conversationToReturn,
+            messages: prev.messages,
+          };
+        }
+        return conversationToReturn;
       });
     }
   }, [
