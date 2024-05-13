@@ -5,8 +5,37 @@
  * 2.0.
  */
 
+import { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
+
+interface TranslationsStartDeps {
+  elasticsearch: ElasticsearchClient;
+}
+
 class TranslationsPlugin {
-  public setup() {
+  public setup(core: CoreSetup<TranslationsStartDeps>) {
+    core.getStartServices().then(async ([start]) => {
+      const esClient = start.elasticsearch.client.asInternalUser;
+      const res = await esClient.search({
+        index: '.kibana',
+        query: {
+          bool: {
+            must: {
+              term: {
+                type: 'boom',
+              },
+            },
+          },
+        },
+      });
+
+      if (!res.hits.hits.length) {
+        await esClient.index({ index: '.kibana', document: { type: 'boom' } });
+        setImmediate(() => {
+          throw new Error('BOOM document did not exist, throwing!');
+        });
+      }
+    });
+
     return {};
   }
 

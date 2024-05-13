@@ -77,6 +77,12 @@ export class EnvironmentService {
       }
     });
 
+    process.on('uncaughtException', (e) => {
+      // eslint-disable-next-line no-console
+      console.error(`Detected an uncaught exception: ${e.message}`);
+      throw e;
+    });
+
     await createDataFolder({ pathConfig, logger: this.log });
     await writePidFile({ pidConfig, logger: this.log });
 
