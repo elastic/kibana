@@ -274,7 +274,7 @@ export class DashboardPanelActionsService extends FtrService {
     );
   }
 
-  async unlinkFromLibary(parent?: WebElementWrapper) {
+  async unlinkFromLibrary(parent?: WebElementWrapper) {
     this.log.debug('unlinkFromLibrary');
     await this.clickContextMenuItem(UNLINK_FROM_LIBRARY_TEST_SUBJ, parent);
     await this.testSubjects.waitForDeleted(
