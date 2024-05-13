@@ -363,11 +363,11 @@ function getRetryDelay({
 }
 
 function calculateDelay(attempts: number) {
-if (attempts === 1) {
-  return 30 * 1000; // 30s
-} else {
-  // get multiples of 5 min
-  const defaultBackoffPerFailure = 5 * 60 * 1000;
-  return defaultBackoffPerFailure * Math.pow(2, attempts - 2);
-}
+  if (attempts === 1) {
+    return 30 * 1000; // 30s
+  } else {
+    // get multiples of 5 min
+    const defaultBackoffPerFailure = 5 * 60 * 1000;
+    return defaultBackoffPerFailure * Math.pow(2, attempts - 2);
+  }
 }
