@@ -58,7 +58,7 @@ export const AlertSummaryWidgetFullSize = ({
       paddingSize="none"
     >
       {!hideStats && (
-        <EuiFlexItem>
+        <EuiFlexItem data-test-subj="alertSummaryWidgetFullSizeStats">
           <AlertCounts
             activeAlertCount={activeAlertCount}
             recoveredAlertCount={recoveredAlertCount}

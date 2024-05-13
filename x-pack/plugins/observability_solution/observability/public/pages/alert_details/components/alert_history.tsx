@@ -60,11 +60,11 @@ export function AlertHistoryChart({ rule, alert }: Props) {
 
   if (isError) {
     notifications?.toasts.addDanger({
-      title: i18n.translate('xpack.observability.customThreshold.alertHistory.error.toastTitle', {
+      title: i18n.translate('xpack.observability.alertDetailsPage.alertHistory.error.toastTitle', {
         defaultMessage: 'Alerts history chart error',
       }),
       text: i18n.translate(
-        'xpack.observability.customThreshold.alertHistory.error.toastDescription',
+        'xpack.observability.alertDetailsPage.alertHistory.error.toastDescription',
         {
           defaultMessage: `An error occurred when fetching alert history chart data`,
         }
@@ -78,7 +78,7 @@ export function AlertHistoryChart({ rule, alert }: Props) {
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h2>
-              {i18n.translate('xpack.observability.customThreshold.alertHistory.chartTitle', {
+              {i18n.translate('xpack.observability.alertDetailsPage.alertHistory.chartTitle', {
                 defaultMessage: 'Alerts history',
               })}
             </h2>
@@ -86,7 +86,7 @@ export function AlertHistoryChart({ rule, alert }: Props) {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="s" color="subdued">
-            {i18n.translate('xpack.observability.customThreshold.alertHistory.last30days', {
+            {i18n.translate('xpack.observability.alertDetailsPage.alertHistory.last30days', {
               defaultMessage: 'Last 30 days',
             })}
           </EuiText>
@@ -108,7 +108,7 @@ export function AlertHistoryChart({ rule, alert }: Props) {
             <EuiFlexItem grow={false}>
               <EuiText size="s" color="subdued">
                 {i18n.translate(
-                  'xpack.observability.customThreshold.alertHistory.alertsTriggered',
+                  'xpack.observability.alertDetailsPage.alertHistory.alertsTriggered',
                   {
                     defaultMessage: 'Alerts triggered',
                   }
@@ -139,9 +139,12 @@ export function AlertHistoryChart({ rule, alert }: Props) {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="subdued">
-              {i18n.translate('xpack.observability.customThreshold.alertHistory.avgTimeToRecover', {
-                defaultMessage: 'Avg time to recover',
-              })}
+              {i18n.translate(
+                'xpack.observability.alertDetailsPage.alertHistory.avgTimeToRecover',
+                {
+                  defaultMessage: 'Avg time to recover',
+                }
+              )}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
