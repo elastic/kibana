@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 
 import {
   EuiFlexGroup,
@@ -22,12 +22,14 @@ import { IngestGetPipelineResponse } from '@elastic/elasticsearch/lib/api/types'
 import { createIngestPipelineOptions } from './ingest_pipeline_options';
 
 interface IngestPipelinePanelProps {
+  selectedPipeline: string;
   setSelectedPipeline: (pipeline: string) => void;
   ingestPipelinesData?: IngestGetPipelineResponse;
   defaultIngestPipeline: string;
 }
 
 export const IngestPipelinePanel: React.FC<IngestPipelinePanelProps> = ({
+  selectedPipeline,
   setSelectedPipeline,
   ingestPipelinesData,
   defaultIngestPipeline,
@@ -36,13 +38,6 @@ export const IngestPipelinePanel: React.FC<IngestPipelinePanelProps> = ({
     () => createIngestPipelineOptions(ingestPipelinesData, defaultIngestPipeline),
     [ingestPipelinesData, defaultIngestPipeline]
   );
-
-  const [selected, setSelected] = useState<string>();
-
-  const onChange = (value: string) => {
-    setSelected(value);
-    setSelectedPipeline(value);
-  };
 
   return (
     <>
@@ -76,14 +71,14 @@ export const IngestPipelinePanel: React.FC<IngestPipelinePanelProps> = ({
       <EuiSpacer size="m" />
       <EuiSuperSelect
         options={options}
-        valueOfSelected={selected}
+        valueOfSelected={selectedPipeline}
         placeholder={i18n.translate(
           'searchApiPanels.welcomeBanner.ingestPipelinePanel.selectPipelinePlaceholder',
           {
             defaultMessage: 'Select a pipeline',
           }
         )}
-        onChange={(value) => onChange(value)}
+        onChange={setSelectedPipeline}
         itemLayoutAlign="top"
         hasDividers
         data-test-subj="ingestPipelinePanelSelect"

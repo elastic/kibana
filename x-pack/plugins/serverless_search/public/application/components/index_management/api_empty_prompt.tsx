@@ -97,6 +97,7 @@ export const APIIndexEmptyPrompt = ({ indexName, onBackClick }: APIIndexEmptyPro
           </EuiFlexItem>
           <EuiFlexItem>
             <IngestPipelinePanel
+              selectedPipeline={selectedPipeline}
               setSelectedPipeline={setSelectedPipeline}
               ingestPipelinesData={pipelineData?.pipelines}
               defaultIngestPipeline={DEFAULT_INGESTION_PIPELINE}

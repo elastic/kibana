@@ -35,6 +35,7 @@ interface IngestDataProps {
   consoleRequest?: string;
   additionalIngestionPanel?: React.ReactNode;
   ingestPipelineData?: IngestGetPipelineResponse;
+  selectedPipeline: string;
   setSelectedPipeline: (pipelineId: string) => void;
   defaultIngestPipeline: string;
 }
@@ -42,6 +43,7 @@ interface IngestDataProps {
 export const IngestData: React.FC<IngestDataProps> = ({
   codeSnippet,
   selectedLanguage,
+  selectedPipeline,
   setSelectedLanguage,
   docLinks,
   assetBasePath,
@@ -80,6 +82,7 @@ export const IngestData: React.FC<IngestDataProps> = ({
     >
       <EuiSpacer size="l" />
       <IngestPipelinePanel
+        selectedPipeline={selectedPipeline}
         setSelectedPipeline={setSelectedPipeline}
         ingestPipelinesData={ingestPipelineData}
         defaultIngestPipeline={defaultIngestPipeline}

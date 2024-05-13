@@ -319,6 +319,7 @@ export const ElasticsearchOverview = () => {
           consolePlugin={consolePlugin}
           sharePlugin={share}
           additionalIngestionPanel={<ConnectorIngestionPanel assetBasePath={assetBasePath} />}
+          selectedPipeline={selectedPipeline}
           setSelectedPipeline={setSelectedPipeline}
           defaultIngestPipeline={DEFAULT_INGESTION_PIPELINE}
         />
