@@ -282,6 +282,39 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server",
+        "id": "def-common.isKibanaResponse",
+        "type": "Function",
+        "tags": [],
+        "label": "isKibanaResponse",
+        "description": [],
+        "signature": [
+          "(response: Record<string, any>) => boolean"
+        ],
+        "path": "packages/core/http/core-http-server/src/router/response.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.isKibanaResponse.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "response",
+            "description": [],
+            "signature": [
+              "Record<string, any>"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/response.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -12489,7 +12522,7 @@
             "tags": [],
             "label": "description",
             "description": [
-              "Human-friendly description of this endpoint"
+              "A short, human-friendly description of this endpoint"
             ],
             "signature": [
               "string | undefined"
@@ -15335,10 +15368,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/fields_service.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/indices.ts"
               },
               {
                 "plugin": "ml",

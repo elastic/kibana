@@ -81,6 +81,10 @@ export const RiskScoresCalculationResponse = z.object({
        * A list of user risk scores
        */
       user: z.array(EntityRiskScore).optional(),
+      /**
+       * If 'wait_for' the request will wait for the index refresh.
+       */
+      refresh: z.literal('wait_for').optional(),
     })
     .optional(),
 });

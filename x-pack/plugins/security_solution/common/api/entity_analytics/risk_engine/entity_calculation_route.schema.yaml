@@ -15,6 +15,7 @@ servers:
 
 paths:
   /api/risk_scores/calculation/entity:
+    x-internal: true
     post:
       summary: Trigger calculation of Risk Scores for an entity
       description: Calculates and persists Risk Scores for an entity, returning the calculated risk score.
@@ -44,7 +45,7 @@ components:
         - identifier_type
       properties:
         identifier:
-          description: Used to identify the entity.                      
+          description: Used to identify the entity.
           type: string
           example: 'my.host'
         identifier_type:

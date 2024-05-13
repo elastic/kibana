@@ -102,3 +102,7 @@ components:
               items:
                 $ref: '../common/common.schema.yaml#/components/schemas/EntityRiskScore'
               description: A list of user risk scores
+            refresh:
+                type: string
+                enum: [wait_for]
+                description: If 'wait_for' the request will wait for the index refresh.

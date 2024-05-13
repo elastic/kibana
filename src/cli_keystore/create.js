@@ -7,9 +7,9 @@
  */
 
 import { Logger } from '../cli/logger';
-import { confirm } from './utils';
+import { confirm, question } from '../cli/keystore/utils';
 
-export async function create(keystore, options) {
+export async function create(keystore, options = {}) {
   const logger = new Logger(options);
 
   if (keystore.exists()) {
@@ -21,6 +21,17 @@ export async function create(keystore, options) {
   }
 
   keystore.reset();
+
+  if (options.password) {
+    const password = await question(
+      'Enter new password for the kibana keystore (empty for no password)',
+      {
+        mask: '*',
+      }
+    );
+    if (password) keystore.setPassword(password);
+  }
+
   keystore.save();
 
   logger.log(`Created Kibana keystore in ${keystore.path}`);
@@ -30,6 +41,7 @@ export function createCli(program, keystore) {
   program
     .command('create')
     .description('Creates a new Kibana keystore')
-    .option('-s, --silent', 'prevent all logging')
+    .option('-p, --password', 'Prompt for password to encrypt the keystore')
+    .option('-s, --silent', 'Show minimal output')
     .action(create.bind(null, keystore));
 }

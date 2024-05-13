@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBadge } from '@elastic/eui';
+import { EuiBetaBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ContentTabIds, type Tab } from '../../components/asset_details/types';
@@ -65,11 +65,21 @@ export const commonFlyoutTabs: Tab[] = [
       defaultMessage: 'Dashboards',
     }),
     append: (
-      <EuiBadge color="accent">
-        {i18n.translate('xpack.infra.customDashboards.newLabel', {
-          defaultMessage: 'NEW',
+      <EuiBetaBadge
+        label={i18n.translate('xpack.infra.customDashboards.technicalPreviewBadgeLabel', {
+          defaultMessage: 'Technical preview',
         })}
-      </EuiBadge>
+        tooltipContent={i18n.translate(
+          'xpack.infra.customDashboards.technicalPreviewBadgeDescription',
+          {
+            defaultMessage:
+              'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+          }
+        )}
+        iconType="beaker"
+        size="s"
+        style={{ verticalAlign: 'middle' }}
+      />
     ),
   },
 ];
