@@ -81,8 +81,6 @@ export async function getLogCategories({
     },
   };
 
-  console.log('query', JSON.stringify(query));
-
   const hitCountRes = await search({
     index,
     size: 0,
