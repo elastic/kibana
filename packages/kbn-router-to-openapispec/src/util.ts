@@ -14,6 +14,7 @@ import {
   type RouteValidatorConfig,
 } from '@kbn/core-http-server';
 import { KnownParameters } from './type';
+import type { GenerateOpenApiDocumentOptionsFilters } from './generate_oas';
 
 export const getPathParameters = (path: string): KnownParameters => {
   return Array.from(path.matchAll(/\{(.+?)\}/g)).reduce<KnownParameters>((acc, [_, key]) => {
@@ -62,11 +63,14 @@ export const prepareRoutes = <
   R extends { path: string; options: { access?: 'public' | 'internal' } }
 >(
   routes: R[],
-  pathStartsWith?: string
+  filters: GenerateOpenApiDocumentOptionsFilters = {}
 ): R[] => {
-  return routes.filter(
-    pathStartsWith ? (route) => route.path.startsWith(pathStartsWith) : () => true
-  );
+  if (Object.getOwnPropertyNames(filters).length === 0) return routes;
+  return routes.filter((route) => {
+    if (filters.pathStartsWith && !route.path.startsWith(filters.pathStartsWith)) return false;
+    if (filters.access && route.options.access !== filters.access) return false;
+    return true;
+  });
 };
 
 export const assignToPathsObject = (

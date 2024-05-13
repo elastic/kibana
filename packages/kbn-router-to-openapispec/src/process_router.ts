@@ -21,17 +21,15 @@ import {
   prepareRoutes,
 } from './util';
 import type { OperationIdCounter } from './operation_id_counter';
+import type { GenerateOpenApiDocumentOptionsFilters } from './generate_oas';
 
 export const processRouter = (
   appRouter: Router,
   converter: OasConverter,
   getOpId: OperationIdCounter,
-  pathStartsWith?: string
+  filters?: GenerateOpenApiDocumentOptionsFilters
 ) => {
-  const routes = prepareRoutes(
-    appRouter.getRoutes({ excludeVersionedRoutes: true }),
-    pathStartsWith
-  );
+  const routes = prepareRoutes(appRouter.getRoutes({ excludeVersionedRoutes: true }), filters);
 
   const paths: OpenAPIV3.PathsObject = {};
   for (const route of routes) {

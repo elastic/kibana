@@ -13,6 +13,7 @@ import {
   unwrapVersionedResponseBodyValidation,
 } from '@kbn/core-http-router-server-internal';
 import type { OpenAPIV3 } from 'openapi-types';
+import type { GenerateOpenApiDocumentOptionsFilters } from './generate_oas';
 import type { OasConverter } from './oas_converter';
 import type { OperationIdCounter } from './operation_id_counter';
 import {
@@ -28,9 +29,9 @@ export const processVersionedRouter = (
   appRouter: CoreVersionedRouter,
   converter: OasConverter,
   getOpId: OperationIdCounter,
-  pathStartsWith?: string
+  filters?: GenerateOpenApiDocumentOptionsFilters
 ) => {
-  const routes = prepareRoutes(appRouter.getRoutes(), pathStartsWith);
+  const routes = prepareRoutes(appRouter.getRoutes(), filters);
   const paths: OpenAPIV3.PathsObject = {};
   for (const route of routes) {
     const pathParams = getPathParameters(route.path);
