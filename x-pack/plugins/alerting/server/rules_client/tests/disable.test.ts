@@ -440,7 +440,7 @@ describe('disable()', () => {
     expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
 
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(0);
-    expect(rulesClientParams.logger.warn).toHaveBeenCalledWith(
+    expect(rulesClientParams.logger.debug).toHaveBeenCalledWith(
       `rulesClient.disable('1') - Could not write untrack events - Fail`
     );
   });
