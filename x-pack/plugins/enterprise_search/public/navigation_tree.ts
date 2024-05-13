@@ -19,9 +19,12 @@ export interface DynamicSideNavItems {
   indices?: Array<EuiSideNavItemType<unknown>>;
 }
 
-const title = i18n.translate('navigation.searchNav.headerSolutionSwitcher.searchSolutionTitle', {
-  defaultMessage: 'Search',
-});
+const title = i18n.translate(
+  'xpack.enterpriseSearch.searchNav.headerSolutionSwitcher.searchSolutionTitle',
+  {
+    defaultMessage: 'Search',
+  }
+);
 const icon = 'logoElasticsearch';
 
 const euiItemTypeToNodeDefinition = ({
@@ -83,7 +86,7 @@ export const getNavigationTreeDefinition = ({
                   },
                   id: 'dev_tools',
                   link: 'dev_tools:console',
-                  title: i18n.translate('navigation.searchNav.devTools', {
+                  title: i18n.translate('xpack.enterpriseSearch.searchNav.devTools', {
                     defaultMessage: 'Dev Tools',
                   }),
                 },
@@ -100,7 +103,7 @@ export const getNavigationTreeDefinition = ({
                     },
                   ],
                   id: 'kibana',
-                  title: i18n.translate('navigation.searchNav.kibana', {
+                  title: i18n.translate('xpack.enterpriseSearch.searchNav.kibana', {
                     defaultMessage: 'Kibana',
                   }),
                 },
@@ -137,7 +140,7 @@ export const getNavigationTreeDefinition = ({
                     { link: 'enterpriseSearchContent:webCrawlers' },
                   ],
                   id: 'content',
-                  title: i18n.translate('navigation.searchNav.content', {
+                  title: i18n.translate('xpack.enterpriseSearch.searchNav.content', {
                     defaultMessage: 'Content',
                   }),
                 },
@@ -161,29 +164,32 @@ export const getNavigationTreeDefinition = ({
                       //     link: 'home',
                       //   },
                       //   {
-                      //     title: i18n.translate('navigation.searchNav.build.searchApplications.content', {
+                      //     title: i18n.translate('xpack.enterpriseSearch.searchNav.build.searchApplications.content', {
                       //       defaultMessage: 'Content',
                       //     }),
                       //     link: 'home',
                       //   },
                       //   {
-                      //     title: i18n.translate('navigation.searchNav.build.searchApplications.connect', {
+                      //     title: i18n.translate('xpack.enterpriseSearch.searchNav.build.searchApplications.connect', {
                       //       defaultMessage: 'Connect',
                       //     }),
                       //     link: 'home',
                       //   },
                       // ],
                       link: 'enterpriseSearchApplications:searchApplications',
-                      title: i18n.translate('navigation.searchNav.build.searchApplications', {
-                        defaultMessage: 'Search applications',
-                      }),
+                      title: i18n.translate(
+                        'xpack.enterpriseSearch.searchNav.build.searchApplications',
+                        {
+                          defaultMessage: 'Search applications',
+                        }
+                      ),
                     },
                     {
                       link: 'enterpriseSearchAnalytics',
                     },
                   ],
                   id: 'build',
-                  title: i18n.translate('navigation.searchNav.build', {
+                  title: i18n.translate('xpack.enterpriseSearch.searchNav.build', {
                     defaultMessage: 'Build',
                   }),
                 },
@@ -196,16 +202,19 @@ export const getNavigationTreeDefinition = ({
                         );
                       },
                       link: 'appSearch:engines',
-                      title: i18n.translate('navigation.searchNav.entsearch.appSearch', {
-                        defaultMessage: 'App Search',
-                      }),
+                      title: i18n.translate(
+                        'xpack.enterpriseSearch.searchNav.entsearch.appSearch',
+                        {
+                          defaultMessage: 'App Search',
+                        }
+                      ),
                     },
                     {
                       link: 'workplaceSearch',
                     },
                   ],
                   id: 'entsearch',
-                  title: i18n.translate('navigation.searchNav.entsearch', {
+                  title: i18n.translate('xpack.enterpriseSearch.searchNav.entsearch', {
                     defaultMessage: 'Enterprise Search',
                   }),
                 },
@@ -224,9 +233,12 @@ export const getNavigationTreeDefinition = ({
               children: [
                 {
                   link: 'ml:modelManagement',
-                  title: i18n.translate('navigation.searchNav.management.trainedModels', {
-                    defaultMessage: 'Trained models',
-                  }),
+                  title: i18n.translate(
+                    'xpack.enterpriseSearch.searchNav.management.trainedModels',
+                    {
+                      defaultMessage: 'Trained models',
+                    }
+                  ),
                 },
                 {
                   children: [
@@ -295,14 +307,14 @@ export const getNavigationTreeDefinition = ({
                   link: 'management',
                   renderAs: 'panelOpener',
                   spaceBefore: null,
-                  title: i18n.translate('navigation.searchNav.mngt', {
+                  title: i18n.translate('xpack.enterpriseSearch.searchNav.mngt', {
                     defaultMessage: 'Stack Management',
                   }),
                 },
               ],
               icon: 'gear',
               id: 'project_settings_project_nav',
-              title: i18n.translate('navigation.searchNav.management', {
+              title: i18n.translate('xpack.enterpriseSearch.searchNav.management', {
                 defaultMessage: 'Management',
               }),
               type: 'navGroup',
