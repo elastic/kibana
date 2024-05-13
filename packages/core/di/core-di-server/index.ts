@@ -6,12 +6,6 @@
  * Side Public License, v 1.
  */
 
-export type {
-  CoreDiServiceSetup,
-  CoreDiServiceStart,
-  CoreDiSetupModuleHelper,
-  CoreDiSetupModuleCallback,
-  CoreDiSetupModuleCallbackResult,
-} from './src/contracts';
+export type { CoreDiServiceSetup, CoreDiServiceStart } from './src/contracts';
 export type { InjectionRequestHandlerContext } from './src/request_handler_context';
 export { requestServiceId } from './src/service_identifiers';

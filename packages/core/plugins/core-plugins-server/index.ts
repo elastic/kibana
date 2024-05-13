@@ -22,4 +22,9 @@ export type {
 } from './src';
 
 export { SharedGlobalConfigKeys } from './src';
-export { loggerServiceId, configServiceId } from './src/service_identifiers';
+export {
+  ConfigService,
+  LoggerService,
+  LoggingService,
+  OpaqueIdToken,
+} from './src/service_identifiers';
