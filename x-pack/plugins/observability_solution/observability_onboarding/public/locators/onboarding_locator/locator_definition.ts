@@ -18,9 +18,7 @@ export class ObservabilityOnboardingLocatorDefinition
 {
   public readonly id = OBSERVABILITY_ONBOARDING_LOCATOR;
 
-  public readonly getLocation = async (
-    params: ObservabilityOnboardingLocatorParams = {}
-  ) => {
+  public readonly getLocation = async (params: ObservabilityOnboardingLocatorParams = {}) => {
     const { getLocation } = await import('./get_location');
     return getLocation(params);
   };

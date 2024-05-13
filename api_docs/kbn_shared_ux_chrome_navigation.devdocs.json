@@ -67,7 +67,7 @@
           "\nKibana-specific Provider that maps dependencies to services."
         ],
         "signature": [
-          "({ children, ...dependencies }: React.PropsWithChildren<",
+          "({ children, ...dependencies }: React.PropsWithChildren<React.PropsWithChildren<",
           {
             "pluginId": "@kbn/shared-ux-chrome-navigation",
             "scope": "public",
@@ -75,7 +75,7 @@
             "section": "def-public.NavigationKibanaDependencies",
             "text": "NavigationKibanaDependencies"
           },
-          ">) => JSX.Element"
+          ">>) => JSX.Element"
         ],
         "path": "packages/shared-ux/chrome/navigation/src/services.tsx",
         "deprecated": false,
@@ -89,7 +89,7 @@
             "label": "{\n  children,\n  ...dependencies\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
+              "React.PropsWithChildren<React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/shared-ux-chrome-navigation",
                 "scope": "public",
@@ -97,7 +97,7 @@
                 "section": "def-public.NavigationKibanaDependencies",
                 "text": "NavigationKibanaDependencies"
               },
-              ">"
+              ">>"
             ],
             "path": "packages/shared-ux/chrome/navigation/src/services.tsx",
             "deprecated": false,
@@ -118,7 +118,7 @@
           "\nA Context Provider that provides services to the component and its dependencies."
         ],
         "signature": [
-          "({ children, ...services }: React.PropsWithChildren<",
+          "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
           {
             "pluginId": "@kbn/shared-ux-chrome-navigation",
             "scope": "public",
@@ -126,7 +126,7 @@
             "section": "def-public.NavigationServices",
             "text": "NavigationServices"
           },
-          ">) => JSX.Element"
+          ">>) => JSX.Element"
         ],
         "path": "packages/shared-ux/chrome/navigation/src/services.tsx",
         "deprecated": false,
@@ -137,10 +137,10 @@
             "id": "def-public.NavigationProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{ children, ...services }",
+            "label": "{\n  children,\n  ...services\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
+              "React.PropsWithChildren<React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/shared-ux-chrome-navigation",
                 "scope": "public",
@@ -148,7 +148,7 @@
                 "section": "def-public.NavigationServices",
                 "text": "NavigationServices"
               },
-              ">"
+              ">>"
             ],
             "path": "packages/shared-ux/chrome/navigation/src/services.tsx",
             "deprecated": false,

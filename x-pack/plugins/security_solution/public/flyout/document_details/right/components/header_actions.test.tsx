@@ -43,6 +43,14 @@ const renderHeaderActions = (contextValue: RightPanelContext) =>
   );
 
 describe('<HeaderAction />', () => {
+  beforeAll(() => {
+    Object.defineProperty(window, 'location', {
+      value: {
+        search: '?',
+      },
+    });
+  });
+
   beforeEach(() => {
     window.location.search = '?';
     jest.mocked(useGetAlertDetailsFlyoutLink).mockReturnValue(alertUrl);

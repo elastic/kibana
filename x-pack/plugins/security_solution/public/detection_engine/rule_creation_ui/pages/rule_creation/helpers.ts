@@ -403,6 +403,7 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
 
   const baseFields = {
     type: ruleType,
+    related_integrations: defineStepData.relatedIntegrations?.filter((ri) => !isEmpty(ri.package)),
     ...(timeline.id != null &&
       timeline.title != null && {
         timeline_id: timeline.id,
@@ -481,6 +482,7 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         timestamp_field: ruleFields.eqlOptions?.timestampField,
         event_category_override: ruleFields.eqlOptions?.eventCategoryField,
         tiebreaker_field: ruleFields.eqlOptions?.tiebreakerField,
+        ...alertSuppressionFields,
       }
     : isNewTermsFields(ruleFields)
     ? {
@@ -557,6 +559,7 @@ export const formatAboutStepData = (
     threat,
     isAssociatedToEndpointList,
     isBuildingBlock,
+    maxSignals,
     note,
     ruleNameOverride,
     threatIndicatorPath,
@@ -611,6 +614,7 @@ export const formatAboutStepData = (
     timestamp_override: timestampOverride !== '' ? timestampOverride : undefined,
     timestamp_override_fallback_disabled: timestampOverrideFallbackDisabled,
     ...(!isEmpty(note) ? { note } : {}),
+    max_signals: Number.isSafeInteger(maxSignals) ? maxSignals : undefined,
     ...rest,
   };
   return resp;

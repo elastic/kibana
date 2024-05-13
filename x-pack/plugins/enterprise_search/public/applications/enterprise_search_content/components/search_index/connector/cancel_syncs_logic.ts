@@ -22,7 +22,7 @@ interface CancelSyncsLogicValues {
   isConnectorIndex: boolean;
 }
 
-interface CancelSyncsLogicActions {
+export interface CancelSyncsLogicActions {
   cancelSyncs: () => void;
   cancelSyncsApiError: CancelSyncsApiActions['apiError'];
   cancelSyncsApiSuccess: CancelSyncsApiActions['apiSuccess'];

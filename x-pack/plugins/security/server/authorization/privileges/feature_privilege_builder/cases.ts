@@ -18,7 +18,7 @@ export type CasesSupportedOperations = typeof allOperations[number];
  * extend the mapping here x-pack/plugins/features/server/feature_privilege_iterator/feature_privilege_iterator.ts
  *
  * Also if you add a new operation (createCase, updateCase, etc) here you'll likely also need to make changes here:
- * x-pack/plugins/cases/server/authorization/index.ts
+ * x-pack/plugins/cases/server/authorization/index.ts and here x-pack/plugins/cases/server/connectors/cases/utils.ts
  */
 
 const pushOperations = ['pushCase'] as const;

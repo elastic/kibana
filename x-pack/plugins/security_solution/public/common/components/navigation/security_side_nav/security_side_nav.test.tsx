@@ -53,9 +53,9 @@ jest.mock('../../../links', () => ({
   getAncestorLinksInfo: (id: string) => [{ id }],
 }));
 
-const mockUseNavLinks = jest.fn();
+const mockUseSecurityInternalNavLinks = jest.fn();
 jest.mock('../../../links/nav_links', () => ({
-  useNavLinks: () => mockUseNavLinks(),
+  useSecurityInternalNavLinks: () => mockUseSecurityInternalNavLinks(),
 }));
 jest.mock('../../links', () => ({
   useGetSecuritySolutionLinkProps:
@@ -82,14 +82,14 @@ const renderNav = () =>
 describe('SecuritySideNav', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseNavLinks.mockReturnValue([alertsNavLink, settingsNavLink]);
+    mockUseSecurityInternalNavLinks.mockReturnValue([alertsNavLink, settingsNavLink]);
     useKibana().services.chrome.hasHeaderBanner$ = jest.fn(() =>
       new BehaviorSubject(false).asObservable()
     );
   });
 
   it('should render main items', () => {
-    mockUseNavLinks.mockReturnValue([alertsNavLink]);
+    mockUseSecurityInternalNavLinks.mockReturnValue([alertsNavLink]);
     renderNav();
     expect(mockSolutionSideNav).toHaveBeenCalledWith({
       selectedId: SecurityPageName.alerts,
@@ -107,7 +107,7 @@ describe('SecuritySideNav', () => {
   });
 
   it('should render the loader if items are still empty', () => {
-    mockUseNavLinks.mockReturnValue([]);
+    mockUseSecurityInternalNavLinks.mockReturnValue([]);
     const result = renderNav();
     expect(result.getByTestId('sideNavLoader')).toBeInTheDocument();
     expect(mockSolutionSideNav).not.toHaveBeenCalled();
@@ -124,7 +124,7 @@ describe('SecuritySideNav', () => {
   });
 
   it('should render footer items', () => {
-    mockUseNavLinks.mockReturnValue([settingsNavLink]);
+    mockUseSecurityInternalNavLinks.mockReturnValue([settingsNavLink]);
     renderNav();
     expect(mockSolutionSideNav).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -150,7 +150,10 @@ describe('SecuritySideNav', () => {
   });
 
   it('should not render disabled items', () => {
-    mockUseNavLinks.mockReturnValue([{ ...alertsNavLink, disabled: true }, settingsNavLink]);
+    mockUseSecurityInternalNavLinks.mockReturnValue([
+      { ...alertsNavLink, disabled: true },
+      settingsNavLink,
+    ]);
     renderNav();
     expect(mockSolutionSideNav).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -164,7 +167,7 @@ describe('SecuritySideNav', () => {
   });
 
   it('should render get started item', () => {
-    mockUseNavLinks.mockReturnValue([
+    mockUseSecurityInternalNavLinks.mockReturnValue([
       { id: SecurityPageName.landing, title: 'Get started', sideNavIcon: 'launch' },
     ]);
     renderNav();

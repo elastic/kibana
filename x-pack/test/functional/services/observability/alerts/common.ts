@@ -159,9 +159,16 @@ export function ObservabilityAlertsCommonProvider({
   };
 
   // Flyout
+  const getReasonMessageLinkByIndex = async (index: number) => {
+    const reasonMessageLinks = await find.allByCssSelector(
+      '[data-test-subj="o11yGetRenderCellValueLink"]'
+    );
+    return reasonMessageLinks[index] || null;
+  };
+
   const openAlertsFlyout = retryOnStale.wrap(async (index: number = 0) => {
-    await openActionsMenuForRow(index);
-    await testSubjects.click('viewAlertDetailsFlyout');
+    const reasonMessageLink = await getReasonMessageLinkByIndex(index);
+    await reasonMessageLink.click();
     await retry.waitFor(
       'flyout open',
       async () => await testSubjects.exists(ALERTS_FLYOUT_SELECTOR, { timeout: 2500 })

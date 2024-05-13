@@ -7,9 +7,8 @@
 
 import React, { useContext, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import type { Observable } from 'rxjs';
-import type { CoreTheme } from '@kbn/core/public';
-import { toMountPoint, useKibana } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   canCreateMLJobSelector,
   hasMLJobSelector,
@@ -43,7 +42,6 @@ const showMLJobNotification = (
   range: { to: string; from: string },
   success: boolean,
   awaitingNodeAssignment: boolean,
-  theme$?: Observable<CoreTheme>,
   error?: Error
 ) => {
   if (success) {
@@ -51,7 +49,7 @@ const showMLJobNotification = (
       {
         title: toMountPoint(
           <p data-test-subj="uptimeMLJobSuccessfullyCreated">{labels.JOB_CREATED_SUCCESS_TITLE}</p>,
-          { theme$ }
+          kibanaService.core
         ),
         text: toMountPoint(
           <p>
@@ -62,7 +60,7 @@ const showMLJobNotification = (
               {labels.VIEW_JOB}
             </MLJobLink>
           </p>,
-          { theme$ }
+          kibanaService.core
         ),
       },
       { toastLifeTimeMs: 10000 }
@@ -116,8 +114,7 @@ export const MachineLearningFlyout: React.FC<Props> = ({ onClose }) => {
           basePath,
           { to: dateRangeEnd, from: dateRangeStart },
           true,
-          hasMLJob.awaitingNodeAssignment,
-          core.services.theme?.theme$
+          hasMLJob.awaitingNodeAssignment
         );
         dispatch(getExistingMLJobAction.get({ monitorId: monitorId as string }));
         refreshApp();
@@ -134,7 +131,6 @@ export const MachineLearningFlyout: React.FC<Props> = ({ onClose }) => {
           { to: dateRangeEnd, from: dateRangeStart },
           false,
           false,
-          core.services.theme?.theme$,
           error as Error
         );
       }

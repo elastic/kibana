@@ -7,7 +7,6 @@
 
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
-import '../../../../common/mock/match_media';
 import { TestProviders, mockGlobalState, createMockStore } from '../../../../common/mock';
 
 import { EmbeddedMapComponent } from './embedded_map';

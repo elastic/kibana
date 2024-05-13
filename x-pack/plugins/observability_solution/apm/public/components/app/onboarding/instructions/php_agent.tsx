@@ -10,16 +10,11 @@ import { EuiCodeBlock, EuiMarkdownFormat, EuiSpacer } from '@elastic/eui';
 import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import React from 'react';
 import { AgentConfigInstructions } from '../agent_config_instructions';
-import {
-  INSTRUCTION_VARIANT,
-  AgentInstructions,
-} from '../instruction_variants';
+import { INSTRUCTION_VARIANT, AgentInstructions } from '../instruction_variants';
 import { ApiKeyCallout } from './api_key_callout';
 import { agentStatusCheckInstruction } from '../agent_status_instructions';
 
-export const createPhpAgentInstructions = (
-  commonOptions: AgentInstructions
-): EuiStepProps[] => {
+export const createPhpAgentInstructions = (commonOptions: AgentInstructions): EuiStepProps[] => {
   const {
     baseUrl,
     apmServerUrl,
@@ -39,8 +34,7 @@ export const createPhpAgentInstructions = (
             defaultMessage:
               'Download the package corresponding to your platform from [GitHub releases]({githubReleasesLink}).',
             values: {
-              githubReleasesLink:
-                'https://github.com/elastic/apm-agent-php/releases',
+              githubReleasesLink: 'https://github.com/elastic/apm-agent-php/releases',
             },
           })}
         </EuiMarkdownFormat>
@@ -63,16 +57,13 @@ export const createPhpAgentInstructions = (
           </EuiCodeBlock>
           <EuiSpacer />
           <EuiMarkdownFormat>
-            {i18n.translate(
-              'xpack.apm.onboarding.php.installPackage.textPost',
-              {
-                defaultMessage:
-                  'See the [documentation]({documentationLink}) for installation commands on other supported platforms and advanced installation.',
-                values: {
-                  documentationLink: `${baseUrl}guide/en/apm/agent/php/current/setup.html`,
-                },
-              }
-            )}
+            {i18n.translate('xpack.apm.onboarding.php.installPackage.textPost', {
+              defaultMessage:
+                'See the [documentation]({documentationLink}) for installation commands on other supported platforms and advanced installation.',
+              values: {
+                documentationLink: `${baseUrl}guide/en/apm/agent/php/current/setup.html`,
+              },
+            })}
           </EuiMarkdownFormat>
         </>
       ),
@@ -84,13 +75,10 @@ export const createPhpAgentInstructions = (
       children: (
         <>
           <EuiMarkdownFormat>
-            {i18n.translate(
-              'xpack.apm.onboarding.php.Configure the agent.textPre',
-              {
-                defaultMessage:
-                  'APM is automatically started when your app boots. Configure the agent either via `php.ini` file:',
-              }
-            )}
+            {i18n.translate('xpack.apm.onboarding.php.Configure the agent.textPre', {
+              defaultMessage:
+                'APM is automatically started when your app boots. Configure the agent either via `php.ini` file:',
+            })}
           </EuiMarkdownFormat>
 
           {(apiKeyDetails?.displayApiKeySuccessCallout ||
@@ -113,16 +101,13 @@ export const createPhpAgentInstructions = (
           />
           <EuiSpacer />
           <EuiMarkdownFormat>
-            {i18n.translate(
-              'xpack.apm.onboarding.php.configureAgent.textPost',
-              {
-                defaultMessage:
-                  'See the [documentation]({documentationLink}) for configuration options and advanced usage.\n\n',
-                values: {
-                  documentationLink: `${baseUrl}guide/en/apm/agent/php/current/configuration.html`,
-                },
-              }
-            )}
+            {i18n.translate('xpack.apm.onboarding.php.configureAgent.textPost', {
+              defaultMessage:
+                'See the [documentation]({documentationLink}) for configuration options and advanced usage.\n\n',
+              values: {
+                documentationLink: `${baseUrl}guide/en/apm/agent/php/current/configuration.html`,
+              },
+            })}
           </EuiMarkdownFormat>
         </>
       ),

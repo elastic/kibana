@@ -7,6 +7,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import type {
+  GetActionStatusRequest,
   GetActionStatusResponse,
   GetAgentTagsResponse,
   GetAgentUploadsResponse,
@@ -279,11 +280,12 @@ export function sendPostBulkAgentUpgrade(
   });
 }
 
-export function sendGetActionStatus() {
+export function sendGetActionStatus(query: GetActionStatusRequest['query'] = {}) {
   return sendRequest<GetActionStatusResponse>({
     path: agentRouteService.getActionStatusPath(),
     method: 'get',
     version: API_VERSIONS.public.v1,
+    query,
   });
 }
 

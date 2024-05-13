@@ -118,12 +118,20 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(404);
 
       // expect summary and rollup documents to be deleted
-      await retry.tryForTime(60 * 1000, async () => {
+      await retry.waitForWithTimeout('SLO summary data is deleted', 60 * 1000, async () => {
         const sloSummaryResponseAfterDeletion = await sloEsClient.getSLOSummaryDataById(id);
+        if (sloSummaryResponseAfterDeletion.hits.hits.length > 0) {
+          throw new Error('SLO summary data not deleted yet');
+        }
+        return true;
+      });
+
+      await retry.waitForWithTimeout('SLO rollup data is deleted', 60 * 1000, async () => {
         const sloRollupResponseAfterDeletion = await sloEsClient.getSLORollupDataById(id);
-        expect(sloSummaryResponseAfterDeletion.hits.hits.length).eql(0);
-        // sometimes the ingest pipeline ingests one extra document after the transform is stopped
-        expect(sloRollupResponseAfterDeletion.hits.hits.length <= 1).eql(true);
+        if (sloRollupResponseAfterDeletion.hits.hits.length > 1) {
+          throw new Error('SLO rollup data not deleted yet');
+        }
+        return true;
       });
     });
   });

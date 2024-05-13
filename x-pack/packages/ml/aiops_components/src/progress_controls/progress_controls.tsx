@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React, { type FC, type PropsWithChildren } from 'react';
 
 import {
   useEuiTheme,
@@ -49,7 +49,7 @@ interface ProgressControlProps {
  * @param props ProgressControls component props
  * @returns The ProgressControls component.
  */
-export const ProgressControls: FC<ProgressControlProps> = (props) => {
+export const ProgressControls: FC<PropsWithChildren<ProgressControlProps>> = (props) => {
   const {
     children,
     isBrushCleared,

@@ -34,20 +34,17 @@ export function InfraTabs() {
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
       if (start && end) {
-        return callApmApi(
-          'GET /internal/apm/services/{serviceName}/infrastructure_attributes',
-          {
-            params: {
-              path: { serviceName },
-              query: {
-                environment,
-                kuery,
-                start,
-                end,
-              },
+        return callApmApi('GET /internal/apm/services/{serviceName}/infrastructure_attributes', {
+          params: {
+            path: { serviceName },
+            query: {
+              environment,
+              kuery,
+              start,
+              end,
             },
-          }
-        );
+          },
+        });
       }
     },
     [environment, kuery, serviceName, start, end]

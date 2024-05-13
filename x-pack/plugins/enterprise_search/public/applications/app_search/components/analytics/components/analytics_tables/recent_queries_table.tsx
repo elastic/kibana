@@ -57,8 +57,6 @@ export const RecentQueriesTable: React.FC<Props> = ({ items }) => {
         [TERM_COLUMN, TIME_COLUMN, TAGS_LIST_COLUMN, RESULTS_COLUMN, ACTIONS_COLUMN] as Columns
       }
       items={items}
-      responsive
-      hasActions
       noItemsMessage={
         <EuiEmptyPrompt
           iconType="visLine"

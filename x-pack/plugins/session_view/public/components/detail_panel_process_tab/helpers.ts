@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { Process, ProcessFields } from '../../../common';
+import type { EventAction, Process, ProcessFields } from '../../../common';
 import { DetailPanelProcess, DetailPanelProcessLeader } from '../../types';
 import { DASH } from '../../constants';
 import { dataOrDash } from '../../utils/data_or_dash';
+import { AUDITBEAT_INDEX } from '../../methods';
 
 const DEFAULT_PROCESS_DATA: DetailPanelProcessLeader = {
   id: DASH,
@@ -83,7 +84,10 @@ const getDetailPanelProcessLeader = (
   entryMetaSourceIp: leader?.entry_meta?.source?.ip ?? DEFAULT_PROCESS_DATA.entryMetaSourceIp,
 });
 
-export const getDetailPanelProcess = (process: Process | null): DetailPanelProcess => {
+export const getDetailPanelProcess = (
+  process: Process | null,
+  index: string
+): DetailPanelProcess => {
   const processData = {
     id: DEFAULT_PROCESS_DATA.id,
     start: DEFAULT_PROCESS_DATA.start,
@@ -132,7 +136,8 @@ export const getDetailPanelProcess = (process: Process | null): DetailPanelProce
   }
 
   processData.executable = executables.map((exe, i) => {
-    const action = i === 0 ? 'fork' : 'exec';
+    const execEventAction = index === AUDITBEAT_INDEX ? 'executed' : 'exec';
+    const action: EventAction = i === 0 ? 'fork' : execEventAction;
 
     return [exe, `(${action})`];
   });

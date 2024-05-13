@@ -240,6 +240,8 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
       false,
       {
         fetchIndexApiSuccess: () => false,
+        startAccessControlSync: () => true,
+        startIncrementalSync: () => true,
         startSyncApiSuccess: () => true,
       },
     ],

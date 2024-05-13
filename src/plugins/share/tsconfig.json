@@ -20,6 +20,7 @@
     "@kbn/shared-ux-prompt-not-found",
     "@kbn/react-kibana-mount",
     "@kbn/shared-ux-tabbed-modal",
+    "@kbn/core-theme-browser",
   ],
   "exclude": [
     "target/**/*",

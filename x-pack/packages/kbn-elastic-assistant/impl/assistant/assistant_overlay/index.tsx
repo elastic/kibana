@@ -5,14 +5,19 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-import { EuiModal } from '@elastic/eui';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { EuiModal, EuiFlyoutResizable, useEuiTheme } from '@elastic/eui';
 
 import useEvent from 'react-use/lib/useEvent';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
-import { ShowAssistantOverlayProps, useAssistantContext } from '../../assistant_context';
-import { Assistant } from '..';
+import { css } from '@emotion/react';
+import {
+  ShowAssistantOverlayProps,
+  useAssistantContext,
+  UserAvatar,
+} from '../../assistant_context';
+import { Assistant, CONVERSATION_SIDE_PANEL_WIDTH } from '..';
 import { WELCOME_CONVERSATION_TITLE } from '../use_conversation/translations';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
@@ -27,14 +32,22 @@ const StyledEuiModal = styled(EuiModal)`
  * Modal container for Elastic AI Assistant conversations, receiving the page contents as context, plus whatever
  * component currently has focus and any specific context it may provide through the SAssInterface.
  */
-export const AssistantOverlay = React.memo(() => {
+export interface Props {
+  isFlyoutMode: boolean;
+  currentUserAvatar?: UserAvatar;
+}
+
+export const AssistantOverlay = React.memo<Props>(({ isFlyoutMode, currentUserAvatar }) => {
+  const { euiTheme } = useEuiTheme();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [conversationTitle, setConversationTitle] = useState<string | undefined>(
     WELCOME_CONVERSATION_TITLE
   );
   const [promptContextId, setPromptContextId] = useState<string | undefined>();
-  const { assistantTelemetry, setShowAssistantOverlay, getLastConversationTitle } =
+  const { assistantTelemetry, setShowAssistantOverlay, getLastConversationId } =
     useAssistantContext();
+
+  const [chatHistoryVisible, setChatHistoryVisible] = useState(false);
 
   // Bind `showAssistantOverlay` in SecurityAssistantContext to this modal instance
   const showOverlay = useCallback(
@@ -44,7 +57,7 @@ export const AssistantOverlay = React.memo(() => {
         promptContextId: pid,
         conversationTitle: cTitle,
       }: ShowAssistantOverlayProps) => {
-        const newConversationTitle = getLastConversationTitle(cTitle);
+        const newConversationTitle = getLastConversationId(cTitle);
         if (so)
           assistantTelemetry?.reportAssistantInvoked({
             conversationId: newConversationTitle,
@@ -55,7 +68,7 @@ export const AssistantOverlay = React.memo(() => {
         setPromptContextId(pid);
         setConversationTitle(newConversationTitle);
       },
-    [assistantTelemetry, getLastConversationTitle]
+    [assistantTelemetry, getLastConversationId]
   );
   useEffect(() => {
     setShowAssistantOverlay(showOverlay);
@@ -65,15 +78,15 @@ export const AssistantOverlay = React.memo(() => {
   const handleShortcutPress = useCallback(() => {
     // Try to restore the last conversation on shortcut pressed
     if (!isModalVisible) {
-      setConversationTitle(getLastConversationTitle());
+      setConversationTitle(getLastConversationId());
       assistantTelemetry?.reportAssistantInvoked({
         invokedBy: 'shortcut',
-        conversationId: getLastConversationTitle(),
+        conversationId: getLastConversationId(),
       });
     }
 
     setIsModalVisible(!isModalVisible);
-  }, [isModalVisible, getLastConversationTitle, assistantTelemetry]);
+  }, [isModalVisible, getLastConversationId, assistantTelemetry]);
 
   // Register keyboard listener to show the modal when cmd + ; is pressed
   const onKeyDown = useCallback(
@@ -98,11 +111,67 @@ export const AssistantOverlay = React.memo(() => {
     cleanupAndCloseModal();
   }, [cleanupAndCloseModal]);
 
+  const toggleChatHistory = useCallback(() => {
+    setChatHistoryVisible((prev) => {
+      if (flyoutRef?.current) {
+        const currentValue = parseInt(flyoutRef.current.style.inlineSize.split('px')[0], 10);
+        flyoutRef.current.style.inlineSize = `${
+          prev
+            ? currentValue - CONVERSATION_SIDE_PANEL_WIDTH
+            : currentValue + CONVERSATION_SIDE_PANEL_WIDTH
+        }px`;
+      }
+
+      return !prev;
+    });
+  }, []);
+
+  const flyoutRef = useRef<HTMLDivElement>();
+
+  if (!isModalVisible) return null;
+
+  if (isFlyoutMode) {
+    return (
+      <EuiFlyoutResizable
+        ref={flyoutRef}
+        css={css`
+          max-inline-size: calc(100% - 20px);
+          min-inline-size: 400px;
+          > div {
+            height: 100%;
+          }
+        `}
+        onClose={handleCloseModal}
+        data-test-subj="ai-assistant-flyout"
+        paddingSize="none"
+        hideCloseButton
+        // EUI TODO: This z-index override of EuiOverlayMask is a workaround, and ideally should be resolved with a cleaner UI/UX flow long-term
+        maskProps={{ style: `z-index: ${(euiTheme.levels.flyout as number) + 3}` }} // we need this flyout to be above the timeline flyout (which has a z-index of 1002)
+      >
+        <Assistant
+          conversationTitle={conversationTitle}
+          promptContextId={promptContextId}
+          onCloseFlyout={handleCloseModal}
+          isFlyoutMode={isFlyoutMode}
+          chatHistoryVisible={chatHistoryVisible}
+          setChatHistoryVisible={toggleChatHistory}
+          currentUserAvatar={currentUserAvatar}
+        />
+      </EuiFlyoutResizable>
+    );
+  }
+
   return (
     <>
       {isModalVisible && (
         <StyledEuiModal onClose={handleCloseModal} data-test-subj="ai-assistant-modal">
-          <Assistant conversationTitle={conversationTitle} promptContextId={promptContextId} />
+          <Assistant
+            conversationTitle={conversationTitle}
+            promptContextId={promptContextId}
+            chatHistoryVisible={chatHistoryVisible}
+            setChatHistoryVisible={toggleChatHistory}
+            currentUserAvatar={currentUserAvatar}
+          />
         </StyledEuiModal>
       )}
     </>

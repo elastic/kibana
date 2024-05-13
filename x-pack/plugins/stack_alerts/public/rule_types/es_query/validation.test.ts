@@ -175,7 +175,7 @@ describe('expression params validation', () => {
     };
     expect(validateExpression(initialParams).errors.esQuery.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.esQuery[0]).toBe(`Query field is required.`);
-    expect(hasExpressionValidationErrors(initialParams)).toBe(true);
+    expect(hasExpressionValidationErrors(initialParams, false)).toBe(true);
   });
 
   test('if searchConfiguration property is not set should return proper error message', () => {
@@ -302,6 +302,25 @@ describe('expression params validation', () => {
     );
   });
 
+  test('if size property is > 100, in serverless, should return proper error message', () => {
+    const initialParams: EsQueryRuleParams<SearchType.esQuery> = {
+      index: ['test'],
+      esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n`,
+      size: 250,
+      timeWindowSize: 1,
+      timeWindowUnit: 's',
+      threshold: [0],
+      timeField: '',
+      excludeHitsFromPreviousRun: true,
+      aggType: 'count',
+      groupBy: 'all',
+    };
+    expect(validateExpression(initialParams, true).errors.size.length).toBeGreaterThan(0);
+    expect(validateExpression(initialParams, true).errors.size[0]).toBe(
+      'Size must be between 0 and 100.'
+    );
+  });
+
   test('should not return error messages if all is correct', () => {
     const initialParams: EsQueryRuleParams<SearchType.esQuery> = {
       index: ['test'],
@@ -316,7 +335,7 @@ describe('expression params validation', () => {
       groupBy: 'all',
     };
     expect(validateExpression(initialParams).errors.size.length).toBe(0);
-    expect(hasExpressionValidationErrors(initialParams)).toBe(false);
+    expect(hasExpressionValidationErrors(initialParams, false)).toBe(false);
   });
 
   test('if esqlQuery property is not set should return proper error message', () => {

@@ -6,18 +6,10 @@
  */
 
 import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
-import {
-  AggregatedTransactionsCounts,
-  APMUsage,
-  APMPerService,
-  DataStreamCombined,
-} from './types';
+import { AggregatedTransactionsCounts, APMUsage, APMPerService, DataStreamCombined } from './types';
 import { ElasticAgentName } from '../../../typings/es_schemas/ui/fields/agent';
 
-const aggregatedTransactionCountSchema: MakeSchemaFrom<
-  AggregatedTransactionsCounts,
-  true
-> = {
+const aggregatedTransactionCountSchema: MakeSchemaFrom<AggregatedTransactionsCounts, true> = {
   expected_metric_document_count: {
     type: 'long',
     _meta: {
@@ -38,8 +30,7 @@ const dataStreamCombinedSchema: MakeSchemaFrom<DataStreamCombined, true> = {
       shards: {
         type: 'long',
         _meta: {
-          description:
-            'Total number of shards for the given metricset per rollup interval.',
+          description: 'Total number of shards for the given metricset per rollup interval.',
         },
       },
       docs: {
@@ -66,141 +57,128 @@ const dataStreamCombinedSchema: MakeSchemaFrom<DataStreamCombined, true> = {
     doc_count: {
       type: 'long',
       _meta: {
-        description:
-          'Document count for the last day for a given metricset and rollup interval',
+        description: 'Document count for the last day for a given metricset and rollup interval',
       },
     },
   },
 };
 
-const agentSchema: MakeSchemaFrom<APMUsage, true>['agents'][ElasticAgentName] =
-  {
-    agent: {
+const agentSchema: MakeSchemaFrom<APMUsage, true>['agents'][ElasticAgentName] = {
+  agent: {
+    version: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'An array of the top 3 agent versions within the last day',
+        },
+      },
+    },
+    activation_method: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'An array of the top 3 agent activation methods within the last day',
+        },
+      },
+    },
+  },
+  service: {
+    framework: {
+      name: {
+        type: 'array',
+        items: {
+          type: 'keyword',
+          _meta: {
+            description: 'An array of the top 3 service framework name  within the last day',
+          },
+        },
+      },
       version: {
         type: 'array',
         items: {
           type: 'keyword',
           _meta: {
-            description:
-              'An array of the top 3 agent versions within the last day',
+            description: 'An array of the top 3 service framework version within the last day',
           },
         },
       },
-      activation_method: {
+      composite: {
         type: 'array',
         items: {
           type: 'keyword',
           _meta: {
             description:
-              'An array of the top 3 agent activation methods within the last day',
+              'Composite field containing service framework and version sorted by doc count',
           },
         },
       },
     },
-    service: {
-      framework: {
-        name: {
-          type: 'array',
-          items: {
-            type: 'keyword',
-            _meta: {
-              description:
-                'An array of the top 3 service framework name  within the last day',
-            },
-          },
-        },
-        version: {
-          type: 'array',
-          items: {
-            type: 'keyword',
-            _meta: {
-              description:
-                'An array of the top 3 service framework version within the last day',
-            },
-          },
-        },
-        composite: {
-          type: 'array',
-          items: {
-            type: 'keyword',
-            _meta: {
-              description:
-                'Composite field containing service framework and version sorted by doc count',
-            },
+    language: {
+      name: {
+        type: 'array',
+        items: {
+          type: 'keyword',
+          _meta: {
+            description: 'An array of the top 3 service language name within the last day',
           },
         },
       },
-      language: {
-        name: {
-          type: 'array',
-          items: {
-            type: 'keyword',
-            _meta: {
-              description:
-                'An array of the top 3 service language name within the last day',
-            },
-          },
-        },
-        version: {
-          type: 'array',
-          items: {
-            type: 'keyword',
-            _meta: {
-              description:
-                'An array of the top 3 service language version within the last day',
-            },
-          },
-        },
-        composite: {
-          type: 'array',
-          items: {
-            type: 'keyword',
-            _meta: {
-              description:
-                'Composite field containing service language name and version sorted by doc count.',
-            },
+      version: {
+        type: 'array',
+        items: {
+          type: 'keyword',
+          _meta: {
+            description: 'An array of the top 3 service language version within the last day',
           },
         },
       },
-      runtime: {
-        name: {
-          type: 'array',
-          items: {
-            type: 'keyword',
-            _meta: {
-              description:
-                'An array of the top 3 service runtime name within the last day',
-            },
-          },
-        },
-        version: {
-          type: 'array',
-          items: {
-            type: 'keyword',
-            _meta: {
-              description:
-                'An array of the top 3 service runtime version within the last day',
-            },
-          },
-        },
-        composite: {
-          type: 'array',
-          items: {
-            type: 'keyword',
-            _meta: {
-              description:
-                'Composite field containing service runtime name and version sorted by doc count.',
-            },
+      composite: {
+        type: 'array',
+        items: {
+          type: 'keyword',
+          _meta: {
+            description:
+              'Composite field containing service language name and version sorted by doc count.',
           },
         },
       },
     },
-  };
+    runtime: {
+      name: {
+        type: 'array',
+        items: {
+          type: 'keyword',
+          _meta: {
+            description: 'An array of the top 3 service runtime name within the last day',
+          },
+        },
+      },
+      version: {
+        type: 'array',
+        items: {
+          type: 'keyword',
+          _meta: {
+            description: 'An array of the top 3 service runtime version within the last day',
+          },
+        },
+      },
+      composite: {
+        type: 'array',
+        items: {
+          type: 'keyword',
+          _meta: {
+            description:
+              'Composite field containing service runtime name and version sorted by doc count.',
+          },
+        },
+      },
+    },
+  },
+};
 
-const apmPerAgentSchema: Pick<
-  MakeSchemaFrom<APMUsage, true>,
-  'services_per_agent' | 'agents'
-> = {
+const apmPerAgentSchema: Pick<MakeSchemaFrom<APMUsage, true>, 'services_per_agent' | 'agents'> = {
   // services_per_agent: AGENT_NAMES.reduce(
   //   (acc, name) => ({ ...acc, [name]: long }),
   //   {} as Record<AgentName, typeof long>
@@ -229,71 +207,61 @@ const apmPerAgentSchema: Pick<
     'iOS/swift': {
       type: 'long',
       _meta: {
-        description:
-          'Total number of services utilizing the iOS/swift agent within the last day',
+        description: 'Total number of services utilizing the iOS/swift agent within the last day',
       },
     },
     go: {
       type: 'long',
       _meta: {
-        description:
-          'Total number of services utilizing the go agent within the last day',
+        description: 'Total number of services utilizing the go agent within the last day',
       },
     },
     java: {
       type: 'long',
       _meta: {
-        description:
-          'Total number of services utilizing the Java agent within the last day',
+        description: 'Total number of services utilizing the Java agent within the last day',
       },
     },
     'js-base': {
       type: 'long',
       _meta: {
-        description:
-          'Total number of services utilizing the js-base agent within the last day',
+        description: 'Total number of services utilizing the js-base agent within the last day',
       },
     },
     nodejs: {
       type: 'long',
       _meta: {
-        description:
-          'Total number of services utilizing the nodeJS agent within the last day',
+        description: 'Total number of services utilizing the nodeJS agent within the last day',
       },
     },
     php: {
       type: 'long',
       _meta: {
-        description:
-          'Total number of services utilizing the PHH agent within the last day',
+        description: 'Total number of services utilizing the PHH agent within the last day',
       },
     },
     python: {
       type: 'long',
       _meta: {
-        description:
-          'Total number of services utilizing the Python agent within the last day',
+        description: 'Total number of services utilizing the Python agent within the last day',
       },
     },
     ruby: {
       type: 'long',
       _meta: {
-        description:
-          'Total number of services utilizing the Ruby agent within the last day',
+        description: 'Total number of services utilizing the Ruby agent within the last day',
       },
     },
     'rum-js': {
       type: 'long',
       _meta: {
-        description:
-          'Total number of services utilizing the rum-js agent within the last day',
+        description: 'Total number of services utilizing the rum-js agent within the last day',
       },
     },
     otlp: {
       type: 'long',
       _meta: {
-        description:
-          'Total number of services utilizing the otlp agent within the last day',
+        description: 'Total number of services utilizing the otlp agent within the last day',
       },
     },
     'opentelemetry/cpp': {
@@ -421,8 +389,7 @@ export const apmPerServiceSchema: MakeSchemaFrom<APMPerService, true> = {
   num_transaction_types: {
     type: 'long',
     _meta: {
-      description:
-        'Total number of the unique transaction types within an hour',
+      description: 'Total number of the unique transaction types within an hour',
     },
   },
   timed_out: {
@@ -447,8 +414,7 @@ export const apmPerServiceSchema: MakeSchemaFrom<APMPerService, true> = {
       items: {
         type: 'keyword',
         _meta: {
-          description:
-            'An array of the top 5 cloud regions within an hour. Example [ca-central-1]',
+          description: 'An array of the top 5 cloud regions within an hour. Example [ca-central-1]',
         },
       },
     },
@@ -457,8 +423,7 @@ export const apmPerServiceSchema: MakeSchemaFrom<APMPerService, true> = {
       items: {
         type: 'keyword',
         _meta: {
-          description:
-            'An array of the top 3 cloud provider within an hour. Example [aws]',
+          description: 'An array of the top 3 cloud provider within an hour. Example [aws]',
         },
       },
     },
@@ -584,8 +549,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
   has_any_services: {
     type: 'boolean',
     _meta: {
-      description:
-        'Indicates whether any service is being monitored within the last day.',
+      description: 'Indicates whether any service is being monitored within the last day.',
     },
   },
   version: {
@@ -695,8 +659,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
       '1d': {
         type: 'long',
         _meta: {
-          description:
-            'Total number of transaction documents within the last day',
+          description: 'Total number of transaction documents within the last day',
         },
       },
       all: {
@@ -752,8 +715,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
       '1d': {
         type: 'long',
         _meta: {
-          description:
-            'Total number of onboarding documents within the last day',
+          description: 'Total number of onboarding documents within the last day',
         },
       },
       all: {
@@ -767,8 +729,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
       all: {
         type: 'long',
         _meta: {
-          description:
-            'Total number of apm-agent-configuration documents overall',
+          description: 'Total number of apm-agent-configuration documents overall',
         },
       },
     },
@@ -825,8 +786,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
       '1d': {
         type: 'long',
         _meta: {
-          description:
-            'Total number of unique environments within the last day',
+          description: 'Total number of unique environments within the last day',
         },
       },
     },
@@ -863,8 +823,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
           '1d': {
             type: 'long',
             _meta: {
-              description:
-                'Unique user agent for all agents within the last day',
+              description: 'Unique user agent for all agents within the last day',
             },
           },
         },
@@ -872,8 +831,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
           '1d': {
             type: 'long',
             _meta: {
-              description:
-                'Unique user agent for rum agent within the last day',
+              description: 'Unique user agent for rum agent within the last day',
             },
           },
         },
@@ -885,8 +843,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
           '1d': {
             type: 'long',
             _meta: {
-              description:
-                'Unique transaction names for all agents within the last day',
+              description: 'Unique transaction names for all agents within the last day',
             },
           },
         },
@@ -894,8 +851,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
           '1d': {
             type: 'long',
             _meta: {
-              description:
-                'Unique transaction names for rum agent within the last day',
+              description: 'Unique transaction names for rum agent within the last day',
             },
           },
         },
@@ -986,8 +942,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
             size_in_bytes: {
               type: 'long',
               _meta: {
-                description:
-                  'Size of the metric indicess in byte units overall.',
+                description: 'Size of the metric indicess in byte units overall.',
               },
             },
           },
@@ -1022,8 +977,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
         total: {
           type: 'long',
           _meta: {
-            description:
-              'Total number of shards for span and transaction indices',
+            description: 'Total number of shards for span and transaction indices',
           },
         },
       },
@@ -1041,8 +995,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
             size_in_bytes: {
               type: 'long',
               _meta: {
-                description:
-                  'Size of the metric indicess in byte units overall.',
+                description: 'Size of the metric indicess in byte units overall.',
               },
             },
           },
@@ -1121,15 +1074,13 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
     max: {
       type: 'long',
       _meta: {
-        description:
-          'Max number of documents in top 100 traces withing the last day',
+        description: 'Max number of documents in top 100 traces withing the last day',
       },
     },
     median: {
       type: 'long',
       _meta: {
-        description:
-          'Median number of documents in top 100 traces within the last day',
+        description: 'Median number of documents in top 100 traces within the last day',
       },
     },
   },
@@ -1139,8 +1090,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
         ms: {
           type: 'long',
           _meta: {
-            description:
-              'Execution time in milliseconds for the "aggregated_transactions" task',
+            description: 'Execution time in milliseconds for the "aggregated_transactions" task',
           },
         },
       },
@@ -1170,8 +1120,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
         ms: {
           type: 'long',
           _meta: {
-            description:
-              'Execution time in milliseconds for the "processor_events" task',
+            description: 'Execution time in milliseconds for the "processor_events" task',
           },
         },
       },
@@ -1181,8 +1130,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
         ms: {
           type: 'long',
           _meta: {
-            description:
-              'Execution time in milliseconds for the "agent_configuration" task',
+            description: 'Execution time in milliseconds for the "agent_configuration" task',
           },
         },
       },
@@ -1192,8 +1140,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
         ms: {
           type: 'long',
           _meta: {
-            description:
-              'Execution time in milliseconds for the "global_labels" task',
+            description: 'Execution time in milliseconds for the "global_labels" task',
           },
         },
       },
@@ -1203,8 +1150,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
         ms: {
           type: 'long',
           _meta: {
-            description:
-              'Execution time in milliseconds for the "services" task',
+            description: 'Execution time in milliseconds for the "services" task',
           },
         },
       },
@@ -1214,8 +1160,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
         ms: {
           type: 'long',
           _meta: {
-            description:
-              'Execution time in milliseconds for the "versions" task',
+            description: 'Execution time in milliseconds for the "versions" task',
           },
         },
       },
@@ -1225,8 +1170,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
         ms: {
           type: 'long',
           _meta: {
-            description:
-              'Execution time in milliseconds for the "groupings" task',
+            description: 'Execution time in milliseconds for the "groupings" task',
           },
         },
       },
@@ -1236,8 +1180,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
         ms: {
           type: 'long',
           _meta: {
-            description:
-              'Execution time in milliseconds for the "integrations" task',
+            description: 'Execution time in milliseconds for the "integrations" task',
           },
         },
       },
@@ -1257,8 +1200,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
         ms: {
           type: 'long',
           _meta: {
-            description:
-              'Execution time in milliseconds for the "indices_stats" task',
+            description: 'Execution time in milliseconds for the "indices_stats" task',
           },
         },
       },
@@ -1268,8 +1210,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
         ms: {
           type: 'long',
           _meta: {
-            description:
-              'Execution time in milliseconds for the "cardinality" task',
+            description: 'Execution time in milliseconds for the "cardinality" task',
           },
         },
       },
@@ -1279,8 +1220,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
         ms: {
           type: 'long',
           _meta: {
-            description:
-              'Execution time in milliseconds for the "environments" task',
+            description: 'Execution time in milliseconds for the "environments" task',
           },
         },
       },
@@ -1290,8 +1230,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
         ms: {
           type: 'long',
           _meta: {
-            description:
-              'Execution time in milliseconds for the "service_groups" task',
+            description: 'Execution time in milliseconds for the "service_groups" task',
           },
         },
       },
@@ -1301,8 +1240,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
         ms: {
           type: 'long',
           _meta: {
-            description:
-              'Execution time in milliseconds for the "custom_dashboards" task',
+            description: 'Execution time in milliseconds for the "custom_dashboards" task',
           },
         },
       },
@@ -1312,8 +1250,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
         ms: {
           type: 'long',
           _meta: {
-            description:
-              'Execution time in milliseconds for the "per_service" task',
+            description: 'Execution time in milliseconds for the "per_service" task',
           },
         },
       },
@@ -1323,8 +1260,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
         ms: {
           type: 'long',
           _meta: {
-            description:
-              'Execution time in milliseconds for the "top_traces" task',
+            description: 'Execution time in milliseconds for the "top_traces" task',
           },
         },
       },

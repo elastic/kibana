@@ -6,7 +6,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { ActionsClient } from './actions_client';
+import type { ActionsClient } from './actions_client';
 
 type ActionsClientContract = PublicMethodsOf<ActionsClient>;
 export type ActionsClientMock = jest.Mocked<ActionsClientContract>;

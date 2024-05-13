@@ -15,6 +15,7 @@ import { CanvasPageProvider } from './canvas_page';
 import { CopySavedObjectsToSpacePageProvider } from './copy_saved_objects_to_space_page';
 import { CrossClusterReplicationPageProvider } from './cross_cluster_replication_page';
 import { DetectionsPageObject } from '../../security_solution_ftr/page_objects/detections';
+import { EmbeddedConsoleProvider } from './embedded_console';
 import { GeoFileUploadPageObject } from './geo_file_upload';
 import { GisPageObject } from './gis_page';
 import { GraphPageObject } from './graph_page';
@@ -65,6 +66,7 @@ export const pageObjects = {
   copySavedObjectsToSpace: CopySavedObjectsToSpacePageProvider,
   crossClusterReplication: CrossClusterReplicationPageProvider,
   detections: DetectionsPageObject,
+  embeddedConsole: EmbeddedConsoleProvider,
   geoFileUpload: GeoFileUploadPageObject,
   graph: GraphPageObject,
   grokDebugger: GrokDebuggerPageObject,

@@ -27,7 +27,7 @@ import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import {
   PLUGIN,
-  type TransformHealth,
+  type TransformHealthStatus,
   TRANSFORM_RULE_TYPE,
   TRANSFORM_HEALTH_RESULTS,
 } from '../../../../common/constants';
@@ -38,7 +38,7 @@ import { transformHealthServiceProvider } from './transform_health_service';
 export interface BaseTransformAlertResponse {
   transform_id: string;
   description?: string;
-  health_status: TransformHealth;
+  health_status: TransformHealthStatus;
   issues?: Array<{ issue: string; details?: string; count: number; first_occurrence?: string }>;
 }
 

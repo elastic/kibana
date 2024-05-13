@@ -11,10 +11,7 @@ import {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
 } from '@kbn/data-plugin/server';
-import {
-  FleetSetupContract,
-  FleetStartContract,
-} from '@kbn/fleet-plugin/server';
+import { FleetSetupContract, FleetStartContract } from '@kbn/fleet-plugin/server';
 import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
@@ -39,5 +36,4 @@ export interface ObservabilityOnboardingPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ObservabilityOnboardingPluginStart {}
 
-export type ObservabilityOnboardingRequestHandlerContext =
-  CustomRequestHandlerContext<{}>;
+export type ObservabilityOnboardingRequestHandlerContext = CustomRequestHandlerContext<{}>;

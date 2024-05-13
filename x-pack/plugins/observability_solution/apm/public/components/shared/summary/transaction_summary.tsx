@@ -41,12 +41,7 @@ function getTransactionResultSummaryItem(transaction: Transaction) {
   return null;
 }
 
-function TransactionSummary({
-  transaction,
-  totalDuration,
-  errorCount,
-  coldStartBadge,
-}: Props) {
+function TransactionSummary({ transaction, totalDuration, errorCount, coldStartBadge }: Props) {
   const items = [
     <TimestampTooltip time={transaction.timestamp.us / 1000} />,
     <DurationSummaryItem
@@ -56,9 +51,7 @@ function TransactionSummary({
     />,
     getTransactionResultSummaryItem(transaction),
     errorCount ? <ErrorCountSummaryItemBadge count={errorCount} /> : null,
-    transaction.user_agent ? (
-      <UserAgentSummaryItem {...transaction.user_agent} />
-    ) : null,
+    transaction.user_agent ? <UserAgentSummaryItem {...transaction.user_agent} /> : null,
     coldStartBadge ? <ColdStartBadge /> : null,
   ];
 

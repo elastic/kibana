@@ -16,7 +16,7 @@ import { AZURE_CREDENTIALS_TYPE } from './azure_credentials_form';
 
 export type AzureCredentialsFields = Record<
   string,
-  { label: string; type?: 'password' | 'text'; testSubj?: string }
+  { label: string; type?: 'password' | 'text'; testSubj?: string; isSecret?: boolean }
 >;
 
 export interface AzureOptionValue {
@@ -55,6 +55,7 @@ export const getInputVarsFields = (input: NewPackagePolicyInput, fields: AzureCr
         type: field.type || 'text',
         testSubj: field.testSubj,
         value: inputVar.value,
+        isSecret: field?.isSecret,
       } as const;
     });
 
@@ -107,6 +108,7 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
       },
       'azure.credentials.client_secret': {
         type: 'password',
+        isSecret: true,
         label: i18n.translate('xpack.csp.azureIntegration.clientSecretLabel', {
           defaultMessage: 'Client Secret',
         }),
@@ -135,6 +137,7 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
       },
       'azure.credentials.client_certificate_password': {
         type: 'password',
+        isSecret: true,
         label: i18n.translate('xpack.csp.azureIntegration.clientCertificatePasswordLabel', {
           defaultMessage: 'Client Certificate Password',
         }),
@@ -164,6 +167,7 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
       },
       'azure.credentials.client_password': {
         type: 'password',
+        isSecret: true,
         label: i18n.translate('xpack.csp.azureIntegration.clientPasswordLabel', {
           defaultMessage: 'Client Password',
         }),

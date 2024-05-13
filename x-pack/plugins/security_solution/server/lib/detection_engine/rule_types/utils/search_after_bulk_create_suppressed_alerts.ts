@@ -14,12 +14,14 @@ import type {
   WrapSuppressedHits,
 } from '../types';
 import type { AlertSuppressionCamel } from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { ExperimentalFeatures } from '../../../../../common';
 
 interface SearchAfterAndBulkCreateSuppressedAlertsParams extends SearchAfterAndBulkCreateParams {
   wrapSuppressedHits: WrapSuppressedHits;
   alertTimestampOverride: Date | undefined;
   alertWithSuppression: SuppressedAlertService;
   alertSuppression?: AlertSuppressionCamel;
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 import type { SearchAfterAndBulkCreateFactoryParams } from './search_after_bulk_create_factory';
@@ -44,6 +46,7 @@ export const searchAfterAndBulkCreateSuppressedAlerts = async (
     wrapSuppressedHits,
     alertWithSuppression,
     alertTimestampOverride,
+    experimentalFeatures,
   } = params;
 
   const bulkCreateExecutor: SearchAfterAndBulkCreateFactoryParams['bulkCreateExecutor'] = async ({
@@ -63,6 +66,7 @@ export const searchAfterAndBulkCreateSuppressedAlerts = async (
       alertTimestampOverride,
       enrichedEvents,
       toReturn,
+      experimentalFeatures,
     });
   };
 

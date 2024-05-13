@@ -7,8 +7,10 @@
 
 import React, { useCallback } from 'react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
+import { euiLightVars } from '@kbn/ui-theme';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import * as i18n from '../translations';
 import { useAssistantContext } from '../../assistant_context';
 import { CONVERSATIONS_TAB } from '../../assistant/settings/assistant_settings';
@@ -18,6 +20,7 @@ interface Props {
   isConnectorConfigured: boolean;
   isSettingsModalVisible: boolean;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  isFlyoutMode: boolean;
 }
 
 /**
@@ -28,7 +31,7 @@ interface Props {
  * TODO: Add setting for 'default connector' so we can auto-resolve and not even show this
  */
 export const ConnectorMissingCallout: React.FC<Props> = React.memo(
-  ({ isConnectorConfigured, isSettingsModalVisible, setIsSettingsModalVisible }) => {
+  ({ isConnectorConfigured, isSettingsModalVisible, setIsSettingsModalVisible, isFlyoutMode }) => {
     const { assistantAvailability, setSelectedSettingsTab } = useAssistantContext();
 
     const onConversationSettingsClicked = useCallback(() => {
@@ -52,9 +55,15 @@ export const ConnectorMissingCallout: React.FC<Props> = React.memo(
             iconType="controlsVertical"
             size="m"
             title={i18n.MISSING_CONNECTOR_CALLOUT_TITLE}
+            css={
+              isFlyoutMode &&
+              css`
+                padding-left: ${euiLightVars.euiPanelPaddingModifiers.paddingMedium} !important;
+                padding-right: ${euiLightVars.euiPanelPaddingModifiers.paddingMedium} !important;
+              `
+            }
           >
             <p>
-              {' '}
               <FormattedMessage
                 defaultMessage="Select a connector above or from the {link} to continue"
                 id="xpack.elasticAssistant.assistant.connectors.connectorMissingCallout.calloutDescription"

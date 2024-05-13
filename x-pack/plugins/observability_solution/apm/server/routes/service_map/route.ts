@@ -60,32 +60,24 @@ const serviceMapRoute = createApmServerRoute({
     });
 
     const {
-      query: {
-        serviceName,
-        serviceGroup: serviceGroupId,
-        environment,
-        start,
-        end,
-        kuery,
-      },
+      query: { serviceName, serviceGroup: serviceGroupId, environment, start, end, kuery },
     } = params;
 
     const {
       savedObjects: { client: savedObjectsClient },
       uiSettings: { client: uiSettingsClient },
     } = await context.core;
-    const [mlClient, apmEventClient, serviceGroup, maxNumberOfServices] =
-      await Promise.all([
-        getMlClient(resources),
-        getApmEventClient(resources),
-        serviceGroupId
-          ? getServiceGroup({
-              savedObjectsClient,
-              serviceGroupId,
-            })
-          : Promise.resolve(null),
-        uiSettingsClient.get<number>(apmServiceGroupMaxNumberOfServices),
-      ]);
+    const [mlClient, apmEventClient, serviceGroup, maxNumberOfServices] = await Promise.all([
+      getMlClient(resources),
+      getApmEventClient(resources),
+      serviceGroupId
+        ? getServiceGroup({
+            savedObjectsClient,
+            serviceGroupId,
+          })
+        : Promise.resolve(null),
+      uiSettingsClient.get<number>(apmServiceGroupMaxNumberOfServices),
+    ]);
 
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
       apmEventClient,
@@ -160,17 +152,10 @@ const serviceMapServiceNodeRoute = createApmServerRoute({
 const serviceMapDependencyNodeRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/service-map/dependency',
   params: t.type({
-    query: t.intersection([
-      t.type({ dependencyName: t.string }),
-      environmentRt,
-      rangeRt,
-      offsetRt,
-    ]),
+    query: t.intersection([t.type({ dependencyName: t.string }), environmentRt, rangeRt, offsetRt]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<ServiceMapServiceDependencyInfoResponse> => {
+  handler: async (resources): Promise<ServiceMapServiceDependencyInfoResponse> => {
     const { config, context, params } = resources;
 
     if (!config.serviceMapEnabled) {

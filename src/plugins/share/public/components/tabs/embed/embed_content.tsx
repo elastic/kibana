@@ -6,7 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { EuiForm, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiForm,
+  EuiFormRow,
+  EuiSpacer,
+  EuiText,
+  EuiFlexItem,
+  EuiCopy,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
@@ -24,7 +33,7 @@ type EmbedProps = Pick<
   | 'embedUrlParamExtensions'
   | 'objectType'
 > & {
-  onChange: (url: string) => void;
+  setIsNotSaved: () => void;
 };
 
 interface UrlParams {
@@ -43,8 +52,8 @@ export const EmbedContent = ({
   shareableUrlForSavedObject,
   shareableUrl,
   isEmbedded,
-  onChange,
   objectType,
+  setIsNotSaved,
 }: EmbedProps) => {
   const isMounted = useMountedState();
   const [urlParams, setUrlParams] = useState<UrlParams | undefined>(undefined);
@@ -56,8 +65,8 @@ export const EmbedContent = ({
   const [usePublicUrl] = useState<boolean>(false);
 
   useEffect(() => {
-    onChange(url);
-  }, [url, onChange]);
+    if (objectType !== 'dashboard') setIsNotSaved();
+  }, [url, setIsNotSaved, objectType]);
 
   const getUrlParamExtensions = useCallback(
     (tempUrl: string): string => {
@@ -224,7 +233,7 @@ export const EmbedContent = ({
   const helpText =
     objectType === 'dashboard' ? (
       <FormattedMessage
-        id="share.embed.dashbord.helpText"
+        id="share.embed.dashboard.helpText"
         defaultMessage="Embed this dashboard into another webpage. Select which items to include in the embeddable view."
       />
     ) : (
@@ -236,12 +245,33 @@ export const EmbedContent = ({
     );
 
   return (
-    <EuiForm>
-      <EuiSpacer size="m" />
-      <EuiText size="s">{helpText}</EuiText>
-      <EuiSpacer />
-      {renderUrlParamExtensions()}
-      <EuiSpacer />
-    </EuiForm>
+    <>
+      <EuiForm>
+        <EuiSpacer size="m" />
+        <EuiText size="s">{helpText}</EuiText>
+        <EuiSpacer />
+        {renderUrlParamExtensions()}
+        <EuiSpacer />
+      </EuiForm>
+      <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiCopy textToCopy={url}>
+            {(copy) => (
+              <EuiButton
+                data-test-subj="copyEmbedUrlButton"
+                onClick={copy}
+                data-share-url={url}
+                fill
+              >
+                <FormattedMessage
+                  id="share.link.copyEmbedCodeButton"
+                  defaultMessage="Copy Embed Code"
+                />
+              </EuiButton>
+            )}
+          </EuiCopy>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
 };

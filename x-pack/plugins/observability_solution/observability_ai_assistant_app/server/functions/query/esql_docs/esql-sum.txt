@@ -1,7 +1,19 @@
 SUM
 
-The sum of a numeric field.
+Syntax
+SUM(expression)
+expression
+Numeric expression.
+DescriptionReturns the sum of a numeric expression.Example
 ```esql
 FROM employees
 | STATS SUM(languages)
+```
+
+The expression can use inline functions. For example, to calculate
+the sum of each employee’s maximum salary changes, apply the
+MV_MAX function to each row and then sum the results:
+```esql
+FROM employees
+| STATS total_salary_changes = SUM(MV_MAX(salary_change))
 ```

@@ -26,7 +26,20 @@ import {
   QUERY_KEY_ALERTS,
   QUERY_KEY_GET_TOTAL_IO_BYTES,
   CURRENT_API_VERSION,
+  EVENT_ACTION_FORK,
+  EVENT_ACTION_EXEC,
+  EVENT_ACTION_EXECUTED,
+  EVENT_ACTION_END,
 } from '../../../common/constants';
+
+const isSessionEventAction = (action: EventAction | undefined): boolean => {
+  if (!action) {
+    return false;
+  }
+  return [EVENT_ACTION_FORK, EVENT_ACTION_EXEC, EVENT_ACTION_EXECUTED, EVENT_ACTION_END].includes(
+    action
+  );
+};
 
 export const useFetchSessionViewProcessEvents = (
   index: string,
@@ -72,10 +85,7 @@ export const useFetchSessionViewProcessEvents = (
         if (isRefetch || lastPage.events.length >= PROCESS_EVENTS_PER_PAGE) {
           const filtered = lastPage.events.filter((event) => {
             const action = event.event?.action as EventAction;
-            return (
-              action &&
-              (action.includes('fork') || action.includes('exec') || action.includes('end'))
-            );
+            return isSessionEventAction(action);
           });
 
           const cursor = filtered?.[filtered.length - 1]?.['@timestamp'];
@@ -91,9 +101,7 @@ export const useFetchSessionViewProcessEvents = (
       getPreviousPageParam: (firstPage, pages) => {
         const filtered = firstPage.events.filter((event) => {
           const action = event.event?.action as EventAction;
-          return (
-            action && (action.includes('fork') || action.includes('exec') || action.includes('end'))
-          );
+          return isSessionEventAction(action);
         });
 
         const atBeginning = pages.length > 1 && filtered.length < PROCESS_EVENTS_PER_PAGE;

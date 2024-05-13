@@ -26,10 +26,7 @@ import { useHistory } from 'react-router-dom';
 import { useChartThemes } from '@kbn/observability-shared-plugin/public';
 import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
 import { SERVICE_NODE_NAME } from '../../../../../common/es_fields/apm';
-import {
-  asTransactionRate,
-  getDurationFormatter,
-} from '../../../../../common/utils/formatters';
+import { asTransactionRate, getDurationFormatter } from '../../../../../common/utils/formatters';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
@@ -99,9 +96,7 @@ export function InstancesLatencyDistributionChart({
   // there's just a single instance) they'll show along the origin. Make sure
   // the x-axis domain is [0, maxThroughput].
   const maxThroughput = Math.max(...items.map((item) => item.throughput ?? 0));
-  const maxComparisonThroughput = Math.max(
-    ...comparisonItems.map((item) => item.throughput ?? 0)
-  );
+  const maxComparisonThroughput = Math.max(...comparisonItems.map((item) => item.throughput ?? 0));
   const xDomain = {
     min: 0,
     max: Math.max(maxThroughput, maxComparisonThroughput),
@@ -137,10 +132,9 @@ export function InstancesLatencyDistributionChart({
           <BubbleSeries
             color={theme.eui.euiColorVis0}
             data={items}
-            id={i18n.translate(
-              'xpack.apm.instancesLatencyDistributionChartLegend',
-              { defaultMessage: 'Instances' }
-            )}
+            id={i18n.translate('xpack.apm.instancesLatencyDistributionChartLegend', {
+              defaultMessage: 'Instances',
+            })}
             xAccessor={(item) => item.throughput}
             xScaleType={ScaleType.Linear}
             yAccessors={[(item) => item.latency]}
@@ -174,11 +168,7 @@ export function InstancesLatencyDistributionChart({
               }}
             />
           )}
-          <Axis
-            id="x-axis"
-            labelFormat={asTransactionRate}
-            position={Position.Bottom}
-          />
+          <Axis id="x-axis" labelFormat={asTransactionRate} position={Position.Bottom} />
           <Axis
             id="y-axis"
             labelFormat={getResponseTimeTickFormatter(latencyFormatter)}

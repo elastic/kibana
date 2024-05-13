@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useAlertsHistory } from '@kbn/observability-alert-details';
 import rison from '@kbn/rison';
-import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
+import { ALERT_INSTANCE_ID, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import { GetSLOResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React from 'react';
@@ -30,7 +30,7 @@ import { convertTo } from '@kbn/observability-plugin/public';
 import { useKibana } from '../../../../../../utils/kibana_react';
 import { WindowSchema } from '../../../../../../typings';
 import { ErrorRateChart } from '../../../../error_rate_chart';
-import { BurnRateAlert, BurnRateRule } from '../../alert_details_app_section';
+import { BurnRateAlert, BurnRateRule } from '../../types';
 import { getActionGroupFromReason } from '../../utils/alert';
 
 interface Props {
@@ -52,6 +52,7 @@ export function AlertsHistoryPanel({ rule, slo, alert, isLoading }: Props) {
       to: 'now',
     },
     http,
+    instanceId: alert.fields[ALERT_INSTANCE_ID],
   });
 
   const actionGroup = getActionGroupFromReason(alert.reason);

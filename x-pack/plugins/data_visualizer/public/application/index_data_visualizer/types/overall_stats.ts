@@ -6,7 +6,7 @@
  */
 
 import type { DocumentCountStats } from '../../../../common/types/field_stats';
-
+import type { SupportedFieldType } from '../../../../common/types';
 export interface AggregatableField {
   fieldName: string;
   stats: {
@@ -25,6 +25,7 @@ export interface NonAggregatableField {
     sampleCount?: number;
   };
   existsInDocs: boolean;
+  secondaryType?: SupportedFieldType;
 }
 
 export interface OverallStats {

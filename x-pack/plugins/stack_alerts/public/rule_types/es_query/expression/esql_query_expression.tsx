@@ -16,6 +16,7 @@ import {
   EuiSelect,
   EuiSpacer,
 } from '@elastic/eui';
+import { getESQLQueryColumns } from '@kbn/esql-utils';
 import { getFields, RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
 import { fetchFieldsFromESQL } from '@kbn/text-based-editor';
@@ -32,7 +33,7 @@ import {
 import { DataView } from '@kbn/data-views-plugin/common';
 import { SourceFields } from '../../components/source_fields_select';
 import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType } from '../types';
-import { DEFAULT_VALUES } from '../constants';
+import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
 import { useTriggerUiActionServices } from '../util';
 import { hasExpressionValidationErrors } from '../validation';
 import { TestQueryRow } from '../test_query_row';
@@ -41,7 +42,7 @@ import { rowToDocument, toEsQueryHits, transformDatatableToEsqlTable } from '../
 export const EsqlQueryExpression: React.FC<
   RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esqlQuery>, EsQueryRuleMetaData>
 > = ({ ruleParams, setRuleParams, setRuleProperty, errors }) => {
-  const { expressions, http, fieldFormats } = useTriggerUiActionServices();
+  const { expressions, http, fieldFormats, isServerless, data } = useTriggerUiActionServices();
   const { esqlQuery, timeWindowSize, timeWindowUnit, timeField, sourceFields } = ruleParams;
 
   const [currentRuleParams, setCurrentRuleParams] = useState<
@@ -54,7 +55,7 @@ export const EsqlQueryExpression: React.FC<
     // so only 'met' results are returned, therefore the threshold should always be 0
     threshold: [0],
     thresholdComparator: DEFAULT_VALUES.THRESHOLD_COMPARATOR,
-    size: DEFAULT_VALUES.SIZE,
+    size: isServerless ? SERVERLESS_DEFAULT_VALUES.SIZE : DEFAULT_VALUES.SIZE,
     esqlQuery: esqlQuery ?? { esql: '' },
     aggType: DEFAULT_VALUES.AGGREGATION_TYPE,
     groupBy: DEFAULT_VALUES.GROUP_BY,
@@ -82,7 +83,7 @@ export const EsqlQueryExpression: React.FC<
   const setDefaultExpressionValues = async () => {
     setRuleProperty('params', currentRuleParams);
     setQuery(esqlQuery ?? { esql: '' });
-    if (esqlQuery && 'esql' in esqlQuery) {
+    if (esqlQuery) {
       if (esqlQuery.esql) {
         refreshTimeFields(esqlQuery);
         refreshEsFields(esqlQuery, false);
@@ -105,7 +106,7 @@ export const EsqlQueryExpression: React.FC<
       timeWindow: window,
     };
 
-    if (hasExpressionValidationErrors(currentRuleParams)) {
+    if (hasExpressionValidationErrors(currentRuleParams, isServerless)) {
       return emptyResult;
     }
     const timeWindow = parseDuration(window);
@@ -160,6 +161,7 @@ export const EsqlQueryExpression: React.FC<
     expressions,
     fieldFormats,
     timeField,
+    isServerless,
   ]);
 
   const refreshTimeFields = async (q: AggregateQuery) => {
@@ -181,9 +183,12 @@ export const EsqlQueryExpression: React.FC<
   const refreshEsFields = async (q: AggregateQuery, resetSourceFields: boolean = true) => {
     let fields: FieldOption[] = [];
     try {
-      const table = await fetchFieldsFromESQL({ esql: `${get(q, 'esql')} | limit 0` }, expressions);
-      if (table) {
-        fields = table.columns.map((c) => ({
+      const columns = await getESQLQueryColumns({
+        esqlQuery: `${get(q, 'esql')}`,
+        search: data.search.search,
+      });
+      if (columns.length) {
+        fields = columns.map((c) => ({
           name: c.id,
           type: c.meta.type,
           normalizedType: c.meta.type,
@@ -309,7 +314,7 @@ export const EsqlQueryExpression: React.FC<
       <EuiSpacer />
       <TestQueryRow
         fetch={onTestQuery}
-        hasValidationErrors={hasExpressionValidationErrors(currentRuleParams)}
+        hasValidationErrors={hasExpressionValidationErrors(currentRuleParams, isServerless)}
         showTable
       />
     </Fragment>

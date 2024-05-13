@@ -133,9 +133,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       const embeddableError = await testSubjects.find('embeddableError');
       const errorMessage = await embeddableError.findByTestSubject('errorMessageMarkdown');
-      expect(await errorMessage.getVisibleText()).to.equal(
-        'Expected AND, OR, end of input, whitespace but "n" found.\nthis < is not : a valid > query\n----------^'
-      );
+      const errorText = await errorMessage.getVisibleText();
+      expect(errorText).to.match(/Expected[\S\s]+but "n" found/);
     });
 
     it('should not show the full screen button', async () => {
@@ -145,7 +144,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show the the grid toolbar', async () => {
       await addSearchEmbeddableToDashboard();
-      await testSubjects.existOrFail('dscGridToolbar');
+      await testSubjects.existOrFail('unifiedDataTableToolbar');
     });
   });
 }

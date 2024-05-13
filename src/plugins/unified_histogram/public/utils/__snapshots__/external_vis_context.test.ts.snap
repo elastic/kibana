@@ -3,13 +3,7 @@
 exports[`external_vis_context exportVisContext should work correctly 1`] = `
 Object {
   "attributes": Object {
-    "references": Array [
-      Object {
-        "id": "index-pattern-with-timefield-id",
-        "name": "textBasedLanguages-datasource-layer-suggestion",
-        "type": "index-pattern",
-      },
-    ],
+    "references": Array [],
     "state": Object {
       "datasourceStates": Object {
         "textBased": Object {
@@ -192,13 +186,7 @@ Object {
 exports[`external_vis_context exportVisContext should work correctly 2`] = `
 Object {
   "attributes": Object {
-    "references": Array [
-      Object {
-        "id": "index-pattern-with-timefield-id",
-        "name": "textBasedLanguages-datasource-layer-suggestion",
-        "type": "index-pattern",
-      },
-    ],
+    "references": Array [],
     "state": Object {
       "datasourceStates": Object {
         "textBased": Object {

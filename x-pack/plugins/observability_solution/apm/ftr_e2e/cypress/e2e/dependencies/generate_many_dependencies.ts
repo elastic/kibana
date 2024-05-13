@@ -11,13 +11,7 @@ const MAX_DEPENDENCIES = 10000;
 const MAX_DEPENDENCIES_PER_SERVICE = 500;
 const MAX_SERVICES = 20;
 
-export function generateManyDependencies({
-  from,
-  to,
-}: {
-  from: number;
-  to: number;
-}) {
+export function generateManyDependencies({ from, to }: { from: number; to: number }) {
   const instances = Array.from({ length: MAX_SERVICES }).map((_, index) =>
     apm
       .service({
@@ -61,9 +55,6 @@ export function generateManyDependencies({
   };
 
   return instances.flatMap((instance, index) =>
-    instanceDependencies(
-      instance,
-      (index * MAX_DEPENDENCIES_PER_SERVICE) % MAX_DEPENDENCIES
-    )
+    instanceDependencies(instance, (index * MAX_DEPENDENCIES_PER_SERVICE) % MAX_DEPENDENCIES)
   );
 }

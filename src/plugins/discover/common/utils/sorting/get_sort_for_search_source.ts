@@ -46,7 +46,7 @@ export function getSortForSearchSource({
   }
 
   const { timeFieldName } = dataView;
-  const sortPairs = getSort(sort, dataView);
+  const sortPairs = getSort(sort, dataView, false); // text based request is not using search source
 
   const sortForSearchSource = sortPairs.map((sortPair: Record<string, string>) => {
     if (timeFieldName && sortPair[timeFieldName]) {

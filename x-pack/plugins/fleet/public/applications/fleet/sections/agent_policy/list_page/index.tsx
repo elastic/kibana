@@ -15,7 +15,7 @@ import {
   EuiEmptyPrompt,
   EuiBasicTable,
   EuiLink,
-  EuiTextColor,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { i18n } from '@kbn/i18n';
@@ -104,21 +104,9 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         name: i18n.translate('xpack.fleet.agentPolicyList.nameColumnTitle', {
           defaultMessage: 'Name',
         }),
-        width: '25%',
-        render: (name: string, agentPolicy: AgentPolicy) => (
-          <AgentPolicySummaryLine policy={agentPolicy} />
-        ),
-      },
-      {
-        field: 'description',
-        name: i18n.translate('xpack.fleet.agentPolicyList.descriptionColumnTitle', {
-          defaultMessage: 'Description',
-        }),
         width: '35%',
-        render: (value: string) => (
-          <EuiTextColor color="subdued" className="eui-textTruncate" title={value}>
-            {value}
-          </EuiTextColor>
+        render: (name: string, agentPolicy: AgentPolicy) => (
+          <AgentPolicySummaryLine policy={agentPolicy} withDescription={true} />
         ),
       },
       {
@@ -134,11 +122,67 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
       {
         field: 'agents',
         name: i18n.translate('xpack.fleet.agentPolicyList.agentsColumnTitle', {
-          defaultMessage: 'Agents',
+          defaultMessage: 'Unprivileged / Privileged',
         }),
         dataType: 'number',
         render: (agents: number, agentPolicy: AgentPolicy) => (
-          <LinkedAgentCount count={agents} agentPolicyId={agentPolicy.id} />
+          <EuiFlexGroup direction="row" gutterSize="xs" justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={
+                  <FormattedMessage
+                    id="xpack.fleet.agentPolicyList.agentsColumn.unprivilegedAgentsTooltip"
+                    defaultMessage="Unprivileged agents"
+                  />
+                }
+              >
+                <LinkedAgentCount
+                  count={agentPolicy.unprivileged_agents || 0}
+                  agentPolicyId={agentPolicy.id}
+                  showAgentText={false}
+                  privilegeMode="unprivileged"
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>/</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={
+                  <FormattedMessage
+                    id="xpack.fleet.agentPolicyList.agentsColumn.privilegedAgentsTooltip"
+                    defaultMessage="Privileged agents"
+                  />
+                }
+              >
+                <LinkedAgentCount
+                  count={agents - (agentPolicy.unprivileged_agents || 0)}
+                  agentPolicyId={agentPolicy.id}
+                  showAgentText={false}
+                  privilegeMode="privileged"
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <span>
+                {'('}
+                <EuiToolTip
+                  content={
+                    <FormattedMessage
+                      id="xpack.fleet.agentPolicyList.agentsColumn.totalAgentsTooltip"
+                      defaultMessage="Total agents"
+                    />
+                  }
+                >
+                  <LinkedAgentCount
+                    count={agents}
+                    agentPolicyId={agentPolicy.id}
+                    showAgentText={false}
+                  />
+                </EuiToolTip>
+                {')'}
+              </span>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ),
       },
       {
@@ -279,7 +323,6 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
       <EuiSpacer size="m" />
       <EuiBasicTable<AgentPolicy>
         loading={isLoading}
-        hasActions={true}
         noItemsMessage={
           isLoading ? (
             <FormattedMessage
@@ -308,7 +351,6 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         items={agentPolicyData ? agentPolicyData.items : []}
         itemId="id"
         columns={columns}
-        isSelectable={false}
         pagination={{
           pageIndex: pagination.currentPage - 1,
           pageSize: pagination.pageSize,

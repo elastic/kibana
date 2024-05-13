@@ -13,11 +13,7 @@ import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { BreakdownChart } from '../../shared/charts/breakdown_chart';
 
-export function ServiceDependenciesBreakdownChart({
-  height,
-}: {
-  height: number;
-}) {
+export function ServiceDependenciesBreakdownChart({ height }: { height: number }) {
   const { serviceName } = useApmServiceContext();
 
   const {
@@ -31,22 +27,19 @@ export function ServiceDependenciesBreakdownChart({
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      return callApmApi(
-        'GET /internal/apm/services/{serviceName}/dependencies/breakdown',
-        {
-          params: {
-            path: {
-              serviceName,
-            },
-            query: {
-              start,
-              end,
-              kuery,
-              environment,
-            },
+      return callApmApi('GET /internal/apm/services/{serviceName}/dependencies/breakdown', {
+        params: {
+          path: {
+            serviceName,
           },
-        }
-      );
+          query: {
+            start,
+            end,
+            kuery,
+            environment,
+          },
+        },
+      });
     },
     [serviceName, start, end, kuery, environment]
   );

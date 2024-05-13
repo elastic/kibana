@@ -40,10 +40,10 @@ class TutorialDirectoryUi extends React.Component {
         }),
         content: <SampleDataTab />,
       },
-      ...extraTabs.map(({ id, name, component: Component }) => ({
+      ...extraTabs.map(({ id, name, getComponent }) => ({
         id,
         name,
-        content: <Component />,
+        content: getComponent(),
       })),
     ];
 

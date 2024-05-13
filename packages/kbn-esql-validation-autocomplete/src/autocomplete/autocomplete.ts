@@ -15,6 +15,7 @@ import type {
   ESQLFunction,
   ESQLSingleAstItem,
 } from '@kbn/esql-ast';
+import { partition } from 'lodash';
 import type { EditorContext, SuggestionRawDefinition } from './types';
 import {
   columnExists,
@@ -68,6 +69,7 @@ import {
   buildVariablesDefinitions,
   buildOptionDefinition,
   buildSettingDefinitions,
+  buildValueDefinitions,
 } from './factories';
 import { EDITOR_MARKER, SINGLE_BACKTICK } from '../shared/constants';
 import { getAstContext, removeMarkerArgFromArgsList } from '../shared/context';
@@ -79,6 +81,7 @@ import {
 } from '../shared/resources_helpers';
 import { ESQLCallbacks } from '../shared/types';
 import { getFunctionsToIgnoreForStats, isAggFunctionUsedAlready } from './helper';
+import { FunctionArgSignature } from '../definitions/types';
 
 type GetSourceFn = () => Promise<SuggestionRawDefinition[]>;
 type GetFieldsByTypeFn = (
@@ -543,7 +546,7 @@ async function getExpressionSuggestionsByType(
         prevArg &&
         (prevArg.type === 'function' || (!Array.isArray(nodeArg) && prevArg.type !== nodeArg.type))
       ) {
-        if (!isLiteralItem(nodeArg) || !prevArg.literalOnly) {
+        if (!isLiteralItem(nodeArg) || !prevArg.constantOnly) {
           argDef = prevArg;
         }
       }
@@ -593,9 +596,14 @@ async function getExpressionSuggestionsByType(
             option?.name,
             getFieldsByType,
             {
-              functions: canHaveAssignments,
-              fields: true,
+              // TODO instead of relying on canHaveAssignments and other command name checks
+              // we should have a more generic way to determine if a command can have functions.
+              // I think it comes down to the definition of 'column' since 'any' should always
+              // include functions.
+              functions: canHaveAssignments || command.name === 'sort',
+              fields: !argDef.constantOnly,
               variables: anyVariables,
+              literals: argDef.constantOnly,
             },
             {
               ignoreFields: isNewExpression
@@ -645,6 +653,7 @@ async function getExpressionSuggestionsByType(
               functions: true,
               fields: false,
               variables: nodeArg ? undefined : anyVariables,
+              literals: argDef.constantOnly,
             }
           ))
         );
@@ -736,7 +745,7 @@ async function getExpressionSuggestionsByType(
     // If the type is specified try to dig deeper in the definition to suggest the best candidate
     if (['string', 'number', 'boolean'].includes(argDef.type) && !argDef.values) {
       // it can be just literal values (i.e. "string")
-      if (argDef.literalOnly) {
+      if (argDef.constantOnly) {
         // ... | <COMMAND> ... <suggest>
         suggestions.push(...getCompatibleLiterals(command.name, [argDef.type], [argDef.name]));
       } else {
@@ -970,6 +979,9 @@ function pushItUpInTheList(suggestions: SuggestionRawDefinition[], shouldPromote
   }));
 }
 
+/**
+ * TODO — split this into distinct functions, one for fields, one for functions, one for literals
+ */
 async function getFieldsOrFunctionsSuggestions(
   types: string[],
   commandName: string,
@@ -979,10 +991,12 @@ async function getFieldsOrFunctionsSuggestions(
     functions,
     fields,
     variables,
+    literals = false,
   }: {
     functions: boolean;
     fields: boolean;
     variables?: Map<string, ESQLVariable[]>;
+    literals?: boolean;
   },
   {
     ignoreFn = [],
@@ -1032,11 +1046,13 @@ async function getFieldsOrFunctionsSuggestions(
     variables
       ? pushItUpInTheList(buildVariablesDefinitions(filteredVariablesByType), functions)
       : [],
-    getCompatibleLiterals(commandName, types)
+    literals ? getCompatibleLiterals(commandName, types) : []
   );
 
   return suggestions;
 }
+
+const addCommaIf = (condition: boolean, text: string) => (condition ? `${text},` : text);
 
 async function getFunctionArgsSuggestions(
   innerText: string,
@@ -1072,15 +1088,6 @@ async function getFunctionArgsSuggestions(
   if (!shouldGetNextArgument && argIndex) {
     argIndex -= 1;
   }
-  const types = fnDefinition.signatures.flatMap((signature) => {
-    if (signature.params.length > argIndex) {
-      return signature.params[argIndex].type;
-    }
-    if (signature.minParams) {
-      return signature.params[signature.params.length - 1].type;
-    }
-    return [];
-  });
 
   const arg = node.args[argIndex];
 
@@ -1088,11 +1095,38 @@ async function getFunctionArgsSuggestions(
   const refSignature = fnDefinition.signatures[0];
 
   const hasMoreMandatoryArgs =
-    refSignature.params.filter(({ optional }, index) => !optional && index > argIndex).length >
-      argIndex ||
+    (refSignature.params.length >= argIndex &&
+      refSignature.params.filter(({ optional }, index) => !optional && index > argIndex).length >
+        0) ||
     ('minParams' in refSignature && refSignature.minParams
       ? refSignature.minParams - 1 > argIndex
       : false);
+
+  const suggestedConstants = Array.from(
+    new Set(
+      fnDefinition.signatures.reduce<string[]>((acc, signature) => {
+        const p = signature.params[argIndex];
+        if (!p) {
+          return acc;
+        }
+
+        const _suggestions: string[] = p.literalSuggestions
+          ? p.literalSuggestions
+          : p.literalOptions
+          ? p.literalOptions
+          : [];
+
+        return acc.concat(_suggestions);
+      }, [] as string[])
+    )
+  );
+
+  if (suggestedConstants.length) {
+    return buildValueDefinitions(suggestedConstants).map((suggestion) => ({
+      ...suggestion,
+      text: addCommaIf(hasMoreMandatoryArgs && fnDefinition.type !== 'builtin', suggestion.text),
+    }));
+  }
 
   const suggestions = [];
   const noArgDefined = !arg;
@@ -1104,6 +1138,9 @@ async function getFunctionArgsSuggestions(
       variables: variablesExcludingCurrentCommandOnes,
     }).hit;
   if (noArgDefined || isUnknownColumn) {
+    // ... | EVAL fn( <suggest>)
+    // ... | EVAL fn( field, <suggest>)
+
     const commandArgIndex = command.args.findIndex(
       (cmdArg) => isSingleItem(cmdArg) && cmdArg.location.max >= node.location.max
     );
@@ -1114,9 +1151,14 @@ async function getFunctionArgsSuggestions(
         ? Math.max(command.args.length - 1, 0)
         : commandArgIndex;
 
+    const finalCommandArg = command.args[finalCommandArgIndex];
+
     const fnToIgnore = [];
     // just ignore the current function
-    if (command.name !== 'stats') {
+    if (
+      command.name !== 'stats' ||
+      (isOptionItem(finalCommandArg) && finalCommandArg.name === 'by')
+    ) {
       fnToIgnore.push(node.name);
     } else {
       fnToIgnore.push(
@@ -1127,11 +1169,64 @@ async function getFunctionArgsSuggestions(
       );
     }
 
-    // ... | EVAL fn( <suggest>)
-    // ... | EVAL fn( field, <suggest>)
+    const existingTypes = node.args
+      .map((nodeArg) =>
+        extractFinalTypeFromArg(nodeArg, {
+          fields: fieldsMap,
+          variables: variablesExcludingCurrentCommandOnes,
+        })
+      )
+      .filter(nonNullable);
+
+    const validSignatures = fnDefinition.signatures
+      // if existing arguments are preset already, use them to filter out incompatible signatures
+      .filter((signature) => {
+        if (existingTypes.length) {
+          return existingTypes.every((type, index) => signature.params[index].type === type);
+        }
+        return true;
+      });
+
+    /**
+     * Get all parameter definitions across all function signatures
+     * for the current parameter position in the given function definition,
+     */
+    const allParamDefinitionsForThisPosition = validSignatures
+      .map((signature) =>
+        signature.params.length > argIndex
+          ? signature.params[argIndex]
+          : signature.minParams
+          ? signature.params[signature.params.length - 1]
+          : null
+      )
+      .filter(nonNullable);
+
+    // Separate the param definitions into two groups:
+    // fields should only be suggested if the param isn't constant-only,
+    // and constant suggestions should only be given if it is.
+    //
+    // TODO - consider incorporating the literalOptions into this
+    //
+    // TODO — improve this to inherit the constant flag from the outer function
+    // (e.g. if func1's first parameter is constant-only, any nested functions should
+    // inherit that constraint: func1(func2(shouldBeConstantOnly)))
+    //
+    const [constantOnlyParamDefs, paramDefsWhichSupportFields] = partition(
+      allParamDefinitionsForThisPosition,
+      (paramDef) => paramDef.constantOnly || /_literal$/.test(paramDef.type)
+    );
+
+    const getTypesFromParamDefs = (paramDefs: FunctionArgSignature[]) => {
+      return Array.from(new Set(paramDefs.map(({ type }) => type)));
+    };
+
+    suggestions.push(
+      ...getCompatibleLiterals(command.name, getTypesFromParamDefs(constantOnlyParamDefs))
+    );
+
     suggestions.push(
       ...(await getFieldsOrFunctionsSuggestions(
-        types,
+        getTypesFromParamDefs(paramDefsWhichSupportFields),
         command.name,
         option?.name,
         getFieldsByType,
@@ -1164,11 +1259,13 @@ async function getFunctionArgsSuggestions(
               functions: false,
               fields: false,
               variables: variablesExcludingCurrentCommandOnes,
+              literals: true,
             }
           ))
         );
       }
     }
+
     if (hasMoreMandatoryArgs) {
       // suggest a comma if there's another argument for the function
       suggestions.push(commaCompleteItem);
@@ -1189,7 +1286,7 @@ async function getFunctionArgsSuggestions(
 
   return suggestions.map(({ text, ...rest }) => ({
     ...rest,
-    text: hasMoreMandatoryArgs && fnDefinition.type !== 'builtin' ? `${text},` : text,
+    text: addCommaIf(hasMoreMandatoryArgs && fnDefinition.type !== 'builtin', text),
   }));
 }
 

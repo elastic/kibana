@@ -64,7 +64,6 @@ exports[`delete modal content render 1`] = `
         token="euiBasicTable.noItemsMessage"
       />
     }
-    responsive={true}
     tableCaption="Data views selected for deletion"
     tableLayout="fixed"
   />
@@ -127,7 +126,6 @@ exports[`delete modal content render 2`] = `
         token="euiBasicTable.noItemsMessage"
       />
     }
-    responsive={true}
     tableCaption="Data views selected for deletion"
     tableLayout="fixed"
   />
@@ -196,7 +194,6 @@ exports[`delete modal content render 3`] = `
         token="euiBasicTable.noItemsMessage"
       />
     }
-    responsive={true}
     tableCaption="Data views selected for deletion"
     tableLayout="fixed"
   />
@@ -276,7 +273,6 @@ exports[`delete modal content render 4`] = `
         token="euiBasicTable.noItemsMessage"
       />
     }
-    responsive={true}
     tableCaption="Data views selected for deletion"
     tableLayout="fixed"
   />

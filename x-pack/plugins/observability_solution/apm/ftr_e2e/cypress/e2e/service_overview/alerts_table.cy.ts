@@ -38,9 +38,10 @@ describe('Errors table', () => {
   it('Alerts table with the search bar is populated', () => {
     cy.visitKibana(serviceOverviewHref);
     cy.contains('opbeans-java');
-    cy.get(
-      '[data-test-subj="environmentFilter"] [data-test-subj="comboBoxSearchInput"]'
-    ).should('have.value', 'All');
+    cy.get('[data-test-subj="environmentFilter"] [data-test-subj="comboBoxSearchInput"]').should(
+      'have.value',
+      'All'
+    );
     cy.contains('Active');
     cy.contains('Recovered');
     cy.getByTestSubj('globalQueryBar').should('exist');

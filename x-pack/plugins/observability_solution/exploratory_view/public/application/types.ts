@@ -6,10 +6,12 @@
  */
 
 import type {
+  AnalyticsServiceStart,
   ApplicationStart,
   ChromeStart,
   DocLinksStart,
   HttpStart,
+  I18nStart,
   IUiSettingsClient,
   NotificationsStart,
   OverlayStart,
@@ -48,6 +50,8 @@ export interface ObservabilityAppServices {
   share: SharePluginStart;
   stateTransfer: EmbeddableStateTransfer;
   storage: IStorageWrapper;
+  analytics: AnalyticsServiceStart;
+  i18n: I18nStart;
   theme: ThemeServiceStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   uiSettings: IUiSettingsClient;

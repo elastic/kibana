@@ -17,7 +17,7 @@ describe('useMetricsCharts', () => {
     );
     await waitForNextUpdate();
 
-    expect(result.current).toHaveLength(12);
+    expect(result.current).toHaveLength(11);
 
     result.current.forEach((chart) => {
       const seriesLayer = chart.layers.find((layer) => layer.type === 'series') as LensSeriesLayer;
@@ -39,7 +39,6 @@ describe('useMetricsCharts', () => {
       'normalizedLoad1m',
       'memoryUsage',
       'memoryFree',
-      'diskUsage',
       'diskSpaceAvailable',
       'diskIORead',
       'diskIOWrite',

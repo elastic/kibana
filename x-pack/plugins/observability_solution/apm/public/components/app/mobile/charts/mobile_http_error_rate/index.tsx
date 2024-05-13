@@ -50,28 +50,23 @@ export function HttpErrorRateChart({
   comparisonEnabled: boolean;
 }) {
   const comparisonChartTheme = getComparisonChartTheme();
-  const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-    ChartType.HTTP_REQUESTS
-  );
+  const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(ChartType.HTTP_REQUESTS);
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
-      return callApmApi(
-        'GET /internal/apm/mobile-services/{serviceName}/error/http_error_rate',
-        {
-          params: {
-            path: {
-              serviceName,
-            },
-            query: {
-              environment,
-              kuery,
-              start,
-              end,
-              offset: comparisonEnabled ? offset : undefined,
-            },
+      return callApmApi('GET /internal/apm/mobile-services/{serviceName}/error/http_error_rate', {
+        params: {
+          path: {
+            serviceName,
           },
-        }
-      );
+          query: {
+            environment,
+            kuery,
+            start,
+            end,
+            offset: comparisonEnabled ? offset : undefined,
+          },
+        },
+      });
     },
     [environment, kuery, serviceName, start, end, offset, comparisonEnabled]
   );
@@ -101,9 +96,7 @@ export function HttpErrorRateChart({
 
   return (
     <EuiPanel hasBorder={true} style={{ position: 'relative' }}>
-      {isPending(status) && (
-        <EuiProgress size="xs" color="accent" position="absolute" />
-      )}
+      {isPending(status) && <EuiProgress size="xs" color="accent" position="absolute" />}
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
@@ -116,12 +109,9 @@ export function HttpErrorRateChart({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiIconTip
-            content={i18n.translate(
-              'xpack.apm.mobile.errors.httpErrorRateTooltip',
-              {
-                defaultMessage: 'Http error rate consisting of 4xx & 5xx.',
-              }
-            )}
+            content={i18n.translate('xpack.apm.mobile.errors.httpErrorRateTooltip', {
+              defaultMessage: 'Http error rate consisting of 4xx & 5xx.',
+            })}
             position="right"
           />
         </EuiFlexItem>

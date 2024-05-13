@@ -13,10 +13,7 @@ import { Page } from '../../../../components/page';
 import { useDeps } from '../../../../hooks/use_deps';
 import { Sidebar } from '../../sidebar';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface Props {}
-
-export const PageCountUntil: React.FC<Props> = () => {
+export const PageCountUntil = () => {
   const { plugins } = useDeps();
 
   return (

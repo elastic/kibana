@@ -12,19 +12,17 @@ import React from 'react';
 import { CSV_JOB_TYPE, CSV_JOB_TYPE_V2 } from '@kbn/reporting-export-types-csv-common';
 
 import type { SearchSourceFields } from '@kbn/data-plugin/common';
-import { ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
+import { ShareContext, ShareMenuItem, ShareMenuProvider } from '@kbn/share-plugin/public';
 import type { ExportPanelShareOpts } from '.';
 import { checkLicense } from '../..';
 import { ReportingPanelContent } from './reporting_panel_content_lazy';
 
 export const reportingCsvShareProvider = ({
   apiClient,
-  toasts,
-  uiSettings,
   application,
   license,
   usesUiCapabilities,
-  theme,
+  startServices$,
 }: ExportPanelShareOpts): ShareMenuProvider => {
   const getShareMenuItems = ({ objectType, objectId, sharingData, onClose }: ShareContext) => {
     if ('search' !== objectType) {
@@ -68,7 +66,7 @@ export const reportingCsvShareProvider = ({
       };
     };
 
-    const shareActions = [];
+    const shareActions: ShareMenuItem[] = [];
 
     const licenseCheck = checkLicense(license.check('reporting', 'basic'));
     const licenseToolTipContent = licenseCheck.message;
@@ -104,14 +102,12 @@ export const reportingCsvShareProvider = ({
             <ReportingPanelContent
               requiresSavedState={false}
               apiClient={apiClient}
-              toasts={toasts}
-              uiSettings={uiSettings}
               reportType={reportType}
               layoutId={undefined}
               objectId={objectId}
               getJobParams={getJobParams}
               onClose={onClose}
-              theme={theme}
+              startServices$={startServices$}
             />
           ),
         },

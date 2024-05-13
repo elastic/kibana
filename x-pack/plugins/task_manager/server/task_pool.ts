@@ -198,7 +198,8 @@ export class TaskPool {
       })
       .then(() => {
         this.tasksInPool.delete(taskRunner.taskExecutionId);
-      });
+      })
+      .catch(() => {});
   }
 
   private handleFailureOfMarkAsRunning(task: TaskRunner, err: Error) {
@@ -227,14 +228,17 @@ export class TaskPool {
     }
   }
 
-  private async cancelTask(task: TaskRunner) {
-    try {
-      this.logger.debug(`Cancelling task ${task.toString()}.`);
-      this.tasksInPool.delete(task.taskExecutionId);
-      await task.cancel();
-    } catch (err) {
-      this.logger.error(`Failed to cancel task ${task.toString()}: ${err}`);
-    }
+  private cancelTask(task: TaskRunner) {
+    // internally async (without rejections), but public-facing is synchronous
+    (async () => {
+      try {
+        this.logger.debug(`Cancelling task ${task.toString()}.`);
+        this.tasksInPool.delete(task.taskExecutionId);
+        await task.cancel();
+      } catch (err) {
+        this.logger.error(`Failed to cancel task ${task.toString()}: ${err}`);
+      }
+    })().catch(() => {});
   }
 }
 

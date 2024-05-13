@@ -8,25 +8,25 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useKibana } from './use_kibana';
 
-export const useManagementLink = () => {
+export const useManagementLink = (connectorId: string) => {
   const {
     services: { share },
   } = useKibana();
   const managementLocator = useMemo(
     () => share.url.locators.get('MANAGEMENT_APP_LOCATOR'),
-    [share]
+    [share.url.locators]
   );
   const [managementLink, setManagementLink] = useState('');
   useEffect(() => {
     const getLink = async () => {
       const link = await managementLocator?.getUrl({
         sectionId: 'insightsAndAlerting',
-        appId: 'triggersActionsConnectors',
+        appId: `triggersActionsConnectors/connectors/${connectorId}`,
       });
       setManagementLink(link || '');
     };
     getLink();
-  }, [managementLocator]);
+  }, [managementLocator, connectorId]);
 
   return managementLink;
 };

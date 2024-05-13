@@ -11,19 +11,13 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getAgentAuthorizationSettings } from './settings_definition/agent_authorization_settings';
 import { getApmSettings } from './settings_definition/apm_settings';
 import { getDebugSettings } from './settings_definition/debug_settings';
-import {
-  getRUMSettings,
-  isRUMFormValid,
-} from './settings_definition/rum_settings';
+import { getRUMSettings, isRUMFormValid } from './settings_definition/rum_settings';
 import {
   TAIL_SAMPLING_ENABLED_KEY,
   getTailSamplingSettings,
   isTailBasedSamplingValid,
 } from './settings_definition/tail_sampling_settings';
-import {
-  getTLSSettings,
-  isTLSFormValid,
-} from './settings_definition/tls_settings';
+import { getTLSSettings, isTLSFormValid } from './settings_definition/tls_settings';
 import { SettingsForm, SettingsSection } from './settings_form';
 import { isSettingsFormValid, mergeNewVars } from './settings_form/utils';
 import { PackagePolicyVars } from './typings';
@@ -50,9 +44,7 @@ export function APMPolicyForm({ vars = {}, updateAPMPolicy }: Props) {
       tlsSettings: getTLSSettings(),
       debugSettings: getDebugSettings(),
       agentAuthorizationSettings: getAgentAuthorizationSettings(),
-      tailSamplingSettings: getTailSamplingSettings(
-        tailSamplingPoliciesDocsLink
-      ),
+      tailSamplingSettings: getTailSamplingSettings(tailSamplingPoliciesDocsLink),
     };
   }, [tailSamplingPoliciesDocsLink]);
 
@@ -75,38 +67,32 @@ export function APMPolicyForm({ vars = {}, updateAPMPolicy }: Props) {
   const settingsSections: SettingsSection[] = [
     {
       id: 'apm',
-      title: i18n.translate(
-        'xpack.apm.fleet_integration.settings.apm.settings.title',
-        { defaultMessage: 'General' }
-      ),
-      subtitle: i18n.translate(
-        'xpack.apm.fleet_integration.settings.apm.settings.subtitle',
-        { defaultMessage: 'Settings for the APM integration.' }
-      ),
+      title: i18n.translate('xpack.apm.fleet_integration.settings.apm.settings.title', {
+        defaultMessage: 'General',
+      }),
+      subtitle: i18n.translate('xpack.apm.fleet_integration.settings.apm.settings.subtitle', {
+        defaultMessage: 'Settings for the APM integration.',
+      }),
       settings: apmSettings,
     },
     {
       id: 'rum',
-      title: i18n.translate(
-        'xpack.apm.fleet_integration.settings.rum.settings.title',
-        { defaultMessage: 'Real User Monitoring' }
-      ),
-      subtitle: i18n.translate(
-        'xpack.apm.fleet_integration.settings.rum.settings.subtitle',
-        { defaultMessage: 'Manage the configuration of the RUM JS agent.' }
-      ),
+      title: i18n.translate('xpack.apm.fleet_integration.settings.rum.settings.title', {
+        defaultMessage: 'Real User Monitoring',
+      }),
+      subtitle: i18n.translate('xpack.apm.fleet_integration.settings.rum.settings.subtitle', {
+        defaultMessage: 'Manage the configuration of the RUM JS agent.',
+      }),
       settings: rumSettings,
     },
     {
       id: 'tls',
-      title: i18n.translate(
-        'xpack.apm.fleet_integration.settings.tls.settings.title',
-        { defaultMessage: 'TLS Settings' }
-      ),
-      subtitle: i18n.translate(
-        'xpack.apm.fleet_integration.settings.tls.settings.subtitle',
-        { defaultMessage: 'Settings for TLS certification.' }
-      ),
+      title: i18n.translate('xpack.apm.fleet_integration.settings.tls.settings.title', {
+        defaultMessage: 'TLS Settings',
+      }),
+      subtitle: i18n.translate('xpack.apm.fleet_integration.settings.tls.settings.subtitle', {
+        defaultMessage: 'Settings for TLS certification.',
+      }),
       settings: tlsSettings,
     },
     {
@@ -128,8 +114,7 @@ export function APMPolicyForm({ vars = {}, updateAPMPolicy }: Props) {
             subtitle: i18n.translate(
               'xpack.apm.fleet_integration.settings.tailSampling.settings.subtitle',
               {
-                defaultMessage:
-                  'Manage tail-based sampling for services and traces.',
+                defaultMessage: 'Manage tail-based sampling for services and traces.',
               }
             ),
             settings: tailSamplingSettings,
@@ -139,14 +124,12 @@ export function APMPolicyForm({ vars = {}, updateAPMPolicy }: Props) {
       : []),
     {
       id: 'debug',
-      title: i18n.translate(
-        'xpack.apm.fleet_integration.settings.debug.settings.title',
-        { defaultMessage: 'Debug settings' }
-      ),
-      subtitle: i18n.translate(
-        'xpack.apm.fleet_integration.settings.debug.settings.subtitle',
-        { defaultMessage: 'Settings for the APM server debug flags' }
-      ),
+      title: i18n.translate('xpack.apm.fleet_integration.settings.debug.settings.title', {
+        defaultMessage: 'Debug settings',
+      }),
+      subtitle: i18n.translate('xpack.apm.fleet_integration.settings.debug.settings.subtitle', {
+        defaultMessage: 'Settings for the APM server debug flags',
+      }),
       settings: debugSettings,
     },
   ];

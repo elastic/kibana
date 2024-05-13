@@ -74,7 +74,7 @@ const manageDefaultIndexPatternRoutesFactory =
           request: {},
           response: {
             200: {
-              body: schema.object({ [`${serviceKey}_id`]: schema.string() }),
+              body: () => schema.object({ [`${serviceKey}_id`]: schema.string() }),
             },
           },
         },
@@ -121,7 +121,7 @@ const manageDefaultIndexPatternRoutesFactory =
           },
           response: {
             200: {
-              body: schema.object({ acknowledged: schema.boolean() }),
+              body: () => schema.object({ acknowledged: schema.boolean() }),
             },
           },
         },

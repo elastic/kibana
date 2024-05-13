@@ -1,6 +1,6 @@
 {
   "type": "tcp",
-  "locations": [],
+  "locations": ["dev"],
   "enabled": true,
   "config_id": "",
   "schedule": {

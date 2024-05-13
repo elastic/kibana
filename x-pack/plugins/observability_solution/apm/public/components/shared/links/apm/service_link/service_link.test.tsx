@@ -28,9 +28,7 @@ describe('ServiceLink', () => {
     expect(() => render(<AndroidAgent />)).not.toThrowError();
     expect(() => render(<IOSAgent />)).not.toThrowError();
 
-    expect(
-      await screen.findByTestId('serviceLink_android/java')
-    ).toHaveAttribute(
+    expect(await screen.findByTestId('serviceLink_android/java')).toHaveAttribute(
       'href',
       `/basepath/app/apm/mobile-services/opbeans-android/overview?${params}`
     );

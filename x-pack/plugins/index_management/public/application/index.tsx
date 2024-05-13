@@ -17,7 +17,7 @@ import {
   createKibanaReactContext,
   GlobalFlyout,
   useKibana as useKibanaReactPlugin,
-  KibanaThemeProvider,
+  KibanaRenderContextProvider,
 } from '../shared_imports';
 
 import { AppContextProvider, AppDependencies } from './app_context';
@@ -29,6 +29,7 @@ const { GlobalFlyoutProvider } = GlobalFlyout;
 
 export interface IndexManagementAppContextProps {
   core: CoreStart;
+  children: React.ReactNode;
   dependencies: AppDependencies;
 }
 
@@ -37,9 +38,18 @@ export const IndexManagementAppContext: React.FC<IndexManagementAppContextProps>
   core,
   dependencies,
 }) => {
-  const { i18n, docLinks, notifications, application, executionContext, overlays, theme } = core;
-  const { Context: I18nContext } = i18n;
-  const { services, setBreadcrumbs, uiSettings, settings, kibanaVersion, theme$ } = dependencies;
+  const {
+    docLinks,
+    notifications,
+    application,
+    executionContext,
+    overlays,
+    analytics,
+    i18n,
+    theme,
+  } = core;
+  const startServices = { analytics, i18n, overlays, theme };
+  const { services, setBreadcrumbs, uiSettings, settings, kibanaVersion } = dependencies;
 
   // theme is required by the CodeEditor component used to edit runtime field Painless scripts.
   const { Provider: KibanaReactContextProvider } =
@@ -63,24 +73,23 @@ export const IndexManagementAppContext: React.FC<IndexManagementAppContextProps>
     setBreadcrumbs,
     getUrlForApp: application.getUrlForApp,
     executionContext,
+    startServices,
   };
 
   return (
-    <I18nContext>
-      <KibanaThemeProvider theme$={theme$}>
-        <KibanaReactContextProvider>
-          <Provider store={indexManagementStore(services)}>
-            <AppContextProvider value={dependencies}>
-              <MappingsEditorProvider>
-                <ComponentTemplatesProvider value={componentTemplateProviderValues}>
-                  <GlobalFlyoutProvider>{children}</GlobalFlyoutProvider>
-                </ComponentTemplatesProvider>
-              </MappingsEditorProvider>
-            </AppContextProvider>
-          </Provider>
-        </KibanaReactContextProvider>
-      </KibanaThemeProvider>
-    </I18nContext>
+    <KibanaRenderContextProvider {...core}>
+      <KibanaReactContextProvider>
+        <Provider store={indexManagementStore(services)}>
+          <AppContextProvider value={dependencies}>
+            <MappingsEditorProvider>
+              <ComponentTemplatesProvider value={componentTemplateProviderValues}>
+                <GlobalFlyoutProvider>{children}</GlobalFlyoutProvider>
+              </ComponentTemplatesProvider>
+            </MappingsEditorProvider>
+          </AppContextProvider>
+        </Provider>
+      </KibanaReactContextProvider>
+    </KibanaRenderContextProvider>
   );
 };
 

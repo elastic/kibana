@@ -102,8 +102,8 @@ describe('resolveRuleRoute', () => {
     id: mockedRule.id,
     revision: mockedRule.revision,
     execution_status: {
-      status: mockedRule.executionStatus.status,
-      last_execution_date: mockedRule.executionStatus.lastExecutionDate.toISOString(),
+      status: mockedRule.executionStatus!.status,
+      last_execution_date: mockedRule.executionStatus!.lastExecutionDate.toISOString(),
     },
     actions: [
       {
@@ -197,7 +197,7 @@ describe('resolveRuleRoute', () => {
       ['ok']
     );
 
-    expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
+    await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
 
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
   });

@@ -20,14 +20,9 @@ import {
   consoleOutputLanguageConfiguration,
 } from './lexer_rules';
 
-export {
-  CONSOLE_LANG_ID,
-  CONSOLE_OUTPUT_LANG_ID,
-  CONSOLE_THEME_ID,
-  CONSOLE_OUTPUT_THEME_ID,
-} from './constants';
+export { CONSOLE_LANG_ID, CONSOLE_OUTPUT_LANG_ID, CONSOLE_THEME_ID } from './constants';
 
-export { buildConsoleTheme, buildConsoleOutputTheme } from './theme';
+export { buildConsoleTheme } from './theme';
 
 export const ConsoleLang: LangModuleType = {
   ID: CONSOLE_LANG_ID,
@@ -40,3 +35,7 @@ export const ConsoleOutputLang: LangModuleType = {
   lexerRules: consoleOutputLexerRules,
   languageConfiguration: consoleOutputLanguageConfiguration,
 };
+
+export type { ParsedRequest } from './types';
+export { getParsedRequestsProvider } from './language';
+export { ConsoleParsedRequestsProvider } from './console_parsed_requests_provider';

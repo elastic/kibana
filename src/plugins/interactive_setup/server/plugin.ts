@@ -16,6 +16,7 @@ import type {
   PluginInitializerContext,
   PrebootPlugin,
 } from '@kbn/core/server';
+import { unsafeConsole } from '@kbn/security-hardening';
 import { getDataPath } from '@kbn/utils';
 
 import type { ConfigSchema, ConfigType } from './config';
@@ -129,8 +130,8 @@ export class InteractiveSetupPlugin implements PrebootPlugin {
           const { protocol, hostname, port } = core.http.getServerInfo();
           const url = `${protocol}://${hostname}:${port}${pathname}?code=${verificationCode.code}`;
 
-          // eslint-disable-next-line no-console
-          console.log(`
+          // eslint-disable-next-line @kbn/eslint/no_unsafe_console
+          unsafeConsole.log(`
 
 ${chalk.whiteBright.bold(`${chalk.cyanBright('i')} Kibana has not been configured.`)}
 

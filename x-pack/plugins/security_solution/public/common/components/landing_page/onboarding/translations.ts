@@ -269,16 +269,8 @@ export const ALL_DONE_TEXT = i18n.translate(
   }
 );
 
-export const COLLAPSE_STEP_BUTTON_LABEL = i18n.translate(
-  'xpack.securitySolution.onboarding.togglePanel.collapseStepButton.label',
-  {
-    defaultMessage: 'Collapse',
-  }
-);
-
-export const EXPAND_STEP_BUTTON_LABEL = i18n.translate(
-  'xpack.securitySolution.onboarding.togglePanel.expandStepButton.label',
-  {
-    defaultMessage: 'Expand',
-  }
-);
+export const EXPAND_STEP_BUTTON_LABEL = (title: string) =>
+  i18n.translate('xpack.securitySolution.onboarding.togglePanel.expandStepButton.ariaLabel', {
+    defaultMessage: 'Expand "{title}"',
+    values: { title },
+  });

@@ -7,12 +7,7 @@
 
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
-import {
-  Logger,
-  KibanaRequest,
-  KibanaResponseFactory,
-  RouteRegistrar,
-} from '@kbn/core/server';
+import { Logger, KibanaRequest, KibanaResponseFactory, RouteRegistrar } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 import agent from 'elastic-apm-node';
 import { ServerRouteRepository } from '@kbn/server-route-repository';
@@ -30,13 +25,14 @@ import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { ApmFeatureFlags } from '../../../common/apm_feature_flags';
 import { pickKeys } from '../../../common/utils/pick_keys';
-import { APMCore, TelemetryUsageCounter } from '../typings';
+import type {
+  APMCore,
+  MinimalApmPluginRequestHandlerContext,
+  TelemetryUsageCounter,
+} from '../typings';
 import type { ApmPluginRequestHandlerContext } from '../typings';
-import { APMConfig } from '../..';
-import {
-  APMPluginSetupDependencies,
-  APMPluginStartDependencies,
-} from '../../types';
+import type { APMConfig } from '../..';
+import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../types';
 
 const inspectRt = t.exact(
   t.partial({
@@ -51,10 +47,7 @@ const CLIENT_CLOSED_REQUEST = {
   },
 };
 
-export const inspectableEsQueriesMap = new WeakMap<
-  KibanaRequest,
-  InspectResponse
->();
+export const inspectableEsQueriesMap = new WeakMap<KibanaRequest, InspectResponse>();
 
 export function registerRoutes({
   core,
@@ -213,12 +206,7 @@ export function registerRoutes({
     };
 
     if (!version) {
-      (
-        router[method] as RouteRegistrar<
-          typeof method,
-          ApmPluginRequestHandlerContext
-        >
-      )(
+      (router[method] as RouteRegistrar<typeof method, ApmPluginRequestHandlerContext>)(
         {
           path: pathname,
           options,
@@ -254,6 +242,10 @@ type Plugins = {
     setup: Required<APMPluginSetupDependencies>[key];
     start: () => Promise<Required<APMPluginStartDependencies>[key]>;
   };
+};
+
+export type MinimalAPMRouteHandlerResources = Omit<APMRouteHandlerResources, 'context'> & {
+  context: MinimalApmPluginRequestHandlerContext;
 };
 
 export interface APMRouteHandlerResources {

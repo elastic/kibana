@@ -10,7 +10,6 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
-import '../../../../common/mock/match_media';
 import { mockTimelineResults } from '../../../../common/mock/timeline_results';
 import type { TimelinesTableProps } from '.';
 import { TimelinesTable } from '.';

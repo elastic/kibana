@@ -1055,7 +1055,7 @@
             "label": "getAttribute",
             "description": [],
             "signature": [
-              "(selector: string, attribute: string, options?: number | { findTimeout?: number | undefined; tryTimeout?: number | undefined; } | undefined) => Promise<string>"
+              "(selector: string, attribute: string, options?: number | { findTimeout?: number | undefined; tryTimeout?: number | undefined; } | undefined) => Promise<string | null>"
             ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
             "deprecated": false,
@@ -2620,13 +2620,15 @@
             "parentPluginId": "@kbn/ftr-common-functional-ui-services",
             "id": "def-common.WebElementWrapper.getAttribute",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "return"
+            ],
             "label": "getAttribute",
             "description": [
               "\nRetrieves the current value of the given attribute of this element. Will return the current\nvalue, even if it has been modified after the page has been loaded. More exactly, this method\nwill return the value of the given attribute, unless that attribute is not present, in which\ncase the value of the property with the same name is returned. If neither value is set, null\nis returned (for example, the \"value\" property of a textarea element). The \"style\" attribute\nis converted as best can be to a text representation with a trailing semi-colon.\nhttps://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#getAttribute\n"
             ],
             "signature": [
-              "(name: string) => Promise<string>"
+              "(name: string) => Promise<string | null>"
             ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
             "deprecated": false,

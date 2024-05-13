@@ -28,9 +28,7 @@ describe('getShouldMatchOrNotExistFilter', () => {
       expect(result).toHaveLength(3);
 
       expect(
-        result.flatMap(({ bool }) =>
-          bool.should[0].bool.filter?.map(({ term }) => term)
-        )
+        result.flatMap(({ bool }) => bool.should[0].bool.filter?.map(({ term }) => term))
       ).toEqual([
         { 'service.name': 'opbeans-node' },
         { 'container.id': 'my-first-container' },

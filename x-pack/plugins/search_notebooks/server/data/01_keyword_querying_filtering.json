@@ -8,7 +8,7 @@
    "source": [
     "# Keyword querying and filtering\n",
     "\n",
-    "<a target=\"_blank\" href=\"https://colab.research.google.com/github/elasticsearch-labs/blob/main/search/01-keyword-querying-filtering.ipynb\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>\n",
+    "[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/elasticsearch-labs/blob/main/search/01-keyword-querying-filtering.ipynb)\n",
     "\n",
     "This interactive notebook will introduce you to the basic Elasticsearch queries, using the official Elasticsearch Python client. Before getting started on this section you should work through our [quick start](https://github.com/elastic/elasticsearch-labs/blob/main/notebooks/search/00-quick-start.ipynb), as you will be using the same dataset."
    ]

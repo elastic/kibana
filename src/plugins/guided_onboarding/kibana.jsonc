@@ -8,6 +8,6 @@
     "server": true,
     "browser": true,
     "optionalPlugins": ["cloud", "features"],
-    "requiredBundles": ["kibanaReact"],
+    "requiredBundles": []
   }
 }

@@ -1,11 +1,11 @@
 COUNT
 
 Syntax
-COUNT([input])
+COUNT([expression])
 Parameters
-input
-Column or literal for which to count the number of values. If omitted, returns a
-count all (the number of rows).
+expression
+Expression that outputs values to be counted.
+If omitted, equivalent to COUNT(*) (the number of rows).
 DescriptionReturns the total number (count) of input values.Supported typesCan take any field type as input.Examples
 ```esql
 FROM employees
@@ -17,4 +17,11 @@ To count the number of rows, use COUNT() or COUNT(*):
 FROM employees
 | STATS count = COUNT(*) BY languages
 | SORT languages DESC
+```
+
+The expression can use inline functions. This example splits a string into
+multiple values using the SPLIT function and counts the values:
+```esql
+ROW words="foo;bar;baz;qux;quux;foo"
+| STATS word_count = COUNT(SPLIT(words, ";"))
 ```

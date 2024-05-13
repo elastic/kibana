@@ -12,9 +12,7 @@ import { useApmServiceContext } from '../context/apm_service/use_apm_service_con
 import { useAnyOfApmParams } from './use_apm_params';
 import { useTimeRange } from './use_time_range';
 
-export type TraceSamplesFetchResult = ReturnType<
-  typeof useTransactionTraceSamplesFetcher
->;
+export type TraceSamplesFetchResult = ReturnType<typeof useTransactionTraceSamplesFetcher>;
 
 export function useTransactionTraceSamplesFetcher({
   transactionName,
@@ -29,10 +27,7 @@ export function useTransactionTraceSamplesFetcher({
 
   const {
     query: { rangeFrom, rangeTo },
-  } = useAnyOfApmParams(
-    '/services/{serviceName}',
-    '/mobile-services/{serviceName}'
-  );
+  } = useAnyOfApmParams('/services/{serviceName}', '/mobile-services/{serviceName}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -43,28 +38,25 @@ export function useTransactionTraceSamplesFetcher({
   const { data, status, error } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end && transactionType && transactionName) {
-        return callApmApi(
-          'GET /internal/apm/services/{serviceName}/transactions/traces/samples',
-          {
-            params: {
-              path: {
-                serviceName,
-              },
-              query: {
-                environment,
-                kuery,
-                start,
-                end,
-                transactionType,
-                transactionName,
-                transactionId,
-                traceId,
-                sampleRangeFrom,
-                sampleRangeTo,
-              },
+        return callApmApi('GET /internal/apm/services/{serviceName}/transactions/traces/samples', {
+          params: {
+            path: {
+              serviceName,
             },
-          }
-        );
+            query: {
+              environment,
+              kuery,
+              start,
+              end,
+              transactionType,
+              transactionName,
+              transactionId,
+              traceId,
+              sampleRangeFrom,
+              sampleRangeTo,
+            },
+          },
+        });
       }
     },
     // the samples should not be refetched if the transactionId or traceId changes

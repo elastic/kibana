@@ -7,17 +7,16 @@
 
 import { SavedObjectMigrationFn, SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { SavedObject } from '@kbn/core/server';
+import { StoredSLODefinition } from '../domain/models';
 
-import { StoredSLO } from '../domain/models';
-
-type StoredSLOBefore890 = StoredSLO & {
+type StoredSLOBefore890 = StoredSLODefinition & {
   timeWindow: {
     duration: string;
     isRolling?: boolean;
     isCalendar?: boolean;
   };
 };
-const migrateSlo890: SavedObjectMigrationFn<StoredSLOBefore890, StoredSLO> = (doc) => {
+const migrateSlo890: SavedObjectMigrationFn<StoredSLOBefore890, StoredSLODefinition> = (doc) => {
   const { timeWindow, ...other } = doc.attributes;
   return {
     ...doc,
@@ -73,7 +72,7 @@ export const slo: SavedObjectsType = {
   management: {
     displayName: 'SLO',
     importableAndExportable: false,
-    getTitle(sloSavedObject: SavedObject<StoredSLO>) {
+    getTitle(sloSavedObject: SavedObject<StoredSLODefinition>) {
       return `SLO: [${sloSavedObject.attributes.name}]`;
     },
   },

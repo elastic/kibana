@@ -66,6 +66,11 @@ describe('useLoadConnectors', () => {
         isMissingSecrets: false,
         config: { apiProvider: OpenAiProviderType.AzureAi },
       },
+      {
+        id: '4',
+        actionTypeId: '.bedrock',
+        isMissingSecrets: false,
+      },
     ];
     mockedLoadConnectors.mockResolvedValue(connectors);
 
@@ -73,8 +78,8 @@ describe('useLoadConnectors', () => {
       const { result, waitForNextUpdate } = renderHook(() => useLoadConnectors());
       await waitForNextUpdate();
 
-      await expect(result.current).resolves.toStrictEqual({
-        openai: {
+      await expect(result.current).resolves.toStrictEqual([
+        {
           actionTypeId: '.gen-ai',
           config: {
             apiProvider: 'OpenAI',
@@ -82,8 +87,9 @@ describe('useLoadConnectors', () => {
           id: '1',
           isMissingSecrets: false,
           title: 'OpenAI',
+          type: 'openai',
         },
-        openai_azure: {
+        {
           actionTypeId: '.gen-ai',
           config: {
             apiProvider: 'Azure OpenAI',
@@ -91,8 +97,16 @@ describe('useLoadConnectors', () => {
           id: '3',
           isMissingSecrets: false,
           title: 'OpenAI Azure',
+          type: 'openai_azure',
         },
-      });
+        {
+          actionTypeId: '.bedrock',
+          id: '4',
+          isMissingSecrets: false,
+          title: 'Bedrock',
+          type: 'bedrock',
+        },
+      ]);
     });
   });
 

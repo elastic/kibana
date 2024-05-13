@@ -11,7 +11,8 @@ import type { Writable } from 'stream';
 
 import { errors as esErrors, estypes } from '@elastic/elasticsearch';
 import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
-import type { ISearchClient, ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import type { ISearchClient } from '@kbn/search-types';
+import type { DataView, ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { cellHasFormulas, tabifyDocs } from '@kbn/data-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/server';
 import type {
@@ -146,11 +147,21 @@ export class CsvGenerator {
   private generateHeader(
     columns: Set<string>,
     builder: MaxSizeStringBuilder,
-    settings: CsvExportSettings
+    settings: CsvExportSettings,
+    dataView: DataView
   ) {
     this.logger.debug(`Building CSV header row`);
     const header =
-      Array.from(columns).map(this.escapeValues(settings)).join(settings.separator) + '\n';
+      Array.from(columns)
+        .map((column) => {
+          const field = dataView?.fields.getByName(column);
+          if (field && field.customLabel && field.customLabel !== column) {
+            return `${field.customLabel} (${column})`;
+          }
+          return column;
+        })
+        .map(this.escapeValues(settings))
+        .join(settings.separator) + '\n';
 
     if (!builder.tryAppend(header)) {
       return {
@@ -364,7 +375,7 @@ export class CsvGenerator {
 
         if (first) {
           first = false;
-          this.generateHeader(columns, builder, settings);
+          this.generateHeader(columns, builder, settings, index);
         }
 
         if (table.rows.length < 1) {

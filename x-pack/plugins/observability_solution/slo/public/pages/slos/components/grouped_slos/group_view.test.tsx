@@ -46,6 +46,8 @@ describe('Group View', () => {
     useFetchSloGroupsMock.mockReturnValue({
       isError: true,
       isLoading: false,
+      isRefetching: false,
+      refetch: jest.fn(),
     });
     const { queryByTestId, getByTestId } = render(
       <GroupView groupBy="slo.tags" kqlQuery="" sloView="cardView" sort="status" direction="desc" />
@@ -65,6 +67,7 @@ describe('Group View', () => {
         total: 0,
         results: [],
       },
+      refetch: jest.fn(),
     });
 
     const { queryByTestId, getByTestId } = render(
@@ -78,6 +81,7 @@ describe('Group View', () => {
   it('should show loading indicator', async () => {
     useFetchSloGroupsMock.mockReturnValue({
       isLoading: true,
+      refetch: jest.fn(),
     });
 
     const { queryByTestId, getByTestId } = render(
@@ -115,6 +119,7 @@ describe('Group View', () => {
             },
           ],
         },
+        refetch: jest.fn(),
       });
       const { queryAllByTestId, getByTestId } = render(
         <GroupView
@@ -163,6 +168,7 @@ describe('Group View', () => {
             },
           ],
         },
+        refetch: jest.fn(),
       });
 
       const { queryAllByTestId } = render(

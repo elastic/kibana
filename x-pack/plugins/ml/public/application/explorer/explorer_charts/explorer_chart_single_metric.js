@@ -14,7 +14,6 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import d3 from 'd3';
-import $ from 'jquery';
 import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
@@ -107,14 +106,12 @@ export class ExplorerChartSingleMetric extends React.Component {
     drawLineChart(config.chartData);
 
     function init(chartLimits) {
-      const $el = $('.ml-explorer-chart');
-
       // Clear any existing elements from the visualization,
       // then build the svg elements for the chart.
       const chartElement = d3.select(element).select(`.${CONTENT_WRAPPER_CLASS}`);
       chartElement.select('svg').remove();
 
-      const svgWidth = $el.width();
+      const svgWidth = element.clientWidth;
       const svgHeight = chartHeight + margin.top + margin.bottom;
 
       const svg = chartElement

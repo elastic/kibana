@@ -22,7 +22,13 @@ export interface AlertTypeCount {
 }
 export type EventKind = 'event' | 'signal';
 export type EventCategory = 'process' | 'file' | 'network';
-export type EventAction = 'fork' | 'exec' | 'end' | 'text_output';
+type AuditbeatEventAction = 'executed';
+export type EventAction = 'fork' | 'exec' | 'end' | 'text_output' | AuditbeatEventAction;
+export type SessionViewIndex =
+  | 'logs-cloud_defend.*'
+  | 'logs-endpoint.events.process*'
+  | 'logs-*'
+  | 'auditbeat-*';
 
 export type ProcessEventAlertCategory = EventCategory | 'all';
 

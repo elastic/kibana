@@ -71,15 +71,31 @@ describe('KnowledgeBaseTab', () => {
 
       fireEvent.click(getByTestId('knowledgeBaseSingleEntryContextMenuItem'));
 
-      fireEvent.click(getByTestId('knowledgeBaseEditManualEntryFlyoutFieldText'));
-
-      fireEvent.change(getByTestId('knowledgeBaseEditManualEntryFlyoutFieldText'), {
+      fireEvent.change(getByTestId('knowledgeBaseEditManualEntryFlyoutIdInput'), {
         target: { value: 'foo' },
+      });
+
+      fireEvent.change(getByTestId('euiMarkdownEditorTextArea'), {
+        target: { value: 'bar' },
       });
 
       getByTestId('knowledgeBaseEditManualEntryFlyoutSaveButton').click();
 
-      expect(createMock).toHaveBeenCalledWith({ entry: { id: 'foo', text: '' } });
+      expect(createMock).toHaveBeenCalledWith({ entry: { id: 'foo', text: 'bar' } });
+    });
+
+    it('should require an id', () => {
+      const { getByTestId } = render(<KnowledgeBaseTab />);
+
+      fireEvent.click(getByTestId('knowledgeBaseNewEntryButton'));
+
+      fireEvent.click(getByTestId('knowledgeBaseSingleEntryContextMenuItem'));
+
+      fireEvent.change(getByTestId('knowledgeBaseEditManualEntryFlyoutIdInput'), {
+        target: { value: 'foo' },
+      });
+
+      expect(getByTestId('knowledgeBaseEditManualEntryFlyoutSaveButton')).toBeDisabled();
     });
   });
 

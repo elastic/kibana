@@ -15,7 +15,7 @@ interface SidebarTitleProps {
 const SidebarTitleComponent: React.FC<SidebarTitleProps> = ({ title }) => {
   return (
     <EuiTitle size="xs">
-      <h2>{title}</h2>
+      <h3>{title}</h3>
     </EuiTitle>
   );
 };

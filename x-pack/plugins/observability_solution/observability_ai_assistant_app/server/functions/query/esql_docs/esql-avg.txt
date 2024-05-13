@@ -1,11 +1,19 @@
 AVG
 
 Syntax
-AVG(column)
-column
-Numeric column. If null, the function returns null.
-DescriptionThe average of a numeric field.Supported typesThe result is always a double no matter the input type.Example
+AVG(expression)
+expression
+Numeric expression.
+DescriptionThe average of a numeric expression.Supported typesThe result is always a double no matter the input type.Examples
 ```esql
 FROM employees
 | STATS AVG(height)
+```
+
+The expression can use inline functions. For example, to calculate the average
+over a multivalued column, first use MV_AVG to average the multiple values per
+row, and use the result with the AVG function:
+```esql
+FROM employees
+| STATS avg_salary_change = ROUND(AVG(MV_AVG(salary_change)), 10)
 ```

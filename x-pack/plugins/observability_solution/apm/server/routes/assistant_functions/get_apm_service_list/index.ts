@@ -79,9 +79,7 @@ export async function getApmServiceList({
   });
 
   if (healthStatus && healthStatus.length) {
-    mappedItems = mappedItems.filter((item): boolean =>
-      healthStatus.includes(item.healthStatus)
-    );
+    mappedItems = mappedItems.filter((item): boolean => healthStatus.includes(item.healthStatus));
   }
 
   return mappedItems;

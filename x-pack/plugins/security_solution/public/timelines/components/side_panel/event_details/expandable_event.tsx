@@ -24,6 +24,7 @@ import styled from 'styled-components';
 
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
 import { URL_PARAM_KEY } from '../../../../common/hooks/use_url_state';
 import type { GetFieldsData } from '../../../../common/hooks/use_get_fields_data';
 import { Assignees } from '../../../../flyout/document_details/right/components/assignees';
@@ -111,7 +112,7 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
     const urlModifier = (value: string) => {
       // this is actually only needed for when users click on the Share Alert button and then enable the expandable flyout
       // (for the old (non-expandable) flyout, we do not need to save anything in the url as we automatically open the flyout here: x-pack/plugins/security_solution/public/detections/pages/alerts/alert_details_redirect.tsx
-      return `${value}&${URL_PARAM_KEY.flyout}=(preview:!(),right:(id:document-details-right,params:(id:'${eventId}',indexName:${eventIndex},scopeId:${scopeId})))`;
+      return `${value}&${URL_PARAM_KEY.flyout}=(preview:!(),right:(id:${DocumentDetailsRightPanelKey},params:(id:'${eventId}',indexName:${eventIndex},scopeId:${scopeId})))`;
     };
 
     const { refetch } = useRefetchByScope({ scopeId });

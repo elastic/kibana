@@ -14,9 +14,8 @@ import moment from 'moment';
 import { useCurrentThemeVars } from '../contexts/kibana';
 import type { Annotation, AnnotationsTable } from '../../../common/types/annotations';
 import type { ChartTooltipService } from '../components/chart_tooltip';
+import { Y_AXIS_LABEL_PADDING, Y_AXIS_LABEL_WIDTH } from './constants';
 
-export const Y_AXIS_LABEL_WIDTH = 170;
-export const Y_AXIS_LABEL_PADDING = 8;
 const ANNOTATION_CONTAINER_HEIGHT = 12;
 const ANNOTATION_MIN_WIDTH = 8;
 

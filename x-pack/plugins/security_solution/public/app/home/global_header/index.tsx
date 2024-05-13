@@ -53,22 +53,24 @@ export const GlobalHeader = React.memo(() => {
   const { href, onClick } = useAddIntegrationsUrl();
 
   useEffect(() => {
-    setHeaderActionMenu((element) => {
-      const mount = toMountPoint(<OutPortal node={portalNode} />, {
-        theme,
-        i18n: kibanaServiceI18n,
+    if (setHeaderActionMenu) {
+      setHeaderActionMenu((element) => {
+        const mount = toMountPoint(<OutPortal node={portalNode} />, {
+          theme,
+          i18n: kibanaServiceI18n,
+        });
+        return mount(element);
       });
-      return mount(element);
-    });
 
-    return () => {
-      /* Dashboard mounts an edit toolbar, it should be restored when leaving dashboard editing page */
-      if (dashboardViewPath) {
-        return;
-      }
-      portalNode.unmount();
-      setHeaderActionMenu(undefined);
-    };
+      return () => {
+        /* Dashboard mounts an edit toolbar, it should be restored when leaving dashboard editing page */
+        if (dashboardViewPath) {
+          return;
+        }
+        portalNode.unmount();
+        setHeaderActionMenu(undefined);
+      };
+    }
   }, [portalNode, setHeaderActionMenu, theme, kibanaServiceI18n, dashboardViewPath]);
 
   return (

@@ -187,7 +187,6 @@ describe('createRuleRoute', () => {
           "data": Object {
             "actions": Array [
               Object {
-                "actionTypeId": undefined,
                 "alertsFilter": Object {
                   "query": Object {
                     "filters": Array [],
@@ -304,7 +303,6 @@ describe('createRuleRoute', () => {
           "data": Object {
             "actions": Array [
               Object {
-                "actionTypeId": undefined,
                 "alertsFilter": Object {
                   "query": Object {
                     "filters": Array [],
@@ -422,7 +420,6 @@ describe('createRuleRoute', () => {
           "data": Object {
             "actions": Array [
               Object {
-                "actionTypeId": undefined,
                 "alertsFilter": Object {
                   "query": Object {
                     "filters": Array [],
@@ -540,7 +537,6 @@ describe('createRuleRoute', () => {
           "data": Object {
             "actions": Array [
               Object {
-                "actionTypeId": undefined,
                 "alertsFilter": Object {
                   "query": Object {
                     "filters": Array [],
@@ -636,7 +632,7 @@ describe('createRuleRoute', () => {
 
     const [context, req, res] = mockHandlerArguments({ rulesClient }, {});
 
-    expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
+    await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
 
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
   });
@@ -703,7 +699,6 @@ describe('createRuleRoute', () => {
             "data": Object {
               "actions": Array [
                 Object {
-                  "actionTypeId": "test",
                   "group": "default",
                   "id": "2",
                   "params": Object {
@@ -725,7 +720,6 @@ describe('createRuleRoute', () => {
               },
               "systemActions": Array [
                 Object {
-                  "actionTypeId": "test-2",
                   "id": "system_action-id",
                   "params": Object {
                     "foo": true,

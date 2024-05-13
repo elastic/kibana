@@ -89,7 +89,9 @@ export const Page: FC<PageProps> = ({
           >
             <EuiFlexGroup direction="row" gutterSize="s">
               <CreateDataViewButton
-                onDataViewCreated={onObjectSelection}
+                onDataViewCreated={(dataView) => {
+                  onObjectSelection(dataView.id!, 'index-pattern', dataView.getIndexPattern());
+                }}
                 allowAdHocDataView={true}
               />
               {extraButtons ? extraButtons : null}

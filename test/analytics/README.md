@@ -18,6 +18,21 @@ const events = await getService('kibana_ebt_ui').getEvents(2, { eventTypes: ['my
 expect(events).to...
 ```
 
+Refer to [`EBTHelpersContract`](./plugins/analytics_ftr_helpers/common/types.ts#:~:text=EBTHelpersContract) for more details about the existing APIs and all the options they accept.
+
+## Usage outside of this test suite
+
+First, you'll need to add the services to your config, such as:
+```
+kibana_ebt_server: KibanaEBTServerProvider,
+kibana_ebt_ui: KibanaEBTUIProvider,
+```
+
+The providers are found inside `./services/kibana_ebt.ts`
+
+You'll also need to inject a plugin to Kibana that loads the helper code, by adding a CLI flag like:
+`--plugin-path=PATH_TO/test/analytics/plugins/analytics_ftr_helpers`
+
 If you are reusing these helpers in another suite, please remember to make sure to optIn via `await getService('kibana_ebt_ui').setOptIn(true);`
 
-Refer to [`EBTHelpersContract`](./plugins/analytics_ftr_helpers/common/types.ts#:~:text=EBTHelpersContract) for more details about the existing APIs and all the options they accept.
+> Note: This opt in is only stored in memory, so a page refresh will reset it.

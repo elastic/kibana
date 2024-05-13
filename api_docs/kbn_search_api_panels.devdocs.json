@@ -458,7 +458,7 @@
         "label": "OverviewPanel",
         "description": [],
         "signature": [
-          "({ children, description, leftPanelContent, links, rightPanelContent, title, overviewPanelProps, }: React.PropsWithChildren<OverviewPanelProps>) => JSX.Element"
+          "({ children, description, leftPanelContent, links, rightPanelContent, title, overviewPanelProps, }: React.PropsWithChildren<React.PropsWithChildren<OverviewPanelProps>>) => JSX.Element"
         ],
         "path": "packages/kbn-search-api-panels/components/overview_panel.tsx",
         "deprecated": false,
@@ -472,7 +472,7 @@
             "label": "{\n  children,\n  description,\n  leftPanelContent,\n  links,\n  rightPanelContent,\n  title,\n  overviewPanelProps,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<OverviewPanelProps>"
+              "React.PropsWithChildren<React.PropsWithChildren<OverviewPanelProps>>"
             ],
             "path": "packages/kbn-search-api-panels/components/overview_panel.tsx",
             "deprecated": false,
@@ -518,13 +518,46 @@
       },
       {
         "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-common.PreprocessDataPanel",
+        "type": "Function",
+        "tags": [],
+        "label": "PreprocessDataPanel",
+        "description": [],
+        "signature": [
+          "({ docLinks, images }: React.PropsWithChildren<{ docLinks: { arrayOrJson: string; dataEnrichment: string; dataFiltering: string; dataTransformation: string; pipelineHandling: string; }; images: { dataEnrichment: string; dataTransformation: string; dataFiltering: string; pipelineHandling: string; arrayHandling: string; }; }>) => JSX.Element"
+        ],
+        "path": "packages/kbn-search-api-panels/components/preprocess_data.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.PreprocessDataPanel.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ docLinks, images }",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<{ docLinks: { arrayOrJson: string; dataEnrichment: string; dataFiltering: string; dataTransformation: string; pipelineHandling: string; }; images: { dataEnrichment: string; dataTransformation: string; dataFiltering: string; pipelineHandling: string; arrayHandling: string; }; }>"
+            ],
+            "path": "packages/kbn-search-api-panels/components/preprocess_data.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
         "id": "def-common.SelectClientPanel",
         "type": "Function",
         "tags": [],
         "label": "SelectClientPanel",
         "description": [],
         "signature": [
-          "({ docLinks, children, isPanelLeft, overviewPanelProps, callout, application, consolePlugin, sharePlugin, }: React.PropsWithChildren<",
+          "({ docLinks, children, isPanelLeft, overviewPanelProps, callout, application, consolePlugin, sharePlugin, }: React.PropsWithChildren<React.PropsWithChildren<",
           {
             "pluginId": "@kbn/search-api-panels",
             "scope": "common",
@@ -532,7 +565,7 @@
             "section": "def-common.SelectClientPanelProps",
             "text": "SelectClientPanelProps"
           },
-          ">) => JSX.Element"
+          ">>) => JSX.Element"
         ],
         "path": "packages/kbn-search-api-panels/components/select_client.tsx",
         "deprecated": false,
@@ -546,7 +579,7 @@
             "label": "{\n  docLinks,\n  children,\n  isPanelLeft = true,\n  overviewPanelProps,\n  callout,\n  application,\n  consolePlugin,\n  sharePlugin,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
+              "React.PropsWithChildren<React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/search-api-panels",
                 "scope": "common",
@@ -554,7 +587,7 @@
                 "section": "def-common.SelectClientPanelProps",
                 "text": "SelectClientPanelProps"
               },
-              ">"
+              ">>"
             ],
             "path": "packages/kbn-search-api-panels/components/select_client.tsx",
             "deprecated": false,
@@ -1229,6 +1262,20 @@
             "path": "packages/kbn-search-api-panels/components/select_client.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.SelectClientPanelProps.children",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "children",
+            "description": [],
+            "signature": [
+              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+            ],
+            "path": "packages/kbn-search-api-panels/components/select_client.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1308,33 +1355,14 @@
             "label": "sharePlugin",
             "description": [],
             "signature": [
-              "{ toggleShareContextMenu: (options: ",
               {
                 "pluginId": "share",
                 "scope": "public",
                 "docId": "kibSharePluginApi",
-                "section": "def-public.ShowShareMenuOptions",
-                "text": "ShowShareMenuOptions"
+                "section": "def-public.SharePublicStart",
+                "text": "SharePublicStart"
               },
-              ") => void; } & { url: ",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.BrowserUrlService",
-                "text": "BrowserUrlService"
-              },
-              "; navigate(options: ",
-              "RedirectOptions",
-              "<",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
-              ">): void; }"
+              " | undefined"
             ],
             "path": "packages/kbn-search-api-panels/components/try_in_console_button.tsx",
             "deprecated": false,

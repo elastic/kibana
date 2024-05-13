@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import * as Boom from '@hapi/boom';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server/plugin';
 import { createConcreteWriteIndex, getDataStreamAdapter } from '@kbn/alerting-plugin/server';
 import type { CoreSetup, CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
@@ -274,11 +273,8 @@ export class ObservabilityAIAssistantService {
         [CoreStart, { security: SecurityPluginStart; actions: ActionsPluginStart }, unknown]
       >,
     ]);
+    // user will not be found when executed from system connector context
     const user = plugins.security.authc.getCurrentUser(request);
-
-    if (!user) {
-      throw Boom.forbidden(`User not found for current request`);
-    }
 
     const basePath = coreStart.http.basePath.get(request);
 
@@ -293,10 +289,12 @@ export class ObservabilityAIAssistantService {
       },
       resources: this.resourceNames,
       logger: this.logger,
-      user: {
-        id: user.profile_uid,
-        name: user.username,
-      },
+      user: user
+        ? {
+            id: user.profile_uid,
+            name: user.username,
+          }
+        : undefined,
       knowledgeBaseService: this.kbService!,
     });
   }

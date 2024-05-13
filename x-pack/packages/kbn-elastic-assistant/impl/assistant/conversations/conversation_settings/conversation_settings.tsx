@@ -50,6 +50,7 @@ export interface ConversationSettingsProps {
     React.SetStateAction<ConversationsBulkActions>
   >;
   isDisabled?: boolean;
+  isFlyoutMode: boolean;
 }
 
 /**
@@ -65,6 +66,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
     conversationSettings,
     http,
     isDisabled = false,
+    isFlyoutMode,
     setAssistantStreamingEnabled,
     setConversationSettings,
     conversationsSettingsBulkActions,
@@ -81,6 +83,14 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
     const { data: connectors, isSuccess: areConnectorsFetched } = useLoadConnectors({
       http,
     });
+
+    const selectedConversationId = useMemo(
+      () =>
+        selectedConversation?.id === ''
+          ? selectedConversation.title
+          : (selectedConversation?.id as string),
+      [selectedConversation]
+    );
 
     // Conversation callbacks
     // When top level conversation selection changes
@@ -124,7 +134,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
           setConversationSettings((prev) => {
             return {
               ...prev,
-              [newSelectedConversation.title]: newSelectedConversation,
+              [newSelectedConversation.id]: newSelectedConversation,
             };
           });
         }
@@ -144,9 +154,10 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
 
     const onConversationDeleted = useCallback(
       (conversationTitle: string) => {
-        const conversationId = conversationSettings[conversationTitle].id;
+        const conversationId =
+          Object.values(conversationSettings).find((c) => c.title === conversationTitle)?.id ?? '';
         const updatedConversationSettings = { ...conversationSettings };
-        delete updatedConversationSettings[conversationTitle];
+        delete updatedConversationSettings[conversationId];
         setConversationSettings(updatedConversationSettings);
 
         setConversationsSettingsBulkActions({
@@ -176,22 +187,22 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
           };
           setConversationSettings({
             ...conversationSettings,
-            [updatedConversation.title]: updatedConversation,
+            [updatedConversation.id]: updatedConversation,
           });
           if (selectedConversation.id !== '') {
             setConversationsSettingsBulkActions({
               ...conversationsSettingsBulkActions,
               update: {
                 ...(conversationsSettingsBulkActions.update ?? {}),
-                [updatedConversation.title]: {
+                [updatedConversation.id]: {
                   ...updatedConversation,
                   ...(conversationsSettingsBulkActions.update
-                    ? conversationsSettingsBulkActions.update[updatedConversation.title] ?? {}
+                    ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
                     : {}),
                   apiConfig: {
                     ...updatedConversation.apiConfig,
                     ...((conversationsSettingsBulkActions.update
-                      ? conversationsSettingsBulkActions.update[updatedConversation.title] ?? {}
+                      ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
                       : {}
                     ).apiConfig ?? {}),
                     defaultSystemPromptId: systemPromptId,
@@ -204,7 +215,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
               ...conversationsSettingsBulkActions,
               create: {
                 ...(conversationsSettingsBulkActions.create ?? {}),
-                [updatedConversation.title]: updatedConversation,
+                [updatedConversation.id]: updatedConversation,
               },
             });
           }
@@ -248,22 +259,22 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
           };
           setConversationSettings({
             ...conversationSettings,
-            [selectedConversation.title]: updatedConversation,
+            [selectedConversationId]: updatedConversation,
           });
           if (selectedConversation.id !== '') {
             setConversationsSettingsBulkActions({
               ...conversationsSettingsBulkActions,
               update: {
                 ...(conversationsSettingsBulkActions.update ?? {}),
-                [updatedConversation.title]: {
+                [updatedConversation.id]: {
                   ...updatedConversation,
                   ...(conversationsSettingsBulkActions.update
-                    ? conversationsSettingsBulkActions.update[updatedConversation.title] ?? {}
+                    ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
                     : {}),
                   apiConfig: {
                     ...updatedConversation.apiConfig,
                     ...((conversationsSettingsBulkActions.update
-                      ? conversationsSettingsBulkActions.update[updatedConversation.title] ?? {}
+                      ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
                       : {}
                     ).apiConfig ?? {}),
                     connectorId: connector?.id,
@@ -279,7 +290,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
               ...conversationsSettingsBulkActions,
               create: {
                 ...(conversationsSettingsBulkActions.create ?? {}),
-                [updatedConversation.title]: updatedConversation,
+                [updatedConversation.id]: updatedConversation,
               },
             });
           }
@@ -289,6 +300,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
         conversationSettings,
         conversationsSettingsBulkActions,
         selectedConversation,
+        selectedConversationId,
         setConversationSettings,
         setConversationsSettingsBulkActions,
       ]
@@ -312,22 +324,22 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
           };
           setConversationSettings({
             ...conversationSettings,
-            [updatedConversation.title]: updatedConversation,
+            [updatedConversation.id]: updatedConversation,
           });
           if (selectedConversation.id !== '') {
             setConversationsSettingsBulkActions({
               ...conversationsSettingsBulkActions,
               update: {
                 ...(conversationsSettingsBulkActions.update ?? {}),
-                [updatedConversation.title]: {
+                [updatedConversation.id]: {
                   ...updatedConversation,
                   ...(conversationsSettingsBulkActions.update
-                    ? conversationsSettingsBulkActions.update[updatedConversation.title] ?? {}
+                    ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
                     : {}),
                   apiConfig: {
                     ...updatedConversation.apiConfig,
                     ...((conversationsSettingsBulkActions.update
-                      ? conversationsSettingsBulkActions.update[updatedConversation.title] ?? {}
+                      ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
                       : {}
                     ).apiConfig ?? {}),
                     model,
@@ -340,7 +352,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
               ...conversationsSettingsBulkActions,
               create: {
                 ...(conversationsSettingsBulkActions.create ?? {}),
-                [updatedConversation.title]: updatedConversation,
+                [updatedConversation.id]: updatedConversation,
               },
             });
           }
@@ -388,6 +400,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
             showTitles={true}
             isSettingsModalVisible={true}
             setIsSettingsModalVisible={noop} // noop, already in settings
+            isFlyoutMode={isFlyoutMode}
           />
         </EuiFormRow>
 
@@ -412,6 +425,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
             isDisabled={isDisabled}
             onConnectorSelectionChange={handleOnConnectorSelectionChange}
             selectedConnectorId={selectedConnector?.id}
+            isFlyoutMode={isFlyoutMode}
           />
         </EuiFormRow>
 

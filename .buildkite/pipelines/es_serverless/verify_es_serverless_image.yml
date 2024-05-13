@@ -9,13 +9,23 @@
 # BUILDKITE_COMMIT: the commit hash of the kibana branch to test
 
 agents:
-  queue: kibana-default
+  image: family/kibana-ubuntu-2004
+  imageProject: elastic-images-prod
+  provider: gcp
+  machineType: n2-standard-2
 
 steps:
   - label: "Annotate runtime parameters"
     command: |
-      buildkite-agent annotate --context es-serverless-image --style info "ES Serverless image: $ES_SERVERLESS_IMAGE"
       buildkite-agent annotate --context kibana-commit --style info "Kibana build hash: $BUILDKITE_BRANCH / $BUILDKITE_COMMIT"
+      cat << EOF | buildkite-agent annotate --context es-serverless-image --style info
+        ES Serverless image: \`$ES_SERVERLESS_IMAGE\`
+
+        To run this locally:
+        \`\`\`
+        node scripts/es serverless --image $ES_SERVERLESS_IMAGE
+        \`\`\`
+      EOF
 
   - group: "(:kibana: x :elastic:) Trigger Kibana Serverless suite"
     if: "build.env('SKIP_VERIFICATION') != '1' && build.env('SKIP_VERIFICATION') != 'true'"
@@ -25,12 +35,18 @@ steps:
         key: pre-build
         timeout_in_minutes: 10
         agents:
-          queue: kibana-default
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-2
 
       - label: "Build Kibana Distribution and Plugins"
         command: .buildkite/scripts/steps/build_kibana.sh
         agents:
-          queue: n2-16-spot
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-16
         key: build
         depends_on: pre-build
         timeout_in_minutes: 60
@@ -41,8 +57,6 @@ steps:
 
       - label: "Pick Test Group Run Order (FTR + Integration)"
         command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
-        agents:
-          queue: kibana-default
         depends_on: build
         timeout_in_minutes: 10
         env:
@@ -60,7 +74,11 @@ steps:
         label: 'Serverless Entity Analytics - Security Solution Cypress Tests'
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
-          queue: n2-4-spot
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+          preemptible: true
         depends_on: build
         timeout_in_minutes: 60
         parallelism: 2
@@ -73,7 +91,11 @@ steps:
         label: 'Serverless Explore - Security Solution Cypress Tests'
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
-          queue: n2-4-spot
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+          preemptible: true
         depends_on: build
         timeout_in_minutes: 60
         parallelism: 4
@@ -86,7 +108,11 @@ steps:
         label: 'Serverless Investigations - Security Solution Cypress Tests'
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
-          queue: n2-4-spot
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+          preemptible: true
         depends_on: build
         timeout_in_minutes: 60
         parallelism: 8
@@ -99,7 +125,11 @@ steps:
         label: 'Serverless Rule Management - Security Solution Cypress Tests'
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
-          queue: n2-4-spot
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+          preemptible: true
         depends_on: build
         timeout_in_minutes: 60
         parallelism: 5
@@ -112,7 +142,11 @@ steps:
         label: 'Serverless Rule Management - Prebuilt Rules - Security Solution Cypress Tests'
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
-          queue: n2-4-spot
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+          preemptible: true
         depends_on: build
         timeout_in_minutes: 60
         parallelism: 2
@@ -125,7 +159,11 @@ steps:
         label: 'Serverless Detection Engine - Security Solution Cypress Tests'
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
-          queue: n2-4-spot
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+          preemptible: true
         depends_on: build
         timeout_in_minutes: 60
         parallelism: 5
@@ -138,7 +176,11 @@ steps:
         label: 'Serverless Detection Engine - Exceptions - Security Solution Cypress Tests'
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
-          queue: n2-4-spot
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+          preemptible: true
         depends_on: build
         timeout_in_minutes: 60
         parallelism: 2
@@ -151,7 +193,11 @@ steps:
         label: 'Serverless AI Assistant - Security Solution Cypress Tests'
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
-          queue: n2-4-spot
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+          preemptible: true
         depends_on: build
         timeout_in_minutes: 60
         parallelism: 1
@@ -164,7 +210,13 @@ steps:
         label: 'Defend Workflows Cypress Tests on Serverless'
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
-          queue: n2-4-virt
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          enableNestedVirtualization: true
+          localSsds: 1
+          localSsdInterface: nvme
+          machineType: n2-standard-4
         depends_on: build
         timeout_in_minutes: 60
         parallelism: 12
@@ -177,7 +229,11 @@ steps:
         label: 'Serverless Osquery Cypress Tests'
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
-          queue: n2-4-spot
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+          preemptible: true
         depends_on: build
         timeout_in_minutes: 60
         parallelism: 7
@@ -196,5 +252,3 @@ steps:
   - label: 'Post-Build'
     command: .buildkite/scripts/lifecycle/post_build.sh
     timeout_in_minutes: 10
-    agents:
-      queue: kibana-default

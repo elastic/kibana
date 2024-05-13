@@ -126,7 +126,7 @@ export class PieChartService extends FtrService {
     }
     const pieSlices = await this.getAllPieSlices(name);
     const slicesStyles = await Promise.all(
-      pieSlices.map(async (pieSlice) => await pieSlice.getAttribute('style'))
+      pieSlices.map(async (pieSlice) => (await pieSlice.getAttribute('style')) ?? '')
     );
     return slicesStyles
       .map(

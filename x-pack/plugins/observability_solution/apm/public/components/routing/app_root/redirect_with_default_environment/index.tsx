@@ -10,11 +10,7 @@ import qs from 'query-string';
 import React from 'react';
 import { useDefaultEnvironment } from '../../../../hooks/use_default_environment';
 
-export function RedirectWithDefaultEnvironment({
-  children,
-}: {
-  children: React.ReactElement;
-}) {
+export function RedirectWithDefaultEnvironment({ children }: { children: React.ReactElement }) {
   const location = useLocation();
 
   const query = qs.parse(location.search);

@@ -59,6 +59,7 @@ export function ShowShareModal({
         },
       },
     },
+    notifications,
     share: { toggleShareContextMenu },
   } = pluginServices.getServices();
 
@@ -197,5 +198,6 @@ export function ShowShareModal({
     snapshotShareWarning: Boolean(unsavedDashboardState?.panels)
       ? shareModalStrings.getSnapshotShareWarning()
       : undefined,
+    toasts: notifications.toasts,
   });
 }

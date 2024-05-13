@@ -65,15 +65,11 @@ export interface TopDependenciesResponse {
   }>;
 }
 
-export async function getTopDependencies(
-  options: Options
-): Promise<TopDependenciesResponse> {
+export async function getTopDependencies(options: Options): Promise<TopDependenciesResponse> {
   const { offset, ...otherOptions } = options;
   const [currentDependencies, previousDependencies] = await Promise.all([
     getTopDependenciesForTimeRange(otherOptions),
-    offset
-      ? getTopDependenciesForTimeRange({ ...otherOptions, offset })
-      : Promise.resolve([]),
+    offset ? getTopDependenciesForTimeRange({ ...otherOptions, offset }) : Promise.resolve([]),
   ]);
 
   return {

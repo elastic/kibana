@@ -14,6 +14,8 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import { errors } from '@elastic/elasticsearch';
 
+import { STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS } from '../../../../constants/fleet_es_assets';
+
 import { createAppContextStartContractMock } from '../../../../mocks';
 import { appContextService } from '../../..';
 import type { RegistryDataStream } from '../../../../types';
@@ -23,6 +25,7 @@ import {
   FLEET_COMPONENT_TEMPLATES,
   STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
   FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
+  STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
 } from '../../../../constants';
 
 import {
@@ -81,7 +84,8 @@ describe('EPM template', () => {
       isIndexModeTimeSeries: false,
     });
     expect(template.composed_of).toStrictEqual([
-      'logs@settings',
+      STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
+      STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
       ...composedOfTemplates,
       STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
       ...FLEET_COMPONENT_TEMPLATES_NAMES,
@@ -126,7 +130,8 @@ describe('EPM template', () => {
       isIndexModeTimeSeries: false,
     });
     expect(template.composed_of).toStrictEqual([
-      'logs@settings',
+      STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
+      STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
       ...composedOfTemplates,
       STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
       FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
@@ -146,7 +151,8 @@ describe('EPM template', () => {
       isIndexModeTimeSeries: false,
     });
     expect(template.composed_of).toStrictEqual([
-      'logs@settings',
+      STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
+      STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
       STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
       ...FLEET_COMPONENT_TEMPLATES_NAMES,
     ]);

@@ -22,8 +22,6 @@ describe('[Logs onboarding] Give Feedback', () => {
   });
 
   it('feedback button is not present in the landing page', () => {
-    cy.getByTestSubj('observabilityOnboardingPageGiveFeedback').should(
-      'not.exist'
-    );
+    cy.getByTestSubj('observabilityOnboardingPageGiveFeedback').should('not.exist');
   });
 });

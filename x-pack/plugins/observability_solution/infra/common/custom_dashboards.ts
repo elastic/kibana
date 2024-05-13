@@ -18,3 +18,7 @@ export interface InfraCustomDashboard {
 export interface InfraSavedCustomDashboard extends InfraCustomDashboard {
   id: string;
 }
+
+export interface DashboardItemWithTitle extends InfraSavedCustomDashboard {
+  title: string;
+}

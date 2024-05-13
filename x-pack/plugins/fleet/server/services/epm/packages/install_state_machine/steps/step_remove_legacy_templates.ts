@@ -8,12 +8,15 @@
 import { removeLegacyTemplates } from '../../../elasticsearch/template/remove_legacy';
 
 import type { InstallContext } from '../_state_machine_package_install';
+import { withPackageSpan } from '../../utils';
 
 export async function stepRemoveLegacyTemplates(context: InstallContext) {
   const { esClient, packageInstallContext, logger } = context;
   const { packageInfo } = packageInstallContext;
   try {
-    await removeLegacyTemplates({ packageInfo, esClient, logger });
+    await withPackageSpan('Remove legacy templates', () =>
+      removeLegacyTemplates({ packageInfo, esClient, logger })
+    );
   } catch (e) {
     logger.warn(`Error removing legacy templates: ${e.message}`);
   }

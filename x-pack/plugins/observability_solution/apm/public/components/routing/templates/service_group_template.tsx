@@ -68,11 +68,7 @@ export function ServiceGroupTemplate({
       responsive={false}
     >
       <EuiFlexItem grow={false}>
-        <EuiSkeletonTitle
-          size="l"
-          style={{ width: 180 }}
-          isLoading={loadingServiceGroupName}
-        >
+        <EuiSkeletonTitle size="l" style={{ width: 180 }} isLoading={loadingServiceGroupName}>
           {serviceGroupName ||
             i18n.translate('xpack.apm.serviceGroup.allServices.title', {
               defaultMessage: 'Services',
@@ -122,10 +118,9 @@ export function ServiceGroupTemplate({
                 text: (
                   <>
                     <EuiIcon size="s" type="arrowLeft" />{' '}
-                    {i18n.translate(
-                      'xpack.apm.serviceGroups.breadcrumb.return',
-                      { defaultMessage: 'Return to service groups' }
-                    )}
+                    {i18n.translate('xpack.apm.serviceGroups.breadcrumb.return', {
+                      defaultMessage: 'Return to service groups',
+                    })}
                   </>
                 ),
                 color: 'primary',

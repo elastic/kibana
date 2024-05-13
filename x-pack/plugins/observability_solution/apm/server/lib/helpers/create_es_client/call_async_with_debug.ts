@@ -61,9 +61,7 @@ export async function callAsyncWithDebug<T>({
 
     const { title, body } = getDebugMessage();
 
-    console.log(
-      chalk.bold[highlightColor](`=== Debug: ${title} (${duration}ms) ===`)
-    );
+    console.log(chalk.bold[highlightColor](`=== Debug: ${title} (${duration}ms) ===`));
 
     console.log(body);
     console.log(`\n`);
@@ -105,9 +103,7 @@ export const getDebugBody = ({
   const operationLine = `${operationName}\n`;
 
   if (requestType === 'search') {
-    return `${operationLine}GET ${params.index}/_search\n${formatObj(
-      params.body
-    )}`;
+    return `${operationLine}GET ${params.index}/_search\n${formatObj(params.body)}`;
   }
 
   return `${chalk.bold('ES operation:')} ${requestType}\n${chalk.bold(

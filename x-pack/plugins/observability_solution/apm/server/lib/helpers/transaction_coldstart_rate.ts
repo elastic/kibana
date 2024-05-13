@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  AggregationOptionsByType,
-  AggregationResultOf,
-} from '@kbn/es-types';
+import type { AggregationOptionsByType, AggregationResultOf } from '@kbn/es-types';
 import { FAAS_COLDSTART } from '../../../common/es_fields/apm';
 
 export const getColdstartAggregation = () => ({
@@ -19,11 +16,7 @@ export const getColdstartAggregation = () => ({
 
 type ColdstartAggregation = ReturnType<typeof getColdstartAggregation>;
 
-export const getTimeseriesAggregation = (
-  start: number,
-  end: number,
-  intervalString: string
-) => ({
+export const getTimeseriesAggregation = (start: number, end: number, intervalString: string) => ({
   date_histogram: {
     field: '@timestamp',
     fixed_interval: intervalString,

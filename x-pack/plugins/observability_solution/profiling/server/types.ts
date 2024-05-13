@@ -17,6 +17,10 @@ import {
   ProfilingDataAccessPluginStart,
 } from '@kbn/profiling-data-access-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import {
+  ApmDataAccessPluginSetup,
+  ApmDataAccessPluginStart,
+} from '@kbn/apm-data-access-plugin/server';
 
 export interface ProfilingPluginSetupDeps {
   observability: ObservabilityPluginSetup;
@@ -27,6 +31,7 @@ export interface ProfilingPluginSetupDeps {
   usageCollection?: UsageCollectionSetup;
   profilingDataAccess: ProfilingDataAccessPluginSetup;
   security?: SecurityPluginSetup;
+  apmDataAccess?: ApmDataAccessPluginSetup;
 }
 
 export interface ProfilingPluginStartDeps {
@@ -37,6 +42,7 @@ export interface ProfilingPluginStartDeps {
   spaces?: SpacesPluginStart;
   profilingDataAccess: ProfilingDataAccessPluginStart;
   security?: SecurityPluginStart;
+  apmDataAccess?: ApmDataAccessPluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

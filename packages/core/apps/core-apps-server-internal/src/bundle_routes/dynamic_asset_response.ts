@@ -75,7 +75,9 @@ export const createDynamicAssetHandler = ({
 
       let headers: Record<string, string>;
       if (isDist) {
-        headers = { 'cache-control': `max-age=${365 * DAY}` };
+        headers = {
+          'cache-control': `public, max-age=${365 * DAY}, immutable`,
+        };
       } else {
         const stat = await fstat(fd);
         const hash = await getFileHash(fileHashCache, path, stat, fd);
