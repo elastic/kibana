@@ -130,7 +130,6 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
   },
   {
     name: 'agent.logging.level',
-    hidden: true,
     title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.agentLoggingLevelTitle', {
       defaultMessage: 'Agent Logging Level',
     }),
