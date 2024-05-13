@@ -30,6 +30,6 @@ describe('[Observability onboarding] Landing page', () => {
 
   it('when user navigates to observability onboarding landing page is showed', () => {
     cy.visitKibana('/app/observabilityOnboarding');
-    cy.contains('Add Observability data');
+    cy.contains('Onboard Observability data');
   });
 });
