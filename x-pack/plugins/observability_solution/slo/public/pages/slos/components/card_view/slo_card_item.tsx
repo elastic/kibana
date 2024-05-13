@@ -125,13 +125,17 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
           overflow: hidden;
           position: relative;
         `}
-        title={i18n.translate('xpack.slo.sloCardItem.euiPanel.lastUpdatedLabel', {
-          defaultMessage: '{status}, Last updated: {value}',
-          values: {
-            status: slo.summary.status,
-            value: moment(slo.summary.summaryUpdatedAt).fromNow(),
-          },
-        })}
+        title={
+          slo.summary.summaryUpdatedAt
+            ? i18n.translate('xpack.slo.sloCardItem.euiPanel.lastUpdatedLabel', {
+                defaultMessage: '{status}, Last updated: {value}',
+                values: {
+                  status: slo.summary.status,
+                  value: moment(slo.summary.summaryUpdatedAt).fromNow(),
+                },
+              })
+            : slo.summary.status
+        }
       >
         <SloCardChart
           slo={slo}
