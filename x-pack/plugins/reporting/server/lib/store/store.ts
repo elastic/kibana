@@ -121,7 +121,9 @@ export class ReportingStore {
     const ilmPolicyManager = IlmPolicyManager.create({ client });
     if (await ilmPolicyManager.doesIlmPolicyExist()) {
       this.logger.debug(`Found ILM policy ${ILM_POLICY_NAME}; skipping creation.`);
-      return;
+    } else {
+      this.logger.info(`Creating ILM policy for reporting data stream: ${ILM_POLICY_NAME}`);
+      await ilmPolicyManager.createIlmPolicy();
     }
     this.logger.info(`Creating ILM policy for reporting data stream: ${ILM_POLICY_NAME}`);
     await ilmPolicyManager.createIlmPolicy();
