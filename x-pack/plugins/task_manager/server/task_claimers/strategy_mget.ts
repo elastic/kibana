@@ -148,6 +148,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
     const candidateTasks = applyLimitedConcurrency(currentTasks, batches);
     const now = new Date();
     const taskUpdates: ConcreteTaskInstance[] = Array.from(candidateTasks)
+      .slice(0, initialCapacity)
       .map((task) => {
         return {
           ...omit(task, 'enabled'),
@@ -168,8 +169,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
                   addDuration: '5m',
                 })) ?? null,
         };
-      })
-      .slice(0, initialCapacity);
+      });
 
     const finalResults: ConcreteTaskInstance[] = [];
     let conflicts = staleTasks.size;
