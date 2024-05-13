@@ -33,6 +33,7 @@ import {
   buildSiemResponse,
 } from '../../../../routes/utils';
 import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from '../../deprecation';
+import { getRulesManagementClient } from '../../../logic/rules_management_client';
 
 /**
  * @deprecated since version 8.2.0. Use the detection_engine/rules/_bulk_action API instead
@@ -72,6 +73,7 @@ export const bulkCreateRulesRoute = (
 
           const rulesClient = ctx.alerting.getRulesClient();
           const savedObjectsClient = ctx.core.savedObjects.client;
+          const rulesManagementClient = getRulesManagementClient();
 
           const mlAuthz = buildMlAuthz({
             license: ctx.licensing.license,
@@ -127,7 +129,7 @@ export const bulkCreateRulesRoute = (
 
                   throwAuthzError(await mlAuthz.validateRuleType(payloadRule.type));
 
-                  const createdRule = await createRules({
+                  const createdRule = await rulesManagementClient.createCustomRule({
                     rulesClient,
                     params: payloadRule,
                   });

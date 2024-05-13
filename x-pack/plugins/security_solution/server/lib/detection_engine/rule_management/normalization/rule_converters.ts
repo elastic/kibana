@@ -21,7 +21,6 @@ import {
 
 import type { PatchRuleRequestBody } from '../../../../../common/api/detection_engine/rule_management';
 import type {
-  RelatedIntegrationArray,
   RuleCreateProps,
   TypeSpecificCreateProps,
   TypeSpecificResponse,
@@ -429,9 +428,7 @@ export const patchTypeSpecificSnakeToCamel = (
 
 // eslint-disable-next-line complexity
 export const convertPatchAPIToInternalSchema = (
-  nextParams: PatchRuleRequestBody & {
-    related_integrations?: RelatedIntegrationArray;
-  },
+  nextParams: PatchRuleRequestBody,
   existingRule: SanitizedRule<RuleParams>
 ): InternalRuleUpdate => {
   const typeSpecificParams = patchTypeSpecificSnakeToCamel(nextParams, existingRule.params);
@@ -486,13 +483,17 @@ export const convertPatchAPIToInternalSchema = (
   };
 };
 
+interface RuleCreateOptions {
+  immutable?: boolean;
+  defaultEnabled?: boolean;
+}
+
 export const convertCreateAPIToInternalSchema = (
-  input: RuleCreateProps & {
-    related_integrations?: RelatedIntegrationArray;
-  },
-  immutable = false,
-  defaultEnabled = true
+  input: RuleCreateProps,
+  options: RuleCreateOptions
 ): InternalRuleCreate => {
+  const { immutable = false, defaultEnabled = true } = options;
+
   const typeSpecificParams = typeSpecificSnakeToCamel(input);
   const newRuleId = input.rule_id ?? uuidv4();
 

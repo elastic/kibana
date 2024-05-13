@@ -66,7 +66,7 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { RuleCreateProps } from '../../../../../common/api/detection_engine';
 import { convertCreateAPIToInternalSchema } from '..';
-import type { RuleParams, RuleSourceCamelCased } from '../../rule_schema';
+import type { RuleAlertType, RuleParams, RuleSourceCamelCased } from '../../rule_schema';
 import type { PrebuiltRuleAsset } from '../../prebuilt_rules';
 
 interface CreateCustomRuleProps {
@@ -78,6 +78,12 @@ interface CreatePrebuiltRuleProps {
   ruleAsset: PrebuiltRuleAsset;
 }
 
+interface UpdateRuleProps {
+  rulesClient: RulesClient;
+  existingRule: PrebuiltRuleAsset;
+  ruleId: string;
+}
+
 // TODOs:
 // 1. Refactor `convertCreateAPIToInternalSchema` to take a first argument of input/params and then options object
 
@@ -87,16 +93,16 @@ export const getRulesManagementClient = () => {
     // Need to pass enabled flag?
     createCustomRule: async (
       createCustomRulePayload: CreateCustomRuleProps
-    ): Promise<SanitizedRule<RuleParams>> => {
+    ): Promise<RuleAlertType> => {
       const { rulesClient, params } = createCustomRulePayload;
 
-      const internalRule = convertCreateAPIToInternalSchema(params, false);
+      const internalRule = convertCreateAPIToInternalSchema(params, { immutable: false });
       const rule = await rulesClient.create<RuleParams>({
         data: internalRule,
       });
 
       // Do migration of rulesClient response here
-      const migratedRule = migrateRule(rule);
+      const migratedRule = normalizeRule(rule);
 
       return migratedRule;
     },
@@ -109,21 +115,36 @@ export const getRulesManagementClient = () => {
     // 9. INSTALL NEW PREBUILT RULES
     createPrebuiltRule: async (
       createPrebuiltRulePayload: CreatePrebuiltRuleProps
-    ): Promise<SanitizedRule<RuleParams>> => {
+    ): Promise<RuleAlertType> => {
       const { rulesClient, ruleAsset } = createPrebuiltRulePayload;
 
-      const internalRule = convertCreateAPIToInternalSchema(ruleAsset, true, false);
+      const internalRule = convertCreateAPIToInternalSchema(ruleAsset, {
+        immutable: true,
+        defaultEnabled: false,
+      });
       const rule = await rulesClient.create<RuleParams>({
         data: internalRule,
       });
 
-      return rule;
+      // Do migration of rulesClient response here
+      const migratedRule = normalizeRule(rule);
+
+      return migratedRule;
     },
+
+    // 3.  UPDATE RULE
+    updateRule: async (
+      updateRulePayload: UpdateRuleProps
+    ): Promise<void> => {
+    //   const { rulesClient, params } = updateRulePayload;
+
+    //   return;
+    // }
   };
 };
 
-// TODO: Just testing migration, to remove
-const migrateRule = (rule: SanitizedRule<RuleParams>): SanitizedRule<RuleParams> => {
+// TODO: Just testing normalization, to remove
+const normalizeRule = (rule: RuleAlertType): RuleAlertType => {
   const immutable = rule.params.immutable;
 
   if (rule.params.ruleSource) {
