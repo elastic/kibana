@@ -30,5 +30,8 @@
     "@kbn/data-views-plugin",
     "@kbn/unified-search-plugin",
     "@kbn/alerts-ui-shared",
+    "@kbn/data-view-editor-plugin",
+    "@kbn/core-http-browser",
+    "@kbn/core-notifications-browser",
   ]
 }
