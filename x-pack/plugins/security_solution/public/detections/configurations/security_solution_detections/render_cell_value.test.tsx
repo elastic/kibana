@@ -29,9 +29,6 @@ jest.mock('../../../common/containers/sourcerer', () => ({
     indicesExist: true,
   }),
 }));
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutState: jest.fn().mockReturnValue({ left: true }),
-}));
 
 describe('RenderCellValue', () => {
   const columnId = '@timestamp';
@@ -86,15 +83,36 @@ describe('RenderCellValue', () => {
     expect(wrapper.find(DefaultCellRenderer).props()).toEqual(props);
   });
 
-  test('it renders Hidden GuidedOnboardingTourStep when left flyout is open', () => {
+  test('it renders a GuidedOnboardingTourStep when left flyout is closed', () => {
     const RenderCellValue = getRenderCellValueHook({
       scopeId: SourcererScopeName.default,
       tableId: TableId.test,
     });
+
     const wrapper = mount(
       <TestProviders>
         <DragDropContextWrapper browserFields={mockBrowserFields}>
           <RenderCellValue {...props} />
+        </DragDropContextWrapper>
+      </TestProviders>
+    );
+
+    expect(wrapper.find('GuidedOnboardingTourStep').prop('hidden')).toEqual(false);
+  });
+
+  test('it renders a Hidden GuidedOnboardingTourStep when left flyout is open', () => {
+    const RenderCellValue = getRenderCellValueHook({
+      scopeId: SourcererScopeName.default,
+      tableId: TableId.test,
+    });
+    const testProps = {
+      ...props,
+      isLeftExpandableFlyoutExpanded: true,
+    };
+    const wrapper = mount(
+      <TestProviders>
+        <DragDropContextWrapper browserFields={mockBrowserFields}>
+          <RenderCellValue {...testProps} />
         </DragDropContextWrapper>
       </TestProviders>
     );

@@ -121,7 +121,7 @@ export const RenderCellValue: React.FC<NonNullable<EuiDataGridCellProps['cellCon
 
     const hiddenWhenLeftExpandableFlyoutOpened = useMemo(
       () =>
-        isLeftExpandableFlyoutExpanded &&
+        !!isLeftExpandableFlyoutExpanded &&
         hiddenWhenLeftExpandableFlyoutExpanded[SecurityStepId.alertsCases]?.includes(
           AlertsCasesTourSteps.pointToAlertName
         ),
