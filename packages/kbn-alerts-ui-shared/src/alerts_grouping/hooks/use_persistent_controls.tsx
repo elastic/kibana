@@ -6,29 +6,36 @@
  * Side Public License, v 1.
  */
 
-import { useDispatch } from 'react-redux';
 import { useCallback, useMemo } from 'react';
 import { useGetGroupSelectorStateless } from '@kbn/securitysolution-grouping/src/hooks/use_get_group_selector';
-import { updateGroups } from '../store/actions';
-import { useDeepEqualSelector, groupIdSelector } from '../store/selectors';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useAlertDataView } from '../../..';
+import { useAlertsGroupingState } from '../contexts/alerts_grouping_context';
+import { AlertsGroupingProps } from '../types';
 
-export const getUsePersistentControls =
-  ({ groupingId, featureIds, dataViews, http, notifications }) =>
+interface GetUsePersistentControlsParams {
+  groupingId: string;
+  featureIds: AlertConsumers[];
+  maxGroupingLevels?: number;
+  services: Pick<AlertsGroupingProps['services'], 'dataViews' | 'http' | 'notifications'>;
+}
+
+export const getDefaultPersistentControls =
+  ({
+    groupingId,
+    featureIds,
+    maxGroupingLevels = 3,
+    services: { dataViews, http, notifications },
+  }: GetUsePersistentControlsParams) =>
   () => {
-    const dispatch = useDispatch();
+    const { grouping, updateGrouping } = useAlertsGroupingState(groupingId);
+
     const onGroupChange = useCallback(
       (selectedGroups: string[]) => {
-        // selectedGroups.forEach((g) => trackGroupChange(g));
-        dispatch(updateGroups({ activeGroups: selectedGroups, tableId: groupingId }));
+        updateGrouping({ activeGroups: selectedGroups });
       },
-      [dispatch]
+      [updateGrouping]
     );
-
-    const groupId = useMemo(() => groupIdSelector(), []);
-    const { options } = useDeepEqualSelector((state) => groupId(state, groupingId)) ?? {
-      options: [],
-    };
 
     const { dataViews: alertDataViews } = useAlertDataView({
       featureIds,
@@ -43,8 +50,8 @@ export const getUsePersistentControls =
       groupingId,
       onGroupChange,
       fields: dataView?.fields ?? [],
-      defaultGroupingOptions: options,
-      maxGroupingLevels: 3,
+      defaultGroupingOptions: grouping.options,
+      maxGroupingLevels,
     });
 
     return useMemo(() => {

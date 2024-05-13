@@ -14,15 +14,25 @@ import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { GenericBuckets } from '@kbn/securitysolution-grouping/src';
+import { GenericBuckets, GroupOption, NamedAggregation } from '@kbn/securitysolution-grouping/src';
+
+export interface GroupModel {
+  activeGroups: string[];
+  options: Array<{ key: string; label: string }>;
+}
+
+export interface AlertsGroupingState {
+  [tableId: string]: GroupModel;
+}
 
 type NumberOrNull = number | null;
 
-export interface GroupedAlertsTableProps {
+export interface AlertsGroupingProps {
   // TODO
   // currentAlertStatusFilterValue?: Status[];
   // runtimeMappings: RunTimeMappings;
   defaultFilters?: Filter[];
+  defaultGroupingOptions: GroupOption[];
   featureIds: ValidFeatureId[];
   from: string;
   globalFilters: Filter[];
@@ -34,6 +44,7 @@ export interface GroupedAlertsTableProps {
   signalIndexName?: string | null;
   tableId: string;
   to: string;
+  getAggregationsByGroupingField: (field: string) => NamedAggregation[];
   services: {
     storage: Storage;
     // telemetry: TelemetryClientStart;

@@ -6,5 +6,7 @@
  * Side Public License, v 1.
  */
 
-export * from './use_alert_data_view';
-export * from './use_rule_aad_fields';
+export * from './fetch_aad_fields';
+export * from './fetch_alert_fields';
+export * from './fetch_alert_index_names';
+export * from './fetch_rule_types';

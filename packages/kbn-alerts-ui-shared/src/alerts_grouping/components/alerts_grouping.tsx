@@ -6,23 +6,21 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { isNoneGroup, useGrouping } from '@kbn/securitysolution-grouping';
 import { isEqual } from 'lodash/fp';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import { Provider } from 'react-redux';
-import { combineReducers, configureStore } from '@reduxjs/toolkit';
-import { useAlertDataView } from '../../..';
-import { updateGroups } from '../store/actions';
-import { GroupedSubLevel } from './alerts_sub_grouping';
-import { groupIdSelector, useDeepEqualSelector } from '../store/selectors';
-import { GroupedAlertsTableProps } from '../types';
+import { useAlertDataView } from '../../common/hooks';
+import { AlertsGroupingLevel } from './alerts_grouping_level';
+import { AlertsGroupingProps } from '../types';
 import { renderGroupPanel } from './group_panel_renderers';
 import { getStats } from './group_stats';
-import { groupsReducer } from '../store/reducer';
+import {
+  AlertsGroupingContextProvider,
+  useAlertsGroupingState,
+} from '../contexts/alerts_grouping_context';
 
 const DEFAULT_PAGE_SIZE = 25;
 const DEFAULT_PAGE_INDEX = 0;
@@ -45,28 +43,39 @@ const useStorage = (storage: Storage, tableId: string) =>
     [storage, tableId]
   );
 
-const GroupedAlertsTableComponent = (props: GroupedAlertsTableProps) => {
-  const { storage, dataViews, notifications, http } = props.services;
+const AlertsGroupingInternal = (props: AlertsGroupingProps) => {
+  const {
+    tableId,
+    services,
+    featureIds,
+    defaultGroupingOptions,
+    defaultFilters,
+    globalFilters,
+    globalQuery,
+    renderChildComponent,
+  } = props;
+  const { storage, dataViews, notifications, http } = services;
+  const { grouping, updateGrouping } = useAlertsGroupingState(tableId);
+
   const { dataViews: alertDataViews } = useAlertDataView({
-    featureIds: props.featureIds,
+    featureIds,
     dataViewsService: dataViews,
     http,
     toasts: notifications.toasts,
   });
   const dataView = useMemo(() => alertDataViews?.[0], [alertDataViews]);
-  const dispatch = useDispatch();
-  const { getStoragePageSize, setStoragePageSize } = useStorage(storage, props.tableId);
+  const { getStoragePageSize, setStoragePageSize } = useStorage(storage, tableId);
 
   const onOptionsChange = useCallback(
     (options) => {
-      dispatch(
-        updateGroups({
-          tableId: props.tableId,
-          options,
-        })
-      );
+      // useGrouping > useAlertsGroupingState options sync
+      // the available grouping options change when the user selects
+      // a new field not in the default ones
+      updateGrouping({
+        options,
+      });
     },
-    [dispatch, props.tableId]
+    [updateGrouping]
   );
 
   const { getGrouping, selectedGroups, setSelectedGroups } = useGrouping({
@@ -79,51 +88,29 @@ const GroupedAlertsTableComponent = (props: GroupedAlertsTableProps) => {
           defaultMessage: `{totalCount, plural, =1 {alert} other {alerts}}`,
         }),
     },
-    defaultGroupingOptions: [
-      {
-        label: 'Rule',
-        key: 'kibana.alert.rule.name',
-      },
-      {
-        label: 'Username',
-        key: 'user.name',
-      },
-      {
-        label: 'Hostname',
-        key: 'host.name',
-      },
-      {
-        label: 'Source IP',
-        key: 'source.ip',
-      },
-    ],
+    defaultGroupingOptions,
     fields: dataView?.fields ?? [],
-    groupingId: props.tableId,
+    groupingId: tableId,
     maxGroupingLevels: MAX_GROUPING_LEVELS,
     onOptionsChange,
   });
 
-  const groupId = useMemo(() => groupIdSelector(), []);
-  const groupInRedux = useDeepEqualSelector((state) => groupId(state, props.tableId));
   useEffect(() => {
-    // only ever set to `none` - siem only handles group selector when `none` is selected
+    // The `none` grouping is managed from the internal selector state
     if (isNoneGroup(selectedGroups)) {
-      // set active groups from selected groups
-      dispatch(
-        updateGroups({
-          activeGroups: selectedGroups,
-          tableId: props.tableId,
-        })
-      );
+      // Set active groups from selected groups
+      updateGrouping({
+        activeGroups: selectedGroups,
+      });
     }
-  }, [dispatch, props.tableId, selectedGroups]);
+  }, [selectedGroups, updateGrouping]);
 
   useEffect(() => {
-    if (groupInRedux != null && !isNoneGroup(groupInRedux.activeGroups)) {
-      // set selected groups from active groups
-      setSelectedGroups(groupInRedux.activeGroups);
+    if (!isNoneGroup(grouping.activeGroups)) {
+      // Set selected groups from active groups
+      setSelectedGroups(grouping.activeGroups);
     }
-  }, [groupInRedux, setSelectedGroups]);
+  }, [grouping.activeGroups, setSelectedGroups]);
 
   const [pageIndex, setPageIndex] = useState<number[]>(
     Array(MAX_GROUPING_LEVELS).fill(DEFAULT_PAGE_INDEX)
@@ -163,54 +150,46 @@ const GroupedAlertsTableComponent = (props: GroupedAlertsTableProps) => {
   );
 
   const paginationResetTriggers = useRef({
-    defaultFilters: props.defaultFilters,
-    globalFilters: props.globalFilters,
-    globalQuery: props.globalQuery,
+    defaultFilters,
+    globalFilters,
+    globalQuery,
     selectedGroups,
   });
 
   useEffect(() => {
     const triggers = {
-      defaultFilters: props.defaultFilters,
-      globalFilters: props.globalFilters,
-      globalQuery: props.globalQuery,
+      defaultFilters,
+      globalFilters,
+      globalQuery,
       selectedGroups,
     };
     if (!isEqual(paginationResetTriggers.current, triggers)) {
       resetAllPagination();
       paginationResetTriggers.current = triggers;
     }
-  }, [
-    props.defaultFilters,
-    props.globalFilters,
-    props.globalQuery,
-    resetAllPagination,
-    selectedGroups,
-  ]);
+  }, [defaultFilters, globalFilters, globalQuery, resetAllPagination, selectedGroups]);
 
   const getLevel = useCallback(
     (level: number, selectedGroup: string, parentGroupingFilter?: string) => {
-      let rcc;
-      if (level < selectedGroups.length - 1) {
-        rcc = (groupingFilters: Filter[]) => {
-          return getLevel(
-            level + 1,
-            selectedGroups[level + 1],
-            // stringify because if the filter is passed as an object, it will cause unnecessary re-rendering
-            JSON.stringify([
-              ...groupingFilters,
-              ...(parentGroupingFilter ? JSON.parse(parentGroupingFilter) : []),
-            ])
-          );
-        };
-      } else {
-        rcc = (groupingFilters: Filter[]) => {
-          return props.renderChildComponent([
-            ...groupingFilters,
-            ...(parentGroupingFilter ? JSON.parse(parentGroupingFilter) : []),
-          ]);
-        };
-      }
+      const rcc =
+        level < selectedGroups.length - 1
+          ? (groupingFilters: Filter[]) => {
+              return getLevel(
+                level + 1,
+                selectedGroups[level + 1],
+                // stringify because if the filter is passed as an object, it will cause unnecessary re-rendering
+                JSON.stringify([
+                  ...groupingFilters,
+                  ...(parentGroupingFilter ? JSON.parse(parentGroupingFilter) : []),
+                ])
+              )!;
+            }
+          : (groupingFilters: Filter[]) => {
+              return renderChildComponent([
+                ...groupingFilters,
+                ...(parentGroupingFilter ? JSON.parse(parentGroupingFilter) : []),
+              ]);
+            };
 
       const resetGroupChildrenPagination = (parentLevel: number) => {
         setPageIndex((allPages) => {
@@ -224,7 +203,7 @@ const GroupedAlertsTableComponent = (props: GroupedAlertsTableProps) => {
       }
 
       return (
-        <GroupedSubLevel
+        <AlertsGroupingLevel
           {...props}
           dataView={dataView}
           getGrouping={getGrouping}
@@ -240,12 +219,17 @@ const GroupedAlertsTableComponent = (props: GroupedAlertsTableProps) => {
         />
       );
     },
-    [dataView, getGrouping, pageIndex, pageSize, props, selectedGroups, setPageVar]
+    [
+      dataView,
+      getGrouping,
+      pageIndex,
+      pageSize,
+      props,
+      renderChildComponent,
+      selectedGroups,
+      setPageVar,
+    ]
   );
-
-  // if (isEmpty(selectedPatterns)) {
-  //   return null;
-  // }
 
   if (!dataView) {
     return null;
@@ -254,16 +238,58 @@ const GroupedAlertsTableComponent = (props: GroupedAlertsTableProps) => {
   return getLevel(0, selectedGroups[0]);
 };
 
-const store = configureStore({
-  reducer: combineReducers({
-    groups: groupsReducer,
-  }),
-});
-
-export const GroupedAlertsTable = React.memo((props: GroupedAlertsTableProps) => {
+/**
+ * A coordinator component to show multiple alert tables grouped by one or more fields
+ *
+ * @example Basic grouping
+ * ```ts
+ * const {
+ *   uiSettings,
+ *   storage,
+ *   notifications,
+ *   dataViews,
+ *   http,
+ *   data,
+ * } = useKibana().services;
+ *
+ * const renderAlertsTable = useCallback(
+ *   (groupingFilters: Filter[]) => {
+ *     const query = buildEsQuery({
+ *       filters: groupingFilters,
+ *     });
+ *     return (
+ *       <AlertsTable
+ *         id={...}
+ *         featureIds={[...]}
+ *         configurationId={AlertConsumers.OBSERVABILITY}
+ *         query={query}
+ *         alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
+ *       />
+ *     );
+ *   },
+ *   [AlertsTable, alertsTableConfigurationRegistry]
+ * );
+ *
+ * return <AlertsGrouping
+ *   featureIds={[...]} // The same feature ids used in the table
+ *   renderChildComponent={renderAlertsTable} // Renderer of the alerts table in leaf panels
+ *   tableId={...} // The rendered alerts table id
+ *   getAggregationsByGroupingField={...} // A getter from field id to a list of stats aggregations
+ *   services={{
+ *     uiSettings,
+ *     storage,
+ *     notifications,
+ *     dataViews,
+ *     http,
+ *     data,
+ *   }}
+ * />
+ * ```
+ */
+export const AlertsGrouping = memo((props: AlertsGroupingProps) => {
   return (
-    <Provider store={store}>
-      <GroupedAlertsTableComponent {...props} />
-    </Provider>
+    <AlertsGroupingContextProvider>
+      <AlertsGroupingInternal {...props} />
+    </AlertsGroupingContextProvider>
   );
 });

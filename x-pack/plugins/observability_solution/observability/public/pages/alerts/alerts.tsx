@@ -11,8 +11,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { BoolQuery, Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
-// import { AlertConsumers } from '@kbn/rule-data-utils';
-import { GroupedAlertsTable } from '@kbn/alerts-ui-shared/src/grouped_alerts_table/components/alerts_grouping';
+import { AlertsGrouping } from '@kbn/alerts-ui-shared/src/alerts_grouping/components/alerts_grouping';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
@@ -46,6 +45,185 @@ const ALERTS_TABLE_ID = 'xpack.observability.alerts.alert.table';
 
 const DEFAULT_INTERVAL = '60s';
 const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm';
+
+const DEFAULT_GROUPING_OPTIONS = [
+  {
+    label: 'Rule name',
+    key: 'kibana.alert.rule.name',
+  },
+  {
+    label: 'Status',
+    key: 'kibana.alert.status',
+  },
+  {
+    label: 'Host name',
+    key: 'host.name',
+  },
+  {
+    label: 'Host ip',
+    key: 'host.ip',
+  },
+];
+
+const getAggregationsByGroupingField = (field: string): any[] => {
+  const aggMetrics: any[] = [
+    {
+      unitsCount: {
+        cardinality: {
+          field: 'kibana.alert.uuid',
+        },
+      },
+    },
+  ];
+  switch (field) {
+    case 'kibana.alert.rule.name':
+      aggMetrics.push(
+        ...[
+          {
+            description: {
+              terms: {
+                field: 'kibana.alert.rule.description',
+                size: 1,
+              },
+            },
+          },
+          {
+            usersCountAggregation: {
+              cardinality: {
+                field: 'user.name',
+              },
+            },
+          },
+          {
+            hostsCountAggregation: {
+              cardinality: {
+                field: 'host.name',
+              },
+            },
+          },
+          {
+            ruleTags: {
+              terms: {
+                field: 'kibana.alert.rule.tags',
+              },
+            },
+          },
+        ]
+      );
+      break;
+    case 'host.name':
+      aggMetrics.push(
+        ...[
+          {
+            rulesCountAggregation: {
+              cardinality: {
+                field: 'kibana.alert.rule.rule_id',
+              },
+            },
+          },
+          {
+            countSeveritySubAggregation: {
+              cardinality: {
+                field: 'kibana.alert.severity',
+              },
+            },
+          },
+          {
+            severitiesSubAggregation: {
+              terms: {
+                field: 'kibana.alert.severity',
+              },
+            },
+          },
+          {
+            usersCountAggregation: {
+              cardinality: {
+                field: 'user.name',
+              },
+            },
+          },
+        ]
+      );
+      break;
+    case 'user.name':
+      aggMetrics.push(
+        ...[
+          {
+            rulesCountAggregation: {
+              cardinality: {
+                field: 'kibana.alert.rule.rule_id',
+              },
+            },
+          },
+          {
+            countSeveritySubAggregation: {
+              cardinality: {
+                field: 'kibana.alert.severity',
+              },
+            },
+          },
+          {
+            severitiesSubAggregation: {
+              terms: {
+                field: 'kibana.alert.severity',
+              },
+            },
+          },
+          {
+            hostsCountAggregation: {
+              cardinality: {
+                field: 'host.name',
+              },
+            },
+          },
+        ]
+      );
+      break;
+    case 'source.ip':
+      aggMetrics.push(
+        ...[
+          {
+            rulesCountAggregation: {
+              cardinality: {
+                field: 'kibana.alert.rule.rule_id',
+              },
+            },
+          },
+          {
+            countSeveritySubAggregation: {
+              cardinality: {
+                field: 'kibana.alert.severity',
+              },
+            },
+          },
+          {
+            severitiesSubAggregation: {
+              terms: {
+                field: 'kibana.alert.severity',
+              },
+            },
+          },
+          {
+            hostsCountAggregation: {
+              cardinality: {
+                field: 'host.name',
+              },
+            },
+          },
+        ]
+      );
+      break;
+    default:
+      aggMetrics.push({
+        rulesCountAggregation: {
+          cardinality: {
+            field: 'kibana.alert.rule.rule_id',
+          },
+        },
+      });
+  }
+  return aggMetrics;
+};
 
 function InternalAlertsPage() {
   const kibanaServices = useKibana().services;
@@ -204,7 +382,7 @@ function InternalAlertsPage() {
 
   const manageRulesHref = http.basePath.prepend('/app/observability/alerts/rules');
 
-  const renderAlertTable = useCallback(
+  const renderAlertsTable = useCallback(
     (groupingFilters: Filter[]) => {
       const query = buildEsQuery({
         filters: groupingFilters,
@@ -269,8 +447,7 @@ function InternalAlertsPage() {
           </EuiFlexItem>
           <EuiFlexItem>
             {esQuery && (
-              <GroupedAlertsTable
-                // currentAlertStatusFilterValue={statusFilter}
+              <AlertsGrouping
                 featureIds={observabilityAlertFeatureIds}
                 defaultFilters={[]}
                 from={alertSearchBarStateProps.rangeFrom}
@@ -279,11 +456,11 @@ function InternalAlertsPage() {
                 hasIndexMaintenance={false}
                 hasIndexWrite={false}
                 loading={false}
-                renderChildComponent={renderAlertTable}
-                // runtimeMappings={runtimeMappings}
-                // signalIndexName={signalIndexName}
+                renderChildComponent={renderAlertsTable}
                 tableId={observabilityFeatureId}
                 to={alertSearchBarStateProps.rangeTo}
+                defaultGroupingOptions={DEFAULT_GROUPING_OPTIONS}
+                getAggregationsByGroupingField={getAggregationsByGroupingField}
                 services={{
                   uiSettings,
                   storage,

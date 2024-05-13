@@ -6,6 +6,9 @@
  */
 
 import { AlertTableConfigRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/alert_table_config_registry';
+import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
+import { HttpSetup } from '@kbn/core-http-browser';
+import { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { ConfigSchema } from '../../plugin';
 import { ObservabilityRuleTypeRegistry } from '../..';
 import { getAlertsPageTableConfiguration } from './alerts/get_alerts_page_table_configuration';
@@ -16,9 +19,9 @@ export const registerAlertsTableConfiguration = (
   alertTableConfigRegistry: AlertTableConfigRegistry,
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry,
   config: ConfigSchema,
-  dataViews?,
-  http?,
-  notifications?
+  dataViews: DataViewsServicePublic,
+  http: HttpSetup,
+  notifications: NotificationsStart
 ) => {
   // Alert page
   const alertsPageAlertsTableConfig = getAlertsPageTableConfiguration(

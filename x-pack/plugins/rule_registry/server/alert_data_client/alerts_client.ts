@@ -41,6 +41,7 @@ import { AuditLogger } from '@kbn/security-plugin/server';
 import { FieldDescriptor, IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { isEmpty } from 'lodash';
 import { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { BrowserFields } from '../../common';
 import { alertAuditEvent, operationAlertAuditActionMap } from './audit_events';
 import {
@@ -140,6 +141,7 @@ interface SingleSearchAfterAndAudit {
   sort?: estypes.SortOptions[] | undefined;
   lastSortIds?: Array<string | number> | undefined;
   featureIds?: string[];
+  runtime_mappings?: MappingRuntimeFields;
 }
 
 /**
@@ -288,6 +290,7 @@ export class AlertsClient {
     operation,
     sort,
     lastSortIds = [],
+    runtime_mappings,
     featureIds,
   }: SingleSearchAfterAndAudit) {
     try {
@@ -314,6 +317,7 @@ export class AlertsClient {
         _source,
         track_total_hits: trackTotalHits,
         size,
+        runtime_mappings,
         sort: sort || [
           {
             '@timestamp': {
@@ -981,6 +985,7 @@ export class AlertsClient {
     size,
     sort,
     track_total_hits: trackTotalHits,
+    runtime_mappings,
     _source,
   }: {
     aggs?: object;
@@ -991,7 +996,8 @@ export class AlertsClient {
     size?: number;
     sort?: estypes.SortOptions[];
     track_total_hits?: boolean | number;
-    _source?: string[];
+    runtime_mappings?: MappingRuntimeFields;
+    _source?: false | string[];
   }) {
     try {
       let indexToUse = index;
@@ -1012,6 +1018,7 @@ export class AlertsClient {
         index: indexToUse,
         operation: ReadOperations.Find,
         sort,
+        runtime_mappings,
         lastSortIds: searchAfter,
       });
 

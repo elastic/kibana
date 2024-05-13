@@ -12,7 +12,10 @@ import {
   AlertsTableConfigurationRegistry,
   RenderCustomActionsRowArgs,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { getUsePersistentControls } from '@kbn/alerts-ui-shared/src/grouped_alerts_table/hooks/use_persistent_controls';
+import { getDefaultPersistentControls } from '@kbn/alerts-ui-shared/src/alerts_grouping/hooks/use_persistent_controls';
+import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
+import { HttpSetup } from '@kbn/core-http-browser';
+import { NotificationsStart } from '@kbn/core-notifications-browser';
 import {
   casesFeatureId,
   observabilityAlertFeatureIds,
@@ -28,9 +31,9 @@ import { getColumns } from '../common/get_columns';
 export const getAlertsPageTableConfiguration = (
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry,
   config: ConfigSchema,
-  dataViews?,
-  http?,
-  notifications?
+  dataViews: DataViewsServicePublic,
+  http: HttpSetup,
+  notifications: NotificationsStart
 ): AlertsTableConfigurationRegistry => {
   const renderCustomActionsRow = (props: RenderCustomActionsRowArgs) => {
     return (
@@ -61,12 +64,14 @@ export const getAlertsPageTableConfiguration = (
       return { header, body, footer };
     },
     ruleTypeIds: observabilityRuleTypeRegistry.list(),
-    usePersistentControls: getUsePersistentControls({
+    usePersistentControls: getDefaultPersistentControls({
       groupingId: observabilityFeatureId,
       featureIds: observabilityAlertFeatureIds,
-      dataViews,
-      http,
-      notifications,
+      services: {
+        dataViews,
+        http,
+        notifications,
+      },
     }),
     showInspectButton: true,
   };
