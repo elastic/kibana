@@ -179,6 +179,7 @@ describe('conversational chain', () => {
           body: { query: { match: { field: 'what is the work from home policy?' } }, size: 3 },
         },
       ],
+      // @ts-ignore
       { index: ['field'], website: ['body_content'] }
     );
   });
