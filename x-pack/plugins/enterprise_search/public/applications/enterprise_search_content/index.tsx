@@ -22,11 +22,13 @@ import { VersionMismatchPage } from '../shared/version_mismatch';
 
 import { ConnectorsRouter } from './components/connectors/connectors_router';
 import { CrawlersRouter } from './components/connectors/crawlers_router';
+import { InferenceEndpointsRouter } from './components/inference_endpoints/inference_endpoints_router';
 import { NotFound } from './components/not_found';
 import { SearchIndicesRouter } from './components/search_indices';
 import {
   CONNECTORS_PATH,
   CRAWLERS_PATH,
+  INFERENCE_ENDPOINTS_PATH,
   ERROR_STATE_PATH,
   ROOT_PATH,
   SEARCH_INDICES_PATH,
@@ -81,6 +83,9 @@ export const EnterpriseSearchContentConfigured: React.FC<Required<InitialAppData
       </Route>
       <Route path={CRAWLERS_PATH}>
         <CrawlersRouter />
+      </Route>
+      <Route path={INFERENCE_ENDPOINTS_PATH}>
+        <InferenceEndpointsRouter />
       </Route>
       <Route>
         <NotFound />

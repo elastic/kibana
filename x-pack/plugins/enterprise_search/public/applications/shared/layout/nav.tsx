@@ -32,6 +32,7 @@ import { useIndicesNav } from '../../enterprise_search_content/components/search
 import {
   CONNECTORS_PATH,
   CRAWLERS_PATH,
+  INFERENCE_ENDPOINTS_PATH,
   SEARCH_INDICES_PATH,
 } from '../../enterprise_search_content/routes';
 import { KibanaLogic } from '../kibana';
@@ -94,6 +95,17 @@ export const useEnterpriseSearchNav = () => {
             shouldNotCreateHref: true,
             shouldShowActiveForSubroutes: true,
             to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + CRAWLERS_PATH,
+          }),
+        },
+        {
+          id: 'inference_endpoints',
+          name: i18n.translate('xpack.enterpriseSearch.nav.inferenceEndpointsTitle', {
+            defaultMessage: 'Inference Endpoints',
+          }),
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            shouldShowActiveForSubroutes: true,
+            to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + INFERENCE_ENDPOINTS_PATH,
           }),
         },
       ],

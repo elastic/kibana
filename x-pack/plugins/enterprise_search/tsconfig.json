@@ -73,6 +73,7 @@
     "@kbn/utility-types",
     "@kbn/index-management",
     "@kbn/deeplinks-search",
+    "@kbn/inference_integration_flyout",
     "@kbn/react-kibana-context-theme",
     "@kbn/search-types",
     "@kbn/cloud",
