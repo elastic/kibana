@@ -7,6 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { inject, injectable } from 'inversify';
+import type { interfaces } from 'inversify';
 
-export { inject, injectable };
+/**
+ * The service identifier for the global service references.
+ */
+export const Global = Symbol.for('Global') as interfaces.ServiceIdentifier<
+  interfaces.ServiceIdentifier<unknown>
+>;

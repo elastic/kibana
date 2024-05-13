@@ -7,20 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ServiceIdentifier } from '@kbn/core-di-common';
-import type { LoggerFactory } from '@kbn/logging';
-import { PluginConfig } from './types';
+import type { interfaces } from 'inversify';
+import type { CoreSetup } from '@kbn/core-lifecycle-server';
+import type { PluginInitializerContext } from './types';
 
 /**
- * ServiceId for the logger that will be scoped to the current plugin.
+ * The dependency injection token for the plugin opaque id.
+ *
+ * Similar to the logger exposed via {@link PluginInitializerContext.opaqueId}
+ */
+export const OpaqueIdToken: interfaces.ServiceIdentifier<PluginInitializerContext['opaqueId']> =
+  Symbol.for('PluginOpaqueId');
+
+/**
+ * Service identifier for the logger that will be scoped to the current plugin.
  *
  * Similar to the logger exposed via {@link PluginInitializerContext.logger}
  */
-export const loggerServiceId: ServiceIdentifier<LoggerFactory> = Symbol.for('pluginLogger');
+export const LoggerService: interfaces.ServiceIdentifier<PluginInitializerContext['logger']> =
+  Symbol.for('LoggerService');
 
 /**
- * ServiceId for the plugin's configuration accessor.
+ * Service identifier for the logging service setup that will be scoped to the current plugin.
+ *
+ * Similar to the logging exposed via {@link CoreSetup.logging}
+ */
+export const LoggingService: interfaces.ServiceIdentifier<CoreSetup['logging']> =
+  Symbol.for('LoggingService');
+
+/**
+ * Service identifier for the plugin's configuration accessor.
  *
  * Similar to the config exposed via {@link PluginInitializerContext.config}
  */
-export const configServiceId: ServiceIdentifier<PluginConfig> = Symbol.for('pluginConfig');
+export const ConfigService: interfaces.ServiceIdentifier<PluginInitializerContext['config']> =
+  Symbol.for('ConfigService');
