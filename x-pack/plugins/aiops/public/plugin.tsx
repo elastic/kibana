@@ -41,7 +41,7 @@ export class AiopsPlugin
       ]) => {
         if (license.hasAtLeast('platinum')) {
           if (embeddable) {
-            registerEmbeddables(core);
+            registerEmbeddables(embeddable, core);
           }
 
           if (uiActions) {
