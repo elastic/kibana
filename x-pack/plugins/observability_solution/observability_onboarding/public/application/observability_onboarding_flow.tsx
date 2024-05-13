@@ -21,7 +21,7 @@ import { CustomLogsPanel } from './quickstart_flows/custom_logs';
 
 const queryClient = new QueryClient();
 
-export function ExperimentalOnboardingFlow() {
+export function ObservabilityOnboardingFlow() {
   const { pathname } = useLocation();
 
   useEffect(() => {
