@@ -11,6 +11,7 @@ import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE, Link } from '../../common/cont
 import { DashboardLinkStrings } from '../components/dashboard_link/dashboard_link_strings';
 import { fetchDashboard } from '../components/dashboard_link/dashboard_link_tools';
 import { validateUrl } from '../components/external_link/external_link_tools';
+import { LinksStrings } from '../components/links_strings';
 import { ResolvedLink } from './types';
 
 export const getOrderedLinkList = (links: ResolvedLink[]): ResolvedLink[] => {
@@ -68,5 +69,5 @@ export async function resolveLinkInfo(
       };
     }
   }
-  throw new Error('Unsupported link type');
+  throw new Error(LinksStrings.embeddable.getUnsupportedLinkTypeError());
 }
