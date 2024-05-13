@@ -19,13 +19,9 @@ This directory serves as a centralized location to place the observability solut
 
     * `@serverless`: Runs in the first quality gate and in the periodic pipeline.
 
-    * `@serverlessQA`: Runs in the second quality gate.
-
     * `@skipInEss`: Skipped for ESS environment.
 
     * `@skipInServerless`: Skipped for all quality gates, CI and periodic pipeline.
-
-    * `@skipInServerlessMKI`: Skipped for all the MKI environments. 
 
 ex:
 ```
