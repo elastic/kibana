@@ -97,6 +97,7 @@
     "reactPackages": "packages/react",
     "textBasedEditor": "packages/kbn-text-based-editor",
     "jsonTree": "packages/kbn-json-tree",
+    "esqlUtils": "packages/kbn-esql-utils",
     "reporting": "packages/kbn-reporting",
     "savedObjects": "src/plugins/saved_objects",
     "savedObjectsFinder": "src/plugins/saved_objects_finder",
