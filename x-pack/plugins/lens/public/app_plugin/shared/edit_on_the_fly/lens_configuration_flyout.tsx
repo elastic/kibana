@@ -400,32 +400,6 @@ export function LensEditConfigurationFlyout({
         <EuiFlexGroup
           css={css`
             block-size: 100%;
-            .euiFlexItem,
-            .euiAccordion,
-            .euiAccordion__triggerWrapper,
-            .euiAccordion__childWrapper {
-              min-block-size: 0;
-            }
-            .euiAccordion {
-              display: flex;
-              flex: 1;
-              flex-direction: column;
-            }
-            .euiAccordion__childWrapper {
-              ${euiScrollBarStyles(euiTheme)}
-              overflow-y: auto !important;
-              pointer-events: none;
-              padding-left: ${euiThemeVars.euiFormMaxWidth};
-              margin-left: -${euiThemeVars.euiFormMaxWidth};
-              > * {
-                pointer-events: auto;
-              }
-
-              .euiAccordion-isOpen & {
-                block-size: auto !important;
-                flex: 1;
-              }
-            }
           `}
           direction="column"
           gutterSize="none"
@@ -469,26 +443,23 @@ export function LensEditConfigurationFlyout({
           <EuiFlexItem
             grow={isLayerAccordionOpen ? 1 : false}
             css={css`
-                .euiAccordion__childWrapper {
-                  flex: ${isLayerAccordionOpen ? 1 : 'none'}
+                overflow: auto;
+                border-bottom: ${euiThemeVars.euiBorderThin};
+                .euiAccordion__triggerWrapper {
+                  padding-left: ${euiThemeVars.euiSize};
+                  padding-right: ${euiThemeVars.euiSize};
                 }
               }
             `}
           >
             <EuiAccordion
-              css={css`
-                .euiAccordion__triggerWrapper {
-                  padding: 0 ${euiThemeVars.euiSize};
-                }
-              `}
               id="layer-configuration"
               buttonContent={
                 <EuiTitle
                   size="xxs"
                   css={css`
-                padding: 2px;
-              }
-            `}
+                    padding: 2px;
+                  `}
                 >
                   <h5>
                     {i18n.translate('xpack.lens.config.visualizationConfigurationLabel', {
@@ -530,13 +501,10 @@ export function LensEditConfigurationFlyout({
             grow={isSuggestionsAccordionOpen ? 1 : false}
             data-test-subj="InlineEditingSuggestions"
             css={css`
-                border-top: ${euiThemeVars.euiBorderThin};
+                overflow: auto;
                 border-bottom: ${euiThemeVars.euiBorderThin};
                 padding-left: ${euiThemeVars.euiSize};
                 padding-right: ${euiThemeVars.euiSize};
-                .euiAccordion__childWrapper {
-                  flex: ${isSuggestionsAccordionOpen ? 1 : 'none'}
-                }
               }
             `}
           >
