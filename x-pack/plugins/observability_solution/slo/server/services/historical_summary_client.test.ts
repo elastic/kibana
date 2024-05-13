@@ -225,7 +225,7 @@ describe('FetchHistoricalSummary', () => {
   });
 
   describe('Rolling and Timeslices SLOs', () => {
-    it('returns the summary', async () => {
+    it('returns the summary using the SLO timeWindow date range', async () => {
       const slo = createSLO({
         timeWindow: { type: 'rolling', duration: thirtyDays() },
         budgetingMethod: 'timeslices',
@@ -253,6 +253,40 @@ describe('FetchHistoricalSummary', () => {
         expect(dailyResult).toMatchSnapshot({ date: expect.any(Date) })
       );
       expect(results[0].data).toHaveLength(180);
+    });
+
+    it('returns the summary using the provided date range', async () => {
+      const slo = createSLO({
+        timeWindow: { type: 'rolling', duration: thirtyDays() },
+        budgetingMethod: 'timeslices',
+        objective: { target: 0.95, timesliceTarget: 0.9, timesliceWindow: oneMinute() },
+        groupBy: ALL_VALUE,
+      });
+      const range: DateRange = {
+        from: new Date('2023-01-09T15:00:00.000Z'),
+        to: new Date('2023-01-13T15:00:00.000Z'),
+      };
+      esClientMock.msearch.mockResolvedValueOnce(generateEsResponseForRollingSLO(slo, range));
+      const client = new DefaultHistoricalSummaryClient(esClientMock);
+
+      const results = await client.fetch({
+        list: [
+          {
+            timeWindow: slo.timeWindow,
+            groupBy: slo.groupBy,
+            budgetingMethod: slo.budgetingMethod,
+            objective: slo.objective,
+            revision: slo.revision,
+            sloId: slo.id,
+            instanceId: ALL_VALUE,
+            range,
+          },
+        ],
+      });
+
+      results[0].data.forEach((dailyResult) =>
+        expect(dailyResult).toMatchSnapshot({ date: expect.any(Date) })
+      );
     });
   });
 
