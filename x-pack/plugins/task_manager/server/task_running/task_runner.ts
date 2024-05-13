@@ -434,6 +434,9 @@ export class TaskManagerRunner implements TaskRunner {
       );
     }
 
+    this.instance = asReadyToRun(this.instance.task as ConcreteTaskInstanceWithStartedAt);
+    return true;
+
     const apmTrans = apm.startTransaction(
       TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
       TASK_MANAGER_TRANSACTION_TYPE

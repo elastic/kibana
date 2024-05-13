@@ -15,6 +15,7 @@
 /*
  * This module contains helpers for managing the task manager storage layer.
  */
+import { omit } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
 import apm from 'elastic-apm-node';
 import { Subject, Observable } from 'rxjs';
@@ -27,7 +28,7 @@ import {
   TaskStatus,
   ConcreteTaskInstanceVersion,
 } from '../task';
-import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
+import { isRetryableError, TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
 import {
   isLimited,
   TASK_MANAGER_MARK_AS_CLAIMED,
@@ -48,6 +49,7 @@ import {
 
 import { TaskStore, SearchOpts } from '../task_store';
 import { isOk } from '../lib/result_type';
+import { intervalFromDate, maxIntervalFromDate } from '../lib/intervals';
 
 interface OwnershipClaimingOpts {
   claimOwnershipUntil: Date;
@@ -144,25 +146,35 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
     }
 
     const candidateTasks = applyLimitedConcurrency(currentTasks, batches);
+    const now = new Date();
     const taskUpdates: ConcreteTaskInstance[] = Array.from(candidateTasks)
       .map((task) => {
-        if (task.retryAt != null && new Date(task.retryAt).getTime() < Date.now()) {
-          task.scheduledAt = task.retryAt;
-        } else {
-          task.scheduledAt = task.runAt;
-        }
-        task.retryAt = claimOwnershipUntil;
-        task.ownerId = taskStore.taskManagerId;
-        task.status = TaskStatus.Claiming;
-
-        return task;
+        return {
+          ...omit(task, 'enabled'),
+          status: TaskStatus.Running,
+          startedAt: now,
+          attempts: task.attempts + 1,
+          ownerId: taskStore.taskManagerId,
+          scheduledAt:
+            task.retryAt != null && new Date(task.retryAt).getTime() < Date.now()
+              ? task.retryAt
+              : task.runAt,
+          retryAt:
+            (task.schedule
+              ? maxIntervalFromDate(now, task.schedule.interval, '5m')
+              : getRetryDelay({
+                  attempts: task.attempts + 1,
+                  error: new Error('Task timeout'),
+                  addDuration: '5m',
+                })) ?? null,
+        };
       })
       .slice(0, initialCapacity);
 
     const finalResults: ConcreteTaskInstance[] = [];
     let conflicts = staleTasks.size;
     try {
-      const updateResults = await taskStore.bulkUpdate(taskUpdates, { validate: true });
+      const updateResults = await taskStore.bulkUpdate(taskUpdates, { validate: false });
       for (const updateResult of updateResults) {
         if (isOk(updateResult)) {
           finalResults.push(updateResult.value);
@@ -323,4 +335,39 @@ function applyLimitedConcurrency(
   }
 
   return result;
+}
+
+function getRetryDelay({
+  error,
+  attempts,
+  addDuration,
+}: {
+  error: Error;
+  attempts: number;
+  addDuration?: string;
+}): Date | undefined {
+  const retry: boolean | Date = isRetryableError(error) ?? true;
+
+  let result;
+  if (retry instanceof Date) {
+    result = retry;
+  } else if (retry === true) {
+    result = new Date(Date.now() + calculateDelay(attempts));
+  }
+
+  // Add a duration to the result
+  if (addDuration && result) {
+    result = intervalFromDate(result, addDuration)!;
+  }
+  return result;
+}
+
+function calculateDelay(attempts: number) {
+if (attempts === 1) {
+  return 30 * 1000; // 30s
+} else {
+  // get multiples of 5 min
+  const defaultBackoffPerFailure = 5 * 60 * 1000;
+  return defaultBackoffPerFailure * Math.pow(2, attempts - 2);
+}
 }
