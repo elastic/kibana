@@ -24,9 +24,12 @@ describe('actions telemetry', () => {
       {
         aggregations: {
           byActionTypeId: {
-            value: {
-              types: { '.index': 1, '.server-log': 1, 'some.type': 1, 'another.type.': 1 },
-            },
+            buckets: [
+              { key: '.index', doc_count: 1 },
+              { key: '.server-log', doc_count: 1 },
+              { key: 'some.type', doc_count: 1 },
+              { key: 'another.type.', doc_count: 1 },
+            ],
           },
         },
         hits: {
@@ -344,9 +347,12 @@ describe('actions telemetry', () => {
       {
         aggregations: {
           byActionTypeId: {
-            value: {
-              types: { '.index': 1, '.server-log': 1, 'some.type': 1, 'another.type.': 1 },
-            },
+            buckets: [
+              { key: '.index', doc_count: 1 },
+              { key: '.server-log', doc_count: 1 },
+              { key: 'some.type', doc_count: 1 },
+              { key: 'another.type.', doc_count: 1 },
+            ],
           },
         },
         hits: {
@@ -472,9 +478,7 @@ describe('actions telemetry', () => {
       {
         aggregations: {
           byActionTypeId: {
-            value: {
-              types: {},
-            },
+            buckets: [],
           },
         },
         hits: {

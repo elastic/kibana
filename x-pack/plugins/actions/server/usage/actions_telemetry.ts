@@ -20,59 +20,34 @@ interface InMemoryAggRes {
   actionRefs: Record<string, { actionRef: string; actionTypeId: string }>;
 }
 
+interface ByActionTypeIdAgg {
+  key: string;
+  doc_count: number;
+}
+
 export async function getTotalCount(
   esClient: ElasticsearchClient,
   kibanaIndex: string,
   logger: Logger,
   inMemoryConnectors?: InMemoryConnector[]
 ) {
-  const scriptedMetric = {
-    scripted_metric: {
-      init_script: 'state.types = [:]',
-      map_script: `
-        String actionType = doc['action.actionTypeId'].value;
-        if (actionType =~ /\.gen-ai/) {
-          String genAiActionType = actionType +"__"+ doc['apiProvider'].value;
-          state.types.put(genAiActionType, state.types.containsKey(genAiActionType) ? state.types.get(genAiActionType) + 1 : 1);
-        } else {
-          state.types.put(actionType, state.types.containsKey(actionType) ? state.types.get(actionType) + 1 : 1);
-        }
-      `,
-      // Combine script is executed per cluster, but we already have a key-value pair per cluster.
-      // Despite docs that say this is optional, this script can't be blank.
-      combine_script: 'return state',
-      // Reduce script is executed across all clusters, so we need to add up all the total from each cluster
-      // This also needs to account for having no data
-      reduce_script: `
-        HashMap result = new HashMap();
-        HashMap combinedTypes = new HashMap();
-        for (state in states) {
-          for (String type : state.types.keySet()) {
-            int typeCount = combinedTypes.containsKey(type) ? combinedTypes.get(type) + state.types.get(type) : state.types.get(type);
-            combinedTypes.put(type, typeCount);
-          }
-        }
-
-        result.types = combinedTypes;
-        return result;
-      `,
-    },
-  };
   try {
     const searchResult = await esClient.search<
       unknown,
-      { byActionTypeId: { value: { types: Record<string, number> } } }
+      { byActionTypeId: { buckets: ByActionTypeIdAgg[] } }
     >({
       index: kibanaIndex,
       size: 0,
       runtime_mappings: {
-        apiProvider: {
+        calcActionTypeId: {
           type: 'keyword',
           script: {
-            // add apiProvider to the doc so we can use it in the scripted_metric
             source: `
-            if (doc['action.actionTypeId'].value =~ /\.gen-ai/) {
-              emit(params._source["action"]["config"]["apiProvider"])
+            String actionType = doc['action.actionTypeId'].value;
+            if (actionType =~ /\.gen-ai/) {
+              emit( actionType +"__"+ params._source["action"]["config"]["apiProvider"])
+            } else {
+              emit(actionType)
             }
             `,
           },
@@ -85,12 +60,19 @@ export async function getTotalCount(
           },
         },
         aggs: {
-          byActionTypeId: scriptedMetric,
+          byActionTypeId: {
+            terms: {
+              field: 'calcActionTypeId',
+            },
+          },
         },
       },
     });
 
-    const aggs = searchResult.aggregations?.byActionTypeId.value?.types ?? {};
+    const aggs: Record<string, number> = {};
+    for (const bucket of searchResult.aggregations?.byActionTypeId.buckets ?? []) {
+      aggs[bucket.key] = bucket.doc_count;
+    }
     const { countGenAiProviderTypes, countByType } = getCounts(aggs);
 
     if (inMemoryConnectors && inMemoryConnectors.length) {
