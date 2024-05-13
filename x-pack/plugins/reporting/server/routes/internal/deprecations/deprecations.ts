@@ -64,9 +64,7 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
       const counters = getCounters(req.route.method, getStatusPath, reporting.getUsageCounter());
 
       const checkIlmMigrationStatus = async () => {
-        const {
-          elasticsearch: { client: scopedClient },
-        } = await core;
+        const { client: scopedClient } = (await core).elasticsearch;
 
         const ilmPolicyManager = IlmPolicyManager.create({ client: scopedClient.asInternalUser });
         return ilmPolicyManager.checkIlmMigrationStatus();
@@ -102,16 +100,15 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
     authzWrapper(async ({ core }, req, res) => {
       const counters = getCounters(req.route.method, migrateApiPath, reporting.getUsageCounter());
 
-      const {
-        client: { asCurrentUser: client },
-      } = (await core).elasticsearch;
-
-      const scopedIlmPolicyManager = IlmPolicyManager.create({
-        client,
-      });
-
       // First we ensure that the reporting ILM policy exists in the cluster
       try {
+        const {
+          client: { asCurrentUser },
+        } = (await core).elasticsearch;
+        const scopedIlmPolicyManager = IlmPolicyManager.create({
+          client: asCurrentUser,
+        });
+
         // We don't want to overwrite an existing reporting policy because it may contain alterations made by users
         if (!(await scopedIlmPolicyManager.doesIlmPolicyExist())) {
           await scopedIlmPolicyManager.createIlmPolicy();
@@ -122,11 +119,17 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
 
       // Second we migrate all of the existing indices to be managed by the reporting ILM policy
       try {
-        await scopedIlmPolicyManager.migrateIndicesToIlmPolicy();
+        const {
+          client: { asInternalUser },
+        } = (await core).elasticsearch;
+        const unscopedIlmPolicyManager = IlmPolicyManager.create({
+          client: asInternalUser,
+        });
+        const response = await unscopedIlmPolicyManager.migrateIndicesToIlmPolicy();
 
         counters.usageCounter();
 
-        return res.ok();
+        return res.ok({ body: response });
       } catch (err) {
         logger.error(err);
 

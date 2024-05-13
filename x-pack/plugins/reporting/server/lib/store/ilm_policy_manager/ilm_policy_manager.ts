@@ -10,8 +10,10 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { ILM_POLICY_NAME } from '@kbn/reporting-common';
 import { IlmPolicyMigrationStatus } from '@kbn/reporting-common/types';
 import {
+  REPORTING_DATA_STREAM_ALIAS,
   REPORTING_DATA_STREAM_COMPONENT_TEMPLATE,
   REPORTING_DATA_STREAM_WILDCARD,
+  REPORTING_LEGACY_INDICES,
 } from '@kbn/reporting-server';
 
 /**
@@ -49,19 +51,26 @@ export class IlmPolicyManager {
       return 'policy-not-found';
     }
 
-    // FIXME: should also check if legacy indices exist
-    const reportingIndicesSettings = await this.client.indices.getSettings({
-      index: REPORTING_DATA_STREAM_WILDCARD,
-    });
+    const [reportingDataStreamSettings, reportingLegacyIndexSettings] = await Promise.all([
+      this.client.indices.getSettings({
+        index: REPORTING_DATA_STREAM_WILDCARD,
+      }),
+      this.client.indices.getSettings({
+        index: REPORTING_LEGACY_INDICES,
+      }),
+    ]);
 
-    const hasUnmanagedIndices = Object.values(reportingIndicesSettings).some((settings) => {
+    const hasUnmanaged = (settings: estypes.IndicesIndexState) => {
       return (
         settings?.settings?.index?.lifecycle?.name !== ILM_POLICY_NAME &&
         settings?.settings?.['index.lifecycle']?.name !== ILM_POLICY_NAME
       );
-    });
+    };
 
-    return hasUnmanagedIndices ? 'indices-not-managed-by-policy' : 'ok';
+    const hasUnmanagedDataStream = Object.values(reportingDataStreamSettings).some(hasUnmanaged);
+    const hasUnmanagedIndices = Object.values(reportingLegacyIndexSettings).some(hasUnmanaged);
+
+    return hasUnmanagedDataStream || hasUnmanagedIndices ? 'indices-not-managed-by-policy' : 'ok';
   }
 
   /**
@@ -85,7 +94,7 @@ export class IlmPolicyManager {
   /**
    * Update the Data Stream index template with a link to the Reporting ILM policy
    */
-  public async linkIlmPolicy(): Promise<void> {
+  public async linkIlmPolicy() {
     const reportingIndicesPutTemplateRequest: estypes.ClusterPutComponentTemplateRequest = {
       name: REPORTING_DATA_STREAM_COMPONENT_TEMPLATE,
       template: {
@@ -97,25 +106,62 @@ export class IlmPolicyManager {
       },
       create: false,
     };
+    const putTemplateAcknowledged = await this.client.cluster.putComponentTemplate(
+      reportingIndicesPutTemplateRequest
+    );
 
-    await this.client.cluster.putComponentTemplate(reportingIndicesPutTemplateRequest);
+    let backingIndicesAcknowledged: { acknowledged: boolean | null } = { acknowledged: null };
+    const backingIndicesExist = await this.client.indices.exists({
+      index: REPORTING_DATA_STREAM_ALIAS,
+      expand_wildcards: ['hidden'],
+    });
+    if (backingIndicesExist) {
+      const datastreamPutSettingsRequest: estypes.IndicesPutSettingsRequest = {
+        index: REPORTING_DATA_STREAM_ALIAS,
+        settings: {
+          lifecycle: {
+            name: ILM_POLICY_NAME,
+          },
+        },
+      };
+      backingIndicesAcknowledged = await this.client.indices.putSettings(
+        datastreamPutSettingsRequest
+      );
+    }
+
+    return { putTemplateResponse: putTemplateAcknowledged, backingIndicesAcknowledged };
   }
 
   /**
-   * Update existing index settings to use ILM policy
-   *
-   * FIXME: should also migrate legacy indices, if any exist
+   * Update datastream to use ILM policy. If legacy indices exist, this attempts to link
+   * the ILM policy to them as well.
    */
   public async migrateIndicesToIlmPolicy() {
-    const indicesPutSettingsRequest: estypes.IndicesPutSettingsRequest = {
-      index: REPORTING_DATA_STREAM_WILDCARD,
-      settings: {
-        lifecycle: {
-          name: ILM_POLICY_NAME,
-        },
-      },
-    };
+    const {
+      putTemplateResponse: { acknowledged: putTemplateAcknowledged },
+      backingIndicesAcknowledged: { acknowledged: backingIndicesAcknowledged },
+    } = await this.linkIlmPolicy();
 
-    await this.client.indices.putSettings(indicesPutSettingsRequest);
+    let legacyAcknowledged: boolean | null = null;
+    const legacyExists = await this.client.indices.exists({
+      index: REPORTING_LEGACY_INDICES,
+      expand_wildcards: ['hidden'],
+    });
+    if (legacyExists) {
+      const legacyIndicesPutSettingsRequest: estypes.IndicesPutSettingsRequest = {
+        index: REPORTING_LEGACY_INDICES,
+        settings: {
+          lifecycle: {
+            name: ILM_POLICY_NAME,
+          },
+        },
+      };
+      const { acknowledged } = await this.client.indices.putSettings(
+        legacyIndicesPutSettingsRequest
+      );
+      legacyAcknowledged = acknowledged;
+    }
+
+    return { putTemplateAcknowledged, backingIndicesAcknowledged, legacyAcknowledged };
   }
 }
