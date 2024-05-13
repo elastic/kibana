@@ -6,75 +6,48 @@
  * Side Public License, v 1.
  */
 
-import React, { createContext, CSSProperties, ReactNode, useEffect, useRef, useState } from 'react';
+import React, { CSSProperties, ReactNode } from 'react';
 import cytoscape from 'cytoscape';
 import dagre from 'cytoscape-dagre';
 import { useTheme } from './use_theme';
 import { getStyle } from './get_style';
+import { useCytoscape } from './use_cytoscape';
 
 cytoscape.use(dagre);
-
-export const CytoscapeContext = createContext<cytoscape.Core | undefined>(undefined);
 
 export interface CytoscapeProps {
   children?: ReactNode;
   elements: cytoscape.ElementsDefinition;
   height: number;
+  width: number;
   style?: CSSProperties;
+  layoutOptions: any;
+  onReady: () => void;
 }
 
-function useCytoscape(options: cytoscape.CytoscapeOptions) {
-  const [cy, setCy] = useState<cytoscape.Core | undefined>(undefined);
-  const ref = useRef(null);
-
-  useEffect(() => {
-    if (!cy) {
-      setCy(cytoscape({ ...options, container: ref.current }));
-    }
-  }, [options, cy]);
-
-  // Destroy the cytoscape instance on unmount
-  useEffect(() => {
-    return () => {
-      if (cy) {
-        cy.destroy();
-      }
-    };
-  }, [cy]);
-
-  return [ref, cy] as [React.MutableRefObject<any>, cytoscape.Core | undefined];
-}
-
-export function Cytoscape({ children, elements, height, style }: CytoscapeProps) {
+export function Cytoscape({
+  children,
+  elements,
+  height,
+  width,
+  style,
+  layoutOptions,
+}: CytoscapeProps) {
   const theme = useTheme();
-  const [ref, cy] = useCytoscape({
-    ...{
+  const [ref] = useCytoscape({
+    options: {
       boxSelectionEnabled: false,
       maxZoom: 3,
       minZoom: 0.0000002,
       style: getStyle(theme),
+      elements,
     },
-    elements,
-    layout: {
-      name: 'cose',
-      padding: 10,
-      componentSpacing: 50,
-      avoidOverlap: true,
-      nodeRepulsion: () => 200000000,
-      fit: true,
-      sort: (a, b) => a.data.weight - b.data.weight,
-    },
+    layoutOptions,
   });
 
-  // Add the height to the div style. The height is a separate prop because it
-  // is required and can trigger rendering when changed.
-  const divStyle = { ...style, height };
-
   return (
-    <CytoscapeContext.Provider value={cy}>
-      <div ref={ref} style={divStyle}>
-        {children}
-      </div>
-    </CytoscapeContext.Provider>
+    <div ref={ref} style={{ ...style, height, width }}>
+      {children}
+    </div>
   );
 }

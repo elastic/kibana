@@ -7,7 +7,9 @@
  */
 
 import { EuiThemeProviderDecorator } from '@kbn/kibana-react-plugin/common';
-import * as jest from 'jest-mock';
+// import * as jest from 'jest-mock';
 
-window.jest = jest;
+// window.jest = jest;
 export const decorators = [EuiThemeProviderDecorator];
+
+import './global.css';

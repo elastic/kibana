@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { generateGraph } from './src/gather_kbn_dependency_graph';
+import { generateGraph } from './common/gather_kbn_dependency_graph';
 
 export function runGenerateGraph() {
   generateGraph();
-  // 'npx http-server -p 8080 packages/kbn-kibana-plugin-graph/ui'
 }

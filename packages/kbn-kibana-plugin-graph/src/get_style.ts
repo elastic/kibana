@@ -9,10 +9,7 @@
 import cytoscape from 'cytoscape';
 import { EuiTheme } from '@kbn/kibana-react-plugin/common';
 
-export const getStyle = (
-  theme: EuiTheme
-  // isTraceExplorerEnabled: boolean
-): cytoscape.Stylesheet[] => {
+export const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => {
   const lineColor = theme.eui.euiColorPrimary;
   return [
     {
@@ -24,16 +21,9 @@ export const getStyle = (
       selector: 'node',
       style: {
         'background-color': theme.eui.euiColorPrimary,
-        // The DefinitelyTyped definitions don't specify that a function can be
-        // used here.
-        // 'background-image': (el: cytoscape.NodeSingular) => iconForNode(el),
-        // 'background-height': (el: cytoscape.NodeSingular) => (isService(el) ? '60%' : '40%'),
-        // 'background-width': (el: cytoscape.NodeSingular) => (isService(el) ? '60%' : '40%'),
-        // 'border-color': theme.eui.euiColorPrimary,
-        // 'border-style': 'solid',
-        // 'border-width': '40%',
         color: (el: cytoscape.NodeSingular) => {
-          return el.selected() ? theme.eui.euiColorPrimaryText : theme.eui.euiTextColor;
+          // TEXT COLOR
+          return el.selected() ? theme.eui.euiColorPrimaryText : theme.eui.euiColorPrimary;
         },
         // theme.euiFontFamily doesn't work here for some reason, so we're just
         // specifying a subset of the fonts for the label text.
@@ -43,26 +33,24 @@ export const getStyle = (
         // 'ghost-offset-x': 0,
         // 'ghost-offset-y': 2,
         // 'ghost-opacity': 0.15,
-        height: 5,
+        // height: 5,
         label: (el: cytoscape.NodeSingular) => {
           return el.data('id');
         },
         'min-zoomed-font-size': parseInt(theme.eui.euiSizeS, 10),
-        'overlay-opacity': 1,
         shape: (el: cytoscape.NodeSingular) => {
-          console.log('el.data', el.data());
           return el.data('type') === 'plugin' ? 'ellipse' : 'diamond';
         },
-        'text-background-color': theme.eui.euiColorPrimary,
+        'text-background-color': '#ffffff',
         'text-background-opacity': (el: cytoscape.NodeSingular) =>
-          el.hasClass('primary') || el.selected() ? 0.1 : 0,
+          el.hasClass('primary') || el.selected() ? 0.1 : 1,
         'text-background-padding': theme.eui.euiSizeXS,
         'text-background-shape': 'roundrectangle',
         'text-margin-y': parseInt(theme.eui.euiSizeL, 10),
         'text-max-width': '200px',
         'text-valign': 'bottom',
         'text-wrap': 'ellipsis',
-        width: 5,
+        // width: 5,
         // 'z-index': zIndexNode,
       },
     },
@@ -70,13 +58,14 @@ export const getStyle = (
       selector: 'edge',
       style: {
         'curve-style': 'unbundled-bezier',
-        'line-color': lineColor,
+        'line-color': (edge) =>
+          edge.data('type') === 'requiredPlugin'
+            ? theme.eui.euiColorPrimary
+            : theme.eui.euiColorAccent,
+        opacity: 0.5,
         'overlay-opacity': 0,
         'target-arrow-color': lineColor,
         'target-arrow-shape': 'triangle',
-        // The DefinitelyTyped definitions don't specify this property since it's
-        // fairly new.
-        //
         'target-distance-from-node': parseInt(theme.eui.euiSizeXS, 10),
         width: 1,
         'source-arrow-shape': 'none',
@@ -106,6 +95,7 @@ export const getStyle = (
         'line-color': theme.eui.euiColorDarkShade,
         'source-arrow-color': theme.eui.euiColorDarkShade,
         'target-arrow-color': theme.eui.euiColorDarkShade,
+        opacity: 1,
       },
     },
     {

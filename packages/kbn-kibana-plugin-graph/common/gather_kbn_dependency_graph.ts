@@ -46,8 +46,6 @@ export async function generateGraph() {
 
       if (json.plugin?.id) {
         elements.nodes.push({ data: { id: json.plugin.id, type: 'plugin' } });
-      } else {
-        elements.nodes.push({ data: { id: json.id, type: 'package' } });
       }
 
       if (json.plugin?.requiredPlugins) {
@@ -57,28 +55,44 @@ export async function generateGraph() {
               id: `${json.plugin.id}-${requiredPlugin}`,
               source: json.plugin.id,
               target: requiredPlugin,
-              type: 'plugin',
+              type: 'requiredPlugin',
             },
           });
         }
-
-        if (json.plugin?.requiredBundles) {
-          for (const requiredBundle of json.plugin.requiredBundles) {
+      }
+      if (json.plugin?.optionalPlugins) {
+        for (const optionalPlugin of json.plugin.optionalPlugins) {
+          if (elements.nodes.find((node) => node.data.id === optionalPlugin)) {
+            // apparently elements in 'optionalPlugins' are not checked; so it could be they don't exist
             elements.edges.push({
               data: {
-                id: `${json.plugin.id}-${requiredBundle}`,
+                id: `${json.plugin.id}-${optionalPlugin}`,
                 source: json.plugin.id,
-                target: requiredBundle,
-                type: 'bundle',
+                target: optionalPlugin,
+                type: 'optionalPlugin',
               },
             });
           }
+        }
+      }
+
+      if (json.plugin?.requiredBundles) {
+        for (const requiredBundle of json.plugin.requiredBundles) {
+          elements.edges.push({
+            data: {
+              id: `${json.plugin.id}-${requiredBundle}`,
+              source: json.plugin.id,
+              target: requiredBundle,
+              type: 'bundle',
+            },
+          });
         }
       }
     }
 
     fs.writeFileSync('kbn-dependency-graph.json', JSON.stringify(elements, null, 2));
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Error occurred while searching for files:', error);
     return [];
   }
