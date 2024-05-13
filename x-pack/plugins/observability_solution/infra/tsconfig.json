@@ -97,6 +97,7 @@
     "@kbn/dashboard-plugin",
     "@kbn/shared-svg",
     "@kbn/aiops-log-rate-analysis",
+    "@kbn/react-hooks",
     "@kbn/search-types"
   ],
   "exclude": [

@@ -2,7 +2,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     "common/**/*",
@@ -36,8 +36,9 @@
     "@kbn/logging",
     "@kbn/search-errors",
     "@kbn/search-types",
+    "@kbn/react-kibana-mount"
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ]
 }
