@@ -165,7 +165,7 @@ describe('GET /internal/spaces/{spaceId}/content_summary', () => {
     expect(response.status).toEqual(404);
   });
 
-  it('returns http/200 with non agnostic namsespace types.', async () => {
+  it('returns http/200 with non agnostic namespace types.', async () => {
     const importableAndExportableTypesMock = [
       {
         name: 'dashboard',
