@@ -79,6 +79,7 @@ export type {
   PanelState,
   PropertySpec,
   RangeSelectContext,
+  ReactEmbeddableSavedObject,
   ReferenceOrValueEmbeddable,
   SavedObjectEmbeddableInput,
   SelfStyledEmbeddable,
