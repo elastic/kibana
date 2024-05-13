@@ -304,56 +304,64 @@ export const DocViewerTable = ({
       : undefined;
   }, [showPagination, curPageIndex, pageSize, onChangePageSize, changePageIndex]);
 
-  const gridColumns: EuiDataGridProps['columns'] = [
-    {
-      id: 'name',
-      displayAsText: i18n.translate('unifiedDocViewer.fieldChooser.discoverField.name', {
-        defaultMessage: 'Field',
-      }),
-      initialWidth: 270, // TODO: what should be the default width?
-      actions: false,
-      visibleCellActions: 3,
-      cellActions: [
-        ...(filter
+  const rows = useMemo(() => [...pinnedItems, ...restItems], [pinnedItems, restItems]);
+
+  const gridColumns: EuiDataGridProps['columns'] = useMemo(
+    () => [
+      {
+        id: 'name',
+        displayAsText: i18n.translate('unifiedDocViewer.fieldChooser.discoverField.name', {
+          defaultMessage: 'Field',
+        }),
+        initialWidth: 270, // TODO: what should be the default width?
+        actions: false,
+        visibleCellActions: 3,
+        cellActions: [
+          ...(filter
+            ? [
+                ({ Component, rowIndex }: EuiDataGridColumnCellActionProps) => {
+                  return <FilterExist row={rows[rowIndex]} Component={Component} />;
+                },
+              ]
+            : []),
+          ({ Component, rowIndex }) => {
+            return <ToggleColumn row={rows[rowIndex]} Component={Component} />;
+          },
+          ({ Component, rowIndex }) => {
+            return <PinToggle row={rows[rowIndex]} Component={Component} />;
+          },
+        ],
+      },
+      {
+        id: 'value',
+        displayAsText: i18n.translate('unifiedDocViewer.fieldChooser.discoverField.value', {
+          defaultMessage: 'Value',
+        }),
+        actions: false,
+        visibleCellActions: 2,
+        cellActions: filter
           ? [
-              ({ Component, rowIndex }: EuiDataGridColumnCellActionProps) => {
-                return <FilterExist row={rows[rowIndex]} Component={Component} />;
+              ({ Component, rowIndex }) => {
+                return <FilterIn row={rows[rowIndex]} Component={Component} />;
+              },
+              ({ Component, rowIndex }) => {
+                return <FilterOut row={rows[rowIndex]} Component={Component} />;
               },
             ]
-          : []),
-        ({ Component, rowIndex }) => {
-          return <ToggleColumn row={rows[rowIndex]} Component={Component} />;
-        },
-        ({ Component, rowIndex }) => {
-          return <PinToggle row={rows[rowIndex]} Component={Component} />;
-        },
-      ],
-    },
-    {
-      id: 'value',
-      displayAsText: i18n.translate('unifiedDocViewer.fieldChooser.discoverField.value', {
-        defaultMessage: 'Value',
-      }),
-      actions: false,
-      visibleCellActions: 2,
-      cellActions: filter
-        ? [
-            ({ Component, rowIndex }) => {
-              return <FilterIn row={rows[rowIndex]} Component={Component} />;
-            },
-            ({ Component, rowIndex }) => {
-              return <FilterOut row={rows[rowIndex]} Component={Component} />;
-            },
-          ]
-        : [],
-    },
-  ];
-
-  const rows = useMemo(() => [...pinnedItems, ...restItems], [pinnedItems, restItems]);
+          : [],
+      },
+    ],
+    [filter, rows]
+  );
 
   const renderCellValue = useCallback(
     ({ rowIndex, columnId }) => {
       const row = rows[rowIndex];
+
+      if (!row) {
+        return null;
+      }
+
       const {
         action: { flattenedField },
         field: { field, fieldMapping, fieldType, scripted },
