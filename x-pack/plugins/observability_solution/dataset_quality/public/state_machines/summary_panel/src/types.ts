@@ -9,30 +9,11 @@ import { DoneInvokeEvent } from 'xstate';
 import { GetDataStreamsEstimatedDataInBytesResponse } from '../../../../common/data_streams_stats';
 
 export interface Retries {
-  datasetsQualityRetries: number;
-  datasetsActivityRetries: number;
   estimatedDataRetries: number;
-}
-
-export interface DatasetsQuality {
-  percentages: number[];
-}
-
-export interface DatasetsActivityDetails {
-  total: number;
-  active: number;
 }
 
 export interface EstimatedDataDetails {
   estimatedDataInBytes: number;
-}
-
-export interface WithDatasetsQuality {
-  datasetsQuality: DatasetsQuality;
-}
-
-export interface WithActiveDatasets {
-  datasetsActivity: DatasetsActivityDetails;
 }
 
 export interface WithEstimatedData {
@@ -43,36 +24,9 @@ export interface WithRetries {
   retries: Retries;
 }
 
-export type DefaultDatasetsSummaryPanelContext = WithDatasetsQuality &
-  WithActiveDatasets &
-  WithEstimatedData &
-  WithRetries;
+export type DefaultDatasetsSummaryPanelContext = WithEstimatedData & WithRetries;
 
 export type DatasetsSummaryPanelState =
-  | {
-      value: 'datasetsQuality.fetching';
-      context: DefaultDatasetsSummaryPanelContext;
-    }
-  | {
-      value: 'datasetsQuality.loaded';
-      context: DefaultDatasetsSummaryPanelContext;
-    }
-  | {
-      value: 'datasetsQuality.retrying';
-      context: DefaultDatasetsSummaryPanelContext;
-    }
-  | {
-      value: 'datasetsActivity.fetching';
-      context: DefaultDatasetsSummaryPanelContext;
-    }
-  | {
-      value: 'datasetsActivity.loaded';
-      context: DefaultDatasetsSummaryPanelContext;
-    }
-  | {
-      value: 'datasetsActivity.retrying';
-      context: DefaultDatasetsSummaryPanelContext;
-    }
   | {
       value: 'estimatedData.fetching';
       context: DefaultDatasetsSummaryPanelContext;
@@ -84,12 +38,14 @@ export type DatasetsSummaryPanelState =
   | {
       value: 'estimatedData.retrying';
       context: DefaultDatasetsSummaryPanelContext;
+    }
+  | {
+      value: 'estimatedData.disabled';
+      context: DefaultDatasetsSummaryPanelContext;
     };
 
 export type DatasetSummaryPanelEvent =
   | DoneInvokeEvent<Retries>
-  | DoneInvokeEvent<DatasetsQuality>
-  | DoneInvokeEvent<DatasetsActivityDetails>
   | DoneInvokeEvent<GetDataStreamsEstimatedDataInBytesResponse>
   | DoneInvokeEvent<Error>;
 

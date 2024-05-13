@@ -8,7 +8,7 @@
 
 import { uniq } from 'lodash';
 import { merge, type Observable, Subject, type Subscription } from 'rxjs';
-import { pairwise, takeUntil, map, startWith, bufferTime, concatAll, filter } from 'rxjs/operators';
+import { pairwise, takeUntil, map, startWith, bufferTime, concatAll, filter } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import { type CoreStatus, ServiceStatusLevels } from '@kbn/core-status-common';
 import type { LoggableServiceStatus } from './types';

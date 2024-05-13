@@ -8,9 +8,14 @@
 import { useCallback } from 'react';
 import { useQueryTimelineById } from '../../../timelines/components/open_timeline/helpers';
 import type { TimelineErrorCallback } from '../../../timelines/components/open_timeline/types';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
 export const useTimelineClick = () => {
   const queryTimelineById = useQueryTimelineById();
+
+  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineEnabled'
+  );
 
   const handleTimelineClick = useCallback(
     (timelineId: string, onError: TimelineErrorCallback, graphEventId?: string) => {
@@ -18,9 +23,10 @@ export const useTimelineClick = () => {
         graphEventId,
         timelineId,
         onError,
+        unifiedComponentsInTimelineEnabled,
       });
     },
-    [queryTimelineById]
+    [queryTimelineById, unifiedComponentsInTimelineEnabled]
   );
 
   return handleTimelineClick;

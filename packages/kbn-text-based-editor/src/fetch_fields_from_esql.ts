@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { pluck } from 'rxjs/operators';
+import { pluck } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
 import { Query, AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';

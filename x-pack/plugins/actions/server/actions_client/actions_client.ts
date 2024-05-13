@@ -91,6 +91,7 @@ import {
 } from '../lib/get_execution_log_aggregation';
 import { connectorFromSavedObject, isConnectorDeprecated } from '../application/connector/lib';
 import { ListTypesParams } from '../application/connector/methods/list_types/types';
+import { getAllSystemConnectors } from '../application/connector/methods/get_all/get_all';
 
 interface ActionUpdate {
   name: string;
@@ -419,6 +420,13 @@ export class ActionsClient {
   }
 
   /**
+   * Get all system connectors
+   */
+  public async getAllSystemConnectors(): Promise<ConnectorWithExtraFindData[]> {
+    return getAllSystemConnectors({ context: this.context });
+  }
+
+  /**
    * Get bulk actions with in-memory list
    */
   public async getBulk({
@@ -691,7 +699,7 @@ export class ActionsClient {
       let actionTypeId: string | undefined;
 
       try {
-        if (this.isPreconfigured(actionId)) {
+        if (this.isPreconfigured(actionId) || this.isSystemAction(actionId)) {
           const connector = this.context.inMemoryConnectors.find(
             (inMemoryConnector) => inMemoryConnector.id === actionId
           );

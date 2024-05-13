@@ -6,11 +6,7 @@
  */
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common/processor_event';
-import {
-  kqlQuery,
-  rangeQuery,
-  termQuery,
-} from '@kbn/observability-plugin/server/utils/queries';
+import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server/utils/queries';
 import {
   AGENT_NAME,
   AGENT_VERSION,
@@ -71,9 +67,7 @@ export async function getAgentsItems({
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
             ...(serviceName ? termQuery(SERVICE_NAME, serviceName) : []),
-            ...(agentLanguage
-              ? termQuery(SERVICE_LANGUAGE_NAME, agentLanguage)
-              : []),
+            ...(agentLanguage ? termQuery(SERVICE_LANGUAGE_NAME, agentLanguage) : []),
           ],
         },
       },
@@ -127,17 +121,12 @@ export async function getAgentsItems({
     response.aggregations?.sample.services.buckets.map((bucket) => {
       return {
         serviceName: bucket.key as string,
-        environments: bucket.environments.buckets.map(
-          (env) => env.key as string
-        ),
+        environments: bucket.environments.buckets.map((env) => env.key as string),
         agentName: bucket.sample.top[0].metrics[AGENT_NAME] as AgentName,
-        agentVersion: bucket.agentVersions.buckets.map(
+        agentVersion: bucket.agentVersions.buckets.map((version) => version.key as string),
+        agentTelemetryAutoVersion: bucket.agentTelemetryAutoVersions.buckets.map(
           (version) => version.key as string
         ),
-        agentTelemetryAutoVersion:
-          bucket.agentTelemetryAutoVersions.buckets.map(
-            (version) => version.key as string
-          ),
         // service.node.name is set by the server only if a container.id or host.name are set. Otherwise should be explicitly set by agents.
         instances: (bucket.instances.value as number) || 1,
       };

@@ -238,10 +238,9 @@ export function LayerPanels(
     [dispatchLens, props.framePublicAPI.dataViews.indexPatterns, props.indexPatternService]
   );
 
-  const addLayer: AddLayerFunction = (layerType, extraArg, ignoreInitialValues) => {
+  const addLayer: AddLayerFunction = (layerType, extraArg, ignoreInitialValues, seriesType) => {
     const layerId = generateId();
-
-    dispatchLens(addLayerAction({ layerId, layerType, extraArg, ignoreInitialValues }));
+    dispatchLens(addLayerAction({ layerId, layerType, extraArg, ignoreInitialValues, seriesType }));
 
     setNextFocusedLayerId(layerId);
   };
@@ -335,6 +334,7 @@ export function LayerPanels(
       })}
       {!hideAddLayerButton &&
         activeVisualization?.getAddLayerButtonComponent?.({
+          state: visualization.state,
           supportedLayers: activeVisualization.getSupportedLayers(
             visualization.state,
             props.framePublicAPI

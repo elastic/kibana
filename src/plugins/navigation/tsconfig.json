@@ -27,6 +27,10 @@
     "@kbn/solution-nav-es",
     "@kbn/solution-nav-oblt",
     "@kbn/config",
+    "@kbn/security-plugin",
+    "@kbn/user-profile-components",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/cloud-experiments-plugin",
   ],
   "exclude": [
     "target/**/*",

@@ -10,6 +10,7 @@ import { services as kibanaCommonServices } from '../../../../test/common/servic
 import { InfraLogViewsServiceProvider } from './infra_log_views';
 import { SpacesServiceProvider } from './spaces';
 import { BsearchSecureService } from './bsearch_secure';
+import { ApmSynthtraceKibanaClientProvider } from './apm_synthtrace_kibana_client';
 
 export const services = {
   ...kibanaCommonServices,
@@ -17,4 +18,5 @@ export const services = {
   supertest: kibanaApiIntegrationServices.supertest,
   spaces: SpacesServiceProvider,
   secureBsearch: BsearchSecureService,
+  apmSynthtraceKibanaClient: ApmSynthtraceKibanaClientProvider,
 };

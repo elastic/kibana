@@ -66,12 +66,13 @@ const actionAlertsFilterSchema = schema.object({
 
 const actionSchema = schema.object({
   uuid: schema.maybe(schema.string()),
-  group: schema.string(),
+  group: schema.maybe(schema.string()),
   id: schema.string(),
   connector_type_id: schema.string(),
   params: actionParamsSchema,
   frequency: schema.maybe(actionFrequencySchema),
   alerts_filter: schema.maybe(actionAlertsFilterSchema),
+  use_alert_data_for_template: schema.maybe(schema.boolean()),
 });
 
 export const ruleExecutionStatusSchema = schema.object({

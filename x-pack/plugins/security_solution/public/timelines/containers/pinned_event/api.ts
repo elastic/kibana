@@ -15,7 +15,7 @@ export const persistPinnedEvent = async ({
 }: {
   eventId: string;
   pinnedEventId?: string | null;
-  timelineId?: string | null;
+  timelineId: string;
 }) => {
   let requestBody;
   try {

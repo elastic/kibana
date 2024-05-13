@@ -6,13 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-
 /** @public */
 export interface AddDataTab {
   id: string;
   name: string;
-  component: React.FC;
+  getComponent: () => JSX.Element;
 }
 
 export class AddDataService {

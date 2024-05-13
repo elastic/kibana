@@ -19,6 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
+import { useFetchSLOSuggestions } from '../hooks/use_fetch_suggestions';
 import { OptionalText } from './common/optional_text';
 import { CreateSLOForm } from '../types';
 import { maxWidth } from './slo_edit_form';
@@ -28,6 +29,8 @@ export function SloEditFormDescriptionSection() {
   const sloNameId = useGeneratedHtmlId({ prefix: 'sloName' });
   const descriptionId = useGeneratedHtmlId({ prefix: 'sloDescription' });
   const tagsId = useGeneratedHtmlId({ prefix: 'tags' });
+
+  const { suggestions } = useFetchSLOSuggestions();
 
   return (
     <EuiPanel
@@ -121,8 +124,7 @@ export function SloEditFormDescriptionSection() {
                     defaultMessage: 'Add tags',
                   })}
                   isInvalid={fieldState.invalid}
-                  options={[]}
-                  noSuggestions
+                  options={suggestions?.tags ?? []}
                   selectedOptions={generateTagOptions(field.value)}
                   onChange={(selected: EuiComboBoxOptionOption[]) => {
                     if (selected.length) {

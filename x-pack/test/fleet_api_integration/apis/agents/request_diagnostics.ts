@@ -17,6 +17,7 @@ export default function (providerContext: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const es = getService('es');
 
   describe('fleet_request_diagnostics', () => {
     skipIfNoDockerRegistry(providerContext);
@@ -117,6 +118,44 @@ export default function (providerContext: FtrProviderContext) {
       }).catch((e) => {
         throw e;
       });
+    });
+
+    it('should create action with additional_metrics when api contains CPU option', async () => {
+      await supertest
+        .post(`/api/fleet/agents/agent1/request_diagnostics`)
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          additional_metrics: ['CPU'],
+        })
+        .expect(200);
+      const actionsRes = await es.search({
+        index: '.fleet-actions',
+        body: {
+          sort: [{ '@timestamp': { order: 'desc' } }],
+        },
+      });
+      const action: any = actionsRes.hits.hits[0]._source;
+      expect(action.data.additional_metrics).contain('CPU');
+    });
+
+    it('/agents/bulk_request_diagnostics should add CPU option to action doc', async () => {
+      await supertestWithoutAuth
+        .post(`/api/fleet/agents/bulk_request_diagnostics`)
+        .set('kbn-xsrf', 'xxx')
+        .auth(testUsers.fleet_agents_read_only.username, testUsers.fleet_agents_read_only.password)
+        .send({
+          agents: ['agent2', 'agent3'],
+          additional_metrics: ['CPU'],
+        });
+
+      const actionsRes = await es.search({
+        index: '.fleet-actions',
+        body: {
+          sort: [{ '@timestamp': { order: 'desc' } }],
+        },
+      });
+      const action: any = actionsRes.hits.hits[0]._source;
+      expect(action.data.additional_metrics).contain('CPU');
     });
   });
 }

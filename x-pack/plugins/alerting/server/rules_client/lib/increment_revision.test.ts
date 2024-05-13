@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { UpdateOptions } from '..';
 import { mockedDateString } from '../tests/lib';
 import { incrementRevision } from './increment_revision';
 import { SavedObject } from '@kbn/core/server';
-import { RawRule, RuleTypeParams } from '../../types';
+import { RuleTypeParams } from '../../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { UpdateRuleData } from '../../application/rule/methods/update';
+import { RuleAttributes } from '../../data/rule/types';
 
 describe('incrementRevision', () => {
-  const currentRule: SavedObject<RawRule> = {
+  const currentRule: SavedObject<RuleAttributes> = {
     id: '1',
     type: RULE_SAVED_OBJECT_TYPE,
     attributes: {
@@ -47,55 +48,71 @@ describe('incrementRevision', () => {
     references: [],
   };
 
-  const updateOptions: UpdateOptions<RuleTypeParams> = {
-    id: '1',
-    data: {
-      schedule: {
-        interval: '1m',
-      },
-      name: 'abc',
-      tags: ['foo'],
-      params: {
-        bar: true,
-        risk_score: 40,
-        severity: 'low',
-      },
-      throttle: null,
-      notifyWhen: 'onActiveAlert',
-      actions: [],
-    },
-  };
   const updatedParams: RuleTypeParams = { bar: true, risk_score: 40, severity: 'low' };
 
+  const updateRuleData: UpdateRuleData<RuleTypeParams> = {
+    schedule: {
+      interval: '1m',
+    },
+    name: 'abc',
+    tags: ['foo'],
+    params: {
+      bar: true,
+      risk_score: 40,
+      severity: 'low',
+    },
+    throttle: null,
+    notifyWhen: 'onActiveAlert',
+    actions: [],
+  };
+
   it('should return the current revision if no attrs or params are updated', () => {
-    // @ts-expect-error
-    expect(incrementRevision(currentRule, { data: {} }, {})).toBe(0);
+    expect(
+      incrementRevision({
+        originalRule: currentRule.attributes,
+        updateRuleData: {} as UpdateRuleData,
+        updatedParams: {},
+      })
+    ).toBe(0);
   });
 
   it('should increment the revision if a root level attr is updated', () => {
-    expect(incrementRevision(currentRule, updateOptions, {})).toBe(1);
+    expect(
+      incrementRevision({
+        originalRule: currentRule.attributes,
+        updateRuleData,
+        updatedParams: {},
+      })
+    ).toBe(1);
   });
 
   it('should increment the revision if a rule param is updated', () => {
-    // @ts-expect-error
-    expect(incrementRevision(currentRule, { data: {} }, updatedParams)).toBe(1);
+    expect(
+      incrementRevision({
+        originalRule: currentRule.attributes,
+        updateRuleData: {} as UpdateRuleData,
+        updatedParams,
+      })
+    ).toBe(1);
   });
 
   it('should not increment the revision if an excluded attr is updated', () => {
-    // @ts-expect-error
-    expect(incrementRevision(currentRule, { data: { activeSnoozes: 'excludedValue' } }, {})).toBe(
-      0
-    );
+    expect(
+      incrementRevision({
+        originalRule: currentRule.attributes,
+        updateRuleData: { activeSnoozes: ['excludedValue'] } as unknown as UpdateRuleData,
+        updatedParams: {},
+      })
+    ).toBe(0);
   });
 
   it('should not increment the revision if an excluded param is updated', () => {
     expect(
-      incrementRevision(
-        currentRule,
-        // @ts-expect-error
-        { data: {} },
-        { isSnoozedUntil: '1970-01-02T00:00:00.000Z' }
-      )
+      incrementRevision({
+        originalRule: currentRule.attributes,
+        updateRuleData: {} as UpdateRuleData,
+        updatedParams: { isSnoozedUntil: '1970-01-02T00:00:00.000Z' },
+      })
     ).toBe(0);
   });
 });

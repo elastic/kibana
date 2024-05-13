@@ -45,18 +45,17 @@ export interface ThreatIntelligencePluginStart {
 
 export interface ThreatIntelligencePluginStartDeps {
   data: DataPublicPluginStart;
-}
-
-export type Services = {
   cases: CasesPublicStart;
-  data: DataPublicPluginStart;
-  storage: Storage;
   dataViews: DataViewsPublicPluginStart;
   triggersActionsUi: TriggersActionsStart;
   timelines: TimelinesUIStart;
   securityLayout: any;
   inspector: InspectorPluginStart;
-} & CoreStart;
+}
+
+export interface Services extends CoreStart, ThreatIntelligencePluginStartDeps {
+  storage: Storage;
+}
 
 export interface LicenseAware {
   isEnterprise(): boolean;
@@ -90,6 +89,17 @@ export interface BlockListFlyoutProps {
 
 export interface BlockListFormProps {
   item: CreateExceptionListItemSchema;
+}
+
+export interface Blocking {
+  canWriteBlocklist: boolean;
+  exceptionListApiClient: unknown;
+  useSetUrlParams: () => (
+    params: Record<string, string | number | null | undefined>,
+    replace?: boolean | undefined
+  ) => void;
+  getFlyoutComponent: () => NamedExoticComponent<BlockListFlyoutProps>;
+  getFormComponent: () => NamedExoticComponent<BlockListFormProps>;
 }
 
 /**
@@ -151,16 +161,7 @@ export interface SecuritySolutionPluginContext {
   /**
    * Add to blocklist feature
    */
-  blockList: {
-    canWriteBlocklist: boolean;
-    exceptionListApiClient: unknown;
-    useSetUrlParams: () => (
-      params: Record<string, string | number | null | undefined>,
-      replace?: boolean | undefined
-    ) => void;
-    getFlyoutComponent: () => NamedExoticComponent<BlockListFlyoutProps>;
-    getFormComponent: () => NamedExoticComponent<BlockListFormProps>;
-  };
+  blockList: Blocking;
 }
 
 /**

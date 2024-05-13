@@ -1,11 +1,12 @@
 LOG10
 
-
-Returns the log base 10.  The input can be any numeric value, the return value
-is always a double.Logs of negative numbers are NaN. Logs of infinites are infinite, as is the log of 0.
+Syntax
+Parameters
+number
+Numeric expression. If null, the function returns null.
+DescriptionReturns the logarithm of a value to base 10. The input can be any numeric value, the return value is always a double.  Logs of 0 and negative numbers return null as well as a warning.Supported types
+Example
 ```esql
 ROW d = 1000.0
 | EVAL s = LOG10(d)
 ```
-
-Supported types:

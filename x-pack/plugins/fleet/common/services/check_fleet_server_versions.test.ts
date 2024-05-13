@@ -7,6 +7,7 @@
 
 import {
   checkFleetServerVersion,
+  getFleetServerVersionMessage,
   isAgentVersionLessThanFleetServer,
 } from './check_fleet_server_versions';
 
@@ -65,5 +66,31 @@ describe('isAgentVersionLessThanFleetServer', () => {
       { local_metadata: { elastic: { agent: { version: '8.4.0' } } } },
     ] as any;
     expect(isAgentVersionLessThanFleetServer('8.5.0', fleetServers)).toBe(false);
+  });
+
+  it('should not throw if version is not a semver', () => {
+    const fleetServers = [
+      { local_metadata: { elastic: { agent: { version: '8.13.0' } } } },
+      { local_metadata: { elastic: { agent: { version: '8.14.0' } } } },
+    ] as any;
+    const version = '8.14';
+
+    const result = isAgentVersionLessThanFleetServer(version, fleetServers);
+
+    expect(result).toEqual(false);
+  });
+});
+
+describe('getFleetServerVersionMessage', () => {
+  it('should not throw if version is not a semver', () => {
+    const fleetServers = [
+      { local_metadata: { elastic: { agent: { version: '8.13.0' } } } },
+      { local_metadata: { elastic: { agent: { version: '8.14.0' } } } },
+    ] as any;
+    const version = '8.14';
+
+    const result = getFleetServerVersionMessage(version, fleetServers);
+
+    expect(result).toEqual('Invalid Version: 8.14');
   });
 });

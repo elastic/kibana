@@ -24,10 +24,10 @@ describe('test getEcsAllowedValueDescription', () => {
     );
 
     expect(getEcsAllowedValueDescription('event.kind', 'not ecs')).toBe(
-      'This field is not an ecs field, description is not available.'
+      "This field doesn't have a description because it's not part of ECS."
     );
     expect(getEcsAllowedValueDescription('event.category', 'not ecs')).toBe(
-      'This field is not an ecs field, description is not available.'
+      "This field doesn't have a description because it's not part of ECS."
     );
   });
 });

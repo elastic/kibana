@@ -88,15 +88,19 @@ export class PieChartService extends FtrService {
     return await this.testSubjects.findAll(`pieSlice-${name.split(' ').join('-')}`);
   }
 
+  async getSelectedSlice(name: string) {
+    const slices = this.getSlices(
+      await this.visChart.getEsChartDebugState(partitionVisChartSelector)
+    );
+    return slices.filter((slice) => {
+      return slice.name.toString() === name.replace(',', '');
+    });
+  }
+
   async getPieSliceStyle(name: string) {
     this.log.debug(`VisualizePage.getPieSliceStyle(${name})`);
     if (await this.visChart.isNewLibraryChart(partitionVisChartSelector)) {
-      const slices = this.getSlices(
-        await this.visChart.getEsChartDebugState(partitionVisChartSelector)
-      );
-      const selectedSlice = slices.filter((slice) => {
-        return slice.name.toString() === name.replace(',', '');
-      });
+      const selectedSlice = await this.getSelectedSlice(name);
       return selectedSlice[0]?.color;
     }
     const pieSlice = await this.getPieSlice(name);
@@ -117,17 +121,12 @@ export class PieChartService extends FtrService {
   async getAllPieSliceColor(name: string) {
     this.log.debug(`VisualizePage.getAllPieSliceColor(${name})`);
     if (await this.visChart.isNewLibraryChart(partitionVisChartSelector)) {
-      const slices = this.getSlices(
-        await this.visChart.getEsChartDebugState(partitionVisChartSelector)
-      );
-      const selectedSlice = slices.filter((slice) => {
-        return slice.name.toString() === name.replace(',', '');
-      });
+      const selectedSlice = await this.getSelectedSlice(name);
       return selectedSlice.map((slice) => slice.color);
     }
     const pieSlices = await this.getAllPieSlices(name);
     const slicesStyles = await Promise.all(
-      pieSlices.map(async (pieSlice) => await pieSlice.getAttribute('style'))
+      pieSlices.map(async (pieSlice) => (await pieSlice.getAttribute('style')) ?? '')
     );
     return slicesStyles
       .map(

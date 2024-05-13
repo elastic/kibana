@@ -155,6 +155,7 @@ describe('useDashboardListingTable', () => {
         isReadonly: false,
         customValidators: expect.any(Object),
       },
+      createdByEnabled: true,
     };
 
     expect(tableListViewTableProps).toEqual(expectedProps);

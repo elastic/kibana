@@ -39,7 +39,7 @@ export const txtManyDrilldowns = (count: number) =>
 
 export const ACTION_PANEL_NOTIFICATIONS = 'ACTION_PANEL_NOTIFICATIONS';
 
-export type PanelNotificationsActionApi = CanAccessViewMode & HasDynamicActions;
+export type PanelNotificationsActionApi = CanAccessViewMode & Required<HasDynamicActions>;
 
 const isApiCompatible = (api: unknown | null): api is PanelNotificationsActionApi =>
   apiHasDynamicActions(api) && apiCanAccessViewMode(api);
@@ -73,11 +73,8 @@ export class PanelNotificationsAction implements ActionDefinition<EmbeddableApiC
     onChange: (isCompatible: boolean, action: PanelNotificationsAction) => void
   ) => {
     if (!isApiCompatible(embeddable)) return;
-
-    return merge(
-      getViewModeSubject(embeddable) ?? new BehaviorSubject(ViewMode.VIEW),
-      embeddable.dynamicActionsState$
-    ).subscribe(() => {
+    const viewModeSubject = getViewModeSubject(embeddable) ?? new BehaviorSubject(ViewMode.VIEW);
+    return merge(embeddable.dynamicActionsState$, viewModeSubject).subscribe(() => {
       onChange(
         getInheritedViewMode(embeddable) === ViewMode.EDIT &&
           this.getEventCount({ embeddable }) > 0,

@@ -22,7 +22,9 @@ import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
 
 jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -60,9 +62,12 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   auditLogger,
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
+  backfillClient: backfillClientMock.create(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
+  isSystemAction: jest.fn(),
 };
 
 beforeEach(() => {
@@ -282,7 +287,7 @@ describe('updateApiKey()', () => {
     rulesClientParams.createAPIKey.mockImplementation(() => {
       throw new Error('no');
     });
-    expect(
+    await expect(
       async () => await rulesClient.updateApiKey({ id: '1' })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Error updating API key for rule: could not create API key - no"`

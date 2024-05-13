@@ -23,6 +23,9 @@ export const getUpdateScript = ({
           ctx._source.api_config.remove('model');
           ctx._source.api_config.remove('provider');
         }
+        if (params.assignEmpty == true || params.api_config.containsKey('action_type_id')) {
+          ctx._source.api_config.action_type_id = params.api_config.action_type_id;
+        }
         if (params.assignEmpty == true || params.api_config.containsKey('default_system_prompt_id')) {
           ctx._source.api_config.default_system_prompt_id = params.api_config.default_system_prompt_id;
         }

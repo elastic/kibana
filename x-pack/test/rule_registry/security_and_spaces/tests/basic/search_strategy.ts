@@ -216,6 +216,134 @@ export default ({ getService }: FtrProviderContext) => {
         );
         expect(consumers.every((consumer) => consumer === AlertConsumers.APM));
       });
+
+      it('should not by pass our RBAC authz filter with a should filter', async () => {
+        const result = await secureBsearch.send<RuleRegistrySearchResponse>({
+          supertestWithoutAuth,
+          auth: {
+            username: obsOnlySpacesAll.username,
+            password: obsOnlySpacesAll.password,
+          },
+          referer: 'test',
+          kibanaVersion,
+          internalOrigin: 'Kibana',
+          options: {
+            featureIds: [AlertConsumers.APM],
+            query: {
+              bool: {
+                filter: [],
+                should: [
+                  {
+                    bool: {
+                      should: [
+                        {
+                          match: {
+                            'kibana.alert.rule.consumer': 'logs',
+                          },
+                        },
+                      ],
+                      minimum_should_match: 1,
+                    },
+                  },
+                ],
+                must: [],
+                must_not: [],
+              },
+            },
+          },
+          strategy: 'privateRuleRegistryAlertsSearchStrategy',
+          space: 'default',
+        });
+        expect(result.rawResponse.hits.total).to.eql(9);
+        const consumers = result.rawResponse.hits.hits.map(
+          (hit) => hit.fields?.['kibana.alert.rule.consumer']
+        );
+        expect(consumers.every((consumer) => consumer === AlertConsumers.APM));
+      });
+
+      it('should return an empty response with must filter and our RBAC authz filter', async () => {
+        const result = await secureBsearch.send<RuleRegistrySearchResponse>({
+          supertestWithoutAuth,
+          auth: {
+            username: obsOnlySpacesAll.username,
+            password: obsOnlySpacesAll.password,
+          },
+          referer: 'test',
+          kibanaVersion,
+          internalOrigin: 'Kibana',
+          options: {
+            featureIds: [AlertConsumers.APM],
+            query: {
+              bool: {
+                filter: [],
+                must: [
+                  {
+                    bool: {
+                      should: [
+                        {
+                          match: {
+                            'kibana.alert.rule.consumer': 'logs',
+                          },
+                        },
+                      ],
+                      minimum_should_match: 1,
+                    },
+                  },
+                ],
+                should: [],
+                must_not: [],
+              },
+            },
+          },
+          strategy: 'privateRuleRegistryAlertsSearchStrategy',
+          space: 'default',
+        });
+        expect(result.rawResponse.hits.total).to.eql(0);
+      });
+
+      it('should not by pass our RBAC authz filter with must_not filter', async () => {
+        const result = await secureBsearch.send<RuleRegistrySearchResponse>({
+          supertestWithoutAuth,
+          auth: {
+            username: obsOnlySpacesAll.username,
+            password: obsOnlySpacesAll.password,
+          },
+          referer: 'test',
+          kibanaVersion,
+          internalOrigin: 'Kibana',
+          options: {
+            featureIds: [AlertConsumers.APM],
+            query: {
+              bool: {
+                filter: [],
+                must: [],
+                must_not: [
+                  {
+                    bool: {
+                      should: [
+                        {
+                          match: {
+                            'kibana.alert.rule.consumer': 'apm',
+                          },
+                        },
+                      ],
+                      minimum_should_match: 1,
+                    },
+                  },
+                ],
+                should: [],
+              },
+            },
+          },
+          strategy: 'privateRuleRegistryAlertsSearchStrategy',
+          space: 'default',
+        });
+        expect(result.rawResponse.hits.total).to.eql(9);
+        const consumers = result.rawResponse.hits.hits.map(
+          (hit) => hit.fields?.['kibana.alert.rule.consumer']
+        );
+        expect(consumers.every((consumer) => consumer === AlertConsumers.APM));
+      });
     });
 
     describe('empty response', () => {

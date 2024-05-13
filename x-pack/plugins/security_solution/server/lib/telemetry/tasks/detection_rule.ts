@@ -13,10 +13,11 @@ import {
   templateExceptionList,
   newTelemetryLogger,
   createUsageCounterLabel,
+  safeValue,
 } from '../helpers';
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
-import type { ExceptionListItem, ESClusterInfo, ESLicense, RuleSearchResult } from '../types';
+import type { ExceptionListItem, RuleSearchResult } from '../types';
 import type { TaskExecutionPeriod } from '../task';
 import type { ITaskMetricsService } from '../task_metrics.types';
 
@@ -52,14 +53,8 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
           receiver.fetchLicenseInfo(),
         ]);
 
-        const clusterInfo =
-          clusterInfoPromise.status === 'fulfilled'
-            ? clusterInfoPromise.value
-            : ({} as ESClusterInfo);
-        const licenseInfo =
-          licenseInfoPromise.status === 'fulfilled'
-            ? licenseInfoPromise.value
-            : ({} as ESLicense | undefined);
+        const clusterInfo = safeValue(clusterInfoPromise);
+        const licenseInfo = safeValue(licenseInfoPromise);
 
         // Lists Telemetry: Detection Rules
 
@@ -67,7 +62,7 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
 
         if (!prebuiltRules) {
           log.l('no prebuilt rules found');
-          taskMetricsService.end(trace);
+          await taskMetricsService.end(trace);
           return 0;
         }
 
@@ -123,7 +118,7 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
         for (const batch of batches) {
           await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch);
         }
-        taskMetricsService.end(trace);
+        await taskMetricsService.end(trace);
 
         log.l(
           `Task: ${taskId} executed.  Processed ${detectionRuleExceptionsJson.length} exceptions`
@@ -131,7 +126,7 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
 
         return detectionRuleExceptionsJson.length;
       } catch (err) {
-        taskMetricsService.end(trace, err);
+        await taskMetricsService.end(trace, err);
         return 0;
       }
     },

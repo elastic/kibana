@@ -132,4 +132,6 @@ export function getBeforeSetup(
   rulesClientParams.getEventLogClient.mockResolvedValue(
     eventLogClient ?? eventLogClientMock.create()
   );
+
+  rulesClientParams.isSystemAction.mockImplementation((id) => id === 'system_action-id');
 }

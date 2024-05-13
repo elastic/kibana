@@ -5,30 +5,16 @@
  * 2.0.
  */
 
-import { EuiSelectableOption } from '@elastic/eui';
-import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
+import { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import { observabilityAppId } from '@kbn/observability-plugin/public';
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
-import { Query } from '@kbn/es-query';
-import { observabilityAppId } from '@kbn/observability-plugin/public';
 import { useKibana } from '../../../utils/kibana_react';
 import { useSloCrudLoading } from '../hooks/use_crud_loading';
-import { SLO_SUMMARY_DESTINATION_INDEX_NAME } from '../../../../common/constants';
-import { useCreateDataView } from '../../../hooks/use_create_data_view';
+import { useSloSummaryDataView } from '../hooks/use_summary_dataview';
 import { useUrlSearchState } from '../hooks/use_url_search_state';
 import { QuickFilters } from './common/quick_filters';
-
-export type SortField = 'sli_value' | 'error_budget_consumed' | 'error_budget_remaining' | 'status';
-export type SortDirection = 'asc' | 'desc';
-
-export type Item<T> = EuiSelectableOption & {
-  label: string;
-  type: T;
-  checked?: EuiSelectableOptionCheckedType;
-};
-
-export type ViewMode = 'default' | 'compact';
 
 export function SloListSearchBar() {
   const {
@@ -39,11 +25,9 @@ export function SloListSearchBar() {
   } = useKibana().services;
 
   const { state, onStateChange } = useUrlSearchState();
-  const loading = useSloCrudLoading();
+  const isSloCrudLoading = useSloCrudLoading();
 
-  const { dataView } = useCreateDataView({
-    indexPatternString: SLO_SUMMARY_DESTINATION_INDEX_NAME,
-  });
+  const { isLoading: isDataViewLoading, data: dataView } = useSloSummaryDataView();
 
   useEffect(() => {
     const sub = query.state$.subscribe(() => {
@@ -63,9 +47,14 @@ export function SloListSearchBar() {
         appName={observabilityAppId}
         placeholder={PLACEHOLDER}
         indexPatterns={dataView ? [dataView] : []}
-        isDisabled={loading}
+        isDisabled={isSloCrudLoading}
         renderQueryInputAppend={() => (
-          <QuickFilters initialState={state} loading={loading} onStateChange={onStateChange} />
+          <QuickFilters
+            dataView={dataView}
+            initialState={state}
+            loading={isSloCrudLoading || isDataViewLoading}
+            onStateChange={onStateChange}
+          />
         )}
         filters={state.filters}
         onFiltersUpdated={(newFilters) => {

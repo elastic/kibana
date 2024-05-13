@@ -15,7 +15,7 @@ import {
   getSecurityTelemetryStats,
   createExceptionListItem,
   createExceptionList,
-  removeTimeFieldsFromTelemetryStats,
+  removeExtraFieldsFromTelemetryStats,
 } from '../../../utils';
 import {
   createAlertsIndex,
@@ -76,7 +76,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           const trustedApplication = stats.security_lists
             .flat()
             .map((obj: any) => (obj.passed != null ? obj : obj.trusted_application));
@@ -146,7 +146,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           const trustedApplication = stats.security_lists
             .flat()
             .map((obj: any) => (obj.passed != null ? obj : obj.trusted_application))
@@ -222,7 +222,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           const securityLists = stats.security_lists
             .flat()
             .map((obj: any) => (obj.passed != null ? obj : obj.endpoint_exception));
@@ -288,7 +288,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           const securityLists = stats.security_lists
             .flat()
             .map((obj: any) => (obj.passed != null ? obj : obj.endpoint_exception))
@@ -368,7 +368,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           const endPointEventFilter = stats.security_lists
             .flat()
             .map((obj: any) => (obj.passed != null ? obj : obj.endpoint_event_filter));
@@ -435,7 +435,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           const endPointEventFilter = stats.security_lists
             .flat()
             .map((obj: any) => (obj.passed != null ? obj : obj.endpoint_event_filter))

@@ -46,7 +46,7 @@ describe('Expand panel action', () => {
   });
 
   it('returns the correct display name based on expanded panel id', async () => {
-    expect(await action.getDisplayName(context)).toBe('Maximize panel');
+    expect(await action.getDisplayName(context)).toBe('Maximize');
     context.embeddable.parentApi.expandedPanelId = new BehaviorSubject<string | undefined>(
       'superPanelId'
     );

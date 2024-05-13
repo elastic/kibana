@@ -36,7 +36,7 @@ export function showOpenSearchPanel({
 
   document.body.appendChild(container);
   const element = (
-    <KibanaRenderContextProvider theme={services.core.theme} i18n={services.core.i18n}>
+    <KibanaRenderContextProvider {...services.core}>
       <KibanaContextProvider services={services}>
         <OpenSearchPanel onClose={onClose} onOpenSavedSearch={onOpenSavedSearch} />
       </KibanaContextProvider>

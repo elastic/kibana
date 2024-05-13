@@ -6,12 +6,11 @@
  */
 import { TypeOf } from '@kbn/config-schema/src/types/object_type';
 import { omit } from 'lodash';
-import { NormalizedAlertAction } from '../../rules_client';
-import { RuleAction } from '../../types';
-import { actionsSchema } from './actions_schema';
+import { NormalizedAlertAction, NormalizedSystemAction } from '../../rules_client';
+import { actionsSchema, systemActionsSchema } from './actions_schema';
 
 export const rewriteActionsReq = (
-  actions?: TypeOf<typeof actionsSchema>
+  actions: TypeOf<typeof actionsSchema>
 ): NormalizedAlertAction[] => {
   if (!actions) return [];
 
@@ -23,12 +22,17 @@ export const rewriteActionsReq = (
       ...action
     }) => {
       return {
-        ...action,
+        group: action.group ?? 'default',
+        id: action.id,
+        params: action.params,
+        ...(action.uuid ? { uuid: action.uuid } : {}),
         ...(typeof useAlertDataForTemplate !== 'undefined' ? { useAlertDataForTemplate } : {}),
         ...(frequency
           ? {
               frequency: {
                 ...omit(frequency, 'notify_when'),
+                summary: frequency.summary,
+                throttle: frequency.throttle,
                 notifyWhen: frequency.notify_when,
               },
             }
@@ -39,25 +43,16 @@ export const rewriteActionsReq = (
   );
 };
 
-export const rewriteActionsRes = (actions?: RuleAction[]) => {
-  const rewriteFrequency = ({ notifyWhen, ...rest }: NonNullable<RuleAction['frequency']>) => ({
-    ...rest,
-    notify_when: notifyWhen,
-  });
+export const rewriteSystemActionsReq = (
+  actions: TypeOf<typeof systemActionsSchema>
+): NormalizedSystemAction[] => {
   if (!actions) return [];
-  return actions.map(
-    ({ actionTypeId, frequency, alertsFilter, useAlertDataForTemplate, ...action }) => ({
-      ...action,
-      connector_type_id: actionTypeId,
-      ...(typeof useAlertDataForTemplate !== 'undefined'
-        ? { use_alert_data_for_template: useAlertDataForTemplate }
-        : {}),
-      ...(frequency ? { frequency: rewriteFrequency(frequency) } : {}),
-      ...(alertsFilter
-        ? {
-            alerts_filter: alertsFilter,
-          }
-        : {}),
-    })
-  );
+
+  return actions.map((action) => {
+    return {
+      id: action.id,
+      params: action.params,
+      ...(action.uuid ? { uuid: action.uuid } : {}),
+    };
+  });
 };

@@ -6,8 +6,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
-import { skipWhile } from 'rxjs/operators';
+import { BehaviorSubject, skipWhile } from 'rxjs';
 
 import type { HttpSetup } from '@kbn/core/public';
 import type { SavedObjectsCollectMultiNamespaceReferencesResponse } from '@kbn/core-saved-objects-api-server';

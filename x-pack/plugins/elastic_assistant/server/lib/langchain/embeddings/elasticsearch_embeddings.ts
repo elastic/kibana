@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { Embeddings } from 'langchain/embeddings/base';
-import { EmbeddingsParams } from 'langchain/dist/embeddings/base';
+import { Embeddings, EmbeddingsParams } from '@langchain/core/embeddings';
 import { Logger } from '@kbn/core/server';
 
 /**

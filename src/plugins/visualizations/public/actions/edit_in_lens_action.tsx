@@ -24,7 +24,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import React from 'react';
-import { take } from 'rxjs/operators';
+import { take } from 'rxjs';
 import { apiHasVisualizeConfig, HasVisualizeConfig } from '../embeddable';
 import {
   apiHasExpressionVariables,

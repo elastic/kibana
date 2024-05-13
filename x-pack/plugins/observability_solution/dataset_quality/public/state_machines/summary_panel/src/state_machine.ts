@@ -10,16 +10,9 @@ import { getDateISORange } from '@kbn/timerange';
 import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from 'xstate';
 import { DEFAULT_TIME_RANGE } from '../../../../common/constants';
 import { IDataStreamsStatsClient } from '../../../services/data_streams_stats';
-import { filterInactiveDatasets } from '../../../utils/filter_inactive_datasets';
 import { defaultContext, MAX_RETRIES, RETRY_DELAY_IN_MS } from './defaults';
+import { fetchDatasetsEstimatedDataFailedNotifier } from './notifications';
 import {
-  fetchDatasetsActivityFailedNotifier,
-  fetchDatasetsEstimatedDataFailedNotifier,
-  fetchDatasetsQualityFailedNotifier,
-} from './notifications';
-import {
-  DatasetsActivityDetails,
-  DatasetsQuality,
   DatasetsSummaryPanelContext,
   DatasetsSummaryPanelState,
   DatasetSummaryPanelEvent,
@@ -39,88 +32,24 @@ export const createPureDatasetsSummaryPanelStateMachine = (
       id: 'DatasetsQualitySummaryPanel',
       type: 'parallel',
       states: {
-        datasetsQuality: {
-          initial: 'fetching',
-          states: {
-            fetching: {
-              invoke: {
-                src: 'loadDatasetsQuality',
-                onDone: {
-                  target: 'loaded',
-                  actions: ['storeDatasetsQuality'],
-                },
-                onError: [
-                  {
-                    target: 'retrying',
-                    cond: {
-                      type: 'canRetry',
-                      counter: 'datasetsQualityRetries',
-                    },
-                    actions: ['incrementDatasetsQualityRetries'],
-                  },
-                  {
-                    target: 'loaded',
-                    actions: ['notifyFetchDatasetsQualityFailed'],
-                  },
-                ],
-              },
-            },
-            retrying: {
-              after: {
-                [RETRY_DELAY_IN_MS]: 'fetching',
-              },
-            },
-            loaded: {
-              type: 'final',
-            },
-          },
-        },
-        datasetsActivity: {
-          initial: 'fetching',
-          states: {
-            fetching: {
-              invoke: {
-                src: 'loadDatasetsActivity',
-                onDone: {
-                  target: 'loaded',
-                  actions: ['storeDatasetsActivity'],
-                },
-                onError: [
-                  {
-                    target: 'retrying',
-                    cond: {
-                      type: 'canRetry',
-                      counter: 'datasetsActivityRetries',
-                    },
-                    actions: ['incrementDatasetsActivityRetries'],
-                  },
-                  {
-                    target: 'loaded',
-                    actions: ['notifyFetchDatasetsActivityFailed'],
-                  },
-                ],
-              },
-            },
-            retrying: {
-              after: {
-                [RETRY_DELAY_IN_MS]: 'fetching',
-              },
-            },
-            loaded: {
-              type: 'final',
-            },
-          },
-        },
         estimatedData: {
           initial: 'fetching',
           states: {
             fetching: {
               invoke: {
                 src: 'loadEstimatedData',
-                onDone: {
-                  target: 'loaded',
-                  actions: ['storeEstimatedData'],
-                },
+                onDone: [
+                  {
+                    target: 'disabled',
+                    cond: {
+                      type: 'estimatedDataIsDisabled',
+                    },
+                  },
+                  {
+                    target: 'loaded',
+                    actions: ['storeEstimatedData'],
+                  },
+                ],
                 onError: [
                   {
                     target: 'retrying',
@@ -145,18 +74,15 @@ export const createPureDatasetsSummaryPanelStateMachine = (
             loaded: {
               type: 'final',
             },
+            disabled: {
+              type: 'final',
+            },
           },
         },
       },
     },
     {
       actions: {
-        storeDatasetsQuality: assign((_context, event) =>
-          'data' in event ? { datasetsQuality: event.data as DatasetsQuality } : {}
-        ),
-        storeDatasetsActivity: assign((_context, event) =>
-          'data' in event ? { datasetsActivity: event.data as DatasetsActivityDetails } : {}
-        ),
         storeEstimatedData: assign((_context, event) =>
           'data' in event
             ? {
@@ -164,12 +90,6 @@ export const createPureDatasetsSummaryPanelStateMachine = (
               }
             : {}
         ),
-        incrementDatasetsQualityRetries: assign(({ retries }, _event) => ({
-          retries: { ...retries, datasetsQualityRetries: retries.datasetsQualityRetries + 1 },
-        })),
-        incrementDatasetsActivityRetries: assign(({ retries }, _event) => ({
-          retries: { ...retries, datasetsActivityRetries: retries.datasetsActivityRetries + 1 },
-        })),
         incrementEstimatedDataRetries: assign(({ retries }, _event) => ({
           retries: { ...retries, estimatedDataRetries: retries.estimatedDataRetries + 1 },
         })),
@@ -181,6 +101,9 @@ export const createPureDatasetsSummaryPanelStateMachine = (
             return context.retries[retriesKey] < MAX_RETRIES;
           }
           return false;
+        },
+        estimatedDataIsDisabled: (context, event) => {
+          return 'estimatedDataInBytes' in event.data && event.data.estimatedDataInBytes === null;
         },
       },
     }
@@ -199,27 +122,10 @@ export const createDatasetsSummaryPanelStateMachine = ({
 }: DatasetsSummaryPanelStateMachineDependencies) =>
   createPureDatasetsSummaryPanelStateMachine(initialContext).withConfig({
     actions: {
-      notifyFetchDatasetsQualityFailed: (_context, event: DoneInvokeEvent<Error>) =>
-        fetchDatasetsQualityFailedNotifier(toasts, event.data),
-      notifyFetchDatasetsActivityFailed: (_context, event: DoneInvokeEvent<Error>) =>
-        fetchDatasetsActivityFailedNotifier(toasts, event.data),
       notifyFetchEstimatedDataFailed: (_context, event: DoneInvokeEvent<Error>) =>
         fetchDatasetsEstimatedDataFailedNotifier(toasts, event.data),
     },
     services: {
-      loadDatasetsQuality: async (_context) => {
-        const dataStreamsStats = await dataStreamStatsClient.getDataStreamsDegradedStats();
-        const percentages = dataStreamsStats.map((stat) => stat.percentage);
-        return { percentages };
-      },
-      loadDatasetsActivity: async (_context) => {
-        const { dataStreamStats } = await dataStreamStatsClient.getDataStreamsStats();
-        const activeDataStreams = filterInactiveDatasets({ datasets: dataStreamStats });
-        return {
-          total: dataStreamStats.length,
-          active: activeDataStreams.length,
-        };
-      },
       loadEstimatedData: async (_context) => {
         const { startDate, endDate } = getDateISORange(DEFAULT_TIME_RANGE);
         return dataStreamStatsClient.getDataStreamsEstimatedDataInBytes({

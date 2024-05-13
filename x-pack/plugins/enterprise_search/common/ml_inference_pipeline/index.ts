@@ -56,7 +56,6 @@ export const generateMlInferencePipelineBody = ({
   model,
   pipelineName,
 }: MlInferencePipelineParams): MlInferencePipeline => {
-  // @ts-expect-error pipeline._meta defined as mandatory
   const pipelineDefinition: MlInferencePipeline = {
     description: description ?? '',
     processors: [],
@@ -186,7 +185,6 @@ export const parseMlInferenceParametersFromPipeline = (
     })
     .filter((f) => f.sourceField) as FieldMapping[];
 
-  // @ts-expect-error pipeline._meta defined as mandatory
   return fieldMappings.length === 0
     ? null
     : {

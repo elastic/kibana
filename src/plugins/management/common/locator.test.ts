@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
 import { MANAGEMENT_APP_ID } from './contants';
-import { ManagementAppLocatorDefinition, MANAGEMENT_APP_LOCATOR } from './locator';
+import { ManagementAppLocatorDefinition } from './locator';
 
 test('locator has the right ID', () => {
   const locator = new ManagementAppLocatorDefinition();

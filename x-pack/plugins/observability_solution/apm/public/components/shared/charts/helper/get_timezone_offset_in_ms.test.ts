@@ -39,8 +39,7 @@ describe('getTimezoneOffsetInMs', () => {
       moment.tz.setDefault('America/Denver');
       const now = Date.now();
       // get the expected offset from moment to prevent any issues with DST
-      const expectedOffset =
-        moment.tz.zone('America/Denver')!.parse(now) * 60000;
+      const expectedOffset = moment.tz.zone('America/Denver')!.parse(now) * 60000;
       expect(getTimezoneOffsetInMs(Date.now())).toEqual(expectedOffset);
     });
   });

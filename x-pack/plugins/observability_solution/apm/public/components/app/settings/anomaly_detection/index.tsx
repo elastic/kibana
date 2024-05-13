@@ -48,10 +48,7 @@ export function AnomalyDetection() {
   if (!canGetJobs) {
     return (
       <EuiPanel>
-        <EuiEmptyPrompt
-          iconType="warning"
-          body={<>{ML_ERRORS.MISSING_READ_PRIVILEGES}</>}
-        />
+        <EuiEmptyPrompt iconType="warning" body={<>{ML_ERRORS.MISSING_READ_PRIVILEGES}</>} />
       </EuiPanel>
     );
   }
@@ -60,9 +57,7 @@ export function AnomalyDetection() {
     <>
       {viewAddEnvironments ? (
         <AddEnvironments
-          currentEnvironments={anomalyDetectionJobsData.jobs.map(
-            ({ environment }) => environment
-          )}
+          currentEnvironments={anomalyDetectionJobsData.jobs.map(({ environment }) => environment)}
           onCreateJobSuccess={() => {
             anomalyDetectionJobsRefetch();
             setViewAddEnvironments(false);

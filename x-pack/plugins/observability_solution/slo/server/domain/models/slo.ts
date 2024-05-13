@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { sloDefinitionSchema, sloIdSchema } from '@kbn/slo-schema';
 import * as t from 'io-ts';
-import { sloIdSchema, sloSchema, sloWithSummarySchema } from '@kbn/slo-schema';
 
-type SLO = t.TypeOf<typeof sloSchema>;
+type SLODefinition = t.TypeOf<typeof sloDefinitionSchema>;
+type StoredSLODefinition = t.OutputOf<typeof sloDefinitionSchema>;
+
 type SLOId = t.TypeOf<typeof sloIdSchema>;
-type SLOWithSummary = t.TypeOf<typeof sloWithSummarySchema>;
-type StoredSLO = t.OutputOf<typeof sloSchema>;
 
-export type { SLO, SLOWithSummary, SLOId, StoredSLO };
+export type { SLODefinition, StoredSLODefinition, SLOId };

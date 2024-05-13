@@ -80,24 +80,28 @@ export const useAddBulkToTimelineAction = ({
 
   const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
 
-  const timelineQuerySortField = sort.map(({ columnId, columnType, esTypes, sortDirection }) => ({
-    field: columnId,
-    direction: sortDirection as Direction,
-    esTypes: esTypes ?? [],
-    type: columnType,
-  }));
+  const timelineQuerySortField = useMemo(() => {
+    return sort.map(({ columnId, columnType, esTypes, sortDirection }) => ({
+      field: columnId,
+      direction: sortDirection as Direction,
+      esTypes: esTypes ?? [],
+      type: columnType,
+    }));
+  }, [sort]);
 
   const combinedFilters = useMemo(() => [...localFilters, ...filters], [localFilters, filters]);
 
-  const combinedQuery = combineQueries({
-    config: esQueryConfig,
-    dataProviders: [],
-    indexPattern,
-    filters: combinedFilters,
-    kqlQuery: { query: '', language: 'kuery' },
-    browserFields,
-    kqlMode: 'filter',
-  });
+  const combinedQuery = useMemo(() => {
+    return combineQueries({
+      config: esQueryConfig,
+      dataProviders: [],
+      indexPattern,
+      filters: combinedFilters,
+      kqlQuery: { query: '', language: 'kuery' },
+      browserFields,
+      kqlMode: 'filter',
+    });
+  }, [esQueryConfig, indexPattern, combinedFilters, browserFields]);
 
   const filterQuery = useMemo(() => {
     if (!combinedQuery) return '';

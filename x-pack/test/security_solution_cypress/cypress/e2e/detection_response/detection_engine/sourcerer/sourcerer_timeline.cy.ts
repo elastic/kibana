@@ -31,15 +31,20 @@ import {
   saveSourcerer,
 } from '../../../../tasks/sourcerer';
 import { openTimelineUsingToggle } from '../../../../tasks/security_main';
+import { waitForFleetSetup } from '../../../../tasks/fleet_integrations';
 import { SOURCERER } from '../../../../screens/sourcerer';
 import { createTimeline, deleteTimelines } from '../../../../tasks/api_calls/timelines';
-import { getTimeline, getTimelineModifiedSourcerer } from '../../../../objects/timeline';
+import { getTimelineModifiedSourcerer } from '../../../../objects/timeline';
 import { closeTimeline, openTimelineById } from '../../../../tasks/timeline';
 
 const siemDataViewTitle = 'Security Default Data View';
 const dataViews = ['logs-*', 'metrics-*', '.kibana-event-log-*'];
 
-describe('Timeline scope', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Timeline scope', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
+  before(() => {
+    waitForFleetSetup();
+  });
+
   beforeEach(() => {
     cy.clearLocalStorage();
     login();
@@ -58,7 +63,7 @@ describe('Timeline scope', { tags: ['@ess', '@serverless', '@brokenInServerless'
   });
 
   // FLAKY: https://github.com/elastic/kibana/issues/173854
-  describe.skip('Modified badge', () => {
+  describe('Modified badge', () => {
     it('Selecting new data view does not add a modified badge', () => {
       openTimelineUsingToggle();
       cy.get(SOURCERER.badgeModified).should(`not.exist`);
@@ -96,7 +101,7 @@ describe('Timeline scope', { tags: ['@ess', '@serverless', '@brokenInServerless'
     beforeEach(() => {
       login();
       deleteTimelines();
-      createTimeline(getTimeline()).then((response) =>
+      createTimeline().then((response) =>
         cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId')
       );
       createTimeline(getTimelineModifiedSourcerer()).then((response) =>

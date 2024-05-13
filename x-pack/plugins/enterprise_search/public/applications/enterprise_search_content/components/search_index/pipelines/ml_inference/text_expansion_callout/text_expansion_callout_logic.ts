@@ -177,8 +177,8 @@ export const TextExpansionCalloutLogic = kea<
   },
   events: ({ actions, values }) => ({
     afterMount: async () => {
-      const elserModel = await KibanaLogic.values.ml.elasticModels?.getELSER({ version: 2 });
-      if (elserModel != null) {
+      const elserModel = await KibanaLogic.values.ml?.elasticModels?.getELSER({ version: 2 });
+      if (elserModel) {
         actions.setElserModelId(elserModel.model_id);
         actions.fetchTextExpansionModel();
       }

@@ -38,7 +38,6 @@ export const SavedObjectPinnedEventRuntimeType = runtimeTypes.intersection([
   }),
   runtimeTypes.partial({
     pinnedEventId: unionWithNullType(runtimeTypes.string),
-    timelineVersion: unionWithNullType(runtimeTypes.string),
   }),
 ]);
 

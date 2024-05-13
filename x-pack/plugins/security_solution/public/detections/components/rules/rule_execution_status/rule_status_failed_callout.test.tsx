@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { render } from '@testing-library/react';
 
@@ -31,6 +32,7 @@ const mockAssistantAvailability: AssistantAvailability = {
   hasAssistantPrivilege: false,
   hasConnectorsAllPrivilege: true,
   hasConnectorsReadPrivilege: true,
+  hasUpdateAIAssistantAnonymization: true,
   isAssistantEnabled: true,
 };
 const queryClient = new QueryClient({
@@ -46,17 +48,13 @@ const queryClient = new QueryClient({
   },
 });
 
-const ContextWrapper: React.FC = ({ children }) => (
+const ContextWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <QueryClientProvider client={queryClient}>
     <AssistantProvider
       actionTypeRegistry={actionTypeRegistry}
       assistantAvailability={mockAssistantAvailability}
       augmentMessageCodeBlocks={jest.fn()}
-      baseAllow={[]}
-      baseAllowReplacement={[]}
       basePath={'https://localhost:5601/kbn'}
-      defaultAllow={[]}
-      defaultAllowReplacement={[]}
       docLinks={{
         ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
         DOC_LINK_VERSION: 'current',
@@ -64,8 +62,6 @@ const ContextWrapper: React.FC = ({ children }) => (
       getComments={mockGetComments}
       http={mockHttp}
       baseConversations={BASE_SECURITY_CONVERSATIONS}
-      setDefaultAllow={jest.fn()}
-      setDefaultAllowReplacement={jest.fn()}
     >
       {children}
     </AssistantProvider>

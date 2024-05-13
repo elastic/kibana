@@ -50,6 +50,7 @@ const addAuditEventSpy = jest.spyOn(
   SavedObjectsSecurityExtension.prototype as any,
   'addAuditEvent'
 );
+const getCurrentUser = jest.fn();
 
 const obj1 = {
   type: 'a',
@@ -113,6 +114,7 @@ function setup() {
     auditLogger,
     errors,
     checkPrivileges,
+    getCurrentUser,
   });
   return { actions, auditLogger, errors, checkPrivileges, securityExtension };
 }

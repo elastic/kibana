@@ -17,6 +17,7 @@ export interface InvokeBody {
     role: string;
     content: string;
   }>;
+  signal?: AbortSignal;
 }
 
 /**
@@ -42,10 +43,10 @@ export async function getTokenCountFromInvokeStream({
   prompt: number;
   completion: number;
 }> {
-  const chatCompletionRequest = body;
+  const { signal, ...chatCompletionRequest } = body;
 
   const parser = actionTypeId === '.bedrock' ? parseBedrockStream : parseOpenAIStream;
-  const parsedResponse = await parser(responseStream, logger);
+  const parsedResponse = await parser(responseStream, logger, signal);
   if (typeof parsedResponse === 'string') {
     // per https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
     const promptTokens = encode(
@@ -67,7 +68,8 @@ export async function getTokenCountFromInvokeStream({
 
 type StreamParser = (
   responseStream: Readable,
-  logger: Logger
+  logger: Logger,
+  signal?: AbortSignal
 ) => Promise<
   | {
       total: number;
@@ -79,6 +81,8 @@ type StreamParser = (
 
 const parseBedrockStream: StreamParser = async (responseStream, logger) => {
   const responseBuffer: Uint8Array[] = [];
+  // do not destroy response stream on abort for bedrock
+  // Amazon charges the same tokens whether the stream is destroyed or not, so let it finish to calculate
   responseStream.on('data', (chunk) => {
     // special encoding for bedrock, do not attempt to convert to string
     responseBuffer.push(chunk);
@@ -95,16 +99,33 @@ const parseBedrockStream: StreamParser = async (responseStream, logger) => {
   return parseBedrockBuffer(responseBuffer);
 };
 
-const parseOpenAIStream: StreamParser = async (responseStream, logger) => {
+const parseOpenAIStream: StreamParser = async (responseStream, logger, signal) => {
   let responseBody: string = '';
-  responseStream.on('data', (chunk) => {
-    // no special encoding, can safely use toString and append to responseBody
-    responseBody += chunk.toString();
-  });
+  const destroyStream = () => {
+    // Pause the stream to prevent further data events
+    responseStream.pause();
+    // Remove the 'data' event listener once the stream is paused
+    responseStream.removeListener('data', onData);
+    // Manually destroy the stream
+    responseStream.emit('close');
+    responseStream.destroy();
+  };
+
+  const onData = (chunk: Buffer) => {
+    // no special encoding, can safely use `${chunk}` and append to responseBody
+    responseBody += `${chunk}`;
+  };
+
+  responseStream.on('data', onData);
+
   try {
+    // even though the stream is destroyed in the axios request, the response body is still calculated
+    // if we do not destroy the stream, the response never resolves
+    signal?.addEventListener('abort', destroyStream);
     await finished(responseStream);
   } catch (e) {
-    logger.error('An error occurred while calculating streaming response tokens');
+    if (!signal?.aborted)
+      logger.error('An error occurred while calculating streaming response tokens');
   }
   return parseOpenAIResponse(responseBody);
 };

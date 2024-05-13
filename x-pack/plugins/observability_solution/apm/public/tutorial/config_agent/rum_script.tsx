@@ -15,12 +15,7 @@ interface Props {
   kibanaVersion: string;
 }
 
-function TutorialConfigAgentRumScript({
-  http,
-  basePath,
-  isCloudEnabled,
-  kibanaVersion,
-}: Props) {
+function TutorialConfigAgentRumScript({ http, basePath, isCloudEnabled, kibanaVersion }: Props) {
   return (
     <TutorialConfigAgent
       variantId="js_script"

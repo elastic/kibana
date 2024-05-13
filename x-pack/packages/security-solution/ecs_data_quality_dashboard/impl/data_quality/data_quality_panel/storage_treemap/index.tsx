@@ -39,15 +39,16 @@ export const LEGEND_WIDTH = 220; // px
 export const LEGEND_TEXT_WITH = 120; // px
 
 export interface Props {
+  accessor: 'sizeInBytes' | 'docsCount';
+  baseTheme: Theme;
   flattenedBuckets: FlattenedBucket[];
-  formatBytes: (value: number | undefined) => string;
   maxChartHeight?: number;
   minChartHeight?: number;
   onIndexSelected: ({ indexName, pattern }: SelectedIndex) => void;
   patternRollups: Record<string, PatternRollup>;
   patterns: string[];
   theme?: PartialTheme;
-  baseTheme: Theme;
+  valueFormatter: (value: number) => string;
 }
 
 interface GetGroupByFieldsResult {
@@ -84,15 +85,16 @@ export const getGroupByFieldsOnClick = (
 };
 
 const StorageTreemapComponent: React.FC<Props> = ({
+  accessor,
+  baseTheme,
   flattenedBuckets,
-  formatBytes,
   maxChartHeight,
   minChartHeight = DEFAULT_MIN_CHART_HEIGHT,
   onIndexSelected,
   patternRollups,
   patterns,
   theme = {},
-  baseTheme,
+  valueFormatter,
 }: Props) => {
   const fillColor = useMemo(
     () => theme?.background?.color ?? baseTheme.background.color,
@@ -129,14 +131,14 @@ const StorageTreemapComponent: React.FC<Props> = ({
   const layers = useMemo(
     () =>
       getLayersMultiDimensional({
-        formatBytes,
+        valueFormatter,
         layer0FillColor: fillColor,
         pathToFlattenedBucketMap,
       }),
-    [fillColor, formatBytes, pathToFlattenedBucketMap]
+    [fillColor, valueFormatter, pathToFlattenedBucketMap]
   );
 
-  const valueAccessor = useCallback(({ sizeInBytes }: Datum) => sizeInBytes, []);
+  const valueAccessor = useCallback((d: Datum) => d[accessor], [accessor]);
 
   const legendItems = useMemo(
     () => getLegendItems({ patterns, flattenedBuckets, patternRollups }),
@@ -167,7 +169,7 @@ const StorageTreemapComponent: React.FC<Props> = ({
               layers={layers}
               layout={PartitionLayout.treemap}
               valueAccessor={valueAccessor}
-              valueFormatter={(d: number) => formatBytes(d)}
+              valueFormatter={valueFormatter}
             />
           </Chart>
         )}
@@ -180,10 +182,10 @@ const StorageTreemapComponent: React.FC<Props> = ({
           className="eui-yScroll"
           $width={LEGEND_WIDTH}
         >
-          {legendItems.map(({ color, ilmPhase, index, pattern, sizeInBytes }) => (
+          {legendItems.map(({ color, ilmPhase, index, pattern, sizeInBytes, docsCount }) => (
             <ChartLegendItem
               color={color}
-              count={formatBytes(sizeInBytes)}
+              count={valueFormatter(accessor === 'sizeInBytes' ? sizeInBytes ?? 0 : docsCount)}
               dataTestSubj={`chart-legend-item-${ilmPhase}${pattern}${index}`}
               key={`${ilmPhase}${pattern}${index}`}
               onClick={

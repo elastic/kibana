@@ -19,11 +19,7 @@ Cypress.on('test:after:run', (attributes, test) => {
   }
 
   /* eslint-disable no-console */
-  console.log(
-    'Test "%s" has finished in %dms',
-    attributes.title,
-    attributes.duration
-  );
+  console.log('Test "%s" has finished in %dms', attributes.title, attributes.duration);
 
   let totalElapsed = 0;
 

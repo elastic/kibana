@@ -56,7 +56,6 @@ describe('createMlInferencePipeline lib function', () => {
 
     const actualResult = await createMlInferencePipeline(
       pipelineName,
-      // @ts-expect-error pipeline._meta defined as mandatory
       pipelineDefinition,
       mockClient as unknown as ElasticsearchClient
     );
@@ -68,7 +67,6 @@ describe('createMlInferencePipeline lib function', () => {
   it('should convert spaces to underscores in the pipeline name', async () => {
     await createMlInferencePipeline(
       'my pipeline with spaces  ',
-      // @ts-expect-error pipeline._meta defined as mandatory
       pipelineDefinition,
       mockClient as unknown as ElasticsearchClient
     );
@@ -80,7 +78,7 @@ describe('createMlInferencePipeline lib function', () => {
     );
   });
 
-  it('should throw an error without creating the pipeline if it already exists', () => {
+  it('should throw an error without creating the pipeline if it already exists', async () => {
     mockClient.ingest.getPipeline.mockImplementation(() =>
       Promise.resolve({
         [inferencePipelineGeneratedName]: {},
@@ -89,12 +87,11 @@ describe('createMlInferencePipeline lib function', () => {
 
     const actualResult = createMlInferencePipeline(
       pipelineName,
-      // @ts-expect-error pipeline._meta defined as mandatory
       pipelineDefinition,
       mockClient as unknown as ElasticsearchClient
     );
 
-    expect(actualResult).rejects.toThrow(Error);
+    await expect(actualResult).rejects.toThrow(Error);
     expect(mockClient.ingest.putPipeline).not.toHaveBeenCalled();
   });
 });

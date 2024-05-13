@@ -179,6 +179,7 @@ describe('split .kibana index into multiple system indices', () => {
           ".kibana": Array [
             "action",
             "action_task_params",
+            "ad_hoc_run_params",
             "alert",
             "api_key_pending_invalidation",
             "apm-custom-dashboards",
@@ -195,6 +196,7 @@ describe('split .kibana index into multiple system indices', () => {
             "cases-comments",
             "cases-configure",
             "cases-connector-mappings",
+            "cases-rules",
             "cases-telemetry",
             "cases-user-actions",
             "cloud-security-posture-settings",
@@ -264,6 +266,7 @@ describe('split .kibana index into multiple system indices', () => {
             "siem-ui-timeline-note",
             "siem-ui-timeline-pinned-event",
             "slo",
+            "slo-settings",
             "space",
             "spaces-usage-stats",
             "synthetics-monitor",

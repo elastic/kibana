@@ -471,10 +471,11 @@ describe('<IndexDetailsPage />', () => {
         requestOptions
       );
     });
-    it('searchbar, toggle button, add field button exists', async () => {
+    it('filter, searchbar, toggle button, add field button exists', async () => {
       expect(testBed.exists('indexDetailsMappingsAddField')).toBe(true);
       expect(testBed.exists('indexDetailsMappingsToggleViewButton')).toBe(true);
       expect(testBed.exists('indexDetailsMappingsFieldSearch')).toBe(true);
+      expect(testBed.exists('indexDetailsMappingsFilter')).toBe(true);
     });
 
     it('displays the mappings in the table view', async () => {
@@ -497,12 +498,67 @@ describe('<IndexDetailsPage />', () => {
       expect(testBed.actions.mappings.isSearchBarDisabled()).toBe(false);
     });
 
+    it('semantic text banner is not visible', async () => {
+      expect(testBed.actions.mappings.isSemanticTextBannerVisible()).toBe(false);
+    });
+
     it('sets the docs link href from the documentation service', async () => {
       const docsLinkHref = testBed.actions.mappings.getDocsLinkHref();
       // the url from the mocked docs mock
       expect(docsLinkHref).toEqual(
         'https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/mapping.html'
       );
+    });
+    describe('Filter field by filter Type', () => {
+      const mockIndexMappingResponse: any = {
+        ...testIndexMappings.mappings,
+        properties: {
+          ...testIndexMappings.mappings.properties,
+          name: {
+            type: 'text',
+          },
+        },
+      };
+      beforeEach(async () => {
+        httpRequestsMockHelpers.setLoadIndexMappingResponse(testIndexName, {
+          mappings: mockIndexMappingResponse,
+        });
+        await act(async () => {
+          testBed = await setup({ httpSetup });
+        });
+        testBed.component.update();
+        await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+      });
+      test('popover is visible and shows list of available field types', async () => {
+        await testBed.actions.mappings.clickFilterByFieldType();
+        expect(testBed.exists('euiSelectableList')).toBe(true);
+        expect(testBed.exists('indexDetailsMappingsFilterByFieldTypeSearch')).toBe(true);
+        expect(testBed.exists('euiSelectableList')).toBe(true);
+      });
+      test('can select a field type and list view changes', async () => {
+        await testBed.actions.mappings.clickFilterByFieldType();
+        await testBed.actions.mappings.selectFilterFieldType(
+          'indexDetailsMappingsSelectFilter-text'
+        );
+        expect(testBed.actions.mappings.getTreeViewContent('nameField-fieldName')).toContain(
+          'name'
+        );
+        expect(testBed.find('@timestampField-fieldName')).not.toContain('@timestamp');
+      });
+      test('can search field with filter', async () => {
+        expect(testBed.find('fieldName')).toHaveLength(2);
+
+        // set filter
+        await testBed.actions.mappings.clickFilterByFieldType();
+        await testBed.actions.mappings.selectFilterFieldType(
+          'indexDetailsMappingsSelectFilter-text'
+        );
+
+        await testBed.actions.mappings.setSearchBarValue('na');
+        expect(testBed.find('fieldName')).toHaveLength(1);
+        expect(testBed.actions.mappings.findSearchResult()).not.toBe('@timestamp');
+        expect(testBed.actions.mappings.findSearchResult()).toBe('name');
+      });
     });
     describe('Add a new field ', () => {
       const mockIndexMappingResponse: any = {
@@ -575,6 +631,44 @@ describe('<IndexDetailsPage />', () => {
         const jsonContent = testBed.actions.mappings.getCodeBlockContent();
         expect(jsonContent).toEqual(
           JSON.stringify({ mappings: mockIndexMappingResponse }, null, 2)
+        );
+      });
+
+      it('can add a semantic_text field and can save mappings', async () => {
+        const mockIndexMappingResponseForSemanticText: any = {
+          ...testIndexMappings.mappings,
+          properties: {
+            ...testIndexMappings.mappings.properties,
+            sem: {
+              type: 'semantic_text',
+              inference_id: 'my-elser',
+            },
+          },
+        };
+        httpRequestsMockHelpers.setLoadIndexMappingResponse(testIndexName, {
+          mappings: mockIndexMappingResponseForSemanticText,
+        });
+        await testBed.actions.mappings.addNewMappingFieldNameAndType([
+          { name: 'sem', type: 'semantic_text' },
+        ]);
+        await testBed.actions.mappings.clickSaveMappingsButton();
+        // add field button is available again
+        expect(testBed.exists('indexDetailsMappingsAddField')).toBe(true);
+        expect(testBed.find('semField-datatype').props()['data-type-value']).toBe('semantic_text');
+        expect(httpSetup.get).toHaveBeenCalledTimes(5);
+        expect(httpSetup.get).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}/mapping/${testIndexName}`,
+          requestOptions
+        );
+        // refresh mappings and page re-renders
+        expect(testBed.exists('indexDetailsMappingsAddField')).toBe(true);
+        expect(testBed.actions.mappings.isSearchBarDisabled()).toBe(false);
+        const treeViewContent = testBed.actions.mappings.getTreeViewContent('semField');
+        expect(treeViewContent).toContain('sem');
+        await testBed.actions.mappings.clickToggleViewButton();
+        const jsonContent = testBed.actions.mappings.getCodeBlockContent();
+        expect(jsonContent).toEqual(
+          JSON.stringify({ mappings: mockIndexMappingResponseForSemanticText }, null, 2)
         );
       });
       it('there is a callout with error message when save mappings fail', async () => {

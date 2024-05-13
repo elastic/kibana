@@ -98,6 +98,7 @@ export interface CreateTargetIndexState extends BaseState {
   readonly controlState: 'CREATE_TARGET_INDEX';
   readonly currentIndex: string;
   readonly indexMappings: IndexMapping;
+  readonly creationAliases: string[];
 }
 
 export interface UpdateIndexMappingsState extends PostInitState {

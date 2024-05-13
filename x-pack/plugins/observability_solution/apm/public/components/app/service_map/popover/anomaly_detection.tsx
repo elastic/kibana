@@ -5,20 +5,11 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHealth,
-  EuiIconTip,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiIconTip, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import {
-  getSeverity,
-  ServiceAnomalyStats,
-} from '../../../../../common/anomaly_detection';
+import { getSeverity, ServiceAnomalyStats } from '../../../../../common/anomaly_detection';
 import {
   getServiceHealthStatus,
   getServiceHealthStatusColor,
@@ -65,8 +56,7 @@ export function AnomalyDetection({ serviceName, serviceAnomalyStats }: Props) {
   const severity = getSeverity(anomalyScore);
   const actualValue = serviceAnomalyStats?.actualValue;
   const mlJobId = serviceAnomalyStats?.jobId;
-  const transactionType =
-    serviceAnomalyStats?.transactionType ?? TRANSACTION_REQUEST;
+  const transactionType = serviceAnomalyStats?.transactionType ?? TRANSACTION_REQUEST;
   const hasAnomalyDetectionScore = anomalyScore !== undefined;
 
   const healthStatus = getServiceHealthStatus({ severity });
@@ -86,18 +76,14 @@ export function AnomalyDetection({ serviceName, serviceAnomalyStats }: Props) {
           <EuiFlexGroup>
             <EuiFlexItem>
               <VerticallyCentered>
-                <EuiHealth
-                  color={getServiceHealthStatusColor(theme, healthStatus)}
-                />
+                <EuiHealth color={getServiceHealthStatusColor(theme, healthStatus)} />
                 <SubduedText>{ANOMALY_DETECTION_SCORE_METRIC}</SubduedText>
               </VerticallyCentered>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <div>
                 {getDisplayedAnomalyScore(anomalyScore as number)}
-                {actualValue && (
-                  <SubduedText>&nbsp;({asDuration(actualValue)})</SubduedText>
-                )}
+                {actualValue && <SubduedText>&nbsp;({asDuration(actualValue)})</SubduedText>}
               </div>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -147,10 +133,9 @@ const ANOMALY_DETECTION_SCORE_METRIC = i18n.translate(
   { defaultMessage: 'Score (max.)' }
 );
 
-const ANOMALY_DETECTION_LINK = i18n.translate(
-  'xpack.apm.serviceMap.anomalyDetectionPopoverLink',
-  { defaultMessage: 'View anomalies' }
-);
+const ANOMALY_DETECTION_LINK = i18n.translate('xpack.apm.serviceMap.anomalyDetectionPopoverLink', {
+  defaultMessage: 'View anomalies',
+});
 
 const ANOMALY_DETECTION_DISABLED_TEXT = i18n.translate(
   'xpack.apm.serviceMap.anomalyDetectionPopoverDisabled',

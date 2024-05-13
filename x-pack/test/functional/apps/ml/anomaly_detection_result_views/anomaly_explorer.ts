@@ -6,10 +6,8 @@
  */
 
 import type { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
-import type {
-  AnomalyChartsEmbeddableInput,
-  AnomalySwimlaneEmbeddableInput,
-} from '@kbn/ml-plugin/public/embeddables';
+import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-plugin/public';
+import type { AnomalyChartsEmbeddableInput } from '@kbn/ml-plugin/public/embeddables';
 import { stringHash } from '@kbn/ml-string-hash';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
@@ -463,7 +461,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 from: '2016-02-07T00:00:00.000Z',
                 to: '2016-02-11T23:59:54.000Z',
               },
-            } as AnomalySwimlaneEmbeddableInput;
+            } as AnomalySwimLaneEmbeddableState;
 
             expectedAttachment.id = stringHash(JSON.stringify(expectedAttachment)).toString();
 

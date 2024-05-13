@@ -33,30 +33,23 @@ describe('toKueryFilterFormat', () => {
     });
 
     it('returns only first kuery when second is empty', () => {
-      expect(mergeKueries(['host.name: "foo"', ''])).toEqual(
-        'host.name: "foo"'
-      );
+      expect(mergeKueries(['host.name: "foo"', ''])).toEqual('host.name: "foo"');
     });
 
     it('returns second kuery when first is empty', () => {
-      expect(mergeKueries(['', 'host.name: "foo"'])).toEqual(
-        'host.name: "foo"'
-      );
+      expect(mergeKueries(['', 'host.name: "foo"'])).toEqual('host.name: "foo"');
     });
 
     it('returns merged kueries with default separator', () => {
-      expect(
-        mergeKueries([
-          'host.name: "foo" OR host.name: "bar"',
-          'process.id: "1"',
-        ])
-      ).toEqual('host.name: "foo" OR host.name: "bar" AND process.id: "1"');
+      expect(mergeKueries(['host.name: "foo" OR host.name: "bar"', 'process.id: "1"'])).toEqual(
+        'host.name: "foo" OR host.name: "bar" AND process.id: "1"'
+      );
     });
 
     it('uses custom separator', () => {
-      expect(
-        mergeKueries(['host.name: "foo"', 'process.id: "1"'], 'OR')
-      ).toEqual('host.name: "foo" OR process.id: "1"');
+      expect(mergeKueries(['host.name: "foo"', 'process.id: "1"'], 'OR')).toEqual(
+        'host.name: "foo" OR process.id: "1"'
+      );
     });
   });
 });

@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import React, { useCallback, useMemo, useState } from 'react';
+import useSessionStorage from 'react-use/lib/useSessionStorage';
 import {
   EuiBasicTableColumn,
   EuiButtonEmpty,
@@ -19,11 +20,10 @@ import {
   EuiSearchBarProps,
   EuiText,
 } from '@elastic/eui';
-import { DataView } from '@kbn/data-views-plugin/common';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-
+import { SESSION_STORAGE_FIELDS_MODAL_SHOW_SELECTED } from '../../../common/constants';
 const ACTION_COLUMN_WIDTH = '24px';
 const defaultSorting = {
   sort: {
@@ -56,9 +56,34 @@ export interface FieldsSelectorTableProps {
   onAddColumn: (column: string) => void;
   onRemoveColumn: (column: string) => void;
   title: string;
-  onFilterSelectedChange: (enabled: boolean) => void;
-  isFilterSelectedEnabled: boolean;
 }
+
+export const filterFieldsBySearch = (
+  fields: DataViewField[],
+  visibleColumns: string[] = [],
+  searchQuery?: string,
+  isFilterSelectedEnabled: boolean = false
+) => {
+  const allowedFields = fields
+    .filter((field) => field.name !== '_index' && field.visualizable)
+    .map((field) => ({
+      id: field.name,
+      name: field.name,
+      displayName: field.customLabel || '',
+    }));
+
+  const visibleFields = !isFilterSelectedEnabled
+    ? allowedFields
+    : allowedFields.filter((field) => visibleColumns.includes(field.id));
+
+  return !searchQuery
+    ? visibleFields
+    : visibleFields.filter((field) => {
+        const normalizedName = `${field.name} ${field.displayName}`.toLowerCase();
+        const normalizedQuery = searchQuery.toLowerCase() || '';
+        return normalizedName.indexOf(normalizedQuery) !== -1;
+      });
+};
 
 export const FieldsSelectorTable = ({
   title,
@@ -66,36 +91,18 @@ export const FieldsSelectorTable = ({
   columns,
   onAddColumn,
   onRemoveColumn,
-  isFilterSelectedEnabled,
-  onFilterSelectedChange,
 }: FieldsSelectorTableProps) => {
-  const dataViewFields = useMemo<Field[]>(() => {
-    return dataView.fields
-      .getAll()
-      .filter((field) => {
-        return field.name !== '_index' && field.visualizable;
-      })
-      .map((field) => ({
-        id: field.name,
-        name: field.name,
-        displayName: field.customLabel || '',
-      }));
-  }, [dataView.fields]);
-
-  const [fields, setFields] = useState(dataViewFields);
-
-  useEffect(() => {
-    if (isFilterSelectedEnabled) {
-      const filteredItems = dataViewFields.filter((field) => {
-        return columns.includes(field.id);
-      });
-      setFields(filteredItems);
-    } else {
-      setFields(dataViewFields);
-    }
-  }, [columns, dataViewFields, isFilterSelectedEnabled]);
-
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState<string | undefined>();
+  const [isFilterSelectedEnabled, setIsFilterSelectedEnabled] = useSessionStorage(
+    SESSION_STORAGE_FIELDS_MODAL_SHOW_SELECTED,
+    false
+  );
+  const fields = useMemo<Field[]>(
+    () =>
+      filterFieldsBySearch(dataView.fields.getAll(), columns, searchQuery, isFilterSelectedEnabled),
+    [dataView, columns, searchQuery, isFilterSelectedEnabled]
+  );
 
   const togglePopover = useCallback(() => {
     setIsPopoverOpen((open) => !open);
@@ -103,19 +110,21 @@ export const FieldsSelectorTable = ({
   const closePopover = useCallback(() => {
     setIsPopoverOpen(false);
   }, []);
+
+  const onFilterSelectedChange = useCallback(
+    (enabled: boolean) => {
+      setIsFilterSelectedEnabled(enabled);
+    },
+    [setIsFilterSelectedEnabled]
+  );
+
   let debounceTimeoutId: ReturnType<typeof setTimeout>;
 
   const onQueryChange: EuiSearchBarProps['onChange'] = ({ query }) => {
     clearTimeout(debounceTimeoutId);
 
     debounceTimeoutId = setTimeout(() => {
-      const filteredItems = dataViewFields.filter((field) => {
-        const normalizedName = `${field.name} ${field.displayName}`.toLowerCase();
-        const normalizedQuery = query?.text.toLowerCase() || '';
-        return normalizedName.indexOf(normalizedQuery) !== -1;
-      });
-
-      setFields(filteredItems);
+      setSearchQuery(query?.text);
     }, 300);
   };
 
@@ -125,19 +134,17 @@ export const FieldsSelectorTable = ({
       name: '',
       width: ACTION_COLUMN_WIDTH,
       sortable: false,
-      render: (_, { id }: Field) => {
-        return (
-          <EuiCheckbox
-            checked={columns.includes(id)}
-            id={`cloud-security-fields-selector-item-${id}`}
-            data-test-subj={`cloud-security-fields-selector-item-${id}`}
-            onChange={(e) => {
-              const isChecked = e.target.checked;
-              return isChecked ? onAddColumn(id) : onRemoveColumn(id);
-            }}
-          />
-        );
-      },
+      render: (_, { id }: Field) => (
+        <EuiCheckbox
+          checked={columns.includes(id)}
+          id={`cloud-security-fields-selector-item-${id}`}
+          data-test-subj={`cloud-security-fields-selector-item-${id}`}
+          onChange={(e) => {
+            const isChecked = e.target.checked;
+            return isChecked ? onAddColumn(id) : onRemoveColumn(id);
+          }}
+        />
+      ),
     },
     {
       field: 'name',

@@ -11,7 +11,9 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { unwrapEsResponse } from '@kbn/observability-plugin/server';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
+  AggregationField,
   BaseFlameGraph,
+  ESTopNFunctions,
   ProfilingStatusResponse,
   StackTraceResponse,
 } from '@kbn/profiling-utils';
@@ -45,6 +47,21 @@ export interface ProfilingESClient {
     query: QueryDslQueryContainer;
     sampleSize: number;
   }): Promise<BaseFlameGraph>;
+  topNFunctions(params: {
+    query: QueryDslQueryContainer;
+    limit?: number;
+    sampleSize?: number;
+    indices?: string[];
+    stacktraceIdsField?: string;
+    aggregationField?: AggregationField;
+    co2PerKWH?: number;
+    datacenterPUE?: number;
+    pervCPUWattX86?: number;
+    pervCPUWattArm64?: number;
+    awsCostDiscountRate?: number;
+    azureCostDiscountRate?: number;
+    costPervCPUPerHour?: number;
+  }): Promise<ESTopNFunctions>;
 }
 
 export function createProfilingEsClient({
@@ -150,6 +167,52 @@ export function createProfilingEsClient({
         );
       });
       return unwrapEsResponse(promise) as Promise<BaseFlameGraph>;
+    },
+    topNFunctions({
+      query,
+      aggregationField,
+      indices,
+      stacktraceIdsField,
+      co2PerKWH,
+      datacenterPUE,
+      awsCostDiscountRate,
+      costPervCPUPerHour,
+      pervCPUWattArm64,
+      pervCPUWattX86,
+      azureCostDiscountRate,
+      sampleSize,
+      limit,
+    }) {
+      const controller = new AbortController();
+
+      const promise = withProfilingSpan('_profiling/topn/functions', () => {
+        return esClient.transport.request(
+          {
+            method: 'POST',
+            path: encodeURI('/_profiling/topn/functions'),
+            body: {
+              query,
+              sample_size: sampleSize,
+              limit,
+              indices,
+              stacktrace_ids_field: stacktraceIdsField,
+              aggregation_field: aggregationField,
+              co2_per_kwh: co2PerKWH,
+              per_core_watt_x86: pervCPUWattX86,
+              per_core_watt_arm64: pervCPUWattArm64,
+              datacenter_pue: datacenterPUE,
+              aws_cost_factor: awsCostDiscountRate,
+              cost_per_core_hour: costPervCPUPerHour,
+              azure_cost_factor: azureCostDiscountRate,
+            },
+          },
+          {
+            signal: controller.signal,
+            meta: true,
+          }
+        );
+      });
+      return unwrapEsResponse(promise) as Promise<ESTopNFunctions>;
     },
   };
 }

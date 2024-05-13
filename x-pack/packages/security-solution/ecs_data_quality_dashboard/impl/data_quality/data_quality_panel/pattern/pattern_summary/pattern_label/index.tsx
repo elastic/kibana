@@ -56,7 +56,7 @@ const PatternLabelComponent: React.FC<Props> = ({
       <EuiFlexItem grow={false}>
         <EuiToolTip content={i18n.PATTERN_OR_INDEX_TOOLTIP}>
           <EuiTitle size="s">
-            <h4>{pattern}</h4>
+            <h2>{pattern}</h2>
           </EuiTitle>
         </EuiToolTip>
       </EuiFlexItem>

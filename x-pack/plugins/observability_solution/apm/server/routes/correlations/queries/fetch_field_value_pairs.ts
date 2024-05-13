@@ -38,33 +38,30 @@ export const fetchFieldValuePairs = async ({
   const { fulfilled: responses, rejected: errors } = splitAllSettledPromises(
     await Promise.allSettled(
       fieldCandidates.map(async (fieldName) => {
-        const response = await apmEventClient.search(
-          'get_field_value_pairs_for_field_candidate',
-          {
-            apm: {
-              events: [eventType],
-            },
-            body: {
-              track_total_hits: false,
-              size: 0,
-              query: getCommonCorrelationsQuery({
-                start,
-                end,
-                environment,
-                kuery,
-                query,
-              }),
-              aggs: {
-                attribute_terms: {
-                  terms: {
-                    field: fieldName,
-                    size: TERMS_SIZE,
-                  },
+        const response = await apmEventClient.search('get_field_value_pairs_for_field_candidate', {
+          apm: {
+            events: [eventType],
+          },
+          body: {
+            track_total_hits: false,
+            size: 0,
+            query: getCommonCorrelationsQuery({
+              start,
+              end,
+              environment,
+              kuery,
+              query,
+            }),
+            aggs: {
+              attribute_terms: {
+                terms: {
+                  field: fieldName,
+                  size: TERMS_SIZE,
                 },
               },
             },
-          }
-        );
+          },
+        });
 
         return (
           response.aggregations?.attribute_terms.buckets.map((d) => ({

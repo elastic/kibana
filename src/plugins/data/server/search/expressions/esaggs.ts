@@ -8,7 +8,7 @@
 
 import { get } from 'lodash';
 import { defer } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { switchMap } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { KibanaRequest, StartServicesAccessor } from '@kbn/core/server';
 import {

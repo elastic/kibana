@@ -19,6 +19,33 @@
     "dynamic": false,
     "properties": {}
   },
+  "ad_hoc_run_params": {
+    "dynamic": false,
+    "properties": {
+      "apiKeyId": {
+        "type": "keyword"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "end": {
+        "type": "date"
+      },
+      "rule": {
+        "properties": {
+          "alertTypeId": {
+            "type": "keyword"
+          },
+          "consumer": {
+            "type": "keyword"
+          }
+        }
+      },
+      "start": {
+        "type": "date"
+      }
+    }
+  },
   "alert": {
     "dynamic": false,
     "properties": {
@@ -669,6 +696,27 @@
       }
     }
   },
+  "cases-rules": {
+    "dynamic": false,
+    "properties": {
+      "counter": {
+        "type": "unsigned_long"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "rules": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          }
+        }
+      },
+      "updatedAt": {
+        "type": "date"
+      }
+    }
+  },
   "cases-telemetry": {
     "dynamic": false,
     "properties": {}
@@ -1002,6 +1050,10 @@
       "keep_policies_up_to_date": {
         "index": false,
         "type": "boolean"
+      },
+      "latest_executed_state": {
+        "enabled": false,
+        "type": "object"
       },
       "latest_install_failed_attempts": {
         "enabled": false,
@@ -1559,15 +1611,16 @@
     }
   },
   "infra-custom-dashboards": {
+    "dynamic": false,
     "properties": {
       "assetType": {
         "type": "keyword"
       },
-      "dashboardIdList": {
-        "type": "keyword"
+      "dashboardFilterAssetIdEnabled": {
+        "type": "boolean"
       },
-      "kuery": {
-        "type": "text"
+      "dashboardSavedObjectId": {
+        "type": "keyword"
       }
     }
   },
@@ -1585,6 +1638,10 @@
   },
   "ingest-agent-policies": {
     "properties": {
+      "advanced_settings": {
+        "index": false,
+        "type": "flattened"
+      },
       "agent_features": {
         "properties": {
           "enabled": {
@@ -1653,6 +1710,9 @@
       },
       "status": {
         "type": "keyword"
+      },
+      "supports_agentless": {
+        "type": "boolean"
       },
       "unenroll_timeout": {
         "type": "integer"
@@ -1933,6 +1993,10 @@
       },
       "namespace": {
         "type": "keyword"
+      },
+      "overrides": {
+        "index": false,
+        "type": "flattened"
       },
       "package": {
         "properties": {
@@ -2966,6 +3030,10 @@
       }
     }
   },
+  "slo-settings": {
+    "dynamic": false,
+    "properties": {}
+  },
   "space": {
     "dynamic": false,
     "properties": {
@@ -3004,6 +3072,9 @@
             }
           }
         }
+      },
+      "config_id": {
+        "type": "keyword"
       },
       "custom_heartbeat_id": {
         "type": "keyword"

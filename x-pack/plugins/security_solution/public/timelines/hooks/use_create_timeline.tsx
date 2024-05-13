@@ -20,6 +20,8 @@ import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { appActions } from '../../common/store/app';
 import type { TimeRange } from '../../common/store/inputs/model';
 import { useDiscoverInTimelineContext } from '../../common/components/discover_in_timeline/use_discover_in_timeline_context';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { defaultUdtHeaders } from '../components/timeline/unified_components/default_headers';
 
 export interface UseCreateTimelineParams {
   /**
@@ -47,6 +49,9 @@ export const useCreateTimeline = ({
   onClick,
 }: UseCreateTimelineParams): ((options?: { timeRange?: TimeRange }) => Promise<void>) => {
   const dispatch = useDispatch();
+  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineEnabled'
+  );
   const { id: dataViewId, patternList: selectedPatterns } = useSelector(
     sourcererSelectors.defaultDataView
   ) ?? { id: '', patternList: [] };
@@ -72,7 +77,7 @@ export const useCreateTimeline = ({
       );
       dispatch(
         timelineActions.createTimeline({
-          columns: defaultHeaders,
+          columns: unifiedComponentsInTimelineEnabled ? defaultUdtHeaders : defaultHeaders,
           dataViewId,
           id,
           indexNames: selectedPatterns,
@@ -113,6 +118,7 @@ export const useCreateTimeline = ({
       setTimelineFullScreen,
       timelineFullScreen,
       timelineType,
+      unifiedComponentsInTimelineEnabled,
     ]
   );
 

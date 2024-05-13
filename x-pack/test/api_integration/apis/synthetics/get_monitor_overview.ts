@@ -15,6 +15,7 @@ import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
+import { LOCAL_LOCATION } from './get_filters';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('GetMonitorsOverview', function () {
@@ -36,8 +37,11 @@ export default function ({ getService }: FtrProviderContext) {
     const deleteMonitor = async (id: string) => {
       try {
         await supertest
-          .delete(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${id}`)
+          .delete(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
           .set('kbn-xsrf', 'true')
+          .send({
+            ids: [id],
+          })
           .expect(200);
       } catch (e) {
         // eslint-disable-next-line no-console
@@ -50,6 +54,8 @@ export default function ({ getService }: FtrProviderContext) {
         .post(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
         .set('kbn-xsrf', 'true')
         .send(monitor);
+
+      expect(res.status).eql(200, JSON.stringify(res.body));
 
       return res.body as EncryptedSyntheticsSavedMonitor;
     };
@@ -75,15 +81,8 @@ export default function ({ getService }: FtrProviderContext) {
         roles: [roleName],
         full_name: 'a kibana user',
       });
-      const { body } = await supertest
-        .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
-        .set('kbn-xsrf', 'true')
-        .expect(200);
-      await Promise.all([
-        (body.monitors as EncryptedSyntheticsSavedMonitor[]).map((monitor) => {
-          return deleteMonitor(monitor.id);
-        }),
-      ]);
+
+      await kibanaServer.savedObjects.cleanStandardList();
 
       _monitors = [getFixtureJson('http_monitor')];
     });
@@ -113,11 +112,11 @@ export default function ({ getService }: FtrProviderContext) {
           `/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_OVERVIEW}`
         );
 
-        expect(apiResponse.body.total).eql(monitors.length * 2);
+        expect(apiResponse.body.total).eql(monitors.length);
         expect(apiResponse.body.allMonitorIds.sort()).eql(
           savedMonitors.map((monitor) => monitor.id).sort()
         );
-        expect(apiResponse.body.monitors.length).eql(40);
+        expect(apiResponse.body.monitors.length).eql(20);
       } finally {
         await Promise.all(
           savedMonitors.map((monitor) => {
@@ -138,13 +137,13 @@ export default function ({ getService }: FtrProviderContext) {
             query: '19',
           });
 
-        expect(apiResponse.body.total).eql(2);
+        expect(apiResponse.body.total).eql(1);
         expect(apiResponse.body.allMonitorIds.sort()).eql(
           savedMonitors
             .filter((monitor) => monitor.name.includes('19'))
             .map((monitor) => monitor.id)
         );
-        expect(apiResponse.body.monitors.length).eql(2);
+        expect(apiResponse.body.monitors.length).eql(1);
       } finally {
         await Promise.all(
           savedMonitors.map((monitor) => {
@@ -178,36 +177,7 @@ export default function ({ getService }: FtrProviderContext) {
             id: savedMonitors[0][ConfigKey.MONITOR_QUERY_ID],
             configId: savedMonitors[0].config_id,
             name: 'test monitor a',
-            location: {
-              id: 'eu-west-01',
-              label: 'Europe East',
-              geo: {
-                lat: 33.2343132435,
-                lon: 73.2342343434,
-              },
-              url: 'https://example-url.com',
-              isServiceManaged: true,
-            },
-            isEnabled: true,
-            isStatusAlertEnabled: true,
-            tags: ['tag1', 'tag2'],
-            type: 'http',
-            schedule: '5',
-          },
-          {
-            id: savedMonitors[0][ConfigKey.MONITOR_QUERY_ID],
-            configId: savedMonitors[0].config_id,
-            name: 'test monitor a',
-            location: {
-              id: 'eu-west-02',
-              label: 'Europe West',
-              geo: {
-                lat: 33.2343132435,
-                lon: 73.2342343434,
-              },
-              url: 'https://example-url.com',
-              isServiceManaged: true,
-            },
+            location: LOCAL_LOCATION,
             isEnabled: true,
             isStatusAlertEnabled: true,
             tags: ['tag1', 'tag2'],
@@ -218,36 +188,7 @@ export default function ({ getService }: FtrProviderContext) {
             id: savedMonitors[1][ConfigKey.MONITOR_QUERY_ID],
             configId: savedMonitors[1].config_id,
             name: 'test monitor b',
-            location: {
-              id: 'eu-west-01',
-              label: 'Europe East',
-              geo: {
-                lat: 33.2343132435,
-                lon: 73.2342343434,
-              },
-              url: 'https://example-url.com',
-              isServiceManaged: true,
-            },
-            isEnabled: true,
-            isStatusAlertEnabled: true,
-            tags: ['tag1', 'tag2'],
-            type: 'http',
-            schedule: '5',
-          },
-          {
-            id: savedMonitors[1][ConfigKey.MONITOR_QUERY_ID],
-            configId: savedMonitors[1].config_id,
-            name: 'test monitor b',
-            location: {
-              id: 'eu-west-02',
-              label: 'Europe West',
-              geo: {
-                lat: 33.2343132435,
-                lon: 73.2342343434,
-              },
-              url: 'https://example-url.com',
-              isServiceManaged: true,
-            },
+            location: LOCAL_LOCATION,
             isEnabled: true,
             isStatusAlertEnabled: true,
             tags: ['tag1', 'tag2'],

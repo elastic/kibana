@@ -12,10 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { apmEnableServiceInventoryTableSearchBar } from '@kbn/observability-plugin/common';
 import { useEditableSettings } from '@kbn/observability-shared-plugin/public';
 import { ApmDocumentType } from '../../../../common/document_type';
-import {
-  ServiceInventoryFieldName,
-  ServiceListItem,
-} from '../../../../common/service_inventory';
+import { ServiceInventoryFieldName, ServiceListItem } from '../../../../common/service_inventory';
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
@@ -123,14 +120,7 @@ function useServicesDetailedStatisticsFetcher({
   renderedItems: ServiceListItem[];
 }) {
   const {
-    query: {
-      rangeFrom,
-      rangeTo,
-      environment,
-      kuery,
-      offset,
-      comparisonEnabled,
-    },
+    query: { rangeFrom, rangeTo, environment, kuery, offset, comparisonEnabled },
   } = useApmParams('/services');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -163,10 +153,7 @@ function useServicesDetailedStatisticsFetcher({
               kuery,
               start,
               end,
-              offset:
-                comparisonEnabled && isTimeComparison(offset)
-                  ? offset
-                  : undefined,
+              offset: comparisonEnabled && isTimeComparison(offset) ? offset : undefined,
               documentType: dataSourceOptions.source.documentType,
               rollupInterval: dataSourceOptions.source.rollupInterval,
               bucketSizeInSeconds: dataSourceOptions.bucketSizeInSeconds,
@@ -193,13 +180,10 @@ export function ServiceInventory() {
 
   const [renderedItems, setRenderedItems] = useState<ServiceListItem[]>([]);
 
-  const mainStatisticsFetch =
-    useServicesMainStatisticsFetcher(debouncedSearchQuery);
+  const mainStatisticsFetch = useServicesMainStatisticsFetcher(debouncedSearchQuery);
   const { mainStatisticsData, mainStatisticsStatus } = mainStatisticsFetch;
 
-  const displayHealthStatus = mainStatisticsData.items.some(
-    (item) => 'healthStatus' in item
-  );
+  const displayHealthStatus = mainStatisticsData.items.some((item) => 'healthStatus' in item);
 
   const serviceOverflowCount = mainStatisticsData?.serviceOverflowCount ?? 0;
 
@@ -228,8 +212,7 @@ export function ServiceInventory() {
   );
 
   const displayMlCallout =
-    !userHasDismissedCallout &&
-    shouldDisplayMlCallout(anomalyDetectionSetupState);
+    !userHasDismissedCallout && shouldDisplayMlCallout(anomalyDetectionSetupState);
 
   const noItemsMessage = useMemo(() => {
     return (
@@ -268,10 +251,13 @@ export function ServiceInventory() {
     [tiebreakerField]
   );
 
-  const { setScreenContext } =
-    useApmPluginContext().observabilityAIAssistant.service;
+  const setScreenContext = useApmPluginContext().observabilityAIAssistant?.service.setScreenContext;
 
   useEffect(() => {
+    if (!setScreenContext) {
+      return;
+    }
+
     if (isFailure(mainStatisticsStatus)) {
       return setScreenContext({
         screenDescription: 'The services have failed to load',
@@ -295,7 +281,7 @@ export function ServiceInventory() {
     });
   }, [mainStatisticsStatus, mainStatisticsData.items, setScreenContext]);
 
-  const { fields, isSaving, saveSingleSetting } = useEditableSettings('apm', [
+  const { fields, isSaving, saveSingleSetting } = useEditableSettings([
     apmEnableServiceInventoryTableSearchBar,
   ]);
 
@@ -315,9 +301,7 @@ export function ServiceInventory() {
           <ServiceList
             status={mainStatisticsStatus}
             items={mainStatisticsData.items}
-            comparisonDataLoading={
-              comparisonFetch.status === FETCH_STATUS.LOADING
-            }
+            comparisonDataLoading={comparisonFetch.status === FETCH_STATUS.LOADING}
             displayHealthStatus={displayHealthStatus}
             displayAlerts={displayAlerts}
             initialSortField={initialSortField}
@@ -333,10 +317,7 @@ export function ServiceInventory() {
             isTableSearchBarEnabled={isTableSearchBarEnabled}
             isSavingSetting={isSaving}
             onChangeTableSearchBarVisibility={() => {
-              saveSingleSetting(
-                apmEnableServiceInventoryTableSearchBar,
-                !isTableSearchBarEnabled
-              );
+              saveSingleSetting(apmEnableServiceInventoryTableSearchBar, !isTableSearchBarEnabled);
             }}
           />
         </EuiFlexItem>

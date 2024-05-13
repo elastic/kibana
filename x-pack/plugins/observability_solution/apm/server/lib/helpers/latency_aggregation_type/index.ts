@@ -18,9 +18,7 @@ export function getLatencyAggregation(
         : {
             percentiles: {
               field,
-              percents: [
-                latencyAggregationType === LatencyAggregationType.p95 ? 95 : 99,
-              ],
+              percents: [latencyAggregationType === LatencyAggregationType.p95 ? 95 : 99],
             },
           }),
     },
@@ -32,9 +30,7 @@ export function getLatencyValue({
   aggregation,
 }: {
   latencyAggregationType: LatencyAggregationType;
-  aggregation:
-    | { value: number | null }
-    | { values: Record<string, number | null> };
+  aggregation: { value: number | null } | { values: Record<string, number | null> };
 }) {
   if ('value' in aggregation) {
     return aggregation.value;

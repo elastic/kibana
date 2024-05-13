@@ -9,7 +9,7 @@
 
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { isNumber, isEmpty } from 'lodash/fp';
+import { isEmpty, isNumber } from 'lodash/fp';
 import React from 'react';
 import { css } from '@emotion/css';
 
@@ -32,21 +32,21 @@ import { Port } from '../../../../../explore/network/components/port';
 import { PORT_NAMES } from '../../../../../explore/network/components/port/helpers';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
 import {
+  AGENT_STATUS_FIELD_NAME,
   DATE_FIELD_TYPE,
+  EVENT_MODULE_FIELD_NAME,
+  EVENT_URL_FIELD_NAME,
+  GEO_FIELD_TYPE,
   HOST_NAME_FIELD_NAME,
-  USER_NAME_FIELD_NAME,
   IP_FIELD_TYPE,
   MESSAGE_FIELD_NAME,
-  EVENT_MODULE_FIELD_NAME,
+  REFERENCE_URL_FIELD_NAME,
   RULE_REFERENCE_FIELD_NAME,
   SIGNAL_RULE_NAME_FIELD_NAME,
-  REFERENCE_URL_FIELD_NAME,
-  EVENT_URL_FIELD_NAME,
   SIGNAL_STATUS_FIELD_NAME,
-  AGENT_STATUS_FIELD_NAME,
-  GEO_FIELD_TYPE,
+  USER_NAME_FIELD_NAME,
 } from './constants';
-import { RenderRuleName, renderEventModule, renderUrl } from './formatted_field_helpers';
+import { renderEventModule, RenderRuleName, renderUrl } from './formatted_field_helpers';
 import { RuleStatus } from './rule_status';
 import { HostName } from './host_name';
 import { UserName } from './user_name';
@@ -70,6 +70,7 @@ const FormattedFieldValueComponent: React.FC<{
   eventId: string;
   isAggregatable?: boolean;
   isObjectArray?: boolean;
+  isUnifiedDataTable?: boolean;
   fieldFormat?: string;
   fieldFromBrowserField?: BrowserField;
   fieldName: string;
@@ -89,6 +90,7 @@ const FormattedFieldValueComponent: React.FC<{
   eventId,
   fieldFormat,
   isAggregatable = false,
+  isUnifiedDataTable,
   fieldName,
   fieldType = '',
   fieldFromBrowserField,
@@ -124,15 +126,18 @@ const FormattedFieldValueComponent: React.FC<{
   } else if (fieldType === GEO_FIELD_TYPE) {
     return <>{value}</>;
   } else if (fieldType === DATE_FIELD_TYPE) {
-    const classNames = truncate ? 'eui-textTruncate eui-alignMiddle' : undefined;
+    const classNames = truncate ? 'eui-textTruncate' : undefined;
     const date = (
       <FormattedDate
         className={classNames}
         fieldName={fieldName}
         value={value}
-        tooltipProps={{ position: 'bottom', className: dataGridToolTipOffset }}
+        tooltipProps={
+          isUnifiedDataTable ? undefined : { position: 'bottom', className: dataGridToolTipOffset }
+        }
       />
     );
+    if (isUnifiedDataTable) return date;
     return isDraggable ? (
       <DefaultDraggable
         field={fieldName}
@@ -265,7 +270,7 @@ const FormattedFieldValueComponent: React.FC<{
       />
     );
   } else if (
-    fieldName === SENTINEL_ONE_AGENT_ID_FIELD ||
+    fieldName === AGENT_STATUS_FIELD_NAME &&
     fieldFromBrowserField?.name === SENTINEL_ONE_AGENT_ID_FIELD
   ) {
     return <SentinelOneAgentStatus agentId={String(value ?? '')} />;
@@ -308,7 +313,7 @@ const FormattedFieldValueComponent: React.FC<{
       title,
       value,
     });
-  } else if (columnNamesNotDraggable.includes(fieldName) || !isDraggable) {
+  } else if (isUnifiedDataTable || columnNamesNotDraggable.includes(fieldName) || !isDraggable) {
     return truncate && !isEmpty(value) ? (
       <TruncatableText data-test-subj="truncatable-message">
         <EuiToolTip
@@ -333,6 +338,7 @@ const FormattedFieldValueComponent: React.FC<{
       <span data-test-subj={`formatted-field-${fieldName}`}>{value}</span>
     );
   } else {
+    // This should not be reached for the unified data table
     const contentValue = getOrEmptyTagFromValue(value);
     const content = truncate ? <TruncatableText>{contentValue}</TruncatableText> : contentValue;
     return (

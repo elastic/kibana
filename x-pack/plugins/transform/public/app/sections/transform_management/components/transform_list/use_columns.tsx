@@ -31,7 +31,10 @@ import { useTransformCapabilities } from '../../../../hooks';
 import { needsReauthorization } from '../../../../common/reauthorization_utils';
 import type { TransformId } from '../../../../../../common/types/transform';
 import { isLatestTransform, isPivotTransform } from '../../../../../../common/types/transform';
-import { TRANSFORM_STATE } from '../../../../../../common/constants';
+import {
+  mapEsHealthStatus2TransformHealthStatus,
+  TRANSFORM_STATE,
+} from '../../../../../../common/constants';
 
 import type { TransformListRow } from '../../../../common';
 import { getTransformProgress, TRANSFORM_LIST_COLUMN } from '../../../../common';
@@ -349,11 +352,13 @@ export const useColumns = (
     {
       name: i18n.translate('xpack.transform.health', { defaultMessage: 'Health' }),
       'data-test-subj': 'transformListColumnHealth',
-      sortable: (item: TransformListRow) => item.stats?.health.status,
+      sortable: (item: TransformListRow) => item.stats?.health?.status,
       truncateText: true,
       render(item: TransformListRow) {
-        return item.stats ? (
-          <TransformHealthColoredDot healthStatus={item.stats.health.status} />
+        return item.stats?.health ? (
+          <TransformHealthColoredDot
+            healthStatus={mapEsHealthStatus2TransformHealthStatus(item.stats.health.status)}
+          />
         ) : (
           <NoStatsFallbackComponent />
         );

@@ -12,7 +12,6 @@ describe('pipeline_serialization', () => {
     it('should deserialize pipelines', () => {
       expect(
         deserializePipelines({
-          // @ts-expect-error pipeline._meta defined as mandatory
           pipeline1: {
             description: 'pipeline 1 description',
             version: 1,
@@ -32,7 +31,6 @@ describe('pipeline_serialization', () => {
               },
             ],
           },
-          // @ts-expect-error pipeline._meta defined as mandatory
           pipeline2: {
             description: 'pipeline2 description',
             version: 1,

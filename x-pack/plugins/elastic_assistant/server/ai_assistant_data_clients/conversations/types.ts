@@ -43,6 +43,7 @@ export interface EsConversationSchema {
   }>;
   api_config?: {
     connector_id: string;
+    action_type_id: string;
     default_system_prompt_id?: string;
     provider?: Provider;
     model?: string;
@@ -76,7 +77,8 @@ export interface CreateMessageSchema {
     };
   }>;
   api_config?: {
-    connector_id?: string;
+    action_type_id: string;
+    connector_id: string;
     default_system_prompt_id?: string;
     provider?: Provider;
     model?: string;

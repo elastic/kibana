@@ -47,7 +47,9 @@ import {
   buildAlertSuppressionWindowDescription,
   buildAlertSuppressionMissingFieldsDescription,
   buildHighlightedFieldsOverrideDescription,
+  buildSetupDescription,
   getQueryLabel,
+  buildIntervalDescription,
 } from './helpers';
 import * as i18n from './translations';
 import { buildMlJobsDescription } from './build_ml_jobs_description';
@@ -223,7 +225,7 @@ export const getDescriptionItem = (
       return [];
     }
     const values: string[] = get(field, data);
-    return buildAlertSuppressionDescription(label, values);
+    return buildAlertSuppressionDescription(label, values, ruleType);
   } else if (field === 'groupByRadioSelection') {
     return [];
   } else if (field === 'groupByDuration') {
@@ -245,7 +247,8 @@ export const getDescriptionItem = (
       return buildAlertSuppressionWindowDescription(
         label,
         value,
-        get('groupByRadioSelection', data)
+        get('groupByRadioSelection', data),
+        ruleType
       );
     } else {
       return [];
@@ -260,7 +263,7 @@ export const getDescriptionItem = (
     }
     if (get('groupByFields', data).length > 0) {
       const value = get(field, data);
-      return buildAlertSuppressionMissingFieldsDescription(label, value);
+      return buildAlertSuppressionMissingFieldsDescription(label, value, ruleType);
     } else {
       return [];
     }
@@ -305,6 +308,9 @@ export const getDescriptionItem = (
   } else if (field === 'note') {
     const val: string = get(field, data);
     return buildNoteDescription(label, val);
+  } else if (field === 'setup') {
+    const val: string = get(field, data);
+    return buildSetupDescription(label, val);
   } else if (field === 'ruleType') {
     const ruleType: Type = get(field, data);
     return buildRuleTypeDescription(label, ruleType);
@@ -337,6 +343,11 @@ export const getDescriptionItem = (
     return get('isBuildingBlock', data)
       ? [{ title: i18n.BUILDING_BLOCK_LABEL, description: i18n.BUILDING_BLOCK_DESCRIPTION }]
       : [];
+  } else if (['interval', 'from'].includes(field)) {
+    return buildIntervalDescription(label, get(field, data));
+  } else if (field === 'maxSignals') {
+    const value: number | undefined = get(field, data);
+    return value ? [{ title: label, description: value }] : [];
   }
 
   const description: string = get(field, data);

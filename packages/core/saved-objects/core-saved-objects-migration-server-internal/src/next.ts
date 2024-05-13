@@ -15,7 +15,7 @@ import type { WaitGroup } from './kibana_migrator_utils';
 import type {
   AllActionStates,
   CalculateExcludeFiltersState,
-  CheckTargetMappingsState,
+  CheckTargetTypesMappingsState,
   CheckUnknownDocumentsState,
   CleanupUnknownAndExcluded,
   CleanupUnknownAndExcludedWaitForTaskState,
@@ -203,8 +203,8 @@ export const nextActionMap = (
       }),
     REFRESH_TARGET: (state: RefreshTarget) =>
       Actions.refreshIndex({ client, index: state.targetIndex }),
-    CHECK_TARGET_MAPPINGS: (state: CheckTargetMappingsState) =>
-      Actions.checkTargetMappings({
+    CHECK_TARGET_MAPPINGS: (state: CheckTargetTypesMappingsState) =>
+      Actions.checkTargetTypesMappings({
         indexTypes: state.indexTypes,
         indexMappings: Option.toUndefined(state.sourceIndexMappings),
         appMappings: state.targetIndexMappings,

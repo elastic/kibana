@@ -40,7 +40,7 @@ export class CompleteExternalResponseActionsTask {
   private wasStarted = false;
   private log: Logger;
   private esClient: ElasticsearchClient | undefined = undefined;
-  private cleanup: (() => void | Promise<void>) | undefined;
+  private cleanup: (() => void) | undefined;
   private taskTimeout = '20m'; // Default. Real value comes from server config
   private taskInterval = '60s'; // Default. Real value comes from server config
 
@@ -54,7 +54,7 @@ export class CompleteExternalResponseActionsTask {
     return `${COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE}-${COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_VERSION}`;
   }
 
-  public async setup({ taskManager }: CompleteExternalResponseActionsTaskSetupOptions) {
+  public setup({ taskManager }: CompleteExternalResponseActionsTaskSetupOptions) {
     if (this.wasSetup) {
       throw new Error(`Task has already been setup!`);
     }
@@ -98,10 +98,14 @@ export class CompleteExternalResponseActionsTask {
             );
           }
 
+          const { id: taskId, taskType } = taskInstance;
+
           return new CompleteExternalActionsTaskRunner(
             this.options.endpointAppContext.service,
             this.esClient,
-            this.taskInterval
+            this.taskInterval,
+            taskId,
+            taskType
           );
         },
       },
@@ -139,7 +143,7 @@ export class CompleteExternalResponseActionsTask {
       this.log.info(
         `Un-registering task definition [${COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE}] (if it exists)`
       );
-      taskManager.removeIfExists(COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE);
+      taskManager.removeIfExists(COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE).catch(() => {});
       this.cleanup = undefined;
     };
   }

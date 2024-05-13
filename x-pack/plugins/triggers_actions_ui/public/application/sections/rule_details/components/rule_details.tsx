@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useState, useEffect, useReducer } from 'react';
+import React, { useState, useEffect, useReducer, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
   EuiPageHeader,
@@ -24,7 +24,7 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { RuleExecutionStatusErrorReasons, parseDuration } from '@kbn/alerting-plugin/common';
 import { getRuleDetailsRoute } from '@kbn/rule-data-utils';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
@@ -58,7 +58,7 @@ import {
   rulesWarningReasonTranslationsMapping,
 } from '../../rules_list/translations';
 import { useKibana } from '../../../../common/lib/kibana';
-import { ruleReducer } from '../../rule_form/rule_reducer';
+import { getRuleReducer } from '../../rule_form/rule_reducer';
 import { loadAllActions as loadConnectors } from '../../../lib/action_connector_api';
 import { triggersActionsUiConfig } from '../../../../common/lib/config_api';
 import { runRule } from '../../../lib/run_rule';
@@ -90,12 +90,9 @@ const ruleDetailStyle = {
 export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   rule,
   ruleType,
-  actionTypes,
   bulkDisableRules,
   bulkEnableRules,
   bulkDeleteRules,
-  snoozeRule,
-  unsnoozeRule,
   requestRefresh,
   refreshToken,
 }) => {
@@ -107,8 +104,11 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     setBreadcrumbs,
     chrome,
     http,
+    i18n: i18nStart,
+    theme,
     notifications: { toasts },
   } = useKibana().services;
+  const ruleReducer = useMemo(() => getRuleReducer(actionTypeRegistry), [actionTypeRegistry]);
   const [{}, dispatch] = useReducer(ruleReducer, { rule });
   const setInitialRule = (value: Rule) => {
     dispatch({ command: { type: 'setRule' }, payload: { key: 'rule', value } });
@@ -141,7 +141,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     (async () => {
       let loadedConnectors: ActionConnector[] = [];
       try {
-        loadedConnectors = await loadConnectors({ http });
+        loadedConnectors = await loadConnectors({ http, includeSystemActions: true });
       } catch (err) {
         loadedConnectors = [];
       }
@@ -217,12 +217,20 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                   </EuiFlexItem>
                 </EuiFlexGroup>
               )}
-            </>
+            </>,
+            { i18n: i18nStart, theme }
           ),
         });
       }
     }
-  }, [rule.schedule.interval, config.minimumScheduleInterval, toasts, hasEditButton]);
+  }, [
+    i18nStart,
+    theme,
+    rule.schedule.interval,
+    config.minimumScheduleInterval,
+    toasts,
+    hasEditButton,
+  ]);
 
   const setRule = async () => {
     history.push(getRuleDetailsRoute(rule.id));

@@ -16,16 +16,7 @@ import path from 'path';
 import puppeteer, { Browser, ConsoleMessage, Page, Viewport, PageEvents } from 'puppeteer';
 import { createInterface } from 'readline';
 import * as Rx from 'rxjs';
-import {
-  catchError,
-  concatMap,
-  ignoreElements,
-  mergeMap,
-  map,
-  reduce,
-  takeUntil,
-  tap,
-} from 'rxjs/operators';
+import { catchError, concatMap, ignoreElements, mergeMap, map, reduce, takeUntil, tap } from 'rxjs';
 import { PerformanceMetrics } from '../../../../common/types';
 import { getChromiumDisconnectedError } from '..';
 import { errors } from '../../../../common';
@@ -235,7 +226,7 @@ export class HeadlessChromiumDriverFactory {
         observer.add(() => {
           if (page.isClosed()) return; // avoid emitting a log unnecessarily
           logger.debug(`It looks like the browser is no longer being used. Closing the browser...`);
-          childProcess.kill(); // ignore async
+          void childProcess.kill(); // ignore async
         });
 
         // make the observer subscribe to terminate$
@@ -281,7 +272,7 @@ export class HeadlessChromiumDriverFactory {
             logger.error(error);
           });
         });
-      })();
+      })().catch(() => {});
     });
   }
 

@@ -29,8 +29,7 @@
       "dataViews",
       "lens",
       "maps",
-      "uiActions",
-      "observabilityAIAssistant"
+      "uiActions"
     ],
     "optionalPlugins": [
       "actions",
@@ -49,7 +48,8 @@
       "customIntegrations", // Move this to requiredPlugins after completely migrating from the Tutorials Home App
       "licenseManagement",
       "profilingDataAccess",
-      "cases"
+      "cases",
+      "observabilityAIAssistant"
     ],
     "requiredBundles": [
       "fleet",

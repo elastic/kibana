@@ -31,6 +31,7 @@ export const rewriteRule = ({
   mutedInstanceIds,
   executionStatus,
   actions,
+  systemActions,
   scheduledTaskId,
   snoozeSchedule,
   isSnoozedUntil,
@@ -39,45 +40,71 @@ export const rewriteRule = ({
   nextRun,
   alertDelay,
   ...rest
-}: SanitizedRule<RuleTypeParams> & { activeSnoozes?: string[] }) => ({
-  ...rest,
-  rule_type_id: alertTypeId,
-  created_by: createdBy,
-  updated_by: updatedBy,
-  created_at: createdAt,
-  updated_at: updatedAt,
-  api_key_owner: apiKeyOwner,
-  notify_when: notifyWhen,
-  mute_all: muteAll,
-  muted_alert_ids: mutedInstanceIds,
-  scheduled_task_id: scheduledTaskId,
-  snooze_schedule: snoozeSchedule,
-  ...(isSnoozedUntil != null ? { is_snoozed_until: isSnoozedUntil } : {}),
-  ...(activeSnoozes != null ? { active_snoozes: activeSnoozes } : {}),
-  execution_status: executionStatus && {
-    ...omit(executionStatus, 'lastExecutionDate', 'lastDuration'),
-    last_execution_date: executionStatus.lastExecutionDate,
-    last_duration: executionStatus.lastDuration,
-  },
-  actions: actions.map(({ group, id, actionTypeId, params, frequency, uuid, alertsFilter }) => ({
-    group,
-    id,
-    params,
-    connector_type_id: actionTypeId,
-    ...(frequency
-      ? {
-          frequency: {
-            summary: frequency.summary,
-            notify_when: frequency.notifyWhen,
-            throttle: frequency.throttle,
-          },
-        }
-      : {}),
-    ...(uuid && { uuid }),
-    ...(alertsFilter && { alerts_filter: alertsFilter }),
-  })),
-  ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
-  ...(nextRun ? { next_run: nextRun } : {}),
-  ...(apiKeyCreatedByUser !== undefined ? { api_key_created_by_user: apiKeyCreatedByUser } : {}),
-  ...(alertDelay !== undefined ? { alert_delay: alertDelay } : {}),
-});
+}: SanitizedRule<RuleTypeParams> & { activeSnoozes?: string[] }) => {
+  const actionsTemp: unknown[] = [];
+  actions.forEach((action) => {
+    const {
+      id,
+      actionTypeId,
+      params,
+      uuid,
+      useAlertDataForTemplate,
+      group,
+      frequency,
+      alertsFilter,
+    } = action;
+    actionsTemp.push({
+      group,
+      id,
+      params,
+      connector_type_id: actionTypeId,
+      ...(frequency
+        ? {
+            frequency: {
+              summary: frequency.summary,
+              notify_when: frequency.notifyWhen,
+              throttle: frequency.throttle,
+            },
+          }
+        : {}),
+      ...(uuid && { uuid }),
+      ...(alertsFilter && { alerts_filter: alertsFilter }),
+      ...(typeof useAlertDataForTemplate !== 'undefined'
+        ? { use_alert_data_for_template: useAlertDataForTemplate }
+        : {}),
+    });
+  });
+  (systemActions ?? []).forEach((systemAction) => {
+    const { actionTypeId, ...restSystemAction } = systemAction;
+    actionsTemp.push({
+      ...restSystemAction,
+      connector_type_id: actionTypeId,
+    });
+  });
+  return {
+    ...rest,
+    rule_type_id: alertTypeId,
+    created_by: createdBy,
+    updated_by: updatedBy,
+    created_at: createdAt,
+    updated_at: updatedAt,
+    api_key_owner: apiKeyOwner,
+    notify_when: notifyWhen,
+    mute_all: muteAll,
+    muted_alert_ids: mutedInstanceIds,
+    scheduled_task_id: scheduledTaskId,
+    snooze_schedule: snoozeSchedule,
+    ...(isSnoozedUntil != null ? { is_snoozed_until: isSnoozedUntil } : {}),
+    ...(activeSnoozes != null ? { active_snoozes: activeSnoozes } : {}),
+    execution_status: executionStatus && {
+      ...omit(executionStatus, 'lastExecutionDate', 'lastDuration'),
+      last_execution_date: executionStatus.lastExecutionDate,
+      last_duration: executionStatus.lastDuration,
+    },
+    actions: actionsTemp,
+    ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
+    ...(nextRun ? { next_run: nextRun } : {}),
+    ...(apiKeyCreatedByUser !== undefined ? { api_key_created_by_user: apiKeyCreatedByUser } : {}),
+    ...(alertDelay !== undefined ? { alert_delay: alertDelay } : {}),
+  };
+};

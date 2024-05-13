@@ -67,7 +67,7 @@ export function createTelemetryDiagnosticTimelineTaskConfig() {
           });
 
           if (result.timeline) {
-            sender.sendOnDemand(TELEMETRY_CHANNEL_TIMELINE, [result.timeline]);
+            await sender.sendOnDemand(TELEMETRY_CHANNEL_TIMELINE, [result.timeline]);
             counter += 1;
           } else {
             log.l('no events in timeline');
@@ -76,11 +76,11 @@ export function createTelemetryDiagnosticTimelineTaskConfig() {
 
         log.l(`sent ${counter} timelines. Concluding timeline task.`);
 
-        taskMetricsService.end(trace);
+        await taskMetricsService.end(trace);
 
         return counter;
       } catch (err) {
-        taskMetricsService.end(trace, err);
+        await taskMetricsService.end(trace, err);
         return 0;
       }
     },

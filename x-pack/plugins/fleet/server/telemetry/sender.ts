@@ -14,6 +14,8 @@ import axios from 'axios';
 
 import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
 
+import { exhaustMap, Subject, takeUntil, timer } from 'rxjs';
+
 import { TelemetryQueue } from './queue';
 
 import type { FleetTelemetryChannel, FleetTelemetryChannelEvents } from './types';
@@ -26,10 +28,10 @@ export class TelemetryEventsSender {
   private readonly initialCheckDelayMs = 10 * 1000;
   private readonly checkIntervalMs = 30 * 1000;
   private readonly logger: Logger;
+  private readonly stop$ = new Subject<void>();
 
   private telemetryStart?: TelemetryPluginStart;
   private telemetrySetup?: TelemetryPluginSetup;
-  private intervalId?: NodeJS.Timeout;
   private isSending = false;
   private queuesPerChannel: { [channel: string]: TelemetryQueue<any> } = {};
   private isOptedIn?: boolean = true; // Assume true until the first check
@@ -50,16 +52,16 @@ export class TelemetryEventsSender {
     this.clusterInfo = await this.fetchClusterInfo();
 
     this.logger.debug(`Starting local task`);
-    setTimeout(() => {
-      this.sendIfDue();
-      this.intervalId = setInterval(() => this.sendIfDue(), this.checkIntervalMs);
-    }, this.initialCheckDelayMs);
+    timer(this.initialCheckDelayMs, this.checkIntervalMs)
+      .pipe(
+        takeUntil(this.stop$),
+        exhaustMap(() => this.sendIfDue())
+      )
+      .subscribe();
   }
 
   public stop() {
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
-    }
+    this.stop$.next();
   }
 
   public queueTelemetryEvents<T extends FleetTelemetryChannel>(

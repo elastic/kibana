@@ -27,6 +27,7 @@ import { FieldIcon } from '@kbn/react-field';
 
 import type { ThreatMapping, Type, Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 import { FilterBadgeGroup } from '@kbn/unified-search-plugin/public';
+import { IntervalAbbrScreenReader } from '../../../../common/components/accessibility';
 import type {
   RequiredFieldArray,
   Threshold,
@@ -50,9 +51,13 @@ import type {
 import { GroupByOptions } from '../../../../detections/pages/detection_engine/rules/types';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { ThreatEuiFlexGroup } from './threat_description';
-import { AlertSuppressionTechnicalPreviewBadge } from './alert_suppression_technical_preview_badge';
-import { TechnicalPreviewBadge } from '../../../../common/components/technical_preview_badge';
+import { AlertSuppressionLabel } from './alert_suppression_label';
 const NoteDescriptionContainer = styled(EuiFlexItem)`
+  height: 105px;
+  overflow-y: hidden;
+`;
+
+const SetupDescriptionContainer = styled(EuiFlexItem)`
   height: 105px;
   overflow-y: hidden;
 `;
@@ -477,7 +482,7 @@ export const buildRuleTypeDescription = (label: string, ruleType: Type): ListIte
       return [
         {
           title: label,
-          description: <TechnicalPreviewBadge label={i18n.ESQL_TYPE_DESCRIPTION} />,
+          description: i18n.ESQL_TYPE_DESCRIPTION,
         },
       ];
     }
@@ -581,7 +586,11 @@ export const buildRequiredFieldsDescription = (
   ];
 };
 
-export const buildAlertSuppressionDescription = (label: string, values: string[]): ListItems[] => {
+export const buildAlertSuppressionDescription = (
+  label: string = i18n.GROUP_BY_LABEL,
+  values: string[],
+  ruleType: Type
+): ListItems[] => {
   if (isEmpty(values)) {
     return [];
   }
@@ -599,7 +608,7 @@ export const buildAlertSuppressionDescription = (label: string, values: string[]
     </EuiFlexGroup>
   );
 
-  const title = <AlertSuppressionTechnicalPreviewBadge label={label} />;
+  const title = <AlertSuppressionLabel label={label} ruleType={ruleType} />;
   return [
     {
       title,
@@ -611,14 +620,15 @@ export const buildAlertSuppressionDescription = (label: string, values: string[]
 export const buildAlertSuppressionWindowDescription = (
   label: string,
   value: Duration,
-  groupByRadioSelection: GroupByOptions
+  groupByRadioSelection: GroupByOptions,
+  ruleType: Type
 ): ListItems[] => {
   const description =
     groupByRadioSelection === GroupByOptions.PerTimePeriod
       ? `${value.value}${value.unit}`
       : i18n.ALERT_SUPPRESSION_PER_RULE_EXECUTION;
 
-  const title = <AlertSuppressionTechnicalPreviewBadge label={label} />;
+  const title = <AlertSuppressionLabel label={label} ruleType={ruleType} />;
   return [
     {
       title,
@@ -629,7 +639,8 @@ export const buildAlertSuppressionWindowDescription = (
 
 export const buildAlertSuppressionMissingFieldsDescription = (
   label: string,
-  value: AlertSuppressionMissingFieldsStrategy
+  value: AlertSuppressionMissingFieldsStrategy,
+  ruleType: Type
 ): ListItems[] => {
   if (isEmpty(value)) {
     return [];
@@ -640,11 +651,38 @@ export const buildAlertSuppressionMissingFieldsDescription = (
       ? i18n.ALERT_SUPPRESSION_SUPPRESS_ON_MISSING_FIELDS
       : i18n.ALERT_SUPPRESSION_DO_NOT_SUPPRESS_ON_MISSING_FIELDS;
 
-  const title = <AlertSuppressionTechnicalPreviewBadge label={label} />;
+  const title = <AlertSuppressionLabel label={label} ruleType={ruleType} />;
   return [
     {
       title,
       description,
+    },
+  ];
+};
+
+export const buildSetupDescription = (label: string, setup: string): ListItems[] => {
+  if (setup.trim() !== '') {
+    return [
+      {
+        title: label,
+        description: (
+          <SetupDescriptionContainer>
+            <div data-test-subj="setupDescriptionItem" className="eui-yScrollWithShadows">
+              {setup}
+            </div>
+          </SetupDescriptionContainer>
+        ),
+      },
+    ];
+  }
+  return [];
+};
+
+export const buildIntervalDescription = (label: string, value: string): ListItems[] => {
+  return [
+    {
+      title: label,
+      description: <IntervalAbbrScreenReader interval={value} />,
     },
   ];
 };

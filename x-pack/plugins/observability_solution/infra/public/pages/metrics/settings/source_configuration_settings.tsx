@@ -7,7 +7,7 @@
 
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   BottomBarActions,
   Prompt,
@@ -17,6 +17,12 @@ import {
   enableInfrastructureHostsView,
   enableInfrastructureProfilingIntegration,
 } from '@kbn/observability-plugin/common';
+import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
+import { HttpSetup } from '@kbn/core-http-browser';
+import {
+  METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+  METRIC_THRESHOLD_ALERT_TYPE_ID,
+} from '@kbn/rule-data-utils';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useSourceContext } from '../../../containers/metrics_source';
 import { useInfraMLCapabilitiesContext } from '../../../containers/ml/infra_ml_capabilities';
@@ -31,16 +37,37 @@ import { MetricsPageTemplate } from '../page_template';
 import { FeaturesConfigurationPanel } from './features_configuration_panel';
 interface SourceConfigurationSettingsProps {
   shouldAllowEdit: boolean;
+  http?: HttpSetup;
 }
 
 export const SourceConfigurationSettings = ({
   shouldAllowEdit,
+  http,
 }: SourceConfigurationSettingsProps) => {
   useMetricsBreadcrumbs([
     {
       text: settingsTitle,
     },
   ]);
+
+  const [numberOfInfraRules, setNumberOfInfraRules] = useState(0);
+
+  useEffect(() => {
+    const getNumberOfInfraRules = async () => {
+      if (http) {
+        const { ruleExecutionStatus } = await loadRuleAggregations({
+          http,
+          typesFilter: [METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID, METRIC_THRESHOLD_ALERT_TYPE_ID],
+        });
+        const numberOfRules = Object.values(ruleExecutionStatus).reduce(
+          (acc, value) => acc + value,
+          0
+        );
+        setNumberOfInfraRules(numberOfRules);
+      }
+    };
+    getNumberOfInfraRules();
+  }, [http]);
 
   const {
     createSourceConfiguration,
@@ -60,7 +87,7 @@ export const SourceConfigurationSettings = ({
     formStateChanges,
     getUnsavedChanges,
   } = useSourceConfigurationFormState(source?.configuration);
-  const infraUiSettings = useEditableSettings('infra_metrics', [
+  const infraUiSettings = useEditableSettings([
     enableInfrastructureHostsView,
     enableInfrastructureProfilingIntegration,
   ]);
@@ -137,6 +164,8 @@ export const SourceConfigurationSettings = ({
           readOnly={!isWriteable}
           metricIndicesExist={metricIndicesExist}
           remoteClustersExist={remoteClustersExist}
+          isMetricAliasChanged={Boolean(getUnsavedChanges().metricAlias)}
+          numberOfInfraRules={numberOfInfraRules}
         />
       </EuiPanel>
       <EuiSpacer />

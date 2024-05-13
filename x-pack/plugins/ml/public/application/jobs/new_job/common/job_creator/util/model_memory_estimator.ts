@@ -19,7 +19,7 @@ import {
   pairwise,
   filter,
   skipWhile,
-} from 'rxjs/operators';
+} from 'rxjs';
 import { useEffect, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';

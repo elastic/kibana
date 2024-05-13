@@ -25,7 +25,9 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { migrateLegacyActions } from '../lib';
 import { migrateLegacyActionsMock } from '../lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
+import { API_KEY_PENDING_INVALIDATION_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
 
 jest.mock('../lib/siem_legacy_actions/migrate_legacy_actions', () => {
   return {
@@ -72,9 +74,12 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   auditLogger,
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
+  backfillClient: backfillClientMock.create(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
+  isSystemAction: jest.fn(),
 };
 
 setGlobalDate();
@@ -234,7 +239,9 @@ describe('enable()', () => {
         namespace: 'default',
       }
     );
-    expect(unsecuredSavedObjectsClient.create).not.toBeCalledWith('api_key_pending_invalidation');
+    expect(unsecuredSavedObjectsClient.create).not.toBeCalledWith(
+      API_KEY_PENDING_INVALIDATION_TYPE
+    );
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,
       '1',
@@ -294,7 +301,9 @@ describe('enable()', () => {
         namespace: 'default',
       }
     );
-    expect(unsecuredSavedObjectsClient.create).not.toBeCalledWith('api_key_pending_invalidation');
+    expect(unsecuredSavedObjectsClient.create).not.toBeCalledWith(
+      API_KEY_PENDING_INVALIDATION_TYPE
+    );
     expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: myType/name');
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,

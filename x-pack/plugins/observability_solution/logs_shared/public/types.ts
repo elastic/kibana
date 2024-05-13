@@ -8,6 +8,7 @@
 import type { CoreSetup, CoreStart, Plugin as PluginClass } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import { SharePluginSetup } from '@kbn/share-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -25,7 +26,7 @@ export interface LogsSharedClientSetupExports {
 
 export interface LogsSharedClientStartExports {
   logViews: LogViewsServiceStart;
-  LogAIAssistant: (props: Omit<LogAIAssistantProps, 'observabilityAIAssistant'>) => JSX.Element;
+  LogAIAssistant?: (props: Omit<LogAIAssistantProps, 'observabilityAIAssistant'>) => JSX.Element;
 }
 
 export interface LogsSharedClientSetupDeps {
@@ -35,7 +36,8 @@ export interface LogsSharedClientSetupDeps {
 export interface LogsSharedClientStartDeps {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
-  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
+  discoverShared: DiscoverSharedPublicStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   uiActions: UiActionsStart;
 }
 

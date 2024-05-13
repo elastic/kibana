@@ -24,22 +24,15 @@ export function AgentLatestVersion({
 }) {
   const { euiTheme } = useEuiTheme();
 
-  const latestVersionElement = latestVersion ? (
-    <>{latestVersion}</>
-  ) : (
-    <>{NOT_AVAILABLE_LABEL}</>
-  );
+  const latestVersionElement = latestVersion ? <>{latestVersion}</> : <>{NOT_AVAILABLE_LABEL}</>;
 
   const failedLatestVersionsElement = (
     <EuiToolTip
-      content={i18n.translate(
-        'xpack.apm.agentExplorer.agentLatestVersion.airGappedMessage',
-        {
-          defaultMessage:
-            'The latest version of {agentName} agent could not be fetched from the repository. Please contact your administrator to check the server logs.',
-          values: { agentName },
-        }
-      )}
+      content={i18n.translate('xpack.apm.agentExplorer.agentLatestVersion.airGappedMessage', {
+        defaultMessage:
+          'The latest version of {agentName} agent could not be fetched from the repository. Please contact your administrator to check the server logs.',
+        values: { agentName },
+      })}
     >
       <>{NOT_AVAILABLE_LABEL}</>
     </EuiToolTip>

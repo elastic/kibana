@@ -13,9 +13,10 @@ import { deserializer } from '../../common/deserializer';
 import { list_id } from '../../common/list_id';
 import { type } from '../../common/type';
 import { serializer } from '../../common/serializer';
+import { refreshWithWaitFor } from '../../common/refresh';
 
 export const importListItemQuerySchema = t.exact(
-  t.partial({ deserializer, list_id, serializer, type })
+  t.partial({ deserializer, list_id, serializer, type, refresh: refreshWithWaitFor })
 );
 
 export type ImportListItemQuerySchema = RequiredKeepUndefined<

@@ -216,7 +216,7 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
     class="euiFlyoutBody c1 emotion-euiFlyoutBody"
   >
     <div
-      class="euiFlyoutBody__overflow css-18yrfj9-noBanner"
+      class="euiFlyoutBody__overflow emotion-euiFlyoutBody__overflow-noBanner"
       tabindex="0"
     >
       <div

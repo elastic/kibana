@@ -229,7 +229,7 @@ export class TelemetryPlugin
   }
 
   public start(
-    { analytics, http, overlays, theme, application, docLinks }: CoreStart,
+    { analytics, http, overlays, application, docLinks, ...startServices }: CoreStart,
     { screenshotMode }: TelemetryPluginStartDependencies
   ): TelemetryPluginStart {
     if (!this.telemetryService) {
@@ -243,9 +243,10 @@ export class TelemetryPlugin
     const telemetryNotifications = new TelemetryNotifications({
       http,
       overlays,
-      theme,
       telemetryService: this.telemetryService,
       telemetryConstants,
+      analytics,
+      ...startServices,
     });
     this.telemetryNotifications = telemetryNotifications;
 

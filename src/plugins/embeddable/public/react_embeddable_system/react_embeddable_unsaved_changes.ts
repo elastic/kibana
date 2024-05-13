@@ -8,7 +8,6 @@
 
 import {
   getLastSavedStateSubjectForChild,
-  PresentationContainer,
   SerializedPanelState,
 } from '@kbn/presentation-containers';
 import {
@@ -18,7 +17,7 @@ import {
   StateComparators,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, combineLatest } from 'rxjs';
-import { combineLatestWith, debounceTime, map } from 'rxjs/operators';
+import { combineLatestWith, debounceTime, map } from 'rxjs';
 
 const getDefaultDiffingApi = () => {
   return {
@@ -28,15 +27,18 @@ const getDefaultDiffingApi = () => {
   };
 };
 
-export const startTrackingEmbeddableUnsavedChanges = <StateType extends object = object>(
+export const startTrackingEmbeddableUnsavedChanges = <
+  SerializedState extends object = object,
+  RuntimeState extends object = object
+>(
   uuid: string,
-  parentApi: PresentationContainer | undefined,
-  comparators: StateComparators<StateType>,
-  deserializeState: (state: SerializedPanelState<object>) => StateType
+  parentApi: unknown,
+  comparators: StateComparators<RuntimeState>,
+  deserializeState: (state: SerializedPanelState<SerializedState>) => RuntimeState
 ) => {
   if (Object.keys(comparators).length === 0) return getDefaultDiffingApi();
 
-  const lastSavedStateSubject = getLastSavedStateSubjectForChild<StateType>(
+  const lastSavedStateSubject = getLastSavedStateSubjectForChild<SerializedState, RuntimeState>(
     parentApi,
     uuid,
     deserializeState
@@ -44,14 +46,14 @@ export const startTrackingEmbeddableUnsavedChanges = <StateType extends object =
   if (!lastSavedStateSubject) return getDefaultDiffingApi();
 
   const comparatorSubjects: Array<PublishingSubject<unknown>> = [];
-  const comparatorKeys: Array<keyof StateType> = [];
-  for (const key of Object.keys(comparators) as Array<keyof StateType>) {
+  const comparatorKeys: Array<keyof RuntimeState> = [];
+  for (const key of Object.keys(comparators) as Array<keyof RuntimeState>) {
     const comparatorSubject = comparators[key][0]; // 0th element of tuple is the subject
     comparatorSubjects.push(comparatorSubject as PublishingSubject<unknown>);
     comparatorKeys.push(key);
   }
 
-  const unsavedChanges = new BehaviorSubject<Partial<StateType> | undefined>(
+  const unsavedChanges = new BehaviorSubject<Partial<RuntimeState> | undefined>(
     runComparators(
       comparators,
       comparatorKeys,
@@ -65,9 +67,9 @@ export const startTrackingEmbeddableUnsavedChanges = <StateType extends object =
       debounceTime(100),
       map((latestStates) =>
         comparatorKeys.reduce((acc, key, index) => {
-          acc[key] = latestStates[index] as StateType[typeof key];
+          acc[key] = latestStates[index] as RuntimeState[typeof key];
           return acc;
-        }, {} as Partial<StateType>)
+        }, {} as Partial<RuntimeState>)
       ),
       combineLatestWith(lastSavedStateSubject)
     )
@@ -83,7 +85,7 @@ export const startTrackingEmbeddableUnsavedChanges = <StateType extends object =
       const lastSaved = lastSavedStateSubject?.getValue();
       for (const key of comparatorKeys) {
         const setter = comparators[key][1]; // setter function is the 1st element of the tuple
-        setter(lastSaved?.[key] as StateType[typeof key]);
+        setter(lastSaved?.[key] as RuntimeState[typeof key]);
       }
     },
     cleanup: () => subscription.unsubscribe(),

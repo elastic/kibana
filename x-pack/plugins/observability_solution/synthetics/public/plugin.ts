@@ -14,7 +14,7 @@ import {
   PackageInfo,
 } from '@kbn/core/public';
 import { from } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
@@ -68,7 +68,7 @@ export interface ClientPluginsSetup {
   exploratoryView: ExploratoryViewPublicSetup;
   observability: ObservabilityPublicSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
-  observabilityAIAssistant: ObservabilityAIAssistantPublicSetup;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
   share: SharePluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   cloud?: CloudSetup;
@@ -85,7 +85,7 @@ export interface ClientPluginsStart {
   exploratoryView: ExploratoryViewPublicStart;
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
-  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   share: SharePluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   cases: CasesPublicStart;
@@ -159,11 +159,14 @@ export class UptimePlugin
       deepLinks: [
         {
           id: 'overview',
-          title: i18n.translate('xpack.synthetics.overviewPage.linkText', {
-            defaultMessage: 'Monitors',
-          }),
+          title: this._isServerless
+            ? i18n.translate('xpack.synthetics.overviewPage.serverless.linkText', {
+                defaultMessage: 'Overview',
+              })
+            : i18n.translate('xpack.synthetics.overviewPage.linkText', {
+                defaultMessage: 'Monitors',
+              }),
           path: '/',
-          visibleIn: this._isServerless ? ['globalSearch', 'sideNav'] : [],
         },
         {
           id: 'certificates',
@@ -171,7 +174,6 @@ export class UptimePlugin
             defaultMessage: 'TLS Certificates',
           }),
           path: '/certificates',
-          visibleIn: this._isServerless ? ['globalSearch', 'sideNav'] : [],
         },
       ],
       mount: async (params: AppMountParameters) => {

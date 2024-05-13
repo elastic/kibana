@@ -21,10 +21,9 @@
       "security",
       "share",
       "triggersActionsUi",
-      "unifiedSearch",
-      "observabilityAIAssistant"
+      "unifiedSearch"
     ],
-    "optionalPlugins": ["discover", "embeddable", "home", "licensing", "spaces", "usageCollection"],
+    "optionalPlugins": ["discover", "embeddable", "home", "licensing", "spaces", "usageCollection", "observabilityAIAssistant"],
     "requiredBundles": [
       "dataViews",
       "embeddable",

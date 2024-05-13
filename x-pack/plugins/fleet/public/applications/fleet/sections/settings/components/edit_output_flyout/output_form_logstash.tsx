@@ -32,6 +32,9 @@ export const OutputFormLogstashSection: React.FunctionComponent<Props> = (props)
   const { docLinks } = useStartServices();
 
   const [isFirstLoad, setIsFirstLoad] = React.useState(true);
+  const [isConvertedToSecret, setIsConvertedToSecret] = React.useState({
+    sslKey: false,
+  });
 
   useEffect(() => {
     if (!isFirstLoad) return;
@@ -41,6 +44,7 @@ export const OutputFormLogstashSection: React.FunctionComponent<Props> = (props)
       if (inputs.sslKeyInput.value && !inputs.sslKeySecretInput.value) {
         inputs.sslKeySecretInput.setValue(inputs.sslKeyInput.value);
         inputs.sslKeyInput.clear();
+        setIsConvertedToSecret({ ...isConvertedToSecret, sslKey: true });
       }
     }
   }, [
@@ -49,6 +53,7 @@ export const OutputFormLogstashSection: React.FunctionComponent<Props> = (props)
     inputs.sslKeySecretInput,
     isFirstLoad,
     setIsFirstLoad,
+    isConvertedToSecret,
   ]);
 
   const onToggleSecretAndClearValue = (secretEnabled: boolean) => {
@@ -57,6 +62,7 @@ export const OutputFormLogstashSection: React.FunctionComponent<Props> = (props)
     } else {
       inputs.sslKeySecretInput.setValue('');
     }
+    setIsConvertedToSecret({ sslKey: false });
     onToggleSecretStorage(secretEnabled);
   };
 
@@ -172,6 +178,7 @@ export const OutputFormLogstashSection: React.FunctionComponent<Props> = (props)
           })}
           {...inputs.sslKeySecretInput.formRowProps}
           useSecretsStorage={useSecretsStorage}
+          isConvertedToSecret={isConvertedToSecret.sslKey}
           onToggleSecretStorage={onToggleSecretAndClearValue}
           cancelEdit={inputs.sslKeySecretInput.cancelEdit}
         >

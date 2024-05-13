@@ -35,13 +35,7 @@ function CrashDetailLink({ serviceName, groupId, query, ...rest }: Props) {
     }
   );
 
-  return (
-    <EuiLink
-      data-test-subj="apmMobileCrashDetailsLink"
-      href={crashDetailsLink}
-      {...rest}
-    />
-  );
+  return <EuiLink data-test-subj="apmMobileCrashDetailsLink" href={crashDetailsLink} {...rest} />;
 }
 
 export { CrashDetailLink };

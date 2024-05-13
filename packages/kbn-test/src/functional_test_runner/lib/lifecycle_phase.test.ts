@@ -7,7 +7,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { materialize, toArray } from 'rxjs/operators';
+import { materialize, toArray } from 'rxjs';
 
 import { LifecyclePhase } from './lifecycle_phase';
 

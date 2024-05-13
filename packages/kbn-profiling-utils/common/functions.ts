@@ -49,6 +49,7 @@ type TopNFunction = Pick<
 > & {
   Id: string;
   Rank: number;
+  subGroups: Record<string, number>;
 };
 
 export interface TopNFunctions {
@@ -207,6 +208,7 @@ export function createTopNFunctions({
         selfAnnualCostUSD: frameAndCount.selfAnnualCostUSD,
         totalAnnualCO2kgs: frameAndCount.totalAnnualCO2kgs,
         totalAnnualCostUSD: frameAndCount.totalAnnualCostUSD,
+        subGroups: {},
       };
     });
 

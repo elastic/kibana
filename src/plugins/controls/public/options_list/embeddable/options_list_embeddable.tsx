@@ -12,7 +12,7 @@ import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { batch } from 'react-redux';
 import { merge, Subject, Subscription, switchMap, tap } from 'rxjs';
-import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs';
 
 import { DataView, FieldSpec } from '@kbn/data-views-plugin/public';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
@@ -26,7 +26,7 @@ import {
 } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 import {
   ControlGroupContainer,
@@ -465,14 +465,14 @@ export class OptionsListEmbeddable
     this.node = node;
 
     ReactDOM.render(
-      <KibanaThemeProvider theme={pluginServices.getServices().core.theme}>
+      <KibanaRenderContextProvider {...pluginServices.getServices().core}>
         <OptionsListEmbeddableContext.Provider value={this}>
           <OptionsListControl
             typeaheadSubject={this.typeaheadSubject}
             loadMoreSubject={this.loadMoreSubject}
           />
         </OptionsListEmbeddableContext.Provider>
-      </KibanaThemeProvider>,
+      </KibanaRenderContextProvider>,
       node
     );
   };

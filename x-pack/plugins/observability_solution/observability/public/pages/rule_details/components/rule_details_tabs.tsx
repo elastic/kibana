@@ -19,6 +19,7 @@ import type { AlertConsumers } from '@kbn/rule-data-utils';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import type { Query, BoolQuery } from '@kbn/es-query';
 import { useKibana } from '../../../utils/kibana_react';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { ObservabilityAlertSearchbarWithUrlSync } from '../../../components/alert_search_bar/alert_search_bar_with_url_sync';
 import { RULE_DETAILS_ALERTS_TABLE_CONFIG_ID } from '../../../constants';
 import {
@@ -62,6 +63,7 @@ export function RuleDetailsTabs({
       getRuleEventLogList: RuleEventLogList,
     },
   } = useKibana().services;
+  const { observabilityRuleTypeRegistry } = usePluginContext();
 
   const ruleQuery = useRef<Query[]>([
     { query: `kibana.alert.rule.uuid: ${ruleId}`, language: 'kuery' },
@@ -96,6 +98,7 @@ export function RuleDetailsTabs({
                   featureIds={featureIds}
                   query={esQuery}
                   showAlertStatusWithFlapping
+                  cellContext={{ observabilityRuleTypeRegistry }}
                 />
               )}
             </EuiFlexItem>

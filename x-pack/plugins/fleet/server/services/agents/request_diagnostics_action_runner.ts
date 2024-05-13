@@ -8,6 +8,8 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
+import type { RequestDiagnosticsAdditionalMetrics } from '../../../common/types';
+
 import { isAgentRequestDiagnosticsSupported } from '../../../common/services';
 
 import type { Agent } from '../../types';
@@ -38,6 +40,7 @@ export async function requestDiagnosticsBatch(
   options: {
     actionId?: string;
     total?: number;
+    additionalMetrics?: RequestDiagnosticsAdditionalMetrics[];
   }
 ): Promise<{ actionId: string }> {
   const errors: Record<Agent['id'], Error> = {};
@@ -62,6 +65,9 @@ export async function requestDiagnosticsBatch(
     created_at: now,
     type: 'REQUEST_DIAGNOSTICS',
     total,
+    data: {
+      additional_metrics: options.additionalMetrics,
+    },
   });
 
   await createErrorActionResults(

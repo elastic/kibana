@@ -16,7 +16,7 @@ import type { SubsetTimelineModel, TimelineModel } from './model';
 const { from: start, to: end } = normalizeTimeRange({ from: '', to: '' }, false);
 
 export const timelineDefaults: SubsetTimelineModel &
-  Pick<TimelineModel, 'eqlOptions' | 'resolveTimelineConfig'> = {
+  Pick<TimelineModel, 'eqlOptions' | 'resolveTimelineConfig' | 'sampleSize' | 'rowHeight'> = {
   activeTab: TimelineTabs.query,
   prevActiveTab: TimelineTabs.query,
   columns: defaultHeaders,
@@ -81,6 +81,8 @@ export const timelineDefaults: SubsetTimelineModel &
   savedSearchId: null,
   savedSearch: null,
   isDataProviderVisible: false,
+  sampleSize: 500,
+  rowHeight: 3,
 };
 
 export const getTimelineManageDefaults = (id: string) => ({

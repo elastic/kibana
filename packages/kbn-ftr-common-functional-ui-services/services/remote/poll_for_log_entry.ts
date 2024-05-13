@@ -8,7 +8,7 @@
 
 import { WebDriver, logging } from 'selenium-webdriver';
 import * as Rx from 'rxjs';
-import { mergeMap, catchError, delay, repeat } from 'rxjs/operators';
+import { mergeMap, catchError, delay, repeat } from 'rxjs';
 import { NoSuchSessionError, NoSuchWindowError } from 'selenium-webdriver/lib/error';
 
 export const FINAL_LOG_ENTRY_PREFIX = 'WEBDRIVER SESSION IS STOPPED';

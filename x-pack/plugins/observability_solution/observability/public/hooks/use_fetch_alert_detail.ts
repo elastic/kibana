@@ -44,12 +44,14 @@ export const useFetchAlertDetail = (id: string): [boolean, AlertData | null] => 
     shouldExecuteApiCall,
   });
 
-  const data = rawAlert
-    ? {
-        formatted: parseAlert(observabilityRuleTypeRegistry)(rawAlert),
-        raw: rawAlert,
-      }
-    : null;
+  const data = useMemo(() => {
+    return rawAlert
+      ? {
+          formatted: parseAlert(observabilityRuleTypeRegistry)(rawAlert),
+          raw: rawAlert,
+        }
+      : null;
+  }, [observabilityRuleTypeRegistry, rawAlert]);
 
   return [loading, data];
 };

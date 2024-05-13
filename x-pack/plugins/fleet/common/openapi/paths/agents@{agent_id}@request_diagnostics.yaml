@@ -8,6 +8,19 @@ post:
   summary: Request agent diagnostics
   tags:
     - Agents
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            additional_metrics:
+              type: array
+              items:
+                oneOf:
+                  - type: string
+                    enum:
+                      - "CPU"
   responses:
     '200':
       description: OK

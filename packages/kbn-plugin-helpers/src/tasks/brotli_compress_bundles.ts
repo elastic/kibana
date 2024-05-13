@@ -34,7 +34,7 @@ export async function brotliCompressBundles({ buildDir, log, plugin }: TaskConte
   try {
     await del(['**/*.br'], { cwd: compressDir });
     await asyncPipeline(
-      vfs.src(['**/*.{js,css}'], { cwd: compressDir }),
+      vfs.src(['**/*.{js,css}'], { cwd: compressDir, encoding: false }),
       gulpBrotli({
         params: {
           [zlib.constants.BROTLI_PARAM_QUALITY]: zlib.constants.BROTLI_MAX_QUALITY,

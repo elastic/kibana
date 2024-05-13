@@ -88,11 +88,19 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "container.id": Object {
+      "required": false,
+      "type": "keyword",
+    },
     "error.grouping_key": Object {
       "required": false,
       "type": "keyword",
     },
     "error.grouping_name": Object {
+      "required": false,
+      "type": "keyword",
+    },
+    "host.name": Object {
       "required": false,
       "type": "keyword",
     },
@@ -172,11 +180,19 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "container.id": Object {
+      "required": false,
+      "type": "keyword",
+    },
     "error.grouping_key": Object {
       "required": false,
       "type": "keyword",
     },
     "error.grouping_name": Object {
+      "required": false,
+      "type": "keyword",
+    },
+    "host.name": Object {
       "required": false,
       "type": "keyword",
     },
@@ -256,11 +272,19 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "container.id": Object {
+      "required": false,
+      "type": "keyword",
+    },
     "error.grouping_key": Object {
       "required": false,
       "type": "keyword",
     },
     "error.grouping_name": Object {
+      "required": false,
+      "type": "keyword",
+    },
+    "host.name": Object {
       "required": false,
       "type": "keyword",
     },
@@ -340,11 +364,19 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "container.id": Object {
+      "required": false,
+      "type": "keyword",
+    },
     "error.grouping_key": Object {
       "required": false,
       "type": "keyword",
     },
     "error.grouping_name": Object {
+      "required": false,
+      "type": "keyword",
+    },
+    "host.name": Object {
       "required": false,
       "type": "keyword",
     },
@@ -1001,6 +1033,11 @@ Object {
       "array": true,
       "required": false,
       "type": "object",
+    },
+    "kibana.alert.rule.execution.timestamp": Object {
+      "array": false,
+      "required": false,
+      "type": "date",
     },
     "kibana.alert.rule.execution.uuid": Object {
       "array": false,
@@ -2054,6 +2091,11 @@ Object {
       "required": false,
       "type": "object",
     },
+    "kibana.alert.rule.execution.timestamp": Object {
+      "array": false,
+      "required": false,
+      "type": "date",
+    },
     "kibana.alert.rule.execution.uuid": Object {
       "array": false,
       "required": false,
@@ -3105,6 +3147,11 @@ Object {
       "array": true,
       "required": false,
       "type": "object",
+    },
+    "kibana.alert.rule.execution.timestamp": Object {
+      "array": false,
+      "required": false,
+      "type": "date",
     },
     "kibana.alert.rule.execution.uuid": Object {
       "array": false,
@@ -4158,6 +4205,11 @@ Object {
       "required": false,
       "type": "object",
     },
+    "kibana.alert.rule.execution.timestamp": Object {
+      "array": false,
+      "required": false,
+      "type": "date",
+    },
     "kibana.alert.rule.execution.uuid": Object {
       "array": false,
       "required": false,
@@ -5209,6 +5261,11 @@ Object {
       "array": true,
       "required": false,
       "type": "object",
+    },
+    "kibana.alert.rule.execution.timestamp": Object {
+      "array": false,
+      "required": false,
+      "type": "date",
     },
     "kibana.alert.rule.execution.uuid": Object {
       "array": false,
@@ -6268,6 +6325,11 @@ Object {
       "required": false,
       "type": "object",
     },
+    "kibana.alert.rule.execution.timestamp": Object {
+      "array": false,
+      "required": false,
+      "type": "date",
+    },
     "kibana.alert.rule.execution.uuid": Object {
       "array": false,
       "required": false,
@@ -7320,6 +7382,11 @@ Object {
       "required": false,
       "type": "object",
     },
+    "kibana.alert.rule.execution.timestamp": Object {
+      "array": false,
+      "required": false,
+      "type": "date",
+    },
     "kibana.alert.rule.execution.uuid": Object {
       "array": false,
       "required": false,
@@ -8371,6 +8438,11 @@ Object {
       "array": true,
       "required": false,
       "type": "object",
+    },
+    "kibana.alert.rule.execution.timestamp": Object {
+      "array": false,
+      "required": false,
+      "type": "date",
     },
     "kibana.alert.rule.execution.uuid": Object {
       "array": false,

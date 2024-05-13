@@ -7,6 +7,7 @@
 
 import { cloneDeep, getOr, omit } from 'lodash/fp';
 import { renderHook } from '@testing-library/react-hooks';
+import { waitFor } from '@testing-library/react';
 
 import { mockTimelineResults, mockGetOneTimelineResult } from '../../../common/mock';
 import { timelineDefaults } from '../../store/defaults';
@@ -29,6 +30,7 @@ import {
   mockTemplate as mockSelectedTemplate,
 } from './__mocks__';
 import { resolveTimeline } from '../../containers/api';
+import { defaultUdtHeaders } from '../timeline/unified_components/default_headers';
 
 jest.mock('react-redux', () => {
   const actual = jest.requireActual('react-redux');
@@ -494,6 +496,60 @@ describe('helpers', () => {
         title: 'Awesome Timeline',
       });
     });
+
+    test('should produce correct model if unifiedComponentsInTimelineEnabled is true', () => {
+      const timeline = {
+        savedObjectId: 'savedObject-1',
+        title: 'Awesome Timeline',
+        version: '1',
+        status: TimelineStatus.active,
+        timelineType: TimelineType.default,
+      };
+
+      const newTimeline = defaultTimelineToTimelineModel(
+        timeline,
+        false,
+        TimelineType.default,
+        true
+      );
+      expect(newTimeline).toEqual({
+        ...defaultTimeline,
+        dateRange: { end: '2020-07-08T08:20:18.966Z', start: '2020-07-07T08:20:18.966Z' },
+        status: TimelineStatus.active,
+        title: 'Awesome Timeline',
+        timelineType: TimelineType.default,
+        defaultColumns: defaultUdtHeaders,
+        columns: defaultUdtHeaders,
+      });
+    });
+
+    test('should produce correct model if unifiedComponentsInTimelineEnabled is true and custom set of columns is passed', () => {
+      const customColumns = defaultUdtHeaders.slice(0, 2);
+      const timeline = {
+        savedObjectId: 'savedObject-1',
+        title: 'Awesome Timeline',
+        version: '1',
+        status: TimelineStatus.active,
+        timelineType: TimelineType.default,
+        columns: customColumns,
+      };
+
+      const newTimeline = defaultTimelineToTimelineModel(
+        timeline,
+        false,
+        TimelineType.default,
+        true
+      );
+      expect(newTimeline).toEqual({
+        ...defaultTimeline,
+        dateRange: { end: '2020-07-08T08:20:18.966Z', start: '2020-07-07T08:20:18.966Z' },
+        status: TimelineStatus.active,
+        title: 'Awesome Timeline',
+        timelineType: TimelineType.default,
+        defaultColumns: defaultUdtHeaders,
+        columns: customColumns,
+      });
+    });
   });
 
   describe('queryTimelineById', () => {
@@ -714,6 +770,119 @@ describe('helpers', () => {
         expect(dispatchUpdateIsLoading).toBeCalledWith({
           id: TimelineId.active,
           isLoading: false,
+        });
+      });
+    });
+    describe('open a timeline when unifiedComponentsInTimelineEnabled is true', () => {
+      const untitledTimeline = { ...mockSelectedTimeline, title: '' };
+      const onOpenTimeline = jest.fn();
+      afterEach(() => {
+        jest.clearAllMocks();
+      });
+
+      it('should update timeline correctly when timeline is untitled', async () => {
+        const args: QueryTimelineById = {
+          duplicate: false,
+          graphEventId: '',
+          timelineId: undefined,
+          timelineType: TimelineType.default,
+          onOpenTimeline,
+          openTimeline: true,
+          unifiedComponentsInTimelineEnabled: true,
+        };
+        (resolveTimeline as jest.Mock).mockResolvedValue(untitledTimeline);
+        renderHook(async () => {
+          const queryTimelineById = useQueryTimelineById();
+          queryTimelineById(args);
+        });
+
+        expect(dispatchUpdateIsLoading).toHaveBeenCalledWith({
+          id: TimelineId.active,
+          isLoading: true,
+        });
+
+        expect(mockUpdateTimeline).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({
+            id: TimelineId.active,
+            timeline: expect.objectContaining({
+              columns: defaultUdtHeaders,
+            }),
+          })
+        );
+        expect(dispatchUpdateIsLoading).toHaveBeenCalledWith({
+          id: TimelineId.active,
+          isLoading: false,
+        });
+      });
+
+      it('should update timeline correctly when timeline is already saved and onOpenTimeline is not provided', async () => {
+        const args: QueryTimelineById = {
+          duplicate: false,
+          graphEventId: '',
+          timelineId: TimelineId.active,
+          timelineType: TimelineType.default,
+          onOpenTimeline: undefined,
+          openTimeline: true,
+          unifiedComponentsInTimelineEnabled: true,
+        };
+
+        (resolveTimeline as jest.Mock).mockResolvedValue(mockSelectedTimeline);
+        renderHook(async () => {
+          const queryTimelineById = useQueryTimelineById();
+          queryTimelineById(args);
+        });
+
+        expect(dispatchUpdateIsLoading).toHaveBeenCalledWith({
+          id: TimelineId.active,
+          isLoading: true,
+        });
+
+        await waitFor(() => {
+          expect(mockUpdateTimeline).toHaveBeenNthCalledWith(
+            1,
+            expect.objectContaining({
+              timeline: expect.objectContaining({
+                columns: mockSelectedTimeline.data.timeline.columns.map((col) => ({
+                  columnHeaderType: col.columnHeaderType,
+                  id: col.id,
+                  initialWidth: defaultUdtHeaders.find((defaultCol) => col.id === defaultCol.id)
+                    ?.initialWidth,
+                })),
+              }),
+            })
+          );
+        });
+      });
+
+      it('should update timeline correctly when timeline is already saved and onOpenTimeline IS provided', async () => {
+        const args: QueryTimelineById = {
+          duplicate: false,
+          graphEventId: '',
+          timelineId: TimelineId.active,
+          timelineType: TimelineType.default,
+          onOpenTimeline,
+          openTimeline: true,
+          unifiedComponentsInTimelineEnabled: true,
+        };
+
+        (resolveTimeline as jest.Mock).mockResolvedValue(mockSelectedTimeline);
+        renderHook(async () => {
+          const queryTimelineById = useQueryTimelineById();
+          queryTimelineById(args);
+        });
+
+        waitFor(() => {
+          expect(onOpenTimeline).toHaveBeenCalledWith(
+            expect.objectContaining({
+              columns: mockSelectedTimeline.data.timeline.columns.map((col) => ({
+                columnHeaderType: col.columnHeaderType,
+                id: col.id,
+                initialWidth: defaultUdtHeaders.find((defaultCol) => col.id === defaultCol.id)
+                  ?.initialWidth,
+              })),
+            })
+          );
         });
       });
     });

@@ -112,6 +112,10 @@ export const addFieldToTable = (fieldId: string) => {
   clearFieldSearch();
 };
 
+export const removeFieldFromTable = (fieldId: string) => {
+  cy.get(GET_DISCOVER_COLUMN_TOGGLE_BTN(fieldId)).first().click();
+};
+
 export const createAdHocDataView = (name: string, indexPattern: string, save: boolean = false) => {
   openDataViewSwitcher();
   cy.get(DISCOVER_DATA_VIEW_SWITCHER.CREATE_NEW).trigger('click');

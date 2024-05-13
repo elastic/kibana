@@ -8,7 +8,7 @@
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
-  ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+  API_VERSIONS,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
 } from '@kbn/elastic-assistant-common';
 import {
@@ -19,6 +19,7 @@ import { UpdateConversationRequestParams } from '@kbn/elastic-assistant-common/i
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
+import { UPGRADE_LICENSE_MESSAGE, hasAIAssistantLicense } from '../helpers';
 
 export const updateConversationRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
@@ -31,7 +32,7 @@ export const updateConversationRoute = (router: ElasticAssistantPluginRouter) =>
     })
     .addVersion(
       {
-        version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             body: buildRouteValidationWithZod(ConversationUpdateProps),
@@ -43,7 +44,15 @@ export const updateConversationRoute = (router: ElasticAssistantPluginRouter) =>
         const assistantResponse = buildResponse(response);
         const { id } = request.params;
         try {
-          const ctx = await context.resolve(['core', 'elasticAssistant']);
+          const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
+          const license = ctx.licensing.license;
+          if (!hasAIAssistantLicense(license)) {
+            return response.forbidden({
+              body: {
+                message: UPGRADE_LICENSE_MESSAGE,
+              },
+            });
+          }
 
           const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
           const authenticatedUser = ctx.elasticAssistant.getCurrentUser();

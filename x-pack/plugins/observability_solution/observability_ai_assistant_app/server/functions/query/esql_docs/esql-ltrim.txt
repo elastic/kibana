@@ -1,7 +1,11 @@
 LTRIM
 
-
-Removes leading whitespaces from strings.
+Syntax
+Parameters
+string
+String expression. If null, the function returns null.
+DescriptionRemoves leading whitespaces from a string.Supported types
+Example
 ```esql
 ROW message = "   some text  ",  color = " red "
 | EVAL message = LTRIM(message)
@@ -9,5 +13,3 @@ ROW message = "   some text  ",  color = " red "
 | EVAL message = CONCAT("'", message, "'")
 | EVAL color = CONCAT("'", color, "'")
 ```
-
-Supported types:

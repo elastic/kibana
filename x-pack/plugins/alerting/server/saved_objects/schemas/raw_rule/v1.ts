@@ -194,7 +194,7 @@ const rawRuleAlertsFilterSchema = schema.object({
 
 const rawRuleActionSchema = schema.object({
   uuid: schema.maybe(schema.string()),
-  group: schema.string(),
+  group: schema.maybe(schema.string()),
   actionRef: schema.string(),
   actionTypeId: schema.string(),
   params: schema.recordOf(schema.string(), schema.any()),

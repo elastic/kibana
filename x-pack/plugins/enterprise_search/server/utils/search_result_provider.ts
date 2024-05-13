@@ -54,6 +54,9 @@ export function toSearchResult({
       ? 'native'
       : 'connector_client'
     : null;
+  const newUrl = isCrawler
+    ? `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/crawlers/new_crawler`
+    : `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/connectors/new_connector?connector_type=${connectorTypeParam}&service_type=${serviceType}`;
 
   return {
     icon: iconPath || 'logoEnterpriseSearch',
@@ -64,13 +67,7 @@ export function toSearchResult({
       defaultMessage: 'Search',
     }),
     url: {
-      path:
-        url ??
-        `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/search_indices/new_index/${
-          isCrawler
-            ? 'crawler'
-            : `connector?connector_type=${connectorTypeParam}&service_type=${serviceType}`
-        }`,
+      path: url ?? newUrl,
       prependBasePath: true,
     },
   };

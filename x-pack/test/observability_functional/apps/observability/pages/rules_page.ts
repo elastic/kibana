@@ -56,8 +56,13 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   };
 
   const selectAndFillInEsQueryRule = async (ruleName: string) => {
-    await testSubjects.setValue('ruleNameInput', ruleName);
     await testSubjects.click(`.es-query-SelectOption`);
+    await retry.waitFor(
+      'Create Rule flyout is visible',
+      async () => await testSubjects.exists('addRuleFlyoutTitle')
+    );
+
+    await testSubjects.setValue('ruleNameInput', ruleName);
     await testSubjects.click('queryFormType_esQuery');
     await testSubjects.click('selectIndexExpression');
     const indexComboBox = await find.byCssSelector('#indexSelectSearchBox');
@@ -91,8 +96,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       );
       await observability.alerts.rulesPage.clickCreateRuleButton();
       await retry.waitFor(
-        'Create Rule flyout is visible',
-        async () => await testSubjects.exists('addRuleFlyoutTitle')
+        'Rule Type Modal is visible',
+        async () => await testSubjects.exists('ruleTypeModal')
       );
     };
 
@@ -109,13 +114,14 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
     describe('Feature flag', () => {
       it('Link point to O11y Rules pages by default', async () => {
-        const manageRulesPageHref = await observability.alerts.rulesPage.getManageRulesPageHref();
+        const manageRulesPageHref =
+          (await observability.alerts.rulesPage.getManageRulesPageHref()) ?? '';
         expect(new URL(manageRulesPageHref).pathname).equal('/app/observability/alerts/rules');
       });
     });
 
     describe('Create rule button', () => {
-      it('Show Create Rule flyout when Create Rule button is clicked', async () => {
+      it('Show Rule Type Modal when Create Rule button is clicked', async () => {
         await navigateAndOpenCreateRuleFlyout();
       });
     });

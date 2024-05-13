@@ -46,7 +46,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
   private featureUsage = new FeatureUsageService();
 
   constructor(
-    context: PluginInitializerContext,
+    _context: PluginInitializerContext,
     private readonly storage: Storage = sessionStorage
   ) {}
 
@@ -169,13 +169,15 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
   };
 
   private showExpiredBanner(license: ILicense) {
-    const uploadUrl = this.coreStart!.http.basePath.prepend(
+    const coreStart = this.coreStart!;
+    const uploadUrl = coreStart.http.basePath.prepend(
       '/app/management/stack/license_management/upload_license'
     );
-    this.coreStart!.overlays.banners.add(
+    coreStart.overlays.banners.add(
       mountExpiredBanner({
         type: license.type!,
         uploadUrl,
+        ...coreStart,
       })
     );
   }

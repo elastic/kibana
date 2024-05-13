@@ -85,7 +85,7 @@ describe('handleStreamStorage', () => {
       stream.write(encodeBedrockResponse('Simple.'));
       defaultProps = {
         responseStream: stream.transform,
-        actionTypeId: 'openai',
+        actionTypeId: '.gen-ai',
         onMessageSent,
         logger: mockLogger,
       };

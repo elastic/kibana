@@ -42,6 +42,7 @@ import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 import type { PluginSetup as UnifiedSearchServerPluginSetup } from '@kbn/unified-search-plugin/server';
 import type { ElasticAssistantPluginStart } from '@kbn/elastic-assistant-plugin/server';
+import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import type { ExperimentalFeatures } from '../common';
 
@@ -84,6 +85,7 @@ export interface SecuritySolutionPluginStartDependencies {
   taskManager?: TaskManagerPluginStart;
   telemetry?: TelemetryPluginStart;
   share: SharePluginStart;
+  actions: ActionsPluginStartContract;
 }
 
 export interface SecuritySolutionPluginSetup {

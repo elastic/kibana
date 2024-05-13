@@ -140,6 +140,10 @@ export const ApiConfig = z.object({
    */
   connectorId: z.string(),
   /**
+   * action type Id
+   */
+  actionTypeId: z.string(),
+  /**
    * defaultSystemPromptId
    */
   defaultSystemPromptId: z.string().optional(),
@@ -258,6 +262,10 @@ export const ConversationUpdateProps = z.object({
 
 export type ConversationCreateProps = z.infer<typeof ConversationCreateProps>;
 export const ConversationCreateProps = z.object({
+  /**
+   * The conversation id.
+   */
+  id: z.string().optional(),
   /**
    * The conversation title.
    */

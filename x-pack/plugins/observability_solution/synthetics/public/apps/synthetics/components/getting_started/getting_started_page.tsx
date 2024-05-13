@@ -20,6 +20,7 @@ import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useBreadcrumbs, useEnablement, useLocations } from '../../hooks';
 import { usePrivateLocationsAPI } from '../settings/private_locations/hooks/use_locations_api';
 import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
@@ -34,10 +35,14 @@ import {
 import { MONITOR_ADD_ROUTE } from '../../../../../common/constants/ui';
 import { SimpleMonitorForm } from './simple_monitor_form';
 import { AddLocationFlyout, NewLocation } from '../settings/private_locations/add_location_flyout';
+import type { ClientPluginsStart } from '../../../../plugin';
 
 export const GettingStartedPage = () => {
   const dispatch = useDispatch();
   const history = useHistory();
+
+  const { observabilityAIAssistant } = useKibana<ClientPluginsStart>().services;
+  const setScreenContext = observabilityAIAssistant?.service.setScreenContext;
 
   useEnablement();
 
@@ -57,6 +62,31 @@ export const GettingStartedPage = () => {
   const loading = allLocationsLoading || agentPoliciesLoading;
 
   const hasNoLocations = !allLocationsLoading && locations.length === 0;
+
+  useEffect(() => {
+    return setScreenContext?.({
+      screenDescription: hasNoLocations
+        ? 'The user has no locations configured.'
+        : `The user has ${locations.length} locations configured: ${JSON.stringify(locations)}`,
+      starterPrompts: [
+        ...(hasNoLocations
+          ? [
+              {
+                title: i18n.translate(
+                  'xpack.synthetics.aiAssistant.starterPrompts.explainNoData.title',
+                  { defaultMessage: 'Explain' }
+                ),
+                prompt: i18n.translate(
+                  'xpack.synthetics.aiAssistant.starterPrompts.explainNoData.prompt',
+                  { defaultMessage: "Why don't I see any monitors?" }
+                ),
+                icon: 'sparkles',
+              },
+            ]
+          : []),
+      ],
+    });
+  }, [setScreenContext, hasNoLocations, locations]);
 
   return !loading ? (
     <Wrapper>

@@ -28,12 +28,14 @@ export function getLogsForDataset({
   count = 1,
   isMalformed = false,
   namespace = defaultNamespace,
+  services,
 }: {
   dataset: string;
   to: moment.MomentInput;
   count?: number;
   isMalformed?: boolean;
   namespace?: string;
+  services?: string[];
 }) {
   return timerange(moment(to).subtract(count, 'minute'), moment(to))
     .interval('1m')
@@ -46,7 +48,9 @@ export function getLogsForDataset({
             timestamp,
             dataset,
             MESSAGE_LOG_LEVELS[index % MESSAGE_LOG_LEVELS.length],
-            SERVICE_NAMES[index % SERVICE_NAMES.length],
+            services?.[index] ??
+              services?.[index % services.length] ??
+              SERVICE_NAMES[index % SERVICE_NAMES.length],
             CLUSTER[index % CLUSTER.length],
             CLOUD_PROVIDERS[index % CLOUD_PROVIDERS.length],
             CLOUD_REGION[index % CLOUD_REGION.length],

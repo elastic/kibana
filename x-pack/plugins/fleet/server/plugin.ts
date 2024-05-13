@@ -8,7 +8,7 @@
 import { backOff } from 'exponential-backoff';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import { filter, take } from 'rxjs/operators';
+import { filter, take } from 'rxjs';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type {
@@ -288,10 +288,13 @@ export class FleetPlugin
 
     core.status.set(this.fleetStatus$.asObservable());
 
-    registerSavedObjects(core.savedObjects);
+    const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental ?? []);
+
+    registerSavedObjects(core.savedObjects, {
+      useSpaceAwareness: experimentalFeatures.useSpaceAwareness,
+    });
     registerEncryptedSavedObjects(deps.encryptedSavedObjects);
 
-    const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental ?? []);
     // Register feature
     if (deps.features) {
       deps.features.registerKibanaFeature({
@@ -613,12 +616,14 @@ export class FleetPlugin
       uninstallTokenService,
     });
     licenseService.start(plugins.licensing.license$);
-    this.telemetryEventsSender.start(plugins.telemetry, core);
-    this.bulkActionsResolver?.start(plugins.taskManager);
-    this.fleetUsageSender?.start(plugins.taskManager);
-    this.checkDeletedFilesTask?.start({ taskManager: plugins.taskManager });
-    startFleetUsageLogger(plugins.taskManager);
-    this.fleetMetricsTask?.start(plugins.taskManager, core.elasticsearch.client.asInternalUser);
+    this.telemetryEventsSender.start(plugins.telemetry, core).catch(() => {});
+    this.bulkActionsResolver?.start(plugins.taskManager).catch(() => {});
+    this.fleetUsageSender?.start(plugins.taskManager).catch(() => {});
+    this.checkDeletedFilesTask?.start({ taskManager: plugins.taskManager }).catch(() => {});
+    startFleetUsageLogger(plugins.taskManager).catch(() => {});
+    this.fleetMetricsTask
+      ?.start(plugins.taskManager, core.elasticsearch.client.asInternalUser)
+      .catch(() => {});
 
     const logger = appContextService.getLogger();
 
@@ -686,7 +691,7 @@ export class FleetPlugin
         );
 
         // initialize (generate/encrypt/validate) Uninstall Tokens asynchronously
-        this.initializeUninstallTokens();
+        this.initializeUninstallTokens().catch(() => {});
 
         this.fleetStatus$.next({
           level: ServiceStatusLevels.available,

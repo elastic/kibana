@@ -147,11 +147,15 @@ export function MachineLearningDataFrameAnalyticsTableProvider({
     }
 
     public async assertJobRowViewButtonExists(analyticsId: string) {
-      await testSubjects.existOrFail(this.rowSelector(analyticsId, 'mlAnalyticsJobViewButton'));
+      await testSubjects.existOrFail(this.rowSelector(analyticsId, 'mlAnalyticsJobViewButton'), {
+        allowHidden: true, // Table action may be only visible on row hover
+      });
     }
 
     public async assertJobRowMapButtonExists(analyticsId: string) {
-      await testSubjects.existOrFail(this.rowSelector(analyticsId, 'mlAnalyticsJobMapButton'));
+      await testSubjects.existOrFail(this.rowSelector(analyticsId, 'mlAnalyticsJobMapButton'), {
+        allowHidden: true, // Table action may be only visible on row hover
+      });
     }
 
     public async assertJobRowViewButtonEnabled(analyticsId: string, expectedValue: boolean) {

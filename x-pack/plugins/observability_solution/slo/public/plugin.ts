@@ -25,7 +25,9 @@ import { SLOS_BASE_PATH } from '../common/locators/paths';
 import { getCreateSLOFlyoutLazy } from './pages/slo_edit/shared_flyout/get_create_slo_flyout';
 import { registerBurnRateRuleType } from './rules/register_burn_rate_rule_type';
 import { ExperimentalFeatures, SloConfig } from '../common/config';
-
+import { SLO_OVERVIEW_EMBEDDABLE_ID } from './embeddable/slo/overview/constants';
+import { SloOverviewEmbeddableState } from './embeddable/slo/overview/types';
+import { SLO_ERROR_BUDGET_ID } from './embeddable/slo/error_budget/constants';
 export class SloPlugin
   implements Plugin<SloPublicSetup, SloPublicStart, SloPublicPluginsSetup, SloPublicPluginsStart>
 {
@@ -91,14 +93,26 @@ export class SloPlugin
 
       const hasPlatinumLicense = license.hasAtLeast('platinum');
       if (hasPlatinumLicense) {
-        const registerSloOverviewEmbeddableFactory = async () => {
-          const { SloOverviewEmbeddableFactoryDefinition } = await import(
-            './embeddable/slo/overview/slo_embeddable_factory'
-          );
-          const factory = new SloOverviewEmbeddableFactoryDefinition(coreSetup.getStartServices);
-          pluginsSetup.embeddable.registerEmbeddableFactory(factory.type, factory);
-        };
-        registerSloOverviewEmbeddableFactory();
+        const [coreStart, pluginsStart] = await coreSetup.getStartServices();
+        pluginsStart.dashboard.registerDashboardPanelPlacementSetting(
+          SLO_OVERVIEW_EMBEDDABLE_ID,
+          (serializedState: SloOverviewEmbeddableState | undefined) => {
+            if (serializedState?.showAllGroupByInstances || serializedState?.groupFilters) {
+              return { width: 24, height: 8 };
+            }
+            return { width: 12, height: 8 };
+          }
+        );
+        pluginsSetup.embeddable.registerReactEmbeddableFactory(
+          SLO_OVERVIEW_EMBEDDABLE_ID,
+          async () => {
+            const deps = { ...coreStart, ...pluginsStart };
+            const { getOverviewEmbeddableFactory } = await import(
+              './embeddable/slo/overview/slo_embeddable_factory'
+            );
+            return getOverviewEmbeddableFactory(deps);
+          }
+        );
         const registerSloAlertsEmbeddableFactory = async () => {
           const { SloAlertsEmbeddableFactoryDefinition } = await import(
             './embeddable/slo/alerts/slo_alerts_embeddable_factory'
@@ -111,22 +125,22 @@ export class SloPlugin
         };
         registerSloAlertsEmbeddableFactory();
 
-        const registerSloErrorBudgetEmbeddableFactory = async () => {
-          const { SloErrorBudgetEmbeddableFactoryDefinition } = await import(
-            './embeddable/slo/error_budget/slo_error_budget_embeddable_factory'
-          );
-          const factory = new SloErrorBudgetEmbeddableFactoryDefinition(coreSetup.getStartServices);
-          pluginsSetup.embeddable.registerEmbeddableFactory(factory.type, factory);
-        };
-        registerSloErrorBudgetEmbeddableFactory();
+        pluginsSetup.embeddable.registerReactEmbeddableFactory(SLO_ERROR_BUDGET_ID, async () => {
+          const deps = { ...coreStart, ...pluginsStart };
 
-        const registerAsyncSloAlertsUiActions = async () => {
+          const { getErrorBudgetEmbeddableFactory } = await import(
+            './embeddable/slo/error_budget/error_budget_react_embeddable_factory'
+          );
+          return getErrorBudgetEmbeddableFactory(deps);
+        });
+
+        const registerAsyncSloUiActions = async () => {
           if (pluginsSetup.uiActions) {
-            const { registerSloAlertsUiActions } = await import('./ui_actions');
-            registerSloAlertsUiActions(pluginsSetup.uiActions, coreSetup);
+            const { registerSloUiActions } = await import('./ui_actions');
+            registerSloUiActions(pluginsSetup.uiActions, coreSetup);
           }
         };
-        registerAsyncSloAlertsUiActions();
+        registerAsyncSloUiActions();
       }
     };
     assertPlatinumLicense();

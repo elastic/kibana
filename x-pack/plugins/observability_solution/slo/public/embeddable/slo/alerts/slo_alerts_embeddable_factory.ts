@@ -13,7 +13,7 @@ import {
   ErrorEmbeddable,
   IContainer,
 } from '@kbn/embeddable-plugin/public';
-import { COMMON_SLO_GROUPING } from '../overview/slo_embeddable_factory';
+import { COMMON_SLO_GROUPING } from '../common/constants';
 import { SLO_ALERTS_EMBEDDABLE, SLOAlertsEmbeddable } from './slo_alerts_embeddable';
 import { SloPublicPluginsStart, SloPublicStart } from '../../..';
 import { SloAlertsEmbeddableInput } from './types';

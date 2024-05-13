@@ -7,7 +7,7 @@
  */
 
 import { Observable, of } from 'rxjs';
-import { catchError, map, share } from 'rxjs/operators';
+import { catchError, map, share } from 'rxjs';
 import { History } from 'history';
 import { throttle } from 'lodash';
 import { IStateStorage } from './types';

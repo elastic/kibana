@@ -169,6 +169,46 @@ describe('AgentUpgradeAgentModal', () => {
       });
     });
 
+    it('should display invalid input if version is not a valid semver', async () => {
+      const { utils } = renderAgentUpgradeAgentModal({
+        agents: [
+          {
+            id: 'agent1',
+            local_metadata: { host: 'abc', elastic: { agent: { version: '8.12.0' } } },
+          },
+        ] as any,
+        agentCount: 1,
+      });
+
+      await waitFor(() => {
+        const input = utils.getByTestId('agentUpgradeModal.VersionInput');
+        fireEvent.input(input, { target: { value: '8.14' } });
+        expect(
+          utils.getByText('Invalid version, please use a valid semver version, e.g. 8.14.0')
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('should not display invalid input if version is a valid semver', async () => {
+      const { utils } = renderAgentUpgradeAgentModal({
+        agents: [
+          {
+            id: 'agent1',
+            local_metadata: { host: 'abc', elastic: { agent: { version: '8.12.0' } } },
+          },
+        ] as any,
+        agentCount: 1,
+      });
+
+      await waitFor(() => {
+        const input = utils.getByTestId('agentUpgradeModal.VersionInput');
+        fireEvent.input(input, { target: { value: '8.14.0+build123456789' } });
+        expect(
+          utils.queryByText('Invalid version, please use a valid semver version, e.g. 8.14.0')
+        ).toBeNull();
+      });
+    });
+
     it('should display available version options', async () => {
       mockSendGetAgentsAvailableVersions.mockClear();
       mockSendGetAgentsAvailableVersions.mockResolvedValue({
@@ -292,6 +332,43 @@ describe('AgentUpgradeAgentModal', () => {
         ).toBeInTheDocument();
         const el = utils.getByTestId('confirmModalConfirmButton');
         expect(el).not.toBeDisabled();
+      });
+    });
+
+    it('should enable submit button for a single fleet-server when version is greater than maxFleetServerVersion', async () => {
+      mockSendGetAgentsAvailableVersions.mockClear();
+      mockSendGetAgentsAvailableVersions.mockResolvedValue({
+        data: {
+          items: ['8.10.4', '8.10.2', '8.9.0', '8.8.0'],
+        },
+      });
+      mockSendAllFleetServerAgents.mockResolvedValue({
+        allFleetServerAgents: [
+          { id: 'fleet-server', local_metadata: { elastic: { agent: { version: '8.9.0' } } } },
+        ] as any,
+      });
+
+      const { utils } = renderAgentUpgradeAgentModal({
+        agents: [
+          {
+            id: 'fleet-server',
+            local_metadata: {
+              elastic: {
+                agent: { version: '8.9.0', upgradeable: true },
+              },
+              host: { hostname: 'host00001' },
+            },
+          },
+        ] as any,
+        agentCount: 1,
+      });
+
+      await waitFor(() => {
+        const container = utils.getByTestId('agentUpgradeModal.VersionCombobox');
+        const input = within(container).getByRole<HTMLInputElement>('combobox');
+        expect(input?.value).toEqual('8.10.2');
+        const el = utils.getByTestId('confirmModalConfirmButton');
+        expect(el).toBeEnabled();
       });
     });
   });

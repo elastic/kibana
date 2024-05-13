@@ -22,6 +22,7 @@ export const getExternalAlertLensAttributes: GetLensAttributes = (
           isVisible: true,
           position: 'right',
           legendSize: 'xlarge',
+          legendStats: ['currentAndLastValue'],
         },
         valueLabels: 'hide',
         preferredSeriesType: 'bar_stacked',
@@ -48,7 +49,6 @@ export const getExternalAlertLensAttributes: GetLensAttributes = (
           yLeft: false,
           yRight: true,
         },
-        valuesInLegend: true,
       },
       query: {
         query: '',

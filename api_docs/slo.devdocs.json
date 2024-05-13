@@ -231,7 +231,7 @@
                 "section": "def-common.AnonymousAccessServiceContract",
                 "text": "AnonymousAccessServiceContract"
               },
-              ") => void; }"
+              ") => void; isNewVersion: () => boolean; }"
             ],
             "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
             "deprecated": false,
@@ -359,7 +359,8 @@
                 "docId": "kibObservabilityAIAssistantPluginApi",
                 "section": "def-public.ObservabilityAIAssistantPublicSetup",
                 "text": "ObservabilityAIAssistantPublicSetup"
-              }
+              },
+              " | undefined"
             ],
             "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
             "deprecated": false,
@@ -439,6 +440,20 @@
           },
           {
             "parentPluginId": "slo",
+            "id": "def-public.SloPublicPluginsStart.aiops",
+            "type": "Object",
+            "tags": [],
+            "label": "aiops",
+            "description": [],
+            "signature": [
+              "AiopsPluginStart"
+            ],
+            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "slo",
             "id": "def-public.SloPublicPluginsStart.cases",
             "type": "Object",
             "tags": [],
@@ -473,6 +488,26 @@
                 "text": "CloudStart"
               },
               " | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "slo",
+            "id": "def-public.SloPublicPluginsStart.dashboard",
+            "type": "Object",
+            "tags": [],
+            "label": "dashboard",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dashboard",
+                "scope": "public",
+                "docId": "kibDashboardPluginApi",
+                "section": "def-public.DashboardStart",
+                "text": "DashboardStart"
+              }
             ],
             "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
             "deprecated": false,
@@ -797,7 +832,7 @@
                 "section": "def-common.Trigger",
                 "text": "Trigger"
               },
-              ") => void; readonly getTrigger: (triggerId: string) => ",
+              ") => void; readonly hasTrigger: (triggerId: string) => boolean; readonly getTrigger: (triggerId: string) => ",
               "TriggerContract",
               "<object>; readonly registerAction: <Context extends object>(definition: ",
               {
@@ -1026,7 +1061,8 @@
                 "docId": "kibObservabilityAIAssistantPluginApi",
                 "section": "def-public.ObservabilityAIAssistantPublicStart",
                 "text": "ObservabilityAIAssistantPublicStart"
-              }
+              },
+              " | undefined"
             ],
             "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
             "deprecated": false,
@@ -1451,7 +1487,7 @@
             "signature": [
               "Pick<",
               "TaskScheduling",
-              ", \"schedule\" | \"runSoon\" | \"ephemeralRunNow\" | \"ensureScheduled\" | \"bulkUpdateSchedules\" | \"bulkEnable\" | \"bulkDisable\" | \"bulkSchedule\" | \"bulkUpdateState\"> & Pick<",
+              ", \"schedule\" | \"runSoon\" | \"bulkEnable\" | \"ephemeralRunNow\" | \"ensureScheduled\" | \"bulkUpdateSchedules\" | \"bulkDisable\" | \"bulkSchedule\" | \"bulkUpdateState\"> & Pick<",
               "TaskStore",
               ", \"get\" | \"aggregate\" | \"fetch\" | \"remove\" | \"bulkRemove\"> & { removeIfExists: (id: string) => Promise<void>; } & { supportsEphemeralTasks: () => boolean; getRegisteredTypes: () => string[]; }"
             ],
@@ -1550,7 +1586,7 @@
         "label": "sloPaths",
         "description": [],
         "signature": [
-          "{ slos: string; slosWelcome: string; slosOutdatedDefinitions: string; sloCreate: string; sloCreateWithEncodedForm: (encodedParams: string) => string; sloEdit: (sloId: string) => string; sloEditWithEncodedForm: (sloId: string, encodedParams: string) => string; sloDetails: (sloId: string, instanceId?: string | undefined) => string; }"
+          "{ slos: string; slosSettings: string; slosWelcome: string; slosOutdatedDefinitions: string; sloCreate: string; sloCreateWithEncodedForm: (encodedParams: string) => string; sloEdit: (sloId: string) => string; sloEditWithEncodedForm: (sloId: string, encodedParams: string) => string; sloDetails: (sloId: string, instanceId?: string | undefined, remoteName?: string | undefined, tabId?: string | undefined) => string; }"
         ],
         "path": "x-pack/plugins/observability_solution/slo/common/index.ts",
         "deprecated": false,

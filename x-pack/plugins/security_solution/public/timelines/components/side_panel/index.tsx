@@ -35,6 +35,8 @@ interface DetailsPanelProps {
   isReadOnly?: boolean;
 }
 
+const detailsPanelStyleProp = { zIndex: 1001 };
+
 /**
  * This panel is used in both the main timeline as well as the flyouts on the host, detection, cases, and network pages.
  * To prevent duplication the `isFlyoutView` prop is passed to determine the layout that should be used
@@ -87,7 +89,7 @@ export const DetailsPanel = React.memo(
       }
     }, [dispatch, scopeId]);
 
-    const activeTab = tabType ?? TimelineTabs.query;
+    const activeTab: TimelineTabs = tabType ?? TimelineTabs.query;
     const closePanel = useCallback(() => {
       if (handleOnPanelClosed) handleOnPanelClosed();
       else defaultOnPanelClose();
@@ -169,6 +171,7 @@ export const DetailsPanel = React.memo(
       <EuiFlyout
         data-test-subj="timeline:details-panel:flyout"
         size={panelSize}
+        style={detailsPanelStyleProp}
         onClose={closePanel}
         ownFocus={false}
         key={flyoutUniqueKey}

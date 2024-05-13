@@ -170,19 +170,21 @@ export class BaseRule {
       if (!action) {
         continue;
       }
-      ruleActions.push({
-        group: 'default',
-        id: actionData.id,
-        params: {
-          message: '{{context.internalShortMessage}}',
-          ...actionData.config,
-        },
-        frequency: {
-          summary: false,
-          notifyWhen: RuleNotifyWhen.THROTTLE,
-          throttle,
-        },
-      });
+      if (!action.isSystemAction) {
+        ruleActions.push({
+          group: 'default',
+          id: actionData.id,
+          params: {
+            message: '{{context.internalShortMessage}}',
+            ...actionData.config,
+          },
+          frequency: {
+            summary: false,
+            notifyWhen: RuleNotifyWhen.THROTTLE,
+            throttle,
+          },
+        });
+      }
     }
 
     return await rulesClient.create<RuleTypeParams>({

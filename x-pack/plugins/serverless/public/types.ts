@@ -26,6 +26,7 @@ export interface ServerlessPluginStart {
   ) => void;
   setProjectHome(homeHref: string): void;
   initNavigation(
+    id: string,
     navigationTree$: Observable<NavigationTreeDefinition>,
     config?: {
       dataTestSubj?: string;

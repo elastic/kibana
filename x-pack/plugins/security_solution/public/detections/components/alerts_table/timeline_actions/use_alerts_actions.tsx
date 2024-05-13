@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import type { AlertWorkflowStatus } from '../../../../common/types';
@@ -58,16 +58,22 @@ export const useAlertsActions = ({
     [dispatch, scopeId, scopedActions]
   );
 
-  const actionItems = useBulkActionItems({
-    eventIds: [eventId],
-    currentStatus: alertStatus as AlertWorkflowStatus,
-    setEventsLoading: localSetEventsLoading,
-    setEventsDeleted,
-    onUpdateSuccess: onStatusUpdate,
-    onUpdateFailure: onStatusUpdate,
-  });
+  const eventIds = useMemo(() => [eventId], [eventId]);
 
-  return {
-    actionItems: hasIndexWrite ? actionItems : [],
-  };
+  const actionItemArgs = useMemo(() => {
+    return {
+      eventIds,
+      currentStatus: alertStatus as AlertWorkflowStatus,
+      setEventsLoading: localSetEventsLoading,
+      setEventsDeleted,
+      onUpdateSuccess: onStatusUpdate,
+      onUpdateFailure: onStatusUpdate,
+    };
+  }, [alertStatus, eventIds, localSetEventsLoading, onStatusUpdate, setEventsDeleted]);
+
+  const actionItems = useBulkActionItems(actionItemArgs);
+
+  return useMemo(() => {
+    return { actionItems: hasIndexWrite ? actionItems : [] };
+  }, [actionItems, hasIndexWrite]);
 };

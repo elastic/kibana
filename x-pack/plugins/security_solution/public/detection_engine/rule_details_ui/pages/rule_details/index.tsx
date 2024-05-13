@@ -724,11 +724,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     <Display show={!globalFullScreen}>
                       <AlertsHistogramPanel
                         filters={alertMergedFilters}
-                        query={query}
                         signalIndexName={signalIndexName}
                         defaultStackByOption={defaultRuleStackByOption}
                         updateDateRange={updateDateRangeCallback}
-                        runtimeMappings={runtimeMappings}
                       />
                       <EuiSpacer />
                     </Display>

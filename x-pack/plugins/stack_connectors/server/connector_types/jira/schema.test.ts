@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MAX_OTHER_FIELDS_LENGTH } from './constants';
+import { MAX_OTHER_FIELDS_LENGTH } from '../../../common/jira/constants';
 import { ExecutorSubActionPushParamsSchema, incidentSchemaObjectProperties } from './schema';
 
 describe('Jira schema', () => {

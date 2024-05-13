@@ -25,12 +25,9 @@ export function ServiceDetails({ service }: Props) {
   const listItems: EuiDescriptionListProps['listItems'] = [];
   if (!!service.versions?.length) {
     listItems.push({
-      title: i18n.translate(
-        'xpack.apm.serviceIcons.serviceDetails.service.versionLabel',
-        {
-          defaultMessage: 'Service version',
-        }
-      ),
+      title: i18n.translate('xpack.apm.serviceIcons.serviceDetails.service.versionLabel', {
+        defaultMessage: 'Service version',
+      }),
       description: (
         <ul>
           {service.versions.map((version, index) => (
@@ -43,12 +40,9 @@ export function ServiceDetails({ service }: Props) {
 
   if (service.runtime) {
     listItems.push({
-      title: i18n.translate(
-        'xpack.apm.serviceIcons.serviceDetails.service.runtimeLabel',
-        {
-          defaultMessage: 'Runtime name & version',
-        }
-      ),
+      title: i18n.translate('xpack.apm.serviceIcons.serviceDetails.service.runtimeLabel', {
+        defaultMessage: 'Runtime name & version',
+      }),
       description: (
         <>
           {service.runtime.name} {service.runtime.version}
@@ -59,24 +53,18 @@ export function ServiceDetails({ service }: Props) {
 
   if (service.framework) {
     listItems.push({
-      title: i18n.translate(
-        'xpack.apm.serviceIcons.serviceDetails.service.frameworkLabel',
-        {
-          defaultMessage: 'Framework name',
-        }
-      ),
+      title: i18n.translate('xpack.apm.serviceIcons.serviceDetails.service.frameworkLabel', {
+        defaultMessage: 'Framework name',
+      }),
       description: service.framework,
     });
   }
 
   if (service.agent) {
     listItems.push({
-      title: i18n.translate(
-        'xpack.apm.serviceIcons.serviceDetails.service.agentLabel',
-        {
-          defaultMessage: 'Agent name & version',
-        }
-      ),
+      title: i18n.translate('xpack.apm.serviceIcons.serviceDetails.service.agentLabel', {
+        defaultMessage: 'Agent name & version',
+      }),
       description: (
         <>
           {service.agent.name} {service.agent.version}

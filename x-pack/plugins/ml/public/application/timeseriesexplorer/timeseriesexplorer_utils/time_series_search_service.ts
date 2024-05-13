@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import { each, find, get, filter } from 'lodash';
 import type { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 import type { MlEntityField, ES_AGGREGATION } from '@kbn/ml-anomaly-utils';
 import type { Job } from '../../../../common/types/anomaly_detection_jobs';
 import type { ModelPlotOutput } from '../../services/results_service/result_service_rx';

@@ -39,7 +39,7 @@ export class OverlayService {
       targetDomElement: flyoutElement,
     });
 
-    const banners = this.bannersService.start({ i18n, uiSettings });
+    const banners = this.bannersService.start({ uiSettings, analytics, i18n, theme });
 
     const modalElement = document.createElement('div');
     targetDomElement.appendChild(modalElement);
