@@ -84,7 +84,7 @@ describe('extractVersionedRequestBody', () => {
     expect(
       extractVersionedRequestBody(route.handlers[0], ['application/json'], oasConverter)
     ).toEqual({
-      'application/json; Elastic-Api-Version=2023-10-31': {
+      'application/json': {
         schema: {
           additionalProperties: false,
           properties: {
@@ -107,7 +107,7 @@ describe('extractVersionedResponses', () => {
     ).toEqual({
       200: {
         content: {
-          'application/test+json; Elastic-Api-Version=2023-10-31': {
+          'application/test+json': {
             schema: {
               type: 'object',
               additionalProperties: false,
@@ -121,7 +121,7 @@ describe('extractVersionedResponses', () => {
       },
       404: {
         content: {
-          'application/test2+json; Elastic-Api-Version=2023-10-31': {
+          'application/test2+json': {
             schema: {
               type: 'object',
               additionalProperties: false,
@@ -147,7 +147,7 @@ describe('processVersionedRouter', () => {
     );
 
     expect(Object.keys(get(baseCase, 'paths["/foo"].get.responses.200.content'))).toEqual([
-      'application/test+json; Elastic-Api-Version=2024-12-31',
+      'application/test+json',
     ]); // defaults to latest
 
     const filteredCase = processVersionedRouter(
@@ -157,7 +157,7 @@ describe('processVersionedRouter', () => {
       { version: '2023-10-31' }
     );
     expect(Object.keys(get(filteredCase, 'paths["/foo"].get.responses.200.content'))).toEqual([
-      'application/test+json; Elastic-Api-Version=2023-10-31',
+      'application/test+json',
     ]);
   });
 });

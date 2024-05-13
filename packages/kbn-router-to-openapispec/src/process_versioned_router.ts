@@ -22,7 +22,7 @@ import {
   extractContentType,
   assignToPathsObject,
   getVersionedHeaderParam,
-  getVersionedContentTypeString,
+  getContentTypeString,
 } from './util';
 
 export const processVersionedRouter = (
@@ -107,7 +107,7 @@ export const extractVersionedRequestBody = (
   if (!schemas?.request) return {};
   const schema = converter.convert(schemas.request.body);
   return {
-    [getVersionedContentTypeString(handler.options.version, contentType)]: {
+    [getContentTypeString(contentType)]: {
       schema,
     },
   };
@@ -129,8 +129,7 @@ export const extractVersionedResponses = (
       ...result[statusCode],
       content: {
         ...((result[statusCode] ?? {}) as OpenAPIV3.ResponseObject).content,
-        [getVersionedContentTypeString(
-          handler.options.version,
+        [getContentTypeString(
           responseSchema.bodyContentType ? [responseSchema.bodyContentType] : contentType
         )]: {
           schema,
