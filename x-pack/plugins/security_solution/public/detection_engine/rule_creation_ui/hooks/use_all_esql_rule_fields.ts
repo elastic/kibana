@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { useMemo, useState } from 'react';
-import type { Datatable, ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { DatatableColumn } from '@kbn/expressions-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import useDebounce from 'react-use/lib/useDebounce';
 
@@ -17,13 +18,13 @@ import { parseEsqlQuery } from '../../rule_creation/logic/esql_validator';
 import { getEsqlQueryConfig } from '../../rule_creation/logic/get_esql_query_config';
 
 const esqlToFields = (
-  data: { error: unknown } | Datatable | undefined | null
+  columns: { error: unknown } | DatatableColumn[] | undefined | null
 ): DataViewFieldBase[] => {
-  if (data && 'error' in data) {
+  if (columns && 'error' in columns) {
     return [];
   }
 
-  const fields = (data?.columns ?? []).map(({ id, meta }) => {
+  const fields = (columns ?? []).map(({ id, meta }) => {
     return {
       name: id,
       type: meta.type,
@@ -42,11 +43,11 @@ type UseEsqlFields = (esqlQuery: string | undefined) => {
  * fetches ES|QL fields and convert them to DataViewBase fields
  */
 export const useEsqlFields: UseEsqlFields = (esqlQuery) => {
-  const kibana = useKibana<{ expressions: ExpressionsStart }>();
+  const kibana = useKibana<{ data: DataPublicPluginStart }>();
 
-  const { expressions } = kibana.services;
+  const { data: dataService } = kibana.services;
 
-  const queryConfig = getEsqlQueryConfig({ esqlQuery, expressions });
+  const queryConfig = getEsqlQueryConfig({ esqlQuery, search: dataService?.search?.search });
   const { data, isLoading } = useQuery(queryConfig);
 
   const fields = useMemo(() => {

@@ -7,24 +7,26 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import type { DataViewFieldBase } from '@kbn/es-query';
+import { getESQLQueryColumns } from '@kbn/esql-utils';
 
 import { useAllEsqlRuleFields } from './use_all_esql_rule_fields';
 
 import { createQueryWrapperMock } from '../../../common/__mocks__/query_wrapper';
 import { parseEsqlQuery } from '../../rule_creation/logic/esql_validator';
 
-import { fetchFieldsFromESQL } from '@kbn/text-based-editor';
-
 jest.mock('../../rule_creation/logic/esql_validator', () => ({
   parseEsqlQuery: jest.fn(),
 }));
 
-jest.mock('@kbn/text-based-editor', () => ({
-  fetchFieldsFromESQL: jest.fn(),
-}));
+jest.mock('@kbn/esql-utils', () => {
+  return {
+    getESQLQueryColumns: jest.fn(),
+    getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('auditbeat*'),
+  };
+});
 
 const parseEsqlQueryMock = parseEsqlQuery as jest.Mock;
-const fetchFieldsFromESQLMock = fetchFieldsFromESQL as jest.Mock;
+const getESQLQueryColumnsMock = getESQLQueryColumns as jest.Mock;
 
 const { wrapper } = createQueryWrapperMock();
 
@@ -48,7 +50,7 @@ const mockEsqlDatatable = {
 describe('useAllEsqlRuleFields', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    fetchFieldsFromESQLMock.mockResolvedValue(mockEsqlDatatable);
+    getESQLQueryColumnsMock.mockResolvedValue(mockEsqlDatatable.columns);
     parseEsqlQueryMock.mockReturnValue({ isEsqlQueryAggregating: false });
   });
 

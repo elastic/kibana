@@ -70,16 +70,16 @@ export const esqlValidator = async (
       };
     }
 
-    const data = await queryClient?.fetchQuery(
-      getEsqlQueryConfig({ esqlQuery: query, expressions: services.expressions })
+    const columns = await queryClient?.fetchQuery(
+      getEsqlQueryConfig({ esqlQuery: query, search: services.data.search.search })
     );
 
-    if (data && 'error' in data) {
-      return constructValidationError(data.error);
+    if (columns && 'error' in columns) {
+      return constructValidationError(columns.error);
     }
 
     // check whether _id field is present in response
-    const isIdFieldPresent = (data?.columns ?? []).find(({ id }) => '_id' === id);
+    const isIdFieldPresent = (columns ?? []).find(({ id }) => '_id' === id);
     // for non-aggregating query, we want to disable queries w/o _id property returned in response
     if (!isEsqlQueryAggregating && !isIdFieldPresent) {
       return {
